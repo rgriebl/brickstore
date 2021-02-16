@@ -321,7 +321,10 @@ public:
             if (b) {
                 m_doc->setDifferenceModeActive(true);
             } else {
-                if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?")) == QMessageBox::Yes) {
+                if (m_doc->lastCommandWasActivateDifferenceMode()
+                        || (MessageBox::question(this, tr("End difference mode"),
+                                                 tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?"))
+                            == QMessageBox::Yes)) {
                     m_doc->setDifferenceModeActive(false);
                 } else {
                     m_differenceMode->setChecked(true);

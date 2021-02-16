@@ -71,6 +71,9 @@ for color in "" "-dark"; do
   rsvg-convert $b/custom/brick-1x1$color.svg -w $s -h $s -f png -o $tmp/brick-1x1$color.png
   rsvg-convert $b/icons/$theme$color/svg/taxes-finances.svg -w $s -h $s -f png -o $tmp/dollar$color.png
   rsvg-convert $b/icons/$theme$color/svg/help-about.svg -w $s -h $s -f png -o $tmp/info$color.png
+  rsvg-convert $b/icons/$theme$color/svg/view-filter.svg -w $s -h $s -f png -o $tmp/filter$color.png
+  rsvg-convert $b/icons/$theme$color/svg/view-refresh.svg -w $s -h $s -f png -o $tmp/reload$color.png
+  rsvg-convert $b/icons/$theme$color/svg/view-sort-ascending-name.svg -w $s -h $s -f png -o $tmp/sort$color.png
 
   out="$b/icons/$theme$color/generated"
   mkdir -p "$out"
@@ -105,6 +108,12 @@ for color in "" "-dark"; do
         \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
         \( $tmp/brick-1x1$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
         $out/bricklink-lotsforsale.png
+
+  convert -size ${s}x${s} canvas:transparent \
+      \( $tmp/filter$color.png -scale $((s*5/8)) -fill Green -colorize 100% \) -geometry +0+0 -composite \
+      \( $tmp/sort$color.png -scale $((s*5/8)) -fill Green -colorize 100% \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+      \( $tmp/reload$color.png -scale $((s)) \) -geometry +0+0 -composite \
+      $out/view-sortfilter-reapply.png
 done
 
 rm -rf "$tmp"

@@ -140,10 +140,14 @@ public:
     void setFilter(const QString &filter);
 
     void nextSortFilterIsDirect(); // hack for the Window c'tor ... find something better
+    void reapplySortFilter();
 
     BrickLink::InvItemList sortItemList(const BrickLink::InvItemList &list) const;
 
     QString filterToolTip() const;
+
+    bool lastCommandWasSortFilter() const;
+    bool lastCommandWasActivateDifferenceMode() const;
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
@@ -230,6 +234,7 @@ signals:
     void filterChanged(const QString &filter);
     void sortOrderChanged(Qt::SortOrder order);
     void sortColumnChanged(int column);
+    void lastCommandWasSortFilterChanged(bool b);
 
 protected:
     bool event(QEvent *e) override;

@@ -506,6 +506,7 @@ FrameWork::FrameWork(QWidget *parent)
                      "view_column_layout_load",
                      "|",
                      "widget_filter",
+                     "view_sortfilter_reapply",
                      "|",
                      "widget_progress",
                      "|"
@@ -744,6 +745,7 @@ void FrameWork::translateActions()
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
+        { "view_sortfilter_reapply",        tr("Re-apply the sorting and filtering rules"), tr("Ctrl+Alt+F") },
         { "menu_extras",                    tr("E&xtras"),                            },
         { "update_database",                tr("Update Database"),                    },
         { "configure",                      tr("Settings..."),                        },
@@ -1242,6 +1244,9 @@ void FrameWork::createActions()
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
     lclm->menuAction()->setIcon(QIcon::fromTheme("object-columns"));
     lclm->setObjectName("view_column_layout_list");
+    (void) newQAction(this, "view_sortfilter_reapply", NeedDocument, false, this, [this]() {
+        m_current_window->document()->reapplySortFilter();
+    });
 
     (void) newQAction(this, "update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 

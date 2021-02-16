@@ -79,6 +79,8 @@ public:
     DifferenceModeCmd(Document *doc, bool active);
     int id() const override;
 
+    bool isActivate() const { return !m_active; }
+
     void redo() override;
     void undo() override;
 

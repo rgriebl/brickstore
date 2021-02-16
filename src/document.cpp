@@ -262,6 +262,8 @@ Document::Document()
         if (!m_gui_state_modified)
             emit modificationChanged(!clean);
     });
+    connect(m_undo, &QUndoStack::indexChanged,
+            this, [this]() { emit lastCommandWasSortFilterChanged(lastCommandWasSortFilter()); });
 
     s_documents.append(this);
 }
@@ -1463,6 +1465,38 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
 QString Document::filterToolTip() const
 {
     return m_filterParser->toolTip();
+}
+
+bool Document::lastCommandWasSortFilter() const
+{
+    if (m_undo) {
+        int index = m_undo->index() - 1;
+        auto *cmd = m_undo->command(index);
+        if ((index < 0) || (cmd && (cmd->id() == CID_SortFilter)))
+            return true;
+    }
+    return false;
+}
+
+bool Document::lastCommandWasActivateDifferenceMode() const
+{
+    if (m_undo) {
+        int index = m_undo->index() - 1;
+        auto *cmd = m_undo->command(index);
+        if (cmd && (cmd->id() == CID_DifferenceMode)
+                && static_cast<const DifferenceModeCmd *>(cmd)->isActivate()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Document::reapplySortFilter()
+{
+    if (!lastCommandWasSortFilter()) {
+        m_undo->push(new SortFilterCmd(this, m_sortColumn, m_sortOrder,
+                                       m_filterString, m_filterList));
+    }
 }
 
 
