@@ -26,6 +26,10 @@ echo -n "Checking if git workdir is clean... "
 [ -z "$(git status --porcelain)" ]
 status "clean" "dirty - check git status"
 
+echo -n "Checking if you have unpushed commits... "
+[ -z "$(git cherry @{upstream})" ]
+status "ok" "unpushed commits - check git status"
+
 echo -n "Fetching git tags... "
 git fetch --tags origin >/dev/null 2>/dev/null 
 status "done" "failed"
