@@ -58,7 +58,12 @@ PictureWidget::PictureWidget(QWidget *parent)
     layout->setContentsMargins(2, 6, 2, 2);
 
 #if !defined(QT_NO_OPENGL)
+#if defined(Q_OS_MACOS)
+    w_ldrawWin = new LDraw::RenderWindow();
+    w_ldraw = QWidget::createWindowContainer(w_ldrawWin, this);
+#else
     w_ldraw = new LDraw::RenderWidget(this);
+#endif
     w_ldraw->hide();
 
     w_2d = new QToolButton();
@@ -92,9 +97,9 @@ PictureWidget::PictureWidget(QWidget *parent)
         w_playPause->setIcon(w_playPause->style()->standardIcon(
                                  m_animationActive ? QStyle::SP_MediaStop : QStyle::SP_MediaPlay));
         if (m_animationActive)
-            w_ldraw->startAnimation();
+            w_ldrawWin->startAnimation();
         else
-            w_ldraw->resetCamera();
+            w_ldrawWin->resetCamera();
     };
     connect(w_playPause, &QToolButton::clicked,
             w_ldraw, toggleAnimation);
@@ -147,6 +152,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
             this, &PictureWidget::pictureWasUpdated);
 
+    paletteChange();
     languageChange();
     redraw();
 }
@@ -157,6 +163,12 @@ void PictureWidget::languageChange()
     findChild<QAction *> ("picture_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *> ("picture_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *> ("picture_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+}
+
+void PictureWidget::paletteChange()
+{
+    if (w_ldrawWin)
+        w_ldrawWin->setClearColor(palette().color(backgroundRole()));
 }
 
 void PictureWidget::resizeEvent(QResizeEvent *e)
@@ -286,16 +298,16 @@ void PictureWidget::redraw()
         w_image->hide();
 
         w_ldraw->show();
-        w_ldraw->setPartAndColor(m_part, m_colorId);
+        w_ldrawWin->setPartAndColor(m_part, m_colorId);
         if (m_animationActive)
-            w_ldraw->startAnimation();
+            w_ldrawWin->startAnimation();
 #endif
     } else {
 #if !defined(QT_NO_OPENGL)
         if (w_ldraw) {
-            w_ldraw->setPartAndColor(nullptr, -1);
+            w_ldrawWin->setPartAndColor(nullptr, -1);
             w_ldraw->hide();
-            w_ldraw->stopAnimation();
+            w_ldrawWin->stopAnimation();
         }
 #endif
         w_image->show();
@@ -308,6 +320,8 @@ void PictureWidget::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         languageChange();
+    else if (e->type() == QEvent::PaletteChange)
+        paletteChange();
     QFrame::changeEvent(e);
 }
 

@@ -523,7 +523,6 @@ protected:
 
             auto downbg = Utility::gradientColor(baseColor, winbg, 0.5);
             bool darkText = (tb->palette().color(QPalette::ButtonText).lightnessF() < 0.5);
-            qWarning() << "DARKTEXT" << darkText;
             QColor border;
             QColor hoverbg;
             if (darkText) {

@@ -256,6 +256,10 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 {
     Q_UNUSED(context)
 
+    if (m_clearColor.isValid()) {
+        glClearColor(m_clearColor.redF(), m_clearColor.greenF(),
+                     m_clearColor.blueF(), m_clearColor.alphaF());
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
@@ -491,6 +495,10 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
     }
 }
 
+void LDraw::GLRenderer::setClearColor(const QColor &color)
+{
+    m_clearColor = color;
+}
 
 void LDraw::GLRenderer::startAnimation()
 {
@@ -546,6 +554,11 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
 LDraw::RenderWidget::~RenderWidget()
 {
     m_renderer->cleanup();
+}
+
+void LDraw::RenderWidget::setClearColor(const QColor &color)
+{
+    m_renderer->setClearColor(color);
 }
 
 QSize LDraw::RenderWidget::minimumSizeHint() const
@@ -649,6 +662,130 @@ void LDraw::RenderWidget::stopAnimation()
 }
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+LDraw::RenderWindow::RenderWindow()
+    : QOpenGLWindow()
+{
+    QSurfaceFormat fmt = format();
+    fmt.setAlphaBufferSize(8);
+    fmt.setDepthBufferSize(24);
+    fmt.setSamples(4);
+    setFormat(fmt);
+
+    m_renderer = new GLRenderer(this);
+    resetCamera();
+    connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderWindow::slotMakeCurrent);
+    connect(m_renderer, &GLRenderer::doneCurrent, this, &RenderWindow::slotDoneCurrent);
+    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<>::of(&RenderWindow::update));
+
+    setCursor(Qt::OpenHandCursor);
+}
+
+LDraw::RenderWindow::~RenderWindow()
+{
+    m_renderer->cleanup();
+}
+
+void LDraw::RenderWindow::setClearColor(const QColor &color)
+{
+    m_renderer->setClearColor(color);
+}
+
+void LDraw::RenderWindow::mousePressEvent(QMouseEvent *e)
+{
+    m_last_pos = e->pos();
+    setCursor(Qt::ClosedHandCursor);
+}
+
+void LDraw::RenderWindow::mouseReleaseEvent(QMouseEvent *)
+{
+    setCursor(Qt::OpenHandCursor);
+}
+
+void LDraw::RenderWindow::mouseMoveEvent(QMouseEvent *e)
+{
+    auto dx = float(e->x() - m_last_pos.x());
+    auto dy = float(e->y() - m_last_pos.y());
+
+    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
+    }
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
+    }
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
+        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
+        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
+    }
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
+        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9f : 1.1f));
+    }
+    m_last_pos = e->pos();
+}
+
+void LDraw::RenderWindow::wheelEvent(QWheelEvent *e)
+{
+    float d = 1.0f + (float(e->angleDelta().y()) / 1200.0f);
+    m_renderer->setZoom(m_renderer->zoom() * d);
+}
+
+void LDraw::RenderWindow::slotMakeCurrent()
+{
+    makeCurrent();
+}
+
+void LDraw::RenderWindow::slotDoneCurrent()
+{
+    doneCurrent();
+}
+
+void LDraw::RenderWindow::initializeGL()
+{
+    m_renderer->initializeGL(context());
+}
+
+void LDraw::RenderWindow::resizeGL(int w, int h)
+{
+    m_renderer->resizeGL(context(), w, h);
+}
+
+void LDraw::RenderWindow::paintGL()
+{
+    m_renderer->paintGL(context());
+}
+
+void LDraw::RenderWindow::resetCamera()
+{
+    stopAnimation();
+
+    m_renderer->setXRotation(-180+30);
+    m_renderer->setYRotation(45);
+    m_renderer->setZRotation(0);
+
+    m_renderer->setXTranslation(0);
+    m_renderer->setYTranslation(0);
+    m_renderer->setZTranslation(0);
+
+    m_renderer->setZoom(1);
+}
+
+void LDraw::RenderWindow::startAnimation()
+{
+    m_renderer->startAnimation();
+}
+
+void LDraw::RenderWindow::stopAnimation()
+{
+    m_renderer->stopAnimation();
+}
+
 #endif // !QT_NO_OPENGL
 
 #include "moc_renderwidget.cpp"
+

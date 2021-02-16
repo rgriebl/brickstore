@@ -198,31 +198,41 @@ public:
         setIndent(style()->pixelMetric(QStyle::PM_LayoutLeftMargin));
         m_gradient.setCoordinateMode(QGradient::ObjectMode);
 
+        fontChange();
+        paletteChange();
+    }
+
+protected:
+    void changeEvent(QEvent *e) override
+    {
+        if (e->type() == QEvent::PaletteChange)
+            paletteChange();
+        else if (e->type() == QEvent::FontChange)
+            fontChange();
+        QLabel::changeEvent(e);
+    }
+
+    void fontChange()
+    {
         QFont f = font();
         f.setBold(true);
         setFont(f);
     }
 
-protected:
-    void paintEvent(QPaintEvent *e) override
+    void paletteChange()
     {
         QPalette p = palette();
-        QPalette ivp = qApp->palette("QAbstractItemView");
+        QPalette ivp = QApplication::palette("QAbstractItemView");
         QColor high = ivp.color(p.currentColorGroup(), QPalette::Highlight);
         QColor text = ivp.color(p.currentColorGroup(), QPalette::HighlightedText);
         QColor win = QApplication::palette(this).color(QPalette::Window);
 
-        if (m_gradient.stops().count() != 3
-                || m_gradient.stops().at(0).second != high
-                || m_gradient.stops().at(2).second != win) {
-            m_gradient.setStops({ { 0, high },
-                         { .6, Utility::gradientColor(high, win, 0.5) },
-                         { 1, win } });
-            p.setBrush(QPalette::Window, m_gradient);
-            p.setColor(QPalette::WindowText, text);
-            setPalette(p);
-        }
-        QLabel::paintEvent(e);
+        m_gradient.setStops({ { 0, high },
+                              { .6, Utility::gradientColor(high, win, 0.5) },
+                              { 1, win } });
+        p.setBrush(QPalette::Window, m_gradient);
+        p.setColor(QPalette::WindowText, text);
+        setPalette(p);
     }
 
     QSize sizeHint() const override
@@ -281,10 +291,8 @@ FrameWork::FrameWork(QWidget *parent)
     m_filter = nullptr;
     m_progress = nullptr;
 
-#if defined(QT_NO_OPENGL)
-    // QTBUG-39781
+    // keep QTBUG-39781 in mind: we cannot use QOpenGLWidget directly
     setUnifiedTitleAndToolBarOnMac(true);
-#endif
 
     setDocumentMode(true);
     setAcceptDrops(true);

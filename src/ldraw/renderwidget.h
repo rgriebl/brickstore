@@ -18,6 +18,7 @@
 #if !defined(QT_NO_OPENGL)
 
 #include <QOpenGLWidget>
+#include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
@@ -86,6 +87,7 @@ signals:
     void doneCurrent();
 
 public slots:
+    void setClearColor(const QColor &color);
     void startAnimation();
     void stopAnimation();
 
@@ -127,6 +129,7 @@ private:
     int m_color = -1;
     QColor m_baseColor;
     QColor m_edgeColor;
+    QColor m_clearColor;
 
     float m_rx = 0, m_ry = 0, m_rz = 0;
     float m_tx = 0, m_ty = 0, m_tz = 0;
@@ -159,6 +162,8 @@ public:
     RenderWidget(QWidget *parent = nullptr);
     ~RenderWidget() override;
 
+    void setClearColor(const QColor &color);
+
     Part *part() const  { return m_renderer->part(); }
     int color() const   { return m_renderer->color(); }
     void setPartAndColor(Part *part, const QColor &color)  { m_renderer->setPartAndColor(part, color); }
@@ -166,6 +171,47 @@ public:
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+
+    bool isAnimationActive() const;
+
+public slots:
+    void resetCamera();
+    void startAnimation();
+    void stopAnimation();
+
+protected slots:
+    void slotMakeCurrent();
+    void slotDoneCurrent();
+
+protected:
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
+
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
+
+private:
+    GLRenderer *m_renderer;
+    QPoint m_last_pos;
+};
+
+
+class RenderWindow : public QOpenGLWindow
+{
+    Q_OBJECT
+public:
+    RenderWindow();
+    ~RenderWindow() override;
+
+    void setClearColor(const QColor &color);
+
+    Part *part() const  { return m_renderer->part(); }
+    int color() const   { return m_renderer->color(); }
+    void setPartAndColor(Part *part, const QColor &color)  { m_renderer->setPartAndColor(part, color); }
+    void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
     bool isAnimationActive() const;
 

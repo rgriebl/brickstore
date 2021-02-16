@@ -21,6 +21,7 @@
 namespace LDraw {
 class Part;
 class RenderWidget;
+class RenderWindow;
 }
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QLabel)
@@ -45,6 +46,7 @@ protected slots:
     void showBLPriceGuideInfo();
     void showBLLotsForSale();
     void languageChange();
+    void paletteChange();
 
 protected:
     void resizeEvent(QResizeEvent *e) override;
@@ -67,7 +69,13 @@ private:
 #if !defined(QT_NO_OPENGL)
     bool m_prefer3D = false;
     bool m_animationActive = true;
+#if defined(Q_OS_MACOS)
+    QWidget *w_ldraw = nullptr;
+    LDraw::RenderWindow *w_ldrawWin = nullptr;
+#else
     LDraw::RenderWidget *w_ldraw = nullptr;
+    LDraw::RenderWidget *&w_ldrawWin = w_ldraw; // less #ifdefs in the cpp file
+#endif
     LDraw::Part *m_part = nullptr;
     int m_colorId = 0;
     QToolButton *w_2d = nullptr;
