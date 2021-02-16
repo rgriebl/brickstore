@@ -303,14 +303,14 @@ void SelectItem::init()
     });
 
     QToolButton *tb;
-    tb = new QToolButton(this);
+    tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+1"));
     tb->setIcon(QIcon::fromTheme("view-list-text"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
-    tb = new QToolButton(this);
+    tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon::fromTheme("view-list-details"));
     tb->setAutoRaise(true);
@@ -318,14 +318,14 @@ void SelectItem::init()
     tb->setChecked(true);
     d->w_viewmode->addButton(tb, 1);
 
-    tb = new QToolButton(this);
+    tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+3"));
     tb->setIcon(QIcon::fromTheme("view-list-icons"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
 
-    d->w_items = new QTreeView(this);
+    d->w_items = new QTreeView();
     d->w_items->setAlternatingRowColors(true);
     d->w_items->setAllColumnsShowFocus(true);
     d->w_items->setUniformRowHeights(true);
@@ -336,7 +336,7 @@ void SelectItem::init()
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
     d->w_items->header()->setSectionsMovable(false);
 
-    d->w_itemthumbs = new QTreeView(this);
+    d->w_itemthumbs = new QTreeView();
     d->w_itemthumbs->setAlternatingRowColors(true);
     d->w_itemthumbs->setAllColumnsShowFocus(true);
     d->w_itemthumbs->setUniformRowHeights(true);
@@ -349,7 +349,7 @@ void SelectItem::init()
     d->w_itemthumbs->viewport()->installEventFilter(this);
     d->w_itemthumbs->header()->setSectionsMovable(false);
 
-    d->w_thumbs = new QListView(this);
+    d->w_thumbs = new QListView();
     d->w_thumbs->setUniformItemSizes(true);
     d->w_thumbs->setMovement(QListView::Static);
     d->w_thumbs->setViewMode(QListView::IconMode);

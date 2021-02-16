@@ -521,9 +521,18 @@ protected:
         auto coloredToolButton = [this](QToolButton *tb, const QColor &baseColor, bool checkable) {
             auto winbg = palette().color(QPalette::Window);
 
-            auto downbg = Utility::gradientColor(baseColor, winbg, 0.4);
-            auto border = downbg.darker();
-            auto hoverbg = downbg.lighter();
+            auto downbg = Utility::gradientColor(baseColor, winbg, 0.5);
+            bool darkText = (tb->palette().color(QPalette::ButtonText).lightnessF() < 0.5);
+            qWarning() << "DARKTEXT" << darkText;
+            QColor border;
+            QColor hoverbg;
+            if (darkText) {
+                border = downbg.darker(150);
+                hoverbg = downbg.lighter();
+            } else {
+                border = downbg.lighter();
+                hoverbg = downbg.darker(150);
+            }
             auto bgName = checkable ? QString::fromLatin1("transparent")
                                     : hoverbg.name();
 

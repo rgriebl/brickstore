@@ -186,6 +186,7 @@ class FancyDockTitleBar : public QLabel
 public:
     explicit FancyDockTitleBar(QDockWidget *parent)
         : QLabel(parent)
+        , m_gradient(0, 0, 1, 0)
         , m_dock(parent)
     {
         if (m_dock) {
@@ -194,8 +195,7 @@ public:
                     this, &QLabel::setText);
         }
         setAutoFillBackground(true);
-        setIndent(style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin));
-        //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        setIndent(style()->pixelMetric(QStyle::PM_LayoutLeftMargin));
         m_gradient.setCoordinateMode(QGradient::ObjectMode);
 
         QFont f = font();
@@ -207,16 +207,16 @@ protected:
     void paintEvent(QPaintEvent *e) override
     {
         QPalette p = palette();
-        QColor high = p.color(QPalette::Highlight);
-        QColor text = p.color(QPalette::HighlightedText);
+        QPalette ivp = qApp->palette("QAbstractItemView");
+        QColor high = ivp.color(p.currentColorGroup(), QPalette::Highlight);
+        QColor text = ivp.color(p.currentColorGroup(), QPalette::HighlightedText);
         QColor win = QApplication::palette(this).color(QPalette::Window);
 
         if (m_gradient.stops().count() != 3
                 || m_gradient.stops().at(0).second != high
                 || m_gradient.stops().at(2).second != win) {
-            QLinearGradient g(0, 0, 1, 0.5);
             m_gradient.setStops({ { 0, high },
-                         { .65, Utility::gradientColor(high, win, 0.5) },
+                         { .6, Utility::gradientColor(high, win, 0.5) },
                          { 1, win } });
             p.setBrush(QPalette::Window, m_gradient);
             p.setColor(QPalette::WindowText, text);

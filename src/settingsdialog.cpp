@@ -106,9 +106,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
-#if defined(Q_OS_MACOS)
-    w_currency_update->setStyle(QStyleFactory::create("fusion"));
-#endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);

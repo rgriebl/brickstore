@@ -57,6 +57,7 @@
 #include "version.h"
 #include "application.h"
 #include "stopwatch.h"
+#include "utility.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
@@ -319,6 +320,26 @@ void Application::doEmitOpenDocument()
 
 bool Application::eventFilter(QObject *o, QEvent *e)
 {
+    // QToolButtons look really ugly on macOS, so we re-style them to the fusion style
+#if defined(Q_OS_MACOS)
+    static QStyle *fusion = QStyleFactory::create("fusion");
+    if (e->type() == QEvent::ChildPolished) {
+        if (auto *tb = qobject_cast<QToolButton *>(static_cast<QChildEvent *>(e)->child())) {
+            if (!qobject_cast<QToolBar *>(o)) {
+                QPointer<QToolButton> tbptr(tb);
+                QMetaObject::invokeMethod(this, [tbptr]() {
+                    if (tbptr) {
+                        QPalette pal = tbptr->palette();
+                        pal.setColor(QPalette::Button, Utility::premultiplyAlpha(qApp->palette("QAbstractItemView").color(QPalette::Highlight)));
+                        tbptr->setStyle(fusion);
+                        tbptr->setPalette(pal);
+                    }
+                });
+            }
+        }
+    }
+#endif
+
     if ((o != qApp) || !e)
         return false;
 
