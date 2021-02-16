@@ -81,5 +81,7 @@ private:
     QToolButton *w_2d = nullptr;
     QToolButton *w_3d = nullptr;
     QToolButton *w_playPause = nullptr;
+    QIcon m_playIcon;
+    QIcon m_pauseIcon;
 #endif
 };

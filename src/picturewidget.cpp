@@ -69,7 +69,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d = new QToolButton();
     w_2d->setText("2D");
     w_2d->setAutoRaise(true);
-    w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
         m_prefer3D = false;
         redraw();
@@ -78,7 +78,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_3d = new QToolButton();
     w_3d->setText("3D");
     w_3d->setAutoRaise(true);
-    w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
         m_prefer3D = true;
         redraw();
@@ -89,13 +89,15 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setFont(font);
     w_3d->setFont(font);
 
+    m_playIcon = QIcon::fromTheme("media-playback-start");
+    m_pauseIcon = QIcon::fromTheme("media-playback-stop");
+
     w_playPause = new QToolButton();
     w_playPause->setAutoRaise(true);
-    w_playPause->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    w_playPause->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     auto toggleAnimation = [this]() {
         m_animationActive = !m_animationActive;
-        w_playPause->setIcon(w_playPause->style()->standardIcon(
-                                 m_animationActive ? QStyle::SP_MediaStop : QStyle::SP_MediaPlay));
+        w_playPause->setIcon(m_animationActive ? m_pauseIcon : m_playIcon);
         if (m_animationActive)
             w_ldrawWin->startAnimation();
         else
