@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.2.2] - 2021-02-17
+This is a quick-fix release for 2021.2.1: it adds the missing German translation and fixes a bug
+where the language would sometimes revert to English.
+
+
 ## [2021.2.1] - 2021-02-17
 ### Improvements
 - Complete overhaul of BrickLink cart and order importing.
@@ -24,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 A lot.
+
 
 ## [2021.2.0] - 2021-02-07
 ### Improvements
@@ -175,7 +181,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.2...HEAD
+[2021.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.2
 [2021.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.1
 [2021.2.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.0
 [2021.1.7]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.7
