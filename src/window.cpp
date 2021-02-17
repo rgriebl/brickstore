@@ -2399,7 +2399,8 @@ void Window::print(bool as_pdf)
         if (!selection().isEmpty())
             pd.setOption(QAbstractPrintDialog::PrintSelection);
 
-        //pd.setPrintRange(m_doc->selection().isEmpty() ? QAbstractPrintDialog::AllPages : QAbstractPrintDialog::Selection);
+        pd.setPrintRange(selection().isEmpty() ? QAbstractPrintDialog::AllPages
+                                               : QAbstractPrintDialog::Selection);
 
         if (pd.exec() != QDialog::Accepted)
             return;
@@ -2424,6 +2425,8 @@ void Window::print(bool as_pdf)
         QString msg = e.error();
         if (msg.isEmpty())
             msg = tr("Printing failed.");
+        else
+            msg.replace(QChar('\n'), QLatin1String("<br>"));
         MessageBox::warning(nullptr, { }, msg);
     }
 }

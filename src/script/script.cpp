@@ -174,8 +174,8 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
 
     QQmlEngine *engine = m_script->qmlEngine();
     QJSValueList args = { engine->toScriptValue(job.data()),
-                          engine->toScriptValue(itemList),
-                          engine->toScriptValue(wrappedDoc) };
+                          engine->toScriptValue(wrappedDoc),
+                          engine->toScriptValue(itemList) };
     QJSValue result = m_printFunction.call(args);
 
     if (result.isError()) {
