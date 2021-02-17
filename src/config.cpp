@@ -263,7 +263,7 @@ void Config::setDataDir(const QString &dir)
 
 QString Config::language() const
 {
-    return value("General/Locale", QLocale::system().name()).toString();
+    return value("General/Locale", QLocale::system().name().left(2)).toString();
 }
 
 void Config::setLanguage(const QString &lang)

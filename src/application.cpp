@@ -263,10 +263,9 @@ QPlainTextEdit *Application::logWidget() const
 
 void Application::updateTranslations()
 {
-    QString locale = Config::inst()->language();
-    if (locale.isEmpty())
-        locale = QLocale::system().name().left(2);
-//    QLocale::setDefault(QLocale(locale));
+    QString language = Config::inst()->language();
+    if (language.isEmpty())
+        return;
 
     if (m_trans_qt)
         QCoreApplication::removeTranslator(m_trans_qt.data());
@@ -286,13 +285,13 @@ void Application::updateTranslations()
         once = true;
     }
 
-    if (locale != "en") {
-        if (m_trans_qt->load(QLatin1String("qtbase_") + locale, i18n))
+    if (language != "en") {
+        if (m_trans_qt->load(QLatin1String("qtbase_") + language, i18n))
             QCoreApplication::installTranslator(m_trans_qt.data());
         else
             m_trans_qt.reset();
 
-        if (m_trans_brickstore->load(QLatin1String("brickstore_") + locale, i18n))
+        if (m_trans_brickstore->load(QLatin1String("brickstore_") + language, i18n))
             QCoreApplication::installTranslator(m_trans_brickstore.data());
         else
             m_trans_brickstore.reset();

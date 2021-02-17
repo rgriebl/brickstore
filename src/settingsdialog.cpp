@@ -103,8 +103,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(w_item_image_size_reset, &QToolButton::clicked,
             this, [this]() { w_item_image_size->setValue(10); });
 
-
-
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
@@ -226,8 +224,7 @@ void SettingsDialog::load()
         w_language->setEnabled(false);
     }
     else {
-        bool localematch = false;
-        QLocale l_active;
+        const QString currentLanguage = Config::inst()->language();
 
         for (const auto &trans : translations) {
             if (trans.language == QLatin1String("en"))
@@ -235,16 +232,8 @@ void SettingsDialog::load()
             else
                 w_language->addItem(QString("%1 (%2)").arg(trans.languageName[QLatin1String("en")], trans.languageName[trans.language]), trans.language);
 
-            QLocale l(trans.language);
-
-            if (!localematch) {
-                if (l.language() == l_active.language()) {
-                    if (l.country() == l_active.country())
-                        localematch = true;
-
-                    w_language->setCurrentIndex(w_language->count()-1);
-                }
-            }
+            if (currentLanguage == trans.language)
+                w_language->setCurrentIndex(w_language->count()-1);
         }
     }
 
