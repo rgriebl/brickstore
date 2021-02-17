@@ -95,7 +95,7 @@
           <item>
            <widget class="QLabel" name="w_labelEcb">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;ECB&lt;/span&gt;&lt;/a&gt;: %1 1 equals %2 %3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</string>
             </property>
            </widget>
           </item>
@@ -262,7 +262,7 @@
           <item>
            <widget class="QLabel" name="w_labelLegacy">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;From V1 BrickStore/Stock: USD 1 equals %1 %2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>From V1 BrickStore/Stock: USD 1 equals %1 %2</string>
             </property>
            </widget>
           </item>

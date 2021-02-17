@@ -900,7 +900,7 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
 
                     if (updated & updatedWarningMask & (1ULL << idx.column())) {
                         updatedTip = updatedTip % u"<br><br>" %
-                                tr("This change cannot be applied via BrickLink's Mass-Upload mechanism!");
+                                tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
                     }
                 }
             }
