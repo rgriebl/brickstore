@@ -99,6 +99,8 @@ Application::Application(int &_argc, char **_argv)
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
 
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 #endif
