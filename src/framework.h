@@ -69,6 +69,8 @@ public slots:
     void titleUpdate();
     void showContextMenu(bool onitem, const QPoint &pos);
     void setFilter(const QString &filterText);
+    void reFilter();
+    void updateReFilterAction(bool b);
 
     void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
                                       BrickLink::Condition condition = BrickLink::Condition::New);

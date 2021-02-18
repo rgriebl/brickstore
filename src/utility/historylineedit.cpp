@@ -148,6 +148,9 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     auto *a = addAction(QIcon(filterPix), QLineEdit::LeadingPosition);
     connect(a, &QAction::triggered,
             this, &HistoryLineEdit::showPopup);
+
+    m_reFilterAction = addAction(QIcon::fromTheme("view-refresh"), QLineEdit::TrailingPosition);
+    m_reFilterAction->setVisible(false);
 }
 
 void HistoryLineEdit::appendToModel()
@@ -222,6 +225,11 @@ bool HistoryLineEdit::restoreState(const QByteArray &ba)
     m_filterModel.setStringList(list);
     setText(text);
     return true;
+}
+
+QAction *HistoryLineEdit::reFilterAction()
+{
+    return m_reFilterAction;
 }
 
 void HistoryLineEdit::showPopup()

@@ -23,7 +23,8 @@ public:
     enum Type { Add, Remove };
 
     AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
-                 const QVector<int> &viewPositions, const Document::ItemList &items);
+                 const QVector<int> &sortedPositions, const QVector<int> &filteredPositions,
+                 const Document::ItemList &items);
     ~AddRemoveCmd() override;
     int id() const override;
 
@@ -35,7 +36,8 @@ public:
 private:
     Document *         m_doc;
     QVector<int>       m_positions;
-    QVector<int>       m_viewPositions;
+    QVector<int>       m_sortedPositions;
+    QVector<int>       m_filteredPositions;
     Document::ItemList m_items;
     Type               m_type;
 };
@@ -90,11 +92,10 @@ private:
 };
 
 
-class SortFilterCmd : public QUndoCommand
+class SortCmd : public QUndoCommand
 {
 public:
-    SortFilterCmd(Document *doc, int column, Qt::SortOrder order,
-                  const QString &filterString, const QVector<Filter> &filterList);
+    SortCmd(Document *doc, int column, Qt::SortOrder order);
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
 
@@ -106,8 +107,27 @@ private:
     QDateTime m_created;
     int m_column;
     Qt::SortOrder m_order;
-    QString m_filterString;
-    QVector<Filter> m_filterList;
+    bool m_isSorted = false;
 
     QVector<BrickLink::InvItem *> m_unsorted;
+};
+
+class FilterCmd : public QUndoCommand
+{
+public:
+    FilterCmd(Document *doc, const QString &filterString, const QVector<Filter> &filterList);
+    int id() const override;
+    bool mergeWith(const QUndoCommand *other) override;
+
+    void redo() override;
+    void undo() override;
+
+private:
+    Document *m_doc;
+    QDateTime m_created;
+    QString m_filterString;
+    QVector<Filter> m_filterList;
+    bool m_isFiltered = false;
+
+    QVector<BrickLink::InvItem *> m_unfiltered;
 };

@@ -506,7 +506,6 @@ FrameWork::FrameWork(QWidget *parent)
                      "view_column_layout_load",
                      "|",
                      "widget_filter",
-                     "view_sortfilter_reapply",
                      "|",
                      "widget_progress",
                      "|"
@@ -745,7 +744,6 @@ void FrameWork::translateActions()
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
-        { "view_sortfilter_reapply",        tr("Re-apply the sorting and filtering rules"), tr("Ctrl+Alt+F") },
         { "menu_extras",                    tr("E&xtras"),                            },
         { "update_database",                tr("Update Database"),                    },
         { "configure",                      tr("Settings..."),                        },
@@ -957,6 +955,9 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 // a bit of a hack, but the action needs to be "used" for the shortcut to be
                 // active, but we don't want an icon in the filter edit.
                 m_filter->QWidget::addAction(findAction("edit_filter_focus"));
+
+                connect(m_filter->reFilterAction(), &QAction::triggered,
+                        this, &FrameWork::reFilter);
 
                 connect(m_filter, &QLineEdit::textChanged, [this]() {
                     m_filter_delay->start();
@@ -1244,9 +1245,6 @@ void FrameWork::createActions()
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
     lclm->menuAction()->setIcon(QIcon::fromTheme("object-columns"));
     lclm->setObjectName("view_column_layout_list");
-    (void) newQAction(this, "view_sortfilter_reapply", NeedDocument, false, this, [this]() {
-        m_current_window->document()->reapplySortFilter();
-    });
 
     (void) newQAction(this, "update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
@@ -1545,9 +1543,12 @@ void FrameWork::connectWindow(QWidget *w)
                        doc, &Document::setFilter);
             disconnect(doc, &Document::filterChanged,
                        this, &FrameWork::setFilter);
+            disconnect(doc, &Document::isFilteredChanged,
+                       this, &FrameWork::updateReFilterAction);
 
             m_filter->setText(QString());
             m_filter->setEnabled(false);
+            m_filter->reFilterAction()->setVisible(false);
         }
         m_undogroup->setActiveStack(nullptr);
 
@@ -1573,6 +1574,8 @@ void FrameWork::connectWindow(QWidget *w)
                     doc, &Document::setFilter);
             connect(doc, &Document::filterChanged,
                     this, &FrameWork::setFilter);
+            connect(doc, &Document::isFilteredChanged,
+                    this, &FrameWork::updateReFilterAction);
 
             if (auto a = findAction("edit_filter_focus"))
                 m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
@@ -1609,6 +1612,10 @@ void FrameWork::updateActions(const Document::ItemList &selection)
     int cnt = selection.count();
     bool isOnline = Application::inst()->isOnline();
 
+    const auto *doc = m_current_window ? m_current_window->document() : nullptr;
+    bool docIsModified = doc ? doc->isModified() : false;
+    int docItemCount = doc ? int(doc->rowCount()) : 0;
+
     foreach (QAction *a, findChildren<QAction *>()) {
         quint32 flags = a->property("bsFlags").toUInt();
 
@@ -1620,17 +1627,15 @@ void FrameWork::updateActions(const Document::ItemList &selection)
         if (flags & NeedNetwork)
             b = b && isOnline;
 
-        if (flags & NeedModification) {
-            b = b && m_current_window && m_current_window->document()
-                    && m_current_window->document()->isModified();
-        }
+        if (flags & NeedModification)
+            b = b && docIsModified;
 
         if (flags & NeedDocument) {
             b = b && m_current_window;
 
             if (b) {
                 if (flags & NeedItems)
-                    b = b && (m_current_window->document()->rowCount() > 0);
+                    b = b && (docItemCount > 0);
 
                 quint8 minSelection = (flags >> 24) & 0xff;
                 quint8 maxSelection = (flags >> 16) & 0xff;
@@ -1651,7 +1656,7 @@ void FrameWork::updateActions(const Document::ItemList &selection)
                 if (flags & NeedQuantity)
                     b = b && (item->quantity() != 0);
                 if (flags & NeedSubCondition)
-                    b = b && (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
+                    b = b && (item->itemType() && item->itemType()->hasSubConditions());
 
                 if (!b)
                     break;
@@ -1774,6 +1779,18 @@ void FrameWork::setFilter(const QString &filter)
 {
     if (m_filter)
         m_filter->setText(filter);
+}
+
+void FrameWork::reFilter()
+{
+    if (m_filter && m_current_window)
+        m_current_window->document()->reFilter();
+}
+
+void FrameWork::updateReFilterAction(bool b)
+{
+    if (m_filter)
+        m_filter->reFilterAction()->setVisible(!b);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)

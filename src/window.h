@@ -30,6 +30,7 @@ class FrameWork;
 class UndoStack;
 class HeaderView;
 class StatusBar;
+class ColumnChangeWatcher;
 
 
 class Window : public QWidget
@@ -195,6 +196,10 @@ private:
     int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
     void deleteAutosave();
 
+    void moveColumnDirect(int logical, int oldVisual, int newVisual);
+    void resizeColumnDirect(int logical, int oldSize, int newSize);
+    friend class ColumnCmd;
+
 private:
     Document *           m_doc;
     QItemSelectionModel *m_selection_model;
@@ -205,10 +210,10 @@ private:
     HeaderView *         w_header;
     bool                 m_diff_mode;
     bool                 m_simple_mode;
+    ColumnChangeWatcher *m_ccw = nullptr;
 
     int                  m_latest_row;
     QTimer *             m_latest_timer;
-
 
     int                  m_settopg_failcnt = 0;
     int                  m_settopg_todocnt = 0;

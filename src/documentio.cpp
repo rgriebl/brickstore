@@ -566,7 +566,6 @@ bool DocumentIO::saveTo(Document *doc, const QString &s, bool export_only)
         if (ok) {
             if (!export_only) {
                 doc->unsetModified();
-                doc->setGuiStateModified(false);
                 doc->setFileName(s);
 
                 Config::inst()->addToRecentFiles(s);

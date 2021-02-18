@@ -32,6 +32,9 @@ class ChangeCmd;
 class Document : public QAbstractTableModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool isSorted READ isSorted NOTIFY isSortedChanged)
+    Q_PROPERTY(bool isFiltered READ isFiltered NOTIFY isFilteredChanged)
+
 public:
     enum Field {
         Index = 0,
@@ -140,13 +143,13 @@ public:
     void setFilter(const QString &filter);
 
     void nextSortFilterIsDirect(); // hack for the Window c'tor ... find something better
-    void reapplySortFilter();
+    void reSort();
+    void reFilter();
 
     BrickLink::InvItemList sortItemList(const BrickLink::InvItemList &list) const;
 
     QString filterToolTip() const;
 
-    bool lastCommandWasSortFilter() const;
     bool lastCommandWasActivateDifferenceMode() const;
 
 public slots:
@@ -155,7 +158,8 @@ public slots:
 public:
     Document();
     Document(const BrickLink::InvItemList &items);
-    Document(const BrickLink::InvItemList &items, const QString &currencyCode);
+    Document(const BrickLink::InvItemList &items, const QString &currencyCode,
+             bool forceModified = false);
     virtual ~Document() override;
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
@@ -198,7 +202,6 @@ public:
     QDomElement guiState() const;
     void setGuiState(QDomElement dom);
     void clearGuiState();
-    void setGuiStateModified(bool modified);
 
     void setOrder(BrickLink::Order *order);
 
@@ -234,7 +237,9 @@ signals:
     void filterChanged(const QString &filter);
     void sortOrderChanged(Qt::SortOrder order);
     void sortColumnChanged(int column);
-    void lastCommandWasSortFilterChanged(bool b);
+    void lastCommandWasVisualChanged(bool b);
+    void isSortedChanged(bool b);
+    void isFilteredChanged(bool b);
 
 protected:
     bool event(QEvent *e) override;
@@ -246,13 +251,14 @@ private:
     void setFakeIndexes(const QVector<int> &fakeIndexes);
 
     void setItemsDirect(const ItemList &items);
-    void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
-    void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
+    void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
+    void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void changeItemDirect(BrickLink::InvItem *item, Item &value);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
     void setDifferenceModeActiveDirect(bool active);
-    void sortFilterDirect(int column, Qt::SortOrder order, const QString &filterString,
-                          const QVector<Filter> &filterList, BrickLink::InvItemList &unsorted);
+    void filterDirect(const QString &filterString, const QVector<Filter> &filterList, bool &filtered,
+                      BrickLink::InvItemList &unfiltered);
+    void sortDirect(int column, Qt::SortOrder order, bool &sorted, BrickLink::InvItemList &unsorted);
 
     void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
     void emitStatisticsChanged();
@@ -266,23 +272,29 @@ private:
     friend class AddRemoveCmd;
     friend class ChangeCmd;
     friend class CurrencyCmd;
-    friend class SortFilterCmd;
+    friend class SortCmd;
+    friend class FilterCmd;
     friend class DifferenceModeCmd;
 
 private:
     QVector<BrickLink::InvItem *> m_items;
+    QVector<BrickLink::InvItem *> m_sortedItems;
+    QVector<BrickLink::InvItem *> m_filteredItems;
+
     QHash<const Item *, Item> m_differenceBase;
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs
     QHash<const Item *, QPair<quint64, quint64>> m_itemFlags;
 
-    QVector<BrickLink::InvItem *> m_viewItems;
 
     int m_sortColumn = -1;
     Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
-    bool m_nextSortFilterIsDirect = false;
     QScopedPointer<Filter::Parser> m_filterParser;
     QString m_filterString;
     QVector<Filter> m_filterList;
+
+    bool m_isSorted = false;   // freshly sorted, no changes
+    bool m_isFiltered = false; // freshly filtered, no changes
+    bool m_nextSortFilterIsDirect = false;
 
     bool m_differenceModeActive = false;
 
@@ -292,10 +304,10 @@ private:
     QString          m_title;
 
     UndoStack *      m_undo = nullptr;
+    bool m_forceModified = false; // used to flag restored autosaves
 
     BrickLink::Order *m_order = nullptr;
 
-    bool              m_gui_state_modified = false;
     QDomElement       m_gui_state;
 
     QTimer *          m_delayedEmitOfStatisticsChanged = nullptr;

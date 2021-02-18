@@ -58,6 +58,7 @@ HEADERS += \
   $$PWD/updatedatabase.h \
   $$PWD/welcomewidget.h \
   $$PWD/window.h \
+  $$PWD/window_p.h
 
 FORMS = \
   $$PWD/aboutdialog.ui \

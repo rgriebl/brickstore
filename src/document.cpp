@@ -43,8 +43,103 @@ enum {
     CID_AddRemove,
     CID_Currency,
     CID_DifferenceMode,
-    CID_SortFilter,
+    CID_Sort,
+    CID_Filter,
+
+    // values starting at 0x00010000 are reserved for the view
 };
+
+
+AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
+                           const QVector<int> &sortedPositions, const QVector<int> &filteredPositions, const Document::ItemList &items)
+    : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count())))
+    , m_doc(doc)
+    , m_positions(positions)
+    , m_sortedPositions(sortedPositions)
+    , m_filteredPositions(filteredPositions)
+    , m_items(items)
+    , m_type(t)
+{
+    // for add: specify items and optionally also positions
+    // for remove: specify items only
+}
+
+AddRemoveCmd::~AddRemoveCmd()
+{
+    if (m_type == Add)
+        qDeleteAll(m_items);
+}
+
+int AddRemoveCmd::id() const
+{
+    return CID_AddRemove;
+}
+
+void AddRemoveCmd::redo()
+{
+    if (m_type == Add) {
+        // Document::insertItemsDirect() adds all m_items at the positions given in
+        // m_*positions (or append them to the document in case m_*positions is empty)
+        m_doc->insertItemsDirect(m_items, m_positions, m_sortedPositions, m_filteredPositions);
+        m_positions.clear();
+        m_sortedPositions.clear();
+        m_filteredPositions.clear();
+        m_type = Remove;
+    }
+    else {
+        // Document::removeItemsDirect() removes all m_items and records the positions
+        // in m_*positions
+        m_doc->removeItemsDirect(m_items, m_positions, m_sortedPositions, m_filteredPositions);
+        m_type = Add;
+    }
+}
+
+void AddRemoveCmd::undo()
+{
+    redo();
+}
+
+QString AddRemoveCmd::genDesc(bool is_add, int count)
+{
+    if (is_add)
+        return Document::tr("Added %n item(s)", nullptr, count);
+    else
+        return Document::tr("Removed %n item(s)", nullptr, count);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+ChangeCmd::ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value)
+    : QUndoCommand(qApp->translate("ChangeCmd", "Modified item"))
+    , m_doc(doc)
+    , m_item(item)
+    , m_value(value)
+{ }
+
+int ChangeCmd::id() const
+{
+    return CID_Change;
+}
+
+void ChangeCmd::redo()
+{
+    m_doc->changeItemDirect(m_item, m_value);
+}
+
+void ChangeCmd::undo()
+{
+    redo();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 CurrencyCmd::CurrencyCmd(Document *doc, const QString &ccode, qreal crate)
@@ -84,91 +179,118 @@ void CurrencyCmd::undo()
 }
 
 
-ChangeCmd::ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value)
-    : QUndoCommand(qApp->translate("ChangeCmd", "Modified item"))
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+DifferenceModeCmd::DifferenceModeCmd(Document *doc, bool active)
+    : QUndoCommand(qApp->translate("DifferenceModeCmd", "Switched from or to difference mode"))
     , m_doc(doc)
-    , m_item(item)
-    , m_value(value)
+    , m_active(active)
 { }
 
-int ChangeCmd::id() const
+int DifferenceModeCmd::id() const
 {
-    return CID_Change;
+    return CID_DifferenceMode;
 }
 
-void ChangeCmd::redo()
+void DifferenceModeCmd::redo()
 {
-    m_doc->changeItemDirect(m_item, m_value);
+    m_doc->setDifferenceModeActiveDirect(m_active);
+    m_active = !m_active;
 }
 
-void ChangeCmd::undo()
+void DifferenceModeCmd::undo()
 {
     redo();
 }
 
 
-AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
-                           const QVector<int> &viewPositions, const Document::ItemList &items)
-    : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count())))
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+SortCmd::SortCmd(Document *doc, int column, Qt::SortOrder order)
+    : QUndoCommand(qApp->translate("SortCmd", "Sorted the view"))
     , m_doc(doc)
-    , m_positions(positions)
-    , m_viewPositions(viewPositions)
-    , m_items(items)
-    , m_type(t)
+    , m_created(QDateTime::currentDateTime())
+    , m_column(column)
+    , m_order(order)
+{ }
+
+int SortCmd::id() const
 {
-    // for add: specify items and optionally also positions
-    // for remove: specify items only
+    return CID_Sort;
 }
 
-AddRemoveCmd::~AddRemoveCmd()
+bool SortCmd::mergeWith(const QUndoCommand *other)
 {
-    if (m_type == Add)
-        qDeleteAll(m_items);
+    return (other->id() == id());
 }
 
-int AddRemoveCmd::id() const
+void SortCmd::redo()
 {
-    return CID_AddRemove;
+    int oldColumn = m_doc->sortColumn();
+    Qt::SortOrder oldOrder = m_doc->sortOrder();
+
+    m_doc->sortDirect(m_column, m_order, m_isSorted, m_unsorted);
+
+    m_column = oldColumn;
+    m_order = oldOrder;
 }
 
-void AddRemoveCmd::redo()
-{
-    if (m_type == Add) {
-        // Document::insertItemsDirect() adds all m_items at the positions given in
-        // m_(view)positions (or append them to the document in case m_(view)positions is empty)
-        m_doc->insertItemsDirect(m_items, m_positions, m_viewPositions);
-        m_positions.clear();
-        m_viewPositions.clear();
-        m_type = Remove;
-    }
-    else {
-        // Document::removeItemsDirect() removes all m_items and records the positions
-        // in m_(view)positions
-        m_doc->removeItemsDirect(m_items, m_positions, m_viewPositions);
-        m_type = Add;
-    }
-}
-
-void AddRemoveCmd::undo()
+void SortCmd::undo()
 {
     redo();
 }
 
-QString AddRemoveCmd::genDesc(bool is_add, int count)
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+FilterCmd::FilterCmd(Document *doc, const QString &filterString, const QVector<Filter> &filterList)
+    : QUndoCommand(qApp->translate("FilterCmd", "Filtered the view"))
+    , m_doc(doc)
+    , m_created(QDateTime::currentDateTime())
+    , m_filterString(filterString)
+    , m_filterList(filterList)
+{ }
+
+int FilterCmd::id() const
 {
-    if (is_add)
-        return Document::tr("Added %n item(s)", nullptr, count);
-    else
-        return Document::tr("Removed %n item(s)", nullptr, count);
+    return CID_Filter;
+}
+
+bool FilterCmd::mergeWith(const QUndoCommand *other)
+{
+    return (other->id() == id());
+}
+
+void FilterCmd::redo()
+{
+    QString oldFilterString = m_doc->filter();
+    auto oldFilterList = m_doc->m_filterList;
+
+    m_doc->filterDirect(m_filterString, m_filterList, m_isFiltered, m_unfiltered);
+
+    m_filterString = oldFilterString;
+    m_filterList = oldFilterList;
+}
+
+void FilterCmd::undo()
+{
+    redo();
 }
 
 
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 
 Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool ignoreExcluded)
 {
@@ -259,12 +381,9 @@ Document::Document()
     connect(m_undo, &QUndoStack::cleanChanged,
             this, [this](bool clean) {
         // if the gui state is modified, the overall state stays at "modified"
-        if (!m_gui_state_modified)
+        if (!m_forceModified)
             emit modificationChanged(!clean);
     });
-    connect(m_undo, &QUndoStack::indexChanged,
-            this, [this]() { emit lastCommandWasSortFilterChanged(lastCommandWasSortFilter()); });
-
     s_documents.append(this);
 }
 
@@ -277,10 +396,12 @@ Document::Document(const BrickLink::InvItemList &items)
 }
 
 // the caller owns the items
-Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
+Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode,
+                   bool forceModified)
     : Document(items)
 {
     m_currencycode = currencyCode;
+    m_forceModified = forceModified;
 }
 
 Document::~Document()
@@ -330,7 +451,7 @@ bool Document::clear()
 
 void Document::appendItem(Item *item)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { item }));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, { item }));
 }
 
 void Document::insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items)
@@ -339,18 +460,22 @@ void Document::insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &i
         return;
 
     int afterPos = m_items.indexOf(afterItem) + 1;
-    int afterViewPos = m_viewItems.indexOf(afterItem) + 1;
+    int afterSortedPos = m_sortedItems.indexOf(afterItem) + 1;
+    int afterFilteredPos = m_filteredItems.indexOf(afterItem) + 1;
 
-    Q_ASSERT(afterPos > 0);
-    if (afterViewPos == 0)
-        afterViewPos = m_viewItems.size();
+    Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
+    if (afterFilteredPos == 0)
+        afterFilteredPos = m_filteredItems.size();
 
     QVector<int> positions(items.size());
     std::iota(positions.begin(), positions.end(), afterPos);
-    QVector<int> viewPositions(items.size());
-    std::iota(viewPositions.begin(), viewPositions.end(), afterViewPos);
+    QVector<int> sortedPositions(items.size());
+    std::iota(sortedPositions.begin(), sortedPositions.end(), afterSortedPos);
+    QVector<int> filteredPositions(items.size());
+    std::iota(filteredPositions.begin(), filteredPositions.end(), afterFilteredPos);
 
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, viewPositions, items));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, sortedPositions,
+                                  filteredPositions, items));
 }
 
 void Document::removeItem(Item *item)
@@ -360,7 +485,7 @@ void Document::removeItem(Item *item)
 
 void Document::removeItems(const ItemList &items)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, items));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, { }, items));
 }
 
 void Document::changeItem(Item *item, const Item &value)
@@ -370,28 +495,34 @@ void Document::changeItem(Item *item, const Item &value)
 
 void Document::setItemsDirect(const Document::ItemList &items)
 {
-    QVector<int> posDummy, viewPosDummy;
-    insertItemsDirect(items, posDummy, viewPosDummy);
+    QVector<int> posDummy, sortedPosDummy, filteredPosDummy;
+    insertItemsDirect(items, posDummy, sortedPosDummy, filteredPosDummy);
 }
 
 void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
-                                 QVector<int> &viewPositions)
+                                 QVector<int> &sortedPositions, QVector<int> &filteredPositions)
 {
     auto pos = positions.constBegin();
-    auto viewPos = viewPositions.constBegin();
+    auto sortedPos = sortedPositions.constBegin();
+    auto filteredPos = filteredPositions.constBegin();
+    bool isAppend = positions.isEmpty();
+
+    Q_ASSERT((positions.size() == sortedPositions.size())
+             && (positions.size() == filteredPositions.size()));
+    Q_ASSERT(isAppend != (positions.size() == items.size()));
 
     emit layoutAboutToBeChanged();
     QModelIndexList before = persistentIndexList();
 
     for (Item *item : qAsConst(items)) {
-        if (viewPos != viewPositions.constEnd()) {
-            m_items.insert(*pos, item);
-            m_viewItems.insert(*viewPos, item);
-            ++pos;
-            ++viewPos;
+        if (!isAppend) {
+            m_items.insert(*pos++, item);
+            m_sortedItems.insert(*sortedPos++, item);
+            m_filteredItems.insert(*filteredPos++, item);
         } else {
             m_items.append(item);
-            m_viewItems.append(item);
+            m_sortedItems.append(item);
+            m_filteredItems.append(item);
         }
 
         // this is really a new item, not just a redo - start with no differences
@@ -409,12 +540,19 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
+
+    if (isSorted())
+        emit isSortedChanged(m_isSorted = false);
+    if (isFiltered())
+        emit isFilteredChanged(m_isFiltered = false);
 }
 
-void Document::removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &viewPositions)
+void Document::removeItemsDirect(ItemList &items, QVector<int> &positions,
+                                 QVector<int> &sortedPositions, QVector<int> &filteredPositions)
 {
     positions.resize(items.count());
-    viewPositions.resize(items.count());
+    sortedPositions.resize(items.count());
+    filteredPositions.resize(items.count());
 
     emit layoutAboutToBeChanged();
     QModelIndexList before = persistentIndexList();
@@ -422,12 +560,15 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions, QVect
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items.at(i);
         int idx = m_items.indexOf(item);
-        int viewIdx = m_viewItems.indexOf(item);
-        Q_ASSERT(idx >= 0 && viewIdx >= 0);
+        int sortIdx = m_sortedItems.indexOf(item);
+        int filterIdx = m_filteredItems.indexOf(item);
+        Q_ASSERT(idx >= 0 && sortIdx >= 0);
         positions[i] = idx;
-        viewPositions[i] = viewIdx;
+        sortedPositions[i] = sortIdx;
+        filteredPositions[i] = filterIdx;
         m_items.removeAt(idx);
-        m_viewItems.removeAt(viewIdx);
+        m_sortedItems.removeAt(sortIdx);
+        m_filteredItems.removeAt(filterIdx);
     }
 
     QModelIndexList after;
@@ -438,6 +579,12 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions, QVect
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
+
+    //TODO: we should remember and re-apply the isSorted/isFiltered state
+    if (isSorted())
+        emit isSortedChanged(m_isSorted = false);
+    if (isFiltered())
+        emit isFilteredChanged(m_isFiltered = false);
 }
 
 void Document::changeItemDirect(BrickLink::InvItem *item, Item &value)
@@ -450,6 +597,12 @@ void Document::changeItemDirect(BrickLink::InvItem *item, Item &value)
     emitDataChanged(idx1, idx2);
     updateItemFlags(item);
     emitStatisticsChanged();
+
+    //TODO: we should remember and re-apply the isSorted/isFiltered state
+    if (isSorted())
+        emit isSortedChanged(m_isSorted = false);
+    if (isFiltered())
+        emit isFilteredChanged(m_isFiltered = false);
 }
 
 void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
@@ -491,6 +644,12 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
 
         emitDataChanged();
         emitStatisticsChanged();
+
+        //TODO: we should remember and re-apply the isSorted/isFiltered state
+        if (isSorted())
+            emit isSortedChanged(m_isSorted = false);
+        if (isFiltered())
+            emit isFilteredChanged(m_isFiltered = false);
     }
     emit currencyCodeChanged(currencyCode());
 }
@@ -701,14 +860,6 @@ void Document::clearGuiState()
     m_gui_state.clear();
 }
 
-void Document::setGuiStateModified(bool modified)
-{
-    bool wasModified = isModified();
-    m_gui_state_modified = modified;
-    if (wasModified != isModified())
-        emit modificationChanged(!wasModified);
-}
-
 void Document::setOrder(BrickLink::Order *order)
 {
     if (m_order)
@@ -761,11 +912,12 @@ void Document::setTitle(const QString &str)
 
 bool Document::isModified() const
 {
-    return !m_undo->isClean() || m_gui_state_modified;
+    return !m_undo->isClean() || m_forceModified;
 }
 
 void Document::unsetModified()
 {
+    m_forceModified = false;
     m_undo->setClean();
 
     // at this point, we can cleanup the diff mode base
@@ -774,6 +926,8 @@ void Document::unsetModified()
         goneItems.removeOne(item);
     for (const auto &item : qAsConst(goneItems))
         m_differenceBase.remove(item);
+
+    emit modificationChanged(isModified());
 }
 
 quint64 Document::errorMask() const
@@ -830,7 +984,7 @@ const BrickLink::Order *Document::order() const
 QModelIndex Document::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && column >= 0 && row < rowCount() && column < columnCount())
-        return createIndex(row, column, m_viewItems.at(row));
+        return createIndex(row, column, m_filteredItems.at(row));
     return { };
 }
 
@@ -841,7 +995,7 @@ BrickLink::InvItem *Document::item(const QModelIndex &idx) const
 
 QModelIndex Document::index(const BrickLink::InvItem *item, int column) const
 {
-    int row = m_viewItems.indexOf(const_cast<BrickLink::InvItem *>(item));
+    int row = m_filteredItems.indexOf(const_cast<BrickLink::InvItem *>(item));
     if (row >= 0)
         return createIndex(row, column, const_cast<BrickLink::InvItem *>(item));
     return { };
@@ -849,7 +1003,7 @@ QModelIndex Document::index(const BrickLink::InvItem *item, int column) const
 
 int Document::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_viewItems.size();
+    return parent.isValid() ? 0 : m_filteredItems.size();
 }
 
 int Document::columnCount(const QModelIndex &parent) const
@@ -1295,7 +1449,7 @@ QString Document::subConditionLabel(BrickLink::SubCondition sc) const
 
 bool Document::isSorted() const
 {
-    return m_sortColumn != -1;
+    return m_isSorted;
 }
 
 int Document::sortColumn() const
@@ -1314,17 +1468,18 @@ void Document::sort(int column, Qt::SortOrder order)
         return;
 
     if (m_undo && !m_nextSortFilterIsDirect) {
-        m_undo->push(new SortFilterCmd(this, column, order, m_filterString, m_filterList));
+        m_undo->push(new SortCmd(this, column, order));
     } else {
-        BrickLink::InvItemList dummy;
-        sortFilterDirect(column, order, m_filterString, m_filterList, dummy);
+        bool dummy1;
+        BrickLink::InvItemList dummy2;
+        sortDirect(column, order, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
 }
 
 bool Document::isFiltered() const
 {
-    return !m_filterList.isEmpty();
+    return m_isFiltered;
 }
 
 QString Document::filter() const
@@ -1341,10 +1496,11 @@ void Document::setFilter(const QString &filter)
         return;
 
     if (m_undo && !m_nextSortFilterIsDirect) {
-        m_undo->push(new SortFilterCmd(this, m_sortColumn, m_sortOrder, filter, filterList));
+        m_undo->push(new FilterCmd(this, filter, filterList));
     } else {
-        BrickLink::InvItemList dummy;
-        sortFilterDirect(m_sortColumn, m_sortOrder, filter, filterList, dummy);
+        bool dummy1;
+        BrickLink::InvItemList dummy2;
+        filterDirect(filter, filterList, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
 }
@@ -1354,44 +1510,94 @@ void Document::nextSortFilterIsDirect()
     m_nextSortFilterIsDirect = true;
 }
 
-void Document::sortFilterDirect(int column, Qt::SortOrder order, const QString &filterString,
-                                const QVector<Filter> &filterList, BrickLink::InvItemList &unsorted)
+void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
+                          BrickLink::InvItemList &unsortedItems)
 {
-    bool emitFilterChanged = (filterList != m_filterList);
     bool emitSortOrderChanged = (order != m_sortOrder);
     bool emitSortColumnChanged = (column != m_sortColumn);
+    bool wasSorted = isSorted();
 
     emit layoutAboutToBeChanged();
     QModelIndexList before = persistentIndexList();
 
     m_sortColumn = column;
     m_sortOrder = order;
-    m_filterString = filterString;
-    m_filterList = filterList;
 
-    if (!unsorted.isEmpty()) {
-        m_viewItems = unsorted;
-        unsorted.clear();
+    if (!unsortedItems.isEmpty()) {
+        m_isSorted = sorted;
+        m_sortedItems = unsortedItems;
+        unsortedItems.clear();
 
     } else {
-        unsorted = m_viewItems;
-        m_viewItems = m_items;
+        unsortedItems = m_sortedItems;
+        sorted = m_isSorted;
+        m_isSorted = true;
+        m_sortedItems = m_items;
 
         if (column >= 0) {
-            qParallelSort(m_viewItems.begin(), m_viewItems.end(),
+            qParallelSort(m_sortedItems.begin(), m_sortedItems.end(),
                           [column, order, this](const auto *item1, const auto *item2) {
                 return compare(item1, item2, column) < 0;
             });
             if (order == Qt::DescendingOrder)
-                std::reverse(m_viewItems.begin(), m_viewItems.end());
+                std::reverse(m_sortedItems.begin(), m_sortedItems.end());
 
             // c++17 alternatives, but not supported everywhere yet:
             //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
             //std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
         }
+    }
+
+    // we were filtered before, but we don't want to refilter: the solution is to
+    // keep the old filtered items, but use the order from m_sortedItems
+    if (!m_filteredItems.isEmpty()) {
+        m_filteredItems = QtConcurrent::blockingFiltered(m_sortedItems, [this](auto *item) {
+            return m_filteredItems.contains(item);
+        });
+    } else {
+        m_filteredItems = m_sortedItems;
+    }
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(item(idx), idx.column()));
+    changePersistentIndexList(before, after);
+    emit layoutChanged();
+
+    if (emitSortColumnChanged)
+        emit sortColumnChanged(column);
+    if (emitSortOrderChanged)
+        emit sortOrderChanged(order);
+
+    if (isSorted() != wasSorted)
+        emit isSortedChanged(isSorted());
+}
+
+void Document::filterDirect(const QString &filterString, const QVector<Filter> &filterList,
+                            bool &filtered, BrickLink::InvItemList &unfilteredItems)
+{
+    bool emitFilterChanged = (filterList != m_filterList);
+    bool wasFiltered = isFiltered();
+
+    emit layoutAboutToBeChanged();
+    QModelIndexList before = persistentIndexList();
+
+    m_filterString = filterString;
+    m_filterList = filterList;
+
+    if (!unfilteredItems.isEmpty()) {
+        m_isFiltered = filtered;
+        m_filteredItems = unfilteredItems;
+        unfilteredItems.clear();
+
+    } else {
+        unfilteredItems = m_filteredItems;
+        filtered = m_isFiltered;
+        m_isFiltered = true;
+        m_filteredItems = m_sortedItems;
 
         if (!filterList.isEmpty()) {
-            m_viewItems = QtConcurrent::blockingFiltered(m_viewItems, [this](const auto *item) {
+            m_filteredItems = QtConcurrent::blockingFiltered(m_sortedItems, [this](auto *item) {
                 return filterAcceptsItem(item);
             });
         }
@@ -1405,23 +1611,27 @@ void Document::sortFilterDirect(int column, Qt::SortOrder order, const QString &
 
     if (emitFilterChanged)
         emit filterChanged(filterString);
-    if (emitSortColumnChanged)
-        emit sortColumnChanged(column);
-    if (emitSortOrderChanged)
-        emit sortOrderChanged(order);
+
+    if (isFiltered() != wasFiltered)
+        emit isFilteredChanged(isFiltered());
 }
 
 QByteArray Document::saveSortFilterState() const
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SFST") << qint32(1);
+    ds << QByteArray("SFST") << qint32(2);
 
     ds << qint8(m_sortColumn) << qint8(m_sortOrder) << m_filterString;
 
-    ds << qint32(m_viewItems.size());
-    for (int i = 0; i < m_viewItems.size(); ++i)
-        ds << qint32(m_items.indexOf(m_viewItems.at(i)));
+    ds << qint32(m_sortedItems.size());
+    for (int i = 0; i < m_sortedItems.size(); ++i) {
+        auto *item = m_sortedItems.at(i);
+        qint32 row = m_items.indexOf(item);
+        bool visible = m_filteredItems.contains(item);
+
+        ds << (visible ? row : (-row - 1)); // can't have -0
+    }
 
     return ba;
 }
@@ -1432,24 +1642,30 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version != 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version != 2))
         return false;
     qint8 sortColumn, sortOrder;
     QString filterString;
     qint32 viewSize;
 
     ds >> sortColumn >> sortOrder >> filterString >> viewSize;
-    if ((ds.status() != QDataStream::Ok) || (viewSize < 0) || (viewSize > m_items.size()))
+    if ((ds.status() != QDataStream::Ok) || (viewSize != m_items.size()))
         return false;
 
-    BrickLink::InvItemList viewItems;
+    BrickLink::InvItemList sortedItems;
+    BrickLink::InvItemList filteredItems;
     int itemsSize = m_items.size();
     while (viewSize--) {
         qint32 pos;
         ds >> pos;
-        if ((pos < 0) || (pos >= itemsSize))
+        if ((pos < -itemsSize) || (pos >= itemsSize))
             return false;
-        viewItems << m_items.at(pos);
+        bool visible = (pos >= 0);
+        pos = visible ? pos : (-pos - 1);
+        auto *item = m_items.at(pos);
+        sortedItems << item;
+        if (visible)
+            filteredItems << item;
     }
 
     if (ds.status() != QDataStream::Ok)
@@ -1457,7 +1673,10 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
 
     auto filterList = m_filterParser->parse(filterString);
 
-    sortFilterDirect(sortColumn, Qt::SortOrder(sortOrder), filterString, filterList, viewItems);
+    bool willBeSorted = true;
+    sortDirect(sortColumn, Qt::SortOrder(sortOrder), willBeSorted, sortedItems);
+    bool willBeFiltered = true;
+    filterDirect(filterString, filterList, willBeFiltered, filteredItems);
     return true;
 }
 
@@ -1465,17 +1684,6 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
 QString Document::filterToolTip() const
 {
     return m_filterParser->toolTip();
-}
-
-bool Document::lastCommandWasSortFilter() const
-{
-    if (m_undo) {
-        int index = m_undo->index() - 1;
-        auto *cmd = m_undo->command(index);
-        if ((index < 0) || (cmd && (cmd->id() == CID_SortFilter)))
-            return true;
-    }
-    return false;
 }
 
 bool Document::lastCommandWasActivateDifferenceMode() const
@@ -1491,12 +1699,16 @@ bool Document::lastCommandWasActivateDifferenceMode() const
     return false;
 }
 
-void Document::reapplySortFilter()
+void Document::reSort()
 {
-    if (!lastCommandWasSortFilter()) {
-        m_undo->push(new SortFilterCmd(this, m_sortColumn, m_sortOrder,
-                                       m_filterString, m_filterList));
-    }
+    if (!isSorted())
+        m_undo->push(new SortCmd(this, m_sortColumn, m_sortOrder));
+}
+
+void Document::reFilter()
+{
+    if (!isFiltered())
+        m_undo->push(new FilterCmd(this, m_filterString, m_filterList));
 }
 
 
@@ -1667,80 +1879,5 @@ BrickLink::InvItemList Document::sortItemList(const BrickLink::InvItemList &list
     return result;
 }
 
+
 #include "moc_document.cpp"
-
-DifferenceModeCmd::DifferenceModeCmd(Document *doc, bool active)
-    : QUndoCommand(qApp->translate("DifferenceModeCmd", "Switched from or to difference mode"))
-    , m_doc(doc)
-    , m_active(active)
-{ }
-
-int DifferenceModeCmd::id() const
-{
-    return CID_DifferenceMode;
-}
-
-void DifferenceModeCmd::redo()
-{
-    m_doc->setDifferenceModeActiveDirect(m_active);
-    m_active = !m_active;
-}
-
-void DifferenceModeCmd::undo()
-{
-    redo();
-}
-
-
-
-SortFilterCmd::SortFilterCmd(Document *doc, int column, Qt::SortOrder order,
-                             const QString &filterString, const QVector<Filter> &filterList)
-    : QUndoCommand(qApp->translate("SortCmd", "Sorted/filtered the view"))
-    , m_doc(doc)
-    , m_created(QDateTime::currentDateTime())
-    , m_column(column)
-    , m_order(order)
-    , m_filterString(filterString)
-    , m_filterList(filterList)
-{ }
-
-int SortFilterCmd::id() const
-{
-    return CID_SortFilter;
-}
-
-bool SortFilterCmd::mergeWith(const QUndoCommand *other)
-{
-    if (other->id() == id()) {
-        auto otherSortFilter = static_cast<const SortFilterCmd *>(other);
-
-        if (m_created.msecsTo(otherSortFilter->m_created) <= 1000) {
-            m_column = otherSortFilter->m_column;
-            m_order = otherSortFilter->m_order;
-            m_filterString = otherSortFilter->m_filterString;
-            m_filterList = otherSortFilter->m_filterList;
-            return true;
-        }
-    }
-    return false;
-}
-
-void SortFilterCmd::redo()
-{
-    int oldColumn = m_doc->sortColumn();
-    Qt::SortOrder oldOrder = m_doc->sortOrder();
-    QString oldFilterString = m_doc->filter();
-    auto oldFilterList = m_doc->m_filterList;
-
-    m_doc->sortFilterDirect(m_column, m_order, m_filterString, m_filterList, m_unsorted);
-
-    m_column = oldColumn;
-    m_order = oldOrder;
-    m_filterString = oldFilterString;
-    m_filterList = oldFilterList;
-}
-
-void SortFilterCmd::undo()
-{
-    redo();
-}

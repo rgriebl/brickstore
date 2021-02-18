@@ -37,6 +37,8 @@ public:
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
 
+    QAction *reFilterAction();
+
 protected:
     void keyPressEvent(QKeyEvent *ke) override;
 
@@ -49,6 +51,7 @@ private:
     int m_maximumHistorySize;
     bool m_favoritesMode = false;
     QMetaObject::Connection m_connection;
+    QAction *m_reFilterAction;
 
     friend class HistoryViewDelegate;
     friend class HistoryView;
