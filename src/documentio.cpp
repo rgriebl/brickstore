@@ -122,7 +122,7 @@ Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order, const QByteA
 
     try {
         auto result = fromBrickLinkXML(xml);
-        auto *doc = new Document(result.first, result.second); // Document owns the items now
+        auto *doc = new Document(result.first, order->currencyCode()); // Document owns the items now
         doc->setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
         doc->setOrder(order);
         return doc;

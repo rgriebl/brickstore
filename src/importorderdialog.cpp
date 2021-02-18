@@ -500,7 +500,7 @@ void ImportOrderDialog::importOrders()
 {
     const auto selection = w_orders->selectionModel()->selectedRows();
     for (auto idx : selection) {
-        auto order = m_orderModel->data(idx, OrderPointerRole).value<const BrickLink::Order *>();
+        auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
         QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
         QUrlQuery query;

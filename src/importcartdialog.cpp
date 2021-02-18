@@ -507,7 +507,7 @@ void ImportCartDialog::importCarts()
 {
     const auto selection = w_carts->selectionModel()->selectedRows();
     for (auto idx : selection) {
-        auto cart = m_cartModel->data(idx, CartPointerRole).value<const BrickLink::Cart *>();
+        auto cart = idx.data(CartPointerRole).value<const BrickLink::Cart *>();
 
         QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax");
         QUrlQuery query;
