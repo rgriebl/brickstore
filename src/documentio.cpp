@@ -852,7 +852,7 @@ QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteA
     p.parse([&p, &items, &currencyCode, &incompleteCount](QDomElement e) {
         const QString itemId = p.elementText(e, "ITEMID");
         char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
-        uint colorId = p.elementText(e, "COLOR").toUInt();
+        uint colorId = p.elementText(e, "COLOR", "0").toUInt();
         uint categoryId = p.elementText(e, "CATEGORY", "0").toUInt();
         int qty = p.elementText(e, "MINQTY", "-1").toInt();
         if (qty < 0)
