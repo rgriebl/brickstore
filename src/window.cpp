@@ -2277,9 +2277,11 @@ void Window::setPrice(double d)
 void Window::gotoNextError()
 {
     auto startIdx = m_selection_model->currentIndex();
-    if (!startIdx.isValid())
+    auto skipIdx = startIdx; // skip the field we're on right now...
+    if (!startIdx.isValid() || !m_selection_model->isSelected(startIdx)) {
         startIdx = m_doc->index(0, 0);
-    bool skipFirst = (startIdx.row() != 0) || (startIdx.column() != 0);
+        skipIdx = { }; // ... but no skipping when we're not anywhere at all
+    }
 
     bool wrapped = false;
     int startCol = startIdx.column();
@@ -2295,11 +2297,13 @@ void Window::gotoNextError()
                     return;
 
                 if (error & (1ULL << col)) {
-                    if (skipFirst) {
-                        skipFirst = false;
+                    auto gotoIdx = m_doc->index(row, col);
+                    if (skipIdx.isValid() && (gotoIdx == skipIdx)) {
+                        skipIdx = { };
                     } else {
-                        auto gotoIdx = m_doc->index(row, col);
-                        m_selection_model->setCurrentIndex(gotoIdx, QItemSelectionModel::SelectCurrent
+                        m_selection_model->setCurrentIndex(gotoIdx, QItemSelectionModel::Clear
+                                                           | QItemSelectionModel::Select
+                                                           | QItemSelectionModel::Current
                                                            | QItemSelectionModel::Rows);
                         w_list->scrollTo(gotoIdx, QAbstractItemView::PositionAtCenter);
                         return;
