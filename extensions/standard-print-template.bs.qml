@@ -21,6 +21,7 @@ Script {
 
         let ps = {}
         ps.doc = doc
+        ps.ccode = BrickStore.symbolForCurrencyCode(doc.currencyCode)
         ps.x = 20.0
         ps.y = 10.0
         ps.w = job.paperSize.width - (2 * ps.x)
@@ -94,8 +95,6 @@ Script {
         }
     }
 
-
-
     function xs(pw, x)
     {
         return x * pw / 170.0
@@ -152,15 +151,15 @@ Script {
         page.drawRect(ps.x, y, ps.w, h)
 
         page.color = "white"
-        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10)    , h,
-                      Page.AlignHCenter | Page.AlignVCenter,
+        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h,
+                      Page.AlignRight | Page.AlignVCenter,
                       jobstat.lots)
-        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10)    , h,
-                      Page.AlignHCenter | Page.AlignVCenter,
+        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h,
+                      Page.AlignRight | Page.AlignVCenter,
                       jobstat.items)
-        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h,
-                      Page.AlignRight   | Page.AlignVCenter,
-                      jobstat.total.toLocaleCurrencyString(Qt.locale(), ps.doc.currencyCode))
+        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 39), h,
+                      Page.AlignRight | Page.AlignVCenter,
+                      BrickStore.toCurrencyString(jobstat.total, ps.ccode))
 
         page.font.bold = true
         page.drawText(ps.x + 2, y, xs(ps.w, 100), h, Page.AlignLeft | Page.AlignVCenter,
@@ -183,11 +182,11 @@ Script {
 
         page.drawText(ps.x                , y, xs(ps.w, 20), h, Page.AlignCenter, "Image")
         page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h, Page.AlignCenter, "Cond.")
-        page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 75), h, Page.AlignCenter, "Part")
-        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h, Page.AlignCenter, "Lots")
-        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, Page.AlignCenter, "Qty")
-        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 20), h, Page.AlignCenter, "Price")
-        page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 20), h, Page.AlignCenter, "Total")
+        page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 75), h, Page.AlignVCenter | Page.AlignLeft,   "Part")
+        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h, Page.AlignVCenter | Page.AlignRight,  "Lots")
+        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, Page.AlignVCenter | Page.AlignRight,  "Qty")
+        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 19), h, Page.AlignVCenter | Page.AlignRight,  "Price")
+        page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 19), h, Page.AlignVCenter | Page.AlignRight,  "Total")
 
         ps.pos += h
     }
@@ -204,18 +203,19 @@ Script {
         page.color = "white"
         page.font = Qt.font({ family: "Arial", pointSize: 10 })
 
-        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10),     h,
-                      Page.AlignHCenter | Page.AlignVCenter,
+        page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h,
+                      Page.AlignRight | Page.AlignVCenter,
                       pagestat.lots)
-        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10),     h,
-                      Page.AlignHCenter | Page.AlignVCenter,
+        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h,
+                      Page.AlignRight | Page.AlignVCenter,
                       pagestat.items)
-        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h,
-                      Page.AlignRight   | Page.AlignVCenter,
-                      pagestat.total.toLocaleCurrencyString(Qt.locale(), ps.doc.currencyCode))
+        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 39), h,
+                      Page.AlignRight | Page.AlignVCenter,
+                      BrickStore.toCurrencyString(pagestat.total, ps.ccode))
 
         page.font.bold = true
-        page.drawText(ps.x + 2, y, xs(ps.w, 100), h, Page.AlignLeft | Page.AlignVCenter,
+        page.drawText(ps.x + 2, y, xs(ps.w, 100), h,
+                      Page.AlignLeft | Page.AlignVCenter,
                       "Total")
 
         ps.pos += h
@@ -237,19 +237,19 @@ Script {
 
         page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h,
                       Page.AlignHCenter | Page.AlignVCenter,
-                      item.condition.used ? "Used" : "New")
+                      item.condition == BrickLink.Used ? "Used" : "New")
         page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 85), h,
-                      Page.AlignLeft    | Page.AlignVCenter | Page.TextWordWrap,
+                      Page.AlignLeft | Page.AlignVCenter | Page.TextWordWrap,
                       item.color.name + " " + item.name + " [" + item.id + "]")
         page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h,
-                      Page.AlignHCenter | Page.AlignVCenter,
+                      Page.AlignRight | Page.AlignVCenter,
                       item.quantity)
-        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 18), h,
-                      Page.AlignRight   | Page.AlignVCenter,
-                      item.price.toLocaleCurrencyString(Qt.locale(), ps.doc.currencyCode))
-        page.drawText(ps.x + xs(ps.w, 149), y, xs(ps.w, 20), h,
-                      Page.AlignRight   | Page.AlignVCenter,
-                      item.total.toLocaleCurrencyString(Qt.locale(), ps.doc.currencyCode))
+        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 19), h,
+                      Page.AlignRight | Page.AlignVCenter,
+                      BrickStore.toCurrencyString(item.price, ps.ccode))
+        page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 19), h,
+                      Page.AlignRight | Page.AlignVCenter,
+                      BrickStore.toCurrencyString(item.total, ps.ccode))
 
         ps.pos += h
     }

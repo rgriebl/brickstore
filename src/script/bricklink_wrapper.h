@@ -128,8 +128,8 @@ class Category : public WrapperBase<const ::BrickLink::Category>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
 
 public:
     Category(const ::BrickLink::Category *cat = nullptr);
@@ -143,16 +143,16 @@ class ItemType : public WrapperBase<const ::BrickLink::ItemType>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
     Q_PROPERTY(QVariantList categories READ categories CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasInventories READ hasInventories CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasColors READ hasColors CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasYearReleased READ hasYearReleased CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasWeight READ hasWeight CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasSubConditions READ hasSubConditions CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), char pictureId READ pictureId CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QSize pictureSize READ pictureSize CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasInventories READ hasInventories CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasColors READ hasColors CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasYearReleased READ hasYearReleased CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasWeight READ hasWeight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasSubConditions READ hasSubConditions CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, char pictureId READ pictureId CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QSize pictureSize READ pictureSize CONSTANT)
 
 public:
     ItemType(const ::BrickLink::ItemType *itt = nullptr);
@@ -168,22 +168,26 @@ class Color : public WrapperBase<const ::BrickLink::Color>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QColor color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), int ldrawId READ ldrawId CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool solid READ isSolid CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool transparent READ isTransparent CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool glitter READ isGlitter CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool speckle READ isSpeckle CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool metallic READ isMetallic CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool chrome READ isChrome CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool milky READ isMilky CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool modulex READ isModulex CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), double popularity READ popularity CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QColor color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int ldrawId READ ldrawId CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool solid READ isSolid CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool transparent READ isTransparent CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool glitter READ isGlitter CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool speckle READ isSpeckle CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool metallic READ isMetallic CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool chrome READ isChrome CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool milky READ isMilky CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool modulex READ isModulex CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double popularity READ popularity CONSTANT)
+
+    Q_PROPERTY(QImage image READ image)
 
 public:
     Color(const ::BrickLink::Color *col = nullptr);
+
+    QImage image() const;
 
     friend class BrickLink;
     friend class Document;
@@ -196,16 +200,16 @@ class Item : public WrapperBase<const ::BrickLink::Item>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), ItemType itemType READ itemType CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), Category category READ category CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasInventory READ hasInventory CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), Color defaultColor READ defaultColor CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), double weight READ weight CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), int yearReleased READ yearReleased CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasKnownColors READ hasKnownColors CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, ItemType itemType READ itemType CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, Category category READ category CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasInventory READ hasInventory CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, Color defaultColor READ defaultColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double weight READ weight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int yearReleased READ yearReleased CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasKnownColors READ hasKnownColors CONSTANT)
     Q_PROPERTY(QVariantList knownColors READ knownColors CONSTANT)
 
 public:
@@ -227,12 +231,12 @@ class Picture : public WrapperBase<::BrickLink::Picture>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), Color color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime lastUpdate READ lastUpdate)
+    Q_PRIVATE_PROPERTY(wrapped, Item item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool valid READ valid)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QImage image READ image)
+    Q_PRIVATE_PROPERTY(wrapped, bool valid READ valid)
+    Q_PRIVATE_PROPERTY(wrapped, QImage image READ image)
 
 public:
     explicit Picture(::BrickLink::Picture *pic = nullptr);
@@ -253,11 +257,11 @@ class PriceGuide : public WrapperBase<::BrickLink::PriceGuide>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), Color color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime lastUpdate READ lastUpdate)
+    Q_PRIVATE_PROPERTY(wrapped, Item item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(wrappedObject(), bool valid READ valid)
+    Q_PRIVATE_PROPERTY(wrapped, bool valid READ valid)
 
 public:
     explicit PriceGuide(::BrickLink::PriceGuide *pg = nullptr);
@@ -431,16 +435,55 @@ private:
 };
 
 
+class Order : public WrapperBase<const ::BrickLink::Order>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PRIVATE_PROPERTY(wrapped, QString id READ id CONSTANT)
+    Q_PROPERTY(BrickLink::OrderType type READ type CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDate date READ date CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDate statusChange READ statusChange CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString otherParty READ otherParty CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double shipping READ shipping CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double insurance READ insurance CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double additionalCharges1 READ additionalCharges1 CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double additionalCharges2 READ additionalCharges2 CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double credit READ credit CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double creditCoupon READ creditCoupon CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double orderTotal READ orderTotal CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double salesTax READ salesTax CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double grandTotal READ grandTotal CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double vatCharges READ vatCharges CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString currencyCode READ currencyCode CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString paymentCurrencyCode READ paymentCurrencyCode CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int itemCount READ itemCount CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int lotCount READ lotCount CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString status READ status CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString paymentType READ paymentType CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString trackingNumber READ trackingNumber CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString address READ address CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString countryName READ countryName CONSTANT)
+
+public:
+    Order(const ::BrickLink::Order *order = nullptr);
+
+    BrickLink::OrderType type() const;
+
+    friend class BrickLink;
+    friend class Document;
+};
+
+
 class Document : public QObject
 {
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PRIVATE_PROPERTY(d, QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PRIVATE_PROPERTY(d, QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
     Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
-
-    //TODO: missing: statistics & order
+    Q_PRIVATE_PROPERTY(d, Order order READ order CONSTANT)
+    //TODO: missing: statistics
 
 public:
     Document(::Document *doc);
@@ -473,12 +516,12 @@ private:
 };
 
 
-class BrickStore : public QObject, public QQmlParserStatus
+class BrickStore : public QObject
 {
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QVector<Document *> documents READ documents NOTIFY documentsChanged)
     Q_PROPERTY(Document *currentDocument READ currentDocument NOTIFY currentDocumentChanged)
+    Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
 
 public:
     BrickStore();
@@ -493,13 +536,15 @@ public:
     Q_INVOKABLE QmlWrapper::Document *openDocument(const QString &fileName);
     Q_INVOKABLE QmlWrapper::Document *importBrickLinkStore(const QString &title = { });
 
+    QString defaultCurrencyCode() const;
+    Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
+    Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
+    Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
+
 signals:
     void documentsChanged(QVector<Document *> documents);
     void currentDocumentChanged(Document *currentDocument);
-
-protected:
-    void classBegin() override;
-    void componentComplete() override;
+    void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
 
 private:
     Document *setupDocument(::Document *doc, const QString &title = { });
@@ -517,6 +562,7 @@ Q_DECLARE_METATYPE(QmlWrapper::Item)
 Q_DECLARE_METATYPE(QmlWrapper::InvItem)
 Q_DECLARE_METATYPE(QmlWrapper::Picture)
 Q_DECLARE_METATYPE(QmlWrapper::PriceGuide)
+Q_DECLARE_METATYPE(QmlWrapper::Order)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Time)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Price)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Condition)

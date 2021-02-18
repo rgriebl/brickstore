@@ -529,6 +529,8 @@ public:
     void setCountryName(const QString &str);
     void setCountryCode(const QString &str);
 
+    Order(std::nullptr_t) : Order({ }, BrickLink::OrderType::Received) { } // for scripting only!
+
 private:
     QString   m_id;
     OrderType m_type;

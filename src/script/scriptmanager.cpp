@@ -70,25 +70,20 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     m_brickLink = new QmlWrapper::BrickLink(core);
     m_brickStore = new QmlWrapper::BrickStore();
 
+    static auto *that = this; // workaround for qmlRegisterSingleton in Qt < 5.14
+
     QString cannotCreate = tr("Cannot create objects of type %1");
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickLink", m_brickLink);
-    qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickStore", m_brickStore);
-#else
-    static auto staticBrickLink = m_brickLink;
-    QQmlEngine::setObjectOwnership(staticBrickLink, QQmlEngine::CppOwnership);
+    QQmlEngine::setObjectOwnership(m_brickLink, QQmlEngine::CppOwnership);
     qmlRegisterSingletonType<QmlWrapper::BrickLink>("BrickStore", 1, 0, "BrickLink",
                              [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return staticBrickLink;
+        return that->m_brickLink;
     });
-    static auto staticBrickStore = m_brickStore;
-    QQmlEngine::setObjectOwnership(staticBrickStore, QQmlEngine::CppOwnership);
+    QQmlEngine::setObjectOwnership(m_brickStore, QQmlEngine::CppOwnership);
     qmlRegisterSingletonType<QmlWrapper::BrickStore>("BrickStore", 1, 0, "BrickStore",
                              [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return staticBrickStore;
+        return that->m_brickStore;
     });
-#endif
 
     qRegisterMetaType<QmlWrapper::Color>("Color");
     qRegisterMetaType<QmlWrapper::ItemType>("ItemType");
@@ -97,6 +92,7 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     qRegisterMetaType<QmlWrapper::InvItem>("InvItem");
     qRegisterMetaType<QmlWrapper::PriceGuide>("PriceGuide");
     qRegisterMetaType<QmlWrapper::Picture>("Picture");
+    qRegisterMetaType<QmlWrapper::Order>("Order");
     qRegisterMetaType<QmlWrapper::BrickLink::Time>("BrickLink::Time");
     qRegisterMetaType<QmlWrapper::BrickLink::Price>("BrickLink::Price");
     qRegisterMetaType<QmlWrapper::BrickLink::Condition>("BrickLink::Condition");
@@ -110,9 +106,9 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
                                                      cannotCreate.arg("Document"));
 
     qmlRegisterUncreatableType<QmlWrapper::PrintJob>("BrickStore", 1, 0, "PrintJob",
-                                                         cannotCreate.arg("PrintJob"));
+                                                     cannotCreate.arg("PrintJob"));
     qmlRegisterUncreatableType<QmlWrapper::PrintPage>("BrickStore", 1, 0, "Page",
-                                                         cannotCreate.arg("Page"));
+                                                      cannotCreate.arg("Page"));
     qRegisterMetaType<QmlWrapper::PrintPage::Alignment>("PrintPage::Alignment");
     qRegisterMetaType<QmlWrapper::PrintPage::LineStyle>("PrintPage::LineStyle");
 

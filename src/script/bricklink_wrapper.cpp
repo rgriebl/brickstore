@@ -18,6 +18,8 @@
 #include "framework.h"
 #include "window.h"
 #include "documentio.h"
+#include "utility.h"
+#include "currency.h"
 
 #include "bricklink_wrapper.h"
 
@@ -37,6 +39,8 @@ static bool isReadOnly(QObject *obj)
 BrickLink::BrickLink(::BrickLink::Core *core)
     : d(core)
 {
+    setObjectName(QLatin1String("BrickLink"));
+
     connect(core, &::BrickLink::Core::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
         emit priceGuideUpdated(PriceGuide(pg));
@@ -145,6 +149,11 @@ QVariantList ItemType::categories() const
 Color::Color(const ::BrickLink::Color *col)
     : WrapperBase(col)
 { }
+
+QImage Color::image() const
+{
+    return ::BrickLink::core()->colorImage(wrapped, 20, 20);
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -347,6 +356,21 @@ InvItem::Setter InvItem::set()
 ///////////////////////////////////////////////////////////////////////
 
 
+Order::Order(const ::BrickLink::Order *order)
+    : WrapperBase(order)
+{ }
+
+BrickLink::OrderType Order::type() const
+{
+    return static_cast<BrickLink::OrderType>(wrapped->type());
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 Document::Document(::Document *doc)
     : d(doc)
 {
@@ -424,6 +448,8 @@ InvItem Document::addInvItem(Item item, Color color)
 
 BrickStore::BrickStore()
 {
+    setObjectName(QLatin1String("BrickStore"));
+
     auto checkActiveWindow = [this](Window *win) {
         Document *doc = documentForWindow(win);
         if (doc != m_currentDocument) {
@@ -463,8 +489,10 @@ BrickStore::BrickStore()
         // before the windowListChanged signal. Check if the current still is valid.
         checkActiveWindow(FrameWork::inst()->activeWindow());
     });
-}
 
+    connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
+            this, &BrickStore::defaultCurrencyCodeChanged);
+}
 
 QVector<Document *> BrickStore::documents() const
 {
@@ -500,11 +528,39 @@ Document *BrickStore::importBrickLinkStore(const QString &title)
     return setupDocument(::DocumentIO::importBrickLinkStore(), title);
 }
 
-void BrickStore::classBegin()
-{ }
+QString BrickStore::defaultCurrencyCode() const
+{
+     return Config::inst()->defaultCurrencyCode();
+}
 
-void BrickStore::componentComplete()
-{ }
+QString BrickStore::symbolForCurrencyCode(const QString &currencyCode) const
+{
+    static QHash<QString, QString> cache;
+    QString s = cache.value(currencyCode);
+    if (s.isEmpty()) {
+         const auto allLoc = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript,
+                                                      QLocale::AnyCountry);
+
+         for (auto &loc : allLoc) {
+             if (loc.currencySymbol(QLocale::CurrencyIsoCode) == currencyCode) {
+                 s = loc.currencySymbol(QLocale::CurrencySymbol);
+                 break;
+             }
+         }
+         cache.insert(currencyCode, s.isEmpty() ? currencyCode : s);
+    }
+    return s;
+}
+
+QString BrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
+{
+    return QLocale::system().toCurrencyString(value, symbol, precision);
+}
+
+QString BrickStore::toWeightString(double value, bool showUnit) const
+{
+    return Utility::weightToString(value, Config::inst()->measurementSystem(), true, showUnit);
+}
 
 Document *BrickStore::documentForWindow(Window *win) const
 {
