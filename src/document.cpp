@@ -1024,6 +1024,8 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     case ItemType    :
     case Category    :
     case YearReleased:
+    case PriceOrig   :
+    case QuantityOrig:
     case LotId       : break;
     case Retain      : ifs |= Qt::ItemIsUserCheckable; Q_FALLTHROUGH();
     default          : ifs |= Qt::ItemIsEditable; break;
