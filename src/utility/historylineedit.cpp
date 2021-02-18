@@ -240,5 +240,7 @@ void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
 {
     if (ke->key() == Qt::Key_Down && !ke->modifiers())
         showPopup();
-    return QLineEdit::keyPressEvent(ke);
+    QLineEdit::keyPressEvent(ke);
+    if ((ke->key() == Qt::Key_Return) || (ke->key() == Qt::Key_Enter))
+        ke->accept(); // don't trigger the dialog's default button
 }
