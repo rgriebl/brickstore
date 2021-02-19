@@ -495,6 +495,8 @@ void Document::changeItem(Item *item, const Item &value)
 
 void Document::setItemsDirect(const Document::ItemList &items)
 {
+    if (items.isEmpty())
+        return;
     QVector<int> posDummy, sortedPosDummy, filteredPosDummy;
     insertItemsDirect(items, posDummy, sortedPosDummy, filteredPosDummy);
 }
