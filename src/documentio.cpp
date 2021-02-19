@@ -15,7 +15,6 @@
 #include <QFileDialog>
 #include <QClipboard>
 #include <QRegularExpression>
-#include <QDesktopServices>
 #include <QStandardPaths>
 #include <QStringBuilder>
 #include <QStringView>
@@ -604,7 +603,7 @@ void DocumentIO::exportBrickLinkInvReqClipboard(const BrickLink::InvItemList &it
     QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
     if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryRequest));
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryRequest);
 }
 
 void DocumentIO::exportBrickLinkWantedListClipboard(const BrickLink::InvItemList &itemlist)
@@ -641,7 +640,7 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const BrickLink::InvItemList
         QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
         if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_WantedListUpload));
+            BrickLink::core()->openUrl(BrickLink::URL_WantedListUpload);
     }
 }
 
@@ -770,7 +769,7 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
     QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
     if (Config::inst()->value(qL1S("/General/Export/OpenBrowser"), true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpdate));
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryUpdate);
 }
 
 QString DocumentIO::toBrickLinkXML(const BrickLink::InvItemList &itemlist)
@@ -971,7 +970,7 @@ void DocumentIO::exportBrickLinkXMLClipboard(const BrickLink::InvItemList &iteml
     QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
 
     if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpload));
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryUpload);
 }
 
 

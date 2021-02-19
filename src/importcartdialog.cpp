@@ -236,6 +236,11 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
             this, &ImportCartDialog::importCarts);
+    w_showOnBrickLink = new QPushButton();
+    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
+    w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
+    connect(w_showOnBrickLink, &QAbstractButton::clicked,
+            this, &ImportCartDialog::showCartsOnBrickLink);
 
     connect(w_update, &QToolButton::clicked,
             this, &ImportCartDialog::updateCarts);
@@ -292,6 +297,7 @@ void ImportCartDialog::languageChange()
     w_import->setText(tr("Import"));
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
+    w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
 }
 
 void ImportCartDialog::login()
@@ -523,10 +529,21 @@ void ImportCartDialog::importCarts()
     }
 }
 
+void ImportCartDialog::showCartsOnBrickLink()
+{
+    const auto selection = w_carts->selectionModel()->selectedRows();
+    for (auto idx : selection) {
+        auto cart = idx.data(CartPointerRole).value<const BrickLink::Cart *>();
+        int sellerId = cart->sellerId();
+        BrickLink::core()->openUrl(BrickLink::URL_ShoppingCart, &sellerId);
+    }
+}
 
 void ImportCartDialog::checkSelected()
 {
-    w_import->setEnabled(w_carts->selectionModel()->hasSelection());
+    bool b = w_carts->selectionModel()->hasSelection();
+    w_import->setEnabled(b);
+    w_showOnBrickLink->setEnabled(b);
 }
 
 void ImportCartDialog::activateItem()

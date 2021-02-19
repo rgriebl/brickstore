@@ -27,6 +27,7 @@
 #include <QThread>
 #include <QUrlQuery>
 #include <QStringBuilder>
+#include <QDesktopServices>
 
 #include "config.h"
 #include "utility.h"
@@ -39,7 +40,7 @@
 
 namespace BrickLink {
 
-QUrl Core::url(UrlList u, const void *opt, const void *opt2)
+void Core::openUrl(UrlList u, const void *opt, const void *opt2)
 {
     QUrl url;
 
@@ -157,8 +158,29 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
+    case URL_OrderDetails: {
+        auto orderId = static_cast<const char *>(opt);
+        if (orderId && *orderId) {
+            url = "https://www.bricklink.com/orderDetail.asp";
+            QUrlQuery query;
+            query.addQueryItem("ID", QString::fromLatin1(orderId));
+            url.setQuery(query);
+        }
+        break;
     }
-    return url;
+    case URL_ShoppingCart: {
+        auto shopId = static_cast<const int *>(opt);
+        if (shopId && *shopId) {
+            url = "https://www.bricklink.com/v2/globalcart.page";
+            QUrlQuery query;
+            query.addQueryItem("sid", QString::number(*shopId));
+            url.setQuery(query);
+        }
+        break;
+    }
+    }
+    if (url.isValid())
+        QDesktopServices::openUrl(url);
 }
 
 

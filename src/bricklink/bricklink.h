@@ -734,7 +734,7 @@ class Core : public QObject
 public:
     ~Core() override;
 
-    QUrl url(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
+    void openUrl(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
 
     enum class DatabaseVersion {
         Invalid,

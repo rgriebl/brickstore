@@ -45,11 +45,13 @@ protected slots:
 
     void downloadFinished(TransferJob *job);
     void importCarts();
+    void showCartsOnBrickLink();
 
 private:
     Transfer *m_trans;
     bool m_loggedIn = false;
     QPushButton *w_import;
+    QPushButton *w_showOnBrickLink;
     QDateTime m_lastUpdated;
     QVector<TransferJob *> m_currentUpdate;
     QVector<TransferJob *> m_cartDownloads;

@@ -15,7 +15,6 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QShortcut>
-#include <QDesktopServices>
 
 #include "bricklink.h"
 #include "config.h"
@@ -57,21 +56,21 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item)
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, item));
+                BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item);
         });
     }
     if (QAction *a = FrameWork::inst()->findAction("bricklink_priceguide")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item && !item->itemType()->hasColors())
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item));
+                BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item);
         });
     }
     if (QAction *a = FrameWork::inst()->findAction("bricklink_lotsforsale")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item && !item->itemType()->hasColors())
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, item));
+                BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item);
         });
     }
     checkItem(nullptr, false);

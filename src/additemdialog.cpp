@@ -29,7 +29,6 @@
 #include <QStringBuilder>
 #include <QTimer>
 #include <QAction>
-#include <QDesktopServices>
 
 #include "smartvalidator.h"
 #include "config.h"
@@ -247,8 +246,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item) {
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo,
-                                                                 item, color));
+                BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item, color);
             }
         });
     }
@@ -257,8 +255,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item && (color || !item->itemType()->hasColors())) {
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo,
-                                                                 item, color));
+                BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item, color);
             }
         });
     }
@@ -267,8 +264,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item && (color || !item->itemType()->hasColors())) {
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale,
-                                                                 item, color));
+                BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item, color);
             }
         });
     }

@@ -265,6 +265,11 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
             this, &ImportOrderDialog::importOrders);
+    w_showOnBrickLink = new QPushButton();
+    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
+    w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
+    connect(w_showOnBrickLink, &QAbstractButton::clicked,
+            this, &ImportOrderDialog::showOrdersOnBrickLink);
 
     connect(w_update, &QToolButton::clicked,
             this, &ImportOrderDialog::updateOrders);
@@ -325,6 +330,7 @@ void ImportOrderDialog::languageChange()
     w_import->setText(tr("Import"));
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
+    w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
 }
 
 void ImportOrderDialog::updateOrders()
@@ -526,10 +532,21 @@ void ImportOrderDialog::importOrders()
     }
 }
 
+void ImportOrderDialog::showOrdersOnBrickLink()
+{
+    const auto selection = w_orders->selectionModel()->selectedRows();
+    for (auto idx : selection) {
+        auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
+        QByteArray orderId = order->id().toLatin1();
+        BrickLink::core()->openUrl(BrickLink::URL_OrderDetails, orderId.constData());
+    }
+}
 
 void ImportOrderDialog::checkSelected()
 {
-    w_import->setEnabled(w_orders->selectionModel()->hasSelection());
+    bool b = w_orders->selectionModel()->hasSelection();
+    w_import->setEnabled(b);
+    w_showOnBrickLink->setEnabled(b);
 }
 
 void ImportOrderDialog::activateItem()

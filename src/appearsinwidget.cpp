@@ -15,7 +15,6 @@
 #include <QVariant>
 #include <QAction>
 #include <QHeaderView>
-#include <QDesktopServices>
 #include <QApplication>
 #include <QTimer>
 
@@ -178,7 +177,7 @@ void AppearsInWidget::showBLCatalogInfo()
     const BrickLink::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, ai->second));
+        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, ai->second);
 }
 
 void AppearsInWidget::showBLPriceGuideInfo()
@@ -186,7 +185,7 @@ void AppearsInWidget::showBLPriceGuideInfo()
     const BrickLink::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, ai->second, BrickLink::core()->color(0)));
+        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, ai->second, BrickLink::core()->color(0));
 }
 
 void AppearsInWidget::showBLLotsForSale()
@@ -194,7 +193,7 @@ void AppearsInWidget::showBLLotsForSale()
     const BrickLink::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0)));
+        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0));
 }
 
 #include "moc_appearsinwidget.cpp"

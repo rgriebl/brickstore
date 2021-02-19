@@ -44,10 +44,12 @@ protected slots:
 
     void downloadFinished(TransferJob *job);
     void importOrders();
+    void showOrdersOnBrickLink();
 
 private:
     Transfer *m_trans;
     QPushButton *w_import;
+    QPushButton *w_showOnBrickLink;
     QDateTime m_lastUpdated;
     QVector<TransferJob *> m_currentUpdate;
     QVector<TransferJob *> m_orderDownloads;

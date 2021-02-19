@@ -74,6 +74,8 @@ enum UrlList {
     URL_AppearsInSets,
     URL_StoreItemDetail,
     URL_StoreItemSearch,
+    URL_OrderDetails,
+    URL_ShoppingCart,
 };
 
 enum ModelRoles {

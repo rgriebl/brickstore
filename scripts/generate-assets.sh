@@ -75,6 +75,8 @@ for color in "" "-dark"; do
   out="$b/icons/$theme$color/generated"
   mkdir -p "$out"
 
+  convert $cus/bricklink.png -colorspace sRGB -scale $s $out/bricklink.png
+
   convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_plus.png -scale $s -composite $out/edit-additems.png
   convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_divide.png -scale $s -composite $out/edit-qty-divide.png
   convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_multiply.png -scale $s -composite $out/edit-qty-multiply.png

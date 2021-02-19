@@ -2341,30 +2341,38 @@ void Window::closeEvent(QCloseEvent *e)
 
 void Window::on_bricklink_catalog_triggered()
 {
-    if (!selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item(), (*selection().front()).color()));
+    if (!selection().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, (*selection().front()).item(),
+                                   (*selection().front()).color());
+    }
 }
 
 void Window::on_bricklink_priceguide_triggered()
 {
-    if (!selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(), (*selection().front()).color()));
+    if (!selection().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(),
+                                   (*selection().front()).color());
+    }
 }
 
 void Window::on_bricklink_lotsforsale_triggered()
 {
-    if (!selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*selection().front()).item(), (*selection().front()).color()));
+    if (!selection().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, (*selection().front()).item(),
+                                   (*selection().front()).color());
+    }
 }
 
 void Window::on_bricklink_myinventory_triggered()
 {
     if (!selection().isEmpty()) {
         uint lotid = (*selection().front()).lotId();
-        if (lotid)
-            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
-        else
-            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemSearch, (*selection().front()).item(), (*selection().front()).color()));
+        if (lotid) {
+            BrickLink::core()->openUrl(BrickLink::URL_StoreItemDetail, &lotid);
+        } else {
+            BrickLink::core()->openUrl(BrickLink::URL_StoreItemSearch,
+                                       (*selection().front()).item(), (*selection().front()).color());
+        }
     }
 }
 
