@@ -976,6 +976,11 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 m_progress->setIcon(QIcon(":/images/brickstore_icon.png"));
                 m_progress->setColor("#4ba2d8");
                 t->addWidget(m_progress);
+
+                connect(m_progress, &ProgressCircle::cancelAll, this, [this]() {
+                    BrickLink::core()->cancelPictureTransfers();
+                    BrickLink::core()->cancelPriceGuideTransfers();
+                });
             }
         } else if (QAction *a = findAction(an)) {
             t->addAction(a);

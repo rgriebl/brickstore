@@ -52,6 +52,8 @@ bool TransferJob::abort()
 {
     if (m_reply)
         m_reply->abort();
+    else
+        setStatus(TransferJob::Aborted);
     return true;
 }
 
@@ -185,10 +187,20 @@ void TransferRetriever::addJob(TransferJob *job, bool highPriority)
 
 void TransferRetriever::abortAllJobs()
 {
-    qDeleteAll(m_jobs);
+    for (auto &j : qAsConst(m_jobs)) {
+        j->abort();
+        emit finished(j);
+    }
+
+    m_progressDone += m_jobs.size();
+    emit progress(m_progressDone, m_progressTotal);
+    if (m_progressDone == m_progressTotal)
+        m_progressDone = m_progressTotal = 0;
+
     m_jobs.clear();
-    while (!m_currentJobs.isEmpty())
-        m_currentJobs.first()->abort();
+
+    for (auto &j : qAsConst(m_currentJobs))
+        j->abort();
 }
 
 void TransferRetriever::schedule()

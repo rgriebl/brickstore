@@ -15,8 +15,11 @@
 #include <QToolTip>
 #include <QPainter>
 #include <QConicalGradient>
+#include <QMenu>
+#include <QContextMenuEvent>
+#include <QAction>
 
-#include <climits>
+#include <limits>
 
 #include "progresscircle.h"
 
@@ -29,9 +32,7 @@ ProgressCircle::ProgressCircle(QWidget *parent)
     , m_online(false)
     , m_tt_normal(QLatin1String("%p%"))
 {
-    QSizePolicy sp;
-    sp.setHorizontalPolicy(QSizePolicy::Preferred);
-    sp.setVerticalPolicy(QSizePolicy::Preferred);
+    QSizePolicy sp(QSizePolicy::Preferred, QSizePolicy::Preferred);
     sp.setHeightForWidth(true);
     setSizePolicy(sp);
     setToolTip(toolTip());
@@ -97,8 +98,8 @@ void ProgressCircle::setValue(int value)
 
 void ProgressCircle::reset()
 {
-    if (m_min == INT_MIN)
-        m_value = INT_MIN;
+    if (m_min == std::numeric_limits<int>::min())
+        m_value = std::numeric_limits<int>::min();
     else
         m_value = m_min - 1;
     setToolTip(toolTip());
@@ -108,6 +109,15 @@ void ProgressCircle::reset()
 void ProgressCircle::resizeEvent(QResizeEvent *)
 {
     m_fill.reset();
+}
+
+void ProgressCircle::contextMenuEvent(QContextMenuEvent *e)
+{
+    QMenu *m = new QMenu();
+    auto *a = m->addAction(tr("Cancel all active downloads"));
+    a->setEnabled(m_online && ((m_value >= m_min) && (m_value < m_max)));
+    connect(a, &QAction::triggered, this, &ProgressCircle::cancelAll);
+    m->popup(e->globalPos());
 }
 
 void ProgressCircle::paintEvent(QPaintEvent *)
@@ -126,7 +136,8 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     if (m_min == 0 && m_max == 0) {
         fromAngle = (90 - (m_value - m_min)) * 16;
         sweepAngle = 22 * 16;
-    } else if ((m_value == (m_min - 1)) || (m_value == INT_MIN && m_min == INT_MIN)) {
+    } else if ((m_value == (m_min - 1)) || (m_value == std::numeric_limits<int>::min()
+                                            && m_min == std::numeric_limits<int>::min())) {
         inactive = true;
     } else if (m_max - m_min) {
         fromAngle = 90 * 16;
@@ -202,7 +213,7 @@ QString ProgressCircle::toolTip() const
 
     if ((m_max == 0 && m_min == 0) ||
         (m_value < m_min) ||
-        (m_value == INT_MIN && m_min == INT_MIN))
+        (m_value == std::numeric_limits<int>::min() && m_min == std::numeric_limits<int>::min()))
         return m_tt_nothing;
 
     qint64 totalSteps = qint64(m_max) - m_min;

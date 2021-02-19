@@ -52,11 +52,13 @@ public slots:
     void setOnlineState(bool isOnline);
 
 signals:
+    void cancelAll();
     void valueChanged(int value);
 
 protected:
     void paintEvent(QPaintEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
+    void contextMenuEvent(QContextMenuEvent *e);
 
 private:
     QString toolTip() const;
