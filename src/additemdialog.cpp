@@ -51,10 +51,10 @@
 using namespace std::chrono_literals;
 
 
-class ValidatorSpinBox : public QSpinBox
+class ValidatorSpinBox : public QAbstractSpinBox
 {
 public:
-    static void setValidator(QSpinBox *spinbox, const QValidator *validator)
+    static void setValidator(QAbstractSpinBox *spinbox, const QValidator *validator)
     {
         // why is lineEdit() protected?
         (spinbox->*(&ValidatorSpinBox::lineEdit))()->setValidator(validator);
@@ -95,42 +95,39 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_appears_in->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_appears_in->setLineWidth(2);
 
-    ValidatorSpinBox::setValidator(w_qty, new SmartIntValidator(1, FrameWork::maxQuantity, 1, w_qty));
+    w_qty->setRange(1, FrameWork::maxQuantity);
     w_qty->setValue(1);
     w_qty->installEventFilter(this);
 
-    ValidatorSpinBox::setValidator(w_bulk, new SmartIntValidator(1, FrameWork::maxQuantity, 1, w_bulk));
+    w_bulk->setRange(1, FrameWork::maxQuantity);
     w_bulk->setValue(1);
     w_bulk->installEventFilter(this);
 
-    w_price->setValidator(new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, w_price));
+    w_price->setRange(0, FrameWork::maxPrice);
     w_price->installEventFilter(this);
-    w_cost->setValidator(new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, w_cost));
+    w_cost->setRange(0, FrameWork::maxPrice);
     w_cost->installEventFilter(this);
 
-    w_tier_qty [0] = w_tier_qty_0;
-    w_tier_qty [1] = w_tier_qty_1;
-    w_tier_qty [2] = w_tier_qty_2;
-    w_tier_price [0] = w_tier_price_0;
-    w_tier_price [1] = w_tier_price_1;
-    w_tier_price [2] = w_tier_price_2;
+    w_tier_qty[0] = w_tier_qty_0;
+    w_tier_qty[1] = w_tier_qty_1;
+    w_tier_qty[2] = w_tier_qty_2;
+    w_tier_price[0] = w_tier_price_0;
+    w_tier_price[1] = w_tier_price_1;
+    w_tier_price[2] = w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
-        ValidatorSpinBox::setValidator(w_tier_qty[i], new SmartIntValidator(1, FrameWork::maxQuantity,
-                                                                            1, w_tier_qty[i]));
-        w_tier_qty [i]->setValue(0);
-        w_tier_price [i]->setText(QString());
-        w_tier_qty [i]->installEventFilter(this);
-        w_tier_price [i]->installEventFilter(this);
+        w_tier_qty[i]->setRange(0, FrameWork::maxQuantity);
+        w_tier_price[i]->setRange(0, FrameWork::maxPrice);
+        w_tier_qty[i]->setValue(0);
+        w_tier_price[i]->setValue(0);
+        w_tier_qty[i]->installEventFilter(this);
+        w_tier_price[i]->installEventFilter(this);
 
-        connect(w_tier_qty [i], QOverload<int>::of(&QSpinBox::valueChanged),
+        connect(w_tier_qty[i], QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
-        connect(w_tier_price [i], &QLineEdit::textChanged,
+        connect(w_tier_price[i], QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
     }
-
-    m_percent_validator = new SmartIntValidator(1, 99, 1, this);
-    m_money_validator = new SmartDoubleValidator(0.001, FrameWork::maxPrice, 3, 1, this);
 
     connect(w_select_item, &SelectItem::hasColors,
             this, [this](bool b) {
@@ -158,7 +155,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         if (confirmed)
             w_add->animateClick();
     });
-    connect(w_price, &QLineEdit::textChanged,
+    connect(w_price, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
     connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
@@ -173,12 +170,9 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_price_guide, &PriceGuideWidget::priceDoubleClicked,
             this, [this](double p) {
         p *= Currency::inst()->rate(m_currency_code);
-        w_price->setText(Currency::toString(p));
+        w_price->setValue(p);
         checkAddPossible();
     });
-
-    connect(Config::inst(), &Config::simpleModeChanged,
-            this, &AddItemDialog::setSimpleMode);
 
     w_radio_percent->click();
 
@@ -190,6 +184,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_splitter_bottom->widget(i)->setVisible(on);
         });
     }
+    connect(w_toggle_seller_mode, &QToolButton::toggled,
+            this, &AddItemDialog::setSellerMode);
 
     w_splitter_bottom->setStretchFactor(0, 2);
     w_splitter_bottom->setStretchFactor(1, 1);
@@ -217,6 +213,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
                 w_toggles[i]->setChecked(false);
             }
         }
+        if (hidden & (1 << 7)) {
+            w_toggle_seller_mode->setChecked(false);
+            setSellerMode(false);
+        }
+
         w_splitter_bottom->restoreState(ba.mid(1));
     }
 
@@ -298,6 +299,8 @@ AddItemDialog::~AddItemDialog()
         if (!w_toggles[i]->isChecked())
             hidden |= (1 << i);
     }
+    if (!w_toggle_seller_mode->isChecked())
+        hidden |= (1 << 7);
     ba.prepend(hidden);
     Config::inst()->setValue("/MainWindow/AddItemDialog/HSplitter", ba);
     Config::inst()->setValue("/MainWindow/AddItemDialog/SelectItem", w_select_item->saveState());
@@ -385,8 +388,8 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
     if (event->type() == QEvent::FocusIn) {
         if (auto *le = qobject_cast<QLineEdit *>(watched))
             QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
-        else if (auto *sb = qobject_cast<QSpinBox *>(watched))
-            QMetaObject::invokeMethod(sb, &QSpinBox::selectAll, Qt::QueuedConnection);
+        else if (auto *sb = qobject_cast<QAbstractSpinBox *>(watched))
+            QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
 
     } else if (event->type() == QEvent::ToolTip && watched == w_last_added) {
         const auto *he = static_cast<QHelpEvent *>(event);
@@ -405,7 +408,7 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
     return res;
 }
 
-void AddItemDialog::setSimpleMode(bool b)
+void AddItemDialog::setSellerMode(bool b)
 {
     QWidget *wl [] = {
         w_bulk,
@@ -427,14 +430,14 @@ void AddItemDialog::setSimpleMode(bool b)
 
     for (QWidget **wpp = wl; *wpp; wpp++) {
         if (b)
-            (*wpp)->hide();
-        else
             (*wpp)->show();
+        else
+            (*wpp)->hide();
     }
 
-    if (b) {
+    if (!b) {
         w_bulk->setValue(1);
-        w_tier_qty [0]->setValue(0);
+        w_tier_qty[0]->setValue(0);
         w_comments->setText(QString());
         checkTieredPrices();
     }
@@ -460,14 +463,17 @@ void AddItemDialog::updateItemAndColor()
 
 void AddItemDialog::setTierType(int type)
 {
-    QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
-    QString text = (type == 0) ? QString("0") : Currency::toString(0);
-
     (type == 0 ? w_radio_percent : w_radio_currency)->setChecked(true);
 
-    for (const auto &tp : w_tier_price) {
-        tp->setValidator(valid);
-        tp->setText(text);
+    for (auto *tp : qAsConst(w_tier_price)) {
+        if (type == 0) {
+            tp->setRange(0, 99);
+            tp->setDecimals(0);
+        } else {
+            tp->setRange(0, FrameWork::maxPrice);
+            tp->setDecimals(3);
+        }
+        tp->setValue(0);
     }
 }
 
@@ -588,13 +594,12 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
 
     w_qty->setValue(qty);
     w_bulk->setValue(bulk);
-    w_price->setText(Currency::toString(price));
-    w_cost->setText(Currency::toString(cost));
+    w_price->setValue(price);
+    w_cost->setValue(cost);
     setTierType(tierCurrency ? 1 : 0);
     for (int i = 0; i < 3; ++i) {
         w_tier_qty[i]->setValue(tierQty[i]);
-        w_tier_price[i]->setText(tierCurrency ? Currency::toString(tierPrice[i])
-                                              : QString::number(tierPrice[i]));
+        w_tier_price[i]->setValue(tierPrice[i]);
     }
     w_radio_new->setChecked(isNew);
     w_radio_used->setChecked(!isNew);

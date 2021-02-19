@@ -426,7 +426,6 @@ FrameWork::FrameWork(QWidget *parent)
                                       "-",
                                       "view_fullscreen",
                                       "-",
-                                      "view_simple_mode",
                                       "view_show_input_errors",
                                       "-",
                                       "view_column_layout_save",
@@ -522,7 +521,6 @@ FrameWork::FrameWork(QWidget *parent)
             this, &FrameWork::onlineStateChanged);
     onlineStateChanged(Application::inst()->isOnline());
 
-    findAction("view_simple_mode")->setChecked(Config::inst()->simpleMode());
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
 
     connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
@@ -739,7 +737,6 @@ void FrameWork::translateActions()
         { "view_toolbar",                   tr("View Toolbar"),                       },
         { "view_docks",                     tr("View Info Docks"),                    },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
-        { "view_simple_mode",               tr("Buyer/Collector Mode"),               },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
@@ -1238,7 +1235,6 @@ void FrameWork::createActions()
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);

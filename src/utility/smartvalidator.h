@@ -49,3 +49,16 @@ protected:
 private:
     int m_empty;
 };
+
+
+class DotCommaFilter : public QObject
+{
+public:
+    static void install();
+
+private:
+    explicit DotCommaFilter(QObject *parent);
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override;
+};

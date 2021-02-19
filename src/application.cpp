@@ -58,6 +58,7 @@
 #include "application.h"
 #include "stopwatch.h"
 #include "utility.h"
+#include "smartvalidator.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
@@ -197,6 +198,10 @@ Application::Application(int &_argc, char **_argv)
     m_files_to_open << QCoreApplication::arguments().mid(1);
 
     MessageBox::setDefaultParent(FrameWork::inst());
+
+    // tranform . or , into the local decimal separator in all QDoubleSpinBoxes and all
+    // QLineEdits with a SmartDoubleValidator set
+    DotCommaFilter::install();
 
     FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)

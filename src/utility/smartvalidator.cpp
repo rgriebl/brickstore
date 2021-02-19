@@ -14,36 +14,33 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QDoubleSpinBox>
+#include <QDebug>
 
 #include "smartvalidator.h"
 
-class DotCommaFilter : public QObject
+
+void DotCommaFilter::install()
 {
-public:
-    static void install()
-    {
-        static bool once = false;
-        if (!once) {
-            once = true;
-            qApp->installEventFilter(new DotCommaFilter(qApp));
-        }
+    static bool once = false;
+    if (!once) {
+        once = true;
+        qApp->installEventFilter(new DotCommaFilter(qApp));
     }
+}
 
-private:
-    explicit DotCommaFilter(QObject *parent)
-        : QObject(parent)
-    { }
-
-protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
-};
+DotCommaFilter::DotCommaFilter(QObject *parent)
+    : QObject(parent)
+{ }
 
 bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
 {
-    if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) && qobject_cast<QLineEdit *>(o)) {
-        const auto *val = qobject_cast<const SmartDoubleValidator *>(static_cast<QLineEdit *>(o)->validator());
+    if ((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) {
+        if (qobject_cast<QDoubleSpinBox *>(o)
+                || (qobject_cast<QLineEdit *>(o)
+                    && qobject_cast<const QDoubleValidator *>(
+                        static_cast<QLineEdit *>(o)->validator()))) {
 
-        if (val) {
             auto *ke = static_cast<QKeyEvent *>(e);
 
             QString text = ke->text();
@@ -52,13 +49,15 @@ bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
             for (int i = 0; i < text.length(); ++i) {
                 QCharRef ir = text[i];
                 if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
-                    ir = val->locale().decimalPoint();
+                    ir = QLocale::system().decimalPoint();
                     fixed = true;
                 }
             }
 
-            if (fixed)
-                *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ushort(ke->count()));
+            if (fixed) {
+                *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text,
+                                ke->isAutoRepeat(), ushort(ke->count()));
+            }
         }
     }
     return false;

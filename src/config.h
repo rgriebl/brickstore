@@ -48,7 +48,6 @@ public:
     QString dataDir() const;
 
     bool showInputErrors() const;
-    bool simpleMode() const;
     bool onlineStatus() const;
 
     QStringList recentFiles() const;
@@ -90,7 +89,6 @@ public slots:
     void setDataDir(const QString &dir);
 
     void setShowInputErrors(bool b);
-    void setSimpleMode(bool b);
     void setOnlineStatus(bool b);
 
     void setRecentFiles(const QStringList &recent);
@@ -114,7 +112,6 @@ signals:
     void filtersInFavoritesModeChanged(bool favoritesMode);
     void defaultCurrencyCodeChanged(const QString &ccode);
     void showInputErrorsChanged(bool b);
-    void simpleModeChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void recentFilesChanged(const QStringList &recent);
@@ -132,7 +129,6 @@ protected:
 
 private:
     bool                       m_show_input_errors = false;
-    bool                       m_simple_mode = false;
     QLocale::MeasurementSystem m_measurement = QLocale::MetricSystem;
     mutable bool               m_translations_parsed = false;
     mutable QVector<Translation> m_translations;

@@ -76,12 +76,9 @@ public:
     QDomElement createGuiStateXML();
     void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
 
-    bool isSimpleMode() const;
-
     QByteArray currentColumnLayout() const;
 
 public slots:
-    void setSimpleMode(bool b);
     void setSelection(const Document::ItemList &);
 
     void on_document_save_triggered();
@@ -209,7 +206,6 @@ private:
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;
-    bool                 m_simple_mode;
     ColumnChangeWatcher *m_ccw = nullptr;
 
     int                  m_latest_row;

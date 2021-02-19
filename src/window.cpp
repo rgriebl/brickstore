@@ -693,7 +693,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_settopg_list = nullptr;
     m_settopg_time = BrickLink::Time::PastSix;
     m_settopg_price = BrickLink::Price::Average;
-    m_simple_mode = false;
     m_diff_mode = false;
 
     w_statusbar = new StatusBar(this);
@@ -775,8 +774,6 @@ Window::Window(Document *doc, QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
             this, &Window::priceGuideUpdated);
 
-    connect(Config::inst(), &Config::simpleModeChanged,
-            this, &Window::setSimpleMode);
     connect(Config::inst(), &Config::showInputErrorsChanged,
             this, &Window::updateErrorMask);
     connect(Config::inst(), &Config::measurementSystemChanged,
@@ -824,7 +821,6 @@ Window::Window(Document *doc, QWidget *parent)
     }
 
     updateDifferenceMode();
-    setSimpleMode(Config::inst()->simpleMode());
 
     m_ccw = new ColumnChangeWatcher(this, w_header);
 
@@ -863,38 +859,9 @@ void Window::updateCaption()
     setWindowModified(m_doc->isModified());
 }
 
-bool Window::isSimpleMode() const
-{
-    return m_simple_mode;
-}
-
 QByteArray Window::currentColumnLayout() const
 {
     return w_header->saveLayout();
-}
-
-void Window::setSimpleMode(bool b)
-{
-    m_simple_mode = b;
-
-    for (const auto col : {
-         Document::Bulk,
-         Document::Sale,
-         Document::TierQ1,
-         Document::TierQ2,
-         Document::TierQ3,
-         Document::TierP1,
-         Document::TierP2,
-         Document::TierP3,
-         Document::Reserved,
-         Document::Stockroom,
-         Document::Retain,
-         Document::LotId,
-         Document::Comments }) {
-        w_header->setSectionAvailable(col, !b);
-    }
-
-    updateErrorMask();
 }
 
 void Window::ensureLatestVisible()
@@ -1513,7 +1480,9 @@ void Window::on_edit_price_inc_dec_triggered()
     if (selection().isEmpty())
         return;
 
-    IncDecPricesDialog dlg(!isSimpleMode(), m_doc->currencyCode(), this);
+    bool showTiers = !w_header->isSectionHidden(Document::TierQ1);
+
+    IncDecPricesDialog dlg(showTiers, m_doc->currencyCode(), this);
 
     if (dlg.exec() == QDialog::Accepted) {
         double fixed     = dlg.fixed();

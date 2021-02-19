@@ -57,7 +57,7 @@ private slots:
     void addClicked();
     void checkTieredPrices();
     void setTierType(int type);
-    void setSimpleMode(bool);
+    void setSellerMode(bool);
 
 private:
     double tierPriceValue(int i);
@@ -71,14 +71,11 @@ private:
     QPointer<Window> m_window;
 
     QPushButton *w_add;
-    QSpinBox *w_tier_qty [3];
-    QLineEdit *w_tier_price [3];
+    QSpinBox *w_tier_qty[3];
+    QDoubleSpinBox *w_tier_price[3];
 
     QButtonGroup *m_tier_type;
     QButtonGroup *m_condition;
-
-    QValidator *m_money_validator;
-    QValidator *m_percent_validator;
 
     QString m_caption_fmt;
     QString m_price_label_fmt;

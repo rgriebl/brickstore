@@ -57,7 +57,6 @@ static const char *application = BRICKSTORE_NAME;
 Config::Config()
     : QSettings(organization, application)
 {
-    m_simple_mode = value("General/SimpleMode", false).toBool();
     m_show_input_errors = value("General/ShowInputErrors", true).toBool();
     m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial"))
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
@@ -118,7 +117,6 @@ void Config::upgrade(int vmajor, int vminor)
             "MainWindow/",
             "General/Registration/",
             "General/ConfigVersion",
-            "General/SimpleMode",
             "General/lastApplicationUpdateCheck",
             "Internet/UseProxy",
             "Internet/Proxy"
@@ -199,11 +197,6 @@ bool Config::showInputErrors() const
     return m_show_input_errors;
 }
 
-bool Config::simpleMode() const
-{
-    return m_simple_mode;
-}
-
 void Config::setShowInputErrors(bool b)
 {
     if (b != m_show_input_errors) {
@@ -211,16 +204,6 @@ void Config::setShowInputErrors(bool b)
         setValue("General/ShowInputErrors", b);
 
         emit showInputErrorsChanged(b);
-    }
-}
-
-void Config::setSimpleMode(bool b)
-{
-    if (b != m_simple_mode) {
-        m_simple_mode = b;
-        setValue("General/SimpleMode", b);
-
-        emit simpleModeChanged(b);
     }
 }
 
