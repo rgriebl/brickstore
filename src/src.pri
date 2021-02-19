@@ -30,6 +30,7 @@ SOURCES += \
   $$PWD/documentio.cpp \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
+  $$PWD/incdecpricesdialog.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
   $$PWD/documentio.h \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
+  $$PWD/incdecpricesdialog.h \
   $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
@@ -68,7 +70,6 @@ FORMS = \
   $$PWD/importinventorydialog.ui \
   $$PWD/importcartdialog.ui \
   $$PWD/importorderdialog.ui \
-  $$PWD/incdecpricesdialog.ui \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectdocumentdialog.ui \
   $$PWD/selectitemdialog.ui \

@@ -14,29 +14,28 @@
 #pragma once
 
 #include <QDialog>
-#include "currency.h"
-#include "ui_incdecpricesdialog.h"
 
-QT_FORWARD_DECLARE_CLASS(QDoubleValidator)
+QT_FORWARD_DECLARE_CLASS(QDoubleSpinBox)
+QT_FORWARD_DECLARE_CLASS(QButtonGroup)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
 
 
-class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog
+class IncDecPricesDialog : public QDialog
 {
     Q_OBJECT
 public:
-    IncDecPricesDialog(bool showTiers, const QString &currencycode, QWidget *parent = nullptr);
+    IncDecPricesDialog(const QString &text, bool showTiers, const QString &currencyCode,
+                       QWidget *parent = nullptr);
 
     double fixed() const;
     double percent() const;
     bool applyToTiers() const;
 
 private slots:
-    void updateValidators();
-    void checkValue();
+    void switchType(int type);
     
 private:
-    QDoubleValidator *m_pos_percent_validator;
-    QDoubleValidator *m_neg_percent_validator;
-    QDoubleValidator *m_fixed_validator;
-    QString m_currencycode;
+    QDoubleSpinBox *m_value;
+    QButtonGroup *m_percentOrFixed;
+    QCheckBox *m_applyToTiers = nullptr;
 };

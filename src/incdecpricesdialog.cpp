@@ -11,82 +11,121 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QDialogButtonBox>
+#include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QToolButton>
+#include <QLabel>
+#include <QBoxLayout>
+#include <QButtonGroup>
+#include <QCheckBox>
 
-#include "smartvalidator.h"
 #include "incdecpricesdialog.h"
+#include "utility.h"
 #include "framework.h"
 
 
-IncDecPricesDialog::IncDecPricesDialog(bool showTiers, const QString &currencycode, QWidget *parent)
+IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
+                                       const QString &currencyCode, QWidget *parent)
     : QDialog(parent)
-    , m_currencycode(currencycode)
 {
-    setupUi(this);
-    
-    w_apply_to_tiers->setVisible(showTiers);
+    auto layout = new QVBoxLayout(this);
 
-    w_value->setText(QLatin1String("0"));
-    w_fixed->setText(currencycode);
+    auto label = new QLabel();
+    label->setText(text);
+    layout->addWidget(label);
 
-    m_pos_percent_validator = new SmartDoubleValidator(0., 1000., 2, 0, this);
-    m_neg_percent_validator = new SmartDoubleValidator(0., 99.99, 2, 0, this);
-    m_fixed_validator       = new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, this);
+    auto hlayout = new QHBoxLayout();
+    hlayout->setSpacing(0);
 
-    connect(w_increase, &QAbstractButton::toggled,
-            this, &IncDecPricesDialog::updateValidators);
-    connect(w_percent, &QAbstractButton::toggled,
-            this, &IncDecPricesDialog::updateValidators);
-    connect(w_value, &QLineEdit::textChanged,
-            this, &IncDecPricesDialog::checkValue);
+    m_value = new QDoubleSpinBox();
+    m_value->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
+    m_value->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
+    m_value->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    m_value->setButtonSymbols(QAbstractSpinBox::PlusMinus);
+    hlayout->addWidget(m_value);
 
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
-    updateValidators();
+    hlayout->addSpacing(11);
 
-    w_value->selectAll();
-}
+    auto percent = new QToolButton();
+    percent->setText("%");
+    percent->setCheckable(true);
+    percent->setChecked(true);
+    percent->setShortcut(tr("Ctrl+%"));
+    percent->setToolTip(Utility::toolTipLabel(tr("Percent"), percent->shortcut()));
+    hlayout->addWidget(percent);
 
-void IncDecPricesDialog::checkValue()
-{
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(w_value->hasAcceptableInput());
-}
+    auto fixed = new QToolButton();
+    fixed->setText(currencyCode);
+    fixed->setCheckable(true);
+    fixed->setShortcut(tr("Ctrl+$"));
+    fixed->setToolTip(Utility::toolTipLabel(tr("Fixed %1 amount").arg(currencyCode),
+                                            fixed->shortcut()));
+    hlayout->addWidget(fixed);
+    layout->addLayout(hlayout);
 
-void IncDecPricesDialog::updateValidators()
-{
-    if (w_percent->isChecked()) {
-        w_value->setValidator(w_increase->isChecked() ? m_pos_percent_validator : m_neg_percent_validator);
-        w_value->setText(QLatin1String("0"));
-    } else {
-        w_value->setValidator(m_fixed_validator);
-        w_value->setText(Currency::toString(0));
+    m_percentOrFixed = new QButtonGroup(this);
+    m_percentOrFixed->addButton(percent, 0);
+    m_percentOrFixed->addButton(fixed, 1);
+
+    if (showTiers) {
+        m_applyToTiers = new QCheckBox(tr("Also apply this change to &tier prices"));
+        layout->addWidget(m_applyToTiers);
     }
-    checkValue();
+
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttons);
+
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(m_percentOrFixed, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
+            this, [this](auto *) {
+        switchType(m_percentOrFixed->checkedId());
+    });
+    connect(m_value, &QDoubleSpinBox::textChanged,
+            this, [this, buttons]() {
+        buttons->button(QDialogButtonBox::Ok)->setEnabled(m_value->hasAcceptableInput());
+    });
+
+    switchType(0);
+    setFocusProxy(m_value);
+    m_value->selectAll();
 }
 
+void IncDecPricesDialog::switchType(int type)
+{
+    auto oldType = m_value->property("bsType");
+    if (!oldType.isNull() && oldType.toInt() == type)
+        return;
+    m_value->setProperty("bsType", type);
+    m_value->setValue(0);
+
+    if (type == 0) { // percent
+        m_value->setRange(-99, 1000);
+        m_value->setDecimals(2);
+    } else { // fixed
+        m_value->setRange(-FrameWork::maxPrice, FrameWork::maxPrice);
+        m_value->setDecimals(3);
+    }
+}
 
 double IncDecPricesDialog::fixed() const
 {
-    if (w_value->hasAcceptableInput() && w_fixed->isChecked()) {
-        double v = Currency::fromString(w_value->text());
-        return w_increase->isChecked() ? v : -v;
-    } else {
-        return 0;
-    }
+    if (m_value->hasAcceptableInput() && (m_percentOrFixed->checkedId() == 1))
+        return m_value->value();
+    return 0;
 }
 
 double IncDecPricesDialog::percent() const
 {
-    if (w_value->hasAcceptableInput() && w_percent->isChecked()) {
-        double v = QLocale().toDouble(w_value->text());
-        return w_increase->isChecked() ? v : -v;
-    } else {
-        return 0.;
-    }
+    if (m_value->hasAcceptableInput() && (m_percentOrFixed->checkedId() == 0))
+        return m_value->value();
+    return 0;
 }
 
 bool IncDecPricesDialog::applyToTiers() const
 {
-    return w_apply_to_tiers->isChecked();
+    return m_applyToTiers && m_applyToTiers->isChecked();
 }
 
 #include "moc_incdecpricesdialog.cpp"

@@ -1482,7 +1482,8 @@ void Window::on_edit_price_inc_dec_triggered()
 
     bool showTiers = !w_header->isSectionHidden(Document::TierQ1);
 
-    IncDecPricesDialog dlg(showTiers, m_doc->currencyCode(), this);
+    IncDecPricesDialog dlg(tr("Increase or decrease the prices of the selected items by"),
+                           showTiers, m_doc->currencyCode(), this);
 
     if (dlg.exec() == QDialog::Accepted) {
         double fixed     = dlg.fixed();
@@ -1571,7 +1572,8 @@ void Window::on_edit_cost_inc_dec_triggered()
     if (selection().isEmpty())
         return;
 
-    IncDecPricesDialog dlg(false, m_doc->currencyCode(), this);
+    IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
+                           false, m_doc->currencyCode(), this);
 
     if (dlg.exec() == QDialog::Accepted) {
         double fixed     = dlg.fixed();
