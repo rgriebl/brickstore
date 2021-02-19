@@ -130,7 +130,7 @@ private:
 
     Workspace *m_workspace;
 
-    QPointer<Window> m_current_window;
+    QPointer<Window> m_activeWin;
 
     ProgressCircle *m_progress;
     HistoryLineEdit *m_filter;

@@ -95,7 +95,6 @@ enum {
     NeedItemMask     = 0x000f,
 
     NeedDocument     = 0x0010,
-    NeedModification = 0x0020,
     NeedItems        = 0x0040,
     NeedNetwork      = 0x0100,
 
@@ -302,7 +301,7 @@ FrameWork::FrameWork(QWidget *parent)
     connect(Application::inst(), &Application::openDocument,
             this, &FrameWork::openDocument);
 
-    m_current_window = nullptr;
+    m_activeWin = nullptr;
 
     m_workspace = new Workspace(this);
     connect(m_workspace, &Workspace::windowActivated,
@@ -659,8 +658,8 @@ void FrameWork::languageChange()
         // so we need to skip this event loop round
         QMetaObject::invokeMethod(this, [this]() {
             QString tt = findAction("edit_filter_focus")->toolTip();
-            if (m_current_window)
-                tt.append(m_current_window->document()->filterToolTip());
+            if (m_activeWin)
+                tt.append(m_activeWin->document()->filterToolTip());
             m_filter->setToolTip(tt);
         }, Qt::QueuedConnection);
     }
@@ -697,7 +696,7 @@ void FrameWork::translateActions()
         { "document_open",                  tr("Open..."),                            QKeySequence::Open },
         { "document_open_recent",           tr("Open Recent"),                        },
         { "document_save",                  tr("Save"),                               QKeySequence::Save },
-        { "document_save_as",               tr("Save As..."),                         },
+        { "document_save_as",               tr("Save As..."),                         QKeySequence::SaveAs },
         { "document_print",                 tr("Print..."),                           QKeySequence::Print },
         { "document_print_pdf",             tr("Print to PDF..."),                    },
         { "document_import",                tr("Import"),                             },
@@ -1069,7 +1068,7 @@ void FrameWork::createActions()
     connect(rm, &RecentMenu::clearRecent,
             this, []() { Config::inst()->setRecentFiles({ }); });
 
-    (void) newQAction(this, "document_save", NeedDocument | NeedModification);
+    (void) newQAction(this, "document_save");
     (void) newQAction(this, "document_save_as", NeedDocument);
     (void) newQAction(this, "document_print", NeedDocument | NeedItems);
     (void) newQAction(this, "document_print_pdf", NeedDocument | NeedItems);
@@ -1356,7 +1355,7 @@ Window *FrameWork::createWindow(Document *doc)
 
 Window *FrameWork::activeWindow() const
 {
-    return m_current_window;
+    return m_activeWin;
 }
 
 void FrameWork::setActiveWindow(Window *window)
@@ -1518,21 +1517,21 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
 
 void FrameWork::connectWindow(QWidget *w)
 {
-    if (w && w == m_current_window)
+    if (w && w == m_activeWin)
         return;
 
     QString filterToolTip;
 
-    if (m_current_window) {
-        Document *doc = m_current_window->document();
+    if (m_activeWin) {
+        Document *doc = m_activeWin->document();
 
-        connectAllActions(false, m_current_window);
+        connectAllActions(false, m_activeWin);
 
-        disconnect(m_current_window.data(), &Window::windowTitleChanged,
+        disconnect(m_activeWin.data(), &Window::windowTitleChanged,
                    this, &FrameWork::titleUpdate);
         disconnect(doc, &Document::modificationChanged,
                    this, &FrameWork::modificationUpdate);
-        disconnect(m_current_window.data(), &Window::selectionChanged,
+        disconnect(m_activeWin.data(), &Window::selectionChanged,
                    this, &FrameWork::selectionUpdate);
         if (m_filter) {
             disconnect(this, &FrameWork::filterChanged,
@@ -1548,7 +1547,7 @@ void FrameWork::connectWindow(QWidget *w)
         }
         m_undogroup->setActiveStack(nullptr);
 
-        m_current_window = nullptr;
+        m_activeWin = nullptr;
     }
 
     if (Window *window = qobject_cast<Window *>(w)) {
@@ -1585,22 +1584,20 @@ void FrameWork::connectWindow(QWidget *w)
         // update per-document action states
 
         //findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
-        m_current_window = window;
+        m_activeWin = window;
     }
 
     if (m_add_dialog) {
-        m_add_dialog->attach(m_current_window);
-        if (!m_current_window)
+        m_add_dialog->attach(m_activeWin);
+        if (!m_activeWin)
             m_add_dialog->close();
     }
 
-    findAction("edit_additems")->setEnabled((m_current_window));
-
-    selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
+    selectionUpdate(m_activeWin ? m_activeWin->selection() : Document::ItemList());
     titleUpdate();
     modificationUpdate();
 
-    emit windowActivated(m_current_window);
+    emit windowActivated(m_activeWin);
 }
 
 void FrameWork::updateActions(const Document::ItemList &selection)
@@ -1608,8 +1605,7 @@ void FrameWork::updateActions(const Document::ItemList &selection)
     int cnt = selection.count();
     bool isOnline = Application::inst()->isOnline();
 
-    const auto *doc = m_current_window ? m_current_window->document() : nullptr;
-    bool docIsModified = doc ? doc->isModified() : false;
+    const auto *doc = m_activeWin ? m_activeWin->document() : nullptr;
     int docItemCount = doc ? int(doc->rowCount()) : 0;
 
     foreach (QAction *a, findChildren<QAction *>()) {
@@ -1623,11 +1619,8 @@ void FrameWork::updateActions(const Document::ItemList &selection)
         if (flags & NeedNetwork)
             b = b && isOnline;
 
-        if (flags & NeedModification)
-            b = b && docIsModified;
-
         if (flags & NeedDocument) {
-            b = b && m_current_window;
+            b = b && m_activeWin;
 
             if (b) {
                 if (flags & NeedItems)
@@ -1719,9 +1712,9 @@ void FrameWork::titleUpdate()
     QString title = QApplication::applicationName();
     QString file;
 
-    if (m_current_window) {
-        title = m_current_window->windowTitle() % u" \u2014 " % title;
-        file = m_current_window->document()->fileName();
+    if (m_activeWin) {
+        title = m_activeWin->windowTitle() % u" \u2014 " % title;
+        file = m_activeWin->document()->fileName();
     }
     setWindowTitle(title);
     setWindowFilePath(file);
@@ -1729,10 +1722,11 @@ void FrameWork::titleUpdate()
 
 void FrameWork::modificationUpdate()
 {
-    bool modified = m_current_window ? m_current_window->isWindowModified() : false;
+    bool modified = m_activeWin ? m_activeWin->isWindowModified() : false;
     setWindowModified(modified);
-    if (QAction *a = findAction("document_save"))
-        a->setEnabled(modified);
+
+    bool hasNoFileName = (m_activeWin && m_activeWin->document()->fileName().isEmpty());
+    findAction("document_save")->setEnabled(modified || hasNoFileName);
 }
 
 void FrameWork::transferJobProgressUpdate(int p, int t)
@@ -1760,8 +1754,8 @@ void FrameWork::onlineStateChanged(bool isOnline)
     if (!isOnline)
         cancelAllTransfers(true);
 
-    if (m_current_window)
-        updateActions(m_current_window->selection());
+    if (m_activeWin)
+        updateActions(m_activeWin->selection());
     else
         updateActions();
 }
@@ -1779,8 +1773,8 @@ void FrameWork::setFilter(const QString &filter)
 
 void FrameWork::reFilter()
 {
-    if (m_filter && m_current_window)
-        m_current_window->document()->reFilter();
+    if (m_filter && m_activeWin)
+        m_activeWin->document()->reFilter();
 }
 
 void FrameWork::updateReFilterAction(bool b)
@@ -1832,7 +1826,7 @@ void FrameWork::showAddItemDialog()
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName(QLatin1String("additems"));
-        m_add_dialog->attach(m_current_window);
+        m_add_dialog->attach(m_activeWin);
 
         connect(m_add_dialog, &AddItemDialog::closed,
                 this, [this]() {
