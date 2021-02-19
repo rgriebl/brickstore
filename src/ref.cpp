@@ -16,6 +16,6 @@
 
 Ref::~Ref()
 {
-    if (ref != 0)
-        qWarning("Deleting %p, although refCount=%d", static_cast<void *>(this), int(ref));
+//    if (ref != 0)
+//        qWarning("Deleting %p, although refCount=%d", static_cast<void *>(this), int(ref));
 }
