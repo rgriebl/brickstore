@@ -83,4 +83,6 @@ private:
 
     static ParseItemListResult parseBsxInventory(const QDomDocument &domDoc);
     static QDomDocument createBsxInventory(const Document *doc);
+
+    static QString s_lastDirectory;
 };

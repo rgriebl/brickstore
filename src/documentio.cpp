@@ -38,6 +38,9 @@
 #define qL1S(x) QLatin1String(x)
 
 
+QString DocumentIO::s_lastDirectory { };
+
+
 Document *DocumentIO::create()
 {
     auto *doc = new Document();
@@ -51,7 +54,18 @@ Document *DocumentIO::open()
     filters << tr("BrickStore XML Data") + " (*.bsx)";
     filters << tr("All Files") + "(*.*)";
 
-    return open(QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), Config::inst()->documentDir(), filters.join(";;")));
+    QString dir = s_lastDirectory;
+    if (dir.isEmpty())
+        dir = Config::inst()->documentDir();
+
+    auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), dir, filters.join(";;"));
+
+    if (!fn.isNull()) {
+        s_lastDirectory = QFileInfo(fn).absolutePath();
+
+        return open(fn);
+    }
+    return nullptr;
 }
 
 Document *DocumentIO::open(const QString &s)
@@ -523,12 +537,14 @@ bool DocumentIO::saveAs(Document *doc)
     filters << tr("BrickStore XML Data") + " (*.bsx)";
 
     QString fn = doc->fileName();
+    if (fn.isEmpty()) {
+        fn = s_lastDirectory;
+        if (fn.isEmpty())
+            fn = Config::inst()->documentDir();
 
-    if (fn.isEmpty() && !doc->title().isEmpty()) {
-        QDir d(Config::inst()->documentDir());
-        if (d.exists()) {
+        if (!doc->title().isEmpty()) {
             QString t = Utility::sanitizeFileName(doc->title());
-            fn = d.filePath(t);
+            fn = fn % u'/' % t;
         }
     }
     if (fn.right(4) == ".xml")
@@ -537,6 +553,8 @@ bool DocumentIO::saveAs(Document *doc)
     fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save File as"), fn, filters.join(";;"));
 
     if (!fn.isNull()) {
+        s_lastDirectory = QFileInfo(fn).absolutePath();
+
         if (fn.right(4) != ".bsx")
             fn += ".bsx";
 
