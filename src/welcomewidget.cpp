@@ -284,6 +284,7 @@ void WelcomeButton::paintEvent(QPaintEvent *)
 
 WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
+    , m_docIcon(QLatin1String(":/images/brickstore_doc_icon"))
 {
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 
@@ -323,7 +324,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
         for (const auto &f : recent) {
             auto b = new WelcomeButton(QFileInfo(f).fileName(), f);
-            b->setIcon(QIcon(":/images/brickstore_doc_icon"));
+            b->setIcon(m_docIcon);
             recent_layout->addWidget(b);
             connect(b, &WelcomeButton::clicked,
                     this, [b]() { FrameWork::inst()->openDocument(b->description()); });

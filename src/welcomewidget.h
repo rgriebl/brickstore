@@ -15,6 +15,7 @@
 
 #include <QWidget>
 #include <QPointer>
+#include <QIcon>
 
 QT_FORWARD_DECLARE_CLASS(QGroupBox)
 QT_FORWARD_DECLARE_CLASS(QLabel)
@@ -43,6 +44,7 @@ private:
     QGroupBox *m_import_frame;
     QPointer<QLabel> m_no_recent;
     QLabel *m_versions;
+    QIcon m_docIcon;
 };
 
 
