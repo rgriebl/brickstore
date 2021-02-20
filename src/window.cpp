@@ -175,9 +175,13 @@ void ColumnChangeWatcher::moveColumn(int logical, int oldVisual, int newVisual)
 
 void ColumnChangeWatcher::resizeColumn(int logical, int oldSize, int newSize)
 {
-    Q_UNUSED(oldSize)
     disable();
-    m_header->resizeSection(logical, newSize);
+    if (oldSize && !newSize)
+        m_header->hideSection(logical);
+    else if (!oldSize && newSize)
+        m_header->showSection(logical);
+    if (newSize)
+        m_header->resizeSection(logical, newSize);
     enable();
 }
 
@@ -214,6 +218,8 @@ ColumnCmd::ColumnCmd(ColumnChangeWatcher *ccw, bool alreadyDone, ColumnCmd::Type
 {
     if (type == Type::Move)
         setText(qApp->translate("ColumnCmd", "Moved column %1").arg(ccw->columnTitle(logical)));
+    else if (!oldValue || !newValue)
+        setText(qApp->translate("ColumnCmd", "Show/hide column %1").arg(ccw->columnTitle(logical)));
     else
         setText(qApp->translate("ColumnCmd", "Resized column %1").arg(ccw->columnTitle(logical)));
 }

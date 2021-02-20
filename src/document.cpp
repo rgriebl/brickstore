@@ -525,7 +525,7 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
              && (positions.size() == filteredPositions.size()));
     Q_ASSERT(isAppend != (positions.size() == items.size()));
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     for (Item *item : qAsConst(items)) {
@@ -550,7 +550,7 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
     foreach (const QModelIndex &idx, before)
         after.append(index(item(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
@@ -568,7 +568,7 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions,
     sortedPositions.resize(items.count());
     filteredPositions.resize(items.count());
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     for (int i = items.count() - 1; i >= 0; --i) {
@@ -589,7 +589,7 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions,
     foreach (const QModelIndex &idx, before)
         after.append(index(item(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
@@ -1495,7 +1495,7 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
     bool emitSortColumnChanged = (column != m_sortColumn);
     bool wasSorted = isSorted();
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     m_sortColumn = column;
@@ -1540,7 +1540,7 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
     foreach (const QModelIndex &idx, before)
         after.append(index(item(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 
     if (emitSortColumnChanged)
         emit sortColumnChanged(column);
@@ -1557,7 +1557,7 @@ void Document::filterDirect(const QString &filterString, const QVector<Filter> &
     bool emitFilterChanged = (filterList != m_filterList);
     bool wasFiltered = isFiltered();
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     m_filterString = filterString;
@@ -1585,7 +1585,7 @@ void Document::filterDirect(const QString &filterString, const QVector<Filter> &
     foreach (const QModelIndex &idx, before)
         after.append(index(item(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 
     if (emitFilterChanged)
         emit filterChanged(filterString);

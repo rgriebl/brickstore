@@ -129,7 +129,7 @@ void StaticPointerModel::invalidateFilterDelayed()
 {
     init();
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     invalidateFilterInternal();
@@ -138,7 +138,7 @@ void StaticPointerModel::invalidateFilterDelayed()
     foreach (const QModelIndex &idx, before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 }
 
 void StaticPointerModel::invalidateFilterInternal()
@@ -163,7 +163,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     if (n < 2)
         return;
 
-    emit layoutAboutToBeChanged();
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
     if (column >= 0 && column < columnCount()) {
@@ -190,7 +190,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     foreach (const QModelIndex &idx, before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
-    emit layoutChanged();
+    emit layoutChanged({ }, VerticalSortHint);
 }
 
 int StaticPointerModel::sortColumn() const
