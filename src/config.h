@@ -42,7 +42,6 @@ public:
     QPair<QString, double> legacyCurrencyCodeAndRate() const;
     QString defaultCurrencyCode() const;
 
-    bool closeEmptyDocuments() const;
     QString documentDir() const;
     QString ldrawDir() const;
     QString dataDir() const;
@@ -84,7 +83,6 @@ public slots:
     void setFiltersInFavoritesMode(bool b);
     void setDefaultCurrencyCode(const QString &ccode);
 
-    void setCloseEmptyDocuments(bool b);
     void setDocumentDir(const QString &dir);
     void setLDrawDir(const QString &dir);
     void setDataDir(const QString &dir);

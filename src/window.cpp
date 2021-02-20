@@ -2336,9 +2336,7 @@ void Window::on_document_close_triggered()
 
 void Window::closeEvent(QCloseEvent *e)
 {
-    bool close_empty = (m_doc->items().isEmpty() && Config::inst()->closeEmptyDocuments());
-
-    if (m_doc->isModified() && !close_empty) {
+    if (m_doc->isModified()) {
         FrameWork::inst()->setActiveWindow(this);
 
         QMessageBox msgBox(this);

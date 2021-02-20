@@ -166,28 +166,7 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_28">
-         <property name="text">
-          <string>Interface</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="w_openbrowser">
-         <property name="text">
-          <string>Open a Web-Browser window when exporting to the clipboard</string>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="1">
-        <widget class="QCheckBox" name="w_closeempty">
-         <property name="text">
-          <string>Close empty documents without confirmation</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QVBoxLayout" name="verticalLayout">
           <property name="spacing">
@@ -208,14 +187,14 @@
          </layout>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="label_30">
          <property name="text">
           <string>Document Directory</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="5" column="1">
         <widget class="QComboBox" name="w_docdir">
          <property name="sizeAdjustPolicy">
           <enum>QComboBox::AdjustToContents</enum>

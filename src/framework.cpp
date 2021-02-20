@@ -155,7 +155,6 @@ public:
             clear();
 
             for (auto cl : Window::columnLayoutCommands()) {
-                qWarning() << "??" << int(cl);
                 addAction(Window::columnLayoutCommandName(cl))
                         ->setData(Window::columnLayoutCommandId(cl));
             }

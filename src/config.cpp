@@ -183,16 +183,6 @@ void Config::addToRecentFiles(const QString &file)
     setRecentFiles(recent);
 }
 
-bool Config::closeEmptyDocuments() const
-{
-    return value("General/CloseEmptyDocs", false).toBool();
-}
-
-void Config::setCloseEmptyDocuments(bool b)
-{
-    setValue("General/CloseEmptyDocs", b);
-}
-
 bool Config::showInputErrors() const
 {
     return m_show_input_errors;

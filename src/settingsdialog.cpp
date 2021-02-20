@@ -243,9 +243,6 @@ void SettingsDialog::load()
     m_preferedCurrency = Config::inst()->defaultCurrencyCode();
     currenciesUpdated();
 
-    w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
-    w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
-
     QString docdir = QDir::toNativeSeparators(Config::inst()->documentDir());
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
@@ -305,9 +302,6 @@ void SettingsDialog::save()
         Config::inst()->setDocumentDir(dd.absolutePath());
     else
         MessageBox::warning(this, { }, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
-
-    Config::inst()->setCloseEmptyDocuments(w_closeempty->isChecked ());
-    Config::inst()->setValue("/General/Export/OpenBrowser", w_openbrowser->isChecked());
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 
