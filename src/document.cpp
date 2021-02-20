@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <utility>
 
 #include <QApplication>
 #include <QCursor>
@@ -42,7 +43,7 @@ enum {
     CID_Change,
     CID_AddRemove,
     CID_Currency,
-    CID_DifferenceMode,
+    CID_ResetDifferenceMode,
     CID_Sort,
     CID_Filter,
 
@@ -184,24 +185,27 @@ void CurrencyCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-DifferenceModeCmd::DifferenceModeCmd(Document *doc, bool active)
-    : QUndoCommand(qApp->translate("DifferenceModeCmd", "Switched from or to difference mode"))
+ResetDifferenceModeCmd::ResetDifferenceModeCmd(Document *doc)
+    : QUndoCommand(qApp->translate("ResetDifferenceModeCmd", "Reset difference mode base values"))
     , m_doc(doc)
-    , m_active(active)
 { }
 
-int DifferenceModeCmd::id() const
+int ResetDifferenceModeCmd::id() const
 {
-    return CID_DifferenceMode;
+    return CID_ResetDifferenceMode;
 }
 
-void DifferenceModeCmd::redo()
+bool ResetDifferenceModeCmd::mergeWith(const QUndoCommand *other)
 {
-    m_doc->setDifferenceModeActiveDirect(m_active);
-    m_active = !m_active;
+    return (other->id() == id());
 }
 
-void DifferenceModeCmd::undo()
+void ResetDifferenceModeCmd::redo()
+{
+    m_doc->resetDifferenceModeDirect(m_differenceBase);
+}
+
+void ResetDifferenceModeCmd::undo()
 {
     redo();
 }
@@ -299,6 +303,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
     m_val = m_minval = m_cost = 0.;
     m_weight = .0;
     m_errors = 0;
+    m_differences = 0;
     m_incomplete = 0;
     bool weight_missing = false;
 
@@ -326,8 +331,11 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
         else
             weight_missing = true;
 
-        if (quint64 errors = doc->itemFlags(item).first)
-            m_errors += qPopulationCount(errors);
+        auto flags = doc->itemFlags(item);
+        if (flags.first)
+            m_errors += qPopulationCount(flags.first);
+        if (flags.second)
+            m_differences += qPopulationCount(flags.second);
 
         if (item->isIncomplete())
             m_incomplete++;
@@ -397,11 +405,15 @@ Document::Document(const BrickLink::InvItemList &items)
 
 // the caller owns the items
 Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode,
+                   const QHash<const BrickLink::InvItem *, BrickLink::InvItem> &differenceBase,
                    bool forceModified)
     : Document(items)
 {
     m_currencycode = currencyCode;
     m_forceModified = forceModified;
+
+    auto db = differenceBase;
+    resetDifferenceModeDirect(db);
 }
 
 Document::~Document()
@@ -734,92 +746,58 @@ void Document::updateItemFlags(const Item *item)
     if (item->tierQuantity(2) && (item->tierQuantity(2) <= item->tierQuantity(1)))
         errors |= (1ULL << TierQ3);
 
-    if (isDifferenceModeActive()) {
-        if (auto base = differenceBaseItem(item)) {
-            static const quint64 ignoreMask = 0ULL
-                    | (1ULL << Index)
-                    | (1ULL << Status)
-                    | (1ULL << Picture)
-                    | (1ULL << Description)
-                    | (1ULL << QuantityOrig)
-                    | (1ULL << QuantityDiff)
-                    | (1ULL << PriceOrig)
-                    | (1ULL << PriceDiff)
-                    | (1ULL << Total)
-                    | (1ULL << Category)
-                    | (1ULL << ItemType)
-                    | (1ULL << LotId)
-                    | (1ULL << Weight)
-                    | (1ULL << YearReleased);
+    if (auto base = differenceBaseItem(item)) {
+        static const quint64 ignoreMask = 0ULL
+                | (1ULL << Index)
+                | (1ULL << Status)
+                | (1ULL << Picture)
+                | (1ULL << Description)
+                | (1ULL << QuantityOrig)
+                | (1ULL << QuantityDiff)
+                | (1ULL << PriceOrig)
+                | (1ULL << PriceDiff)
+                | (1ULL << Total)
+                | (1ULL << Category)
+                | (1ULL << ItemType)
+                | (1ULL << LotId)
+                | (1ULL << Weight)
+                | (1ULL << YearReleased);
 
-            for (Field f = Index; f != FieldCount; f = Field(f + 1)) {
-                quint64 fmask = (1ULL << f);
-                if (fmask & ignoreMask)
-                    continue;
-                if (dataForFilterRole(item, f) != dataForFilterRole(base, f))
-                    updated |= fmask;
-            }
+        for (Field f = Index; f != FieldCount; f = Field(f + 1)) {
+            quint64 fmask = (1ULL << f);
+            if (fmask & ignoreMask)
+                continue;
+            if (dataForFilterRole(item, f) != dataForFilterRole(base, f))
+                updated |= fmask;
         }
     }
 
     setItemFlags(item, errors, updated);
 }
 
-bool Document::isDifferenceModeActive() const
+void Document::resetDifferenceMode()
 {
-    return m_differenceModeActive;
+    m_undo->push(new ResetDifferenceModeCmd(this));
 }
 
-void Document::activateDifferenceModeInternal(const QHash<const Item *, Item> &differenceBase)
-{
-    m_differenceBase = differenceBase;
-    if (m_differenceBase.size() != m_items.size()) {
-        for (const auto &item : qAsConst(m_items)) {
-            if (!m_differenceBase.contains(item))
-                m_differenceBase.insert(item, *item);
-        }
+void Document::resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
+                                         &differenceBase) {
+    std::swap(m_differenceBase, differenceBase);
+
+    if (m_differenceBase.isEmpty()) {
+        for (const auto *item : qAsConst(m_items))
+            m_differenceBase.insert(item, *item);
     }
 
-    m_differenceModeActive = true;
+    for (const auto *item : qAsConst(m_items))
+        updateItemFlags(item);
 
-    for (const BrickLink::InvItem *i : qAsConst(m_items))
-        updateItemFlags(i);
-
-    emit differenceModeChanged(true);
     emitDataChanged();
-}
-
-void Document::setDifferenceModeActive(bool active)
-{
-    if (active != isDifferenceModeActive())
-        m_undo->push(new DifferenceModeCmd(this, active));
-}
-
-void Document::setDifferenceModeActiveDirect(bool active)
-{
-    if (active) {
-        m_differenceBase.clear();
-        decltype(m_differenceBase) base;
-
-        for (const BrickLink::InvItem *i : qAsConst(m_items))
-            base.insert(i, *i);
-
-        activateDifferenceModeInternal(base);
-    } else {
-        m_differenceBase.clear();
-        m_differenceModeActive = false;
-
-        for (const BrickLink::InvItem *i : qAsConst(m_items))
-            updateItemFlags(i);
-
-        emit differenceModeChanged(false);
-        emitDataChanged();
-    }
 }
 
 const Document::Item *Document::differenceBaseItem(const Document::Item *item) const
 {
-    if (!item || !isDifferenceModeActive())
+    if (!item)
         return nullptr;
 
     auto it = m_differenceBase.constFind(item);
@@ -932,14 +910,9 @@ void Document::unsetModified()
     emit modificationChanged(isModified());
 }
 
-quint64 Document::errorMask() const
+void Document::setItemFlagsMask(QPair<quint64, quint64> flagsMask)
 {
-    return m_error_mask;
-}
-
-void Document::setErrorMask(quint64 em)
-{
-    m_error_mask = em;
+    m_itemFlagsMask = flagsMask;
     emitStatisticsChanged();
     emitDataChanged();
 }
@@ -947,7 +920,8 @@ void Document::setErrorMask(quint64 em)
 QPair<quint64, quint64> Document::itemFlags(const Item *item) const
 {
     auto flags = m_itemFlags.value(item, { });
-    flags.first &= m_error_mask;
+    flags.first &= m_itemFlagsMask.first;
+    flags.second &= m_itemFlagsMask.second;
     return flags;
 }
 
@@ -1688,19 +1662,6 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
 QString Document::filterToolTip() const
 {
     return m_filterParser->toolTip();
-}
-
-bool Document::lastCommandWasActivateDifferenceMode() const
-{
-    if (m_undo) {
-        int index = m_undo->index() - 1;
-        auto *cmd = m_undo->command(index);
-        if (cmd && (cmd->id() == CID_DifferenceMode)
-                && static_cast<const DifferenceModeCmd *>(cmd)->isActivate()) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void Document::reSort()

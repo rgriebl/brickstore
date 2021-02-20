@@ -418,34 +418,6 @@ StatusBar::StatusBar(Window *window)
             return sep;
     };
 
-    m_differenceMode = new QToolButton();
-    m_differenceMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differenceMode->setIcon(QIcon::fromTheme("mode2"));
-    m_differenceMode->setCheckable(true);
-    connect(m_doc, &Document::differenceModeChanged,
-            this, &StatusBar::updateDifferenceMode);
-    connect(m_doc, &Document::itemCountChanged,
-            this, [this](int count) { m_differenceMode->setEnabled(count > 0); });
-    m_differenceMode->setEnabled(m_doc->items().count() > 0);
-    connect(m_differenceMode, &QToolButton::toggled,
-            this, [this](bool b) {
-        if (b == m_doc->isDifferenceModeActive())
-            return;
-        if (b) {
-            m_doc->setDifferenceModeActive(true);
-        } else {
-            if (m_doc->lastCommandWasActivateDifferenceMode()
-                    || (MessageBox::question(this, tr("End difference mode"),
-                                             tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?"))
-                        == QMessageBox::Yes)) {
-                m_doc->setDifferenceModeActive(false);
-            } else {
-                m_differenceMode->setChecked(true);
-            }
-        }
-    });
-    layout->addWidget(m_differenceMode);
-
     if (m_doc->order()) {
         addSeparator();
         m_order = new QToolButton();
@@ -464,6 +436,16 @@ StatusBar::StatusBar(Window *window)
     }
     layout->addStretch(1);
 
+    m_differencesSeparator = addSeparator();
+    m_differences = new QToolButton();
+    m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_differences->setIcon(QIcon::fromTheme("edit-find"));
+    m_differences->setShortcut(tr("F5"));
+    m_differences->setAutoRaise(true);
+    connect(m_differences, &QToolButton::clicked,
+            m_window, [this]() { m_window->gotoNextErrorOrDifference(true); });
+    layout->addWidget(m_differences);
+
     m_errorsSeparator = addSeparator();
     m_errors = new QToolButton();
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -471,7 +453,7 @@ StatusBar::StatusBar(Window *window)
     m_errors->setShortcut(tr("F6"));
     m_errors->setAutoRaise(true);
     connect(m_errors, &QToolButton::clicked,
-            m_window, &Window::gotoNextError);
+            m_window, [this]() { m_window->gotoNextErrorOrDifference(false); });
     layout->addWidget(m_errors);
 
     addSeparator();
@@ -559,19 +541,21 @@ void StatusBar::changeDocumentCurrency(QAction *a)
     }
 }
 
-void StatusBar::updateDifferenceMode()
-{
-    bool b = m_doc->isDifferenceModeActive();
-    m_differenceMode->setText(m_differenceMode->property(b ? "bsTextUpdate" : "bsTextNormal").toString());
-    m_differenceMode->setChecked(b);
-}
-
 void StatusBar::updateStatistics()
 {
     static QLocale loc;
     auto stat = m_doc->statistics(m_doc->items(), true /* ignoreExcluded */);
 
-    bool b = (stat.errors() > 0);
+    bool b = (stat.differences() > 0);
+    if (b && Config::inst()->showDifferenceIndicators()) {
+        auto oldShortcut = m_differences->shortcut();
+        m_differences->setText(tr("%n Differences(s)", nullptr, stat.differences()));
+        m_differences->setShortcut(oldShortcut);
+    }
+    m_differences->setVisible(b);
+    m_differencesSeparator->setVisible(b);
+
+    b = (stat.errors() > 0);
     if (b && Config::inst()->showInputErrors()) {
         auto oldShortcut = m_errors->shortcut();
         m_errors->setText(tr("%n Error(s)", nullptr, stat.errors()));
@@ -612,10 +596,8 @@ void StatusBar::updateStatistics()
 
 void StatusBar::languageChange()
 {
-    m_differenceMode->setProperty("bsTextUpdate", tr("Disable difference mode"));
-    m_differenceMode->setProperty("bsTextNormal", tr("Enable difference mode"));
-    updateDifferenceMode();
-
+    m_differences->setToolTip(Utility::toolTipLabel(tr("Go to the next difference"),
+                                                    m_differences->shortcut()));
     m_errors->setToolTip(Utility::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
 
     if (m_order)
@@ -635,7 +617,7 @@ void StatusBar::paletteChange()
     auto coloredToolButton = [this](QToolButton *tb, const QColor &baseColor, bool checkable) {
         auto winbg = palette().color(QPalette::Window);
 
-        auto downbg = Utility::gradientColor(baseColor, winbg, 0.5);
+        auto downbg = Utility::gradientColor(baseColor, winbg, 0.4);
         bool darkText = (tb->palette().color(QPalette::ButtonText).lightnessF() < 0.5);
         QColor border;
         QColor hoverbg;
@@ -650,7 +632,7 @@ void StatusBar::paletteChange()
                                 : hoverbg.name();
 
         tb->setStyleSheet(QString::fromLatin1(
-                              "QToolButton         { background-color: %1; border: 1px solid transparent; padding: 1px; }"
+                "QToolButton         { background-color: %1; border: 1px solid transparent; padding: 1px; }"
                 "QToolButton:hover   { background-color: %3; border: 1px solid %4 } "
                 "QToolButton:checked { background-color: %2; border: 1px solid %4; } "
                 "QToolButton:checked:hover { } "
@@ -658,7 +640,7 @@ void StatusBar::paletteChange()
             ).arg(bgName, downbg.name(), hoverbg.name(), border.name()));
     };
 
-    coloredToolButton(m_differenceMode, Qt::green, true);
+    coloredToolButton(m_differences, Qt::green, false);
     coloredToolButton(m_errors, Qt::red, false);
 }
 
@@ -777,11 +759,11 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::priceGuideUpdated);
 
     connect(Config::inst(), &Config::showInputErrorsChanged,
-            this, &Window::updateErrorMask);
+            this, &Window::updateItemFlagsMask);
+    connect(Config::inst(), &Config::showDifferenceIndicatorsChanged,
+            this, &Window::updateItemFlagsMask);
     connect(Config::inst(), &Config::measurementSystemChanged,
             w_list->viewport(), QOverload<>::of(&QWidget::update));
-
-    //connect(Config::inst(), SIGNAL(localCurrencyChanged()), w_list->viewport(), SLOT(update()));
 
     connect(m_doc, &Document::titleChanged,
             this, &Window::updateCaption);
@@ -789,16 +771,8 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::updateCaption);
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
-    connect(m_doc, &Document::differenceModeChanged,
-            this, &Window::updateDifferenceMode);
     connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
-
-    // don't save the hidden status of these
-    w_header->setSectionInternal(Document::PriceOrig, true);
-    w_header->setSectionInternal(Document::PriceDiff, true);
-    w_header->setSectionInternal(Document::QuantityOrig, true);
-    w_header->setSectionInternal(Document::QuantityDiff, true);
 
     bool columnsSet = false;
     bool sortFilterSet = false;
@@ -822,11 +796,9 @@ Window::Window(Document *doc, QWidget *parent)
         w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
     }
 
-    updateDifferenceMode();
-
     m_ccw = new ColumnChangeWatcher(this, w_header);
 
-    updateErrorMask();
+    updateItemFlagsMask();
     updateCaption();
 
     setFocusProxy(w_list);
@@ -1257,6 +1229,11 @@ void Window::on_edit_filter_from_selection_triggered()
                                          + m_doc->data(idx, Document::FilterRole).toString());
         }
     }
+}
+
+void Window::on_view_reset_diff_mode_triggered()
+{
+    m_doc->resetDifferenceMode();
 }
 
 void Window::on_edit_status_include_triggered()
@@ -2052,14 +2029,17 @@ void Window::on_edit_reserved_triggered()
     }
 }
 
-void Window::updateErrorMask()
+void Window::updateItemFlagsMask()
 {
     quint64 em = 0;
+    quint64 dm = 0;
 
     if (Config::inst()->showInputErrors())
         em = (1ULL << Document::FieldCount) - 1;
+    if (Config::inst()->showDifferenceIndicators())
+        dm = (1ULL << Document::FieldCount) - 1;
 
-    m_doc->setErrorMask(em);
+    m_doc->setItemFlagsMask({ em, dm });
 }
 
 void Window::on_edit_copyremarks_triggered()
@@ -2296,7 +2276,7 @@ void Window::setPrice(double d)
         QApplication::beep();
 }
 
-void Window::gotoNextError()
+void Window::gotoNextErrorOrDifference(bool difference)
 {
     auto startIdx = m_selection_model->currentIndex();
     auto skipIdx = startIdx; // skip the field we're on right now...
@@ -2312,13 +2292,14 @@ void Window::gotoNextError()
         if (wrapped && (row > startIdx.row()))
             return;
 
-        auto error = m_doc->itemFlags(m_doc->item(m_doc->index(row, 0))).first;
-        if (error) {
+        auto flags = m_doc->itemFlags(m_doc->item(m_doc->index(row, 0)));
+        quint64 mask = difference ? flags.second : flags.first;
+        if (mask) {
             for (int col = startCol; col < m_doc->columnCount(); ++col) {
                 if (wrapped && (row == startIdx.row()) && (col > startIdx.column()))
                     return;
 
-                if (error & (1ULL << col)) {
+                if (mask & (1ULL << col)) {
                     auto gotoIdx = m_doc->index(row, col);
                     if (skipIdx.isValid() && (gotoIdx == skipIdx)) {
                         skipIdx = { };
@@ -2684,8 +2665,19 @@ void Window::resizeColumnsToDefault(bool simpleMode)
         if (width)
             w_header->resizeSection(i, width);
     }
+
+    static const int hiddenColumns[] = {
+        Document::PriceOrig,
+        Document::PriceDiff,
+        Document::QuantityOrig,
+        Document::QuantityDiff,
+    };
+
+    for (auto i : hiddenColumns)
+        w_header->hideSection(i);
+
     if (simpleMode) {
-        static const int notInSimpleMode[] = {
+        static const int hiddenColumnsInSimpleMode[] = {
             Document::Bulk,
             Document::Sale,
             Document::TierQ1,
@@ -2698,10 +2690,14 @@ void Window::resizeColumnsToDefault(bool simpleMode)
             Document::Stockroom,
             Document::Retain,
             Document::LotId,
-            Document::Comments
+            Document::Comments,
+            Document::PriceOrig,
+            Document::PriceDiff,
+            Document::QuantityOrig,
+            Document::QuantityDiff,
         };
 
-        for (auto i : notInSimpleMode)
+        for (auto i : hiddenColumnsInSimpleMode)
             w_header->hideSection(i);
     }
 }
@@ -2726,21 +2722,6 @@ void Window::updateSelection()
         });
     }
     m_delayedSelectionUpdate->start();
-}
-
-void Window::updateDifferenceMode()
-{
-    bool b = document()->isDifferenceModeActive();
-    setWindowIcon(b ? QIcon::fromTheme("mode2") : QIcon());
-
-    if (m_ccw)
-        m_ccw->disable();
-    w_header->setSectionAvailable(Document::PriceOrig, b);
-    w_header->setSectionAvailable(Document::PriceDiff, b);
-    w_header->setSectionAvailable(Document::QuantityOrig, b);
-    w_header->setSectionAvailable(Document::QuantityDiff, b);
-    if (m_ccw)
-        m_ccw->enable();
 }
 
 void Window::setSelection(const Document::ItemList &lst)
@@ -2840,7 +2821,7 @@ void Window::autosave() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray(autosaveMagic)
-       << qint32(4) // version
+       << qint32(5) // version
        << doc->title()
        << doc->fileName()
        << doc->currencyCode()
@@ -2848,8 +2829,13 @@ void Window::autosave() const
        << doc->saveSortFilterState()
        << qint32(doc->items().count());
 
-    for (auto item : items)
+    for (auto item : items) {
         item->save(ds);
+        auto base = doc->differenceBaseItem(item);
+        ds << bool(base);
+        if (base)
+            base->save(ds);
+    }
 
     ds << QByteArray(autosaveMagic);
 
@@ -2879,18 +2865,30 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
             QString savedCurrencyCode;
             QByteArray savedColumnLayout;
             QByteArray savedSortFilterState;
+            QHash<const BrickLink::InvItem *, BrickLink::InvItem> differenceBase;
             qint32 count = 0;
 
             QDataStream ds(&f);
             ds >> magic >> version >> savedTitle >> savedFileName >> savedCurrencyCode
                     >> savedColumnLayout >> savedSortFilterState >> count;
 
-            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 4)) {
+            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 5)) {
                 BrickLink::InvItemList items;
 
                 for (int i = 0; i < count; ++i) {
-                    if (auto item = BrickLink::InvItem::restore(ds))
+                    if (auto item = BrickLink::InvItem::restore(ds)) {
                         items.append(item);
+                        bool hasBase = false;
+                        ds >> hasBase;
+                        if (hasBase) {
+                            if (auto base = BrickLink::InvItem::restore(ds)) {
+                                differenceBase.insert(item, *base);
+                                delete base;
+                                continue;
+                            }
+                        }
+                        differenceBase.insert(item, *item);
+                    }
                 }
                 ds >> magic;
 
@@ -2898,7 +2896,8 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     QString restoredTag = tr("RESTORED", "Tag for document restored from autosave");
 
                     // Document owns the items now
-                    auto doc = new Document(items, savedCurrencyCode, true /*mark as modified*/);
+                    auto doc = new Document(items, savedCurrencyCode, differenceBase,
+                                            true /*mark as modified*/);
                     items.clear();
 
                     if (!savedFileName.isEmpty()) {

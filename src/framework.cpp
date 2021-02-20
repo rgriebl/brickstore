@@ -148,7 +148,6 @@ class LoadColumnLayoutMenu : public QMenu
     Q_OBJECT
 
 public:
-
     explicit LoadColumnLayoutMenu(QWidget *parent)
         : QMenu(parent)
     {
@@ -431,6 +430,9 @@ FrameWork::FrameWork(QWidget *parent)
                                       "-",
                                       "view_show_input_errors",
                                       "-",
+                                      "view_show_diff_indicators",
+                                      "view_reset_diff_mode",
+                                      "-",
                                       "view_column_layout_save",
                                       "view_column_layout_manage",
                                       "view_column_layout_load"
@@ -525,6 +527,7 @@ FrameWork::FrameWork(QWidget *parent)
     onlineStateChanged(Application::inst()->isOnline());
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
+    findAction("view_show_diff_indicators")->setChecked(Config::inst()->showDifferenceIndicators());
 
     connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
             this, &FrameWork::transferJobProgressUpdate);
@@ -741,6 +744,8 @@ void FrameWork::translateActions()
         { "view_docks",                     tr("View Info Docks"),                    },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
+        { "view_show_diff_indicators",      tr("Show difference mode indicators"),    },
+        { "view_reset_diff_mode",           tr("Reset difference mode base values"),  },
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
@@ -1243,7 +1248,12 @@ void FrameWork::createActions()
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
+    (void) newQAction(this, "view_show_input_errors", 0, true,
+                      Config::inst(), &Config::setShowInputErrors);
+    (void) newQAction(this, "view_show_diff_indicators", 0, true,
+                      Config::inst(), &Config::setShowDifferenceIndicators);
+    (void) newQAction(this, "view_reset_diff_mode", NeedDocument);
+
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);

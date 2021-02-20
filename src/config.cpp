@@ -58,6 +58,7 @@ Config::Config()
     : QSettings(organization, application)
 {
     m_show_input_errors = value("General/ShowInputErrors", true).toBool();
+    m_show_difference_indicators = value("General/ShowDifferenceIndicators", false).toBool();
     m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial"))
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
@@ -204,6 +205,21 @@ void Config::setShowInputErrors(bool b)
         setValue("General/ShowInputErrors", b);
 
         emit showInputErrorsChanged(b);
+    }
+}
+
+bool Config::showDifferenceIndicators() const
+{
+    return m_show_difference_indicators;
+}
+
+void Config::setShowDifferenceIndicators(bool b)
+{
+    if (b != m_show_difference_indicators) {
+        m_show_difference_indicators = b;
+        setValue("General/ShowDifferenceIndicators", b);
+
+        emit showDifferenceIndicatorsChanged(b);
     }
 }
 

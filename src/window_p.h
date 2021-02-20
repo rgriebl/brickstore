@@ -165,7 +165,6 @@ public:
     void updateCurrencyRates();
     void documentCurrencyChanged(const QString &ccode);
     void changeDocumentCurrency(QAction *a);
-    void updateDifferenceMode();
     void updateStatistics();
 
 protected:
@@ -176,8 +175,9 @@ protected:
 private:
     Window *m_window;
     Document *m_doc;
-    QToolButton *m_differenceMode;
     QToolButton *m_order;
+    QWidget *m_differencesSeparator;
+    QToolButton *m_differences;
     QWidget *m_errorsSeparator;
     QToolButton *m_errors;
     QLabel *m_weight;

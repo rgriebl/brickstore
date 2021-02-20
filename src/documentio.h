@@ -71,9 +71,6 @@ private:
         QString currencyCode;
 
         QHash<const BrickLink::InvItem *, BrickLink::InvItem> differenceModeBase;
-        bool differenceModeActive = false;
-        bool differenceModeBroken = false;
-        bool differenceModeMigrated = false;
         bool xmlParseError = false;
 
         int invalidItemCount = 0;

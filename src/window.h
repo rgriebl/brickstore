@@ -169,11 +169,13 @@ public slots:
     void on_bricklink_lotsforsale_triggered();
     void on_bricklink_myinventory_triggered();
 
+    void on_view_reset_diff_mode_triggered();
+
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
 
     void setPrice(double);
-    void gotoNextError();
+    void gotoNextErrorOrDifference(bool difference = false);
 
 signals:
     void selectionChanged(const Document::ItemList &);
@@ -188,12 +190,11 @@ private slots:
     void ensureLatestVisible();
     void updateCaption();
     void updateSelection();
-    void updateDifferenceMode();
     void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);
-    void updateErrorMask();
+    void updateItemFlagsMask();
 
     void setMatchProgress(int, int);
     void setMatchFinished(QVector<const BrickLink::Item *>);

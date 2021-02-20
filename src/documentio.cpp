@@ -202,7 +202,6 @@ Document *DocumentIO::importBrickLinkStore()
             auto result = fromBrickLinkXML(xml);
             auto *doc = new Document(result.first, result.second); // Document owns the items now
             doc->setTitle(tr("Store %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat)));
-            doc->activateDifferenceModeInternal();
             return doc;
 
         } catch (const Exception &e) {
@@ -280,10 +279,6 @@ Document *DocumentIO::loadFrom(const QString &name)
         return nullptr;
     }
 
-    if (result.differenceModeBroken) {
-        MessageBox::warning(nullptr, { }, tr("This document was saved with difference mode enabled, but the original base values could not be restored."));
-    }
-
     Document *doc = nullptr;
 
     if (result.invalidItemCount) {
@@ -300,11 +295,10 @@ Document *DocumentIO::loadFrom(const QString &name)
         return nullptr;
     }
 
-    doc = new Document(result.items, result.currencyCode);  // Document owns the items now
+    // Document owns the items now
+    doc = new Document(result.items, result.currencyCode, result.differenceModeBase);
     doc->setGuiState(result.domGuiState);
     doc->setFileName(name);
-    if (result.differenceModeActive)
-        doc->activateDifferenceModeInternal(result.differenceModeBase);
     Config::inst()->addToRecentFiles(name);
 
     return doc;
@@ -667,6 +661,7 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
 {
     bool withoutLotId = false;
     bool duplicateLotId = false;
+    bool hasDifferences = false;
     QSet<uint> lotIds;
     for (const BrickLink::InvItem *item : itemlist) {
         const uint lotId = item->lotId();
@@ -678,12 +673,16 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
             else
                 lotIds.insert(lotId);
         }
+        if (auto *base = doc->differenceBaseItem(item)) {
+            if (*base != *item)
+                hasDifferences = true;
+        }
     }
 
     QStringList warnings;
 
-    if (!doc->isDifferenceModeActive())
-        warnings << tr("This document is not in difference mode.");
+    if (!hasDifferences)
+        warnings << tr("This document has no differences that could be exported.");
     if (withoutLotId)
         warnings << tr("This list contains items without a BrickLink Lot-ID.");
     if (duplicateLotId)
@@ -1000,6 +999,7 @@ void DocumentIO::exportBrickLinkXMLClipboard(const BrickLink::InvItemList &iteml
 DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument &domDoc)
 {
     ParseItemListResult result;
+    bool migrateDiffMode = false;
 
     QDomElement domRoot = domDoc.documentElement();
 
@@ -1012,7 +1012,6 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
     }
 
     QDomElement domInventory;
-    QDomElement domDifferenceMode;
     QDomElement domGuiState;
 
     for (QDomNode n = domRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
@@ -1021,20 +1020,12 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
 
         if (n.nodeName() == qL1S("Inventory"))
             domInventory = n.toElement();
-        else if (n.nodeName() == qL1S("DifferenceMode"))
-            domDifferenceMode = n.toElement();
         else if (n.nodeName() == qL1S("GuiState"))
             domGuiState = n.toElement();
     }
 
     if (domInventory.isNull())
         return result;
-    if (!domDifferenceMode.isNull()) {
-        if (domDifferenceMode.attribute(qL1S("Version")) == qL1S("1"))
-            result.differenceModeActive = true;
-        else
-            result.differenceModeBroken = true;
-    }
 
     // a bit of a hack for a clean switch from the old to the new Difference mode
     if (!domGuiState.isNull()) {
@@ -1042,8 +1033,7 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
         if (list.size() == 1) {
             domGuiState.removeChild(list.at(0));
 
-            result.differenceModeActive = true;
-            result.differenceModeMigrated = true;
+            migrateDiffMode = true;
         }
     }
 
@@ -1105,16 +1095,16 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
                          v == qL1S("B") ? BrickLink::Stockroom::B :
                          v == qL1S("C") ? BrickLink::Stockroom::C
                                         : BrickLink::Stockroom::None); } },
-    { u"OrigPrice",    [&result, &legacyOrigPrice](auto v) {
-        if (result.differenceModeMigrated)
+    { u"OrigPrice",    [&migrateDiffMode, &legacyOrigPrice](auto v) {
+        if (migrateDiffMode)
             legacyOrigPrice.setValue(v.toDouble());
     } },
-    { u"OrigQty",      [&result, &legacyOrigQty](auto v) {
-        if (result.differenceModeMigrated)
+    { u"OrigQty",      [&migrateDiffMode, &legacyOrigQty](auto v) {
+        if (migrateDiffMode)
             legacyOrigQty.setValue(v.toInt());
     } },
-    { u"X-DifferenceModeBase", [&result, &ii](auto v) {
-        if (result.differenceModeActive && !result.differenceModeMigrated) {
+    { u"X-DifferenceModeBase", [&migrateDiffMode, &result, &ii](auto v) {
+        if (!migrateDiffMode) {
             const auto ba = QByteArray::fromBase64(v.toLatin1());
             QDataStream ds(ba);
             if (auto base = BrickLink::InvItem::restore(ds)) {
@@ -1186,7 +1176,7 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
                 result.invalidItemCount++;
         }
 
-        if (result.differenceModeMigrated) {
+        if (migrateDiffMode) {
             // create an update base item from the OrigPrice and OrigQty values
             auto base = *ii;
             if (!legacyOrigPrice.isNull())
@@ -1195,11 +1185,9 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
                 base.setQuantity(legacyOrigQty.toInt());
             result.differenceModeBase.insert(ii, base);
 
-        } else if (result.differenceModeActive && !result.differenceModeBase.contains(ii)) {
-            // don't give up, at least try to load the current values
-            result.differenceModeBase.clear();
-            result.differenceModeActive = false;
-            result.differenceModeBroken = true;
+        } else if (!result.differenceModeBase.contains(ii)) {
+            // no differences saved, so start out with none
+            result.differenceModeBase.insert(ii, *ii);
         }
 
         result.items.append(ii);
@@ -1218,13 +1206,6 @@ QDomDocument DocumentIO::createBsxInventory(const Document *doc)
     domDoc.appendChild(domDoc.createProcessingInstruction(qL1S("xml"), qL1S(R"(version="1.0" encoding="UTF-8")")));
     QDomElement domRoot = domDoc.createElement(qL1S("BrickStoreXML"));
     domDoc.appendChild(domRoot);
-
-    bool differenceModeActive = doc->isDifferenceModeActive();
-    if (differenceModeActive) {
-        QDomElement domDifferenceMode = domDoc.createElement(qL1S("DifferenceMode"));
-        domDifferenceMode.setAttribute(qL1S("Version"), qL1S("1"));
-        domRoot.appendChild(domDifferenceMode);
-    }
 
     QDomElement domInventory = domDoc.createElement(qL1S("Inventory"));
     domInventory.setAttribute(qL1S("Currency"), doc->currencyCode());
@@ -1328,17 +1309,15 @@ QDomDocument DocumentIO::createBsxInventory(const Document *doc)
         if (!qFuzzyIsNull(ii->cost()))
             create(u"Cost", c.toCurrencyString(ii->cost(), { }, 3));
 
-        if (differenceModeActive) {
-            auto base = doc->differenceBaseItem(ii);
-            if (base) {
-                //TODO as soon as the new difference mode has matured and is deemed stable, this
-                // should be changed into writing out minimal XML
+        auto base = doc->differenceBaseItem(ii);
+        if (base && (*base != *ii)) {
+            //TODO as soon as the new difference mode has matured and is deemed stable, this
+            // should be changed into writing out minimal XML
 
-                QByteArray ba;
-                QDataStream ds(&ba, QIODevice::WriteOnly);
-                base->save(ds);
-                create(u"X-DifferenceModeBase", QString::fromLatin1(ba.toBase64()));
-            }
+            QByteArray ba;
+            QDataStream ds(&ba, QIODevice::WriteOnly);
+            base->save(ds);
+            create(u"X-DifferenceModeBase", QString::fromLatin1(ba.toBase64()));
         }
     }
 

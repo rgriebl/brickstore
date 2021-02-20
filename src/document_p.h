@@ -75,20 +75,19 @@ private:
     double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
 };
 
-class DifferenceModeCmd : public QUndoCommand
+class ResetDifferenceModeCmd : public QUndoCommand
 {
 public:
-    DifferenceModeCmd(Document *doc, bool active);
+    ResetDifferenceModeCmd(Document *doc);
     int id() const override;
-
-    bool isActivate() const { return !m_active; }
+    bool mergeWith(const QUndoCommand *other) override;
 
     void redo() override;
     void undo() override;
 
 private:
     Document *m_doc;
-    bool m_active;
+    QHash<const BrickLink::InvItem *, BrickLink::InvItem> m_differenceBase;
 };
 
 

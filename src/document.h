@@ -93,6 +93,7 @@ public:
         double cost() const          { return m_cost; }
         double weight() const        { return m_weight; }
         int errors() const           { return m_errors; }
+        int differences() const      { return m_differences; }
         int incomplete() const       { return m_incomplete; }
         QString currencyCode() const { return m_ccode; }
 
@@ -104,6 +105,7 @@ public:
         double m_cost;
         double m_weight;
         int m_errors;
+        int m_differences;
         int m_incomplete;
         QString m_ccode;
     };
@@ -150,7 +152,7 @@ public:
 
     QString filterToolTip() const;
 
-    bool lastCommandWasActivateDifferenceMode() const;
+    void resetDifferenceMode();
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
@@ -159,6 +161,7 @@ public:
     Document();
     Document(const BrickLink::InvItemList &items);
     Document(const BrickLink::InvItemList &items, const QString &currencyCode,
+             const QHash<const BrickLink::InvItem *, BrickLink::InvItem> &differenceBase = { },
              bool forceModified = false);
     virtual ~Document() override;
 
@@ -189,8 +192,7 @@ public:
 
     Statistics statistics(const ItemList &list, bool ignoreExcluded = false) const;
 
-    quint64 errorMask() const;
-    void setErrorMask(quint64);
+    void setItemFlagsMask(QPair<quint64, quint64> flagsMask);
 
     QPair<quint64, quint64> itemFlags(const Item *item) const;
 
@@ -216,11 +218,7 @@ public:
 
     QUndoStack *undoStack() const;
 
-    bool isDifferenceModeActive() const;
-    void setDifferenceModeActive(bool active);
     const Item *differenceBaseItem(const Item *item) const;
-
-    void activateDifferenceModeInternal(const QHash<const Item *, Item> &differenceBase = { }); // only for DocumentIO
 
     QByteArray saveSortFilterState() const;
     bool restoreSortFilterState(const QByteArray &ba);
@@ -232,7 +230,6 @@ signals:
     void titleChanged(const QString &);
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
-    void differenceModeChanged(bool differenceMode);
     void itemCountChanged(int itemCount);
     void filterChanged(const QString &filter);
     void sortOrderChanged(Qt::SortOrder order);
@@ -255,7 +252,8 @@ private:
     void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void changeItemDirect(BrickLink::InvItem *item, Item &value);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
-    void setDifferenceModeActiveDirect(bool active);
+    void resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
+                                   &differenceBase);
     void filterDirect(const QString &filterString, const QVector<Filter> &filterList, bool &filtered,
                       BrickLink::InvItemList &unfiltered);
     void sortDirect(int column, Qt::SortOrder order, bool &sorted, BrickLink::InvItemList &unsorted);
@@ -274,7 +272,7 @@ private:
     friend class CurrencyCmd;
     friend class SortCmd;
     friend class FilterCmd;
-    friend class DifferenceModeCmd;
+    friend class ResetDifferenceModeCmd;
 
 private:
     QVector<BrickLink::InvItem *> m_items;
@@ -296,10 +294,8 @@ private:
     bool m_isFiltered = false; // freshly filtered, no changes
     bool m_nextSortFilterIsDirect = false;
 
-    bool m_differenceModeActive = false;
-
     QString          m_currencycode;
-    quint64          m_error_mask = 0;
+    QPair<quint64, quint64> m_itemFlagsMask = { 0, 0 };
     QString          m_filename;
     QString          m_title;
 

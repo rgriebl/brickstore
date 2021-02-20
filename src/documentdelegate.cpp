@@ -887,21 +887,19 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
             BrickLink::ToolTip::inst()->show(it->item(), nullptr, event->globalPos(), view);
     } else {
         QString updatedTip;
-        if (m_doc->isDifferenceModeActive()) {
-            Document::Item *item = m_doc->item(idx);
-            auto base = m_doc->differenceBaseItem(item);
+        Document::Item *item = m_doc->item(idx);
+        auto base = m_doc->differenceBaseItem(item);
 
-            if (base && item) {
-                auto updated = m_doc->itemFlags(item).second;
-                if (updated & (1ULL << idx.column())) {
-                    updatedTip = tr("The original value of this field was:") % u"<br><b>"
+        if (base && item) {
+            auto updated = m_doc->itemFlags(item).second;
+            if (updated & (1ULL << idx.column())) {
+                updatedTip = tr("The original value of this field was:") % u"<br><b>"
                             % m_doc->dataForDisplayRole(base, Document::Field(idx.column()))
-                            % u"</b>";
+                        % u"</b>";
 
-                    if (updated & updatedWarningMask & (1ULL << idx.column())) {
-                        updatedTip = updatedTip % u"<br><br>" %
-                                tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
-                    }
+                if (updated & updatedWarningMask & (1ULL << idx.column())) {
+                    updatedTip = updatedTip % u"<br><br>" %
+                            tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
                 }
             }
         }
