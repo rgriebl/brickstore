@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QStandardPaths>
 #include <QRegularExpression>
+#include <QDebug>
 
 #include "messagebox.h"
 #include "config.h"
@@ -43,6 +44,7 @@
 #include "currency.h"
 #include "document.h"
 #include "documentio.h"
+#include "undo.h"
 #include "window.h"
 #include "window_p.h"
 #include "headerview.h"
@@ -1150,6 +1152,55 @@ void Window::applyGuiStateXML(const QDomElement &root, bool &changedColumns, boo
             changedSortFilter = m_doc->restoreSortFilterState(ba);
         }
     }
+}
+
+static const struct {
+    Window::ColumnLayoutCommand cmd;
+    const char *name;
+    const char *id;
+} columnLayoutCommandList[] = {
+{ Window::ColumnLayoutCommand::BrickStoreDefault,
+    QT_TRANSLATE_NOOP("Window", "BrickStore default"), "brickstore-default" },
+{ Window::ColumnLayoutCommand::BrickStoreSimpleDefault,
+    QT_TRANSLATE_NOOP("Window", "BrickStore buyer/collector default"), "brickstore-simple-default" },
+{ Window::ColumnLayoutCommand::AutoResize,
+    QT_TRANSLATE_NOOP("Window", "Auto-resize once"), "auto-resize" },
+{ Window::ColumnLayoutCommand::UserDefault,
+    QT_TRANSLATE_NOOP("Window", "User default"), "user-default" },
+};
+
+std::vector<Window::ColumnLayoutCommand> Window::columnLayoutCommands()
+{
+    return { ColumnLayoutCommand::BrickStoreDefault, ColumnLayoutCommand::BrickStoreSimpleDefault,
+                ColumnLayoutCommand::AutoResize, ColumnLayoutCommand::UserDefault };
+}
+
+QString Window::columnLayoutCommandName(ColumnLayoutCommand clc)
+{
+    for (const auto cmd : columnLayoutCommandList) {
+        if (cmd.cmd == clc)
+            return tr(cmd.name);
+    }
+    return { };
+}
+
+QString Window::columnLayoutCommandId(Window::ColumnLayoutCommand clc)
+{
+    for (const auto cmd : columnLayoutCommandList) {
+        if (cmd.cmd == clc)
+            return QString::fromLatin1(cmd.id);
+    }
+    return { };
+}
+
+Window::ColumnLayoutCommand Window::columnLayoutCommandFromId(const QString &id)
+{
+    for (const auto cmd : columnLayoutCommandList) {
+        if (id == QLatin1String(cmd.id))
+            return cmd.cmd;
+    }
+    return ColumnLayoutCommand::User;
+
 }
 
 void Window::on_edit_cut_triggered()
@@ -2406,32 +2457,42 @@ void Window::on_view_column_layout_save_triggered()
 
 void Window::on_view_column_layout_list_load(const QString &layoutId)
 {
-    QString cmdName;
-    if (layoutId == "default")
-        cmdName = tr("Set column layout to BrickStore defaults");
-    else if (layoutId == "user-default")
-        cmdName = tr("Set column layout to user defaults");
-    else if (layoutId == "auto-resize")
-        cmdName = tr("Auto resized all columns");
-    else
-        cmdName = tr("Loaded column layout %1").arg(Config::inst()->columnLayoutName(layoutId));
-
-    document()->undoStack()->beginMacro(cmdName);
-
-    if (layoutId == "default") {
-        resizeColumnsToDefault();
-        w_list->sortByColumn(0, Qt::AscendingOrder);
-    } else if (layoutId == "auto-resize") {
-        w_list->resizeColumnsToContents();
-    } else {
-        auto layout = Config::inst()->columnLayout(layoutId);
-        if (!layout.isEmpty()) {
-            w_header->restoreLayout(layout);
-            w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
-        } else if (layoutId == "user-default") {
-            on_view_column_layout_list_load(QLatin1String("default"));
-        }
+    auto clc = columnLayoutCommandFromId(layoutId);
+    QString undoName = columnLayoutCommandName(clc);
+    QByteArray userLayout;
+    if (clc == ColumnLayoutCommand::User) {
+        userLayout = Config::inst()->columnLayout(layoutId);
+        if (userLayout.isEmpty())
+            return;
+        undoName = Config::inst()->columnLayoutName(layoutId);
     }
+
+    document()->undoStack()->beginMacro(tr("Set column layout:") % u' ' % undoName);
+
+    switch (clc) {
+    case ColumnLayoutCommand::BrickStoreDefault:
+    case ColumnLayoutCommand::BrickStoreSimpleDefault:
+        resizeColumnsToDefault(clc == ColumnLayoutCommand::BrickStoreSimpleDefault);
+        w_list->sortByColumn(0, Qt::AscendingOrder);
+        break;
+    case ColumnLayoutCommand::AutoResize:
+        w_list->resizeColumnsToContents();
+        break;
+    case ColumnLayoutCommand::UserDefault:
+        userLayout = Config::inst()->columnLayout(layoutId);
+        if (userLayout.isEmpty()) { // use brickstore default
+            resizeColumnsToDefault(false);
+            w_list->sortByColumn(0, Qt::AscendingOrder);
+            break;
+        }
+        Q_FALLTHROUGH();
+    case ColumnLayoutCommand::User: {
+        w_header->restoreLayout(userLayout);
+        w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
+        break;
+    }
+    }
+
     document()->undoStack()->endMacro();
 }
 
@@ -2608,7 +2669,7 @@ Document::ItemList Window::exportCheck() const
     return m_doc->sortItemList(items);
 }
 
-void Window::resizeColumnsToDefault()
+void Window::resizeColumnsToDefault(bool simpleMode)
 {
     int em = w_list->fontMetrics().averageCharWidth();
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
@@ -2622,6 +2683,26 @@ void Window::resizeColumnsToDefault()
         int width = qMax((mw < 0 ? -mw : mw * em) + 8, w_header->sectionSizeHint(i));
         if (width)
             w_header->resizeSection(i, width);
+    }
+    if (simpleMode) {
+        static const int notInSimpleMode[] = {
+            Document::Bulk,
+            Document::Sale,
+            Document::TierQ1,
+            Document::TierQ2,
+            Document::TierQ3,
+            Document::TierP1,
+            Document::TierP2,
+            Document::TierP3,
+            Document::Reserved,
+            Document::Stockroom,
+            Document::Retain,
+            Document::LotId,
+            Document::Comments
+        };
+
+        for (auto i : notInSimpleMode)
+            w_header->hideSection(i);
     }
 }
 

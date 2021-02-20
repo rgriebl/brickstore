@@ -76,6 +76,19 @@ public:
     QDomElement createGuiStateXML();
     void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
 
+    enum class ColumnLayoutCommand {
+        BrickStoreDefault,
+        BrickStoreSimpleDefault,
+        AutoResize,
+        UserDefault,
+        User,
+    };
+
+    static std::vector<ColumnLayoutCommand> columnLayoutCommands();
+    static QString columnLayoutCommandName(ColumnLayoutCommand clc);
+    static QString columnLayoutCommandId(ColumnLayoutCommand clc);
+    static ColumnLayoutCommand columnLayoutCommandFromId(const QString &id);
+
     QByteArray currentColumnLayout() const;
 
 public slots:
@@ -189,7 +202,7 @@ private slots:
 
 private:
     Document::ItemList exportCheck() const;
-    void resizeColumnsToDefault();
+    void resizeColumnsToDefault(bool simpleMode = false);
     int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
     void deleteAutosave();
 

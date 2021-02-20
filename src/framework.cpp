@@ -146,16 +146,20 @@ signals:
 class LoadColumnLayoutMenu : public QMenu
 {
     Q_OBJECT
+
 public:
+
     explicit LoadColumnLayoutMenu(QWidget *parent)
         : QMenu(parent)
     {
         connect(this, &QMenu::aboutToShow, this, [this]() {
             clear();
 
-            addAction(tr("User Default"))->setData(QLatin1String("user-default"));
-            addAction(tr("BrickStore Default"))->setData(QLatin1String("default"));
-            addAction(tr("Auto Resize Once"))->setData(QLatin1String("auto-resize"));
+            for (auto cl : Window::columnLayoutCommands()) {
+                qWarning() << "??" << int(cl);
+                addAction(Window::columnLayoutCommandName(cl))
+                        ->setData(Window::columnLayoutCommandId(cl));
+            }
 
             auto ids = Config::inst()->columnLayoutIds();
             if (!ids.isEmpty()) {
