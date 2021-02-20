@@ -23,6 +23,7 @@
 #include <QStyleOptionHeader>
 #include <QDesktopServices>
 #include <QApplication>
+#include <QStringBuilder>
 
 #include "bricklink.h"
 #include "config.h"
@@ -720,9 +721,42 @@ bool PriceGuideWidget::event(QEvent *e)
     if (e->type() == QEvent::ToolTip) {
         auto *he = static_cast<QHelpEvent *>(e);
         auto c = d->cellAtPos(he->pos());
+        QString tt;
 
-        if (c && (c->m_type == cell::Price) && d->m_pg && d->m_pg->valid())
-            QToolTip::showText(he->globalPos(), PriceGuideWidget::tr("Double-click to set the price of the current item."), this);
+        if (c && (c->m_type == cell::Price) && d->m_pg && d->m_pg->valid()) {
+            QString pt;
+
+            switch (c->m_price) {
+            case BrickLink::Price::Lowest  : pt = tr("Lowest price"); break;
+            case BrickLink::Price::Average : pt = tr("Average price (arithmetic mean)"); break;
+            case BrickLink::Price::WAverage: pt = tr("Weighted average price (weighted arithmetic mean)"); break;
+            case BrickLink::Price::Highest : pt = tr("Highest price"); break;
+            }
+
+            tt = tr("Double-click to set the price of the current item")
+                    % u"<br><br><i>" % pt % u"</i>";
+
+        } else if (c && (c->m_type == cell::Quantity) && d->m_pg && d->m_pg->valid()) {
+            int items = d->m_pg->quantity(c->m_time, c->m_condition);
+            int lots = d->m_pg->lots(c->m_time, c->m_condition);
+
+            if (items && lots) {
+                if (c->m_time == BrickLink::Time::Current) {
+                    tt = tr("A total quantity of %Ln item(s) is available for purchase", nullptr, items)
+                            % u" (" % tr("in %Ln individual lot(s)", nullptr, lots) % u")";
+                } else {
+                    tt = tr("A total quantity of %Ln item(s) has been sold", nullptr, items)
+                            % u" (" % tr("in %Ln individual lot(s)", nullptr, lots) % u")";
+                }
+            } else {
+                if (c->m_time == BrickLink::Time::Current)
+                    tt = tr("No items currently for sale");
+                else
+                    tt = tr("No items have been sold");
+            }
+        }
+        if (!tt.isEmpty())
+            QToolTip::showText(he->globalPos(), tt, this);
         e->accept();
         return true;
     }
