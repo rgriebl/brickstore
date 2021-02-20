@@ -66,6 +66,7 @@ OTHER_FILES += \
   VERSION \
   CHANGELOG.md \
   LICENSE.GPL \
+  BrickStoreXML.rnc \
   configure \
   translations/translations.xml \
   scripts/generate-assets.sh \

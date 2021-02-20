@@ -1,0 +1,103 @@
+# This is a Relax-NG compact XML schema for BrickStoreXML (*.bsx) files
+# 
+# You can validate a bsx with the open-source tool jing:
+#  Debian/Ubuntu package 'jing' or https://github.com/relaxng/jing-trang
+#
+# $ jing -c path/to/BrickStoreXML.rnc file.bsx
+
+start = BrickStoreXML
+
+# the rename of the root element to BrickStockXML didn't make any sense,
+# but now we have to deal with it:
+
+BrickStoreXML = element BrickStoreXML | BrickStockXML {
+    Inventory, GuiState? 
+}
+
+# Currency is optional. The default currency is USD:
+
+Inventory = element Inventory {
+    attribute Currency { xsd:string { length="3" } }?,
+    Item*
+}
+
+Item = element Item {
+    # Required elements
+    element ItemID       { xsd:string { minLength="1" } } &
+    element ItemTypeID   { xsd:string { length="1" } } &
+    element ColorID      { xsd:integer } &
+
+    # Optional elements, useful to track an item across catalog updates
+    element ItemName     { xsd:string }? &
+    element ItemTypeName { xsd:string }? &
+    element ColorName    { xsd:string }? &
+    element CategoryID   { xsd:integer }? &
+    element CategoryName { xsd:string }? &
+
+    # Optional - the actual item data
+    element Status       { string "I" | string "E" | string "X" | string "?" }? &
+                         # default: I  (I = include, E = exclude, X = extra, ? = unknown)
+    element Qty          { xsd:integer }? &                                        
+                         # default: 0
+    element Price        { xsd:double }? &                                      
+                         # default: 0
+    element Condition    { string "N" | string "U" }? &
+                         # default: N  (N = new, U = used)
+    element SubCondition { string "C" | string "I" | string "M" | string "?" }? &
+                         # default: C  (C = complete, I = incomplete, M = sealed/MISB, ? = unknown)
+
+    element Bulk         { xsd:integer { minInclusive="1" } }? &
+                         # default: 1
+    element Sale         { xsd:integer }? &
+                         # default: 0
+    element Comments     { xsd:string }? &
+    element Remarks      { xsd:string }? &
+    element Retain       { empty }? &
+    element Stockroom    { string "A" | string "B" | string "C" | empty }? &
+                         # default: none
+    element Reserved     { xsd:string }? &
+    element LotID        { xsd:integer }? &
+                         # default: 0
+
+    element TQ1          { xsd:integer }? &
+                         # default: 0
+    element TP1          { xsd:double }? &
+                         # default: 0
+    element TQ2          { xsd:integer }? &
+                         # default: 0
+    element TP2          { xsd:double }? &
+                         # default: 0
+    element TQ3          { xsd:integer }? &
+                         # default: 0
+    element TP3          { xsd:double }? &
+                         # default: 0
+
+    element TotalWeight  { xsd:double }? &
+                         # default: 0 (catalog weight * quantity)
+    element Cost         { xsd:double }? &
+                         # default: 0
+
+    # Deprecated
+    element OrigQty      { xsd:integer }? &
+                         # default: 0
+    element OrigPrice    { xsd:double }? &
+                         # default: 0
+
+    # Experimental features
+    element X-DifferenceModeBase { text }?
+}
+
+# GuiState is free for any UI editor to use for non-essential data. Make sure to write a
+# matching Application/Version attribute pair, so other editors can safely ignore your data.
+
+GuiState = element GuiState {
+    attribute Application { xsd:string },
+    attribute Version     { xsd:string },
+
+    AnyXML*
+}
+
+AnyXML = element * {
+    (attribute * { text } | text | AnyXML)*
+}
+
