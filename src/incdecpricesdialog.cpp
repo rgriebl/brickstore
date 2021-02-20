@@ -82,7 +82,11 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
             this, [this](auto *) {
         switchType(m_percentOrFixed->checkedId());
     });
+#if QT_VERSON < QT_VERSION_CHECK(5, 14, 0)
+    connect(m_value, QOverload<const QString &>::of(&QDoubleSpinBox::valueChanged),
+#else
     connect(m_value, &QDoubleSpinBox::textChanged,
+#endif
             this, [this, buttons]() {
         buttons->button(QDialogButtonBox::Ok)->setEnabled(m_value->hasAcceptableInput());
     });
