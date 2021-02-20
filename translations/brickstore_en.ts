@@ -137,6 +137,10 @@
         <source>Consolidate added items into document</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show additional input fields for sellers</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AppearsInWidget</name>
@@ -298,6 +302,21 @@
     </message>
 </context>
 <context>
+    <name>ColumnCmd</name>
+    <message>
+        <source>Moved column %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show/hide column %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resized column %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConsolidateItemsDialog</name>
     <message>
         <source>Consolidate Items</source>
@@ -365,13 +384,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <name>CurrencyCmd</name>
     <message>
         <source>Changed currency</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DifferenceModeCmd</name>
-    <message>
-        <source>Switched from or to difference mode</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -812,14 +824,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This document was saved with difference mode enabled, but the original base values could not be restored.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This document is not in difference mode.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This list contains items without a BrickLink Lot-ID.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -829,6 +833,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>There are problems: %1Do you really want to export this list?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This document has no differences that could be exported.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -915,6 +923,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>doesn&apos;t end with,does not end with</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FilterCmd</name>
+    <message>
+        <source>Filtered the view</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1293,10 +1308,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Buyer/Collector Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Save Column Layout...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1524,11 +1535,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Re-apply the sorting and filtering rules</source>
+        <source>Show difference mode indicators</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+Alt+F</source>
+        <source>Reset difference mode base values</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1696,6 +1707,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Currently updating carts</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show on BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ImportInventoryDialog</name>
@@ -1822,31 +1837,31 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Currently updating orders</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show on BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>IncDecPricesDialog</name>
     <message>
-        <source>Increase or Decrease Prices</source>
+        <source>Ctrl+%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Increase</source>
+        <source>Percent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Decrease</source>
+        <source>Ctrl+$</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>the prices of the selected items by</source>
+        <source>Fixed %1 amount</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Also apply this change to tier prices</source>
+        <source>Also apply this change to &amp;tier prices</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1858,21 +1873,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>The LDraw directory &apos;%1&apos; is not readable.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>LoadColumnLayoutMenu</name>
-    <message>
-        <source>User Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickStore Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto Resize Once</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1985,7 +1985,52 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Double-click to set the price of the current item.</source>
+        <source>Lowest price</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Average price (arithmetic mean)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weighted average price (weighted arithmetic mean)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Highest price</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Double-click to set the price of the current item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>A total quantity of %Ln item(s) is available for purchase</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>in %Ln individual lot(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>A total quantity of %Ln item(s) has been sold</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No items currently for sale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No items have been sold</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2020,6 +2065,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>ProgressCircle</name>
+    <message>
+        <source>Cancel all active downloads</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ProgressDialog</name>
     <message>
         <source>Error</source>
@@ -2038,6 +2090,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Clear recent files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ResetDifferenceModeCmd</name>
+    <message>
+        <source>Reset difference mode base values</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2284,19 +2343,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open a Web-Browser window when exporting to the clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Close empty documents without confirmation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2439,24 +2486,44 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Parting out items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ask the user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Always replace the item being parted out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Always part out to a new document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Visual changes modify the document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SortCmd</name>
     <message>
-        <source>Sorted/filtered the view</source>
+        <source>Sorted the view</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>StatusBar</name>
-    <message>
-        <source>End difference mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ending difference mode resets all base values used for calculating the actual differences to the current values.&lt;br&gt;This operation is not undoable.&lt;br&gt;Do you still want to continue?</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>Order information</source>
         <translation type="unfinished"></translation>
@@ -2481,14 +2548,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Disable difference mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable difference mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Go to the next error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2498,6 +2557,21 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Currency:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>F5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n Differences(s)</source>
+        <translation>
+            <numerusform>1 Difference</numerusform>
+            <numerusform>%n Differences</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Go to the next difference</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3154,6 +3228,34 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
             <numerusform>Cost spreaded over one item</numerusform>
             <numerusform>Cost spreaded over %n items</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>BrickStore default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore buyer/collector default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-resize once</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>User default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Increase or decrease the prices of the selected items by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Increase or decrease the costs of the selected items by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set column layout:</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
