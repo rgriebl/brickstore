@@ -263,7 +263,8 @@ private:
     void updateItemFlags(const Item *item);
     void setItemFlags(const Item *item, quint64 errors, quint64 updated);
 
-    void invalidateFilterInternal();
+    void updateModified();
+
     int compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2, int sortColumn) const;
     void languageChange();
 
@@ -300,7 +301,8 @@ private:
     QString          m_title;
 
     UndoStack *      m_undo = nullptr;
-    bool m_forceModified = false; // used to flag restored autosaves
+    int m_firstNonVisualIndex = 0;
+    bool m_visuallyClean = true;
 
     BrickLink::Order *m_order = nullptr;
 

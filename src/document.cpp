@@ -388,9 +388,36 @@ Document::Document()
     m_undo = new UndoStack(this);
     connect(m_undo, &QUndoStack::cleanChanged,
             this, [this](bool clean) {
-        // if the gui state is modified, the overall state stays at "modified"
-        if (!m_forceModified)
-            emit modificationChanged(!clean);
+        if (clean) {
+            m_firstNonVisualIndex = 0;
+            m_visuallyClean = true;
+        }
+        updateModified();
+    });
+    connect(m_undo, &QUndoStack::indexChanged,
+            this, [this](int index) {
+        bool oldVisuallyClean = m_visuallyClean;
+        int cleanIndex = m_undo->cleanIndex();
+
+        if ((cleanIndex < 0) || (index < cleanIndex)) {
+            m_visuallyClean = false;
+        } else if (index == 0 || (index == cleanIndex)) {
+            m_firstNonVisualIndex = 0;
+            m_visuallyClean = true;
+        } else if (m_firstNonVisualIndex && (index < m_firstNonVisualIndex)) {
+            m_firstNonVisualIndex = 0;
+            m_visuallyClean = true;
+        } else {
+            const auto *lastCmd = m_undo->command(index - 1);
+            if (lastCmd && (lastCmd->id() < CID_Sort)) {
+                if (!m_firstNonVisualIndex || (index < m_firstNonVisualIndex)) {
+                    m_firstNonVisualIndex = index;
+                    m_visuallyClean = false;
+                }
+            }
+        }
+        if (m_visuallyClean != oldVisuallyClean)
+            updateModified();
     });
     s_documents.append(this);
 }
@@ -410,7 +437,9 @@ Document::Document(const BrickLink::InvItemList &items, const QString &currencyC
     : Document(items)
 {
     m_currencycode = currencyCode;
-    m_forceModified = forceModified;
+
+    if (forceModified)
+        m_undo->resetClean();
 
     auto db = differenceBase;
     resetDifferenceModeDirect(db);
@@ -892,21 +921,21 @@ void Document::setTitle(const QString &str)
 
 bool Document::isModified() const
 {
-    return !m_undo->isClean() || m_forceModified;
+    bool modified = !m_undo->isClean();
+    if (modified && !Config::inst()->visualChangesMarkModified())
+        modified = !m_visuallyClean;
+
+    return modified;
 }
 
 void Document::unsetModified()
 {
-    m_forceModified = false;
     m_undo->setClean();
+    updateModified();
+}
 
-    // at this point, we can cleanup the diff mode base
-    auto goneItems = m_differenceBase.keys();
-    for (const auto &item : qAsConst(m_items))
-        goneItems.removeOne(item);
-    for (const auto &item : qAsConst(goneItems))
-        m_differenceBase.remove(item);
-
+void Document::updateModified()
+{
     emit modificationChanged(isModified());
 }
 

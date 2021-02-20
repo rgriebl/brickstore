@@ -59,6 +59,9 @@ public:
     PartOutMode partOutMode() const;
     void setPartOutMode(PartOutMode pom);
 
+    bool visualChangesMarkModified();
+    void setVisualChangesMarkModified(bool b);
+
     QStringList recentFiles() const;
 
     static constexpr int MaxRecentFiles = 18;
@@ -122,6 +125,7 @@ signals:
     void defaultCurrencyCodeChanged(const QString &ccode);
     void showInputErrorsChanged(bool b);
     void showDifferenceIndicatorsChanged(bool b);
+    void visualChangesMarkModifiedChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void recentFilesChanged(const QStringList &recent);

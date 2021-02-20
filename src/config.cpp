@@ -523,6 +523,19 @@ void Config::setPartOutMode(Config::PartOutMode pom)
     setValue("General/PartOutMode", int(pom));
 }
 
+bool Config::visualChangesMarkModified()
+{
+    return value("General/VisualChangesMarkModified", false).toBool();
+}
+
+void Config::setVisualChangesMarkModified(bool b)
+{
+    if (visualChangesMarkModified() != b) {
+        setValue("General/VisualChangesMarkModified", b);
+        emit visualChangesMarkModifiedChanged(b);
+    }
+}
+
 QVector<Config::Translation> Config::translations() const
 {
     if (!m_translations_parsed)

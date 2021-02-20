@@ -104,6 +104,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, [this]() { w_item_image_size->setValue(10); });
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
+    w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
@@ -241,6 +242,7 @@ void SettingsDialog::load()
     w_imperial->setChecked(Config::inst()->measurementSystem() == QLocale::ImperialSystem);
 
     w_partout->setCurrentIndex(int(Config::inst()->partOutMode()));
+    w_modifications->setChecked(Config::inst()->visualChangesMarkModified());
 
     m_preferedCurrency = Config::inst()->defaultCurrencyCode();
     currenciesUpdated();
@@ -299,6 +301,7 @@ void SettingsDialog::save()
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
     Config::inst()->setPartOutMode(Config::PartOutMode(w_partout->currentIndex()));
+    Config::inst()->setVisualChangesMarkModified(w_modifications->isChecked());
 
     QDir dd(w_docdir->itemData(0).toString());
 
