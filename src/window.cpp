@@ -2180,19 +2180,22 @@ void Window::on_edit_mergeitems_triggered()
 void Window::on_edit_partoutitems_triggered()
 {
     if (selection().count() >= 1) {
-        bool inplace = false;
+        auto pom = Config::inst()->partOutMode();
+        bool inplace = (pom == Config::PartOutMode::InPlace);
 
-        switch (MessageBox::question(this, { },
-                                     tr("Should the selected items be parted out into the current document, replacing the selected items?"),
-                                     QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-                                     QMessageBox::Yes)) {
-        case QMessageBox::Cancel:
-            return;
-        case QMessageBox::Yes:
-            inplace = true;
-            break;
-        default:
-            break;
+        if (pom == Config::PartOutMode::Ask) {
+            switch (MessageBox::question(this, { },
+                                         tr("Should the selected items be parted out into the current document, replacing the selected items?"),
+                                         QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                         QMessageBox::Yes)) {
+            case QMessageBox::Cancel:
+                return;
+            case QMessageBox::Yes:
+                inplace = true;
+                break;
+            default:
+                break;
+            }
         }
 
         if (inplace)

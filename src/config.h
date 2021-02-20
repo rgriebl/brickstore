@@ -50,6 +50,15 @@ public:
     bool showDifferenceIndicators() const;
     bool onlineStatus() const;
 
+    enum class PartOutMode {
+        Ask,
+        InPlace,
+        NewDocument
+    };
+
+    PartOutMode partOutMode() const;
+    void setPartOutMode(PartOutMode pom);
+
     QStringList recentFiles() const;
 
     static constexpr int MaxRecentFiles = 18;

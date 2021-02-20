@@ -240,6 +240,8 @@ void SettingsDialog::load()
     w_metric->setChecked(Config::inst()->measurementSystem() == QLocale::MetricSystem);
     w_imperial->setChecked(Config::inst()->measurementSystem() == QLocale::ImperialSystem);
 
+    w_partout->setCurrentIndex(int(Config::inst()->partOutMode()));
+
     m_preferedCurrency = Config::inst()->defaultCurrencyCode();
     currenciesUpdated();
 
@@ -295,6 +297,8 @@ void SettingsDialog::save()
         Config::inst()->setLanguage(w_language->itemData(w_language->currentIndex()).toString());
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
+
+    Config::inst()->setPartOutMode(Config::PartOutMode(w_partout->currentIndex()));
 
     QDir dd(w_docdir->itemData(0).toString());
 

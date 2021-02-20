@@ -510,6 +510,19 @@ void Config::setOnlineStatus(bool b)
     }
 }
 
+Config::PartOutMode Config::partOutMode() const
+{
+    int v = value("General/PartOutMode").toInt();
+    if ((v < int(PartOutMode::Ask)) || (v > int(PartOutMode::NewDocument)))
+         v = int(PartOutMode::Ask);
+    return PartOutMode(v);
+}
+
+void Config::setPartOutMode(Config::PartOutMode pom)
+{
+    setValue("General/PartOutMode", int(pom));
+}
+
 QVector<Config::Translation> Config::translations() const
 {
     if (!m_translations_parsed)
