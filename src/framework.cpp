@@ -1155,7 +1155,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_copyremarks", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_all", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
-    (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1));
+    (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1, 1));
     (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
         m_filter->setFocus();
     });
