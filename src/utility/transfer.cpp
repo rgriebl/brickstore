@@ -102,6 +102,7 @@ Transfer::Transfer(QObject *parent)
         return returnCode;
     });
     m_retriever->moveToThread(m_retrieverThread);
+    m_retrieverThread->setObjectName("TransferRetriever");
     m_retrieverThread->setParent(this);
     m_retrieverThread->start(QThread::LowPriority);
 
