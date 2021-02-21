@@ -151,7 +151,7 @@ public:
             }
             }
         } else if (role == Qt::TextAlignmentRole) {
-            return (col == 6) ? Qt::AlignRight : Qt::AlignLeft;
+            return int(Qt::AlignVCenter) | int((col == 6) ? Qt::AlignRight : Qt::AlignLeft);
         } else if (role == Qt::BackgroundRole) {
             if (col == 1) {
                 QColor c((order->type() == BrickLink::OrderType::Received) ? Qt::green : Qt::blue);

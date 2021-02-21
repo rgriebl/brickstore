@@ -284,7 +284,10 @@ void PictureWidget::redraw()
         QPixmap p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
         QSize s = w_image->contentsRect().size();
         QSize ps = p.size().scaled(s, Qt::KeepAspectRatio).boundedTo(p.size() * 2);
-        w_image->setPixmap(p.scaled(ps, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ps *= devicePixelRatioF();
+        p = p.scaled(ps, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        p.setDevicePixelRatio(devicePixelRatioF());
+        w_image->setPixmap(p);
     } else {
         w_image->setText({ });
     }

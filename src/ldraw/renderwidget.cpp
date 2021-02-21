@@ -735,6 +735,28 @@ void LDraw::RenderWindow::wheelEvent(QWheelEvent *e)
     m_renderer->setZoom(m_renderer->zoom() * d);
 }
 
+bool LDraw::RenderWindow::event(QEvent *e)
+{
+    if (e->type() == QEvent::NativeGesture) {
+        const auto *nge = static_cast<QNativeGestureEvent *>(e);
+        if (nge->gestureType() == Qt::ZoomNativeGesture) {
+            float d = 1.0f + float(nge->value());
+            m_renderer->setZoom(m_renderer->zoom() * d);
+            e->accept();
+            return true;
+        } else if (nge->gestureType() == Qt::SmartZoomNativeGesture) {
+            resetCamera();
+            e->accept();
+            return true;
+        } else if (nge->gestureType() == Qt::RotateNativeGesture) {
+            m_renderer->setZRotation(m_renderer->zRotation() + float(nge->value()));
+            e->accept();
+            return true;
+        }
+    }
+    return QOpenGLWindow::event(e);
+}
+
 void LDraw::RenderWindow::slotMakeCurrent()
 {
     makeCurrent();

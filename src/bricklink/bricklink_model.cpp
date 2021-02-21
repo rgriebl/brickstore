@@ -959,10 +959,10 @@ void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewIte
                 image = BrickLink::core()->noImage(option.rect.size());
 
             if (!image.isNull()) {
-                image = image.scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
-                auto offset = (option.rect.size() - image.size()) / 2;
-                painter->drawImage(option.rect.x() + offset.width(),
-                                   option.rect.y() + offset.height(), image);
+                QSizeF s = image.size().scaled(option.rect.size(), Qt::KeepAspectRatio);
+                QPointF p = option.rect.center() - QRectF({ }, s).center();
+                // scale while drawing, so we don't have to deal with hi-dpi calculations
+                painter->drawImage({ p, s }, image, image.rect());
             }
         }
     }

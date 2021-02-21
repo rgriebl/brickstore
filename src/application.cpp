@@ -126,7 +126,7 @@ Application::Application(int &_argc, char **_argv)
         QGuiApplication::setWindowIcon(pix);
 #endif
 #if defined(Q_OS_MACOS)
-    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus); // mac style guide
+    //QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus); // mac style guide
 
     // macOS style guide doesn't want shortcut keys in dialogs (Alt + underlined character)
     qApp->setStyle(new MacUnderlineStyle());
@@ -334,7 +334,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
             if (!qobject_cast<QToolBar *>(o)) {
                 QPointer<QToolButton> tbptr(tb);
                 QMetaObject::invokeMethod(this, [tbptr]() {
-                    if (tbptr) {
+                    if (tbptr && tbptr->autoRaise()) {
                         QPalette pal = tbptr->palette();
                         pal.setColor(QPalette::Button, Utility::premultiplyAlpha(qApp->palette("QAbstractItemView").color(QPalette::Highlight)));
                         tbptr->setStyle(fusion);

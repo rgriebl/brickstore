@@ -229,6 +229,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
+    bool event(QEvent *e) override;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;

@@ -389,7 +389,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     case Document::Picture: {
         if (!it->image().isNull()) {
-            image = it->image().scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
+            double dpr = p->device()->devicePixelRatioF();
+            image = it->image().scaled(option.rect.size() * dpr,
+                                       Qt::KeepAspectRatio, Qt::FastTransformation);
+            image.setDevicePixelRatio(dpr);
             selectionFrame = true;
         }
         break;
@@ -532,14 +535,16 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int px = x;
         int py = y;
 
+        QSize imgSize = image.size() / image.devicePixelRatio();
+
         if (align & Qt::AlignHCenter)
-            px += (option.rect.width() - image.width()) / 2;
+            px = option.rect.left() + (option.rect.width() - imgSize.width()) / 2;
         if (align & Qt::AlignVCenter)
-            py += (option.rect.height() - image.height()) / 2;
+            py = option.rect.top() + (option.rect.height() - imgSize.height()) / 2;
 
-        p->drawImage(px, py, image);
+        p->drawImage(QPointF(px, py), image);
 
-        int delta = px + image.width() + margin;
+        int delta = px + imgSize.width() + margin;
         w -= (delta - x);
         x = delta;
     }
