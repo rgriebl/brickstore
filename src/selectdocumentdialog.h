@@ -14,28 +14,64 @@
 #pragma once
 
 #include <QDialog>
+#include "document.h"
 #include "bricklinkfwd.h"
-#include "ui_selectdocumentdialog.h"
 
 class Document;
-QT_FORWARD_DECLARE_CLASS(QListWidgetItem)
+QT_FORWARD_DECLARE_CLASS(QListWidget)
+QT_FORWARD_DECLARE_CLASS(QRadioButton)
+QT_FORWARD_DECLARE_CLASS(QAbstractButton)
 
 
-class SelectDocumentDialog : public QDialog, private Ui::SelectDocumentDialog
+class SelectDocument : public QWidget
+{
+    Q_OBJECT
+public:
+    SelectDocument(const Document *self, QWidget *parent = nullptr);
+    ~SelectDocument() override;
+
+    bool isDocumentSelected() const;
+    BrickLink::InvItemList items() const;
+
+signals:
+    void documentSelected(bool valid);
+
+private:
+    BrickLink::InvItemList m_itemsFromClipboard;
+
+    QRadioButton *m_clipboard;
+    QRadioButton *m_document;
+    QListWidget *m_documentList;
+};
+
+class SelectDocumentDialog : public QDialog
 {
     Q_OBJECT
 public:
     SelectDocumentDialog(const Document *self, const QString &headertext,
                          QWidget *parent = nullptr);
-    ~SelectDocumentDialog() override;
 
     BrickLink::InvItemList items() const;
-
-private slots:
-    void updateButtons();
-    void itemActivated(QListWidgetItem *item);
     
 private:
-    BrickLink::InvItemList m_clipboard_list;
+    SelectDocument *m_sd;
+    QAbstractButton *m_ok;
+};
+
+
+class SelectCopyFieldsDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    SelectCopyFieldsDialog(const Document *self, const QString &headertext,
+                           const QVector<QPair<QString, bool>> &fields, QWidget *parent = nullptr);
+
+    BrickLink::InvItemList items() const;
+    const QVector<int> &selectedFields() const;
+
+private:
+    SelectDocument *m_sd;
+    QVector<int> m_selectedFields;
+    QAbstractButton *m_ok;
 };
 

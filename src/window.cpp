@@ -2048,56 +2048,92 @@ void Window::updateItemFlagsMask()
     m_doc->setItemFlagsMask({ em, dm });
 }
 
-void Window::on_edit_copyremarks_triggered()
+void Window::on_edit_copy_fields_triggered()
 {
-    SelectDocumentDialog dlg(document(), tr("Please choose the document that should serve as a source to fill in the remarks fields of the current document:"));
+    static const struct {
+        const char *name;
+        std::function<void(const Document::Item *from, Document::Item *to)> copyFunction;
+    } fields[] = {
+    { QT_TR_NOOP("Prices"),           [](const Document::Item *from, Document::Item *to)
+        { to->setPrice(from->price()); } },
+    { QT_TR_NOOP("Costs"),            [](const Document::Item *from, Document::Item *to)
+        { to->setCost(from->cost()); } },
+    { QT_TR_NOOP("Tier prices"),      [](const Document::Item *from, Document::Item *to)
+        {
+            for (int i = 0; i < 3; ++i) {
+                to->setTierPrice(i, from->tierPrice(i));
+                to->setTierQuantity(i, from->tierQuantity(i));
+            }
+        } },
+    { QT_TR_NOOP("Quantities"),       [](const Document::Item *from, Document::Item *to)
+        { to->setQuantity(from->quantity()); } },
+    { QT_TR_NOOP("Bulk quantities"),  [](const Document::Item *from, Document::Item *to)
+        { to->setBulkQuantity(from->bulkQuantity()); } },
+    { QT_TR_NOOP("Sale percentages"), [](const Document::Item *from, Document::Item *to)
+        { to->setSale(from->sale()); } },
+    { QT_TR_NOOP("Comments"),         [](const Document::Item *from, Document::Item *to)
+        { to->setComments(from->comments()); } },
+    { QT_TR_NOOP("Remarks"),          [](const Document::Item *from, Document::Item *to)
+        { to->setRemarks(from->remarks()); } },
+    { QT_TR_NOOP("Reserved"),          [](const Document::Item *from, Document::Item *to)
+        { to->setReserved(from->reserved()); } },
+    { QT_TR_NOOP("Retain flags"),     [](const Document::Item *from, Document::Item *to)
+        { to->setRetain(from->retain()); } },
+    { QT_TR_NOOP("Stockrooms"),       [](const Document::Item *from, Document::Item *to)
+        { to->setStockroom(from->stockroom()); } },
+    { QT_TR_NOOP("Custom weights"),   [](const Document::Item *from, Document::Item *to)
+        { if (from->hasCustomWeight()) { to->setWeight(from->weight()); } } },
+    };
 
-    if (dlg.exec() == QDialog::Accepted ) {
-        BrickLink::InvItemList list = dlg.items();
+    QVector<QPair<QString, bool>> availableFields;
+    for (const auto &f : fields)
+        availableFields.append(qMakePair(tr(f.name), false));
 
-        if (!list.isEmpty())
-            copyRemarks(list);
+    SelectCopyFieldsDialog dlg(document(),
+                               tr("Please choose the document and item fields that should serve as a source to fill in the corresponding fields in the current document:"),
+                               availableFields);
 
-        qDeleteAll(list);
-    }
-}
-
-void Window::copyRemarks(const BrickLink::InvItemList &items)
-{
-    if (items.isEmpty())
+    if (dlg.exec() != QDialog::Accepted )
+        return;
+    QVector<int> selectedFields = dlg.selectedFields();
+    if (selectedFields.isEmpty())
+        return;
+    BrickLink::InvItemList itemList = dlg.items();
+    if (itemList.isEmpty())
         return;
 
     m_doc->beginMacro();
 
-    WindowProgress wp(w_list);
-
     int copy_count = 0;
 
-    foreach(Document::Item *pos, m_doc->items()) {
-        BrickLink::InvItem *match = nullptr;
-
-        foreach(BrickLink::InvItem *ii, items) {
+    foreach (Document::Item *pos, m_doc->items()) {
+        foreach (BrickLink::InvItem *ii, itemList) {
             const BrickLink::Item *item   = ii->item();
             const BrickLink::Color *color = ii->color();
-            BrickLink::Condition cond     = ii->condition();
-            int qty                       = ii->quantity();
 
-            if (!item || !color || !qty)
+            if (!item || !color)
                 continue;
 
-            if ((pos->item() == item) && (pos->condition() == cond) && (pos->color() == color))
-                match = ii;
-        }
+            if ((pos->item() != item)
+                    || (pos->color() != color)
+                    || (pos->condition() != ii->condition())
+                    || (pos->subCondition() != ii->subCondition()))
+                continue;
 
-        if (match && !match->remarks().isEmpty()) {
-            Document::Item newitem = *pos;
-            newitem.setRemarks(match->remarks());
-            m_doc->changeItem(pos, newitem);
+            Document::Item newItem = *pos;
 
+            for (const auto &index : selectedFields) {
+                if ((index >= 0) && (index < availableFields.size()))
+                    fields[index].copyFunction(ii, &newItem);
+            }
+
+            m_doc->changeItem(pos, newItem);
             copy_count++;
         }
     }
-    m_doc->endMacro(tr("Copied Remarks for %n item(s)", nullptr, copy_count));
+
+    m_doc->endMacro(tr("Copied fields for %n item(s)", nullptr, copy_count));
+    qDeleteAll(itemList);
 }
 
 void Window::on_edit_subtractitems_triggered()

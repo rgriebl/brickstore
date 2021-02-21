@@ -413,7 +413,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_stockroom",
                                       "edit_reserved",
                                       "-",
-                                      "edit_copyremarks",
+                                      "edit_copy_fields",
                                       "-",
                                       "bricklink_catalog",
                                       "bricklink_priceguide",
@@ -732,7 +732,7 @@ void FrameWork::translateActions()
         { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
         { "edit_partoutitems",              tr("Part out Item..."),                   },
         { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
-        { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
+        { "edit_copy_fields",               tr("Copy values from document..."),       },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A") },
         //                                                   QKeySequence::Deselect is only mapped on Linux
@@ -1152,7 +1152,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1) | NeedQuantity);
     (void) newQAction(this, "edit_setmatch", NeedDocument);
 //    (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
-    (void) newQAction(this, "edit_copyremarks", NeedDocument | NeedItems);
+    (void) newQAction(this, "edit_copy_fields", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_all", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1, 1));

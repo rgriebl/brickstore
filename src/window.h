@@ -71,7 +71,6 @@ public:
     void consolidateItems(const Document::ItemList &items);
 
     void subtractItems(const BrickLink::InvItemList &items);
-    void copyRemarks(const BrickLink::InvItemList &items);
 
     QDomElement createGuiStateXML();
     void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
@@ -112,7 +111,7 @@ public slots:
     void on_edit_delete_triggered();
 
     void on_edit_subtractitems_triggered();
-    void on_edit_copyremarks_triggered();
+    void on_edit_copy_fields_triggered();
     void on_edit_mergeitems_triggered();
     void on_edit_partoutitems_triggered();
     void on_edit_setmatch_triggered();

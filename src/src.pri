@@ -35,6 +35,7 @@ SOURCES += \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
   $$PWD/selectcolor.cpp \
+  $$PWD/selectdocumentdialog.cpp \
   $$PWD/selectitem.cpp \
   $$PWD/taskwidgets.cpp \
   $$PWD/updatedatabase.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
   $$PWD/selectcolor.h \
+  $$PWD/selectdocumentdialog.h \
   $$PWD/selectitem.h \
   $$PWD/taskwidgets.h \
   $$PWD/updatedatabase.h \
@@ -71,7 +73,6 @@ FORMS = \
   $$PWD/importcartdialog.ui \
   $$PWD/importorderdialog.ui \
   $$PWD/selectcolordialog.ui \
-  $$PWD/selectdocumentdialog.ui \
   $$PWD/selectitemdialog.ui \
   $$PWD/selectprintingtemplatedialog.ui \
   $$PWD/settingsdialog.ui \

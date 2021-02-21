@@ -11,81 +11,85 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QPushButton>
-#include <QListWidget>
+#include <QApplication>
 #include <QClipboard>
+#include <QListWidget>
+#include <QRadioButton>
+#include <QGridLayout>
+
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QLabel>
+#include <QBoxLayout>
+
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QButtonGroup>
 
 #include "document.h"
 #include "selectdocumentdialog.h"
 
 
-SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &headertext,
-                                           QWidget *parent)
-    : QDialog(parent)
+SelectDocument::SelectDocument(const Document *self, QWidget *parent)
+    : QWidget(parent)
 {
-    setupUi(this);
-    
-    w_header->setText(headertext);
-    m_clipboard_list = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
+    m_clipboard = new QRadioButton(tr("Items from Clipboard"));
+    m_document = new QRadioButton(tr("Items from an already open document:"));
+    m_documentList = new QListWidget();
+
+    auto layout = new QGridLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setColumnMinimumWidth(0, 20);
+    layout->setColumnStretch(1, 100);
+    layout->setRowStretch(2, 100);
+    layout->addWidget(m_clipboard, 0, 0, 1, 2);
+    layout->addWidget(m_document, 1, 0, 1, 2);
+    layout->addWidget(m_documentList, 2, 1, 1, 1);
+
+    m_itemsFromClipboard = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
 
     foreach (const Document *doc, Document::allDocuments()) {
         if (doc != self) {
-            QListWidgetItem *item = new QListWidgetItem(doc->fileNameOrTitle(), w_document_list);
+            QListWidgetItem *item = new QListWidgetItem(doc->fileNameOrTitle(), m_documentList);
             item->setData(Qt::UserRole, QVariant::fromValue(doc));
         }
     }
 
-    bool hasClip = !m_clipboard_list.isEmpty();
-    bool hasDocs = w_document_list->count();
+    bool hasClip = !m_itemsFromClipboard.isEmpty();
+    bool hasDocs = m_documentList->count() > 0;
 
-    w_clipboard->setEnabled(hasClip);
-    w_document->setEnabled(hasDocs);
-    w_document_list->setEnabled(hasDocs);
+    m_clipboard->setEnabled(hasClip);
+    m_document->setEnabled(hasDocs);
+    m_documentList->setEnabled(hasDocs);
 
     if (hasDocs) {
-        w_document->setChecked(true);
-        w_document_list->setCurrentRow(0);
+        m_document->setChecked(true);
+        m_documentList->setCurrentRow(0);
     } else if (hasClip) {
-        w_clipboard->setChecked(true);
+        m_clipboard->setChecked(true);
     }
 
-    connect(w_clipboard, &QAbstractButton::toggled,
-            this, &SelectDocumentDialog::updateButtons);
-    connect(w_document_list, &QListWidget::currentItemChanged,
-            this, &SelectDocumentDialog::updateButtons);
-    connect(w_document_list, &QListWidget::itemActivated,
-            this, &SelectDocumentDialog::itemActivated);
+    auto emitSelected = [this]() { emit documentSelected(isDocumentSelected()); };
 
-    updateButtons();
+    connect(m_clipboard, &QAbstractButton::toggled,
+            this, [this, emitSelected]() { emitSelected(); });
+    connect(m_documentList, &QListWidget::itemSelectionChanged,
+            this, [this, emitSelected]() { emitSelected(); });
+
+    QMetaObject::invokeMethod(this, emitSelected, Qt::QueuedConnection);
 }
 
-SelectDocumentDialog::~SelectDocumentDialog()
-{
-    qDeleteAll(m_clipboard_list);
-}
-
-void SelectDocumentDialog::updateButtons()
-{
-    bool b = w_clipboard->isChecked() || w_document_list->currentItem();
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(b);
-}
-
-void SelectDocumentDialog::itemActivated(QListWidgetItem *)
-{
-    w_buttons->button(QDialogButtonBox::Ok)->animateClick();
-}
-
-BrickLink::InvItemList SelectDocumentDialog::items() const
+BrickLink::InvItemList SelectDocument::items() const
 {
     BrickLink::InvItemList list;
 
-    if (w_clipboard->isChecked()) {
-        for (const BrickLink::InvItem *item : m_clipboard_list)
+    if (m_clipboard->isChecked()) {
+        for (const BrickLink::InvItem *item : m_itemsFromClipboard)
             list.append(new BrickLink::InvItem(*item));
     } else {
-        if (w_document_list->currentItem()) {
-            const auto *doc = w_document_list->currentItem()->data(Qt::UserRole).value<const Document *>();
-            
+        if (!m_documentList->selectedItems().isEmpty()) {
+            const auto *doc = m_documentList->selectedItems().constFirst()
+                    ->data(Qt::UserRole).value<const Document *>();
             if (doc) {
                 const auto items = doc->items();
                 for (const Document::Item *item : items)
@@ -96,4 +100,110 @@ BrickLink::InvItemList SelectDocumentDialog::items() const
     return list;
 }
 
+SelectDocument::~SelectDocument()
+{
+    qDeleteAll(m_itemsFromClipboard);
+}
+
+bool SelectDocument::isDocumentSelected() const
+{
+    return m_clipboard->isChecked() || !m_documentList->selectedItems().isEmpty();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &headertext,
+                                           QWidget *parent)
+    : QDialog(parent)
+{
+    m_sd = new SelectDocument(self);
+
+    auto label = new QLabel(headertext);
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    m_ok = buttons->button(QDialogButtonBox::Ok);
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    auto layout = new QVBoxLayout(this);
+    layout->addWidget(label);
+    layout->addWidget(m_sd);
+    layout->addWidget(buttons);
+
+    connect(m_sd, &SelectDocument::documentSelected,
+            m_ok, &QAbstractButton::setEnabled);
+}
+
+BrickLink::InvItemList SelectDocumentDialog::items() const
+{
+    return m_sd->items();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+SelectCopyFieldsDialog::SelectCopyFieldsDialog(const Document *self, const QString &headertext,
+                                               const QVector<QPair<QString, bool>> &fields,
+                                               QWidget *parent)
+    : QDialog(parent)
+{
+    m_sd = new SelectDocument(self);
+
+    auto label = new QLabel(headertext);
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    m_ok = buttons->button(QDialogButtonBox::Ok);
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    auto updateButtons = [this]() {
+        m_ok->setEnabled(!m_selectedFields.isEmpty() && m_sd->isDocumentSelected());
+    };
+
+    connect(m_sd, &SelectDocument::documentSelected,
+            this, updateButtons);
+
+    auto box = new QGroupBox(tr("Fields"));
+    auto boxgrid = new QGridLayout(box);
+
+    for (int i = 0; i < fields.size(); ++i) {
+        const auto &f = fields.at(i);
+        auto check = new QCheckBox(f.first);
+        check->setChecked(f.second);
+        boxgrid->addWidget(check, i / 3, i % 3);
+        if (f.second)
+            m_selectedFields << i;
+        connect (check, &QCheckBox::toggled,
+                 this, [this, i, updateButtons](bool b) {
+            if (b && !m_selectedFields.contains(i))
+                m_selectedFields.append(i);
+            else
+                m_selectedFields.removeAll(i);
+            updateButtons();
+        });
+    }
+
+    auto layout = new QVBoxLayout(this);
+    layout->addWidget(label);
+    layout->addWidget(m_sd);
+    layout->addWidget(box);
+    layout->addWidget(buttons);
+}
+
+BrickLink::InvItemList SelectCopyFieldsDialog::items() const
+{
+    return m_sd->items();
+}
+
+const QVector<int> &SelectCopyFieldsDialog::selectedFields() const
+{
+    return m_selectedFields;
+}
+
 #include "moc_selectdocumentdialog.cpp"
+
