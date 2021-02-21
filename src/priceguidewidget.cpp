@@ -731,6 +731,7 @@ bool PriceGuideWidget::event(QEvent *e)
             case BrickLink::Price::Average : pt = tr("Average price (arithmetic mean)"); break;
             case BrickLink::Price::WAverage: pt = tr("Weighted average price (weighted arithmetic mean)"); break;
             case BrickLink::Price::Highest : pt = tr("Highest price"); break;
+            default: break;
             }
 
             tt = tr("Double-click to set the price of the current item")

@@ -415,7 +415,7 @@ StatusBar::StatusBar(Window *window)
     auto layout = new QHBoxLayout(this);
     layout->setContentsMargins(11, 4, 11, 4);
 
-    auto addSeparator = [this, &layout]() -> QWidget * {
+    auto addSeparator = [&layout]() -> QWidget * {
             auto sep = new QFrame();
             sep->setFrameShape(QFrame::VLine);
             sep->setFixedWidth(sep->frameWidth());

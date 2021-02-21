@@ -1543,7 +1543,7 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
 
         if (column >= 0) {
             qParallelSort(m_sortedItems.begin(), m_sortedItems.end(),
-                          [column, order, this](const auto *item1, const auto *item2) {
+                          [column, this](const auto *item1, const auto *item2) {
                 return compare(item1, item2, column) < 0;
             });
             if (order == Qt::DescendingOrder)
