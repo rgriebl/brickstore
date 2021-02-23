@@ -149,11 +149,13 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_StoreItemSearch: {
         const Item *item = static_cast<const Item *>(opt);
         const Color *color = static_cast<const Color *>(opt2);
-        if (item && item->itemType() && color) {
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/inventory_detail.asp?";
             QUrlQuery query;
             query.addQueryItem("catType", QChar(item->itemType()->id()));
-            query.addQueryItem("q", color->name() % u' ' % item->id());
+            query.addQueryItem("q", item->id());
+            if (item->itemType()->hasColors() && color)
+                query.addQueryItem("ColorID", QString::number(color->id()));
             url.setQuery(query);
         }
         break;
