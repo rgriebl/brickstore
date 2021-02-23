@@ -868,8 +868,11 @@ QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteA
         uint colorId = p.elementText(e, "COLOR", "0").toUInt();
         uint categoryId = p.elementText(e, "CATEGORY", "0").toUInt();
         int qty = p.elementText(e, "MINQTY", "-1").toInt();
-        if (qty < 0)
-            qty = p.elementText(e, "QTY", "0").toInt();
+        if (qty < 0) {
+            // The remove(',') stuff is a workaround for the broken Order XML generator: the QTY
+            // field is generated with thousands-separators enabled (e.g. 1,752 instead of 1752)
+            qty = p.elementText(e, "QTY", "0").remove(QChar(',')).toInt();
+        }
         double price = p.elementText(e, "MAXPRICE", "-1").toDouble();
         if (price < 0)
             price = p.elementText(e, "PRICE", "0").toDouble();
