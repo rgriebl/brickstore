@@ -260,6 +260,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     t->setInterval(30s);
     connect(t, &QTimer::timeout, this,
             &ImportCartDialog::updateStatusLabel);
+    t->start();
 
     connect(m_trans, &Transfer::finished,
             this, &ImportCartDialog::downloadFinished);
@@ -298,6 +299,7 @@ void ImportCartDialog::languageChange()
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
     w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
+    updateStatusLabel();
 }
 
 void ImportCartDialog::login()
