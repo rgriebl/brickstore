@@ -93,13 +93,6 @@ public:
         endResetModel();
     }
 
-    void updateOrder(BrickLink::Order *order)
-    {
-        int r = m_orders.indexOf(order);
-        if (r >= 0)
-            emit dataChanged(index(r, 0), index(r, columnCount() - 1));
-    }
-
     int rowCount(const QModelIndex &parent = { }) const override
     {
         return parent.isValid() ? 0 : m_orders.size();
@@ -396,10 +389,13 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
                     a = match.captured(1);
                     a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"), QLatin1String("\n"));
                     order->setAddress(a);
-                    m_orderModel->updateOrder(order);
                 }
             }
         }
+        if (order->address().isEmpty())
+            order->setAddress(tr("Address not available"));
+
+        orderDownloadFinished(order, job);
         break;
     }
     case 'r':
@@ -445,17 +441,6 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
                     if (!location.isEmpty())
                         order->setCountryName(location.section(QLatin1String(", "), 0, 0));
 
-                    QUrl addressUrl("https://www.bricklink.com/orderDetail.asp");
-                    QUrlQuery query;
-                    query.addQueryItem("ID", id);
-                    addressUrl.setQuery(query);
-
-                    auto addressJob = TransferJob::get(addressUrl);
-                    addressJob->setUserData('a', order);
-                    m_currentUpdate << addressJob;
-
-                    m_trans->retrieve(addressJob);
-
                     orders << order;
                 });
             } catch (const Exception &e) {
@@ -471,11 +456,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
     }
     case 'o': {
         auto order = job->userData<BrickLink::Order>('o');
-
-        if (auto doc = DocumentIO::importBrickLinkOrder(order, *job->data()))
-            FrameWork::inst()->createWindow(doc);
-
-        m_orderDownloads.removeOne(job);
+        orderDownloadFinished(order, job, *job->data());
         break;
     }
     default:
@@ -504,6 +485,28 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
     }
 }
 
+void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJob *job,
+                                              const QByteArray &xml)
+{
+    for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ++it) {
+        if (it->m_order != order)
+            continue;
+
+        if (it->m_addressJob == job) {
+            it->m_addressJob = nullptr;
+        } else if (it->m_xmlJob == job) {
+            it->m_xmlJob = nullptr;
+            it->m_xmlData = xml;
+        }
+        if (!it->m_xmlJob && !it->m_addressJob) {
+            if (auto doc = DocumentIO::importBrickLinkOrder(order, it->m_xmlData))
+                FrameWork::inst()->createWindow(doc);
+            m_orderDownloads.erase(it);
+            break;
+        }
+    }
+}
+
 void ImportOrderDialog::importOrders()
 {
     const auto selection = w_orders->selectionModel()->selectedRows();
@@ -527,10 +530,20 @@ void ImportOrderDialog::importOrders()
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
 
-        job->setUserData('o', new BrickLink::Order(*order));
-        m_orderDownloads << job;
+        QUrl addressUrl("https://www.bricklink.com/orderDetail.asp");
+        QUrlQuery addressQuery;
+        addressQuery.addQueryItem("ID", order->id());
+        addressUrl.setQuery(addressQuery);
+
+        auto addressJob = TransferJob::get(addressUrl);
+
+        auto orderCopy = new BrickLink::Order(*order);
+        job->setUserData('o', orderCopy);
+        addressJob->setUserData('a', orderCopy);
+        m_orderDownloads << OrderDownload { orderCopy, job, addressJob };
 
         m_trans->retrieve(job);
+        m_trans->retrieve(addressJob);
     }
 }
 

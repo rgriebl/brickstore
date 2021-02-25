@@ -47,11 +47,24 @@ protected slots:
     void showOrdersOnBrickLink();
 
 private:
+    void orderDownloadFinished(BrickLink::Order *order, TransferJob *job,
+                               const QByteArray &xml = { });
+
     Transfer *m_trans;
     QPushButton *w_import;
     QPushButton *w_showOnBrickLink;
     QDateTime m_lastUpdated;
     QVector<TransferJob *> m_currentUpdate;
-    QVector<TransferJob *> m_orderDownloads;
+    struct OrderDownload {
+        OrderDownload() = delete;
+        OrderDownload(BrickLink::Order *order, TransferJob *xmlJob, TransferJob *addressJob)
+            : m_order(order), m_xmlJob(xmlJob), m_addressJob(addressJob)
+        { }
+        BrickLink::Order *m_order;
+        TransferJob *m_xmlJob;
+        TransferJob *m_addressJob;
+        QByteArray m_xmlData;
+    };
+    QVector<OrderDownload> m_orderDownloads;
     OrderModel *m_orderModel;
 };
