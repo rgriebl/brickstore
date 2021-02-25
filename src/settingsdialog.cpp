@@ -24,6 +24,8 @@
 #include "bricklink_model.h"
 #include "ldraw.h"
 #include "messagebox.h"
+#include "utility.h"
+
 
 static int sec2day(int s)
 {
@@ -130,6 +132,21 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             Currency::inst(), &Currency::updateRates);
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &SettingsDialog::currenciesUpdated);
+
+    w_bl_username_note->hide();
+    connect(w_bl_username, &QLineEdit::textChanged,
+            this, [this](const QString &s) {
+        bool b = s.contains(QLatin1Char('@'));
+        if (w_bl_username_note->isVisible() != b) {
+            w_bl_username_note->setVisible(b);
+            QPalette pal = QApplication::palette("QLineEdit");
+            if (b) {
+                pal.setColor(QPalette::Base,
+                             Utility::gradientColor(pal.color(QPalette::Base), Qt::red, 0.25));
+            }
+            w_bl_username->setPalette(pal);
+        }
+    });
 
     load();
 

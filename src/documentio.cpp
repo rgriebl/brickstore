@@ -185,7 +185,8 @@ Document *DocumentIO::importBrickLinkStore()
 
         if (j->isFailed() || j->responseCode() != 200 || !j->data()) {
             pd.setErrorText(tr("Failed to download the store inventory."));
-        } else if (data->startsWith("<HTML>") && data->contains("Invalid password")) {
+        } else if ((data->left(30).contains("<html") || data->left(30).contains("<HTML"))
+                   && data->contains("there was a problem during login")) {
             pd.setErrorText(tr("Either your username or password are incorrect."));
         } else {
             xml = *data;
