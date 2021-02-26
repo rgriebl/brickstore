@@ -595,7 +595,6 @@ bool DocumentIO::saveTo(Document *doc, const QString &s, bool export_only)
 
 void DocumentIO::exportBrickLinkInvReqClipboard(const BrickLink::InvItemList &itemlist)
 {
-    static QLocale c = QLocale::c();
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const BrickLink::InvItem *item : itemlist) {

@@ -971,7 +971,7 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
 
 QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool differenceBase) const
 {
-    QVariant v = idx.data(differenceBase ? Document::BaseDisplayRole : Qt::DisplayRole);
+    QVariant v = idx.data(differenceBase ? int(Document::BaseDisplayRole) : int(Qt::DisplayRole));
     QLocale loc;
 
     switch (idx.column()) {

@@ -56,7 +56,7 @@ private:
     QDateTime m_lastUpdated;
     QVector<TransferJob *> m_currentUpdate;
     struct OrderDownload {
-        OrderDownload() = delete;
+        OrderDownload() = default;
         OrderDownload(BrickLink::Order *order, TransferJob *xmlJob, TransferJob *addressJob)
             : m_order(order), m_xmlJob(xmlJob), m_addressJob(addressJob)
         { }

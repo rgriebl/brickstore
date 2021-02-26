@@ -407,7 +407,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
             buf->open(QIODevice::ReadOnly);
             try {
                 XmlHelpers::ParseXML p(buf, "ORDERS", "ORDER");
-                p.parse([this, &p, &type, &orders](QDomElement e) {
+                p.parse([&p, &type, &orders](QDomElement e) {
                     auto id = p.elementText(e, "ORDERID");
 
                     if (id.isEmpty())

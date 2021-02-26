@@ -39,13 +39,13 @@ public:
         MODELTEST_ATTACH(this)
         connect(ScriptManager::inst(), &ScriptManager::aboutToReload,
                 this, [this]() {
-            emit beginResetModel();
+            beginResetModel();
             m_prtScripts.clear();
         });
         connect(ScriptManager::inst(), &ScriptManager::reloaded,
                 this, [this]() {
             refreshScripts();
-            emit endResetModel();
+            endResetModel();
         });
         refreshScripts();
     }

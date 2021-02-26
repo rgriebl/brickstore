@@ -51,7 +51,8 @@ struct FieldOp
     }
 
     static bool merge(const Document::Item &from, Document::Item &to,
-                      Document::MergeMode mergeMode = MergeMode::Merge, const R defaultValue = { })
+                      Document::MergeMode mergeMode = Document::MergeMode::Merge,
+                      const R defaultValue = { })
     {
         if (mergeMode == Document::MergeMode::Ignore) {
             return false;

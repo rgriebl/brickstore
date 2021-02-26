@@ -239,7 +239,7 @@ public:
     bool restoreSortFilterState(const QByteArray &ba);
 
 signals:
-    void itemFlagsChanged(const Item *);
+    void itemFlagsChanged(const Document::Item *);
     void statisticsChanged();
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);

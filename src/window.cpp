@@ -72,7 +72,7 @@ using namespace std::chrono_literals;
 template <typename E>
 static E nextEnumValue(E current, std::initializer_list<E> values)
 {
-    for (int i = 0; i < values.size(); ++i) {
+    for (size_t i = 0; i < values.size(); ++i) {
         if (current == values.begin()[i])
             return values.begin()[(i + 1) % values.size()];
     }
@@ -2281,7 +2281,7 @@ void Window::contextMenu(const QPoint &pos)
         m_contextMenu->addSeparator();
 
     const auto actions = FrameWork::inst()->contextMenuActions();
-    for (auto action : actions) {
+    for (auto action : qAsConst(actions)) {
         if (action)
             m_contextMenu->addAction(action);
         else
