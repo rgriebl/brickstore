@@ -79,6 +79,8 @@ int MacUnderlineStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *opt
 {
     if (hint == SH_UnderlineShortcut)
         return true;
+    else if (hint == SH_ItemView_MovementWithoutUpdatingSelection)
+        return true;
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }
 
