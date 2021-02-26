@@ -1066,7 +1066,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
     case Document::TierP2:
     case Document::TierP3: {
         double d = v.toDouble();
-        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : loc.toString(d, 'f', 3);
+        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : Currency::toDisplayString(d);
     }
     case Document::Bulk: {
         int i = v.toInt();

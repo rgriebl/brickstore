@@ -294,8 +294,8 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
-    cw[3] = fm.horizontalAdvance(Currency::toString(9000));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("9.000.000 (90.000)"));
+    cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
 
@@ -387,8 +387,8 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
-    cw[3] = fm.horizontalAdvance(Currency::toString(9000));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("9.000.000 (90.000)"));
+    cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
 
@@ -473,8 +473,8 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         cw[0] = qMax(cw[0], fm.horizontalAdvance(price));
     cw[0] += 2 * hborder;
 
-    cw[1] = qMax(fm.horizontalAdvance(Currency::toString(9000)),
-                  fm.horizontalAdvance("0000000 (00000)"));
+    cw[1] = qMax(fm.horizontalAdvance(Currency::toDisplayString(9000)),
+                  fm.horizontalAdvance("9.000.000 (90.000)"));
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
     cw[1] += 2 * hborder;
@@ -646,7 +646,8 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Quantity:
             if (!is_updating) {
                 if (valid)
-                    str = QString("%1 (%2)").arg(d->m_pg->quantity(c.m_time, c.m_condition)).arg(d->m_pg->lots(c.m_time, c.m_condition));
+                    str = QString("%L1 (%L2)").arg(d->m_pg->quantity(c.m_time, c.m_condition))
+                            .arg(d->m_pg->lots(c.m_time, c.m_condition));
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }
@@ -655,7 +656,8 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate);
+                    str = Currency::toDisplayString(d->m_pg->price(c.m_time, c.m_condition,
+                                                                   c.m_price) * d->m_crate);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
                           (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->isValid());

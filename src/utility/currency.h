@@ -42,7 +42,8 @@ public:
 
     QDateTime lastUpdate() const;
 
-    static QString toString(double value, const QString &intSymbol = { }, int precision = 3);
+    static QString toDisplayString(double value, const QString &currencyCode = { }, int precision = 3);
+    static QString toString(double value, const QString &currencyCode = { }, int precision = 3);
     static double fromString(const QString &str);
 
 public slots:

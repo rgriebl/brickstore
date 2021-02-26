@@ -242,13 +242,13 @@ void TaskInfoWidget::delayedSelectionUpdate()
         QString ccode = m_win->document()->currencyCode();
         QString wgtstr;
         QString minvalstr;
-        QString valstr = loc.toString(stat.value(), 'f', 3);
+        QString valstr = Currency::toDisplayString(stat.value());
         bool hasMinValue = !qFuzzyCompare(stat.value(), stat.minValue());
 
         if (hasMinValue)
-            minvalstr = loc.toString(stat.minValue(), 'f', 3);
+            minvalstr = Currency::toDisplayString(stat.minValue());
 
-        QString coststr = loc.toString(stat.cost(), 'f', 3);
+        QString coststr = Currency::toDisplayString(stat.cost());
         QString profitstr;
         if (!qFuzzyIsNull(stat.cost())) {
             int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));

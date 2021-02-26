@@ -502,7 +502,7 @@ void StatusBar::updateStatistics()
     }
     m_weight->setText(wgtstr);
 
-    QString valstr = loc.toString(stat.value(), 'f', 3);
+    QString valstr = Currency::toDisplayString(stat.value());
     if (stat.minValue() < stat.value())
         valstr.prepend(QStringLiteral(u"\u2264 "));
     m_value->setText(valstr);

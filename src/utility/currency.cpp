@@ -203,9 +203,18 @@ QDateTime Currency::lastUpdate() const
     return m_lastUpdate;
 }
 
+QString Currency::toDisplayString(double value, const QString &currencyCode, int precision)
+{
+    static QLocale loc;
+    if (currencyCode.isEmpty())
+        return loc.toString(value, 'f', precision);
+    else
+        return currencyCode % u' ' % loc.toString(value, 'f', precision);
+}
+
 QString Currency::toString(double value, const QString &currencyCode, int precision)
 {
-    QLocale loc;
+    static QLocale loc;
     loc.setNumberOptions(QLocale::OmitGroupSeparator);
     if (currencyCode.isEmpty())
         return loc.toString(value, 'f', precision);
