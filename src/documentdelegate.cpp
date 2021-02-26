@@ -997,10 +997,10 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
     case Document::Condition: {
         QString str;
         if (!toolTip) {
-            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::Used)
+            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::New)
                     ?  tr("N", "List>Cond>New") : tr("U", "List>Cond>Used");
         } else {
-            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::Used)
+            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::New)
                     ?  tr("New", "ToolTip Cond>New") : tr("Used", "ToolTip Cond>Used");
         }
 
