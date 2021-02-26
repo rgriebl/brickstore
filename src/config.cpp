@@ -536,6 +536,16 @@ void Config::setVisualChangesMarkModified(bool b)
     }
 }
 
+bool Config::restoreLastSession()
+{
+    return value("General/RestoreLastSession", false).toBool();
+}
+
+void Config::setRestoreLastSession(bool b)
+{
+    setValue("General/RestoreLastSession", b);
+}
+
 QVector<Config::Translation> Config::translations() const
 {
     if (!m_translations_parsed)

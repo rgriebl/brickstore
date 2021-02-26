@@ -55,7 +55,7 @@ public:
 
     bool closeAllWindows();
     QVector<Window *> allWindows() const;
-    void restoreWindowsFromAutosave();
+    bool restoreWindowsFromAutosave();
     Window *createWindow(Document *doc);
     Window *activeWindow() const;
     void setActiveWindow(Window *window);

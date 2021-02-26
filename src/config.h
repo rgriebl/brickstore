@@ -62,6 +62,9 @@ public:
     bool visualChangesMarkModified();
     void setVisualChangesMarkModified(bool b);
 
+    bool restoreLastSession();
+    void setRestoreLastSession(bool b);
+
     QStringList recentFiles() const;
 
     static constexpr int MaxRecentFiles = 18;

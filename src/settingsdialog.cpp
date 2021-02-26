@@ -259,6 +259,7 @@ void SettingsDialog::load()
     w_imperial->setChecked(Config::inst()->measurementSystem() == QLocale::ImperialSystem);
 
     w_partout->setCurrentIndex(int(Config::inst()->partOutMode()));
+    w_restore_session->setChecked(Config::inst()->restoreLastSession());
     w_modifications->setChecked(Config::inst()->visualChangesMarkModified());
 
     m_preferedCurrency = Config::inst()->defaultCurrencyCode();
@@ -318,6 +319,7 @@ void SettingsDialog::save()
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
     Config::inst()->setPartOutMode(Config::PartOutMode(w_partout->currentIndex()));
+    Config::inst()->setRestoreLastSession(w_restore_session->isChecked());
     Config::inst()->setVisualChangesMarkModified(w_modifications->isChecked());
 
     QDir dd(w_docdir->itemData(0).toString());

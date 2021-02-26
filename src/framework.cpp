@@ -601,7 +601,13 @@ FrameWork::FrameWork(QWidget *parent)
 
     checkForUpdates(true /* silent */);
 
-    restoreWindowsFromAutosave();
+    if (!restoreWindowsFromAutosave()) {
+        if (Config::inst()->restoreLastSession()) {
+            const auto files = Config::inst()->value("/MainWindow/LastSessionDocuments").toStringList();
+            for (const auto &file : files)
+                openDocument(file);
+        }
+    }
 }
 
 void FrameWork::setupScripts()
@@ -1338,6 +1344,7 @@ void FrameWork::restoreWindowsFromAutosave()
             setActiveWindow(window);
         }
     }
+    return (restorable > 0);
 }
 
 Window *FrameWork::createWindow(Document *doc)
@@ -1803,6 +1810,14 @@ void FrameWork::updateReFilterAction(bool b)
 
 void FrameWork::closeEvent(QCloseEvent *e)
 {
+    QStringList files;
+    foreach (QWidget *w, m_workspace->windowList()) {
+        QString fileName = static_cast<Window *>(w)->document()->fileName();
+        if (!fileName.isEmpty())
+            files << fileName;
+    }
+    Config::inst()->setValue("/MainWindow/LastSessionDocuments", files);
+
     if (!closeAllWindows()) {
         e->ignore();
         return;
@@ -1814,7 +1829,7 @@ void FrameWork::closeEvent(QCloseEvent *e)
 
 bool FrameWork::closeAllWindows()
 {
-    foreach(QWidget *w, m_workspace->windowList()) {
+    foreach (QWidget *w, m_workspace->windowList()) {
         if (!w->close())
             return false;
     }
