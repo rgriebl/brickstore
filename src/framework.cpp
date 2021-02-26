@@ -1761,6 +1761,7 @@ void FrameWork::blockUpdate(bool blocked)
     if (m_filter)
         m_filter->setDisabled(blocked);
     updateActions();
+    modificationUpdate();
 }
 
 void FrameWork::titleUpdate()
