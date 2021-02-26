@@ -1088,7 +1088,7 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
         ii->setStatus(v == qL1S("X") ? BrickLink::Status::Exclude :
                       v == qL1S("I") ? BrickLink::Status::Include :
                       v == qL1S("E") ? BrickLink::Status::Extra :
-                      v == qL1S("?") ? BrickLink::Status::Unknown
+                      v == qL1S("?") ? BrickLink::Status::Exclude // BrikTrak legacy
                                      : BrickLink::Status::Include); } },
     { u"Stockroom",    [&ii](auto v) {
         ii->setStockroom(v == qL1S("A") || v.isEmpty() ? BrickLink::Stockroom::A :
@@ -1246,7 +1246,6 @@ QDomDocument DocumentIO::createBsxInventory(const Document *doc)
             const char16_t *st;
             switch (ii->status()) {
             default             :
-            case BrickLink::Status::Unknown: st = u"?"; break;
             case BrickLink::Status::Extra  : st = u"E"; break;
             case BrickLink::Status::Exclude: st = u"X"; break;
             case BrickLink::Status::Include: st = u"I"; break;
