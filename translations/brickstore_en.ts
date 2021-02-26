@@ -411,34 +411,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message>
-        <source>Exclude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extra</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Include</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Counter part</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Alternate match id: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
@@ -562,23 +534,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>-</source>
-        <comment>no subcondition</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sealed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Complete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Incomplete</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
         <source>While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.</source>
         <translation type="vanished">
@@ -592,16 +547,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Cost</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>N</source>
-        <comment>List&gt;Cond&gt;New</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>U</source>
-        <comment>List&gt;Cond&gt;Used</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -684,6 +629,75 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>This change cannot be applied via BrickLink&apos;s Mass-Update mechanism!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extra</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Include</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Counter part</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alternate match id: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N</source>
+        <comment>List&gt;Cond&gt;New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>U</source>
+        <comment>List&gt;Cond&gt;Used</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>ToolTip Cond&gt;New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Used</source>
+        <comment>ToolTip Cond&gt;Used</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sealed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do not retain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>ToolTip Stockroom&gt;None</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stockroom</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1092,14 +1106,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Match Items against Set Inventories...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Copy Remarks from Document...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Select All</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1156,35 +1162,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Include</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Exclude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extra</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggle Include/Exclude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggle New/Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Color...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1192,51 +1170,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Multiply...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Divide...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Price</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Round to 2 Decimal Places</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set to Price Guide...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Inc- or Decrease...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Bulk Quantity...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sale...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Add to...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remove from...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1248,35 +1186,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Yes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggle Yes/No</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Stockroom Item</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>B</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>C</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reserved for...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1325,10 +1235,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Error Log</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1418,31 +1324,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <source>Insert</source>
         <comment>Edit|AddItems</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>New</source>
-        <comment>Cond|New</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>None</source>
-        <comment>SubCond|None</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sealed</source>
-        <comment>SubCond|Sealed</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Complete</source>
-        <comment>SubCond|Complete</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Incomplete</source>
-        <comment>SubCond|Incomplete</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1540,6 +1421,171 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Reset difference mode base values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy values from document...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set status to Include</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set status to Exclude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set status to Extra</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle status between Include and Exclude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set condition to New</source>
+        <comment>Cond|New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set condition to Used</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sub-condition to None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sub-condition to Sealed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sub-condition to Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sub-condition to Incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set item...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set color...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set quantity...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiply quantity...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Divide quantity...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Round price to 2 decimals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set price...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set price to guide...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adjust price...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Round cost to 2 decimals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set cost...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adjust cost...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set bulk quantity...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sale...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set comment...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to comment...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from comment...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set remark...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to remark...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from remark...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear remark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set retain flag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unset retain flag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle retain flag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set stockroom to None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set stockroom to A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set stockroom to B</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set stockroom to C</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set reserved for...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1754,6 +1800,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>&amp;Include instructions</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ImportOrderDialog</name>
@@ -1841,6 +1891,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Show on BrickLink</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Address not available</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>IncDecPricesDialog</name>
@@ -1879,11 +1933,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>ManageColumnLayoutsDialog</name>
     <message>
-        <source>Configure Column Layouts</source>
+        <source>Drag the column layouts into the order you prefer, double-click to rename them and delete them by removing the check mark.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Drag the column layouts into the order you prefer, double-click to rename them and delete them by removing the check mark.</source>
+        <source>Manage Column Layouts</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2149,17 +2203,20 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>SelectDocumentDialog</name>
+    <name>SelectCopyMergeDialog</name>
+    <message>
+        <source>Copy or merge values</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SelectDocument</name>
     <message>
         <source>Items from Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Items from an already open document:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Select Item Source</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2251,6 +2308,97 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <name>SelectItemDialog</name>
     <message>
         <source>Select Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SelectMergeMode</name>
+    <message>
+        <source>Ignore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Leave the destination value as is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set to source value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set to source value, but only if destination is at default value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge average</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge field by calculating a quantity average</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tier prices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bulk quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sale percentage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reserved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retain flag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stockroom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All fields</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge the text from the source and the destination</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2514,6 +2662,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Restore the saved documents from the previous session.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On startup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your username is required here - not your email address.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SortCmd</name>
@@ -2572,6 +2732,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Go to the next difference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel the currently running blocking operation</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2762,19 +2926,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Prices are currently updated to Price Guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Verifying Price Guide data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Prices of the selected items have been updated to Price Guide values.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1 have been skipped, because of missing Price Guide records and/or network errors.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2818,10 +2970,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Changing remarks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2834,10 +2982,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Changing comments</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2846,15 +2990,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Which items should be subtracted from the current document:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Subtracting items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2936,7 +3072,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Toggled condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Toggled condition on one item</numerusform>
             <numerusform>Toggled condition on %n items</numerusform>
         </translation>
@@ -3027,7 +3163,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Price change on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Price change on one item</numerusform>
             <numerusform>Price change on %n items</numerusform>
         </translation>
@@ -3097,7 +3233,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Copied Remarks for %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Copied Remarks for one item</numerusform>
             <numerusform>Copied Remarks for %n items</numerusform>
         </translation>
@@ -3132,7 +3268,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Quantity divide by %1 on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Quantity divide by %1 on one item</numerusform>
             <numerusform>Quantity divide by %1 on %n items</numerusform>
         </translation>
@@ -3158,21 +3294,21 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>The quantities of %n lot(s) will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>The quantity of one lot will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
             <numerusform>The quantities of %n lots will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Clear remark on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Clear remark on one item</numerusform>
             <numerusform>Clear remark on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Clear comment on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Clear comment on one item</numerusform>
             <numerusform>Clear comment on %n items</numerusform>
         </translation>
@@ -3201,14 +3337,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Cost change on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cost change on one item</numerusform>
             <numerusform>Cost change on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Quantity multiply by %1 on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Quantity multiply by %1 on one item</numerusform>
             <numerusform>Quantity multiply by %1 on %n items</numerusform>
         </translation>
@@ -3224,7 +3360,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Cost spreaded over %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cost spreaded over one item</numerusform>
             <numerusform>Cost spreaded over %n items</numerusform>
         </translation>
@@ -3255,6 +3391,114 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Set column layout:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Rounded price on %n item(s)</source>
+        <translation>
+            <numerusform>Rounded price on one item</numerusform>
+            <numerusform>Rounded price on %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Loading price guide data from disk</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading price guide data from BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Set price to guide on %n item(s)</source>
+        <translation>
+            <numerusform>Set price to guide on one item</numerusform>
+            <numerusform>Set price to guide on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Adjusted price on %n item(s)</source>
+        <translation>
+            <numerusform>Adjusted price on one item</numerusform>
+            <numerusform>Adjusted price on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Rounded cost on %n item(s)</source>
+        <translation>
+            <numerusform>Rounded cost on one item</numerusform>
+            <numerusform>Rounded cost on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Adjusted cost on %n item(s)</source>
+        <translation>
+            <numerusform>Adjusted cost on one item</numerusform>
+            <numerusform>Adjusted cost on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Spreaded cost over %n item(s)</source>
+        <translation>
+            <numerusform>Spreaded cost over one item</numerusform>
+            <numerusform>Spreaded cost over %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Quantity divide on %n item(s)</source>
+        <translation>
+            <numerusform>Quantity divide on one item</numerusform>
+            <numerusform>Quantity divide on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</source>
+        <translation>
+            <numerusform>The quantities of one lot would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</numerusform>
+            <numerusform>The quantities of %n lots would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Quantity multiply on %n item(s)</source>
+        <translation>
+            <numerusform>Quantity multiply on one item</numerusform>
+            <numerusform>Quantity multiply on %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Modify Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Cleared remark on %n item(s)</source>
+        <translation>
+            <numerusform>Cleared remark on one item</numerusform>
+            <numerusform>Cleared remark on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Cleared comment on %n item(s)</source>
+        <translation>
+            <numerusform>Cleared comment on one item</numerusform>
+            <numerusform>Cleared comment on %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Select the document that should serve as a source to fill in the corresponding fields in the current document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose how fields are getting copied or merged.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Copied or merged %n item(s)</source>
+        <translation>
+            <numerusform>Copied or merged one item</numerusform>
+            <numerusform>Copied or merged %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>%1 have been skipped, because of missing Price Guide records or network errors.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

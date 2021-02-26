@@ -1463,7 +1463,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
         QString s = tr("Prices of the selected items have been updated to Price Guide values.");
         if (failCount) {
-            s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records and/or network errors.")
+            s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records or network errors.")
                     .arg(CMB_BOLD(QString::number(failCount)));
         }
 

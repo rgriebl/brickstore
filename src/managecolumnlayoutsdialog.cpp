@@ -77,7 +77,7 @@ ManageColumnLayoutsDialog::ManageColumnLayoutsDialog(QWidget *parent)
 
 void ManageColumnLayoutsDialog::retranslateUi()
 {
-    setWindowTitle(tr("Configure Column Layouts"));
+    setWindowTitle(tr("Manage Column Layouts"));
     m_label->setText(tr("Drag the column layouts into the order you prefer, double-click to rename them and delete them by removing the check mark."));
 }
 

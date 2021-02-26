@@ -201,7 +201,7 @@ void SelectMergeMode::createFields(QWidget *parent)
                 "join", },
     { Document::MergeMode::MergeText,
                 QT_TR_NOOP("Merge text"),
-                QT_TR_NOOP("Merge tfhe text from the source and the destination"),
+                QT_TR_NOOP("Merge the text from the source and the destination"),
                 "edit-select-text", },
     { Document::MergeMode::MergeAverage,
                 QT_TR_NOOP("Merge average"),

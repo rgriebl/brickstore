@@ -712,7 +712,6 @@ void FrameWork::translateActions()
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
         { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
         { "edit_partoutitems",              tr("Part out Item..."),                   },
-        { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
         { "edit_copy_fields",               tr("Copy values from document..."),       },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A") },
@@ -1142,8 +1141,6 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_subtractitems", NeedDocument);
     (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
     (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1) | NeedQuantity);
-    (void) newQAction(this, "edit_setmatch", NeedDocument);
-//    (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
     (void) newQAction(this, "edit_copy_fields", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_all", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
