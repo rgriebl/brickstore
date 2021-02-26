@@ -37,9 +37,9 @@
 
 // all rates as downloaded are relative to the Euro, but
 // we need everything relative to the US Dollar
-static void baseConvert(QMap<QString, qreal> &rates)
+static void baseConvert(QHash<QString, qreal> &rates)
 {
-    QMap<QString, qreal>::iterator usd_it = rates.find(QLatin1String("USD"));
+    QHash<QString, qreal>::iterator usd_it = rates.find(QLatin1String("USD"));
 
     if (usd_it == rates.end()) {
         rates.clear();
@@ -47,7 +47,7 @@ static void baseConvert(QMap<QString, qreal> &rates)
     }
     qreal usd_eur = qreal(1) / usd_it.value();
 
-    for (QMap<QString, qreal>::iterator it = rates.begin(); it != rates.end(); ++it)
+    for (QHash<QString, qreal>::iterator it = rates.begin(); it != rates.end(); ++it)
         it.value() = (it == usd_it) ? 1 : it.value() *= usd_eur;
 
     rates.insert(QLatin1String("EUR"), usd_eur);
@@ -95,7 +95,7 @@ Currency *Currency::inst()
     return s_inst;
 }
 
-void Currency::parseRates(const QStringList &ratesList, QMap<QString, double> &ratesMap)
+void Currency::parseRates(const QStringList &ratesList, QHash<QString, double> &ratesMap)
 {
     for (const QString &s : ratesList) {
         QStringList sl = s.split(QLatin1Char('|'));
@@ -115,12 +115,12 @@ QStringList Currency::currencyCodes() const
     return m_rates.keys();
 }
 
-QMap<QString, qreal> Currency::rates() const
+QHash<QString, qreal> Currency::rates() const
 {
     return m_rates;
 }
 
-QMap<QString, qreal> Currency::customRates() const
+QHash<QString, qreal> Currency::customRates() const
 {
     return m_customRates;
 }
@@ -158,7 +158,7 @@ void Currency::updateRates(bool silent)
             } else {
                 auto r = reply->readAll();
                 QXmlStreamReader reader(r);
-                QMap<QString, qreal> newRates;
+                QHash<QString, qreal> newRates;
                 static QLocale c = QLocale::c();
 
                 while (!reader.atEnd()) {

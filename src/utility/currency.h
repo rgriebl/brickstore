@@ -15,7 +15,7 @@
 
 #include <QObject>
 #include <QString>
-#include <QMap>
+#include <QHash>
 #include <QDateTime>
 
 QT_FORWARD_DECLARE_CLASS(QKeyEvent)
@@ -31,8 +31,8 @@ public:
     static Currency *inst();
     ~Currency() override;
 
-    QMap<QString, qreal> rates() const;
-    QMap<QString, qreal> customRates() const;
+    QHash<QString, qreal> rates() const;
+    QHash<QString, qreal> customRates() const;
     qreal rate(const QString &currencyCode) const;
     qreal customRate(const QString &currencyCode) const;
     QStringList currencyCodes() const;
@@ -56,10 +56,10 @@ private:
     Currency(const Currency &);
     static Currency *s_inst;
 
-    static void parseRates(const QStringList &ratesList, QMap<QString, double> &ratesMap);
+    static void parseRates(const QStringList &ratesList, QHash<QString, double> &ratesMap);
 
     QNetworkAccessManager *m_nam;
-    QMap<QString, qreal> m_rates;
-    QMap<QString, qreal> m_customRates;
+    QHash<QString, qreal> m_rates;
+    QHash<QString, qreal> m_customRates;
     QDateTime m_lastUpdate;
 };
