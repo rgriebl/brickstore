@@ -100,7 +100,6 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
             this, [this]() {
         m_table->resizeRowsToContents();
-        m_table->resizeColumnToContents(Document::Picture);
     });
 }
 
