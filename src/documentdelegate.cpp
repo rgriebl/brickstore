@@ -649,8 +649,8 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     switch (e->type()) {
     case QEvent::KeyPress:
     case QEvent::MouseButtonDblClick: {
-        m_multiEdit = (e->type() == QEvent::KeyPress)
-                && (static_cast<QInputEvent *>(e)->modifiers() & Qt::ControlModifier);
+        m_multiEdit = true; /*(e->type() == QEvent::KeyPress)
+                && (static_cast<QInputEvent *>(e)->modifiers() & Qt::ControlModifier);*/
         if (nonInlineEdit(e, option, idx))
             return true;
         break;
@@ -843,7 +843,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
     m_lineedit->setValidator(valid);
-    m_multiEdit = (qApp->keyboardModifiers() & Qt::ControlModifier);
+    m_multiEdit = true; /*(qApp->keyboardModifiers() & Qt::ControlModifier);*/
 
     return m_lineedit;
 }
