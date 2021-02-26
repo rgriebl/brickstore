@@ -369,8 +369,9 @@ public:
     void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
     double price() const               { return m_price; }
     void setPrice(double p)            { m_price = p; }
-    double tierPrice(int i) const      { return m_tier_price [qBound(0, i, 2)]; }
-    bool setTierPrice(int i, double p) { if (p < 0) return false; m_tier_price [qBound(0, i, 2)] = p; return true; }
+    double tierPrice(int i) const      { return m_tier_price[qBound(0, i, 2)]; }
+    void setTierPrice(int i, double p) { m_tier_price[qBound(0, i, 2)] = p; }
+
     int sale() const                   { return m_sale; }
     void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
     double total() const               { return m_price * m_quantity; }
@@ -401,6 +402,20 @@ public:
 
     bool counterPart() const           { return m_cpart; }
     void setCounterPart(bool b)        { m_cpart = b; }
+
+    // needed for the copy/merge template code -- std::bind doesn't work there
+    int tierQuantity0() const          { return tierQuantity(0); }
+    int tierQuantity1() const          { return tierQuantity(1); }
+    int tierQuantity2() const          { return tierQuantity(2); }
+    void setTierQuantity0(int q)       { setTierQuantity(0, q); }
+    void setTierQuantity1(int q)       { setTierQuantity(1, q); }
+    void setTierQuantity2(int q)       { setTierQuantity(2, q); }
+    double tierPrice0() const          { return tierPrice(0); }
+    double tierPrice1() const          { return tierPrice(1); }
+    double tierPrice2() const          { return tierPrice(2); }
+    void setTierPrice0(double p)       { setTierPrice(0, p); }
+    void setTierPrice1(double p)       { setTierPrice(1, p); }
+    void setTierPrice2(double p)       { setTierPrice(2, p); }
 
     struct Incomplete {
         QString m_item_id;
@@ -912,6 +927,7 @@ Q_DECLARE_METATYPE(const BrickLink::Color *)
 Q_DECLARE_METATYPE(const BrickLink::Category *)
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
 Q_DECLARE_METATYPE(const BrickLink::Item *)
+Q_DECLARE_METATYPE(const BrickLink::InvItem *)
 Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
 Q_DECLARE_METATYPE(const BrickLink::Order *)
 Q_DECLARE_METATYPE(const BrickLink::Cart *)

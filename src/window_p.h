@@ -17,10 +17,11 @@
 #include <QFrame>
 #include <QTableView>
 
-QT_FORWARD_DECLARE_CLASS(QProgressDialog)
 QT_FORWARD_DECLARE_CLASS(QWidget)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QStackedLayout)
+QT_FORWARD_DECLARE_CLASS(QProgressBar)
 
 class Window;
 class Document;
@@ -87,46 +88,6 @@ private:
 ///////////////////////////////////////////////////////////////////////
 
 
-class WindowProgressHelper : public QObject
-{
-public:
-    WindowProgressHelper(QProgressDialog *pd);
-protected:
-    bool eventFilter(QObject *watched, QEvent *event) override;
-};
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-class WindowProgress
-{
-public:
-    explicit WindowProgress(QWidget *w, const QString &title = QString(), int total = 0);
-    ~WindowProgress();
-
-    void stop();
-    void step(int d = 1);
-    void setOverrideCursor();
-    void restoreOverrideCursor();
-
-private:
-    QWidget * m_w;
-    bool      m_upd_enabled : 1;
-    bool      m_reenabled   : 1;
-    int       m_counter = 0;
-    int       m_lastTick = 0;
-    QProgressDialog *m_progress;
-};
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
 class TableView : public QTableView
 {
     Q_OBJECT
@@ -166,6 +127,7 @@ public:
     void documentCurrencyChanged(const QString &ccode);
     void changeDocumentCurrency(QAction *a);
     void updateStatistics();
+    void updateBlockState(bool blocked);
 
 protected:
     void languageChange();
@@ -185,5 +147,11 @@ private:
     QLabel *m_value;
     QLabel *m_profit;
     QToolButton *m_currency;
+
+    QStackedLayout *m_stack;
+
+    QProgressBar *m_blockProgress;
+    QLabel *m_blockTitle;
+    QToolButton *m_blockCancel;
 };
 

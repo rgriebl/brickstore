@@ -397,11 +397,11 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_subtractitems",
                                       "edit_mergeitems",
                                       "edit_partoutitems",
-                                      //"edit_setmatch",
                                       "-",
+                                      "edit_item",
+                                      "edit_color",
                                       "edit_status",
                                       "edit_cond",
-                                      "edit_color",
                                       "edit_qty",
                                       "edit_price",
                                       "edit_cost",
@@ -452,35 +452,6 @@ FrameWork::FrameWork(QWidget *parent)
                                       "-",
                                       "help_about"
                                   }));
-
-    m_contextmenu = createMenu("menu_context", {
-                                   "edit_cut",
-                                   "edit_copy",
-                                   "edit_paste",
-                                   "edit_delete",
-                                   "-",
-                                   "edit_select_all",
-                                   "edit_select_none",
-                                   "-",
-                                   "edit_filter_from_selection",
-                                   "-",
-                                   "edit_mergeitems",
-                                   "edit_partoutitems",
-                                   "-",
-                                   "edit_status",
-                                   "edit_cond",
-                                   "edit_color",
-                                   "edit_qty",
-                                   "edit_price",
-                                   "edit_cost",
-                                   "edit_comment",
-                                   "edit_remark",
-                                   "-",
-                                   "bricklink_catalog",
-                                   "bricklink_priceguide",
-                                   "bricklink_lotsforsale",
-                                   "bricklink_myinventory"
-                               });
 
     setupToolBar(m_toolbar, {
                      "document_new",
@@ -617,35 +588,39 @@ void FrameWork::setupScripts()
         return;
     }
 
-    const auto scripts = ScriptManager::inst()->extensionScripts();
+    auto reloadScripts = [this](const QVector<Script *> &scripts) {
+        for (auto script : scripts) {
+            const auto extensionActions = script->extensionActions();
+            for (auto extensionAction : extensionActions) {
+                auto action = new QAction(extensionAction->text(), extensionAction);
 
-    auto extrasMenu = findChild<QAction *>("menu_extras")->menu();
-    auto contextMenu = findChild<QAction *>("menu_context")->menu();
+                ((extensionAction->location() == ExtensionScriptAction::Location::ContextMenu)
+                        ? m_extensionContextActions : m_extensionExtraActions).append(action);
 
-    bool addedToExtras = false;
-    bool addedToContext = false;
-
-    for (auto script : scripts) {
-        const auto extensionActions = script->extensionActions();
-        for (auto extensionAction : extensionActions) {
-            bool c = (extensionAction->location() == ExtensionScriptAction::Location::ContextMenu);
-            QMenu *menu = c ? contextMenu : extrasMenu;
-            bool &addedTo = c ? addedToContext : addedToExtras;
-
-            if (!addedTo) {
-                addedTo = true;
-                menu->addSeparator();
+                connect(action, &QAction::triggered, this, [extensionAction]() {
+                    try {
+                        extensionAction->executeAction();
+                    } catch (const Exception &e) {
+                        MessageBox::warning(nullptr, { }, e.error());
+                    }
+                });
             }
-            menu->addAction(extensionAction->text(), extensionAction,
-                            [extensionAction]() {
-                try {
-                    extensionAction->executeAction();
-                } catch (const Exception &e) {
-                    MessageBox::warning(nullptr, { }, e.error());
-                }
-            });
         }
-    }
+
+    };
+
+    connect(ScriptManager::inst(), &ScriptManager::aboutToReload,
+            this, [this]() {
+        m_extensionContextActions.clear();
+        m_extensionExtraActions.clear();
+    });
+    connect(ScriptManager::inst(), &ScriptManager::reloaded,
+            this, [this, &reloadScripts]() {
+        reloadScripts(ScriptManager::inst()->extensionScripts());
+    });
+    reloadScripts(ScriptManager::inst()->extensionScripts());
+
+    //TODO: aboutToShow in Extra menu
 }
 
 void FrameWork::languageChange()
@@ -762,55 +737,55 @@ void FrameWork::translateActions()
         { "help_about",                     tr("About..."),                           },
         { "check_for_updates",              tr("Check for Program Updates..."),       },
         { "edit_status",                    tr("Status"),                             },
-        { "edit_status_include",            tr("Include"),                            },
-        { "edit_status_exclude",            tr("Exclude"),                            },
-        { "edit_status_extra",              tr("Extra"),                              },
-        { "edit_status_toggle",             tr("Toggle Include/Exclude"),             },
+        { "edit_status_include",            tr("Set status to Include"),              },
+        { "edit_status_exclude",            tr("Set status to Exclude"),              },
+        { "edit_status_extra",              tr("Set status to Extra"),                },
+        { "edit_status_toggle",             tr("Toggle status between Include and Exclude"), },
         { "edit_cond",                      tr("Condition"),                          },
-        { "edit_cond_new",                  tr("New", "Cond|New"),                    },
-        { "edit_cond_used",                 tr("Used"),                               },
-        { "edit_cond_toggle",               tr("Toggle New/Used"),                    },
-        { "edit_subcond_none",              tr("None", "SubCond|None"),               },
-        { "edit_subcond_sealed",            tr("Sealed", "SubCond|Sealed"),           },
-        { "edit_subcond_complete",          tr("Complete", "SubCond|Complete"),       },
-        { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   },
-        { "edit_color",                     tr("Color..."),                           },
+        { "edit_cond_new",                  tr("Set condition to New", "Cond|New"),   },
+        { "edit_cond_used",                 tr("Set condition to Used"),              },
+        { "edit_subcond_none",              tr("Set sub-condition to None"),          },
+        { "edit_subcond_sealed",            tr("Set sub-condition to Sealed"),        },
+        { "edit_subcond_complete",          tr("Set sub-condition to Complete"),      },
+        { "edit_subcond_incomplete",        tr("Set sub-condition to Incomplete"),    },
+        { "edit_item",                      tr("Set item..."),                        },
+        { "edit_color",                     tr("Set color..."),                       },
         { "edit_qty",                       tr("Quantity"),                           },
-        { "edit_qty_set",                   tr("Set..."),                             },
-        { "edit_qty_multiply",              tr("Multiply..."),                        tr("Ctrl+*", "Edit|Quantity|Multiply") },
-        { "edit_qty_divide",                tr("Divide..."),                          tr("Ctrl+/", "Edit|Quantity|Divide") },
+        { "edit_qty_set",                   tr("Set quantity..."),                    },
+        { "edit_qty_multiply",              tr("Multiply quantity..."),               tr("Ctrl+*", "Edit|Quantity|Multiply") },
+        { "edit_qty_divide",                tr("Divide quantity..."),                 tr("Ctrl+/", "Edit|Quantity|Divide") },
         { "edit_price",                     tr("Price"),                              },
-        { "edit_price_round",               tr("Round to 2 Decimal Places"),          },
-        { "edit_price_set",                 tr("Set..."),                             },
-        { "edit_price_to_priceguide",       tr("Set to Price Guide..."),              tr("Ctrl+G", "Edit|Price|Set to PriceGuide") },
-        { "edit_price_inc_dec",             tr("Inc- or Decrease..."),                tr("Ctrl++", "Edit|Price|Inc/Dec") },
+        { "edit_price_round",               tr("Round price to 2 decimals"),          },
+        { "edit_price_set",                 tr("Set price..."),                       },
+        { "edit_price_to_priceguide",       tr("Set price to guide..."),              tr("Ctrl+G", "Edit|Price|Set to PriceGuide") },
+        { "edit_price_inc_dec",             tr("Adjust price..."),                    tr("Ctrl++", "Edit|Price|Inc/Dec") },
         { "edit_cost",                      tr("Cost"),                               },
-        { "edit_cost_round",                tr("Round to 2 Decimal Places"),          },
-        { "edit_cost_set",                  tr("Set..."),                             },
-        { "edit_cost_inc_dec",              tr("Inc- or Decrease..."),                },
+        { "edit_cost_round",                tr("Round cost to 2 decimals") ,          },
+        { "edit_cost_set",                  tr("Set cost..."),                        },
+        { "edit_cost_inc_dec",              tr("Adjust cost..."),                     },
         { "edit_cost_spread",               tr("Spread Cost Amount..."),              },
-        { "edit_bulk",                      tr("Bulk Quantity..."),                   },
-        { "edit_sale",                      tr("Sale..."),                            tr("Ctrl+%", "Edit|Sale") },
+        { "edit_bulk",                      tr("Set bulk quantity..."),               },
+        { "edit_sale",                      tr("Set sale..."),                        tr("Ctrl+%", "Edit|Sale") },
         { "edit_comment",                   tr("Comment"),                            },
-        { "edit_comment_set",               tr("Set..."),                             },
-        { "edit_comment_add",               tr("Add to..."),                          },
-        { "edit_comment_rem",               tr("Remove from..."),                     },
-        { "edit_comment_clear",             tr("Clear"),                              },
+        { "edit_comment_set",               tr("Set comment..."),                     },
+        { "edit_comment_add",               tr("Add to comment..."),                  },
+        { "edit_comment_rem",               tr("Remove from comment..."),             },
+        { "edit_comment_clear",             tr("Clear comment"),                      },
         { "edit_remark",                    tr("Remark"),                             },
-        { "edit_remark_set",                tr("Set..."),                             },
-        { "edit_remark_add",                tr("Add to..."),                          },
-        { "edit_remark_rem",                tr("Remove from..."),                     },
-        { "edit_remark_clear",              tr("Clear"),                              },
+        { "edit_remark_set",                tr("Set remark..."),                      },
+        { "edit_remark_add",                tr("Add to remark..."),                   },
+        { "edit_remark_rem",                tr("Remove from remark..."),              },
+        { "edit_remark_clear",              tr("Clear remark"),                       },
         { "edit_retain",                    tr("Retain in Inventory"),                },
-        { "edit_retain_yes",                tr("Yes"),                                },
-        { "edit_retain_no",                 tr("No"),                                 },
-        { "edit_retain_toggle",             tr("Toggle Yes/No"),                      },
+        { "edit_retain_yes",                tr("Set retain flag"),                    },
+        { "edit_retain_no",                 tr("Unset retain flag"),                  },
+        { "edit_retain_toggle",             tr("Toggle retain flag"),                 },
         { "edit_stockroom",                 tr("Stockroom Item"),                     },
-        { "edit_stockroom_no",              tr("No"),                                 },
-        { "edit_stockroom_a",               tr("A"),                                  },
-        { "edit_stockroom_b",               tr("B"),                                  },
-        { "edit_stockroom_c",               tr("C"),                                  },
-        { "edit_reserved",                  tr("Reserved for..."),                    },
+        { "edit_stockroom_no",              tr("Set stockroom to None"),              },
+        { "edit_stockroom_a",               tr("Set stockroom to A"),                 },
+        { "edit_stockroom_b",               tr("Set stockroom to B"),                 },
+        { "edit_stockroom_c",               tr("Set stockroom to C"),                 },
+        { "edit_reserved",                  tr("Set reserved for..."),                },
         { "bricklink_catalog",              tr("Show BrickLink Catalog Info..."),     tr("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info") },
         { "bricklink_priceguide",           tr("Show BrickLink Price Guide Info..."), tr("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide") },
         { "bricklink_lotsforsale",          tr("Show Lots for Sale on BrickLink..."), tr("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale") },
@@ -823,6 +798,7 @@ void FrameWork::translateActions()
         { "edit_status_include", "vcs-normal" },
         { "edit_status_exclude", "vcs-removed" },
         { "edit_status_extra", "vcs-added" },
+        { "edit_color", "color_management" },
     };
 
     for (auto &at : actiontable) {
@@ -887,9 +863,17 @@ void FrameWork::changeEvent(QEvent *e)
     QMainWindow::changeEvent(e);
 }
 
-QAction *FrameWork::findAction(const char *name)
+QAction *FrameWork::findAction(const char *name) const
 {
-    return !name || !name[0] ? nullptr : static_cast <QAction *>(findChild<QAction *>(QLatin1String(name)));
+    static QHash<QString, QAction *> cache;
+
+    if (!name || !name[0])
+        return nullptr;
+    QString n = QLatin1String(name);
+    auto &action = cache[n];
+    if (!action)
+        action = findChild<QAction *>(n);
+    return action;
 }
 
 QDockWidget *FrameWork::createDock(QWidget *widget)
@@ -1181,14 +1165,13 @@ void FrameWork::createActions()
     m->addAction(newQAction(g, "edit_cond_new", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_cond_used", NeedSelection(1), true));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_cond_toggle", NeedSelection(1)));
-    m->addSeparator();
     g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_subcond_none", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_sealed", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_complete", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_incomplete", NeedSelection(1) | NeedSubCondition, true));
 
+    (void) newQAction(this, "edit_item", NeedSelection(1));
     (void) newQAction(this, "edit_color", NeedSelection(1));
 
     m = newQMenu(this, "edit_qty", NeedSelection(1));
@@ -1292,24 +1275,11 @@ void FrameWork::openDocument(const QString &file)
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
                                              BrickLink::Condition condition)
 {
-    bool instructions = false;
-    BrickLink::Status extraParts = BrickLink::Status::Extra;
+    if (!item)
+        return;
 
-    if (!item) {
-        if (!m_importinventory_dialog)
-            m_importinventory_dialog = new ImportInventoryDialog(this);
-
-        if (m_importinventory_dialog->exec() == QDialog::Accepted) {
-            item = m_importinventory_dialog->item();
-            quantity = m_importinventory_dialog->quantity();
-            condition = m_importinventory_dialog->condition();
-            instructions = m_importinventory_dialog->includeInstructions();
-            extraParts = m_importinventory_dialog->extraParts();
-        }
-    }
-
-    createWindow(DocumentIO::importBrickLinkInventory(item, quantity, condition, extraParts,
-                                                      instructions));
+    if (auto doc = DocumentIO::importBrickLinkInventory(item, quantity, condition))
+        FrameWork::inst()->createWindow(doc);
 }
 
 bool FrameWork::checkBrickLinkLogin()
@@ -1329,7 +1299,47 @@ bool FrameWork::checkBrickLinkLogin()
     }
 }
 
-void FrameWork::restoreWindowsFromAutosave()
+QList<QAction *> FrameWork::contextMenuActions() const
+{
+    static const char *contextActions[] =  {
+        "edit_cut",
+        "edit_copy",
+        "edit_paste",
+        "edit_delete",
+        "-",
+        "edit_select_all",
+        "edit_select_none",
+        "-",
+        "edit_filter_from_selection",
+        "-",
+        "edit_mergeitems",
+        "edit_partoutitems",
+        "-",
+        "bricklink_catalog",
+        "bricklink_priceguide",
+        "bricklink_lotsforsale",
+        "bricklink_myinventory"
+    };
+    static QList<QAction *> actions;
+    if (actions.isEmpty()) {
+        for (const auto &aname : contextActions) {
+            if (aname == QByteArray("-"))
+                actions << nullptr;
+            else
+                actions << findAction(aname);
+        }
+    }
+
+    QList<QAction *> result = actions;
+    if (!m_extensionContextActions.isEmpty()) {
+        result.append(nullptr);
+        result.append(m_extensionContextActions);
+    }
+
+    return result;
+}
+
+bool FrameWork::restoreWindowsFromAutosave()
 {
     int restorable = Window::restorableAutosaves();
     if (restorable > 0) {
@@ -1560,6 +1570,8 @@ void FrameWork::connectWindow(QWidget *w)
                    this, &FrameWork::modificationUpdate);
         disconnect(m_activeWin.data(), &Window::selectionChanged,
                    this, &FrameWork::selectionUpdate);
+        disconnect(m_activeWin.data(), &Window::blockingOperationActiveChanged,
+                   this, &FrameWork::blockUpdate);
         if (m_filter) {
             disconnect(this, &FrameWork::filterChanged,
                        doc, &Document::setFilter);
@@ -1588,6 +1600,8 @@ void FrameWork::connectWindow(QWidget *w)
                 this, &FrameWork::modificationUpdate);
         connect(window, &Window::selectionChanged,
                 this, &FrameWork::selectionUpdate);
+        connect(window, &Window::blockingOperationActiveChanged,
+                this, &FrameWork::blockUpdate);
 
         if (m_filter) {
             m_filter->setText(doc->filter());
@@ -1607,10 +1621,6 @@ void FrameWork::connectWindow(QWidget *w)
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
-
-        // update per-document action states
-
-        //findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
         m_activeWin = window;
     }
 
@@ -1621,15 +1631,18 @@ void FrameWork::connectWindow(QWidget *w)
     }
 
     selectionUpdate(m_activeWin ? m_activeWin->selection() : Document::ItemList());
+    blockUpdate(m_activeWin ? m_activeWin->isBlockingOperationActive() : false);
     titleUpdate();
     modificationUpdate();
 
     emit windowActivated(m_activeWin);
 }
 
-void FrameWork::updateActions(const Document::ItemList &selection)
+void FrameWork::updateActions()
 {
-    int cnt = selection.count();
+    Document::ItemList selection;
+    if (m_activeWin)
+        selection = m_activeWin->selection();
     bool isOnline = Application::inst()->isOnline();
 
     const auto *doc = m_activeWin ? m_activeWin->document() : nullptr;
@@ -1642,6 +1655,11 @@ void FrameWork::updateActions(const Document::ItemList &selection)
             continue;
 
         bool b = true;
+
+        if (m_activeWin && m_activeWin->isBlockingOperationActive()
+                && (flags & (NeedDocument | NeedItems | NeedItemMask))) {
+            b = false;
+        }
 
         if (flags & NeedNetwork)
             b = b && isOnline;
@@ -1657,9 +1675,9 @@ void FrameWork::updateActions(const Document::ItemList &selection)
                 quint8 maxSelection = (flags >> 16) & 0xff;
 
                 if (minSelection)
-                    b = b && (cnt >= minSelection);
+                    b = b && (selection.count() >= minSelection);
                 if (maxSelection)
-                    b = b && (cnt <= maxSelection);
+                    b = b && (selection.count() <= maxSelection);
             }
         }
 
@@ -1684,8 +1702,6 @@ void FrameWork::updateActions(const Document::ItemList &selection)
 
 void FrameWork::selectionUpdate(const Document::ItemList &selection)
 {
-    updateActions(selection);
-
     int cnt        = selection.count();
     int status     = -1;
     int condition  = -1;
@@ -1732,6 +1748,19 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
     findAction("edit_stockroom_a")->setChecked(stockroom == int(BrickLink::Stockroom::A));
     findAction("edit_stockroom_b")->setChecked(stockroom == int(BrickLink::Stockroom::B));
     findAction("edit_stockroom_c")->setChecked(stockroom == int(BrickLink::Stockroom::C));
+
+    updateActions();
+}
+
+void FrameWork::blockUpdate(bool blocked)
+{
+    static QUndoStack blockStack;
+
+    if (activeWindow())
+        m_undogroup->setActiveStack(blocked ? &blockStack : activeWindow()->document()->undoStack());
+    if (m_filter)
+        m_filter->setDisabled(blocked);
+    updateActions();
 }
 
 void FrameWork::titleUpdate()
@@ -1750,10 +1779,11 @@ void FrameWork::titleUpdate()
 void FrameWork::modificationUpdate()
 {
     bool modified = m_activeWin ? m_activeWin->isWindowModified() : false;
-    setWindowModified(modified);
-
+    bool blocked = m_activeWin ? m_activeWin->isBlockingOperationActive() : false;
     bool hasNoFileName = (m_activeWin && m_activeWin->document()->fileName().isEmpty());
-    findAction("document_save")->setEnabled(modified || hasNoFileName);
+
+    setWindowModified(modified);
+    findAction("document_save")->setEnabled((modified || hasNoFileName) && !blocked);
 }
 
 void FrameWork::transferJobProgressUpdate(int p, int t)
@@ -1781,15 +1811,7 @@ void FrameWork::onlineStateChanged(bool isOnline)
     if (!isOnline)
         cancelAllTransfers(true);
 
-    if (m_activeWin)
-        updateActions(m_activeWin->selection());
-    else
-        updateActions();
-}
-
-void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
-{
-    m_contextmenu->popup(pos);
+    updateActions();
 }
 
 void FrameWork::setFilter(const QString &filter)

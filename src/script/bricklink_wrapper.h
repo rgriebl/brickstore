@@ -235,7 +235,7 @@ class Picture : public WrapperBase<::BrickLink::Picture>
     Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(wrapped, bool valid READ valid)
+    Q_PRIVATE_PROPERTY(wrapped, bool isValid READ isValid)
     Q_PRIVATE_PROPERTY(wrapped, QImage image READ image)
 
 public:
@@ -261,7 +261,7 @@ class PriceGuide : public WrapperBase<::BrickLink::PriceGuide>
     Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(wrapped, bool valid READ valid)
+    Q_PRIVATE_PROPERTY(wrapped, bool isValid READ isValid)
 
 public:
     explicit PriceGuide(::BrickLink::PriceGuide *pg = nullptr);

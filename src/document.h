@@ -75,8 +75,26 @@ public:
     };
 
     enum ExtraRoles {
-        FilterRole = Qt::UserRole
+        FilterRole = Qt::UserRole,
+        BaseDisplayRole, // like Qt::DisplayRole, but for differenceBase
+        BaseEditRole,    // like Qt::EditRole, but for differenceBase
+        ItemPointerRole,
+        BaseItemPointerRole,
+        ErrorFlagsRole,
+        DifferenceFlagsRole,
+
+        HeaderDefaultWidthRole,
     };
+
+    enum class MergeMode {
+        Ignore       = 0,
+        Copy         = 1,
+        Merge        = 2,
+        MergeText    = 4,
+        MergeAverage = 8,
+    };
+    Q_DECLARE_FLAGS(MergeModes, MergeMode)
+    Q_FLAG(MergeMode)
 
     typedef BrickLink::InvItem Item;
     typedef QVector<BrickLink::InvItem *> ItemList;
@@ -123,17 +141,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex&) const override;
     bool setData(const QModelIndex&, const QVariant&, int) override;
     QVariant dataForEditRole(const Item *it, Field f) const;
-    QString dataForDisplayRole(const BrickLink::InvItem *it, Field f) const;
+    QVariant dataForDisplayRole(const BrickLink::InvItem *it, Field f) const;
     QVariant dataForFilterRole(const Item *it, Field f) const;
-    QVariant dataForDecorationRole(const Item *it, Field f) const;
-    Qt::CheckState dataForCheckStateRole(const Item *it, Field f) const;
-    int dataForTextAlignmentRole(const Item *it, Field f) const;
-    QString dataForToolTipRole(const Item *it, Field f) const;
-    static QString headerDataForDisplayRole(Field f);
-    int headerDataForTextAlignmentRole(Field f) const;
-    int headerDataForDefaultWidthRole(Field f) const;
-
-    QString subConditionLabel(BrickLink::SubCondition sc) const;
 
     bool isSorted() const;
     int sortColumn() const;
@@ -183,12 +192,14 @@ public:
     bool clear();
 
     void appendItem(Item *item);
+    void appendItems(const ItemList &items);
     void insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items);
 
     void removeItems(const ItemList &items);
     void removeItem(Item *item);
 
     void changeItem(Item *item, const Item &value);
+    void changeItems(const std::vector<std::pair<Item *, Item>> &changes);
 
     Statistics statistics(const ItemList &list, bool ignoreExcluded = false) const;
 
@@ -207,6 +218,10 @@ public:
 
     void setOrder(BrickLink::Order *order);
 
+    static bool canItemsBeMerged(const Item &item1, const Item &item2);
+    static bool mergeItemFields(const Item &from, Item &to, MergeMode defaultMerge,
+                                const QHash<Field, MergeMode> &fieldMerge = { });
+
 public slots:
     void setFileName(const QString &str);
     void setTitle(const QString &title);
@@ -224,7 +239,7 @@ public:
     bool restoreSortFilterState(const QByteArray &ba);
 
 signals:
-    void itemFlagsChanged(const Document::Item *);
+    void itemFlagsChanged(const Item *);
     void statisticsChanged();
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
@@ -250,7 +265,7 @@ private:
     void setItemsDirect(const ItemList &items);
     void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
-    void changeItemDirect(BrickLink::InvItem *item, Item &value);
+    void changeItemsDirect(std::vector<std::pair<Item *, Item> > &changes);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
     void resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
                                    &differenceBase);
@@ -314,6 +329,8 @@ private:
 
     static QVector<Document *> s_documents;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Document::MergeModes)
 
 Q_DECLARE_METATYPE(Document *)
 Q_DECLARE_METATYPE(const Document *)

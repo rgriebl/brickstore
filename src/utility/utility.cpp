@@ -255,7 +255,8 @@ quint64 Utility::physicalMemory()
 QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
 {
     QLocale loc;
-    loc.setNumberOptions(QLocale::OmitGroupSeparator);
+    if (!optimize)
+        loc.setNumberOptions(QLocale::OmitGroupSeparator);
 
     int decimals = 0;
     const char *unit = nullptr;

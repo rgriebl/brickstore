@@ -65,9 +65,9 @@ public:
 
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
+    void blockUpdate(bool blocked);
     void modificationUpdate();
     void titleUpdate();
-    void showContextMenu(bool onitem, const QPoint &pos);
     void setFilter(const QString &filterText);
     void reFilter();
     void updateReFilterAction(bool b);
@@ -108,29 +108,26 @@ protected:
 
 private:
     void setBrickLinkUpdateIntervals();
-
     bool checkBrickLinkLogin();
 
 public:
-    QAction *findAction(const char *name);
+    QList<QAction *> contextMenuActions() const;
+    QAction *findAction(const char *name) const;
 
 private:
-    QIcon *icon(const char *name);
-
     void setupScripts();
-    QVector<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();
-    void updateActions(const Document::ItemList &selection = Document::ItemList());
+    void updateActions();
     QMenu *createMenu(const QByteArray &, const QVector<QByteArray> &);
     bool setupToolBar(QToolBar *, const QVector<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
-    QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
     Workspace *m_workspace;
-
     QPointer<Window> m_activeWin;
+    QList<QAction *> m_extensionExtraActions;
+    QList<QAction *> m_extensionContextActions;
 
     ProgressCircle *m_progress;
     HistoryLineEdit *m_filter;
@@ -139,7 +136,6 @@ private:
     TaskInfoWidget *m_task_info;
     TaskPriceGuideWidget *m_task_priceguide;
     TaskAppearsInWidget *m_task_appears;
-    QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ImportOrderDialog> m_importorder_dialog;

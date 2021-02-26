@@ -325,6 +325,9 @@ bool HeaderView::viewportEvent(QEvent *e)
 
 void HeaderView::showMenu(const QPoint &pos)
 {
+    if (!isEnabled())
+        return;
+
     QMenu m(this);
 
     m.addAction(tr("Configure columns..."))->setData(-1);

@@ -37,16 +37,23 @@ public:
     PrintingScriptModel()
     {
         MODELTEST_ATTACH(this)
+        connect(ScriptManager::inst(), &ScriptManager::aboutToReload,
+                this, [this]() {
+            emit beginResetModel();
+            m_prtScripts.clear();
+        });
+        connect(ScriptManager::inst(), &ScriptManager::reloaded,
+                this, [this]() {
+            refreshScripts();
+            emit endResetModel();
+        });
         refreshScripts();
     }
 
 public slots:
     void reload()
     {
-        beginResetModel();
         ScriptManager::inst()->reload();
-        refreshScripts();
-        endResetModel();
     }
 
 public:

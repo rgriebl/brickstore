@@ -14,6 +14,8 @@
 #pragma once
 
 #include <QDialog>
+#include <QWizard>
+#include <QHash>
 #include "document.h"
 #include "bricklinkfwd.h"
 
@@ -21,6 +23,7 @@ class Document;
 QT_FORWARD_DECLARE_CLASS(QListWidget)
 QT_FORWARD_DECLARE_CLASS(QRadioButton)
 QT_FORWARD_DECLARE_CLASS(QAbstractButton)
+QT_FORWARD_DECLARE_CLASS(QButtonGroup)
 
 
 class SelectDocument : public QWidget
@@ -58,20 +61,42 @@ private:
     QAbstractButton *m_ok;
 };
 
-
-class SelectCopyFieldsDialog : public QDialog
+class SelectMergeMode : public QWidget
 {
     Q_OBJECT
 public:
-    SelectCopyFieldsDialog(const Document *self, const QString &headertext,
-                           const QVector<QPair<QString, bool>> &fields, QWidget *parent = nullptr);
+    SelectMergeMode(Document::MergeMode defaultMode, QWidget *parent = nullptr);
 
-    BrickLink::InvItemList items() const;
-    const QVector<int> &selectedFields() const;
+    Document::MergeMode defaultMergeMode() const;
+    QHash<Document::Field, Document::MergeMode> fieldMergeModes() const;
+
+signals:
+    void mergeModesChanged(bool valid);
 
 private:
-    SelectDocument *m_sd;
-    QVector<int> m_selectedFields;
-    QAbstractButton *m_ok;
+    void createFields(QWidget *parent);
+
+    QButtonGroup *m_allGroup;
+    QVector<QButtonGroup *> m_groups;
 };
 
+class SelectCopyMergeDialog : public QWizard
+{
+    Q_OBJECT
+public:
+    SelectCopyMergeDialog(const Document *self, const QString &chooseDocText,
+                          const QString &chooseFieldsText, QWidget *parent = nullptr);
+
+    Document::ItemList items() const;
+    Document::MergeMode defaultMergeMode() const;
+    QHash<Document::Field, Document::MergeMode> fieldMergeModes() const;
+
+protected:
+    void showEvent(QShowEvent *e) override;
+
+private:
+    void createFields(QWidget *parent);
+
+    SelectDocument *m_sd;
+    SelectMergeMode *m_mm;
+};

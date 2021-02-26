@@ -28,7 +28,6 @@
 #include <QDesktopServices>
 #include <QPrinter>
 #include <QPrintDialog>
-#include <QProgressDialog>
 #include <QStringBuilder>
 #include <QScrollBar>
 #include <QMenu>
@@ -36,6 +35,9 @@
 #include <QStandardPaths>
 #include <QRegularExpression>
 #include <QDebug>
+
+#include <QProgressBar>
+#include <QStackedLayout>
 
 #include "messagebox.h"
 #include "config.h"
@@ -57,6 +59,7 @@
 #include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
+#include "selectitemdialog.h"
 #include "selectdocumentdialog.h"
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
@@ -66,71 +69,40 @@
 using namespace std::chrono_literals;
 
 
-// should be a function, but MSVC.Net doesn't accept default
-// template arguments for template functions...
-
-template <typename TG, typename TS = TG> class setOrToggle {
-public:
-    static void toggle(Window *w, const char *actiontext, TG(Document::Item::* getter)() const,
-                       void (Document::Item::* setter)(TS t), TS val1, TS val2)
-    {
-        set_or_toggle(w, true, actiontext, getter, setter, val1, val2);
+template <typename E>
+static E nextEnumValue(E current, std::initializer_list<E> values)
+{
+    for (int i = 0; i < values.size(); ++i) {
+        if (current == values.begin()[i])
+            return values.begin()[(i + 1) % values.size()];
     }
+    return current;
+}
 
-    static void set(Window *w, const char *actiontext, TG(Document::Item::* getter)() const,
-                    void (Document::Item::* setter)(TS t), TS val)
-    {
-        set_or_toggle(w, false, actiontext, getter, setter, val, TG());
-    }
 
-private:
-    static void set_or_toggle(Window *w, bool toggle, const char *actiontext,
-                              TG(Document::Item::* getter)() const,
-                              void (Document::Item::* setter)(TS t), TS val1, TS val2 = TG())
-    {
-        Document *doc = w->document();
+void Window::applyTo(const Document::ItemList &items, const char *undoText,
+                     std::function<bool(const Document::Item &, Document::Item &)> callback)
+{
+    if (items.isEmpty())
+        return;
 
-        if (w->selection().isEmpty())
-            return;
+    document()->beginMacro();
 
-        //DisableUpdates wp ( w_list );
-        doc->beginMacro();
-        int count = 0;
+    int count = items.size();
+    std::vector<std::pair<Document::Item *, Document::Item>> changes;
+    changes.reserve(count);
 
-        foreach (Document::Item *pos, w->selection()) {
-            if (toggle) {
-                TG val = (pos->* getter)();
-
-                if (val == val1)
-                    val = val2;
-                else if (val == val2)
-                    val = val1;
-
-                if (val != (pos->* getter)()) {
-                    Document::Item item = *pos;
-
-                    (item.* setter)(val);
-                    doc->changeItem(pos, item);
-
-                    count++;
-                }
-            }
-            else {
-                if ((pos->* getter)() != val1) {
-                    Document::Item item = *pos;
-
-                    (item.* setter)(val1);
-                    doc->changeItem(pos, item);
-
-                    count++;
-                }
-            }
+    for (Document::Item *from : items) {
+        Document::Item to = *from;
+        if (callback(*from, to)) {
+            changes.emplace_back(from, to);
+        } else {
+            --count;
         }
-
-
-        doc->endMacro(Window::tr(actiontext, nullptr, count));
     }
-};
+    document()->changeItems(changes);
+    document()->endMacro(Window::tr(undoText, nullptr, count));
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -263,94 +235,6 @@ void ColumnCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-WindowProgressHelper::WindowProgressHelper(QProgressDialog *pd)
-    : QObject(pd)
-{
-    pd->installEventFilter(this);
-}
-
-bool WindowProgressHelper::eventFilter(QObject *watched, QEvent *event)
-{
-    // eat the Escape key
-    if (event->type() == QEvent::KeyPress) {
-        if (static_cast<QKeyEvent *>(event)->matches(QKeySequence::Cancel))
-            return true;
-    }
-    return QObject::eventFilter(watched, event);
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-WindowProgress::WindowProgress(QWidget *w, const QString &title, int total)
-    : m_w(w), m_reenabled(false)
-{
-    auto *sa = qobject_cast<QAbstractScrollArea *>(w);
-    m_w = sa ? sa->viewport() : w;
-    m_upd_enabled = m_w->updatesEnabled();
-    m_w->setUpdatesEnabled(false);
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    if (total) {
-        m_progress = new QProgressDialog(title, QString(), 0, total, w->window(),
-                                         Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-        m_progress->setWindowModality(Qt::WindowModal);
-        m_progress->setMinimumDuration(1500);
-        m_progress->setValue(0);
-        new WindowProgressHelper(m_progress);
-    } else {
-        m_progress = nullptr;
-    }
-}
-
-WindowProgress::~WindowProgress()
-{
-    stop();
-}
-
-void WindowProgress::stop()
-{
-    if (!m_reenabled) {
-        delete m_progress;
-        m_progress = nullptr;
-        QApplication::restoreOverrideCursor();
-        m_w->setUpdatesEnabled(m_upd_enabled);
-        m_reenabled = true;
-    }
-}
-
-void WindowProgress::step(int d)
-{
-    m_counter += d;
-
-    if (m_progress) {
-        int total = m_progress->maximum();
-        if ((m_counter == total) || ((m_counter - m_lastTick) >= (total / 100))) {
-            m_progress->setValue(m_counter);
-            m_lastTick = m_counter;
-        }
-    }
-}
-
-void WindowProgress::setOverrideCursor()
-{
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-}
-
-void WindowProgress::restoreOverrideCursor()
-{
-    QApplication::restoreOverrideCursor();
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-
 TableView::TableView(QWidget *parent)
     : QTableView(parent)
 {
@@ -412,7 +296,8 @@ StatusBar::StatusBar(Window *window)
     // hide the top and bottom frame
     setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
 
-    auto layout = new QHBoxLayout(this);
+    auto page = new QWidget();
+    auto layout = new QHBoxLayout(page);
     layout->setContentsMargins(11, 4, 11, 4);
 
     auto addSeparator = [&layout]() -> QWidget * {
@@ -485,6 +370,22 @@ StatusBar::StatusBar(Window *window)
     m_profit = new QLabel();
     layout->addWidget(m_profit);
 
+    auto blockPage = new QWidget();
+    auto blockLayout = new QHBoxLayout(blockPage);
+    blockLayout->setContentsMargins(11, 4, 11, 4);
+    m_blockTitle = new QLabel();
+    blockLayout->addWidget(m_blockTitle);
+    m_blockProgress = new QProgressBar();
+    blockLayout->addWidget(m_blockProgress, 1);
+    m_blockCancel = new QToolButton();
+    m_blockCancel->setIcon(QIcon::fromTheme("process-stop"));
+    m_blockCancel->setAutoRaise(true);
+    blockLayout->addWidget(m_blockCancel);
+
+    m_stack = new QStackedLayout(this);
+    m_stack->addWidget(page);
+    m_stack->addWidget(blockPage);
+
     connect(m_currency, &QToolButton::triggered,
             this, &StatusBar::changeDocumentCurrency);
     connect(Currency::inst(), &Currency::ratesChanged,
@@ -493,8 +394,23 @@ StatusBar::StatusBar(Window *window)
             this, &StatusBar::documentCurrencyChanged);
     connect(m_doc, &Document::statisticsChanged,
             this, &StatusBar::updateStatistics);
+    connect(window, &Window::blockingOperationActiveChanged,
+            this, &StatusBar::updateBlockState);
+    connect(window, &Window::blockingOperationTitleChanged,
+            m_blockTitle, &QLabel::setText);
+    connect(window, &Window::blockingOperationCancelableChanged,
+            m_blockCancel, &QWidget::setEnabled);
+    connect(window, &Window::blockingOperationProgress,
+            this, [this](int done, int total) {
+        if (m_blockProgress->maximum() != total)
+            m_blockProgress->setRange(0, total);
+        m_blockProgress->setValue(done);
+    });
+    connect(m_blockCancel, &QToolButton::clicked,
+            window, &Window::cancelBlockingOperation);
 
     updateCurrencyRates();
+    updateBlockState(false);
     documentCurrencyChanged(m_doc->currencyCode());
 
     paletteChange();
@@ -600,12 +516,25 @@ void StatusBar::updateStatistics()
     m_profit->setVisible(b);
 }
 
+void StatusBar::updateBlockState(bool blocked)
+{
+    m_stack->setCurrentIndex(blocked ? 1 : 0);
+    if (blocked) {
+        m_blockTitle->setText(m_window->blockingOperationTitle());
+        m_blockProgress->setRange(0, 0);
+    } else {
+        m_blockTitle->clear();
+        m_blockProgress->reset();
+    }
+}
+
 void StatusBar::languageChange()
 {
     m_differences->setToolTip(Utility::toolTipLabel(tr("Go to the next difference"),
                                                     m_differences->shortcut()));
     m_errors->setToolTip(Utility::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
 
+    m_blockCancel->setToolTip(tr("Cancel the currently running blocking operation"));
     if (m_order)
         m_order->setText(tr("Order information..."));
     m_value->setText(tr("Currency:"));
@@ -679,10 +608,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_timer->setSingleShot(true);
     m_latest_timer->setInterval(100ms);
 
-    m_settopg_failcnt = 0;
-    m_settopg_list = nullptr;
-    m_settopg_time = BrickLink::Time::PastSix;
-    m_settopg_price = BrickLink::Price::Average;
     m_diff_mode = false;
 
     w_statusbar = new StatusBar(this);
@@ -743,7 +668,7 @@ Window::Window(Document *doc, QWidget *parent)
         updateSelection();
     });
 
-    auto *dd = new DocumentDelegate(doc, w_list);
+    auto *dd = new DocumentDelegate(w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
 
@@ -779,6 +704,9 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::updateCaption);
     connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
+
+    connect(this, &Window::blockingOperationActiveChanged,
+            w_list, &QWidget::setDisabled);
 
     bool columnsSet = false;
     bool sortFilterSet = false;
@@ -842,6 +770,67 @@ void Window::updateCaption()
 QByteArray Window::currentColumnLayout() const
 {
     return w_header->saveLayout();
+}
+
+bool Window::isBlockingOperationActive() const
+{
+    return m_blocked;
+}
+
+QString Window::blockingOperationTitle() const
+{
+    return m_blockTitle;
+}
+
+bool Window::isBlockingOperationCancelable() const
+{
+    return bool(m_blockCancelCallback);
+}
+
+void Window::setBlockingOperationCancelCallback(std::function<void ()> cancelCallback)
+{
+    const bool wasCancelable = isBlockingOperationCancelable();
+    m_blockCancelCallback = cancelCallback;
+    if (wasCancelable != isBlockingOperationCancelable())
+        emit blockingOperationCancelableChanged(!wasCancelable);
+}
+
+void Window::setBlockingOperationTitle(const QString &title)
+{
+    if (title != m_blockTitle) {
+        m_blockTitle = title;
+        emit blockingOperationTitleChanged(title);
+    }
+}
+
+void Window::startBlockingOperation(const QString &title, std::function<void ()> cancelCallback)
+{
+    if (!m_blocked) {
+        m_blocked = true;
+        setBlockingOperationCancelCallback(cancelCallback);
+        setBlockingOperationTitle(title);
+
+        emit blockingOperationActiveChanged(m_blocked);
+    }
+}
+
+void Window::endBlockingOperation()
+{
+    if (m_blocked) {
+        m_blocked = false;
+        setBlockingOperationCancelCallback({ });
+        setBlockingOperationTitle({ });
+
+        emit blockingOperationActiveChanged(m_blocked);
+    }
+}
+
+void Window::cancelBlockingOperation()
+{
+    if (m_blocked) {
+        if (m_blockCancelCallback)
+            m_blockCancelCallback();
+    }
 }
 
 void Window::ensureLatestVisible()
@@ -1047,7 +1036,7 @@ void Window::consolidateItems(const Document::ItemList &items)
             if (i != mergeIndex) {
                 newitem.mergeFrom(*mergeItems.at(i), costQtyAvg);
                 m_doc->removeItem(mergeItems.at(i));
-            }    
+            }
         }
         m_doc->changeItem(mergeItems.at(mergeIndex), newitem);
 
@@ -1244,125 +1233,137 @@ void Window::on_view_reset_diff_mode_triggered()
 
 void Window::on_edit_status_include_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'include' status on %n item(s)"),
-                                        &Document::Item::status, &Document::Item::setStatus,
-                                        BrickLink::Status::Include);
+    setStatus(QT_TR_N_NOOP("Set 'include' status on %n item(s)"), BrickLink::Status::Include);
 }
 
 void Window::on_edit_status_exclude_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'exclude' status on %n item(s)"),
-                                        &Document::Item::status, &Document::Item::setStatus,
-                                        BrickLink::Status::Exclude);
+    setStatus(QT_TR_N_NOOP("Set 'exclude' status on %n item(s)"), BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_status_extra_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'extra' status on %n item(s)"),
-                                        &Document::Item::status, &Document::Item::setStatus,
-                                        BrickLink::Status::Extra);
+    setStatus(QT_TR_N_NOOP("Set 'extra' status on %n item(s)"), BrickLink::Status::Extra);
 }
 
 void Window::on_edit_status_toggle_triggered()
 {
-    setOrToggle<BrickLink::Status>::toggle(this, QT_TR_N_NOOP("Toggled status on %n item(s)"),
-                                           &Document::Item::status, &Document::Item::setStatus,
-                                           BrickLink::Status::Include, BrickLink::Status::Exclude);
+    applyTo(selection(), QT_TR_N_NOOP("Toggled status on %n item(s)"), [](const auto &from, auto &to) {
+        (to = from).setStatus(nextEnumValue(from.status(), { BrickLink::Status::Include,
+                                                             BrickLink::Status::Exclude }));
+        return true;
+    });
 }
+
+void Window::setStatus(const char *undoText, BrickLink::Status status)
+{
+    applyTo(selection(), undoText, [status](const auto &from, auto &to) {
+        (to = from).setStatus(status); return true;
+    });
+}
+
 
 void Window::on_edit_cond_new_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, QT_TR_N_NOOP("Set 'new' condition on %n item(s)"),
-                                           &Document::Item::condition, &Document::Item::setCondition,
-                                           BrickLink::Condition::New);
+    setCondition(QT_TR_N_NOOP("Set 'new' condition on %n item(s)"), BrickLink::Condition::New);
 }
 
 void Window::on_edit_cond_used_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, QT_TR_N_NOOP("Set 'used' condition on %n item(s)"),
-                                           &Document::Item::condition, &Document::Item::setCondition,
-                                           BrickLink::Condition::Used);
+    setCondition(QT_TR_N_NOOP("Set 'used' condition on %n item(s)"), BrickLink::Condition::Used);
 }
 
-void Window::on_edit_cond_toggle_triggered()
+void Window::setCondition(const char *undoText, BrickLink::Condition condition)
 {
-    setOrToggle<BrickLink::Condition>::toggle(this, QT_TR_N_NOOP("Toggled condition on %n item(s)"),
-                                              &Document::Item::condition, &Document::Item::setCondition,
-                                              BrickLink::Condition::New, BrickLink::Condition::Used);
+    applyTo(selection(), undoText, [condition](const auto &from, auto &to) {
+        (to = from).setCondition(condition);
+        return true;
+    });
 }
+
 
 void Window::on_edit_subcond_none_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'none' sub-condition on %n item(s)"),
-                                              &Document::Item::subCondition, &Document::Item::setSubCondition,
-                                              BrickLink::SubCondition::None);
+    setSubCondition(QT_TR_N_NOOP("Set 'none' sub-condition on %n item(s)"),
+                    BrickLink::SubCondition::None);
 }
 
 void Window::on_edit_subcond_sealed_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'sealed' sub-condition on %n item(s)"),
-                                              &Document::Item::subCondition, &Document::Item::setSubCondition,
-                                              BrickLink::SubCondition::Sealed);
+    setSubCondition(QT_TR_N_NOOP("Set 'sealed' sub-condition on %n item(s)"),
+                    BrickLink::SubCondition::Sealed);
 }
 
 void Window::on_edit_subcond_complete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'complete' sub-condition on %n item(s)"),
-                                              &Document::Item::subCondition, &Document::Item::setSubCondition,
-                                              BrickLink::SubCondition::Complete);
+    setSubCondition(QT_TR_N_NOOP("Set 'complete' sub-condition on %n item(s)"),
+                    BrickLink::SubCondition::Complete);
 }
 
 void Window::on_edit_subcond_incomplete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'incomplete' sub-condition on %n item(s)"),
-                                              &Document::Item::subCondition, &Document::Item::setSubCondition,
-                                              BrickLink::SubCondition::Incomplete);
+    setSubCondition(QT_TR_N_NOOP("Set 'incomplete' sub-condition on %n item(s)"),
+                    BrickLink::SubCondition::Incomplete);
 }
+
+void Window::setSubCondition(const char *undoText, BrickLink::SubCondition subCondition)
+{
+    applyTo(selection(), undoText, [subCondition](const auto &from, auto &to) {
+        (to = from).setSubCondition(subCondition); return true;
+    });
+}
+
 
 void Window::on_edit_retain_yes_triggered()
 {
-    setOrToggle<bool>::set(this, QT_TR_N_NOOP("Set 'retain' flag on %n item(s)"),
-                           &Document::Item::retain, &Document::Item::setRetain, true);
+    setRetain(QT_TR_N_NOOP("Set 'retain' flag on %n item(s)"), true);
 }
 
 void Window::on_edit_retain_no_triggered()
 {
-    setOrToggle<bool>::set(this, QT_TR_N_NOOP("Cleared 'retain' flag on %n item(s)"),
-                           &Document::Item::retain, &Document::Item::setRetain, false);
+    setRetain(QT_TR_N_NOOP("Cleared 'retain' flag on %n item(s)"), false);
 }
 
 void Window::on_edit_retain_toggle_triggered()
 {
-    setOrToggle<bool>::toggle(this, QT_TR_N_NOOP("Toggled 'retain' flag on %n item(s)"),
-                              &Document::Item::retain, &Document::Item::setRetain, true, false);
+    applyTo(selection(), QT_TR_N_NOOP("Toggled 'retain' flag on %n item(s)"), [](const auto &from, auto &to) {
+        (to = from).setRetain(!from.retain()); return true;
+    });
 }
+
+void Window::setRetain(const char *undoText, bool retain)
+{
+    applyTo(selection(), undoText, [retain](const auto &from, auto &to) {
+        (to = from).setRetain(retain); return true;
+    });
+}
+
 
 void Window::on_edit_stockroom_no_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Cleared 'stockroom' flag on %n item(s)"),
-                                           &Document::Item::stockroom, &Document::Item::setStockroom,
-                                           BrickLink::Stockroom::None);
+    setStockroom(QT_TR_N_NOOP("Cleared 'stockroom' flag on %n item(s)"), BrickLink::Stockroom::None);
 }
 
 void Window::on_edit_stockroom_a_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'A' on %n item(s)"),
-                                           &Document::Item::stockroom, &Document::Item::setStockroom,
-                                           BrickLink::Stockroom::A);
+    setStockroom(QT_TR_N_NOOP("Set stockroom to 'A' on %n item(s)"), BrickLink::Stockroom::A);
 }
 
 void Window::on_edit_stockroom_b_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'B' on %n item(s)"),
-                                           &Document::Item::stockroom, &Document::Item::setStockroom,
-                                           BrickLink::Stockroom::B);
+    setStockroom(QT_TR_N_NOOP("Set stockroom to 'B' on %n item(s)"), BrickLink::Stockroom::B);
 }
 
 void Window::on_edit_stockroom_c_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'C' on %n item(s)"),
-                                           &Document::Item::stockroom, &Document::Item::setStockroom,
-                                           BrickLink::Stockroom::C);
+    setStockroom(QT_TR_N_NOOP("Set stockroom to 'C' on %n item(s)"), BrickLink::Stockroom::C);
+}
+
+void Window::setStockroom(const char *undoText, BrickLink::Stockroom stockroom)
+{
+    applyTo(selection(), undoText, [stockroom](const auto &from, auto &to) {
+        (to = from).setStockroom(stockroom); return true;
+    });
 }
 
 
@@ -1375,34 +1376,23 @@ void Window::on_edit_price_set_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
                               m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
-        setOrToggle<double>::set(this, QT_TR_N_NOOP("Set price on %n item(s)"),
-                                 &Document::Item::price, &Document::Item::setPrice, price);
+        applyTo(selection(), QT_TR_N_NOOP("Set price on %n item(s)"), [price](const auto &from, auto &to) {
+            (to = from).setPrice(price); return true;
+        });
     }
 }
 
 void Window::on_edit_price_round_triggered()
 {
-    if (selection().isEmpty())
-        return;
-
-    int roundcount = 0;
-    m_doc->beginMacro();
-
-    WindowProgress wp(w_list);
-
-    foreach(Document::Item *pos, selection()) {
-        double p = int(pos->price() * 100 + .5) / 100.;
-
-        if (!qFuzzyCompare(p, pos->price())) {
-            Document::Item item = *pos;
-
-            item.setPrice(p);
-            m_doc->changeItem(pos, item);
-
-            roundcount++;
+    applyTo(selection(), QT_TR_N_NOOP("Rounded price on %n item(s)"),
+                     [](const auto &from, auto &to) {
+        double price = int(from.price() * 100 + .5) / 100.;
+        if (!qFuzzyCompare(price, from.price())) {
+            (to = from).setPrice(price);
+            return true;
         }
-    }
-    m_doc->endMacro(tr("Price change on %n item(s)", nullptr, roundcount));
+        return false;
+    });
 }
 
 
@@ -1411,100 +1401,126 @@ void Window::on_edit_price_to_priceguide_triggered()
     if (selection().isEmpty())
         return;
 
-    if (m_settopg_list || m_settopg_todocnt) {
-        MessageBox::information(this, { }, tr("Prices are currently updated to Price Guide values.<br /><br />Please wait until this operation has finished."));
-        return;
-    }
+    Q_ASSERT(m_setToPG.isNull());
 
     SetToPriceGuideDialog dlg(this);
 
     if (dlg.exec() == QDialog::Accepted) {
         const auto sel = selection();
 
-        WindowProgress wp(w_list, tr("Verifying Price Guide data"), sel.count());
+        Q_ASSERT(!isBlockingOperationActive());
+        startBlockingOperation(tr("Loading price guide data from disk"));
 
-        m_settopg_list    = new QMultiHash<BrickLink::PriceGuide *, Document::Item *>();
-        m_settopg_failcnt = 0;
-        m_settopg_todocnt = sel.count();
-        m_settopg_time    = dlg.time();
-        m_settopg_price   = dlg.price();
-        bool force_update = dlg.forceUpdate();
+        m_doc->beginMacro();
+
+        m_setToPG.reset(new SetToPriceGuideData);
+        m_setToPG->changes.reserve(sel.size());
+        m_setToPG->totalCount = sel.count();
+        m_setToPG->doneCount = 0;
+        m_setToPG->time = dlg.time();
+        m_setToPG->price = dlg.price();
+        m_setToPG->currencyRate = Currency::inst()->rate(m_doc->currencyCode());
+
+        bool forceUpdate = dlg.forceUpdate();
 
         for (Document::Item *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
-            if (force_update && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
+            if (forceUpdate && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
                 pg->update();
 
             if (pg && (pg->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-                m_settopg_list->insert(pg, item);
+                m_setToPG->priceGuides.insert(pg, item);
                 pg->addRef();
-            }
-            else if (pg && pg->valid()) {
-                double p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
 
-                p *= Currency::inst()->rate(m_doc->currencyCode());
+            } else if (pg && pg->isValid()) {
+                double price = pg->price(m_setToPG->time, item->condition(), m_setToPG->price)
+                        * m_setToPG->currencyRate;
 
-                if (!qFuzzyCompare(p, item->price())) {
-                    Document::Item newitem = *item;
-                    newitem.setPrice(p);
-                    m_doc->changeItem(item, newitem);
+                if (!qFuzzyCompare(price, item->price())) {
+                    Document::Item newItem = *item;
+                    newItem.setPrice(price);
+                    m_setToPG->changes.emplace_back(item, newItem);
                 }
-                --m_settopg_todocnt;
-            }
-            else {
-                Document::Item newitem = *item;
-                newitem.setPrice(0);
-                m_doc->changeItem(item, newitem);
+                ++m_setToPG->doneCount;
+                emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
 
-                ++m_settopg_failcnt;
-                --m_settopg_todocnt;
+            } else {
+                Document::Item newItem = *item;
+                newItem.setPrice(0);
+                m_setToPG->changes.emplace_back(item, newItem);
+
+                ++m_setToPG->failCount;
+                ++m_setToPG->doneCount;
+                emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
             }
-            wp.step();
         }
-        wp.stop();
 
-        if (m_settopg_list && m_settopg_list->isEmpty())
+        setBlockingOperationTitle(tr("Downloading price guide data from BrickLink"));
+        setBlockingOperationCancelCallback(std::bind(&Window::cancelPriceGuideUpdates, this));
+
+        if (m_setToPG->priceGuides.isEmpty())
             priceGuideUpdated(nullptr);
     }
 }
 
 void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
-    if (m_settopg_list && pg) {
-        double crate = Currency::inst()->rate(m_doc->currencyCode());
-
-        const auto items = m_settopg_list->values(pg);
+    if (m_setToPG && pg) {
+        const auto items = m_setToPG->priceGuides.values(pg);
         for (auto item : items) {
-            double p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price)
-                                   : 0;
-            p *= crate;
-            if (!qFuzzyCompare(p, item->price())) {
-                Document::Item newitem = *item;
-                newitem.setPrice(p);
-                m_doc->changeItem(item, newitem);
+            if (!m_setToPG->canceled) {
+                double price = pg->isValid() ? (pg->price(m_setToPG->time, item->condition(),
+                                                          m_setToPG->price) * m_setToPG->currencyRate)
+                                             : 0;
+
+                if (!qFuzzyCompare(price, item->price())) {
+                    Document::Item newItem = *item;
+                    newItem.setPrice(price);
+                    m_setToPG->changes.emplace_back(item, newItem);
+                }
             }
             pg->release();
-            --m_settopg_todocnt;
         }
-        m_settopg_list->remove(pg);
+
+        m_setToPG->doneCount += items.size();
+        emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
+
+        if (!pg->isValid() || (pg->updateStatus() == BrickLink::UpdateStatus::UpdateFailed))
+            m_setToPG->failCount += items.size();
+        m_setToPG->priceGuides.remove(pg);
     }
 
-    if (m_settopg_list && m_settopg_list->isEmpty() && !m_settopg_todocnt) {
-        int fails = m_settopg_failcnt;
+    if (m_setToPG && m_setToPG->priceGuides.isEmpty()
+            && (m_setToPG->doneCount == m_setToPG->totalCount)) {
+        int failCount = m_setToPG->failCount;
+        int successCount = m_setToPG->totalCount - failCount;
+        m_doc->changeItems(m_setToPG->changes);
+        m_setToPG.reset();
 
-        m_settopg_failcnt = 0;
-        delete m_settopg_list;
-        m_settopg_list = nullptr;
+        m_doc->endMacro(tr("Set price to guide on %n item(s)", nullptr, successCount));
+
+        endBlockingOperation();
 
         QString s = tr("Prices of the selected items have been updated to Price Guide values.");
-        if (fails) {
+        if (failCount) {
             s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records and/or network errors.")
-                    .arg(CMB_BOLD(QString::number(fails)));
+                    .arg(CMB_BOLD(QString::number(failCount)));
         }
 
         MessageBox::information(this, { }, s);
+    }
+}
 
+void Window::cancelPriceGuideUpdates()
+{
+    if (m_setToPG) {
+        m_setToPG->canceled = true;
+        const auto pgs = m_setToPG->priceGuides.uniqueKeys();
+        for (BrickLink::PriceGuide *pg : pgs) {
+            if (pg->updateStatus() == BrickLink::UpdateStatus::Updating)
+                pg->cancelUpdate();
+        }
     }
 }
 
@@ -1524,41 +1540,35 @@ void Window::on_edit_price_inc_dec_triggered()
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
         bool tiers       = dlg.applyToTiers();
-        int incdeccount = 0;
 
-        m_doc->beginMacro();
-
-        WindowProgress wp(w_list);
-
-        foreach(Document::Item *pos, selection()) {
-            Document::Item item = *pos;
-
-            double p = item.price();
+        applyTo(selection(), QT_TR_N_NOOP("Adjusted price on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            double price = from.price();
 
             if (!qFuzzyIsNull(percent))
-                p *= factor;
+                price *= factor;
             else if (!qFuzzyIsNull(fixed))
-                p += fixed;
+                price += fixed;
 
-            item.setPrice(p);
+            if (!qFuzzyCompare(price, from.price())) {
+                (to = from).setPrice(price);
 
-            if (tiers) {
-                for (int i = 0; i < 3; i++) {
-                    p = item.tierPrice(i);
+                if (tiers) {
+                    for (int i = 0; i < 3; i++) {
+                        price = from.tierPrice(i);
 
-                    if (!qFuzzyIsNull(percent))
-                        p *= factor;
-                    else if (!qFuzzyIsNull(fixed))
-                        p += fixed;
+                        if (!qFuzzyIsNull(percent))
+                            price *= factor;
+                        else if (!qFuzzyIsNull(fixed))
+                            price += fixed;
 
-                    item.setTierPrice(i, p);
+                        to.setTierPrice(i, price);
+                    }
                 }
+                return true;
             }
-            m_doc->changeItem(pos, item);
-            incdeccount++;
-        }
-
-        m_doc->endMacro(tr("Price change on %n item(s)", nullptr, incdeccount));
+            return false;
+        });
     }
 }
 
@@ -1571,34 +1581,24 @@ void Window::on_edit_cost_set_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
                               m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
-        setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
-                                 &Document::Item::cost, &Document::Item::setCost, cost);
+        applyTo(selection(), QT_TR_N_NOOP("Set cost on %n item(s)"),
+                         [cost](const auto &from, auto &to) {
+            (to = from).setCost(cost); return true;
+        });
     }
 }
 
 void Window::on_edit_cost_round_triggered()
 {
-    if (selection().isEmpty())
-        return;
-
-    int roundcount = 0;
-    m_doc->beginMacro();
-
-    WindowProgress wp(w_list);
-
-    foreach(Document::Item *pos, selection()) {
-        double c = int(pos->cost() * 100 + .5) / 100.;
-
-        if (!qFuzzyCompare(c, pos->cost())) {
-            Document::Item item = *pos;
-
-            item.setCost(c);
-            m_doc->changeItem(pos, item);
-
-            roundcount++;
+    applyTo(selection(), QT_TR_N_NOOP("Rounded cost on %n item(s)"),
+                     [](const auto &from, auto &to) {
+        double cost = int(from.cost() * 100 + .5) / 100.;
+        if (!qFuzzyCompare(cost, from.cost())) {
+            (to = from).setCost(cost);
+            return true;
         }
-    }
-    m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, roundcount));
+        return false;
+    });
 }
 
 void Window::on_edit_cost_inc_dec_triggered()
@@ -1613,29 +1613,22 @@ void Window::on_edit_cost_inc_dec_triggered()
         double fixed     = dlg.fixed();
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
-        int incdeccount = 0;
 
-        m_doc->beginMacro();
-
-        WindowProgress wp(w_list);
-
-        foreach(Document::Item *pos, selection()) {
-            Document::Item item = *pos;
-
-            double c = item.cost();
+        applyTo(selection(), QT_TR_N_NOOP("Adjusted cost on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            double cost = from.cost();
 
             if (!qFuzzyIsNull(percent))
-                c *= factor;
+                cost *= factor;
             else if (!qFuzzyIsNull(fixed))
-                c += fixed;
+                cost += fixed;
 
-            item.setCost(c);
-
-            m_doc->changeItem(pos, item);
-            incdeccount++;
-        }
-
-        m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, incdeccount));
+            if (!qFuzzyCompare(cost, from.cost())) {
+                (to = from).setCost(cost);
+                return true;
+            }
+            return false;
+        });
     }
 }
 
@@ -1648,27 +1641,20 @@ void Window::on_edit_cost_spread_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
                               m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
-        int spreadcount = 0;
         double priceTotal = 0;
 
         foreach (Document::Item *item, selection())
             priceTotal += (item->price() * item->quantity());
-
         if (qFuzzyIsNull(priceTotal))
             return;
         double f = spreadAmount / priceTotal;
+        if (qFuzzyCompare(f, 1))
+            return;
 
-        m_doc->beginMacro();
-
-        foreach (Document::Item *item, selection()) {
-            Document::Item newItem(*item);
-            newItem.setCost(item->price() * f);
-            m_doc->changeItem(item, newItem);
-
-            spreadcount++;
-        }
-
-        m_doc->endMacro(tr("Cost spreaded over %n item(s)", nullptr, spreadcount));
+        applyTo(selection(), QT_TR_N_NOOP("Spreaded cost over %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            (to = from).setPrice(from.price() * f); return true;
+        });
     }
 }
 
@@ -1682,36 +1668,27 @@ void Window::on_edit_qty_divide_triggered()
     if (MessageBox::getInteger(this, { },
                                tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"),
                                QString(), divisor, 1, 1000)) {
-        if (divisor > 1) {
-            int lots_with_errors = 0;
+        if (divisor <= 1)
+            return;
 
-            foreach(Document::Item *item, selection()) {
-                if (qAbs(item->quantity()) % divisor)
-                    lots_with_errors++;
-            }
+        int lotsNotDivisible = 0;
 
-            if (lots_with_errors) {
-                MessageBox::information(this, { },
-                                        tr("The quantities of %n lot(s) are not divisible without remainder by %1.<br /><br />Nothing has been modified.",
-                                           nullptr, lots_with_errors).arg(divisor));
-            }
-            else {
-                int divcount = 0;
-                m_doc->beginMacro();
-
-                WindowProgress wp(w_list);
-
-                foreach(Document::Item *pos, selection()) {
-                    Document::Item item = *pos;
-
-                    item.setQuantity(item.quantity() / divisor);
-                    m_doc->changeItem(pos, item);
-
-                    divcount++;
-                }
-                m_doc->endMacro(tr("Quantity divide by %1 on %n item(s)", nullptr, divcount).arg(divisor));
-            }
+        foreach (Document::Item *item, selection()) {
+            if (qAbs(item->quantity()) % divisor)
+                ++lotsNotDivisible;
         }
+
+        if (lotsNotDivisible) {
+            MessageBox::information(this, { },
+                                    tr("The quantities of %n lot(s) are not divisible without remainder by %1.<br /><br />Nothing has been modified.",
+                                       nullptr, lotsNotDivisible).arg(divisor));
+            return;
+        }
+
+        applyTo(selection(), QT_TR_N_NOOP("Quantity divide on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            (to = from).setQuantity(from.quantity() / divisor); return true;
+        });
     }
 }
 
@@ -1724,36 +1701,28 @@ void Window::on_edit_qty_multiply_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Multiply the quantities of all selected items with this factor."),
                                tr("x"), factor, -1000, 1000)) {
-        if ((factor <= -1) || (factor > 1)) {
-            int lots_with_errors = 0;
-            int maxQty = FrameWork::maxQuantity / qAbs(factor);
+        if ((factor == 0) || (factor == 1))
+            return;
 
-            foreach(Document::Item *item, selection()) {
-                if (qAbs(item->quantity()) > maxQty)
-                    lots_with_errors++;
-            }
+        int lotsTooLarge = 0;
+        int maxQty = FrameWork::maxQuantity / qAbs(factor);
 
-            if (lots_with_errors) {
-                MessageBox::information(this, { },
-                                        tr("The quantities of %n lot(s) will exceed the maximum allowed value (%2) when multiplied by %1.<br /><br />Nothing has been modified.",
-                                           nullptr, lots_with_errors).arg(factor).arg(FrameWork::maxQuantity));
-            } else {
-                int mulcount = 0;
-                m_doc->beginMacro();
-
-                WindowProgress wp(w_list);
-
-                foreach(Document::Item *pos, selection()) {
-                    Document::Item item = *pos;
-
-                    item.setQuantity(item.quantity() * factor);
-                    m_doc->changeItem(pos, item);
-
-                    mulcount++;
-                }
-                m_doc->endMacro(tr("Quantity multiply by %1 on %n item(s)", nullptr, mulcount).arg(factor));
-            }
+        foreach(Document::Item *item, selection()) {
+            if (qAbs(item->quantity()) > maxQty)
+                lotsTooLarge++;
         }
+
+        if (lotsTooLarge) {
+            MessageBox::information(this, { },
+                                    tr("The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.<br><br>Nothing has been modified.",
+                                       nullptr, lotsTooLarge).arg(factor).arg(FrameWork::maxQuantity));
+            return;
+        }
+
+        applyTo(selection(), QT_TR_N_NOOP("Quantity multiply on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            (to = from).setQuantity(from.quantity() * factor); return true;
+        });
     }
 }
 
@@ -1766,8 +1735,10 @@ void Window::on_edit_sale_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
                                tr("%"), sale, -1000, 99)) {
-        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set sale on %n item(s)"),
-                              &Document::Item::sale, &Document::Item::setSale, sale);
+        applyTo(selection(), QT_TR_N_NOOP("Set sale on %n item(s)"),
+                         [sale](const auto &from, auto &to) {
+            (to = from).setSale(sale); return true;
+        });
     }
 }
 
@@ -1780,8 +1751,10 @@ void Window::on_edit_bulk_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Set bulk quantity for the selected items:"),
                                QString(), bulk, 1, 99999)) {
-        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set bulk quantity on %n item(s)"),
-                              &Document::Item::bulkQuantity, &Document::Item::setBulkQuantity, bulk);
+        applyTo(selection(), QT_TR_N_NOOP("Set bulk quantity on %n item(s)"),
+                         [bulk](const auto &from, auto &to) {
+            (to = from).setBulkQuantity(bulk); return true;
+        });
     }
 }
 
@@ -1795,9 +1768,29 @@ void Window::on_edit_color_triggered()
     d.setColor(selection().front()->color());
 
     if (d.exec() == QDialog::Accepted) {
-        setOrToggle<const BrickLink::Color *>::set(this, QT_TR_N_NOOP( "Set color on %n item(s)" ),
-                                                   &Document::Item::color, &Document::Item::setColor,
-                                                   d.color());
+        const auto color = d.color();
+        applyTo(selection(), QT_TR_N_NOOP("Set color on %n item(s)"),
+                         [color](const auto &from, auto &to) {
+            (to = from).setColor(color); return true;
+        });
+    }
+}
+
+void Window::on_edit_item_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    SelectItemDialog d(false, this);
+    d.setWindowTitle(tr("Modify Item"));
+    d.setItem(selection().front()->item());
+
+    if (d.exec() == QDialog::Accepted) {
+        const auto item = d.item();
+        applyTo(selection(), QT_TR_N_NOOP("Set color on %n item(s)"),
+                         [item](const auto &from, auto &to) {
+            (to = from).setItem(item); return true;
+        });
     }
 }
 
@@ -1810,8 +1803,10 @@ void Window::on_edit_qty_set_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Enter the new quantities for all selected items:"),
                                QString(), quantity, -FrameWork::maxQuantity, FrameWork::maxQuantity)) {
-        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set quantity on %n item(s)"),
-                              &Document::Item::quantity, &Document::Item::setQuantity, quantity);
+        applyTo(selection(), QT_TR_N_NOOP("Set quantity on %n item(s)"),
+                         [quantity](const auto &from, auto &to) {
+            (to = from).setQuantity(quantity); return true;
+        });
     }
 }
 
@@ -1824,20 +1819,19 @@ void Window::on_edit_remark_set_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the new remark for all selected items:"),
                               remarks)) {
-        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set remark on %n item(s)"),
-                                                   &Document::Item::remarks, &Document::Item::setRemarks,
-                                                   remarks);
+        applyTo(selection(), QT_TR_N_NOOP("Set remark on %n item(s)"),
+                         [remarks](const auto &from, auto &to) {
+            (to = from).setRemarks(remarks); return true;
+        });
     }
 }
 
 void Window::on_edit_remark_clear_triggered()
 {
-    if (selection().isEmpty())
-        return;
-
-    setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Clear remark on %n item(s)"),
-                                               &Document::Item::remarks, &Document::Item::setRemarks,
-                                               QString { });
+    applyTo(selection(), QT_TR_N_NOOP("Cleared remark on %n item(s)"),
+                     [](const auto &from, auto &to) {
+        (to = from).setRemarks({ }); return true;
+    });
 }
 
 void Window::on_edit_remark_add_triggered()
@@ -1845,40 +1839,19 @@ void Window::on_edit_remark_add_triggered()
     if (selection().isEmpty())
         return;
 
-    QString addremarks;
+    QString addRemarks;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the remarks of all selected items:"),
-                              addremarks)) {
-        int remarkcount = 0;
-        m_doc->beginMacro();
+                              addRemarks)) {
+        applyTo(selection(), QT_TR_N_NOOP("Modified remark on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            to = from;
+            Document::Item tmp = from;
+            tmp.setRemarks(addRemarks);
 
-        QRegularExpression regexp("\\b" + QRegularExpression::escape(addremarks) + "\\b");
-
-        WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
-
-        foreach(Document::Item *pos, selection()) {
-            QString str = pos->remarks();
-
-            if (str.isEmpty())
-                str = addremarks;
-            else if (str.indexOf(regexp) != -1)
-                ;
-            else if (addremarks.indexOf(QRegularExpression("\\b" + QRegularExpression::escape(str) + "\\b")) != -1)
-                str = addremarks;
-            else
-                str = str + " " + addremarks;
-
-            if (str != pos->remarks()) {
-                Document::Item item = *pos;
-
-                item.setRemarks(str);
-                m_doc->changeItem(pos, item);
-
-                remarkcount++;
-            }
-            wp.step();
-        }
-        m_doc->endMacro(tr("Modified remark on %n item(s)", nullptr, remarkcount));
+            return Document::mergeItemFields(tmp, to, Document::MergeMode::Ignore,
+                                             {{ Document::Remarks, Document::MergeMode::MergeText }});
+        });
     }
 }
 
@@ -1887,33 +1860,23 @@ void Window::on_edit_remark_rem_triggered()
     if (selection().isEmpty())
         return;
 
-    QString remremarks;
+    QString remRemarks;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be removed from the remarks of all selected items:"),
-                              remremarks)) {
-        int remarkcount = 0;
-        m_doc->beginMacro();
+                              remRemarks)) {
+        QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remRemarks) % u"\\b");
 
-        QRegularExpression regexp("\\b" + QRegularExpression::escape(remremarks) + "\\b");
-
-        WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
-
-        foreach(Document::Item *pos, selection()) {
-            QString str = pos->remarks();
-            str.remove(regexp);
-            str = str.simplified();
-
-            if (str != pos->remarks()) {
-                Document::Item item = *pos;
-
-                item.setRemarks(str);
-                m_doc->changeItem(pos, item);
-
-                remarkcount++;
+        applyTo(selection(), QT_TR_N_NOOP("Modified remark on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            QString remark = from.remarks();
+            if (!remark.isEmpty())
+                remark = remark.remove(regexp).simplified();
+            if (from.remarks() != remark) {
+                (to = from).setRemarks(remark);
+                return true;
             }
-            wp.step();
-        }
-        m_doc->endMacro(tr("Modified remark on %n item(s)", nullptr, remarkcount));
+            return false;
+        });
     }
 }
 
@@ -1925,20 +1888,21 @@ void Window::on_edit_comment_set_triggered()
 
     QString comments = selection().front()->comments();
 
-    if (MessageBox::getString(this, { }, tr("Enter the new comment for all selected items:"), comments))
-        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set comment on %n item(s)"),
-                                                   &Document::Item::comments, &Document::Item::setComments,
-                                                   comments);
+    if (MessageBox::getString(this, { }, tr("Enter the new comment for all selected items:"),
+                              comments)) {
+        applyTo(selection(), QT_TR_N_NOOP("Set comment on %n item(s)"),
+                         [comments](const auto &from, auto &to) {
+            (to = from).setComments(comments); return true;
+        });
+    }
 }
 
 void Window::on_edit_comment_clear_triggered()
 {
-    if (selection().isEmpty())
-        return;
-
-    setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Clear comment on %n item(s)"),
-                                               &Document::Item::comments, &Document::Item::setComments,
-                                               QString { });
+    applyTo(selection(), QT_TR_N_NOOP("Cleared comment on %n item(s)"),
+                     [](const auto &from, auto &to) {
+        (to = from).setComments({ }); return true;
+    });
 }
 
 void Window::on_edit_comment_add_triggered()
@@ -1946,40 +1910,19 @@ void Window::on_edit_comment_add_triggered()
     if (selection().isEmpty())
         return;
 
-    QString addcomments;
+    QString addComments;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the comments of all selected items:"),
-                              addcomments)) {
-        int commentcount = 0;
-        m_doc->beginMacro();
+                              addComments)) {
+        applyTo(selection(), QT_TR_N_NOOP("Modified comment on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            to = from;
+            Document::Item tmp = from;
+            tmp.setRemarks(addComments);
 
-        QRegularExpression regexp("\\b" + QRegularExpression::escape(addcomments) + "\\b");
-
-        WindowProgress wp(w_list, tr("Changing comments"), selection().count());
-
-        foreach(Document::Item *pos, selection()) {
-            QString str = pos->comments();
-
-            if (str.isEmpty())
-                str = addcomments;
-            else if (str.indexOf(regexp) != -1)
-                ;
-            else if (addcomments.indexOf(QRegularExpression("\\b" + QRegularExpression::escape(str) + "\\b")) != -1)
-                str = addcomments;
-            else
-                str = str + " " + addcomments;
-
-            if (str != pos->comments()) {
-                Document::Item item = *pos;
-
-                item.setComments(str);
-                m_doc->changeItem(pos, item);
-
-                commentcount++;
-            }
-            wp.step();
-        }
-        m_doc->endMacro(tr("Modified comment on %n item(s)", nullptr, commentcount));
+            return Document::mergeItemFields(tmp, to, Document::MergeMode::Ignore,
+                                             {{ Document::Comments, Document::MergeMode::MergeText }});
+        });
     }
 }
 
@@ -1988,33 +1931,23 @@ void Window::on_edit_comment_rem_triggered()
     if (selection().isEmpty())
         return;
 
-    QString remcomments;
+    QString remComment;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be removed from the comments of all selected items:"),
-                              remcomments)) {
-        int commentcount = 0;
-        m_doc->beginMacro();
+                              remComment)) {
+        QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remComment) % u"\\b");
 
-        QRegularExpression regexp("\\b" + QRegularExpression::escape(remcomments) + "\\b");
-
-        WindowProgress wp(w_list, tr("Changing comments"), selection().count());
-
-        foreach(Document::Item *pos, selection()) {
-            QString str = pos->comments();
-            str.remove(regexp);
-            str = str.simplified();
-
-            if (str != pos->comments()) {
-                Document::Item item = *pos;
-
-                item.setComments(str);
-                m_doc->changeItem(pos, item);
-
-                commentcount++;
+        applyTo(selection(), QT_TR_N_NOOP("Modified comment on %n item(s)"),
+                         [=](const auto &from, auto &to) {
+            QString comment = from.comments();
+            if (!comment.isEmpty())
+                comment = comment.remove(regexp).simplified();
+            if (from.comments() != comment) {
+                (to = from).setComments(comment);
+                return true;
             }
-            wp.step();
-        }
-        m_doc->endMacro(tr("Modified comment on %n item(s)", nullptr, commentcount));
+            return false;
+        });
     }
 }
 
@@ -2029,9 +1962,10 @@ void Window::on_edit_reserved_triggered()
     if (MessageBox::getString(this, { },
                               tr("Reserve all selected items for this specific buyer (BrickLink username):"),
                               reserved)) {
-        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set reservation on %n item(s)"),
-                                                   &Document::Item::reserved, &Document::Item::setReserved,
-                                                   reserved);
+        applyTo(selection(), QT_TR_N_NOOP("Set reservation on %n item(s)"),
+                         [reserved](const auto &from, auto &to) {
+            (to = from).setReserved(reserved); return true;
+        });
     }
 }
 
@@ -2048,92 +1982,45 @@ void Window::updateItemFlagsMask()
     m_doc->setItemFlagsMask({ em, dm });
 }
 
+
 void Window::on_edit_copy_fields_triggered()
 {
-    static const struct {
-        const char *name;
-        std::function<void(const Document::Item *from, Document::Item *to)> copyFunction;
-    } fields[] = {
-    { QT_TR_NOOP("Prices"),           [](const Document::Item *from, Document::Item *to)
-        { to->setPrice(from->price()); } },
-    { QT_TR_NOOP("Costs"),            [](const Document::Item *from, Document::Item *to)
-        { to->setCost(from->cost()); } },
-    { QT_TR_NOOP("Tier prices"),      [](const Document::Item *from, Document::Item *to)
-        {
-            for (int i = 0; i < 3; ++i) {
-                to->setTierPrice(i, from->tierPrice(i));
-                to->setTierQuantity(i, from->tierQuantity(i));
-            }
-        } },
-    { QT_TR_NOOP("Quantities"),       [](const Document::Item *from, Document::Item *to)
-        { to->setQuantity(from->quantity()); } },
-    { QT_TR_NOOP("Bulk quantities"),  [](const Document::Item *from, Document::Item *to)
-        { to->setBulkQuantity(from->bulkQuantity()); } },
-    { QT_TR_NOOP("Sale percentages"), [](const Document::Item *from, Document::Item *to)
-        { to->setSale(from->sale()); } },
-    { QT_TR_NOOP("Comments"),         [](const Document::Item *from, Document::Item *to)
-        { to->setComments(from->comments()); } },
-    { QT_TR_NOOP("Remarks"),          [](const Document::Item *from, Document::Item *to)
-        { to->setRemarks(from->remarks()); } },
-    { QT_TR_NOOP("Reserved"),          [](const Document::Item *from, Document::Item *to)
-        { to->setReserved(from->reserved()); } },
-    { QT_TR_NOOP("Retain flags"),     [](const Document::Item *from, Document::Item *to)
-        { to->setRetain(from->retain()); } },
-    { QT_TR_NOOP("Stockrooms"),       [](const Document::Item *from, Document::Item *to)
-        { to->setStockroom(from->stockroom()); } },
-    { QT_TR_NOOP("Custom weights"),   [](const Document::Item *from, Document::Item *to)
-        { if (from->hasCustomWeight()) { to->setWeight(from->weight()); } } },
-    };
-
-    QVector<QPair<QString, bool>> availableFields;
-    for (const auto &f : fields)
-        availableFields.append(qMakePair(tr(f.name), false));
-
-    SelectCopyFieldsDialog dlg(document(),
-                               tr("Please choose the document and item fields that should serve as a source to fill in the corresponding fields in the current document:"),
-                               availableFields);
+    SelectCopyMergeDialog dlg(document(),
+                              tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
+                              tr("Choose how fields are getting copied or merged."));
 
     if (dlg.exec() != QDialog::Accepted )
         return;
-    QVector<int> selectedFields = dlg.selectedFields();
-    if (selectedFields.isEmpty())
-        return;
-    BrickLink::InvItemList itemList = dlg.items();
-    if (itemList.isEmpty())
+
+    auto srcItems = dlg.items();
+    if (srcItems.isEmpty())
         return;
 
-    m_doc->beginMacro();
+    auto defaultMergeMode = dlg.defaultMergeMode();
+    auto fieldMergeModes = dlg.fieldMergeModes();
+    int copyCount = 0;
+    std::vector<std::pair<Document::Item *, Document::Item>> changes;
+    changes.reserve(m_doc->items().size()); // just a guestimate
 
-    int copy_count = 0;
+    document()->beginMacro();
 
-    foreach (Document::Item *pos, m_doc->items()) {
-        foreach (BrickLink::InvItem *ii, itemList) {
-            const BrickLink::Item *item   = ii->item();
-            const BrickLink::Color *color = ii->color();
-
-            if (!item || !color)
+    foreach (Document::Item *dstItem, m_doc->items()) {
+        foreach (Document::Item *srcItem, srcItems) {
+            if (!Document::canItemsBeMerged(*dstItem, *srcItem))
                 continue;
 
-            if ((pos->item() != item)
-                    || (pos->color() != color)
-                    || (pos->condition() != ii->condition())
-                    || (pos->subCondition() != ii->subCondition()))
-                continue;
-
-            Document::Item newItem = *pos;
-
-            for (const auto &index : selectedFields) {
-                if ((index >= 0) && (index < availableFields.size()))
-                    fields[index].copyFunction(ii, &newItem);
+            Document::Item newItem = *dstItem;
+            if (Document::mergeItemFields(*srcItem, newItem, defaultMergeMode, fieldMergeModes)) {
+                changes.emplace_back(dstItem, newItem);
+                ++copyCount;
+                break;
             }
-
-            m_doc->changeItem(pos, newItem);
-            copy_count++;
         }
     }
-
-    m_doc->endMacro(tr("Copied fields for %n item(s)", nullptr, copy_count));
-    qDeleteAll(itemList);
+    if (!changes.empty())
+        document()->changeItems(changes);
+    document()->endMacro(tr("Copied or merged %n item(s)", nullptr, copyCount));
+    qDeleteAll(srcItems);
 }
 
 void Window::on_edit_subtractitems_triggered()
@@ -2141,74 +2028,65 @@ void Window::on_edit_subtractitems_triggered()
     SelectDocumentDialog dlg(document(), tr("Which items should be subtracted from the current document:"));
 
     if (dlg.exec() == QDialog::Accepted ) {
-        BrickLink::InvItemList list = dlg.items();
+        const Document::ItemList subItems = dlg.items();
+        if (subItems.isEmpty())
+            return;
+        const Document::ItemList &items = document()->items();
 
-        if (!list.isEmpty())
-            subtractItems(list);
+        std::vector<std::pair<Document::Item *, Document::Item>> changes;
+        changes.reserve(subItems.size() * 2); // just a guestimate
+        Document::ItemList newItems;
 
-        qDeleteAll(list);
-    }
-}
+        document()->beginMacro();
 
-void Window::subtractItems(const BrickLink::InvItemList &items)
-{
-    if (items.isEmpty())
-        return;
+        for (const Document::Item *subItem : subItems) {
+            int qty = subItem->quantity();
+            if (!subItem->item() || !subItem->color() || !qty)
+                continue;
 
-    m_doc->beginMacro();
+            bool hadMatch = false;
 
-    WindowProgress wp(w_list, tr("Subtracting items"), items.count() * m_doc->items().count());
+            for (Document::Item *item : items) {
+                if (!Document::canItemsBeMerged(*item, *subItem))
+                    continue;
 
-    foreach(BrickLink::InvItem *ii, items) {
-        const BrickLink::Item *item   = ii->item();
-        const BrickLink::Color *color = ii->color();
-        BrickLink::Condition cond     = ii->condition();
-        int qty                       = ii->quantity();
+                Document::Item newItem = *item;
 
-        if (!item || !color || !qty) {
-            wp.step(m_doc->items().count());
-            continue;
-        }
-
-        Document::Item *last_match = nullptr;
-
-        foreach(Document::Item *pos, m_doc->items()) {
-            if ((pos->item() == item) && (pos->color() == color) && (pos->condition() == cond)) {
-                Document::Item newitem = *pos;
-
-                if (pos->quantity() >= qty) {
-                    newitem.setQuantity(pos->quantity() - qty);
+                if (item->quantity() >= qty) {
+                    newItem.setQuantity(item->quantity() - qty);
                     qty = 0;
+                } else {
+                    newItem.setQuantity(0);
+                    qty -= item->quantity();
                 }
-                else {
-                    qty -= pos->quantity();
-                    newitem.setQuantity(0);
-                }
-                m_doc->changeItem(pos, newitem);
-                last_match = pos;
+                changes.emplace_back(item, newItem);
+                hadMatch = true;
             }
-            wp.step();
+            if (qty) {   // still a qty left
+                if (hadMatch) {
+                    Document::Item &lastChange = changes.back().second;
+                    lastChange.setQuantity(lastChange.quantity() - qty);
+                } else {
+                    auto *newItem = new Document::Item();
+                    newItem->setItem(subItem->item());
+                    newItem->setColor(subItem->color());
+                    newItem->setCondition(subItem->condition());
+                    newItem->setSubCondition(subItem->subCondition());
+                    newItem->setQuantity(-qty);
+
+                    newItems.append(newItem);
+                }
+            }
         }
 
-        if (qty) {   // still a qty left
-            if (last_match) {
-                Document::Item newitem = *last_match;
-                newitem.setQuantity(last_match->quantity() - qty);
-                m_doc->changeItem(last_match, newitem);
-            }
-            else {
-                auto *newitem = new Document::Item();
-                newitem->setItem(item);
-                newitem->setColor(color);
-                newitem->setCondition(cond);
-                ///////newitem->setOrigQuantity(0);
-                newitem->setQuantity(-qty);
+        if (!changes.empty())
+            document()->changeItems(changes);
+        if (!newItems.isEmpty())
+            document()->appendItems(newItems);
+        document()->endMacro(tr("Subtracted %n item(s)", nullptr, subItems.size()));
 
-                m_doc->appendItem(newitem);
-            }
-        }
+        qDeleteAll(subItems);
     }
-    m_doc->endMacro(tr("Subtracted %n item(s)", nullptr, items.count()));
 }
 
 void Window::on_edit_mergeitems_triggered()
@@ -2273,54 +2151,6 @@ void Window::on_edit_partoutitems_triggered()
         QApplication::beep();
 }
 
-void Window::setMatchProgress(int /*pmax*/, int /*pcur*/)
-{
-    fputc('.', stderr);
-}
-
-void Window::setMatchFinished(QVector<const BrickLink::Item *> result)
-{
-    foreach (const BrickLink::Item *item, result)
-        qWarning() << "SetMatch:" << item->name() << item->id();
-}
-
-void Window::on_edit_setmatch_triggered()
-{
-    if (!m_doc->items().isEmpty()) {
-        BrickLink::SetMatch *sm = new BrickLink::SetMatch(m_doc);
-
-        sm->setGreedyPreference(BrickLink::SetMatch::PreferLargerSets);
-
-        sm->setItemTypeConstraint(QVector<const BrickLink::ItemType *>() << BrickLink::core()->itemType('S'));
-        sm->setPartCountConstraint(100, -1);
-        sm->setYearReleasedConstraint(1995, -1);
-
-        connect(sm, &BrickLink::SetMatch::finished,
-                this, &Window::setMatchFinished);
-        connect(sm, &BrickLink::SetMatch::progress,
-                this, &Window::setMatchProgress);
-
-        if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items()
-                                              : selection(), BrickLink::SetMatch::Greedy))
-            qWarning("SetMatch (Recursive): error.");
-    } else {
-        QApplication::beep();
-    }
-}
-
-void Window::setPrice(double d)
-{
-    if (selection().count() == 1) {
-        Document::Item *pos = selection().front();
-        Document::Item item = *pos;
-
-        item.setPrice(d);
-        m_doc->changeItem(pos, item);
-    }
-    else
-        QApplication::beep();
-}
-
 void Window::gotoNextErrorOrDifference(bool difference)
 {
     auto startIdx = m_selection_model->currentIndex();
@@ -2369,9 +2199,95 @@ void Window::gotoNextErrorOrDifference(bool difference)
     }
 }
 
-void Window::contextMenu(const QPoint &p)
+void Window::contextMenu(const QPoint &pos)
 {
-    FrameWork::inst()->showContextMenu(true, w_list->viewport()->mapToGlobal(p));
+    if (!m_contextMenu)
+        m_contextMenu = new QMenu(this);
+    m_contextMenu->clear();
+    QAction *defaultAction = nullptr;
+
+    auto idx = w_list->indexAt(pos);
+    if (idx.isValid()) {
+        QVector<QByteArray> actionNames;
+
+        switch (idx.column()) {
+        case Document::Status:
+            actionNames = { "edit_status_include", "edit_status_exclude", "edit_status_extra", "-",
+                            "edit_status_toggle" };
+            break;
+        case Document::Picture:
+        case Document::PartNo:
+        case Document::Description:
+            actionNames = { "edit_item" };
+            break;
+        case Document::Condition:
+            actionNames = { "edit_cond_new", "edit_cond_used", "-", "edit_subcond_none",
+                            "edit_subcond_sealed", "edit_subcond_complete",
+                            "edit_subcond_incomplete" };
+            break;
+        case Document::Color:
+            actionNames = { "edit_color" };
+            break;
+        case Document::QuantityOrig:
+        case Document::QuantityDiff:
+        case Document::Quantity:
+            actionNames = { "edit_qty_set", "edit_qty_multiply", "edit_qty_divide" };
+            break;
+        case Document::PriceOrig:
+        case Document::PriceDiff:
+        case Document::Price:
+        case Document::Total:
+            actionNames = { "edit_price_set", "edit_price_inc_dec", "edit_price_round",
+                            "edit_price_to_priceguide" };
+            break;
+        case Document::Cost:
+            actionNames = { "edit_cost_set", "edit_cost_inc_dec", "on_edit_cost_round",
+                            "edit_cost_spread" };
+            break;
+        case Document::Bulk:
+            actionNames = { "edit_bulk" };
+            break;
+        case Document::Sale:
+            actionNames = { "edit_sale" };
+            break;
+        case Document::Comments:
+            actionNames = { "edit_comment_set", "edit_comment_add", "edit_comment_rem",
+                            "edit_comment_clear" };
+            break;
+        case Document::Remarks:
+            actionNames = { "edit_remark_set", "edit_remark_add", "edit_remark_rem",
+                            "edit_remark_clear" };
+            break;
+        case Document::Retain:
+            actionNames = { "edit_retain_yes", "edit_retain_no", "-", "edit_retain_toggle" };
+            break;
+        case Document::Stockroom:
+            actionNames = { "edit_stockroom_no", "-", "edit_stockroom_a", "edit_stockroom_b",
+                            "edit_stockroom_c" };
+            break;
+        case Document::Reserved:
+            actionNames = { "edit_reserved" };
+            break;
+        }
+        for (const auto &actionName : actionNames) {
+            if (actionName == "-")
+                m_contextMenu->addSeparator();
+            else
+                m_contextMenu->addAction(FrameWork::inst()->findAction(actionName.constData()));
+        }
+    }
+
+    if (!m_contextMenu->isEmpty())
+        m_contextMenu->addSeparator();
+
+    const auto actions = FrameWork::inst()->contextMenuActions();
+    for (auto action : actions) {
+        if (action)
+            m_contextMenu->addAction(action);
+        else
+            m_contextMenu->addSeparator();
+    }
+    m_contextMenu->popup(w_list->viewport()->mapToGlobal(pos), defaultAction);
 }
 
 void Window::on_document_close_triggered()
@@ -2703,7 +2619,7 @@ void Window::resizeColumnsToDefault(bool simpleMode)
         if (w_header->isSectionAvailable(i))
             w_header->setSectionHidden(i, false);
 
-        int mw = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
+        int mw = w_list->model()->headerData(i, Qt::Horizontal, Document::HeaderDefaultWidthRole).toInt();
         int width = qMax((mw < 0 ? -mw : mw * em) + 8, w_header->sectionSizeHint(i));
         if (width)
             w_header->resizeSection(i, width);

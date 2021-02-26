@@ -122,6 +122,8 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
 
 bool ScriptManager::reload()
 {
+    emit aboutToReload();
+
     clearScripts();
 
     QStringList spath = { QStringLiteral(":/extensions") };
@@ -151,6 +153,8 @@ bool ScriptManager::reload()
             }
         }
     }
+    emit reloaded();
+
     return !m_scripts.isEmpty();
 }
 

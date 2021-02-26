@@ -54,8 +54,8 @@ enum class Time      { PastSix, Current, Count };
 enum class Price     { Lowest, Average, WAverage, Highest, Count };
 enum class Condition { New, Used, Count };
 enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
-enum class Stockroom { None, A, B, C };
-enum class Status    { Include, Exclude, Extra, Unknown };
+enum class Stockroom { None, A, B, C, Count };
+enum class Status    { Include, Exclude, Extra, Count };
 
 enum class UpdateStatus  { Ok, Updating, UpdateFailed };
 
@@ -94,3 +94,7 @@ enum ModelRoles {
 
 Q_DECLARE_METATYPE(BrickLink::Time)
 Q_DECLARE_METATYPE(BrickLink::Price)
+Q_DECLARE_METATYPE(BrickLink::Condition)
+Q_DECLARE_METATYPE(BrickLink::SubCondition)
+Q_DECLARE_METATYPE(BrickLink::Stockroom)
+Q_DECLARE_METATYPE(BrickLink::Status)

@@ -45,16 +45,19 @@ private:
 class ChangeCmd : public QUndoCommand
 {
 public:
-    ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value);
+    ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes);
     int id() const override;
+    bool mergeWith(const QUndoCommand *other) override;
 
     void redo() override;
     void undo() override;
 
 private:
-    Document *      m_doc;
-    Document::Item *m_item;
-    Document::Item  m_value;
+    Document *m_doc;
+    uint m_loopCount;
+    std::vector<std::pair<Document::Item *, Document::Item>> m_changes;
+
+    static QTimer *s_eventLoopCounter;
 };
 
 class CurrencyCmd : public QUndoCommand

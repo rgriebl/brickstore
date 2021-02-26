@@ -49,6 +49,10 @@ public:
     QVector<Script *> extensionScripts() const;
     QVector<Script *> printingScripts() const;
 
+signals:
+    void aboutToReload();
+    void reloaded();
+
 private:
     void clearScripts();
     void loadScript(const QString &fileName);

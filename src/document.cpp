@@ -39,6 +39,106 @@
 using namespace std::chrono_literals;
 
 
+template <auto G, auto S>
+struct FieldOp
+{
+    template <typename Result> static Result returnType(Result (Document::Item::*)() const);
+    typedef decltype(returnType(G)) R;
+
+    static void copy(const Document::Item &from, Document::Item &to)
+    {
+        (to.*S)((from.*G)());
+    }
+
+    static bool merge(const Document::Item &from, Document::Item &to,
+                      Document::MergeMode mergeMode = MergeMode::Merge, const R defaultValue = { })
+    {
+        if (mergeMode == Document::MergeMode::Ignore) {
+            return false;
+        } else if (mergeMode == Document::MergeMode::Copy) {
+            copy(from, to);
+            return true;
+        } else {
+            return mergeInternal(from, to, mergeMode, defaultValue);
+        }
+    }
+
+private:
+    template<class Q = R>
+    static typename std::enable_if<!std::is_same<Q, double>::value && !std::is_same<Q, QString>::value, bool>::type
+    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+                  const R defaultValue)
+    {
+        Q_UNUSED(mergeMode)
+
+        if (((from.*G)() != defaultValue) && ((to.*G)() == defaultValue)) {
+            copy(from, to);
+            return true;
+        }
+        return false;
+    }
+
+    template<class Q = R>
+    static typename std::enable_if<std::is_same<Q, double>::value, bool>::type
+    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+                  const R defaultValue)
+    {
+        if (mergeMode == Document::MergeMode::MergeAverage) { // weighted by quantity
+            const int fromQty = from.quantity();
+            const int toQty = to.quantity();
+
+            (to.*S)(((to.*G)() * toQty + (from.*G)() * fromQty) / (toQty + fromQty));
+            return true;
+        } else {
+            if (!qFuzzyCompare((from.*G)(), defaultValue) && qFuzzyCompare((to.*G)(), defaultValue)) {
+                copy(from, to);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template<class Q = R>
+    static typename std::enable_if<std::is_same<Q, QString>::value, bool>::type
+    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+                  const R defaultValue)
+    {
+        if (mergeMode == Document::MergeMode::MergeText) { // add or remove "tags"
+            QString f = (from.*G)();
+            QString t = (to.*G)();
+
+            if (!f.isEmpty() && !t.isEmpty() && (f != t)) {
+                QRegularExpression fromRe { u"\\b" % QRegularExpression::escape(f) % u"\\b" };
+
+                if (!fromRe.match(t).hasMatch()) {
+                    QRegularExpression toRe { u"\\b" % QRegularExpression::escape(t) % u"\\b" };
+
+                    if (toRe.match(f).hasMatch())
+                        (to.*S)(f);
+                    else
+                        (to.*S)(t % u" " % f);
+                    return true;
+                }
+            } else if (!f.isEmpty()) {
+                (to.*S)(f);
+                return true;
+            }
+        } else {
+            if (((from.*G)() != defaultValue) && ((to.*G)() == defaultValue)) {
+                copy(from, to);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 enum {
     CID_Change,
     CID_AddRemove,
@@ -52,7 +152,8 @@ enum {
 
 
 AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
-                           const QVector<int> &sortedPositions, const QVector<int> &filteredPositions, const Document::ItemList &items)
+                           const QVector<int> &sortedPositions,
+                           const QVector<int> &filteredPositions, const Document::ItemList &items)
     : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count())))
     , m_doc(doc)
     , m_positions(positions)
@@ -114,22 +215,59 @@ QString AddRemoveCmd::genDesc(bool is_add, int count)
 ///////////////////////////////////////////////////////////////////////
 
 
+QTimer *ChangeCmd::s_eventLoopCounter = nullptr;
 
-ChangeCmd::ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value)
+ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes)
     : QUndoCommand(qApp->translate("ChangeCmd", "Modified item"))
     , m_doc(doc)
-    , m_item(item)
-    , m_value(value)
-{ }
+    , m_changes(changes)
+{
+    std::sort(m_changes.begin(), m_changes.end(), [](const auto &a, const auto &b) {
+        return a.first < b.first;
+    });
+
+    if (!s_eventLoopCounter) {
+        s_eventLoopCounter = new QTimer(qApp);
+        s_eventLoopCounter->setProperty("loopCount", uint(0));
+        s_eventLoopCounter->setInterval(0);
+        s_eventLoopCounter->setSingleShot(true);
+        QObject::connect(s_eventLoopCounter, &QTimer::timeout,
+                         s_eventLoopCounter, []() {
+            uint lc = s_eventLoopCounter->property("loopCount").toUInt();
+            s_eventLoopCounter->setProperty("loopCount", lc + 1);
+        });
+    }
+    m_loopCount = s_eventLoopCounter->property("loopCount").toUInt();
+    s_eventLoopCounter->start();
+}
 
 int ChangeCmd::id() const
 {
     return CID_Change;
 }
 
+bool ChangeCmd::mergeWith(const QUndoCommand *other)
+{
+    if (other->id() == id()) {
+        auto *otherChange = static_cast<const ChangeCmd *>(other);
+        if (m_loopCount == otherChange->m_loopCount) {
+            std::copy_if(otherChange->m_changes.cbegin(), otherChange->m_changes.cend(),
+                         std::back_inserter(m_changes), [this](const auto &change) {
+                return !std::binary_search(m_changes.begin(), m_changes.end(),
+                                           std::make_pair(change.first, Document::Item()),
+                                           [](const auto &a, const auto &b) {
+                    return a.first < b.first;
+                });
+            });
+            return true;
+        }
+    }
+    return false;
+}
+
 void ChangeCmd::redo()
 {
-    m_doc->changeItemDirect(m_item, m_value);
+    m_doc->changeItemsDirect(m_changes);
 }
 
 void ChangeCmd::undo()
@@ -495,6 +633,11 @@ void Document::appendItem(Item *item)
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, { item }));
 }
 
+void Document::appendItems(const Document::ItemList &items)
+{
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, items));
+}
+
 void Document::insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items)
 {
     if (items.isEmpty())
@@ -531,7 +674,13 @@ void Document::removeItems(const ItemList &items)
 
 void Document::changeItem(Item *item, const Item &value)
 {
-    m_undo->push(new ChangeCmd(this, item, value));
+    m_undo->push(new ChangeCmd(this, {{ item, value }}));
+}
+
+void Document::changeItems(const std::vector<std::pair<Item *, Item>> &changes)
+{
+    if (!changes.empty())
+        m_undo->push(new ChangeCmd(this, changes));
 }
 
 void Document::setItemsDirect(const Document::ItemList &items)
@@ -630,15 +779,20 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions,
         emit isFilteredChanged(m_isFiltered = false);
 }
 
-void Document::changeItemDirect(BrickLink::InvItem *item, Item &value)
+void Document::changeItemsDirect(std::vector<std::pair<Item *, Item>> &changes)
 {
-    std::swap(*item, value);
+    Q_ASSERT(!changes.empty());
 
-    QModelIndex idx1 = index(item, 0);
-    QModelIndex idx2 = idx1.siblingAtColumn(columnCount() - 1);
+    for (auto &change : changes) {
+        Item *item = change.first;
+        std::swap(*item, change.second);
 
-    emitDataChanged(idx1, idx2);
-    updateItemFlags(item);
+        QModelIndex idx1 = index(item, 0);
+        QModelIndex idx2 = idx1.siblingAtColumn(columnCount() - 1);
+        updateItemFlags(item);
+        emitDataChanged(idx1, idx2);
+    }
+
     emitStatisticsChanged();
 
     //TODO: we should remember and re-apply the isSorted/isFiltered state
@@ -796,7 +950,7 @@ void Document::updateItemFlags(const Item *item)
             quint64 fmask = (1ULL << f);
             if (fmask & ignoreMask)
                 continue;
-            if (dataForFilterRole(item, f) != dataForFilterRole(base, f))
+            if (dataForEditRole(item, f) != dataForEditRole(base, f))
                 updated |= fmask;
         }
     }
@@ -874,6 +1028,75 @@ void Document::setOrder(BrickLink::Order *order)
     if (m_order)
         delete m_order;
     m_order = order;
+}
+
+bool Document::canItemsBeMerged(const Item &item1, const Item &item2)
+{
+    return ((&item1 != &item2)
+            && !item1.isIncomplete()
+            && !item2.isIncomplete()
+            && (item1.item() == item2.item())
+            && (item1.color() == item2.color())
+            && (item1.condition() == item2.condition())
+            && (item1.subCondition() == item2.subCondition()));
+}
+
+bool Document::mergeItemFields(const Item &from, Item &to, MergeMode defaultMerge,
+                               const QHash<Field, MergeMode> &fieldMerge)
+{
+    if (!canItemsBeMerged(from, to))
+        return false;
+
+    if (fieldMerge.isEmpty()) {
+        if (defaultMerge == MergeMode::Ignore) {
+            return false;
+        } else if (defaultMerge == MergeMode::Copy) {
+            to = from;
+            return true;
+        }
+    }
+
+    auto mergeModeFor = [&fieldMerge, defaultMerge](Field f) -> MergeMode {
+        auto mergeIt = fieldMerge.constFind(f);
+        return (mergeIt == fieldMerge.cend()) ? defaultMerge : mergeIt.value();
+    };
+
+    bool changed = false;
+
+    if (FieldOp<&Item::quantity, &Item::setQuantity>::merge(from, to, mergeModeFor(Quantity)))
+        changed = true;
+    if (FieldOp<&Item::price, &Item::setPrice>::merge(from, to, mergeModeFor(Price)))
+        changed = true;
+    if (FieldOp<&Item::cost, &Item::setCost>::merge(from, to, mergeModeFor(Cost)))
+        changed = true;
+    if (FieldOp<&Item::bulkQuantity, &Item::setBulkQuantity>::merge(from, to, mergeModeFor(Bulk)))
+        changed = true;
+    if (FieldOp<&Item::sale, &Item::setSale>::merge(from, to, mergeModeFor(Sale)))
+        changed = true;
+    if (FieldOp<&Item::comments, &Item::setComments>::merge(from, to, mergeModeFor(Comments)))
+        changed = true;
+    if (FieldOp<&Item::remarks, &Item::setRemarks>::merge(from, to, mergeModeFor(Remarks)))
+        changed = true;
+    if (FieldOp<&Item::tierQuantity0, &Item::setTierQuantity0>::merge(from, to, mergeModeFor(TierQ1)))
+        changed = true;
+    if (FieldOp<&Item::tierPrice0, &Item::setTierPrice0>::merge(from, to, mergeModeFor(TierP1)))
+        changed = true;
+    if (FieldOp<&Item::tierQuantity1, &Item::setTierQuantity1>::merge(from, to, mergeModeFor(TierQ2)))
+        changed = true;
+    if (FieldOp<&Item::tierPrice1, &Item::setTierPrice1>::merge(from, to, mergeModeFor(TierP2)))
+        changed = true;
+    if (FieldOp<&Item::tierQuantity2, &Item::setTierQuantity2>::merge(from, to, mergeModeFor(TierQ3)))
+        changed = true;
+    if (FieldOp<&Item::tierPrice2, &Item::setTierPrice2>::merge(from, to, mergeModeFor(TierP3)))
+        changed = true;
+    if (FieldOp<&Item::retain, &Item::setRetain>::merge(from, to, mergeModeFor(Retain)))
+        changed = true;
+    if (FieldOp<&Item::stockroom, &Item::setStockroom>::merge(from, to, mergeModeFor(Stockroom)))
+        changed = true;
+    if (FieldOp<&Item::reserved, &Item::setReserved>::merge(from, to, mergeModeFor(Reserved)))
+        changed = true;
+
+    return changed;
 }
 
 void Document::setFakeIndexes(const QVector<int> &fakeIndexes)
@@ -1040,50 +1263,56 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
 
 bool Document::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole) {
-        Item *itemp = this->item(index);
-        Item item = *itemp;
-        auto f = static_cast<Field>(index.column());
+    if (!index.isValid() || (role != Qt::EditRole))
+        return false;
+    Item *itemp = this->item(index);
+    Item item = *itemp;
 
-        switch (f) {
-        case Document::PartNo      : {
-            char itid = item.itemType() ? item.itemType()->id() : 'P';
-            const BrickLink::Item *newitem = BrickLink::core()->item(itid, value.toString().toLatin1().constData());
-            if (newitem)
-                item.setItem(newitem);
-            break;
-        }
-        case Comments    : item.setComments(value.toString()); break;
-        case Remarks     : item.setRemarks(value.toString()); break;
-        case Reserved    : item.setReserved(value.toString()); break;
-        case Sale        : item.setSale(value.toInt()); break;
-        case Bulk        : item.setBulkQuantity(value.toInt()); break;
-        case TierQ1      : item.setTierQuantity(0, value.toInt()); break;
-        case TierQ2      : item.setTierQuantity(1, value.toInt()); break;
-        case TierQ3      : item.setTierQuantity(2, value.toInt()); break;
-        case TierP1      : item.setTierPrice(0, Currency::fromString(value.toString())); break;
-        case TierP2      : item.setTierPrice(1, Currency::fromString(value.toString())); break;
-        case TierP3      : item.setTierPrice(2, Currency::fromString(value.toString())); break;
-        case Weight      : item.setTotalWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
-        case Quantity    : item.setQuantity(value.toInt()); break;
-        case QuantityDiff: {
-            if (auto base = differenceBaseItem(itemp))
-                item.setQuantity(base->quantity() + value.toInt());
-            break;
-        }
-        case Price       : item.setPrice(Currency::fromString(value.toString())); break;
-        case PriceDiff   :  {
-            if (auto base = differenceBaseItem(itemp))
-                item.setPrice(base->price() + Currency::fromString(value.toString()));
-            break;
-        }
-        case Cost        : item.setCost(Currency::fromString(value.toString())); break;
-        default          : break;
-        }
-        if (item != *itemp) {
-            changeItem(itemp, item);
-            return true;
-        }
+    switch (static_cast<Field>(index.column())) {
+    case Status      : item.setStatus(value.value<BrickLink::Status>()); break;
+    case Picture     :
+    case Description : item.setItem(value.value<const BrickLink::Item *>()); break;
+    case PartNo      : {
+        char itid = item.itemType() ? item.itemType()->id() : 'P';
+        const BrickLink::Item *newitem = BrickLink::core()->item(itid, value.toString().toLatin1().constData());
+        if (newitem)
+            item.setItem(newitem);
+        break;
+    }
+    case Condition   : item.setCondition(value.value<BrickLink::Condition>()); break;
+    case Color       : item.setColor(value.value<const BrickLink::Color *>()); break;
+    case QuantityDiff: {
+        if (auto base = differenceBaseItem(itemp))
+            item.setQuantity(base->quantity() + value.toInt());
+        break;
+    }
+    case Quantity    : item.setQuantity(value.toInt()); break;
+    case PriceDiff   :  {
+        if (auto base = differenceBaseItem(itemp))
+            item.setPrice(base->price() + value.toDouble());
+        break;
+    }
+    case Price       : item.setPrice(value.toDouble()); break;
+    case Cost        : item.setCost(value.toDouble()); break;
+    case Bulk        : item.setBulkQuantity(value.toInt()); break;
+    case Sale        : item.setSale(value.toInt()); break;
+    case Comments    : item.setComments(value.toString()); break;
+    case Remarks     : item.setRemarks(value.toString()); break;
+    case TierQ1      : item.setTierQuantity(0, value.toInt()); break;
+    case TierQ2      : item.setTierQuantity(1, value.toInt()); break;
+    case TierQ3      : item.setTierQuantity(2, value.toInt()); break;
+    case TierP1      : item.setTierPrice(0, value.toDouble()); break;
+    case TierP2      : item.setTierPrice(1, value.toDouble()); break;
+    case TierP3      : item.setTierPrice(2, value.toDouble()); break;
+    case Retain      : item.setRetain(value.toBool()); break;
+    case Stockroom   : item.setStockroom(value.value<BrickLink::Stockroom>()); break;
+    case Reserved    : item.setReserved(value.toString()); break;
+    case Weight      : item.setTotalWeight(value.toDouble()); break;
+    default          : break;
+    }
+    if (item != *itemp) {
+        changeItem(itemp, item);
+        return true;
     }
     return false;
 }
@@ -1097,12 +1326,16 @@ QVariant Document::data(const QModelIndex &index, int role) const
 
         switch (role) {
         case Qt::DisplayRole      : return dataForDisplayRole(it, f);
-        case Qt::DecorationRole   : return dataForDecorationRole(it, f);
-        case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
-        case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
+        case BaseDisplayRole      : return dataForDisplayRole(differenceBaseItem(it), f);
+        case Qt::DecorationRole   : if (f == Picture) return it->image(); break;
+        case Qt::TextAlignmentRole: return headerData(index.column(), Qt::Horizontal, role);
         case Qt::EditRole         : return dataForEditRole(it, f);
-        case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
-        case Document::FilterRole : return dataForFilterRole(it, f);
+        case BaseEditRole         : return dataForEditRole(differenceBaseItem(it), f);
+        case FilterRole           : return dataForFilterRole(it, f);
+        case ItemPointerRole      : return QVariant::fromValue(it);
+        case BaseItemPointerRole  : return QVariant::fromValue(differenceBaseItem(it));
+        case ErrorFlagsRole       : return itemFlags(it).first;
+        case DifferenceFlagsRole  : return itemFlags(it).second;
         }
     }
     return QVariant();
@@ -1110,53 +1343,100 @@ QVariant Document::data(const QModelIndex &index, int role) const
 
 QVariant Document::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal) {
-        auto f = static_cast<Field>(section);
+    if (orientation != Qt::Horizontal)
+        return { };
 
-        switch (role) {
-        case Qt::DisplayRole      : return headerDataForDisplayRole(f);
-        case Qt::TextAlignmentRole: return headerDataForTextAlignmentRole(f);
-        case Qt::UserRole         : return headerDataForDefaultWidthRole(f);
-        }
+    static constexpr int left   = Qt::AlignLeft    | Qt::AlignVCenter;
+    static constexpr int center = Qt::AlignHCenter | Qt::AlignVCenter;
+    static constexpr int right  = Qt::AlignRight   | Qt::AlignVCenter;
+
+    // column -> { default width, alignment, title }
+    static QHash<int, std::tuple<int, int, const char *>> columnData = {
+        { Index,        {  3,  right, QT_TR_NOOP("Index") } },
+        { Status,       {  6, center, QT_TR_NOOP("Status") } },
+        { Picture,      {-80, center, QT_TR_NOOP("Image") } },
+        { PartNo,       { 10,   left, QT_TR_NOOP("Part #") } },
+        { Description,  { 28,   left, QT_TR_NOOP("Description") } },
+        { Comments,     {  8,   left, QT_TR_NOOP("Comments") } },
+        { Remarks,      {  8,   left, QT_TR_NOOP("Remarks") } },
+        { QuantityOrig, {  5,  right, QT_TR_NOOP("Qty.Orig") } },
+        { QuantityDiff, {  5,  right, QT_TR_NOOP("Qty.Diff") } },
+        { Quantity,     {  5,  right, QT_TR_NOOP("Qty.") } },
+        { Bulk,         {  5,  right, QT_TR_NOOP("Bulk") } },
+        { PriceOrig,    {  8,  right, QT_TR_NOOP("Pr.Orig") } },
+        { PriceDiff,    {  8,  right, QT_TR_NOOP("Pr.Diff") } },
+        { Cost,         {  8,  right, QT_TR_NOOP("Cost") } },
+        { Price,        {  8,  right, QT_TR_NOOP("Price") } },
+        { Total,        {  8,  right, QT_TR_NOOP("Total") } },
+        { Sale,         {  5,  right, QT_TR_NOOP("Sale") } },
+        { Condition,    {  5, center, QT_TR_NOOP("Cond.") } },
+        { Color,        { 15,   left, QT_TR_NOOP("Color") } },
+        { Category,     { 12,   left, QT_TR_NOOP("Category") } },
+        { ItemType,     { 12,   left, QT_TR_NOOP("Item Type") } },
+        { TierQ1,       {  5,  right, QT_TR_NOOP("Tier Q1") } },
+        { TierP1,       {  8,  right, QT_TR_NOOP("Tier P1") } },
+        { TierQ2,       {  5,  right, QT_TR_NOOP("Tier Q2") } },
+        { TierP2,       {  8,  right, QT_TR_NOOP("Tier P2") } },
+        { TierQ3,       {  5,  right, QT_TR_NOOP("Tier Q3") } },
+        { TierP3,       {  8,  right, QT_TR_NOOP("Tier P3") } },
+        { LotId,        {  8,  right, QT_TR_NOOP("Lot Id") } },
+        { Retain,       {  8, center, QT_TR_NOOP("Retain") } },
+        { Stockroom,    {  8, center, QT_TR_NOOP("Stockroom") } },
+        { Reserved,     {  8,   left, QT_TR_NOOP("Reserved") } },
+        { Weight,       {  8,  right, QT_TR_NOOP("Weight") } },
+        { YearReleased, {  5,  right, QT_TR_NOOP("Year") } },
+    };
+    switch (role) {
+    case HeaderDefaultWidthRole: return std::get<0>(columnData.value(section));
+    case Qt::TextAlignmentRole : return std::get<1>(columnData.value(section));
+    case Qt::DisplayRole       : return tr(std::get<2>(columnData.value(section)));
+    default                    : return { };
     }
-    return QVariant();
 }
 
 QVariant Document::dataForEditRole(const Item *it, Field f) const
 {
+    if (!it)
+        return { };
+
     switch (f) {
+    case Status      : return QVariant::fromValue(it->status());
+    case Picture     :
+    case Description : return QVariant::fromValue(it->item());
     case PartNo      : return it->itemId();
-    case Comments    : return it->comments();
-    case Remarks     : return it->remarks();
-    case Reserved    : return it->reserved();
-    case Sale        : return it->sale();
-    case Bulk        : return it->bulkQuantity();
-    case TierQ1      : return it->tierQuantity(0);
-    case TierQ2      : return it->tierQuantity(1);
-    case TierQ3      : return it->tierQuantity(2);
-    case TierP1      : return Currency::toString(it->tierPrice(0));
-    case TierP2      : return Currency::toString(it->tierPrice(1));
-    case TierP3      : return Currency::toString(it->tierPrice(2));
-    case Weight      : return Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), false);
-    case Quantity    : return it->quantity();
+    case Condition   : return QVariant::fromValue(it->condition());
+    case Color       : return QVariant::fromValue(it->color());
     case QuantityDiff:  {
         auto base = differenceBaseItem(it);
         return base ? it->quantity() - base->quantity() : 0;
     }
-    case Price       : return Currency::toString(it->price());
+    case Quantity    : return it->quantity();
     case PriceDiff   : {
         auto base = differenceBaseItem(it);
-        return Currency::toString(base ? it->price() - base->price() : 0);
+        return base ? it->price() - base->price() : 0;
     }
-    case Cost        : return Currency::toString(it->cost());
-    default          : return QString();
+    case Price       : return it->price();
+    case Cost        : return it->cost();
+    case Bulk        : return it->bulkQuantity();
+    case Sale        : return it->sale();
+    case Comments    : return it->comments();
+    case Remarks     : return it->remarks();
+    case TierQ1      : return it->tierQuantity(0);
+    case TierQ2      : return it->tierQuantity(1);
+    case TierQ3      : return it->tierQuantity(2);
+    case TierP1      : return it->tierPrice(0);
+    case TierP2      : return it->tierPrice(1);
+    case TierP3      : return it->tierPrice(2);
+    case Retain      : return it->retain();
+    case Stockroom   : return QVariant::fromValue(it->stockroom());
+    case Reserved    : return it->reserved();
+    case Weight      : return it->totalWeight();
+    default          : return { };
     }
 }
 
-QString Document::dataForDisplayRole(const BrickLink::InvItem *it, Field f) const
+QVariant Document::dataForDisplayRole(const BrickLink::InvItem *it, Field f) const
 {
-    QString dash = QLatin1String("-");
-
     switch (f) {
     case Index       :
         if (m_fakeIndexes.isEmpty()) {
@@ -1165,56 +1445,23 @@ QString Document::dataForDisplayRole(const BrickLink::InvItem *it, Field f) cons
             auto fi = m_fakeIndexes.at(m_items.indexOf(const_cast<BrickLink::InvItem *>(it)));
             return fi >= 0 ? QString::number(fi + 1) : QString::fromLatin1("+");
         }
-    case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
-    case PartNo      : return it->itemId();
+    case LotId       : return it->lotId();
     case Description : return it->itemName();
-    case Comments    : return it->comments();
-    case Remarks     : return it->remarks();
-    case Quantity    : return QString::number(it->quantity());
-    case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
-    case Price       : return Currency::toString(it->price());
-    case Total       : return Currency::toString(it->total());
-    case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
-    case Condition   : {
-        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "List>Cond>New")
-                                                                   : tr("U", "List>Cond>Used");
-        if (it->itemType() && it->itemType()->hasSubConditions()
-                && (it->subCondition() != BrickLink::SubCondition::None)) {
-            c = c % u" / " % subConditionLabel(it->subCondition());
-        }
-        return c;
-    }
+    case Total       : return it->total();
     case Color       : return it->colorName();
-    case Category    : return it->category() ? it->category()->name() : dash;
-    case ItemType    : return it->itemType() ? it->itemType()->name() : dash;
-    case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
-    case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
-    case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
-    case TierP1      : return Currency::toString(it->tierPrice(0));
-    case TierP2      : return Currency::toString(it->tierPrice(1));
-    case TierP3      : return Currency::toString(it->tierPrice(2));
-    case Reserved    : return it->reserved();
-    case Weight      : return qFuzzyIsNull(it->totalWeight()) ? dash : Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), true, true);
-    case YearReleased: return (it->itemYearReleased() == 0) ? dash : QString::number(it->itemYearReleased());
+    case Category    : return it->categoryName();
+    case ItemType    : return it->itemTypeName();
 
     case PriceOrig   : {
         auto base = differenceBaseItem(it);
-        return Currency::toString(base ? base->price() : 0);
+        return base ? base->price() : 0;
     }
-    case PriceDiff   : {
-        auto base = differenceBaseItem(it);
-        return Currency::toString(base ? it->price() - base->price() : 0);
-    }
-    case Cost        : return Currency::toString(it->cost());
     case QuantityOrig: {
         auto base = differenceBaseItem(it);
-        return QString::number(base ? base->quantity() : 0);
+        return base ? base->quantity() : 0;
     }
-    case QuantityDiff: {
-        auto base = differenceBaseItem(it);
-        return QString::number(base ? it->quantity() - base->quantity() : 0);
-    }
-    default          : return QString();
+    case YearReleased: return it->itemYearReleased();
+    default          : return dataForEditRole(it, f);
     }
 }
 
@@ -1235,197 +1482,16 @@ QVariant Document::dataForFilterRole(const Item *it, Field f) const
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return QString("-");
         }
-    case Retain      : return it->retain() ? tr("Y", "Filter>Retain>Yes")
-                                           : tr("N", "Filter>Retain>No");
-    case Price       : return it->price();
-    case PriceDiff   :  {
-        auto base = differenceBaseItem(it);
-        return base ? it->price() - base->price() : 0;
-    }
-    case Cost        : return it->cost();
-    case TierP1      : return it->tierPrice(0);
-    case TierP2      : return it->tierPrice(1);
-    case TierP3      : return it->tierPrice(2);
-
+    case Retain:
+        return it->retain() ? tr("Y", "Filter>Retain>Yes")
+                            : tr("N", "Filter>Retain>No");
     default: {
         QVariant v = dataForEditRole(it, f);
-        if (v.isNull())
+        if (v.isNull() || (v.userType() >= QMetaType::User))
             v = dataForDisplayRole(it, f);
         return v;
     }
     }
-}
-
-QVariant Document::dataForDecorationRole(const Item *it, Field f) const
-{
-    switch (f) {
-    case Picture: return it->image();
-    default     : return QPixmap();
-    }
-}
-
-Qt::CheckState Document::dataForCheckStateRole(const Item *it, Field f) const
-{
-    switch (f) {
-    case Retain   : return it->retain() ? Qt::Checked : Qt::Unchecked;
-    default       : return Qt::Unchecked;
-    }
-}
-
-int Document::dataForTextAlignmentRole(const Item *, Field f) const
-{
-    switch (f) {
-    case Status      :
-    case Retain      :
-    case Stockroom   :
-    case Picture     :
-    case Condition   : return Qt::AlignVCenter | Qt::AlignHCenter;
-    case Index       :
-    case LotId       :
-    case PriceOrig   :
-    case PriceDiff   :
-    case Cost        :
-    case Price       :
-    case Total       :
-    case Sale        :
-    case TierP1      :
-    case TierP2      :
-    case TierP3      :
-    case Quantity    :
-    case Bulk        :
-    case QuantityOrig:
-    case QuantityDiff:
-    case TierQ1      :
-    case TierQ2      :
-    case TierQ3      :
-    case YearReleased:
-    case Weight      : return Qt::AlignRight | Qt::AlignVCenter;
-    default          : return Qt::AlignLeft | Qt::AlignVCenter;
-    }
-}
-
-QString Document::dataForToolTipRole(const Item *it, Field f) const
-{
-    switch (f) {
-    case Status: {
-        QString str;
-        switch (it->status()) {
-        case BrickLink::Status::Exclude: str = tr("Exclude"); break;
-        case BrickLink::Status::Extra  : str = tr("Extra"); break;
-        case BrickLink::Status::Include: str = tr("Include"); break;
-        default                : break;
-        }
-        if (it->counterPart())
-            str += QLatin1String("\n(") + tr("Counter part") + QLatin1Char(')');
-        else if (it->alternateId())
-            str += QLatin1String("\n(") + tr("Alternate match id: %1").arg(it->alternateId()) + QLatin1Char(')');
-        return str;
-    }
-    case Picture: {
-        return dataForDisplayRole(it, PartNo) + QLatin1Char(' ') + dataForDisplayRole(it, Description);
-    }
-    case Condition: {
-        QString c = (it->condition() == BrickLink::Condition::New) ? tr("New") : tr("Used");
-        if (it->itemType() && it->itemType()->hasSubConditions()
-                && (it->subCondition() != BrickLink::SubCondition::None)) {
-            c = c % u" / " % subConditionLabel(it->subCondition());
-        }
-        return c;
-    }
-    default: {
-        return dataForDisplayRole(it, f);
-    }
-    }
-}
-
-
-QString Document::headerDataForDisplayRole(Field f)
-{
-    switch (f) {
-    case Index       : return tr("Index");
-    case Status      : return tr("Status");
-    case Picture     : return tr("Image");
-    case PartNo      : return tr("Part #");
-    case Description : return tr("Description");
-    case Comments    : return tr("Comments");
-    case Remarks     : return tr("Remarks");
-    case QuantityOrig: return tr("Qty.Orig");
-    case QuantityDiff: return tr("Qty.Diff");
-    case Quantity    : return tr("Qty.");
-    case Bulk        : return tr("Bulk");
-    case PriceOrig   : return tr("Pr.Orig");
-    case PriceDiff   : return tr("Pr.Diff");
-    case Cost        : return tr("Cost");
-    case Price       : return tr("Price");
-    case Total       : return tr("Total");
-    case Sale        : return tr("Sale");
-    case Condition   : return tr("Cond.");
-    case Color       : return tr("Color");
-    case Category    : return tr("Category");
-    case ItemType    : return tr("Item Type");
-    case TierQ1      : return tr("Tier Q1");
-    case TierP1      : return tr("Tier P1");
-    case TierQ2      : return tr("Tier Q2");
-    case TierP2      : return tr("Tier P2");
-    case TierQ3      : return tr("Tier Q3");
-    case TierP3      : return tr("Tier P3");
-    case LotId       : return tr("Lot Id");
-    case Retain      : return tr("Retain");
-    case Stockroom   : return tr("Stockroom");
-    case Reserved    : return tr("Reserved");
-    case Weight      : return tr("Weight");
-    case YearReleased: return tr("Year");
-    default          : return QString();
-    }
-}
-
-int Document::headerDataForTextAlignmentRole(Field f) const
-{
-    return dataForTextAlignmentRole(nullptr, f);
-}
-
-int Document::headerDataForDefaultWidthRole(Field f) const
-{
-    int width = 0;
-    QSize picsize = BrickLink::core()->standardPictureSize();
-
-    switch (f) {
-    case Index       : width = 3; break;
-    case Status      : width = 6; break;
-    case Picture     : width = -picsize.width(); break;
-    case PartNo      : width = 10; break;
-    case Description : width = 28; break;
-    case Comments    : width = 8; break;
-    case Remarks     : width = 8; break;
-    case QuantityOrig: width = 5; break;
-    case QuantityDiff: width = 5; break;
-    case Quantity    : width = 5; break;
-    case Bulk        : width = 5; break;
-    case PriceOrig   : width = 8; break;
-    case PriceDiff   : width = 8; break;
-    case Cost        : width = 8; break;
-    case Price       : width = 8; break;
-    case Total       : width = 8; break;
-    case Sale        : width = 5; break;
-    case Condition   : width = 5; break;
-    case Color       : width = 15; break;
-    case Category    : width = 12; break;
-    case ItemType    : width = 12; break;
-    case TierQ1      : width = 5; break;
-    case TierP1      : width = 8; break;
-    case TierQ2      : width = 5; break;
-    case TierP2      : width = 8; break;
-    case TierQ3      : width = 5; break;
-    case TierP3      : width = 8; break;
-    case LotId       : width = 8; break;
-    case Retain      : width = 8; break;
-    case Stockroom   : width = 8; break;
-    case Reserved    : width = 8; break;
-    case Weight      : width = 8; break;
-    case YearReleased: width = 5; break;
-    default          : break;
-    }
-    return width;
 }
 
 
@@ -1439,18 +1505,6 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
             QModelIndex idx = index(const_cast<BrickLink::InvItem *>(it), Picture);
             emitDataChanged(idx, idx);
         }
-    }
-}
-
-
-QString Document::subConditionLabel(BrickLink::SubCondition sc) const
-{
-    switch (sc) {
-    case BrickLink::SubCondition::None      : return tr("-", "no subcondition");
-    case BrickLink::SubCondition::Sealed    : return tr("Sealed");
-    case BrickLink::SubCondition::Complete  : return tr("Complete");
-    case BrickLink::SubCondition::Incomplete: return tr("Incomplete");
-    default                                 : return QString();
     }
 }
 

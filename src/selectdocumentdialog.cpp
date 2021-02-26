@@ -15,7 +15,9 @@
 #include <QClipboard>
 #include <QListWidget>
 #include <QRadioButton>
+#include <QToolButton>
 #include <QGridLayout>
+#include <QWizard>
 
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -148,62 +150,266 @@ BrickLink::InvItemList SelectDocumentDialog::items() const
 ///////////////////////////////////////////////////////////////////////
 
 
-SelectCopyFieldsDialog::SelectCopyFieldsDialog(const Document *self, const QString &headertext,
-                                               const QVector<QPair<QString, bool>> &fields,
-                                               QWidget *parent)
-    : QDialog(parent)
+SelectMergeMode::SelectMergeMode(Document::MergeMode defaultMode, QWidget *parent)
+    : QWidget(parent)
 {
-    m_sd = new SelectDocument(self);
-
-    auto label = new QLabel(headertext);
-    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    m_ok = buttons->button(QDialogButtonBox::Ok);
-    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-
-    auto updateButtons = [this]() {
-        m_ok->setEnabled(!m_selectedFields.isEmpty() && m_sd->isDocumentSelected());
-    };
-
-    connect(m_sd, &SelectDocument::documentSelected,
-            this, updateButtons);
-
-    auto box = new QGroupBox(tr("Fields"));
-    auto boxgrid = new QGridLayout(box);
-
-    for (int i = 0; i < fields.size(); ++i) {
-        const auto &f = fields.at(i);
-        auto check = new QCheckBox(f.first);
-        check->setChecked(f.second);
-        boxgrid->addWidget(check, i / 3, i % 3);
-        if (f.second)
-            m_selectedFields << i;
-        connect (check, &QCheckBox::toggled,
-                 this, [this, i, updateButtons](bool b) {
-            if (b && !m_selectedFields.contains(i))
-                m_selectedFields.append(i);
-            else
-                m_selectedFields.removeAll(i);
-            updateButtons();
-        });
-    }
-
-    auto layout = new QVBoxLayout(this);
-    layout->addWidget(label);
-    layout->addWidget(m_sd);
-    layout->addWidget(box);
-    layout->addWidget(buttons);
+    createFields(this);
+    m_allGroup->button(int(defaultMode))->animateClick();
 }
 
-BrickLink::InvItemList SelectCopyFieldsDialog::items() const
+Document::MergeMode SelectMergeMode::defaultMergeMode() const
+{
+    return Document::MergeMode::Ignore;
+}
+
+QHash<Document::Field, Document::MergeMode> SelectMergeMode::fieldMergeModes() const
+{
+    QHash<Document::Field, Document::MergeMode> mergeModes;
+    auto dmm = defaultMergeMode();
+
+    for (QButtonGroup *bg : m_groups) {
+        auto mm = Document::MergeMode(bg->checkedId());
+        if (mm != dmm) {
+            const auto fields = bg->property("documentField").value<QVector<int>>();
+            for (const auto &field : fields)
+                mergeModes.insert(Document::Field(field), mm);
+        }
+    }
+    return mergeModes;
+}
+
+
+void SelectMergeMode::createFields(QWidget *parent)
+{
+    static const struct {
+        Document::MergeMode mergeMode;
+        const char *name;
+        const char *toolTip;
+        const char *icon;
+    } modes[] = {
+    { Document::MergeMode::Ignore,
+                QT_TR_NOOP("Ignore"),
+                QT_TR_NOOP("Leave the destination value as is"),
+                "process-stop", },
+    { Document::MergeMode::Copy,
+                QT_TR_NOOP("Copy"),
+                QT_TR_NOOP("Set to source value"),
+                "edit-copy", },
+    { Document::MergeMode::Merge,
+                QT_TR_NOOP("Merge"),
+                QT_TR_NOOP("Set to source value, but only if destination is at default value"),
+                "join", },
+    { Document::MergeMode::MergeText,
+                QT_TR_NOOP("Merge text"),
+                QT_TR_NOOP("Merge tfhe text from the source and the destination"),
+                "edit-select-text", },
+    { Document::MergeMode::MergeAverage,
+                QT_TR_NOOP("Merge average"),
+                QT_TR_NOOP("Merge field by calculating a quantity average"),
+                "taxes-finances", },
+    };
+
+    static const struct {
+        const char *name;
+        QVector<int> fields;
+        Document::MergeModes mergeModes;
+
+    } fields[] = {
+    { QT_TR_NOOP("Price"),           { Document::Price },
+        Document::MergeMode::Copy | Document::MergeMode::Merge | Document::MergeMode::MergeAverage },
+    { QT_TR_NOOP("Cost"),            { Document::Cost },
+        Document::MergeMode::Copy | Document::MergeMode::Merge | Document::MergeMode::MergeAverage },
+    { QT_TR_NOOP("Tier prices"),     { Document::TierP1, Document::TierP2, Document::TierP3,
+                                       Document::TierQ1, Document::TierQ2, Document::TierQ3 },
+        Document::MergeMode::Copy | Document::MergeMode::Merge | Document::MergeMode::MergeAverage },
+    { QT_TR_NOOP("Quantity"),        { Document::Quantity },
+        Document::MergeMode::Copy | Document::MergeMode::Merge },
+    { QT_TR_NOOP("Bulk quantity"),   { Document::Bulk },
+        Document::MergeMode::Copy | Document::MergeMode::Merge },
+    { QT_TR_NOOP("Sale percentage"), { Document::Sale },
+        Document::MergeMode::Copy | Document::MergeMode::Merge },
+    { QT_TR_NOOP("Comment"),         { Document::Comments },
+        Document::MergeMode::Copy | Document::MergeMode::Merge | Document::MergeMode::MergeText },
+    { QT_TR_NOOP("Remark"),          { Document::Remarks },
+        Document::MergeMode::Copy | Document::MergeMode::Merge | Document::MergeMode::MergeText },
+    { QT_TR_NOOP("Reserved"),        { Document::Reserved },
+        Document::MergeMode::Copy | Document::MergeMode::Merge },
+    { QT_TR_NOOP("Retain flag"),     { Document::Retain },
+        Document::MergeMode::Copy },
+    { QT_TR_NOOP("Stockroom"),       { Document::Stockroom },
+        Document::MergeMode::Copy },
+    };
+
+    auto grid = new QGridLayout(parent);
+    grid->setColumnStretch(6, 100);
+    int row = 0;
+    int col = 0;
+
+    auto label = new QLabel(tr("All fields"));
+    grid->addWidget(label, row, 0);
+    m_allGroup = new QButtonGroup();
+    for (const auto &mode : modes) {
+        auto tb = new QToolButton();
+        tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        tb->setIcon(QIcon::fromTheme(mode.icon));
+        tb->setText(mode.name);
+        tb->setToolTip(mode.toolTip);
+        tb->setAutoRaise(true);
+        grid->addWidget(tb, row, col + 1);
+        m_allGroup->addButton(tb, int(mode.mergeMode));
+        ++col;
+    }
+    connect(m_allGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, [this](int mergeMode) {
+        for (QButtonGroup *group : qAsConst(m_groups)) {
+            int m = mergeMode;
+            while (true) {
+                if (auto *b = group->button(m)) {
+                    b->setChecked(true);
+                    break;
+                } else {
+                    m >>= 1;
+                }
+            }
+        }
+        emit mergeModesChanged(mergeMode != int(Document::MergeMode::Ignore));
+    });
+
+    ++row;
+    auto hbar = new QFrame();
+    hbar->setFrameStyle(QFrame::HLine);
+    grid->addWidget(hbar, row, 0, 1, 6);
+
+    ++row;
+    col = 0;
+
+    for (const auto &field : fields) {
+        label = new QLabel(tr(field.name));
+        grid->addWidget(label, row, 0);
+        auto group = new QButtonGroup();
+        group->setProperty("documentField", QVariant::fromValue(field.fields));
+        for (const auto &mode : modes) {
+            if ((mode.mergeMode == Document::MergeMode::Ignore)
+                    || (field.mergeModes & mode.mergeMode)) {
+                auto tb = new QToolButton();
+                tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+                tb->setIcon(QIcon::fromTheme(mode.icon));
+                tb->setText(mode.name);
+                tb->setToolTip(mode.toolTip);
+                tb->setCheckable(true);
+                tb->setAutoRaise(true);
+                grid->addWidget(tb, row, col + 1);
+                group->addButton(tb, int(mode.mergeMode));
+            }
+            ++col;
+        }
+        m_groups.append(group);
+
+        connect(group, QOverload<int>::of(&QButtonGroup::buttonClicked),
+                this, [this]() {
+            bool ignoreAll = true;
+            for (QButtonGroup *bg : qAsConst(m_groups))
+                ignoreAll = ignoreAll && (bg->checkedId() == int(Document::MergeMode::Ignore));
+            emit mergeModesChanged(!ignoreAll);
+        });
+
+        ++row;
+        col = 0;
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+class WizardPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    WizardPage() = default;
+
+    void setComplete(bool b)
+    {
+        if (m_completed != b) {
+            m_completed = b;
+            emit completeChanged();
+        }
+    }
+
+    bool isComplete() const override;
+
+private:
+    bool m_completed = false;
+};
+
+bool WizardPage::isComplete() const
+{
+    return m_completed;
+}
+
+
+SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString &chooseDocText,
+                                             const QString &chooseFieldsText, QWidget *parent)
+    : QWizard(parent)
+{
+    setOptions(QWizard::IndependentPages);
+#ifdef Q_OS_WIN
+    setWizardStyle(QWizard::ModernStyle);
+#endif
+    QString title = tr("Copy or merge values");
+
+    m_sd = new SelectDocument(self);
+    m_mm = new SelectMergeMode(Document::MergeMode::Merge);
+
+    auto *dpage = new WizardPage();
+    dpage->setTitle(title);
+    dpage->setSubTitle(chooseDocText);
+    auto *dlayout = new QVBoxLayout(dpage);
+    dlayout->addWidget(m_sd);
+    addPage(dpage);
+
+    auto *mpage = new WizardPage();
+    mpage->setTitle(title);
+    mpage->setSubTitle(chooseFieldsText);
+    mpage->setFinalPage(true);
+    auto *mlayout = new QVBoxLayout(mpage);
+    mlayout->addWidget(m_mm);
+    addPage(mpage);
+
+    dpage->adjustSize();
+    mpage->adjustSize();
+    QSize s = mpage->size().expandedTo(dpage->size());
+    dpage->setFixedSize(s);
+    mpage->setFixedSize(s);
+
+    connect(m_sd, &SelectDocument::documentSelected,
+            dpage, &WizardPage::setComplete);
+    connect(m_mm, &SelectMergeMode::mergeModesChanged,
+            mpage, &WizardPage::setComplete);
+}
+
+Document::ItemList SelectCopyMergeDialog::items() const
 {
     return m_sd->items();
 }
 
-const QVector<int> &SelectCopyFieldsDialog::selectedFields() const
+Document::MergeMode SelectCopyMergeDialog::defaultMergeMode() const
 {
-    return m_selectedFields;
+    return m_mm->defaultMergeMode();
 }
 
-#include "moc_selectdocumentdialog.cpp"
+QHash<Document::Field, Document::MergeMode> SelectCopyMergeDialog::fieldMergeModes() const
+{
+    return m_mm->fieldMergeModes();
+}
 
+void SelectCopyMergeDialog::showEvent(QShowEvent *e)
+{
+    setFixedSize(sizeHint());
+    QWizard::showEvent(e);
+}
+
+
+#include "moc_selectdocumentdialog.cpp"
+#include "selectdocumentdialog.moc"

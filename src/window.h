@@ -13,6 +13,8 @@
 */
 #pragma once
 
+#include <functional>
+
 #include <QWidget>
 #include <QHash>
 #include <qdom.h>
@@ -31,11 +33,16 @@ class UndoStack;
 class HeaderView;
 class StatusBar;
 class ColumnChangeWatcher;
+class WindowProgress;
 
 
 class Window : public QWidget
 {
     Q_OBJECT
+    Q_PROPERTY(bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
+    Q_PROPERTY(bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged)
+    Q_PROPERTY(QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged)
+
 public:
     Window(Document *doc, QWidget *parent = nullptr);
     ~Window() override;
@@ -70,8 +77,6 @@ public:
 
     void consolidateItems(const Document::ItemList &items);
 
-    void subtractItems(const BrickLink::InvItemList &items);
-
     QDomElement createGuiStateXML();
     void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
 
@@ -90,6 +95,17 @@ public:
 
     QByteArray currentColumnLayout() const;
 
+
+    bool isBlockingOperationActive() const;
+    void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
+    void endBlockingOperation();
+
+    bool isBlockingOperationCancelable() const;
+    void setBlockingOperationCancelCallback(std::function<void()> cancelCallback);
+    void cancelBlockingOperation();
+
+    QString blockingOperationTitle() const;
+    void setBlockingOperationTitle(const QString &title);
 public slots:
     void setSelection(const Document::ItemList &);
 
@@ -114,7 +130,6 @@ public slots:
     void on_edit_copy_fields_triggered();
     void on_edit_mergeitems_triggered();
     void on_edit_partoutitems_triggered();
-    void on_edit_setmatch_triggered();
 
     void on_edit_select_all_triggered();
     void on_edit_select_none_triggered();
@@ -127,12 +142,12 @@ public slots:
     void on_edit_status_toggle_triggered();
     void on_edit_cond_new_triggered();
     void on_edit_cond_used_triggered();
-    void on_edit_cond_toggle_triggered();
     void on_edit_subcond_none_triggered();
     void on_edit_subcond_sealed_triggered();
     void on_edit_subcond_complete_triggered();
     void on_edit_subcond_incomplete_triggered();
     void on_edit_color_triggered();
+    void on_edit_item_triggered();
     void on_edit_qty_set_triggered();
     void on_edit_qty_multiply_triggered();
     void on_edit_qty_divide_triggered();
@@ -173,11 +188,20 @@ public slots:
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
 
-    void setPrice(double);
     void gotoNextErrorOrDifference(bool difference = false);
+
+    void setStatus(const char *undoText, BrickLink::Status status);
+    void setCondition(const char *undoText, BrickLink::Condition condition);
+    void setSubCondition(const char *undoText, BrickLink::SubCondition subCondition);
+    void setRetain(const char *undoText, bool retain);
+    void setStockroom(const char *undoText, BrickLink::Stockroom stockroom);
 
 signals:
     void selectionChanged(const Document::ItemList &);
+    void blockingOperationActiveChanged(bool blocked);
+    void blockingOperationCancelableChanged(bool cancelable);
+    void blockingOperationTitleChanged(const QString &title);
+    void blockingOperationProgress(int done, int total);
 
 protected:
     void closeEvent(QCloseEvent *e) override;
@@ -191,16 +215,18 @@ private slots:
     void updateSelection();
     void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
-    void contextMenu(const QPoint &);
+    void contextMenu(const QPoint &pos);
     void priceGuideUpdated(BrickLink::PriceGuide *);
     void updateItemFlagsMask();
-
-    void setMatchProgress(int, int);
-    void setMatchFinished(QVector<const BrickLink::Item *>);
 
     void autosave() const;
 
 private:
+    void applyTo(const Document::ItemList &items, const char *undoText,
+                 std::function<bool(const Document::Item &, Document::Item &)> callback);
+
+    void cancelPriceGuideUpdates();
+
     Document::ItemList exportCheck() const;
     void resizeColumnsToDefault(bool simpleMode = false);
     int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
@@ -215,6 +241,7 @@ private:
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
     QTimer *             m_delayedSelectionUpdate = nullptr;
+    QMenu *              m_contextMenu = nullptr;
     StatusBar *          w_statusbar;
     QTableView *         w_list;
     HeaderView *         w_header;
@@ -224,11 +251,23 @@ private:
     int                  m_latest_row;
     QTimer *             m_latest_timer;
 
-    int                  m_settopg_failcnt = 0;
-    int                  m_settopg_todocnt = 0;
-    BrickLink::Time      m_settopg_time;
-    BrickLink::Price     m_settopg_price;
-    QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
+    bool                 m_blocked = false;
+    QString              m_blockTitle;
+    std::function<void()> m_blockCancelCallback;
+
+    struct SetToPriceGuideData
+    {
+        std::vector<std::pair<Document::Item *, Document::Item>> changes;
+        QMultiHash<BrickLink::PriceGuide *, Document::Item *>    priceGuides;
+        int              failCount = 0;
+        int              doneCount = 0;
+        int              totalCount = 0;
+        BrickLink::Time  time;
+        BrickLink::Price price;
+        double           currencyRate;
+        bool             canceled = false;
+    };
+    QScopedPointer<SetToPriceGuideData> m_setToPG;
 
     QUuid                m_uuid;  // for autosave
     QTimer               m_autosave_timer;

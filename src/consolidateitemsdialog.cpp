@@ -72,7 +72,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
 
     w_list->setModel(doc);
 
-    auto *dd = new DocumentDelegate(doc, w_list);
+    auto *dd = new DocumentDelegate(w_list);
     dd->setReadOnly(true);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));

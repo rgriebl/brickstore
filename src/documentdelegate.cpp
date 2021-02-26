@@ -30,6 +30,7 @@
 #include <QtMath>
 #include <QScopeGuard>
 #include <QStringBuilder>
+#include <QMetaProperty>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -38,6 +39,7 @@
 #include "framework.h"
 #include "smartvalidator.h"
 #include "bricklink_model.h"
+#include "config.h"
 
 
 QVector<QColor>                 DocumentDelegate::s_shades;
@@ -47,7 +49,7 @@ QCache<quint64, QPixmap>        DocumentDelegate::s_tagicon_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
 
-static const quint64 updatedWarningMask = 0ULL
+static const quint64 differenceWarningMask = 0ULL
         | (1ULL << Document::PartNo)
         | (1ULL << Document::Color)
         | (1ULL << Document::Reserved);
@@ -81,9 +83,8 @@ bool LanguageChangeHelper::eventFilter(QObject *o, QEvent *e)
 }
 
 
-DocumentDelegate::DocumentDelegate(Document *doc, QTableView *table)
+DocumentDelegate::DocumentDelegate(QTableView *table)
     : QItemDelegate(table)
-    , m_doc(doc)
     , m_table(table)
 {
     m_table->viewport()->setAttribute(Qt::WA_Hover);
@@ -150,7 +151,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     };
 
     if (twoLiners.contains(idx.column())
-            && (w > (m_doc->headerDataForDefaultWidthRole(static_cast<Document::Field>(idx.column()))
+            && (w > (idx.model()->headerData(idx.column(), Qt::Horizontal, Document::HeaderDefaultWidthRole).toInt()
                      * option1.fontMetrics.averageCharWidth()))) {
         w = int(w / 1.9);  // we can wrap to two lines (plus 10% security margin)
     }
@@ -174,11 +175,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (!idx.isValid())
         return;
 
-    const Document::Item *it = m_doc->item(idx);
-    if (!it)
-        return;
-    const Document::Item *base = m_doc->differenceBaseItem(it);
-    auto itemFlags = m_doc->itemFlags(it);
+    const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+    const auto *base = idx.data(Document::BaseItemPointerRole).value<const BrickLink::InvItem *>();
+    const auto errorFlags = idx.data(Document::ErrorFlagsRole).value<quint64>();
+    const auto differenceFlags = idx.data(Document::DifferenceFlagsRole).value<quint64>();
 
     p->save();
     auto restorePainter = qScopeGuard([p] { p->restore(); });
@@ -211,8 +211,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     bool selected = (option.state & QStyle::State_Selected);
-    bool nocolor = !it->color();
-    bool noitem = !it->item();
+    bool nocolor = !item->color();
+    bool noitem = !item->item();
 
     const QFontMetrics &fm = option.fontMetrics;
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
@@ -226,7 +226,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         } else {
             bg = option.palette.color(cg, QPalette::Highlight);
             if (!(option.state & QStyle::State_HasFocus))
-                bg.setAlphaF(0.7);
+                bg.setAlphaF(0.5);
             fg = option.palette.color(cg, QPalette::HighlightedText);
         }
     }
@@ -244,8 +244,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QPixmap *icon = nullptr;
     } tag;
 
-    if (itemFlags.second & (1ULL << idx.column())) {
-        bool warn = (itemFlags.second & updatedWarningMask & (1ULL << idx.column()));
+    if (differenceFlags & (1ULL << idx.column())) {
+        bool warn = (differenceFlags & differenceWarningMask & (1ULL << idx.column()));
 
         int s = option.fontMetrics.height() / 10 * 8;
         quint64 key = (warn ? 1ULL << 32 : 0ULL) | quint32(s);
@@ -262,32 +262,32 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     QImage image;
-    QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
+    QString str = displayData(idx, false);
     int checkmark = 0;
     bool selectionFrame = false;
 
     if (!selected) {
         switch (idx.column()) {
         case Document::ItemType:
-            if (it->itemType())
-                bg = shadeColor(it->itemType()->id(), 0.1);
+            if (item->itemType())
+                bg = shadeColor(item->itemType()->id(), 0.1);
             break;
 
         case Document::Category:
-            if (it->category())
-                bg = shadeColor(int(it->category()->id()), 0.2);
+            if (item->category())
+                bg = shadeColor(int(item->category()->id()), 0.2);
             break;
 
         case Document::Quantity:
-            if (it->quantity() <= 0)
-                bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
-                                           : QColor::fromRgbF(1, 0, 0, 0.4);
+            if (item->quantity() <= 0)
+                bg = (item->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
+                                             : QColor::fromRgbF(1, 0, 0, 0.4);
             break;
 
         case Document::QuantityDiff:
-            if (base && (base->quantity() < it->quantity()))
+            if (base && (base->quantity() < item->quantity()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (base && (base->quantity() > it->quantity()))
+            else if (base && (base->quantity() > item->quantity()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
 
@@ -297,9 +297,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             break;
 
         case Document::PriceDiff: {
-            if (base && (base->price() < it->price()))
+            if (base && (base->price() < item->price()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (base && (base->price() > it->price()))
+            else if (base && (base->price() > item->price()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
         }
@@ -308,7 +308,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             break;
 
         case Document::Condition:
-            if (it->condition() != BrickLink::Condition::New) {
+            if (item->condition() != BrickLink::Condition::New) {
                 bg = fg;
                 bg.setAlphaF(0.3);
             }
@@ -340,12 +340,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
         union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
         key.s.i1 = iconSize;
-        key.s.i2 = quint32(it->status());
+        key.s.i2 = quint32(item->status());
 
         QPixmap *pix = s_status_cache[key.q];
         if (!pix) {
             QIcon icon;
-            switch (it->status()) {
+            switch (item->status()) {
             case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"); break;
             case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"); break;
             default                        :
@@ -358,11 +358,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (pix)
             image = pix->toImage();
 
-        uint altid = it->alternateId();
-        bool cp = it->counterPart();
+        uint altid = item->alternateId();
+        bool cp = item->counterPart();
         if (altid || cp) {
             tag.text = cp ? QLatin1String("CP") : QString::number(altid);
-            tag.bold = (cp || !it->alternate());
+            tag.bold = (cp || !item->alternate());
             tag.foreground = fg;
             if (cp || selected) {
                 tag.background = fg;
@@ -374,13 +374,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Description:
-        if (it->item() && it->item()->hasInventory()) {
+        if (item->item() && item->item()->hasInventory()) {
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
             tag.background.setAlphaF(0.3);
 
-            if ((option.state & QStyle::State_MouseOver) && it->quantity()) {
+            if ((option.state & QStyle::State_MouseOver) && item->quantity()) {
                 tag.foreground = option.palette.color(QPalette::HighlightedText);
                 tag.background = option.palette.color(QPalette::Highlight);
             }
@@ -388,29 +388,29 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case Document::Picture: {
-        if (!it->image().isNull()) {
+        if (!item->image().isNull()) {
             double dpr = p->device()->devicePixelRatioF();
-            image = it->image().scaled(option.rect.size() * dpr,
-                                       Qt::KeepAspectRatio, Qt::FastTransformation);
+            image = item->image().scaled(option.rect.size() * dpr,
+                                         Qt::KeepAspectRatio, Qt::FastTransformation);
             image.setDevicePixelRatio(dpr);
             selectionFrame = true;
         }
         break;
     }
     case Document::Color: {
-        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width() * 3 / 2,
+        image = BrickLink::core()->colorImage(item->color(), option.decorationSize.width() * 3 / 2,
                                               option.rect.height());
         break;
     }
     case Document::Retain:
-        checkmark = it->retain() ? 1 : -1;
+        checkmark = item->retain() ? 1 : -1;
         break;
 
     case Document::Stockroom:
-        if (it->stockroom() == BrickLink::Stockroom::None)
+        if (item->stockroom() == BrickLink::Stockroom::None)
             checkmark = -1;
         else
-            str = QLatin1Char('A' + char(it->stockroom()) - char(BrickLink::Stockroom::A));
+            str = QLatin1Char('A' + char(item->stockroom()) - char(BrickLink::Stockroom::A));
         break;
     }
 
@@ -503,7 +503,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         p->setOpacity(1);
     }
 
-    if (itemFlags.first & (1ULL << idx.column())) {
+    if (errorFlags & (1ULL << idx.column())) {
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.75));
         p->drawRect(QRectF(x+.5, y+.5, w-1, h-1));
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.50));
@@ -647,14 +647,12 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     if (!e || !model || !idx.isValid())
         return false;
 
-    Document::Item *it = m_doc->item(idx);
-    if (!it)
-        return false;
-
     switch (e->type()) {
     case QEvent::KeyPress:
     case QEvent::MouseButtonDblClick: {
-        if (nonInlineEdit(e, it, option, idx))
+        m_multiEdit = (e->type() == QEvent::KeyPress)
+                && (static_cast<QInputEvent *>(e)->modifiers() & Qt::ControlModifier);
+        if (nonInlineEdit(e, option, idx))
             return true;
         break;
     }
@@ -664,8 +662,10 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     return QItemDelegate::editorEvent(e, model, option, idx);
 }
 
-bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx)
+bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &option, const QModelIndex &idx)
 {
+    QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model()); //TODO: replace with explicit parameter
+
     bool accept = true;
 
     bool dblclick = (e->type() == QEvent::MouseButtonDblClick);
@@ -675,76 +675,51 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
     if (keypress) {
         key = static_cast<QKeyEvent *>(e)->key();
-
-        if (key == Qt::Key_Space ||
-            key == Qt::Key_Return ||
-            key == Qt::Key_Enter ||
-#if defined(Q_OS_MACOS)
-            (key == Qt::Key_O && static_cast<QKeyEvent *>(e)->modifiers() & Qt::ControlModifier)
-#else
-            key == Qt::Key_F2
-#endif
-           ) {
-            editkey = true;
-        }
+        editkey = ((key == Qt::Key_Space) || (key == Qt::Key_Return) || (key == Qt::Key_Enter));
     }
-
 
     switch (idx.column()) {
     case Document::Retain:
-        if (dblclick || (keypress && editkey)) {
-            Document::Item item = *it;
-            item.setRetain(!it->retain());
-            m_doc->changeItem(it, item);
-        }
+        if (dblclick || (keypress && editkey))
+            setModelDataInternal(!idx.data(Qt::EditRole).toBool(), model, idx);
         break;
 
     case Document::Stockroom: {
         bool noneKey = (QKeySequence(key) == QKeySequence(tr("-", "set stockroom to none")));
+        const BrickLink::Stockroom value = idx.data(Qt::EditRole).value<BrickLink::Stockroom>();
+        BrickLink::Stockroom setValue = value;
 
-        if (dblclick || (keypress && (editkey || key == Qt::Key_A || key == Qt::Key_B
-                                      || key == Qt::Key_C  || noneKey))) {
-            BrickLink::Stockroom st = it->stockroom();
-            if (key == Qt::Key_A)
-                st = BrickLink::Stockroom::A;
-            else if (key == Qt::Key_B)
-                st = BrickLink::Stockroom::B;
-            else if (key == Qt::Key_C)
-                st = BrickLink::Stockroom::C;
-            else if (noneKey)
-                st = BrickLink::Stockroom::None;
-            else
-                switch (st) {
-                case BrickLink::Stockroom::None: st = BrickLink::Stockroom::A; break;
-                case BrickLink::Stockroom::A   : st = BrickLink::Stockroom::B; break;
-                case BrickLink::Stockroom::B   : st = BrickLink::Stockroom::C; break;
-                default                        :
-                case BrickLink::Stockroom::C   : st = BrickLink::Stockroom::None; break;
-                }
+        if (keypress && (key == Qt::Key_A))
+            setValue = BrickLink::Stockroom::A;
+        else if (keypress && (key == Qt::Key_B))
+            setValue = BrickLink::Stockroom::B;
+        else if (keypress && (key == Qt::Key_C))
+            setValue = BrickLink::Stockroom::C;
+        else if (keypress && noneKey)
+            setValue = BrickLink::Stockroom::None;
+        else if (dblclick || (keypress && editkey))
+            setValue = BrickLink::Stockroom((int(value) + 1) % int(BrickLink::Stockroom::Count));
 
-            Document::Item item = *it;
-            item.setStockroom(st);
-            m_doc->changeItem(it, item);
-        }
+        if (setValue != value)
+            setModelDataInternal(QVariant::fromValue(setValue), model, idx);
         break;
     }
     case Document::Condition: {
         bool newKey = (QKeySequence(key) == QKeySequence(tr("N", "set condition to new")));
         bool usedKey = (QKeySequence(key) == QKeySequence(tr("U", "set condition to used")));
 
-        if (dblclick || (keypress && (editkey || newKey || usedKey))) {
-            BrickLink::Condition cond;
-            if (newKey)
-                cond = BrickLink::Condition::New;
-            else if (usedKey)
-                cond = BrickLink::Condition::Used;
-            else
-                cond = (it->condition() == BrickLink::Condition::New) ? BrickLink::Condition::Used : BrickLink::Condition::New;
+        const BrickLink::Condition value = idx.data(Qt::EditRole).value<BrickLink::Condition>();
+        BrickLink::Condition setValue = value;
 
-            Document::Item item = *it;
-            item.setCondition(cond);
-            m_doc->changeItem(it, item);
-        }
+        if (keypress && newKey)
+            setValue = BrickLink::Condition::New;
+        else if (keypress && usedKey)
+            setValue = BrickLink::Condition::Used;
+        else if (dblclick || (keypress && editkey))
+            setValue = BrickLink::Condition((int(value) + 1) % int(BrickLink::Condition::Count));
+
+        if (setValue != value)
+            setModelDataInternal(QVariant::fromValue(setValue), model, idx);
         break;
     }
     case Document::Status: {
@@ -752,31 +727,26 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         bool excludeKey = (QKeySequence(key) == QKeySequence(tr("E", "set status to exclude")));
         bool extraKey = (QKeySequence(key) == QKeySequence(tr("X", "set status to extra")));
 
-        if (dblclick || (keypress && (editkey || includeKey || excludeKey || extraKey))) {
-            BrickLink::Status st = it->status();
-            if (includeKey) {
-                st = BrickLink::Status::Include;
-            } else if (excludeKey) {
-                st = BrickLink::Status::Exclude;
-            } else if (extraKey) {
-                st = BrickLink::Status::Extra;
-            } else {
-                switch (st) {
-                case BrickLink::Status::Include: st = BrickLink::Status::Exclude; break;
-                case BrickLink::Status::Exclude: st = BrickLink::Status::Extra; break;
-                case BrickLink::Status::Extra  :
-                default                        : st = BrickLink::Status::Include; break;
-                }
-            }
+        const BrickLink::Status value = idx.data(Qt::EditRole).value<BrickLink::Status>();
+        BrickLink::Status setValue = value;
 
-            Document::Item item = *it;
-            item.setStatus(st);
-            m_doc->changeItem(it, item);
-        }
+        if (keypress && includeKey)
+            setValue = BrickLink::Status::Include;
+        else if (keypress && excludeKey)
+            setValue = BrickLink::Status::Exclude;
+        else if (keypress && extraKey)
+            setValue = BrickLink::Status::Extra;
+        else if (dblclick || (keypress && editkey))
+            setValue = BrickLink::Status((int(value) + 1) % int(BrickLink::Status::Count));
+
+        if (setValue != value)
+            setModelDataInternal(QVariant::fromValue(setValue), model, idx);
         break;
     }
-    case Document::Description:
-        if (dblclick && it->item() && it->item()->hasInventory()) {
+    case Document::Description: {
+        auto item = idx.data(Qt::EditRole).value<const BrickLink::Item *>();
+
+        if (dblclick && item && item->hasInventory()) {
             auto me = static_cast<QMouseEvent *>(e);
             int d = option.rect.height() / 2;
 
@@ -790,6 +760,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             }
         }
         Q_FALLTHROUGH();
+    }
     case Document::Picture:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_item) {
@@ -797,14 +768,14 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_item->setWindowFlag(Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
             }
-            m_select_item->setItem(it->item());
+            auto item = idx.data(Qt::EditRole).value<const BrickLink::Item *>();
+
+            m_select_item->setItem(item);
 
             if (m_select_item->execAtPosition(
                         QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()),
                               option.rect.size())) == QDialog::Accepted) {
-                Document::Item item = *it;
-                item.setItem(m_select_item->item());
-                m_doc->changeItem(it, item);
+                setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
             }
         }
         break;
@@ -816,12 +787,16 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
-            m_select_color->setColorAndItem(it->color(), it->item());
+            auto color = idx.data(Qt::EditRole).value<const BrickLink::Color *>();
+            auto item = idx.siblingAtColumn(Document::Description).data(Qt::EditRole)
+                    .value<const BrickLink::Item *>();
 
-            if (m_select_color->execAtPosition(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
-                Document::Item item = *it;
-                item.setColor(m_select_color->color());
-                m_doc->changeItem(it, item);
+            m_select_color->setColorAndItem(color, item);
+
+            if (m_select_color->execAtPosition(QRect(m_table->viewport()->mapToGlobal
+                                                     (option.rect.topLeft()),
+                                                     option.rect.size())) == QDialog::Accepted) {
+                setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
             }
         }
         break;
@@ -838,8 +813,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     if (m_read_only)
         return nullptr;
 
-    Document::Item *it = m_doc->item(idx);
-    if (!it)
+    if (!idx.isValid())
         return nullptr;
 
     QValidator *valid = nullptr;
@@ -869,10 +843,16 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
                                                             nullptr, m_lineedit));
     }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
-    if (valid)
-        m_lineedit->setValidator(valid);
+    m_lineedit->setValidator(valid);
+    m_multiEdit = (qApp->keyboardModifiers() & Qt::ControlModifier);
 
     return m_lineedit;
+}
+
+void DocumentDelegate::destroyEditor(QWidget *editor, const QModelIndex &index) const
+{
+    if (editor != m_lineedit)
+        QItemDelegate::destroyEditor(editor, index);
 }
 
 void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
@@ -883,49 +863,228 @@ void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
 bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
                                  const QStyleOptionViewItem &option, const QModelIndex &idx)
 {
-    if (!event || !view || (event->type() != QEvent::ToolTip))
+    if (!event || !view || !idx.isValid() || (event->type() != QEvent::ToolTip))
         return QItemDelegate::helpEvent(event, view, option, idx);
 
-    if (idx.isValid() && (idx.column() == Document::Picture)) {
-        Document::Item *it = m_doc->item(idx);
-        if (it && it->item())
-            BrickLink::ToolTip::inst()->show(it->item(), nullptr, event->globalPos(), view);
+    auto f = static_cast<Document::Field>(idx.column());
+
+    const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+    if (!item)
+        return false;
+
+    if (f == Document::Picture) {
+        if (item->item())
+            BrickLink::ToolTip::inst()->show(item->item(), nullptr, event->globalPos(), view);
     } else {
-        QString updatedTip;
-        Document::Item *item = m_doc->item(idx);
-        auto base = m_doc->differenceBaseItem(item);
+        QString text = displayData(idx, false);
+        QString tip = displayData(idx, true);
 
-        if (base && item) {
-            auto updated = m_doc->itemFlags(item).second;
-            if (updated & (1ULL << idx.column())) {
-                updatedTip = tr("The original value of this field was:") % u"<br><b>"
-                            % m_doc->dataForDisplayRole(base, Document::Field(idx.column()))
-                        % u"</b>";
+        const auto differenceFlags = idx.data(Document::DifferenceFlagsRole).value<quint64>();
+        if (differenceFlags & (1ULL << idx.column())) {
+            if (tip.isEmpty())
+                tip = text;
+            if (differenceFlags & differenceWarningMask & (1ULL << idx.column())) {
+                tip = tip % u"<br><br>" %
+                        tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
+            } else {
+                QString oldText = displayData(idx, true, true);
 
-                if (updated & updatedWarningMask & (1ULL << idx.column())) {
-                    updatedTip = updatedTip % u"<br><br>" %
-                            tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
-                }
+                tip = tip % u"<br><br>" %
+                        tr("The original value of this field was:") % u"<br><b>" % oldText % u"</b>";
             }
         }
 
-        QString text = idx.data(Qt::DisplayRole).toString();
-        QString toolTip = idx.data(Qt::ToolTipRole).toString();
-        quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
-        if (!updatedTip.isEmpty()) {
-            if (toolTip.isEmpty())
-                toolTip = updatedTip;
-            else
-                toolTip = toolTip % u"<br><br>" % updatedTip;
-        }
-        if ((text != toolTip) || m_elided.contains(elideHash)) {
-            if (!QToolTip::isVisible() || (QToolTip::text() != toolTip))
-                QToolTip::showText(event->globalPos(), toolTip, view, option.rect);
+        bool isElided = m_elided.contains(quint64(idx.row()) << 32 | quint64(idx.column()));
+        if (!tip.isEmpty() && ((tip != text) || isElided)) {
+            if (!QToolTip::isVisible() || (QToolTip::text() != tip))
+                QToolTip::showText(event->globalPos(), tip, view, option.rect);
         } else {
             QToolTip::hideText();
         }
     }
     return true;
+}
+
+void DocumentDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+    QVariant v = index.data(Qt::EditRole);
+    switch (static_cast<Document::Field>(index.column())) {
+    case Document::Price:
+    case Document::PriceDiff:
+    case Document::Cost:
+    case Document::TierP1:
+    case Document::TierP2:
+    case Document::TierP3:
+        v = Currency::toString(v.toDouble());
+        break;
+    case Document::Weight:
+        v = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
+        break;
+    default:
+        break;
+    }
+
+    QByteArray n = editor->metaObject()->userProperty().name();
+    if (!n.isEmpty()) {
+        if (!v.isValid())
+            v = QVariant(editor->property(n).userType(), (const void *) nullptr);
+        editor->setProperty(n, v);
+    }
+}
+
+void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    QByteArray n = editor->metaObject()->userProperty().name();
+    if (!n.isEmpty()) {
+        QVariant v = editor->property(n);
+        switch (static_cast<Document::Field>(index.column())) {
+        case Document::Price:
+        case Document::PriceDiff:
+        case Document::Cost:
+        case Document::TierP1:
+        case Document::TierP2:
+        case Document::TierP3:
+            v = Currency::fromString(v.toString());
+            break;
+        case Document::Weight:
+            v = Utility::stringToWeight(v.toString(), Config::inst()->measurementSystem());
+            break;
+        default:
+            break;
+        }
+
+        setModelDataInternal(v, model, index);
+    }
+}
+
+void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItemModel *model,
+                                            const QModelIndex &index) const
+{
+    if (!m_multiEdit) {
+        model->setData(index, value);
+    } else {
+        auto selection = m_table->selectionModel()->selectedRows();
+        for (const auto &s : selection)
+            model->setData(index.siblingAtRow(s.row()), value);
+    }
+}
+
+QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool differenceBase) const
+{
+    QVariant v = idx.data(differenceBase ? Document::BaseDisplayRole : Qt::DisplayRole);
+    QLocale loc;
+
+    switch (idx.column()) {
+    case Document::Status: {
+        if (!toolTip)
+            return { };
+
+        QString tip;
+        switch (v.value<BrickLink::Status>()) {
+        case BrickLink::Status::Exclude: tip = tr("Exclude"); break;
+        case BrickLink::Status::Extra  : tip = tr("Extra"); break;
+        case BrickLink::Status::Include: tip = tr("Include"); break;
+        default                        : break;
+        }
+
+        const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+        if (item->counterPart())
+            tip = tip % u"<br>(" % tr("Counter part") % u")";
+        else if (item->alternateId())
+            tip = tip % u"<br>(" % tr("Alternate match id: %1").arg(item->alternateId()) % u")";
+        return tip;
+    }
+    case Document::Condition: {
+        QString str;
+        if (!toolTip) {
+            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::Used)
+                    ?  tr("N", "List>Cond>New") : tr("U", "List>Cond>Used");
+        } else {
+            str = (v.value<BrickLink::Condition>() == BrickLink::Condition::Used)
+                    ?  tr("New", "ToolTip Cond>New") : tr("Used", "ToolTip Cond>Used");
+        }
+
+        const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+        if (item && item->itemType() && item->itemType()->hasSubConditions()
+                && (item->subCondition() != BrickLink::SubCondition::None)) {
+            QString scStr;
+            switch (item->subCondition()) {
+            case BrickLink::SubCondition::None      : scStr = QString('-'); break;
+            case BrickLink::SubCondition::Sealed    : scStr = tr("Sealed"); break;
+            case BrickLink::SubCondition::Complete  : scStr = tr("Complete"); break;
+            case BrickLink::SubCondition::Incomplete: scStr = tr("Incomplete"); break;
+            default: break;
+            }
+            if (!scStr.isEmpty()) {
+                if (toolTip)
+                    str = str % u"<br><i>" % scStr % u"</i>";
+                else
+                    str = str % u" (" % scStr % u")";
+            }
+        }
+        return str;
+    }
+    case Document::Retain: {
+        if (!toolTip)
+            return { };
+        return v.toBool() ? tr("Retain") : tr("Do not retain");
+    }
+    case Document::Stockroom: {
+        if (!toolTip)
+            return { };
+
+        QString tip;
+        switch (v.value<BrickLink::Stockroom>()) {
+        case BrickLink::Stockroom::A   : tip = QString::fromLatin1("A"); break;
+        case BrickLink::Stockroom::B   : tip = QString::fromLatin1("B"); break;
+        case BrickLink::Stockroom::C   : tip = QString::fromLatin1("C"); break;
+        default:
+        case BrickLink::Stockroom::None: tip = tr("None", "ToolTip Stockroom>None"); break;
+        }
+        tip = tr("Stockroom") % u": " % tip;
+        return tip;
+    }
+    case Document::QuantityOrig:
+    case Document::QuantityDiff:
+    case Document::Quantity:
+    case Document::TierQ1:
+    case Document::TierQ2:
+    case Document::TierQ3: {
+        int i = v.toInt();
+        return (!i && !toolTip) ? QString('-') : loc.toString(i);
+    }
+    case Document::YearReleased:
+    case Document::LotId: {
+        int i = v.toUInt();
+        return (!i && !toolTip) ? QString('-') : QString::number(i);
+    }
+    case Document::PriceOrig:
+    case Document::PriceDiff:
+    case Document::Price:
+    case Document::Total:
+    case Document::Cost:
+    case Document::TierP1:
+    case Document::TierP2:
+    case Document::TierP3: {
+        double d = v.toDouble();
+        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : loc.toString(d, 'f', 3);
+    }
+    case Document::Bulk: {
+        int i = v.toInt();
+        return ((i == 1) && !toolTip) ? QString('-') : loc.toString(i);
+    }
+    case Document::Sale: {
+        int i = v.toInt();
+        return (!i && !toolTip) ? QString('-') : loc.toString(i) % u'%';
+    }
+    case Document::Weight: {
+        double d = v.toDouble();
+        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : Utility::weightToString
+                                               (d, Config::inst()->measurementSystem(), true, true);
+    }
+    default:
+        return v.toString();
+    }
 }
 
 void DocumentDelegate::languageChange()
