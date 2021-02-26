@@ -18,6 +18,7 @@
 
 #include "bricklink.h"
 #include "config.h"
+#include "documentio.h"
 #include "progressdialog.h"
 #include "framework.h"
 #include "importinventorydialog.h"
@@ -35,7 +36,11 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
             this, [this](const BrickLink::ItemType *itt) {
         w_instructions->setVisible(itt && (itt->id() == 'S'));
     });
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
+    w_import = new QPushButton();
+    w_import->setDefault(true);
+    w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
+    connect(w_import, &QAbstractButton::clicked,
+            this, &ImportInventoryDialog::importInventory);
 
     QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
     if (!ba.isEmpty())
@@ -73,7 +78,8 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
                 BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item);
         });
     }
-    checkItem(nullptr, false);
+    checkItem(w_select->currentItem(), false);
+    languageChange();
 }
 
 ImportInventoryDialog::~ImportInventoryDialog()
@@ -113,6 +119,19 @@ bool ImportInventoryDialog::includeInstructions() const
     return !w_instructions->isHidden()
             && w_instructions->isEnabled()
             && w_instructions->isChecked();
+}
+
+void ImportInventoryDialog::languageChange()
+{
+    retranslateUi(this);
+    w_import->setText(tr("Import"));
+}
+
+void ImportInventoryDialog::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QDialog::changeEvent(e);
 }
 
 void ImportInventoryDialog::showEvent(QShowEvent *e)
@@ -179,7 +198,7 @@ bool ImportInventoryDialog::restoreState(const QByteArray &ba)
 
 void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 {
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled((it));
+    w_import->setEnabled((it));
 
     if (it && it->itemType() && (it->itemType()->id() == 'S')) {
         bool hasInstructions = (BrickLink::core()->item('I', it->id()));
@@ -187,7 +206,15 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
     }
 
     if ((it) && ok)
-        w_buttons->button(QDialogButtonBox::Ok)->animateClick();
+        w_import->animateClick();
+}
+
+void ImportInventoryDialog::importInventory()
+{
+    if (auto doc = DocumentIO::importBrickLinkInventory(item(), quantity(), condition(),
+                                                        extraParts(), includeInstructions())) {
+        FrameWork::inst()->createWindow(doc);
+    }
 }
 
 #include "moc_importinventorydialog.cpp"

@@ -17,6 +17,8 @@
 
 #include "ui_importinventorydialog.h"
 
+QT_FORWARD_DECLARE_CLASS(QPushButton)
+
 
 class ImportInventoryDialog : public QDialog, private Ui::ImportInventoryDialog
 {
@@ -33,12 +35,18 @@ public:
     bool includeInstructions() const;
 
 protected:
+    void changeEvent(QEvent *e) override;
     void showEvent(QShowEvent *) override;
     QSize sizeHint() const override;
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
+    void languageChange();
 
 protected slots:
     void checkItem(const BrickLink::Item *it, bool ok);
+    void importInventory();
+
+private:
+    QPushButton *w_import;
 };

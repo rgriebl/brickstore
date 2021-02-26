@@ -1094,7 +1094,9 @@ void FrameWork::createActions()
 
     m = newQMenu(this, "document_import");
     m->addAction(newQAction(this, "document_import_bl_inv", 0, false, this, [this]() {
-        fileImportBrickLinkInventory(nullptr);
+        if (!m_importinventory_dialog)
+            m_importinventory_dialog = new ImportInventoryDialog(this);
+        m_importinventory_dialog->show();
     }));
     m->addAction(newQAction(this, "document_import_bl_xml", 0, false, this, [this]() {
         createWindow(DocumentIO::importBrickLinkXML());
@@ -1103,7 +1105,7 @@ void FrameWork::createActions()
         if (checkBrickLinkLogin()) {
             if (!m_importorder_dialog)
                 m_importorder_dialog = new ImportOrderDialog(this);
-            m_importorder_dialog->exec();
+            m_importorder_dialog->show();
         }
     }));
     m->addAction(newQAction(this, "document_import_bl_store_inv", NeedNetwork, false, this, [this]() {
@@ -1114,7 +1116,7 @@ void FrameWork::createActions()
         if (checkBrickLinkLogin()) {
             if (!m_importcart_dialog)
                 m_importcart_dialog = new ImportCartDialog(this);
-            m_importcart_dialog->exec();
+            m_importcart_dialog->show();
         }
     }));
     m->addAction(newQAction(this, "document_import_ldraw_model", 0, false, this, [this]() {
