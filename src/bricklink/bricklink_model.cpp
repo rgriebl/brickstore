@@ -953,7 +953,7 @@ void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewIte
 
             Picture *pic = core()->picture(item, item->defaultColor());
 
-            if (pic && pic->valid())
+            if (pic && pic->isValid())
                 image = pic->image();
             else
                 image = BrickLink::core()->noImage(option.rect.size());

@@ -290,8 +290,9 @@ public:
 
     void update(bool high_priority = false);
     QDateTime lastUpdate() const      { return m_fetched; }
+    void cancelUpdate();
 
-    bool valid() const                { return m_valid; }
+    bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
     const QImage image() const;
@@ -309,6 +310,8 @@ private:
 
     bool          m_valid         : 1;
     UpdateStatus  m_update_status : 7;
+
+    TransferJob * m_transferJob = nullptr;
 
     QImage        m_image;
 
@@ -612,8 +615,9 @@ public:
 
     void update(bool high_priority = false);
     QDateTime lastUpdate() const      { return m_fetched; }
+    void cancelUpdate();
 
-    bool valid() const                { return m_valid; }
+    bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
     int quantity(Time t, Condition c) const           { return m_quantities[int(t)][int(c)]; }
@@ -621,6 +625,7 @@ public:
     double price(Time t, Condition c, Price p) const  { return m_prices[int(t)][int(c)][int(p)]; }
 
     PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr) { } // for scripting only!
+    ~PriceGuide() override;
 
 private:
     const Item *  m_item;
@@ -630,6 +635,8 @@ private:
 
     bool          m_valid         : 1;
     UpdateStatus  m_update_status : 7;
+
+    TransferJob * m_transferJob = nullptr;
 
     int           m_quantities [int(Time::Count)][int(Condition::Count)];
     int           m_lots       [int(Time::Count)][int(Condition::Count)];
@@ -824,9 +831,13 @@ private:
 private:
     void updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority = false);
     void updatePicture(BrickLink::Picture *pic, bool high_priority = false);
-
     friend void PriceGuide::update(bool);
     friend void Picture::update(bool);
+
+    void cancelPriceGuideUpdate(BrickLink::PriceGuide *pg);
+    void cancelPictureUpdate(BrickLink::Picture *pic);
+    friend void PriceGuide::cancelUpdate();
+    friend void Picture::cancelUpdate();
 
     static bool updateNeeded(bool valid, const QDateTime &last, int iv);
 
@@ -909,7 +920,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::Color::Type)
 
 
 // tell Qt that Pictures and PriceGuides are shared and can't simply be deleted
-// (QCache will use that function to determine what can really be purged from the cache)
+// (Q3Cache will use that function to determine what can really be purged from the cache)
 
 template<> inline bool q3IsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
 template<> inline bool q3IsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }

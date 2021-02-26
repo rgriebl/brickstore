@@ -47,7 +47,7 @@ private:
 
 void PictureLoaderJob::run()
 {
-    if (m_pic && !m_pic->valid()) {
+    if (m_pic && !m_pic->isValid()) {
         m_pic->loadFromDisk();
 
         auto blcore = BrickLink::core();
@@ -93,10 +93,10 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     }
 
     if (high_priority) {
-        if (!pic->valid())
+        if (!pic->isValid())
             pic->loadFromDisk();
 
-        if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
+        if (updateNeeded(pic->isValid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, high_priority);
     }
     else if (need_to_load) {
@@ -137,7 +137,9 @@ int BrickLink::Picture::cost() const
 }
 
 BrickLink::Picture::~Picture()
-{ }
+{
+    cancelUpdate();
+}
 
 QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
 {
@@ -183,10 +185,16 @@ void BrickLink::Picture::update(bool high_priority)
     BrickLink::core()->updatePicture(this, high_priority);
 }
 
+void BrickLink::Picture::cancelUpdate()
+{
+    if (m_transferJob && BrickLink::core())
+        BrickLink::core()->cancelPictureUpdate(this);
+}
+
 void BrickLink::Core::pictureLoaded(Picture *pic)
 {
    if (pic) {
-        if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
+        if (updateNeeded(pic->isValid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, false);
         else
             emit pictureUpdated(pic);
@@ -223,9 +231,15 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 
     //qDebug() << "PIC request started for" << url;
     QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
-    TransferJob *job = TransferJob::get(url, f);
-    job->setUserData<Picture>('P', pic);
-    m_transfer->retrieve(job, high_priority);
+    pic->m_transferJob = TransferJob::get(url, f);
+    pic->m_transferJob->setUserData<Picture>('P', pic);
+    m_transfer->retrieve(pic->m_transferJob, high_priority);
+}
+
+void BrickLink::Core::cancelPictureUpdate(BrickLink::Picture *pic)
+{
+    if (pic->m_transferJob)
+        m_transfer->abortJob(pic->m_transferJob);
 }
 
 
@@ -236,6 +250,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
     auto *pic = j->userData<Picture>('P');
     if (!pic)
         return;
+    pic->m_transferJob = nullptr;
 
     bool large = (!pic->color());
 

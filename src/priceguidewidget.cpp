@@ -625,7 +625,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     QPainter p(viewport());
     p.fillRect(e->rect(), palette().base());
 
-    bool valid = d->m_pg && d->m_pg->valid();
+    bool valid = d->m_pg && d->m_pg->isValid();
     bool is_updating = d->m_pg && (d->m_pg->updateStatus() == BrickLink::UpdateStatus::Updating);
 
     QString str = d->m_pg ? "-" : "";
@@ -658,7 +658,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
                     str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
-                          (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->valid());
+                          (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->isValid());
             }
             break;
 
@@ -676,7 +676,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
 
 void PriceGuideWidget::mouseDoubleClickEvent(QMouseEvent *me)
 {
-    if (!d->m_pg || !d->m_pg->valid())
+    if (!d->m_pg || !d->m_pg->isValid())
         return;
 
     if (auto c = d->cellAtPos(me->pos())) {
@@ -692,7 +692,7 @@ void PriceGuideWidget::mouseMoveEvent(QMouseEvent *me)
 
     auto c = d->cellAtPos(me->pos());
 
-    if (c && (c->m_type == cell::Price) && d->m_pg->valid())
+    if (c && (c->m_type == cell::Price) && d->m_pg->isValid())
         setCursor(Qt::PointingHandCursor);
     else
         unsetCursor();
@@ -723,7 +723,7 @@ bool PriceGuideWidget::event(QEvent *e)
         auto c = d->cellAtPos(he->pos());
         QString tt;
 
-        if (c && (c->m_type == cell::Price) && d->m_pg && d->m_pg->valid()) {
+        if (c && (c->m_type == cell::Price) && d->m_pg && d->m_pg->isValid()) {
             QString pt;
 
             switch (c->m_price) {
@@ -737,7 +737,7 @@ bool PriceGuideWidget::event(QEvent *e)
             tt = tr("Double-click to set the price of the current item")
                     % u"<br><br><i>" % pt % u"</i>";
 
-        } else if (c && (c->m_type == cell::Quantity) && d->m_pg && d->m_pg->valid()) {
+        } else if (c && (c->m_type == cell::Quantity) && d->m_pg && d->m_pg->isValid()) {
             int items = d->m_pg->quantity(c->m_time, c->m_condition);
             int lots = d->m_pg->lots(c->m_time, c->m_condition);
 

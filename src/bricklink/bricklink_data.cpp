@@ -378,7 +378,7 @@ QImage BrickLink::InvItem::image() const
 {
     BrickLink::Picture *pic = BrickLink::core()->picture(item(), color());
 
-    if (pic && pic->valid()) {
+    if (pic && pic->isValid()) {
         return pic->image();
     } else {
         QSize s = BrickLink::core()->standardPictureSize();

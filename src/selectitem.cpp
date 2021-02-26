@@ -921,7 +921,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 if (partItem->itemType()->hasColors() && partColor)
                     filter = filter % u'@' % QString::number(partColor->id());
                 QIcon icon;
-                if (partPicture->valid())
+                if (partPicture->isValid())
                     icon = QPixmap::fromImage(partPicture->image());
 
                 m.addSeparator();

@@ -40,7 +40,7 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
         }
     }
 
-    if (pg && (updateNeeded(pg->valid(), pg->lastUpdate(), m_pg_update_iv)))
+    if (pg && (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv)))
         updatePriceGuide(pg, high_priority);
 
     return pg;
@@ -228,6 +228,17 @@ void BrickLink::PriceGuide::update(bool high_priority)
     BrickLink::core()->updatePriceGuide(this, high_priority);
 }
 
+void BrickLink::PriceGuide::cancelUpdate()
+{
+    if (m_transferJob && BrickLink::core())
+        BrickLink::core()->cancelPriceGuideUpdate(this);
+}
+
+BrickLink::PriceGuide::~PriceGuide()
+{
+    cancelUpdate();
+}
+
 
 void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority)
 {
@@ -270,9 +281,15 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     url.setQuery(query);
 
     //qDebug ( "PG request started for %s", (const char *) url );
-    TransferJob *job = TransferJob::get(url);
-    job->setUserData('G', pg);
-    m_transfer->retrieve(job, high_priority);
+    pg->m_transferJob = TransferJob::get(url);
+    pg->m_transferJob->setUserData('G', pg);
+    m_transfer->retrieve(pg->m_transferJob, high_priority);
+}
+
+void BrickLink::Core::cancelPriceGuideUpdate(BrickLink::PriceGuide *pg)
+{
+    if (pg->m_transferJob)
+        m_transfer->abortJob(pg->m_transferJob);
 }
 
 
@@ -280,11 +297,10 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
 {
     if (!j || !j->data())
         return;
-
     auto *pg = j->userData<PriceGuide>('G');
-
     if (!pg)
         return;
+    pg->m_transferJob = nullptr;
 
     pg->m_update_status = UpdateStatus::UpdateFailed;
 
