@@ -1003,10 +1003,16 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
 
     QDomElement domRoot = domDoc.documentElement();
 
-    static const QVector<QString> knownDocTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
+    // in an ideal world, BrickStock wouldn't have changed the root tag and everyone would add
+    // valid DOCTYPE declarations ... sadly that's not the world we're living in
 
-    if (!knownDocTypes.contains(domDoc.doctype().name())
-            || !knownDocTypes.contains(domRoot.tagName())) {
+    static const QVector<QString> knownTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
+
+    QString docType = domDoc.doctype().name();
+    QString rootTagName = domRoot.tagName();
+
+    if ((!docType.isEmpty() && !knownTypes.contains(docType))
+            || !knownTypes.contains(rootTagName)) {
         result.xmlParseError = true;
         return result;
     }
