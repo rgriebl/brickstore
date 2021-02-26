@@ -131,7 +131,6 @@ public:
 
 protected:
     void languageChange();
-    void paletteChange();
     void changeEvent(QEvent *e) override;
 
 private:

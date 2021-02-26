@@ -330,7 +330,7 @@ StatusBar::StatusBar(Window *window)
     m_differencesSeparator = addSeparator();
     m_differences = new QToolButton();
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setIcon(QIcon::fromTheme("edit-find"));
+    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified-small"));
     m_differences->setShortcut(tr("F5"));
     m_differences->setAutoRaise(true);
     connect(m_differences, &QToolButton::clicked,
@@ -340,7 +340,7 @@ StatusBar::StatusBar(Window *window)
     m_errorsSeparator = addSeparator();
     m_errors = new QToolButton();
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setIcon(QIcon::fromTheme("edit-find"));
+    m_errors->setIcon(QIcon::fromTheme("vcs-conflicting-small"));
     m_errors->setShortcut(tr("F6"));
     m_errors->setAutoRaise(true);
     connect(m_errors, &QToolButton::clicked,
@@ -413,7 +413,6 @@ StatusBar::StatusBar(Window *window)
     updateBlockState(false);
     documentCurrencyChanged(m_doc->currencyCode());
 
-    paletteChange();
     languageChange();
 }
 
@@ -471,7 +470,7 @@ void StatusBar::updateStatistics()
     bool b = (stat.differences() > 0);
     if (b && Config::inst()->showDifferenceIndicators()) {
         auto oldShortcut = m_differences->shortcut();
-        m_differences->setText(tr("%n Differences(s)", nullptr, stat.differences()));
+        m_differences->setText(u"  " % tr("%n Differences(s)", nullptr, stat.differences()));
         m_differences->setShortcut(oldShortcut);
     }
     m_differences->setVisible(b);
@@ -480,7 +479,7 @@ void StatusBar::updateStatistics()
     b = (stat.errors() > 0);
     if (b && Config::inst()->showInputErrors()) {
         auto oldShortcut = m_errors->shortcut();
-        m_errors->setText(tr("%n Error(s)", nullptr, stat.errors()));
+        m_errors->setText(u"  " % tr("%n Error(s)", nullptr, stat.errors()));
         m_errors->setShortcut(oldShortcut);
     }
     m_errors->setVisible(b);
@@ -541,51 +540,11 @@ void StatusBar::languageChange()
     updateStatistics();
 }
 
-void StatusBar::paletteChange()
-{
-    auto pal = palette();
-    pal.setColor(QPalette::Window, CheckColorTabBar().color());
-    setPalette(pal);
-
-    updateStatistics();
-
-    auto coloredToolButton = [this](QToolButton *tb, const QColor &baseColor, bool checkable) {
-        auto winbg = palette().color(QPalette::Window);
-
-        auto downbg = Utility::gradientColor(baseColor, winbg, 0.4);
-        bool darkText = (tb->palette().color(QPalette::ButtonText).lightnessF() < 0.5);
-        QColor border;
-        QColor hoverbg;
-        if (darkText) {
-            border = downbg.darker(150);
-            hoverbg = downbg.lighter();
-        } else {
-            border = downbg.lighter();
-            hoverbg = downbg.darker(150);
-        }
-        auto bgName = checkable ? QString::fromLatin1("transparent")
-                                : hoverbg.name();
-
-        tb->setStyleSheet(QString::fromLatin1(
-                "QToolButton         { background-color: %1; border: 1px solid transparent; padding: 1px; }"
-                "QToolButton:hover   { background-color: %3; border: 1px solid %4 } "
-                "QToolButton:checked { background-color: %2; border: 1px solid %4; } "
-                "QToolButton:checked:hover { } "
-                "QToolButton:pressed { background-color: %2; border: 1px solid %4 } "
-            ).arg(bgName, downbg.name(), hoverbg.name(), border.name()));
-    };
-
-    coloredToolButton(m_differences, Qt::green, false);
-    coloredToolButton(m_errors, Qt::red, false);
-}
-
 void StatusBar::changeEvent(QEvent *e)
 {
     QFrame::changeEvent(e);
     if (e->type() == QEvent::LanguageChange)
         languageChange();
-    if (e->type() == QEvent::PaletteChange)
-        paletteChange();
 }
 
 
