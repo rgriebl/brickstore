@@ -40,9 +40,8 @@ public:
     QDateTime lastModified() const   { return m_last_modified; }
     bool wasNotModifiedSince() const { return m_was_not_modified; }
 
-    bool abort();
-
     bool isActive() const            { return m_status == Active; }
+
     bool isCompleted() const         { return m_status == Completed; }
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
@@ -74,6 +73,7 @@ private:
                                QIODevice *file, bool noRedirects);
 
     void setStatus(Status st)  { m_status = st; }
+    bool abort();
 
     TransferJob() = default;
     Q_DISABLE_COPY(TransferJob)
@@ -108,6 +108,7 @@ public:
     ~TransferRetriever() override;
 
     void addJob(TransferJob *job, bool highPriority);
+    void abortJob(TransferJob *job);
     void abortAllJobs();
     void schedule();
 
@@ -135,6 +136,7 @@ public:
 
     bool retrieve(TransferJob *job, bool highPriority = false);
 
+    void abortJob(TransferJob *job);
     void abortAllJobs();
 
     QString userAgent() const;

@@ -141,6 +141,13 @@ bool Transfer::retrieve(TransferJob *job, bool highPriority)
     return true;
 }
 
+void Transfer::abortJob(TransferJob *job)
+{
+    QMetaObject::invokeMethod(m_retriever, [this, job]() {
+        m_retriever->abortJob(job);
+    }, Qt::QueuedConnection);
+}
+
 void Transfer::abortAllJobs()
 {
     QMetaObject::invokeMethod(m_retriever, &TransferRetriever::abortAllJobs, Qt::QueuedConnection);
@@ -184,6 +191,20 @@ void TransferRetriever::addJob(TransferJob *job, bool highPriority)
 
     emit m_transfer->progress(m_progressDone, ++m_progressTotal);
     schedule();
+}
+
+void TransferRetriever::abortJob(TransferJob *j)
+{
+    j->abort();
+
+    if (m_jobs.removeOne(j)) {
+        emit finished(j);
+
+        m_progressDone++;
+        emit progress(m_progressDone, m_progressTotal);
+        if (m_progressDone == m_progressTotal)
+            m_progressDone = m_progressTotal = 0;
+    }
 }
 
 void TransferRetriever::abortAllJobs()

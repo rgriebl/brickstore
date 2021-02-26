@@ -88,7 +88,7 @@ ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *p
 void ProgressDialog::done(int r)
 {
     if (m_job && m_job->isActive())
-        m_job->abort();
+        m_trans->abortJob(m_job);
 
     QDialog::done(r);
 
