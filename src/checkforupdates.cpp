@@ -26,6 +26,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QProgressDialog>
+#include <QRegularExpression>
 #include <QStringBuilder>
 
 
