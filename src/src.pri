@@ -25,6 +25,7 @@ HEADERS += \
 SOURCES += \
   $$PWD/appearsinwidget.cpp \
   $$PWD/application.cpp \
+  $$PWD/checkforupdates.cpp \
   $$PWD/config.cpp \
   $$PWD/document.cpp \
   $$PWD/documentio.cpp \
@@ -45,6 +46,7 @@ SOURCES += \
 HEADERS += \
   $$PWD/appearsinwidget.h \
   $$PWD/application.h \
+  $$PWD/checkforupdates.h \
   $$PWD/config.h \
   $$PWD/document.h \
   $$PWD/document_p.h \
