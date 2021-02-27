@@ -302,6 +302,45 @@
     </message>
 </context>
 <context>
+    <name>CheckForUpdates</name>
+    <message>
+        <source>Version information is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your currently installed version is up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A newer version than the one currently installed is available:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changes:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading installer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ColumnCmd</name>
     <message>
         <source>Moved column %1</source>
@@ -576,6 +615,16 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Any</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N</source>
+        <comment>Filter&gt;Condition&gt;New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>U</source>
+        <comment>Filter&gt;Condition&gt;Used</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1235,30 +1284,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Error Log</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse server response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version information is not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Your currently installed version is up-to-date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A newer version than the one currently installed is available:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Download</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Program Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
