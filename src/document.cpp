@@ -1476,6 +1476,9 @@ QVariant Document::dataForFilterRole(const Item *it, Field f) const
         default:
         case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude");
         }
+    case Condition:
+        return (it->condition() == BrickLink::Condition::New) ? tr("N", "Filter>Condition>New")
+                                                              : tr("U", "Filter>Condition>Used");
     case Stockroom:
         switch (it->stockroom()) {
         case BrickLink::Stockroom::A: return QString("A");

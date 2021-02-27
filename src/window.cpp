@@ -1178,9 +1178,11 @@ void Window::on_edit_filter_from_selection_triggered()
     if (selection().count() == 1) {
         auto idx = m_selection_model->currentIndex();
         if (idx.isValid() && idx.column() >= 0) {
+            QVariant v = idx.data(Document::FilterRole);
+            if (v.userType() != QMetaType::QString)
+                v = DocumentDelegate::displayData(idx, false);
             FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
-                                         + QLatin1String(" == ")
-                                         + m_doc->data(idx, Document::FilterRole).toString());
+                                         % QLatin1String(" == ") % v.toString());
         }
     }
 }
