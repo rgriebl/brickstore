@@ -1,5 +1,7 @@
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
+!win32:LIBS *= -lz
+
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
