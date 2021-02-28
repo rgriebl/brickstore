@@ -687,7 +687,7 @@ void FrameWork::translateActions()
         { "document_import_bl_order",       tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
         { "document_import_bl_store_inv",   tr("BrickLink Store Inventory..."),       tr("Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory") },
         { "document_import_bl_cart",        tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
-        { "document_import_ldraw_model",    tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
+        { "document_import_ldraw_model",    tr("LDraw or Studio Model..."),           tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
         { "document_export",                tr("Export"),                             },
         { "document_export_bl_xml",         tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
         { "document_export_bl_xml_clip",    tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },

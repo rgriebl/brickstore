@@ -23,6 +23,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTemporaryFile>
 
 #include "framework.h"
 #include "progressdialog.h"
@@ -33,6 +34,8 @@
 #include "utility.h"
 #include "document.h"
 #include "documentio.h"
+
+#include "unzip.h"
 
 
 #define qL1S(x) QLatin1String(x)
@@ -308,17 +311,62 @@ Document *DocumentIO::loadFrom(const QString &name)
 Document *DocumentIO::importLDrawModel()
 {
     QStringList filters;
+    filters << tr("All Models") + " (*.dat;*.ldr;*.mpd;*.io)";
     filters << tr("LDraw Models") + " (*.dat;*.ldr;*.mpd)";
-    filters << tr("All Files") + "(*.*)";
+    filters << tr("BrickLink Studio Models") + " (*.io)";
+    filters << tr("All Files") + " (*.*)";
 
     QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
 
     if (s.isEmpty())
         return nullptr;
 
-    QFile f(s);
+    QScopedPointer<QFile> f;
 
-    if (!f.open(QIODevice::ReadOnly)) {
+    if (s.endsWith(QLatin1String(".io"))) {
+        // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
+
+        f.reset(new QTemporaryFile());
+        QString errorMsg;
+
+        if (f->open(QIODevice::ReadWrite)) {
+            QByteArray su8 = s.toUtf8();
+            if (auto zip = unzOpen64(su8.constData())) {
+                if (unzLocateFile(zip, "model.ldr", 2 /*case insensitive*/) == UNZ_OK) {
+                    if (unzOpenCurrentFilePassword(zip, "soho0909") == UNZ_OK) {
+                        QByteArray block;
+                        block.resize(1024*1024);
+                        int bytesRead;
+                        do {
+                            bytesRead = unzReadCurrentFile(zip, block.data(), block.size());
+                            if (bytesRead > 0)
+                                f->write(block.constData(), bytesRead);
+                        } while (bytesRead > 0);
+                        if (bytesRead < 0)
+                            errorMsg = tr("Could not extract model.ldr from the Studio ZIP file.");
+                        unzCloseCurrentFile(zip);
+                    } else {
+                        errorMsg = tr("Could not decrypt the model.ldr within the Studio ZIP file.");
+                    }
+                } else {
+                    errorMsg = tr("Could not locate the model.ldr file within the Studio ZIP file.");
+                }
+                unzClose(zip);
+            } else {
+                errorMsg = tr("Could not open the Studio ZIP file");
+            }
+            f->close();
+        }
+        if (!errorMsg.isEmpty()) {
+            MessageBox::warning(nullptr, { }, tr("Could not parse the Studio model:")
+                                % u"<br><br>" % errorMsg);
+            return nullptr;
+        }
+    } else {
+        f.reset(new QFile(s));
+    }
+
+    if (!f->open(QIODevice::ReadOnly)) {
         MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
         return nullptr;
     }
@@ -328,7 +376,7 @@ Document *DocumentIO::importLDrawModel()
     int invalid_items = 0;
     BrickLink::InvItemList items; // we own the items
 
-    bool b = DocumentIO::parseLDrawModel(f, items, &invalid_items);
+    bool b = DocumentIO::parseLDrawModel(f.get(), items, &invalid_items);
     Document *doc = nullptr;
 
     QApplication::restoreOverrideCursor();
@@ -356,7 +404,7 @@ Document *DocumentIO::importLDrawModel()
     return doc;
 }
 
-bool DocumentIO::parseLDrawModel(QFile &f, BrickLink::InvItemList &items, int *invalid_items)
+bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items)
 {
     QHash<QString, BrickLink::InvItem *> mergehash;
     QStringList recursion_detection;
@@ -365,7 +413,7 @@ bool DocumentIO::parseLDrawModel(QFile &f, BrickLink::InvItemList &items, int *i
                                    recursion_detection);
 }
 
-bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, BrickLink::InvItemList &items,
+bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, BrickLink::InvItemList &items,
                                          int *invalid_items, QHash<QString, BrickLink::InvItem *> &mergehash,
                                          QStringList &recursion_detection)
 {
@@ -383,13 +431,13 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
     bool is_mpd_model_found = false;
 
 
-    searchpath.append(QFileInfo(f).dir().absolutePath());
+    searchpath.append(QFileInfo(*f).dir().absolutePath());
     if (!BrickLink::core()->ldrawDataPath().isEmpty()) {
         searchpath.append(BrickLink::core()->ldrawDataPath() + qL1S("/models"));
     }
 
-    if (f.isOpen()) {
-        QTextStream in(&f);
+    if (f->isOpen()) {
+        QTextStream in(f);
         QString line;
 
         while (!(line = in.readLine()).isNull()) {
@@ -411,7 +459,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
                     if ((current_mpd_model == model_name.toLower()) || (model_name.isEmpty() && (current_mpd_index == 0)))
                         is_mpd_model_found = true;
 
-                    if (f.isSequential())
+                    if (f->isSequential())
                         return false; // we need to seek!
                 }
             }
@@ -441,13 +489,13 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
                         if (is_mpd) {
                             int sub_invalid_items = 0;
 
-                            qint64 oldpos = f.pos();
-                            f.seek(0);
+                            qint64 oldpos = f->pos();
+                            f->seek(0);
 
                             got_subfile = parseLDrawModelInternal(f, partname, items, &sub_invalid_items, mergehash, recursion_detection);
 
                             invalid += sub_invalid_items;
-                            f.seek(oldpos);
+                            f->seek(oldpos);
                         }
 
                         if (!got_subfile) {
@@ -457,7 +505,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
                                 if (subf.open(QIODevice::ReadOnly)) {
                                     int sub_invalid_items = 0;
 
-                                    (void) parseLDrawModelInternal(subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
+                                    (void) parseLDrawModelInternal(&subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
 
                                     invalid += sub_invalid_items;
                                     got_subfile = true;

@@ -58,8 +58,8 @@ private:
     static QString toBrickLinkXML(const BrickLink::InvItemList &itemlist);
     static QPair<BrickLink::InvItemList, QString> fromBrickLinkXML(const QByteArray &xml);
 
-    static bool parseLDrawModel(QFile &f, BrickLink::InvItemList &items, int *invalid_items);
-    static bool parseLDrawModelInternal(QFile &f, const QString &model_name,
+    static bool parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items);
+    static bool parseLDrawModelInternal(QFile *f, const QString &model_name,
                                         BrickLink::InvItemList &items,
                                         int *invalid_items,
                                         QHash<QString, BrickLink::InvItem *> &mergehash,
