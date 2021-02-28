@@ -96,6 +96,7 @@ include(src/bricklink/bricklink.pri)
 include(src/ldraw/ldraw.pri)
 include(src/script/script.pri)
 include(src/lzma/lzma.pri)
+include(src/minizip/minizip.pri)
 
 qtPrepareTool(LUPDATE, lupdate)
 

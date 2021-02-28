@@ -63,3 +63,10 @@ BrickStore is copyrighted &copy;2004-2021 by Robert Griebl, licensed under the
 All data from [www.bricklink.com](https://www.bricklink.com) is owned by BrickLink&trade;, which is
 a trademark of Dan Jezek. LEGO&reg; is a trademark of the LEGO group of companies, which does not
 sponsor, authorize or endorse this software. All other trademarks recognized.
+
+3rd-Party Components
+====================
+This projects contains 3rd-party components under different licenses:
+* src/minizip: see LICENSE.ZLIB
+* src/lzma: see LICENSE.LGPLv21
+* assets/icons: see COPYING-ICONS and COPYING-FLAGS
