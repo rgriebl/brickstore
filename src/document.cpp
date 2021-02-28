@@ -1469,6 +1469,9 @@ QVariant Document::dataForDisplayRole(const BrickLink::InvItem *it, Field f) con
 QVariant Document::dataForFilterRole(const Item *it, Field f) const
 {
     switch (f) {
+    case Picture:
+        return it->itemId();
+
     case Status:
         switch (it->status()) {
         case BrickLink::Status::Include: return tr("I", "Filter>Status>Include");
@@ -1484,7 +1487,7 @@ QVariant Document::dataForFilterRole(const Item *it, Field f) const
         case BrickLink::Stockroom::A: return QString("A");
         case BrickLink::Stockroom::B: return QString("B");
         case BrickLink::Stockroom::C: return QString("C");
-        default                     : return QString("-");
+        default                     : return tr("N", "Filter>Stockroom>None");
         }
     case Retain:
         return it->retain() ? tr("Y", "Filter>Retain>Yes")
@@ -1785,8 +1788,6 @@ bool Document::filterAcceptsItem(const BrickLink::InvItem *item) const
         bool localresult = false;
         for (int col = firstcol; col <= lastcol && !localresult; ++col) {
             QVariant v = dataForFilterRole(item, static_cast<Field>(col));
-            if (v.isNull())
-                v = dataForDisplayRole(item, static_cast<Field>(col));
             localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)

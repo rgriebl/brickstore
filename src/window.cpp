@@ -1179,10 +1179,21 @@ void Window::on_edit_filter_from_selection_triggered()
         auto idx = m_selection_model->currentIndex();
         if (idx.isValid() && idx.column() >= 0) {
             QVariant v = idx.data(Document::FilterRole);
-            if (v.userType() != QMetaType::QString)
-                v = DocumentDelegate::displayData(idx, false);
+            QString s;
+            static QLocale loc;
+
+            switch (v.userType()) {
+            case QMetaType::Double : s = loc.toString(v.toDouble(), 'f', 3); break;
+            case QMetaType::Int    : s = loc.toString(v.toInt()); break;
+            default:
+            case QMetaType::QString: s = v.toString(); break;
+            }
+            if (idx.column() == Document::Weight) {
+                s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
+            }
+
             FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
-                                         % QLatin1String(" == ") % v.toString());
+                                         % QLatin1String(" == ") % s);
         }
     }
 }

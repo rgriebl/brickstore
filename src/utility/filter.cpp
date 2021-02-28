@@ -62,9 +62,8 @@ void Filter::setCombination(Combination cmb)
 
 bool Filter::matches(const QVariant &v) const
 {
-    bool isInt = false, isDbl = false;
-    int i1 = 0, i2 = 0;
-    double d1 = 0, d2 = 0;
+    bool isInt = false;
+    qint64 i1 = 0, i2 = 0;
     QString s1, s2;
     
     switch (v.type()) {
@@ -82,9 +81,9 @@ bool Filter::matches(const QVariant &v) const
     case QVariant::Double: {
         if (!m_isDouble)
             return false;
-        d1 = m_asDouble;
-        d2 = v.toDouble();
-        isDbl = true;
+        i1 = qRound64(m_asDouble * 1000.);
+        i2 = qRound64(v.toDouble() * 1000.);
+        isInt = true;
         break;
     }    
     default:
@@ -95,25 +94,25 @@ bool Filter::matches(const QVariant &v) const
 
     switch (comparison()) {
     case Is:
-        return isInt ? i2 == i1 : isDbl ? qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) == 0;
+        return isInt ? i2 == i1 : s2.compare(s1, Qt::CaseInsensitive) == 0;
     case IsNot:
-        return isInt ? i2 != i1 : isDbl ? !qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) != 0;
+        return isInt ? i2 != i1 : s2.compare(s1, Qt::CaseInsensitive) != 0;
     case Less:
-        return isInt ? i2 < i1 : isDbl ? d2 < d1 : false;
+        return isInt ? i2 < i1 : false;
     case LessEqual:
-        return isInt ? i2 <= i1 : isDbl ? d2 <= d1 : false;
+        return isInt ? i2 <= i1 : false;
     case Greater:
-        return isInt ? i2 > i1 : isDbl ? d2 > d1 : false;
+        return isInt ? i2 > i1 : false;
     case GreaterEqual:
-        return isInt ? i2 >= i1 : isDbl ? d2 >= d1 : false;
+        return isInt ? i2 >= i1 : false;
     case StartsWith:
-        return isInt || isDbl ? false : s2.startsWith(s1, Qt::CaseInsensitive);
+        return isInt ? false : s2.startsWith(s1, Qt::CaseInsensitive);
     case DoesNotStartWith:
-        return isInt || isDbl ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
+        return isInt ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
     case EndsWith:
-        return isInt || isDbl ? false : s2.endsWith(s1, Qt::CaseInsensitive);
+        return isInt ? false : s2.endsWith(s1, Qt::CaseInsensitive);
     case DoesNotEndWith:
-        return isInt || isDbl ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
+        return isInt ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
     case Matches:
     case DoesNotMatch: {
         if (m_isRegExp) {
