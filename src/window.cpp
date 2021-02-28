@@ -1625,7 +1625,7 @@ void Window::on_edit_cost_spread_triggered()
 
         applyTo(selection(), QT_TR_N_NOOP("Spreaded cost over %n item(s)"),
                          [=](const auto &from, auto &to) {
-            (to = from).setCost(from.cost() * f); return true;
+            (to = from).setCost(from.price() * f); return true;
         });
     }
 }
