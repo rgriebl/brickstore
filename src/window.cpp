@@ -1625,7 +1625,7 @@ void Window::on_edit_cost_spread_triggered()
 
         applyTo(selection(), QT_TR_N_NOOP("Spreaded cost over %n item(s)"),
                          [=](const auto &from, auto &to) {
-            (to = from).setPrice(from.price() * f); return true;
+            (to = from).setCost(from.cost() * f); return true;
         });
     }
 }
@@ -2213,7 +2213,7 @@ void Window::contextMenu(const QPoint &pos)
                             "edit_price_to_priceguide" };
             break;
         case Document::Cost:
-            actionNames = { "edit_cost_set", "edit_cost_inc_dec", "on_edit_cost_round",
+            actionNames = { "edit_cost_set", "edit_cost_inc_dec", "edit_cost_round",
                             "edit_cost_spread" };
             break;
         case Document::Bulk:
