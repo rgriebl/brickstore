@@ -979,7 +979,7 @@ void Window::consolidateItems(const Document::ItemList &items)
                 if (repeatForRemaining)
                     break;
                 else
-                    continue; // TODO: we may end up with an empty macro
+                    continue;
             }
         } else {
             mergeIndex = consolidateItemsHelper(mergeItems, conMode);

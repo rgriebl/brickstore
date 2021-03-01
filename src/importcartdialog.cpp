@@ -439,7 +439,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                     auto cond = (cartItem["invNew"].toString() == QLatin1String("New"))
                             ? BrickLink::Condition::New : BrickLink::Condition::Used;
                     int qty = cartItem["cartQty"].toInt();
-                    QString priceStr = cartItem["nativePrice"].toString(); //TODO: which one?
+                    QString priceStr = cartItem["nativePrice"].toString();
                     double price = en_US.toDouble(priceStr.mid(4));
 
                     if (itemSeq)

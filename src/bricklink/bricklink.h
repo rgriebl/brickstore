@@ -55,7 +55,6 @@ class ItemType
 public:
     char id() const                 { return m_id; }
     QString name() const            { return m_name; }
-    QString apiName () const        { return QString(m_name).replace(" ", "_"); } //TODO5: brickstock has this
 
     const QVector<const Category *> categories() const  { return m_categories; }
     bool hasInventories() const     { return m_has_inventories; }
@@ -343,11 +342,30 @@ public:
     const Color *color() const         { return m_color; }
     void setColor(const Color *c)      { m_color = c; }
 
-    QString itemId() const             { return m_item ? m_item->id() : (m_incomplete ? m_incomplete->m_item_id : QString()); }
-    QString itemName() const           { return m_item ? m_item->name() : (m_incomplete ? m_incomplete->m_item_name : QString()); }
-    QString colorName() const          { return m_color ? m_color->name() : (m_incomplete ? m_incomplete->m_color_name : QString()); }
-    QString categoryName() const       { return category() ? category()->name() : (m_incomplete ? m_incomplete->m_category_name : QString()); }
-    QString itemTypeName() const       { return itemType() ? itemType()->name() : (m_incomplete ? m_incomplete->m_itemtype_name : QString()); }
+    QString itemId() const             { return m_item ? m_item->id()
+                                                       : (m_incomplete ? m_incomplete->m_item_id
+                                                                       : QString()); }
+    QString itemName() const           { return m_item ? m_item->name()
+                                                       : (m_incomplete ? m_incomplete->m_item_name
+                                                                       : QString()); }
+    QString colorId() const            { return m_color ? QString::number(m_color->id())
+                                                        : (m_incomplete ? m_incomplete->m_color_id
+                                                                        : QString()); }
+    QString colorName() const          { return m_color ? m_color->name()
+                                                        : (m_incomplete ? m_incomplete->m_color_name
+                                                                        : QString()); }
+    QString categoryId() const         { return category() ? QString::number(category()->id())
+                                                           : (m_incomplete ? m_incomplete->m_category_id
+                                                                           : QString()); }
+    QString categoryName() const       { return category() ? category()->name()
+                                                           : (m_incomplete ? m_incomplete->m_category_name
+                                                                           : QString()); }
+    QString itemTypeId() const         { return itemType() ? QString(QChar(itemType()->id()))
+                                                           : (m_incomplete ? m_incomplete->m_itemtype_id
+                                                                           : QString()); }
+    QString itemTypeName() const       { return itemType() ? itemType()->name()
+                                                           : (m_incomplete ? m_incomplete->m_itemtype_name
+                                                                           : QString()); }
     int itemYearReleased() const       { return m_item ? m_item->yearReleased() : 0; }
 
     Status status() const              { return m_status; }
@@ -422,12 +440,14 @@ public:
         QString m_item_name;
         QString m_itemtype_id;
         QString m_itemtype_name;
+        QString m_color_id;
         QString m_color_name;
+        QString m_category_id;
         QString m_category_name;
     };
 
-    const Incomplete *isIncomplete() const { return m_incomplete.data(); }
-    void setIncomplete(Incomplete *inc)    { m_incomplete.reset(inc); }
+    Incomplete *isIncomplete() const    { return m_incomplete.data(); }
+    void setIncomplete(Incomplete *inc) { m_incomplete.reset(inc); }
 
     bool mergeFrom(const InvItem &merge, bool useCostQtyAg = false);
 
@@ -794,7 +814,6 @@ public:
     const PartColorCode *partColorCode(uint id);
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
-    void flushPriceGuidesToUpdate(); //TODO5: brickstock has this
 
     QSize standardPictureSize() const;
     Picture *picture(const Item *item, const Color *color, bool high_priority = false);
@@ -872,7 +891,7 @@ private:
     static void writePCCToDatabase(const PartColorCode *pcc, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
-    void pictureJobFinished(TransferJob *j); //TODO5: timeout handling in brickstock updatePicturesTimeOut
+    void pictureJobFinished(TransferJob *j);
     void priceGuideJobFinished(TransferJob *j);
 
     void pictureLoaded(BrickLink::Picture *pic);
