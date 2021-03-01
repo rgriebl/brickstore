@@ -218,9 +218,10 @@ QString AddRemoveCmd::genDesc(bool is_add, int count)
 
 QTimer *ChangeCmd::s_eventLoopCounter = nullptr;
 
-ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes)
-    : QUndoCommand(qApp->translate("ChangeCmd", "Modified item"))
+ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes, Document::Field hint)
+    : QUndoCommand()
     , m_doc(doc)
+    , m_hint(hint)
     , m_changes(changes)
 {
     std::sort(m_changes.begin(), m_changes.end(), [](const auto &a, const auto &b) {
@@ -240,6 +241,16 @@ ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *
     }
     m_loopCount = s_eventLoopCounter->property("loopCount").toUInt();
     s_eventLoopCounter->start();
+
+    updateText();
+}
+
+void ChangeCmd::updateText()
+{
+    setText(QCoreApplication::translate("ChangeCmd", "Modified %1 on %Ln item(s)", nullptr,
+                                        int(m_changes.size()))
+            .arg((int(m_hint) >= 0) ? m_doc->headerData(m_hint, Qt::Horizontal).toString()
+                                    : QCoreApplication::translate("ChangeCmd", "multiple fields")));
 }
 
 int ChangeCmd::id() const
@@ -251,7 +262,7 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
 {
     if (other->id() == id()) {
         auto *otherChange = static_cast<const ChangeCmd *>(other);
-        if (m_loopCount == otherChange->m_loopCount) {
+        if ((m_loopCount == otherChange->m_loopCount) && (m_hint == otherChange->m_hint)) {
             std::copy_if(otherChange->m_changes.cbegin(), otherChange->m_changes.cend(),
                          std::back_inserter(m_changes), [this](const auto &change) {
                 return !std::binary_search(m_changes.begin(), m_changes.end(),
@@ -260,6 +271,7 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
                     return a.first < b.first;
                 });
             });
+            updateText();
             return true;
         }
     }
@@ -673,15 +685,15 @@ void Document::removeItems(const ItemList &items)
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, { }, items));
 }
 
-void Document::changeItem(Item *item, const Item &value)
+void Document::changeItem(Item *item, const Item &value, Document::Field hint)
 {
-    m_undo->push(new ChangeCmd(this, {{ item, value }}));
+    m_undo->push(new ChangeCmd(this, {{ item, value }}, hint));
 }
 
-void Document::changeItems(const std::vector<std::pair<Item *, Item>> &changes)
+void Document::changeItems(const std::vector<std::pair<Item *, Item>> &changes, Field hint)
 {
     if (!changes.empty())
-        m_undo->push(new ChangeCmd(this, changes));
+        m_undo->push(new ChangeCmd(this, changes, hint));
 }
 
 void Document::setItemsDirect(const Document::ItemList &items)
@@ -1268,8 +1280,9 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         return false;
     Item *itemp = this->item(index);
     Item item = *itemp;
+    Document::Field f = static_cast<Field>(index.column());
 
-    switch (static_cast<Field>(index.column())) {
+    switch (f) {
     case Status      : item.setStatus(value.value<BrickLink::Status>()); break;
     case Picture     :
     case Description : item.setItem(value.value<const BrickLink::Item *>()); break;
@@ -1312,7 +1325,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
     default          : break;
     }
     if (item != *itemp) {
-        changeItem(itemp, item);
+        changeItem(itemp, item, f);
         return true;
     }
     return false;

@@ -190,11 +190,11 @@ public slots:
 
     void gotoNextErrorOrDifference(bool difference = false);
 
-    void setStatus(const char *undoText, BrickLink::Status status);
-    void setCondition(const char *undoText, BrickLink::Condition condition);
-    void setSubCondition(const char *undoText, BrickLink::SubCondition subCondition);
-    void setRetain(const char *undoText, bool retain);
-    void setStockroom(const char *undoText, BrickLink::Stockroom stockroom);
+    void setStatus(BrickLink::Status status);
+    void setCondition(BrickLink::Condition condition);
+    void setSubCondition(BrickLink::SubCondition subCondition);
+    void setRetain(bool retain);
+    void setStockroom(BrickLink::Stockroom stockroom);
 
 signals:
     void selectionChanged(const Document::ItemList &);
@@ -222,7 +222,7 @@ private slots:
     void autosave() const;
 
 private:
-    void applyTo(const Document::ItemList &items, const char *undoText,
+    void applyTo(const Document::ItemList &items,
                  std::function<bool(const Document::Item &, Document::Item &)> callback);
 
     void cancelPriceGuideUpdates();

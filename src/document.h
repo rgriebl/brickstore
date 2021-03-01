@@ -198,8 +198,9 @@ public:
     void removeItems(const ItemList &items);
     void removeItem(Item *item);
 
-    void changeItem(Item *item, const Item &value);
-    void changeItems(const std::vector<std::pair<Item *, Item>> &changes);
+    void changeItem(Item *item, const Item &value, Document::Field hint = Document::Field(-1));
+    void changeItems(const std::vector<std::pair<Item *, Item>> &changes,
+                     Document::Field hint = Document::Field(-1));
 
     Statistics statistics(const ItemList &list, bool ignoreExcluded = false) const;
 

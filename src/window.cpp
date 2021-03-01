@@ -80,13 +80,21 @@ static E nextEnumValue(E current, std::initializer_list<E> values)
 }
 
 
-void Window::applyTo(const Document::ItemList &items, const char *undoText,
+void Window::applyTo(const Document::ItemList &items,
                      std::function<bool(const Document::Item &, Document::Item &)> callback)
 {
     if (items.isEmpty())
         return;
 
-    document()->beginMacro();
+    QString actionText;
+    if (auto a = qobject_cast<QAction *>(sender())) {
+        actionText = a->text();
+        if (actionText.endsWith(QLatin1String("...")))
+            actionText.chop(3);
+    }
+
+    if (!actionText.isEmpty())
+        document()->beginMacro();
 
     int count = items.size();
     std::vector<std::pair<Document::Item *, Document::Item>> changes;
@@ -101,7 +109,9 @@ void Window::applyTo(const Document::ItemList &items, const char *undoText,
         }
     }
     document()->changeItems(changes);
-    document()->endMacro(Window::tr(undoText, nullptr, count));
+
+    if (!actionText.isEmpty())
+        document()->endMacro(tr("%1 on %Ln item(s)", nullptr, count).arg(actionText));
 }
 
 
@@ -1131,8 +1141,10 @@ Window::ColumnLayoutCommand Window::columnLayoutCommandFromId(const QString &id)
 
 void Window::on_edit_cut_triggered()
 {
-    on_edit_copy_triggered();
-    on_edit_delete_triggered();
+    if (!selection().isEmpty()) {
+        QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(selection()));
+        m_doc->removeItems(selection());
+    }
 }
 
 void Window::on_edit_copy_triggered()
@@ -1205,31 +1217,31 @@ void Window::on_view_reset_diff_mode_triggered()
 
 void Window::on_edit_status_include_triggered()
 {
-    setStatus(QT_TR_N_NOOP("Set 'include' status on %n item(s)"), BrickLink::Status::Include);
+    setStatus(BrickLink::Status::Include);
 }
 
 void Window::on_edit_status_exclude_triggered()
 {
-    setStatus(QT_TR_N_NOOP("Set 'exclude' status on %n item(s)"), BrickLink::Status::Exclude);
+    setStatus(BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_status_extra_triggered()
 {
-    setStatus(QT_TR_N_NOOP("Set 'extra' status on %n item(s)"), BrickLink::Status::Extra);
+    setStatus(BrickLink::Status::Extra);
 }
 
 void Window::on_edit_status_toggle_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Toggled status on %n item(s)"), [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         (to = from).setStatus(nextEnumValue(from.status(), { BrickLink::Status::Include,
                                                              BrickLink::Status::Exclude }));
         return true;
     });
 }
 
-void Window::setStatus(const char *undoText, BrickLink::Status status)
+void Window::setStatus(BrickLink::Status status)
 {
-    applyTo(selection(), undoText, [status](const auto &from, auto &to) {
+    applyTo(selection(), [status](const auto &from, auto &to) {
         (to = from).setStatus(status); return true;
     });
 }
@@ -1237,17 +1249,17 @@ void Window::setStatus(const char *undoText, BrickLink::Status status)
 
 void Window::on_edit_cond_new_triggered()
 {
-    setCondition(QT_TR_N_NOOP("Set 'new' condition on %n item(s)"), BrickLink::Condition::New);
+    setCondition(BrickLink::Condition::New);
 }
 
 void Window::on_edit_cond_used_triggered()
 {
-    setCondition(QT_TR_N_NOOP("Set 'used' condition on %n item(s)"), BrickLink::Condition::Used);
+    setCondition(BrickLink::Condition::Used);
 }
 
-void Window::setCondition(const char *undoText, BrickLink::Condition condition)
+void Window::setCondition(BrickLink::Condition condition)
 {
-    applyTo(selection(), undoText, [condition](const auto &from, auto &to) {
+    applyTo(selection(), [condition](const auto &from, auto &to) {
         (to = from).setCondition(condition);
         return true;
     });
@@ -1256,31 +1268,27 @@ void Window::setCondition(const char *undoText, BrickLink::Condition condition)
 
 void Window::on_edit_subcond_none_triggered()
 {
-    setSubCondition(QT_TR_N_NOOP("Set 'none' sub-condition on %n item(s)"),
-                    BrickLink::SubCondition::None);
+    setSubCondition(BrickLink::SubCondition::None);
 }
 
 void Window::on_edit_subcond_sealed_triggered()
 {
-    setSubCondition(QT_TR_N_NOOP("Set 'sealed' sub-condition on %n item(s)"),
-                    BrickLink::SubCondition::Sealed);
+    setSubCondition(BrickLink::SubCondition::Sealed);
 }
 
 void Window::on_edit_subcond_complete_triggered()
 {
-    setSubCondition(QT_TR_N_NOOP("Set 'complete' sub-condition on %n item(s)"),
-                    BrickLink::SubCondition::Complete);
+    setSubCondition(BrickLink::SubCondition::Complete);
 }
 
 void Window::on_edit_subcond_incomplete_triggered()
 {
-    setSubCondition(QT_TR_N_NOOP("Set 'incomplete' sub-condition on %n item(s)"),
-                    BrickLink::SubCondition::Incomplete);
+    setSubCondition(BrickLink::SubCondition::Incomplete);
 }
 
-void Window::setSubCondition(const char *undoText, BrickLink::SubCondition subCondition)
+void Window::setSubCondition(BrickLink::SubCondition subCondition)
 {
-    applyTo(selection(), undoText, [subCondition](const auto &from, auto &to) {
+    applyTo(selection(), [subCondition](const auto &from, auto &to) {
         (to = from).setSubCondition(subCondition); return true;
     });
 }
@@ -1288,24 +1296,24 @@ void Window::setSubCondition(const char *undoText, BrickLink::SubCondition subCo
 
 void Window::on_edit_retain_yes_triggered()
 {
-    setRetain(QT_TR_N_NOOP("Set 'retain' flag on %n item(s)"), true);
+    setRetain(true);
 }
 
 void Window::on_edit_retain_no_triggered()
 {
-    setRetain(QT_TR_N_NOOP("Cleared 'retain' flag on %n item(s)"), false);
+    setRetain(false);
 }
 
 void Window::on_edit_retain_toggle_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Toggled 'retain' flag on %n item(s)"), [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         (to = from).setRetain(!from.retain()); return true;
     });
 }
 
-void Window::setRetain(const char *undoText, bool retain)
+void Window::setRetain(bool retain)
 {
-    applyTo(selection(), undoText, [retain](const auto &from, auto &to) {
+    applyTo(selection(), [retain](const auto &from, auto &to) {
         (to = from).setRetain(retain); return true;
     });
 }
@@ -1313,27 +1321,27 @@ void Window::setRetain(const char *undoText, bool retain)
 
 void Window::on_edit_stockroom_no_triggered()
 {
-    setStockroom(QT_TR_N_NOOP("Cleared 'stockroom' flag on %n item(s)"), BrickLink::Stockroom::None);
+    setStockroom(BrickLink::Stockroom::None);
 }
 
 void Window::on_edit_stockroom_a_triggered()
 {
-    setStockroom(QT_TR_N_NOOP("Set stockroom to 'A' on %n item(s)"), BrickLink::Stockroom::A);
+    setStockroom(BrickLink::Stockroom::A);
 }
 
 void Window::on_edit_stockroom_b_triggered()
 {
-    setStockroom(QT_TR_N_NOOP("Set stockroom to 'B' on %n item(s)"), BrickLink::Stockroom::B);
+    setStockroom(BrickLink::Stockroom::B);
 }
 
 void Window::on_edit_stockroom_c_triggered()
 {
-    setStockroom(QT_TR_N_NOOP("Set stockroom to 'C' on %n item(s)"), BrickLink::Stockroom::C);
+    setStockroom(BrickLink::Stockroom::C);
 }
 
-void Window::setStockroom(const char *undoText, BrickLink::Stockroom stockroom)
+void Window::setStockroom(BrickLink::Stockroom stockroom)
 {
-    applyTo(selection(), undoText, [stockroom](const auto &from, auto &to) {
+    applyTo(selection(), [stockroom](const auto &from, auto &to) {
         (to = from).setStockroom(stockroom); return true;
     });
 }
@@ -1348,7 +1356,7 @@ void Window::on_edit_price_set_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
                               m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set price on %n item(s)"), [price](const auto &from, auto &to) {
+        applyTo(selection(), [price](const auto &from, auto &to) {
             (to = from).setPrice(price); return true;
         });
     }
@@ -1356,8 +1364,7 @@ void Window::on_edit_price_set_triggered()
 
 void Window::on_edit_price_round_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Rounded price on %n item(s)"),
-                     [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         double price = int(from.price() * 100 + .5) / 100.;
         if (!qFuzzyCompare(price, from.price())) {
             (to = from).setPrice(price);
@@ -1513,8 +1520,7 @@ void Window::on_edit_price_inc_dec_triggered()
         double factor    = (1.+ percent / 100.);
         bool tiers       = dlg.applyToTiers();
 
-        applyTo(selection(), QT_TR_N_NOOP("Adjusted price on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             double price = from.price();
 
             if (!qFuzzyIsNull(percent))
@@ -1553,8 +1559,7 @@ void Window::on_edit_cost_set_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
                               m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set cost on %n item(s)"),
-                         [cost](const auto &from, auto &to) {
+        applyTo(selection(), [cost](const auto &from, auto &to) {
             (to = from).setCost(cost); return true;
         });
     }
@@ -1562,8 +1567,7 @@ void Window::on_edit_cost_set_triggered()
 
 void Window::on_edit_cost_round_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Rounded cost on %n item(s)"),
-                     [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         double cost = int(from.cost() * 100 + .5) / 100.;
         if (!qFuzzyCompare(cost, from.cost())) {
             (to = from).setCost(cost);
@@ -1586,8 +1590,7 @@ void Window::on_edit_cost_inc_dec_triggered()
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
 
-        applyTo(selection(), QT_TR_N_NOOP("Adjusted cost on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             double cost = from.cost();
 
             if (!qFuzzyIsNull(percent))
@@ -1623,8 +1626,7 @@ void Window::on_edit_cost_spread_triggered()
         if (qFuzzyCompare(f, 1))
             return;
 
-        applyTo(selection(), QT_TR_N_NOOP("Spreaded cost over %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             (to = from).setCost(from.price() * f); return true;
         });
     }
@@ -1657,8 +1659,7 @@ void Window::on_edit_qty_divide_triggered()
             return;
         }
 
-        applyTo(selection(), QT_TR_N_NOOP("Quantity divide on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             (to = from).setQuantity(from.quantity() / divisor); return true;
         });
     }
@@ -1691,8 +1692,7 @@ void Window::on_edit_qty_multiply_triggered()
             return;
         }
 
-        applyTo(selection(), QT_TR_N_NOOP("Quantity multiply on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             (to = from).setQuantity(from.quantity() * factor); return true;
         });
     }
@@ -1707,8 +1707,7 @@ void Window::on_edit_sale_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
                                tr("%"), sale, -1000, 99)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set sale on %n item(s)"),
-                         [sale](const auto &from, auto &to) {
+        applyTo(selection(), [sale](const auto &from, auto &to) {
             (to = from).setSale(sale); return true;
         });
     }
@@ -1723,8 +1722,7 @@ void Window::on_edit_bulk_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Set bulk quantity for the selected items:"),
                                QString(), bulk, 1, 99999)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set bulk quantity on %n item(s)"),
-                         [bulk](const auto &from, auto &to) {
+        applyTo(selection(), [bulk](const auto &from, auto &to) {
             (to = from).setBulkQuantity(bulk); return true;
         });
     }
@@ -1741,8 +1739,7 @@ void Window::on_edit_color_triggered()
 
     if (d.exec() == QDialog::Accepted) {
         const auto color = d.color();
-        applyTo(selection(), QT_TR_N_NOOP("Set color on %n item(s)"),
-                         [color](const auto &from, auto &to) {
+        applyTo(selection(), [color](const auto &from, auto &to) {
             (to = from).setColor(color); return true;
         });
     }
@@ -1759,8 +1756,7 @@ void Window::on_edit_item_triggered()
 
     if (d.exec() == QDialog::Accepted) {
         const auto item = d.item();
-        applyTo(selection(), QT_TR_N_NOOP("Set color on %n item(s)"),
-                         [item](const auto &from, auto &to) {
+        applyTo(selection(), [item](const auto &from, auto &to) {
             (to = from).setItem(item); return true;
         });
     }
@@ -1775,8 +1771,7 @@ void Window::on_edit_qty_set_triggered()
 
     if (MessageBox::getInteger(this, { }, tr("Enter the new quantities for all selected items:"),
                                QString(), quantity, -FrameWork::maxQuantity, FrameWork::maxQuantity)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set quantity on %n item(s)"),
-                         [quantity](const auto &from, auto &to) {
+        applyTo(selection(), [quantity](const auto &from, auto &to) {
             (to = from).setQuantity(quantity); return true;
         });
     }
@@ -1791,8 +1786,7 @@ void Window::on_edit_remark_set_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the new remark for all selected items:"),
                               remarks)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set remark on %n item(s)"),
-                         [remarks](const auto &from, auto &to) {
+        applyTo(selection(), [remarks](const auto &from, auto &to) {
             (to = from).setRemarks(remarks); return true;
         });
     }
@@ -1800,8 +1794,7 @@ void Window::on_edit_remark_set_triggered()
 
 void Window::on_edit_remark_clear_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Cleared remark on %n item(s)"),
-                     [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         (to = from).setRemarks({ }); return true;
     });
 }
@@ -1815,8 +1808,7 @@ void Window::on_edit_remark_add_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the remarks of all selected items:"),
                               addRemarks)) {
-        applyTo(selection(), QT_TR_N_NOOP("Modified remark on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             to = from;
             Document::Item tmp = from;
             tmp.setRemarks(addRemarks);
@@ -1838,8 +1830,7 @@ void Window::on_edit_remark_rem_triggered()
                               remRemarks)) {
         QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remRemarks) % u"\\b");
 
-        applyTo(selection(), QT_TR_N_NOOP("Modified remark on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             QString remark = from.remarks();
             if (!remark.isEmpty())
                 remark = remark.remove(regexp).simplified();
@@ -1862,8 +1853,7 @@ void Window::on_edit_comment_set_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the new comment for all selected items:"),
                               comments)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set comment on %n item(s)"),
-                         [comments](const auto &from, auto &to) {
+        applyTo(selection(), [comments](const auto &from, auto &to) {
             (to = from).setComments(comments); return true;
         });
     }
@@ -1871,8 +1861,7 @@ void Window::on_edit_comment_set_triggered()
 
 void Window::on_edit_comment_clear_triggered()
 {
-    applyTo(selection(), QT_TR_N_NOOP("Cleared comment on %n item(s)"),
-                     [](const auto &from, auto &to) {
+    applyTo(selection(), [](const auto &from, auto &to) {
         (to = from).setComments({ }); return true;
     });
 }
@@ -1886,8 +1875,7 @@ void Window::on_edit_comment_add_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the comments of all selected items:"),
                               addComments)) {
-        applyTo(selection(), QT_TR_N_NOOP("Modified comment on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             to = from;
             Document::Item tmp = from;
             tmp.setRemarks(addComments);
@@ -1909,8 +1897,7 @@ void Window::on_edit_comment_rem_triggered()
                               remComment)) {
         QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remComment) % u"\\b");
 
-        applyTo(selection(), QT_TR_N_NOOP("Modified comment on %n item(s)"),
-                         [=](const auto &from, auto &to) {
+        applyTo(selection(), [=](const auto &from, auto &to) {
             QString comment = from.comments();
             if (!comment.isEmpty())
                 comment = comment.remove(regexp).simplified();
@@ -1934,8 +1921,7 @@ void Window::on_edit_reserved_triggered()
     if (MessageBox::getString(this, { },
                               tr("Reserve all selected items for this specific buyer (BrickLink username):"),
                               reserved)) {
-        applyTo(selection(), QT_TR_N_NOOP("Set reservation on %n item(s)"),
-                         [reserved](const auto &from, auto &to) {
+        applyTo(selection(), [reserved](const auto &from, auto &to) {
             (to = from).setReserved(reserved); return true;
         });
     }

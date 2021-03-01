@@ -45,7 +45,8 @@ private:
 class ChangeCmd : public QUndoCommand
 {
 public:
-    ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes);
+    ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes,
+              Document::Field hint = Document::Field(-1));
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
 
@@ -53,8 +54,11 @@ public:
     void undo() override;
 
 private:
+    void updateText();
+
     Document *m_doc;
     uint m_loopCount;
+    Document::Field m_hint;
     std::vector<std::pair<Document::Item *, Document::Item>> m_changes;
 
     static QTimer *s_eventLoopCounter;
