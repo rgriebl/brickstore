@@ -423,6 +423,7 @@ StatusBar::StatusBar(Window *window)
     updateBlockState(false);
     documentCurrencyChanged(m_doc->currencyCode());
 
+    paletteChange();
     languageChange();
 }
 
@@ -537,6 +538,14 @@ void StatusBar::updateBlockState(bool blocked)
     }
 }
 
+void StatusBar::paletteChange()
+{
+    QColor c = CheckColorTabBar().color();
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, c);
+    setPalette(pal);
+}
+
 void StatusBar::languageChange()
 {
     m_differences->setToolTip(Utility::toolTipLabel(tr("Go to the next difference"),
@@ -555,6 +564,8 @@ void StatusBar::changeEvent(QEvent *e)
     QFrame::changeEvent(e);
     if (e->type() == QEvent::LanguageChange)
         languageChange();
+    if (e->type() == QEvent::PaletteChange)
+        paletteChange();
 }
 
 
