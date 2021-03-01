@@ -247,8 +247,10 @@ ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *
 
 void ChangeCmd::updateText()
 {
+    //: Generic undo/redo text for table edits: %1 == column name (e.g. "Price")
     setText(QCoreApplication::translate("ChangeCmd", "Modified %1 on %Ln item(s)", nullptr,
                                         int(m_changes.size()))
+            //: Generic undo/redo text for table edits: if more than one column was edited at once
             .arg((int(m_hint) >= 0) ? m_doc->headerData(m_hint, Qt::Horizontal).toString()
                                     : QCoreApplication::translate("ChangeCmd", "multiple fields")));
 }

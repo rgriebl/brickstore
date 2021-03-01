@@ -257,8 +257,16 @@
 </context>
 <context>
     <name>ChangeCmd</name>
+    <message numerus="yes">
+        <source>Modified %1 on %Ln item(s)</source>
+        <extracomment>Generic undo/redo text for table edits: %1 == column name (e.g. &quot;Price&quot;)</extracomment>
+        <translation>
+            <numerusform>Modified %1 on one item</numerusform>
+            <numerusform>Modified %1 on %Ln items</numerusform>
+        </translation>
+    </message>
     <message>
-        <source>Modified item</source>
+        <source>multiple fields</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -627,6 +635,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <comment>Filter&gt;Condition&gt;Used</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>N</source>
+        <comment>Filter&gt;Stockroom&gt;None</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DocumentDelegate</name>
@@ -828,10 +841,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Could not open file %1 for reading.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
         <translation>
@@ -883,10 +892,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This XML document is not a BrickStoreXML file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This list contains items without a BrickLink Lot-ID.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -900,6 +905,38 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>This document has no differences that could be exported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This XML document is not a valid BrickStoreXML file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All Models</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Studio Models</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not extract model.ldr from the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not decrypt the model.ldr within the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not locate the model.ldr file within the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not open the Studio ZIP file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the Studio model:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1084,10 +1121,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>BrickLink Shopping Cart...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>LDraw Model...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1613,6 +1646,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Set reserved for...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>LDraw or Studio Model...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -2085,23 +2122,23 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>A total quantity of %Ln item(s) is available for purchase</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>One item is available for purchase</numerusform>
+            <numerusform>A total quantity of %Ln items is available for purchase</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>in %Ln individual lot(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>in one individual lot</numerusform>
+            <numerusform>in %Ln individual lots</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>A total quantity of %Ln item(s) has been sold</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>One item has been sold</numerusform>
+            <numerusform>A total quantity of %Ln items has been sold</numerusform>
         </translation>
     </message>
     <message>
@@ -3055,42 +3092,42 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Set &apos;include&apos; status on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;include&apos; status on one item</numerusform>
             <numerusform>Set &apos;include&apos; status on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;exclude&apos; status on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;exclude&apos; status on one item</numerusform>
             <numerusform>Set &apos;exclude&apos; status on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;extra&apos; status on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;extra&apos; status on one item</numerusform>
             <numerusform>Set &apos;extra&apos; status on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Toggled status on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Toggled status on one item</numerusform>
             <numerusform>Toggled status on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;new&apos; condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;new&apos; condition on one item</numerusform>
             <numerusform>Set &apos;new&apos; condition on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;used&apos; condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;used&apos; condition on one item</numerusform>
             <numerusform>Set &apos;used&apos; condition on %n items</numerusform>
         </translation>
@@ -3104,84 +3141,84 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Set &apos;none&apos; sub-condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;none&apos; sub-condition on one item</numerusform>
             <numerusform>Set &apos;none&apos; sub-condition on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;sealed&apos; sub-condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;sealed&apos; sub-condition on one item</numerusform>
             <numerusform>Set &apos;sealed&apos; sub-condition on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;complete&apos; sub-condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;complete&apos; sub-condition on one item</numerusform>
             <numerusform>Set &apos;complete&apos; sub-condition on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;incomplete&apos; sub-condition on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;incomplete&apos; sub-condition on one item</numerusform>
             <numerusform>Set &apos;incomplete&apos; sub-condition on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set &apos;retain&apos; flag on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set &apos;retain&apos; flag on one item</numerusform>
             <numerusform>Set &apos;retain&apos; flag on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Cleared &apos;retain&apos; flag on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cleared &apos;retain&apos; flag on one item</numerusform>
             <numerusform>Cleared &apos;retain&apos; flag on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Toggled &apos;retain&apos; flag on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Toggled &apos;retain&apos; flag on one item</numerusform>
             <numerusform>Toggled &apos;retain&apos; flag on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Cleared &apos;stockroom&apos; flag on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cleared &apos;stockroom&apos; flag on one item</numerusform>
             <numerusform>Cleared &apos;stockroom&apos; flag on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set stockroom to &apos;A&apos; on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set stockroom to &apos;A&apos; on one item</numerusform>
             <numerusform>Set stockroom to &apos;A&apos; on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set stockroom to &apos;B&apos; on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set stockroom to &apos;B&apos; on one item</numerusform>
             <numerusform>Set stockroom to &apos;B&apos; on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set stockroom to &apos;C&apos; on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set stockroom to &apos;C&apos; on one item</numerusform>
             <numerusform>Set stockroom to &apos;C&apos; on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set price on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set price on one item</numerusform>
             <numerusform>Set price on %n items</numerusform>
         </translation>
@@ -3195,63 +3232,63 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Set sale on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set sale on one item</numerusform>
             <numerusform>Set sale on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set bulk quantity on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set bulk quantity on one item</numerusform>
             <numerusform>Set bulk quantity on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set color on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set color on one item</numerusform>
             <numerusform>Set color on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set quantity on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set quantity on one item</numerusform>
             <numerusform>Set quantity on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set remark on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set remark on one item</numerusform>
             <numerusform>Set remark on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Modified remark on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Modified remark on one item</numerusform>
             <numerusform>Modified remark on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set comment on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set comment on one item</numerusform>
             <numerusform>Set comment on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Modified comment on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Modified comment on one item</numerusform>
             <numerusform>Modified comment on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Set reservation on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set reservation on one item</numerusform>
             <numerusform>Set reservation on %n items</numerusform>
         </translation>
@@ -3355,7 +3392,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Set cost on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Set cost on one item</numerusform>
             <numerusform>Set cost on %n items</numerusform>
         </translation>
@@ -3420,7 +3457,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Rounded price on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Rounded price on one item</numerusform>
             <numerusform>Rounded price on %n items</numerusform>
         </translation>
@@ -3442,35 +3479,35 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Adjusted price on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Adjusted price on one item</numerusform>
             <numerusform>Adjusted price on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Rounded cost on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Rounded cost on one item</numerusform>
             <numerusform>Rounded cost on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Adjusted cost on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Adjusted cost on one item</numerusform>
             <numerusform>Adjusted cost on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Spreaded cost over %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Spreaded cost over one item</numerusform>
             <numerusform>Spreaded cost over %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Quantity divide on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Quantity divide on one item</numerusform>
             <numerusform>Quantity divide on %n items</numerusform>
         </translation>
@@ -3484,7 +3521,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Quantity multiply on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Quantity multiply on one item</numerusform>
             <numerusform>Quantity multiply on %n items</numerusform>
         </translation>
@@ -3495,14 +3532,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Cleared remark on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cleared remark on one item</numerusform>
             <numerusform>Cleared remark on %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Cleared comment on %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Cleared comment on one item</numerusform>
             <numerusform>Cleared comment on %n items</numerusform>
         </translation>
@@ -3525,6 +3562,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <source>%1 have been skipped, because of missing Price Guide records or network errors.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%1 on %Ln item(s)</source>
+        <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
+        <translation>
+            <numerusform>%1 on one item</numerusform>
+            <numerusform>%1 on %Ln items</numerusform>
+        </translation>
     </message>
 </context>
 <context>

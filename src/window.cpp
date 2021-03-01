@@ -110,8 +110,10 @@ void Window::applyTo(const Document::ItemList &items,
     }
     document()->changeItems(changes);
 
-    if (!actionText.isEmpty())
+    if (!actionText.isEmpty()) {
+        //: Generic undo/redo text: %1 == action name (e.g. "Set price")
         document()->endMacro(tr("%1 on %Ln item(s)", nullptr, count).arg(actionText));
+    }
 }
 
 
