@@ -27,23 +27,21 @@ Item = element Item {
     element ItemTypeID   { xsd:string { length="1" } } &
     element ColorID      { xsd:integer } &
 
-    # Optional elements, useful to track an item across catalog updates
-    element ItemName     { xsd:string }? &
-    element ItemTypeName { xsd:string }? &
-    element ColorName    { xsd:string }? &
-    element CategoryID   { xsd:integer }? &
-    element CategoryName { xsd:string }? &
-
-    # Optional - the actual item data
     element Qty          { xsd:integer }? &   # default: 0
     element Price        { xsd:double }? &    # default: 0
+    element Status       { string "I" | string "X" | string "E" }? &
+                         # I = include, X = exclude, E = extra
+    element Condition    { string "N" | string "U" }? &
+                         # N = new, U = used
+
+    # Optional: the actual item data. Do not write these tags at all, if value equals default value
 
     element Bulk         { xsd:integer { minInclusive="1" } }? &   # default: 1
     element Sale         { xsd:integer }? &   # default: 0
-    element Comments     { xsd:string }? &    # default: none
-    element Remarks      { xsd:string }? &    # default: none
+    element Comments     { xsd:string }? &    # default: no comment
+    element Remarks      { xsd:string }? &    # default: no remark
     element Retain       { empty }? &         # default: no retain
-    element Reserved     { xsd:string }? &    # default: none
+    element Reserved     { xsd:string }? &    # default: no reserve
     element LotID        { xsd:integer }? &   # default: 0
 
     element TQ1          { xsd:integer }? &   # default: 0
@@ -56,24 +54,55 @@ Item = element Item {
     element TotalWeight  { xsd:double }? &    # default: 0 (catalog weight * quantity)
     element Cost         { xsd:double }? &    # default: 0
 
-    element Status       { string "I" | string "E" | string "X" | string "?" }? &
-                         # default: I  (I = include, E = exclude, X = extra, ? = unknown)
+    element SubCondition { string "C" | string "I" | string "M" }? &  # default: no sub-condition
+                         # C = complete, I = incomplete, M = sealed/MISB
 
-    element Condition    { string "N" | string "U" }? &
-                         # default: N  (N = new, U = used)
+    element Stockroom    { string "A" | string "B" | string "C" }? &  # default: no stockroom
 
-    element SubCondition { string "C" | string "I" | string "M" | string "?" }? &
-                         # default: C  (C = complete, I = incomplete, M = sealed/MISB, ? = unknown)
+    # Optional elements, useful to track an item across catalog updates
+    element ItemName     { xsd:string }? &
+    element ItemTypeName { xsd:string }? &
+    element ColorName    { xsd:string }? &
+    element CategoryID   { xsd:integer }? &
+    element CategoryName { xsd:string }? &
 
-    element Stockroom    { string "A" | string "B" | string "C" | empty }? &
-                         # default: none
-
-    # Deprecated
+    # Deprecated - replaced by the more versatile DifferenceBaseValues
     element OrigQty      { xsd:integer }? &   # default: 0
     element OrigPrice    { xsd:double }? &    # default: 0
 
-    # Experimental features
-    element X-DifferenceModeBase { text }?
+    # Difference mode base values:
+    # All attributes are optional and have a corresponding element defined above
+    element DifferenceBaseValues {
+        attribute ItemID       { xsd:string { minLength="1" } }?,
+        attribute ItemTypeID   { xsd:string { length="1" } } &
+        attribute ColorID      { xsd:integer } &
+        attribute Qty          { xsd:integer }?,
+        attribute Price        { xsd:double }?,
+        attribute Status       { string "I" | string "X" | string "E" }?,
+        attribute Condition    { string "N" | string "U" }?,
+        attribute Bulk         { xsd:integer { minInclusive="1" } }?,
+        attribute Sale         { xsd:integer }?,
+        attribute Comments     { xsd:string }?,
+        attribute Remarks      { xsd:string }?,
+        attribute Retain       { empty }?,
+        attribute Reserved     { xsd:string }?,
+        attribute LotID        { xsd:integer }?,
+        attribute TQ1          { xsd:integer }?,
+        attribute TP1          { xsd:double }?,
+        attribute TQ2          { xsd:integer }?,
+        attribute TP2          { xsd:double }?,
+        attribute TQ3          { xsd:integer }?,
+        attribute TP3          { xsd:double }?,
+        attribute TotalWeight  { xsd:double }?,
+        attribute Cost         { xsd:double }?,
+        attribute SubCondition { string "C" | string "I" | string "M" }?,
+        attribute Stockroom    { string "A" | string "B" | string "C" }?,
+        attribute ItemName     { xsd:string }?,
+        attribute ItemTypeName { xsd:string }?,
+        attribute ColorName    { xsd:string }?,
+        attribute CategoryID   { xsd:integer }?,
+        attribute CategoryName { xsd:string }?
+    }?
 }
 
 # GuiState is free for any UI editor to use for non-essential data. Make sure to write a
