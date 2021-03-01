@@ -111,7 +111,7 @@ void ProgressCircle::resizeEvent(QResizeEvent *)
     m_fill.reset();
 }
 
-void ProgressCircle::contextMenuEvent(QContextMenuEvent *e)
+void ProgressCircle::mousePressEvent(QMouseEvent *e)
 {
     QMenu *m = new QMenu();
     auto *a = m->addAction(tr("Cancel all active downloads"));
