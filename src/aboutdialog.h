@@ -35,5 +35,7 @@ private slots:
     void gotoPage(const QString &url);
 
 private:
+    static QString cpuModel();
+
     QMap<QString, QString> m_pages;
 };

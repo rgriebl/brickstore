@@ -50,6 +50,12 @@
        <property name="text">
         <string notr="true">BrickStore</string>
        </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::TextBrowserInteraction</set>
+       </property>
       </widget>
      </item>
      <item>
