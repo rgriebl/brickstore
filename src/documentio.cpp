@@ -43,6 +43,17 @@
 
 QString DocumentIO::s_lastDirectory { };
 
+QString DocumentIO::lastDirectory()
+{
+    return s_lastDirectory.isEmpty() ? Config::inst()->documentDir() : s_lastDirectory;
+}
+
+void DocumentIO::setLastDirectory(const QString &dir)
+{
+    if (!dir.isEmpty())
+        s_lastDirectory = dir;
+}
+
 
 Document *DocumentIO::create()
 {
@@ -57,18 +68,12 @@ Document *DocumentIO::open()
     filters << tr("BrickStore XML Data") + " (*.bsx)";
     filters << tr("All Files") + "(*.*)";
 
-    QString dir = s_lastDirectory;
-    if (dir.isEmpty())
-        dir = Config::inst()->documentDir();
-
-    auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), dir, filters.join(";;"));
-
-    if (!fn.isNull()) {
-        s_lastDirectory = QFileInfo(fn).absolutePath();
-
-        return open(fn);
-    }
-    return nullptr;
+    auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), lastDirectory(),
+                                           filters.join(";;"));
+    if (fn.isEmpty())
+        return nullptr;
+    setLastDirectory(QFileInfo(fn).absolutePath());
+    return open(fn);
 }
 
 Document *DocumentIO::open(const QString &s)
@@ -228,24 +233,25 @@ Document *DocumentIO::importBrickLinkXML()
     filters << tr("BrickLink XML File") + " (*.xml)";
     filters << tr("All Files") + "(*.*)";
 
-    QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (s.isEmpty())
+    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
+                                             filters.join(";;"));
+    if (fn.isEmpty())
         return nullptr;
+    setLastDirectory(QFileInfo(fn).absolutePath());
 
-    QFile f(s);
+    QFile f(fn);
     if (f.open(QIODevice::ReadOnly)) {
         try {
             auto result = fromBrickLinkXML(f.readAll());
             auto *doc = new Document(result.first, result.second); // Document owns the items now
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
+            doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
             return doc;
 
         } catch (const Exception &e) {
             MessageBox::warning(nullptr, { }, tr("Could not parse the XML data.") % u"<br><br>" % e.error());
         }
     } else {
-        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
     }
     return nullptr;
 }
@@ -316,21 +322,22 @@ Document *DocumentIO::importLDrawModel()
     filters << tr("BrickLink Studio Models") + " (*.io)";
     filters << tr("All Files") + " (*.*)";
 
-    QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (s.isEmpty())
+    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
+                                             filters.join(";;"));
+    if (fn.isEmpty())
         return nullptr;
+    setLastDirectory(QFileInfo(fn).absolutePath());
 
     QScopedPointer<QFile> f;
 
-    if (s.endsWith(QLatin1String(".io"))) {
+    if (fn.endsWith(QLatin1String(".io"))) {
         // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
 
         f.reset(new QTemporaryFile());
         QString errorMsg;
 
         if (f->open(QIODevice::ReadWrite)) {
-            QByteArray su8 = s.toUtf8();
+            QByteArray su8 = fn.toUtf8();
             if (auto zip = unzOpen64(su8.constData())) {
                 if (unzLocateFile(zip, "model.ldr", 2 /*case insensitive*/) == UNZ_OK) {
                     if (unzOpenCurrentFilePassword(zip, "soho0909") == UNZ_OK) {
@@ -363,11 +370,11 @@ Document *DocumentIO::importLDrawModel()
             return nullptr;
         }
     } else {
-        f.reset(new QFile(s));
+        f.reset(new QFile(fn));
     }
 
     if (!f->open(QIODevice::ReadOnly)) {
-        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
         return nullptr;
     }
 
@@ -394,10 +401,10 @@ Document *DocumentIO::importLDrawModel()
         if (!invalid_items) {
             doc = new Document(items); // Document owns the items now
             items.clear();
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
+            doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
         }
     } else {
-        MessageBox::warning(nullptr, { }, tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(fn)));
     }
 
     qDeleteAll(items);
@@ -581,9 +588,7 @@ bool DocumentIO::saveAs(Document *doc)
 
     QString fn = doc->fileName();
     if (fn.isEmpty()) {
-        fn = s_lastDirectory;
-        if (fn.isEmpty())
-            fn = Config::inst()->documentDir();
+        fn = lastDirectory();
 
         if (!doc->title().isEmpty()) {
             QString t = Utility::sanitizeFileName(doc->title());
@@ -595,15 +600,14 @@ bool DocumentIO::saveAs(Document *doc)
 
     fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save File as"), fn, filters.join(";;"));
 
-    if (!fn.isNull()) {
-        s_lastDirectory = QFileInfo(fn).absolutePath();
+    if (fn.isEmpty())
+        return false;
+    setLastDirectory(QFileInfo(fn).absolutePath());
 
-        if (fn.right(4) != ".bsx")
-            fn += ".bsx";
+    if (fn.right(4) != ".bsx")
+        fn += ".bsx";
 
-        return saveTo(doc, fn, false);
-    }
-    return false;
+    return saveTo(doc, fn, false);
 }
 
 
@@ -1009,22 +1013,24 @@ void DocumentIO::exportBrickLinkXML(const BrickLink::InvItemList &itemlist)
     QStringList filters;
     filters << tr("BrickLink XML File") + " (*.xml)";
 
-    QString s = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (s.isNull())
+    QString fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), lastDirectory(),
+                                              filters.join(";;"));
+    if (fn.isEmpty())
         return;
-    if (s.right(4) != qL1S(".xml"))
-        s += qL1S(".xml");
+    setLastDirectory(QFileInfo(fn).absolutePath());
+
+    if (fn.right(4) != qL1S(".xml"))
+        fn += qL1S(".xml");
 
     const QByteArray xml = toBrickLinkXML(itemlist).toUtf8();
 
-    QFile f(s);
+    QFile f(fn);
     if (f.open(QIODevice::WriteOnly)) {
         if (f.write(xml.data(), xml.size()) != qint64(xml.size())) {
-            MessageBox::warning(nullptr, { }, tr("Failed to save data to file %1.").arg(CMB_BOLD(s)));
+            MessageBox::warning(nullptr, { }, tr("Failed to save data to file %1.").arg(CMB_BOLD(fn)));
         }
     } else {
-        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(fn)));
     }
 }
 
