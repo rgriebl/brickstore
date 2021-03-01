@@ -547,7 +547,7 @@ signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
 
 private:
-    Document *setupDocument(::Document *doc, const QString &title = { });
+    Document *setupDocument(Window *win, ::Document *doc, const QString &title = { });
 
     QVector<Document *> m_documents;
     Document *m_currentDocument = nullptr;

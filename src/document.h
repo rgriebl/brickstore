@@ -14,12 +14,12 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include <QDomDocument>
 #include <QPixmap>
 #include <QUuid>
 #include <QElapsedTimer>
 
 #include "bricklink.h"
+#include "documentio.h"
 #include "filter.h"
 
 QT_FORWARD_DECLARE_CLASS(QUndoStack)
@@ -168,10 +168,7 @@ public slots:
 
 public:
     Document();
-    Document(const BrickLink::InvItemList &items);
-    Document(const BrickLink::InvItemList &items, const QString &currencyCode,
-             const QHash<const BrickLink::InvItem *, BrickLink::InvItem> &differenceBase = { },
-             bool forceModified = false);
+    Document(const DocumentIO::BsxContents &bsx, bool forceModified = false);
     virtual ~Document() override;
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
@@ -187,6 +184,7 @@ public:
 
     bool isModified() const;
     void unsetModified(); // only for DocumentIO::fileSaveTo
+    QHash<const Item *, Item> differenceBase() const; // only for DocumentIO::fileSaveTo
 
     const ItemList &items() const;
     bool clear();
@@ -211,11 +209,6 @@ public:
     bool legacyCurrencyCode() const;
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, qreal crate = qreal(1));
-
-    bool hasGuiState() const;
-    QDomElement guiState() const;
-    void setGuiState(QDomElement dom);
-    void clearGuiState();
 
     void setOrder(BrickLink::Order *order);
 
@@ -321,8 +314,6 @@ private:
     bool m_visuallyClean = true;
 
     BrickLink::Order *m_order = nullptr;
-
-    QDomElement       m_gui_state;
 
     QTimer *          m_delayedEmitOfStatisticsChanged = nullptr;
     QTimer *          m_delayedEmitOfDataChanged = nullptr;

@@ -20,7 +20,6 @@
 #include <QColor>
 #include <QObject>
 #include <QImage>
-#include <QtXml/QDomDocument>
 #include <QLocale>
 #include <QHash>
 #include <QVector>

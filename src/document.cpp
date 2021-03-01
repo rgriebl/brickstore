@@ -574,26 +574,25 @@ Document::Document()
 }
 
 // the caller owns the items
-Document::Document(const BrickLink::InvItemList &items)
+Document::Document(const DocumentIO::BsxContents &bsx, bool forceModified)
     : Document()
 {
     // we take ownership of the items
-    setItemsDirect(items);
-}
+    setItemsDirect(bsx.items);
 
-// the caller owns the items
-Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode,
-                   const QHash<const BrickLink::InvItem *, BrickLink::InvItem> &differenceBase,
-                   bool forceModified)
-    : Document(items)
-{
-    m_currencycode = currencyCode;
+    if (!bsx.currencyCode.isEmpty()) {
+        if (bsx.currencyCode == QLatin1String("$$$")) // legacy USD
+            m_currencycode.clear();
+        else
+            m_currencycode = bsx.currencyCode;
+    }
 
     if (forceModified)
         m_undo->resetClean();
 
-    auto db = differenceBase;
-    resetDifferenceModeDirect(db);
+    auto db = bsx.differenceModeBase; // get rid of const
+    if (!db.isEmpty())
+        resetDifferenceModeDirect(db);
 }
 
 Document::~Document()
@@ -1016,26 +1015,6 @@ void Document::setCurrencyCode(const QString &ccode, qreal crate)
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
-bool Document::hasGuiState() const
-{
-    return !m_gui_state.isNull();
-}
-
-QDomElement Document::guiState() const
-{
-    return m_gui_state;
-}
-
-void Document::setGuiState(QDomElement dom)
-{
-    m_gui_state = dom;
-}
-
-void Document::clearGuiState()
-{
-    m_gui_state.clear();
-}
-
 void Document::setOrder(BrickLink::Order *order)
 {
     if (m_order)
@@ -1168,6 +1147,11 @@ void Document::unsetModified()
 {
     m_undo->setClean();
     updateModified();
+}
+
+QHash<const Document::Item *, Document::Item> Document::differenceBase() const
+{
+    return m_differenceBase;
 }
 
 void Document::updateModified()
@@ -1760,7 +1744,6 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     filterDirect(filterString, filterList, willBeFiltered, filteredItems);
     return true;
 }
-
 
 QString Document::filterToolTip() const
 {

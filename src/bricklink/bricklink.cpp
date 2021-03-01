@@ -19,7 +19,6 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
-#include <QtXml/QDomDocument>
 #include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>

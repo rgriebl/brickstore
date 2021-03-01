@@ -509,7 +509,7 @@ Document *BrickStore::newDocument(const QString &title)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocument(::DocumentIO::create(), title);
+    return setupDocument(nullptr, ::DocumentIO::create(), title);
 }
 
 Document *BrickStore::openDocument(const QString &fileName)
@@ -517,7 +517,7 @@ Document *BrickStore::openDocument(const QString &fileName)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocument(::DocumentIO::open(fileName));
+    return setupDocument(::DocumentIO::open(fileName), nullptr);
 }
 
 Document *BrickStore::importBrickLinkStore(const QString &title)
@@ -525,7 +525,7 @@ Document *BrickStore::importBrickLinkStore(const QString &title)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocument(::DocumentIO::importBrickLinkStore(), title);
+    return setupDocument(nullptr, ::DocumentIO::importBrickLinkStore(), title);
 }
 
 QString BrickStore::defaultCurrencyCode() const
@@ -573,19 +573,25 @@ Document *BrickStore::documentForWindow(Window *win) const
     return nullptr;
 }
 
-Document *BrickStore::setupDocument(::Document *doc, const QString &title)
+Document *BrickStore::setupDocument(::Window *win, ::Document *doc, const QString &title)
 {
-    if (doc) {
-        auto win = FrameWork::inst()->createWindow(doc);
-        if (!title.isEmpty())
-            doc->setTitle(title);
+    if ((!win && !doc) || (win && doc))
+        return nullptr;
 
-        Q_ASSERT(currentDocument());
-        Q_ASSERT(currentDocument()->isWrapperFor(win->document()));
-
-        return currentDocument();
+    if (!win) {
+        win = FrameWork::inst()->createWindow(doc);
+    } else {
+        FrameWork::inst()->setupWindow(win);
+        doc = win->document();
     }
-    return nullptr;
+
+    if (!title.isEmpty())
+        doc->setTitle(title);
+
+    Q_ASSERT(currentDocument());
+    Q_ASSERT(currentDocument()->isWrapperFor(win->document()));
+
+    return currentDocument();
 }
 
 } // namespace QmlWrapper

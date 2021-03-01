@@ -574,7 +574,10 @@ void StatusBar::changeEvent(QEvent *e)
 ///////////////////////////////////////////////////////////////////////
 
 
-Window::Window(Document *doc, QWidget *parent)
+QVector<Window *> Window::s_windows;
+
+Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &sortFilterState,
+               QWidget *parent)
     : QWidget(parent)
     , m_uuid(QUuid::createUuid())
 {
@@ -691,10 +694,10 @@ Window::Window(Document *doc, QWidget *parent)
     bool columnsSet = false;
     bool sortFilterSet = false;
 
-    if (m_doc->hasGuiState()) {
-        applyGuiStateXML(m_doc->guiState(), columnsSet, sortFilterSet);
-        m_doc->clearGuiState();
-    }
+    if (!columnLayout.isEmpty())
+        columnsSet = w_header->restoreLayout(columnLayout);
+    if (!sortFilterState.isEmpty())
+        sortFilterSet = m_doc->restoreSortFilterState(sortFilterState);
 
     if (!columnsSet) {
         auto layout = Config::inst()->columnLayout("user-default");
@@ -717,15 +720,25 @@ Window::Window(Document *doc, QWidget *parent)
 
     setFocusProxy(w_list);
 
-    connect(&m_autosave_timer, &QTimer::timeout,
+    connect(doc->undoStack(), &QUndoStack::indexChanged,
+            [this]() { m_autosaveClean = false; });
+    connect(&m_autosaveTimer, &QTimer::timeout,
             this, &Window::autosave);
-    m_autosave_timer.start(1min); // every minute
+    m_autosaveTimer.start(1min); // every minute
+
+    s_windows.append(this);
 }
 
 Window::~Window()
 {
-    m_autosave_timer.stop();
+    m_autosaveTimer.stop();
     deleteAutosave();
+    s_windows.removeAll(this);
+}
+
+const QVector<Window *> &Window::allWindows()
+{
+    return s_windows;
 }
 
 void Window::changeEvent(QEvent *e)
@@ -1051,54 +1064,6 @@ int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate 
         break;
     }
     return -1;
-}
-
-QDomElement Window::createGuiStateXML()
-{
-    QDomDocument doc; // dummy
-    int version = 2;
-
-    QDomElement root = doc.createElement("GuiState");
-    root.setAttribute("Application", "BrickStore");
-    root.setAttribute("Version", version);
-
-    auto cl = doc.createElement("ColumnLayout");
-    cl.setAttribute("Compressed", 1);
-    cl.appendChild(doc.createCDATASection(qCompress(w_header->saveLayout()).toBase64()));
-    root.appendChild(cl);
-
-    auto sf = doc.createElement("SortFilterState");
-    sf.setAttribute("Compressed", 1);
-    sf.appendChild(doc.createCDATASection(qCompress(m_doc->saveSortFilterState()).toBase64()));
-    root.appendChild(sf);
-
-    return root.cloneNode(true).toElement();
-}
-
-void Window::applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter)
-{
-    changedColumns = changedSortFilter = false;
-
-    if ((root.nodeName() == "GuiState") &&
-        (root.attribute("Application") == "BrickStore") &&
-        (root.attribute("Version").toInt() == 2)) {
-
-        auto cl = root.firstChildElement("ColumnLayout");
-        if (!cl.isNull()) {
-            auto ba = QByteArray::fromBase64(cl.text().toLatin1());
-            if (cl.attribute("Compressed").toInt() == 1)
-                ba = qUncompress(ba);
-            changedColumns = w_header->restoreLayout(ba);
-        }
-
-        auto sf = root.firstChildElement("SortFilterState");
-        if (!sf.isNull()) {
-            auto ba = QByteArray::fromBase64(sf.text().toLatin1());
-            if (sf.attribute("Compressed").toInt() == 1)
-                ba = qUncompress(ba);
-            changedSortFilter = m_doc->restoreSortFilterState(ba);
-        }
-    }
 }
 
 static const struct {
@@ -2499,17 +2464,13 @@ void Window::print(bool as_pdf)
 
 void Window::on_document_save_triggered()
 {
-    m_doc->setGuiState(createGuiStateXML());
-    DocumentIO::save(m_doc);
-    m_doc->clearGuiState();
+    DocumentIO::save(this);
     deleteAutosave();
 }
 
 void Window::on_document_save_as_triggered()
 {
-    m_doc->setGuiState(createGuiStateXML());
-    DocumentIO::saveAs(m_doc);
-    m_doc->clearGuiState();
+    DocumentIO::saveAs(this);
     deleteAutosave();
 }
 
@@ -2744,8 +2705,9 @@ void Window::autosave() const
     auto doc = document();
     auto items = document()->items();
 
-    if (m_uuid.isNull() || !doc->isModified() || items.isEmpty())
+    if (m_uuid.isNull() || !doc->isModified() || items.isEmpty() || m_autosaveClean)
         return;
+    m_autosaveClean = true;
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
@@ -2825,8 +2787,11 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     QString restoredTag = tr("RESTORED", "Tag for document restored from autosave");
 
                     // Document owns the items now
-                    auto doc = new Document(items, savedCurrencyCode, differenceBase,
-                                            true /*mark as modified*/);
+                    DocumentIO::BsxContents bsx;
+                    bsx.items = items;
+                    bsx.currencyCode = savedCurrencyCode;
+                    bsx.differenceModeBase = differenceBase;
+                    auto doc = new Document(bsx, true /*mark as modified*/);
                     items.clear();
 
                     if (!savedFileName.isEmpty()) {
@@ -2836,12 +2801,11 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     } else {
                         doc->setTitle(restoredTag % u" " % savedTitle);
                     }
-                    auto win = new Window(doc);
-                    win->w_header->restoreLayout(savedColumnLayout);
                     doc->restoreSortFilterState(savedSortFilterState);
+                    auto win = new Window(doc, savedColumnLayout);
 
                     if (!savedFileName.isEmpty())
-                        DocumentIO::save(doc);
+                        DocumentIO::save(win);
 
                     restored.append(win);
                 }

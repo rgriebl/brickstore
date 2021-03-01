@@ -23,6 +23,8 @@ QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
+#define qL1S(x) QLatin1String(x)
+
 
 namespace Utility {
 

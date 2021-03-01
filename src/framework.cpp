@@ -1055,7 +1055,7 @@ void FrameWork::createActions()
         createWindow(DocumentIO::create());
     });
     (void) newQAction(this, "document_open", 0, false, this, [this]() {
-        createWindow(DocumentIO::open());
+        setupWindow(DocumentIO::open());
     });
 
     auto rm = new RecentMenu(this);
@@ -1261,7 +1261,7 @@ void FrameWork::createActions()
 
 void FrameWork::openDocument(const QString &file)
 {
-    createWindow(DocumentIO::open(file));
+    setupWindow(DocumentIO::open(file));
 }
 
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
@@ -1351,35 +1351,31 @@ bool FrameWork::restoreWindowsFromAutosave()
     return (restorable > 0);
 }
 
+void FrameWork::setupWindow(Window *win)
+{
+    if (!win)
+        return;
+
+    m_undogroup->addStack(win->document()->undoStack());
+    m_workspace->addWindow(win);
+    setActiveWindow(win);
+
+    if (win->document()->legacyCurrencyCode()
+            && (Config::inst()->defaultCurrencyCode() != QLatin1String("USD"))) {
+        QMetaObject::invokeMethod(this, []() {
+            MessageBox::information(nullptr, { }, tr("You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner."));
+        }, Qt::QueuedConnection);
+    }
+}
+
 Window *FrameWork::createWindow(Document *doc)
 {
     if (!doc)
         return nullptr;
 
-    Window *window = nullptr;
-    foreach(QWidget *w, m_workspace->windowList()) {
-        Window *ww = qobject_cast<Window *>(w);
-
-        if (ww && ww->document() == doc) {
-            window = ww;
-            break;
-        }
-    }
-    if (!window) {
-        m_undogroup->addStack(doc->undoStack());
-        window = new Window(doc, nullptr);
-        m_workspace->addWindow(window);
-
-        if (doc->legacyCurrencyCode()
-                && (Config::inst()->defaultCurrencyCode() != QLatin1String("USD"))) {
-            QMetaObject::invokeMethod(this, []() {
-                MessageBox::information(nullptr, { }, tr("You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner."));
-            }, Qt::QueuedConnection);
-        }
-    }
-
-    setActiveWindow(window);
-    return window;
+    Window *win = new Window(doc);
+    setupWindow(win);
+    return win;
 }
 
 Window *FrameWork::activeWindow() const

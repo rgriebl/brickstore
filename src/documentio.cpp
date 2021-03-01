@@ -24,6 +24,9 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QTemporaryFile>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+#include <QDebug>
 
 #include "framework.h"
 #include "progressdialog.h"
@@ -33,12 +36,10 @@
 #include "config.h"
 #include "utility.h"
 #include "document.h"
+#include "window.h"
 #include "documentio.h"
 
 #include "unzip.h"
-
-
-#define qL1S(x) QLatin1String(x)
 
 
 QString DocumentIO::s_lastDirectory { };
@@ -62,7 +63,7 @@ Document *DocumentIO::create()
     return doc;
 }
 
-Document *DocumentIO::open()
+Window *DocumentIO::open()
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") + " (*.bsx)";
@@ -76,17 +77,17 @@ Document *DocumentIO::open()
     return open(fn);
 }
 
-Document *DocumentIO::open(const QString &s)
+Window *DocumentIO::open(const QString &s)
 {
     if (s.isEmpty())
         return nullptr;
 
-    QString abs_s = QFileInfo(s).absoluteFilePath();
+    QString fn = QFileInfo(s).absoluteFilePath();
 
-    const auto all = Document::allDocuments();
-    for (Document *doc : all) {
-        if (QFileInfo(doc->fileName()).absoluteFilePath() == abs_s)
-            return doc;
+    const auto all = Window::allWindows();
+    for (Window *win : all) {
+        if (QFileInfo(win->document()->fileName()).absoluteFilePath() == fn)
+            return win;
     }
 
     return loadFrom(s);
@@ -120,7 +121,10 @@ Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item, int 
                 }
             }
 
-            auto *doc = new Document(items); // Document own the items now
+            DocumentIO::BsxContents bsx;
+            bsx.items = items;
+
+            auto *doc = new Document(bsx); // Document own the items now
             doc->setTitle(tr("Inventory for %1").arg(item->id()));
             return doc;
         } else {
@@ -143,7 +147,7 @@ Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order, const QByteA
 
     try {
         auto result = fromBrickLinkXML(xml);
-        auto *doc = new Document(result.first, order->currencyCode()); // Document owns the items now
+        auto *doc = new Document(result); // Document owns the items now
         doc->setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
         doc->setOrder(order);
         return doc;
@@ -209,7 +213,7 @@ Document *DocumentIO::importBrickLinkStore()
     if (pd.exec() == QDialog::Accepted) {
         try {
             auto result = fromBrickLinkXML(xml);
-            auto *doc = new Document(result.first, result.second); // Document owns the items now
+            auto *doc = new Document(result); // Document owns the items now
             doc->setTitle(tr("Store %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat)));
             return doc;
 
@@ -222,7 +226,11 @@ Document *DocumentIO::importBrickLinkStore()
 
 Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart, const BrickLink::InvItemList &itemlist)
 {
-    auto *doc = new Document(itemlist, cart->currencyCode()); // Document owns the items now
+    BsxContents bsx;
+    bsx.items = itemlist;
+    bsx.currencyCode = cart->currencyCode();
+
+    auto *doc = new Document(bsx); // Document owns the items now
     doc->setTitle(tr("Cart in store %1").arg(cart->storeName()));
     return doc;
 }
@@ -243,7 +251,7 @@ Document *DocumentIO::importBrickLinkXML()
     if (f.open(QIODevice::ReadOnly)) {
         try {
             auto result = fromBrickLinkXML(f.readAll());
-            auto *doc = new Document(result.first, result.second); // Document owns the items now
+            auto *doc = new Document(result); // Document owns the items now
             doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
             return doc;
 
@@ -256,7 +264,7 @@ Document *DocumentIO::importBrickLinkXML()
     return nullptr;
 }
 
-Document *DocumentIO::loadFrom(const QString &name)
+Window *DocumentIO::loadFrom(const QString &name)
 {
     QFile f(name);
 
@@ -265,53 +273,38 @@ Document *DocumentIO::loadFrom(const QString &name)
         return nullptr;
     }
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    try {
+        BsxContents result = DocumentIO::parseBsxInventory(&f); // we own the items now
 
-    ParseItemListResult result;
-
-    QString emsg;
-    int eline = 0, ecol = 0;
-    QDomDocument domDoc;
-
-    if (!domDoc.setContent(&f, &emsg, &eline, &ecol)) {
-        QApplication::restoreOverrideCursor();
-
-        MessageBox::warning(nullptr, { }, tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
-        return nullptr;
-    }
-
-    result = DocumentIO::parseBsxInventory(domDoc); // we own the items now
-
-    QApplication::restoreOverrideCursor();
-
-    if (result.xmlParseError) {
-        MessageBox::warning(nullptr, { }, tr("This XML document is not a BrickStoreXML file."));
-        return nullptr;
-    }
-
-    Document *doc = nullptr;
-
-    if (result.invalidItemCount) {
-        if (MessageBox::information(nullptr, { },
-                                    tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                       nullptr, result.invalidItemCount),
-                                    QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-            result.invalidItemCount = 0;
+        if (result.invalidItemCount) {
+            if (MessageBox::information(nullptr, { },
+                                        tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
+                                           nullptr, result.invalidItemCount),
+                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+                result.invalidItemCount = 0;
+            }
         }
-    }
 
-    if (result.invalidItemCount) {
-        qDeleteAll(result.items);
+        if (result.invalidItemCount) {
+            qDeleteAll(result.items);
+            return nullptr;
+        }
+
+        if (result.currencyCode.isEmpty()) // flag as legacy currency
+            result.currencyCode = qL1S("$$$");
+
+        // Document owns the items now
+        auto doc = new Document(result);
+        doc->setFileName(name);
+        Config::inst()->addToRecentFiles(name);
+
+        return new Window(doc, result.guiColumnLayout, result.guiSortFilterState);
+
+    } catch (const Exception &e) {
+        MessageBox::warning(nullptr, { }, tr("This XML document is not a valid BrickStoreXML file.")
+                            % u"<br><br>" % e.error());
         return nullptr;
     }
-
-    // Document owns the items now
-    doc = new Document(result.items, result.currencyCode, result.differenceModeBase);
-    doc->setGuiState(result.domGuiState);
-    doc->setFileName(name);
-    Config::inst()->addToRecentFiles(name);
-
-    return doc;
 }
 
 Document *DocumentIO::importLDrawModel()
@@ -399,7 +392,9 @@ Document *DocumentIO::importLDrawModel()
         }
 
         if (!invalid_items) {
-            doc = new Document(items); // Document owns the items now
+            DocumentIO::BsxContents bsx;
+            bsx.items = items;
+            doc = new Document(bsx); // Document owns the items now
             items.clear();
             doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
         }
@@ -571,27 +566,27 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
 ///////////////////////////////////////////////////////////////////////
 
 
-bool DocumentIO::save(Document *doc)
+bool DocumentIO::save(Window *win)
 {
-    if (doc->fileName().isEmpty())
-        return saveAs(doc);
-    else if (doc->isModified())
-        return saveTo(doc, doc->fileName(), false);
+    if (win->document()->fileName().isEmpty())
+        return saveAs(win);
+    else if (win->document()->isModified())
+        return saveTo(win, win->document()->fileName());
     return false;
 }
 
 
-bool DocumentIO::saveAs(Document *doc)
+bool DocumentIO::saveAs(Window *win)
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") + " (*.bsx)";
 
-    QString fn = doc->fileName();
+    QString fn = win->document()->fileName();
     if (fn.isEmpty()) {
         fn = lastDirectory();
 
-        if (!doc->title().isEmpty()) {
-            QString t = Utility::sanitizeFileName(doc->title());
+        if (!win->document()->title().isEmpty()) {
+            QString t = Utility::sanitizeFileName(win->document()->title());
             fn = fn % u'/' % t;
         }
     }
@@ -607,33 +602,34 @@ bool DocumentIO::saveAs(Document *doc)
     if (fn.right(4) != ".bsx")
         fn += ".bsx";
 
-    return saveTo(doc, fn, false);
+    return saveTo(win, fn);
 }
 
 
-bool DocumentIO::saveTo(Document *doc, const QString &s, bool export_only)
+bool DocumentIO::saveTo(Window *win, const QString &s)
 {
+    Document *doc = win->document();
+
     QFile f(s);
     if (f.open(QIODevice::WriteOnly)) {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        QDomDocument domDoc = createBsxInventory(doc);
+        BsxContents bsx;
+        bsx.items = doc->items();
+        bsx.currencyCode = doc->currencyCode();
+        bsx.differenceModeBase = doc->differenceBase();
+        bsx.guiSortFilterState = doc->saveSortFilterState();
+        bsx.guiColumnLayout = win->currentColumnLayout();
 
-        if (doc->hasGuiState())
-            domDoc.firstChildElement().appendChild(doc->guiState());
-
-        QByteArray output = domDoc.toByteArray();
-        bool ok = (f.write(output.data(), output.size()) == qint64(output.size()));
+        bool ok = createBsxInventory(&f, bsx);
 
         QApplication::restoreOverrideCursor();
 
         if (ok) {
-            if (!export_only) {
-                doc->unsetModified();
-                doc->setFileName(s);
+            doc->unsetModified();
+            doc->setFileName(s);
 
-                Config::inst()->addToRecentFiles(s);
-            }
+            Config::inst()->addToRecentFiles(s);
             return true;
         }
         else
@@ -904,17 +900,15 @@ QString DocumentIO::toBrickLinkXML(const BrickLink::InvItemList &itemlist)
     return xml.toString();
 }
 
-QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteArray &xml)
+DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
 {
-    BrickLink::InvItemList items;
-    QString currencyCode;
-    int incompleteCount = 0;
+    BsxContents bsx;
 
     auto buf = new QBuffer(const_cast<QByteArray *>(&xml), nullptr);
     buf->open(QIODevice::ReadOnly);
 
     XmlHelpers::ParseXML p(buf, "INVENTORY", "ITEM");
-    p.parse([&p, &items, &currencyCode, &incompleteCount](QDomElement e) {
+    p.parse([&p, &bsx](QDomElement e) {
         const QString itemId = p.elementText(e, "ITEMID");
         char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
         uint colorId = p.elementText(e, "COLOR", "0").toUInt();
@@ -957,9 +951,9 @@ QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteA
         }
         QString ccode = p.elementText(e, "BASECURRENCYCODE", "");
         if (!ccode.isEmpty()) {
-            if (currencyCode.isEmpty())
-                currencyCode = ccode;
-            else if (currencyCode != ccode)
+            if (bsx.currencyCode.isEmpty())
+                bsx.currencyCode = ccode;
+            else if (bsx.currencyCode != ccode)
                 throw Exception("Multiple currencies in one XML file are not supported.");
         }
 
@@ -981,7 +975,7 @@ QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteA
             ii->setIncomplete(inc);
 
             if (!BrickLink::core()->applyChangeLogToItem(ii))
-                ++incompleteCount;
+                ++bsx.invalidItemCount;
         }
 
         ii->setQuantity(qty);
@@ -999,13 +993,13 @@ QPair<BrickLink::InvItemList, QString> DocumentIO::fromBrickLinkXML(const QByteA
         ii->setSubCondition(subCond);
         ii->setStockroom(stockroom);
 
-        items << ii;
+        bsx.items << ii;
     });
 
-    if (currencyCode.isEmpty())
-        currencyCode = qL1S("USD");
+    if (bsx.currencyCode.isEmpty())
+        bsx.currencyCode = qL1S("USD");
 
-    return qMakePair(items, currencyCode);
+    return bsx;
 }
 
 void DocumentIO::exportBrickLinkXML(const BrickLink::InvItemList &itemlist)
@@ -1049,335 +1043,419 @@ void DocumentIO::exportBrickLinkXMLClipboard(const BrickLink::InvItemList &iteml
 ///////////////////////////////////////////////////////////////////////
 
 
-DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument &domDoc)
+
+bool DocumentIO::resolveIncomplete(BrickLink::InvItem *item)
 {
-    ParseItemListResult result;
-    bool migrateDiffMode = false;
+    auto ic = item->isIncomplete();
 
-    QDomElement domRoot = domDoc.documentElement();
-
-    // in an ideal world, BrickStock wouldn't have changed the root tag and everyone would add
-    // valid DOCTYPE declarations ... sadly that's not the world we're living in
-
-    static const QVector<QString> knownTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
-
-    QString docType = domDoc.doctype().name();
-    QString rootTagName = domRoot.tagName();
-
-    if ((!docType.isEmpty() && !knownTypes.contains(docType))
-            || !knownTypes.contains(rootTagName)) {
-        result.xmlParseError = true;
-        return result;
-    }
-
-    QDomElement domInventory;
-    QDomElement domGuiState;
-
-    for (QDomNode n = domRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
-        if (!n.isElement())
-            continue;
-
-        if (n.nodeName() == qL1S("Inventory"))
-            domInventory = n.toElement();
-        else if (n.nodeName() == qL1S("GuiState"))
-            domGuiState = n.toElement();
-    }
-
-    if (domInventory.isNull())
-        return result;
-
-    // a bit of a hack for a clean switch from the old to the new Difference mode
-    if (!domGuiState.isNull()) {
-        auto list = domGuiState.elementsByTagName(qL1S("DifferenceMode"));
-        if (list.size() == 1) {
-            domGuiState.removeChild(list.at(0));
-
-            migrateDiffMode = true;
+    if (!ic->m_item_id.isEmpty() && !ic->m_itemtype_id.isEmpty()) {
+        item->setItem(BrickLink::core()->item(ic->m_itemtype_id[0].toLatin1(),
+                      ic->m_item_id.toLatin1()));
+        if (item->item()) {
+            ic->m_item_id.clear();
+            ic->m_item_name.clear();
+            ic->m_itemtype_id.clear();
+            ic->m_itemtype_name.clear();
+            ic->m_category_id.clear();
+            ic->m_category_name.clear();
         }
     }
 
-    result.currencyCode = domInventory.attribute(qL1S("Currency"));
+    if (!ic->m_color_id.isEmpty()) {
+        item->setColor(BrickLink::core()->color(ic->m_color_id.toUInt()));
+        if (item->color()) {
+            ic->m_color_id.clear();
+            ic->m_color_name.clear();
+        }
+    }
 
-    // no throw beyond this point - otherwise we'd be leaking the domGuiState node clone
-    result.domGuiState = domGuiState.cloneNode(true).toElement();
+    if (item->item() && item->color()) {
+        item->setIncomplete(nullptr);
+        return true;
 
-    BrickLink::InvItem *ii = nullptr;
-    QString itemid, itemname;
-    QString itemtypeid, itemtypename;
-    QString colorid, colorname;
-    QString categoryid, categoryname;
-    QVariant legacyOrigPrice, legacyOrigQty;
+    } else {
+        qWarning() << "failed: insufficient data (item=" << ic->m_item_id << ", itemtype="
+           << ic->m_itemtype_id << ", color=" << ic->m_color_id << ")";
 
-    const QHash<QStringView, std::function<void(const QString &value)>> tagHash {
-    { u"ItemID",       [&itemid](auto v) { itemid = v; } },
-    { u"ColorID",      [&colorid](auto v) { colorid = v; } },
-    { u"CategoryID",   [&categoryid](auto v) { categoryid = v; } },
-    { u"ItemTypeID",   [&itemtypeid](auto v) { itemtypeid = v; } },
-    { u"ItemName",     [&itemname](auto v) { itemname = v; } },
-    { u"ColorName",    [&colorname](auto v) { colorname = v; } },
-    { u"CategoryName", [&categoryname](auto v) { categoryname = v; } },
-    { u"ItemTypeName", [&itemtypename](auto v) { itemtypename = v; } },
-    { u"Price",        [&ii](auto v) { ii->setPrice(v.toDouble()); } },
-    { u"Bulk",         [&ii](auto v) { ii->setBulkQuantity(v.toInt()); } },
-    { u"Qty",          [&ii](auto v) { ii->setQuantity(v.toInt()); } },
-    { u"Sale",         [&ii](auto v) { ii->setSale(v.toInt()); } },
-    { u"Comments",     [&ii](auto v) { ii->setComments(v); } },
-    { u"Remarks",      [&ii](auto v) { ii->setRemarks(v); } },
-    { u"TQ1",          [&ii](auto v) { ii->setTierQuantity(0, v.toInt()); } },
-    { u"TQ2",          [&ii](auto v) { ii->setTierQuantity(1, v.toInt()); } },
-    { u"TQ3",          [&ii](auto v) { ii->setTierQuantity(2, v.toInt()); } },
-    { u"TP1",          [&ii](auto v) { ii->setTierPrice(0, v.toDouble()); } },
-    { u"TP2",          [&ii](auto v) { ii->setTierPrice(1, v.toDouble()); } },
-    { u"TP3",          [&ii](auto v) { ii->setTierPrice(2, v.toDouble()); } },
-    { u"LotID",        [&ii](auto v) { ii->setLotId(v.toUInt()); } },
-    { u"Retain",       [&ii](auto)   { ii->setRetain(true); } },
-    { u"Reserved",     [&ii](auto v) { ii->setReserved(v); } },
-    { u"TotalWeight",  [&ii](auto v) { ii->setTotalWeight(v.toDouble()); } },
-    { u"Cost",         [&ii](auto v) { ii->setCost(v.toDouble()); } },
-    { u"Condition",    [&ii](auto v) {
-        ii->setCondition(v == qL1S("N") ? BrickLink::Condition::New
-                                        : BrickLink::Condition::Used); } },
-    // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-    { u"SubCondition", [&ii](auto v) {
-        ii->setSubCondition(v == qL1S("C") ? BrickLink::SubCondition::Complete :
-                            v == qL1S("I") ? BrickLink::SubCondition::Incomplete :
-                            v == qL1S("M") ? BrickLink::SubCondition::Sealed
-                                           : BrickLink::SubCondition::None); } },
-    { u"Status",       [&ii](auto v) {
-        ii->setStatus(v == qL1S("X") ? BrickLink::Status::Exclude :
-                      v == qL1S("I") ? BrickLink::Status::Include :
-                      v == qL1S("E") ? BrickLink::Status::Extra :
-                      v == qL1S("?") ? BrickLink::Status::Exclude // BrikTrak legacy
-                                     : BrickLink::Status::Include); } },
-    { u"Stockroom",    [&ii](auto v) {
-        ii->setStockroom(v == qL1S("A") || v.isEmpty() ? BrickLink::Stockroom::A :
-                         v == qL1S("B") ? BrickLink::Stockroom::B :
-                         v == qL1S("C") ? BrickLink::Stockroom::C
-                                        : BrickLink::Stockroom::None); } },
-    { u"OrigPrice",    [&migrateDiffMode, &legacyOrigPrice](auto v) {
-        if (migrateDiffMode)
-            legacyOrigPrice.setValue(v.toDouble());
-    } },
-    { u"OrigQty",      [&migrateDiffMode, &legacyOrigQty](auto v) {
-        if (migrateDiffMode)
-            legacyOrigQty.setValue(v.toInt());
-    } },
-    { u"X-DifferenceModeBase", [&migrateDiffMode, &result, &ii](auto v) {
-        if (!migrateDiffMode) {
-            const auto ba = QByteArray::fromBase64(v.toLatin1());
-            QDataStream ds(ba);
-            if (auto base = BrickLink::InvItem::restore(ds)) {
-                result.differenceModeBase.insert(ii, *base);
-                delete base;
+        return BrickLink::core()->applyChangeLogToItem(item);
+    }
+}
+
+DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
+{
+    Q_ASSERT(in);
+    QXmlStreamReader xml(in);
+
+    try {
+        BsxContents bsx;
+        bool foundRoot = false;
+        bool foundInventory = false;
+
+        auto parseGuiState = [&]() {
+            while (xml.readNextStartElement()) {
+                const auto tag = xml.name();
+                bool isColumnLayout = (tag == qL1S("ColumnLayout"));
+                bool isSortFilter = (tag == qL1S("SortFilterState"));
+
+                if (isColumnLayout || isSortFilter) {
+                    bool compressed = (xml.attributes().value("Compressed").toInt() == 1);
+                    auto ba = QByteArray::fromBase64(xml.readElementText().toLatin1());
+                    if (compressed)
+                        ba = qUncompress(ba);
+
+                    if (!ba.isEmpty()) {
+                        if (isColumnLayout)
+                            bsx.guiColumnLayout = ba;
+                        if (isSortFilter)
+                            bsx.guiSortFilterState = ba;
+                    }
+                }
+            }
+        };
+
+        auto parseInventory = [&]() {
+            BrickLink::InvItem *item = nullptr;
+            QVariant legacyOrigPrice, legacyOrigQty;
+            bool hasBaseValues = false;
+            QXmlStreamAttributes baseValues;
+
+            const QHash<QStringView, std::function<void(Document::Item *, const QString &value)>> tagHash {
+            { u"ItemID",       [](auto item, auto v) { item->isIncomplete()->m_item_id = v; } },
+            { u"ColorID",      [](auto item, auto v) { item->isIncomplete()->m_color_id = v; } },
+            { u"CategoryID",   [](auto item, auto v) { item->isIncomplete()->m_category_id = v; } },
+            { u"ItemTypeID",   [](auto item, auto v) { item->isIncomplete()->m_itemtype_id = v; } },
+            { u"ItemName",     [](auto item, auto v) { item->isIncomplete()->m_item_name = v; } },
+            { u"ColorName",    [](auto item, auto v) { item->isIncomplete()->m_color_name = v; } },
+            { u"CategoryName", [](auto item, auto v) { item->isIncomplete()->m_category_name = v; } },
+            { u"ItemTypeName", [](auto item, auto v) { item->isIncomplete()->m_itemtype_name = v; } },
+            { u"Price",        [](auto item, auto v) { item->setPrice(v.toDouble()); } },
+            { u"Bulk",         [](auto item, auto v) { item->setBulkQuantity(v.toInt()); } },
+            { u"Qty",          [](auto item, auto v) { item->setQuantity(v.toInt()); } },
+            { u"Sale",         [](auto item, auto v) { item->setSale(v.toInt()); } },
+            { u"Comments",     [](auto item, auto v) { item->setComments(v); } },
+            { u"Remarks",      [](auto item, auto v) { item->setRemarks(v); } },
+            { u"TQ1",          [](auto item, auto v) { item->setTierQuantity(0, v.toInt()); } },
+            { u"TQ2",          [](auto item, auto v) { item->setTierQuantity(1, v.toInt()); } },
+            { u"TQ3",          [](auto item, auto v) { item->setTierQuantity(2, v.toInt()); } },
+            { u"TP1",          [](auto item, auto v) { item->setTierPrice(0, v.toDouble()); } },
+            { u"TP2",          [](auto item, auto v) { item->setTierPrice(1, v.toDouble()); } },
+            { u"TP3",          [](auto item, auto v) { item->setTierPrice(2, v.toDouble()); } },
+            { u"LotID",        [](auto item, auto v) { item->setLotId(v.toUInt()); } },
+            { u"Retain",       [](auto item, auto v) { item->setRetain(v.isEmpty() || (v == qL1S("Y"))); } },
+            { u"Reserved",     [](auto item, auto v) { item->setReserved(v); } },
+            { u"TotalWeight",  [](auto item, auto v) { item->setTotalWeight(v.toDouble()); } },
+            { u"Cost",         [](auto item, auto v) { item->setCost(v.toDouble()); } },
+            { u"Condition",    [](auto item, auto v) {
+                item->setCondition(v == qL1S("N") ? BrickLink::Condition::New
+                                                  : BrickLink::Condition::Used); } },
+            { u"SubCondition", [](auto item, auto v) {
+                // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
+                item->setSubCondition(v == qL1S("C") ? BrickLink::SubCondition::Complete :
+                                                       v == qL1S("I") ? BrickLink::SubCondition::Incomplete :
+                                                                        v == qL1S("M") ? BrickLink::SubCondition::Sealed
+                                                                                       : BrickLink::SubCondition::None); } },
+            { u"Status",       [](auto item, auto v) {
+                item->setStatus(v == qL1S("X") ? BrickLink::Status::Exclude :
+                                                 v == qL1S("I") ? BrickLink::Status::Include :
+                                                                  v == qL1S("E") ? BrickLink::Status::Extra
+                                                                                 : BrickLink::Status::Include); } },
+            { u"Stockroom",    [](auto item, auto v) {
+                item->setStockroom(v == qL1S("A") || v.isEmpty() ? BrickLink::Stockroom::A :
+                                                                   v == qL1S("B") ? BrickLink::Stockroom::B :
+                                                                                    v == qL1S("C") ? BrickLink::Stockroom::C
+                                                                                                   : BrickLink::Stockroom::None); } },
+            { u"OrigPrice",    [&legacyOrigPrice](auto item, auto v) {
+                Q_UNUSED(item)
+                legacyOrigPrice.setValue(v.toDouble());
+            } },
+            { u"OrigQty",      [&legacyOrigQty](auto item, auto v) {
+                Q_UNUSED(item)
+                legacyOrigQty.setValue(v.toInt());
+            } },
+            { u"X-DifferenceModeBase", [&bsx, &item](auto item, auto v) {
+                //TODO: Remove in 2021.4.1
+                const auto ba = QByteArray::fromBase64(v.toLatin1());
+                QDataStream ds(ba);
+                if (auto base = BrickLink::InvItem::restore(ds)) {
+                    bsx.differenceModeBase.insert(item, *base);
+                    delete base;
+                }
+            } } };
+
+            while (xml.readNextStartElement()) {
+                if (xml.name() != qL1S("Item"))
+                    throw Exception("Expected Item element, but got: %1").arg(xml.name());
+
+                item = new BrickLink::InvItem();
+                item->setIncomplete(new BrickLink::InvItem::Incomplete);
+                baseValues.clear();
+
+                while (xml.readNextStartElement()) {
+                    auto tag = xml.name();
+
+                    if (tag != qL1S("DifferenceBaseValues")) {
+                        auto it = tagHash.find(tag);
+                        if (it != tagHash.end())
+                            (*it)(item, xml.readElementText());
+                        else
+                            xml.skipCurrentElement();
+                    } else {
+                        hasBaseValues = true;
+                        baseValues = xml.attributes();
+                    }
+                }
+
+                if (!resolveIncomplete(item))
+                    bsx.invalidItemCount++;
+
+                // convert the legacy OrigQty / OrigPrice fields
+                if (!hasBaseValues && (legacyOrigPrice.isValid() || legacyOrigQty.isValid())) {
+                    if (legacyOrigQty.isValid())
+                        baseValues.append("Qty", QString::number(legacyOrigQty.toInt()));
+                    if (!legacyOrigPrice.isNull())
+                        baseValues.append("Price", QString::number(legacyOrigPrice.toDouble(), 'f', 3));
+                }
+
+                if (!bsx.differenceModeBase.contains(item)) { // remove condition in 2021.4.1
+                    BrickLink::InvItem base = *item;
+                    if (!baseValues.isEmpty()) {
+                        base.setIncomplete(new BrickLink::InvItem::Incomplete);
+
+                        for (int i = 0; i < baseValues.size(); ++i) {
+                            auto attr = baseValues.at(i);
+                            auto it = tagHash.find(attr.name());
+                            if (it != tagHash.end()) {
+                                (*it)(&base, attr.value().toString());
+                            }
+                        }
+                        if (!resolveIncomplete(&base)) {
+                            if (!base.item() && item->item())
+                                base.setItem(item->item());
+                            if (!base.color() && item->color())
+                                base.setColor(item->color());
+                            base.setIncomplete(nullptr);
+                        }
+                    }
+                    bsx.differenceModeBase.insert(item, base);
+                }
+
+                bsx.items.append(item);
+            }
+        };
+
+
+        // #################### XML PARSING STARTS HERE #####################
+
+
+        // in an ideal world, BrickStock wouldn't have changed the root tag and everyone would add
+        // valid DOCTYPE declarations ... sadly that's not the world we're living in
+        static const QVector<QString> knownTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
+
+        while (true) {
+            switch (xml.readNext()) {
+            case QXmlStreamReader::DTD: {
+                // DTDs are optional, but if there is a DTD, it has to be correct
+                auto dtd = xml.text().toString().trimmed();
+
+                if (!dtd.startsWith(qL1S("<!DOCTYPE "))
+                        || !dtd.endsWith(qL1S(">"))
+                        || !knownTypes.contains(dtd.mid(10).chopped(1))) {
+                    throw Exception("Expected BrickStoreXML as DOCTYPE, but got: %1").arg(dtd);
+                }
+                break;
+            }
+            case QXmlStreamReader::StartElement:
+                if (!foundRoot) { // check the root element
+                    if (!knownTypes.contains(xml.name().toString()))
+                        throw Exception("Expected BrickStoreXML as root element, but got: %1").arg(xml.name());
+                    foundRoot = true;
+                } else {
+                    if (xml.name() == qL1S("Inventory")) {
+                        foundInventory = true;
+                        bsx.currencyCode = xml.attributes().value(qL1S("Currency")).toString();
+                        parseInventory();
+                    } else if ((xml.name() == qL1S("GuiState"))
+                                && (xml.attributes().value(qL1S("Application")) == qL1S("BrickStore"))
+                                && (xml.attributes().value(qL1S("Version")).toInt() == 2)) {
+                        parseGuiState();
+                    } else {
+                        xml.skipCurrentElement();
+                    }
+                }
+                break;
+
+            case QXmlStreamReader::Invalid:
+                throw Exception(xml.errorString());
+
+            case QXmlStreamReader::EndDocument:
+                if (!foundRoot || !foundInventory)
+                    throw Exception("Not a valid BrickStoreXML file");
+                return bsx;
             }
         }
-    } },
-    };
-
-    for (QDomNode in = domInventory.firstChild(); !in.isNull(); in = in.nextSibling()) {
-        if (in.nodeName() != qL1S("Item"))
-            continue;
-
-        ii = new BrickLink::InvItem();
-
-        itemid.clear();
-        itemname.clear();
-        itemtypeid.clear();
-        itemtypename.clear();
-        colorid.clear();
-        colorname.clear();
-        categoryid.clear();
-        categoryname.clear();
-
-        for (QDomNode n = in.firstChild(); !n.isNull(); n = n.nextSibling()) {
-            if (!n.isElement())
-                continue;
-
-            QString tag = n.toElement().tagName();
-            QString val = n.toElement().text();
-
-            auto it = tagHash.find(tag);
-            if (it != tagHash.end())
-                (*it)(val);
-        }
-
-        bool ok = true;
-
-        if (!colorid.isEmpty() && !itemid.isEmpty() && !itemtypeid.isEmpty()) {
-            ii->setItem(BrickLink::core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1()));
-            if (!ii->item())
-                ok = false;
-
-            ii->setColor(BrickLink::core()->color(colorid.toUInt()));
-            if (!ii->color())
-                ok = false;
-        } else {
-            ok = false;
-        }
-
-        if (!ok) {
-            qWarning() << "failed: insufficient data (item=" << itemid << ", itemtype=" << itemtypeid[0] << ", category=" << categoryid << ", color=" << colorid << ")";
-
-            auto *inc = new BrickLink::InvItem::Incomplete;
-            if (!ii->item()) {
-                inc->m_item_id = itemid;
-                inc->m_item_name = itemname;
-                inc->m_itemtype_id = itemtypeid;
-                inc->m_itemtype_name = itemtypename;
-                inc->m_category_name = categoryname.isEmpty() ? categoryid : categoryname;
-            }
-            if (!ii->color())
-                inc->m_color_name = colorname.isEmpty() ? colorid : colorname;
-
-            ii->setIncomplete(inc);
-
-            if (!BrickLink::core()->applyChangeLogToItem(ii))
-                result.invalidItemCount++;
-        }
-
-        if (migrateDiffMode) {
-            // create an update base item from the OrigPrice and OrigQty values
-            auto base = *ii;
-            if (!legacyOrigPrice.isNull())
-                base.setPrice(legacyOrigPrice.toDouble());
-            if (!legacyOrigQty.isNull())
-                base.setQuantity(legacyOrigQty.toInt());
-            result.differenceModeBase.insert(ii, base);
-
-        } else if (!result.differenceModeBase.contains(ii)) {
-            // no differences saved, so start out with none
-            result.differenceModeBase.insert(ii, *ii);
-        }
-
-        result.items.append(ii);
+    } catch (const Exception &e) {
+        throw Exception("XML parse error at line %1, column %2: %3")
+                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
     }
-
-    return result;
 }
 
 
-QDomDocument DocumentIO::createBsxInventory(const Document *doc)
+bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
 {
-    if (!doc)
-        return { };
+    if (!out)
+        return false;
 
-    QDomDocument domDoc(qL1S("BrickStoreXML"));
-    domDoc.appendChild(domDoc.createProcessingInstruction(qL1S("xml"), qL1S(R"(version="1.0" encoding="UTF-8")")));
-    QDomElement domRoot = domDoc.createElement(qL1S("BrickStoreXML"));
-    domDoc.appendChild(domRoot);
+    QXmlStreamWriter xml(out);
+    xml.setAutoFormatting(true);
+    xml.setAutoFormattingIndent(1);
+    xml.writeStartDocument();
+    xml.writeDTD(qL1S("<!DOCTYPE BrickStoreXML>"));
+    xml.writeStartElement(qL1S("BrickStoreXML"));
+    xml.writeStartElement(qL1S("Inventory"));
+    xml.writeAttribute(qL1S("Currency"), bsx.currencyCode);
 
-    QDomElement domInventory = domDoc.createElement(qL1S("Inventory"));
-    domInventory.setAttribute(qL1S("Currency"), doc->currencyCode());
-    domRoot.appendChild(domInventory);
+    const BrickLink::InvItem *item;
+    const BrickLink::InvItem *base;
+    QXmlStreamAttributes baseValues;
 
-    static QLocale c = QLocale::c();
+    enum { Required = 0, Optional = 1, Constant = 2, WriteEmpty = 8 };
 
-    const auto items = doc->items();
-    for (const BrickLink::InvItem *ii : items) {
-        if (ii->isIncomplete())
-            continue;
+    auto create = [&](QStringView tagName, auto getter, auto stringify,
+            int flags = Required, const QVariant &def = { }) {
 
-        QDomElement domItem = domDoc.createElement(qL1S("Item"));
-        domInventory.appendChild(domItem);
+        auto v = (item->*getter)();
+        const QString t = tagName.toString();
+        const bool writeEmpty = (flags & WriteEmpty);
+        const bool optional = ((flags & ~WriteEmpty) == Optional);
+        const bool constant = ((flags & ~WriteEmpty) == Constant);
 
-        auto create = [&domItem, &domDoc](QStringView tagName, QStringView value) {
-            return domItem.appendChild(domDoc.createElement(tagName.toString())
-                                       .appendChild(domDoc.createTextNode(value.toString()))
-                                       .parentNode()).toElement();
-        };
-        auto createEmpty = [&domItem, &domDoc](QStringView tagName) {
-            return domItem.appendChild(domDoc.createElement(tagName.toString())).toElement();
-        };
+        if (!optional || (v != def.value<decltype(v)>())) {
+            if (writeEmpty)
+                xml.writeEmptyElement(t);
+            else
+                xml.writeTextElement(t, stringify(v));
+        }
+        if (!constant && base) {
+            auto bv = (base->*getter)();
+            if (v != bv)
+                baseValues.append(t, stringify(bv));
+        }
+    };
+    static auto asString   = [](const QString &s) { return s; };
+    static auto asInt      = [](auto i)           { return QString::number(i); };
+    static auto asCurrency = [](double d)         { return QString::number(d, 'f', 3); };
 
-        create(u"ItemID", ii->item()->id());
-        create(u"ItemTypeID", QString(ii->itemType()->id()));
-        create(u"ColorID", QString::number(ii->color()->id()));
+
+    for (const auto *ii : bsx.items) {
+        item = ii;
+        base = &(bsx.differenceModeBase.value(item));
+        baseValues.clear();
+
+        xml.writeStartElement(qL1S("Item"));
+
+        // vvv Required Fields (part 1)
+        create(u"ItemID",       &Document::Item::itemId,       asString);
+        create(u"ItemTypeID",   &Document::Item::itemTypeId,   asString);
+        create(u"ColorID",      &Document::Item::colorId,      asString);
+
+        // vvv Redundancy Fields
 
         // this extra information is useful, if the e.g.the color- or item-id
         // are no longer available after a database update
-        create(u"ItemName", ii->item()->name());
-        create(u"ItemTypeName", ii->itemType()->name());
-        create(u"ColorName", ii->color()->name());
-        create(u"CategoryID", QString::number(ii->category()->id()));
-        create(u"CategoryName", ii->category()->name());
+        create(u"ItemName",     &Document::Item::itemName,     asString);
+        create(u"ItemTypeName", &Document::Item::itemTypeName, asString);
+        create(u"ColorName",    &Document::Item::colorName,    asString);
+        create(u"CategoryID",   &Document::Item::categoryId,   asString);
+        create(u"CategoryName", &Document::Item::categoryName, asString);
 
-        {
-            const char16_t *st;
-            switch (ii->status()) {
-            default             :
-            case BrickLink::Status::Extra  : st = u"E"; break;
-            case BrickLink::Status::Exclude: st = u"X"; break;
-            case BrickLink::Status::Include: st = u"I"; break;
+        // vvv Required Fields (part 2)
+
+        create(u"Status", &Document::Item::status, [](auto st) {
+            switch (st) {
+            default                        :
+            case BrickLink::Status::Exclude: return qL1S("X");
+            case BrickLink::Status::Include: return qL1S("I");
+            case BrickLink::Status::Extra  : return qL1S("E");
             }
-            create(u"Status", st);
-        }
+        });
 
-        create(u"Qty", QString::number(ii->quantity()));
-        create(u"Price", c.toCurrencyString(ii->price(), { }, 3));
-        create(u"Condition", (ii->condition() == BrickLink::Condition::New) ? u"N" : u"U");
+        create(u"Qty",       &Document::Item::quantity,     asInt);
+        create(u"Price",     &Document::Item::price,        asCurrency);
+        create(u"Condition", &Document::Item::condition, [](auto c) {
+            return qL1S((c == BrickLink::Condition::New) ? "N" : "U"); });
 
-        if (ii->subCondition() != BrickLink::SubCondition::None) {
+        // vvv Optional Fields (part 2)
+
+        create(u"SubCondition", &Document::Item::subCondition,
+                [](auto sc) {
             // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-            const char16_t *st;
-            switch (ii->subCondition()) {
-            case BrickLink::SubCondition::Incomplete: st = u"I"; break;
-            case BrickLink::SubCondition::Complete  : st = u"C"; break;
-            case BrickLink::SubCondition::Sealed    : st = u"M"; break;
-            default                                 : st = u"?"; break;
+            switch (sc) {
+            case BrickLink::SubCondition::Incomplete: return qL1S("I");
+            case BrickLink::SubCondition::Complete  : return qL1S("C");
+            case BrickLink::SubCondition::Sealed    : return qL1S("M");
+            default                                 : return qL1S("N");
             }
-            create(u"SubCondition", st);
-        }
+        }, Optional, QVariant::fromValue(BrickLink::SubCondition::None));
 
-        if (ii->bulkQuantity() != 1)
-            create(u"Bulk", QString::number(ii->bulkQuantity()));
-        if (ii->sale())
-            create(u"Sale", QString::number(ii->sale()));
-        if (!ii->comments().isEmpty())
-            create(u"Comments", ii->comments());
-        if (!ii->remarks().isEmpty())
-            create(u"Remarks", ii->remarks());
-        if (ii->retain())
-            createEmpty(u"Retain");
-        if (ii->stockroom() != BrickLink::Stockroom::None) {
-            const char16_t *st;
-            switch (ii->stockroom()) {
-            case BrickLink::Stockroom::A: st = u"A"; break;
-            case BrickLink::Stockroom::B: st = u"B"; break;
-            case BrickLink::Stockroom::C: st = u"C"; break;
-            default                     : st = u""; break;
+        create(u"Bulk",      &Document::Item::bulkQuantity,  asInt,      Optional, 1);
+        create(u"Sale",      &Document::Item::sale,          asInt,      Optional, 0);
+        create(u"Cost",      &Document::Item::cost,          asCurrency, Optional, 0);
+        create(u"Comments",  &Document::Item::comments,      asString,   Optional, QString());
+        create(u"Remarks",   &Document::Item::remarks,       asString,   Optional, QString());
+        create(u"Reserved",  &Document::Item::reserved,      asString,   Optional, QString());
+        create(u"LotID",     &Document::Item::lotId,         asInt,      Optional, 0);
+        create(u"TQ1",       &Document::Item::tierQuantity0, asInt,      Optional, 0);
+        create(u"TP1",       &Document::Item::tierPrice0,    asCurrency, Optional, 0);
+        create(u"TQ2",       &Document::Item::tierQuantity1, asInt,      Optional, 0);
+        create(u"TP2",       &Document::Item::tierPrice1,    asCurrency, Optional, 0);
+        create(u"TQ3",       &Document::Item::tierQuantity2, asInt,      Optional, 0);
+        create(u"TP3",       &Document::Item::tierPrice2,    asCurrency, Optional, 0);
+
+        create(u"Retain", &Document::Item::retain, [](bool b) {
+            return qL1S(b ? "Y" : "N"); }, Optional | WriteEmpty, false);
+
+        create(u"Stockroom", &Document::Item::stockroom, [](auto st) {
+            switch (st) {
+            case BrickLink::Stockroom::A: return qL1S("A");
+            case BrickLink::Stockroom::B: return qL1S("B");
+            case BrickLink::Stockroom::C: return qL1S("C");
+            default                     : return qL1S("N");
             }
-            create(u"Stockroom", st);
-        }
-        if (!ii->reserved().isEmpty())
-            create(u"Reserved", ii->reserved());
-        if (ii->lotId())
-            create(u"LotID", QString::number(ii->lotId()));
+        }, Optional, QVariant::fromValue(BrickLink::Stockroom::None));
 
-        if (ii->tierQuantity(0)) {
-            create(u"TQ1", QString::number(ii->tierQuantity(0)));
-            create(u"TP1", c.toCurrencyString(ii->tierPrice(0), { }, 3));
-            create(u"TQ2", QString::number(ii->tierQuantity(1)));
-            create(u"TP2", c.toCurrencyString(ii->tierPrice(1), { }, 3));
-            create(u"TQ3", QString::number(ii->tierQuantity(2)));
-            create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
+        if (ii->hasCustomWeight()) {
+            create(u"TotalWeight", &Document::Item::totalWeight, [](double d) {
+                return QString::number(d, 'f', 4); }, Required);
         }
 
-        if (ii->hasCustomWeight())
-            create(u"TotalWeight", QString::number(ii->totalWeight(), 'f', 4));
-        if (!qFuzzyIsNull(ii->cost()))
-            create(u"Cost", c.toCurrencyString(ii->cost(), { }, 3));
-
-        auto base = doc->differenceBaseItem(ii);
-        if (base && (*base != *ii)) {
-            //TODO as soon as the new difference mode has matured and is deemed stable, this
-            // should be changed into writing out minimal XML
-
-            QByteArray ba;
-            QDataStream ds(&ba, QIODevice::WriteOnly);
-            base->save(ds);
-            create(u"X-DifferenceModeBase", QString::fromLatin1(ba.toBase64()));
+        if (base && !baseValues.isEmpty()) {
+            xml.writeStartElement(qL1S("DifferenceBaseValues"));
+            xml.writeAttributes(baseValues);
+            xml.writeEndElement(); // DifferenceBaseValues
         }
+        xml.writeEndElement(); // Item
     }
 
-    return domDoc;
+    xml.writeEndElement(); // Inventory
+
+    xml.writeStartElement(qL1S("GuiState"));
+    xml.writeAttribute(qL1S("Application"), qL1S("BrickStore"));
+    xml.writeAttribute(qL1S("Version"), QString::number(2));
+    if (!bsx.guiColumnLayout.isEmpty()) {
+        xml.writeStartElement("ColumnLayout");
+        xml.writeAttribute("Compressed", "1");
+        xml.writeCDATA(QLatin1String(qCompress(bsx.guiColumnLayout).toBase64()));
+        xml.writeEndElement(); // ColumnLayout
+    }
+    if (!bsx.guiSortFilterState.isEmpty()) {
+        xml.writeStartElement("SortFilterState");
+        xml.writeAttribute("Compressed", "1");
+        xml.writeCDATA(QLatin1String(qCompress(bsx.guiSortFilterState).toBase64()));
+        xml.writeEndElement(); // SortFilterState
+    }
+    xml.writeEndElement(); // GuiState
+
+    xml.writeEndElement(); // BrickStoreXML
+    xml.writeEndDocument();
+    return !xml.hasError();
 }

@@ -17,7 +17,6 @@
 
 #include <QWidget>
 #include <QHash>
-#include <qdom.h>
 
 #include "bricklinkfwd.h"
 #include "document.h"
@@ -44,8 +43,11 @@ class Window : public QWidget
     Q_PROPERTY(QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged)
 
 public:
-    Window(Document *doc, QWidget *parent = nullptr);
+    Window(Document *doc, const QByteArray &columnLayout = { },
+           const QByteArray &sortFilterState = { }, QWidget *parent = nullptr);
     ~Window() override;
+
+    static const QVector<Window *> &allWindows();
 
     Document *document() const { return m_doc; }
 
@@ -76,9 +78,6 @@ public:
     void deleteItems(const BrickLink::InvItemList &items);
 
     void consolidateItems(const Document::ItemList &items);
-
-    QDomElement createGuiStateXML();
-    void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
 
     enum class ColumnLayoutCommand {
         BrickStoreDefault,
@@ -270,7 +269,10 @@ private:
     QScopedPointer<SetToPriceGuideData> m_setToPG;
 
     QUuid                m_uuid;  // for autosave
-    QTimer               m_autosave_timer;
+    QTimer               m_autosaveTimer;
+    mutable bool         m_autosaveClean = true;
+
+    static QVector<Window *> s_windows;
 };
 
 Q_DECLARE_METATYPE(Window::Consolidate)
