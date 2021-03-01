@@ -1200,9 +1200,10 @@ void Window::on_edit_filter_from_selection_triggered()
             default:
             case QMetaType::QString: s = v.toString(); break;
             }
-            if (idx.column() == Document::Weight) {
+            if (idx.column() == Document::Weight)
                 s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
-            }
+            if (s.isEmpty() || s.contains(QChar(' ')))
+                s = u'"' % s % u'"';
 
             FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
                                          % QLatin1String(" == ") % s);
