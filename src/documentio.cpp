@@ -1202,6 +1202,7 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                     } else {
                         hasBaseValues = true;
                         baseValues = xml.attributes();
+                        xml.skipCurrentElement();
                     }
                 }
 
