@@ -237,7 +237,6 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
     pic->m_transferJob = TransferJob::get(url, f);
     pic->m_transferJob->setUserData<Picture>('P', pic);
-
     m_transfer->retrieve(pic->m_transferJob, high_priority);
 }
 

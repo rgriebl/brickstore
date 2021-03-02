@@ -1141,7 +1141,8 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1, 1));
     (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
-        m_filter->setFocus();
+        if (m_filter)
+            m_filter->setFocus();
     });
 
     m = newQMenu(this, "edit_status", NeedSelection(1));
@@ -1724,6 +1725,9 @@ void FrameWork::modificationUpdate()
 
 void FrameWork::transferJobProgressUpdate(int p, int t)
 {
+    if (!m_progress)
+        return;
+
     if (p == t) {
         m_progress->reset();
     } else {

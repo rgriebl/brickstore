@@ -108,8 +108,12 @@ Application::Application(int &_argc, char **_argv)
     QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 #endif
 
-#if !defined(Q_OS_WINDOWS) // HighDPI work fine, but only without this setting
-#  if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+#  if defined(Q_OS_WINDOWS)
+    // the Vista style scales very badly when scaled to non-integer factors
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
+#  else
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #  endif
 #endif
@@ -117,9 +121,7 @@ Application::Application(int &_argc, char **_argv)
     new QApplication(_argc, _argv);
 
     setupLogging();
-
     qApp->installEventFilter(this);
-
     setIconTheme();
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
@@ -127,11 +129,12 @@ Application::Application(int &_argc, char **_argv)
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
 #endif
+
 #if defined(Q_OS_MACOS)
     //QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus); // mac style guide
 
     // macOS style guide doesn't want shortcut keys in dialogs (Alt + underlined character)
-    qApp->setStyle(new MacUnderlineStyle());
+    QApplication::setStyle(new MacUnderlineStyle());
     void qt_set_sequence_auto_mnemonic(bool on);
     qt_set_sequence_auto_mnemonic(true);
 

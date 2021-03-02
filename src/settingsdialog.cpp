@@ -94,7 +94,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         int s = int(BrickLink::core()->standardPictureSize().height() * v
                     / 10 / BrickLink::core()->itemImageScaleFactor());
         QImage img(":/images/brickstore_icon.png");
-        img = img.scaled(s, s);
+        img = img.scaled(s, s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         w_item_image_example->setPixmap(QPixmap::fromImage(img));
     };
 
