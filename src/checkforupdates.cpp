@@ -73,7 +73,7 @@ void CheckForUpdates::check(bool silent)
 
     QNetworkReply *reply = m_nam.get(QNetworkRequest(m_checkUrl));
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, silent]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
 
         QByteArray data = reply->readAll();
@@ -93,7 +93,7 @@ void CheckForUpdates::check(bool silent)
                 qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
             auto assets = doc["assets"].toArray();
             m_installerUrl.clear();
-            for (const QJsonValue &asset : assets) {
+            for (const QJsonValue asset : assets) {
                 QString name = asset["name"].toString();
 #if defined(Q_OS_MACOS)
                 if (name.startsWith("macOS-")) {
@@ -259,8 +259,8 @@ void CheckForUpdates::downloadInstaller()
     });
     connect(reply, &QNetworkReply::downloadProgress,
             this, [pd](qint64 recv, qint64 total) {
-        pd->setMaximum(total);
-        pd->setValue(recv);
+        pd->setMaximum(int(total));
+        pd->setValue(int(recv));
     });
     connect(pd, &QProgressDialog::canceled,
             reply, &QNetworkReply::abort);

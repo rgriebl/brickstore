@@ -1172,7 +1172,7 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                 Q_UNUSED(item)
                 legacyOrigQty.setValue(v.toInt());
             } },
-            { u"X-DifferenceModeBase", [&bsx, &item](auto item, auto v) {
+            { u"X-DifferenceModeBase", [&bsx](auto item, auto v) {
                 //TODO: Remove in 2021.4.1
                 const auto ba = QByteArray::fromBase64(v.toLatin1());
                 QDataStream ds(ba);
@@ -1291,6 +1291,9 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                 if (!foundRoot || !foundInventory)
                     throw Exception("Not a valid BrickStoreXML file");
                 return bsx;
+
+            default:
+                break;
             }
         }
     } catch (const Exception &e) {
@@ -1329,7 +1332,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         const bool optional = ((flags & ~WriteEmpty) == Optional);
         const bool constant = ((flags & ~WriteEmpty) == Constant);
 
-        if (!optional || (v != def.value<decltype(v)>())) {
+        if (!optional || (QVariant::fromValue(v) != def)) {
             if (writeEmpty)
                 xml.writeEmptyElement(t);
             else
@@ -1337,7 +1340,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         }
         if (!constant && base) {
             auto bv = (base->*getter)();
-            if (v != bv)
+            if (QVariant::fromValue(v) != QVariant::fromValue(bv))
                 baseValues.append(t, stringify(bv));
         }
     };
@@ -1348,7 +1351,8 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
 
     for (const auto *ii : bsx.items) {
         item = ii;
-        base = &(bsx.differenceModeBase.value(item));
+        auto &baseRef = bsx.differenceModeBase.value(item);
+        base = &baseRef;
         baseValues.clear();
 
         xml.writeStartElement(qL1S("Item"));

@@ -74,9 +74,9 @@ SelectDocument::SelectDocument(const Document *self, QWidget *parent)
     auto emitSelected = [this]() { emit documentSelected(isDocumentSelected()); };
 
     connect(m_clipboard, &QAbstractButton::toggled,
-            this, [this, emitSelected]() { emitSelected(); });
+            this, [emitSelected]() { emitSelected(); });
     connect(m_documentList, &QListWidget::itemSelectionChanged,
-            this, [this, emitSelected]() { emitSelected(); });
+            this, [emitSelected]() { emitSelected(); });
 
     QMetaObject::invokeMethod(this, emitSelected, Qt::QueuedConnection);
 }

@@ -324,6 +324,7 @@ void ImportOrderDialog::languageChange()
     w_import->setText(tr("Import"));
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
+    w_showOnBrickLink->setText(tr("Show"));
     w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
     updateStatusLabel();
 }
