@@ -47,13 +47,18 @@ private:
 
 void PictureLoaderJob::run()
 {
-    if (m_pic && !m_pic->isValid()) {
-        m_pic->loadFromDisk();
-
-        auto blcore = BrickLink::core();
+    if (m_pic) {
+        QDateTime fetched;
+        QImage image;
+        bool valid = m_pic->loadFromDisk(fetched, image);
         auto pic = m_pic;
-        QMetaObject::invokeMethod(blcore, [pic, blcore]() {
-            blcore->pictureLoaded(pic);
+        QMetaObject::invokeMethod(BrickLink::core(), [=]() {
+            pic->m_valid = valid;
+            if (valid) {
+                pic->m_fetched = fetched;
+                pic->m_image = image;
+            }
+            BrickLink::core()->pictureLoaded(pic);
         }, Qt::QueuedConnection);
     }
 }
@@ -69,18 +74,16 @@ QSize BrickLink::Core::standardPictureSize() const
     return s;
 }
 
-BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::Color *color, bool high_priority)
+BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::Color *color, bool highPriority)
 {
     if (!item)
         return nullptr;
 
     quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
 
-    QMutexLocker lock(&m_corelock);
-
     Picture *pic = m_pic_cache[key];
 
-    bool need_to_load = false;
+    bool needToLoad = false;
 
     if (!pic) {
         pic = new Picture(item, color);
@@ -89,19 +92,19 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
                      m_pic_cache.maxCost(), m_pic_cache.totalCost(), qPrintable(item->id()));
             return nullptr;
         }
-        need_to_load = true;
+        needToLoad = true;
     }
 
-    if (high_priority) {
+    if (highPriority) {
         if (!pic->isValid())
-            pic->loadFromDisk();
+            pic->m_valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
 
         if (updateNeeded(pic->isValid(), pic->lastUpdate(), m_pic_update_iv))
-            updatePicture(pic, high_priority);
+            updatePicture(pic, highPriority);
     }
-    else if (need_to_load) {
+    else if (needToLoad) {
         pic->addRef();
-        m_pic_diskload.start(new PictureLoaderJob(pic));
+        m_diskloadPool.start(new PictureLoaderJob(pic));
     }
 
     return pic;
@@ -115,10 +118,9 @@ BrickLink::Picture *BrickLink::Core::largePicture(const Item *item, bool high_pr
 }
 
 BrickLink::Picture::Picture(const Item *item, const Color *color)
+    : m_item(item)
+    , m_color(color)
 {
-    m_item = item;
-    m_color = color;
-
     m_valid = false;
     m_update_status = UpdateStatus::Ok;
 }
@@ -150,16 +152,14 @@ QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
                                        m_item, (!large && hasColors) ? m_color : nullptr);
 }
 
-void BrickLink::Picture::loadFromDisk()
+bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
 {
     if (!m_item)
-        return;
+        return false;
 
     QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
 
     bool isValid = false;
-    QDateTime lastModified;
-    QImage image;
 
     if (f && f->isOpen()) {
         if (f->size() > 0) {
@@ -170,14 +170,9 @@ void BrickLink::Picture::loadFromDisk()
 
             isValid = true;
         }
-        lastModified = f->fileTime(QFileDevice::FileModificationTime);
+        fetched = f->fileTime(QFileDevice::FileModificationTime);
     }
-
-    if (isValid) {
-        m_image = image;
-        m_fetched = lastModified;
-    }
-    m_valid = isValid;
+    return isValid;
 }
 
 void BrickLink::Picture::update(bool high_priority)
@@ -187,7 +182,7 @@ void BrickLink::Picture::update(bool high_priority)
 
 void BrickLink::Picture::cancelUpdate()
 {
-    if (m_transferJob && BrickLink::core())
+    if (BrickLink::core())
         BrickLink::core()->cancelPictureUpdate(this);
 }
 
@@ -218,8 +213,6 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     if (!pic || (pic->m_update_status == UpdateStatus::Updating))
         return;
 
-    QMutexLocker lock(&m_corelock);
-
     if (!m_online || !m_transfer) {
         pic->m_update_status = UpdateStatus::UpdateFailed;
         emit pictureUpdated(pic);
@@ -244,6 +237,7 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
     pic->m_transferJob = TransferJob::get(url, f);
     pic->m_transferJob->setUserData<Picture>('P', pic);
+
     m_transfer->retrieve(pic->m_transferJob, high_priority);
 }
 
@@ -258,20 +252,19 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
 {
     if (!j)
         return;
-    auto *pic = j->userData<Picture>('P');
+    Picture *pic = j->userData<Picture>('P');
     if (!pic)
         return;
+
     pic->m_transferJob = nullptr;
-
     bool large = (!pic->color());
-
-    QMutexLocker lock(&m_corelock);
-
-    pic->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted() && j->file()) {
         j->file()->close();
-        pic->loadFromDisk();
+
+        // the pic is still ref'ed, so we just forward it to the loader
+        m_diskloadPool.start(new PictureLoaderJob(pic));
+        return;
 
     } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
         // There's no large JPG image, so try a GIF image instead (mostly very old sets)
@@ -280,21 +273,23 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
 
         if (!m_transfer) {
             pic->m_update_status = UpdateStatus::UpdateFailed;
+        } else {
+            pic->m_update_status = UpdateStatus::Updating;
+
+            QUrl url = j->url();
+            url.setPath(url.path().replace(".jpg", ".gif"));
+
+            QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
+            TransferJob *job = TransferJob::get(url, f);
+            job->setUserData<Picture>('P', pic);
+            m_transfer->retrieve(job);
+
+            // the pic is still ref'ed: leave it that way for one more loop
             return;
         }
-
-        pic->m_update_status = UpdateStatus::Updating;
-
-        QUrl url = j->url();
-        url.setPath(url.path().replace(".jpg", ".gif"));
-
-        QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
-        TransferJob *job = TransferJob::get(url, f);
-        job->setUserData<Picture>('P', pic);
-        m_transfer->retrieve(job);
-        return;
-
     } else {
+        pic->m_update_status = UpdateStatus::UpdateFailed;
+
         qWarning() << "Image download failed:" << j->errorString() << "(" << j->responseCode() << ")";
     }
 

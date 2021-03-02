@@ -189,9 +189,10 @@ const QImage Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
-    QMutexLocker lock(&m_corelock);
+    // we may be called from a diskloader thread
+    QMutexLocker lock(&m_imageCacheLock);
 
-    QImage img = m_noimages.value(key);
+    QImage img = m_noImageCache.value(key);
 
     if (img.isNull()) {
         img = QImage(s, QImage::Format_ARGB32_Premultiplied);
@@ -223,7 +224,7 @@ const QImage Core::noImage(const QSize &s) const
         }
         p.end();
 
-        m_noimages.insert(key, img);
+        m_noImageCache.insert(key, img);
     }
     return img;
 }
@@ -236,9 +237,7 @@ const QImage Core::colorImage(const Color *col, int w, int h) const
 
     QString key = QString("%1:%2x%3").arg(col->id()).arg(w).arg(h);
 
-    QMutexLocker lock(&m_corelock);
-
-    QImage img = m_colimages.value(key);
+    QImage img = m_colorImageCache.value(key);
 
     if (img.isNull()) {
         QColor c = col->color();
@@ -327,7 +326,7 @@ const QImage Core::colorImage(const Color *col, int w, int h) const
         }
         p.end();
 
-        m_colimages.insert(key, img);
+        m_colorImageCache.insert(key, img);
     }
     return img;
 }
@@ -397,10 +396,8 @@ Core *Core::create(const QString &datadir, QString *errstring)
 
 Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
-    , m_c_locale(QLocale::c())
-    , m_corelock(QMutex::Recursive)
 {
-    m_pic_diskload.setMaxThreadCount(QThread::idealThreadCount() * 3);
+    m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
     // cache size is physical memory * 0.25, at least 128MB, at most 1GB
@@ -555,18 +552,14 @@ const PartColorCode *Core::partColorCode(uint id)
 
 void Core::cancelPictureTransfers()
 {
-    QMutexLocker lock(&m_corelock);
-
-    m_pic_diskload.clear();
-    m_pic_diskload.waitForDone();
+    m_diskloadPool.clear();
+    m_diskloadPool.waitForDone();
     if (m_transfer)
         m_transfer->abortAllJobs();
 }
 
 void Core::cancelPriceGuideTransfers()
 {
-    QMutexLocker lock(&m_corelock);
-
     if (m_transfer)
         m_transfer->abortAllJobs();
 }
@@ -588,8 +581,6 @@ bool Core::isDatabaseUpdateNeeded() const
 
 void Core::clear()
 {
-    QMutexLocker lock(&m_corelock);
-
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
 
@@ -617,8 +608,6 @@ void Core::clear()
 
 bool Core::readDatabase(QString *infoText, const QString &filename)
 {
-    QMutexLocker lock(&m_corelock);
-
     try {
         clear();
 
@@ -810,8 +799,6 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
 {
     if (version <= DatabaseVersion::Invalid)
         return false; // too old
-
-    QMutexLocker lock(&m_corelock);
 
     QString fn(!filename.isEmpty() ? filename : dataPath() + defaultDatabaseName(version));
 
@@ -1189,8 +1176,14 @@ void Core::setItemImageScaleFactor(qreal f)
 {
     if (!qFuzzyCompare(f, m_item_image_scale_factor)) {
         m_item_image_scale_factor = f;
-        m_noimages.clear();
-        m_colimages.clear();
+
+        m_imageCacheLock.lock();
+
+        m_noImageCache.clear();
+        m_colorImageCache.clear();
+
+        m_imageCacheLock.unlock();
+
         emit itemImageScaleFactorChanged(f);
     }
 }

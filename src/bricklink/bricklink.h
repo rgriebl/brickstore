@@ -317,7 +317,7 @@ private:
     Picture(const Item *item, const Color *color);
 
     QFile *file(QIODevice::OpenMode openMode) const;
-    void loadFromDisk();
+    bool loadFromDisk(QDateTime &fetched, QImage &image);
 
     friend class Core;
     friend class PictureLoaderJob;
@@ -654,9 +654,9 @@ public:
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
-    int quantity(Time t, Condition c) const           { return m_quantities[int(t)][int(c)]; }
-    int lots(Time t, Condition c) const               { return m_lots[int(t)][int(c)]; }
-    double price(Time t, Condition c, Price p) const  { return m_prices[int(t)][int(c)][int(p)]; }
+    int quantity(Time t, Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
+    int lots(Time t, Condition c) const               { return m_data.lots[int(t)][int(c)]; }
+    double price(Time t, Condition c, Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
 
     PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr) { } // for scripting only!
     ~PriceGuide() override;
@@ -672,22 +672,24 @@ private:
 
     TransferJob * m_transferJob = nullptr;
 
-    int           m_quantities [int(Time::Count)][int(Condition::Count)];
-    int           m_lots       [int(Time::Count)][int(Condition::Count)];
-    double        m_prices     [int(Time::Count)][int(Condition::Count)][int(Price::Count)];
+    struct Data {
+        int    quantities [int(Time::Count)][int(Condition::Count)] = { };
+        int    lots       [int(Time::Count)][int(Condition::Count)] = { };
+        double prices     [int(Time::Count)][int(Condition::Count)][int(Price::Count)] = { };
+    } m_data;
 
-    bool          m_scrapedHtml;
+    bool          m_scrapedHtml = s_scrapeHtml;
     static bool   s_scrapeHtml;
 
 private:
     PriceGuide(const Item *item, const Color *color);
 
     QFile *file(QIODevice::OpenMode openMode) const;
-    void loadFromDisk();
-    void saveToDisk();
+    bool loadFromDisk(QDateTime &fetched, Data &data);
+    void saveToDisk(const QDateTime &fetched, const Data &data);
 
-    void parse(const QByteArray &ba);
-    void parseHtml(const QByteArray &ba);
+    bool parse(const QByteArray &ba, Data &result);
+    bool parseHtml(const QByteArray &ba, Data &result);
 
     friend class Core;
     friend class PriceGuideLoaderJob;
@@ -813,11 +815,11 @@ public:
 
     const PartColorCode *partColorCode(uint id);
 
-    PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
+    PriceGuide *priceGuide(const Item *item, const Color *color, bool highPriority = false);
 
     QSize standardPictureSize() const;
-    Picture *picture(const Item *item, const Color *color, bool high_priority = false);
-    Picture *largePicture(const Item *item, bool high_priority = false);
+    Picture *picture(const Item *item, const Color *color, bool highPriority = false);
+    Picture *largePicture(const Item *item, bool highPriority = false);
 
     qreal itemImageScaleFactor() const;
     void setItemImageScaleFactor(qreal f);
@@ -905,11 +907,10 @@ private:
 
     QString  m_datadir;
     bool     m_online = false;
-    QLocale  m_c_locale;
-    mutable QMutex m_corelock;
 
-    mutable QHash<QString, QImage>  m_noimages;
-    mutable QHash<QString, QImage>  m_colimages;
+    mutable QMutex m_imageCacheLock;
+    mutable QHash<QString, QImage>  m_noImageCache;
+    mutable QHash<QString, QImage>  m_colorImageCache;
 
     std::vector<const Color *>      m_colors;      // id ->Color *
     std::vector<const Category *>   m_categories;  // id ->Category *
@@ -927,7 +928,7 @@ private:
     Q3Cache<quint64, PriceGuide> m_pg_cache;
 
     int                          m_pic_update_iv = 0;
-    QThreadPool                  m_pic_diskload;
+    QThreadPool                  m_diskloadPool;
     Q3Cache<quint64, Picture>    m_pic_cache;
 
     qreal m_item_image_scale_factor = 1.;

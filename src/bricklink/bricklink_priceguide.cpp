@@ -48,49 +48,55 @@ private:
 
 void PriceGuideLoaderJob::run()
 {
-    if (m_pg && !m_pg->isValid()) {
-        m_pg->loadFromDisk();
-
-        auto blcore = BrickLink::core();
+    if (m_pg) {
+        QDateTime fetched;
+        PriceGuide::Data data;
+        bool valid = m_pg->loadFromDisk(fetched, data);
         auto pg = m_pg;
-        QMetaObject::invokeMethod(blcore, [pg, blcore]() {
-            blcore->priceGuideLoaded(pg);
+
+        QMetaObject::invokeMethod(BrickLink::core(), [=]() {
+            pg->m_valid = valid;
+            if (valid) {
+                pg->m_fetched = fetched;
+                pg->m_data = data;
+            }
+            BrickLink::core()->priceGuideLoaded(pg);
         }, Qt::QueuedConnection);
     }
 }
 
 }
 
-BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority)
+BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item,
+                                                   const BrickLink::Color *color, bool highPriority)
 {
     if (!item || !color)
         return nullptr;
 
     quint64 key = quint64(color->id()) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index());
-
     PriceGuide *pg = m_pg_cache [key];
 
-    bool need_to_load = false;
+    bool needToLoad = false;
 
     if (!pg) {
         pg = new PriceGuide(item, color);
         if (!m_pg_cache.insert(key, pg)) {
-            qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), 1);
+            qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)", m_pg_cache.maxCost(), m_pg_cache.totalCost(), 1);
             return nullptr;
         }
-        need_to_load = true;
+        needToLoad = true;
     }
 
-    if (high_priority) {
+    if (highPriority) {
         if (!pg->isValid())
-            pg->loadFromDisk();
+            pg->m_valid = pg->loadFromDisk(pg->m_fetched, pg->m_data);
 
         if (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv))
-            updatePriceGuide(pg, high_priority);
+            updatePriceGuide(pg, highPriority);
     }
-    else if (need_to_load) {
+    else if (needToLoad) {
         pg->addRef();
-        m_pic_diskload.start(new PriceGuideLoaderJob(pg));
+        m_diskloadPool.start(new PriceGuideLoaderJob(pg));
     }
 
     return pg;
@@ -100,38 +106,32 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
 bool BrickLink::PriceGuide::s_scrapeHtml = true;
 
 BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::Color *color)
+    : m_item(item)
+    , m_color(color)
 {
-    m_item = item;
-    m_color = color;
-
     m_valid = false;
     m_update_status = UpdateStatus::Ok;
-
-    memset(m_quantities, 0, sizeof(m_quantities));
-    memset(m_lots, 0, sizeof(m_lots));
-    memset(m_prices, 0, sizeof(m_prices));
 }
 
-void BrickLink::PriceGuide::saveToDisk()
+void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
 {
     QScopedPointer<QFile> f(file(QIODevice::WriteOnly));
 
     if (f && f->isOpen()) {
         QTextStream ts(f.data());
-        static QLocale c = QLocale::c();
 
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
-        ts << "# last update: " << m_fetched.toString() << "\n#\n";
+        ts << "# last update: " << fetched.toString() << "\n#\n";
 
         for (int ti = 0; ti < int(Time::Count); ti++) {
             for (int ci = 0; ci < int(Condition::Count); ci++) {
                 ts << (ti == int(Time::PastSix) ? 'O' : 'I') << '\t' << (ci == int(Condition::New) ? 'N' : 'U') << '\t'
-                   << m_lots[ti][ci] << '\t'
-                   << m_quantities[ti][ci] << '\t'
-                   << c.toString(m_prices[ti][ci][int(Price::Lowest)]) << '\t'
-                   << c.toString(m_prices[ti][ci][int(Price::Average)]) << '\t'
-                   << c.toString(m_prices[ti][ci][int(Price::WAverage)]) << '\t'
-                   << c.toString(m_prices[ti][ci][int(Price::Highest)]) << '\n';
+                   << data.lots[ti][ci] << '\t'
+                   << data.quantities[ti][ci] << '\t'
+                   << QString::number(data.prices[ti][ci][int(Price::Lowest)], 'f', 3) << '\t'
+                   << QString::number(data.prices[ti][ci][int(Price::Average)], 'f', 3) << '\t'
+                   << QString::number(data.prices[ti][ci][int(Price::WAverage)], 'f', 3) << '\t'
+                   << QString::number(data.prices[ti][ci][int(Price::Highest)], 'f', 3) << '\n';
             }
         }
     }
@@ -142,30 +142,28 @@ QFile *BrickLink::PriceGuide::file(QIODevice::OpenMode openMode) const
     return BrickLink::core()->dataFile(u"priceguide.txt", openMode, m_item, m_color);
 }
 
-void BrickLink::PriceGuide::loadFromDisk()
+bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data)
 {
     if (!m_item || !m_color)
-        return;
+        return false;
 
     QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
 
-    m_valid = false;
-    if (f && f->isOpen())
-        parse(f->readAll());
-
-    if (f && m_valid)
-        m_fetched = f->fileTime(QFileDevice::FileModificationTime);
+    if (f && f->isOpen()) {
+        if (parse(f->readAll(), data)) {
+            fetched = f->fileTime(QFileDevice::FileModificationTime);
+            return true;
+        }
+    }
+    return false;
 }
 
-void BrickLink::PriceGuide::parse(const QByteArray &ba)
+bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result)
 {
-    memset(m_quantities, 0, sizeof(m_quantities));
-    memset(m_lots, 0, sizeof(m_lots));
-    memset(m_prices, 0, sizeof(m_prices));
+    result = { };
 
     QTextStream ts(ba);
     QString line;
-    static QLocale c = QLocale::c();
 
     while (!(line = ts.readLine()).isNull()) {
         if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
@@ -198,28 +196,24 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
         }
 
         if ((ti != -1) && (ci != -1)) {
-            m_lots[ti][ci]             = sl[oldformat ? 3 : 2].toInt();
-            m_quantities[ti][ci]       = sl[oldformat ? 2 : 3].toInt();
-            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(sl[4]);
-            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(sl[5]);
-            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(sl[6]);
-            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(sl[7]);
+            result.lots[ti][ci]                         = sl[oldformat ? 3 : 2].toInt();
+            result.quantities[ti][ci]                   = sl[oldformat ? 2 : 3].toInt();
+            result.prices[ti][ci][int(Price::Lowest)]   = sl[4].toDouble();
+            result.prices[ti][ci][int(Price::Average)]  = sl[5].toDouble();
+            result.prices[ti][ci][int(Price::WAverage)] = sl[6].toDouble();
+            result.prices[ti][ci][int(Price::Highest)]  = sl[7].toDouble();
         }
     }
-
-    m_valid = true;
+    return true;
 }
 
-void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
+bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 {
     static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
-    static QLocale c = QLocale::c();
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
 
-    memset(m_quantities, 0, sizeof(m_quantities));
-    memset(m_lots, 0, sizeof(m_lots));
-    memset(m_prices, 0, sizeof(m_prices));
+    result = { };
 
     int matchCounter = 0;
     int startPos = 0;
@@ -256,18 +250,18 @@ void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
             if ((ti == -1) || (ci == -1))
                 continue;
 
-            m_lots[ti][ci]             = m.captured(2).toInt();
-            m_quantities[ti][ci]       = m.captured(3).toInt();
-            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(m.captured(4));
-            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(m.captured(5));
-            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(m.captured(6));
-            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(m.captured(7));
+            result.lots[ti][ci]                         = m.captured(2).toInt();
+            result.quantities[ti][ci]                   = m.captured(3).toInt();
+            result.prices[ti][ci][int(Price::Lowest)]   = m.captured(4).toDouble();
+            result.prices[ti][ci][int(Price::Average)]  = m.captured(5).toDouble();
+            result.prices[ti][ci][int(Price::WAverage)] = m.captured(6).toDouble();
+            result.prices[ti][ci][int(Price::Highest)]  = m.captured(7).toDouble();
 
             ++matchCounter;
             startPos = matchEnd;
         }
     }
-    m_valid = (matchCounter > 0);
+    return (matchCounter > 0);
 }
 
 
@@ -278,7 +272,7 @@ void BrickLink::PriceGuide::update(bool high_priority)
 
 void BrickLink::PriceGuide::cancelUpdate()
 {
-    if (m_transferJob && BrickLink::core())
+    if (BrickLink::core())
         BrickLink::core()->cancelPriceGuideUpdate(this);
 }
 
@@ -305,8 +299,6 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     QUrlQuery query;
     QUrl url;
 
-    pg->m_scrapedHtml = PriceGuide::s_scrapeHtml;
-
     if (pg->m_scrapedHtml) {
         url = QUrl("https://www.bricklink.com/priceGuideSummary.asp");
         query.addQueryItem("a",       QChar(pg->item()->itemType()->id()));
@@ -331,6 +323,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     //qDebug ( "PG request started for %s", (const char *) url );
     pg->m_transferJob = TransferJob::get(url);
     pg->m_transferJob->setUserData('G', pg);
+
     m_transfer->retrieve(pg->m_transferJob, high_priority);
 }
 
@@ -345,21 +338,22 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
 {
     if (!j || !j->data())
         return;
-    auto *pg = j->userData<PriceGuide>('G');
+    PriceGuide *pg = j->userData<PriceGuide>('G');
     if (!pg)
         return;
-    pg->m_transferJob = nullptr;
 
+    pg->m_transferJob = nullptr;
     pg->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
         if (pg->m_scrapedHtml)
-            pg->parseHtml(*j->data());
+            pg->m_valid = pg->parseHtml(*j->data(), pg->m_data);
         else
-            pg->parse(*j->data());
+            pg->m_valid = pg->parse(*j->data(), pg->m_data);
+
         if (pg->m_valid) {
             pg->m_fetched = QDateTime::currentDateTime();
-            pg->saveToDisk();
+            pg->saveToDisk(pg->m_fetched, pg->m_data);
             pg->m_update_status = UpdateStatus::Ok;
         }
     }
