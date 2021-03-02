@@ -41,6 +41,7 @@
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
+#  include <QtPlatformHeaders/QWindowsWindowFunctions>
 #endif
 
 #include "application.h"
@@ -533,6 +534,8 @@ FrameWork::FrameWork(QWidget *parent)
         }
         progress->setVisible(p != t);
     });
+    // workaround for QOpenGLWidget messing with fullscreen mode
+    QWindowsWindowFunctions::setHasBorderInFullScreen(windowHandle(), true);
 #endif
 
     QByteArray ba;
