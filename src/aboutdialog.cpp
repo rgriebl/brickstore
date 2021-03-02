@@ -66,7 +66,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 
     const QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
     const QString version   = tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION).arg(BRICKSTORE_BUILD_NUMBER);
-    const QString support   = tr("Visit %1").arg(R"(<a href="https://")" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)");
+    const QString support   = tr("Visit %1").arg(R"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)");
 
     QString qt = QLibraryInfo::version().toString();
     if (QLibraryInfo::isDebugBuild())
@@ -95,7 +95,7 @@ AboutDialog::AboutDialog(QWidget *parent)
         R"(This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE )"
         R"(WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.)"
         R"(<br>)"
-        R"(See <a href="http://fsf.org/licensing/licenses/gpl.html">www.fsf.org/licensing/licenses/gpl.html</a> for GPL licensing information.)"
+        R"(See <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for GPL licensing information.)"
         R"(</p><p>)"
         R"(All data from <a href="https://www.bricklink.com">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, )"
         R"(which is a trademark of Dan Jezek.)"
