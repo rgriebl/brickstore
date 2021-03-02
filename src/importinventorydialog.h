@@ -37,6 +37,7 @@ public:
 protected:
     void changeEvent(QEvent *e) override;
     void showEvent(QShowEvent *) override;
+    void keyPressEvent(QKeyEvent *e) override;
     QSize sizeHint() const override;
 
     QByteArray saveState() const;

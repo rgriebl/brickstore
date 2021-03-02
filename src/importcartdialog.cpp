@@ -25,6 +25,7 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QShortcut>
+#include <QKeyEvent>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -235,7 +236,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     w_import->setDefault(true);
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
-            this, &ImportCartDialog::importCarts);
+            this, [this]() { importCarts(w_carts->selectionModel()->selectedRows()); });
     w_showOnBrickLink = new QPushButton();
     w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
@@ -247,7 +248,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     connect(w_carts->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &ImportCartDialog::checkSelected);
     connect(w_carts, &QTreeView::activated,
-            this, &ImportCartDialog::activateItem);
+            this, [this]() { w_import->animateClick(); });
     connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
         w_progress->setVisible(done != total);
         w_progress->setMaximum(total);
@@ -282,6 +283,24 @@ ImportCartDialog::~ImportCartDialog()
 {
     Config::inst()->setValue("/MainWindow/ImportCartDialog/Geometry", saveGeometry());
     Config::inst()->setValue("/MainWindow/ImportCartDialog/Filter", w_filter->saveState());
+}
+
+void ImportCartDialog::keyPressEvent(QKeyEvent *e)
+{
+    // simulate QDialog behavior
+    if (e->matches(QKeySequence::Cancel)) {
+        reject();
+        return;
+    } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
+               || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
+        // we need the animateClick here instead of triggering directly: otherwise we
+        // get interference from the QTreeView::activated signal, resulting in double triggers
+        if (w_import->isVisible() && w_import->isEnabled())
+            w_import->animateClick();
+        return;
+    }
+
+    QWidget::keyPressEvent(e);
 }
 
 void ImportCartDialog::changeEvent(QEvent *e)
@@ -343,7 +362,7 @@ void ImportCartDialog::updateCarts()
 
 void ImportCartDialog::downloadFinished(TransferJob *job)
 {
-    int type = job->userData<void>().first; // g_lobal, c_art
+    int type = job->userData<void>().first; // l_ogin, g_lobal, c_art
 
     switch (type) {
     case 'l': {
@@ -353,6 +372,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
         } else {
             MessageBox::warning(this, tr("Import BrickLink Cart"), tr("Could not login to BrickLink."));
         }
+        m_currentUpdate.removeOne(job);
         break;
     }
     case 'g': {
@@ -413,6 +433,28 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
         }
 
         m_cartModel->setCarts(carts);
+
+        m_currentUpdate.removeOne(job);
+        if (m_currentUpdate.isEmpty()) {
+            m_lastUpdated = QDateTime::currentDateTime();
+
+            w_update->setEnabled(true);
+            w_carts->setEnabled(true);
+
+            updateStatusLabel();
+
+            if (m_cartModel->rowCount()) {
+                auto tl = w_carts->model()->index(0, 0);
+                w_carts->selectionModel()->select(tl, QItemSelectionModel::SelectCurrent
+                                                   | QItemSelectionModel::Rows);
+                w_carts->scrollTo(tl);
+            }
+            w_carts->header()->resizeSections(QHeaderView::ResizeToContents);
+            w_carts->setFocus();
+
+            checkSelected();
+        }
+
         break;
     }
     case 'c': {
@@ -489,33 +531,11 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
     default:
         break;
     }
-
-    m_currentUpdate.removeOne(job);
-    if (m_currentUpdate.isEmpty()) {
-        m_lastUpdated = QDateTime::currentDateTime();
-
-        w_update->setEnabled(true);
-        w_carts->setEnabled(true);
-
-        updateStatusLabel();
-
-        if (m_cartModel->rowCount()) {
-            auto tl = w_carts->model()->index(0, 0);
-            w_carts->selectionModel()->select(tl, QItemSelectionModel::SelectCurrent
-                                               | QItemSelectionModel::Rows);
-            w_carts->scrollTo(tl);
-        }
-        w_carts->header()->resizeSections(QHeaderView::ResizeToContents);
-        w_carts->setFocus();
-
-        checkSelected();
-    }
 }
 
-void ImportCartDialog::importCarts()
+void ImportCartDialog::importCarts(const QModelIndexList &rows)
 {
-    const auto selection = w_carts->selectionModel()->selectedRows();
-    for (auto idx : selection) {
+    for (auto idx : rows) {
         auto cart = idx.data(CartPointerRole).value<const BrickLink::Cart *>();
 
         QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax");
@@ -547,12 +567,6 @@ void ImportCartDialog::checkSelected()
     bool b = w_carts->selectionModel()->hasSelection();
     w_import->setEnabled(b);
     w_showOnBrickLink->setEnabled(b);
-}
-
-void ImportCartDialog::activateItem()
-{
-    checkSelected();
-    w_import->animateClick();
 }
 
 void ImportCartDialog::updateStatusLabel()

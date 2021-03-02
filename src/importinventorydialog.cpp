@@ -15,6 +15,7 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QShortcut>
+#include <QKeyEvent>
 
 #include "bricklink.h"
 #include "config.h"
@@ -141,6 +142,26 @@ void ImportInventoryDialog::showEvent(QShowEvent *e)
     w_select->setFocus();
 }
 
+void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
+{
+    // simulate QDialog behavior
+    if (e->matches(QKeySequence::Cancel)) {
+        reject();
+        return;
+    } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
+               || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
+        // we need the animateClick here instead of triggering directly: otherwise we
+        // get interference from the itemActivated signal on the QTreeView, resulting in
+        // double triggering
+        if (w_import->isVisible() && w_import->isEnabled())
+            w_import->animateClick();
+        return;
+    }
+
+    QWidget::keyPressEvent(e);
+}
+
+
 QSize ImportInventoryDialog::sizeHint() const
 {
     QFontMetrics fm(font());
@@ -204,8 +225,7 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
         bool hasInstructions = (BrickLink::core()->item('I', it->id()));
         w_instructions->setEnabled(hasInstructions);
     }
-
-    if ((it) && ok)
+    if (ok)
         w_import->animateClick();
 }
 

@@ -34,16 +34,16 @@ public:
     void updateOrders();
 
 protected:
+    void keyPressEvent(QKeyEvent *e) override;
     virtual void changeEvent(QEvent *e) override;
     void languageChange();
 
 protected slots:
     void checkSelected();
-    void activateItem();
     void updateStatusLabel();
 
     void downloadFinished(TransferJob *job);
-    void importOrders();
+    void importOrders(const QModelIndexList &rows);
     void showOrdersOnBrickLink();
 
 private:

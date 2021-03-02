@@ -22,6 +22,7 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QShortcut>
+#include <QKeyEvent>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -257,7 +258,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     w_import->setDefault(true);
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
-            this, &ImportOrderDialog::importOrders);
+            this, [this]() { importOrders(w_orders->selectionModel()->selectedRows()); });
     w_showOnBrickLink = new QPushButton();
     w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
@@ -269,7 +270,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     connect(w_orders->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &ImportOrderDialog::checkSelected);
     connect(w_orders, &QTreeView::activated,
-            this, &ImportOrderDialog::activateItem);
+            this, [this]() { w_import->animateClick(); });
     connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
         w_progress->setVisible(done != total);
         w_progress->setMaximum(total);
@@ -308,6 +309,24 @@ ImportOrderDialog::~ImportOrderDialog()
     Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry", saveGeometry());
     Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack", w_daysBack->value());
     Config::inst()->setValue("/MainWindow/ImportOrderDialog/Filter", w_filter->saveState());
+}
+
+void ImportOrderDialog::keyPressEvent(QKeyEvent *e)
+{
+    // simulate QDialog behavior
+    if (e->matches(QKeySequence::Cancel)) {
+        reject();
+        return;
+    } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
+               || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
+        // we need the animateClick here instead of triggering directly: otherwise we
+        // get interference from the QTreeView::activated signal, resulting in double triggers
+        if (w_import->isVisible() && w_import->isEnabled())
+            w_import->animateClick();
+        return;
+    }
+
+    QWidget::keyPressEvent(e);
 }
 
 void ImportOrderDialog::changeEvent(QEvent *e)
@@ -371,9 +390,14 @@ void ImportOrderDialog::updateOrders()
 
 void ImportOrderDialog::downloadFinished(TransferJob *job)
 {
-    int type = job->userData<void>().first; // r_eceived, p_laced, a_ddress
+    int type = job->userData<void>().first; // r_eceived, p_laced, a_ddress, o_rder
 
     switch (type) {
+    case 'o': {
+        auto order = job->userData<BrickLink::Order>('o');
+        orderDownloadFinished(order, job, *job->data());
+        break;
+    }
     case 'a': {
         auto order = job->userData<BrickLink::Order>('a');
 
@@ -453,36 +477,30 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
         m_orderModel->setOrders(orders, type == 'r' ? BrickLink::OrderType::Received
                                                     : BrickLink::OrderType::Placed);
 
-        break;
-    }
-    case 'o': {
-        auto order = job->userData<BrickLink::Order>('o');
-        orderDownloadFinished(order, job, *job->data());
+        m_currentUpdate.removeOne(job);
+        if (m_currentUpdate.isEmpty()) {
+            m_lastUpdated = QDateTime::currentDateTime();
+
+            w_update->setEnabled(true);
+            w_orders->setEnabled(true);
+
+            updateStatusLabel();
+
+            if (m_orderModel->rowCount()) {
+                auto tl = w_orders->model()->index(0, 0);
+                w_orders->selectionModel()->select(tl, QItemSelectionModel::SelectCurrent
+                                                   | QItemSelectionModel::Rows);
+                w_orders->scrollTo(tl);
+            }
+            w_orders->header()->resizeSections(QHeaderView::ResizeToContents);
+            w_orders->setFocus();
+
+            checkSelected();
+        }
         break;
     }
     default:
         break;
-    }
-
-    m_currentUpdate.removeOne(job);
-    if (m_currentUpdate.isEmpty()) {
-        m_lastUpdated = QDateTime::currentDateTime();
-
-        w_update->setEnabled(true);
-        w_orders->setEnabled(true);
-
-        updateStatusLabel();
-
-        if (m_orderModel->rowCount()) {
-            auto tl = w_orders->model()->index(0, 0);
-            w_orders->selectionModel()->select(tl, QItemSelectionModel::SelectCurrent
-                                               | QItemSelectionModel::Rows);
-            w_orders->scrollTo(tl);
-        }
-        w_orders->header()->resizeSections(QHeaderView::ResizeToContents);
-        w_orders->setFocus();
-
-        checkSelected();
     }
 }
 
@@ -508,10 +526,9 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
     }
 }
 
-void ImportOrderDialog::importOrders()
+void ImportOrderDialog::importOrders(const QModelIndexList &rows)
 {
-    const auto selection = w_orders->selectionModel()->selectedRows();
-    for (auto idx : selection) {
+    for (auto idx : rows) {
         auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
         QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
@@ -563,12 +580,6 @@ void ImportOrderDialog::checkSelected()
     bool b = w_orders->selectionModel()->hasSelection();
     w_import->setEnabled(b);
     w_showOnBrickLink->setEnabled(b);
-}
-
-void ImportOrderDialog::activateItem()
-{
-    checkSelected();
-    w_import->animateClick();
 }
 
 void ImportOrderDialog::updateStatusLabel()

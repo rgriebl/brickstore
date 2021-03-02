@@ -35,16 +35,16 @@ public:
     void updateCarts();
 
 protected:
+    void keyPressEvent(QKeyEvent *e) override;
     virtual void changeEvent(QEvent *e) override;
     void languageChange();
 
 protected slots:
     void checkSelected();
-    void activateItem();
     void updateStatusLabel();
 
     void downloadFinished(TransferJob *job);
-    void importCarts();
+    void importCarts(const QModelIndexList &rows);
     void showCartsOnBrickLink();
 
 private:
