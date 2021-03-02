@@ -191,6 +191,17 @@ void BrickLink::Picture::cancelUpdate()
         BrickLink::core()->cancelPictureUpdate(this);
 }
 
+void BrickLink::Core::priceGuideLoaded(BrickLink::PriceGuide *pg)
+{
+    if (pg) {
+         if (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv))
+             updatePriceGuide(pg, false);
+         else
+             emit priceGuideUpdated(pg);
+         pg->release();
+     }
+}
+
 void BrickLink::Core::pictureLoaded(Picture *pic)
 {
    if (pic) {

@@ -19,9 +19,47 @@
 #include <QLocale>
 #include <QUrlQuery>
 #include <QRegularExpression>
+#include <QRunnable>
 
 #include "bricklink.h"
 
+
+namespace BrickLink {
+
+class PriceGuideLoaderJob : public QRunnable
+{
+public:
+    explicit PriceGuideLoaderJob(PriceGuide *pg)
+        : QRunnable(), m_pg(pg)
+    { }
+
+    void run() override;
+
+    PriceGuide *priceGuide() const
+    {
+        return m_pg;
+    }
+
+private:
+    Q_DISABLE_COPY(PriceGuideLoaderJob)
+
+    PriceGuide *m_pg;
+};
+
+void PriceGuideLoaderJob::run()
+{
+    if (m_pg && !m_pg->isValid()) {
+        m_pg->loadFromDisk();
+
+        auto blcore = BrickLink::core();
+        auto pg = m_pg;
+        QMetaObject::invokeMethod(blcore, [pg, blcore]() {
+            blcore->priceGuideLoaded(pg);
+        }, Qt::QueuedConnection);
+    }
+}
+
+}
 
 BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority)
 {
@@ -32,16 +70,28 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
 
     PriceGuide *pg = m_pg_cache [key];
 
+    bool need_to_load = false;
+
     if (!pg) {
         pg = new PriceGuide(item, color);
         if (!m_pg_cache.insert(key, pg)) {
             qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), 1);
             return nullptr;
         }
+        need_to_load = true;
     }
 
-    if (pg && (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv)))
-        updatePriceGuide(pg, high_priority);
+    if (high_priority) {
+        if (!pg->isValid())
+            pg->loadFromDisk();
+
+        if (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv))
+            updatePriceGuide(pg, high_priority);
+    }
+    else if (need_to_load) {
+        pg->addRef();
+        m_pic_diskload.start(new PriceGuideLoaderJob(pg));
+    }
 
     return pg;
 }
@@ -60,8 +110,6 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     memset(m_quantities, 0, sizeof(m_quantities));
     memset(m_lots, 0, sizeof(m_lots));
     memset(m_prices, 0, sizeof(m_prices));
-
-    loadFromDisk();
 }
 
 void BrickLink::PriceGuide::saveToDisk()

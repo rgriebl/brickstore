@@ -690,6 +690,7 @@ private:
     void parseHtml(const QByteArray &ba);
 
     friend class Core;
+    friend class PriceGuideLoaderJob;
 };
 
 class ChangeLogEntry
@@ -893,8 +894,10 @@ private slots:
     void pictureJobFinished(TransferJob *j);
     void priceGuideJobFinished(TransferJob *j);
 
+    void priceGuideLoaded(BrickLink::PriceGuide *pg);
     void pictureLoaded(BrickLink::Picture *pic);
 
+    friend class PriceGuideLoaderJob;
     friend class PictureLoaderJob;
 
 private:
