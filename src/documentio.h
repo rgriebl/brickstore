@@ -75,7 +75,7 @@ private:
     static bool parseLDrawModelInternal(QFile *f, const QString &model_name,
                                         BrickLink::InvItemList &items,
                                         int *invalid_items,
-                                        QHash<uint, BrickLink::InvItem *> &mergehash,
+                                        QHash<QPair<QString, uint>, BrickLink::InvItem *> &mergehash,
                                         QStringList &recursion_detection);
 
     static bool resolveIncomplete(BrickLink::InvItem *item);

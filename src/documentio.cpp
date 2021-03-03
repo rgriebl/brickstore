@@ -386,7 +386,7 @@ Document *DocumentIO::importLDrawModel()
 
 bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items)
 {
-    QHash<uint, BrickLink::InvItem *> mergehash;
+    QHash<QPair<QString, uint>, BrickLink::InvItem *> mergehash;
     QStringList recursion_detection;
 
     stopwatch("parse ldraw model");
@@ -395,8 +395,9 @@ bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *i
                                    recursion_detection);
 }
 
-bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, BrickLink::InvItemList &items,
-                                         int *invalid_items, QHash<uint, BrickLink::InvItem *> &mergehash,
+bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
+                                         BrickLink::InvItemList &items, int *invalid_items,
+                                         QHash<QPair<QString, uint>, BrickLink::InvItem *> &mergehash,
                                          QStringList &recursion_detection)
 {
     if (recursion_detection.contains(model_name))
@@ -455,7 +456,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
                 const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
 
                 if (split.count() >= 15) {
-                    int colid = split.at(1).toInt();
+                    uint colid = split.at(1).toUInt();
                     QString partname = line.mid(split.at(14).position()).toLower();
 
                     QString partid = partname;
@@ -498,7 +499,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
                             continue;
                     }
 
-                    uint key = qHash(partid) ^ uint(colid);
+                    QPair<QString, uint> key = qMakePair(partid, colid);
                     BrickLink::InvItem *ii = mergehash.value(key);
 
                     if (ii) {
