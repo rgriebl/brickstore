@@ -12,6 +12,7 @@ HEADERS += \
   $$PWD/ioapi.h \
   $$PWD/minizip.h \
   $$PWD/unzip.h \
+  $$PWD/zlib_p.h \
 
 SOURCES += \
   $$PWD/ioapi.c \
