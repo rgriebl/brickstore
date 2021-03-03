@@ -374,6 +374,18 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool useCostQtyAg)
     return true;
 }
 
+bool BrickLink::InvItem::Incomplete::operator==(const BrickLink::InvItem::Incomplete &other) const
+{
+    return m_item_id           == other.m_item_id
+            && m_item_name     == other.m_item_name
+            && m_itemtype_id   == other.m_itemtype_id
+            && m_itemtype_name == other.m_itemtype_name
+            && m_color_id      == other.m_color_id
+            && m_color_name    == other.m_color_name
+            && m_category_id   == other.m_category_id
+            && m_category_name == other.m_category_name;
+}
+
 void BrickLink::InvItem::save(QDataStream &ds) const
 {
     ds << QByteArray("II") << qint32(2)

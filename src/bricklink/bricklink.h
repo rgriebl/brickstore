@@ -444,6 +444,8 @@ public:
         QString m_color_name;
         QString m_category_id;
         QString m_category_name;
+
+        bool operator==(const Incomplete &other) const; //TODO: = default in C++20
     };
 
     Incomplete *isIncomplete() const    { return m_incomplete.data(); }

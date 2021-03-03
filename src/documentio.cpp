@@ -324,7 +324,7 @@ Document *DocumentIO::importLDrawModel()
     QScopedPointer<QFile> f;
 
     if (fn.endsWith(QLatin1String(".io"))) {
-        stopwatch("unpack/decrypt studio zip");
+        stopwatch unpack("unpack/decrypt studio zip");
 
         // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
 
@@ -386,28 +386,80 @@ Document *DocumentIO::importLDrawModel()
 
 bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items)
 {
-    QHash<QPair<QString, uint>, BrickLink::InvItem *> mergehash;
-    QStringList recursion_detection;
+    QVector<QString> recursion_detection;
+    QHash<QString, QVector<BrickLink::InvItem *>> subCache;
+    QVector<BrickLink::InvItem *> ldrawItems;
 
-    stopwatch("parse ldraw model");
+    {
+        stopwatch parse("parse ldraw model");
 
-    return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash,
-                                   recursion_detection);
+        if (!parseLDrawModelInternal(f, QString(), ldrawItems, subCache, recursion_detection))
+            return false;
+    }
+    {
+        stopwatch consolidate("removing duplicates");
+        // consolidate everything
+        for (int i = 0; i < ldrawItems.count(); ++i) {
+            if (auto *item = ldrawItems[i]) {
+                for (int j = i + 1; j < ldrawItems.count(); ++j) {
+                    if (auto *&otherItem = ldrawItems[j]) {
+                        if (item == otherItem) {
+                            item->setQuantity(item->quantity() + 1);
+                            otherItem = nullptr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    {
+        stopwatch consolidate("consolidate ldraw model");
+        // consolidate everything
+        for (int i = 0; i < ldrawItems.count(); ++i) {
+            if (auto *item = ldrawItems[i]) {
+                if (invalid_items && item->isIncomplete())
+                    ++*invalid_items;
+
+                for (int j = i + 1; j < ldrawItems.count(); ++j) {
+                    if (auto *&otherItem = ldrawItems[j]) {
+                        bool mergeable = false;
+                        if (!item->isIncomplete() && !otherItem->isIncomplete()) {
+                            mergeable = (item->item() == otherItem->item())
+                                    && (item->color() == otherItem->color());
+                        } else if (item->isIncomplete() && otherItem->isIncomplete()) {
+                            mergeable = (*item->isIncomplete() == *otherItem->isIncomplete());
+                        }
+
+                        if (mergeable) {
+                            item->setQuantity(item->quantity() + otherItem->quantity());
+                            delete otherItem;
+                            otherItem = nullptr;
+                        }
+                    }
+                }
+                items.append(item);
+            }
+        }
+    }
+    return true;
 }
 
 bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
-                                         BrickLink::InvItemList &items, int *invalid_items,
-                                         QHash<QPair<QString, uint>, BrickLink::InvItem *> &mergehash,
-                                         QStringList &recursion_detection)
+                                         QVector<BrickLink::InvItem *> &items,
+                                         QHash<QString, QVector<BrickLink::InvItem *>> &subCache,
+                                         QVector<QString> &recursion_detection)
 {
+    auto it = subCache.constFind(model_name);
+    if (it != subCache.cend()) {
+        items = it.value();
+        return true;
+    }
+
     if (recursion_detection.contains(model_name))
         return false;
     recursion_detection.append(model_name);
 
-    stopwatch("parse sub-dat");
-
     QStringList searchpath;
-    int invalid = 0;
     int linecount = 0;
 
     bool is_mpd = false;
@@ -432,7 +484,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
                 continue;
 
             if (line.at(0) == QLatin1Char('0')) {
-                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
+                const auto split = line.splitRef(QLatin1Char(' '), QString::SkipEmptyParts);
 
                 if ((split.count() >= 2) && (split.at(1) == qL1S("FILE"))) {
                     is_mpd = true;
@@ -453,7 +505,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
                 if (is_mpd && !is_mpd_model_found)
                     continue;
 
-                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
+                const auto split = line.splitRef(QLatin1Char(' '), QString::SkipEmptyParts);
 
                 if (split.count() >= 15) {
                     uint colid = split.at(1).toUInt();
@@ -462,21 +514,18 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
                     QString partid = partname;
                     partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
 
-                    const BrickLink::Color *colp = BrickLink::core()->colorFromLDrawId(colid);
                     const BrickLink::Item *itemp = BrickLink::core()->item('P', partid);
 
                     if (!itemp) {
                         bool got_subfile = false;
+                        QVector<BrickLink::InvItem *> subItems;
 
                         if (is_mpd) {
-                            int sub_invalid_items = 0;
-
                             qint64 oldpos = f->pos();
                             f->seek(0);
 
-                            got_subfile = parseLDrawModelInternal(f, partname, items, &sub_invalid_items, mergehash, recursion_detection);
+                            got_subfile = parseLDrawModelInternal(f, partname, subItems, subCache, recursion_detection);
 
-                            invalid += sub_invalid_items;
                             f->seek(oldpos);
                         }
 
@@ -485,54 +534,44 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name,
                                 QFile subf(path % u'/' % partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
-                                    int sub_invalid_items = 0;
 
-                                    (void) parseLDrawModelInternal(&subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
+                                    (void) parseLDrawModelInternal(&subf, partname, subItems, subCache, recursion_detection);
 
-                                    invalid += sub_invalid_items;
                                     got_subfile = true;
                                     break;
                                 }
                             }
                         }
-                        if (got_subfile)
+                        if (got_subfile) {
+                            subCache.insert(partname, subItems);
+                            items.append(subItems);
                             continue;
-                    }
-
-                    QPair<QString, uint> key = qMakePair(partid, colid);
-                    BrickLink::InvItem *ii = mergehash.value(key);
-
-                    if (ii) {
-                        ii->setQuantity(ii->quantity() + 1);
-                    } else {
-                        ii = new BrickLink::InvItem(colp, itemp);
-                        ii->setQuantity(1);
-
-                        if (!colp || !itemp) {
-                            auto *inc = new BrickLink::InvItem::Incomplete;
-
-                            if (!itemp) {
-                                inc->m_item_id = partid;
-                                inc->m_itemtype_id = qL1S("P");
-                                inc->m_itemtype_name = qL1S("Part");
-                            }
-                            if (!colp) {
-                                inc->m_color_name = qL1S("LDraw #") + QByteArray::number(colid);
-                            }
-                            ii->setIncomplete(inc);
-                            invalid++;
                         }
-
-                        items.append(ii);
-                        mergehash.insert(key, ii);
                     }
+
+                    const BrickLink::Color *colp = BrickLink::core()->colorFromLDrawId(colid);
+
+                    auto *item = new BrickLink::InvItem(colp, itemp);
+                    item->setQuantity(1);
+
+                    if (!colp || !itemp) {
+                        auto *inc = new BrickLink::InvItem::Incomplete;
+
+                        if (!itemp) {
+                            inc->m_item_id = partid;
+                            inc->m_itemtype_id = qL1S("P");
+                            inc->m_itemtype_name = qL1S("Part");
+                        }
+                        if (!colp) {
+                            inc->m_color_name = qL1S("LDraw #") + QByteArray::number(colid);
+                        }
+                        item->setIncomplete(inc);
+                    }
+                    items.append(item);
                 }
             }
         }
     }
-
-    if (invalid_items)
-        *invalid_items = invalid;
 
     recursion_detection.removeLast();
 
