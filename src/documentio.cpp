@@ -408,7 +408,7 @@ Document *DocumentIO::importLDrawModel()
 
 bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items)
 {
-    QHash<QString, BrickLink::InvItem *> mergehash;
+    QHash<uint, BrickLink::InvItem *> mergehash;
     QStringList recursion_detection;
 
     return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash,
@@ -416,7 +416,7 @@ bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *i
 }
 
 bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, BrickLink::InvItemList &items,
-                                         int *invalid_items, QHash<QString, BrickLink::InvItem *> &mergehash,
+                                         int *invalid_items, QHash<uint, BrickLink::InvItem *> &mergehash,
                                          QStringList &recursion_detection)
 {
     if (recursion_detection.contains(model_name))
@@ -445,14 +445,15 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
         while (!(line = in.readLine()).isNull()) {
             linecount++;
 
-            if (!line.isEmpty() && line [0] == QLatin1Char('0')) {
-                QStringList sl = line.simplified().split(' ');
+            if (line.isEmpty())
+                continue;
 
-                if ((sl.count() >= 2) && (sl [1] == qL1S("FILE"))) {
+            if (line.at(0) == QLatin1Char('0')) {
+                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
+
+                if ((split.count() >= 2) && (split.at(1) == qL1S("FILE"))) {
                     is_mpd = true;
-                    sl.removeFirst();
-                    sl.removeFirst();
-                    current_mpd_model = sl.join(qL1S(" ")).toLower();
+                    current_mpd_model = line.mid(split.at(2).position()).toLower();
                     current_mpd_index++;
 
                     if (is_mpd_model_found)
@@ -464,20 +465,16 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
                     if (f->isSequential())
                         return false; // we need to seek!
                 }
-            }
-            else if (!line.isEmpty() && line [0] == QLatin1Char('1')) {
+
+            } else if (line.at(0) == QLatin1Char('1')) {
                 if (is_mpd && !is_mpd_model_found)
                     continue;
 
-                QStringList sl = line.simplified().split(QLatin1Char(' '));
+                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
 
-                if (sl.count() >= 15) {
-                    int colid = sl[1].toInt();
-                    QString partname = sl[14].toLower();
-                    for (int i = 15; i < sl.count(); ++i) {
-                        partname.append(QLatin1Char(' '));
-                        partname.append(sl[i].toLower());
-                    }
+                if (split.count() >= 15) {
+                    int colid = split.at(1).toInt();
+                    QString partname = line.mid(split.at(14).position()).toLower();
 
                     QString partid = partname;
                     partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
@@ -502,7 +499,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
 
                         if (!got_subfile) {
                             for (const auto &path : qAsConst(searchpath)) {
-                                QFile subf(path + QDir::separator() + partname);
+                                QFile subf(path % u'/' % partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
                                     int sub_invalid_items = 0;
@@ -519,8 +516,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
                             continue;
                     }
 
-                    QString key = QString("%1@%2").arg(partid).arg(colid);
-
+                    uint key = qHash(partid) ^ uint(colid);
                     BrickLink::InvItem *ii = mergehash.value(key);
 
                     if (ii) {
