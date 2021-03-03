@@ -1288,7 +1288,7 @@ bool FrameWork::checkBrickLinkLogin()
 
         if (MessageBox::question(this, { },
                                  tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
-                                 ) == MessageBox::Yes)
+                                 ) == QMessageBox::Yes)
             showSettings("bricklink");
         else
             return false;
@@ -1341,8 +1341,8 @@ bool FrameWork::restoreWindowsFromAutosave()
     if (restorable > 0) {
         bool b = (MessageBox::question(this, tr("Restore Documents"), tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
                                        % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
-                                       MessageBox::Yes | MessageBox::No, MessageBox::Yes)
-                  == MessageBox::Yes);
+                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
+                  == QMessageBox::Yes);
 
         auto restoredWindows = Window::processAutosaves(b ? Window::AutosaveAction::Restore
                                                           : Window::AutosaveAction::Delete);
@@ -1815,7 +1815,7 @@ void FrameWork::cancelAllTransfers(bool force)
 {
     if (force || (MessageBox::question(nullptr, { },
                                        tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?")
-                                       ) == MessageBox::Yes)) {
+                                       ) == QMessageBox::Yes)) {
         BrickLink::core()->cancelPictureTransfers();
         BrickLink::core()->cancelPriceGuideTransfers();
     }

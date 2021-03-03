@@ -2530,8 +2530,8 @@ Document::ItemList Window::exportCheck() const
         if (MessageBox::question(nullptr, { },
                                  tr("There are %n item(s) selected.<br /><br />Do you want to export only these items?",
                                     nullptr, selection().count()),
-                                 MessageBox::Yes | MessageBox::No, MessageBox::Yes
-                                 ) == MessageBox::Yes) {
+                                 QMessageBox::Yes | QMessageBox::No, MessageBox::Yes
+                                 ) == QMessageBox::Yes) {
             items = selection();
         }
     }

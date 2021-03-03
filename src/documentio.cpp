@@ -277,10 +277,9 @@ Window *DocumentIO::loadFrom(const QString &name)
         BsxContents result = DocumentIO::parseBsxInventory(&f); // we own the items now
 
         if (result.invalidItemCount) {
-            if (MessageBox::information(nullptr, { },
-                                        tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                           nullptr, result.invalidItemCount),
-                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            if (MessageBox::question(nullptr, { },
+                                     tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
+                                        nullptr, result.invalidItemCount)) == QMessageBox::Yes) {
                 result.invalidItemCount = 0;
             }
         }
@@ -361,10 +360,9 @@ Document *DocumentIO::importLDrawModel()
 
     if (b && !items.isEmpty()) {
         if (invalid_items) {
-            if (MessageBox::information(nullptr, { },
-                                        tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                           nullptr, invalid_items),
-                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            if (MessageBox::question(nullptr, { },
+                                     tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
+                                        nullptr, invalid_items)) == QMessageBox::Yes) {
                 invalid_items = 0;
             }
         }
