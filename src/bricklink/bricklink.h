@@ -908,8 +908,9 @@ private:
     QString  m_datadir;
     bool     m_online = false;
 
-    mutable QHash<QString, QImage>  m_noImageCache;
-    mutable QHash<QString, QImage>  m_colorImageCache;
+    QIcon                           m_noImageIcon;
+    mutable QHash<uint, QImage>     m_noImageCache;
+    mutable QHash<uint, QImage>     m_colorImageCache;
 
     std::vector<const Color *>      m_colors;      // id ->Color *
     std::vector<const Category *>   m_categories;  // id ->Category *

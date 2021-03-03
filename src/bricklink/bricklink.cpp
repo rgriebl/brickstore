@@ -187,40 +187,11 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
 
 const QImage Core::noImage(const QSize &s) const
 {
-    QString key = QString("%1x%2").arg(s.width()).arg(s.height());
-
+    uint key = uint(s.width() << 16) | uint(s.height());
     QImage img = m_noImageCache.value(key);
 
     if (img.isNull()) {
-        img = QImage(s, QImage::Format_ARGB32_Premultiplied);
-        QPainter p(&img);
-        p.setRenderHints(QPainter::Antialiasing);
-
-        int w = img.width();
-        int h = img.height();
-        bool high = (w < h);
-
-        p.fillRect(0, 0, w, h, Qt::white);
-
-        QRect r(high ? 0 : (w - h) / 2, high ? (w -h) / 2 : 0, high ? w : h, high ? w : h);
-        int w4 = r.width() / 4;
-        r.adjust(w4, w4, -w4, -w4);
-
-        static const QColor coltable [] = {
-            QColor(0x00, 0x00, 0x00),
-            QColor(0x3f, 0x3f, 0x3f),
-            QColor(0xff, 0x7f, 0x7f)
-        };
-
-        for (const auto &i : coltable) {
-            r.adjust(-1, -1, -1, -1);
-
-            p.setPen(QPen(i, w / 7, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            p.drawLine(r.x(), r.y(), r.right(), r.bottom());
-            p.drawLine(r.right(), r.y(), r.x(), r.bottom());
-        }
-        p.end();
-
+        img = m_noImageIcon.pixmap(nullptr, s).toImage();
         m_noImageCache.insert(key, img);
     }
     return img;
@@ -232,8 +203,8 @@ const QImage Core::colorImage(const Color *col, int w, int h) const
     if (!col || w <= 0 || h <= 0)
         return QImage();
 
-    QString key = QString("%1:%2x%3").arg(col->id()).arg(w).arg(h);
-
+    //TODO for Qt6: use more than 10/11/11 bits ... qHash is 64bit wide now
+    uint key = uint(col->id() << 22) | uint(w << 11) | uint(h);
     QImage img = m_colorImageCache.value(key);
 
     if (img.isNull()) {
@@ -393,6 +364,7 @@ Core *Core::create(const QString &datadir, QString *errstring)
 
 Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
+    , m_noImageIcon(QIcon::fromTheme("image-missing-large"))
 {
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
