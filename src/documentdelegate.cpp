@@ -768,7 +768,6 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
         if (dblclick || (keypress && editkey)) {
             if (!m_select_item) {
                 m_select_item = new SelectItemDialog(false, m_table);
-                m_select_item->setWindowFlag(Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
             }
             auto item = idx.data(Qt::EditRole).value<const BrickLink::Item *>();
@@ -787,7 +786,6 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
         if (dblclick || (keypress && editkey)) {
             if (!m_select_color) {
                 m_select_color = new SelectColorDialog(m_table);
-                m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
             auto color = idx.data(Qt::EditRole).value<const BrickLink::Color *>();

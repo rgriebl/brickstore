@@ -59,10 +59,40 @@ void SelectColorDialog::checkColor(const BrickLink::Color *col, bool ok)
 
 int SelectColorDialog::execAtPosition(const QRect &pos)
 {
+    setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
     m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
-
 }
+
+#if defined(Q_OS_LINUX)
+
+void SelectColorDialog::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::WindowStateChange) {
+        if (windowState() & Qt::WindowMaximized)
+            QMetaObject::invokeMethod(this, [this]() {
+                setWindowState(Qt::WindowNoState | Qt::WindowActive);
+                Utility::setPopupPos(this, m_pos);
+            }, Qt::QueuedConnection);
+    }
+    return QDialog::changeEvent(e);
+}
+#elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
+
+bool SelectColorDialog::event(QEvent *e)
+{
+    if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
+        if (m_pos.isValid()) {
+            QMetaObject::invokeMethod(this, [this]() {
+                Utility::setPopupPos(this, m_pos);
+            }, Qt::QueuedConnection);
+            return true;
+        }
+    }
+    return QDialog::event(e);
+}
+#endif
 
 void SelectColorDialog::showEvent(QShowEvent *e)
 {
@@ -70,9 +100,11 @@ void SelectColorDialog::showEvent(QShowEvent *e)
 
     activateWindow();
     w_sc->setFocus();
+
     if (m_pos.isValid()) {
-        Utility::setPopupPos(this, m_pos);
-        m_pos = QRect();
+        QMetaObject::invokeMethod(this, [this]() {
+            Utility::setPopupPos(this, m_pos);
+        }, Qt::QueuedConnection);
     }
 }
 

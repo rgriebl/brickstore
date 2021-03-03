@@ -62,9 +62,40 @@ void SelectItemDialog::checkItem(const BrickLink::Item *item, bool ok)
 
 int SelectItemDialog::execAtPosition(const QRect &pos)
 {
+    setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
     m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
 }
+
+#if defined(Q_OS_LINUX)
+
+void SelectItemDialog::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::WindowStateChange) {
+        if (windowState() & Qt::WindowMaximized)
+            QMetaObject::invokeMethod(this, [this]() {
+                setWindowState(Qt::WindowNoState | Qt::WindowActive);
+                Utility::setPopupPos(this, m_pos);
+            }, Qt::QueuedConnection);
+    }
+    return QDialog::changeEvent(e);
+}
+#elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
+
+bool SelectItemDialog::event(QEvent *e)
+{
+    if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
+        if (m_pos.isValid()) {
+            QMetaObject::invokeMethod(this, [this]() {
+                Utility::setPopupPos(this, m_pos);
+            }, Qt::QueuedConnection);
+            return true;
+        }
+    }
+    return QDialog::event(e);
+}
+#endif
 
 void SelectItemDialog::showEvent(QShowEvent *e)
 {
@@ -74,8 +105,9 @@ void SelectItemDialog::showEvent(QShowEvent *e)
     w_si->setFocus();
 
     if (m_pos.isValid()) {
-        Utility::setPopupPos(this, m_pos);
-        m_pos = QRect();
+        QMetaObject::invokeMethod(this, [this]() {
+            Utility::setPopupPos(this, m_pos);
+        }, Qt::QueuedConnection);
     }
 }
 
