@@ -67,7 +67,7 @@ Window *DocumentIO::open()
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") + " (*.bsx)";
-    filters << tr("All Files") + "(*.*)";
+    filters << tr("All Files") + "(*)";
 
     auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), lastDirectory(),
                                            filters.join(";;"));
@@ -239,7 +239,7 @@ Document *DocumentIO::importBrickLinkXML()
 {
     QStringList filters;
     filters << tr("BrickLink XML File") + " (*.xml)";
-    filters << tr("All Files") + "(*.*)";
+    filters << tr("All Files") + "(*)";
 
     QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
                                              filters.join(";;"));
@@ -310,10 +310,10 @@ Window *DocumentIO::loadFrom(const QString &name)
 Document *DocumentIO::importLDrawModel()
 {
     QStringList filters;
-    filters << tr("All Models") + " (*.dat;*.ldr;*.mpd;*.io)";
-    filters << tr("LDraw Models") + " (*.dat;*.ldr;*.mpd)";
+    filters << tr("All Models") + " (*.dat *.ldr *.mpd *.io)";
+    filters << tr("LDraw Models") + " (*.dat *.ldr *.mpd)";
     filters << tr("BrickLink Studio Models") + " (*.io)";
-    filters << tr("All Files") + " (*.*)";
+    filters << tr("All Files") + " (*)";
 
     QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
                                              filters.join(";;"));
