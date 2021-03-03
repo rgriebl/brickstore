@@ -37,6 +37,7 @@
 #include "utility.h"
 #include "document.h"
 #include "window.h"
+#include "stopwatch.h"
 #include "documentio.h"
 
 #include "unzip.h"
@@ -324,6 +325,8 @@ Document *DocumentIO::importLDrawModel()
     QScopedPointer<QFile> f;
 
     if (fn.endsWith(QLatin1String(".io"))) {
+        stopwatch("unpack/decrypt studio zip");
+
         // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
 
         f.reset(new QTemporaryFile());
@@ -411,6 +414,8 @@ bool DocumentIO::parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *i
     QHash<uint, BrickLink::InvItem *> mergehash;
     QStringList recursion_detection;
 
+    stopwatch("parse ldraw model");
+
     return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash,
                                    recursion_detection);
 }
@@ -422,6 +427,8 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &model_name, Br
     if (recursion_detection.contains(model_name))
         return false;
     recursion_detection.append(model_name);
+
+    stopwatch("parse sub-dat");
 
     QStringList searchpath;
     int invalid = 0;
