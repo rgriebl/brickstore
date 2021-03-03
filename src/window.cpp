@@ -123,7 +123,8 @@ void Window::applyTo(const Document::ItemList &items,
 
 
 ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
-    : m_window(window)
+    : QObject(window)
+    , m_window(window)
     , m_header(header)
 {
     // redirect the signals, so that we can block the them while we are applying new values
@@ -432,23 +433,21 @@ StatusBar::StatusBar(Window *window)
 void StatusBar::updateCurrencyRates()
 {
     delete m_currency->menu();
-    auto m = new QMenu();
+    auto m = new QMenu(m_currency);
 
     QString defCurrency = Config::inst()->defaultCurrencyCode();
 
     if (!defCurrency.isEmpty()) {
-        auto a = new QAction(tr("Default currency (%1)").arg(defCurrency));
+        auto a = m->addAction(tr("Default currency (%1)").arg(defCurrency));
         a->setObjectName(defCurrency);
-        m->addAction(a);
         m->addSeparator();
     }
 
     foreach (const QString &c, Currency::inst()->currencyCodes()) {
-        auto a = new QAction(c);
+        auto a = m->addAction(c);
         a->setObjectName(c);
         if (c == m_doc->currencyCode())
             a->setEnabled(false);
-        m->addAction(a);
     }
     m_currency->setMenu(m);
 }
@@ -723,7 +722,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     setFocusProxy(w_list);
 
     connect(doc->undoStack(), &QUndoStack::indexChanged,
-            [this]() { m_autosaveClean = false; });
+            this, [this]() { m_autosaveClean = false; });
     connect(&m_autosaveTimer, &QTimer::timeout,
             this, &Window::autosave);
     m_autosaveTimer.start(1min); // every minute

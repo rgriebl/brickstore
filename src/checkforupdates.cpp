@@ -93,7 +93,7 @@ void CheckForUpdates::check(bool silent)
                 qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
             auto assets = doc["assets"].toArray();
             m_installerUrl.clear();
-            for (const QJsonValue asset : assets) {
+            for (const QJsonValue &asset : assets) {
                 QString name = asset["name"].toString();
 #if defined(Q_OS_MACOS)
                 if (name.startsWith("macOS-")) {

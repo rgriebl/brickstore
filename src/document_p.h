@@ -46,7 +46,7 @@ class ChangeCmd : public QUndoCommand
 {
 public:
     ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes,
-              Document::Field hint = Document::Field(-1));
+              Document::Field hint = Document::FieldCount);
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
 

@@ -113,7 +113,8 @@ void ProgressCircle::resizeEvent(QResizeEvent *)
 
 void ProgressCircle::mousePressEvent(QMouseEvent *e)
 {
-    QMenu *m = new QMenu();
+    QMenu *m = new QMenu(this);
+    connect(m, &QMenu::aboutToHide, m, &QObject::deleteLater);
     auto *a = m->addAction(tr("Cancel all active downloads"));
     a->setEnabled(m_online && ((m_value >= m_min) && (m_value < m_max)));
     connect(a, &QAction::triggered, this, &ProgressCircle::cancelAll);

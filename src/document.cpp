@@ -251,8 +251,8 @@ void ChangeCmd::updateText()
     setText(QCoreApplication::translate("ChangeCmd", "Modified %1 on %Ln item(s)", nullptr,
                                         int(m_changes.size()))
             //: Generic undo/redo text for table edits: if more than one column was edited at once
-            .arg((int(m_hint) >= 0) ? m_doc->headerData(m_hint, Qt::Horizontal).toString()
-                                    : QCoreApplication::translate("ChangeCmd", "multiple fields")));
+            .arg((m_hint < Document::FieldCount) ? m_doc->headerData(m_hint, Qt::Horizontal).toString()
+                                                 : QCoreApplication::translate("ChangeCmd", "multiple fields")));
 }
 
 int ChangeCmd::id() const

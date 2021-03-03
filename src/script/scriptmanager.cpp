@@ -51,6 +51,9 @@ ScriptManager::~ScriptManager()
 {
     clearScripts();
     s_inst = nullptr;
+
+    delete m_brickLink;
+    delete m_brickStore;
 }
 
 ScriptManager *ScriptManager::s_inst = nullptr;
