@@ -687,10 +687,10 @@ private:
     PriceGuide(const Item *item, const Color *color);
 
     QFile *file(QIODevice::OpenMode openMode) const;
-    bool loadFromDisk(QDateTime &fetched, Data &data);
+    bool loadFromDisk(QDateTime &fetched, Data &data) const;
     void saveToDisk(const QDateTime &fetched, const Data &data);
 
-    bool parse(const QByteArray &ba, Data &result);
+    bool parse(const QByteArray &ba, Data &result) const;
     bool parseHtml(const QByteArray &ba, Data &result);
 
     friend class Core;

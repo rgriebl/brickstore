@@ -154,7 +154,7 @@ QFile *BrickLink::PriceGuide::file(QIODevice::OpenMode openMode) const
     return BrickLink::core()->dataFile(u"priceguide.txt", openMode, m_item, m_color);
 }
 
-bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data)
+bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
 {
     if (!m_item || !m_color)
         return false;
@@ -170,7 +170,7 @@ bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data)
     return false;
 }
 
-bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result)
+bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
 {
     result = { };
 

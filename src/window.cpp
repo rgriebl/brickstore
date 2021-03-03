@@ -1426,6 +1426,12 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_setToPG && pg) {
         const auto items = m_setToPG->priceGuides.values(pg);
+
+        if (items.isEmpty())
+            return; // not a PG requested by us
+        if (pg->updateStatus() == BrickLink::UpdateStatus::Updating)
+            return; // loaded now, but still needs an online update
+
         for (auto item : items) {
             if (!m_setToPG->canceled) {
                 double price = pg->isValid() ? (pg->price(m_setToPG->time, item->condition(),
