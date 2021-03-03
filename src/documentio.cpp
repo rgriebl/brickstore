@@ -662,7 +662,8 @@ void DocumentIO::exportBrickLinkInvReqClipboard(const BrickLink::InvItemList &it
 
     QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
-    BrickLink::core()->openUrl(BrickLink::URL_InventoryRequest);
+    if (Config::inst()->openBrowserOnExport())
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryRequest);
 }
 
 void DocumentIO::exportBrickLinkWantedListClipboard(const BrickLink::InvItemList &itemlist)
@@ -698,7 +699,8 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const BrickLink::InvItemList
 
         QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
-        BrickLink::core()->openUrl(BrickLink::URL_WantedListUpload);
+        if (Config::inst()->openBrowserOnExport())
+            BrickLink::core()->openUrl(BrickLink::URL_WantedListUpload);
     }
 }
 
@@ -831,7 +833,8 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
 
     QGuiApplication::clipboard()->setText(xml.toString(), QClipboard::Clipboard);
 
-    BrickLink::core()->openUrl(BrickLink::URL_InventoryUpdate);
+    if (Config::inst()->openBrowserOnExport())
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryUpdate);
 }
 
 QString DocumentIO::toBrickLinkXML(const BrickLink::InvItemList &itemlist)
@@ -1034,7 +1037,8 @@ void DocumentIO::exportBrickLinkXMLClipboard(const BrickLink::InvItemList &iteml
 
     QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
 
-    BrickLink::core()->openUrl(BrickLink::URL_InventoryUpload);
+    if (Config::inst()->openBrowserOnExport())
+        BrickLink::core()->openUrl(BrickLink::URL_InventoryUpload);
 }
 
 

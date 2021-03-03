@@ -523,7 +523,7 @@ void Config::setPartOutMode(Config::PartOutMode pom)
     setValue("General/PartOutMode", int(pom));
 }
 
-bool Config::visualChangesMarkModified()
+bool Config::visualChangesMarkModified() const
 {
     return value("General/VisualChangesMarkModified", false).toBool();
 }
@@ -536,14 +536,24 @@ void Config::setVisualChangesMarkModified(bool b)
     }
 }
 
-bool Config::restoreLastSession()
+bool Config::restoreLastSession() const
 {
-    return value("General/RestoreLastSession", false).toBool();
+    return value("General/RestoreLastSession", true).toBool();
 }
 
 void Config::setRestoreLastSession(bool b)
 {
     setValue("General/RestoreLastSession", b);
+}
+
+bool Config::openBrowserOnExport() const
+{
+    return value("/General/Export/OpenBrowser", true).toBool();
+}
+
+void Config::setOpenBrowserOnExport(bool b)
+{
+    setValue("/General/Export/OpenBrowser", b);
 }
 
 QVector<Config::Translation> Config::translations() const

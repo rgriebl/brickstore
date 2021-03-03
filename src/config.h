@@ -59,11 +59,14 @@ public:
     PartOutMode partOutMode() const;
     void setPartOutMode(PartOutMode pom);
 
-    bool visualChangesMarkModified();
+    bool visualChangesMarkModified() const;
     void setVisualChangesMarkModified(bool b);
 
-    bool restoreLastSession();
+    bool restoreLastSession() const;
     void setRestoreLastSession(bool b);
+
+    bool openBrowserOnExport() const;
+    void setOpenBrowserOnExport(bool b);
 
     QStringList recentFiles() const;
 
