@@ -38,9 +38,8 @@
 #include "document.h"
 #include "window.h"
 #include "stopwatch.h"
+#include "minizip.h"
 #include "documentio.h"
-
-#include "unzip.h"
 
 
 QString DocumentIO::s_lastDirectory { };
@@ -330,40 +329,16 @@ Document *DocumentIO::importLDrawModel()
         // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
 
         f.reset(new QTemporaryFile());
-        QString errorMsg;
 
         if (f->open(QIODevice::ReadWrite)) {
-            QByteArray su8 = fn.toUtf8();
-            if (auto zip = unzOpen64(su8.constData())) {
-                if (unzLocateFile(zip, "model.ldr", 2 /*case insensitive*/) == UNZ_OK) {
-                    if (unzOpenCurrentFilePassword(zip, "soho0909") == UNZ_OK) {
-                        QByteArray block;
-                        block.resize(1024*1024);
-                        int bytesRead;
-                        do {
-                            bytesRead = unzReadCurrentFile(zip, block.data(), block.size());
-                            if (bytesRead > 0)
-                                f->write(block.constData(), bytesRead);
-                        } while (bytesRead > 0);
-                        if (bytesRead < 0)
-                            errorMsg = tr("Could not extract model.ldr from the Studio ZIP file.");
-                        unzCloseCurrentFile(zip);
-                    } else {
-                        errorMsg = tr("Could not decrypt the model.ldr within the Studio ZIP file.");
-                    }
-                } else {
-                    errorMsg = tr("Could not locate the model.ldr file within the Studio ZIP file.");
-                }
-                unzClose(zip);
-            } else {
-                errorMsg = tr("Could not open the Studio ZIP file");
+            try {
+                MiniZip::unzip(fn, f.get(), "model.ldr", "soho0909");
+                f->close();
+            } catch (const Exception &e) {
+                MessageBox::warning(nullptr, { }, tr("Could not parse the Studio model:")
+                                    % u"<br><br>" % e.error());
+                return nullptr;
             }
-            f->close();
-        }
-        if (!errorMsg.isEmpty()) {
-            MessageBox::warning(nullptr, { }, tr("Could not parse the Studio model:")
-                                % u"<br><br>" % errorMsg);
-            return nullptr;
         }
     } else {
         f.reset(new QFile(fn));

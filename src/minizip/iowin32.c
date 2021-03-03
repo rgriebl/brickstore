@@ -17,6 +17,8 @@
 #include "ioapi.h"
 #include "iowin32.h"
 
+#include <windows.h>
+
 #ifndef INVALID_HANDLE_VALUE
 #define INVALID_HANDLE_VALUE (0xFFFFFFFF)
 #endif

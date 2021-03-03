@@ -11,8 +11,7 @@
 
 */
 
-#include <windows.h>
-
+//#include <windows.h>
 
 #ifdef __cplusplus
 extern "C" {
