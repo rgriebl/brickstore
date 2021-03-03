@@ -3,6 +3,47 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.3.1] - 2021-03-04
+### Added
+- *Import LDraw Model* can now import BrickLink Studio models as well.
+- Editing a field while multiple rows are selected will change the value in all selected rows.
+  You can also navigate within a selection with `Ctrl+cursor keys` (`Cmd` on macOS), so you don't
+  have to use your mouse at all.
+- *Copy remarks from document* got extended to *Copy fields from document* and can now copy and
+  merge any field in multiple ways from one document to another (e.g. merging in prices from another
+  document using weighted averages).
+- The context menu is really context sensitive now and will only show specific field commands for
+  the clicked column.
+- BrickStore will now restore all the saved documents in your last session on startup (this can be
+  disabled in the settings dialog).
+- The separate *Difference Mode* is gone. Instead it is always active and works on all fields. Just
+  like with errors, you can choose to show or hide the difference markers via the `View` menu. This
+  makes it possible to *Mass-Update* all possible fields in your BrickLink store from within
+  BrickStore.
+- The status bar moved to the top of the document and got more interactive: clicking on `Errors` or 
+  `Differences` will jump to the next one (also available on the keyboard: `F5` or `F6`).
+
+### Improvements
+- Sorting and filtering are now independent operations again: the filter edit has a specific 
+  re-apply filter button now and clicking on the last sorted column header will re-sort the list.
+- All import dialogs are non-modal now to allow multiple imports easily.
+- High-DPI support has been enhanced.
+- Multi-threaded price guide loading to (partially) compensate for the slow I/O on Windows.
+- Faster document loading and saving.
+- Undo/redo actions are now named exactly after the action that triggered them.
+- The update check can now download and start the new installer for you.
+- All numbers should now show with localized thousand's separators.
+- Set-to-price-guide will now block the current document until it is finished. This is to prevent
+  odd behavior if you played around with undo/redo too much while the download was happening in the
+  background, plus you can undo the whole operation in a single click on *Undo* now.
+- Clicking on the logo/progress circle in the top, right corner gives you the option to cancel all
+  current downloads (pictures and price guides).
+- Updating the BrickLink order list is a lot faster now.
+- There is now an option to set a default for part-out operations within documents.
+- All open and save file dialogs remember the last used directory during a session.
+- Renovated the price increase/decrease dialog.
+
+
 ## [2021.2.2] - 2021-02-17
 This is a quick-fix release for 2021.2.1: it adds the missing German translation and fixes a bug
 where the language would sometimes revert to English.
@@ -181,7 +222,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.1...HEAD
+[2021.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.1
 [2021.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.2
 [2021.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.1
 [2021.2.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.0
