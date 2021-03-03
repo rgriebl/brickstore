@@ -67,7 +67,7 @@
         <location filename="../src/additemdialog.ui" line="138"/>
         <source>&amp;Bulk</source>
         <translatorcomment>Warning &amp;L is used by Conso&amp;lidate</translatorcomment>
-        <translation>Par l&amp;ots</translation>
+        <translation>L&amp;ots</translation>
     </message>
     <message>
         <location filename="../src/additemdialog.ui" line="429"/>
@@ -229,12 +229,14 @@
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="127"/>
         <source>Name</source>
-        <translation>Nom</translation>
+        <translatorcomment>Add window for ex./Color list/sort order, lowcase in FR</translatorcomment>
+        <translation>nom</translation>
     </message>
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="127"/>
         <source>Hue</source>
-        <translation>Teinte</translation>
+        <translatorcomment>Add window for ex./Color list/sort order, lowcase in FR</translatorcomment>
+        <translation>teinte</translation>
     </message>
 </context>
 <context>
@@ -250,7 +252,7 @@
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="855"/>
         <source>Qty.</source>
-        <translation>Qté.</translation>
+        <translation>Qté</translation>
     </message>
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="856"/>
@@ -276,7 +278,7 @@
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="538"/>
         <source>Part #</source>
-        <translation>Réf. art.</translation>
+        <translation>Référence</translation>
     </message>
     <message>
         <location filename="../src/bricklink/bricklink_model.cpp" line="539"/>
@@ -409,7 +411,7 @@
     <message>
         <location filename="../src/checkforupdates.cpp" line="243"/>
         <source>Downloading installer</source>
-        <translation>Télécharge l&apos;installateur</translation>
+        <translation>Téléchargement de l&apos;installateur</translation>
     </message>
     <message>
         <location filename="../src/checkforupdates.cpp" line="250"/>
@@ -494,7 +496,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/utility/currency.cpp" line="157"/>
         <source>There was an error downloading the exchange rates from the ECB server:&lt;br&gt;%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Il y a eu une erreur lors du téléchargement des taux de change sur le serveur ECB:&lt;br&gt;%1</translation>
     </message>
     <message>
         <location filename="../src/utility/currency.cpp" line="182"/>
@@ -549,7 +551,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <location filename="../src/document.cpp" line="1476"/>
         <source>X</source>
         <comment>Filter&gt;Status&gt;Extra</comment>
-        <translation>X</translation>
+        <translation type="unfinished">X</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1478"/>
@@ -605,7 +607,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/document.cpp" line="1357"/>
         <source>Part #</source>
-        <translation>Réf. art.</translation>
+        <translation>Réf</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1358"/>
@@ -625,32 +627,32 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/document.cpp" line="1361"/>
         <source>Qty.Orig</source>
-        <translation>Qté. orig.</translation>
+        <translation>Qté orig</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1362"/>
         <source>Qty.Diff</source>
-        <translation>Diff. qté.</translation>
+        <translation>Diff qté</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1363"/>
         <source>Qty.</source>
-        <translation>Qté.</translation>
+        <translation>Qté</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1364"/>
         <source>Bulk</source>
-        <translation>Par lots</translation>
+        <translation>Lots</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1365"/>
         <source>Pr.Orig</source>
-        <translation>Pr. orig.</translation>
+        <translation>Px orig</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1366"/>
         <source>Pr.Diff</source>
-        <translation>Diff. pr.</translation>
+        <translation>Diff px</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1367"/>
@@ -690,7 +692,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/document.cpp" line="1374"/>
         <source>Item Type</source>
-        <translation>Type art.</translation>
+        <translation>Type</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1375"/>
@@ -725,7 +727,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/document.cpp" line="1381"/>
         <source>Lot Id</source>
-        <translation type="unfinished">ID de lot</translation>
+        <translation>ID</translation>
     </message>
     <message>
         <location filename="../src/document.cpp" line="1382"/>
@@ -756,8 +758,8 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/document.cpp" line="1824"/>
         <source>Any</source>
-        <translatorcomment>@rgriebl means? where is it?</translatorcomment>
-        <translation type="unfinished">Tous</translation>
+        <translatorcomment>Filter tooltip, for &quot;Any field&quot;</translatorcomment>
+        <translation>Tous</translation>
     </message>
 </context>
 <context>
@@ -801,7 +803,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <location filename="../src/documentdelegate.cpp" line="731"/>
         <source>X</source>
         <comment>set status to extra</comment>
-        <translation>X</translation>
+        <translation type="unfinished">X</translation>
     </message>
     <message>
         <location filename="../src/documentdelegate.cpp" line="772"/>
@@ -1027,55 +1029,61 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/documentio.cpp" line="733"/>
         <source>This document has no differences that could be exported.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ce document ne présente pas de différence qui puisse être exportée.</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/documentio.cpp" line="281"/>
         <location filename="../src/documentio.cpp" line="387"/>
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Ce fichier contient %n article inconnu.&lt;br /&gt;&lt;br /&gt;Voulez-vous quand même ouvrir ce fichier?</numerusform>
+            <numerusform>Ce fichier contient %n articles inconnus.&lt;br /&gt;&lt;br /&gt;Voulez-vous quand même ouvrir ce fichier?</numerusform>
         </translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="304"/>
         <source>This XML document is not a valid BrickStoreXML file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Assuming BrickStoreXML is a format name?</translatorcomment>
+        <translation>Ce document XML n&apos;est pas un fichier BrickStoreXML valide.</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="313"/>
         <source>All Models</source>
+        <translatorcomment>@rgriebl context? -&gt; the file type filters selection in the open file dialog for &quot;import ldraw models&quot;</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="315"/>
         <source>BrickLink Studio Models</source>
+        <translatorcomment>@rgriebl context? see above</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="346"/>
         <source>Could not extract model.ldr from the Studio ZIP file.</source>
-        <translation type="unfinished"></translation>
+        <translation>N&apos;est pas arrivé à extraire model.ldr du fichier ZIP Studio.</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="349"/>
         <source>Could not decrypt the model.ldr within the Studio ZIP file.</source>
+        <translatorcomment>@rgriebl wouldn&apos;t say decrypt, it&apos;s not encrypted, maybe parse?  -&gt; it IS encrypted, that&apos;s why you need the &quot;secret&quot; password</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="352"/>
         <source>Could not locate the model.ldr file within the Studio ZIP file.</source>
-        <translation type="unfinished"></translation>
+        <translation>N&apos;est pas arrivé à localiser le fichier model.ldr dans le fichier ZIP Studio.</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="356"/>
         <source>Could not open the Studio ZIP file</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>@rgriebl errors terminate with dot? -&gt;  you are right: just translate it, I&apos;ll fix it afterwards</translatorcomment>
+        <translation type="unfinished">N&apos;est pas arrivé à ouvrir le fichier ZIP Studio</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="361"/>
         <source>Could not parse the Studio model:</source>
+        <translatorcomment>@rgriebl missing %1 or such? -&gt; Nope the error will be appended to this (together with 2 &lt;br&gt;) ... makes the translators lives easier ;)</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1086,16 +1094,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/documentio.cpp" line="737"/>
         <source>This list contains items with duplicate BrickLink Lot-IDs.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cette liste contient des articles avec de doublons d&apos;ID de lot BrickLink.</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="741"/>
         <source>There are problems: %1Do you really want to export this list?</source>
-        <translation>Il y a des problèmes: %1Voulez-vous vraiment exporter cette liste?</translation>
+        <translation>Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste?</translation>
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="314"/>
         <source>LDraw Models</source>
+        <translatorcomment>@rgriebl context? -&gt; again file dialog type filters</translatorcomment>
         <translation>Modèles LDraw</translation>
     </message>
     <message>
@@ -1154,87 +1163,87 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/utility/filter.cpp" line="338"/>
         <source>Field names:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom des champs:</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="343"/>
         <source>Comparisons:</source>
-        <translation type="unfinished"></translation>
+        <translation>Comparaisons:</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="348"/>
         <source>Combinations:</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinaisons:</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="388"/>
         <source>and</source>
-        <translation type="unfinished"></translation>
+        <translation>et</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="389"/>
         <source>or</source>
-        <translation type="unfinished"></translation>
+        <translation>ou</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="416"/>
         <source>is,equals</source>
-        <translation type="unfinished"></translation>
+        <translation>est,égale</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="417"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
-        <translation type="unfinished"></translation>
+        <translation>n&apos;est pas,n&apos;est pas égal,pas égal</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="418"/>
         <source>less than</source>
-        <translation type="unfinished"></translation>
+        <translation>inférieur à</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="419"/>
         <source>less equal than</source>
-        <translation type="unfinished"></translation>
+        <translation>inférieur ou égal à</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="420"/>
         <source>greater than</source>
-        <translation type="unfinished"></translation>
+        <translation>supérieur à</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="421"/>
         <source>greater equal than</source>
-        <translation type="unfinished"></translation>
+        <translation>supérieur ou égal à</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="422"/>
         <source>contains,matches</source>
-        <translation type="unfinished"></translation>
+        <translation>contient,comporte</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="423"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
-        <translation type="unfinished"></translation>
+        <translation>ne contient pas,contient pas,ne comporte pas,comporte pas</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="424"/>
         <source>starts with,begins with</source>
-        <translation type="unfinished"></translation>
+        <translation>commence par,débute par</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="425"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
-        <translation type="unfinished"></translation>
+        <translation>ne commence pas par,commence pas par,ne débute pas par,débute pas par</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="426"/>
         <source>ends with</source>
-        <translation type="unfinished"></translation>
+        <translation>termine par</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="427"/>
         <source>doesn&apos;t end with,does not end with</source>
-        <translation type="unfinished"></translation>
+        <translation>ne termine pas par,termine pas par</translation>
     </message>
 </context>
 <context>
@@ -1265,7 +1274,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/framework.cpp" line="632"/>
         <source>Info</source>
-        <translation>Info</translation>
+        <translation>Informations</translation>
     </message>
     <message>
         <location filename="../src/framework.cpp" line="634"/>
@@ -1275,7 +1284,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/framework.cpp" line="636"/>
         <source>Appears In Sets</source>
-        <translation>Apparaît dans les sets</translation>
+        <translation>Présent dans les sets</translation>
     </message>
     <message>
         <location filename="../src/framework.cpp" line="638"/>
@@ -1741,13 +1750,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/framework.cpp" line="729"/>
         <source>E&amp;xtras</source>
-        <translation>E&amp;xtras</translation>
+        <translatorcomment>@rgriebl Called it &quot;tools&quot; here, as it&apos;s usually what has Options in it, see firefox</translatorcomment>
+        <translation>&amp;Outils</translation>
     </message>
     <message>
         <location filename="../src/framework.cpp" line="730"/>
         <location filename="../src/framework.cpp" line="1413"/>
         <source>Update Database</source>
-        <translation>Mise à jour de la base de données</translation>
+        <translation>Mettre à jour la base de données</translation>
     </message>
     <message>
         <location filename="../src/framework.cpp" line="732"/>
@@ -1812,7 +1822,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/framework.cpp" line="731"/>
         <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>Options...</translation>
     </message>
     <message>
         <location filename="../src/framework.cpp" line="750"/>
@@ -2009,7 +2019,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/framework.cpp" line="1817"/>
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
-        <translation>Voulez-vous annuler les téléchargements restant des inventaires, images et guides des prix?</translation>
+        <translation>Voulez-vous annuler les téléchargements en cours: inventaires, images et guides des prix?</translation>
     </message>
 </context>
 <context>
@@ -2152,6 +2162,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importcartdialog.cpp" line="164"/>
         <source>Seller</source>
+        <translatorcomment>@rgriebl I&apos;d see more Shop than Seller - and the list displays SHOP (Seller)  -&gt; I just used the term that is used in the XML API. Let&apos;s leave it at that for the time being</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2177,7 +2188,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importcartdialog.cpp" line="318"/>
         <source>Filter the list for lines containing these words</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer dans la liste les lignes qui contiennent ces mots</translation>
     </message>
     <message>
         <location filename="../src/importcartdialog.cpp" line="320"/>
@@ -2187,6 +2198,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importcartdialog.cpp" line="321"/>
         <source>Show on BrickLink</source>
+        <translatorcomment>@rgriebl context?  -&gt; the tooltip on the &quot;Show&quot; Button (the one with the BrickLink head logo)</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2284,7 +2296,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.ui" line="14"/>
         <source>Import BrickLink Order</source>
-        <translation type="unfinished"></translation>
+        <translation>Import commande BrickLink</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.ui" line="31"/>
@@ -2294,12 +2306,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.ui" line="54"/>
         <source>Synchronize the orders of the last</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>@rgriebl warning, caption width too small  -&gt; interesting, the dialog should self adjust to the width needed. Let me know if looks weird. Otherwise, ignore it</translatorcomment>
+        <translation>Synchroniser les commandes des derniers</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.ui" line="77"/>
         <source>days</source>
-        <translation type="unfinished"></translation>
+        <translation>jours</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.ui" line="104"/>
@@ -2319,7 +2332,8 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.cpp" line="119"/>
         <source>Placed</source>
-        <translation>Placée</translation>
+        <translatorcomment>Placée est un anglicisme</translatorcomment>
+        <translation>Passée</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="184"/>
@@ -2329,12 +2343,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.cpp" line="183"/>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Date</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="185"/>
         <source>Order ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Numéro</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="186"/>
@@ -2344,12 +2358,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.cpp" line="187"/>
         <source>Items</source>
-        <translation>Items</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="188"/>
         <source>Lots</source>
-        <translation>Lots</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="189"/>
@@ -2364,7 +2378,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/importorderdialog.cpp" line="344"/>
         <source>Filter the list for lines containing these words</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer dans la liste les lignes qui contiennent ces mots</translation>
     </message>
     <message>
         <location filename="../src/importorderdialog.cpp" line="346"/>
@@ -2456,7 +2470,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/picturewidget.cpp" line="164"/>
         <source>Update</source>
-        <translation>Mise à jour</translation>
+        <translation>Mettre à jour</translation>
     </message>
     <message>
         <location filename="../src/picturewidget.cpp" line="165"/>
@@ -2476,7 +2490,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/picturewidget.cpp" line="281"/>
         <source>Please wait... updating</source>
-        <translation type="unfinished"></translation>
+        <translation>Patienter... mise à jour</translation>
     </message>
 </context>
 <context>
@@ -2484,7 +2498,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/priceguidewidget.cpp" line="157"/>
         <source>Update</source>
-        <translation>Mise à jour</translation>
+        <translation>Mettre à jour</translation>
     </message>
     <message>
         <location filename="../src/priceguidewidget.cpp" line="158"/>
@@ -2504,7 +2518,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/priceguidewidget.cpp" line="162"/>
         <source>Qty.</source>
-        <translation>Qté.</translation>
+        <translation>Qté</translation>
     </message>
     <message>
         <location filename="../src/priceguidewidget.cpp" line="163"/>
@@ -2569,7 +2583,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/priceguidewidget.cpp" line="175"/>
         <source>Please wait... updating</source>
-        <translation type="unfinished"></translation>
+        <translation>Patienter... mise à jour</translation>
     </message>
     <message>
         <location filename="../src/priceguidewidget.cpp" line="732"/>
@@ -2824,17 +2838,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/selectitem.cpp" line="515"/>
         <source>List with Images</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste avec images</translation>
     </message>
     <message>
         <location filename="../src/selectitem.cpp" line="895"/>
         <source>Switch to the item&apos;s category</source>
-        <translation type="unfinished"></translation>
+        <translation>Basculer dans la catégorie de l&apos;article</translation>
     </message>
     <message>
         <location filename="../src/selectitem.cpp" line="902"/>
         <source>Switch to the &quot;%1&quot; category</source>
-        <translation type="unfinished"></translation>
+        <translation>Basculer dans la catégorie &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../src/selectitem.cpp" line="514"/>
@@ -3526,7 +3540,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/updatedatabase.cpp" line="35"/>
         <source>Updating BrickLink Database</source>
-        <translation>Met à jour la base de données BrickLink</translation>
+        <translation>Mise à jour de la base de données BrickLink</translation>
     </message>
     <message>
         <location filename="../src/updatedatabase.cpp" line="36"/>
@@ -3546,7 +3560,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/updatedatabase.cpp" line="74"/>
         <source>Finished.</source>
-        <translation type="unfinished"></translation>
+        <translation>Terminée.</translation>
     </message>
     <message>
         <location filename="../src/updatedatabase.cpp" line="78"/>
@@ -3813,12 +3827,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/window.cpp" line="1370"/>
         <source>Loading price guide data from disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Chargement des guides des prix depuis le disque</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="1418"/>
         <source>Downloading price guide data from BrickLink</source>
-        <translation type="unfinished"></translation>
+        <translation>Téléchargement des guides des prix depuis BrickLink</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/window.cpp" line="1460"/>
