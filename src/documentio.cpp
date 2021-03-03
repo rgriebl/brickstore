@@ -1229,15 +1229,14 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
 
         // #################### XML PARSING STARTS HERE #####################
 
+        // In an ideal world, BrickStock wouldn't have changed the root tag.
+        // DTDs are not required anymore, but if there is a DTD, it has to be correct
 
-        // in an ideal world, BrickStock wouldn't have changed the root tag and everyone would add
-        // valid DOCTYPE declarations ... sadly that's not the world we're living in
         static const QVector<QString> knownTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
 
         while (true) {
             switch (xml.readNext()) {
             case QXmlStreamReader::DTD: {
-                // DTDs are optional, but if there is a DTD, it has to be correct
                 auto dtd = xml.text().toString().trimmed();
 
                 if (!dtd.startsWith(qL1S("<!DOCTYPE "))
@@ -1295,7 +1294,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
     xml.setAutoFormatting(true);
     xml.setAutoFormattingIndent(1);
     xml.writeStartDocument();
-    xml.writeDTD(qL1S("<!DOCTYPE BrickStoreXML>"));
+
+    // We don't write a DOCTYPE anymore, because RelaxNG wants the schema independent from
+    // the actual XML file. As a side effect, BSX files can now be opened directly in Excel.
+
     xml.writeStartElement(qL1S("BrickStoreXML"));
     xml.writeStartElement(qL1S("Inventory"));
     xml.writeAttribute(qL1S("Currency"), bsx.currencyCode);

@@ -5,6 +5,10 @@
 #
 # $ jing -c path/to/BrickStoreXML.rnc file.bsx
 
+# Please note: There shouldn't be a <!DOCTYPE ...> definition, as Relax-NG does not support
+#              this mechanism. See also: https://relaxng.org/jclark/design.html#section:17
+#              If, for whatever reason, you still need to write a DTD, use <!DOCTYPE BrickStoreXML>
+
 start = BrickStoreXML
 
 # the rename of the root element to BrickStockXML didn't make any sense,
