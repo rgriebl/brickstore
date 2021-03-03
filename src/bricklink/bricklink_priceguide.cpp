@@ -30,8 +30,11 @@ class PriceGuideLoaderJob : public QRunnable
 {
 public:
     explicit PriceGuideLoaderJob(PriceGuide *pg)
-        : QRunnable(), m_pg(pg)
-    { }
+        : QRunnable()
+        , m_pg(pg)
+    {
+        pg->m_update_status = UpdateStatus::Loading;
+    }
 
     void run() override;
 
@@ -56,6 +59,7 @@ void PriceGuideLoaderJob::run()
 
         QMetaObject::invokeMethod(BrickLink::core(), [=]() {
             pg->m_valid = valid;
+            pg->m_update_status = UpdateStatus::Ok;
             if (valid) {
                 pg->m_fetched = fetched;
                 pg->m_data = data;
@@ -88,8 +92,10 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item,
     }
 
     if (highPriority) {
-        if (!pg->isValid())
+        if (!pg->isValid()) {
             pg->m_valid = pg->loadFromDisk(pg->m_fetched, pg->m_data);
+            pg->m_update_status = UpdateStatus::Ok;
+        }
 
         if (updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv))
             updatePriceGuide(pg, highPriority);
@@ -110,7 +116,13 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     , m_color(color)
 {
     m_valid = false;
+    m_updateAfterLoad = false;
     m_update_status = UpdateStatus::Ok;
+}
+
+BrickLink::PriceGuide::~PriceGuide()
+{
+    cancelUpdate();
 }
 
 void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
@@ -265,9 +277,9 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 }
 
 
-void BrickLink::PriceGuide::update(bool high_priority)
+void BrickLink::PriceGuide::update(bool highPriority)
 {
-    BrickLink::core()->updatePriceGuide(this, high_priority);
+    BrickLink::core()->updatePriceGuide(this, highPriority);
 }
 
 void BrickLink::PriceGuide::cancelUpdate()
@@ -276,13 +288,20 @@ void BrickLink::PriceGuide::cancelUpdate()
         BrickLink::core()->cancelPriceGuideUpdate(this);
 }
 
-BrickLink::PriceGuide::~PriceGuide()
+void BrickLink::Core::priceGuideLoaded(BrickLink::PriceGuide *pg)
 {
-    cancelUpdate();
+    if (pg) {
+         if (pg->m_updateAfterLoad
+                 || updateNeeded(pg->isValid(), pg->lastUpdate(), m_pg_update_iv))  {
+             pg->m_updateAfterLoad = false;
+             updatePriceGuide(pg, false);
+         }
+         emit priceGuideUpdated(pg);
+         pg->release();
+     }
 }
 
-
-void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority)
+void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority)
 {
     if (!pg || (pg->m_update_status == UpdateStatus::Updating))
         return;
@@ -290,6 +309,11 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     if (!m_online || !m_transfer) {
         pg->m_update_status = UpdateStatus::UpdateFailed;
         emit priceGuideUpdated(pg);
+        return;
+    }
+
+    if (pg->m_update_status == UpdateStatus::Loading) {
+        pg->m_updateAfterLoad = true;
         return;
     }
 
@@ -324,7 +348,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->m_transferJob = TransferJob::get(url);
     pg->m_transferJob->setUserData('G', pg);
 
-    m_transfer->retrieve(pg->m_transferJob, high_priority);
+    m_transfer->retrieve(pg->m_transferJob, highPriority);
 }
 
 void BrickLink::Core::cancelPriceGuideUpdate(BrickLink::PriceGuide *pg)

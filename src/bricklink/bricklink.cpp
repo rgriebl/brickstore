@@ -189,9 +189,6 @@ const QImage Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
-    // we may be called from a diskloader thread
-    QMutexLocker lock(&m_imageCacheLock);
-
     QImage img = m_noImageCache.value(key);
 
     if (img.isNull()) {
@@ -1177,12 +1174,8 @@ void Core::setItemImageScaleFactor(qreal f)
     if (!qFuzzyCompare(f, m_item_image_scale_factor)) {
         m_item_image_scale_factor = f;
 
-        m_imageCacheLock.lock();
-
         m_noImageCache.clear();
         m_colorImageCache.clear();
-
-        m_imageCacheLock.unlock();
 
         emit itemImageScaleFactorChanged(f);
     }

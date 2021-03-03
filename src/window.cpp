@@ -1387,7 +1387,8 @@ void Window::on_edit_price_to_priceguide_triggered()
             if (forceUpdate && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
                 pg->update();
 
-            if (pg && (pg->updateStatus() == BrickLink::UpdateStatus::Updating)) {
+            if (pg && ((pg->updateStatus() == BrickLink::UpdateStatus::Loading)
+                       || (pg->updateStatus() == BrickLink::UpdateStatus::Updating))) {
                 m_setToPG->priceGuides.insert(pg, item);
                 pg->addRef();
 

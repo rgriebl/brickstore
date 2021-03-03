@@ -387,13 +387,17 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case Document::Picture: {
-        if (!item->image().isNull()) {
-            double dpr = p->device()->devicePixelRatioF();
-            image = item->image().scaled(option.rect.size() * dpr,
-                                         Qt::KeepAspectRatio, Qt::FastTransformation);
-            image.setDevicePixelRatio(dpr);
-            selectionFrame = true;
-        }
+        BrickLink::Picture *pic = BrickLink::core()->picture(item->item(), item->color());
+        double dpr = p->device()->devicePixelRatioF();
+        QSize s = option.rect.size() * dpr;
+
+        if (pic && pic->isValid())
+            image = pic->image().scaled(s, Qt::KeepAspectRatio, Qt::FastTransformation);
+        else
+            image = BrickLink::core()->noImage(s);
+
+        image.setDevicePixelRatio(dpr);
+        selectionFrame = true;
         break;
     }
     case Document::Color: {

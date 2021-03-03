@@ -374,18 +374,6 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool useCostQtyAg)
     return true;
 }
 
-QImage BrickLink::InvItem::image() const
-{
-    BrickLink::Picture *pic = BrickLink::core()->picture(item(), color());
-
-    if (pic && pic->isValid()) {
-        return pic->image();
-    } else {
-        QSize s = BrickLink::core()->standardPictureSize();
-        return BrickLink::core()->noImage(s);
-    }
-}
-
 void BrickLink::InvItem::save(QDataStream &ds) const
 {
     ds << QByteArray("II") << qint32(2)

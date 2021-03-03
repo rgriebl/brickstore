@@ -1327,7 +1327,6 @@ QVariant Document::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DisplayRole      : return dataForDisplayRole(it, f);
         case BaseDisplayRole      : return dataForDisplayRole(differenceBaseItem(it), f);
-        case Qt::DecorationRole   : if (f == Picture) return it->image(); break;
         case Qt::TextAlignmentRole: return headerData(index.column(), Qt::Horizontal, role);
         case Qt::EditRole         : return dataForEditRole(it, f);
         case BaseEditRole         : return dataForEditRole(differenceBaseItem(it), f);

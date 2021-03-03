@@ -280,14 +280,29 @@ void PictureWidget::redraw()
         w_image->setText(QLatin1String("<center><i>") +
                          tr("Please wait... updating") +
                          QLatin1String("</i></center>"));
-    } else if (!m_image.isNull()) {
-        QPixmap p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
-        QSize s = w_image->contentsRect().size();
-        QSize ps = p.size().scaled(s, Qt::KeepAspectRatio).boundedTo(p.size() * 2);
-        ps *= devicePixelRatioF();
-        p = p.scaled(ps, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        p.setDevicePixelRatio(devicePixelRatioF());
+    } else if (m_pic) {
+        bool hasImage = !m_image.isNull();
+        auto dpr = devicePixelRatioF();
+        QPixmap p;
+        QSize pSize;
+        QSize displaySize = w_image->contentsRect().size();
+
+        if (hasImage) {
+            p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
+            pSize = p.size();
+        } else {
+            pSize = BrickLink::core()->standardPictureSize();
+        }
+        QSize s = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2) * dpr;
+
+        if (hasImage)
+            p = p.scaled(s, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else
+            p = QPixmap::fromImage(BrickLink::core()->noImage(s));
+
+        p.setDevicePixelRatio(dpr);
         w_image->setPixmap(p);
+
     } else {
         w_image->setText({ });
     }

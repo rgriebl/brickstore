@@ -286,7 +286,7 @@ public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 
-    void update(bool high_priority = false);
+    void update(bool highPriority = false);
     QDateTime lastUpdate() const      { return m_fetched; }
     void cancelUpdate();
 
@@ -306,8 +306,9 @@ private:
 
     QDateTime     m_fetched;
 
-    bool          m_valid         : 1;
-    UpdateStatus  m_update_status : 7;
+    bool          m_valid           : 1;
+    bool          m_updateAfterLoad : 1;
+    UpdateStatus  m_update_status   : 6;
 
     TransferJob * m_transferJob = nullptr;
 
@@ -449,8 +450,6 @@ public:
     void setIncomplete(Incomplete *inc) { m_incomplete.reset(inc); }
 
     bool mergeFrom(const InvItem &merge, bool useCostQtyAg = false);
-
-    QImage image() const;
 
     void save(QDataStream &ds) const;
     static InvItem *restore(QDataStream &ds);
@@ -647,7 +646,7 @@ public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 
-    void update(bool high_priority = false);
+    void update(bool highPriority = false);
     QDateTime lastUpdate() const      { return m_fetched; }
     void cancelUpdate();
 
@@ -667,8 +666,9 @@ private:
 
     QDateTime     m_fetched;
 
-    bool          m_valid         : 1;
-    UpdateStatus  m_update_status : 7;
+    bool          m_valid           : 1;
+    bool          m_updateAfterLoad : 1;
+    UpdateStatus  m_update_status   : 6;
 
     TransferJob * m_transferJob = nullptr;
 
@@ -865,8 +865,8 @@ private:
     friend Core *create(const QString &, QString *);
 
 private:
-    void updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority = false);
-    void updatePicture(BrickLink::Picture *pic, bool high_priority = false);
+    void updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority = false);
+    void updatePicture(BrickLink::Picture *pic, bool highPriority = false);
     friend void PriceGuide::update(bool);
     friend void Picture::update(bool);
 
@@ -908,7 +908,6 @@ private:
     QString  m_datadir;
     bool     m_online = false;
 
-    mutable QMutex m_imageCacheLock;
     mutable QHash<QString, QImage>  m_noImageCache;
     mutable QHash<QString, QImage>  m_colorImageCache;
 

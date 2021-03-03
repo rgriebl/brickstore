@@ -292,6 +292,12 @@ InvItem::InvItem(::BrickLink::InvItem *invItem, Document *document)
     , doc(document)
 { }
 
+QImage InvItem::image() const
+{
+    auto pic = ::BrickLink::core()->picture(get()->item(), get()->color(), true);
+    return pic->image();
+}
+
 //Item InvItem::item() const
 //{
 //    return wrapped->item();

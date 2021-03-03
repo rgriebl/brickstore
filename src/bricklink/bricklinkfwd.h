@@ -57,7 +57,7 @@ enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
 enum class Stockroom { None, A, B, C, Count };
 enum class Status    { Include, Exclude, Extra, Count };
 
-enum class UpdateStatus  { Ok, Updating, UpdateFailed };
+enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
 
 enum class OrderType { Received, Placed, Any };
 

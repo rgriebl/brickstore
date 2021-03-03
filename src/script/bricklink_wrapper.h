@@ -411,7 +411,7 @@ public:
 
     bool incomplete() const            { return get()->isIncomplete(); }
 
-    QImage image() const               { return get()->image(); }
+    QImage image() const;
 
 private:
     class Setter
