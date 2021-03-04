@@ -718,6 +718,11 @@ void SelectItem::setZoomFactor(double zoom)
     }
 }
 
+void SelectItem::clearFilter()
+{
+    d->w_filter->clear();
+}
+
 QByteArray SelectItem::saveState() const
 {
     auto itt = currentItemType();

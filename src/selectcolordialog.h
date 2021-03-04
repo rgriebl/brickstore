@@ -22,7 +22,8 @@ class SelectColorDialog : public QDialog, private Ui::SelectColorDialog
 {
     Q_OBJECT
 public:
-    SelectColorDialog(QWidget *parent = nullptr);
+    SelectColorDialog(bool popupMode, QWidget *parent = nullptr);
+    ~SelectColorDialog() override;
 
     void setColor(const BrickLink::Color *color);
     void setColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item);
@@ -36,11 +37,19 @@ protected:
 #elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
     bool event(QEvent *e) override;
 #endif
+    void moveEvent(QMoveEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
     void showEvent(QShowEvent *) override;
+    void hideEvent(QHideEvent *e) override;
+    QSize sizeHint() const;
 
 private slots:
     void checkColor(const BrickLink::Color *, bool);
 
 private:
-    QRect m_pos;
+    bool m_popupMode = false;
+    // only relevant when in popupMode and execAtPosition was called:
+    QRect m_popupPos;
+    bool m_geometryChanged = false;
+    QString m_geometryConfigKey;
 };

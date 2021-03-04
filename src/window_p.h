@@ -87,12 +87,23 @@ private:
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+#include <QKeyEvent>
 
 class TableView : public QTableView
 {
     Q_OBJECT
 public:
     explicit TableView(QWidget *parent = nullptr);
+
+    void editCurrentItem(int column)
+    {
+        auto idx = currentIndex();
+        if (!idx.isValid())
+            return;
+        idx = idx.siblingAtColumn(column);
+        QKeyEvent kp(QEvent::KeyPress, Qt::Key_Execute, Qt::NoModifier);
+        edit(idx, AllEditTriggers, &kp);
+    }
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;

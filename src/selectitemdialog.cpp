@@ -16,22 +16,42 @@
 #include "selectitemdialog.h"
 #include "selectitem.h"
 #include "utility.h"
+#include "config.h"
 #include "bricklink.h"
 
 
-SelectItemDialog::SelectItemDialog(bool only_with_inventory, QWidget *parent)
+SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
     : QDialog(parent)
+    , m_popupMode(popupMode)
 {
     setupUi(this);
-    w_si->setExcludeWithoutInventoryFilter(only_with_inventory);
+    w_si->setExcludeWithoutInventoryFilter(false);
 
-    w_si->restoreState(SelectItem::defaultState());
+    auto ba = Config::inst()->value(QLatin1String("/MainWindow/ModifyItemDialog/SelectItem"))
+            .toByteArray();
+    if (!w_si->restoreState(ba)) {
+        w_si->restoreState(SelectItem::defaultState());
+        w_si->setCurrentItemType(BrickLink::core()->itemType('P'));
+    }
 
     connect(w_si, &SelectItem::itemSelected,
             this, &SelectItemDialog::checkItem);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     setFocusProxy(w_si);
+
+    m_geometryConfigKey = popupMode ? qL1S("/MainWindow/ModifyItemPopup/Geometry")
+                                    : qL1S("/MainWindow/ModifyItemDialog/Geometry");
+
+    if (!popupMode)
+        restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
+}
+
+SelectItemDialog::~SelectItemDialog()
+{
+    if (!m_popupMode)
+        Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
+    Config::inst()->setValue("/MainWindow/ModifyItemDialog/SelectItem", w_si->saveState());
 }
 
 void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)
@@ -42,6 +62,7 @@ void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)
 void SelectItemDialog::setItem(const BrickLink::Item *item)
 {
     w_si->setCurrentItem(item, true);
+    w_si->clearFilter();
 }
 
 const BrickLink::Item *SelectItemDialog::item() const
@@ -64,7 +85,7 @@ int SelectItemDialog::execAtPosition(const QRect &pos)
 {
     setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
-    m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
+    m_popupPos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
 }
 
@@ -73,11 +94,15 @@ int SelectItemDialog::execAtPosition(const QRect &pos)
 void SelectItemDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::WindowStateChange) {
-        if (windowState() & Qt::WindowMaximized)
-            QMetaObject::invokeMethod(this, [this]() {
-                setWindowState(Qt::WindowNoState | Qt::WindowActive);
-                Utility::setPopupPos(this, m_pos);
-            }, Qt::QueuedConnection);
+        if (m_popupMode && m_pos.isValid()) {
+            if (windowState() & Qt::WindowMaximized) {
+                QMetaObject::invokeMethod(this, [this]() {
+                    setWindowState(Qt::WindowNoState | Qt::WindowActive);
+                    Utility::setPopupPos(this, m_popupPos);
+                    m_geometryChanged = false;
+                }, Qt::QueuedConnection);
+            }
+        }
     }
     return QDialog::changeEvent(e);
 }
@@ -86,9 +111,10 @@ void SelectItemDialog::changeEvent(QEvent *e)
 bool SelectItemDialog::event(QEvent *e)
 {
     if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
-        if (m_pos.isValid()) {
+        if (m_popupMode && m_popupPos.isValid()) {
             QMetaObject::invokeMethod(this, [this]() {
-                Utility::setPopupPos(this, m_pos);
+                Utility::setPopupPos(this, m_popupPos);
+                m_geometryChanged = false;
             }, Qt::QueuedConnection);
             return true;
         }
@@ -97,18 +123,57 @@ bool SelectItemDialog::event(QEvent *e)
 }
 #endif
 
+void SelectItemDialog::moveEvent(QMoveEvent *e)
+{
+    QDialog::moveEvent(e);
+    if (m_popupMode)
+        m_geometryChanged = true;
+}
+
+void SelectItemDialog::resizeEvent(QResizeEvent *e)
+{
+    QDialog::resizeEvent(e);
+    if (m_popupMode)
+        m_geometryChanged = true;
+}
+
 void SelectItemDialog::showEvent(QShowEvent *e)
 {
     QDialog::showEvent(e);
 
-    activateWindow();
-    w_si->setFocus();
+    if (m_popupMode) {
+        activateWindow();
+        w_si->setFocus();
 
-    if (m_pos.isValid()) {
-        QMetaObject::invokeMethod(this, [this]() {
-            Utility::setPopupPos(this, m_pos);
-        }, Qt::QueuedConnection);
+        if (m_popupPos.isValid()) {
+            QMetaObject::invokeMethod(this, [this]() {
+                auto ba = Config::inst()->value(m_geometryConfigKey).toByteArray();
+                if (ba.isEmpty() || !restoreGeometry(ba)) {
+                    Utility::setPopupPos(this, m_popupPos);
+                    m_geometryChanged = false;
+                } else {
+                    m_geometryChanged = true;
+                }
+            }, Qt::QueuedConnection);
+        }
     }
+}
+
+void SelectItemDialog::hideEvent(QHideEvent *e)
+{
+    if (m_popupMode) {
+        if (m_geometryChanged)
+            Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
+        else
+            Config::inst()->remove(m_geometryConfigKey);
+    }
+    QDialog::hideEvent(e);
+}
+
+QSize SelectItemDialog::sizeHint() const
+{
+    QSize s = QDialog::sizeHint();
+    return { s.rwidth() * 3 / 2, s.height() * 3 / 2 };
 }
 
 #include "moc_selectitemdialog.cpp"

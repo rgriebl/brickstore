@@ -674,11 +674,13 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
     bool dblclick = (e->type() == QEvent::MouseButtonDblClick);
     bool keypress = (e->type() == QEvent::KeyPress);
     bool editkey = false;
+    bool fakeeditkey = false;
     int key = -1;
 
     if (keypress) {
         key = static_cast<QKeyEvent *>(e)->key();
-        editkey = ((key == Qt::Key_Space) || (key == Qt::Key_Return) || (key == Qt::Key_Enter));
+        fakeeditkey = (key == Qt::Key_Execute);
+        editkey = ((key == Qt::Key_Return) || (key == Qt::Key_Enter));
     }
 
     switch (idx.column()) {
@@ -765,27 +767,30 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
         Q_FALLTHROUGH();
     }
     case Document::Picture:
-        if (dblclick || (keypress && editkey)) {
+        if (dblclick || (keypress && (editkey || fakeeditkey))) {
             if (!m_select_item) {
-                m_select_item = new SelectItemDialog(false, m_table);
+                m_select_item = new SelectItemDialog(true /*popup mode*/, m_table);
                 m_select_item->setWindowTitle(tr("Modify Item"));
             }
             auto item = idx.data(Qt::EditRole).value<const BrickLink::Item *>();
 
             m_select_item->setItem(item);
 
-            if (m_select_item->execAtPosition(
-                        QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()),
-                              option.rect.size())) == QDialog::Accepted) {
-                setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
+            QRect centerOn;
+            if (!fakeeditkey) {
+                centerOn = QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()),
+                                 option.rect.size());
             }
+
+            if (m_select_item->execAtPosition(centerOn) == QDialog::Accepted)
+                setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
         }
         break;
 
     case Document::Color:
-        if (dblclick || (keypress && editkey)) {
+        if (dblclick || (keypress && (editkey || fakeeditkey))) {
             if (!m_select_color) {
-                m_select_color = new SelectColorDialog(m_table);
+                m_select_color = new SelectColorDialog(true /*popup mode*/, m_table);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
             auto color = idx.data(Qt::EditRole).value<const BrickLink::Color *>();
@@ -794,11 +799,14 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
             m_select_color->setColorAndItem(color, item);
 
-            if (m_select_color->execAtPosition(QRect(m_table->viewport()->mapToGlobal
-                                                     (option.rect.topLeft()),
-                                                     option.rect.size())) == QDialog::Accepted) {
-                setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
+            QRect centerOn;
+            if (!fakeeditkey) {
+                centerOn = QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()),
+                                 option.rect.size());
             }
+
+            if (m_select_color->execAtPosition(centerOn) == QDialog::Accepted)
+                setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
         }
         break;
 

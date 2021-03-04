@@ -22,7 +22,8 @@ class SelectItemDialog : public QDialog, private Ui::SelectItemDialog
 {
     Q_OBJECT
 public:
-    SelectItemDialog(bool only_with_inventory, QWidget *parent = nullptr);
+    SelectItemDialog(bool popupMode, QWidget *parent = nullptr);
+    ~SelectItemDialog() override;
 
     void setItemType(const BrickLink::ItemType *);
     void setItem(const BrickLink::Item *);
@@ -36,11 +37,19 @@ protected:
 #elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
     bool event(QEvent *e) override;
 #endif
+    void moveEvent(QMoveEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
     void showEvent(QShowEvent *) override;
+    void hideEvent(QHideEvent *e) override;
+    QSize sizeHint() const override;
 
 private slots:
     void checkItem(const BrickLink::Item *, bool);
 
 private:
-    QRect m_pos;
+    bool m_popupMode = false;
+    // only relevant when in popupMode and execAtPosition was called:
+    QRect m_popupPos;
+    bool m_geometryChanged = false;
+    QString m_geometryConfigKey;
 };

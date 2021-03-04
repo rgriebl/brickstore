@@ -48,6 +48,8 @@ public:
     double zoomFactor() const;
     void setZoomFactor(double zoom);
 
+    void clearFilter();
+
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
     static QByteArray defaultState();

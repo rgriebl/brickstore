@@ -16,22 +16,41 @@
 #include "selectcolordialog.h"
 #include "selectcolor.h"
 #include "utility.h"
+#include "config.h"
 #include "bricklink.h"
 
 
-SelectColorDialog::SelectColorDialog(QWidget *parent)
+SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
     : QDialog(parent)
+    , m_popupMode(popupMode)
 {
     setupUi(this);
 
-    w_sc->restoreState(SelectColor::defaultState());
+    auto ba = Config::inst()->value(QLatin1String("/MainWindow/ModifyColorDialog/SelectColor"))
+            .toByteArray();
+    if (!w_sc->restoreState(ba))
+        w_sc->restoreState(SelectColor::defaultState());
 
     connect(w_sc, &SelectColor::colorSelected,
             this, &SelectColorDialog::checkColor);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     setFocusProxy(w_sc);
+
+    m_geometryConfigKey = popupMode ? qL1S("/MainWindow/ModifyColorPopup/Geometry")
+                                    : qL1S("/MainWindow/ModifyColorDialog/Geometry");
+
+    if (!popupMode)
+        restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
 }
+
+SelectColorDialog::~SelectColorDialog()
+{
+    if (!m_popupMode)
+        Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
+    Config::inst()->setValue("/MainWindow/ModifyColorDialog/SelectColor", w_sc->saveState());
+}
+
 
 void SelectColorDialog::setColor(const BrickLink::Color *color)
 {
@@ -61,7 +80,7 @@ int SelectColorDialog::execAtPosition(const QRect &pos)
 {
     setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
-    m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
+    m_popupPos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
 }
 
@@ -70,11 +89,15 @@ int SelectColorDialog::execAtPosition(const QRect &pos)
 void SelectColorDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::WindowStateChange) {
-        if (windowState() & Qt::WindowMaximized)
-            QMetaObject::invokeMethod(this, [this]() {
-                setWindowState(Qt::WindowNoState | Qt::WindowActive);
-                Utility::setPopupPos(this, m_pos);
-            }, Qt::QueuedConnection);
+        if (m_popupMode && m_pos.isValid()) {
+            if (windowState() & Qt::WindowMaximized) {
+                QMetaObject::invokeMethod(this, [this]() {
+                    setWindowState(Qt::WindowNoState | Qt::WindowActive);
+                    Utility::setPopupPos(this, m_popupPos);
+                    m_geometryChanged = false;
+                }, Qt::QueuedConnection);
+            }
+        }
     }
     return QDialog::changeEvent(e);
 }
@@ -83,9 +106,10 @@ void SelectColorDialog::changeEvent(QEvent *e)
 bool SelectColorDialog::event(QEvent *e)
 {
     if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
-        if (m_pos.isValid()) {
+        if (m_popupMode && m_popupPos.isValid()) {
             QMetaObject::invokeMethod(this, [this]() {
-                Utility::setPopupPos(this, m_pos);
+                Utility::setPopupPos(this, m_popupPos);
+                m_geometryChanged = false;
             }, Qt::QueuedConnection);
             return true;
         }
@@ -94,18 +118,57 @@ bool SelectColorDialog::event(QEvent *e)
 }
 #endif
 
+void SelectColorDialog::moveEvent(QMoveEvent *e)
+{
+    QDialog::moveEvent(e);
+    if (m_popupMode)
+        m_geometryChanged = true;
+}
+
+void SelectColorDialog::resizeEvent(QResizeEvent *e)
+{
+    QDialog::resizeEvent(e);
+    if (m_popupMode)
+        m_geometryChanged = true;
+}
+
 void SelectColorDialog::showEvent(QShowEvent *e)
 {
     QDialog::showEvent(e);
 
-    activateWindow();
-    w_sc->setFocus();
+    if (m_popupMode) {
+        activateWindow();
+        w_sc->setFocus();
 
-    if (m_pos.isValid()) {
-        QMetaObject::invokeMethod(this, [this]() {
-            Utility::setPopupPos(this, m_pos);
-        }, Qt::QueuedConnection);
+        if (m_popupPos.isValid()) {
+            QMetaObject::invokeMethod(this, [this]() {
+                auto ba = Config::inst()->value(m_geometryConfigKey).toByteArray();
+                if (ba.isEmpty() || !restoreGeometry(ba)) {
+                    Utility::setPopupPos(this, m_popupPos);
+                    m_geometryChanged = false;
+                } else {
+                    m_geometryChanged = true;
+                }
+            }, Qt::QueuedConnection);
+        }
     }
+}
+
+void SelectColorDialog::hideEvent(QHideEvent *e)
+{
+    if (m_popupMode) {
+        if (m_geometryChanged)
+            Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
+        else
+            Config::inst()->remove(m_geometryConfigKey);
+    }
+    QDialog::hideEvent(e);
+}
+
+QSize SelectColorDialog::sizeHint() const
+{
+    QSize s = QDialog::sizeHint();
+    return { s.rwidth() * 3 / 2, s.height() * 3 / 2 };
 }
 
 #include "moc_selectcolordialog.cpp"

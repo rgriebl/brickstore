@@ -226,6 +226,8 @@ private:
 
     void cancelPriceGuideUpdates();
 
+    void editCurrentItem(int column);
+
     Document::ItemList exportCheck() const;
     void resizeColumnsToDefault(bool simpleMode = false);
     int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;

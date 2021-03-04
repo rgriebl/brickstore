@@ -1488,6 +1488,11 @@ void Window::cancelPriceGuideUpdates()
     }
 }
 
+void Window::editCurrentItem(int column)
+{
+    static_cast<TableView *>(w_list)->editCurrentItem(column);
+}
+
 
 void Window::on_edit_price_inc_dec_triggered()
 {
@@ -1718,16 +1723,7 @@ void Window::on_edit_color_triggered()
     if (selection().isEmpty())
         return;
 
-    SelectColorDialog d(this);
-    d.setWindowTitle(tr("Modify Color"));
-    d.setColor(selection().front()->color());
-
-    if (d.exec() == QDialog::Accepted) {
-        const auto color = d.color();
-        applyTo(selection(), [color](const auto &from, auto &to) {
-            (to = from).setColor(color); return true;
-        });
-    }
+    editCurrentItem(Document::Color);
 }
 
 void Window::on_edit_item_triggered()
@@ -1735,16 +1731,7 @@ void Window::on_edit_item_triggered()
     if (selection().isEmpty())
         return;
 
-    SelectItemDialog d(false, this);
-    d.setWindowTitle(tr("Modify Item"));
-    d.setItem(selection().front()->item());
-
-    if (d.exec() == QDialog::Accepted) {
-        const auto item = d.item();
-        applyTo(selection(), [item](const auto &from, auto &to) {
-            (to = from).setItem(item); return true;
-        });
-    }
+    editCurrentItem(Document::Description);
 }
 
 void Window::on_edit_qty_set_triggered()
