@@ -94,7 +94,7 @@ int SelectItemDialog::execAtPosition(const QRect &pos)
 void SelectItemDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::WindowStateChange) {
-        if (m_popupMode && m_pos.isValid()) {
+        if (m_popupMode && m_popupPos.isValid()) {
             if (windowState() & Qt::WindowMaximized) {
                 QMetaObject::invokeMethod(this, [this]() {
                     setWindowState(Qt::WindowNoState | Qt::WindowActive);
