@@ -38,6 +38,13 @@ jobs:
           debian_container: "buildpack-deps:buster"
           qmake_extra_config: "CONFIG+=backend-only"
 
+        - name: "Linux AppImage 64bit"
+          artifact: "Linux"
+          os: ubuntu-18.04
+          appimage: true
+          qt_version: '5.15.2'
+          qt_arch: ''
+
         - name: "macOS 64bit"
           artifact: "macOS"
           os: macos-latest
@@ -48,7 +55,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: Install Qt from qt.io
-      if: (!startsWith(matrix.config.os, 'ubuntu'))
+      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.config.qt_version }}
@@ -56,15 +63,15 @@ jobs:
         arch: ${{ matrix.config.qt_arch }}
         tools: ${{ matrix.config.qt_tools }}
 
-    - name: Install Qt on Linux (native)
+    - name: Install Qt on Linux (native/appimage)
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
-        sudo apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo apt -y install debhelper qt5-default qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt on Linux (container)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec "debian-build" apt update
@@ -95,26 +102,41 @@ jobs:
         path: "*.exe"
 
     - name: Build on Linux (native)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
       shell: bash
 
     - name: Build on Linux (container)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
       run: |
         sudo docker exec -w /build "debian-build" qmake CONFIG+=release "${{ matrix.config.qmake_extra_config }}"
         sudo docker exec -w /build "debian-build" make package
       shell: bash
 
+    - name: Build on Linux (appimage)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage
+      run: |
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        make
+        make appimage
+      shell: bash
+
     - name: Upload DEB on Linux
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu')
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.appimage
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.deb"
 
+    - name: Upload AppImage on Linux
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: "*.AppImage"
 
     - name: Build on macOS
       if: (startsWith(matrix.config.os, 'mac'))

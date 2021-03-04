@@ -6,4 +6,4 @@ MimeType=application/x-brickstore-xml;
 Icon=brickstore
 Categories=Qt;Network;
 Type=Application
-Terminal=0
+Terminal=false

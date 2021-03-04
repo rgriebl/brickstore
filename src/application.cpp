@@ -118,6 +118,14 @@ Application::Application(int &_argc, char **_argv)
 #  endif
 #endif
 
+#if defined(Q_OS_LINUX)
+    const QByteArray xdgDesktop = qgetenv("XDG_CURRENT_DESKTOP");
+    for (const auto *gtkBased : { "GNOME", "MATE", "Cinnamon" }) {
+        if (xdgDesktop.contains(gtkBased))
+            qputenv("QT_QPA_PLATFORMTHEME", "gtk2");
+    }
+#endif
+
     new QApplication(_argc, _argv);
 
     setupLogging();

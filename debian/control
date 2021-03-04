@@ -7,7 +7,7 @@ Standards-Version: 4.5.0
 
 Package: brickstore
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, qml-module-qtquick2
+Depends: ${shlibs:Depends}, ${misc:Depends}, qml-module-qtquick2, qt5-style-plugins
 Description: Offline tool for BrickLink
  BrickStore is an offline tool to manage your online store on
  https://www.bricklink.com

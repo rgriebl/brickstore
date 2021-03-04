@@ -217,7 +217,25 @@ unix:!macos {
 
     INSTALLS += share_desktop share_mime share_appicon share_mimeicon
 
-    package.depends = $(DESTDIR_TARGET)
+    AppDir = $$BUILD_DIR/AppDir
+
+    appimage.depends   = $(TARGET)
+    appimage.commands  = mkdir -p $$AppDir
+    appimage.commands += && install -D $$PWD/assets/generated-app-icons/brickstore_doc.png $$AppDir/share/icons/hicolor/128x128/mimetypes
+    appimage.commands += && install -D $$PWD/unix/brickstore-mime.xml $$AppDir/share/mime/packages
+    appimage.commands += && mkdir -p .linuxdeploy
+    appimage.commands += && ( cd .linuxdeploy && wget -N https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x ./linuxdeploy-x86_64.AppImage )
+    appimage.commands += && ( cd .linuxdeploy && wget -N https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage && chmod +x ./linuxdeploy-plugin-qt-x86_64.AppImage )
+    appimage.commands += && VERSION=$$VERSION QML_SOURCES_PATHS=\"$$PWD/extensions\" QMAKE=\"$$QMAKE_QMAKE\" EXTRA_QT_PLUGINS=\"svg\" \
+                              ./.linuxdeploy/linuxdeploy-x86_64.AppImage --appdir=AppDir \
+                              -e $$OUT_PWD/bin/brickstore \
+                              -i $$PWD/assets/generated-app-icons/brickstore.png \
+                              -d $$PWD/unix/brickstore.desktop \
+                              --plugin qt --output appimage
+
+    QMAKE_EXTRA_TARGETS += appimage
+
+    package.depends = $(TARGET)
     package.commands = scripts/create-debian-changelog.sh $$VERSION > debian/changelog
     package.commands += && export QMAKE_BIN=\"$$QMAKE_QMAKE\"
     backend-only:package.commands += && export QMAKE_EXTRA_CONFIG=\"CONFIG+=backend-only\"
