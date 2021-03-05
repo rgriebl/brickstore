@@ -252,8 +252,8 @@ void SelectMergeMode::createFields(QWidget *parent)
         auto tb = new QToolButton();
         tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         tb->setIcon(QIcon::fromTheme(mode.icon));
-        tb->setText(mode.name);
-        tb->setToolTip(mode.toolTip);
+        tb->setText(tr(mode.name));
+        tb->setToolTip(tr(mode.toolTip));
         tb->setAutoRaise(true);
         grid->addWidget(tb, row, col + 1);
         m_allGroup->addButton(tb, int(mode.mergeMode));
@@ -294,8 +294,8 @@ void SelectMergeMode::createFields(QWidget *parent)
                 auto tb = new QToolButton();
                 tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
                 tb->setIcon(QIcon::fromTheme(mode.icon));
-                tb->setText(mode.name);
-                tb->setToolTip(mode.toolTip);
+                tb->setText(tr(mode.name));
+                tb->setToolTip(tr(mode.toolTip));
                 tb->setCheckable(true);
                 tb->setAutoRaise(true);
                 grid->addWidget(tb, row, col + 1);
