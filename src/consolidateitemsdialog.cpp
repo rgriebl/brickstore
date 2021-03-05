@@ -79,6 +79,9 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     w_list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
 
     headerView->restoreLayout(win->currentColumnLayout());
+    headerView->showSection(Document::Index);
+    if (headerView->visualIndex(Document::Index) != 0)
+        headerView->moveSection(headerView->visualIndex(Document::Index), 0);
 
     w_list->setMinimumHeight(8 + w_list->frameWidth() * 2 +
                              w_list->horizontalHeader()->height() +
