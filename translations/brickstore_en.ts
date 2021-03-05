@@ -892,22 +892,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Could not extract model.ldr from the Studio ZIP file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not decrypt the model.ldr within the Studio ZIP file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not locate the model.ldr file within the Studio ZIP file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open the Studio ZIP file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not parse the Studio model:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1984,6 +1968,25 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>MiniZip</name>
+    <message>
+        <source>Could not extract model.ldr from the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not decrypt the model.ldr within the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not locate the model.ldr file within the Studio ZIP file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not open the Studio ZIP file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PictureWidget</name>
     <message>
         <source>Update</source>
@@ -3004,10 +3007,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Modify Color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the new quantities for all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3184,10 +3183,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
             <numerusform>The quantities of one lot would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</numerusform>
             <numerusform>The quantities of %n lots would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>Modify Item</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Select the document that should serve as a source to fill in the corresponding fields in the current document</source>
