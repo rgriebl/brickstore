@@ -187,6 +187,7 @@ public:
     QHash<const Item *, Item> differenceBase() const; // only for DocumentIO::fileSaveTo
 
     const ItemList &items() const;
+    const ItemList &sortedItems() const;
     bool clear();
 
     void appendItem(Item *item);

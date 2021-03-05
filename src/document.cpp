@@ -615,6 +615,11 @@ const Document::ItemList &Document::items() const
     return m_items;
 }
 
+const Document::ItemList &Document::sortedItems() const
+{
+    return m_sortedItems;
+}
+
 Document::Statistics Document::statistics(const ItemList &list, bool ignoreExcluded) const
 {
     return Statistics(this, list, ignoreExcluded);

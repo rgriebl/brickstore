@@ -845,7 +845,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     bool startedMacro = false;
 
-    const auto &documentItems = document()->items();
+    const auto &documentItems = document()->sortedItems();
     bool wasEmpty = documentItems.isEmpty();
     Document::Item *lastAdded = nullptr;
     int addCount = 0;
@@ -2024,7 +2024,7 @@ void Window::on_edit_mergeitems_triggered()
     if (!selection().isEmpty())
         consolidateItems(selection());
     else
-        consolidateItems(m_doc->items());
+        consolidateItems(m_doc->sortedItems());
 }
 
 void Window::on_edit_partoutitems_triggered()
@@ -2597,7 +2597,11 @@ void Window::updateSelection()
         connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
             m_selection.clear();
 
-            foreach (const QModelIndex &idx, m_selection_model->selectedRows())
+            auto sel = m_selection_model->selectedRows();
+            std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
+                return idx1.row() < idx2.row(); });
+
+            for (const QModelIndex &idx : qAsConst(sel))
                 m_selection.append(m_doc->item(idx));
 
             emit selectionChanged(m_selection);

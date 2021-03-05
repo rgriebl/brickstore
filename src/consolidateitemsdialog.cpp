@@ -57,7 +57,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
 
     QVector<int> fakeIndexes;
     for (int i = 0; i < items.size(); ++i)
-        fakeIndexes << win->document()->index(items.at(i)).row();
+        fakeIndexes << win->document()->items().indexOf(items.at(i));
 
     Document *doc = Document::createTemporary(items, fakeIndexes);
     doc->setParent(this);
@@ -79,7 +79,6 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     w_list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
 
     headerView->restoreLayout(win->currentColumnLayout());
-    w_list->sortByColumn(headerView->sortIndicatorSection(), headerView->sortIndicatorOrder());
 
     w_list->setMinimumHeight(8 + w_list->frameWidth() * 2 +
                              w_list->horizontalHeader()->height() +
