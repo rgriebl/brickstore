@@ -169,8 +169,11 @@ AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
 
 AddRemoveCmd::~AddRemoveCmd()
 {
-    if (m_type == Add)
+    if (m_type == Add) {
+        for (const auto item : m_items)
+            m_doc->m_differenceBase.remove(item);
         qDeleteAll(m_items);
+    }
 }
 
 int AddRemoveCmd::id() const
@@ -758,7 +761,7 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
         emit isFilteredChanged(m_isFiltered = false);
 }
 
-void Document::removeItemsDirect(ItemList &items, QVector<int> &positions,
+void Document::removeItemsDirect(const ItemList &items, QVector<int> &positions,
                                  QVector<int> &sortedPositions, QVector<int> &filteredPositions)
 {
     positions.resize(items.count());

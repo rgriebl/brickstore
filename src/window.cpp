@@ -845,7 +845,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     bool startedMacro = false;
 
-    const auto &documentItems = document()->sortedItems();
+    const auto documentItems = document()->sortedItems();
     bool wasEmpty = documentItems.isEmpty();
     Document::Item *lastAdded = nullptr;
     int addCount = 0;

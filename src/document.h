@@ -259,7 +259,7 @@ private:
 
     void setItemsDirect(const ItemList &items);
     void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
-    void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
+    void removeItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void changeItemsDirect(std::vector<std::pair<Item *, Item> > &changes);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
     void resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
