@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2021.3.1] - 2021-03-04
+## [2021.3.1] - 2021-03-05
 ### Added
 - *Import LDraw Model* can now import BrickLink Studio models as well.
 - Editing a field while multiple rows are selected will change the value in all selected rows.
