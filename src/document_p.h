@@ -34,7 +34,7 @@ public:
     static QString genDesc(bool is_add, int count);
 
 private:
-    Document *         m_doc;
+    QPointer<Document> m_doc;
     QVector<int>       m_positions;
     QVector<int>       m_sortedPositions;
     QVector<int>       m_filteredPositions;

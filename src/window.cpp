@@ -585,7 +585,6 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     setAttribute(Qt::WA_DeleteOnClose);
 
     m_doc = doc;
-    m_doc->setParent(this);
 
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
@@ -735,6 +734,8 @@ Window::~Window()
     m_autosaveTimer.stop();
     deleteAutosave();
     s_windows.removeAll(this);
+
+    delete m_doc;
 }
 
 const QVector<Window *> &Window::allWindows()
@@ -1985,16 +1986,25 @@ void Window::on_edit_subtractitems_triggered()
                     continue;
 
                 Document::Item newItem = *item;
+                auto change = std::find_if(changes.begin(), changes.end(), [=](const auto &c) {
+                    return c.first == item;
+                });
+                Document::Item &newItemRef = (change == changes.end()) ? newItem : change->second;
+                int qtyInItem = newItemRef.quantity();
 
-                if (item->quantity() >= qty) {
-                    newItem.setQuantity(item->quantity() - qty);
+                if (qtyInItem >= qty) {
+                    newItemRef.setQuantity(qtyInItem - qty);
                     qty = 0;
                 } else {
-                    newItem.setQuantity(0);
-                    qty -= item->quantity();
+                    newItemRef.setQuantity(0);
+                    qty -= qtyInItem;
                 }
-                changes.emplace_back(item, newItem);
+                if (&newItemRef == &newItem)
+                    changes.emplace_back(item, newItem);
                 hadMatch = true;
+
+                if (qty == 0)
+                    break;
             }
             if (qty) {   // still a qty left
                 if (hadMatch) {

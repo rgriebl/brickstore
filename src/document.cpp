@@ -170,8 +170,10 @@ AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
 AddRemoveCmd::~AddRemoveCmd()
 {
     if (m_type == Add) {
-        for (const auto item : m_items)
-            m_doc->m_differenceBase.remove(item);
+        if (m_doc) {
+            for (const auto item : m_items)
+                m_doc->m_differenceBase.remove(item);
+        }
         qDeleteAll(m_items);
     }
 }
@@ -604,6 +606,7 @@ Document::~Document()
 {
     delete m_order;
     qDeleteAll(m_items);
+    delete m_undo;
 
     s_documents.removeAll(this);
 }
