@@ -78,7 +78,8 @@ AboutDialog::AboutDialog(QWidget *parent)
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
         if (trans.language != qL1S("en")) {
-            QString langname = trans.languageName.value(QLocale().name().left(2), trans.languageName[qL1S("en")]);
+            QString langname = trans.languageName.value(Config::inst()->language(),
+                                                        trans.languageName[qL1S("en")]);
             translators += translators_html.arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
         }
     }
