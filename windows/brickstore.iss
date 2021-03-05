@@ -49,6 +49,8 @@ Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
 Filename: "{tmp}\vc_redist.x64.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
     Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist; \
 
+Filename: {app}\BrickStore.exe; Flags: postinstall nowait skipifsilent
+
 [Icons]
 Name: "{commonprograms}\BrickStore"; Filename: "{app}\BrickStore.exe";
 
