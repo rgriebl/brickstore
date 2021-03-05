@@ -891,8 +891,10 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
                     if (yesClicked) {
                         mergeIndex = dlg.consolidateToIndex();
 
-                        if (repeatForRemaining)
+                        if (repeatForRemaining) {
                             conMode = dlg.consolidateRemaining();
+                            mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
+                        }
                     } else {
                         if (repeatForRemaining)
                             addItemMode = AddItemMode::AddAsNew;
@@ -1008,8 +1010,10 @@ void Window::consolidateItems(const Document::ItemList &items)
             if (yesClicked) {
                 mergeIndex = dlg.consolidateToIndex();
 
-                if (repeatForRemaining)
+                if (repeatForRemaining) {
                     conMode = dlg.consolidateRemaining();
+                    mergeIndex = consolidateItemsHelper(mergeItems, conMode);
+                }
             } else {
                 if (repeatForRemaining)
                     break;

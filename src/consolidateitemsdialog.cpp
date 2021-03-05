@@ -131,7 +131,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
 Window::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
 {
     if (m_forAll)
-        return static_cast<Window::Consolidate>(w_prefer_remaining->currentIndex());
+        return w_prefer_remaining->currentData().value<Window::Consolidate>();
     else
         return Window::Consolidate::Not;
 }

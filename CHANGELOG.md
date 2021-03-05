@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
   BrickStore.
 - The status bar moved to the top of the document and got more interactive: clicking on `Errors` or 
   `Differences` will jump to the next one (also available on the keyboard: `F5` or `F6`).
+- Experimental support for distribution independent Linux *AppImage* builds.
 
 ### Improvements
 - Sorting and filtering are now independent operations again: the filter edit has a specific 
@@ -42,6 +43,8 @@ All notable changes to this project will be documented in this file.
 - There is now an option to set a default for part-out operations within documents.
 - All open and save file dialogs remember the last used directory during a session.
 - Renovated the price increase/decrease dialog.
+- The modify item and color dialogs remember their last state and geometry. You can reset their
+  size and position to be centered on the currently active item by double-clicking the title bar.
 
 
 ## [2021.2.2] - 2021-02-17
