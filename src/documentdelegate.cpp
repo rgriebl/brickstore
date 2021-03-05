@@ -895,12 +895,11 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
             if (differenceFlags & differenceWarningMask & (1ULL << idx.column())) {
                 tip = tip % u"<br><br>" %
                         tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
-            } else {
-                QString oldText = displayData(idx, true, true);
-
-                tip = tip % u"<br><br>" %
-                        tr("The original value of this field was:") % u"<br><b>" % oldText % u"</b>";
             }
+            QString oldText = displayData(idx, true, true);
+
+            tip = tip % u"<br><br>" %
+                    tr("The original value of this field was:") % u"<br><b>" % oldText % u"</b>";
         }
 
         bool isElided = m_elided.contains(quint64(idx.row()) << 32 | quint64(idx.column()));
