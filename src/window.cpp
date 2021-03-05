@@ -1854,7 +1854,7 @@ void Window::on_edit_comment_add_triggered()
         applyTo(selection(), [=](const auto &from, auto &to) {
             to = from;
             Document::Item tmp = from;
-            tmp.setRemarks(addComments);
+            tmp.setComments(addComments);
 
             return Document::mergeItemFields(tmp, to, Document::MergeMode::Ignore,
                                              {{ Document::Comments, Document::MergeMode::MergeText }});
