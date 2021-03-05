@@ -275,6 +275,8 @@ private:
     mutable bool         m_autosaveClean = true;
 
     static QVector<Window *> s_windows;
+
+    friend class AutosaveJob;
 };
 
 Q_DECLARE_METATYPE(Window::Consolidate)

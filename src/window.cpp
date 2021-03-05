@@ -2664,14 +2664,16 @@ void Window::resizeColumnDirect(int logical, int /*oldSize*/, int newSize)
 class AutosaveJob : public QRunnable
 {
 public:
-    explicit AutosaveJob(const QUuid &uuid, const QByteArray &contents)
+    explicit AutosaveJob(Window *win, const QByteArray &contents)
         : QRunnable()
-        , m_uuid(uuid)
+        , m_win(win)
+        , m_uuid(win->m_uuid)
         , m_contents(contents)
     { }
 
     void run() override;
 private:
+    Window *m_win;
     const QUuid m_uuid;
     const QByteArray m_contents;
 };
@@ -2697,8 +2699,15 @@ void AutosaveJob::run()
         f.close();
 
         temp.remove(fileName);
-        if (!temp.rename(newFileName, fileName))
-            qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
+
+        Window *win = m_win;
+        QMetaObject::invokeMethod(qApp, [=]() {
+            if (Window::allWindows().contains(win)) {
+                if (!QDir(temp).rename(newFileName, fileName))
+                    qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
+                win->m_autosaveClean = true;
+            }
+        });
     }
 }
 
@@ -2710,7 +2719,6 @@ void Window::autosave() const
 
     if (m_uuid.isNull() || !doc->isModified() || items.isEmpty() || m_autosaveClean)
         return;
-    m_autosaveClean = true;
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
@@ -2733,7 +2741,7 @@ void Window::autosave() const
 
     ds << QByteArray(autosaveMagic);
 
-    QThreadPool::globalInstance()->start(new AutosaveJob(m_uuid, ba));
+    QThreadPool::globalInstance()->start(new AutosaveJob(const_cast<Window *>(this), ba));
 }
 
 int Window::restorableAutosaves()
