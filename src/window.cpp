@@ -343,7 +343,7 @@ StatusBar::StatusBar(Window *window)
     m_differencesSeparator = addSeparator();
     m_differences = new QToolButton();
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified-small"));
+    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified"));
     m_differences->setShortcut(tr("F5"));
     m_differences->setAutoRaise(true);
     connect(m_differences, &QToolButton::clicked,
@@ -353,7 +353,7 @@ StatusBar::StatusBar(Window *window)
     m_errorsSeparator = addSeparator();
     m_errors = new QToolButton();
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setIcon(QIcon::fromTheme("vcs-conflicting-small"));
+    m_errors->setIcon(QIcon::fromTheme("emblem-warning"));
     m_errors->setShortcut(tr("F6"));
     m_errors->setAutoRaise(true);
     connect(m_errors, &QToolButton::clicked,

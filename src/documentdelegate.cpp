@@ -251,7 +251,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
         QPixmap *pix = s_tagicon_cache[key];
         if (!pix) {
-            QIcon icon = warn ? QIcon::fromTheme("vcs-conflicting-small")
+            QIcon icon = warn ? QIcon::fromTheme("vcs-locally-modified-unstaged-small")
                               : QIcon::fromTheme("vcs-locally-modified-small");
             pix = new QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
             if (!s_tagicon_cache.insert(key, pix))
