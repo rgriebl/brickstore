@@ -254,11 +254,16 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
             this, [this]() { w_filter->setFocus(); });
 
+    w_importCombined = new QPushButton();
+    w_importCombined->setDefault(false);
+    w_buttons->addButton(w_importCombined, QDialogButtonBox::ActionRole);
+    connect(w_importCombined, &QAbstractButton::clicked,
+            this, [this]() { importOrders(w_orders->selectionModel()->selectedRows(), true); });
     w_import = new QPushButton();
     w_import->setDefault(true);
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
-            this, [this]() { importOrders(w_orders->selectionModel()->selectedRows()); });
+            this, [this]() { importOrders(w_orders->selectionModel()->selectedRows(), false); });
     w_showOnBrickLink = new QPushButton();
     w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
@@ -341,6 +346,7 @@ void ImportOrderDialog::languageChange()
     retranslateUi(this);
 
     w_import->setText(tr("Import"));
+    w_importCombined->setText(tr("Import combined"));
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
     w_showOnBrickLink->setText(tr("Show"));
@@ -598,29 +604,8 @@ LotList ImportOrderDialog::parseOrderXML(BrickLink::Order *order, const QByteArr
     }
 }
 
-void ImportOrderDialog::importOrders(const QModelIndexList &rows)
+void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
 {
-    bool combine = false;
-
-    if (rows.count() > 1) {
-        QString ccode; // check if all orders have the same currency
-        for (auto idx : rows) {
-            auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
-            if (ccode.isEmpty()) {
-                ccode = order->currencyCode();
-            } else if (ccode != order->currencyCode()) {
-                ccode.clear();
-                break;
-            }
-        }
-
-        if (!ccode.isEmpty()) {
-            combine = (MessageBox::question(this, { },
-                                            tr("Do you want to import all selected orders into a single document for multi order picking?"))
-                       == QMessageBox::Yes);
-        }
-    }
-
     for (auto idx : rows) {
         auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
@@ -651,7 +636,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows)
         auto orderCopy = new BrickLink::Order(*order);
         job->setUserData('o', orderCopy);
         addressJob->setUserData('a', orderCopy);
-        m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combine };
+        m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combined };
 
         m_trans->retrieve(job);
         m_trans->retrieve(addressJob);
@@ -673,6 +658,39 @@ void ImportOrderDialog::checkSelected()
     bool b = w_orders->selectionModel()->hasSelection();
     w_import->setEnabled(b);
     w_showOnBrickLink->setEnabled(b);
+
+    // combined import only makes sense for the same type with the same currency
+
+    if (b) {
+        BrickLink::OrderType otype = BrickLink::OrderType::Any;
+        QString ccode;
+
+        const auto rows = w_orders->selectionModel()->selectedRows();
+        if (rows.size() > 1) {
+            for (auto idx : rows) {
+                auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
+                if (ccode.isEmpty()) {
+                    ccode = order->currencyCode();
+                } else if (ccode != order->currencyCode()) {
+                    ccode.clear();
+                    break;
+                }
+                if (otype == BrickLink::OrderType::Any) {
+                    otype = order->type();
+                } else if (otype != order->type()) {
+                    otype = BrickLink::OrderType::Any;
+                    break;
+                }
+            }
+            if (ccode.isEmpty())
+                b = false;
+            if (otype == BrickLink::OrderType::Any)
+                b = false;
+        } else {
+            b = false;
+        }
+    }
+    w_importCombined->setEnabled(b);
 }
 
 void ImportOrderDialog::updateStatusLabel()

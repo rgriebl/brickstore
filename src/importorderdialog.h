@@ -44,7 +44,7 @@ protected slots:
     void updateStatusLabel();
 
     void downloadFinished(TransferJob *job);
-    void importOrders(const QModelIndexList &rows);
+    void importOrders(const QModelIndexList &rows, bool combined);
     void showOrdersOnBrickLink();
 
 private:
@@ -54,6 +54,7 @@ private:
 
     Transfer *m_trans;
     QPushButton *w_import;
+    QPushButton *w_importCombined;
     QPushButton *w_showOnBrickLink;
     QDateTime m_lastUpdated;
     QVector<TransferJob *> m_currentUpdate;

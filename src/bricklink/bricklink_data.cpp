@@ -149,12 +149,12 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
 void BrickLink::Item::setConsistsOf(const QVector<BrickLink::Item::ConsistsOf> &items)
 {
     m_consists_of = items;
+}
 
 const QVector<BrickLink::Item::ConsistsOf> &BrickLink::Item::consistsOf() const
 {
     return m_consists_of;
 }
-
 
 bool BrickLink::Incomplete::operator==(const BrickLink::Incomplete &other) const
 {

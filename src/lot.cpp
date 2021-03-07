@@ -75,7 +75,7 @@ Lot &Lot::operator=(const Lot &copy)
     m_tier_price[2]       = copy.m_tier_price[2];
     m_weight              = copy.m_weight;
     m_markerText          = copy.m_markerText;
-    m_markerColor          = copy.m_markerColor;
+    m_markerColor         = copy.m_markerColor;
 
     return *this;
 }
