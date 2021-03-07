@@ -17,15 +17,148 @@
 #include <QStandardPaths>
 #include <QStyleFactory>
 #include <QImage>
+#include <QSortFilterProxyModel>
 
 #include "settingsdialog.h"
 #include "config.h"
 #include "bricklink.h"
 #include "bricklink_model.h"
+#include "framework.h"
 #include "ldraw.h"
 #include "messagebox.h"
 #include "utility.h"
+#include "betteritemdelegate.h"
 
+
+class ShortcutModel : public QAbstractTableModel
+{
+    Q_OBJECT
+public:
+    ShortcutModel(const QList<QAction *> &actions, QObject *parent = nullptr)
+        : QAbstractTableModel(parent)
+    {
+        for (QAction *action : actions) {
+            if (!action->property("bsAction").toBool())
+                continue;
+            if (action->menu())
+                continue;
+            if (action->text().isEmpty())
+                continue;
+
+            Entry entry = { action, action->property("bsShortcut").value<QKeySequence>(),
+                            action->shortcut() };
+            m_entries << entry;
+        }
+    }
+
+    void apply()
+    {
+        QVariantMap saved;
+        for (const Entry &entry : m_entries) {
+            if (entry.action && (entry.key != entry.defaultKey))
+                saved.insert(entry.action->objectName(), entry.key);
+        }
+        Config::inst()->setShortcuts(saved);
+    }
+
+    int rowCount(const QModelIndex &parent = { }) const override
+    {
+        return parent.isValid() ? 0 : m_entries.size();
+    }
+
+    int columnCount(const QModelIndex &parent = { }) const override
+    {
+        return parent.isValid() ? 0 : 3;
+    }
+
+    QVariant data(const QModelIndex &idx, int role) const override
+    {
+        if (!idx.isValid() || idx.parent().isValid() || (idx.row() >= m_entries.count())
+                || (idx.column() >= columnCount())) {
+            return { };
+        }
+        const Entry &entry = m_entries.at(idx.row());
+
+        if (role == Qt::DisplayRole) {
+            switch (idx.column()) {
+            case 0: return entry.action->text();
+            case 1: return entry.key.toString(QKeySequence::NativeText);
+            case 2: return entry.defaultKey.toString(QKeySequence::NativeText);
+            }
+        }
+        return { };
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if ((section < 0) || (section >= columnCount()) || (orientation != Qt::Horizontal))
+            return { };
+        if (role == Qt::DisplayRole) {
+            switch (section) {
+            case 0: return tr("Action name");
+            case 1: return tr("Current");
+            case 2: return tr("Default");
+            }
+        }
+        return { };
+    }
+
+    QKeySequence shortcut(const QModelIndex &idx) const
+    {
+        return (idx.isValid() && (idx.row() < m_entries.size()))
+                ? m_entries.at(idx.row()).key : QKeySequence { };
+    }
+
+    QKeySequence defaultShortcut(const QModelIndex &idx) const
+    {
+        return (idx.isValid() && (idx.row() < m_entries.size()))
+                ? m_entries.at(idx.row()).defaultKey : QKeySequence { };
+    }
+
+    bool setShortcut(const QModelIndex &idx, const QKeySequence &newShortcut)
+    {
+        if (idx.isValid() && (idx.row() < m_entries.size())) {
+            int row = idx.row();
+            if (m_entries.at(row).key == newShortcut)
+                return true; // no change
+
+            if (!newShortcut.isEmpty()) {
+                for (const Entry &entry : m_entries) {
+                    if (entry.key == newShortcut)
+                        return false; // duplicate
+                }
+            }
+
+            m_entries[row].key = newShortcut;
+            auto idx = index(row, 1);
+            emit dataChanged(idx, idx);
+            return true;
+        }
+        return false;
+    }
+
+    bool resetShortcut(const QModelIndex &idx)
+    {
+        if (idx.isValid() && (idx.row() < m_entries.size()))
+            return setShortcut(idx, m_entries.at(idx.row()).defaultKey);
+        return false;
+    }
+
+    void resetAllShortcuts()
+    {
+        for (auto &entry : m_entries)
+            entry.key = entry.defaultKey;
+        emit dataChanged(index(0, 1), index(rowCount() - 1, 1));
+    }
+
+private:
+    struct Entry {
+        QPointer<QAction> action;
+        QKeySequence defaultKey;
+        QKeySequence key;
+    };
+    QVector<Entry> m_entries;
+};
 
 static int sec2day(int s)
 {
@@ -148,6 +281,58 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         }
     });
 
+    m_sc_model = new ShortcutModel(FrameWork::inst()->allActions(), this);
+    m_sc_proxymodel = new QSortFilterProxyModel(this);
+    m_sc_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_sc_proxymodel->setFilterKeyColumn(-1);
+    m_sc_proxymodel->setSourceModel(m_sc_model);
+    w_sc_list->setModel(m_sc_proxymodel);
+    w_sc_list->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_sc_filter->addAction(QIcon::fromTheme("view-filter"), QLineEdit::LeadingPosition);
+
+    connect(w_sc_list->selectionModel(), &QItemSelectionModel::currentChanged,
+            this, [=]() {
+        QModelIndex idx = m_sc_proxymodel->mapToSource(w_sc_list->currentIndex());
+        w_sc_edit->setEnabled(idx.isValid());
+        w_sc_reset->setEnabled(idx.isValid());
+        if (idx.isValid()) {
+            auto shortcut = m_sc_model->shortcut(idx);
+            auto defaultShortcut = m_sc_model->defaultShortcut(idx);
+            w_sc_edit->setKeySequence(shortcut);
+            w_sc_reset->setEnabled(shortcut != defaultShortcut);
+        }
+    });
+    connect(m_sc_model, &QAbstractItemModel::dataChanged,
+            this, [=](const QModelIndex &tl, const QModelIndex &br) {
+        QModelIndex idx = m_sc_proxymodel->mapToSource(w_sc_list->currentIndex());
+        if (idx.isValid() && QItemSelection(tl.siblingAtColumn(0), br.siblingAtColumn(0))
+                .contains(idx.siblingAtColumn(0))) {
+            auto shortcut = m_sc_model->shortcut(idx);
+            auto defaultShortcut = m_sc_model->defaultShortcut(idx);
+            w_sc_edit->setKeySequence(shortcut);
+            w_sc_reset->setEnabled(shortcut != defaultShortcut);
+        }
+    });
+    connect(w_sc_edit, &QKeySequenceEdit::editingFinished,
+            this, [=]() {
+        if (!m_sc_model->setShortcut(m_sc_proxymodel->mapToSource(w_sc_list->currentIndex()),
+                                     w_sc_edit->keySequence())) {
+            MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
+        }
+    });
+    connect(w_sc_reset, &QPushButton::clicked, this, [=]() {
+        if (!m_sc_model->resetShortcut(m_sc_proxymodel->mapToSource(w_sc_list->currentIndex()))) {
+            MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
+        }
+    });
+    connect(w_sc_reset_all, &QPushButton::clicked, this, [=]() {
+        m_sc_model->resetAllShortcuts();
+    });
+    connect(w_sc_filter, &QLineEdit::textChanged, this, [this](const QString &text) {
+        m_sc_proxymodel->setFilterFixedString(text);
+    });
+
     load();
 
     QWidget *w = w_tabs->widget(0);
@@ -234,7 +419,7 @@ void SettingsDialog::currenciesUpdated()
 
 void SettingsDialog::load()
 {
-    // --[ GENERAL ]-------------------------------------------------------------------
+    // --[ GENERAL ]---------------------------------------------------
 
     QVector<Config::Translation> translations = Config::inst()->translations();
 
@@ -270,7 +455,7 @@ void SettingsDialog::load()
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
 
-    // --[ INTERFACE ]-----------------------------------------------------------------
+    // --[ INTERFACE ]-------------------------------------------------
 
     int iconSizeIndex = 0;
     auto iconSize = Config::inst()->iconSize();
@@ -284,7 +469,7 @@ void SettingsDialog::load()
 
     w_item_image_size->setValue(Config::inst()->itemImageSizePercent() / 10);
 
-    // --[ UPDATES ]-------------------------------------------------------------------
+    // --[ UPDATES ]---------------------------------------------------
 
     QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
 
@@ -292,21 +477,23 @@ void SettingsDialog::load()
     w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
     w_upd_database->setValue(sec2day(intervals["Database"]));
 
-    // --[ BRICKLINK ]---------------------------------------------------------------
+    // --[ BRICKLINK ]-------------------------------------------------
 
     QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
 
     w_bl_username->setText(blcred.first);
     w_bl_password->setText(blcred.second);
 
-    // --[ LDRAW ]-------------------------------------------------------------------
+    // --[ LDRAW ]-----------------------------------------------------
 
     QString ldrawdir = QDir::toNativeSeparators(Config::inst()->ldrawDir());
     w_ldraw_dir->setItemData(0, ldrawdir.isEmpty() ? QString() : ldrawdir);
     w_ldraw_dir->setItemText(0, ldrawdir.isEmpty() ? w_ldraw_dir->itemText(2) : systemDirName(ldrawdir));
     checkLDrawDir();
 
-    // ---------------------------------------------------------------------
+    // --[ SHORTCUTS ]-------------------------------------------------
+
+    w_sc_list->sortByColumn(0, Qt::AscendingOrder);
 }
 
 
@@ -366,6 +553,10 @@ void SettingsDialog::save()
         MessageBox::information(nullptr, { }, tr("You have changed the LDraw directory. Please restart BrickStore to apply this setting."));
         Config::inst()->setLDrawDir(ldrawDir);
     }
+
+    // --[ SHORTCUTS ]-----------------------------------------------------------------
+
+    m_sc_model->apply();
 }
 
 void SettingsDialog::checkLDrawDir()
@@ -400,3 +591,4 @@ void SettingsDialog::checkLDrawDir()
 }
 
 #include "moc_settingsdialog.cpp"
+#include "settingsdialog.moc"

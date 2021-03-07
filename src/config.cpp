@@ -22,7 +22,7 @@
 #include <QSize>
 #include <QUuid>
 #include <QDebug>
-#include <QCryptographicHash>
+#include <QKeySequence>
 #include <QStringBuilder>
 
 #include "config.h"
@@ -480,6 +480,18 @@ bool Config::reorderColumnLayouts(const QStringList &ids)
     return false;
 }
 
+QVariantMap Config::shortcuts() const
+{
+    return value("General/Shortcuts").toMap();
+}
+
+void Config::setShortcuts(const QVariantMap &list)
+{
+    if (shortcuts() != list) {
+        setValue("General/Shortcuts", list);
+        emit shortcutsChanged(list);
+    }
+}
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {

@@ -19,6 +19,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QHttp)
 QT_FORWARD_DECLARE_CLASS(QBuffer)
+QT_FORWARD_DECLARE_CLASS(QSortFilterProxyModel)
+class ShortcutModel;
 
 
 class SettingsDialog : public QDialog, private Ui::SettingsDialog
@@ -45,4 +47,6 @@ protected:
 
 private:
     QString m_preferedCurrency;
+    ShortcutModel *m_sc_model;
+    QSortFilterProxyModel *m_sc_proxymodel;
 };

@@ -114,6 +114,7 @@ private:
 
 public:
     QList<QAction *> contextMenuActions() const;
+    QList<QAction *> allActions() const;
     QAction *findAction(const char *name) const;
 
 private:

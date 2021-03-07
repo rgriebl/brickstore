@@ -578,6 +578,9 @@ FrameWork::FrameWork(QWidget *parent)
                 openDocument(file);
         }
     }
+
+    connect(Config::inst(), &Config::shortcutsChanged,
+            this, &FrameWork::translateActions);
 }
 
 void FrameWork::setupScripts()
@@ -803,17 +806,29 @@ void FrameWork::translateActions()
         { "edit_color", "color_management" },
     };
 
+    QVariantMap customShortcuts = Config::inst()->shortcuts();
+
     for (auto &at : actiontable) {
         if (QAction *a = findAction(at.name)) {
             if (!at.text.isNull())
                 a->setText(at.text);
-            if (at.standardKey != QKeySequence::UnknownKey)
-                a->setShortcuts(at.standardKey);
-            else if (!at.shortcut.isNull())
-                a->setShortcuts({ QKeySequence(at.shortcut) });
 
-            if (!a->shortcut().isEmpty())
-                a->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut()));
+            QKeySequence defaultShortcut;
+            if (at.standardKey != QKeySequence::UnknownKey)
+                defaultShortcut = QKeySequence(at.standardKey);
+            else if (!at.shortcut.isNull())
+                defaultShortcut = QKeySequence(at.shortcut);
+            a->setProperty("bsShortcut", QVariant::fromValue(defaultShortcut));
+
+            auto shortcut = customShortcuts.value(qL1S(at.name)).value<QKeySequence>();
+            if (shortcut.isEmpty())
+                shortcut = defaultShortcut;
+
+            a->setShortcut(shortcut);
+            if (!shortcut.isEmpty())
+                a->setToolTip(Utility::toolTipLabel(a->text(), shortcut));
+            else
+                a->setToolTip(a->text());
 
             QString iconName = QString::fromLatin1(iconalias.value(at.name, at.name));
             iconName.replace("_", "-");
@@ -1020,6 +1035,7 @@ inline static QAction *newQAction(QObject *parent, const char *name, quint32 fla
     a->setObjectName(QLatin1String(name));
     if (flags)
         a->setProperty("bsFlags", flags);
+    a->setProperty("bsAction", true);
     if (toggle)
         a->setCheckable(true);
     if (receiver && slot)
@@ -1344,6 +1360,11 @@ QList<QAction *> FrameWork::contextMenuActions() const
     }
 
     return result;
+}
+
+QList<QAction *> FrameWork::allActions() const
+{
+    return findChildren<QAction *>();
 }
 
 bool FrameWork::restoreWindowsFromAutosave()

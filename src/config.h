@@ -95,6 +95,9 @@ public:
     int columnLayoutOrder(const QString &id) const;
     QStringList columnLayoutIds() const;
 
+    QVariantMap shortcuts() const;
+    void setShortcuts(const QVariantMap &list);
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -142,7 +145,7 @@ signals:
     void columnLayoutNameChanged(const QString &id, const QString &name);
     void columnLayoutIdsOrderChanged(const QStringList &ids);
     void columnLayoutIdsChanged(const QStringList &ids);
-
+    void shortcutsChanged(const QVariantMap &list);
 
 protected:
     bool parseTranslations() const;
