@@ -170,8 +170,7 @@ bool HeaderView::restoreLayout(const QByteArray &config)
 
     if ((ds.status() != QDataStream::Ok)
             || (magic != CONFIG_HEADER)
-            || (version != 2)
-            || (count != this->count())) {
+            || (version != 2)) {
         return false;
     }
 
@@ -210,11 +209,16 @@ bool HeaderView::restoreLayout(const QByteArray &config)
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < count; ++vi) {
         int li = positions.indexOf(vi);
+        if (li >= this->count()) // ignore columns that we don't know about yet
+            continue;
         if (!isSectionInternal(li))
             setSectionHidden(li, isHiddens.at(li));
         moveSection(visualIndex(li), vi);
         resizeSection(li, sizes.at(li));
     }
+    // hide columns that got added after this was saved
+    for (int li = count; li < this->count(); ++li)
+        setSectionHidden(li, true);
 
     setSortIndicator(sortIndicator, sortAscending ? Qt::AscendingOrder : Qt::DescendingOrder);
     return true;
