@@ -462,7 +462,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
         QLocale en_US("en_US");
 
         if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
-            BrickLink::InvItemList items;
+            LotList lots;
 
             try {
                 int invalidCount = 0;
@@ -493,23 +493,23 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                     if (!item || !color) {
                         ++invalidCount;
                     } else {
-                        auto *ii = new BrickLink::InvItem(color, item);
-                        ii->setCondition(cond);
+                        auto *lot = new Lot(color, item);
+                        lot->setCondition(cond);
 
-                        if (ii->itemType()->hasSubConditions()) {
+                        if (lot->itemType()->hasSubConditions()) {
                             QString scond = cartItem["invComplete"].toString();
                             if (scond == QLatin1String("Complete"))
-                                ii->setSubCondition(BrickLink::SubCondition::Complete);
+                                lot->setSubCondition(BrickLink::SubCondition::Complete);
                             if (scond == QLatin1String("Incomplete"))
-                                ii->setSubCondition(BrickLink::SubCondition::Incomplete);
+                                lot->setSubCondition(BrickLink::SubCondition::Incomplete);
                             if (scond == QLatin1String("Sealed"))
-                                ii->setSubCondition(BrickLink::SubCondition::Sealed);
+                                lot->setSubCondition(BrickLink::SubCondition::Sealed);
                         }
 
-                        ii->setQuantity(qty);
-                        ii->setPrice(price);
+                        lot->setQuantity(qty);
+                        lot->setPrice(price);
 
-                        items << ii;
+                        lots << lot;
                     }
                 }
                 if (invalidCount)
@@ -520,8 +520,8 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                                     tr("Could not parse the cart data") % u"<br><br>" %  e.error());
             }
 
-            if (!items.isEmpty()) {
-                if (auto doc = DocumentIO::importBrickLinkCart(cart, items))
+            if (!lots.isEmpty()) {
+                if (auto doc = DocumentIO::importBrickLinkCart(cart, lots))
                     FrameWork::inst()->createWindow(doc);
             }
         }
@@ -573,8 +573,8 @@ void ImportCartDialog::updateStatusLabel()
 {
     if (m_currentUpdate.isEmpty()) {
         w_lastUpdated->setText(tr("Last updated %1").arg(
-                                   HumanReadableTimeDelta::toString(m_lastUpdated,
-                                                                    QDateTime::currentDateTime())));
+                                   HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
+                                                                    m_lastUpdated)));
     } else {
         w_lastUpdated->setText(tr("Currently updating carts"));
     }

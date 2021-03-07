@@ -991,16 +991,19 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
     dataStream >> consists;
 
     if (consists) {
-        auto *ptr = new quint64 [consists + 1];
-        item->m_consists_of = ptr;
+        item->m_consists_of.resize(consists);
+        union {
+            quint64 ui64;
+            Item::ConsistsOf co;
+        } u;
 
-        *ptr++ = consists;
-
-        for (quint32 i = 0; i < consists; i++)
-            dataStream >> *ptr++;
+        for (quint32 i = 0; i < consists; ++i) {
+            dataStream >> u.ui64;
+            item->m_consists_of[i] = u.co;
+        }
     }
     else
-        item->m_consists_of = nullptr;
+        item->m_consists_of.clear();
 
     quint32 known_colors_count;
     dataStream >> known_colors_count;
@@ -1036,13 +1039,17 @@ void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, Databa
     else
         dataStream << quint32(0);
 
-    if (item->m_consists_of && item->m_consists_of [0]) {
-        dataStream << quint32(item->m_consists_of [0]);
+    if (!item->m_consists_of.empty()) {
+        dataStream << quint32(item->m_consists_of.size());
+        union {
+            quint64 ui64;
+            Item::ConsistsOf co;
+        } u;
 
-        quint64 *ptr = item->m_consists_of + 1;
-
-        for (quint32 i = 0; i < quint32(item->m_consists_of [0]); i++)
-            dataStream << *ptr++;
+        for (quint32 i = 0; i < quint32(item->m_consists_of.size()); ++i) {
+            u.co = item->m_consists_of.at(i);
+            dataStream << u.ui64;
+        }
     }
     else
         dataStream << quint32(0);
@@ -1077,21 +1084,20 @@ void Core::writePCCToDatabase(const PartColorCode *pcc,
 }
 
 
-bool Core::applyChangeLogToItem(InvItem *item)
+bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc)
 {
-    const InvItem::Incomplete *incpl = item->isIncomplete();
-    if (!incpl)
+    if (!inc)
         return false;
 
-    const Item *fixed_item = item->item();
-    const Color *fixed_color = item->color();
+    const Item *fixed_item = item;
+    const Color *fixed_color = color;
 
-    QString itemtypeid = incpl->m_itemtype_id;
-    QString itemid     = incpl->m_item_id;
-    QString colorid    = incpl->m_color_name;
+    QString itemtypeid = inc->m_itemtype_id;
+    QString itemid     = inc->m_item_id;
+    QString colorid    = inc->m_color_name;
 
-    if (itemtypeid.isEmpty() && !incpl->m_itemtype_name.isEmpty())
-        itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
+    if (itemtypeid.isEmpty() && !inc->m_itemtype_name.isEmpty())
+        itemtypeid = inc->m_itemtype_name.at(0).toUpper();
 
     for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
         const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(size_t(i)));
@@ -1124,16 +1130,12 @@ bool Core::applyChangeLogToItem(InvItem *item)
         }
     }
 
-    if (fixed_item && !item->item())
-        item->setItem(fixed_item);
-    if (fixed_color && !item->color())
-        item->setColor(fixed_color);
+    if (fixed_item && !item)
+        item = fixed_item;
+    if (fixed_color && !color)
+        color = fixed_color;
 
-    if (fixed_item && fixed_color) {
-        item->setIncomplete(nullptr);
-        return true;
-    }
-    return false;
+    return (fixed_item && fixed_color);
 }
 
 qreal Core::itemImageScaleFactor() const
@@ -1177,6 +1179,16 @@ const QVector<const Color *> Item::knownColors() const
             result << color;
     }
     return result;
+}
+
+const Item *Item::ConsistsOf::item() const
+{
+    return BrickLink::core()->items().at(m_index);
+}
+
+const Color *Item::ConsistsOf::color() const
+{
+    return BrickLink::core()->color(m_color);
 }
 
 } // namespace BrickLink

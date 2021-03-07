@@ -166,11 +166,11 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
     if (!wrappedDoc)
         throw Exception(tr("Cannot print without a document."));
 
-    const auto items = win->document()->sortItemList(selectionOnly ? win->selection()
-                                                                   : win->document()->items());
+    const auto lots = win->document()->sortLotList(selectionOnly ? win->selectedLots()
+                                                                 : win->document()->lots());
     QVariantList itemList;
-    for (auto item : items)
-        itemList << QVariant::fromValue(QmlWrapper::InvItem(item, wrappedDoc));
+    for (auto lot : lots)
+        itemList << QVariant::fromValue(QmlWrapper::Lot(lot, wrappedDoc));
 
     QQmlEngine *engine = m_script->qmlEngine();
     QJSValueList args = { engine->toScriptValue(job.data()),

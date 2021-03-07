@@ -17,8 +17,11 @@
 #include <QPixmap>
 #include <QUuid>
 #include <QElapsedTimer>
+#include <QMimeData>
 
-#include "bricklink.h"
+
+#include "bricklinkfwd.h"
+#include "lot.h"
 #include "documentio.h"
 #include "filter.h"
 
@@ -78,8 +81,8 @@ public:
         FilterRole = Qt::UserRole,
         BaseDisplayRole, // like Qt::DisplayRole, but for differenceBase
         BaseEditRole,    // like Qt::EditRole, but for differenceBase
-        ItemPointerRole,
-        BaseItemPointerRole,
+        LotPointerRole,
+        BaseLotPointerRole,
         ErrorFlagsRole,
         DifferenceFlagsRole,
 
@@ -96,13 +99,11 @@ public:
     Q_DECLARE_FLAGS(MergeModes, MergeMode)
     Q_FLAG(MergeMode)
 
-    typedef BrickLink::InvItem Item;
-    typedef QVector<BrickLink::InvItem *> ItemList;
 
     class Statistics
     {
     public:
-        Statistics(const Document *doc, const ItemList &list, bool ignoreExcluded = false);
+        Statistics(const Document *doc, const LotList &list, bool ignoreExcluded = false);
 
         int lots() const             { return m_lots; }
         int items() const            { return m_items; }
@@ -129,8 +130,8 @@ public:
     };
 
     // Itemviews API
-    BrickLink::InvItem *item(const QModelIndex &idx) const;
-    QModelIndex index(const BrickLink::InvItem *i, int column = 0) const;
+    Lot *lot(const QModelIndex &idx) const;
+    QModelIndex index(const Lot *i, int column = 0) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -140,9 +141,9 @@ public:
                                 int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex&) const override;
     bool setData(const QModelIndex&, const QVariant&, int) override;
-    QVariant dataForEditRole(const Item *it, Field f) const;
-    QVariant dataForDisplayRole(const BrickLink::InvItem *it, Field f) const;
-    QVariant dataForFilterRole(const Item *it, Field f) const;
+    QVariant dataForEditRole(const Lot *lot, Field f) const;
+    QVariant dataForDisplayRole(const Lot *lot, Field f) const;
+    QVariant dataForFilterRole(const Lot *lot, Field f) const;
 
     bool isSorted() const;
     int sortColumn() const;
@@ -157,7 +158,7 @@ public:
     void reSort();
     void reFilter();
 
-    BrickLink::InvItemList sortItemList(const BrickLink::InvItemList &list) const;
+    LotList sortLotList(const LotList &list) const;
 
     QString filterToolTip() const;
 
@@ -171,7 +172,7 @@ public:
     Document(const DocumentIO::BsxContents &bsx, bool forceModified = false);
     virtual ~Document() override;
 
-    static Document *createTemporary(const BrickLink::InvItemList &list,
+    static Document *createTemporary(const LotList &list,
                                      const QVector<int> &fakeIndexes = { });
 
     static const QVector<Document *> &allDocuments();
@@ -184,28 +185,28 @@ public:
 
     bool isModified() const;
     void unsetModified(); // only for DocumentIO::fileSaveTo
-    QHash<const Item *, Item> differenceBase() const; // only for DocumentIO::fileSaveTo
+    QHash<const Lot *, Lot> differenceBase() const; // only for DocumentIO::fileSaveTo
 
-    const ItemList &items() const;
-    const ItemList &sortedItems() const;
+    const LotList &lots() const;
+    const LotList &sortedLots() const;
     bool clear();
 
-    void appendItem(Item *item);
-    void appendItems(const ItemList &items);
-    void insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items);
+    void appendLot(Lot *lot);
+    void appendLots(const LotList &lots);
+    void insertLotsAfter(Lot *afterLot, const LotList &lots);
 
-    void removeItems(const ItemList &items);
-    void removeItem(Item *item);
+    void removeLots(const LotList &lots);
+    void removeLot(Lot *lot);
 
-    void changeItem(Item *item, const Item &value, Document::Field hint = Document::FieldCount);
-    void changeItems(const std::vector<std::pair<Item *, Item>> &changes,
+    void changeLot(Lot *lot, const Lot &value, Document::Field hint = Document::FieldCount);
+    void changeLots(const std::vector<std::pair<Lot *, Lot>> &changes,
                      Document::Field hint = Document::FieldCount);
 
-    Statistics statistics(const ItemList &list, bool ignoreExcluded = false) const;
+    Statistics statistics(const LotList &list, bool ignoreExcluded = false) const;
 
-    void setItemFlagsMask(QPair<quint64, quint64> flagsMask);
+    void setLotFlagsMask(QPair<quint64, quint64> flagsMask);
 
-    QPair<quint64, quint64> itemFlags(const Item *item) const;
+    QPair<quint64, quint64> lotFlags(const Lot *lot) const;
 
     bool legacyCurrencyCode() const;
     QString currencyCode() const;
@@ -213,8 +214,8 @@ public:
 
     void setOrder(BrickLink::Order *order);
 
-    static bool canItemsBeMerged(const Item &item1, const Item &item2);
-    static bool mergeItemFields(const Item &from, Item &to, MergeMode defaultMerge,
+    static bool canLotsBeMerged(const Lot &lot1, const Lot &lot2);
+    static bool mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
                                 const QHash<Field, MergeMode> &fieldMerge = { });
 
 public slots:
@@ -228,19 +229,19 @@ public:
 
     QUndoStack *undoStack() const;
 
-    const Item *differenceBaseItem(const Item *item) const;
+    const Lot *differenceBaseLot(const Lot *lot) const;
 
     QByteArray saveSortFilterState() const;
     bool restoreSortFilterState(const QByteArray &ba);
 
 signals:
-    void itemFlagsChanged(const Document::Item *);
+    void lotFlagsChanged(const Lot *);
     void statisticsChanged();
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
-    void itemCountChanged(int itemCount);
+    void lotCountChanged(int lotCount);
     void filterChanged(const QString &filter);
     void sortOrderChanged(Qt::SortOrder order);
     void sortColumnChanged(int column);
@@ -250,32 +251,32 @@ signals:
 
 protected:
     bool event(QEvent *e) override;
-    virtual bool filterAcceptsItem(const BrickLink::InvItem *item) const;
+    virtual bool filterAcceptsLot(const Lot *lot) const;
 
 private:
     Document(int dummy);
 
     void setFakeIndexes(const QVector<int> &fakeIndexes);
 
-    void setItemsDirect(const ItemList &items);
-    void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
-    void removeItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
-    void changeItemsDirect(std::vector<std::pair<Item *, Item> > &changes);
+    void setLotsDirect(const LotList &lots);
+    void insertLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
+    void removeLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
+    void changeLotsDirect(std::vector<std::pair<Lot *, Lot> > &changes);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
-    void resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
+    void resetDifferenceModeDirect(QHash<const Lot *, Lot>
                                    &differenceBase);
     void filterDirect(const QString &filterString, const QVector<Filter> &filterList, bool &filtered,
-                      BrickLink::InvItemList &unfiltered);
-    void sortDirect(int column, Qt::SortOrder order, bool &sorted, BrickLink::InvItemList &unsorted);
+                      LotList &unfiltered);
+    void sortDirect(int column, Qt::SortOrder order, bool &sorted, LotList &unsorted);
 
     void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
     void emitStatisticsChanged();
-    void updateItemFlags(const Item *item);
-    void setItemFlags(const Item *item, quint64 errors, quint64 updated);
+    void updateLotFlags(const Lot *lot);
+    void setLotFlags(const Lot *lot, quint64 errors, quint64 updated);
 
     void updateModified();
 
-    int compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2, int sortColumn) const;
+    int compare(const Lot *i1, const Lot *i2, int sortColumn) const;
     void languageChange();
 
     friend class AddRemoveCmd;
@@ -286,13 +287,13 @@ private:
     friend class ResetDifferenceModeCmd;
 
 private:
-    QVector<BrickLink::InvItem *> m_items;
-    QVector<BrickLink::InvItem *> m_sortedItems;
-    QVector<BrickLink::InvItem *> m_filteredItems;
+    QVector<Lot *> m_lots;
+    QVector<Lot *> m_sortedLots;
+    QVector<Lot *> m_filteredLots;
 
-    QHash<const Item *, Item> m_differenceBase;
+    QHash<const Lot *, Lot> m_differenceBase;
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs
-    QHash<const Item *, QPair<quint64, quint64>> m_itemFlags;
+    QHash<const Lot *, QPair<quint64, quint64>> m_lotFlags;
 
 
     int m_sortColumn = -1;
@@ -306,7 +307,7 @@ private:
     bool m_nextSortFilterIsDirect = false;
 
     QString          m_currencycode;
-    QPair<quint64, quint64> m_itemFlagsMask = { 0, 0 };
+    QPair<quint64, quint64> m_lotFlagsMask = { 0, 0 };
     QString          m_filename;
     QString          m_title;
 
@@ -323,7 +324,25 @@ private:
     static QVector<Document *> s_documents;
 };
 
+class DocumentLotsMimeData : public QMimeData
+{
+    Q_OBJECT
+public:
+    DocumentLotsMimeData(const LotList &lots);
+
+    QStringList formats() const override;
+    bool hasFormat(const QString &mimeType) const override;
+
+    void setLots(const LotList &lots);
+    static LotList lots(const QMimeData *md);
+
+private:
+    static const char *s_mimetype;
+};
+
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(Document::MergeModes)
 
 Q_DECLARE_METATYPE(Document *)
 Q_DECLARE_METATYPE(const Document *)
+Q_DECLARE_METATYPE(const Lot *)

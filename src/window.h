@@ -20,6 +20,7 @@
 
 #include "bricklinkfwd.h"
 #include "document.h"
+#include "lot.h"
 #include "config.h"
 #include "currency.h"
 
@@ -61,7 +62,7 @@ public:
         IntoNew = 5
     };
 
-    enum class AddItemMode {
+    enum class AddLotMode {
         AddAsNew,
         ConsolidateWithExisting,
         ConsolidateInteractive,
@@ -71,13 +72,11 @@ public:
     enum class AutosaveAction { Restore, Delete };
     static const QVector<Window *> processAutosaves(AutosaveAction action);
 
-    const Document::ItemList &selection() const  { return m_selection; }
+    const LotList &selectedLots() const  { return m_selectedLots; }
 
-    uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
-    int addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode = AddItemMode::AddAsNew);
-    void deleteItems(const BrickLink::InvItemList &items);
+    int addLots(const LotList &lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
 
-    void consolidateItems(const Document::ItemList &items);
+    void consolidateLots(const LotList &lots);
 
     enum class ColumnLayoutCommand {
         BrickStoreDefault,
@@ -106,7 +105,7 @@ public:
     QString blockingOperationTitle() const;
     void setBlockingOperationTitle(const QString &title);
 public slots:
-    void setSelection(const Document::ItemList &);
+    void setSelection(const LotList &);
 
     void on_document_save_triggered();
     void on_document_save_as_triggered();
@@ -196,7 +195,7 @@ public slots:
     void setStockroom(BrickLink::Stockroom stockroom);
 
 signals:
-    void selectionChanged(const Document::ItemList &);
+    void selectedLotsChanged(const LotList &);
     void blockingOperationActiveChanged(bool blocked);
     void blockingOperationCancelableChanged(bool cancelable);
     void blockingOperationTitleChanged(const QString &title);
@@ -212,7 +211,7 @@ private slots:
     void ensureLatestVisible();
     void updateCaption();
     void updateSelection();
-    void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &pos);
     void priceGuideUpdated(BrickLink::PriceGuide *);
@@ -221,16 +220,15 @@ private slots:
     void autosave() const;
 
 private:
-    void applyTo(const Document::ItemList &items,
-                 std::function<bool(const Document::Item &, Document::Item &)> callback);
+    void applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback);
 
     void cancelPriceGuideUpdates();
 
     void editCurrentItem(int column);
 
-    Document::ItemList exportCheck() const;
+    LotList exportCheck() const;
     void resizeColumnsToDefault(bool simpleMode = false);
-    int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
+    int consolidateLotsHelper(const LotList &lots, Consolidate conMode) const;
     void deleteAutosave();
 
     void moveColumnDirect(int logical, int oldVisual, int newVisual);
@@ -240,7 +238,7 @@ private:
 private:
     Document *           m_doc;
     QItemSelectionModel *m_selection_model;
-    Document::ItemList   m_selection;
+    LotList              m_selectedLots;
     QTimer *             m_delayedSelectionUpdate = nullptr;
     QMenu *              m_contextMenu = nullptr;
     StatusBar *          w_statusbar;
@@ -258,8 +256,8 @@ private:
 
     struct SetToPriceGuideData
     {
-        std::vector<std::pair<Document::Item *, Document::Item>> changes;
-        QMultiHash<BrickLink::PriceGuide *, Document::Item *>    priceGuides;
+        std::vector<std::pair<Lot *, Lot>> changes;
+        QMultiHash<BrickLink::PriceGuide *, Lot *>    priceGuides;
         int              failCount = 0;
         int              doneCount = 0;
         int              totalCount = 0;

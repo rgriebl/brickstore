@@ -197,10 +197,8 @@ public:
     QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:
-    InternalAppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
+    InternalAppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
     InternalAppearsInModel(const Item *item, const Color *color, QObject *parent);
-
-    void init(const InvItemList &list);
 
     AppearsIn m_appearsin;
     QVector<AppearsInItem *> m_items;
@@ -212,7 +210,7 @@ class AppearsInModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
-    AppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
+    AppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
     AppearsInModel(const Item *item, const Color *color, QObject *parent);
 
     using QSortFilterProxyModel::index;

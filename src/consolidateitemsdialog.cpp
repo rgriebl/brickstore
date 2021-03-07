@@ -30,7 +30,7 @@
 
 
 ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
-                                               const BrickLink::InvItemList &items,
+                                               const LotList &lots,
                                                int preselectedIndex, Window::Consolidate mode,
                                                int current, int total, QWidget *parent)
     : QDialog(parent)
@@ -42,24 +42,24 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     else
         w_counter->hide();
 
-    bool newItems = (items.count() == 2) && win->document()->items().contains(items.at(0))
-                     && !win->document()->items().contains(items.at(items.count() - 1));
+    bool newLots = (lots.count() == 2) && win->document()->lots().contains(lots.at(0))
+            && !win->document()->lots().contains(lots.at(lots.count() - 1));
 
-    Q_ASSERT(newItems == (int(mode) >= int(Window::Consolidate::IntoExisting)));
+    Q_ASSERT(newLots == (int(mode) >= int(Window::Consolidate::IntoExisting)));
 
     for (int i = int(Window::Consolidate::IntoNew); i > int(Window::Consolidate::Not); --i) {
         w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<Window::Consolidate>(i)));
 
         bool forNewOnly = (i >= int(Window::Consolidate::IntoExisting));
-        if (newItems != forNewOnly)
+        if (newLots != forNewOnly)
             w_prefer_remaining->removeItem(i);
     }
 
     QVector<int> fakeIndexes;
-    for (int i = 0; i < items.size(); ++i)
-        fakeIndexes << win->document()->items().indexOf(items.at(i));
+    for (int i = 0; i < lots.size(); ++i)
+        fakeIndexes << win->document()->lots().indexOf(lots.at(i));
 
-    Document *doc = Document::createTemporary(items, fakeIndexes);
+    Document *doc = Document::createTemporary(lots, fakeIndexes);
     doc->setParent(this);
 
     auto *headerView = new HeaderView(Qt::Horizontal, w_list);

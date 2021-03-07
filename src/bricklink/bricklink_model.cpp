@@ -715,15 +715,14 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
         }
         for (const auto &c : m_filter_consistsOf) {
             bool found = false;
-            const auto containslist = item->consistsOf();
+            const auto &containslist = item->consistsOf();
             for (const auto &ci : containslist) {
-                if ((ci->item() == c.second.first)
-                        && (!c.second.second || (ci->color() == c.second.second))) {
+                if ((ci.item() == c.second.first)
+                        && (!c.second.second || (ci.color() == c.second.second))) {
                     found = true;
                     break;
                 }
             }
-            qDeleteAll(containslist);
             match = match && (found == !c.first); // found xor negate
         }
 
@@ -737,22 +736,15 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 
 
-BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, const Color *color, QObject *parent)
-    : QAbstractTableModel(parent)
+BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, const Color *color,
+                                                          QObject *parent)
+    : InternalAppearsInModel({ { item, color } }, parent)
 {
-    InvItemList list;
-    InvItem invitem(color, item);
-    list.append(&invitem);
-    init(list);
 }
 
-BrickLink::InternalAppearsInModel::InternalAppearsInModel(const InvItemList &list, QObject *parent)
+BrickLink::InternalAppearsInModel::InternalAppearsInModel(const QVector<QPair<const Item *,
+                                                          const Color *>> &list, QObject *parent)
     : QAbstractTableModel(parent)
-{
-    init(list);
-}
-
-void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
 {
     MODELTEST_ATTACH(this)
 
@@ -760,11 +752,11 @@ void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
     bool first_item = true;
     bool single_item = (list.count() == 1);
 
-    for (const InvItem *invitem : list) {
-        if (!invitem->item())
+    for (const auto &p : list) {
+        if (!p.first)
             continue;
 
-        const auto appearsvec = invitem->item()->appearsIn(invitem->color());
+        const auto appearsvec = p.first->appearsIn(p.second);
         for (const AppearsInColor &vec : appearsvec) {
             for (const AppearsInItem &item : vec) {
                 if (single_item) {
@@ -860,7 +852,8 @@ QVariant BrickLink::InternalAppearsInModel::headerData(int section, Qt::Orientat
     return QVariant();
 }
 
-BrickLink::AppearsInModel::AppearsInModel(const BrickLink::InvItemList &list, QObject *parent)
+BrickLink::AppearsInModel::AppearsInModel(const QVector<QPair<const Item *, const Color *>> &list,
+                                          QObject *parent)
     : QSortFilterProxyModel(parent)
 {
     setSourceModel(new InternalAppearsInModel(list, this));

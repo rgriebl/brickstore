@@ -17,6 +17,7 @@
 #include <QScopedPointer>
 
 #include "bricklinkfwd.h"
+#include "lot.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 class AppearsInWidgetPrivate;
@@ -30,7 +31,7 @@ public:
     ~AppearsInWidget() override;
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
-    void setItems(const BrickLink::InvItemList &list);
+    void setItems(const LotList &lots);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;

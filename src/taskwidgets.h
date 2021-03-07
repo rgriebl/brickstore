@@ -35,7 +35,7 @@ public:
 
 protected slots:
     void windowUpdate(Window *win);
-    void selectionUpdate(const Document::ItemList &list);
+    void selectionUpdate(const LotList &list);
     void currencyUpdate(const QString &ccode);
     virtual void topLevelChanged(bool);
     virtual void dockLocationChanged(Qt::DockWidgetArea);
@@ -50,7 +50,7 @@ private:
     QPointer<Window> m_win;
     QDockWidget *m_dock;
     QTimer m_delayTimer;
-    Document::ItemList m_selection;
+    LotList m_selection;
 };
 
 
@@ -68,7 +68,7 @@ public:
 
 protected slots:
     void windowUpdate(Window *win);
-    void selectionUpdate(const Document::ItemList &list);
+    void selectionUpdate(const LotList &list);
     void statisticsUpdate();
     void currencyUpdate();
 
@@ -85,7 +85,7 @@ private:
     PictureWidget *m_pic;
     QPointer<Window> m_win;
     QTimer m_delayTimer;
-    Document::ItemList m_selection;
+    LotList m_selection;
 };
 
 
@@ -102,10 +102,10 @@ public:
 
 protected slots:
     void windowUpdate(Window *win);
-    void selectionUpdate(const Document::ItemList &list);
+    void selectionUpdate(const LotList &list);
 
 private:
     QPointer<Window> m_win;
     QTimer m_delayTimer;
-    Document::ItemList m_selection;
+    LotList m_selection;
 };

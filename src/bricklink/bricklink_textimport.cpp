@@ -61,10 +61,7 @@ BrickLink::TextImport::TextImport()
 { }
 
 BrickLink::TextImport::~TextImport()
-{
-    for (auto &&items : m_consists_of_hash)
-        qDeleteAll(items);
-}
+{ }
 
 bool BrickLink::TextImport::import(const QString &path)
 {
@@ -319,11 +316,11 @@ bool BrickLink::TextImport::readInventory(const Item *item)
     if (!f || !f->isOpen() || (f->fileTime(QFileDevice::FileModificationTime) < item->inventoryUpdated()))
         return false;
 
-    InvItemList invItems;
+    QVector<Item::ConsistsOf> inventory;
 
     try {
         XmlHelpers::ParseXML p(f.take(), "INVENTORY", "ITEM");
-        p.parse([this, &p, &invItems](QDomElement e) {
+        p.parse([this, &p, &inventory](QDomElement e) {
             char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
             const QString itemId = p.elementText(e, "ITEMID");
             uint colorId = p.elementText(e, "COLOR").toUInt();
@@ -339,26 +336,27 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             if (!item || !color || !qty)
                 throw Exception("Unknown item- or color-id or 0 qty");
 
-            auto *ii = new InvItem(color, item);
-            ii->setQuantity(qty);
-            ii->setStatus(extra ? Status::Extra : Status::Include);
-            ii->setCounterPart(counterPart);
-            ii->setAlternate(alternate);
-            ii->setAlternateId(matchId);
+            Item::ConsistsOf co;
+            co.m_qty = qty;
+            co.m_index = item->index();
+            co.m_color = color->id();
+            co.m_extra = extra;
+            co.m_isalt = alternate;
+            co.m_altid = matchId;
+            co.m_cpart = counterPart;
 
-            invItems << ii;
+            inventory.append(co);
         });
 
-        for (const InvItem *ii : qAsConst(invItems)) {
-            AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
-            vec.append(qMakePair(ii->quantity(), item));
+        for (const Item::ConsistsOf &co : qAsConst(inventory)) {
+            AppearsInColor &vec = m_appears_in_hash[co.item()][co.color()];
+            vec.append(qMakePair(co.quantity(), item));
         }
         // the hash owns the items now
-        m_consists_of_hash.insert(item, invItems);
+        m_consists_of_hash.insert(item, inventory);
         return true;
 
     } catch (const Exception &) {
-        qDeleteAll(invItems);
         return false;
     }
 }
@@ -523,7 +521,7 @@ void BrickLink::TextImport::exportInventoriesTo(Core * /*bl*/)
     //QMutexLocker lock(&m_corelock);
 
     for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it)
-        it.key()->setConsistsOf(it.value());
+        const_cast<Item *>(it.key())->setConsistsOf(it.value());
 
     for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it)
         it.key()->setAppearsIn(it.value());

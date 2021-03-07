@@ -176,11 +176,12 @@ QVariantList Item::knownColors() const
 
 QVariantList Item::consistsOf() const
 {
-    const auto invItems = wrapped->consistsOf();
-    QVariantList result;
-    for (auto invItem : invItems)
-        result << QVariant::fromValue(InvItem { invItem, nullptr });
-    return result;
+//    const auto consists = wrapped->consistsOf();
+//    QVariantList result;
+//    for (auto auto &co : consists)
+//        result << QVariant::fromValue(Lot { nullptr, nullptr });
+//    return result;
+    return { };
 }
 
 
@@ -287,71 +288,71 @@ double PriceGuide::price(::BrickLink::Time time, ::BrickLink::Condition conditio
 ///////////////////////////////////////////////////////////////////////
 
 
-InvItem::InvItem(::BrickLink::InvItem *invItem, Document *document)
-    : WrapperBase(invItem)
+Lot::Lot(::Lot *lot, Document *document)
+    : WrapperBase(lot)
     , doc(document)
 { }
 
-QImage InvItem::image() const
+QImage Lot::image() const
 {
     auto pic = ::BrickLink::core()->picture(get()->item(), get()->color(), true);
     return pic->image();
 }
 
-//Item InvItem::item() const
+//Item Lot::item() const
 //{
 //    return wrapped->item();
 //}
 
-//void InvItem::setItem(Item item)
+//void Lot::setItem(Item item)
 //{
 //    set().to().setItem(item.wrappedObject());
 //}
 
-//Color InvItem::color() const
+//Color Lot::color() const
 //{
 //    return wrapped->color();
 //}
 
-//void InvItem::setColor(Color color)
+//void Lot::setColor(Color color)
 //{
 //    set().to().setColor(color.wrappedObject());
 //}
 
-//int InvItem::quantity() const
+//int Lot::quantity() const
 //{
 //    return wrapped->quantity();
 //}
 
-//void InvItem::setQuantity(int q)
+//void Lot::setQuantity(int q)
 //{
 //    set().to().setQuantity(q);
 //}
 
-InvItem::Setter::Setter(InvItem *invItem)
-    : m_invItem((invItem && !invItem->isNull()) ? invItem : nullptr)
+Lot::Setter::Setter(Lot *lot)
+    : m_lot((lot && !lot->isNull()) ? lot : nullptr)
 {
-    if (m_invItem)
-        m_to = *m_invItem->wrapped;
+    if (m_lot)
+        m_to = *m_lot->wrapped;
 }
 
-::BrickLink::InvItem *InvItem::Setter::to()
+::Lot *Lot::Setter::to()
 {
     return &m_to;
 }
 
-InvItem::Setter::~Setter()
+Lot::Setter::~Setter()
 {
-    if (m_invItem && (*m_invItem->wrapped != m_to))
-        m_invItem->doc->changeItem(m_invItem, m_to);
+    if (m_lot && (*m_lot->wrapped != m_to))
+        m_lot->doc->changeLot(m_lot, m_to);
 }
 
-InvItem::Setter InvItem::set()
+Lot::Setter Lot::set()
 {
     return Setter(this);
 }
 
-::BrickLink::InvItem *InvItem::get() const
+::Lot *Lot::get() const
 {
     return wrapped;
 }
@@ -403,13 +404,13 @@ bool Document::isWrapperFor(::Document *doc) const
     return (d == doc);
 }
 
-bool Document::changeItem(InvItem *from, ::BrickLink::InvItem &to)
+bool Document::changeLot(Lot *from, ::Lot &to)
 {
     if (isReadOnly(this))
         return false;
     if (this != from->doc)
         return false;
-    d->changeItem(from->wrapped, to);
+    d->changeLot(from->wrapped, to);
     return true;
 }
 
@@ -418,32 +419,32 @@ int Document::count() const
     return d->rowCount();
 }
 
-InvItem Document::invItem(int index)
+Lot Document::lot(int index)
 {
     if (index < 0 || index >= d->rowCount())
-        return InvItem { };
-    return InvItem(d->items().at(index), this);
+        return Lot { };
+    return Lot(d->lots().at(index), this);
 }
 
-void Document::deleteInvItem(InvItem ii)
+void Document::deleteLot(Lot ii)
 {
     if (isReadOnly(this))
         return;
 
     if (!ii.isNull() && ii.doc == this)
-        d->removeItem(static_cast<::Document::Item *>(ii.wrapped));
+        d->removeLot(static_cast<::Lot *>(ii.wrapped));
 }
 
-InvItem Document::addInvItem(Item item, Color color)
+Lot Document::addLot(Item item, Color color)
 {
     if (isReadOnly(this))
-        return InvItem { };
+        return Lot { };
 
-    auto di = new ::Document::Item();
+    auto di = new ::Lot();
     di->setItem(item.wrappedObject());
     di->setColor(color.wrappedObject());
-    d->appendItem(di);
-    return InvItem(di, this);
+    d->appendLot(di);
+    return Lot(di, this);
 }
 
 

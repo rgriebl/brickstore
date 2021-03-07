@@ -514,20 +514,20 @@ void AddItemDialog::updateHistoryText()
     }
 }
 
-QString AddItemDialog::historyTextFor(const QDateTime &when, const BrickLink::InvItem &item)
+QString AddItemDialog::historyTextFor(const QDateTime &when, const Lot &lot)
 {
     auto now = QDateTime::currentDateTime();
     QString cs;
-    if (item.color() && item.color()->id()) {
-        QColor color = item.color()->color();
-        cs = u"<b><font color=\"" % Utility::contrastColor(color, 1.).name() %
+    if (lot.color() && lot.color()->id()) {
+        QColor color = lot.color()->color();
+        cs = u"<b><font color=\"" % Utility::textColor(color).name() %
                 "\" style=\"background-color: " % color.name() % u" ;\">&nbsp;" %
-                item.colorName() % u"&nbsp;</font></b>&nbsp;&nbsp;";
+                lot.colorName() % u"&nbsp;</font></b>&nbsp;&nbsp;";
     }
 
     QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %
-            u":&nbsp;&nbsp;<b>" % QString::number(item.quantity()) % u"</b>&nbsp;&nbsp;" % cs %
-            item.itemName() % u" <i>[" + item.itemId() % u"]</i>";
+            u":&nbsp;&nbsp;<b>" % QString::number(lot.quantity()) % u"</b>&nbsp;&nbsp;" % cs %
+            lot.itemName() % u" <i>[" + lot.itemId() % u"]</i>";
 
     return s;
 }
@@ -655,33 +655,33 @@ void AddItemDialog::addClicked()
     else
         color = BrickLink::core()->color(0);
 
-    auto *ii = new BrickLink::InvItem(color, item);
+    auto *lot = new Lot(color, item);
 
-    ii->setQuantity(w_qty->text().toInt());
-    ii->setPrice(Currency::fromString(w_price->text()));
-    ii->setCost(Currency::fromString(w_cost->text()));
-    ii->setBulkQuantity(w_bulk->text().toInt());
-    ii->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
-    if (ii->itemType() && ii->itemType()->hasSubConditions())
-        ii->setSubCondition(static_cast<BrickLink::SubCondition>(1 + w_subcondition->currentIndex()));
-    ii->setRemarks(w_remarks->text());
-    ii->setComments(w_comments->text());
+    lot->setQuantity(w_qty->text().toInt());
+    lot->setPrice(Currency::fromString(w_price->text()));
+    lot->setCost(Currency::fromString(w_cost->text()));
+    lot->setBulkQuantity(w_bulk->text().toInt());
+    lot->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
+    if (lot->itemType() && lot->itemType()->hasSubConditions())
+        lot->setSubCondition(static_cast<BrickLink::SubCondition>(1 + w_subcondition->currentIndex()));
+    lot->setRemarks(w_remarks->text());
+    lot->setComments(w_comments->text());
 
     for (int i = 0; i < 3; i++) {
         if (!w_tier_price [i]->isEnabled())
             break;
 
-        ii->setTierQuantity(i, w_tier_qty [i]->text().toInt());
-        ii->setTierPrice(i, tierPriceValue(i));
+        lot->setTierQuantity(i, w_tier_qty [i]->text().toInt());
+        lot->setTierPrice(i, tierPriceValue(i));
     }
 
-    m_addHistory.emplace_back(qMakePair(QDateTime::currentDateTime(), *ii));
+    m_addHistory.emplace_back(qMakePair(QDateTime::currentDateTime(), *lot));
     while (m_addHistory.size() > 6)
         m_addHistory.pop_front();
     updateHistoryText();
 
-    m_window->addItems({ ii }, w_merge->isChecked() ? Window::AddItemMode::ConsolidateWithExisting
-                                                    : Window::AddItemMode::AddAsNew);
+    m_window->addLots({ lot }, w_merge->isChecked() ? Window::AddLotMode::ConsolidateWithExisting
+                                                     : Window::AddLotMode::AddAsNew);
 }
 
 #include "moc_additemdialog.cpp"

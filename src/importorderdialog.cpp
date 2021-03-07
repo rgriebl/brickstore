@@ -507,6 +507,8 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
 void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJob *job,
                                               const QByteArray &xml)
 {
+    bool hasCombinedFinished = false;
+
     for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ++it) {
         if (it->m_order != order)
             continue;
@@ -518,16 +520,101 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
             it->m_xmlData = xml;
         }
         if (!it->m_xmlJob && !it->m_addressJob) {
-            if (auto doc = DocumentIO::importBrickLinkOrder(order, it->m_xmlData))
-                FrameWork::inst()->createWindow(doc);
-            m_orderDownloads.erase(it);
+            if (!it->m_combine) {
+                LotList lots = parseOrderXML(it->m_order, it->m_xmlData);
+                if (!lots.isEmpty()) {
+                    if (auto doc = DocumentIO::importBrickLinkOrder(order, lots))
+                        FrameWork::inst()->createWindow(doc);
+                }
+                m_orderDownloads.erase(it);
+            } else {
+                it->m_finished = true;
+                hasCombinedFinished = true;
+            }
             break;
         }
+    }
+
+    if (hasCombinedFinished) {
+        bool allCombinedFinished = true;
+        int combinedCount = 0;
+        for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ++it) {
+            if (it->m_combine) {
+                allCombinedFinished = allCombinedFinished && it->m_finished;
+                ++combinedCount;
+            }
+        }
+
+        if (allCombinedFinished) {
+            auto *order = new BrickLink::Order(tr("Multiple"), BrickLink::OrderType::Any);
+            LotList lots;
+
+            int orderCount = 0;
+
+            for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ) {
+                if (it->m_combine) {
+                    LotList orderLots = parseOrderXML(it->m_order, it->m_xmlData);
+                    if (!orderLots.isEmpty()) {
+                        lots.append(orderLots);
+                        order->setCurrencyCode(it->m_order->currencyCode());
+                        order->setItemCount(order->itemCount() + it->m_order->itemCount());
+                        order->setLotCount(order->lotCount() + it->m_order->lotCount());
+                    }
+                    delete it->m_order;
+                    it = m_orderDownloads.erase(it);
+                } else {
+                    ++it;
+                }
+                ++orderCount;
+            }
+
+            if (auto doc = DocumentIO::importBrickLinkOrder(order, lots))
+                FrameWork::inst()->createWindow(doc);
+        }
+    }
+}
+
+LotList ImportOrderDialog::parseOrderXML(BrickLink::Order *order, const QByteArray &orderXml)
+{
+    // we should really parse the XML ourselves
+    int start = orderXml.indexOf("\n      <ITEM>");
+    int end = orderXml.lastIndexOf("</ITEM>");
+    QByteArray xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><INVENTORY>\n" %
+            orderXml.mid(start, end - start + 8) % "</INVENTORY>";
+
+    try {
+        auto result = DocumentIO::fromBrickLinkXML(xml);
+        return result.lots;
+    } catch (const Exception &e) {
+        MessageBox::warning(nullptr, { }, tr("Failed to import order %1").arg(order->id())
+                            % u"<br><br>" % e.error());
+        return { };
     }
 }
 
 void ImportOrderDialog::importOrders(const QModelIndexList &rows)
 {
+    bool combine = false;
+
+    if (rows.count() > 1) {
+        QString ccode; // check if all orders have the same currency
+        for (auto idx : rows) {
+            auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
+            if (ccode.isEmpty()) {
+                ccode = order->currencyCode();
+            } else if (ccode != order->currencyCode()) {
+                ccode.clear();
+                break;
+            }
+        }
+
+        if (!ccode.isEmpty()) {
+            combine = (MessageBox::question(this, { },
+                                            tr("Do you want to import all selected orders into a single document for multi order picking?"))
+                       == QMessageBox::Yes);
+        }
+    }
+
     for (auto idx : rows) {
         auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
@@ -558,7 +645,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows)
         auto orderCopy = new BrickLink::Order(*order);
         job->setUserData('o', orderCopy);
         addressJob->setUserData('a', orderCopy);
-        m_orderDownloads << OrderDownload { orderCopy, job, addressJob };
+        m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combine };
 
         m_trans->retrieve(job);
         m_trans->retrieve(addressJob);
@@ -586,8 +673,8 @@ void ImportOrderDialog::updateStatusLabel()
 {
     if (m_currentUpdate.isEmpty()) {
         w_lastUpdated->setText(tr("Last updated %1").arg(
-                                   HumanReadableTimeDelta::toString(m_lastUpdated,
-                                                                    QDateTime::currentDateTime())));
+                                   HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
+                                                                    m_lastUpdated)));
     } else {
         w_lastUpdated->setText(tr("Currently updating orders"));
     }

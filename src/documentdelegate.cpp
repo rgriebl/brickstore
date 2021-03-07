@@ -174,8 +174,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (!idx.isValid())
         return;
 
-    const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
-    const auto *base = idx.data(Document::BaseItemPointerRole).value<const BrickLink::InvItem *>();
+    const auto *lot = idx.data(Document::LotPointerRole).value<const Lot *>();
+    const auto *base = idx.data(Document::BaseLotPointerRole).value<const Lot *>();
     const auto errorFlags = idx.data(Document::ErrorFlagsRole).value<quint64>();
     const auto differenceFlags = idx.data(Document::DifferenceFlagsRole).value<quint64>();
 
@@ -210,8 +210,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     bool selected = (option.state & QStyle::State_Selected);
-    bool nocolor = !item->color();
-    bool noitem = !item->item();
+    bool nocolor = !lot->color();
+    bool noitem = !lot->item();
 
     const QFontMetrics &fm = option.fontMetrics;
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
@@ -268,25 +268,25 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (!selected) {
         switch (idx.column()) {
         case Document::ItemType:
-            if (item->itemType())
-                bg = shadeColor(item->itemType()->id(), 0.1);
+            if (lot->itemType())
+                bg = shadeColor(lot->itemType()->id(), 0.1);
             break;
 
         case Document::Category:
-            if (item->category())
-                bg = shadeColor(int(item->category()->id()), 0.2);
+            if (lot->category())
+                bg = shadeColor(int(lot->category()->id()), 0.2);
             break;
 
         case Document::Quantity:
-            if (item->quantity() <= 0)
-                bg = (item->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
+            if (lot->quantity() <= 0)
+                bg = (lot->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
                                              : QColor::fromRgbF(1, 0, 0, 0.4);
             break;
 
         case Document::QuantityDiff:
-            if (base && (base->quantity() < item->quantity()))
+            if (base && (base->quantity() < lot->quantity()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (base && (base->quantity() > item->quantity()))
+            else if (base && (base->quantity() > lot->quantity()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
 
@@ -296,9 +296,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             break;
 
         case Document::PriceDiff: {
-            if (base && (base->price() < item->price()))
+            if (base && (base->price() < lot->price()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (base && (base->price() > item->price()))
+            else if (base && (base->price() > lot->price()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
         }
@@ -307,7 +307,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             break;
 
         case Document::Condition:
-            if (item->condition() != BrickLink::Condition::New) {
+            if (lot->condition() != BrickLink::Condition::New) {
                 bg = fg;
                 bg.setAlphaF(0.3);
             }
@@ -339,12 +339,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
         union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
         key.s.i1 = iconSize;
-        key.s.i2 = quint32(item->status());
+        key.s.i2 = quint32(lot->status());
 
         QPixmap *pix = s_status_cache[key.q];
         if (!pix) {
             QIcon icon;
-            switch (item->status()) {
+            switch (lot->status()) {
             case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"); break;
             case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"); break;
             default                        :
@@ -357,11 +357,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (pix)
             image = pix->toImage();
 
-        uint altid = item->alternateId();
-        bool cp = item->counterPart();
+        uint altid = lot->alternateId();
+        bool cp = lot->counterPart();
         if (altid || cp) {
             tag.text = cp ? QLatin1String("CP") : QString::number(altid);
-            tag.bold = (cp || !item->alternate());
+            tag.bold = (cp || !lot->alternate());
             tag.foreground = fg;
             if (cp || selected) {
                 tag.background = fg;
@@ -373,13 +373,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Description:
-        if (item->item() && item->item()->hasInventory()) {
+        if (lot->item() && lot->item()->hasInventory()) {
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
             tag.background.setAlphaF(0.3);
 
-            if ((option.state & QStyle::State_MouseOver) && item->quantity()) {
+            if ((option.state & QStyle::State_MouseOver) && lot->quantity()) {
                 tag.foreground = option.palette.color(QPalette::HighlightedText);
                 tag.background = option.palette.color(QPalette::Highlight);
             }
@@ -387,7 +387,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case Document::Picture: {
-        BrickLink::Picture *pic = BrickLink::core()->picture(item->item(), item->color());
+        BrickLink::Picture *pic = BrickLink::core()->picture(lot->item(), lot->color());
         double dpr = p->device()->devicePixelRatioF();
         QSize s = option.rect.size() * dpr;
 
@@ -401,19 +401,19 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Color: {
-        image = BrickLink::core()->colorImage(item->color(), option.decorationSize.width() * 3 / 2,
+        image = BrickLink::core()->colorImage(lot->color(), option.decorationSize.width() * 3 / 2,
                                               option.rect.height());
         break;
     }
     case Document::Retain:
-        checkmark = item->retain() ? 1 : -1;
+        checkmark = lot->retain() ? 1 : -1;
         break;
 
     case Document::Stockroom:
-        if (item->stockroom() == BrickLink::Stockroom::None)
+        if (lot->stockroom() == BrickLink::Stockroom::None)
             checkmark = -1;
         else
-            str = QLatin1Char('A' + char(item->stockroom()) - char(BrickLink::Stockroom::A));
+            str = QLatin1Char('A' + char(lot->stockroom()) - char(BrickLink::Stockroom::A));
         break;
     }
 
@@ -560,7 +560,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         Document::Remarks,
         Document::Category,
         Document::ItemType,
-        Document::Reserved
+        Document::Reserved,
     };
 
     if (!str.isEmpty()) {
@@ -877,7 +877,7 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
 
     auto f = static_cast<Document::Field>(idx.column());
 
-    const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+    const auto *item = idx.data(Document::LotPointerRole).value<const Lot *>();
     if (!item)
         return false;
 
@@ -995,7 +995,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
         default                        : break;
         }
 
-        const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+        const auto *item = idx.data(Document::LotPointerRole).value<const Lot *>();
         if (item->counterPart())
             tip = tip % u"<br>(" % tr("Counter part") % u")";
         else if (item->alternateId())
@@ -1012,7 +1012,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
                     ?  tr("New", "ToolTip Cond>New") : tr("Used", "ToolTip Cond>Used");
         }
 
-        const auto *item = idx.data(Document::ItemPointerRole).value<const BrickLink::InvItem *>();
+        const auto *item = idx.data(Document::LotPointerRole).value<const Lot *>();
         if (item && item->itemType() && item->itemType()->hasSubConditions()
                 && (item->subCondition() != BrickLink::SubCondition::None)) {
             QString scStr;

@@ -160,8 +160,6 @@ void HeaderView::setModel(QAbstractItemModel *m)
 
 bool HeaderView::restoreLayout(const QByteArray &config)
 {
-    //TODO: we are missing the lastSortColumn[] history here, as this is kept in DocumentProxyModel
-
     if (config.isEmpty())
         return false;
 

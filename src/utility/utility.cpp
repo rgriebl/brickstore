@@ -110,15 +110,6 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
     }
 }
 
-qreal Utility::colorDifference(const QColor &c1, const QColor &c2)
-{
-    qreal r1, g1, b1, a1, r2, g2, b2, a2;
-    c1.getRgbF(&r1, &g1, &b1, &a1);
-    c2.getRgbF(&r2, &g2, &b2, &a2);
-
-    return (qAbs(r1-r2) + qAbs(g1-g2) + qAbs(b1-b2)) / qreal(3);
-}
-
 QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
 {
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
@@ -129,6 +120,29 @@ QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
     qreal e = qreal(1) - f;
 
     return QColor::fromRgbF(r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f);
+}
+
+QColor Utility::textColor(const QColor &bg)
+{
+    // see https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+
+    auto adjust = [](qreal c) {
+        return (c <= 0.03928) ? c / 12.92 : std::pow(((c + 0.055) / 1.055), 2.4);
+    };
+
+    auto luminance = [](qreal r, qreal g, qreal b) {
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    auto r = adjust(bg.redF());
+    auto g = adjust(bg.greenF());
+    auto b = adjust(bg.blueF());
+    auto l = luminance(r, g, b);
+
+    auto cw = (1. + 0.05) / (l + 0.05); // contrast to white
+    auto cb = (l + 0.05) / (0. + 0.05); // contrast to black
+
+    return (cw > cb) ? Qt::white : Qt::black;
 }
 
 QColor Utility::contrastColor(const QColor &c, qreal f)

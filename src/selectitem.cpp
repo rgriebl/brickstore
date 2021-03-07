@@ -914,11 +914,11 @@ void SelectItem::showContextMenu(const QPoint &p)
         if (item && item->itemType() && (item->itemType()->id() == 'M') && item->hasInventory()) {
             auto minifigParts = item->consistsOf();
 
-            for (const BrickLink::InvItem *part : minifigParts) {
-                if (!part || !part->item())
+            for (const BrickLink::Item::ConsistsOf &part : minifigParts) {
+                auto partItem = part.item();
+                if (!partItem)
                     continue;
-                auto partItem = part->item();
-                auto partColor = part->color();
+                auto partColor = part.color();
                 auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
 
 
@@ -947,8 +947,6 @@ void SelectItem::showContextMenu(const QPoint &p)
                     });
                 }
             }
-
-            qDeleteAll(minifigParts);
         }
 
         if (!m.isEmpty())

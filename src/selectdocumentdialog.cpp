@@ -48,7 +48,7 @@ SelectDocument::SelectDocument(const Document *self, QWidget *parent)
     layout->addWidget(m_document, 1, 0, 1, 2);
     layout->addWidget(m_documentList, 2, 1, 1, 1);
 
-    m_itemsFromClipboard = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
+    m_lotsFromClipboard = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
 
     foreach (const Document *doc, Document::allDocuments()) {
         if (doc != self) {
@@ -57,7 +57,7 @@ SelectDocument::SelectDocument(const Document *self, QWidget *parent)
         }
     }
 
-    bool hasClip = !m_itemsFromClipboard.isEmpty();
+    bool hasClip = !m_lotsFromClipboard.isEmpty();
     bool hasDocs = m_documentList->count() > 0;
 
     m_clipboard->setEnabled(hasClip);
@@ -81,21 +81,21 @@ SelectDocument::SelectDocument(const Document *self, QWidget *parent)
     QMetaObject::invokeMethod(this, emitSelected, Qt::QueuedConnection);
 }
 
-BrickLink::InvItemList SelectDocument::items() const
+LotList SelectDocument::lots() const
 {
-    BrickLink::InvItemList list;
+    LotList list;
 
     if (m_clipboard->isChecked()) {
-        for (const BrickLink::InvItem *item : m_itemsFromClipboard)
-            list.append(new BrickLink::InvItem(*item));
+        for (const Lot *lot : m_lotsFromClipboard)
+            list.append(new Lot(*lot));
     } else {
         if (!m_documentList->selectedItems().isEmpty()) {
             const auto *doc = m_documentList->selectedItems().constFirst()
                     ->data(Qt::UserRole).value<const Document *>();
             if (doc) {
-                const auto items = doc->items();
-                for (const Document::Item *item : items)
-                    list.append(new BrickLink::InvItem(*item));
+                const auto lots = doc->lots();
+                for (const Lot *lot : lots)
+                    list.append(new Lot(*lot));
             }
         }
     }
@@ -104,7 +104,7 @@ BrickLink::InvItemList SelectDocument::items() const
 
 SelectDocument::~SelectDocument()
 {
-    qDeleteAll(m_itemsFromClipboard);
+    qDeleteAll(m_lotsFromClipboard);
 }
 
 bool SelectDocument::isDocumentSelected() const
@@ -139,9 +139,9 @@ SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &
             m_ok, &QAbstractButton::setEnabled);
 }
 
-BrickLink::InvItemList SelectDocumentDialog::items() const
+LotList SelectDocumentDialog::lots() const
 {
-    return m_sd->items();
+    return m_sd->lots();
 }
 
 
@@ -389,9 +389,9 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString
             mpage, &WizardPage::setComplete);
 }
 
-Document::ItemList SelectCopyMergeDialog::items() const
+LotList SelectCopyMergeDialog::lots() const
 {
-    return m_sd->items();
+    return m_sd->lots();
 }
 
 Document::MergeMode SelectCopyMergeDialog::defaultMergeMode() const

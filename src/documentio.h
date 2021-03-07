@@ -15,6 +15,7 @@
 
 #include <QCoreApplication>
 #include "bricklinkfwd.h"
+#include "lot.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QIODevice)
@@ -32,52 +33,52 @@ public:
     static Window *open();
     static Window *open(const QString &name);
     static Document *importBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
-                                              int quantity = 1,
+                                              int multiply = 1,
                                               BrickLink::Condition condition = BrickLink::Condition::New,
                                               BrickLink::Status extraParts = BrickLink::Status::Extra,
                                               bool includeInstructions = false);
-    static Document *importBrickLinkOrder(BrickLink::Order *order, const QByteArray &orderXml);
+    static Document *importBrickLinkOrder(BrickLink::Order *order, const LotList &lots);
     static Document *importBrickLinkStore();
-    static Document *importBrickLinkCart(BrickLink::Cart *cart, const BrickLink::InvItemList &itemlist);
+    static Document *importBrickLinkCart(BrickLink::Cart *cart, const LotList &lots);
     static Document *importBrickLinkXML();
     static Document *importLDrawModel();
 
     static bool save(Window *win);
     static bool saveAs(Window *win);
-    static void exportBrickLinkXML(const BrickLink::InvItemList &itemlist);
-    static void exportBrickLinkXMLClipboard(const BrickLink::InvItemList &itemlist);
+    static void exportBrickLinkXML(const LotList &lots);
+    static void exportBrickLinkXMLClipboard(const LotList &itemlist);
     static void exportBrickLinkUpdateClipboard(const Document *doc,
-                                               const BrickLink::InvItemList &itemlist);
-    static void exportBrickLinkInvReqClipboard(const BrickLink::InvItemList &itemlist);
-    static void exportBrickLinkWantedListClipboard(const BrickLink::InvItemList &itemlist);
+                                               const LotList &lots);
+    static void exportBrickLinkInvReqClipboard(const LotList &lots);
+    static void exportBrickLinkWantedListClipboard(const LotList &lots);
 
     struct BsxContents
     {
-        BrickLink::InvItemList items;
+        LotList lots;
         QString currencyCode;
 
-        QHash<const BrickLink::InvItem *, BrickLink::InvItem> differenceModeBase;
+        QHash<const Lot *, Lot> differenceModeBase;
 
         QByteArray guiColumnLayout;
         QByteArray guiSortFilterState;
 
-        int invalidItemCount = 0; // parse only
+        int invalidLotsCount = 0; // parse only
     };
+
+    static QString toBrickLinkXML(const LotList &lots);
+    static BsxContents fromBrickLinkXML(const QByteArray &xml);
 
 private:
     static Window *loadFrom(const QString &s);
     static bool saveTo(Window *win, const QString &s);
 
-    static QString toBrickLinkXML(const BrickLink::InvItemList &itemlist);
-    static BsxContents fromBrickLinkXML(const QByteArray &xml);
+    static bool parseLDrawModel(QFile *f, LotList &lots, int *invalidLots);
+    static bool parseLDrawModelInternal(QFile *f, const QString &modelName,
+                                        QVector<Lot *> &lots,
+                                        QHash<QString, QVector<Lot *> > &subCache,
+                                        QVector<QString> &recursionDetection);
 
-    static bool parseLDrawModel(QFile *f, BrickLink::InvItemList &items, int *invalid_items);
-    static bool parseLDrawModelInternal(QFile *f, const QString &model_name,
-                                        QVector<BrickLink::InvItem *> &items,
-                                        QHash<QString, QVector<BrickLink::InvItem *> > &subCache,
-                                        QVector<QString> &recursion_detection);
-
-    static bool resolveIncomplete(BrickLink::InvItem *item);
+    static bool resolveIncomplete(Lot *lot);
 
     static BsxContents parseBsxInventory(QIODevice *in);
     static bool createBsxInventory(QIODevice *out, const BsxContents &bsx);

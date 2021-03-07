@@ -31,8 +31,8 @@ namespace Utility {
 int naturalCompare(const QString &s1, const QString &s2);
 
 QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5);
-QColor contrastColor(const QColor &c, qreal f = 0.04);
-qreal colorDifference(const QColor &c1, const QColor &c2);
+QColor textColor(const QColor &backgroundColor);
+QColor contrastColor(const QColor &c, qreal f);
 QColor premultiplyAlpha(const QColor &c);
 
 void setPopupPos(QWidget *w, const QRect &pos);

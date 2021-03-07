@@ -23,7 +23,7 @@ class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialo
     Q_OBJECT
 
 public:
-    ConsolidateItemsDialog(const Window *win, const BrickLink::InvItemList &items,
+    ConsolidateItemsDialog(const Window *win, const LotList &lots,
                            int preselectedIndex, Window::Consolidate mode, int current, int total,
                            QWidget *parent = nullptr);
 

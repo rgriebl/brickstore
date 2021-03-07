@@ -66,7 +66,7 @@ public:
     static constexpr double maxPrice = 99999;
 
 public slots:
-    void selectionUpdate(const Document::ItemList &selection);
+    void selectionUpdate(const LotList &selection);
     void blockUpdate(bool blocked);
     void modificationUpdate();
     void titleUpdate();

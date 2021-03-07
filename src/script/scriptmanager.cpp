@@ -92,7 +92,7 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     qRegisterMetaType<QmlWrapper::ItemType>("ItemType");
     qRegisterMetaType<QmlWrapper::Category>("Category");
     qRegisterMetaType<QmlWrapper::Item>("Item");
-    qRegisterMetaType<QmlWrapper::InvItem>("InvItem");
+    qRegisterMetaType<QmlWrapper::Lot>("Lot");
     qRegisterMetaType<QmlWrapper::PriceGuide>("PriceGuide");
     qRegisterMetaType<QmlWrapper::Picture>("Picture");
     qRegisterMetaType<QmlWrapper::Order>("Order");

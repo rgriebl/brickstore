@@ -32,6 +32,7 @@ SOURCES += \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
   $$PWD/incdecpricesdialog.cpp \
+  $$PWD/lot.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
@@ -54,6 +55,7 @@ HEADERS += \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
   $$PWD/incdecpricesdialog.h \
+  $$PWD/lot.h \
   $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \

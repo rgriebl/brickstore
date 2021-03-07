@@ -147,9 +147,14 @@ void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Colo
     delete old_model;
 }
 
-void AppearsInWidget::setItems(const BrickLink::InvItemList &list)
+void AppearsInWidget::setItems(const LotList &lots)
 {
     QAbstractItemModel *old_model = model();
+
+    QVector<QPair<const BrickLink::Item *, const BrickLink::Color *>> list;
+    list.reserve(lots.size());
+    for (const auto &lot : lots)
+        list.append({ lot->item(), lot->color() });
 
     setModel(new BrickLink::AppearsInModel(list, this));
     resizeColumns();

@@ -62,7 +62,7 @@ private slots:
 private:
     double tierPriceValue(int i);
     void updateHistoryText();
-    static QString historyTextFor(const QDateTime &when, const BrickLink::InvItem &item);
+    static QString historyTextFor(const QDateTime &when, const Lot &lot);
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
@@ -85,5 +85,5 @@ private:
     QToolButton *w_toggles[3];
 
     QTimer *m_historyTimer;
-    std::list<QPair<QDateTime, const BrickLink::InvItem>> m_addHistory;
+    std::list<QPair<QDateTime, const Lot>> m_addHistory;
 };

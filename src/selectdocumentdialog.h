@@ -34,13 +34,13 @@ public:
     ~SelectDocument() override;
 
     bool isDocumentSelected() const;
-    BrickLink::InvItemList items() const;
+    LotList lots() const;
 
 signals:
     void documentSelected(bool valid);
 
 private:
-    BrickLink::InvItemList m_itemsFromClipboard;
+    LotList m_lotsFromClipboard;
 
     QRadioButton *m_clipboard;
     QRadioButton *m_document;
@@ -54,7 +54,7 @@ public:
     SelectDocumentDialog(const Document *self, const QString &headertext,
                          QWidget *parent = nullptr);
 
-    BrickLink::InvItemList items() const;
+    LotList lots() const;
     
 private:
     SelectDocument *m_sd;
@@ -87,7 +87,7 @@ public:
     SelectCopyMergeDialog(const Document *self, const QString &chooseDocText,
                           const QString &chooseFieldsText, QWidget *parent = nullptr);
 
-    Document::ItemList items() const;
+    LotList lots() const;
     Document::MergeMode defaultMergeMode() const;
     QHash<Document::Field, Document::MergeMode> fieldMergeModes() const;
 

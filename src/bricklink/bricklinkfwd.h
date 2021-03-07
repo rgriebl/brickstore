@@ -29,12 +29,11 @@ class PartColorCode;
 
 class Picture;
 class PriceGuide;
-class InvItem;
 class Order;
 class Cart;
+class Incomplete;
 class Core;
 class TextImport;
-class InvItemMimeData;
 
 class ColorModel;
 class InternalColorModel;
@@ -45,7 +44,6 @@ class AppearsInModel;
 class InternalAppearsInModel;
 class ItemDelegate;
 
-typedef QVector<InvItem *>                    InvItemList;
 typedef QPair<int, const Item *>              AppearsInItem;
 typedef QVector<AppearsInItem>                AppearsInColor;
 typedef QHash<const Color *, AppearsInColor>  AppearsIn;

@@ -42,15 +42,15 @@ using namespace std::chrono_literals;
 template <auto G, auto S>
 struct FieldOp
 {
-    template <typename Result> static Result returnType(Result (Document::Item::*)() const);
+    template <typename Result> static Result returnType(Result (Lot::*)() const);
     typedef decltype(returnType(G)) R;
 
-    static void copy(const Document::Item &from, Document::Item &to)
+    static void copy(const Lot &from, Lot &to)
     {
         (to.*S)((from.*G)());
     }
 
-    static bool merge(const Document::Item &from, Document::Item &to,
+    static bool merge(const Lot &from, Lot &to,
                       Document::MergeMode mergeMode = Document::MergeMode::Merge,
                       const R defaultValue = { })
     {
@@ -67,7 +67,7 @@ struct FieldOp
 private:
     template<class Q = R>
     static typename std::enable_if<!std::is_same<Q, double>::value && !std::is_same<Q, QString>::value, bool>::type
-    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+    mergeInternal(const Lot &from, Lot &to, Document::MergeMode mergeMode,
                   const R defaultValue)
     {
         Q_UNUSED(mergeMode)
@@ -81,7 +81,7 @@ private:
 
     template<class Q = R>
     static typename std::enable_if<std::is_same<Q, double>::value, bool>::type
-    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+    mergeInternal(const Lot &from, Lot &to, Document::MergeMode mergeMode,
                   const R defaultValue)
     {
         if (mergeMode == Document::MergeMode::MergeAverage) { // weighted by quantity
@@ -101,7 +101,7 @@ private:
 
     template<class Q = R>
     static typename std::enable_if<std::is_same<Q, QString>::value, bool>::type
-    mergeInternal(const Document::Item &from, Document::Item &to, Document::MergeMode mergeMode,
+    mergeInternal(const Lot &from, Lot &to, Document::MergeMode mergeMode,
                   const R defaultValue)
     {
         if (mergeMode == Document::MergeMode::MergeText) { // add or remove "tags"
@@ -154,27 +154,27 @@ enum {
 
 AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
                            const QVector<int> &sortedPositions,
-                           const QVector<int> &filteredPositions, const Document::ItemList &items)
-    : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count())))
+                           const QVector<int> &filteredPositions, const LotList &lots)
+    : QUndoCommand(genDesc(t == Add, qMax(lots.count(), positions.count())))
     , m_doc(doc)
     , m_positions(positions)
     , m_sortedPositions(sortedPositions)
     , m_filteredPositions(filteredPositions)
-    , m_items(items)
+    , m_lots(lots)
     , m_type(t)
 {
-    // for add: specify items and optionally also positions
-    // for remove: specify items only
+    // for add: specify lots and optionally also positions
+    // for remove: specify lots only
 }
 
 AddRemoveCmd::~AddRemoveCmd()
 {
     if (m_type == Add) {
         if (m_doc) {
-            for (const auto item : m_items)
-                m_doc->m_differenceBase.remove(item);
+            for (const auto lot : m_lots)
+                m_doc->m_differenceBase.remove(lot);
         }
-        qDeleteAll(m_items);
+        qDeleteAll(m_lots);
     }
 }
 
@@ -186,18 +186,18 @@ int AddRemoveCmd::id() const
 void AddRemoveCmd::redo()
 {
     if (m_type == Add) {
-        // Document::insertItemsDirect() adds all m_items at the positions given in
+        // Document::insertLotsDirect() adds all m_lots at the positions given in
         // m_*positions (or append them to the document in case m_*positions is empty)
-        m_doc->insertItemsDirect(m_items, m_positions, m_sortedPositions, m_filteredPositions);
+        m_doc->insertLotsDirect(m_lots, m_positions, m_sortedPositions, m_filteredPositions);
         m_positions.clear();
         m_sortedPositions.clear();
         m_filteredPositions.clear();
         m_type = Remove;
     }
     else {
-        // Document::removeItemsDirect() removes all m_items and records the positions
+        // Document::removeLotsDirect() removes all m_lots and records the positions
         // in m_*positions
-        m_doc->removeItemsDirect(m_items, m_positions, m_sortedPositions, m_filteredPositions);
+        m_doc->removeLotsDirect(m_lots, m_positions, m_sortedPositions, m_filteredPositions);
         m_type = Add;
     }
 }
@@ -223,7 +223,7 @@ QString AddRemoveCmd::genDesc(bool is_add, int count)
 
 QTimer *ChangeCmd::s_eventLoopCounter = nullptr;
 
-ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes, Document::Field hint)
+ChangeCmd::ChangeCmd(Document *doc, const std::vector<std::pair<Lot *, Lot>> &changes, Document::Field hint)
     : QUndoCommand()
     , m_doc(doc)
     , m_hint(hint)
@@ -273,7 +273,7 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
             std::copy_if(otherChange->m_changes.cbegin(), otherChange->m_changes.cend(),
                          std::back_inserter(m_changes), [this](const auto &change) {
                 return !std::binary_search(m_changes.begin(), m_changes.end(),
-                                           std::make_pair(change.first, Document::Item()),
+                                           std::make_pair(change.first, Lot()),
                                            [](const auto &a, const auto &b) {
                     return a.first < b.first;
                 });
@@ -287,7 +287,7 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
 
 void ChangeCmd::redo()
 {
-    m_doc->changeItemsDirect(m_changes);
+    m_doc->changeLotsDirect(m_changes);
 }
 
 void ChangeCmd::undo()
@@ -454,7 +454,7 @@ void FilterCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool ignoreExcluded)
+Document::Statistics::Statistics(const Document *doc, const LotList &list, bool ignoreExcluded)
 {
     m_lots = 0;
     m_items = 0;
@@ -465,37 +465,37 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
     m_incomplete = 0;
     bool weight_missing = false;
 
-    for (const Item *item : list) {
-        if (ignoreExcluded && (item->status() == BrickLink::Status::Exclude))
+    for (const Lot *lot : list) {
+        if (ignoreExcluded && (lot->status() == BrickLink::Status::Exclude))
             continue;
 
         ++m_lots;
 
-        int qty = item->quantity();
-        double price = item->price();
+        int qty = lot->quantity();
+        double price = lot->price();
 
         m_val += (qty * price);
-        m_cost += (qty * item->cost());
+        m_cost += (qty * lot->cost());
 
         for (int i = 0; i < 3; i++) {
-            if (item->tierQuantity(i) && !qFuzzyIsNull(item->tierPrice(i)))
-                price = item->tierPrice(i);
+            if (lot->tierQuantity(i) && !qFuzzyIsNull(lot->tierPrice(i)))
+                price = lot->tierPrice(i);
         }
-        m_minval += (qty * price * (1.0 - double(item->sale()) / 100.0));
+        m_minval += (qty * price * (1.0 - double(lot->sale()) / 100.0));
         m_items += qty;
 
-        if (item->totalWeight() > 0)
-            m_weight += item->totalWeight();
+        if (lot->totalWeight() > 0)
+            m_weight += lot->totalWeight();
         else
             weight_missing = true;
 
-        auto flags = doc->itemFlags(item);
+        auto flags = doc->lotFlags(lot);
         if (flags.first)
             m_errors += qPopulationCount(flags.first);
         if (flags.second)
             m_differences += qPopulationCount(flags.second);
 
-        if (item->isIncomplete())
+        if (lot->isIncomplete())
             m_incomplete++;
     }
     if (weight_missing)
@@ -513,16 +513,16 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
 
 QVector<Document *> Document::s_documents;
 
-Document *Document::createTemporary(const BrickLink::InvItemList &list, const QVector<int> &fakeIndexes)
+Document *Document::createTemporary(const LotList &list, const QVector<int> &fakeIndexes)
 {
     auto *doc = new Document(1 /*dummy*/);
-    ItemList items;
+    LotList lots;
 
     // the caller owns the items, so we have to copy here
-    for (const BrickLink::InvItem *item : list)
-        items.append(new Item(*item));
+    for (const Lot *lot : list)
+        lots.append(new Lot(*lot));
 
-    doc->setItemsDirect(items);
+    doc->setLotsDirect(lots);
     doc->setFakeIndexes(fakeIndexes);
     return doc;
 }
@@ -585,7 +585,7 @@ Document::Document(const DocumentIO::BsxContents &bsx, bool forceModified)
     : Document()
 {
     // we take ownership of the items
-    setItemsDirect(bsx.items);
+    setLotsDirect(bsx.lots);
 
     if (!bsx.currencyCode.isEmpty()) {
         if (bsx.currencyCode == QLatin1String("$$$")) // legacy USD
@@ -605,7 +605,7 @@ Document::Document(const DocumentIO::BsxContents &bsx, bool forceModified)
 Document::~Document()
 {
     delete m_order;
-    qDeleteAll(m_items);
+    qDeleteAll(m_lots);
     delete m_undo;
 
     s_documents.removeAll(this);
@@ -616,17 +616,17 @@ const QVector<Document *> &Document::allDocuments()
     return s_documents;
 }
 
-const Document::ItemList &Document::items() const
+const LotList &Document::lots() const
 {
-    return m_items;
+    return m_lots;
 }
 
-const Document::ItemList &Document::sortedItems() const
+const LotList &Document::sortedLots() const
 {
-    return m_sortedItems;
+    return m_sortedLots;
 }
 
-Document::Statistics Document::statistics(const ItemList &list, bool ignoreExcluded) const
+Document::Statistics Document::statistics(const LotList &list, bool ignoreExcluded) const
 {
     return Statistics(this, list, ignoreExcluded);
 }
@@ -649,74 +649,74 @@ QUndoStack *Document::undoStack() const
 
 bool Document::clear()
 {
-    removeItems(m_items);
+    removeLots(m_lots);
     return true;
 }
 
-void Document::appendItem(Item *item)
+void Document::appendLot(Lot *lot)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, { item }));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, { lot }));
 }
 
-void Document::appendItems(const Document::ItemList &items)
+void Document::appendLots(const LotList &lots)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, items));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, lots));
 }
 
-void Document::insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items)
+void Document::insertLotsAfter(Lot *afterLot, const LotList &lots)
 {
-    if (items.isEmpty())
+    if (lots.isEmpty())
         return;
 
-    int afterPos = m_items.indexOf(afterItem) + 1;
-    int afterSortedPos = m_sortedItems.indexOf(afterItem) + 1;
-    int afterFilteredPos = m_filteredItems.indexOf(afterItem) + 1;
+    int afterPos = m_lots.indexOf(afterLot) + 1;
+    int afterSortedPos = m_sortedLots.indexOf(afterLot) + 1;
+    int afterFilteredPos = m_filteredLots.indexOf(afterLot) + 1;
 
     Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
     if (afterFilteredPos == 0)
-        afterFilteredPos = m_filteredItems.size();
+        afterFilteredPos = m_filteredLots.size();
 
-    QVector<int> positions(items.size());
+    QVector<int> positions(lots.size());
     std::iota(positions.begin(), positions.end(), afterPos);
-    QVector<int> sortedPositions(items.size());
+    QVector<int> sortedPositions(lots.size());
     std::iota(sortedPositions.begin(), sortedPositions.end(), afterSortedPos);
-    QVector<int> filteredPositions(items.size());
+    QVector<int> filteredPositions(lots.size());
     std::iota(filteredPositions.begin(), filteredPositions.end(), afterFilteredPos);
 
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, sortedPositions,
-                                  filteredPositions, items));
+                                  filteredPositions, lots));
 }
 
-void Document::removeItem(Item *item)
+void Document::removeLot(Lot *lot)
 {
-    return removeItems({ item });
+    return removeLots({ lot });
 }
 
-void Document::removeItems(const ItemList &items)
+void Document::removeLots(const LotList &lots)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, { }, items));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, { }, lots));
 }
 
-void Document::changeItem(Item *item, const Item &value, Document::Field hint)
+void Document::changeLot(Lot *lot, const Lot &value, Document::Field hint)
 {
-    m_undo->push(new ChangeCmd(this, {{ item, value }}, hint));
+    m_undo->push(new ChangeCmd(this, {{ lot, value }}, hint));
 }
 
-void Document::changeItems(const std::vector<std::pair<Item *, Item>> &changes, Field hint)
+void Document::changeLots(const std::vector<std::pair<Lot *, Lot>> &changes, Field hint)
 {
     if (!changes.empty())
         m_undo->push(new ChangeCmd(this, changes, hint));
 }
 
-void Document::setItemsDirect(const Document::ItemList &items)
+void Document::setLotsDirect(const LotList &lots)
 {
-    if (items.isEmpty())
+    if (lots.isEmpty())
         return;
     QVector<int> posDummy, sortedPosDummy, filteredPosDummy;
-    insertItemsDirect(items, posDummy, sortedPosDummy, filteredPosDummy);
+    insertLotsDirect(lots, posDummy, sortedPosDummy, filteredPosDummy);
 }
 
-void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
+void Document::insertLotsDirect(const LotList &lots, QVector<int> &positions,
                                  QVector<int> &sortedPositions, QVector<int> &filteredPositions)
 {
     auto pos = positions.constBegin();
@@ -726,36 +726,36 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
 
     Q_ASSERT((positions.size() == sortedPositions.size())
              && (positions.size() == filteredPositions.size()));
-    Q_ASSERT(isAppend != (positions.size() == items.size()));
+    Q_ASSERT(isAppend != (positions.size() == lots.size()));
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
-    for (Item *item : qAsConst(items)) {
+    for (Lot *lot : qAsConst(lots)) {
         if (!isAppend) {
-            m_items.insert(*pos++, item);
-            m_sortedItems.insert(*sortedPos++, item);
-            m_filteredItems.insert(*filteredPos++, item);
+            m_lots.insert(*pos++, lot);
+            m_sortedLots.insert(*sortedPos++, lot);
+            m_filteredLots.insert(*filteredPos++, lot);
         } else {
-            m_items.append(item);
-            m_sortedItems.append(item);
-            m_filteredItems.append(item);
+            m_lots.append(lot);
+            m_sortedLots.append(lot);
+            m_filteredLots.append(lot);
         }
 
-        // this is really a new item, not just a redo - start with no differences
-        if (!m_differenceBase.contains(item))
-            m_differenceBase.insert(item, *item);
+        // this is really a new lot, not just a redo - start with no differences
+        if (!m_differenceBase.contains(lot))
+            m_differenceBase.insert(lot, *lot);
 
-        updateItemFlags(item);
+        updateLotFlags(lot);
     }
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(item(idx), idx.column()));
+        after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
-    emit itemCountChanged(m_items.count());
+    emit lotCountChanged(m_lots.count());
     emitStatisticsChanged();
 
     if (isSorted())
@@ -764,37 +764,37 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
         emit isFilteredChanged(m_isFiltered = false);
 }
 
-void Document::removeItemsDirect(const ItemList &items, QVector<int> &positions,
+void Document::removeLotsDirect(const LotList &lots, QVector<int> &positions,
                                  QVector<int> &sortedPositions, QVector<int> &filteredPositions)
 {
-    positions.resize(items.count());
-    sortedPositions.resize(items.count());
-    filteredPositions.resize(items.count());
+    positions.resize(lots.count());
+    sortedPositions.resize(lots.count());
+    filteredPositions.resize(lots.count());
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
-    for (int i = items.count() - 1; i >= 0; --i) {
-        Item *item = items.at(i);
-        int idx = m_items.indexOf(item);
-        int sortIdx = m_sortedItems.indexOf(item);
-        int filterIdx = m_filteredItems.indexOf(item);
+    for (int i = lots.count() - 1; i >= 0; --i) {
+        Lot *lot = lots.at(i);
+        int idx = m_lots.indexOf(lot);
+        int sortIdx = m_sortedLots.indexOf(lot);
+        int filterIdx = m_filteredLots.indexOf(lot);
         Q_ASSERT(idx >= 0 && sortIdx >= 0);
         positions[i] = idx;
         sortedPositions[i] = sortIdx;
         filteredPositions[i] = filterIdx;
-        m_items.removeAt(idx);
-        m_sortedItems.removeAt(sortIdx);
-        m_filteredItems.removeAt(filterIdx);
+        m_lots.removeAt(idx);
+        m_sortedLots.removeAt(sortIdx);
+        m_filteredLots.removeAt(filterIdx);
     }
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(item(idx), idx.column()));
+        after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
-    emit itemCountChanged(m_items.count());
+    emit lotCountChanged(m_lots.count());
     emitStatisticsChanged();
 
     //TODO: we should remember and re-apply the isSorted/isFiltered state
@@ -804,17 +804,17 @@ void Document::removeItemsDirect(const ItemList &items, QVector<int> &positions,
         emit isFilteredChanged(m_isFiltered = false);
 }
 
-void Document::changeItemsDirect(std::vector<std::pair<Item *, Item>> &changes)
+void Document::changeLotsDirect(std::vector<std::pair<Lot *, Lot>> &changes)
 {
     Q_ASSERT(!changes.empty());
 
     for (auto &change : changes) {
-        Item *item = change.first;
-        std::swap(*item, change.second);
+        Lot *lot = change.first;
+        std::swap(*lot, change.second);
 
-        QModelIndex idx1 = index(item, 0);
+        QModelIndex idx1 = index(lot, 0);
         QModelIndex idx2 = idx1.siblingAtColumn(columnCount() - 1);
-        updateItemFlags(item);
+        updateLotFlags(lot);
         emitDataChanged(idx1, idx2);
     }
 
@@ -834,28 +834,28 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
     if (!qFuzzyCompare(crate, qreal(1)) || (ccode != m_currencycode)) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
-            prices = new double[5 * m_items.count()];
+            prices = new double[5 * m_lots.count()];
 
-        for (int i = 0; i < m_items.count(); ++i) {
-            Item *item = m_items[i];
+        for (int i = 0; i < m_lots.count(); ++i) {
+            Lot *lot = m_lots[i];
             if (createPrices) {
-                prices[i * 5] = item->cost();
-                prices[i * 5 + 1] = item->price();
-                prices[i * 5 + 2] = item->tierPrice(0);
-                prices[i * 5 + 3] = item->tierPrice(1);
-                prices[i * 5 + 4] = item->tierPrice(2);
+                prices[i * 5] = lot->cost();
+                prices[i * 5 + 1] = lot->price();
+                prices[i * 5 + 2] = lot->tierPrice(0);
+                prices[i * 5 + 3] = lot->tierPrice(1);
+                prices[i * 5 + 4] = lot->tierPrice(2);
 
-                item->setCost(prices[i * 5] * crate);
-                item->setPrice(prices[i * 5 + 1] * crate);
-                item->setTierPrice(0, prices[i * 5 + 2] * crate);
-                item->setTierPrice(1, prices[i * 5 + 3] * crate);
-                item->setTierPrice(2, prices[i * 5 + 4] * crate);
+                lot->setCost(prices[i * 5] * crate);
+                lot->setPrice(prices[i * 5 + 1] * crate);
+                lot->setTierPrice(0, prices[i * 5 + 2] * crate);
+                lot->setTierPrice(1, prices[i * 5 + 3] * crate);
+                lot->setTierPrice(2, prices[i * 5 + 4] * crate);
             } else {
-                item->setCost(prices[i * 5]);
-                item->setPrice(prices[i * 5 + 1]);
-                item->setTierPrice(0, prices[i * 5 + 2]);
-                item->setTierPrice(1, prices[i * 5 + 3]);
-                item->setTierPrice(2, prices[i * 5 + 4]);
+                lot->setCost(prices[i * 5]);
+                lot->setPrice(prices[i * 5 + 1]);
+                lot->setTierPrice(0, prices[i * 5 + 2]);
+                lot->setTierPrice(1, prices[i * 5 + 3]);
+                lot->setTierPrice(2, prices[i * 5 + 4]);
             }
         }
 
@@ -932,29 +932,29 @@ void Document::emitStatisticsChanged()
     m_delayedEmitOfStatisticsChanged->start();
 }
 
-void Document::updateItemFlags(const Item *item)
+void Document::updateLotFlags(const Lot *lot)
 {
     quint64 errors = 0;
     quint64 updated = 0;
 
-    if (item->price() <= 0)
+    if (lot->price() <= 0)
         errors |= (1ULL << Price);
-    if (item->quantity() <= 0)
+    if (lot->quantity() <= 0)
         errors |= (1ULL << Quantity);
-    if (item->color() && item->itemType() && ((item->color()->id() != 0) && !item->itemType()->hasColors()))
+    if (lot->color() && lot->itemType() && ((lot->color()->id() != 0) && !lot->itemType()->hasColors()))
         errors |= (1ULL << Color);
-    if (item->tierQuantity(0) && ((item->tierPrice(0) <= 0) || (item->tierPrice(0) >= item->price())))
+    if (lot->tierQuantity(0) && ((lot->tierPrice(0) <= 0) || (lot->tierPrice(0) >= lot->price())))
         errors |= (1ULL << TierP1);
-    if (item->tierQuantity(1) && ((item->tierPrice(1) <= 0) || (item->tierPrice(1) >= item->tierPrice(0))))
+    if (lot->tierQuantity(1) && ((lot->tierPrice(1) <= 0) || (lot->tierPrice(1) >= lot->tierPrice(0))))
         errors |= (1ULL << TierP2);
-    if (item->tierQuantity(1) && (item->tierQuantity(1) <= item->tierQuantity(0)))
+    if (lot->tierQuantity(1) && (lot->tierQuantity(1) <= lot->tierQuantity(0)))
         errors |= (1ULL << TierQ2);
-    if (item->tierQuantity(2) && ((item->tierPrice(2) <= 0) || (item->tierPrice(2) >= item->tierPrice(1))))
+    if (lot->tierQuantity(2) && ((lot->tierPrice(2) <= 0) || (lot->tierPrice(2) >= lot->tierPrice(1))))
         errors |= (1ULL << TierP3);
-    if (item->tierQuantity(2) && (item->tierQuantity(2) <= item->tierQuantity(1)))
+    if (lot->tierQuantity(2) && (lot->tierQuantity(2) <= lot->tierQuantity(1)))
         errors |= (1ULL << TierQ3);
 
-    if (auto base = differenceBaseItem(item)) {
+    if (auto base = differenceBaseLot(lot)) {
         static const quint64 ignoreMask = 0ULL
                 | (1ULL << Index)
                 | (1ULL << Status)
@@ -975,12 +975,12 @@ void Document::updateItemFlags(const Item *item)
             quint64 fmask = (1ULL << f);
             if (fmask & ignoreMask)
                 continue;
-            if (dataForEditRole(item, f) != dataForEditRole(base, f))
+            if (dataForEditRole(lot, f) != dataForEditRole(base, f))
                 updated |= fmask;
         }
     }
 
-    setItemFlags(item, errors, updated);
+    setLotFlags(lot, errors, updated);
 }
 
 void Document::resetDifferenceMode()
@@ -988,27 +988,27 @@ void Document::resetDifferenceMode()
     m_undo->push(new ResetDifferenceModeCmd(this));
 }
 
-void Document::resetDifferenceModeDirect(QHash<const BrickLink::InvItem *, BrickLink::InvItem>
+void Document::resetDifferenceModeDirect(QHash<const Lot *, Lot>
                                          &differenceBase) {
     std::swap(m_differenceBase, differenceBase);
 
     if (m_differenceBase.isEmpty()) {
-        for (const auto *item : qAsConst(m_items))
-            m_differenceBase.insert(item, *item);
+        for (const auto *lot : qAsConst(m_lots))
+            m_differenceBase.insert(lot, *lot);
     }
 
-    for (const auto *item : qAsConst(m_items))
-        updateItemFlags(item);
+    for (const auto *lot : qAsConst(m_lots))
+        updateLotFlags(lot);
 
     emitDataChanged();
 }
 
-const Document::Item *Document::differenceBaseItem(const Document::Item *item) const
+const Lot *Document::differenceBaseLot(const Lot *lot) const
 {
-    if (!item)
+    if (!lot)
         return nullptr;
 
-    auto it = m_differenceBase.constFind(item);
+    auto it = m_differenceBase.constFind(lot);
     return (it != m_differenceBase.end()) ? &(*it) : nullptr;
 }
 
@@ -1035,21 +1035,21 @@ void Document::setOrder(BrickLink::Order *order)
     m_order = order;
 }
 
-bool Document::canItemsBeMerged(const Item &item1, const Item &item2)
+bool Document::canLotsBeMerged(const Lot &lot1, const Lot &lot2)
 {
-    return ((&item1 != &item2)
-            && !item1.isIncomplete()
-            && !item2.isIncomplete()
-            && (item1.item() == item2.item())
-            && (item1.color() == item2.color())
-            && (item1.condition() == item2.condition())
-            && (item1.subCondition() == item2.subCondition()));
+    return ((&lot1 != &lot2)
+            && !lot1.isIncomplete()
+            && !lot2.isIncomplete()
+            && (lot1.item() == lot2.item())
+            && (lot1.color() == lot2.color())
+            && (lot1.condition() == lot2.condition())
+            && (lot1.subCondition() == lot2.subCondition()));
 }
 
-bool Document::mergeItemFields(const Item &from, Item &to, MergeMode defaultMerge,
+bool Document::mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
                                const QHash<Field, MergeMode> &fieldMerge)
 {
-    if (!canItemsBeMerged(from, to))
+    if (!canLotsBeMerged(from, to))
         return false;
 
     if (fieldMerge.isEmpty()) {
@@ -1068,37 +1068,37 @@ bool Document::mergeItemFields(const Item &from, Item &to, MergeMode defaultMerg
 
     bool changed = false;
 
-    if (FieldOp<&Item::quantity, &Item::setQuantity>::merge(from, to, mergeModeFor(Quantity)))
+    if (FieldOp<&Lot::quantity, &Lot::setQuantity>::merge(from, to, mergeModeFor(Quantity)))
         changed = true;
-    if (FieldOp<&Item::price, &Item::setPrice>::merge(from, to, mergeModeFor(Price)))
+    if (FieldOp<&Lot::price, &Lot::setPrice>::merge(from, to, mergeModeFor(Price)))
         changed = true;
-    if (FieldOp<&Item::cost, &Item::setCost>::merge(from, to, mergeModeFor(Cost)))
+    if (FieldOp<&Lot::cost, &Lot::setCost>::merge(from, to, mergeModeFor(Cost)))
         changed = true;
-    if (FieldOp<&Item::bulkQuantity, &Item::setBulkQuantity>::merge(from, to, mergeModeFor(Bulk)))
+    if (FieldOp<&Lot::bulkQuantity, &Lot::setBulkQuantity>::merge(from, to, mergeModeFor(Bulk)))
         changed = true;
-    if (FieldOp<&Item::sale, &Item::setSale>::merge(from, to, mergeModeFor(Sale)))
+    if (FieldOp<&Lot::sale, &Lot::setSale>::merge(from, to, mergeModeFor(Sale)))
         changed = true;
-    if (FieldOp<&Item::comments, &Item::setComments>::merge(from, to, mergeModeFor(Comments)))
+    if (FieldOp<&Lot::comments, &Lot::setComments>::merge(from, to, mergeModeFor(Comments)))
         changed = true;
-    if (FieldOp<&Item::remarks, &Item::setRemarks>::merge(from, to, mergeModeFor(Remarks)))
+    if (FieldOp<&Lot::remarks, &Lot::setRemarks>::merge(from, to, mergeModeFor(Remarks)))
         changed = true;
-    if (FieldOp<&Item::tierQuantity0, &Item::setTierQuantity0>::merge(from, to, mergeModeFor(TierQ1)))
+    if (FieldOp<&Lot::tierQuantity0, &Lot::setTierQuantity0>::merge(from, to, mergeModeFor(TierQ1)))
         changed = true;
-    if (FieldOp<&Item::tierPrice0, &Item::setTierPrice0>::merge(from, to, mergeModeFor(TierP1)))
+    if (FieldOp<&Lot::tierPrice0, &Lot::setTierPrice0>::merge(from, to, mergeModeFor(TierP1)))
         changed = true;
-    if (FieldOp<&Item::tierQuantity1, &Item::setTierQuantity1>::merge(from, to, mergeModeFor(TierQ2)))
+    if (FieldOp<&Lot::tierQuantity1, &Lot::setTierQuantity1>::merge(from, to, mergeModeFor(TierQ2)))
         changed = true;
-    if (FieldOp<&Item::tierPrice1, &Item::setTierPrice1>::merge(from, to, mergeModeFor(TierP2)))
+    if (FieldOp<&Lot::tierPrice1, &Lot::setTierPrice1>::merge(from, to, mergeModeFor(TierP2)))
         changed = true;
-    if (FieldOp<&Item::tierQuantity2, &Item::setTierQuantity2>::merge(from, to, mergeModeFor(TierQ3)))
+    if (FieldOp<&Lot::tierQuantity2, &Lot::setTierQuantity2>::merge(from, to, mergeModeFor(TierQ3)))
         changed = true;
-    if (FieldOp<&Item::tierPrice2, &Item::setTierPrice2>::merge(from, to, mergeModeFor(TierP3)))
+    if (FieldOp<&Lot::tierPrice2, &Lot::setTierPrice2>::merge(from, to, mergeModeFor(TierP3)))
         changed = true;
-    if (FieldOp<&Item::retain, &Item::setRetain>::merge(from, to, mergeModeFor(Retain)))
+    if (FieldOp<&Lot::retain, &Lot::setRetain>::merge(from, to, mergeModeFor(Retain)))
         changed = true;
-    if (FieldOp<&Item::stockroom, &Item::setStockroom>::merge(from, to, mergeModeFor(Stockroom)))
+    if (FieldOp<&Lot::stockroom, &Lot::setStockroom>::merge(from, to, mergeModeFor(Stockroom)))
         changed = true;
-    if (FieldOp<&Item::reserved, &Item::setReserved>::merge(from, to, mergeModeFor(Reserved)))
+    if (FieldOp<&Lot::reserved, &Lot::setReserved>::merge(from, to, mergeModeFor(Reserved)))
         changed = true;
 
     return changed;
@@ -1162,7 +1162,7 @@ void Document::unsetModified()
     updateModified();
 }
 
-QHash<const Document::Item *, Document::Item> Document::differenceBase() const
+QHash<const Lot *, Lot> Document::differenceBase() const
 {
     return m_differenceBase;
 }
@@ -1172,34 +1172,34 @@ void Document::updateModified()
     emit modificationChanged(isModified());
 }
 
-void Document::setItemFlagsMask(QPair<quint64, quint64> flagsMask)
+void Document::setLotFlagsMask(QPair<quint64, quint64> flagsMask)
 {
-    m_itemFlagsMask = flagsMask;
+    m_lotFlagsMask = flagsMask;
     emitStatisticsChanged();
     emitDataChanged();
 }
 
-QPair<quint64, quint64> Document::itemFlags(const Item *item) const
+QPair<quint64, quint64> Document::lotFlags(const Lot *lot) const
 {
-    auto flags = m_itemFlags.value(item, { });
-    flags.first &= m_itemFlagsMask.first;
-    flags.second &= m_itemFlagsMask.second;
+    auto flags = m_lotFlags.value(lot, { });
+    flags.first &= m_lotFlagsMask.first;
+    flags.second &= m_lotFlagsMask.second;
     return flags;
 }
 
-void Document::setItemFlags(const Item *item, quint64 errors, quint64 updated)
+void Document::setLotFlags(const Lot *lot, quint64 errors, quint64 updated)
 {
-    if (!item)
+    if (!lot)
         return;
 
-    auto oldFlags = m_itemFlags.value(item, { });
+    auto oldFlags = m_lotFlags.value(lot, { });
     if (oldFlags.first != errors || oldFlags.second != updated) {
         if (errors || updated)
-            m_itemFlags.insert(item, qMakePair(errors, updated));
+            m_lotFlags.insert(lot, qMakePair(errors, updated));
         else
-            m_itemFlags.remove(item);
+            m_lotFlags.remove(lot);
 
-        emit itemFlagsChanged(item);
+        emit lotFlagsChanged(lot);
         emitStatisticsChanged();
     }
 }
@@ -1222,26 +1222,26 @@ const BrickLink::Order *Document::order() const
 QModelIndex Document::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && column >= 0 && row < rowCount() && column < columnCount())
-        return createIndex(row, column, m_filteredItems.at(row));
+        return createIndex(row, column, m_filteredLots.at(row));
     return { };
 }
 
-BrickLink::InvItem *Document::item(const QModelIndex &idx) const
+Lot *Document::lot(const QModelIndex &idx) const
 {
-    return idx.isValid() ? static_cast<Item *>(idx.internalPointer()) : nullptr;
+    return idx.isValid() ? static_cast<Lot *>(idx.internalPointer()) : nullptr;
 }
 
-QModelIndex Document::index(const BrickLink::InvItem *item, int column) const
+QModelIndex Document::index(const Lot *lot, int column) const
 {
-    int row = m_filteredItems.indexOf(const_cast<BrickLink::InvItem *>(item));
+    int row = m_filteredLots.indexOf(const_cast<Lot *>(lot));
     if (row >= 0)
-        return createIndex(row, column, const_cast<BrickLink::InvItem *>(item));
+        return createIndex(row, column, const_cast<Lot *>(lot));
     return { };
 }
 
 int Document::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_filteredItems.size();
+    return parent.isValid() ? 0 : m_filteredLots.size();
 }
 
 int Document::columnCount(const QModelIndex &parent) const
@@ -1252,7 +1252,7 @@ int Document::columnCount(const QModelIndex &parent) const
 Qt::ItemFlags Document::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::ItemFlags();
+        return { };
 
     Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
 
@@ -1275,54 +1275,53 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
 {
     if (!index.isValid() || (role != Qt::EditRole))
         return false;
-    Item *itemp = this->item(index);
-    Item item = *itemp;
+    Lot *lotp = this->lot(index);
+    Lot lot = *lotp;
     Document::Field f = static_cast<Field>(index.column());
 
     switch (f) {
-    case Status      : item.setStatus(value.value<BrickLink::Status>()); break;
+    case Status      : lot.setStatus(value.value<BrickLink::Status>()); break;
     case Picture     :
-    case Description : item.setItem(value.value<const BrickLink::Item *>()); break;
+    case Description : lot.setItem(value.value<const BrickLink::Item *>()); break;
     case PartNo      : {
-        char itid = item.itemType() ? item.itemType()->id() : 'P';
-        const BrickLink::Item *newitem = BrickLink::core()->item(itid, value.toString().toLatin1().constData());
-        if (newitem)
-            item.setItem(newitem);
+        char itid = lot.itemType() ? lot.itemType()->id() : 'P';
+        if (auto newItem = BrickLink::core()->item(itid, value.toString()))
+            lot.setItem(newItem);
         break;
     }
-    case Condition   : item.setCondition(value.value<BrickLink::Condition>()); break;
-    case Color       : item.setColor(value.value<const BrickLink::Color *>()); break;
+    case Condition   : lot.setCondition(value.value<BrickLink::Condition>()); break;
+    case Color       : lot.setColor(value.value<const BrickLink::Color *>()); break;
     case QuantityDiff: {
-        if (auto base = differenceBaseItem(itemp))
-            item.setQuantity(base->quantity() + value.toInt());
+        if (auto base = differenceBaseLot(lotp))
+            lot.setQuantity(base->quantity() + value.toInt());
         break;
     }
-    case Quantity    : item.setQuantity(value.toInt()); break;
+    case Quantity    : lot.setQuantity(value.toInt()); break;
     case PriceDiff   :  {
-        if (auto base = differenceBaseItem(itemp))
-            item.setPrice(base->price() + value.toDouble());
+        if (auto base = differenceBaseLot(lotp))
+            lot.setPrice(base->price() + value.toDouble());
         break;
     }
-    case Price       : item.setPrice(value.toDouble()); break;
-    case Cost        : item.setCost(value.toDouble()); break;
-    case Bulk        : item.setBulkQuantity(value.toInt()); break;
-    case Sale        : item.setSale(value.toInt()); break;
-    case Comments    : item.setComments(value.toString()); break;
-    case Remarks     : item.setRemarks(value.toString()); break;
-    case TierQ1      : item.setTierQuantity(0, value.toInt()); break;
-    case TierQ2      : item.setTierQuantity(1, value.toInt()); break;
-    case TierQ3      : item.setTierQuantity(2, value.toInt()); break;
-    case TierP1      : item.setTierPrice(0, value.toDouble()); break;
-    case TierP2      : item.setTierPrice(1, value.toDouble()); break;
-    case TierP3      : item.setTierPrice(2, value.toDouble()); break;
-    case Retain      : item.setRetain(value.toBool()); break;
-    case Stockroom   : item.setStockroom(value.value<BrickLink::Stockroom>()); break;
-    case Reserved    : item.setReserved(value.toString()); break;
-    case Weight      : item.setTotalWeight(value.toDouble()); break;
+    case Price       : lot.setPrice(value.toDouble()); break;
+    case Cost        : lot.setCost(value.toDouble()); break;
+    case Bulk        : lot.setBulkQuantity(value.toInt()); break;
+    case Sale        : lot.setSale(value.toInt()); break;
+    case Comments    : lot.setComments(value.toString()); break;
+    case Remarks     : lot.setRemarks(value.toString()); break;
+    case TierQ1      : lot.setTierQuantity(0, value.toInt()); break;
+    case TierQ2      : lot.setTierQuantity(1, value.toInt()); break;
+    case TierQ3      : lot.setTierQuantity(2, value.toInt()); break;
+    case TierP1      : lot.setTierPrice(0, value.toDouble()); break;
+    case TierP2      : lot.setTierPrice(1, value.toDouble()); break;
+    case TierP3      : lot.setTierPrice(2, value.toDouble()); break;
+    case Retain      : lot.setRetain(value.toBool()); break;
+    case Stockroom   : lot.setStockroom(value.value<BrickLink::Stockroom>()); break;
+    case Reserved    : lot.setReserved(value.toString()); break;
+    case Weight      : lot.setTotalWeight(value.toDouble()); break;
     default          : break;
     }
-    if (item != *itemp) {
-        changeItem(itemp, item, f);
+    if (lot != *lotp) {
+        changeLot(lotp, lot, f);
         return true;
     }
     return false;
@@ -1332,20 +1331,20 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
 QVariant Document::data(const QModelIndex &index, int role) const
 {
     if (index.isValid()) {
-        const BrickLink::InvItem *it = item(index);
+        const Lot *lot = this->lot(index);
         auto f = static_cast<Field>(index.column());
 
         switch (role) {
-        case Qt::DisplayRole      : return dataForDisplayRole(it, f);
-        case BaseDisplayRole      : return dataForDisplayRole(differenceBaseItem(it), f);
+        case Qt::DisplayRole      : return dataForDisplayRole(lot, f);
+        case BaseDisplayRole      : return dataForDisplayRole(differenceBaseLot(lot), f);
         case Qt::TextAlignmentRole: return headerData(index.column(), Qt::Horizontal, role);
-        case Qt::EditRole         : return dataForEditRole(it, f);
-        case BaseEditRole         : return dataForEditRole(differenceBaseItem(it), f);
-        case FilterRole           : return dataForFilterRole(it, f);
-        case ItemPointerRole      : return QVariant::fromValue(it);
-        case BaseItemPointerRole  : return QVariant::fromValue(differenceBaseItem(it));
-        case ErrorFlagsRole       : return itemFlags(it).first;
-        case DifferenceFlagsRole  : return itemFlags(it).second;
+        case Qt::EditRole         : return dataForEditRole(lot, f);
+        case BaseEditRole         : return dataForEditRole(differenceBaseLot(lot), f);
+        case FilterRole           : return dataForFilterRole(lot, f);
+        case LotPointerRole       : return QVariant::fromValue(lot);
+        case BaseLotPointerRole   : return QVariant::fromValue(differenceBaseLot(lot));
+        case ErrorFlagsRole       : return lotFlags(lot).first;
+        case DifferenceFlagsRole  : return lotFlags(lot).second;
         }
     }
     return QVariant();
@@ -1404,107 +1403,107 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
     }
 }
 
-QVariant Document::dataForEditRole(const Item *it, Field f) const
+QVariant Document::dataForEditRole(const Lot *lot, Field f) const
 {
-    if (!it)
+    if (!lot)
         return { };
 
     switch (f) {
-    case Status      : return QVariant::fromValue(it->status());
+    case Status      : return QVariant::fromValue(lot->status());
     case Picture     :
-    case Description : return QVariant::fromValue(it->item());
-    case PartNo      : return it->itemId();
-    case Condition   : return QVariant::fromValue(it->condition());
-    case Color       : return QVariant::fromValue(it->color());
+    case Description : return QVariant::fromValue(lot->item());
+    case PartNo      : return lot->itemId();
+    case Condition   : return QVariant::fromValue(lot->condition());
+    case Color       : return QVariant::fromValue(lot->color());
     case QuantityDiff:  {
-        auto base = differenceBaseItem(it);
-        return base ? it->quantity() - base->quantity() : 0;
+        auto base = differenceBaseLot(lot);
+        return base ? lot->quantity() - base->quantity() : 0;
     }
-    case Quantity    : return it->quantity();
+    case Quantity    : return lot->quantity();
     case PriceDiff   : {
-        auto base = differenceBaseItem(it);
-        return base ? it->price() - base->price() : 0;
+        auto base = differenceBaseLot(lot);
+        return base ? lot->price() - base->price() : 0;
     }
-    case Price       : return it->price();
-    case Cost        : return it->cost();
-    case Bulk        : return it->bulkQuantity();
-    case Sale        : return it->sale();
-    case Comments    : return it->comments();
-    case Remarks     : return it->remarks();
-    case TierQ1      : return it->tierQuantity(0);
-    case TierQ2      : return it->tierQuantity(1);
-    case TierQ3      : return it->tierQuantity(2);
-    case TierP1      : return it->tierPrice(0);
-    case TierP2      : return it->tierPrice(1);
-    case TierP3      : return it->tierPrice(2);
-    case Retain      : return it->retain();
-    case Stockroom   : return QVariant::fromValue(it->stockroom());
-    case Reserved    : return it->reserved();
-    case Weight      : return it->totalWeight();
+    case Price       : return lot->price();
+    case Cost        : return lot->cost();
+    case Bulk        : return lot->bulkQuantity();
+    case Sale        : return lot->sale();
+    case Comments    : return lot->comments();
+    case Remarks     : return lot->remarks();
+    case TierQ1      : return lot->tierQuantity(0);
+    case TierQ2      : return lot->tierQuantity(1);
+    case TierQ3      : return lot->tierQuantity(2);
+    case TierP1      : return lot->tierPrice(0);
+    case TierP2      : return lot->tierPrice(1);
+    case TierP3      : return lot->tierPrice(2);
+    case Retain      : return lot->retain();
+    case Stockroom   : return QVariant::fromValue(lot->stockroom());
+    case Reserved    : return lot->reserved();
+    case Weight      : return lot->totalWeight();
     default          : return { };
     }
 }
 
-QVariant Document::dataForDisplayRole(const BrickLink::InvItem *it, Field f) const
+QVariant Document::dataForDisplayRole(const Lot *lot, Field f) const
 {
     switch (f) {
     case Index       :
         if (m_fakeIndexes.isEmpty()) {
-            return QString::number(m_items.indexOf(const_cast<BrickLink::InvItem *>(it)) + 1);
+            return QString::number(m_lots.indexOf(const_cast<Lot *>(lot)) + 1);
         } else {
-            auto fi = m_fakeIndexes.at(m_items.indexOf(const_cast<BrickLink::InvItem *>(it)));
+            auto fi = m_fakeIndexes.at(m_lots.indexOf(const_cast<Lot *>(lot)));
             return fi >= 0 ? QString::number(fi + 1) : QString::fromLatin1("+");
         }
-    case LotId       : return it->lotId();
-    case Description : return it->itemName();
-    case Total       : return it->total();
-    case Color       : return it->colorName();
-    case Category    : return it->categoryName();
-    case ItemType    : return it->itemTypeName();
+    case LotId       : return lot->lotId();
+    case Description : return lot->itemName();
+    case Total       : return lot->total();
+    case Color       : return lot->colorName();
+    case Category    : return lot->categoryName();
+    case ItemType    : return lot->itemTypeName();
 
     case PriceOrig   : {
-        auto base = differenceBaseItem(it);
+        auto base = differenceBaseLot(lot);
         return base ? base->price() : 0;
     }
     case QuantityOrig: {
-        auto base = differenceBaseItem(it);
+        auto base = differenceBaseLot(lot);
         return base ? base->quantity() : 0;
     }
-    case YearReleased: return it->itemYearReleased();
-    default          : return dataForEditRole(it, f);
+    case YearReleased: return lot->itemYearReleased();
+    default          : return dataForEditRole(lot, f);
     }
 }
 
-QVariant Document::dataForFilterRole(const Item *it, Field f) const
+QVariant Document::dataForFilterRole(const Lot *lot, Field f) const
 {
     switch (f) {
     case Picture:
-        return it->itemId();
+        return lot->lotId();
 
     case Status:
-        switch (it->status()) {
+        switch (lot->status()) {
         case BrickLink::Status::Include: return tr("I", "Filter>Status>Include");
         case BrickLink::Status::Extra  : return tr("X", "Filter>Status>Extra");
         default:
         case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude");
         }
     case Condition:
-        return (it->condition() == BrickLink::Condition::New) ? tr("N", "Filter>Condition>New")
+        return (lot->condition() == BrickLink::Condition::New) ? tr("N", "Filter>Condition>New")
                                                               : tr("U", "Filter>Condition>Used");
     case Stockroom:
-        switch (it->stockroom()) {
+        switch (lot->stockroom()) {
         case BrickLink::Stockroom::A: return QString("A");
         case BrickLink::Stockroom::B: return QString("B");
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return tr("N", "Filter>Stockroom>None");
         }
     case Retain:
-        return it->retain() ? tr("Y", "Filter>Retain>Yes")
+        return lot->retain() ? tr("Y", "Filter>Retain>Yes")
                             : tr("N", "Filter>Retain>No");
     default: {
-        QVariant v = dataForEditRole(it, f);
+        QVariant v = dataForEditRole(lot, f);
         if (v.isNull() || (v.userType() >= QMetaType::User))
-            v = dataForDisplayRole(it, f);
+            v = dataForDisplayRole(lot, f);
         return v;
     }
     }
@@ -1516,9 +1515,9 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
     if (!pic || !pic->item())
         return;
 
-    for (const auto *it : qAsConst(m_items)) {
-        if ((pic->item() == it->item()) && (pic->color() == it->color())) {
-            QModelIndex idx = index(const_cast<BrickLink::InvItem *>(it), Picture);
+    for (const auto *lot : qAsConst(m_lots)) {
+        if ((pic->item() == lot->item()) && (pic->color() == lot->color())) {
+            QModelIndex idx = index(const_cast<Lot *>(lot), Picture);
             emitDataChanged(idx, idx);
         }
     }
@@ -1548,7 +1547,7 @@ void Document::sort(int column, Qt::SortOrder order)
         m_undo->push(new SortCmd(this, column, order));
     } else {
         bool dummy1;
-        BrickLink::InvItemList dummy2;
+        LotList dummy2;
         sortDirect(column, order, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
@@ -1576,7 +1575,7 @@ void Document::setFilter(const QString &filter)
         m_undo->push(new FilterCmd(this, filter, filterList));
     } else {
         bool dummy1;
-        BrickLink::InvItemList dummy2;
+        LotList dummy2;
         filterDirect(filter, filterList, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
@@ -1588,7 +1587,7 @@ void Document::nextSortFilterIsDirect()
 }
 
 void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
-                          BrickLink::InvItemList &unsortedItems)
+                          LotList &unsortedLots)
 {
     bool emitSortOrderChanged = (order != m_sortOrder);
     bool emitSortColumnChanged = (column != m_sortColumn);
@@ -1600,24 +1599,24 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
     m_sortColumn = column;
     m_sortOrder = order;
 
-    if (!unsortedItems.isEmpty()) {
+    if (!unsortedLots.isEmpty()) {
         m_isSorted = sorted;
-        m_sortedItems = unsortedItems;
-        unsortedItems.clear();
+        m_sortedLots = unsortedLots;
+        unsortedLots.clear();
 
     } else {
-        unsortedItems = m_sortedItems;
+        unsortedLots = m_sortedLots;
         sorted = m_isSorted;
         m_isSorted = true;
-        m_sortedItems = m_items;
+        m_sortedLots = m_lots;
 
         if (column >= 0) {
-            qParallelSort(m_sortedItems.begin(), m_sortedItems.end(),
-                          [column, this](const auto *item1, const auto *item2) {
-                return compare(item1, item2, column) < 0;
+            qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
+                          [column, this](const auto *lot1, const auto *lot2) {
+                return compare(lot1, lot2, column) < 0;
             });
             if (order == Qt::DescendingOrder)
-                std::reverse(m_sortedItems.begin(), m_sortedItems.end());
+                std::reverse(m_sortedLots.begin(), m_sortedLots.end());
 
             // c++17 alternatives, but not supported everywhere yet:
             //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
@@ -1626,18 +1625,18 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
     }
 
     // we were filtered before, but we don't want to refilter: the solution is to
-    // keep the old filtered items, but use the order from m_sortedItems
-    if (!m_filteredItems.isEmpty()) {
-        m_filteredItems = QtConcurrent::blockingFiltered(m_sortedItems, [this](auto *item) {
-            return m_filteredItems.contains(item);
+    // keep the old filtered lots, but use the order from m_sortedLots
+    if (!m_filteredLots.isEmpty()) {
+        m_filteredLots = QtConcurrent::blockingFiltered(m_sortedLots, [this](auto *lot) {
+            return m_filteredLots.contains(lot);
         });
     } else {
-        m_filteredItems = m_sortedItems;
+        m_filteredLots = m_sortedLots;
     }
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(item(idx), idx.column()));
+        after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
@@ -1651,7 +1650,7 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
 }
 
 void Document::filterDirect(const QString &filterString, const QVector<Filter> &filterList,
-                            bool &filtered, BrickLink::InvItemList &unfilteredItems)
+                            bool &filtered, LotList &unfilteredLots)
 {
     bool emitFilterChanged = (filterList != m_filterList);
     bool wasFiltered = isFiltered();
@@ -1662,27 +1661,27 @@ void Document::filterDirect(const QString &filterString, const QVector<Filter> &
     m_filterString = filterString;
     m_filterList = filterList;
 
-    if (!unfilteredItems.isEmpty()) {
+    if (!unfilteredLots.isEmpty()) {
         m_isFiltered = filtered;
-        m_filteredItems = unfilteredItems;
-        unfilteredItems.clear();
+        m_filteredLots = unfilteredLots;
+        unfilteredLots.clear();
 
     } else {
-        unfilteredItems = m_filteredItems;
+        unfilteredLots = m_filteredLots;
         filtered = m_isFiltered;
         m_isFiltered = true;
-        m_filteredItems = m_sortedItems;
+        m_filteredLots = m_sortedLots;
 
         if (!filterList.isEmpty()) {
-            m_filteredItems = QtConcurrent::blockingFiltered(m_sortedItems, [this](auto *item) {
-                return filterAcceptsItem(item);
+            m_filteredLots = QtConcurrent::blockingFiltered(m_sortedLots, [this](auto *lot) {
+                return filterAcceptsLot(lot);
             });
         }
     }
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(item(idx), idx.column()));
+        after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
@@ -1701,11 +1700,11 @@ QByteArray Document::saveSortFilterState() const
 
     ds << qint8(m_sortColumn) << qint8(m_sortOrder) << m_filterString;
 
-    ds << qint32(m_sortedItems.size());
-    for (int i = 0; i < m_sortedItems.size(); ++i) {
-        auto *item = m_sortedItems.at(i);
-        qint32 row = m_items.indexOf(item);
-        bool visible = m_filteredItems.contains(item);
+    ds << qint32(m_sortedLots.size());
+    for (int i = 0; i < m_sortedLots.size(); ++i) {
+        auto *lot = m_sortedLots.at(i);
+        qint32 row = m_lots.indexOf(lot);
+        bool visible = m_filteredLots.contains(lot);
 
         ds << (visible ? row : (-row - 1)); // can't have -0
     }
@@ -1726,23 +1725,23 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     qint32 viewSize;
 
     ds >> sortColumn >> sortOrder >> filterString >> viewSize;
-    if ((ds.status() != QDataStream::Ok) || (viewSize != m_items.size()))
+    if ((ds.status() != QDataStream::Ok) || (viewSize != m_lots.size()))
         return false;
 
-    BrickLink::InvItemList sortedItems;
-    BrickLink::InvItemList filteredItems;
-    int itemsSize = m_items.size();
+    LotList sortedLots;
+    LotList filteredLots;
+    int lotsSize = m_lots.size();
     while (viewSize--) {
         qint32 pos;
         ds >> pos;
-        if ((pos < -itemsSize) || (pos >= itemsSize))
+        if ((pos < -lotsSize) || (pos >= lotsSize))
             return false;
         bool visible = (pos >= 0);
         pos = visible ? pos : (-pos - 1);
-        auto *item = m_items.at(pos);
-        sortedItems << item;
+        auto *lot = m_lots.at(pos);
+        sortedLots << lot;
         if (visible)
-            filteredItems << item;
+            filteredLots << lot;
     }
 
     if (ds.status() != QDataStream::Ok)
@@ -1751,9 +1750,9 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     auto filterList = m_filterParser->parse(filterString);
 
     bool willBeSorted = true;
-    sortDirect(sortColumn, Qt::SortOrder(sortOrder), willBeSorted, sortedItems);
+    sortDirect(sortColumn, Qt::SortOrder(sortOrder), willBeSorted, sortedLots);
     bool willBeFiltered = true;
-    filterDirect(filterString, filterList, willBeFiltered, filteredItems);
+    filterDirect(filterString, filterList, willBeFiltered, filteredLots);
     return true;
 }
 
@@ -1775,9 +1774,9 @@ void Document::reFilter()
 }
 
 
-bool Document::filterAcceptsItem(const BrickLink::InvItem *item) const
+bool Document::filterAcceptsLot(const Lot *lot) const
 {
-    if (!item)
+    if (!lot)
         return false;
     else if (m_filterList.isEmpty())
         return true;
@@ -1795,7 +1794,7 @@ bool Document::filterAcceptsItem(const BrickLink::InvItem *item) const
 
         bool localresult = false;
         for (int col = firstcol; col <= lastcol && !localresult; ++col) {
-            QVariant v = dataForFilterRole(item, static_cast<Field>(col));
+            QVariant v = dataForFilterRole(lot, static_cast<Field>(col));
             localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)
@@ -1852,11 +1851,11 @@ static inline int doubleCompare(double d1, double d2)
     return qFuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
 }
 
-int Document::compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2, int sortColumn) const
+int Document::compare(const Lot *i1, const Lot *i2, int sortColumn) const
 {
     switch (sortColumn) {
     case Document::Index       : {
-        return m_items.indexOf(const_cast<BrickLink::InvItem *>(i1)) - m_items.indexOf(const_cast<BrickLink::InvItem *>(i2));
+        return m_lots.indexOf(const_cast<Lot *>(i1)) - m_lots.indexOf(const_cast<Lot *>(i2));
     }
     case Document::Status      : {
         if (i1->counterPart() != i2->counterPart())
@@ -1905,25 +1904,25 @@ int Document::compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2
     case Document::Weight      : return doubleCompare(i1->totalWeight(), i2->totalWeight());
     case Document::YearReleased: return i1->itemYearReleased() - i2->itemYearReleased();
     case Document::PriceOrig   : {
-        auto base1 = differenceBaseItem(i1);
-        auto base2 = differenceBaseItem(i2);
+        auto base1 = differenceBaseLot(i1);
+        auto base2 = differenceBaseLot(i2);
         return doubleCompare(base1 ? base1->price() : 0, base2 ? base2->price() : 0);
     }
     case Document::PriceDiff   : {
-        auto base1 = differenceBaseItem(i1);
-        auto base2 = differenceBaseItem(i2);
+        auto base1 = differenceBaseLot(i1);
+        auto base2 = differenceBaseLot(i2);
         return doubleCompare(base1 ? i1->price() - base1->price() : 0,
                              base2 ? i2->price() - base2->price() : 0);
     }
     case Document::QuantityOrig: {
-        auto base1 = differenceBaseItem(i1);
-        auto base2 = differenceBaseItem(i2);
+        auto base1 = differenceBaseLot(i1);
+        auto base2 = differenceBaseLot(i2);
         return (base1 ? base1->quantity() : 0) - (base2 ? base2->quantity() : 0);
     }
 
     case Document::QuantityDiff:  {
-        auto base1 = differenceBaseItem(i1);
-        auto base2 = differenceBaseItem(i2);
+        auto base1 = differenceBaseLot(i1);
+        auto base2 = differenceBaseLot(i2);
         return (base1 ? i1->quantity() - base1->quantity() : 0)
                 - (base2 ? i2->quantity() - base2->quantity() : 0);
     }
@@ -1931,13 +1930,81 @@ int Document::compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2
     return 0;
 }
 
-BrickLink::InvItemList Document::sortItemList(const BrickLink::InvItemList &list) const
+LotList Document::sortLotList(const LotList &list) const
 {
-    BrickLink::InvItemList result(list);
+    LotList result(list);
     qParallelSort(result.begin(), result.end(), [this](const auto &i1, const auto &i2) {
         return index(i1).row() < index(i2).row();
     });
     return result;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+const char *DocumentLotsMimeData::s_mimetype = "application/x-bricklink-invlots";
+
+DocumentLotsMimeData::DocumentLotsMimeData(const LotList &lots)
+    : QMimeData()
+{
+    setLots(lots);
+}
+
+void DocumentLotsMimeData::setLots(const LotList &lots)
+{
+    QByteArray data;
+    QString text;
+
+    QDataStream ds(&data, QIODevice::WriteOnly);
+
+    ds << quint32(lots.count());
+    for (const Lot *lot : lots) {
+        lot->save(ds);
+        if (!text.isEmpty())
+            text.append("\n");
+        text.append(lot->lotId());
+    }
+    setText(text);
+    setData(s_mimetype, data);
+}
+
+LotList DocumentLotsMimeData::lots(const QMimeData *md)
+{
+    LotList lots;
+
+    if (md) {
+        QByteArray data = md->data(s_mimetype);
+        QDataStream ds(data);
+
+        if (!data.isEmpty()) {
+            quint32 count = 0;
+            ds >> count;
+
+            for (; count && !ds.atEnd(); count--) {
+                if (auto lot = Lot::restore(ds))
+                    lots.append(lot);
+            }
+        }
+    }
+    return lots;
+}
+
+QStringList DocumentLotsMimeData::formats() const
+{
+    static QStringList sl;
+
+    if (sl.isEmpty())
+        sl << s_mimetype << "text/plain";
+
+    return sl;
+}
+
+bool DocumentLotsMimeData::hasFormat(const QString &mimeType) const
+{
+    return mimeType.compare(s_mimetype) || mimeType.compare("text/plain");
 }
 
 

@@ -17,6 +17,7 @@
 #include <QDateTime>
 
 #include "bricklinkfwd.h"
+#include "lot.h"
 #include "ui_importorderdialog.h"
 
 class Transfer;
@@ -47,6 +48,7 @@ protected slots:
     void showOrdersOnBrickLink();
 
 private:
+    LotList parseOrderXML(BrickLink::Order *order, const QByteArray &orderXML);
     void orderDownloadFinished(BrickLink::Order *order, TransferJob *job,
                                const QByteArray &xml = { });
 
@@ -57,13 +59,16 @@ private:
     QVector<TransferJob *> m_currentUpdate;
     struct OrderDownload {
         OrderDownload() = default;
-        OrderDownload(BrickLink::Order *order, TransferJob *xmlJob, TransferJob *addressJob)
-            : m_order(order), m_xmlJob(xmlJob), m_addressJob(addressJob)
+        OrderDownload(BrickLink::Order *order, TransferJob *xmlJob, TransferJob *addressJob,
+                      bool combine)
+            : m_order(order), m_xmlJob(xmlJob), m_addressJob(addressJob), m_combine(combine)
         { }
         BrickLink::Order *m_order;
         TransferJob *m_xmlJob;
         TransferJob *m_addressJob;
         QByteArray m_xmlData;
+        bool m_finished = false;
+        bool m_combine;
     };
     QVector<OrderDownload> m_orderDownloads;
     OrderModel *m_orderModel;

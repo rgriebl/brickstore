@@ -35,6 +35,7 @@
 #include <QStandardPaths>
 #include <QRegularExpression>
 #include <QDebug>
+#include <QColorDialog>
 
 #include <QProgressBar>
 #include <QStackedLayout>
@@ -55,8 +56,6 @@
 #include "script.h"
 #include "exception.h"
 #include "changecurrencydialog.h"
-
-#include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
 #include "selectitemdialog.h"
@@ -80,10 +79,9 @@ static E nextEnumValue(E current, std::initializer_list<E> values)
 }
 
 
-void Window::applyTo(const Document::ItemList &items,
-                     std::function<bool(const Document::Item &, Document::Item &)> callback)
+void Window::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback)
 {
-    if (items.isEmpty())
+    if (lots.isEmpty())
         return;
 
     QString actionText;
@@ -96,19 +94,19 @@ void Window::applyTo(const Document::ItemList &items,
     if (!actionText.isEmpty())
         document()->beginMacro();
 
-    int count = items.size();
-    std::vector<std::pair<Document::Item *, Document::Item>> changes;
+    int count = lots.size();
+    std::vector<std::pair<Lot *, Lot>> changes;
     changes.reserve(count);
 
-    for (Document::Item *from : items) {
-        Document::Item to = *from;
+    for (Lot *from : lots) {
+        Lot to = *from;
         if (callback(*from, to)) {
             changes.emplace_back(from, to);
         } else {
             --count;
         }
     }
-    document()->changeItems(changes);
+    document()->changeLots(changes);
 
     if (!actionText.isEmpty()) {
         //: Generic undo/redo text: %1 == action name (e.g. "Set price")
@@ -477,7 +475,7 @@ void StatusBar::changeDocumentCurrency(QAction *a)
 void StatusBar::updateStatistics()
 {
     static QLocale loc;
-    auto stat = m_doc->statistics(m_doc->items(), true /* ignoreExcluded */);
+    auto stat = m_doc->statistics(m_doc->lots(), true /* ignoreExcluded */);
 
     bool b = (stat.differences() > 0);
     if (b && Config::inst()->showDifferenceIndicators()) {
@@ -686,7 +684,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
     connect(m_doc, &Document::dataChanged,
-            this, &Window::documentItemsChanged);
+            this, &Window::documentDataChanged);
 
     connect(this, &Window::blockingOperationActiveChanged,
             w_list, &QWidget::setDisabled);
@@ -837,53 +835,53 @@ void Window::ensureLatestVisible()
     }
 }
 
-int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode)
+int Window::addLots(const LotList &lots, AddLotMode addLotMode)
 {
     // we own the items now
 
-    if (items.isEmpty())
+    if (lots.isEmpty())
         return 0;
 
     bool startedMacro = false;
 
-    const auto documentItems = document()->sortedItems();
-    bool wasEmpty = documentItems.isEmpty();
-    Document::Item *lastAdded = nullptr;
+    const auto documentLots = document()->sortedLots();
+    bool wasEmpty = documentLots.isEmpty();
+    Lot *lastAdded = nullptr;
     int addCount = 0;
     int consolidateCount = 0;
     Consolidate conMode = Consolidate::IntoExisting;
     bool repeatForRemaining = false;
     bool costQtyAvg = true;
 
-    for (int i = 0; i < items.count(); ++i) {
-        Document::Item *item = items.at(i);
+    for (int i = 0; i < lots.count(); ++i) {
+        Lot *lot = lots.at(i);
         bool justAdd = true;
 
-        if (addItemMode != AddItemMode::AddAsNew) {
-            Document::Item *mergeItem = nullptr;
+        if (addLotMode != AddLotMode::AddAsNew) {
+            Lot *mergeLot = nullptr;
 
-            for (int j = documentItems.count() - 1; j >= 0; --j) {
-                Document::Item *otherItem = documentItems.at(j);
-                if ((!item->isIncomplete() && !otherItem->isIncomplete())
-                        && (item->item() == otherItem->item())
-                        && (item->color() == otherItem->color())
-                        && (item->condition() == otherItem->condition())
-                        && ((item->status() == BrickLink::Status::Exclude) ==
-                            (otherItem->status() == BrickLink::Status::Exclude))) {
-                    mergeItem = otherItem;
+            for (int j = documentLots.count() - 1; j >= 0; --j) {
+                Lot *otherLot = documentLots.at(j);
+                if ((!lot->isIncomplete() && !otherLot->isIncomplete())
+                        && (lot->item() == otherLot->item())
+                        && (lot->color() == otherLot->color())
+                        && (lot->condition() == otherLot->condition())
+                        && ((lot->status() == BrickLink::Status::Exclude) ==
+                            (otherLot->status() == BrickLink::Status::Exclude))) {
+                    mergeLot = otherLot;
                     break;
                 }
             }
 
-            if (mergeItem) {
+            if (mergeLot) {
                 int mergeIndex = -1;
 
-                if ((addItemMode == AddItemMode::ConsolidateInteractive) && !repeatForRemaining) {
-                    BrickLink::InvItemList list { mergeItem, item };
+                if ((addLotMode == AddLotMode::ConsolidateInteractive) && !repeatForRemaining) {
+                    LotList list { mergeLot, lot };
 
                     ConsolidateItemsDialog dlg(this, list,
                                                conMode == Consolidate::IntoExisting ? 0 : 1,
-                                               conMode, i + 1, items.count(), this);
+                                               conMode, i + 1, lots.count(), this);
                     bool yesClicked = (dlg.exec() == QDialog::Accepted);
                     repeatForRemaining = dlg.repeatForAll();
                     costQtyAvg = dlg.costQuantityAverage();
@@ -898,7 +896,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
                         }
                     } else {
                         if (repeatForRemaining)
-                            addItemMode = AddItemMode::AddAsNew;
+                            addLotMode = AddLotMode::AddAsNew;
                     }
                 } else {
                     mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
@@ -914,15 +912,15 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
                     if (mergeIndex == 0) {
                         // merge new into existing
-                        Document::Item changedItem = *mergeItem;
-                        changedItem.mergeFrom(*item, costQtyAvg);
-                        m_doc->changeItem(mergeItem, changedItem);
-                        delete item; // we own it, but we don't need it anymore
+                        Lot changedLot = *mergeLot;
+                        changedLot.mergeFrom(*lot, costQtyAvg);
+                        m_doc->changeLot(mergeLot, changedLot);
+                        delete lot; // we own it, but we don't need it anymore
                     } else {
                         // merge existing into new, add new, remove existing
-                        item->mergeFrom(*mergeItem, costQtyAvg);
-                        m_doc->appendItem(item); // pass on ownership
-                        m_doc->removeItem(mergeItem);
+                        lot->mergeFrom(*mergeLot, costQtyAvg);
+                        m_doc->appendLot(lot); // pass on ownership
+                        m_doc->removeLot(mergeLot);
                     }
 
                     ++consolidateCount;
@@ -936,9 +934,9 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
                 startedMacro = true;
             }
 
-            m_doc->appendItem(item);  // pass on ownership to the doc
+            m_doc->appendLot(lot);  // pass on ownership to the doc
             ++addCount;
-            lastAdded = item;
+            lastAdded = lot;
         }
     }
 
@@ -953,38 +951,38 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
         m_latest_timer->start();
     }
 
-    return items.count();
+    return lots.count();
 }
 
 
-void Window::consolidateItems(const Document::ItemList &items)
+void Window::consolidateLots(const LotList &lots)
 {
-    if (items.count() < 2)
+    if (lots.count() < 2)
         return;
 
-    QVector<Document::ItemList> mergeList;
-    Document::ItemList sourceItems = items;
+    QVector<LotList> mergeList;
+    LotList sourceLots = lots;
 
-    for (int i = 0; i < sourceItems.count(); ++i) {
-        Document::Item *item = sourceItems.at(i);
-        Document::ItemList mergeItems;
+    for (int i = 0; i < sourceLots.count(); ++i) {
+        Lot *lot = sourceLots.at(i);
+        LotList mergeLots;
 
-        for (int j = i + 1; j < sourceItems.count(); ++j) {
-            Document::Item *otherItem = sourceItems.at(j);
-            if ((!item->isIncomplete() && !otherItem->isIncomplete())
-                    && (item->item() == otherItem->item())
-                    && (item->color() == otherItem->color())
-                    && (item->condition() == otherItem->condition())
-                    && ((item->status() == BrickLink::Status::Exclude) ==
-                        (otherItem->status() == BrickLink::Status::Exclude))) {
-                mergeItems << sourceItems.takeAt(j--);
+        for (int j = i + 1; j < sourceLots.count(); ++j) {
+            Lot *otherLot = sourceLots.at(j);
+            if ((!lot->isIncomplete() && !otherLot->isIncomplete())
+                    && (lot->item() == otherLot->item())
+                    && (lot->color() == otherLot->color())
+                    && (lot->condition() == otherLot->condition())
+                    && ((lot->status() == BrickLink::Status::Exclude) ==
+                        (otherLot->status() == BrickLink::Status::Exclude))) {
+                mergeLots << sourceLots.takeAt(j--);
             }
         }
-        if (mergeItems.isEmpty())
+        if (mergeLots.isEmpty())
             continue;
 
-        mergeItems.prepend(sourceItems.at(i));
-        mergeList << mergeItems;
+        mergeLots.prepend(sourceLots.at(i));
+        mergeList << mergeLots;
     }
 
     if (mergeList.isEmpty())
@@ -998,11 +996,11 @@ void Window::consolidateItems(const Document::ItemList &items)
     int consolidateCount = 0;
 
     for (int mi = 0; mi < mergeList.count(); ++mi) {
-        const Document::ItemList &mergeItems = mergeList.at(mi);
+        const LotList &mergeLots = mergeList.at(mi);
         int mergeIndex = -1;
 
         if (!repeatForRemaining) {
-            ConsolidateItemsDialog dlg(this, mergeItems, consolidateItemsHelper(mergeItems, conMode),
+            ConsolidateItemsDialog dlg(this, mergeLots, consolidateLotsHelper(mergeLots, conMode),
                                        conMode, mi + 1, mergeList.count(), this);
             bool yesClicked = (dlg.exec() == QDialog::Accepted);
             repeatForRemaining = dlg.repeatForAll();
@@ -1013,7 +1011,7 @@ void Window::consolidateItems(const Document::ItemList &items)
 
                 if (repeatForRemaining) {
                     conMode = dlg.consolidateRemaining();
-                    mergeIndex = consolidateItemsHelper(mergeItems, conMode);
+                    mergeIndex = consolidateLotsHelper(mergeLots, conMode);
                 }
             } else {
                 if (repeatForRemaining)
@@ -1022,7 +1020,7 @@ void Window::consolidateItems(const Document::ItemList &items)
                     continue;
             }
         } else {
-            mergeIndex = consolidateItemsHelper(mergeItems, conMode);
+            mergeIndex = consolidateLotsHelper(mergeLots, conMode);
         }
 
         if (!startedMacro) {
@@ -1030,14 +1028,14 @@ void Window::consolidateItems(const Document::ItemList &items)
             startedMacro = true;
         }
 
-        Document::Item newitem = *mergeItems.at(mergeIndex);
-        for (int i = 0; i < mergeItems.count(); ++i) {
+        Lot newitem = *mergeLots.at(mergeIndex);
+        for (int i = 0; i < mergeLots.count(); ++i) {
             if (i != mergeIndex) {
-                newitem.mergeFrom(*mergeItems.at(i), costQtyAvg);
-                m_doc->removeItem(mergeItems.at(i));
+                newitem.mergeFrom(*mergeLots.at(i), costQtyAvg);
+                m_doc->removeLot(mergeLots.at(i));
             }
         }
-        m_doc->changeItem(mergeItems.at(mergeIndex), newitem);
+        m_doc->changeLot(mergeLots.at(mergeIndex), newitem);
 
         ++consolidateCount;
     }
@@ -1045,26 +1043,26 @@ void Window::consolidateItems(const Document::ItemList &items)
         m_doc->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
 }
 
-int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const
+int Window::consolidateLotsHelper(const LotList &lots, Consolidate conMode) const
 {
     switch (conMode) {
     case Consolidate::IntoTopSorted:
         return 0;
     case Consolidate::IntoBottomSorted:
-        return items.count() - 1;
+        return lots.count() - 1;
     case Consolidate::IntoLowestIndex: {
-        const auto di = document()->items();
-        auto it = std::min_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
+        const auto di = document()->lots();
+        auto it = std::min_element(lots.cbegin(), lots.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
-        return int(std::distance(items.cbegin(), it));
+        return int(std::distance(lots.cbegin(), it));
     }
     case Consolidate::IntoHighestIndex: {
-        const auto di = document()->items();
-        auto it = std::max_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
+        const auto di = document()->lots();
+        auto it = std::max_element(lots.cbegin(), lots.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
-        return int(std::distance(items.cbegin(), it));
+        return int(std::distance(lots.cbegin(), it));
     }
     default:
         break;
@@ -1123,38 +1121,38 @@ Window::ColumnLayoutCommand Window::columnLayoutCommandFromId(const QString &id)
 
 void Window::on_edit_cut_triggered()
 {
-    if (!selection().isEmpty()) {
-        QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(selection()));
-        m_doc->removeItems(selection());
+    if (!selectedLots().isEmpty()) {
+        QApplication::clipboard()->setMimeData(new DocumentLotsMimeData(selectedLots()));
+        m_doc->removeLots(selectedLots());
     }
 }
 
 void Window::on_edit_copy_triggered()
 {
-    if (!selection().isEmpty())
-        QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(selection()));
+    if (!selectedLots().isEmpty())
+        QApplication::clipboard()->setMimeData(new DocumentLotsMimeData(selectedLots()));
 }
 
 void Window::on_edit_paste_triggered()
 {
-    BrickLink::InvItemList bllist = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
+    LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
 
-    if (!bllist.isEmpty()) {
-        if (!selection().isEmpty()) {
+    if (!lots.isEmpty()) {
+        if (!selectedLots().isEmpty()) {
             if (MessageBox::question(this, { }, tr("Overwrite the currently selected items?"),
                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes
                                      ) == QMessageBox::Yes) {
-                m_doc->removeItems(selection());
+                m_doc->removeLots(selectedLots());
             }
         }
-        addItems(bllist, AddItemMode::ConsolidateInteractive);
+        addLots(lots, AddLotMode::ConsolidateInteractive);
     }
 }
 
 void Window::on_edit_delete_triggered()
 {
-    if (!selection().isEmpty())
-        m_doc->removeItems(selection());
+    if (!selectedLots().isEmpty())
+        m_doc->removeLots(selectedLots());
 }
 
 void Window::on_edit_select_all_triggered()
@@ -1169,7 +1167,7 @@ void Window::on_edit_select_none_triggered()
 
 void Window::on_edit_filter_from_selection_triggered()
 {
-    if (selection().count() == 1) {
+    if (selectedLots().count() == 1) {
         auto idx = m_selection_model->currentIndex();
         if (idx.isValid() && idx.column() >= 0) {
             QVariant v = idx.data(Document::FilterRole);
@@ -1215,7 +1213,7 @@ void Window::on_edit_status_extra_triggered()
 
 void Window::on_edit_status_toggle_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setStatus(nextEnumValue(from.status(), { BrickLink::Status::Include,
                                                              BrickLink::Status::Exclude }));
         return true;
@@ -1224,7 +1222,7 @@ void Window::on_edit_status_toggle_triggered()
 
 void Window::setStatus(BrickLink::Status status)
 {
-    applyTo(selection(), [status](const auto &from, auto &to) {
+    applyTo(selectedLots(), [status](const auto &from, auto &to) {
         (to = from).setStatus(status); return true;
     });
 }
@@ -1242,7 +1240,7 @@ void Window::on_edit_cond_used_triggered()
 
 void Window::setCondition(BrickLink::Condition condition)
 {
-    applyTo(selection(), [condition](const auto &from, auto &to) {
+    applyTo(selectedLots(), [condition](const auto &from, auto &to) {
         (to = from).setCondition(condition);
         return true;
     });
@@ -1271,7 +1269,7 @@ void Window::on_edit_subcond_incomplete_triggered()
 
 void Window::setSubCondition(BrickLink::SubCondition subCondition)
 {
-    applyTo(selection(), [subCondition](const auto &from, auto &to) {
+    applyTo(selectedLots(), [subCondition](const auto &from, auto &to) {
         (to = from).setSubCondition(subCondition); return true;
     });
 }
@@ -1289,14 +1287,14 @@ void Window::on_edit_retain_no_triggered()
 
 void Window::on_edit_retain_toggle_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setRetain(!from.retain()); return true;
     });
 }
 
 void Window::setRetain(bool retain)
 {
-    applyTo(selection(), [retain](const auto &from, auto &to) {
+    applyTo(selectedLots(), [retain](const auto &from, auto &to) {
         (to = from).setRetain(retain); return true;
     });
 }
@@ -1324,7 +1322,7 @@ void Window::on_edit_stockroom_c_triggered()
 
 void Window::setStockroom(BrickLink::Stockroom stockroom)
 {
-    applyTo(selection(), [stockroom](const auto &from, auto &to) {
+    applyTo(selectedLots(), [stockroom](const auto &from, auto &to) {
         (to = from).setStockroom(stockroom); return true;
     });
 }
@@ -1332,14 +1330,14 @@ void Window::setStockroom(BrickLink::Stockroom stockroom)
 
 void Window::on_edit_price_set_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    double price = selection().front()->price();
+    double price = selectedLots().front()->price();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
                               m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
-        applyTo(selection(), [price](const auto &from, auto &to) {
+        applyTo(selectedLots(), [price](const auto &from, auto &to) {
             (to = from).setPrice(price); return true;
         });
     }
@@ -1347,7 +1345,7 @@ void Window::on_edit_price_set_triggered()
 
 void Window::on_edit_price_round_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         double price = int(from.price() * 100 + .5) / 100.;
         if (!qFuzzyCompare(price, from.price())) {
             (to = from).setPrice(price);
@@ -1360,7 +1358,7 @@ void Window::on_edit_price_round_triggered()
 
 void Window::on_edit_price_to_priceguide_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     Q_ASSERT(m_setToPG.isNull());
@@ -1368,7 +1366,7 @@ void Window::on_edit_price_to_priceguide_triggered()
     SetToPriceGuideDialog dlg(this);
 
     if (dlg.exec() == QDialog::Accepted) {
-        const auto sel = selection();
+        const auto sel = selectedLots();
 
         Q_ASSERT(!isBlockingOperationActive());
         startBlockingOperation(tr("Loading price guide data from disk"));
@@ -1385,7 +1383,7 @@ void Window::on_edit_price_to_priceguide_triggered()
 
         bool forceUpdate = dlg.forceUpdate();
 
-        for (Document::Item *item : sel) {
+        for (Lot *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
             if (forceUpdate && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
@@ -1401,7 +1399,7 @@ void Window::on_edit_price_to_priceguide_triggered()
                         * m_setToPG->currencyRate;
 
                 if (!qFuzzyCompare(price, item->price())) {
-                    Document::Item newItem = *item;
+                    Lot newItem = *item;
                     newItem.setPrice(price);
                     m_setToPG->changes.emplace_back(item, newItem);
                 }
@@ -1409,7 +1407,7 @@ void Window::on_edit_price_to_priceguide_triggered()
                 emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
 
             } else {
-                Document::Item newItem = *item;
+                Lot newItem = *item;
                 newItem.setPrice(0);
                 m_setToPG->changes.emplace_back(item, newItem);
 
@@ -1430,33 +1428,33 @@ void Window::on_edit_price_to_priceguide_triggered()
 void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_setToPG && pg) {
-        const auto items = m_setToPG->priceGuides.values(pg);
+        const auto lots = m_setToPG->priceGuides.values(pg);
 
-        if (items.isEmpty())
+        if (lots.isEmpty())
             return; // not a PG requested by us
         if (pg->updateStatus() == BrickLink::UpdateStatus::Updating)
             return; // loaded now, but still needs an online update
 
-        for (auto item : items) {
+        for (auto lot : lots) {
             if (!m_setToPG->canceled) {
-                double price = pg->isValid() ? (pg->price(m_setToPG->time, item->condition(),
+                double price = pg->isValid() ? (pg->price(m_setToPG->time, lot->condition(),
                                                           m_setToPG->price) * m_setToPG->currencyRate)
                                              : 0;
 
-                if (!qFuzzyCompare(price, item->price())) {
-                    Document::Item newItem = *item;
-                    newItem.setPrice(price);
-                    m_setToPG->changes.emplace_back(item, newItem);
+                if (!qFuzzyCompare(price, lot->price())) {
+                    Lot newLot = *lot;
+                    newLot.setPrice(price);
+                    m_setToPG->changes.emplace_back(lot, newLot);
                 }
             }
             pg->release();
         }
 
-        m_setToPG->doneCount += items.size();
+        m_setToPG->doneCount += lots.size();
         emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
 
         if (!pg->isValid() || (pg->updateStatus() == BrickLink::UpdateStatus::UpdateFailed))
-            m_setToPG->failCount += items.size();
+            m_setToPG->failCount += lots.size();
         m_setToPG->priceGuides.remove(pg);
     }
 
@@ -1464,7 +1462,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
             && (m_setToPG->doneCount == m_setToPG->totalCount)) {
         int failCount = m_setToPG->failCount;
         int successCount = m_setToPG->totalCount - failCount;
-        m_doc->changeItems(m_setToPG->changes);
+        m_doc->changeLots(m_setToPG->changes);
         m_setToPG.reset();
 
         m_doc->endMacro(tr("Set price to guide on %n item(s)", nullptr, successCount));
@@ -1501,7 +1499,7 @@ void Window::editCurrentItem(int column)
 
 void Window::on_edit_price_inc_dec_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     bool showTiers = !w_header->isSectionHidden(Document::TierQ1);
@@ -1515,7 +1513,7 @@ void Window::on_edit_price_inc_dec_triggered()
         double factor    = (1.+ percent / 100.);
         bool tiers       = dlg.applyToTiers();
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             double price = from.price();
 
             if (!qFuzzyIsNull(percent))
@@ -1547,14 +1545,14 @@ void Window::on_edit_price_inc_dec_triggered()
 
 void Window::on_edit_cost_set_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    double cost = selection().front()->cost();
+    double cost = selectedLots().front()->cost();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
                               m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
-        applyTo(selection(), [cost](const auto &from, auto &to) {
+        applyTo(selectedLots(), [cost](const auto &from, auto &to) {
             (to = from).setCost(cost); return true;
         });
     }
@@ -1562,7 +1560,7 @@ void Window::on_edit_cost_set_triggered()
 
 void Window::on_edit_cost_round_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         double cost = int(from.cost() * 100 + .5) / 100.;
         if (!qFuzzyCompare(cost, from.cost())) {
             (to = from).setCost(cost);
@@ -1574,7 +1572,7 @@ void Window::on_edit_cost_round_triggered()
 
 void Window::on_edit_cost_inc_dec_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
@@ -1585,7 +1583,7 @@ void Window::on_edit_cost_inc_dec_triggered()
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             double cost = from.cost();
 
             if (!qFuzzyIsNull(percent))
@@ -1604,7 +1602,7 @@ void Window::on_edit_cost_inc_dec_triggered()
 
 void Window::on_edit_cost_spread_triggered()
 {
-    if (selection().size() < 2)
+    if (selectedLots().size() < 2)
         return;
 
     double spreadAmount = 0;
@@ -1613,7 +1611,7 @@ void Window::on_edit_cost_spread_triggered()
                               m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
         double priceTotal = 0;
 
-        foreach (Document::Item *item, selection())
+        foreach (Lot *item, selectedLots())
             priceTotal += (item->price() * item->quantity());
         if (qFuzzyIsNull(priceTotal))
             return;
@@ -1621,7 +1619,7 @@ void Window::on_edit_cost_spread_triggered()
         if (qFuzzyCompare(f, 1))
             return;
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             (to = from).setCost(from.price() * f); return true;
         });
     }
@@ -1629,7 +1627,7 @@ void Window::on_edit_cost_spread_triggered()
 
 void Window::on_edit_qty_divide_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     int divisor = 1;
@@ -1642,7 +1640,7 @@ void Window::on_edit_qty_divide_triggered()
 
         int lotsNotDivisible = 0;
 
-        foreach (Document::Item *item, selection()) {
+        foreach (Lot *item, selectedLots()) {
             if (qAbs(item->quantity()) % divisor)
                 ++lotsNotDivisible;
         }
@@ -1654,7 +1652,7 @@ void Window::on_edit_qty_divide_triggered()
             return;
         }
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             (to = from).setQuantity(from.quantity() / divisor); return true;
         });
     }
@@ -1662,7 +1660,7 @@ void Window::on_edit_qty_divide_triggered()
 
 void Window::on_edit_qty_multiply_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     int factor = 1;
@@ -1675,7 +1673,7 @@ void Window::on_edit_qty_multiply_triggered()
         int lotsTooLarge = 0;
         int maxQty = FrameWork::maxQuantity / qAbs(factor);
 
-        foreach(Document::Item *item, selection()) {
+        foreach(Lot *item, selectedLots()) {
             if (qAbs(item->quantity()) > maxQty)
                 lotsTooLarge++;
         }
@@ -1687,7 +1685,7 @@ void Window::on_edit_qty_multiply_triggered()
             return;
         }
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             (to = from).setQuantity(from.quantity() * factor); return true;
         });
     }
@@ -1695,14 +1693,14 @@ void Window::on_edit_qty_multiply_triggered()
 
 void Window::on_edit_sale_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    int sale = selection().front()->sale();
+    int sale = selectedLots().front()->sale();
 
     if (MessageBox::getInteger(this, { }, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
                                tr("%"), sale, -1000, 99)) {
-        applyTo(selection(), [sale](const auto &from, auto &to) {
+        applyTo(selectedLots(), [sale](const auto &from, auto &to) {
             (to = from).setSale(sale); return true;
         });
     }
@@ -1710,14 +1708,14 @@ void Window::on_edit_sale_triggered()
 
 void Window::on_edit_bulk_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    int bulk = selection().front()->bulkQuantity();
+    int bulk = selectedLots().front()->bulkQuantity();
 
     if (MessageBox::getInteger(this, { }, tr("Set bulk quantity for the selected items:"),
                                QString(), bulk, 1, 99999)) {
-        applyTo(selection(), [bulk](const auto &from, auto &to) {
+        applyTo(selectedLots(), [bulk](const auto &from, auto &to) {
             (to = from).setBulkQuantity(bulk); return true;
         });
     }
@@ -1725,7 +1723,7 @@ void Window::on_edit_bulk_triggered()
 
 void Window::on_edit_color_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     editCurrentItem(Document::Color);
@@ -1733,7 +1731,7 @@ void Window::on_edit_color_triggered()
 
 void Window::on_edit_item_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     editCurrentItem(Document::Description);
@@ -1741,14 +1739,14 @@ void Window::on_edit_item_triggered()
 
 void Window::on_edit_qty_set_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    int quantity = selection().front()->quantity();
+    int quantity = selectedLots().front()->quantity();
 
     if (MessageBox::getInteger(this, { }, tr("Enter the new quantities for all selected items:"),
                                QString(), quantity, -FrameWork::maxQuantity, FrameWork::maxQuantity)) {
-        applyTo(selection(), [quantity](const auto &from, auto &to) {
+        applyTo(selectedLots(), [quantity](const auto &from, auto &to) {
             (to = from).setQuantity(quantity); return true;
         });
     }
@@ -1756,14 +1754,14 @@ void Window::on_edit_qty_set_triggered()
 
 void Window::on_edit_remark_set_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    QString remarks = selection().front()->remarks();
+    QString remarks = selectedLots().front()->remarks();
 
     if (MessageBox::getString(this, { }, tr("Enter the new remark for all selected items:"),
                               remarks)) {
-        applyTo(selection(), [remarks](const auto &from, auto &to) {
+        applyTo(selectedLots(), [remarks](const auto &from, auto &to) {
             (to = from).setRemarks(remarks); return true;
         });
     }
@@ -1771,34 +1769,34 @@ void Window::on_edit_remark_set_triggered()
 
 void Window::on_edit_remark_clear_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setRemarks({ }); return true;
     });
 }
 
 void Window::on_edit_remark_add_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     QString addRemarks;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the remarks of all selected items:"),
                               addRemarks)) {
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             to = from;
-            Document::Item tmp = from;
+            Lot tmp = from;
             tmp.setRemarks(addRemarks);
 
-            return Document::mergeItemFields(tmp, to, Document::MergeMode::Ignore,
-                                             {{ Document::Remarks, Document::MergeMode::MergeText }});
+            return Document::mergeLotFields(tmp, to, Document::MergeMode::Ignore,
+                                            {{ Document::Remarks, Document::MergeMode::MergeText }});
         });
     }
 }
 
 void Window::on_edit_remark_rem_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     QString remRemarks;
@@ -1807,7 +1805,7 @@ void Window::on_edit_remark_rem_triggered()
                               remRemarks)) {
         QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remRemarks) % u"\\b");
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             QString remark = from.remarks();
             if (!remark.isEmpty())
                 remark = remark.remove(regexp).simplified();
@@ -1823,14 +1821,14 @@ void Window::on_edit_remark_rem_triggered()
 
 void Window::on_edit_comment_set_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    QString comments = selection().front()->comments();
+    QString comments = selectedLots().front()->comments();
 
     if (MessageBox::getString(this, { }, tr("Enter the new comment for all selected items:"),
                               comments)) {
-        applyTo(selection(), [comments](const auto &from, auto &to) {
+        applyTo(selectedLots(), [comments](const auto &from, auto &to) {
             (to = from).setComments(comments); return true;
         });
     }
@@ -1838,34 +1836,34 @@ void Window::on_edit_comment_set_triggered()
 
 void Window::on_edit_comment_clear_triggered()
 {
-    applyTo(selection(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setComments({ }); return true;
     });
 }
 
 void Window::on_edit_comment_add_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     QString addComments;
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the comments of all selected items:"),
                               addComments)) {
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             to = from;
-            Document::Item tmp = from;
+            Lot tmp = from;
             tmp.setComments(addComments);
 
-            return Document::mergeItemFields(tmp, to, Document::MergeMode::Ignore,
-                                             {{ Document::Comments, Document::MergeMode::MergeText }});
+            return Document::mergeLotFields(tmp, to, Document::MergeMode::Ignore,
+                                            {{ Document::Comments, Document::MergeMode::MergeText }});
         });
     }
 }
 
 void Window::on_edit_comment_rem_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
     QString remComment;
@@ -1874,7 +1872,7 @@ void Window::on_edit_comment_rem_triggered()
                               remComment)) {
         QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remComment) % u"\\b");
 
-        applyTo(selection(), [=](const auto &from, auto &to) {
+        applyTo(selectedLots(), [=](const auto &from, auto &to) {
             QString comment = from.comments();
             if (!comment.isEmpty())
                 comment = comment.remove(regexp).simplified();
@@ -1890,19 +1888,20 @@ void Window::on_edit_comment_rem_triggered()
 
 void Window::on_edit_reserved_triggered()
 {
-    if (selection().isEmpty())
+    if (selectedLots().isEmpty())
         return;
 
-    QString reserved = selection().front()->reserved();
+    QString reserved = selectedLots().front()->reserved();
 
     if (MessageBox::getString(this, { },
                               tr("Reserve all selected items for this specific buyer (BrickLink username):"),
                               reserved)) {
-        applyTo(selection(), [reserved](const auto &from, auto &to) {
+        applyTo(selectedLots(), [reserved](const auto &from, auto &to) {
             (to = from).setReserved(reserved); return true;
         });
     }
 }
+
 
 void Window::updateItemFlagsMask()
 {
@@ -1914,7 +1913,7 @@ void Window::updateItemFlagsMask()
     if (Config::inst()->showDifferenceIndicators())
         dm = (1ULL << Document::FieldCount) - 1;
 
-    m_doc->setItemFlagsMask({ em, dm });
+    m_doc->setLotFlagsMask({ em, dm });
 }
 
 
@@ -1927,35 +1926,35 @@ void Window::on_edit_copy_fields_triggered()
     if (dlg.exec() != QDialog::Accepted )
         return;
 
-    auto srcItems = dlg.items();
-    if (srcItems.isEmpty())
+    auto srcLots = dlg.lots();
+    if (srcLots.isEmpty())
         return;
 
     auto defaultMergeMode = dlg.defaultMergeMode();
     auto fieldMergeModes = dlg.fieldMergeModes();
     int copyCount = 0;
-    std::vector<std::pair<Document::Item *, Document::Item>> changes;
-    changes.reserve(m_doc->items().size()); // just a guestimate
+    std::vector<std::pair<Lot *, Lot>> changes;
+    changes.reserve(m_doc->lots().size()); // just a guestimate
 
     document()->beginMacro();
 
-    foreach (Document::Item *dstItem, m_doc->items()) {
-        foreach (Document::Item *srcItem, srcItems) {
-            if (!Document::canItemsBeMerged(*dstItem, *srcItem))
+    foreach (Lot *dstLot, m_doc->lots()) {
+        foreach (Lot *srcLot, srcLots) {
+            if (!Document::canLotsBeMerged(*dstLot, *srcLot))
                 continue;
 
-            Document::Item newItem = *dstItem;
-            if (Document::mergeItemFields(*srcItem, newItem, defaultMergeMode, fieldMergeModes)) {
-                changes.emplace_back(dstItem, newItem);
+            Lot newLot = *dstLot;
+            if (Document::mergeLotFields(*srcLot, newLot, defaultMergeMode, fieldMergeModes)) {
+                changes.emplace_back(dstLot, newLot);
                 ++copyCount;
                 break;
             }
         }
     }
     if (!changes.empty())
-        document()->changeItems(changes);
+        document()->changeLots(changes);
     document()->endMacro(tr("Copied or merged %n item(s)", nullptr, copyCount));
-    qDeleteAll(srcItems);
+    qDeleteAll(srcLots);
 }
 
 void Window::on_edit_subtractitems_triggered()
@@ -1963,34 +1962,36 @@ void Window::on_edit_subtractitems_triggered()
     SelectDocumentDialog dlg(document(), tr("Which items should be subtracted from the current document:"));
 
     if (dlg.exec() == QDialog::Accepted ) {
-        const Document::ItemList subItems = dlg.items();
-        if (subItems.isEmpty())
+        const LotList subLots = dlg.lots();
+        if (subLots.isEmpty())
             return;
-        const Document::ItemList &items = document()->items();
+        const LotList &lots = document()->lots();
 
-        std::vector<std::pair<Document::Item *, Document::Item>> changes;
-        changes.reserve(subItems.size() * 2); // just a guestimate
-        Document::ItemList newItems;
+        std::vector<std::pair<Lot *, Lot>> changes;
+        changes.reserve(subLots.size() * 2); // just a guestimate
+        LotList newLots;
 
         document()->beginMacro();
 
-        for (const Document::Item *subItem : subItems) {
-            int qty = subItem->quantity();
-            if (!subItem->item() || !subItem->color() || !qty)
+        for (const Lot *subLot : subLots) {
+            int qty = subLot->quantity();
+            if (!subLot->item() || !subLot->color() || !qty)
                 continue;
 
             bool hadMatch = false;
 
-            for (Document::Item *item : items) {
-                if (!Document::canItemsBeMerged(*item, *subItem))
+            for (Lot *lot : lots) {
+                if (!Document::canLotsBeMerged(*lot, *subLot))
                     continue;
 
-                Document::Item newItem = *item;
+                Lot newItem = *lot;
                 auto change = std::find_if(changes.begin(), changes.end(), [=](const auto &c) {
-                    return c.first == item;
+                    return c.first == lot;
                 });
-                Document::Item &newItemRef = (change == changes.end()) ? newItem : change->second;
+                Lot &newItemRef = (change == changes.end()) ? newItem : change->second;
                 int qtyInItem = newItemRef.quantity();
+
+                qWarning() << "MATCH against" << lot->quantity() << lot->itemName();
 
                 if (qtyInItem >= qty) {
                     newItemRef.setQuantity(qtyInItem - qty);
@@ -2000,7 +2001,7 @@ void Window::on_edit_subtractitems_triggered()
                     qty -= qtyInItem;
                 }
                 if (&newItemRef == &newItem)
-                    changes.emplace_back(item, newItem);
+                    changes.emplace_back(lot, newItem);
                 hadMatch = true;
 
                 if (qty == 0)
@@ -2008,42 +2009,42 @@ void Window::on_edit_subtractitems_triggered()
             }
             if (qty) {   // still a qty left
                 if (hadMatch) {
-                    Document::Item &lastChange = changes.back().second;
+                    Lot &lastChange = changes.back().second;
                     lastChange.setQuantity(lastChange.quantity() - qty);
                 } else {
-                    auto *newItem = new Document::Item();
-                    newItem->setItem(subItem->item());
-                    newItem->setColor(subItem->color());
-                    newItem->setCondition(subItem->condition());
-                    newItem->setSubCondition(subItem->subCondition());
+                    auto *newItem = new Lot();
+                    newItem->setItem(subLot->item());
+                    newItem->setColor(subLot->color());
+                    newItem->setCondition(subLot->condition());
+                    newItem->setSubCondition(subLot->subCondition());
                     newItem->setQuantity(-qty);
 
-                    newItems.append(newItem);
+                    newLots.append(newItem);
                 }
             }
         }
 
         if (!changes.empty())
-            document()->changeItems(changes);
-        if (!newItems.isEmpty())
-            document()->appendItems(newItems);
-        document()->endMacro(tr("Subtracted %n item(s)", nullptr, subItems.size()));
+            document()->changeLots(changes);
+        if (!newLots.isEmpty())
+            document()->appendLots(newLots);
+        document()->endMacro(tr("Subtracted %n item(s)", nullptr, subLots.size()));
 
-        qDeleteAll(subItems);
+        qDeleteAll(subLots);
     }
 }
 
 void Window::on_edit_mergeitems_triggered()
 {
-    if (!selection().isEmpty())
-        consolidateItems(selection());
+    if (!selectedLots().isEmpty())
+        consolidateLots(selectedLots());
     else
-        consolidateItems(m_doc->sortedItems());
+        consolidateLots(m_doc->sortedLots());
 }
 
 void Window::on_edit_partoutitems_triggered()
 {
-    if (selection().count() >= 1) {
+    if (selectedLots().count() >= 1) {
         auto pom = Config::inst()->partOutMode();
         bool inplace = (pom == Config::PartOutMode::InPlace);
 
@@ -2067,25 +2068,34 @@ void Window::on_edit_partoutitems_triggered()
 
         int partcount = 0;
 
-        foreach(Document::Item *item, selection()) {
+        foreach(Lot *lot, selectedLots()) {
             if (inplace) {
-                if (item->item()->hasInventory() && item->quantity()) {
-                    BrickLink::InvItemList items = item->item()->consistsOf();
-                    if (!items.isEmpty()) {
-                        int multiply = item->quantity();
+                if (lot->item()->hasInventory() && lot->quantity()) {
+                    const auto &parts = lot->item()->consistsOf();
+                    if (!parts.isEmpty()) {
+                        int multiply = lot->quantity();
 
-                        for (int i = 0; i < items.size(); ++i) {
-                            if (multiply != 1)
-                                items[i]->setQuantity(items[i]->quantity() * multiply);
-                            items[i]->setCondition(item->condition());
+                        LotList newLots;
+
+                        for (const BrickLink::Item::ConsistsOf &part : parts) {
+                            auto partItem = part.item();
+                            if (!partItem)
+                                continue;
+                            auto *newLot = new Lot(part.color(), partItem);
+                            newLot->setQuantity(part.quantity() * multiply);
+                            newLot->setCondition(lot->condition());
+                            newLot->setAlternate(part.isAlternate());
+                            newLot->setAlternateId(part.alternateId());
+                            newLot->setCounterPart(part.isCounterPart());
+                            newLots << newLot;
                         }
-                        m_doc->insertItemsAfter(item, Document::ItemList(items));
-                        m_doc->removeItem(item);
+                        m_doc->insertLotsAfter(lot, newLots);
+                        m_doc->removeLot(lot);
                         partcount++;
                     }
                 }
             } else {
-                FrameWork::inst()->fileImportBrickLinkInventory(item->item(), item->quantity(), item->condition());
+                FrameWork::inst()->fileImportBrickLinkInventory(lot->item(), lot->quantity(), lot->condition());
             }
         }
         if (inplace)
@@ -2111,7 +2121,7 @@ void Window::gotoNextErrorOrDifference(bool difference)
         if (wrapped && (row > startIdx.row()))
             return;
 
-        auto flags = m_doc->itemFlags(m_doc->item(m_doc->index(row, 0)));
+        auto flags = m_doc->lotFlags(m_doc->lot(m_doc->index(row, 0)));
         quint64 mask = difference ? flags.second : flags.first;
         if (mask) {
             for (int col = startCol; col < m_doc->columnCount(); ++col) {
@@ -2278,37 +2288,37 @@ void Window::closeEvent(QCloseEvent *e)
 
 void Window::on_bricklink_catalog_triggered()
 {
-    if (!selection().isEmpty()) {
-        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, (*selection().front()).item(),
-                                   (*selection().front()).color());
+    if (!selectedLots().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, (*selectedLots().front()).item(),
+                                   (*selectedLots().front()).color());
     }
 }
 
 void Window::on_bricklink_priceguide_triggered()
 {
-    if (!selection().isEmpty()) {
-        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(),
-                                   (*selection().front()).color());
+    if (!selectedLots().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, (*selectedLots().front()).item(),
+                                   (*selectedLots().front()).color());
     }
 }
 
 void Window::on_bricklink_lotsforsale_triggered()
 {
-    if (!selection().isEmpty()) {
-        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, (*selection().front()).item(),
-                                   (*selection().front()).color());
+    if (!selectedLots().isEmpty()) {
+        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, (*selectedLots().front()).item(),
+                                   (*selectedLots().front()).color());
     }
 }
 
 void Window::on_bricklink_myinventory_triggered()
 {
-    if (!selection().isEmpty()) {
-        uint lotid = (*selection().front()).lotId();
+    if (!selectedLots().isEmpty()) {
+        uint lotid = (*selectedLots().front()).lotId();
         if (lotid) {
             BrickLink::core()->openUrl(BrickLink::URL_StoreItemDetail, &lotid);
         } else {
             BrickLink::core()->openUrl(BrickLink::URL_StoreItemSearch,
-                                       (*selection().front()).item(), (*selection().front()).color());
+                                       (*selectedLots().front()).item(), (*selectedLots().front()).color());
         }
     }
 }
@@ -2392,7 +2402,7 @@ void Window::on_document_print_pdf_triggered()
 
 void Window::print(bool as_pdf)
 {
-    if (m_doc->items().isEmpty())
+    if (m_doc->lots().isEmpty())
         return;
 
     if (ScriptManager::inst()->printingScripts().isEmpty()) {
@@ -2436,10 +2446,10 @@ void Window::print(bool as_pdf)
         pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
         pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
 
-        if (!selection().isEmpty())
+        if (!selectedLots().isEmpty())
             pd.setOption(QAbstractPrintDialog::PrintSelection);
 
-        pd.setPrintRange(selection().isEmpty() ? QAbstractPrintDialog::AllPages
+        pd.setPrintRange(selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
                                                : QAbstractPrintDialog::Selection);
 
         if (pd.exec() != QDialog::Accepted)
@@ -2485,68 +2495,68 @@ void Window::on_document_save_as_triggered()
 
 void Window::on_document_export_bl_xml_triggered()
 {
-    Document::ItemList items = exportCheck();
+    LotList lots = exportCheck();
 
-    if (!items.isEmpty())
-        DocumentIO::exportBrickLinkXML(items);
+    if (!lots.isEmpty())
+        DocumentIO::exportBrickLinkXML(lots);
 }
 
 void Window::on_document_export_bl_xml_clip_triggered()
 {
-    Document::ItemList items = exportCheck();
+    LotList lots = exportCheck();
 
-    if (!items.isEmpty())
-        DocumentIO::exportBrickLinkXMLClipboard(items);
+    if (!lots.isEmpty())
+        DocumentIO::exportBrickLinkXMLClipboard(lots);
 }
 
 void Window::on_document_export_bl_update_clip_triggered()
 {
-    Document::ItemList items = exportCheck();
+    LotList lots = exportCheck();
 
-    if (!items.isEmpty())
-        DocumentIO::exportBrickLinkUpdateClipboard(m_doc, items);
+    if (!lots.isEmpty())
+        DocumentIO::exportBrickLinkUpdateClipboard(m_doc, lots);
 }
 
 void Window::on_document_export_bl_invreq_clip_triggered()
 {
-    Document::ItemList items = exportCheck();
+    LotList lots = exportCheck();
 
-    if (!items.isEmpty())
-        DocumentIO::exportBrickLinkInvReqClipboard(items);
+    if (!lots.isEmpty())
+        DocumentIO::exportBrickLinkInvReqClipboard(lots);
 }
 
 void Window::on_document_export_bl_wantedlist_clip_triggered()
 {
-    Document::ItemList items = exportCheck();
+    LotList lots = exportCheck();
 
-    if (!items.isEmpty())
-        DocumentIO::exportBrickLinkWantedListClipboard(items);
+    if (!lots.isEmpty())
+        DocumentIO::exportBrickLinkWantedListClipboard(lots);
 }
 
-Document::ItemList Window::exportCheck() const
+LotList Window::exportCheck() const
 {
-    Document::ItemList items = m_doc->items();
+    LotList lots = m_doc->lots();
 
-    if (!selection().isEmpty() && (selection().count() != m_doc->items().count())) {
+    if (!selectedLots().isEmpty() && (selectedLots().count() != m_doc->lots().count())) {
         if (MessageBox::question(nullptr, { },
                                  tr("There are %n item(s) selected.<br /><br />Do you want to export only these items?",
-                                    nullptr, selection().count()),
+                                    nullptr, selectedLots().count()),
                                  QMessageBox::Yes | QMessageBox::No, MessageBox::Yes
                                  ) == QMessageBox::Yes) {
-            items = selection();
+            lots = selectedLots();
         }
     }
 
-    if (m_doc->statistics(items).errors()) {
+    if (m_doc->statistics(lots).errors()) {
         if (MessageBox::warning(nullptr, { },
                                 tr("This list contains items with errors.<br /><br />Do you really want to export this list?"),
                                 MessageBox::Yes | MessageBox::No, MessageBox::No
                                 ) != MessageBox::Yes) {
-            items.clear();
+            lots.clear();
         }
     }
 
-    return m_doc->sortItemList(items);
+    return m_doc->sortLotList(lots);
 }
 
 void Window::resizeColumnsToDefault(bool simpleMode)
@@ -2609,16 +2619,16 @@ void Window::updateSelection()
         m_delayedSelectionUpdate->setInterval(0);
 
         connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
-            m_selection.clear();
+            m_selectedLots.clear();
 
             auto sel = m_selection_model->selectedRows();
             std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
                 return idx1.row() < idx2.row(); });
 
             for (const QModelIndex &idx : qAsConst(sel))
-                m_selection.append(m_doc->item(idx));
+                m_selectedLots.append(m_doc->lot(idx));
 
-            emit selectionChanged(m_selection);
+            emit selectedLotsChanged(m_selectedLots);
 
             if (m_selection_model->currentIndex().isValid())
                 w_list->scrollTo(m_selection_model->currentIndex());
@@ -2627,11 +2637,11 @@ void Window::updateSelection()
     m_delayedSelectionUpdate->start();
 }
 
-void Window::setSelection(const Document::ItemList &lst)
+void Window::setSelection(const LotList &lst)
 {
     QItemSelection idxs;
 
-    foreach (const Document::Item *item, lst) {
+    foreach (const Lot *item, lst) {
         QModelIndex idx(m_doc->index(item));
         idxs.select(idx, idx);
     }
@@ -2639,12 +2649,12 @@ void Window::setSelection(const Document::ItemList &lst)
                               | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-void Window::documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+void Window::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
     for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
-        auto item = m_doc->item(topLeft.siblingAtRow(r));
-        if (m_selection.contains(item)) {
-            emit selectionChanged(m_selection);
+        auto lot = m_doc->lot(topLeft.siblingAtRow(r));
+        if (m_selectedLots.contains(lot)) {
+            emit selectedLotsChanged(m_selectedLots);
             break;
         }
     }
@@ -2725,9 +2735,9 @@ void AutosaveJob::run()
 void Window::autosave() const
 {
     auto doc = document();
-    auto items = document()->items();
+    auto lots = document()->lots();
 
-    if (m_uuid.isNull() || !doc->isModified() || items.isEmpty() || m_autosaveClean)
+    if (m_uuid.isNull() || !doc->isModified() || lots.isEmpty() || m_autosaveClean)
         return;
 
     QByteArray ba;
@@ -2739,11 +2749,11 @@ void Window::autosave() const
        << doc->currencyCode()
        << currentColumnLayout()
        << doc->saveSortFilterState()
-       << qint32(doc->items().count());
+       << qint32(lots.count());
 
-    for (auto item : items) {
-        item->save(ds);
-        auto base = doc->differenceBaseItem(item);
+    for (auto lot : lots) {
+        lot->save(ds);
+        auto base = doc->differenceBaseLot(lot);
         ds << bool(base);
         if (base)
             base->save(ds);
@@ -2777,7 +2787,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
             QString savedCurrencyCode;
             QByteArray savedColumnLayout;
             QByteArray savedSortFilterState;
-            QHash<const BrickLink::InvItem *, BrickLink::InvItem> differenceBase;
+            QHash<const Lot *, Lot> differenceBase;
             qint32 count = 0;
 
             QDataStream ds(&f);
@@ -2785,21 +2795,21 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     >> savedColumnLayout >> savedSortFilterState >> count;
 
             if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 5)) {
-                BrickLink::InvItemList items;
+                LotList lots;
 
                 for (int i = 0; i < count; ++i) {
-                    if (auto item = BrickLink::InvItem::restore(ds)) {
-                        items.append(item);
+                    if (auto lot = Lot::restore(ds)) {
+                        lots.append(lot);
                         bool hasBase = false;
                         ds >> hasBase;
                         if (hasBase) {
-                            if (auto base = BrickLink::InvItem::restore(ds)) {
-                                differenceBase.insert(item, *base);
+                            if (auto base = Lot::restore(ds)) {
+                                differenceBase.insert(lot, *base);
                                 delete base;
                                 continue;
                             }
                         }
-                        differenceBase.insert(item, *item);
+                        differenceBase.insert(lot, *lot);
                     }
                 }
                 ds >> magic;
@@ -2809,11 +2819,11 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
 
                     // Document owns the items now
                     DocumentIO::BsxContents bsx;
-                    bsx.items = items;
+                    bsx.lots = lots;
                     bsx.currencyCode = savedCurrencyCode;
                     bsx.differenceModeBase = differenceBase;
                     auto doc = new Document(bsx, true /*mark as modified*/);
-                    items.clear();
+                    lots.clear();
 
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);
@@ -2830,7 +2840,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
 
                     restored.append(win);
                 }
-                qDeleteAll(items);
+                qDeleteAll(lots);
             }
             f.close();
         }

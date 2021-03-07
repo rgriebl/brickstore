@@ -61,21 +61,21 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
 void TaskPriceGuideWidget::windowUpdate(Window *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectionChanged,
+        disconnect(m_win.data(), &Window::selectedLotsChanged,
                    this, &TaskPriceGuideWidget::selectionUpdate);
         disconnect(m_win->document(), &Document::currencyCodeChanged,
                    this, &TaskPriceGuideWidget::currencyUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectionChanged,
+        connect(m_win.data(), &Window::selectedLotsChanged,
                 this, &TaskPriceGuideWidget::selectionUpdate);
         connect(m_win->document(), &Document::currencyCodeChanged,
                 this, &TaskPriceGuideWidget::currencyUpdate);
     }
 
     setCurrencyCode(m_win ? m_win->document()->currencyCode() : Config::inst()->defaultCurrencyCode());
-    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selectedLots() : LotList());
 }
 
 void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
@@ -83,7 +83,7 @@ void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
     setCurrencyCode(ccode);
 }
 
-void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
+void TaskPriceGuideWidget::selectionUpdate(const LotList &list)
 {
     m_selection = list;
     m_delayTimer.start();
@@ -91,15 +91,15 @@ void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
 
 void TaskPriceGuideWidget::setPrice(double p)
 {
-    if (m_win && (m_win->selection().count() == 1)) {
-        Document::Item *pos = m_win->selection().front();
-        Document::Item item = *pos;
+    if (m_win && (m_win->selectedLots().count() == 1)) {
+        Lot *pos = m_win->selectedLots().front();
+        Lot lot = *pos;
 
         auto doc = m_win->document();
         p *= Currency::inst()->rate(doc->currencyCode());
-        item.setPrice(p);
+        lot.setPrice(p);
 
-        doc->changeItem(pos, item);
+        doc->changeLot(pos, lot);
     }
 }
 
@@ -188,7 +188,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
 void TaskInfoWidget::windowUpdate(Window *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectionChanged,
+        disconnect(m_win.data(), &Window::selectedLotsChanged,
                    this, &TaskInfoWidget::selectionUpdate);
         disconnect(m_win->document(), &Document::statisticsChanged,
                    this, &TaskInfoWidget::statisticsUpdate);
@@ -197,7 +197,7 @@ void TaskInfoWidget::windowUpdate(Window *win)
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectionChanged,
+        connect(m_win.data(), &Window::selectedLotsChanged,
                 this, &TaskInfoWidget::selectionUpdate);
         connect(m_win->document(), &Document::statisticsChanged,
                 this, &TaskInfoWidget::statisticsUpdate);
@@ -205,12 +205,12 @@ void TaskInfoWidget::windowUpdate(Window *win)
                 this, &TaskInfoWidget::currencyUpdate);
     }
 
-    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selectedLots() : LotList());
 }
 
 void TaskInfoWidget::currencyUpdate()
 {
-    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selectedLots() : LotList());
 }
 
 void TaskInfoWidget::statisticsUpdate()
@@ -220,7 +220,7 @@ void TaskInfoWidget::statisticsUpdate()
         selectionUpdate(m_selection);
 }
 
-void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
+void TaskInfoWidget::selectionUpdate(const LotList &list)
 {
     m_selection = list;
     m_delayTimer.start();
@@ -236,7 +236,7 @@ void TaskInfoWidget::delayedSelectionUpdate()
         setCurrentWidget(m_pic);
     } else {
         Document::Statistics stat(m_win->document(),
-                                  m_selection.isEmpty() ? m_win->document()->items() : m_selection);
+                                  m_selection.isEmpty() ? m_win->document()->lots() : m_selection);
 
         QLocale loc;
         QString ccode = m_win->document()->currencyCode();
@@ -304,7 +304,7 @@ void TaskInfoWidget::languageChange()
 void TaskInfoWidget::refresh()
 {
     if (m_win)
-        selectionUpdate(m_win->selection());
+        selectionUpdate(m_win->selectedLots());
 }
 
 void TaskInfoWidget::changeEvent(QEvent *e)
@@ -342,19 +342,19 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
 void TaskAppearsInWidget::windowUpdate(Window *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectionChanged,
+        disconnect(m_win.data(), &Window::selectedLotsChanged,
                    this, &TaskAppearsInWidget::selectionUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectionChanged,
+        connect(m_win.data(), &Window::selectedLotsChanged,
                 this, &TaskAppearsInWidget::selectionUpdate);
     }
 
-    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selectedLots() : LotList());
 }
 
-void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
+void TaskAppearsInWidget::selectionUpdate(const LotList &list)
 {
     m_selection = list;
     m_delayTimer.start();

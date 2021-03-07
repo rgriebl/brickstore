@@ -24,7 +24,7 @@ public:
 
     AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
                  const QVector<int> &sortedPositions, const QVector<int> &filteredPositions,
-                 const Document::ItemList &items);
+                 const LotList &lots);
     ~AddRemoveCmd() override;
     int id() const override;
 
@@ -38,14 +38,14 @@ private:
     QVector<int>       m_positions;
     QVector<int>       m_sortedPositions;
     QVector<int>       m_filteredPositions;
-    Document::ItemList m_items;
+    LotList            m_lots;
     Type               m_type;
 };
 
 class ChangeCmd : public QUndoCommand
 {
 public:
-    ChangeCmd(Document *doc, const std::vector<std::pair<Document::Item *, Document::Item>> &changes,
+    ChangeCmd(Document *doc, const std::vector<std::pair<Lot *, Lot>> &changes,
               Document::Field hint = Document::FieldCount);
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
@@ -59,7 +59,7 @@ private:
     Document *m_doc;
     uint m_loopCount;
     Document::Field m_hint;
-    std::vector<std::pair<Document::Item *, Document::Item>> m_changes;
+    std::vector<std::pair<Lot *, Lot>> m_changes;
 
     static QTimer *s_eventLoopCounter;
 };
@@ -94,7 +94,7 @@ public:
 
 private:
     Document *m_doc;
-    QHash<const BrickLink::InvItem *, BrickLink::InvItem> m_differenceBase;
+    QHash<const Lot *, Lot> m_differenceBase;
 };
 
 
@@ -115,7 +115,7 @@ private:
     Qt::SortOrder m_order;
     bool m_isSorted = false;
 
-    QVector<BrickLink::InvItem *> m_unsorted;
+    QVector<Lot *> m_unsorted;
 };
 
 class FilterCmd : public QUndoCommand
@@ -135,5 +135,5 @@ private:
     QVector<Filter> m_filterList;
     bool m_isFiltered = false;
 
-    QVector<BrickLink::InvItem *> m_unfiltered;
+    QVector<Lot *> m_unfiltered;
 };

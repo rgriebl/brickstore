@@ -9,14 +9,14 @@ Script {
 
     PrintingScriptTemplate {
         text: "Standard Print Template"
-        printFunction: function(job, doc, items) {
-            printJob(job, doc, items)
+        printFunction: function(job, doc, lots) {
+            printJob(job, doc, lots)
         }
     }
 
-    function printJob(job, doc, items)
+    function printJob(job, doc, lots)
     {
-        if (!items.length)
+        if (!lots.length)
             return
 
         let ps = {}
@@ -29,12 +29,12 @@ Script {
         ps.pos = 0
 
         let pagecount = 0
-        let itemh = 15
+        let rowh = 15
         let pageh = 10
         let reporth = 7.5
         let listh = 7.5
-        let items_left = items.length
-        let itemflip = false
+        let lots_left = lots.length
+        let alternate = false
         let rfooter = false
         let page
 
@@ -45,7 +45,7 @@ Script {
         jobstat.items = 0
         jobstat.total = 0
 
-        while (items_left || !rfooter) {
+        while (lots_left || !rfooter) {
             page = job.addPage()
 
             ps.pos = 0
@@ -58,36 +58,36 @@ Script {
             if (job.pageCount == 1)
                 reportHeader(page, ps)
 
-            if (items_left)
+            if (lots_left)
                 listHeader(page, ps)
 
-            let items_on_page = false
+            let lots_on_page = false
 
-            while (items_left) {
-                if (ps.pos >(ps.h - itemh - listh - pageh))
+            while (lots_left) {
+                if (ps.pos >(ps.h - rowh - listh - pageh))
                     break
 
-                let item = items [items.length - items_left]
-                listItem(page, ps, item, itemflip)
+                let lot = lots [lots.length - lots_left]
+                listLot(page, ps, lot, alternate)
 
                 pagestat.lots++
-                pagestat.items += item.quantity
-                pagestat.total += item.total
+                pagestat.items += lot.quantity
+                pagestat.total += lot.total
 
                 jobstat.lots++
-                jobstat.items += item.quantity
-                jobstat.total += item.total
+                jobstat.items += lot.quantity
+                jobstat.total += lot.total
 
-                itemflip = itemflip ? false : true
-                items_left--
-                items_on_page = true
+                alternate = !alternate
+                lots_left--
+                lots_on_page = true
             }
 
-            if (items_on_page) {
+            if (lots_on_page) {
                 listFooter(page, ps, pagestat)
             }
 
-            if (!items_left && !rfooter && (ps.pos <= (ps.h - reporth - pageh))) {
+            if (!lots_left && !rfooter && (ps.pos <= (ps.h - reporth - pageh))) {
                 reportFooter(page, ps, jobstat)
                 rfooter = true
             }
@@ -221,35 +221,35 @@ Script {
         ps.pos += h
     }
 
-    function listItem(page, ps, item, odd)
+    function listLot(page, ps, lot, alternate)
     {
         let y = ps.y + ps.pos
         let h = 15
 
-        page.backgroundColor = odd ? "#dddddd" : "white"
+        page.backgroundColor = alternate ? "#dddddd" : "white"
         page.color = page.backgroundColor
         page.drawRect(ps.x, y, ps.w, h)
 
         page.color = "black"
         page.font = Qt.font({ family: "Arial", pointSize: 10 })
 
-        page.drawImage(ps.x + 2, y, xs(ps.w, 15), h, item.image)
+        page.drawImage(ps.x + 2, y, xs(ps.w, 15), h, lot.image)
 
         page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h,
                       Page.AlignHCenter | Page.AlignVCenter,
-                      item.condition == BrickLink.Used ? "Used" : "New")
+                      lot.condition == BrickLink.Used ? "Used" : "New")
         page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 85), h,
                       Page.AlignLeft | Page.AlignVCenter | Page.TextWordWrap,
-                      item.color.name + " " + item.name + " [" + item.id + "]")
+                      lot.color.name + " " + lot.name + " [" + lot.id + "]")
         page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h,
                       Page.AlignRight | Page.AlignVCenter,
-                      item.quantity)
+                      lot.quantity)
         page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 19), h,
                       Page.AlignRight | Page.AlignVCenter,
-                      BrickStore.toCurrencyString(item.price, ps.ccode))
+                      BrickStore.toCurrencyString(lot.price, ps.ccode))
         page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 19), h,
                       Page.AlignRight | Page.AlignVCenter,
-                      BrickStore.toCurrencyString(item.total, ps.ccode))
+                      BrickStore.toCurrencyString(lot.total, ps.ccode))
 
         ps.pos += h
     }

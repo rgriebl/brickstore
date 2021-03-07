@@ -17,6 +17,7 @@
 
 #include "bricklink.h"
 #include "document.h"
+#include "lot.h"
 
 class Window;
 
@@ -26,7 +27,7 @@ class Color;
 class Category;
 class ItemType;
 class Item;
-class InvItem;
+class Lot;
 class PriceGuide;
 class Picture;
 class Document;
@@ -191,7 +192,7 @@ public:
 
     friend class BrickLink;
     friend class Document;
-    friend class InvItem;
+    friend class Lot;
 };
 
 
@@ -282,7 +283,7 @@ public:
 };
 
 
-class InvItem : WrapperBase<::BrickLink::InvItem>
+class Lot : WrapperBase<::Lot>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
@@ -336,7 +337,7 @@ class InvItem : WrapperBase<::BrickLink::InvItem>
     Q_PROPERTY(QImage image READ image)
 
 public:
-    InvItem(::BrickLink::InvItem *invItem = nullptr, Document *document = nullptr);
+    Lot(::Lot *lot = nullptr, Document *document = nullptr);
 
     Item item() const                  { return get()->item(); }
     void setItem(Item item)            { set().to()->setItem(item.wrappedObject()); }
@@ -417,16 +418,16 @@ private:
     class Setter
     {
     public:
-        Setter(InvItem *invItem);
-        ::BrickLink::InvItem *to();
+        Setter(Lot *lot);
+        ::Lot *to();
         ~Setter();
 
     private:
-        InvItem *m_invItem;
-        ::BrickLink::InvItem m_to;
+        Lot *m_lot;
+        ::Lot m_to;
     };
     Setter set();
-    ::BrickLink::InvItem *get() const;
+    ::Lot *get() const;
 
     Document *doc = nullptr;
 
@@ -489,17 +490,17 @@ public:
     Document(::Document *doc);
     bool isWrapperFor(::Document *doc) const;
 
-    bool changeItem(InvItem *from, ::BrickLink::InvItem &to);
+    bool changeLot(Lot *from, ::Lot &to);
 
     int count() const;
 
-    Q_INVOKABLE InvItem invItem(int index);
-    Q_INVOKABLE void deleteInvItem(InvItem ii);
-    Q_INVOKABLE InvItem addInvItem(Item item, Color color);
+    Q_INVOKABLE Lot lot(int index);
+    Q_INVOKABLE void deleteLot(Lot ii);
+    Q_INVOKABLE Lot addLot(Item item, Color color);
 
-//    Q_INVOKABLE InvItem addItem(InvItem invItem, Flags consolidate)
+//    Q_INVOKABLE Lot addItem(Lot lot, Flags consolidate)
 //    {
-//        if (invItem.doc != this) {
+//        if (m_lot.doc != this) {
 //            ...
 //        }
 //    }
@@ -559,7 +560,7 @@ Q_DECLARE_METATYPE(QmlWrapper::Color)
 Q_DECLARE_METATYPE(QmlWrapper::Category)
 Q_DECLARE_METATYPE(QmlWrapper::ItemType)
 Q_DECLARE_METATYPE(QmlWrapper::Item)
-Q_DECLARE_METATYPE(QmlWrapper::InvItem)
+Q_DECLARE_METATYPE(QmlWrapper::Lot)
 Q_DECLARE_METATYPE(QmlWrapper::Picture)
 Q_DECLARE_METATYPE(QmlWrapper::PriceGuide)
 Q_DECLARE_METATYPE(QmlWrapper::Order)

@@ -91,7 +91,7 @@ enum {
     NeedItemMask     = 0x000f,
 
     NeedDocument     = 0x0010,
-    NeedItems        = 0x0040,
+    NeedLots         = 0x0040,
     NeedNetwork      = 0x0100,
 
     // the upper 16 bits (0xffff0000) are reserved for NeedSelection()
@@ -1070,8 +1070,8 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "document_save");
     (void) newQAction(this, "document_save_as", NeedDocument);
-    (void) newQAction(this, "document_print", NeedDocument | NeedItems);
-    (void) newQAction(this, "document_print_pdf", NeedDocument | NeedItems);
+    (void) newQAction(this, "document_print", NeedDocument | NeedLots);
+    (void) newQAction(this, "document_print_pdf", NeedDocument | NeedLots);
 
     m = newQMenu(this, "document_import");
     m->addAction(newQAction(this, "document_import_bl_inv", 0, false, this, [this]() {
@@ -1106,11 +1106,11 @@ void FrameWork::createActions()
 
 
     m = newQMenu(this, "document_export");
-    m->addAction(newQAction(this, "document_export_bl_xml", NeedDocument | NeedItems));
-    m->addAction(newQAction(this, "document_export_bl_xml_clip", NeedDocument | NeedItems));
-    m->addAction(newQAction(this, "document_export_bl_update_clip", NeedDocument | NeedItems));
-    m->addAction(newQAction(this, "document_export_bl_invreq_clip", NeedDocument | NeedItems));
-    m->addAction(newQAction(this, "document_export_bl_wantedlist_clip", NeedDocument | NeedItems));
+    m->addAction(newQAction(this, "document_export_bl_xml", NeedDocument | NeedLots));
+    m->addAction(newQAction(this, "document_export_bl_xml_clip", NeedDocument | NeedLots));
+    m->addAction(newQAction(this, "document_export_bl_update_clip", NeedDocument | NeedLots));
+    m->addAction(newQAction(this, "document_export_bl_invreq_clip", NeedDocument | NeedLots));
+    m->addAction(newQAction(this, "document_export_bl_wantedlist_clip", NeedDocument | NeedLots));
 
     (void) newQAction(this, "document_close", NeedDocument);
 
@@ -1139,9 +1139,9 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_subtractitems", NeedDocument);
     (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
     (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1) | NeedQuantity);
-    (void) newQAction(this, "edit_copy_fields", NeedDocument | NeedItems);
-    (void) newQAction(this, "edit_select_all", NeedDocument | NeedItems);
-    (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
+    (void) newQAction(this, "edit_copy_fields", NeedDocument | NeedLots);
+    (void) newQAction(this, "edit_select_all", NeedDocument | NeedLots);
+    (void) newQAction(this, "edit_select_none", NeedDocument | NeedLots);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1, 1));
     (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
         if (m_filter)
@@ -1510,7 +1510,7 @@ void FrameWork::connectWindow(QWidget *w)
                    this, &FrameWork::titleUpdate);
         disconnect(doc, &Document::modificationChanged,
                    this, &FrameWork::modificationUpdate);
-        disconnect(m_activeWin.data(), &Window::selectionChanged,
+        disconnect(m_activeWin.data(), &Window::selectedLotsChanged,
                    this, &FrameWork::selectionUpdate);
         disconnect(m_activeWin.data(), &Window::blockingOperationActiveChanged,
                    this, &FrameWork::blockUpdate);
@@ -1540,7 +1540,7 @@ void FrameWork::connectWindow(QWidget *w)
                 this, &FrameWork::titleUpdate);
         connect(doc, &Document::modificationChanged,
                 this, &FrameWork::modificationUpdate);
-        connect(window, &Window::selectionChanged,
+        connect(window, &Window::selectedLotsChanged,
                 this, &FrameWork::selectionUpdate);
         connect(window, &Window::blockingOperationActiveChanged,
                 this, &FrameWork::blockUpdate);
@@ -1572,7 +1572,7 @@ void FrameWork::connectWindow(QWidget *w)
             m_add_dialog->close();
     }
 
-    selectionUpdate(m_activeWin ? m_activeWin->selection() : Document::ItemList());
+    selectionUpdate(m_activeWin ? m_activeWin->selectedLots() : LotList());
     blockUpdate(m_activeWin ? m_activeWin->isBlockingOperationActive() : false);
     titleUpdate();
     modificationUpdate();
@@ -1582,9 +1582,9 @@ void FrameWork::connectWindow(QWidget *w)
 
 void FrameWork::updateActions()
 {
-    Document::ItemList selection;
+    LotList selection;
     if (m_activeWin)
-        selection = m_activeWin->selection();
+        selection = m_activeWin->selectedLots();
     bool isOnline = Application::inst()->isOnline();
 
     const auto *doc = m_activeWin ? m_activeWin->document() : nullptr;
@@ -1599,7 +1599,7 @@ void FrameWork::updateActions()
         bool b = true;
 
         if (m_activeWin && m_activeWin->isBlockingOperationActive()
-                && (flags & (NeedDocument | NeedItems | NeedItemMask))) {
+                && (flags & (NeedDocument | NeedLots | NeedItemMask))) {
             b = false;
         }
 
@@ -1610,7 +1610,7 @@ void FrameWork::updateActions()
             b = b && m_activeWin;
 
             if (b) {
-                if (flags & NeedItems)
+                if (flags & NeedLots)
                     b = b && (docItemCount > 0);
 
                 quint8 minSelection = (flags >> 24) & 0xff;
@@ -1624,7 +1624,7 @@ void FrameWork::updateActions()
         }
 
         if (flags & NeedItemMask) {
-            foreach (Document::Item *item, selection) {
+            foreach (Lot *item, selection) {
                 if (flags & NeedLotId)
                     b = b && (item->lotId() != 0);
                 if (flags & NeedInventory)
@@ -1642,7 +1642,7 @@ void FrameWork::updateActions()
     }
 }
 
-void FrameWork::selectionUpdate(const Document::ItemList &selection)
+void FrameWork::selectionUpdate(const LotList &selection)
 {
     int cnt        = selection.count();
     int status     = -1;
@@ -1658,7 +1658,7 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
         retain     = selection.front()->retain()    ? 1 : 0;
         stockroom  = int(selection.front()->stockroom());
 
-        foreach (Document::Item *item, selection) {
+        foreach (Lot *item, selection) {
             if ((status >= 0) && (status != int(item->status())))
                 status = -1;
             if ((condition >= 0) && (condition != int(item->condition())))
