@@ -74,6 +74,8 @@ public:
         Weight,
         YearReleased,
 
+        Marker,
+
         FieldCount
     };
 

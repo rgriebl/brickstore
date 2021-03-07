@@ -555,6 +555,12 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
                 if (it->m_combine) {
                     LotList orderLots = parseOrderXML(it->m_order, it->m_xmlData);
                     if (!orderLots.isEmpty()) {
+                        QColor col = QColor::fromHsl(360 * orderCount / combinedCount, 128, 128);
+                        for (auto &orderLot : orderLots) {
+                            orderLot->setMarkerText(it->m_order->otherParty());
+                            orderLot->setMarkerColor(col);
+                        }
+
                         lots.append(orderLots);
                         order->setCurrencyCode(it->m_order->currencyCode());
                         order->setItemCount(order->itemCount() + it->m_order->itemCount());

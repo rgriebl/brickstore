@@ -969,7 +969,8 @@ void Document::updateLotFlags(const Lot *lot)
                 | (1ULL << ItemType)
                 | (1ULL << LotId)
                 | (1ULL << Weight)
-                | (1ULL << YearReleased);
+                | (1ULL << YearReleased)
+                | (1ULL << Marker);
 
         for (Field f = Index; f != FieldCount; f = Field(f + 1)) {
             quint64 fmask = (1ULL << f);
@@ -1100,6 +1101,8 @@ bool Document::mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
         changed = true;
     if (FieldOp<&Lot::reserved, &Lot::setReserved>::merge(from, to, mergeModeFor(Reserved)))
         changed = true;
+
+    //TODO: merge markers
 
     return changed;
 }
@@ -1318,6 +1321,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
     case Stockroom   : lot.setStockroom(value.value<BrickLink::Stockroom>()); break;
     case Reserved    : lot.setReserved(value.toString()); break;
     case Weight      : lot.setTotalWeight(value.toDouble()); break;
+    case Marker      : lot.setMarkerText(value.toString()); break;
     default          : break;
     }
     if (lot != *lotp) {
@@ -1394,6 +1398,7 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
         { Reserved,     {  8,   left, QT_TR_NOOP("Reserved") } },
         { Weight,       {  8,  right, QT_TR_NOOP("Weight") } },
         { YearReleased, {  5,  right, QT_TR_NOOP("Year") } },
+        { Marker,       {  8,   left, QT_TR_NOOP("Marker") } },
     };
     switch (role) {
     case HeaderDefaultWidthRole: return std::get<0>(columnData.value(section));
@@ -1440,6 +1445,7 @@ QVariant Document::dataForEditRole(const Lot *lot, Field f) const
     case Stockroom   : return QVariant::fromValue(lot->stockroom());
     case Reserved    : return lot->reserved();
     case Weight      : return lot->totalWeight();
+    case Marker      : return lot->markerText();
     default          : return { };
     }
 }

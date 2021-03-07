@@ -74,6 +74,8 @@ Lot &Lot::operator=(const Lot &copy)
     m_tier_price[1]       = copy.m_tier_price[1];
     m_tier_price[2]       = copy.m_tier_price[2];
     m_weight              = copy.m_weight;
+    m_markerText          = copy.m_markerText;
+    m_markerColor          = copy.m_markerColor;
 
     return *this;
 }
@@ -108,7 +110,9 @@ bool Lot::operator==(const Lot &cmp) const
             && qFuzzyCompare(m_tier_price[0], cmp.m_tier_price[0])
             && qFuzzyCompare(m_tier_price[1], cmp.m_tier_price[1])
             && qFuzzyCompare(m_tier_price[2], cmp.m_tier_price[2])
-            && qFuzzyCompare(m_weight,        cmp.m_weight);
+            && qFuzzyCompare(m_weight,        cmp.m_weight)
+            && (m_markerText       == cmp.m_markerText)
+            && (m_markerColor      == cmp.m_markerColor);
 }
 
 Lot::~Lot()
@@ -178,12 +182,14 @@ bool Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
     if (!from.reserved().isEmpty() && reserved().isEmpty())
         setReserved(from.reserved());
 
+    //TODO: add marker or remove this completely
+
     return true;
 }
 
 void Lot::save(QDataStream &ds) const
 {
-    ds << QByteArray("II") << qint32(2)
+    ds << QByteArray("II") << qint32(3)
        << itemId()
        << qint8(itemType() ? itemType()->id() : char(-1))
        << uint(color() ? color()->id() : uint(0xffffffff))
@@ -193,7 +199,8 @@ void Lot::save(QDataStream &ds) const
        << m_tier_quantity[0] << m_tier_quantity[1] << m_tier_quantity[2]
        << m_sale << m_price << m_cost
        << m_tier_price[0] << m_tier_price[1] << m_tier_price[2]
-       << m_weight;
+       << m_weight
+       << m_markerText << m_markerColor;
 }
 
 Lot *Lot::restore(QDataStream &ds)
@@ -203,7 +210,7 @@ Lot *Lot::restore(QDataStream &ds)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version != 2))
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 2) || (version > 3))
         return nullptr;
 
     QString itemid;
@@ -245,6 +252,8 @@ Lot *Lot::restore(QDataStream &ds)
             >> lot->m_sale >> lot->m_price >> lot->m_cost
             >> lot->m_tier_price[0] >> lot->m_tier_price[1] >> lot->m_tier_price[2]
             >> lot->m_weight;
+    if (version >= 3)
+        ds >> lot->m_markerText >> lot->m_markerColor;
 
     if (ds.status() != QDataStream::Ok)
         return nullptr;

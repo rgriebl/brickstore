@@ -1902,6 +1902,45 @@ void Window::on_edit_reserved_triggered()
     }
 }
 
+void Window::on_edit_marker_text_triggered()
+{
+    if (selectedLots().isEmpty())
+        return;
+
+    QString text = selectedLots().front()->markerText();
+
+    if (MessageBox::getString(this, { },
+                              tr("Enter the new marker text for all selected items:"),
+                              text)) {
+        applyTo(selectedLots(), [text](const auto &from, auto &to) {
+            (to = from).setMarkerText(text); return true;
+        });
+    }
+}
+
+void Window::on_edit_marker_color_triggered()
+{
+    if (selectedLots().isEmpty())
+        return;
+
+    QColor color = selectedLots().front()->markerColor();
+
+    color = QColorDialog::getColor(color, this);
+    if (color.isValid()) {
+        applyTo(selectedLots(), [color](const auto &from, auto &to) {
+            (to = from).setMarkerColor(color); return true;
+        });
+    }
+}
+
+void Window::on_edit_marker_clear_triggered()
+{
+    applyTo(selectedLots(), [](const auto &from, auto &to) {
+        (to = from).setMarkerText({ }); to.setMarkerColor({ }); return true;
+    });
+}
+
+
 
 void Window::updateItemFlagsMask()
 {
@@ -2221,6 +2260,9 @@ void Window::contextMenu(const QPoint &pos)
             break;
         case Document::Reserved:
             actionNames = { "edit_reserved" };
+            break;
+        case Document::Marker:
+            actionNames = { "edit_marker_text", "edit_marker_color", "-", "edit_marker_clear" };
             break;
         }
         for (const auto &actionName : actionNames) {

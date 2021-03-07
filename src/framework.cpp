@@ -408,6 +408,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_retain",
                                       "edit_stockroom",
                                       "edit_reserved",
+                                      "edit_marker",
                                       "-",
                                       "edit_copy_fields",
                                       "-",
@@ -783,6 +784,10 @@ void FrameWork::translateActions()
         { "edit_stockroom_b",               tr("Set stockroom to B"),                 },
         { "edit_stockroom_c",               tr("Set stockroom to C"),                 },
         { "edit_reserved",                  tr("Set reserved for..."),                },
+        { "edit_marker",                    tr("Marker"),                             },
+        { "edit_marker_text",               tr("Set marker text"),                    },
+        { "edit_marker_color",              tr("Set marker color..."),                },
+        { "edit_marker_clear",              tr("Clear marker"),                       },
         { "bricklink_catalog",              tr("Show BrickLink Catalog Info..."),     tr("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info") },
         { "bricklink_priceguide",           tr("Show BrickLink Price Guide Info..."), tr("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide") },
         { "bricklink_lotsforsale",          tr("Show Lots for Sale on BrickLink..."), tr("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale") },
@@ -1219,6 +1224,12 @@ void FrameWork::createActions()
     m->addAction(newQAction(g, "edit_stockroom_c", NeedSelection(1), true));
 
     (void) newQAction(this, "edit_reserved", NeedSelection(1));
+
+    m = newQMenu(this, "edit_marker", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_marker_text", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_marker_color", NeedSelection(1)));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_marker_clear", NeedSelection(1)));
 
     (void) newQAction(this, "bricklink_catalog", NeedSelection(1, 1) | NeedNetwork);
     (void) newQAction(this, "bricklink_priceguide", NeedSelection(1, 1) | NeedNetwork);

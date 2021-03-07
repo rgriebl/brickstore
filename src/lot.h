@@ -132,6 +132,12 @@ public:
     void setTierPrice1(double p)       { setTierPrice(1, p); }
     void setTierPrice2(double p)       { setTierPrice(2, p); }
 
+    bool isMarked() const              { return !m_markerText.isEmpty() || m_markerColor.isValid(); }
+    QString markerText() const         { return m_markerText; }
+    QColor markerColor() const         { return m_markerColor; }
+    void setMarkerText(const QString &text)  { m_markerText = text; }
+    void setMarkerColor(const QColor &color) { m_markerColor = color; }
+
     BrickLink::Incomplete *isIncomplete() const    { return m_incomplete.data(); }
     void setIncomplete(BrickLink::Incomplete *inc) { m_incomplete.reset(inc); }
 
@@ -171,6 +177,9 @@ private:
     double           m_tier_price[3] = { 0, 0, 0 };
 
     double           m_weight = 0;
+
+    QString          m_markerText;
+    QColor           m_markerColor;
 
     friend class Core;
 };

@@ -264,9 +264,17 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     QString str = displayData(idx, false);
     int checkmark = 0;
     bool selectionFrame = false;
+    QColor selectionFrameFill = Qt::white;
 
     if (!selected) {
         switch (idx.column()) {
+        case Document::Marker:
+            if (lot->isMarked()) {
+                bg = lot->markerColor();
+                fg = Utility::textColor(bg);
+            }
+            break;
+
         case Document::ItemType:
             if (lot->itemType())
                 bg = shadeColor(lot->itemType()->id(), 0.1);
@@ -335,6 +343,14 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     switch (idx.column()) {
+    case Document::Marker: {
+        if (lot->isMarked()) {
+            selectionFrame = true;
+            selectionFrameFill = lot->markerColor();
+            fg = Utility::textColor(selectionFrameFill);
+        }
+        break;
+    }
     case Document::Status: {
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
         union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
@@ -426,7 +442,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     // (which most likely has an alpha component)
     bg = Utility::gradientColor(normalbg, bg, bg.alphaF());
     bg.setAlpha(255);
-    p->fillRect(option.rect, selectionFrame ? Qt::white : bg);
+    p->fillRect(option.rect, selectionFrame ? selectionFrameFill : bg);
 
     if (nocolor || noitem) {
         int d = option.rect.height();
@@ -561,6 +577,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         Document::Category,
         Document::ItemType,
         Document::Reserved,
+        Document::Marker,
     };
 
     if (!str.isEmpty()) {

@@ -175,6 +175,9 @@ public slots:
     void on_edit_comment_rem_triggered();
     void on_edit_comment_set_triggered();
     void on_edit_comment_clear_triggered();
+    void on_edit_marker_text_triggered();
+    void on_edit_marker_color_triggered();
+    void on_edit_marker_clear_triggered();
 
     void on_bricklink_catalog_triggered();
     void on_bricklink_priceguide_triggered();
