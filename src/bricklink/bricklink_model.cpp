@@ -914,67 +914,35 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
 
 
 
-BrickLink::ItemDelegate::ItemDelegate(QObject *parent, Options options)
-    : QStyledItemDelegate(parent)
-    , m_options(options)
+BrickLink::ItemDelegate::ItemDelegate(Options options, QObject *parent)
+    : BetterItemDelegate(options, parent)
 { }
 
 void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QStyleOptionViewItem myoption(option);
+    BetterItemDelegate::extendedPaint(painter, option, index, [=]() {
+        bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
 
-    bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
+        if (firstColumnImageOnly) {
+            if (auto *item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
+                QImage image;
 
-    bool useFrameHover = false;
-    bool useFrameSelection = false;
+                Picture *pic = core()->picture(item, item->defaultColor());
 
-    if (firstColumnImageOnly) {
-        useFrameSelection = (option.state & QStyle::State_Selected);
-        useFrameHover = (option.state & QStyle::State_MouseOver);
-        if (useFrameSelection)
-            myoption.state &= ~QStyle::State_Selected;
-    }
+                if (pic && pic->isValid())
+                    image = pic->image();
+                else
+                    image = BrickLink::core()->noImage(option.rect.size());
 
-    if ((m_options & AlwaysShowSelection) && (option.state & QStyle::State_Enabled))
-        myoption.state |= QStyle::State_Active;
-
-    QStyledItemDelegate::paint(painter, myoption, index);
-
-    if (firstColumnImageOnly) {
-        if (auto *item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
-            QImage image;
-
-            Picture *pic = core()->picture(item, item->defaultColor());
-
-            if (pic && pic->isValid())
-                image = pic->image();
-            else
-                image = BrickLink::core()->noImage(option.rect.size());
-
-            if (!image.isNull()) {
-                QSizeF s = image.size().scaled(option.rect.size(), Qt::KeepAspectRatio);
-                QPointF p = option.rect.center() - QRectF({ }, s).center();
-                // scale while drawing, so we don't have to deal with hi-dpi calculations
-                painter->drawImage({ p, s }, image, image.rect());
+                if (!image.isNull()) {
+                    QSizeF s = image.size().scaled(option.rect.size(), Qt::KeepAspectRatio);
+                    QPointF p = option.rect.center() - QRectF({ }, s).center() + QPointF(.5, .5);
+                    // scale while drawing, so we don't have to deal with hi-dpi calculations
+                    painter->drawImage({ p, s }, image, image.rect());
+                }
             }
         }
-    }
-
-    if (firstColumnImageOnly && (useFrameSelection || useFrameHover)) {
-        painter->save();
-        QColor c = option.palette.color(QPalette::Highlight);
-        for (int i = 0; i < 6; ++i) {
-            c.setAlphaF((useFrameHover && !useFrameSelection ? 0.6 : 1.) - i * .1);
-            painter->setPen(c);
-            painter->drawRect(option.rect.adjusted(i, i, -i - 1, -i - 1));
-        }
-        painter->restore();
-    }
-}
-
-QSize BrickLink::ItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    return QStyledItemDelegate::sizeHint(option, index) + QSize(0, 2);
+    });
 }
 
 bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)

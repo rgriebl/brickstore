@@ -45,7 +45,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     sortByColumn(0, Qt::DescendingOrder);
     header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
-    setItemDelegate(new BrickLink::ItemDelegate(this));
+    setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::None, this));
 
     QAction *a;
     a = new QAction(this);

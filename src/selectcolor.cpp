@@ -62,7 +62,7 @@ SelectColor::SelectColor(QWidget *parent)
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
     w_colors->setRootIsDecorated(false);
-    w_colors->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
+    w_colors->setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, this));
 
     m_colorModel = new BrickLink::ColorModel(this);
     m_colorModel->setFilterDelayEnabled(true);

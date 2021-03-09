@@ -44,6 +44,7 @@
 #include "documentio.h"
 #include "humanreadabletimedelta.h"
 #include "utility.h"
+#include "betteritemdelegate.h"
 
 #include "importcartdialog.h"
 
@@ -187,27 +188,6 @@ private:
 ///////////////////////////////////////////////////////////////////////
 
 
-class CartDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-public:
-    CartDelegate(QObject *parent = nullptr)
-        : QStyledItemDelegate(parent)
-    { }
-
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        return QStyledItemDelegate::sizeHint(option, index)
-                + QSize { option.fontMetrics.height(), 0 };
-    }
-};
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
 ImportCartDialog::ImportCartDialog(QWidget *parent)
     : QDialog(parent)
     , m_trans(new Transfer(this))
@@ -225,7 +205,8 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     proxyModel->setSourceModel(m_cartModel);
     w_carts->setModel(proxyModel);
     w_carts->header()->setSectionResizeMode(2, QHeaderView::Stretch);
-    w_carts->setItemDelegate(new CartDelegate(w_carts));
+    w_carts->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection
+                                                    | BetterItemDelegate::MoreSpacing, w_carts));
 
     connect(w_filter, &HistoryLineEdit::textChanged,
             proxyModel, &QSortFilterProxyModel::setFilterFixedString);

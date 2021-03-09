@@ -19,6 +19,7 @@
 
 #include "bricklink.h"
 #include "staticpointermodel.h"
+#include "betteritemdelegate.h"
 
 
 namespace BrickLink {
@@ -222,32 +223,19 @@ protected:
 };
 
 
-class ItemDelegate : public QStyledItemDelegate
+class ItemDelegate : public BetterItemDelegate
 {
     Q_OBJECT
 public:
-    enum Option {
-        None,
-        AlwaysShowSelection,
-        FirstColumnImageOnly
-    };
-    Q_DECLARE_FLAGS(Options, Option)
-
-    ItemDelegate(QObject *parent = nullptr, Options options = None);
+    ItemDelegate(Options options = None, QObject *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 public slots:
     bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option,
                    const QModelIndex &index) override;
-
-private:
-    Options m_options;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(ItemDelegate::Options)
 
 
 class ToolTip : public QObject

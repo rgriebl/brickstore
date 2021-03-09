@@ -82,7 +82,7 @@ class CategoryDelegate : public BrickLink::ItemDelegate
         Q_OBJECT
 public:
     CategoryDelegate(QObject *parent = nullptr)
-        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
+        : BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, parent)
     { }
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
@@ -102,8 +102,8 @@ class ItemThumbsDelegate : public BrickLink::ItemDelegate
     Q_OBJECT
 public:
     ItemThumbsDelegate(double initialZoom, QObject *parent = nullptr)
-        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection
-                                  | BrickLink::ItemDelegate::FirstColumnImageOnly)
+        : BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection
+                                  | BrickLink::ItemDelegate::FirstColumnImageOnly, parent)
         , m_zoom(initialZoom)
     { }
 
@@ -332,7 +332,7 @@ void SelectItem::init()
     d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
+    d->w_items->setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, this));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
     d->w_items->header()->setSectionsMovable(false);
 

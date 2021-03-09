@@ -26,6 +26,7 @@ SOURCES += \
 !backend-only {
 
 HEADERS += \
+    $$PWD/betteritemdelegate.h \
     $$PWD/currency.h \
     $$PWD/filter.h \
     $$PWD/flowlayout.h \
@@ -43,6 +44,7 @@ HEADERS += \
 
 
 SOURCES += \
+    $$PWD/betteritemdelegate.cpp \
     $$PWD/currency.cpp \
     $$PWD/filter.cpp \
     $$PWD/flowlayout.cpp \

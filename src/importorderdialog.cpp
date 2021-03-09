@@ -41,6 +41,7 @@
 #include "documentio.h"
 #include "humanreadabletimedelta.h"
 #include "utility.h"
+#include "betteritemdelegate.h"
 
 #include "importorderdialog.h"
 
@@ -209,27 +210,6 @@ private:
 ///////////////////////////////////////////////////////////////////////
 
 
-class OrderDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-public:
-    OrderDelegate(QObject *parent = nullptr)
-        : QStyledItemDelegate(parent)
-    { }
-
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        return QStyledItemDelegate::sizeHint(option, index)
-                + QSize { option.fontMetrics.height(), 0 };
-    }
-};
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
 ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     : QDialog(parent)
     , m_trans(new Transfer(this))
@@ -247,7 +227,8 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     proxyModel->setSourceModel(m_orderModel);
     w_orders->setModel(proxyModel);
     w_orders->header()->setSectionResizeMode(3, QHeaderView::Stretch);
-    w_orders->setItemDelegate(new OrderDelegate(w_orders));
+    w_orders->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection
+                                                     | BetterItemDelegate::MoreSpacing, w_orders));
 
     connect(w_filter, &HistoryLineEdit::textChanged,
             proxyModel, &QSortFilterProxyModel::setFilterFixedString);
