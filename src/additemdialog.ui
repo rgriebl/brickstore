@@ -118,7 +118,7 @@
         <item row="1" column="2">
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string notr="true">&amp;Cost</string>
+           <string>&amp;Cost</string>
           </property>
           <property name="buddy">
            <cstring>w_cost</cstring>
