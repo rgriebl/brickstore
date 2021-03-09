@@ -1404,6 +1404,9 @@ bool FrameWork::updateDatabase(bool forceSync)
 
     if (noWindows || closeAllWindows()) {
         delete m_add_dialog;
+        delete m_importinventory_dialog;
+        delete m_importorder_dialog;
+        delete m_importcart_dialog;
 
         auto doUpdate = [this]() -> bool {
             if (!m_workspace->windowList().isEmpty())
