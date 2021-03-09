@@ -98,13 +98,11 @@ AboutDialog::AboutDialog(QWidget *parent)
         R"(<br>)"
         R"(See <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for GPL licensing information.)"
         R"(</p><p>)"
-        R"(All data from <a href="https://www.bricklink.com">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, )"
-        R"(which is a trademark of Dan Jezek.)"
+        R"(All data from <a href="https://www.bricklink.com">www.bricklink.com</a> is owned by BrickLink. )"
+        R"(Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, )"
+        R"(authorize or endorse this software. All other trademarks recognized.)"
         R"(</p><p>)"
-        R"(LEGO<sup>&reg;</sup> is a trademark of the LEGO group of companies, )"
-        R"(which does not sponsor, authorize or endorse this software.)"
-        R"(</p><p>)"
-        R"(All other trademarks recognised.)"
+        R"(Only made possible by <a href="https://www.danjezek.com/">Dan Jezek's</a> support.)"
         R"(</p>)");
 
     const QString technicalFmt = qL1S(

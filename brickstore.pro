@@ -64,6 +64,7 @@ OTHER_FILES += \
   .github/workflows/*.yml \
   .qmake.conf \
   VERSION \
+  README.md \
   CHANGELOG.md \
   LICENSE.GPL \
   BrickStoreXML.rnc \
