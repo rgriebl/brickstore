@@ -21,6 +21,7 @@
 QT_FORWARD_DECLARE_CLASS(QDataStream)
 
 namespace BrickLink {
+
 class Color;
 class Category;
 class ItemType;
@@ -48,16 +49,17 @@ typedef QPair<int, const Item *>              AppearsInItem;
 typedef QVector<AppearsInItem>                AppearsInColor;
 typedef QHash<const Color *, AppearsInColor>  AppearsIn;
 
-enum class Time      { PastSix, Current, Count };
-enum class Price     { Lowest, Average, WAverage, Highest, Count };
-enum class Condition { New, Used, Count };
+enum class Time          { PastSix, Current, Count };
+enum class Price         { Lowest, Average, WAverage, Highest, Count };
+enum class Condition     { New, Used, Count };
 enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
-enum class Stockroom { None, A, B, C, Count };
-enum class Status    { Include, Exclude, Extra, Count };
-
+enum class Stockroom     { None, A, B, C, Count };
+enum class Status        { Include, Exclude, Extra, Count };
 enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
 
-enum class OrderType { Received, Placed, Any };
+enum class OrderType     { Received, Placed, Any };
+enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
+                           Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
 enum UrlList {
     URL_InventoryRequest,
@@ -96,3 +98,5 @@ Q_DECLARE_METATYPE(BrickLink::Condition)
 Q_DECLARE_METATYPE(BrickLink::SubCondition)
 Q_DECLARE_METATYPE(BrickLink::Stockroom)
 Q_DECLARE_METATYPE(BrickLink::Status)
+Q_DECLARE_METATYPE(BrickLink::OrderType)
+Q_DECLARE_METATYPE(BrickLink::OrderStatus)

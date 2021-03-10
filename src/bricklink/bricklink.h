@@ -362,12 +362,11 @@ public:
 
     int itemCount() const             { return m_items; }
     int lotCount() const              { return m_lots; }
-    QString status() const            { return m_status; }
+    OrderStatus status() const        { return m_status; }
     QString paymentType() const       { return m_payment_type; }
     QString trackingNumber() const    { return m_tracking_number; }
     QString address() const           { return m_address; }
-    QString countryName() const;
-    QString countryCode() const;
+    QString countryCode() const       { return m_countryCode; }
 
     void setId(const QString &id)             { m_id = id; }
     void setDate(const QDate &dt)             { m_date.setDate(dt); }
@@ -389,14 +388,13 @@ public:
 
     void setItemCount(int i)                  { m_items = i; }
     void setLotCount(int i)                   { m_lots = i; }
-    void setStatus(const QString &str)        { m_status = str; }
+    void setStatus(OrderStatus status)        { m_status = status; }
     void setPaymentType(const QString &str)   { m_payment_type = str; }
     void setTrackingNumber(const QString &str){ m_tracking_number = str; }
     void setAddress(const QString &str)       { m_address = str; }
-    void setCountryName(const QString &str);
-    void setCountryCode(const QString &str);
+    void setCountryCode(const QString &str)   { m_countryCode = str; }
 
-    Order(std::nullptr_t) : Order({ }, BrickLink::OrderType::Received) { } // for scripting only!
+    Order(std::nullptr_t) : Order({ }, OrderType::Received) { } // for scripting only!
 
 private:
     QString   m_id;
@@ -418,11 +416,11 @@ private:
     QString   m_payment_currencycode;
     int       m_items = 0;
     int       m_lots = 0;
-    QString   m_status;
+    OrderStatus m_status;
     QString   m_payment_type;
     QString   m_tracking_number;
     QString   m_address;
-    QChar     m_countryCode[2] = { 'U', 'S' };
+    QString   m_countryCode;
 };
 
 
@@ -441,8 +439,7 @@ public:
 
     int itemCount() const             { return m_items; }
     int lotCount() const              { return m_lots; }
-    QString countryName() const;
-    QString countryCode() const;
+    QString countryCode() const       { return m_countryCode; }
 
     void setDomestic(bool domestic)           { m_domestic = domestic; }
     void setSellerId(int id)                  { m_sellerId = id; }
@@ -454,8 +451,7 @@ public:
 
     void setItemCount(int i)                  { m_items = i; }
     void setLotCount(int i)                   { m_lots = i; }
-    void setCountryName(const QString &str);
-    void setCountryCode(const QString &str);
+    void setCountryCode(const QString &str)   { m_countryCode = str; }
 
 private:
     bool      m_domestic = false;
@@ -467,7 +463,7 @@ private:
     QString   m_currencycode;
     int       m_items = 0;
     int       m_lots = 0;
-    QChar     m_countryCode[2] = { 'U', 'S' };
+    QString   m_countryCode;
 };
 
 
@@ -678,6 +674,8 @@ public:
     bool applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc);
 
     bool onlineStatus() const;
+
+    QString countryIdFromName(const QString &name) const;
 
     Transfer *transfer() const;
     void setTransfer(Transfer *trans);

@@ -63,6 +63,45 @@ static QDate mdy2date(const QString &mdy)
     return d;
 }
 
+static const std::pair<BrickLink::OrderStatus, const char *> orderStatus[] = {
+    { BrickLink::OrderStatus::Unknown,    QT_TRANSLATE_NOOP("OrderModel", "Unknown")    },
+    { BrickLink::OrderStatus::Pending,    QT_TRANSLATE_NOOP("OrderModel", "Pending")    },
+    { BrickLink::OrderStatus::Updated,    QT_TRANSLATE_NOOP("OrderModel", "Updated")    },
+    { BrickLink::OrderStatus::Processing, QT_TRANSLATE_NOOP("OrderModel", "Processing") },
+    { BrickLink::OrderStatus::Ready,      QT_TRANSLATE_NOOP("OrderModel", "Ready")      },
+    { BrickLink::OrderStatus::Paid,       QT_TRANSLATE_NOOP("OrderModel", "Paid")       },
+    { BrickLink::OrderStatus::Packed,     QT_TRANSLATE_NOOP("OrderModel", "Packed")     },
+    { BrickLink::OrderStatus::Shipped,    QT_TRANSLATE_NOOP("OrderModel", "Shipped")    },
+    { BrickLink::OrderStatus::Received,   QT_TRANSLATE_NOOP("OrderModel", "Received")   },
+    { BrickLink::OrderStatus::Completed,  QT_TRANSLATE_NOOP("OrderModel", "Completed")  },
+    { BrickLink::OrderStatus::OCR,        QT_TRANSLATE_NOOP("OrderModel", "OCR")        },
+    { BrickLink::OrderStatus::NPB,        QT_TRANSLATE_NOOP("OrderModel", "NPB")        },
+    { BrickLink::OrderStatus::NPX,        QT_TRANSLATE_NOOP("OrderModel", "NPX")        },
+    { BrickLink::OrderStatus::NRS,        QT_TRANSLATE_NOOP("OrderModel", "NRS")        },
+    { BrickLink::OrderStatus::NSS,        QT_TRANSLATE_NOOP("OrderModel", "NSS")        },
+    { BrickLink::OrderStatus::Cancelled,  QT_TRANSLATE_NOOP("OrderModel", "Cancelled")  },
+};
+
+BrickLink::OrderStatus orderStatusFromString(const QString &s)
+{
+    for (const auto &os : orderStatus) {
+        if (s == QLatin1String(os.second))
+            return os.first;
+    }
+    return BrickLink::OrderStatus::Unknown;
+}
+
+QString orderStatusToString(BrickLink::OrderStatus status, bool translated = true)
+{
+    for (const auto &os : orderStatus) {
+        if (status == os.first) {
+            return translated ? qApp->translate("OrderModel", os.second)
+                              : QString::fromLatin1(os.second);
+        }
+    }
+    return { };
+}
+
 
 class OrderModel : public QAbstractTableModel
 {
@@ -102,7 +141,7 @@ public:
 
     int columnCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : 7;
+        return parent.isValid() ? 0 : 8;
     }
 
     QVariant data(const QModelIndex &index, int role) const override
@@ -118,8 +157,9 @@ public:
             case 0: return QLocale::system().toString(order->date(), QLocale::ShortFormat);
             case 1: return (order->type() == BrickLink::OrderType::Received)
                         ? ImportOrderDialog::tr("Received") : ImportOrderDialog::tr("Placed");
-            case 2: return order->id();
-            case 3: {
+            case 2: return orderStatusToString(order->status(), true);
+            case 3: return order->id();
+            case 4: {
                 int firstline = order->address().indexOf('\n');
                 if (firstline > 0) {
                     return QString::fromLatin1("%2 (%1)")
@@ -127,13 +167,13 @@ public:
                 }
                 return order->otherParty();
             }
-            case 4: return QLocale::system().toString(order->itemCount());
-            case 5: return QLocale::system().toString(order->lotCount());
-            case 6: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
+            case 5: return QLocale::system().toString(order->itemCount());
+            case 6: return QLocale::system().toString(order->lotCount());
+            case 7: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {
-            case 3: {
+            case 4: {
                 QIcon flag;
                 QString cc = order->countryCode();
                 flag = m_flags.value(cc);
@@ -146,11 +186,15 @@ public:
             }
             }
         } else if (role == Qt::TextAlignmentRole) {
-            return int(Qt::AlignVCenter) | int((col == 6) ? Qt::AlignRight : Qt::AlignLeft);
+            return int(Qt::AlignVCenter) | int((col == 7) ? Qt::AlignRight : Qt::AlignLeft);
         } else if (role == Qt::BackgroundRole) {
             if (col == 1) {
                 QColor c((order->type() == BrickLink::OrderType::Received) ? Qt::green : Qt::blue);
                 c.setAlphaF(0.1);
+                return c;
+            } else if (col == 2) {
+                QColor c = QColor::fromHslF(qreal(order->status()) / qreal(BrickLink::OrderStatus::Count),
+                                            .5, .5, .5);
                 return c;
             }
         } else if (role == Qt::ToolTipRole) {
@@ -163,13 +207,14 @@ public:
             return QVariant::fromValue(order);
         } else if (role == OrderFilterRole) {
             switch (col) {
-            case  0: return order->date();
-            case  1: return int(order->type());
-            case  2: return order->id();
-            case  3: return order->otherParty();
-            case  4: return order->itemCount();
-            case  5: return order->lotCount();
-            case  6: return order->grandTotal();
+            case 0: return order->date();
+            case 1: return int(order->type());
+            case 2: return orderStatusToString(order->status(), true);
+            case 3: return order->id();
+            case 4: return order->otherParty();
+            case 5: return order->itemCount();
+            case 6: return order->lotCount();
+            case 7: return order->grandTotal();
             }
         }
 
@@ -181,17 +226,18 @@ public:
         if (orient == Qt::Horizontal) {
             if (role == Qt::DisplayRole) {
                 switch (section) {
-                case  0: return ImportOrderDialog::tr("Date");
-                case  1: return ImportOrderDialog::tr("Type");
-                case  2: return ImportOrderDialog::tr("Order ID");
-                case  3: return ImportOrderDialog::tr("Buyer/Seller");
-                case  4: return ImportOrderDialog::tr("Items");
-                case  5: return ImportOrderDialog::tr("Lots");
-                case  6: return ImportOrderDialog::tr("Total");
+                case 0: return ImportOrderDialog::tr("Date");
+                case 1: return ImportOrderDialog::tr("Type");
+                case 2: return ImportOrderDialog::tr("Status");
+                case 3: return ImportOrderDialog::tr("Order ID");
+                case 4: return ImportOrderDialog::tr("Buyer/Seller");
+                case 5: return ImportOrderDialog::tr("Items");
+                case 6: return ImportOrderDialog::tr("Lots");
+                case 7: return ImportOrderDialog::tr("Total");
                 }
             }
             else if (role == Qt::TextAlignmentRole) {
-                return (section == 6) ? Qt::AlignRight : Qt::AlignLeft;
+                return (section == 7) ? Qt::AlignRight : Qt::AlignLeft;
             }
         }
         return { };
@@ -226,7 +272,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     proxyModel->setFilterKeyColumn(-1);
     proxyModel->setSourceModel(m_orderModel);
     w_orders->setModel(proxyModel);
-    w_orders->header()->setSectionResizeMode(3, QHeaderView::Stretch);
+    w_orders->header()->setSectionResizeMode(4, QHeaderView::Stretch);
     w_orders->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection
                                                      | BetterItemDelegate::MoreSpacing, w_orders));
 
@@ -446,12 +492,14 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
                     order->setPaymentCurrencyCode(p.elementText(e, "PAYCURRENCYCODE"));
                     order->setItemCount(p.elementText(e, "ORDERITEMS").toInt());
                     order->setLotCount(p.elementText(e, "ORDERLOTS").toInt());
-                    order->setStatus(p.elementText(e, "ORDERSTATUS"));
+                    order->setStatus(orderStatusFromString(p.elementText(e, "ORDERSTATUS")));
                     order->setPaymentType(p.elementText(e, "PAYMENTTYPE", ""));
                     order->setTrackingNumber(p.elementText(e, "ORDERTRACKNO", ""));
                     auto location = p.elementText(e, "LOCATION");
-                    if (!location.isEmpty())
-                        order->setCountryName(location.section(QLatin1String(", "), 0, 0));
+                    if (!location.isEmpty()) {
+                        order->setCountryCode(BrickLink::core()->countryIdFromName(
+                                                  location.section(QLatin1String(", "), 0, 0)));
+                    }
 
                     orders << order;
                 });
@@ -544,7 +592,7 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
                     if (!orderLots.isEmpty()) {
                         QColor col = QColor::fromHsl(360 * orderCount / combinedCount, 128, 128);
                         for (auto &orderLot : orderLots) {
-                            orderLot->setMarkerText(it->m_order->otherParty());
+                            orderLot->setMarkerText(it->m_order->id() % u' ' % it->m_order->otherParty());
                             orderLot->setMarkerColor(col);
                         }
 

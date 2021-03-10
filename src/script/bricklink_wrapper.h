@@ -80,14 +80,17 @@ public:
     BrickLink(::BrickLink::Core *core);
 
     // copied from namespace BrickLink
-    enum class Time      { PastSix, Current, Count };
-    enum class Price     { Lowest, Average, WAverage, Highest, Count };
-    enum class Condition { New, Used, Count };
-    enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
-    enum class Stockroom { None, A, B, C };
-    enum class Status    { Include, Exclude, Extra, Unknown };
-    enum class UpdateStatus  { Ok, Updating, UpdateFailed };
-    enum class OrderType { Received, Placed, Any };
+    enum class Time          { PastSix, Current };
+    enum class Price         { Lowest, Average, WAverage, Highest };
+    enum class Condition     { New, Used };
+    enum class SubCondition  { None, Complete, Incomplete, Sealed };
+    enum class Stockroom     { None, A, B, C };
+    enum class Status        { Include, Exclude, Extra };
+    enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
+
+    enum class OrderType     { Received, Placed, Any };
+    enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
+                               Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
     Q_ENUM(Time)
     Q_ENUM(Price)
@@ -97,6 +100,7 @@ public:
     Q_ENUM(Status)
     Q_ENUM(UpdateStatus)
     Q_ENUM(OrderType)
+    Q_ENUM(OrderStatus)
 
     Item noItem() const;
     Color noColor() const;
@@ -460,16 +464,17 @@ class Order : public WrapperBase<const ::BrickLink::Order>
     Q_PRIVATE_PROPERTY(wrapped, QString paymentCurrencyCode READ paymentCurrencyCode CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int itemCount READ itemCount CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int lotCount READ lotCount CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, QString status READ status CONSTANT)
+    Q_PROPERTY(BrickLink::OrderStatus status READ status CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString paymentType READ paymentType CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString trackingNumber READ trackingNumber CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString address READ address CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, QString countryName READ countryName CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString countryCode READ countryCode CONSTANT)
 
 public:
     Order(const ::BrickLink::Order *order = nullptr);
 
     BrickLink::OrderType type() const;
+    BrickLink::OrderStatus status() const;
 
     friend class BrickLink;
     friend class Document;

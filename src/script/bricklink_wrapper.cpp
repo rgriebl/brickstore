@@ -372,6 +372,11 @@ BrickLink::OrderType Order::type() const
     return static_cast<BrickLink::OrderType>(wrapped->type());
 }
 
+BrickLink::OrderStatus Order::status() const
+{
+    return static_cast<BrickLink::OrderStatus>(wrapped->status());
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
