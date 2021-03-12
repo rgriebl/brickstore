@@ -93,7 +93,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         pic = new Picture(item, color);
         if (!m_pic_cache.insert(key, pic, pic->cost())) {
             qWarning("Can not add picture to cache (cache max/cur: %d/%d, item: %s)",
-                     m_pic_cache.maxCost(), m_pic_cache.totalCost(), qPrintable(item->id()));
+                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), qPrintable(item->id()));
             return nullptr;
         }
         needToLoad = true;

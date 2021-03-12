@@ -47,11 +47,13 @@ bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
             bool fixed = false;
 
             for (int i = 0; i < text.length(); ++i) {
-                auto &ir = text[i];
-                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+                QCharRef ir = text[i];
+                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
                     ir = QLocale::system().decimalPoint();
 #else
+                QChar &ir = text[i];
+                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
                     ir = QLocale::system().decimalPoint().at(0);
 #endif
                     fixed = (text != ke->text());

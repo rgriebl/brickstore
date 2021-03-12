@@ -240,7 +240,6 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
