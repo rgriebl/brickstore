@@ -43,6 +43,8 @@
 #  include <SystemConfiguration/SCNetworkReachability.h>
 #  include <QVersionNumber>
 #  include <QProxyStyle>
+#  include <QtGui/private/qguiapplication_p.h>
+#  include <QtGui/private/qshortcutmap_p.h>
 #endif
 
 #include "progressdialog.h"
@@ -355,6 +357,16 @@ bool Application::eventFilter(QObject *o, QEvent *e)
                     }
                 });
             }
+        }
+    }
+    // the handling of emacs-style multi-key shortcuts is broken on macOS, because menu
+    // shortcuts are handled directly in the QPA plugin, instad of going through the global
+    // QShortcutMap. The workaround is override any shortcut while the map is in PartialMatch state.
+    if (e->type() == QEvent::ShortcutOverride) {
+        auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
+        if (scm.state() == QKeySequence::PartialMatch) {
+            e->accept();
+            return true;
         }
     }
 #endif
