@@ -169,8 +169,20 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
     bool isValid = false;
 
     if (f && f->isOpen()) {
-        if (f->size() > 0)
-            isValid = image.loadFromData(f->readAll());
+        if (f->size() > 0) {
+            QByteArray ba = f->readAll();
+
+            // optimize loading when a lot of QImageIO plugins are available
+            // (e.g. when building against Qt from a Linux distro)
+            if (ba.startsWith("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"))
+                isValid = image.loadFromData(ba, "PNG");
+            else if (ba.startsWith("GIF8"))
+                isValid = image.loadFromData(ba, "GIF");
+            else if (ba.startsWith("\xFF\xD8\xFF"))
+                isValid = image.loadFromData(ba, "JPG");
+            if (!isValid)
+                isValid = image.loadFromData(ba);
+        }
         fetched = f->fileTime(QFileDevice::FileModificationTime);
     }
     return isValid;
