@@ -1971,7 +1971,7 @@ void DocumentLotsMimeData::setLots(const LotList &lots)
         lot->save(ds);
         if (!text.isEmpty())
             text.append("\n");
-        text.append(lot->lotId());
+        text.append(lot->itemId());
     }
     setText(text);
     setData(s_mimetype, data);
