@@ -18,6 +18,7 @@
 #include <QStyleFactory>
 #include <QImage>
 #include <QSortFilterProxyModel>
+#include <QMenu>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -259,7 +260,11 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, &SettingsDialog::selectDocDir);
     connect(w_upd_reset, &QAbstractButton::clicked,
             this, &SettingsDialog::resetUpdateIntervals);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(w_currency, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
+#else
+    connect(w_currency, &QComboBox::currentTextChanged,
+#endif
             this, &SettingsDialog::currentCurrencyChanged);
     connect(w_currency_update, &QAbstractButton::clicked,
             Currency::inst(), &Currency::updateRates);

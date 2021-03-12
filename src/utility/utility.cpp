@@ -112,7 +112,11 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
 
 QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
+#else
+    float r1, g1, b1, a1, r2, g2, b2, a2;
+#endif
     c1.getRgbF(&r1, &g1, &b1, &a1);
     c2.getRgbF(&r2, &g2, &b2, &a2);
 
@@ -147,7 +151,11 @@ QColor Utility::textColor(const QColor &bg)
 
 QColor Utility::contrastColor(const QColor &c, qreal f)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qreal h, s, l, a;
+#else
+    float h, s, l, a;
+#endif
     c.getHslF(&h, &s, &l, &a);
 
     f = qBound(qreal(0), f, qreal(1));

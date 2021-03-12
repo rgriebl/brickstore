@@ -478,11 +478,16 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                 continue;
 
             if (line.at(0) == QLatin1Char('0')) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 const auto split = line.splitRef(QLatin1Char(' '), QString::SkipEmptyParts);
-
+                auto strPosition = [](const QStringRef &sr) { return sr.position(); };
+#else
+                const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+                auto strPosition = [line](QStringView sv) { return line.constData() - sv.constData(); };
+#endif
                 if ((split.count() >= 2) && (split.at(1) == qL1S("FILE"))) {
                     is_mpd = true;
-                    current_mpd_model = line.mid(split.at(2).position()).toLower();
+                    current_mpd_model = line.mid(strPosition(split.at(2))).toLower();
                     current_mpd_index++;
 
                     if (is_mpd_model_found)
@@ -498,12 +503,17 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
             } else if (line.at(0) == QLatin1Char('1')) {
                 if (is_mpd && !is_mpd_model_found)
                     continue;
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 const auto split = line.splitRef(QLatin1Char(' '), QString::SkipEmptyParts);
+                auto strPosition = [](const QStringRef &sr) { return sr.position(); };
+#else
+                const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+                auto strPosition = [line](QStringView sv) { return sv.constData() - line.constData(); };
+#endif
 
                 if (split.count() >= 15) {
                     uint colid = split.at(1).toUInt();
-                    QString partname = line.mid(split.at(14).position()).toLower();
+                    QString partname = line.mid(strPosition(split.at(14))).toLower();
 
                     QString partid = partname;
                     partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
@@ -1374,7 +1384,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
 
     for (const auto *loopLot : bsx.lots) {
         lot = loopLot;
-        auto &baseRef = bsx.differenceModeBase.value(lot);
+        auto &baseRef = qAsConst(bsx.differenceModeBase)[lot];
         base = &baseRef;
         baseValues.clear();
 

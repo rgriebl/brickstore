@@ -41,7 +41,7 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void showEvent(QShowEvent *) override;
     void hideEvent(QHideEvent *e) override;
-    QSize sizeHint() const;
+    QSize sizeHint() const override;
 
 private slots:
     void checkColor(const BrickLink::Color *, bool);

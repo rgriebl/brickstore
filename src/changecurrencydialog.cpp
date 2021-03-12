@@ -29,7 +29,11 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
             Currency::inst(), &Currency::updateRates);
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &ChangeCurrencyDialog::ratesUpdated);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(w_newCurrency, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
+#else
+    connect(w_newCurrency, &QComboBox::currentTextChanged,
+#endif
             this, &ChangeCurrencyDialog::currencyChanged);
 
     auto *grp = new QButtonGroup(this);

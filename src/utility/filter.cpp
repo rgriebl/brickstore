@@ -16,7 +16,8 @@
 #include <QCoreApplication>
 #include <QVariant>
 #include <QRegularExpression>
-#include <QtDebug>
+#include <QDebug>
+#include <QLocale>
 
 #include "filter.h"
 
@@ -31,6 +32,7 @@ void Filter::setField(int field)
 {
     m_field = field;
 }
+
 void Filter::setExpression(const QString &expr)
 {
     m_expression = expr;

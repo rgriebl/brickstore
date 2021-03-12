@@ -257,7 +257,12 @@ void SelectItem::init()
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(d->w_viewmode, QOverload<int>::of(&QButtonGroup::buttonClicked),
+#else
+    connect(d->w_viewmode, &QButtonGroup::buttonClicked,
+#endif
             this, [this]() {
         setViewMode(d->w_viewmode->checkedId());
     });

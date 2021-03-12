@@ -28,7 +28,7 @@
 #include <QProgressDialog>
 #include <QRegularExpression>
 #include <QStringBuilder>
-
+#include <QStandardPaths>
 
 #include "messagebox.h"
 #include "progressdialog.h"

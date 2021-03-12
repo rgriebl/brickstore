@@ -59,7 +59,11 @@ void LDraw::GLRenderer::setPartAndColor(Part *part, const QColor &color)
 
     {
         // calculate a contrasting edge color
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         qreal h, s, v, a;
+#else
+        float h, s, v, a;
+#endif
         color.getHsvF(&h, &s, &v, &a);
 
         v += qreal(0.5) * ((v < qreal(0.5)) ? qreal(1) : qreal(-1));

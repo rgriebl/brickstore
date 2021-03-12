@@ -158,7 +158,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             this, &AddItemDialog::checkAddPossible);
     connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(m_tier_type, QOverload<int>::of(&QButtonGroup::buttonClicked),
+#else
+    connect(m_tier_type, &QButtonGroup::idClicked,
+#endif
             this, &AddItemDialog::setTierType);
     connect(w_bulk, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);

@@ -1,4 +1,5 @@
 QT *= opengl
+versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
 
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 

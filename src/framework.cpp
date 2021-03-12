@@ -15,6 +15,7 @@
 
 #include <QUndoStack>
 #include <QAction>
+#include <QActionGroup>
 #include <QCloseEvent>
 #include <QMetaObject>
 #include <QMetaMethod>

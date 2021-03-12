@@ -541,14 +541,22 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         opt.features |= QStyleOptionViewItem::HasCheckIndicator;
 
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         QRect r = style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, option.widget);
+#else
+        QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
+#endif
         int dx = margin;
         if (align & Qt::AlignHCenter)
             dx = (opt.rect.width() - r.width()) / 2;
         else if (align & Qt::AlignRight)
             dx = (opt.rect.width() - r.width() - margin);
         opt.rect = r.translated(dx, 0);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
+#else
+        style->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &opt, p, option.widget);
+#endif
     }
     else if (!image.isNull()) {
         int px = x;
@@ -951,8 +959,13 @@ void DocumentDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 
     QByteArray n = editor->metaObject()->userProperty().name();
     if (!n.isEmpty()) {
-        if (!v.isValid())
-            v = QVariant(editor->property(n).userType(), (const void *) nullptr);
+        if (!v.isValid()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            v = QVariant(editor->property(n).userType(), nullptr);
+#else
+            v = QVariant(editor->property(n).metaType(), nullptr);
+#endif
+        }
         editor->setProperty(n, v);
     }
 }
