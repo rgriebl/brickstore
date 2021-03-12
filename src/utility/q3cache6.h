@@ -194,7 +194,7 @@ class Q3Cache
         while (n != &chain && total > m) {
             Node *u = static_cast<Node *>(n);
             n = n->prev;
-            if (q3IsDetached(u->value))
+            if (q3IsDetached(*u->value.t))
                 unlink(u);
         }
     }
