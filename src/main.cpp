@@ -22,6 +22,10 @@
 #else
 #  include <QCoreApplication>
 #endif
+#if defined(Q_OS_UNIX)
+#  include <sys/time.h>
+#  include <sys/resource.h>
+#endif
 
 #include "bricklink.h"
 #include "rebuilddatabase.h"
@@ -101,6 +105,29 @@ int main(int argc, char **argv)
         res = a.exec();
     } else {
 #if !defined(BRICKSTORE_BACKEND_ONLY)
+#  if defined(Q_OS_UNIX)
+        static constexpr rlim_t noFile = 30000;
+        struct rlimit rlim;
+        if (getrlimit(RLIMIT_NOFILE, &rlim) == 0) {
+
+            if (rlim.rlim_cur < noFile) {
+                rlim_t soft = (rlim.rlim_max == RLIM_INFINITY) ? noFile
+                                                               : qMin(rlim.rlim_max, noFile);
+                if (soft > rlim.rlim_cur) {
+                    rlim.rlim_cur = soft;
+                    setrlimit(RLIMIT_NOFILE, &rlim);
+                }
+            }
+        }
+        if (getrlimit(RLIMIT_NOFILE, &rlim) != 0) {
+            qWarning() << "\nCould not retrieve the number of file that are allowed to be opened at the"
+                          "same time. This may lead to image loading problems when opening huge files.\n";
+        } else if (rlim.rlim_cur < noFile) {
+            qWarning() << "\nYour system only allows for" << rlim.rlim_cur << "files to opened at the"
+                          "same time. This may lead to image loading problems when opening huge files.\n";
+        }
+#  endif
+
         Application a(argc, argv);
         res = qApp->exec();
 
