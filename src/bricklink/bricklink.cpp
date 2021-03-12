@@ -337,7 +337,12 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
             return nullptr;
     }
     auto f = new QFile(p);
-    f->open(openMode);
+    if (!f->open(openMode)) {
+        if (openMode & QIODevice::WriteOnly) {
+            qWarning() << "BrickLink::Core::dataFile failed to open" << p << "for writing:"
+                       << f->errorString();
+        }
+    }
     return f;
 }
 
