@@ -26,7 +26,11 @@ public:
     explicit FlowLayout(int margin = -1, int spacing = -1);
     ~FlowLayout() override;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     int spacing() const; //Qt6 override;
+#else
+    int spacing() const override;
+#endif
 
     int count() const override;
     QLayoutItem *itemAt(int index) const override;

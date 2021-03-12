@@ -84,7 +84,7 @@ protected:
     struct TextLayoutCacheKey {
         QString text;
         QSize size;
-        int fontSize;
+        uint fontSize;
 
         bool operator==(const TextLayoutCacheKey &other) const
         {

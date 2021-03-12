@@ -198,7 +198,7 @@ const QImage Core::noImage(const QSize &s) const
     QImage img = m_noImageCache.value(key);
 
     if (img.isNull()) {
-        img = m_noImageIcon.pixmap(nullptr, s).toImage();
+        img = m_noImageIcon.pixmap(s).toImage();
         m_noImageCache.insert(key, img);
     }
     return img;

@@ -239,8 +239,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QColor foreground { Qt::transparent };
         QColor background { Qt::transparent };
         QString text;
-        bool bold = false;
         QPixmap *icon = nullptr;
+        bool bold = false;
     } tag;
 
     if (differenceFlags & (1ULL << idx.column())) {
@@ -405,14 +405,15 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     case Document::Picture: {
         BrickLink::Picture *pic = BrickLink::core()->picture(lot->item(), lot->color());
         double dpr = p->device()->devicePixelRatioF();
-        QSize s = option.rect.size() * dpr;
+        QSize s = option.rect.size();
 
-        if (pic && pic->isValid())
-            image = pic->image().scaled(s, Qt::KeepAspectRatio, Qt::FastTransformation);
-        else
+        if (pic && pic->isValid()) {
+            image = pic->image().scaled(s * dpr, Qt::KeepAspectRatio, Qt::FastTransformation);
+            image.setDevicePixelRatio(dpr);
+        } else {
             image = BrickLink::core()->noImage(s);
+        }
 
-        image.setDevicePixelRatio(dpr);
         selectionFrame = true;
         break;
     }
@@ -541,7 +542,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         opt.features |= QStyleOptionViewItem::HasCheckIndicator;
 
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
         QRect r = style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, option.widget);
 #else
         QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
@@ -552,7 +553,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         else if (align & Qt::AlignRight)
             dx = (opt.rect.width() - r.width() - margin);
         opt.rect = r.translated(dx, 0);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
 #else
         style->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &opt, p, option.widget);
@@ -597,7 +598,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         }
 
         static const QString elide = "..."_l1;
-        auto key = TextLayoutCacheKey { str, QSize(rw, h), fm.height() };
+        auto key = TextLayoutCacheKey { str, QSize(rw, h), uint(fm.height()) };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
         // an unlikely hash collision
@@ -1102,7 +1103,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
     }
     case Document::YearReleased:
     case Document::LotId: {
-        int i = v.toUInt();
+        uint i = v.toUInt();
         return (!i && !toolTip) ? dash : QString::number(i);
     }
     case Document::PriceOrig:
