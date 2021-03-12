@@ -38,6 +38,11 @@
 ****************************************************************************/
 #pragma once
 
+#include <QtCore/qhash.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#  include "q3cache6.h"
+#else
 /*
  Qt 5's version of QCache lost the qIsDetached check, that would prevent items being trimmed, when
  they are still in use somewhere else. Although this is an obscure feature and messes with the
@@ -50,7 +55,6 @@
 template <typename T> inline bool q3IsDetached(T &) { return true; }
 
 
-#include <QtCore/qhash.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -223,3 +227,4 @@ void Q3Cache<Key, T>::clearRecursive()
 
 
 QT_END_NAMESPACE
+#endif
