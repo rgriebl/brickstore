@@ -59,7 +59,8 @@ Currency *Currency::s_inst = nullptr;
 Currency::Currency()
     : m_nam(nullptr)
 {
-    m_lastUpdate = Config::inst()->value("/Rates/LastUpdate").toDateTime();
+    qint64 tt = Config::inst()->value("/Rates/LastUpdate", 0).toLongLong();
+    m_lastUpdate = QDateTime::fromSecsSinceEpoch(tt);
     QStringList rates = Config::inst()->value("/Rates/Normal").toString().split(QLatin1Char(','));
     QStringList customRates = Config::inst()->value("/Rates/Custom").toString().split(QLatin1Char(','));
 
@@ -69,7 +70,7 @@ Currency::Currency()
 
 Currency::~Currency()
 {
-    Config::inst()->setValue("/Rates/LastUpdate", m_lastUpdate);
+    Config::inst()->setValue("/Rates/LastUpdate", m_lastUpdate.toSecsSinceEpoch());
 
     QStringList sl;
     for (auto it = m_rates.constBegin(); it != m_rates.constEnd(); ++it) {
