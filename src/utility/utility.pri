@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/chunkwriter.h \
     $$PWD/exception.h \
     $$PWD/q3cache.h \
+    $$PWD/q5hashfunctions.h \
     $$PWD/stopwatch.h \
     $$PWD/transfer.h \
     $$PWD/utility.h \
@@ -19,6 +20,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/chunkreader.cpp \
     $$PWD/exception.cpp \
+    $$PWD/q5hashfunctions.cpp \
     $$PWD/transfer.cpp \
     $$PWD/utility.cpp \
     $$PWD/xmlhelpers.cpp

@@ -30,6 +30,12 @@
 
 #include "config.h"
 #include "utility.h"
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#  include <qhashfunctions.h>
+#  define q5Hash qHash
+#else
+#  include "q5hashfunctions.h"
+#endif
 #include "stopwatch.h"
 #include "bricklink.h"
 #include "chunkreader.h"
@@ -325,7 +331,8 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
                        const Item *item, const Color *color) const
 {
     // Avoid huge directories with 1000s of entries.
-    uchar hash = qHash(item->id(), 42) & 0xff; // sse4.2 is only used if a seed value is supplied
+    // sse4.2 is only used if a seed value is supplied
+    uchar hash = q5Hash(item->id(), 42) & 0xff; // please note: Qt6's qHash is incompatible
 
     QString p = m_datadir % QChar(item->itemType()->id()) % u'/' % (hash < 0x10 ? u"0" : u"")
             % QString::number(hash, 16) % u'/' % item->id() % u'/'
