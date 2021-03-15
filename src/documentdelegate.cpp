@@ -877,6 +877,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
                                                             nullptr, m_lineedit));
     }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
+    delete m_lineedit->validator();
     m_lineedit->setValidator(valid);
     m_multiEdit = true; /*(qApp->keyboardModifiers() & Qt::ControlModifier);*/
 
