@@ -13,6 +13,7 @@
 */
 #include <QApplication>
 #include <QFileDialog>
+#include <QSaveFile>
 #include <QClipboard>
 #include <QRegularExpression>
 #include <QStandardPaths>
@@ -632,8 +633,11 @@ bool DocumentIO::saveTo(Window *win, const QString &s)
 {
     Document *doc = win->document();
 
-    QFile f(s);
-    if (f.open(QIODevice::WriteOnly)) {
+    QSaveFile f(s);
+    try {
+        if (!f.open(QIODevice::WriteOnly))
+            throw tr("Failed to open file %1 for writing.");
+
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         BsxContents bsx;
@@ -643,24 +647,23 @@ bool DocumentIO::saveTo(Window *win, const QString &s)
         bsx.guiSortFilterState = doc->saveSortFilterState();
         bsx.guiColumnLayout = win->currentColumnLayout();
 
-        bool ok = createBsxInventory(&f, bsx);
+        bool ok = createBsxInventory(&f, bsx) && f.commit();
 
         QApplication::restoreOverrideCursor();
 
-        if (ok) {
-            doc->unsetModified();
-            doc->setFileName(s);
+        if (!ok)
+            throw tr("Failed to save data to file %1.");
 
-            Config::inst()->addToRecentFiles(s);
-            return true;
-        }
-        else
-            MessageBox::warning(nullptr, { }, tr("Failed to save data to file %1.").arg(CMB_BOLD(s)));
+        doc->unsetModified();
+        doc->setFileName(s);
+
+        Config::inst()->addToRecentFiles(s);
+        return true;
+
+    } catch (const Exception &e) {
+        MessageBox::warning(nullptr, { }, e.error().arg(f.fileName()) % u"<br><br>" % f.errorString());
+        return false;
     }
-    else
-        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(s)));
-
-    return false;
 }
 
 void DocumentIO::exportBrickLinkInvReqClipboard(const LotList &lots)
@@ -1037,13 +1040,17 @@ void DocumentIO::exportBrickLinkXML(const LotList &lots)
 
     const QByteArray xml = toBrickLinkXML(lots).toUtf8();
 
-    QFile f(fn);
-    if (f.open(QIODevice::WriteOnly)) {
-        if (f.write(xml.data(), xml.size()) != qint64(xml.size())) {
-            MessageBox::warning(nullptr, { }, tr("Failed to save data to file %1.").arg(CMB_BOLD(fn)));
-        }
-    } else {
-        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(fn)));
+    QSaveFile f(fn);
+    try {
+        if (!f.open(QIODevice::WriteOnly))
+            throw tr("Failed to open file %1 for writing.");
+        if (f.write(xml.data(), xml.size()) != qint64(xml.size()))
+            throw tr("Failed to save data to file %1.");
+        if (!f.commit())
+            throw tr("Failed to save data to file %1.");
+
+    } catch (const Exception &e) {
+        MessageBox::warning(nullptr, { }, e.error().arg(f.fileName()) % u"<br><br>" % f.errorString());
     }
 }
 
