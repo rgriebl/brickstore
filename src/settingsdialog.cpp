@@ -321,6 +321,20 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     });
     connect(w_sc_edit, &QKeySequenceEdit::editingFinished,
             this, [=]() {
+        auto newShortcut = w_sc_edit->keySequence();
+        // disallow Alt only shortcuts, because this interferes with standard menu handling
+        for (int i = 0; i < newShortcut.count(); ++i) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            auto mod = (newShortcut[i] & Qt::KeyboardModifierMask);
+#else
+            auto mod = newShortcut[i].keyboardModifiers();
+#endif
+            if ((mod & Qt::AltModifier) && !(mod & Qt::ControlModifier)) {
+                MessageBox::warning(this, { }, tr("Shortcuts with 'Alt' need to also include 'Control' in order to not interfere with the menu system."));
+                return;
+            }
+        }
+
         if (!m_sc_model->setShortcut(m_sc_proxymodel->mapToSource(w_sc_list->currentIndex()),
                                      w_sc_edit->keySequence())) {
             MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
