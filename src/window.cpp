@@ -1386,8 +1386,10 @@ void Window::on_edit_price_to_priceguide_triggered()
         for (Lot *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
-            if (forceUpdate && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
+            if (pg && (forceUpdate || !pg->isValid())
+                    && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
                 pg->update();
+            }
 
             if (pg && ((pg->updateStatus() == BrickLink::UpdateStatus::Loading)
                        || (pg->updateStatus() == BrickLink::UpdateStatus::Updating))) {
