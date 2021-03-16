@@ -32,10 +32,10 @@ jobs:
           artifact: "Ubuntu-20.04"
           os: ubuntu-20.04
 
-        - name: "Debian 10 Backend 64bit"
-          artifact: "Debian-10-Backend"
+        - name: "Debian 11 Backend 64bit"
+          artifact: "Debian-11-Backend"
           os: ubuntu-20.04
-          debian_container: "buildpack-deps:buster"
+          debian_container: "buildpack-deps:bullseye"
           qmake_extra_config: "CONFIG+=backend-only"
 
         - name: "Linux AppImage 64bit"
