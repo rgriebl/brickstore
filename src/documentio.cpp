@@ -636,7 +636,7 @@ bool DocumentIO::saveTo(Window *win, const QString &s)
     QSaveFile f(s);
     try {
         if (!f.open(QIODevice::WriteOnly))
-            throw tr("Failed to open file %1 for writing.");
+            throw Exception(tr("Failed to open file %1 for writing."));
 
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -652,7 +652,7 @@ bool DocumentIO::saveTo(Window *win, const QString &s)
         QApplication::restoreOverrideCursor();
 
         if (!ok)
-            throw tr("Failed to save data to file %1.");
+            throw Exception(tr("Failed to save data to file %1."));
 
         doc->unsetModified();
         doc->setFileName(s);
@@ -1045,11 +1045,11 @@ void DocumentIO::exportBrickLinkXML(const LotList &lots)
     QSaveFile f(fn);
     try {
         if (!f.open(QIODevice::WriteOnly))
-            throw tr("Failed to open file %1 for writing.");
+            throw Exception(tr("Failed to open file %1 for writing."));
         if (f.write(xml.data(), xml.size()) != qint64(xml.size()))
-            throw tr("Failed to save data to file %1.");
+            throw Exception(tr("Failed to save data to file %1."));
         if (!f.commit())
-            throw tr("Failed to save data to file %1.");
+            throw Exception(tr("Failed to save data to file %1."));
 
     } catch (const Exception &e) {
         MessageBox::warning(nullptr, { }, e.error().arg(f.fileName()) % u"<br><br>" % f.errorString());
