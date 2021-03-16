@@ -2267,7 +2267,7 @@ void Window::contextMenu(const QPoint &pos)
             actionNames = { "edit_marker_text", "edit_marker_color", "-", "edit_marker_clear" };
             break;
         }
-        for (const auto &actionName : actionNames) {
+        for (const auto &actionName : qAsConst(actionNames)) {
             if (actionName == "-")
                 m_contextMenu->addSeparator();
             else

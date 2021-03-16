@@ -1075,22 +1075,33 @@ void DocumentIO::exportBrickLinkXMLClipboard(const LotList &lots)
 
 bool DocumentIO::resolveIncomplete(Lot *lot)
 {
-    auto ic = lot->isIncomplete();
+    if (!lot->isIncomplete())
+        return true;
 
-    lot->setItem(BrickLink::core()->item(ic->m_itemtype_id, ic->m_item_id));
+    BrickLink::Incomplete ic = *lot->isIncomplete();
+
+    if ((ic.m_itemtype_id != BrickLink::ItemType::InvalidId) && !ic.m_item_id.isEmpty())
+        lot->setItem(BrickLink::core()->item(ic.m_itemtype_id, ic.m_item_id));
+
     if (lot->item()) {
-        ic->m_item_id.clear();
-        ic->m_item_name.clear();
-        ic->m_itemtype_id = BrickLink::ItemType::InvalidId;
-        ic->m_itemtype_name.clear();
-        ic->m_category_id = BrickLink::Category::InvalidId;
-        ic->m_category_name.clear();
+        if (auto *lic = lot->isIncomplete()) {
+            lic->m_item_id.clear();
+            lic->m_item_name.clear();
+            lic->m_itemtype_id = BrickLink::ItemType::InvalidId;
+            lic->m_itemtype_name.clear();
+            lic->m_category_id = BrickLink::Category::InvalidId;
+            lic->m_category_name.clear();
+        }
     }
 
-    lot->setColor(BrickLink::core()->color(ic->m_color_id));
+    if (ic.m_color_id != BrickLink::Color::InvalidId)
+        lot->setColor(BrickLink::core()->color(ic.m_color_id));
+
     if (lot->color()) {
-        ic->m_color_id = BrickLink::Color::InvalidId;
-        ic->m_color_name.clear();
+        if (auto *lic = lot->isIncomplete()) {
+            lic->m_color_id = BrickLink::Color::InvalidId;
+            lic->m_color_name.clear();
+        }
     }
 
     if (lot->item() && lot->color()) {
@@ -1098,8 +1109,8 @@ bool DocumentIO::resolveIncomplete(Lot *lot)
         return true;
 
     } else {
-        qWarning() << "failed: insufficient data (item=" << ic->m_item_id << ", itemtype="
-           << ic->m_itemtype_id << ", color=" << ic->m_color_id << ")";
+        qWarning() << "failed: insufficient data (item=" << ic.m_item_id << ", itemtype="
+           << QByteArray(1, ic.m_itemtype_id) << ", color=" << ic.m_color_id << ")";
 
         auto item = lot->item();
         auto color = lot->color();
@@ -1107,10 +1118,8 @@ bool DocumentIO::resolveIncomplete(Lot *lot)
         bool ok = BrickLink::core()->applyChangeLog(item, color, lot->isIncomplete());
         lot->setItem(item);
         lot->setColor(color);
-        if (ok) {
-            lot->setIncomplete(nullptr);
-            return true;
-        }
+
+        Q_ASSERT(ok == !lot->isIncomplete());
         return ok;
     }
 }
@@ -1383,8 +1392,9 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
     };
     static auto asString   = [](const QString &s)      { return s; };
     static auto asL1String = [](const QByteArray &l1s) { return QString::fromLatin1(l1s); };
-    static auto asInt      = [](auto i)                { return QString::number(i); };
+    static auto asChar     = [](char c)                { return QString(QLatin1Char(c)); };
     static auto asCurrency = [](double d)              { return QString::number(d, 'f', 3); };
+    static auto asInt      = [](auto i)                { return QString::number(i); };
 
 
     for (const auto *loopLot : bsx.lots) {
@@ -1397,7 +1407,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
 
         // vvv Required Fields (part 1)
         create(u"ItemID",       &Lot::itemId,       asL1String);
-        create(u"ItemTypeID",   &Lot::itemTypeId,   asInt);
+        create(u"ItemTypeID",   &Lot::itemTypeId,   asChar);
         create(u"ColorID",      &Lot::colorId,      asInt);
 
         // vvv Redundancy Fields

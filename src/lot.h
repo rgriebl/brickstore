@@ -33,11 +33,11 @@ public:
     bool operator!=(const Lot &cmp) const;
 
     const BrickLink::Item *item() const           { return m_item; }
-    void setItem(const BrickLink::Item *i)        { m_item = i; }
+    void setItem(const BrickLink::Item *i);
     const BrickLink::Category *category() const   { return m_item ? m_item->category() : nullptr; }
     const BrickLink::ItemType *itemType() const   { return m_item ? m_item->itemType() : nullptr; }
     const BrickLink::Color *color() const         { return m_color; }
-    void setColor(const BrickLink::Color *c)      { m_color = c; }
+    void setColor(const BrickLink::Color *c);
 
     QByteArray itemId() const          { return m_item ? m_item->id()
                                                        : (m_incomplete ? m_incomplete->m_item_id

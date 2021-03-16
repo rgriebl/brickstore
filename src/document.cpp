@@ -171,7 +171,7 @@ AddRemoveCmd::~AddRemoveCmd()
 {
     if (m_type == Add) {
         if (m_doc) {
-            for (const auto lot : m_lots)
+            for (const auto lot : qAsConst(m_lots))
                 m_doc->m_differenceBase.remove(lot);
         }
         qDeleteAll(m_lots);

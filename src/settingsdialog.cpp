@@ -56,7 +56,7 @@ public:
     void apply()
     {
         QVariantMap saved;
-        for (const Entry &entry : m_entries) {
+        for (const Entry &entry : qAsConst(m_entries)) {
             if (entry.action && (entry.key != entry.defaultKey))
                 saved.insert(entry.action->objectName(), entry.key);
         }
@@ -125,7 +125,7 @@ public:
                 return true; // no change
 
             if (!newShortcut.isEmpty()) {
-                for (const Entry &entry : m_entries) {
+                for (const Entry &entry : qAsConst(m_entries)) {
                     if (entry.key == newShortcut)
                         return false; // duplicate
                 }

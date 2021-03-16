@@ -19,10 +19,9 @@
 
 
 Lot::Lot(const BrickLink::Color *color, const BrickLink::Item *item)
+    : m_item(item)
+    , m_color(color)
 {
-    m_item = item;
-    m_color = color;
-
     //TODO: replace with member initializers when switching to c++20
     m_status = BrickLink::Status::Include;
     m_condition = BrickLink::Condition::New;
@@ -83,6 +82,22 @@ Lot &Lot::operator=(const Lot &copy)
 bool Lot::operator!=(const Lot &cmp) const
 {
     return !operator==(cmp);
+}
+
+void Lot::setItem(const BrickLink::Item *i)
+{
+    m_item = i;
+
+    if (m_item && m_color && m_incomplete)
+        m_incomplete.reset();
+}
+
+void Lot::setColor(const BrickLink::Color *c)
+{
+    m_color = c;
+
+    if (m_item && m_color && m_incomplete)
+        m_incomplete.reset();
 }
 
 bool Lot::operator==(const Lot &cmp) const
