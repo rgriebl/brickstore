@@ -109,7 +109,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole) {
         if (c->id()) {
-            res = R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)"_l1
+            res = QString::fromLatin1(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)")
                     .arg(tr("RGB"), c->color().name(), c->color().name());
         } else {
             res = c->name();

@@ -152,7 +152,7 @@ Application::Application(int &_argc, char **_argv)
     // the new default font San Francisco has rendering problems: QTBUG-88495
     if (QVersionNumber::fromString(QSysInfo::productVersion()).majorVersion() >= 11) {
         QFont f = QApplication::font();
-        f.setFamily("Helvetica Neue");
+        f.setFamily("Helvetica Neue"_l1);
         QApplication::setFont(f);
     }
 #  endif
@@ -342,7 +342,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
 {
     // QToolButtons look really ugly on macOS, so we re-style them to the fusion style
 #if defined(Q_OS_MACOS)
-    static QStyle *fusion = QStyleFactory::create("fusion");
+    static QStyle *fusion = QStyleFactory::create("fusion"_l1);
     if (e->type() == QEvent::ChildPolished) {
         if (auto *tb = qobject_cast<QToolButton *>(static_cast<QChildEvent *>(e)->child())) {
             if (!qobject_cast<QToolBar *>(o)) {
@@ -598,7 +598,7 @@ void Application::setupLogging()
             filename = QString::fromLocal8Bit(msgCtx.file);
             int pos = -1;
 #if defined(Q_OS_WIN)
-            pos = filename.lastIndexOf('\\');
+            pos = filename.lastIndexOf('\\'_l1);
 #endif
             if (pos < 0)
                 pos = int(filename.lastIndexOf('/'_l1));

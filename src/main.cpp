@@ -27,6 +27,7 @@
 #  include <sys/resource.h>
 #endif
 
+#include "utility.h"
 #include "bricklink.h"
 #include "rebuilddatabase.h"
 

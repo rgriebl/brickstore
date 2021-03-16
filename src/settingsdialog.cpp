@@ -459,8 +459,9 @@ void SettingsDialog::load()
             if (trans.language == "en"_l1) {
                 w_language->addItem(trans.languageName["en"_l1], trans.language);
             } else {
-                w_language->addItem("%1 (%2)"_l1.arg(trans.languageName["en"_l1],
-                                    trans.languageName[trans.language]), trans.language);
+                QString s = trans.languageName["en"_l1] % u" ("
+                               % trans.languageName[trans.language] % u')';
+                w_language->addItem(s, trans.language);
             }
 
             if (currentLanguage == trans.language)

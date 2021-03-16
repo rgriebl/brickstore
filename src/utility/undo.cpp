@@ -279,7 +279,7 @@ void UndoAction::setDescription(const QString &desc)
     m_desc = desc;
     QString str = (m_type == Undo) ? tr("Undo") : tr("Redo");
     if (!desc.isEmpty())
-        str.append(" (%1)"_l1.arg(desc));
+        str = str % u" (" % desc % u')';
     setText(str);
 }
 

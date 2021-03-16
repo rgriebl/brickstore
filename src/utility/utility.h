@@ -27,7 +27,7 @@ QT_FORWARD_DECLARE_CLASS(QWidget)
 
 constexpr inline QLatin1String operator ""_l1(const char *c, size_t s)
 {
-    return QLatin1String(c, s);
+    return QLatin1String(c, int(s));
 }
 
 constexpr inline QChar operator ""_l1(const char c)

@@ -189,21 +189,21 @@ QString AboutDialog::cpuModel()
 {
 #if defined(Q_OS_LINUX)
     QProcess p;
-    p.start(R"(sh)"_l1, { R"(-c)"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
+    p.start("sh"_l1, { "-c"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
             QIODevice::ReadOnly);
     p.waitForFinished(1000);
     return QString::fromUtf8(p.readAllStandardOutput()).simplified();
 
 #elif defined(Q_OS_WIN)
     QProcess p;
-    p.start(R"(wmic)", { R"(/locale:ms_409)", R"(cpu)", R"(get)", R"(name)", R"(/value)" },
+    p.start("wmic"_l1, { "/locale:ms_409"_l1, "cpu"_l1, "get"_l1, "name"_l1, "/value"_l1 },
             QIODevice::ReadOnly);
     p.waitForFinished(1000);
     return QString::fromUtf8(p.readAllStandardOutput()).simplified().mid(5);
 
 #elif defined(Q_OS_MACOS)
     QProcess p;
-    p.start(R"(sysctl)", { R"(-n)", R"(machdep.cpu.brand_string)" }, QIODevice::ReadOnly);
+    p.start("sysctl"_l1, { "-n"_l1, "machdep.cpu.brand_string"_l1 }, QIODevice::ReadOnly);
     p.waitForFinished(1000);
     return QString::fromUtf8(p.readAllStandardOutput()).simplified();
 

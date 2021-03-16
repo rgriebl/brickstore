@@ -787,7 +787,7 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
         xml.createText("LOTID", QString::number(lot->lotId()));
         int qdiff = lot->quantity() - base->quantity();
         if (qdiff && (lot->quantity() > 0))
-            xml.createText("QTY", QString::number(qdiff).prepend(qdiff > 0 ? u"+" : u""));
+            xml.createText("QTY", QString::number(qdiff).prepend(QLatin1String(qdiff > 0 ? "+" : "")));
         else if (qdiff && (lot->quantity() <= 0))
             xml.createEmpty("DELETE");
 

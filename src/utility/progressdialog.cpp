@@ -99,7 +99,7 @@ void ProgressDialog::done(int r)
 
 void ProgressDialog::setHeaderText(const QString &str)
 {
-    m_header->setText("<b>%1</b>"_l1.arg(str));
+    m_header->setText(u"<b>" % str % u"</b>");
     syncRepaint(m_header);
 }
 
@@ -118,7 +118,7 @@ void ProgressDialog::setMessageText(const QString &str)
 
 void ProgressDialog::setErrorText(const QString &str)
 {
-    m_message->setText("<b>%1</b>: %2"_l1.arg(tr("Error"), str));
+    m_message->setText(u"<b>" % tr("Error") % u"</b>: " % str);
     setFinished(false);
 
     syncRepaint(m_message);

@@ -92,8 +92,8 @@ int RebuildDatabase::exec()
     // login hack
     {
 #if defined(BRICKSTORE_BACKEND_ONLY)
-        QString username = qgetenv("BRICKSTORE_USERNAME");
-        QString password = qgetenv("BRICKSTORE_PASSWORD");
+        QString username = QString::fromLocal8Bit(qgetenv("BRICKSTORE_USERNAME"));
+        QString password = QString::fromLocal8Bit(qgetenv("BRICKSTORE_PASSWORD"));
 #else
         QString username = Config::inst()->loginForBrickLink().first;
         QString password = Config::inst()->loginForBrickLink().second;
@@ -413,9 +413,9 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
 
             if (!f || !f->isOpen()) {
                 if (f)
-                    m_error = "failed to write %1: %2"_l1.arg(f->fileName(), f->errorString());
+                    m_error = "failed to write "_l1 % f->fileName() % u": " % f->errorString();
                 else
-                    m_error = "could not get a file handle to write inventory for %1"_l1.arg(QLatin1String(item->id()));
+                    m_error = "could not get a file handle to write inventory for "_l1 % QLatin1String(item->id());
                 delete f;
                 failed = true;
                 break;

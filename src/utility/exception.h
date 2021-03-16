@@ -67,7 +67,7 @@ public:
     { }
 
     ParseException(QIODevice *dev, const char *message)
-        : Exception("Parse error%1: %2"_l1
+        : Exception(QString::fromLatin1("Parse error%1: %2")
                     .arg(fileName(dev)).arg(QLatin1String(message)))
     { }
 
