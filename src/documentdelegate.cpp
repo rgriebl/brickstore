@@ -852,6 +852,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     QValidator *valid = nullptr;
     switch (idx.column()) {
+    case Document::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(R"([a-zA-Z0-9._-]+)"_l1), nullptr); break;
     case Document::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case Document::Quantity    :
     case Document::QuantityDiff: valid = new SmartIntValidator(-FrameWork::maxQuantity,
@@ -877,8 +878,9 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
                                                             nullptr, m_lineedit));
     }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
-    delete m_lineedit->validator();
-    m_lineedit->setValidator(valid);
+
+    if (valid)
+        m_lineedit->setValidator(valid);
     m_multiEdit = true; /*(qApp->keyboardModifiers() & Qt::ControlModifier);*/
 
     return m_lineedit;
@@ -886,8 +888,13 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
 void DocumentDelegate::destroyEditor(QWidget *editor, const QModelIndex &index) const
 {
-    if (editor != m_lineedit)
+    if (editor != m_lineedit) {
         QItemDelegate::destroyEditor(editor, index);
+    } else {
+        auto oldValid = m_lineedit->validator();
+        m_lineedit->setValidator(nullptr);
+        delete oldValid;
+    }
 }
 
 void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
