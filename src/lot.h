@@ -39,27 +39,27 @@ public:
     const BrickLink::Color *color() const         { return m_color; }
     void setColor(const BrickLink::Color *c)      { m_color = c; }
 
-    QString itemId() const             { return m_item ? m_item->id()
+    QByteArray itemId() const          { return m_item ? m_item->id()
                                                        : (m_incomplete ? m_incomplete->m_item_id
-                                                                       : QString()); }
+                                                                       : QByteArray()); }
     QString itemName() const           { return m_item ? m_item->name()
                                                        : (m_incomplete ? m_incomplete->m_item_name
                                                                        : QString()); }
-    QString colorId() const            { return m_color ? QString::number(m_color->id())
+    uint colorId() const               { return m_color ? m_color->id()
                                                         : (m_incomplete ? m_incomplete->m_color_id
-                                                                        : QString()); }
+                                                                        : 0); }
     QString colorName() const          { return m_color ? m_color->name()
                                                         : (m_incomplete ? m_incomplete->m_color_name
                                                                         : QString()); }
-    QString categoryId() const         { return category() ? QString::number(category()->id())
+    uint categoryId() const            { return category() ? category()->id()
                                                            : (m_incomplete ? m_incomplete->m_category_id
-                                                                           : QString()); }
+                                                                           : 0); }
     QString categoryName() const       { return category() ? category()->name()
                                                            : (m_incomplete ? m_incomplete->m_category_name
                                                                            : QString()); }
-    QString itemTypeId() const         { return itemType() ? QString(QChar(itemType()->id()))
+    char itemTypeId() const            { return itemType() ? itemType()->id()
                                                            : (m_incomplete ? m_incomplete->m_itemtype_id
-                                                                           : QString()); }
+                                                                           : 0); }
     QString itemTypeName() const       { return itemType() ? itemType()->name()
                                                            : (m_incomplete ? m_incomplete->m_itemtype_name
                                                                            : QString()); }

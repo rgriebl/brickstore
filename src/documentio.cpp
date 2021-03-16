@@ -519,7 +519,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                     QString partid = partname;
                     partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
 
-                    const BrickLink::Item *itemp = BrickLink::core()->item('P', partid);
+                    const BrickLink::Item *itemp = BrickLink::core()->item('P', partid.toLatin1());
 
                     if (!itemp) {
                         bool got_subfile = false;
@@ -563,12 +563,12 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                         auto *inc = new BrickLink::Incomplete;
 
                         if (!itemp) {
-                            inc->m_item_id = partid;
-                            inc->m_itemtype_id = qL1S("P");
-                            inc->m_itemtype_name = qL1S("Part");
+                            inc->m_item_id = partid.toLatin1();
+                            inc->m_itemtype_id = 'P';
+                            inc->m_itemtype_name = "Part"_l1;
                         }
                         if (!colp) {
-                            inc->m_color_name = qL1S("LDraw #") + QByteArray::number(colid);
+                            inc->m_color_name = "LDraw #"_l1 + QString::number(colid);
                         }
                         lot->setIncomplete(inc);
                     }
@@ -675,8 +675,8 @@ void DocumentIO::exportBrickLinkInvReqClipboard(const LotList &lots)
             continue;
 
         xml.createElement();
-        xml.createText("ITEMID", lot->item()->id());
-        xml.createText("ITEMTYPE", QString(lot->itemType()->id()));
+        xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
+        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
         xml.createText("COLOR", QString::number(lot->color()->id()));
         xml.createText("QTY", QString::number(lot->quantity()));
         if (lot->status() == BrickLink::Status::Extra)
@@ -702,8 +702,8 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
                 continue;
 
             xml.createElement();
-            xml.createText("ITEMID", lot->item()->id());
-            xml.createText("ITEMTYPE", QString(lot->itemType()->id()));
+            xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
+            xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
             xml.createText("COLOR", QString::number(lot->color()->id()));
 
             if (lot->quantity())
@@ -866,8 +866,8 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
             continue;
 
         xml.createElement();
-        xml.createText("ITEMID", lot->item()->id());
-        xml.createText("ITEMTYPE", QString(lot->itemType()->id()));
+        xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
+        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
         xml.createText("COLOR", QString::number(lot->color()->id()));
         xml.createText("CATEGORY", QString::number(lot->category()->id()));
         xml.createText("QTY", QString::number(lot->quantity()));
@@ -929,7 +929,7 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
 
     XmlHelpers::ParseXML p(buf, "INVENTORY", "ITEM");
     p.parse([&p, &bsx](QDomElement e) {
-        const QString itemId = p.elementText(e, "ITEMID");
+        const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
         char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
         uint colorId = p.elementText(e, "COLOR", "0").toUInt();
         uint categoryId = p.elementText(e, "CATEGORY", "0").toUInt();
@@ -990,8 +990,10 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
                 if (auto cat = BrickLink::core()->category(categoryId))
                     inc->m_category_name = cat->name();
             }
-            if (!color)
+            if (!color) {
+                inc->m_color_id = colorId;
                 inc->m_color_name = QString::number(colorId);
+            }
 
             if (!BrickLink::core()->applyChangeLog(item, color, inc.get()))
                 ++bsx.invalidLotsCount;
@@ -1075,25 +1077,20 @@ bool DocumentIO::resolveIncomplete(Lot *lot)
 {
     auto ic = lot->isIncomplete();
 
-    if (!ic->m_item_id.isEmpty() && !ic->m_itemtype_id.isEmpty()) {
-        lot->setItem(BrickLink::core()->item(ic->m_itemtype_id[0].toLatin1(),
-                      ic->m_item_id.toLatin1()));
-        if (lot->item()) {
-            ic->m_item_id.clear();
-            ic->m_item_name.clear();
-            ic->m_itemtype_id.clear();
-            ic->m_itemtype_name.clear();
-            ic->m_category_id.clear();
-            ic->m_category_name.clear();
-        }
+    lot->setItem(BrickLink::core()->item(ic->m_itemtype_id, ic->m_item_id));
+    if (lot->item()) {
+        ic->m_item_id.clear();
+        ic->m_item_name.clear();
+        ic->m_itemtype_id = BrickLink::ItemType::InvalidId;
+        ic->m_itemtype_name.clear();
+        ic->m_category_id = BrickLink::Category::InvalidId;
+        ic->m_category_name.clear();
     }
 
-    if (!ic->m_color_id.isEmpty()) {
-        lot->setColor(BrickLink::core()->color(ic->m_color_id.toUInt()));
-        if (lot->color()) {
-            ic->m_color_id.clear();
-            ic->m_color_name.clear();
-        }
+    lot->setColor(BrickLink::core()->color(ic->m_color_id));
+    if (lot->color()) {
+        ic->m_color_id = BrickLink::Color::InvalidId;
+        ic->m_color_name.clear();
     }
 
     if (lot->item() && lot->color()) {
@@ -1157,10 +1154,10 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
             QXmlStreamAttributes baseValues;
 
             const QHash<QStringView, std::function<void(Lot *, const QString &value)>> tagHash {
-            { u"ItemID",       [](auto lot, auto v) { lot->isIncomplete()->m_item_id = v; } },
-            { u"ColorID",      [](auto lot, auto v) { lot->isIncomplete()->m_color_id = v; } },
-            { u"CategoryID",   [](auto lot, auto v) { lot->isIncomplete()->m_category_id = v; } },
-            { u"ItemTypeID",   [](auto lot, auto v) { lot->isIncomplete()->m_itemtype_id = v; } },
+            { u"ItemID",       [](auto lot, auto v) { lot->isIncomplete()->m_item_id = v.toLatin1(); } },
+            { u"ColorID",      [](auto lot, auto v) { lot->isIncomplete()->m_color_id = v.toUInt(); } },
+            { u"CategoryID",   [](auto lot, auto v) { lot->isIncomplete()->m_category_id = v.toUInt(); } },
+            { u"ItemTypeID",   [](auto lot, auto v) { lot->isIncomplete()->m_itemtype_id = XmlHelpers::firstCharInString(v); } },
             { u"ItemName",     [](auto lot, auto v) { lot->isIncomplete()->m_item_name = v; } },
             { u"ColorName",    [](auto lot, auto v) { lot->isIncomplete()->m_color_name = v; } },
             { u"CategoryName", [](auto lot, auto v) { lot->isIncomplete()->m_category_name = v; } },
@@ -1384,9 +1381,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
                 baseValues.append(t, stringify(bv));
         }
     };
-    static auto asString   = [](const QString &s) { return s; };
-    static auto asInt      = [](auto i)           { return QString::number(i); };
-    static auto asCurrency = [](double d)         { return QString::number(d, 'f', 3); };
+    static auto asString   = [](const QString &s)      { return s; };
+    static auto asL1String = [](const QByteArray &l1s) { return QString::fromLatin1(l1s); };
+    static auto asInt      = [](auto i)                { return QString::number(i); };
+    static auto asCurrency = [](double d)              { return QString::number(d, 'f', 3); };
 
 
     for (const auto *loopLot : bsx.lots) {
@@ -1398,9 +1396,9 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         xml.writeStartElement(qL1S("Item"));
 
         // vvv Required Fields (part 1)
-        create(u"ItemID",       &Lot::itemId,       asString);
-        create(u"ItemTypeID",   &Lot::itemTypeId,   asString);
-        create(u"ColorID",      &Lot::colorId,      asString);
+        create(u"ItemID",       &Lot::itemId,       asL1String);
+        create(u"ItemTypeID",   &Lot::itemTypeId,   asInt);
+        create(u"ColorID",      &Lot::colorId,      asInt);
 
         // vvv Redundancy Fields
 
@@ -1409,7 +1407,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         create(u"ItemName",     &Lot::itemName,     asString);
         create(u"ItemTypeName", &Lot::itemTypeName, asString);
         create(u"ColorName",    &Lot::colorName,    asString);
-        create(u"CategoryID",   &Lot::categoryId,   asString);
+        create(u"CategoryID",   &Lot::categoryId,   asInt);
         create(u"CategoryName", &Lot::categoryName, asString);
 
         // vvv Required Fields (part 2)

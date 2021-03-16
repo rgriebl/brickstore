@@ -74,7 +74,7 @@ public:
         CondLine
     };
 
-    static Element *fromByteArray(const QByteArray &line, const QDir &dir);
+    static Element *fromString(const QString &line, const QDir &dir);
 
     inline Type type() const  { return m_type; }
 
@@ -95,17 +95,17 @@ private:
 class CommentElement : public Element
 {
 public:
-    QByteArray comment() const  { return m_comment; }
+    QString comment() const  { return m_comment; }
 
-    static CommentElement *create(const QByteArray &text);
+    static CommentElement *create(const QString &text);
 
     void dump() const override;
 
 protected:
-    CommentElement(Type t, const QByteArray &text);
-    CommentElement(const QByteArray &);
+    CommentElement(Type t, const QString &text);
+    CommentElement(const QString &);
 
-    QByteArray m_comment;
+    QString m_comment;
 
 private:
     Q_DISABLE_COPY(CommentElement)
@@ -123,10 +123,10 @@ public:
     bool cw() const { return m_cw; }
     bool invertNext() const { return m_invertNext; }
 
-    static BfcCommandElement *create(const QByteArray &text);
+    static BfcCommandElement *create(const QString &text);
 
 protected:
-    BfcCommandElement(const QByteArray &);
+    BfcCommandElement(const QString &);
 
     bool m_certify = false;
     bool m_nocertify = false;
@@ -291,7 +291,7 @@ public:
     QColor color(int id, int baseid = -1) const;
     QColor edgeColor(int id) const;
 
-    Part *partFromId(const QString &id);
+    Part *partFromId(const QByteArray &id);
     Part *partFromFile(const QString &filename);
 
     static QStringList potentialDrawDirs();

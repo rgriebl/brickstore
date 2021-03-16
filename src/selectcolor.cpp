@@ -167,7 +167,7 @@ QByteArray SelectColor::saveState() const
     ds << QByteArray("SC") << qint32(1)
        << (col ? col->id() : uint(-1))
        << qint8(m_item && m_item->itemType() ? m_item->itemType()->id() : char(-1))
-       << (m_item ? m_item->id() : QString())
+       << (m_item ? QString::fromLatin1(m_item->id()) : QString())
        << w_filter->currentIndex()
        << (w_colors->header()->sortIndicatorOrder() == Qt::AscendingOrder);
 
@@ -195,7 +195,7 @@ bool SelectColor::restoreState(const QByteArray &ba)
         return false;
 
     if (col != uint(-1))
-        setCurrentColorAndItem(BrickLink::core()->color(col), BrickLink::core()->item(itt, itemid));
+        setCurrentColorAndItem(BrickLink::core()->color(col), BrickLink::core()->item(itt, itemid.toLatin1()));
     w_filter->setCurrentIndex(filterIndex);
 
     w_colors->sortByColumn(0, colSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);

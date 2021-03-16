@@ -205,7 +205,7 @@ class Item : public WrapperBase<const ::BrickLink::Item>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrapped, QString id READ id CONSTANT)
+    Q_PROPERTY(QString id READ id CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, ItemType itemType READ itemType CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, Category category READ category CONSTANT)
@@ -220,6 +220,7 @@ class Item : public WrapperBase<const ::BrickLink::Item>
 public:
     Item(const ::BrickLink::Item *item = nullptr);
 
+    QString id() const;
     QVariantList knownColors() const;
 
     Q_INVOKABLE QVariantList consistsOf() const;
@@ -350,7 +351,7 @@ public:
     Category category() const          { return get()->category(); }
     ItemType itemType() const          { return get()->itemType(); }
 
-    QString itemId() const             { return get()->itemId(); }
+    QString itemId() const             { return QString::fromLatin1(get()->itemId()); }
     QString itemName() const           { return get()->itemName(); }
     QString colorName() const          { return get()->colorName(); }
     QString categoryName() const       { return get()->categoryName(); }

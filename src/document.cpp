@@ -1288,7 +1288,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
     case Description : lot.setItem(value.value<const BrickLink::Item *>()); break;
     case PartNo      : {
         char itid = lot.itemType() ? lot.itemType()->id() : 'P';
-        if (auto newItem = BrickLink::core()->item(itid, value.toString()))
+        if (auto newItem = BrickLink::core()->item(itid, value.toString().toLatin1()))
             lot.setItem(newItem);
         break;
     }
@@ -1874,8 +1874,8 @@ int Document::compare(const Lot *i1, const Lot *i2, int sortColumn) const
             return int(i1->status()) - int(i2->status());
     }
     case Document::Picture     :
-    case Document::PartNo      : return Utility::naturalCompare(i1->itemId(),
-                                                                i2->itemId());
+    case Document::PartNo      : return Utility::naturalCompare(QLatin1String(i1->itemId()),
+                                                                QLatin1String(i2->itemId()));
     case Document::Description : return Utility::naturalCompare(i1->itemName(),
                                                                 i2->itemName());
 

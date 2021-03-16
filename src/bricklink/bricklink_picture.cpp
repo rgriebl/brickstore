@@ -93,7 +93,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         pic = new Picture(item, color);
         if (!m_pic_cache.insert(key, pic, pic->cost())) {
             qWarning("Can not add picture to cache (cache max/cur: %d/%d, item: %s)",
-                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), qPrintable(item->id()));
+                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), item->id().constData());
             return nullptr;
         }
         needToLoad = true;
@@ -233,13 +233,16 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool highPriority)
 
     bool large = (!pic->color());
 
-    QUrl url;
+    QString url;
 
     if (large) {
-        url = QString("https://img.bricklink.com/%1L/%2.jpg").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id());
+        url = u"https://img.bricklink.com/" % QLatin1Char(pic->item()->itemType()->pictureId())
+                % u"L/" % QLatin1String(pic->item()->id()) % u".jpg";
     }
     else {
-        url = QString("https://img.bricklink.com/ItemImage/%1N/%3/%2.png").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id()).arg(pic->color()->id());
+        url = u"https://img.bricklink.com/ItemImage/" % QLatin1Char(pic->item()->itemType()->pictureId())
+                % u"N/" % QString::number(pic->color()->id()) % u'/'
+                % QLatin1String(pic->item()->id()) % u".png";
     }
 
     //qDebug() << "PIC request started for" << url;

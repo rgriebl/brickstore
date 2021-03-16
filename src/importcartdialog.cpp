@@ -467,7 +467,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                     double price = en_US.toDouble(priceStr.mid(4));
 
                     if (itemSeq)
-                        itemId = itemId % u'-' % QString::number(itemSeq);
+                        itemId = itemId % '-' % QByteArray::number(itemSeq);
 
                     auto item = BrickLink::core()->item(itemTypeId, itemId);
                     auto color = BrickLink::core()->color(colorId);

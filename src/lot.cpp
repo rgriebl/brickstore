@@ -189,7 +189,7 @@ bool Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
 
 void Lot::save(QDataStream &ds) const
 {
-    ds << QByteArray("II") << qint32(3)
+    ds << QByteArray("II") << qint32(4)
        << itemId()
        << qint8(itemType() ? itemType()->id() : char(-1))
        << uint(color() ? color()->id() : uint(0xffffffff))
@@ -222,18 +222,20 @@ Lot *Lot::restore(QDataStream &ds)
     if (ds.status() != QDataStream::Ok)
         return nullptr;
 
-    auto item = BrickLink::core()->item(itemtypeid, itemid);
+    auto item = BrickLink::core()->item(itemtypeid, itemid.toLatin1());
     auto color = BrickLink::core()->color(colorid);
     QScopedPointer<BrickLink::Incomplete> inc;
 
     if (!item || !color) {
         inc.reset(new BrickLink::Incomplete);
         if (!item) {
-            inc->m_item_id = itemid;
-            inc->m_itemtype_id = QLatin1Char(itemtypeid);
+            inc->m_item_id = itemid.toLatin1();
+            inc->m_itemtype_id = itemtypeid;
         }
-        if (!color)
+        if (!color) {
+            inc->m_color_id = colorid;
             inc->m_color_name = QString::number(colorid);
+        }
 
         if (BrickLink::core()->applyChangeLog(item, color, inc.get()))
             inc.reset();

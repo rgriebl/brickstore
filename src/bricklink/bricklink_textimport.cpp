@@ -25,7 +25,7 @@
 #include "xmlhelpers.h"
 
 
-const BrickLink::Item *BrickLink::TextImport::findItem(char tid, const QString &id) const
+const BrickLink::Item *BrickLink::TextImport::findItem(char tid, const QByteArray &id) const
 {
     auto needle = std::make_pair(tid, id);
     auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lowerBound);
@@ -81,7 +81,7 @@ bool BrickLink::TextImport::import(const QString &path)
         m_items.reserve(200000);
 
         for (const ItemType *itt : qAsConst(m_item_types))
-            readItems(path + "items_" + char(itt->m_id) + ".xml", itt);
+            readItems(path % u"items_" % QLatin1Char(itt->m_id) % u".xml", itt);
 
 
         // we need to set index for faster reverse lookups
@@ -253,7 +253,7 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
     XmlHelpers::ParseXML p(path, "CODES", "ITEM");
     p.parse([this, &p](QDomElement e) {
         char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
-        const QString itemId = p.elementText(e, "ITEMID");
+        const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
         const QString colorName = p.elementText(e, "COLOR");
         uint code = p.elementText(e, "CODENAME").toUInt();
 
@@ -423,7 +423,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
             throw ParseException(&f, "expected at least 2 fields in line %1").arg(line);
 
         char itemTypeId = XmlHelpers::firstCharInString(strs.at(0));
-        const QString itemId = strs.at(1);
+        const QByteArray itemId = strs.at(1).toLatin1();
 
         if (!itemTypeId || itemId.isEmpty())
             throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(line);

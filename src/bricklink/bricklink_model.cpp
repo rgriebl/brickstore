@@ -506,7 +506,7 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
-        case 1: res = i->id(); break;
+        case 1: res = QLatin1String(i->id()); break;
         case 2: res = i->name(); break;
         }
     }
@@ -627,9 +627,9 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                     str = str.left(atPos);
                 }
 
-                auto item = BrickLink::core()->item('M', str);
+                auto item = BrickLink::core()->item('M', str.toLatin1());
                 if (!item)
-                    item = BrickLink::core()->item('P', str);
+                    item = BrickLink::core()->item('P', str.toLatin1());
                 if (item)
                     m_filter_consistsOf << qMakePair(negate, qMakePair(item, color));
 
@@ -673,8 +673,8 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-    return Utility::naturalCompare((column == 2) ? i1->name() : i1->id(),
-                                   (column == 2) ? i2->name() : i2->id()) < 0;
+    return Utility::naturalCompare((column == 2) ? i1->name() : QLatin1String(i1->id()),
+                                   (column == 2) ? i2->name() : QLatin1String(i2->id())) < 0;
 }
 
 bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
@@ -690,7 +690,7 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else if (m_inv_filter && !item->hasInventory())
         return false;
     else {
-        const QString matchStr = item->id() % u' ' % item->name();
+        const QString matchStr = QLatin1String(item->id()) % u' ' % item->name();
 
         // .first is always "bool negate"
 
@@ -899,8 +899,8 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         switch (left.column()) {
         default:
         case  0: return ai1->first < ai2->first;
-        case  1: return (Utility::naturalCompare(ai1->second->id(),
-                                                 ai2->second->id()) < 0);
+        case  1: return (Utility::naturalCompare(QLatin1String(ai1->second->id()),
+                                                 QLatin1String(ai2->second->id())) < 0);
         case  2: return (Utility::naturalCompare(ai1->second->name(),
                                                  ai2->second->name()) < 0);
         }
@@ -1000,7 +1000,7 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
     QString note_left = u"<i>" % BrickLink::ItemDelegate::tr("[Image is loading]") % u"</i>";
 
     if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
-        return str.arg(note_left, item->id(), item->name());
+        return str.arg(note_left, QLatin1String(item->id()), item->name());
     } else {
         QByteArray ba;
         QBuffer buffer(&ba);
@@ -1009,7 +1009,7 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
         img.save(&buffer, "PNG");
 
         return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
-                       item->id(), item->name());
+                       QLatin1String(item->id()), item->name());
     }
 }
 

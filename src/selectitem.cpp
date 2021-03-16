@@ -739,7 +739,7 @@ QByteArray SelectItem::saveState() const
     ds << QByteArray("SI") << qint32(3)
        << qint8(itt ? itt->id() : char(-1))
        << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id()) : uint(-1))
-       << (item ? item->id() : QString())
+       << (item ? QString::fromLatin1(item->id()) : QString())
        << d->w_filter->saveState()
        << zoomFactor()
        << d->w_viewmode->checkedId()
@@ -782,7 +782,7 @@ bool SelectItem::restoreState(const QByteArray &ba)
                                            : BrickLink::core()->category(cat));
     }
     if (!itemid.isEmpty())
-        setCurrentItem(BrickLink::core()->item(itt, itemid), false);
+        setCurrentItem(BrickLink::core()->item(itt, itemid.toLatin1()), false);
     setZoomFactor(zoom);
     setViewMode(viewMode);
     d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
@@ -927,7 +927,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
 
 
-                QString filter = u"consists-of:" % partItem->id();
+                QString filter = u"consists-of:" % QLatin1String(partItem->id());
                 if (partItem->itemType()->hasColors() && partColor)
                     filter = filter % u'@' % QString::number(partColor->id());
                 QIcon icon;
@@ -938,7 +938,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 QString section;
                 if (partColor && partColor->id())
                     section = partColor->name() % u' ';
-                section = section % partItem->name() % u" [" % partItem->id() % u']';
+                section = section % partItem->name() % u" [" % QLatin1String(partItem->id()) % u']';
                 m.addAction(icon, section)->setEnabled(false);
 
                 connect(m.addAction(tr("Set filter to Minifigs consisting of this part")),

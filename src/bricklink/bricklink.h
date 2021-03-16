@@ -51,6 +51,8 @@ namespace BrickLink {
 class ItemType
 {
 public:
+    static constexpr uint InvalidId = 0;
+
     char id() const                 { return m_id; }
     QString name() const            { return m_name; }
 
@@ -67,7 +69,7 @@ public:
     ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
 
 private:
-    char  m_id = 0;
+    char  m_id = InvalidId;
     char  m_picture_id = 0;
 
     bool  m_has_inventories   : 1;
@@ -92,13 +94,15 @@ private:
 class Category
 {
 public:
+    static constexpr uint InvalidId = static_cast<uint>(-1);
+
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
 
     Category(std::nullptr_t) : Category() { } // for scripting only!
 
 private:
-    uint     m_id = 0;
+    uint     m_id = InvalidId;
     QString  m_name;
 
 private:
@@ -112,6 +116,8 @@ private:
 class Color
 {
 public:
+    static constexpr uint InvalidId = static_cast<uint>(-1);
+
     uint id() const           { return m_id; }
     QString name() const      { return m_name; }
     QColor color() const      { return m_color; }
@@ -175,7 +181,7 @@ private:
 class Item
 {
 public:
-    QString id() const                     { return m_id; }
+    QByteArray id() const                  { return m_id; }
     QString name() const                   { return m_name; }
     const ItemType *itemType() const       { return m_item_type; }
     const Category *category() const       { return m_category; }
@@ -233,7 +239,7 @@ public:
 
 private:
     QString           m_name;
-    QString           m_id;
+    QByteArray        m_id;
     const ItemType *  m_item_type = nullptr;
     const Category *  m_category = nullptr;
     const Color *     m_color = nullptr;
@@ -264,7 +270,7 @@ private:
     };
 
     static int compare(const Item **a, const Item **b);
-    static bool lowerBound(const Item *item, const std::pair<char, QString> &ids);
+    static bool lowerBound(const Item *item, const std::pair<char, QByteArray> &ids);
 
     friend class Core;
     friend class TextImport;
@@ -578,7 +584,7 @@ private:
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);
 
-    const Item *findItem(char type, const QString &id) const;
+    const Item *findItem(char type, const QByteArray &id) const;
     const Color *findColor(uint id) const;
     const BrickLink::Category *findCategory(uint id) const;
 
@@ -600,14 +606,14 @@ private:
 class Incomplete
 {
 public:
-    QString m_item_id;
-    QString m_item_name;
-    QString m_itemtype_id;
-    QString m_itemtype_name;
-    QString m_color_id;
-    QString m_color_name;
-    QString m_category_id;
-    QString m_category_name;
+    QByteArray m_item_id;
+    char       m_itemtype_id = ItemType::InvalidId;
+    uint       m_category_id = Category::InvalidId;
+    uint       m_color_id = Color::InvalidId;
+    QString    m_item_name;
+    QString    m_itemtype_name;
+    QString    m_category_name;
+    QString    m_color_name;
 
     bool operator==(const Incomplete &other) const; //TODO: = default in C++20
 };
@@ -654,7 +660,7 @@ public:
     const Color *colorFromLDrawId(int ldrawId) const;
     const Category *category(uint id) const;
     const ItemType *itemType(char id) const;
-    const Item *item(char tid, const QString &id) const;
+    const Item *item(char tid, const QByteArray &id) const;
 
     const PartColorCode *partColorCode(uint id);
 

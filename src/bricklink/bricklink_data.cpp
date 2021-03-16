@@ -60,7 +60,7 @@ BrickLink::Item::~Item()
     delete [] m_appears_in;
 }
 
-bool BrickLink::Item::lowerBound(const Item *item, const std::pair<char, QString> &ids)
+bool BrickLink::Item::lowerBound(const Item *item, const std::pair<char, QByteArray> &ids)
 {
     int d = (item->m_item_type->id() - ids.first);
 

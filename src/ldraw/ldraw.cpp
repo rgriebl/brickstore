@@ -28,10 +28,11 @@
 #  include <shlobj.h>
 #endif
 
+#include "utility.h"
 #include "ldraw.h"
 #include "stopwatch.h"
 
-LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir &dir)
+LDraw::Element *LDraw::Element::fromString(const QString &line, const QDir &dir)
 {
     Element *e = nullptr;
 
@@ -44,77 +45,77 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
         13,
     };
 
-    QList<QByteArray> bal = line.simplified().split(' ');
+    auto list = line.simplified().split(' '_l1);
 
-    if (!bal.isEmpty()) {
-        int t = bal[0].toInt();
-        bal.removeFirst();
+    if (!list.isEmpty()) {
+        int t = list.at(0).toInt();
+        list.removeFirst();
 
         if (t >= 0 && t <= 5) {
-            if (!t || element_count_lut[t] == bal.size()) {
+            if (!t || element_count_lut[t] == list.size()) {
                 switch (t) {
                 case 0: {
                     e = CommentElement::create(line.simplified().mid(2));
                     break;
                 }
                 case 1: {
-                    int color = bal[0].toInt();
+                    int color = list[0].toInt();
                     QMatrix4x4 m(
-                        bal[4].toFloat(),
-                        bal[5].toFloat(),
-                        bal[6].toFloat(),
-                        bal[1].toFloat(),
+                        list[4].toFloat(),
+                        list[5].toFloat(),
+                        list[6].toFloat(),
+                        list[1].toFloat(),
 
-                        bal[7].toFloat(),
-                        bal[8].toFloat(),
-                        bal[9].toFloat(),
-                        bal[2].toFloat(),
+                        list[7].toFloat(),
+                        list[8].toFloat(),
+                        list[9].toFloat(),
+                        list[2].toFloat(),
 
-                        bal[10].toFloat(),
-                        bal[11].toFloat(),
-                        bal[12].toFloat(),
-                        bal[3].toFloat(),
+                        list[10].toFloat(),
+                        list[11].toFloat(),
+                        list[12].toFloat(),
+                        list[3].toFloat(),
 
                         0, 0, 0, 1
                     );
                     m.optimize();
 
-                    e = PartElement::create(color, m, bal[13], dir);
+                    e = PartElement::create(color, m, list[13], dir);
                     break;
                 }
                 case 2: {
-                    int color = bal[0].toInt();
+                    int color = list[0].toInt();
                     QVector3D v[2];
 
                     for (int i = 0; i < 2; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
+                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
                     e = LineElement::create(color, v);
                     break;
                 }
                 case 3: {
-                    int color = bal[0].toInt();
+                    int color = list[0].toInt();
                     QVector3D v[3];
 
                     for (int i = 0; i < 3; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
+                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
                     e = TriangleElement::create(color, v);
                     break;
                 }
                 case 4: {
-                    int color = bal[0].toInt();
+                    int color = list[0].toInt();
                     QVector3D v[4];
 
                     for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
+                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
                     e = QuadElement::create(color, v);
                     break;
                 }
                 case 5: {
-                    int color = bal[0].toInt();
+                    int color = list[0].toInt();
                     QVector3D v[4];
 
                     for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
+                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
                     e = CondLineElement::create(color, v);
                     break;
                 }
@@ -131,19 +132,19 @@ void LDraw::Element::dump() const
 { }
 
 
-LDraw::CommentElement::CommentElement(const QByteArray &text)
+LDraw::CommentElement::CommentElement(const QString &text)
     : Element(Comment)
     , m_comment(text)
 { }
 
-LDraw::CommentElement::CommentElement(LDraw::Element::Type t, const QByteArray &text)
+LDraw::CommentElement::CommentElement(LDraw::Element::Type t, const QString &text)
     : Element(t)
     , m_comment(text)
 { }
 
-LDraw::CommentElement *LDraw::CommentElement::create(const QByteArray &text)
+LDraw::CommentElement *LDraw::CommentElement::create(const QString &text)
 {
-    if (text.startsWith("BFC "))
+    if (text.startsWith("BFC "_l1))
         return new BfcCommandElement(text);
     else
         return new CommentElement(text);
@@ -156,26 +157,26 @@ void LDraw::CommentElement::dump() const
 
 
 
-LDraw::BfcCommandElement::BfcCommandElement(const QByteArray &text)
+LDraw::BfcCommandElement::BfcCommandElement(const QString &text)
     : CommentElement(BfcCommand, text)
 {
-    QList<QByteArray> c = text.split(' ');
-    if ((c.count() >= 2) && (c.at(0) == "BFC")) {
+    auto c = text.split(' '_l1);
+    if ((c.count() >= 2) && (c.at(0) == "BFC"_l1)) {
         for (int i = 1; i < c.length(); ++i) {
-            QByteArray bfcCommand = c.at(i);
+            QString bfcCommand = c.at(i);
 
-            if (bfcCommand == "INVERTNEXT") {
+            if (bfcCommand == "INVERTNEXT"_l1) {
                 m_invertNext = true;
-            } else if (bfcCommand == "CW") {
+            } else if (bfcCommand == "CW"_l1) {
                 m_cw = true;
-            } else if (bfcCommand == "CCW") {
+            } else if (bfcCommand == "CCW"_l1) {
                 m_ccw = true;
             }
         }
     }
 }
 
-LDraw::BfcCommandElement *LDraw::BfcCommandElement::create(const QByteArray &text)
+LDraw::BfcCommandElement *LDraw::BfcCommandElement::create(const QString &text)
 {
     return new BfcCommandElement(text);
 }
@@ -330,22 +331,27 @@ LDraw::Part::~Part()
 LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
 {
     Part *p = new Part();
-//    QTextStream ts(&file);
+    QTextStream ts(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    ts.setCodec("UTF-8");
+#else
+    ts.setEncoding(QStringConverter::Utf8);
+#endif
 
-    QByteArray line;
+    QString line;
     int lineno = 0;
-    while (!file.atEnd()) {
-        line = file.readLine();
+    while (!ts.atEnd()) {
+        line = ts.readLine();
         if (line.isEmpty() && file.error() != QFile::NoError) {
-            qWarning("Read error in line #%d: %s", lineno, line.constData());
+            qWarning() << "Read error in line" << lineno << ":" << line;
             break;
         }
         lineno++;
-        Element *e = Element::fromByteArray(line, dir);
+        Element *e = Element::fromString(line, dir);
         if (e)
             p->m_elements.append(e);
         else
-            qWarning("Could not parse line #%d: %s", lineno, line.constData());
+            qWarning() << "Could not parse line" << lineno << ":" << line;
     }
 
     if (p->m_elements.isEmpty()) {
@@ -490,11 +496,11 @@ LDraw::Part *LDraw::Core::partFromFile(const QString &file)
     return findPart(file, QDir::current());
 }
 
-LDraw::Part *LDraw::Core::partFromId(const QString &id)
+LDraw::Part *LDraw::Core::partFromId(const QByteArray &id)
 {
     QDir parts(dataPath());
-    if (parts.cd(QLatin1String("parts")) || parts.cd(QLatin1String("PARTS"))) {
-        QString filename = id + QLatin1String(".dat");
+    if (parts.cd("parts"_l1) || parts.cd("PARTS"_l1)) {
+        QString filename = QLatin1String(id) % u".dat";
         return findPart(parts.absoluteFilePath(filename), QDir::root());
     }
     return nullptr;

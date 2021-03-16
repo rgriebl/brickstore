@@ -531,7 +531,7 @@ QString AddItemDialog::historyTextFor(const QDateTime &when, const Lot &lot)
 
     QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %
             u":&nbsp;&nbsp;<b>" % QString::number(lot.quantity()) % u"</b>&nbsp;&nbsp;" % cs %
-            lot.itemName() % u" <i>[" + lot.itemId() % u"]</i>";
+            lot.itemName() % u" <i>[" + QLatin1String(lot.itemId()) % u"]</i>";
 
     return s;
 }

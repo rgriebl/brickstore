@@ -72,7 +72,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItem.asp";
             QUrlQuery query;
-            query.addQueryItem(QChar(item->itemType()->id()), item->id());
+            query.addQueryItem(QString(QLatin1Char(item->itemType()->id())), QLatin1String(item->id()));
             if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("C", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
@@ -84,7 +84,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogPG.asp";
             QUrlQuery query;
-            query.addQueryItem(QChar(item->itemType()->id()), item->id());
+            query.addQueryItem(QString(QLatin1Char(item->itemType()->id())), QLatin1String(item->id()));
             if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
@@ -333,10 +333,11 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
 {
     // Avoid huge directories with 1000s of entries.
     // sse4.2 is only used if a seed value is supplied
-    uchar hash = q5Hash(item->id(), 42) & 0xff; // please note: Qt6's qHash is incompatible
+    // please note: Qt6's qHash is incompatible
+    uchar hash = q5Hash(QString::fromLatin1(item->id()), 42) & 0xff;
 
-    QString p = m_datadir % QChar(item->itemType()->id()) % u'/' % (hash < 0x10 ? u"0" : u"")
-            % QString::number(hash, 16) % u'/' % item->id() % u'/'
+    QString p = m_datadir % QLatin1Char(item->itemType()->id()) % u'/' % (hash < 0x10 ? u"0" : u"")
+            % QString::number(hash, 16) % u'/' % QLatin1String(item->id()) % u'/'
             % (color ? QString::number(color->id()) : QString()) % (color ? u"/" : u"")
             % fileName;
 
@@ -749,7 +750,7 @@ const ItemType *Core::itemType(char id) const
     return nullptr;
 }
 
-const Item *Core::item(char tid, const QString &id) const
+const Item *Core::item(char tid, const QByteArray &id) const
 {
     auto needle = std::make_pair(tid, id);
     auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lowerBound);
@@ -985,13 +986,14 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 .arg(f.fileName());
         }
 
-        qDebug() << "Loaded database from" << f.fileName()
-                 << "\n  Generated at:" << generationDate
+        qDebug().noquote() << "Loaded database from" << f.fileName()
+                 << "\n  Generated at:" << QLocale().toString(generationDate)
                  << "\n  Colors      :" << m_colors.size()
                  << "\n  Item Types  :" << m_item_types.size()
                  << "\n  Categories  :" << m_categories.size()
                  << "\n  Items       :" << m_items.size()
-                 << "\n  PCCs        :" << m_pccs.size();
+                 << "\n  PCCs        :" << m_pccs.size()
+                 << "\n  ChangeLog   :" << m_changelog.size();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
@@ -1199,7 +1201,7 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
     QByteArray name;
 
     dataStream >> id >> name >> ittid >> catid;
-    item->m_id = QString::fromUtf8(id);
+    item->m_id = id;
     item->m_name = QString::fromUtf8(name);
     item->m_item_type = BrickLink::core()->itemType(ittid);
     item->m_category = BrickLink::core()->category(catid);
@@ -1208,7 +1210,7 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
     quint32 index = 0, year = 0;
     qint64 invupd = 0;
     dataStream >> colorid >> invupd >> item->m_weight >> index >> year;
-    item->m_color = BrickLink::core()->color(colorid == quint32(-1) ? 0 : colorid);
+    item->m_color = BrickLink::core()->color(colorid);
     item->m_index = index;
     item->m_year = year;
     item->m_last_inv_update = invupd;
@@ -1264,13 +1266,13 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
 
 void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, DatabaseVersion v)
 {
-    dataStream << item->m_id.toUtf8() << item->m_name.toUtf8() << qint8(item->m_item_type->id());
+    dataStream << item->m_id << item->m_name.toUtf8() << qint8(item->m_item_type->id());
 
     if (v <= DatabaseVersion::Version_2)
         dataStream << quint32(1); // this used to be a list of category ids
     dataStream << quint32(item->category()->id());
 
-    quint32 colorid = item->m_color ? item->m_color->id() : quint32(-1);
+    quint32 colorid = item->m_color ? item->m_color->id() : Color::InvalidId;
     dataStream << colorid << qint64(item->m_last_inv_update) << item->m_weight
        << quint32(item->m_index) << quint32(item->m_year);
 
@@ -1312,10 +1314,9 @@ PartColorCode *Core::readPCCFromDatabase(QDataStream &dataStream, Core::Database
     qint8 itemTypeId;
     QString itemId;
     uint colorId;
-
     dataStream >> pcc->m_id >> itemTypeId >> itemId >> colorId;
 
-    pcc->m_item = item(itemTypeId, itemId);
+    pcc->m_item = item(itemTypeId, itemId.toLatin1());
     pcc->m_color = color(colorId);
     return pcc.take();
 }
@@ -1336,12 +1337,12 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
     const Item *fixed_item = item;
     const Color *fixed_color = color;
 
-    QString itemtypeid = inc->m_itemtype_id;
-    QString itemid     = inc->m_item_id;
-    QString colorid    = inc->m_color_name;
+    QByteArray itemtypeid { 1, inc->m_itemtype_id };
+    QByteArray itemid { inc->m_item_id };
+    uint colorid = inc->m_color_id;
 
-    if (itemtypeid.isEmpty() && !inc->m_itemtype_name.isEmpty())
-        itemtypeid = inc->m_itemtype_name.at(0).toUpper();
+    if (!itemtypeid.isEmpty() && !inc->m_itemtype_name.isEmpty())
+        itemtypeid = inc->m_itemtype_name.toLatin1().toUpper().left(1);
 
     for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
         const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(size_t(i)));
@@ -1350,25 +1351,23 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
             if ((cl.type() == ChangeLogEntry::ItemId) ||
                     (cl.type() == ChangeLogEntry::ItemMerge) ||
                     (cl.type() == ChangeLogEntry::ItemType)) {
-                if ((itemtypeid == QLatin1String(cl.from(0))) &&
-                        (itemid == QLatin1String(cl.from(1)))) {
-                    itemtypeid = QLatin1String(cl.to(0));
-                    itemid = QLatin1String(cl.to(1));
+                if ((itemtypeid == cl.from(0).left(1)) &&
+                        (itemid == cl.from(1))) {
+                    itemtypeid = cl.to(0).left(1);
+                    itemid = cl.to(1);
 
-                    if (itemtypeid.length() == 1 && !itemid.isEmpty())
-                        fixed_item = core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
+                    if (!itemtypeid.isEmpty() && !itemid.isEmpty())
+                        fixed_item = core()->item(itemtypeid.at(0), itemid);
                 }
             }
         }
         if (!fixed_color) {
             if (cl.type() == ChangeLogEntry::ColorMerge) {
-                if (colorid == QLatin1String(cl.from(0))) {
-                    colorid = QLatin1String(cl.to(0));
-
+                if (colorid == cl.from(0).toUInt()) {
                     bool ok;
-                    uint cid = colorid.toUInt(&ok);
+                    colorid = cl.to(0).toUInt(&ok);
                     if (ok)
-                        fixed_color = core()->color(cid);
+                        fixed_color = core()->color(colorid);
                 }
             }
         }

@@ -88,7 +88,7 @@ ItemType BrickLink::itemType(const QString &itemTypeId) const
 
 Item BrickLink::item(const QString &itemTypeId, const QString &itemId) const
 {
-    return d->item(firstCharInString(itemTypeId), itemId);
+    return d->item(firstCharInString(itemTypeId), itemId.toLatin1());
 }
 
 PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority)
@@ -164,6 +164,11 @@ QImage Color::image() const
 Item::Item(const ::BrickLink::Item *item)
     : WrapperBase(item)
 { }
+
+QString Item::id() const
+{
+    return QString::fromLatin1(wrapped->id());
+}
 
 QVariantList Item::knownColors() const
 {
