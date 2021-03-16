@@ -72,7 +72,7 @@ public slots:
     void titleUpdate();
     void setFilter(const QString &filterText);
     void reFilter();
-    void updateReFilterAction(bool b);
+    void updateReFilterAction(bool isFiltered);
 
     void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
                                       BrickLink::Condition condition = BrickLink::Condition::New);

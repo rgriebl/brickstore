@@ -1609,6 +1609,7 @@ void FrameWork::connectWindow(QWidget *w)
     blockUpdate(m_activeWin ? m_activeWin->isBlockingOperationActive() : false);
     titleUpdate();
     modificationUpdate();
+    updateReFilterAction(m_activeWin ? m_activeWin->document()->isFiltered() : true);
 
     emit windowActivated(m_activeWin);
 }
@@ -1805,10 +1806,10 @@ void FrameWork::reFilter()
         m_activeWin->document()->reFilter();
 }
 
-void FrameWork::updateReFilterAction(bool b)
+void FrameWork::updateReFilterAction(bool isFiltered)
 {
     if (m_filter)
-        m_filter->reFilterAction()->setVisible(!b);
+        m_filter->reFilterAction()->setVisible(!m_filter->text().isEmpty() && !isFiltered);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)
