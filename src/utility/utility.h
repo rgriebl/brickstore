@@ -37,7 +37,6 @@ QColor premultiplyAlpha(const QColor &c);
 
 void setPopupPos(QWidget *w, const QRect &pos);
 
-QString safeRename(const QString &basepath);
 QString sanitizeFileName(const QString &name);
 
 quint64 physicalMemory();

@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 #include <QFile>
+#include <QSaveFile>
 #include <QApplication>
 #include <qlogging.h>
 #include <QUrlQuery>
@@ -23,11 +24,13 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #endif
 
+#include "utility.h"
 #include "bricklink.h"
 #include "utility.h"
 #include "rebuilddatabase.h"
@@ -332,7 +335,7 @@ bool RebuildDatabase::download()
     }
 
     for (tptr = table; tptr->m_url; tptr++) {
-        QFile *f = new QFile(path + tptr->m_file + ".new");
+        auto *f = new QSaveFile(path % QLatin1String(tptr->m_file) % ".new"_l1);
 
         if (!f->open(QIODevice::WriteOnly)) {
             m_error = QString("failed to write %1: %2").arg(tptr->m_file, f->errorString());
@@ -367,23 +370,16 @@ bool RebuildDatabase::download()
 void RebuildDatabase::downloadJobFinished(TransferJob *job)
 {
     if (job) {
-        auto *f = qobject_cast<QFile *>(job->file());
+        auto *f = qobject_cast<QSaveFile *>(job->file());
 
         m_downloads_in_progress--;
         bool ok = false;
 
         if (job->isCompleted() && f) {
-            f->close();
-
-            QString basepath = f->fileName();
-            basepath.truncate(basepath.length() - 4);
-
-            QString err = Utility::safeRename(basepath);
-
-            if (err.isNull())
+            if (f->commit())
                 ok = true;
             else
-                m_error = err;
+                m_error = f->errorString();
         }
         else
             m_error = QString("failed to download file: ") + job->errorString();

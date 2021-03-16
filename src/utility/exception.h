@@ -33,7 +33,7 @@ public:
         : Exception(QString::fromLatin1(message))
     { }
 
-    Exception(QFile *f, const char *message)
+    Exception(QFileDevice *f, const char *message)
         : Exception(QLatin1String(message) % u" (" % f->fileName() % u"): " % f->errorString())
     { }
 

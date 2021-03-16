@@ -16,6 +16,7 @@
 
 #include <QFile>
 #include <QBuffer>
+#include <QSaveFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
@@ -1018,7 +1019,7 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
     QString fn(!filename.isEmpty() ? filename : dataPath() + defaultDatabaseName(version));
 
     try {
-        QFile f(fn + QLatin1String(".new"));
+        QSaveFile f(fn);
         if (!f.open(QIODevice::WriteOnly))
             throw Exception(&f, "could not open database for writing");
 
@@ -1083,16 +1084,13 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
 
         check(cw.endChunk()); // BSDB root chunk
 
-        f.close();
-        QString err = Utility::safeRename(filename);
-        if (!err.isNull())
-            throw Exception(err);
+        if (!f.commit())
+            throw Exception(f.errorString());
 
         return true;
 
     } catch (const Exception &e) {
         qWarning() << "Error writing database:" << e.what();
-        QFile::remove(fn + ".new");
         return false;
     }
 }

@@ -191,34 +191,6 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
     w->resize(sh);
 }
 
-QString Utility::safeRename(const QString &basepath)
-{
-    QString error;
-    QString newpath = basepath + ".new";
-    QString oldpath = basepath + ".old";
-
-    QDir cwd;
-
-    if (cwd.exists(newpath)) {
-        if (!cwd.exists(oldpath) || cwd.remove(oldpath)) {
-            if (!cwd.exists(basepath) || cwd.rename(basepath, oldpath)) {
-                if (cwd.rename(newpath, basepath))
-                    error = QString();
-                else
-                    error = qApp->translate("Utility", "Could not rename %1 to %2.").arg(newpath, basepath);
-            }
-            else
-                error = qApp->translate("Utility", "Could not backup %1 to %2.").arg(basepath, oldpath);
-        }
-        else
-            error = qApp->translate("Utility", "Could not delete %1.").arg(oldpath);
-    }
-    else
-        error = qApp->translate("Utility", "Could not find %1.").arg(newpath);
-
-    return error;
-}
-
 quint64 Utility::physicalMemory()
 {
     quint64 physmem = 0;
