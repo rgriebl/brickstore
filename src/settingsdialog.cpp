@@ -421,6 +421,12 @@ void SettingsDialog::accept()
     QDialog::accept();
 }
 
+void SettingsDialog::showEvent(QShowEvent *e)
+{
+    QDialog::showEvent(e);
+    resize(sizeHint());
+}
+
 void SettingsDialog::currenciesUpdated()
 {
     QString oldprefered = m_preferedCurrency;

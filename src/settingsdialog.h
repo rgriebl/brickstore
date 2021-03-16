@@ -32,6 +32,9 @@ public:
 public slots:
     void accept() override;
 
+protected:
+    void showEvent(QShowEvent *e) override;
+
 protected slots:
     void selectDocDir(int index);
     void selectLDrawDir(int index);
