@@ -124,8 +124,8 @@ public:
                 QString cc = cart->countryCode();
                 flag = m_flags.value(cc);
                 if (flag.isNull()) {
-                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Normal);
-                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Selected);
+                    flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Normal);
+                    flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Selected);
                     m_flags.insert(cc, flag);
                 }
                 return flag;
@@ -219,7 +219,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     connect(w_import, &QAbstractButton::clicked,
             this, [this]() { importCarts(w_carts->selectionModel()->selectedRows()); });
     w_showOnBrickLink = new QPushButton();
-    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
+    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
     connect(w_showOnBrickLink, &QAbstractButton::clicked,
             this, &ImportCartDialog::showCartsOnBrickLink);
@@ -249,11 +249,11 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportCartDialog::login, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportCartDialog/Geometry"))
+    QByteArray ba = Config::inst()->value("/MainWindow/ImportCartDialog/Geometry"_l1)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportCartDialog/Filter")).toByteArray();
+    ba = Config::inst()->value("/MainWindow/ImportCartDialog/Filter"_l1).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
 
@@ -262,8 +262,8 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
 ImportCartDialog::~ImportCartDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportCartDialog/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportCartDialog/Filter", w_filter->saveState());
+    Config::inst()->setValue("/MainWindow/ImportCartDialog/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportCartDialog/Filter"_l1, w_filter->saveState());
 }
 
 void ImportCartDialog::keyPressEvent(QKeyEvent *e)
@@ -305,11 +305,11 @@ void ImportCartDialog::languageChange()
 
 void ImportCartDialog::login()
 {
-    QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax");
+    QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
     QUrlQuery q;
-    q.addQueryItem("userid",   Config::inst()->loginForBrickLink().first);
-    q.addQueryItem("password", Config::inst()->loginForBrickLink().second);
-    q.addQueryItem("keepme_loggedin", "1");
+    q.addQueryItem("userid"_l1,          Config::inst()->loginForBrickLink().first);
+    q.addQueryItem("password"_l1,        Config::inst()->loginForBrickLink().second);
+    q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
     url.setQuery(q);
 
     auto job = TransferJob::post(url, nullptr, true /* no redirects */);
@@ -331,7 +331,7 @@ void ImportCartDialog::updateCarts()
     w_import->setEnabled(false);
     w_carts->setEnabled(false);
 
-    QUrl url("https://www.bricklink.com/v2/globalcart.page");
+    QUrl url("https://www.bricklink.com/v2/globalcart.page"_l1);
 
     auto job = TransferJob::post(url, nullptr, true /* no redirects */);
     job->setUserData<void>('g', nullptr);
@@ -374,8 +374,8 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                 if (json.isNull())
                     throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-                const QJsonArray domesticCarts = json["domestic"].toObject()["stores"].toArray();
-                const QJsonArray internationalCarts = json["international"].toObject()["stores"].toArray();
+                const QJsonArray domesticCarts = json["domestic"_l1].toObject()["stores"_l1].toArray();
+                const QJsonArray internationalCarts = json["international"_l1].toObject()["stores"_l1].toArray();
                 QVector<QJsonObject> jsonCarts;
                 for (auto &&v : domesticCarts)
                     jsonCarts << v.toObject();
@@ -383,27 +383,27 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                     jsonCarts << v.toObject();
 
                 for (auto &&jsonCart : jsonCarts) {
-                    int sellerId = jsonCart["sellerID"].toInt();
-                    int lots = jsonCart["totalLots"].toInt();
-                    int items = jsonCart["totalItems"].toInt();
-                    QString totalPrice = jsonCart["totalPriceNative"].toString();
+                    int sellerId = jsonCart["sellerID"_l1].toInt();
+                    int lots = jsonCart["totalLots"_l1].toInt();
+                    int items = jsonCart["totalItems"_l1].toInt();
+                    QString totalPrice = jsonCart["totalPriceNative"_l1].toString();
 
                     if (sellerId && !totalPrice.isEmpty() && lots && items) {
                         auto cart = new BrickLink::Cart;
                         cart->setSellerId(sellerId);
                         cart->setLotCount(lots);
                         cart->setItemCount(items);
-                        if (totalPrice.mid(2, 2) == " $") // why does if have to be different?
-                            cart->setCurrencyCode(totalPrice.left(2) + QChar('D'));
+                        if (totalPrice.mid(2, 2) == " $"_l1) // why does if have to be different?
+                            cart->setCurrencyCode(totalPrice.left(2) + 'D'_l1);
                         else
                             cart->setCurrencyCode(totalPrice.left(3));
                         cart->setCartTotal(totalPrice.mid(4).toDouble());
-                        cart->setDomestic(jsonCart["type"].toString() == QLatin1String("domestic"));
-                        cart->setLastUpdated(QDate::fromString(jsonCart["lastUpdated"].toString(),
-                                             QLatin1String("yyyy-MM-dd")));
-                        cart->setSellerName(jsonCart["sellerName"].toString());
-                        cart->setStoreName(jsonCart["storeName"].toString());
-                        cart->setCountryCode(jsonCart["countryID"].toString());
+                        cart->setDomestic(jsonCart["type"_l1].toString() == "domestic"_l1);
+                        cart->setLastUpdated(QDate::fromString(jsonCart["lastUpdated"_l1].toString(),
+                                             "yyyy-MM-dd"_l1));
+                        cart->setSellerName(jsonCart["sellerName"_l1].toString());
+                        cart->setStoreName(jsonCart["storeName"_l1].toString());
+                        cart->setCountryCode(jsonCart["countryID"_l1].toString());
                         carts << cart;
                     }
                 }
@@ -440,7 +440,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
     }
     case 'c': {
         auto cart = job->userData<BrickLink::Cart>('c');
-        QLocale en_US("en_US");
+        QLocale en_US("en_US"_l1);
 
         if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
             LotList lots;
@@ -452,18 +452,18 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                 if (json.isNull())
                     throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-                const QJsonArray cartItems = json["cart"].toObject()["items"].toArray();
+                const QJsonArray cartItems = json["cart"_l1].toObject()["items"_l1].toArray();
                 for (auto &&v : cartItems) {
                     const QJsonObject cartItem = v.toObject();
 
-                    QString itemId = cartItem["itemNo"].toString();
-                    int itemSeq = cartItem["itemSeq"].toInt();
-                    char itemTypeId = XmlHelpers::firstCharInString(cartItem["itemType"].toString());
-                    uint colorId = cartItem["colorID"].toVariant().toUInt();
-                    auto cond = (cartItem["invNew"].toString() == QLatin1String("New"))
+                    QByteArray itemId = cartItem["itemNo"_l1].toString().toLatin1();
+                    int itemSeq = cartItem["itemSeq"_l1].toInt();
+                    char itemTypeId = XmlHelpers::firstCharInString(cartItem["itemType"_l1].toString());
+                    uint colorId = cartItem["colorID"_l1].toVariant().toUInt();
+                    auto cond = (cartItem["invNew"_l1].toString() == "New"_l1)
                             ? BrickLink::Condition::New : BrickLink::Condition::Used;
-                    int qty = cartItem["cartQty"].toInt();
-                    QString priceStr = cartItem["nativePrice"].toString();
+                    int qty = cartItem["cartQty"_l1].toInt();
+                    QString priceStr = cartItem["nativePrice"_l1].toString();
                     double price = en_US.toDouble(priceStr.mid(4));
 
                     if (itemSeq)
@@ -478,12 +478,12 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                         lot->setCondition(cond);
 
                         if (lot->itemType()->hasSubConditions()) {
-                            QString scond = cartItem["invComplete"].toString();
-                            if (scond == QLatin1String("Complete"))
+                            QString scond = cartItem["invComplete"_l1].toString();
+                            if (scond == "Complete"_l1)
                                 lot->setSubCondition(BrickLink::SubCondition::Complete);
-                            if (scond == QLatin1String("Incomplete"))
+                            if (scond == "Incomplete"_l1)
                                 lot->setSubCondition(BrickLink::SubCondition::Incomplete);
-                            if (scond == QLatin1String("Sealed"))
+                            if (scond == "Sealed"_l1)
                                 lot->setSubCondition(BrickLink::SubCondition::Sealed);
                         }
 
@@ -519,9 +519,9 @@ void ImportCartDialog::importCarts(const QModelIndexList &rows)
     for (auto idx : rows) {
         auto cart = idx.data(CartPointerRole).value<const BrickLink::Cart *>();
 
-        QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax");
+        QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_l1);
         QUrlQuery query;
-        query.addQueryItem("sid", QString::number(cart->sellerId()));
+        query.addQueryItem("sid"_l1, QString::number(cart->sellerId()));
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);

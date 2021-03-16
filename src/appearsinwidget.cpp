@@ -18,6 +18,7 @@
 #include <QApplication>
 #include <QTimer>
 
+#include "utility.h"
 #include "framework.h"
 #include "picturewidget.h"
 #include "bricklink_model.h"
@@ -49,8 +50,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName(QLatin1String("appearsin_partoutitems"));
-    a->setIcon(QIcon::fromTheme("edit-partoutitems"));
+    a->setObjectName("appearsin_partoutitems"_l1);
+    a->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::partOut);
     addAction(a);
@@ -60,20 +61,20 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName(QLatin1String("appearsin_bl_catalog"));
-    a->setIcon(QIcon::fromTheme("bricklink-catalog"));
+    a->setObjectName("appearsin_bl_catalog"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName(QLatin1String("appearsin_bl_priceguide"));
-    a->setIcon(QIcon::fromTheme("bricklink-priceguide"));
+    a->setObjectName("appearsin_bl_priceguide"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName(QLatin1String("appearsin_bl_lotsforsale"));
-    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"));
+    a->setObjectName("appearsin_bl_lotsforsale"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLLotsForSale);
     addAction(a);
@@ -94,10 +95,10 @@ AppearsInWidget::~AppearsInWidget()
 
 void AppearsInWidget::languageChange()
 {
-    findChild<QAction *>(QLatin1String("appearsin_partoutitems"))->setText(tr("Part out Item..."));
-    findChild<QAction *>(QLatin1String("appearsin_bl_catalog"))->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *>(QLatin1String("appearsin_bl_priceguide"))->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *>(QLatin1String("appearsin_bl_lotsforsale"))->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *>("appearsin_partoutitems"_l1)->setText(tr("Part out Item..."));
+    findChild<QAction *>("appearsin_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *>("appearsin_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *>("appearsin_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 void AppearsInWidget::showContextMenu(const QPoint &pos)

@@ -90,7 +90,7 @@ QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &t
         QMessageBox *mb = new QMessageBox(icon, !title.isEmpty() ? title : defaultTitle(), msg,
                                           NoButton, parent ? parent : defaultParent());
         mb->setAttribute(Qt::WA_DeleteOnClose);
-        mb->setObjectName("messagebox");
+        mb->setObjectName("messagebox"_l1);
         mb->setStandardButtons(buttons);
         mb->setDefaultButton(defaultButton);
         mb->setTextFormat(Qt::RichText);

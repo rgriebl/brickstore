@@ -257,7 +257,7 @@ void TaskInfoWidget::delayedSelectionUpdate()
 
 
         if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
-            wgtstr = "-";
+            wgtstr = "-"_l1;
         } else {
             double weight = stat.weight();
 

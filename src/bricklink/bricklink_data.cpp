@@ -16,22 +16,23 @@
 #include <QString>
 #include <QStringBuilder>
 
+#include "utility.h"
 #include "bricklink.h"
 
 
 QString BrickLink::Color::typeName(TypeFlag t)
 {
     static const QMap<TypeFlag, QString> colortypes = {
-        { Solid,       "Solid" },
-        { Transparent, "Transparent" },
-        { Glitter,     "Glitter" },
-        { Speckle,     "Speckle" },
-        { Metallic,    "Metallic" },
-        { Chrome,      "Chrome" },
-        { Pearl,       "Pearl" },
-        { Milky,       "Milky" },
-        { Modulex,     "Modulex" },
-        { Satin,       "Satin" },
+        { Solid,       "Solid"_l1 },
+        { Transparent, "Transparent"_l1 },
+        { Glitter,     "Glitter"_l1 },
+        { Speckle,     "Speckle"_l1 },
+        { Metallic,    "Metallic"_l1 },
+        { Chrome,      "Chrome"_l1 },
+        { Pearl,       "Pearl"_l1 },
+        { Milky,       "Milky"_l1 },
+        { Modulex,     "Modulex"_l1 },
+        { Satin,       "Satin"_l1 },
     };
     return colortypes.value(t);
 }

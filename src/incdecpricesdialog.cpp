@@ -49,7 +49,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
 
     auto percent = new QToolButton();
     percent->setAutoRaise(true);
-    percent->setText("%");
+    percent->setText("%"_l1);
     percent->setCheckable(true);
     percent->setChecked(true);
     percent->setShortcut(tr("Ctrl+%"));

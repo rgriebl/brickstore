@@ -21,6 +21,7 @@
 #include <QCoreApplication>
 #include <QUrlQuery>
 
+#include "utility.h"
 #include "transfer.h"
 #include "config.h"
 
@@ -67,7 +68,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 
     j->m_url = url;
     if (j->m_url.scheme().isEmpty())
-        j->m_url.setScheme("http");
+        j->m_url.setScheme("http"_l1);
     j->m_only_if_newer = ifnewer;
     j->m_data = file ? nullptr : new QByteArray();
     j->m_file = file ? file : nullptr;
@@ -90,7 +91,7 @@ Transfer::Transfer(QObject *parent)
     : QObject(parent)
 {
     if (s_default_user_agent.isEmpty())
-        s_default_user_agent = QString("%1/%2").arg(qApp->applicationName(), qApp->applicationVersion());
+        s_default_user_agent = "%1/%2"_l1.arg(qApp->applicationName(), qApp->applicationVersion());
     m_user_agent = s_default_user_agent;
 
 
@@ -102,7 +103,7 @@ Transfer::Transfer(QObject *parent)
         return returnCode;
     });
     m_retriever->moveToThread(m_retrieverThread);
-    m_retrieverThread->setObjectName("TransferRetriever");
+    m_retrieverThread->setObjectName("TransferRetriever"_l1);
     m_retrieverThread->setParent(this);
     m_retrieverThread->start(QThread::LowPriority);
 
@@ -256,7 +257,7 @@ void TransferRetriever::schedule()
             j->m_reply = m_nam->get(req);
         }
         else {
-            req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+            req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded"_l1);
             QByteArray postdata = url.query(QUrl::FullyEncoded).toLatin1();
             url.setQuery(QUrlQuery());
             req.setUrl(url);

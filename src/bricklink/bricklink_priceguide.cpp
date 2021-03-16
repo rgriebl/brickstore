@@ -21,6 +21,7 @@
 #include <QRegularExpression>
 #include <QRunnable>
 
+#include "utility.h"
 #include "bricklink.h"
 
 
@@ -179,13 +180,13 @@ bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
     QString line;
 
     while (!(line = ts.readLine()).isNull()) {
-        if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
+        if (line.isEmpty() || (line[0] == '#'_l1) || (line[0] == '\r'_l1))         // skip comments fast
             continue;
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        QStringList sl = line.split('\t', QString::KeepEmptyParts);
+        QStringList sl = line.split('\t'_l1, QString::KeepEmptyParts);
 #else
-        QStringList sl = line.split('\t', Qt::KeepEmptyParts);
+        QStringList sl = line.split('\t'_l1, Qt::KeepEmptyParts);
 #endif
 
         if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
@@ -226,18 +227,18 @@ bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
 
 bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 {
-    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
+    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)"_l1);
 
-    QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
+    QString s = QString::fromUtf8(ba).replace("&nbsp;"_l1, " "_l1);
 
     result = { };
 
     int matchCounter = 0;
     int startPos = 0;
 
-    int currentPos = s.indexOf("Current Items for Sale");
+    int currentPos = s.indexOf("Current Items for Sale"_l1);
     bool hasCurrent = (currentPos > 0);
-    int pastSixPos = s.indexOf("Past 6 Months Sales");
+    int pastSixPos = s.indexOf("Past 6 Months Sales"_l1);
     bool hasPastSix = (pastSixPos > 0);
 
     for (int i = 0; i < 4; ++i) {
@@ -256,9 +257,9 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
                 ti = int(Time::PastSix);
 
             const QString condStr = m.captured(1);
-            if (condStr == "Used")
+            if (condStr == "Used"_l1)
                 ci = int(Condition::Used);
-            else if (condStr == "New")
+            else if (condStr == "New"_l1)
                 ci = int(Condition::New);
 
 //            qWarning() << i << ti << ci << m.capturedTexts().mid(1);
@@ -329,23 +330,23 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
     QUrl url;
 
     if (pg->m_scrapedHtml) {
-        url = QUrl("https://www.bricklink.com/priceGuideSummary.asp");
-        query.addQueryItem("a",       QChar(pg->item()->itemType()->id()));
-        query.addQueryItem("vcID",    "1"); // USD
-        query.addQueryItem("vatInc",  "Y");
-        query.addQueryItem("ajView",  "Y"); // only the AJAX snippet
-        query.addQueryItem("colorID", QString::number(pg->color()->id()));
-        query.addQueryItem("itemID",  pg->item()->id());
-        query.addQueryItem("uncache", QString::number(QDateTime::currentSecsSinceEpoch()));
+        url = QUrl("https://www.bricklink.com/priceGuideSummary.asp"_l1);
+        query.addQueryItem("a"_l1,       QString(QLatin1Char(pg->item()->itemType()->id())));
+        query.addQueryItem("vcID"_l1,    "1"_l1); // USD
+        query.addQueryItem("vatInc"_l1,  "Y"_l1);
+        query.addQueryItem("ajView"_l1,  "Y"_l1); // only the AJAX snippet
+        query.addQueryItem("colorID"_l1, QString::number(pg->color()->id()));
+        query.addQueryItem("itemID"_l1,  QLatin1String(pg->item()->id()));
+        query.addQueryItem("uncache"_l1, QString::number(QDateTime::currentSecsSinceEpoch()));
     } else {
         //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
-        url = QUrl("https://www.bricklink.com/BTpriceSummary.asp");
+        url = QUrl("https://www.bricklink.com/BTpriceSummary.asp"_l1);
 
-        query.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
-                           pg->item()->id());
-        query.addQueryItem("colorID",  QString::number(pg->color()->id()));
-        query.addQueryItem("cCode",    "USD");
-        query.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
+        query.addQueryItem(QString(QLatin1Char(pg->item()->itemType()->id())).toUpper(),
+                           QLatin1String(pg->item()->id()));
+        query.addQueryItem("colorID"_l1,  QString::number(pg->color()->id()));
+        query.addQueryItem("cCode"_l1,    "USD"_l1);
+        query.addQueryItem("cExc"_l1,     "Y"_l1); //  Y == exclude incomplete sets
     }
     url.setQuery(query);
 

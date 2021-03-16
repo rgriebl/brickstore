@@ -25,6 +25,7 @@
 #include <QKeySequence>
 #include <QStringBuilder>
 
+#include "utility.h"
 #include "config.h"
 #include "currency.h"
 #include "version.h"
@@ -55,11 +56,11 @@ static const char *application = BRICKSTORE_NAME;
 
 
 Config::Config()
-    : QSettings(organization, application)
+    : QSettings(QLatin1String(organization), QLatin1String(application))
 {
-    m_show_input_errors = value("General/ShowInputErrors", true).toBool();
-    m_show_difference_indicators = value("General/ShowDifferenceIndicators", false).toBool();
-    m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial"))
+    m_show_input_errors = value("General/ShowInputErrors"_l1, true).toBool();
+    m_show_difference_indicators = value("General/ShowDifferenceIndicators"_l1, false).toBool();
+    m_measurement = (value("General/MeasurementSystem"_l1).toString() == "imperial"_l1)
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
 }
@@ -92,15 +93,15 @@ QPair<QString, double> Config::legacyCurrencyCodeAndRate() const
 {
     const QString localCCode = QLocale::system().currencySymbol(QLocale::CurrencyIsoCode);
 
-    QSettings old_v12x(organization_v12x, application_v12x);
-    bool localized = old_v12x.value("/General/Money/Localized", false).toBool();
+    QSettings old_v12x(QLatin1String { organization_v12x }, QLatin1String { application_v12x });
+    bool localized = old_v12x.value("/General/Money/Localized"_l1, false).toBool();
     if (localized) {
-        return qMakePair(localCCode, old_v12x.value("/General/Money/Factor", 1).toDouble());
+        return qMakePair(localCCode, old_v12x.value("/General/Money/Factor"_l1, 1).toDouble());
     } else {
-        QSettings old_v11x(organization_v11x, application_v11x);
-        localized = old_v11x.value("/General/Money/Localized", false).toBool();
+        QSettings old_v11x(QLatin1String { organization_v11x }, QLatin1String { application_v11x });
+        localized = old_v11x.value("/General/Money/Localized"_l1, false).toBool();
         if (localized)
-            return qMakePair(localCCode, old_v11x.value("/General/Money/Factor", 1).toDouble());
+            return qMakePair(localCCode, old_v11x.value("/General/Money/Factor"_l1, 1).toDouble());
     }
     return qMakePair(QString(), 0);
 }
@@ -111,7 +112,7 @@ void Config::upgrade(int vmajor, int vminor)
 
     // no upgrades available, uncomment if needed later on
     //int cfgver = value("General/ConfigVersion", 0).toInt();
-    setValue("General/ConfigVersion", mkver(vmajor, vminor, 0));
+    setValue("General/ConfigVersion"_l1, mkver(vmajor, vminor, 0));
 
     auto copyOldConfig = [this](const char *org, const char *app) -> bool {
         static const std::vector<const char *> ignore = {
@@ -123,13 +124,13 @@ void Config::upgrade(int vmajor, int vminor)
             "Internet/Proxy"
         };
 
-        QSettings old(org, app);
-        if (old.value("General/ConfigVersion", 0).toInt()) {
+        QSettings old(QLatin1String { org }, QLatin1String { app });
+        if (old.value("General/ConfigVersion"_l1, 0).toInt()) {
             const auto allOldKeys = old.allKeys();
             for (const QString &key : allOldKeys) {
                 bool skip = false;
                 for (const char *ign : ignore) {
-                    if (key.startsWith(ign, Qt::CaseInsensitive))
+                    if (key.startsWith(QLatin1String(ign), Qt::CaseInsensitive))
                         skip = true;
                 }
                 if (!skip)
@@ -142,14 +143,14 @@ void Config::upgrade(int vmajor, int vminor)
     };
 
     // import old settings from BrickStore 1.1.x
-    if (!value("General/ImportedV11xSettings", 0).toInt()) {
+    if (!value("General/ImportedV11xSettings"_l1, 0).toInt()) {
         if (copyOldConfig(organization_v11x, application_v11x))
-            setValue("General/ImportedV11xSettings", 1);
+            setValue("General/ImportedV11xSettings"_l1, 1);
     }
     // import old settings from BrickStock 1.2.x
-    if (!value("General/ImportedV12xSettings", 0).toInt()) {
+    if (!value("General/ImportedV12xSettings"_l1, 0).toInt()) {
         if (copyOldConfig(organization_v12x, application_v12x))
-            setValue("General/ImportedV12xSettings", 1);
+            setValue("General/ImportedV12xSettings"_l1, 1);
     }
 
     // do config upgrades as needed
@@ -159,13 +160,13 @@ void Config::upgrade(int vmajor, int vminor)
 
 QStringList Config::recentFiles() const
 {
-    return value("/Files/Recent").toStringList();
+    return value("/Files/Recent"_l1).toStringList();
 }
 
 void Config::setRecentFiles(const QStringList &recent)
 {
     if (recent != recentFiles()) {
-        setValue("/Files/Recent", recent);
+        setValue("/Files/Recent"_l1, recent);
         emit recentFilesChanged(recent);
     }
 }
@@ -192,7 +193,7 @@ void Config::setShowInputErrors(bool b)
 {
     if (b != m_show_input_errors) {
         m_show_input_errors = b;
-        setValue("General/ShowInputErrors", b);
+        setValue("General/ShowInputErrors"_l1, b);
 
         emit showInputErrorsChanged(b);
     }
@@ -207,7 +208,7 @@ void Config::setShowDifferenceIndicators(bool b)
 {
     if (b != m_show_difference_indicators) {
         m_show_difference_indicators = b;
-        setValue("General/ShowDifferenceIndicators", b);
+        setValue("General/ShowDifferenceIndicators"_l1, b);
 
         emit showDifferenceIndicatorsChanged(b);
     }
@@ -215,17 +216,17 @@ void Config::setShowDifferenceIndicators(bool b)
 
 void Config::setLDrawDir(const QString &dir)
 {
-    setValue("General/LDrawDir", dir);
+    setValue("General/LDrawDir"_l1, dir);
 }
 
 QString Config::ldrawDir() const
 {
-    return value("General/LDrawDir").toString();
+    return value("General/LDrawDir"_l1).toString();
 }
 
 QString Config::documentDir() const
 {
-    QString dir = value("General/DocDir", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
+    QString dir = value("General/DocDir"_l1, QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
 
     if (dir.isEmpty())
         dir = QDir::homePath();
@@ -235,24 +236,24 @@ QString Config::documentDir() const
 
 void Config::setDocumentDir(const QString &dir)
 {
-    setValue("General/DocDir", dir);
+    setValue("General/DocDir"_l1, dir);
 }
 
 
 QString Config::dataDir() const
 {
     static QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    return value("BrickLink/DatDir", cacheDir).toString();
+    return value("BrickLink/DatDir"_l1, cacheDir).toString();
 }
 
 void Config::setDataDir(const QString &dir)
 {
-    setValue("BrickLink/DataDir", dir);
+    setValue("BrickLink/DataDir"_l1, dir);
 }
 
 QString Config::language() const
 {
-    return value("General/Locale", QLocale::system().name().left(2)).toString();
+    return value("General/Locale"_l1, QLocale::system().name().left(2)).toString();
 }
 
 void Config::setLanguage(const QString &lang)
@@ -260,7 +261,7 @@ void Config::setLanguage(const QString &lang)
     QString old = language();
 
     if (old != lang) {
-        setValue("General/Locale", lang);
+        setValue("General/Locale"_l1, lang);
 
         emit languageChanged();
     }
@@ -275,8 +276,8 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
 {
     if (ms != m_measurement) {
         m_measurement= ms;
-        setValue("General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric")
-                                                                          : QLatin1String("imperial"));
+        setValue("General/MeasurementSystem"_l1, (ms == QLocale::MetricSystem) ? "metric"_l1
+                                                                               : "imperial"_l1);
         emit measurementSystemChanged(ms);
     }
 }
@@ -302,7 +303,7 @@ QMap<QByteArray, int> Config::updateIntervals() const
     static const char *lut[] = { "Picture", "PriceGuide", "Database" };
 
     for (const auto &iv : lut)
-        uiv[iv] = value(QLatin1String("BrickLink/UpdateInterval/") + QLatin1String(iv), uiv[iv]).toInt();
+        uiv[iv] = value("BrickLink/UpdateInterval/"_l1 + QLatin1String(iv), uiv[iv]).toInt();
     return uiv;
 }
 
@@ -327,7 +328,7 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
         it.next();
 
         if (it.value() != old_uiv.value(it.key())) {
-            setValue(QLatin1String("BrickLink/UpdateInterval/") + it.key(), it.value());
+            setValue("BrickLink/UpdateInterval/"_l1 % QLatin1String(it.key()), it.value());
             modified = true;
         }
     }
@@ -341,7 +342,7 @@ void Config::setFontSizePercent(int p)
     auto oldp = fontSizePercent();
 
     if (oldp != p) {
-        setValue("Interface/FontSizePercent", qBound(50, p, 200));
+        setValue("Interface/FontSizePercent"_l1, qBound(50, p, 200));
         emit fontSizePercentChanged(p);
     }
 }
@@ -354,7 +355,7 @@ void Config::setIconSize(const QSize &iconSize)
     auto oldIconSize = this->iconSize();
 
     if (oldIconSize != iconSize) {
-        setValue("Interface/IconSize", iconSize.width());
+        setValue("Interface/IconSize"_l1, iconSize.width());
         emit iconSizeChanged(iconSize);
     }
 }
@@ -364,7 +365,7 @@ void Config::setItemImageSizePercent(int p)
     auto oldp = itemImageSizePercent();
 
     if (oldp != p) {
-        setValue("Interface/ItemImageSizePercent", qBound(50, p, 200));
+        setValue("Interface/ItemImageSizePercent"_l1, qBound(50, p, 200));
         emit itemImageSizePercentChanged(p);
     }
 }
@@ -373,28 +374,28 @@ QByteArray Config::columnLayout(const QString &id) const
 {
     if (id.isEmpty())
         return { };
-    return value(u"ColumnLayouts/" % id % u"/Layout").value<QByteArray>();
+    return value("ColumnLayouts/"_l1 % id % "/Layout"_l1).value<QByteArray>();
 }
 
 QString Config::columnLayoutName(const QString &id) const
 {
     if (id.isEmpty())
         return { };
-    return value(u"ColumnLayouts/" % id % u"/Name").toString();
+    return value("ColumnLayouts/"_l1 % id % "/Name"_l1).toString();
 }
 
 int Config::columnLayoutOrder(const QString &id) const
 {
     if (id.isEmpty())
         return -1;
-    return value(u"ColumnLayouts/" % id % u"/Order", -1).toInt();
+    return value("ColumnLayouts/"_l1 % id % "/Order"_l1, -1).toInt();
 }
 
 QStringList Config::columnLayoutIds() const
 {
-    const_cast<Config *>(this)->beginGroup("ColumnLayouts");
+    const_cast<Config *>(this)->beginGroup("ColumnLayouts"_l1);
     auto sl = childGroups();
-    sl.removeOne("user-default");
+    sl.removeOne("user-default"_l1);
     const_cast<Config *>(this)->endGroup();
     return sl;
 }
@@ -409,19 +410,19 @@ QString Config::setColumnLayout(const QString &id, const QByteArray &layout)
         if (isNew) {
             nid = QUuid::createUuid().toString();
         } else {
-            if (id != u"user-default") {
-                beginGroup("ColumnLayouts");
+            if (id != "user-default"_l1) {
+                beginGroup("ColumnLayouts"_l1);
                 bool hasLayout = childGroups().contains(id);
                 endGroup();
                 if (!hasLayout)
                     return { };
             }
         }
-        setValue(u"ColumnLayouts/" % nid % u"/Layout", layout);
+        setValue("ColumnLayouts/"_l1 % nid % "/Layout"_l1, layout);
 
         if (isNew) {
             auto newIds = columnLayoutIds();
-            setValue(u"ColumnLayouts/" % nid % u"/Order", newIds.count() - 1);
+            setValue("ColumnLayouts/"_l1 % nid % "/Order"_l1, newIds.count() - 1);
             emit columnLayoutIdsChanged(newIds);
         }
         emit columnLayoutChanged(nid, layout);
@@ -433,11 +434,11 @@ QString Config::setColumnLayout(const QString &id, const QByteArray &layout)
 bool Config::deleteColumnLayout(const QString &id)
 {
     if (!id.isEmpty()) {
-        beginGroup("ColumnLayouts");
+        beginGroup("ColumnLayouts"_l1);
         bool hasLayout = childGroups().contains(id);
         endGroup();
         if (hasLayout) {
-            remove(u"ColumnLayouts/" % id);
+            remove("ColumnLayouts/"_l1 % id);
             emit columnLayoutIdsChanged(columnLayoutIds());
             return true;
         }
@@ -448,14 +449,14 @@ bool Config::deleteColumnLayout(const QString &id)
 bool Config::renameColumnLayout(const QString &id, const QString &name)
 {
     if (!id.isEmpty()) {
-        beginGroup("ColumnLayouts");
+        beginGroup("ColumnLayouts"_l1);
         bool hasLayout = childGroups().contains(id);
         endGroup();
 
         if (hasLayout) {
-            QString oldname = value(u"ColumnLayouts/" % id % u"/Name").toString();
+            QString oldname = value("ColumnLayouts/"_l1 % id % "/Name"_l1).toString();
             if (oldname != name) {
-                setValue(u"ColumnLayouts/" % id % u"/Name", name);
+                setValue("ColumnLayouts/"_l1 % id % "/Name"_l1, name);
                 emit columnLayoutNameChanged(id, name);
                 return true;
             }
@@ -473,7 +474,7 @@ bool Config::reorderColumnLayouts(const QStringList &ids)
 
     if (oldIds == newIds) {
         for (int i = 0; i < ids.count(); ++i)
-            setValue(u"ColumnLayouts/" % ids.at(i) % u"/Order", i);
+            setValue("ColumnLayouts/"_l1 % ids.at(i) % "/Order"_l1, i);
         emit columnLayoutIdsOrderChanged(ids);
         return true;
     }
@@ -482,33 +483,33 @@ bool Config::reorderColumnLayouts(const QStringList &ids)
 
 QVariantMap Config::shortcuts() const
 {
-    return value("General/Shortcuts").toMap();
+    return value("General/Shortcuts"_l1).toMap();
 }
 
 void Config::setShortcuts(const QVariantMap &list)
 {
     if (shortcuts() != list) {
-        setValue("General/Shortcuts", list);
+        setValue("General/Shortcuts"_l1, list);
         emit shortcutsChanged(list);
     }
 }
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {
-    return qMakePair(value("BrickLink/Login/Username").toString(),
-                     scramble(value("BrickLink/Login/Password").toString()));
+    return qMakePair(value("BrickLink/Login/Username"_l1).toString(),
+                     scramble(value("BrickLink/Login/Password"_l1).toString()));
 }
 
 void Config::setLoginForBrickLink(const QString &name, const QString &pass)
 {
-    setValue("BrickLink/Login/Username", name);
-    setValue("BrickLink/Login/Password", scramble(pass));
+    setValue("BrickLink/Login/Username"_l1, name);
+    setValue("BrickLink/Login/Password"_l1, scramble(pass));
 }
 
 
 bool Config::onlineStatus() const
 {
-    return value("Internet/Online", true).toBool();
+    return value("Internet/Online"_l1, true).toBool();
 }
 
 void Config::setOnlineStatus(bool b)
@@ -516,7 +517,7 @@ void Config::setOnlineStatus(bool b)
     bool ob = onlineStatus();
 
     if (b != ob) {
-        setValue("Internet/Online", b);
+        setValue("Internet/Online"_l1, b);
 
         emit onlineStatusChanged(b);
     }
@@ -524,7 +525,7 @@ void Config::setOnlineStatus(bool b)
 
 Config::PartOutMode Config::partOutMode() const
 {
-    int v = value("General/PartOutMode").toInt();
+    int v = value("General/PartOutMode"_l1).toInt();
     if ((v < int(PartOutMode::Ask)) || (v > int(PartOutMode::NewDocument)))
          v = int(PartOutMode::Ask);
     return PartOutMode(v);
@@ -532,40 +533,40 @@ Config::PartOutMode Config::partOutMode() const
 
 void Config::setPartOutMode(Config::PartOutMode pom)
 {
-    setValue("General/PartOutMode", int(pom));
+    setValue("General/PartOutMode"_l1, int(pom));
 }
 
 bool Config::visualChangesMarkModified() const
 {
-    return value("General/VisualChangesMarkModified", false).toBool();
+    return value("General/VisualChangesMarkModified"_l1, false).toBool();
 }
 
 void Config::setVisualChangesMarkModified(bool b)
 {
     if (visualChangesMarkModified() != b) {
-        setValue("General/VisualChangesMarkModified", b);
+        setValue("General/VisualChangesMarkModified"_l1, b);
         emit visualChangesMarkModifiedChanged(b);
     }
 }
 
 bool Config::restoreLastSession() const
 {
-    return value("General/RestoreLastSession", true).toBool();
+    return value("General/RestoreLastSession"_l1, true).toBool();
 }
 
 void Config::setRestoreLastSession(bool b)
 {
-    setValue("General/RestoreLastSession", b);
+    setValue("General/RestoreLastSession"_l1, b);
 }
 
 bool Config::openBrowserOnExport() const
 {
-    return value("/General/Export/OpenBrowser", true).toBool();
+    return value("/General/Export/OpenBrowser"_l1, true).toBool();
 }
 
 void Config::setOpenBrowserOnExport(bool b)
 {
-    setValue("/General/Export/OpenBrowser", b);
+    setValue("/General/Export/OpenBrowser"_l1, b);
 }
 
 QVector<Config::Translation> Config::translations() const
@@ -577,17 +578,17 @@ QVector<Config::Translation> Config::translations() const
 
 int Config::fontSizePercent() const
 {
-    return value("Interface/FontSizePercent", 100).toInt();
+    return value("Interface/FontSizePercent"_l1, 100).toInt();
 }
 
 int Config::itemImageSizePercent() const
 {
-    return value("Interface/ItemImageSizePercent", 100).toInt();
+    return value("Interface/ItemImageSizePercent"_l1, 100).toInt();
 }
 
 QSize Config::iconSize() const
 {
-    int s = value("Interface/IconSize", 0).toInt();
+    int s = value("Interface/IconSize"_l1, 0).toInt();
     return { s, s };
 }
 
@@ -596,7 +597,7 @@ bool Config::parseTranslations() const
     m_translations.clear();
 
     QDomDocument doc;
-    QFile file(":/i18n/translations.xml");
+    QFile file(":/i18n/translations.xml"_l1);
 
     if (file.open(QIODevice::ReadOnly)) {
         QString err_str;
@@ -605,30 +606,30 @@ bool Config::parseTranslations() const
         if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
             QDomElement root = doc.documentElement();
 
-            if (root.isElement() && root.nodeName() == QLatin1String("translations")) {
+            if (root.isElement() && root.nodeName() == "translations"_l1) {
                 for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-                    if (!node.isElement() || (node.nodeName() != QLatin1String("translation")))
+                    if (!node.isElement() || (node.nodeName() != "translation"_l1))
                         continue;
                     QDomNamedNodeMap map = node.attributes();
                     Translation trans;
 
-                    trans.language = map.namedItem(QLatin1String("lang")).toAttr().value();
-                    trans.author = map.namedItem(QLatin1String("author")).toAttr().value();
-                    trans.authorEMail = map.namedItem(QLatin1String("authoremail")).toAttr().value();
+                    trans.language = map.namedItem("lang"_l1).toAttr().value();
+                    trans.author = map.namedItem("author"_l1).toAttr().value();
+                    trans.authorEMail = map.namedItem("authoremail"_l1).toAttr().value();
 
                     if (trans.language.isEmpty())
                         goto error;
 
                     for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
-                        if (!name.isElement() || (name.nodeName() != QLatin1String("name")))
+                        if (!name.isElement() || (name.nodeName() != "name"_l1))
                             continue;
                         QDomNamedNodeMap nameAttribs = name.attributes();
 
-                        QString tr_id = nameAttribs.namedItem(QLatin1String("lang")).toAttr().value();
+                        QString tr_id = nameAttribs.namedItem("lang"_l1).toAttr().value();
                         QString tr_name = name.toElement().text();
 
                         if (!tr_name.isEmpty())
-                            trans.languageName[tr_id.isEmpty() ? QLatin1String("en") : tr_id] = tr_name;
+                            trans.languageName[tr_id.isEmpty() ? "en"_l1 : tr_id] = tr_name;
                     }
 
                     if (trans.languageName.isEmpty())
@@ -646,14 +647,14 @@ error:
 
 void Config::setDefaultCurrencyCode(const QString &currencyCode)
 {
-    setValue("Currency/Default", currencyCode);
+    setValue("Currency/Default"_l1, currencyCode);
 
     emit defaultCurrencyCodeChanged(currencyCode);
 }
 
 QString Config::defaultCurrencyCode() const
 {
-    return value("Currency/Default", QLatin1String("USD")).toString();
+    return value("Currency/Default"_l1, "USD"_l1).toString();
 }
 
 #include "moc_config.cpp"

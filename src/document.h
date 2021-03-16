@@ -339,7 +339,7 @@ public:
     static LotList lots(const QMimeData *md);
 
 private:
-    static const char *s_mimetype;
+    static const QString s_mimetype;
 };
 
 

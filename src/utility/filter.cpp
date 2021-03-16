@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <QLocale>
 
+#include "utility.h"
 #include "filter.h"
 
 
@@ -45,7 +46,7 @@ void Filter::setExpression(const QString &expr)
     m_asDouble = loc.toDouble(expr, &isDouble);
     m_isDouble = isDouble;
 
-    if (expr.contains('*') || expr.contains('*') || expr.contains('[')) {
+    if (expr.contains('?'_l1) || expr.contains('*'_l1) || expr.contains('['_l1)) {
         m_isRegExp = true;
         m_asRegExp.setPattern(QRegularExpression::wildcardToRegularExpression(expr));
         m_asRegExp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
@@ -336,22 +337,22 @@ QString Filter::Parser::toolTip() const
        "<p>Multiple expressions can be combined by separating them with a <b>COMBINATION</b> token.</p>"
        "<p>E.g. to search for anything resembling an brick in blue, you could use: <b>brick and color is blue</b></p>");
 
-    QString block = QLatin1String("<b><u>%1</u></b>%2");
+    QString block = "<b><u>%1</u></b>%2"_l1;
     tt += block.arg(Filter::tr("Field names:"),
                     toString(m_field_tokens,
-                             QLatin1String("<ul><li>"), QLatin1String("</li></ul>"),
-                             QString(),  QString(), QLatin1String(", "),
-                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+                             "<ul><li>"_l1, "</li></ul>"_l1,
+                             QString(),  QString(), ", "_l1,
+                             "<b>"_l1, "</b>"_l1, " / "_l1));
     tt += block.arg(Filter::tr("Comparisons:"),
                     toString(m_comparison_tokens,
-                             QLatin1String("<ul>"), QLatin1String("</ul>"),
-                             QLatin1String("<li>"), QLatin1String("</li>"), QString(),
-                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+                             "<ul>"_l1, "</ul>"_l1,
+                             "<li>"_l1, "</li>"_l1, QString(),
+                             "<b>"_l1, "</b>"_l1, " / "_l1));
     tt += block.arg(Filter::tr("Combinations:"),
                     toString(m_combination_tokens,
-                             QLatin1String("<ul>"), QLatin1String("</ul>"),
-                             QLatin1String("<li>"), QLatin1String("</li>"), QString(),
-                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+                             "<ul>"_l1, "</ul>"_l1,
+                             "<li>"_l1, "</li>"_l1, QString(),
+                             "<b>"_l1, "</b>"_l1, " / "_l1));
     return tt;
 }
 

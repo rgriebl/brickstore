@@ -51,40 +51,41 @@ AboutDialog::AboutDialog(QWidget *parent)
 
     QString ldrawInstallation = part ? LDraw::core()->dataPath()
                                      : tr("No LDraw installation was found.");
-    const QString layoutTop = qL1S(
+    const QString layoutTop = \
         R"(<strong style="font-size: x-large">%1</strong><br>)"
         R"(<strong style="font-size: large">%3</strong><br>)"
         R"(<span style="font-size: large">%2</strong><br>)"
-        R"(<br>%4)");
-    const QString layoutBottom = qL1S(
-        R"(<center><br><big>%5</big></center>%6<p>%7</p>)");
+        R"(<br>%4)"_l1;
+    const QString layoutBottom = R"(<center><br><big>%5</big></center>%6<p>%7</p>)"_l1;
 
-    const QString page1LinkFmt = qL1S(R"(<strong>%1</strong> | <a href="system">%2</a>)");
+    const QString page1LinkFmt = R"(<strong>%1</strong> | <a href="system">%2</a>)"_l1;
     const QString page1_link = page1LinkFmt.arg(tr("Legal Info"), tr("System Info"));
-    const QString page2LinkFmt = qL1S(R"(<a href="index">%1</a> | <strong>%2</strong>)");
+    const QString page2LinkFmt = R"(<a href="index">%1</a> | <strong>%2</strong>)"_l1;
     const QString page2_link = page2LinkFmt.arg(tr("Legal Info"), tr("System Info"));
 
-    const QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
-    const QString version   = tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION).arg(BRICKSTORE_BUILD_NUMBER);
-    const QString support   = tr("Visit %1").arg(R"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)");
+    const QString copyright = tr("Copyright &copy; %1").arg(QLatin1String(BRICKSTORE_COPYRIGHT));
+    const QString version   = tr("Version %1 (build: %2)").arg(QLatin1String(BRICKSTORE_VERSION),
+                                                               QLatin1String(BRICKSTORE_BUILD_NUMBER));
+    const QString support   = tr("Visit %1").arg(R"(<a href="https://)" BRICKSTORE_URL
+                                                 R"(">)" BRICKSTORE_URL R"(</a>)"_l1);
 
     QString qt = QLibraryInfo::version().toString();
     if (QLibraryInfo::isDebugBuild())
-        qt += qL1S(R"( (debug build))");
+        qt += R"( (debug build))"_l1;
 
-    QString translators = qL1S(R"(<b>)") + tr("Translators") + qL1S(R"(</b><table border="0">)");
+    QString translators = R"(<b>)"_l1 + tr("Translators") + R"(</b><table border="0">)"_l1;
 
-    const QString translators_html = qL1S(R"(<tr><td>%1</td><td width="2em"></td><td>%2 &lt;<a href="mailto:%3">%4</a>&gt;</td></tr>)");
+    const QString translators_html = R"(<tr><td>%1</td><td width="2em"></td><td>%2 &lt;<a href="mailto:%3">%4</a>&gt;</td></tr>)"_l1;
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
-        if (trans.language != qL1S("en")) {
+        if (trans.language != "en"_l1) {
             QString langname = trans.languageName.value(Config::inst()->language(),
-                                                        trans.languageName[qL1S("en")]);
+                                                        trans.languageName["en"_l1]);
             translators += translators_html.arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
         }
     }
 
-    translators += qL1S(R"(</table>)");
+    translators += R"(</table>)"_l1;
 
     const QString legal = tr(
         R"(<p>)"
@@ -105,7 +106,7 @@ AboutDialog::AboutDialog(QWidget *parent)
         R"(Only made possible by <a href="https://www.danjezek.com/">Dan Jezek's</a> support.)"
         R"(</p>)");
 
-    const QString technicalFmt = qL1S(
+    const QString technicalFmt =
         R"(<table>)"
         R"(<th colspan="2" align="left">Build Info</th>)"
         R"(<tr><td>Git version   </td><td>%1</td></tr>)"
@@ -123,11 +124,12 @@ AboutDialog::AboutDialog(QWidget *parent)
         R"(<tr><td>Memory        </td><td>%L10 MB</td></tr>)"
         R"(<tr><td>Qt            </td><td>%11</td></tr>)"
         R"(<tr><td>LDraw         </td><td>%12</td></tr>)"
-        R"(</table>)");
+        R"(</table>)"_l1;
 
     const QString technical = technicalFmt
-            .arg(BRICKSTORE_GIT_VERSION, BRICKSTORE_BUILD_USER, BRICKSTORE_BUILD_HOST, __DATE__ " " __TIME__)
-            .arg(QSysInfo::buildCpuArchitecture()).arg(BRICKSTORE_COMPILER_VERSION)
+            .arg(QLatin1String(BRICKSTORE_GIT_VERSION), QLatin1String(BRICKSTORE_BUILD_USER),
+                 QLatin1String(BRICKSTORE_BUILD_HOST), QLatin1String(__DATE__ " " __TIME__))
+            .arg(QSysInfo::buildCpuArchitecture()).arg(QLatin1String(BRICKSTORE_COMPILER_VERSION))
             .arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(), cpu)
             .arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt)
             .arg(ldrawInstallation);
@@ -137,12 +139,12 @@ AboutDialog::AboutDialog(QWidget *parent)
     const QString page1 = layoutBottom.arg(page1_link, legal, translators);
     const QString page2 = layoutBottom.arg(page2_link, technical, QString());
 
-    m_pages ["index"]  = page1;
-    m_pages ["system"] = page2;
+    m_pages["index"_l1]  = page1;
+    m_pages["system"_l1] = page2;
 
     w_header->setText(header);
 
-    gotoPage("index");
+    gotoPage("index"_l1);
     connect(w_browser, &QLabel::linkActivated,
             this, &AboutDialog::gotoPage);
 
@@ -187,7 +189,7 @@ QString AboutDialog::cpuModel()
 {
 #if defined(Q_OS_LINUX)
     QProcess p;
-    p.start(R"(sh)", { R"(-c)", R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')" },
+    p.start(R"(sh)"_l1, { R"(-c)"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
             QIODevice::ReadOnly);
     p.waitForFinished(1000);
     return QString::fromUtf8(p.readAllStandardOutput()).simplified();
@@ -206,7 +208,7 @@ QString AboutDialog::cpuModel()
     return QString::fromUtf8(p.readAllStandardOutput()).simplified();
 
 #else
-    return qL1S("?");
+    return "?"_l1;
 #endif
 }
 

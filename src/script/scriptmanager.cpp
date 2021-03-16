@@ -37,7 +37,7 @@ public:
         : Exception(msg)
     {
         for (auto &error : errors) {
-            m_message.append("\n");
+            m_message.append("\n"_l1);
             m_message.append(error.toString());
         }
     }
@@ -106,12 +106,12 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     qRegisterMetaType<QmlWrapper::BrickLink::OrderType>("BrickLink::OrderType");
 
     qmlRegisterUncreatableType<QmlWrapper::Document>("BrickStore", 1, 0, "Document",
-                                                     cannotCreate.arg("Document"));
+                                                     cannotCreate.arg("Document"_l1));
 
     qmlRegisterUncreatableType<QmlWrapper::PrintJob>("BrickStore", 1, 0, "PrintJob",
-                                                     cannotCreate.arg("PrintJob"));
+                                                     cannotCreate.arg("PrintJob"_l1));
     qmlRegisterUncreatableType<QmlWrapper::PrintPage>("BrickStore", 1, 0, "Page",
-                                                      cannotCreate.arg("Page"));
+                                                      cannotCreate.arg("Page"_l1));
     qRegisterMetaType<QmlWrapper::PrintPage::Alignment>("PrintPage::Alignment");
     qRegisterMetaType<QmlWrapper::PrintPage::LineStyle>("PrintPage::LineStyle");
 
@@ -131,16 +131,16 @@ bool ScriptManager::reload()
 
     QStringList spath = { QStringLiteral(":/extensions") };
 
-    spath << Application::inst()->externalResourceSearchPath("extensions");
+    spath << Application::inst()->externalResourceSearchPath("extensions"_l1);
 
     QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     if (!dataloc.isEmpty())
-        spath.prepend(dataloc + QLatin1String("/extensions"));
+        spath.prepend(dataloc + "/extensions"_l1);
 
     for (const QString &dir : qAsConst(spath)) {
         qDebug() << "Loading scripts from directory:" << dir;
 
-        const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.bs.qml"), QDir::Files | QDir::Readable);
+        const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.bs.qml"_l1), QDir::Files | QDir::Readable);
         for (const QFileInfo &fi : fis) {
             QString filePath = fi.absoluteFilePath();
             if (filePath.startsWith(u":"))
@@ -202,7 +202,7 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
             if (err.object())
                 func = err.object()->objectName().toLocal8Bit();
             QByteArray file;
-            if (err.url().scheme() == "file")
+            if (err.url().scheme() == "file"_l1)
                 file = err.url().toLocalFile().toLocal8Bit();
             else
                 file = err.url().toDisplayString().toLocal8Bit();

@@ -19,6 +19,7 @@
 #include "bricklink_wrapper.h"
 #include "printjob.h"
 #include "window.h"
+#include "utility.h"
 #include "exception.h"
 
 
@@ -27,12 +28,12 @@ static QString formatJSError(const QJSValue &error)
     if (!error.isError())
         return { };
 
-    QString msg = QString::fromLatin1("<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5")
-            .arg(error.property("name").toString(),
-                 error.property("message").toString(),
-                 error.property("fileName").toString(),
-                 error.property("lineNumber").toString(),
-                 error.property("stack").toString());
+    QString msg = "<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5"_l1
+            .arg(error.property("name"_l1).toString(),
+                 error.property("message"_l1).toString(),
+                 error.property("fileName"_l1).toString(),
+                 error.property("lineNumber"_l1).toString(),
+                 error.property("stack"_l1).toString());
     return msg;
 }
 
@@ -91,7 +92,7 @@ void ExtensionScriptAction::executeAction()
 
     if (result.isError()) {
         throw Exception(tr("Extension script aborted with error:")
-                        + QLatin1String("<br/><br/>") + formatJSError(result));
+                        + "<br/><br/>"_l1 + formatJSError(result));
 
     }
 }
@@ -180,7 +181,7 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
 
     if (result.isError()) {
         throw Exception(tr("Print script aborted with error:")
-                        + QLatin1String("<br/><br/>") + formatJSError(result));
+                        + "<br/><br/>"_l1 + formatJSError(result));
     }
 
     if (job->isAborted())

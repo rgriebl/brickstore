@@ -52,29 +52,29 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
 
     switch (u) {
     case URL_InventoryRequest:
-        url = "https://www.bricklink.com/catalogInvAdd.asp";
+        url = "https://www.bricklink.com/catalogInvAdd.asp"_l1;
         break;
 
     case URL_WantedListUpload:
-        url = "https://www.bricklink.com/wantedXML.asp";
+        url = "https://www.bricklink.com/wantedXML.asp"_l1;
         break;
 
     case URL_InventoryUpload:
-        url = "https://www.bricklink.com/invXML.asp";
+        url = "https://www.bricklink.com/invXML.asp"_l1;
         break;
 
     case URL_InventoryUpdate:
-        url = "https://www.bricklink.com/invXML.asp#update";
+        url = "https://www.bricklink.com/invXML.asp#update"_l1;
         break;
 
     case URL_CatalogInfo: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogItem.asp";
+            url = "https://www.bricklink.com/catalogItem.asp"_l1;
             QUrlQuery query;
             query.addQueryItem(QString(QLatin1Char(item->itemType()->id())), QLatin1String(item->id()));
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("C", QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem("C"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -82,11 +82,11 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_PriceGuideInfo: {
         auto *item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogPG.asp";
+            url = "https://www.bricklink.com/catalogPG.asp"_l1;
             QUrlQuery query;
             query.addQueryItem(QString(QLatin1Char(item->itemType()->id())), QLatin1String(item->id()));
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -94,24 +94,24 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_LotsForSale: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/search.asp";
+            url = "https://www.bricklink.com/search.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem("viewFrom", "sa");
-            query.addQueryItem("itemType", QChar(item->itemType()->id()));
+            query.addQueryItem("viewFrom"_l1, "sa"_l1);
+            query.addQueryItem("itemType"_l1, QString(QLatin1Char(item->itemType()->id())));
 
             // workaround for BL not accepting the -X suffix for sets, instructions and boxes
-            QString id = item->id();
+            QString id = QLatin1String(item->id());
             char itt = item->itemType()->id();
 
             if (itt == 'S' || itt == 'I' || itt == 'O') {
-                int pos = id.lastIndexOf('-');
+                int pos = id.lastIndexOf('-'_l1);
                 if (pos >= 0)
                     id.truncate(pos);
             }
-            query.addQueryItem("q", id);
+            query.addQueryItem("q"_l1, id);
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -119,35 +119,35 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_AppearsInSets: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogItemIn.asp";
+            url = "https://www.bricklink.com/catalogItemIn.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem(QChar(item->itemType()->id()), item->id());
-            query.addQueryItem("in", "S");
+            query.addQueryItem(QString(QLatin1Char(item->itemType()->id())), QLatin1String(item->id()));
+            query.addQueryItem("in"_l1, "S"_l1);
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
     }
     case URL_ColorChangeLog:
-        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
+        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R"_l1;
         break;
 
     case URL_ItemChangeLog: {
-        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
+        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_l1;
         QUrlQuery query;
         if (opt)
-            query.addQueryItem("q", static_cast<const char *>(opt));
+            query.addQueryItem("q"_l1, QLatin1String(static_cast<const char *>(opt)));
         url.setQuery(query);
         break;
     }
     case URL_StoreItemDetail: {
         auto lotId = static_cast<const unsigned int *>(opt);
         if (lotId && *lotId) {
-            url = "https://www.bricklink.com/inventory_detail.asp";
+            url = "https://www.bricklink.com/inventory_detail.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem("invID", QString::number(*lotId));
+            query.addQueryItem("invID"_l1, QString::number(*lotId));
             url.setQuery(query);
         }
         break;
@@ -156,12 +156,12 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         const Item *item = static_cast<const Item *>(opt);
         const Color *color = static_cast<const Color *>(opt2);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/inventory_detail.asp?";
+            url = "https://www.bricklink.com/inventory_detail.asp?"_l1;
             QUrlQuery query;
-            query.addQueryItem("catType", QChar(item->itemType()->id()));
-            query.addQueryItem("q", item->id());
+            query.addQueryItem("catType"_l1, QString(QLatin1Char(item->itemType()->id())));
+            query.addQueryItem("q"_l1, QLatin1String(item->id()));
             if (item->itemType()->hasColors() && color)
-                query.addQueryItem("ColorID", QString::number(color->id()));
+                query.addQueryItem("ColorID"_l1, QString::number(color->id()));
             url.setQuery(query);
         }
         break;
@@ -169,9 +169,9 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_OrderDetails: {
         auto orderId = static_cast<const char *>(opt);
         if (orderId && *orderId) {
-            url = "https://www.bricklink.com/orderDetail.asp";
+            url = "https://www.bricklink.com/orderDetail.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem("ID", QString::fromLatin1(orderId));
+            query.addQueryItem("ID"_l1, QString::fromLatin1(orderId));
             url.setQuery(query);
         }
         break;
@@ -179,9 +179,9 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
     case URL_ShoppingCart: {
         auto shopId = static_cast<const int *>(opt);
         if (shopId && *shopId) {
-            url = "https://www.bricklink.com/v2/globalcart.page";
+            url = "https://www.bricklink.com/v2/globalcart.page"_l1;
             QUrlQuery query;
-            query.addQueryItem("sid", QString::number(*shopId));
+            query.addQueryItem("sid"_l1, QString::number(*shopId));
             url.setQuery(query);
         }
         break;
@@ -233,11 +233,11 @@ const QImage Core::colorImage(const Color *col, int w, int h) const
 
             if (!c.isValid()) {
                 QString name = col->name();
-                int dash = name.indexOf('-');
+                int dash = name.indexOf('-'_l1);
                 if (dash > 0) {
                     QString basename = name.mid(8, dash - 8);
-                    if (basename.startsWith("DB"))
-                        basename.replace(0, 2, "Dark Bluish ");
+                    if (basename.startsWith("DB"_l1))
+                        basename.replace(0, 2, "Dark Bluish "_l1);
                     QString speckname = name.mid(dash + 1);
 
                     const Color *basec = colorFromName(basename);
@@ -342,7 +342,7 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
             % fileName;
 
     if (openMode != QIODevice::ReadOnly) {
-        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."))
+        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
             return nullptr;
     }
     auto f = new QFile(p);
@@ -378,7 +378,7 @@ Core *Core::create(const QString &datadir, QString *errstring)
 
 Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
-    , m_noImageIcon(QIcon::fromTheme("image-missing-large"))
+    , m_noImageIcon(QIcon::fromTheme("image-missing-large"_l1))
 {
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
@@ -783,7 +783,7 @@ void Core::cancelPriceGuideTransfers()
 
 QString Core::defaultDatabaseName(DatabaseVersion version) const
 {
-    return QString("database-v%1").arg(int(version));
+    return u"database-v" % QString::number(int(version));
 }
 
 QDateTime Core::databaseDate() const

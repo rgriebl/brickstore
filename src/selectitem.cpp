@@ -268,7 +268,7 @@ void SelectItem::init()
     });
 
     d->w_pcc = new QToolButton();
-    d->w_pcc->setIcon(QIcon::fromTheme("edit-find"));
+    d->w_pcc->setIcon(QIcon::fromTheme("edit-find"_l1));
     d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
     d->w_pcc->setAutoRaise(true);
     connect(d->w_pcc, &QToolButton::clicked, this, [this]() {
@@ -287,7 +287,7 @@ void SelectItem::init()
 
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"));
+    d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"_l1));
     d->w_zoomOut->setAutoRaise(true);
     d->w_zoomOut->setAutoRepeat(true);
     connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
@@ -300,7 +300,7 @@ void SelectItem::init()
             this, [this]() { setZoomFactor(2); });
     d->w_zoomIn = new QToolButton();
     d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"));
+    d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"_l1));
     d->w_zoomIn->setAutoRaise(true);
     d->w_zoomIn->setAutoRepeat(true);
     connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
@@ -310,14 +310,14 @@ void SelectItem::init()
     QToolButton *tb;
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+1"));
-    tb->setIcon(QIcon::fromTheme("view-list-text"));
+    tb->setIcon(QIcon::fromTheme("view-list-text"_l1));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+2"));
-    tb->setIcon(QIcon::fromTheme("view-list-details"));
+    tb->setIcon(QIcon::fromTheme("view-list-details"_l1));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     tb->setChecked(true);
@@ -325,7 +325,7 @@ void SelectItem::init()
 
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+3"));
-    tb->setIcon(QIcon::fromTheme("view-list-icons"));
+    tb->setIcon(QIcon::fromTheme("view-list-icons"_l1));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
@@ -882,13 +882,13 @@ void SelectItem::applyFilter()
 QSize SelectItem::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return { 120 * fm.horizontalAdvance('x'), 20 * fm.height() };
+    return { 120 * fm.horizontalAdvance('x'_l1), 20 * fm.height() };
 }
 
 QSize SelectItem::minimumSizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return { 80 * fm.horizontalAdvance('x'), 12 * fm.height() };
+    return { 80 * fm.horizontalAdvance('x'_l1), 12 * fm.height() };
 }
 
 void SelectItem::showContextMenu(const QPoint &p)

@@ -19,6 +19,7 @@
 
 #include "bricklink.h"
 #include "config.h"
+#include "utility.h"
 #include "documentio.h"
 #include "progressdialog.h"
 #include "framework.h"
@@ -43,18 +44,18 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
     connect(w_import, &QAbstractButton::clicked,
             this, &ImportInventoryDialog::importInventory);
 
-    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
+    QByteArray ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Geometry"_l1).toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/SelectItem"))
+    ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/SelectItem"_l1)
             .toByteArray();
     if (!w_select->restoreState(ba)) {
         w_select->restoreState(SelectItem::defaultState());
         w_select->setCurrentItemType(BrickLink::core()->itemType('S'));
     }
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Details"))
+    ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Details"_l1)
             .toByteArray();
     restoreState(ba);
 
@@ -85,9 +86,9 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
 
 ImportInventoryDialog::~ImportInventoryDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/SelectItem", w_select->saveState());
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Details", saveState());
+    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/SelectItem"_l1, w_select->saveState());
+    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Details"_l1, saveState());
 }
 
 bool ImportInventoryDialog::setItem(const BrickLink::Item *item)
@@ -165,7 +166,7 @@ void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
 QSize ImportInventoryDialog::sizeHint() const
 {
     QFontMetrics fm(font());
-    return QSize(fm.horizontalAdvance("m") * 120, fm.height() * 30);
+    return QSize(fm.horizontalAdvance("m"_l1) * 120, fm.height() * 30);
 }
 
 QByteArray ImportInventoryDialog::saveState() const

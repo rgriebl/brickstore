@@ -160,7 +160,7 @@ public:
             case 2: return orderStatusToString(order->status(), true);
             case 3: return order->id();
             case 4: {
-                int firstline = order->address().indexOf('\n');
+                int firstline = order->address().indexOf('\n'_l1);
                 if (firstline > 0) {
                     return QString::fromLatin1("%2 (%1)")
                             .arg(order->address().left(firstline), order->otherParty());
@@ -178,8 +178,8 @@ public:
                 QString cc = order->countryCode();
                 flag = m_flags.value(cc);
                 if (flag.isNull()) {
-                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Normal);
-                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Selected);
+                    flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Normal);
+                    flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Selected);
                     m_flags.insert(cc, flag);
                 }
                 return flag;
@@ -201,7 +201,7 @@ public:
             QString tt = data(index, Qt::DisplayRole).toString();
 
             if (!order->address().isEmpty())
-                tt = tt + QLatin1String("\n\n") + order->address();
+                tt = tt + "\n\n"_l1 + order->address();
             return tt;
         } else if (role == OrderPointerRole) {
             return QVariant::fromValue(order);
@@ -292,7 +292,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     connect(w_import, &QAbstractButton::clicked,
             this, [this]() { importOrders(w_orders->selectionModel()->selectedRows(), false); });
     w_showOnBrickLink = new QPushButton();
-    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"));
+    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
     connect(w_showOnBrickLink, &QAbstractButton::clicked,
             this, &ImportOrderDialog::showOrdersOnBrickLink);
@@ -322,14 +322,14 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportOrderDialog::updateOrders, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportOrderDialog/Geometry"))
+    QByteArray ba = Config::inst()->value("/MainWindow/ImportOrderDialog/Geometry"_l1)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    int daysBack = Config::inst()->value("/MainWindow/ImportOrderDialog/DaysBack", -1).toInt();
+    int daysBack = Config::inst()->value("/MainWindow/ImportOrderDialog/DaysBack"_l1, -1).toInt();
     if (daysBack > 0)
         w_daysBack->setValue(daysBack);
-    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportOrderDialog/Filter")).toByteArray();
+    ba = Config::inst()->value("/MainWindow/ImportOrderDialog/Filter"_l1).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
 
@@ -338,9 +338,9 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
 ImportOrderDialog::~ImportOrderDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack", w_daysBack->value());
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Filter", w_filter->saveState());
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack"_l1, w_daysBack->value());
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Filter"_l1, w_filter->saveState());
 }
 
 void ImportOrderDialog::keyPressEvent(QKeyEvent *e)
@@ -394,22 +394,22 @@ void ImportOrderDialog::updateOrders()
 
     static const char *types[] = { "received", "placed" };
     for (auto &type : types) {
-        QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
+        QUrl url("https://www.bricklink.com/orderExcelFinal.asp"_l1);
         QUrlQuery query;
-        query.addQueryItem("action",        "save");
-        query.addQueryItem("orderType",     type);
-        query.addQueryItem("viewType",      "X");    // XML - this has to go last, otherwise we get HTML
-        query.addQueryItem("getOrders",     "date");
-        query.addQueryItem("fMM",           QString::number(fromDate.month()));
-        query.addQueryItem("fDD",           QString::number(fromDate.day()));
-        query.addQueryItem("fYY",           QString::number(fromDate.year()));
-        query.addQueryItem("tMM",           QString::number(today.month()));
-        query.addQueryItem("tDD",           QString::number(today.day()));
-        query.addQueryItem("tYY",           QString::number(today.year()));
-        query.addQueryItem("getStatusSel",  "I");
-        query.addQueryItem("getDateFormat", "0");    // MM/DD/YYYY
-        query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
-        query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+        query.addQueryItem("action"_l1,        "save"_l1);
+        query.addQueryItem("orderType"_l1,     QLatin1String(type));
+        query.addQueryItem("viewType"_l1,      "X"_l1);    // XML - this has to go last, otherwise we get HTML
+        query.addQueryItem("getOrders"_l1,     "date"_l1);
+        query.addQueryItem("fMM"_l1,           QString::number(fromDate.month()));
+        query.addQueryItem("fDD"_l1,           QString::number(fromDate.day()));
+        query.addQueryItem("fYY"_l1,           QString::number(fromDate.year()));
+        query.addQueryItem("tMM"_l1,           QString::number(today.month()));
+        query.addQueryItem("tDD"_l1,           QString::number(today.day()));
+        query.addQueryItem("tYY"_l1,           QString::number(today.year()));
+        query.addQueryItem("getStatusSel"_l1,  "I"_l1);
+        query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
+        query.addQueryItem("frmUsername"_l1,   Config::inst()->loginForBrickLink().first);
+        query.addQueryItem("frmPassword"_l1,   Config::inst()->loginForBrickLink().second);
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
@@ -438,14 +438,14 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
             QString s = QString::fromUtf8(*job->data());
             QString a;
 
-            QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)");
+            QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
             auto matches = regExp.globalMatch(s);
             if (matches.hasNext()) {
                 matches.next();
                 if (matches.hasNext()) { // skip our own address
                     QRegularExpressionMatch match = matches.next();
                     a = match.captured(1);
-                    a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"), QLatin1String("\n"));
+                    a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"_l1), "\n"_l1);
                     order->setAddress(a);
                 }
             }
@@ -498,7 +498,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
                     auto location = p.elementText(e, "LOCATION");
                     if (!location.isEmpty()) {
                         order->setCountryCode(BrickLink::core()->countryIdFromName(
-                                                  location.section(QLatin1String(", "), 0, 0)));
+                                                  location.section(", "_l1, 0, 0)));
                     }
 
                     orders << order;
@@ -638,26 +638,26 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     for (auto idx : rows) {
         auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
-        QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
+        QUrl url("https://www.bricklink.com/orderExcelFinal.asp"_l1);
         QUrlQuery query;
-        query.addQueryItem("action",        "save");
-        query.addQueryItem("orderType",     (order->type() == BrickLink::OrderType::Received)
-                           ? "received" : "placed");
-        query.addQueryItem("viewType",      "X");    // XML - this has to go last, otherwise we get HTML
-        query.addQueryItem("getOrders",     "");
-        query.addQueryItem("getStatusSel",  "I");
-        query.addQueryItem("getDetail",     "y");
-        query.addQueryItem("orderID",       order->id());
-        query.addQueryItem("getDateFormat", "0");    // MM/DD/YYYY
-        query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
-        query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+        query.addQueryItem("action"_l1,        "save"_l1);
+        query.addQueryItem("orderType"_l1,     QLatin1String((order->type() == BrickLink::OrderType::Received)
+                                                       ? "received" : "placed"));
+        query.addQueryItem("viewType"_l1,      "X"_l1);    // XML - this has to go last, otherwise we get HTML
+        query.addQueryItem("getOrders"_l1,     ""_l1);
+        query.addQueryItem("getStatusSel"_l1,  "I"_l1);
+        query.addQueryItem("getDetail"_l1,     "y"_l1);
+        query.addQueryItem("orderID"_l1,       order->id());
+        query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
+        query.addQueryItem("frmUsername"_l1,   Config::inst()->loginForBrickLink().first);
+        query.addQueryItem("frmPassword"_l1,   Config::inst()->loginForBrickLink().second);
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
 
-        QUrl addressUrl("https://www.bricklink.com/orderDetail.asp");
+        QUrl addressUrl("https://www.bricklink.com/orderDetail.asp"_l1);
         QUrlQuery addressQuery;
-        addressQuery.addQueryItem("ID", order->id());
+        addressQuery.addQueryItem("ID"_l1, order->id());
         addressUrl.setQuery(addressQuery);
 
         auto addressJob = TransferJob::get(addressUrl);

@@ -28,6 +28,7 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 
+#include "utility.h"
 #include "document.h"
 #include "selectdocumentdialog.h"
 
@@ -251,7 +252,7 @@ void SelectMergeMode::createFields(QWidget *parent)
     for (const auto &mode : modes) {
         auto tb = new QToolButton();
         tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        tb->setIcon(QIcon::fromTheme(mode.icon));
+        tb->setIcon(QIcon::fromTheme(QLatin1String(mode.icon)));
         tb->setText(tr(mode.name));
         tb->setToolTip(tr(mode.toolTip));
         tb->setAutoRaise(true);
@@ -298,7 +299,7 @@ void SelectMergeMode::createFields(QWidget *parent)
                     || (field.mergeModes & mode.mergeMode)) {
                 auto tb = new QToolButton();
                 tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-                tb->setIcon(QIcon::fromTheme(mode.icon));
+                tb->setIcon(QIcon::fromTheme(QLatin1String(mode.icon)));
                 tb->setText(tr(mode.name));
                 tb->setToolTip(tr(mode.toolTip));
                 tb->setCheckable(true);

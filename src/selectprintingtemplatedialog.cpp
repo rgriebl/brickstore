@@ -18,7 +18,7 @@
 
 #include "script.h"
 #include "scriptmanager.h"
-
+#include "utility.h"
 #include "selectprintingtemplatedialog.h"
 
 #if defined(MODELTEST)
@@ -144,7 +144,7 @@ SelectPrintingTemplateDialog::SelectPrintingTemplateDialog(QWidget *parent)
     int selectionIndex = -1;
     for (int i = 0; i < model->rowCount(); ++i) {
         auto script = model->script(model->index(i, 0));
-        if (script && script->text() == "standard") {
+        if (script && script->text() == "standard"_l1) {
             selectionIndex = i;
             break;
         }

@@ -17,6 +17,7 @@
 #include <QDomElement>
 #include <QDebug>
 
+#include "utility.h"
 #include "exception.h"
 #include "xmlhelpers.h"
 
@@ -28,7 +29,7 @@ QString XmlHelpers::decodeEntities(const QString &src)
 
     QString decoded(src);
 
-    int pos = decoded.indexOf(QLatin1String("&#"));
+    int pos = decoded.indexOf("&#"_l1);
     if (pos < 0)
         return decoded;
 
@@ -45,7 +46,7 @@ QString XmlHelpers::decodeEntities(const QString &src)
                 pos = endpos + 1;
             }
         }
-        pos = decoded.indexOf(QLatin1String("&#"), pos);
+        pos = decoded.indexOf("&#"_l1, pos);
     } while (pos >= 0);
 
     return decoded;
@@ -67,8 +68,8 @@ XmlHelpers::ParseXML::ParseXML(const QString &path, const char *rootNodeName, co
 }
 
 XmlHelpers::ParseXML::ParseXML(QIODevice *file, const char *rootNodeName, const char *elementNodeName)
-    : m_rootNodeName(rootNodeName)
-    , m_elementNodeName(elementNodeName)
+    : m_rootNodeName(QLatin1String(rootNodeName))
+    , m_elementNodeName(QLatin1String(elementNodeName))
     , m_file(file)
 { }
 
@@ -112,7 +113,7 @@ QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagNam
     auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
     if (dnl.size() != 1) {
         throw ParseException("Expected a single %1 tag, but found %2")
-                .arg(tagName).arg(dnl.size());
+                .arg(QLatin1String(tagName)).arg(dnl.size());
     }
     // the contents are double XML escaped. QDom unescaped once already, now have to do one more
     return decodeEntities(dnl.at(0).toElement().text().simplified());

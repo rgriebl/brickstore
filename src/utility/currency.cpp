@@ -39,7 +39,7 @@
 // we need everything relative to the US Dollar
 static void baseConvert(QHash<QString, qreal> &rates)
 {
-    QHash<QString, qreal>::iterator usd_it = rates.find(QLatin1String("USD"));
+    QHash<QString, qreal>::iterator usd_it = rates.find("USD"_l1);
 
     if (usd_it == rates.end()) {
         rates.clear();
@@ -50,7 +50,7 @@ static void baseConvert(QHash<QString, qreal> &rates)
     for (QHash<QString, qreal>::iterator it = rates.begin(); it != rates.end(); ++it)
         it.value() = (it == usd_it) ? 1 : it.value() *= usd_eur;
 
-    rates.insert(QLatin1String("EUR"), usd_eur);
+    rates.insert("EUR"_l1, usd_eur);
 }
 
 
@@ -59,10 +59,10 @@ Currency *Currency::s_inst = nullptr;
 Currency::Currency()
     : m_nam(nullptr)
 {
-    qint64 tt = Config::inst()->value("/Rates/LastUpdate", 0).toLongLong();
+    qint64 tt = Config::inst()->value("/Rates/LastUpdate"_l1, 0).toLongLong();
     m_lastUpdate = QDateTime::fromSecsSinceEpoch(tt);
-    QStringList rates = Config::inst()->value("/Rates/Normal").toString().split(QLatin1Char(','));
-    QStringList customRates = Config::inst()->value("/Rates/Custom").toString().split(QLatin1Char(','));
+    QStringList rates = Config::inst()->value("/Rates/Normal"_l1).toString().split(','_l1);
+    QStringList customRates = Config::inst()->value("/Rates/Custom"_l1).toString().split(','_l1);
 
     parseRates(rates, m_rates);
     parseRates(customRates, m_customRates);
@@ -70,21 +70,21 @@ Currency::Currency()
 
 Currency::~Currency()
 {
-    Config::inst()->setValue("/Rates/LastUpdate", m_lastUpdate.toSecsSinceEpoch());
+    Config::inst()->setValue("/Rates/LastUpdate"_l1, m_lastUpdate.toSecsSinceEpoch());
 
     QStringList sl;
     for (auto it = m_rates.constBegin(); it != m_rates.constEnd(); ++it) {
-        QString s = QLatin1String("%1|%2");
+        QString s = "%1|%2"_l1;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue("/Rates/Normal", sl.join(QLatin1String(",")));
+    Config::inst()->setValue("/Rates/Normal"_l1, sl.join(","_l1));
 
     sl.clear();
     for (auto it = m_customRates.constBegin(); it != m_customRates.constEnd(); ++it) {
-        QString s = QLatin1String("%1|%2");
+        QString s = "%1|%2"_l1;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue("/Rates/Custom", sl.join(QLatin1String(",")));
+    Config::inst()->setValue("/Rates/Custom"_l1, sl.join(","_l1));
 
     s_inst = nullptr;
 }
@@ -164,11 +164,11 @@ void Currency::updateRates(bool silent)
 
                 while (!reader.atEnd()) {
                     if (reader.readNext() == QXmlStreamReader::StartElement &&
-                        reader.name() == QLatin1String("Cube") &&
-                        reader.attributes().hasAttribute(QLatin1String("currency"))) {
+                        reader.name() == "Cube"_l1 &&
+                        reader.attributes().hasAttribute("currency"_l1)) {
 
-                        QString currency = reader.attributes().value(QLatin1String("currency")).toString();
-                        qreal rate = c.toDouble(reader.attributes().value(QLatin1String("rate")).toString());
+                        QString currency = reader.attributes().value("currency"_l1).toString();
+                        qreal rate = c.toDouble(reader.attributes().value("rate"_l1).toString());
 
                         if (currency.length() == 3 && rate > 0)
                             newRates.insert(currency, rate);
@@ -195,7 +195,7 @@ void Currency::updateRates(bool silent)
         });
     }
     if (Application::inst()->isOnline()) {
-        m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml")));
+        m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
     }
 }
 

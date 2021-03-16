@@ -135,7 +135,7 @@ Application::Application(int &_argc, char **_argv)
     setIconTheme();
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
-    QPixmap pix(":/images/brickstore_icon.png");
+    QPixmap pix(":/images/brickstore_icon.png"_l1);
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
 #endif
@@ -188,9 +188,8 @@ Application::Application(int &_argc, char **_argv)
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent("Br1ckstore" + QLatin1Char('/') + QCoreApplication::applicationVersion() +
-                                  QLatin1String(" (") + QSysInfo::prettyProductName() +
-                                  QLatin1Char(')'));
+    Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
+                                  % u" (" + QSysInfo::prettyProductName() % u')');
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR);
@@ -255,10 +254,10 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
         baseSearchPath << appdir;
 
         if (isDeveloperBuild)
-            baseSearchPath << appdir + QLatin1String("/..");
+            baseSearchPath << appdir + "/.."_l1;
 #elif defined(Q_OS_MACOS)
         Q_UNUSED(isDeveloperBuild)
-        baseSearchPath << appdir + QLatin1String("/../Resources");
+        baseSearchPath << appdir + "/../Resources"_l1;
 #elif defined(Q_OS_UNIX)
         baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore");
 
@@ -296,22 +295,22 @@ void Application::updateTranslations()
     if (!m_trans_brickstore_en)
         m_trans_brickstore_en.reset(new QTranslator());
 
-    QString i18n = ":/i18n";
+    QString i18n = ":/i18n"_l1;
 
     static bool once = false; // always load the english plural forms
     if (!once) {
-        if (m_trans_brickstore_en->load("brickstore_en", i18n))
+        if (m_trans_brickstore_en->load("brickstore_en"_l1, i18n))
             QCoreApplication::installTranslator(m_trans_brickstore_en.data());
         once = true;
     }
 
-    if (language != "en") {
-        if (m_trans_qt->load(QLatin1String("qtbase_") + language, i18n))
+    if (language != "en"_l1) {
+        if (m_trans_qt->load("qtbase_"_l1 + language, i18n))
             QCoreApplication::installTranslator(m_trans_qt.data());
         else
             m_trans_qt.reset();
 
-        if (m_trans_brickstore->load(QLatin1String("brickstore_") + language, i18n))
+        if (m_trans_brickstore->load("brickstore_"_l1 + language, i18n))
             QCoreApplication::installTranslator(m_trans_brickstore.data());
         else
             m_trans_brickstore.reset();
@@ -391,7 +390,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
 bool Application::isClient(int timeout)
 {
     enum { Undecided, Server, Client } state = Undecided;
-    QString socketName = QLatin1String("BrickStore");
+    QString socketName = "BrickStore"_l1;
     QLocalServer *server = nullptr;
 
 #if defined(Q_OS_WINDOWS)
@@ -533,10 +532,10 @@ void LogHighlighter::highlightBlock(const QString &text)
 {
     ++Application::s_inst->m_logGuiLock;
 
-    int colonPos = int(text.indexOf(':', 1));
+    int colonPos = int(text.indexOf(':'_l1, 1));
     if (colonPos > 0) {
-        int atPos = int(text.lastIndexOf(" at "));
-        int linePos = int(text.lastIndexOf(", line "));
+        int atPos = int(text.lastIndexOf(" at "_l1));
+        int linePos = int(text.lastIndexOf(", line "_l1));
 
         int atLen = 0;
         int lineLen = 0;
@@ -581,7 +580,7 @@ void LogHighlighter::highlightBlock(const QString &text)
 void Application::setupLogging()
 {
     m_logWidget = new QPlainTextEdit();
-    m_logWidget->setObjectName("LogWidget");
+    m_logWidget->setObjectName("LogWidget"_l1);
     m_logWidget->setReadOnly(true);
     m_logWidget->setMaximumBlockCount(1000);
     m_logWidget->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
@@ -602,7 +601,7 @@ void Application::setupLogging()
             pos = filename.lastIndexOf('\\');
 #endif
             if (pos < 0)
-                pos = int(filename.lastIndexOf('/'));
+                pos = int(filename.lastIndexOf('/'_l1));
             filename = filename.mid(pos + 1);
         }
 
@@ -622,7 +621,7 @@ void Application::setIconTheme()
 {
     static bool once = false;
     if (!once) {
-        QIcon::setThemeSearchPaths({ QLatin1String(":/assets/icons") });
+        QIcon::setThemeSearchPaths({ ":/assets/icons"_l1 });
         once = true;
     }
 
@@ -630,7 +629,7 @@ void Application::setIconTheme()
     auto winColor = pal.color(QPalette::Active, QPalette::Window);
     bool dark = ((winColor.lightnessF() * winColor.alphaF()) < 0.5);
 
-    QIcon::setThemeName(dark ? "brickstore-breeze-dark" : "brickstore-breeze");
+    QIcon::setThemeName(dark ? "brickstore-breeze-dark"_l1 : "brickstore-breeze"_l1);
 }
 
 bool Application::initBrickLink()

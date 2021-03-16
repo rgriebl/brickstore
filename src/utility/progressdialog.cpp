@@ -21,6 +21,7 @@
 #include <QLayout>
 #include <QApplication>
 
+#include "utility.h"
 #include "progressdialog.h"
 
 
@@ -39,7 +40,7 @@ ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *p
 
     setWindowTitle(title);
 
-    int minwidth = fontMetrics().horizontalAdvance('m') * 40;
+    int minwidth = fontMetrics().horizontalAdvance('m'_l1) * 40;
 
     auto *lay = new QVBoxLayout(this);
 
@@ -98,14 +99,14 @@ void ProgressDialog::done(int r)
 
 void ProgressDialog::setHeaderText(const QString &str)
 {
-    m_header->setText(QString("<b>%1</b>").arg(str));
+    m_header->setText("<b>%1</b>"_l1.arg(str));
     syncRepaint(m_header);
 }
 
 void ProgressDialog::setMessageText(const QString &str)
 {
     m_message_text = str;
-    m_message_progress = str.contains("%p");
+    m_message_progress = str.contains("%p"_l1);
 
     if (m_message_progress)
         setProgress(0, 0);
@@ -117,7 +118,7 @@ void ProgressDialog::setMessageText(const QString &str)
 
 void ProgressDialog::setErrorText(const QString &str)
 {
-    m_message->setText(QString("<b>%1</b>: %2").arg(tr("Error"), str));
+    m_message->setText("<b>%1</b>: %2"_l1.arg(tr("Error"), str));
     setFinished(false);
 
     syncRepaint(m_message);
@@ -151,15 +152,15 @@ void ProgressDialog::setProgress(int s, int t)
     if (m_message_progress) {
         QString str = m_message_text;
         
-        if (str.contains("%p")) {
+        if (str.contains("%p"_l1)) {
             QString prog;
 
             if (t)
-                prog = QString("%1/%2 KB").arg(s).arg(t);
+                prog = QString::fromLatin1("%1/%2 KB").arg(s).arg(t);
             else
-                prog = QString("%1 KB").arg(s);
+                prog = QString::fromLatin1("%1 KB").arg(s);
 
-            str.replace("%p", prog);
+            str.replace("%p"_l1, prog);
         }
         m_message->setText(str);
     }

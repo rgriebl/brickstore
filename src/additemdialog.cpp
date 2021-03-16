@@ -197,16 +197,16 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     checkTieredPrices();
 
-    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
+    QByteArray ba = Config::inst()->value("/MainWindow/AddItemDialog/Geometry"_l1)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/VSplitter"))
+    ba = Config::inst()->value("/MainWindow/AddItemDialog/VSplitter"_l1)
             .toByteArray();
     if (!ba.isEmpty())
         w_splitter_vertical->restoreState(ba);
-    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/HSplitter"))
+    ba = Config::inst()->value("/MainWindow/AddItemDialog/HSplitter"_l1)
             .toByteArray();
     if (!ba.isEmpty()) {
         char hidden = ba.at(0);
@@ -224,17 +224,17 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_splitter_bottom->restoreState(ba.mid(1));
     }
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/SelectItem"))
+    ba = Config::inst()->value("/MainWindow/AddItemDialog/SelectItem"_l1)
             .toByteArray();
     if (!w_select_item->restoreState(ba))
         w_select_item->restoreState(SelectItem::defaultState());
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/SelectColor"))
+    ba = Config::inst()->value("/MainWindow/AddItemDialog/SelectColor"_l1)
             .toByteArray();
     if (!w_select_color->restoreState(ba))
         w_select_color->restoreState(SelectColor::defaultState());
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/ItemDetails"))
+    ba = Config::inst()->value("/MainWindow/AddItemDialog/ItemDetails"_l1)
             .toByteArray();
     restoreState(ba);
 
@@ -290,8 +290,8 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
-    Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/AddItemDialog/VSplitter", w_splitter_vertical->saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/VSplitter"_l1, w_splitter_vertical->saveState());
 
     QByteArray ba = w_splitter_bottom->saveState();
     char hidden = 0;
@@ -302,10 +302,10 @@ AddItemDialog::~AddItemDialog()
     if (!w_toggle_seller_mode->isChecked())
         hidden |= (1 << 7);
     ba.prepend(hidden);
-    Config::inst()->setValue("/MainWindow/AddItemDialog/HSplitter", ba);
-    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectItem", w_select_item->saveState());
-    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectColor", w_select_color->saveState());
-    Config::inst()->setValue("/MainWindow/AddItemDialog/ItemDetails", saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/HSplitter"_l1, ba);
+    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectItem"_l1, w_select_item->saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectColor"_l1, w_select_color->saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/ItemDetails"_l1, saveState());
 
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
@@ -320,7 +320,7 @@ void AddItemDialog::updateCaption()
 
 void AddItemDialog::updateCurrencyCode()
 {
-    m_currency_code = m_window ? m_window->document()->currencyCode() : QLatin1String("USD");
+    m_currency_code = m_window ? m_window->document()->currencyCode() : "USD"_l1;
 
     w_price_guide->setCurrencyCode(m_currency_code);
 
@@ -394,8 +394,8 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
     } else if (event->type() == QEvent::ToolTip && watched == w_last_added) {
         const auto *he = static_cast<QHelpEvent *>(event);
         if (m_addHistory.size() > 1) {
-            static const QString pre = QLatin1String("<p style='white-space:pre'>");
-            static const QString post = QLatin1String("</p>");
+            static const QString pre = "<p style='white-space:pre'>"_l1;
+            static const QString post = "</p>"_l1;
             QString tips;
 
             for (const auto &entry : m_addHistory)
@@ -524,9 +524,9 @@ QString AddItemDialog::historyTextFor(const QDateTime &when, const Lot &lot)
     QString cs;
     if (lot.color() && lot.color()->id()) {
         QColor color = lot.color()->color();
-        cs = u"<b><font color=\"" % Utility::textColor(color).name() %
-                "\" style=\"background-color: " % color.name() % u" ;\">&nbsp;" %
-                lot.colorName() % u"&nbsp;</font></b>&nbsp;&nbsp;";
+        cs = R"(<b><font color=")"_l1 % Utility::textColor(color).name() %
+                R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
+                lot.colorName() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
     }
 
     QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %

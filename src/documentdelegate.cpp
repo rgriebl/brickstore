@@ -251,8 +251,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
         QPixmap *pix = s_tagicon_cache[key];
         if (!pix) {
-            QIcon icon = warn ? QIcon::fromTheme("vcs-locally-modified-unstaged-small")
-                              : QIcon::fromTheme("vcs-locally-modified-small");
+            QIcon icon = warn ? QIcon::fromTheme("vcs-locally-modified-unstaged-small"_l1)
+                              : QIcon::fromTheme("vcs-locally-modified-small"_l1);
             pix = new QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
             if (!s_tagicon_cache.insert(key, pix))
                 pix = nullptr;
@@ -361,10 +361,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (!pix) {
             QIcon icon;
             switch (lot->status()) {
-            case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"); break;
-            case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"); break;
+            case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"_l1); break;
+            case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"_l1); break;
             default                        :
-            case BrickLink::Status::Include: icon = QIcon::fromTheme("vcs-normal"); break;
+            case BrickLink::Status::Include: icon = QIcon::fromTheme("vcs-normal"_l1); break;
             }
             pix = new QPixmap(icon.pixmap(iconSize));
             if (!s_tag_cache.insert(key.q, pix))
@@ -376,7 +376,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         uint altid = lot->alternateId();
         bool cp = lot->counterPart();
         if (altid || cp) {
-            tag.text = cp ? QLatin1String("CP") : QString::number(altid);
+            tag.text = cp ? "CP"_l1 : QString::number(altid);
             tag.bold = (cp || !lot->alternate());
             tag.foreground = fg;
             if (cp || selected) {
@@ -596,7 +596,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             return;
         }
 
-        static const QString elide = QLatin1String("...");
+        static const QString elide = "..."_l1;
         auto key = TextLayoutCacheKey { str, QSize(rw, h), fm.height() };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
@@ -1019,6 +1019,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
 {
     QVariant v = idx.data(differenceBase ? int(Document::BaseDisplayRole) : int(Qt::DisplayRole));
     QLocale loc;
+    static const QString dash = QStringLiteral("-");
 
     switch (idx.column()) {
     case Document::Status: {
@@ -1055,7 +1056,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
                 && (item->subCondition() != BrickLink::SubCondition::None)) {
             QString scStr;
             switch (item->subCondition()) {
-            case BrickLink::SubCondition::None      : scStr = QString('-'); break;
+            case BrickLink::SubCondition::None      : scStr = QStringLiteral("-"); break;
             case BrickLink::SubCondition::Sealed    : scStr = tr("Sealed"); break;
             case BrickLink::SubCondition::Complete  : scStr = tr("Complete"); break;
             case BrickLink::SubCondition::Incomplete: scStr = tr("Incomplete"); break;
@@ -1097,12 +1098,12 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
     case Document::TierQ2:
     case Document::TierQ3: {
         int i = v.toInt();
-        return (!i && !toolTip) ? QString('-') : loc.toString(i);
+        return (!i && !toolTip) ? dash : loc.toString(i);
     }
     case Document::YearReleased:
     case Document::LotId: {
         int i = v.toUInt();
-        return (!i && !toolTip) ? QString('-') : QString::number(i);
+        return (!i && !toolTip) ? dash : QString::number(i);
     }
     case Document::PriceOrig:
     case Document::PriceDiff:
@@ -1113,19 +1114,19 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool
     case Document::TierP2:
     case Document::TierP3: {
         double d = v.toDouble();
-        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : Currency::toDisplayString(d);
+        return (qFuzzyIsNull(d) && !toolTip) ? dash : Currency::toDisplayString(d);
     }
     case Document::Bulk: {
         int i = v.toInt();
-        return ((i == 1) && !toolTip) ? QString('-') : loc.toString(i);
+        return ((i == 1) && !toolTip) ? dash : loc.toString(i);
     }
     case Document::Sale: {
         int i = v.toInt();
-        return (!i && !toolTip) ? QString('-') : loc.toString(i) % u'%';
+        return (!i && !toolTip) ? dash : loc.toString(i) % u'%';
     }
     case Document::Weight: {
         double d = v.toDouble();
-        return (qFuzzyIsNull(d) && !toolTip) ? QString('-') : Utility::weightToString
+        return (qFuzzyIsNull(d) && !toolTip) ? dash : Utility::weightToString
                                                (d, Config::inst()->measurementSystem(), true, true);
     }
     default:

@@ -19,7 +19,9 @@
 #include <QImage>
 #include <QUrlQuery>
 #include <QRunnable>
+#include <QStringBuilder>
 
+#include "utility.h"
 #include "bricklink.h"
 
 
@@ -278,7 +280,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         m_diskloadPool.start(new PictureLoaderJob(pic));
         return;
 
-    } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
+    } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"_l1))) {
         // There's no large JPG image, so try a GIF image instead (mostly very old sets)
         // We save the GIF with an JPG extension if we succeed, but Qt uses the file header on
         // loading to do the right thing.
@@ -289,7 +291,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
             pic->m_update_status = UpdateStatus::Updating;
 
             QUrl url = j->url();
-            url.setPath(url.path().replace(".jpg", ".gif"));
+            url.setPath(url.path().replace(".jpg"_l1, ".gif"_l1));
 
             QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
             TransferJob *job = TransferJob::get(url, f);

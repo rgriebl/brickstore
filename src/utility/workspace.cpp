@@ -33,7 +33,9 @@
 #include <QShortcut>
 #include <QSizeGrip>
 #include <QDebug>
+#include <QStringBuilder>
 
+#include "utility.h"
 #include "workspace.h"
 
 Q_DECLARE_METATYPE(QWidget *)
@@ -42,7 +44,7 @@ Q_DECLARE_METATYPE(QWidget *)
 static QString cleanWindowTitle(QWidget *window)
 {
     QString s = window->windowTitle();
-    s.replace(QLatin1String("[*]"), QLatin1String(window->isWindowModified() ? "*" : ""));
+    s.replace("[*]"_l1, QLatin1String(window->isWindowModified() ? "*" : ""));
     return s;
 }
 
@@ -78,7 +80,7 @@ private slots:
         for (auto *w : wl) {
             QString s = cleanWindowTitle(w);
             if (m_shortcut && (i < 10))
-                s.prepend(QString("&%1   ").arg((i + 1) % 10));
+                s = s % u'&' % QString::number((i + 1) % 10) % u"   ";
 
             QAction *a = addAction(s);
             a->setCheckable(true);
@@ -117,7 +119,7 @@ Workspace::Workspace(QWidget *parent)
     m_tabs->tabBar()->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
 
     m_tablist = new QToolButton();
-    m_tablist->setIcon(QIcon::fromTheme("tab-duplicate"));
+    m_tablist->setIcon(QIcon::fromTheme("tab-duplicate"_l1));
     m_tablist->setAutoRaise(true);
     m_tablist->setPopupMode(QToolButton::InstantPopup);
     m_tablist->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -125,7 +127,7 @@ Workspace::Workspace(QWidget *parent)
     m_tabs->setCornerWidget(m_tablist, Qt::TopRightCorner);
 
     m_tabhome = new QToolButton();
-    m_tabhome->setIcon(QIcon::fromTheme("go-home"));
+    m_tabhome->setIcon(QIcon::fromTheme("go-home"_l1));
     m_tabhome->setAutoRaise(true);
     m_tabhome->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_tabs->setCornerWidget(m_tabhome, Qt::TopLeftCorner);
@@ -133,7 +135,7 @@ Workspace::Workspace(QWidget *parent)
     m_welcomeWidget = new QWidget();
 
     m_tabback = new QToolButton(m_welcomeWidget);
-    m_tabback->setIcon(QIcon::fromTheme("go-previous"));
+    m_tabback->setIcon(QIcon::fromTheme("go-previous"_l1));
     m_tabback->setAutoRaise(true);
     m_tabback->setToolButtonStyle(Qt::ToolButtonIconOnly);
     connect(m_tabback, &QToolButton::clicked,
@@ -168,8 +170,8 @@ Workspace::Workspace(QWidget *parent)
         m_tabs->widget(idx)->close();
     });
 
-    connect(m_tabs->findChild<QStackedWidget *>("qt_tabwidget_stackedwidget"), &QStackedWidget::widgetRemoved,
-            this, [this]() {
+    connect(m_tabs->findChild<QStackedWidget *>("qt_tabwidget_stackedwidget"_l1),
+            &QStackedWidget::widgetRemoved, this, [this]() {
         int c = windowCount();
         emit windowCountChanged(c);
         if (c == 0)

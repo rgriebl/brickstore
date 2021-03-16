@@ -19,6 +19,7 @@
 #include <QImage>
 #include <QSortFilterProxyModel>
 #include <QMenu>
+#include <QStringBuilder>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -207,7 +208,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_item_image_size_percent->setFixedWidth(w_item_image_size_percent->width());
 
     auto setFontSize = [this](int v) {
-        w_font_size_percent->setText(QString("%1 %").arg(v * 10));
+        w_font_size_percent->setText(QString::number(v * 10) % u" %");
         QFont f = font();
         qreal defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
         if (defaultFontSize <= 0)
@@ -224,10 +225,10 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, [this]() { w_font_size->setValue(10); });
 
     auto setImageSize = [this](int v) {
-        w_item_image_size_percent->setText(QString("%1 %").arg(v * 10));
+        w_item_image_size_percent->setText(QString::number(v * 10) % u" %");
         int s = int(BrickLink::core()->standardPictureSize().height() * v
                     / 10 / BrickLink::core()->itemImageScaleFactor());
-        QImage img(":/images/brickstore_icon.png");
+        QImage img(":/images/brickstore_icon.png"_l1);
         img = img.scaled(s, s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         w_item_image_example->setPixmap(QPixmap::fromImage(img));
     };
@@ -294,7 +295,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_sc_list->setModel(m_sc_proxymodel);
     w_sc_list->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
-    w_sc_filter->addAction(QIcon::fromTheme("view-filter"), QLineEdit::LeadingPosition);
+    w_sc_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
 
     connect(w_sc_list->selectionModel(), &QItemSelectionModel::currentChanged,
             this, [=]() {
@@ -425,8 +426,8 @@ void SettingsDialog::currenciesUpdated()
     QString oldprefered = m_preferedCurrency;
     QStringList currencies = Currency::inst()->currencyCodes();
     currencies.sort();
-    currencies.removeOne(QLatin1String("USD"));
-    currencies.prepend(QLatin1String("USD"));
+    currencies.removeOne("USD"_l1);
+    currencies.prepend("USD"_l1);
     w_currency->clear();
     w_currency->insertItems(0, currencies);
     if (currencies.count() > 1)
@@ -449,10 +450,12 @@ void SettingsDialog::load()
         const QString currentLanguage = Config::inst()->language();
 
         for (const auto &trans : translations) {
-            if (trans.language == QLatin1String("en"))
-                w_language->addItem(trans.languageName[QLatin1String("en")], trans.language);
-            else
-                w_language->addItem(QString("%1 (%2)").arg(trans.languageName[QLatin1String("en")], trans.languageName[trans.language]), trans.language);
+            if (trans.language == "en"_l1) {
+                w_language->addItem(trans.languageName["en"_l1], trans.language);
+            } else {
+                w_language->addItem("%1 (%2)"_l1.arg(trans.languageName["en"_l1],
+                                    trans.languageName[trans.language]), trans.language);
+            }
 
             if (currentLanguage == trans.language)
                 w_language->setCurrentIndex(w_language->count()-1);
@@ -584,7 +587,7 @@ void SettingsDialog::checkLDrawDir()
 
     auto setStatus = [this](bool ok, const QString &status, const QString &path = { }) {
         w_ldraw_status->setText(QString::fromLatin1("%1<br><i>%2</i>").arg(status, path));
-        auto icon = QIcon::fromTheme(ok ? "vcs-normal" : "vcs-removed");
+        auto icon = QIcon::fromTheme(ok ? "vcs-normal"_l1 : "vcs-removed"_l1);
         w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
     };
 

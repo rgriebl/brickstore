@@ -27,6 +27,7 @@
 #include "picturewidget.h"
 #include "ldraw.h"
 #include "renderwidget.h"
+#include "utility.h"
 
 
 PictureWidget::PictureWidget(QWidget *parent)
@@ -67,7 +68,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_ldraw->hide();
 
     w_2d = new QToolButton();
-    w_2d->setText("2D");
+    w_2d->setText("2D"_l1);
     w_2d->setAutoRaise(true);
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
@@ -76,7 +77,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     w_3d = new QToolButton();
-    w_3d->setText("3D");
+    w_3d->setText("3D"_l1);
     w_3d->setAutoRaise(true);
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
@@ -89,8 +90,8 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setFont(font);
     w_3d->setFont(font);
 
-    m_playIcon = QIcon::fromTheme("media-playback-start");
-    m_pauseIcon = QIcon::fromTheme("media-playback-stop");
+    m_playIcon = QIcon::fromTheme("media-playback-start"_l1);
+    m_pauseIcon = QIcon::fromTheme("media-playback-stop"_l1);
 
     w_playPause = new QToolButton();
     w_playPause->setAutoRaise(true);
@@ -122,8 +123,8 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("picture_reload");
-    a->setIcon(QIcon::fromTheme("view-refresh"));
+    a->setObjectName("picture_reload"_l1);
+    a->setIcon(QIcon::fromTheme("view-refresh"_l1));
     connect(a, &QAction::triggered,
             this, &PictureWidget::doUpdate);
     addAction(a);
@@ -133,20 +134,20 @@ PictureWidget::PictureWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("picture_bl_catalog");
-    a->setIcon(QIcon::fromTheme("bricklink-catalog"));
+    a->setObjectName("picture_bl_catalog"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
     connect(a, &QAction::triggered,
             this, &PictureWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("picture_bl_priceguide");
-    a->setIcon(QIcon::fromTheme("bricklink-priceguide"));
+    a->setObjectName("picture_bl_priceguide"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
     connect(a, &QAction::triggered,
             this, &PictureWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("picture_bl_lotsforsale");
-    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"));
+    a->setObjectName("picture_bl_lotsforsale"_l1);
+    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
     connect(a, &QAction::triggered,
             this, &PictureWidget::showBLLotsForSale);
     addAction(a);
@@ -161,10 +162,10 @@ PictureWidget::PictureWidget(QWidget *parent)
 
 void PictureWidget::languageChange()
 {
-    findChild<QAction *> ("picture_reload")->setText(tr("Update"));
-    findChild<QAction *> ("picture_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *> ("picture_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *> ("picture_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *> ("picture_reload"_l1)->setText(tr("Update"));
+    findChild<QAction *> ("picture_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *> ("picture_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *> ("picture_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 void PictureWidget::paletteChange()
@@ -267,19 +268,19 @@ void PictureWidget::redraw()
     w_image->setPixmap({ });
 
     if (m_item) {
-        w_text->setText(QLatin1String("<center><b>") +
-                        m_item->id() +
-                        QLatin1String("</b>&nbsp; ") +
+        w_text->setText("<center><b>"_l1 +
+                        QLatin1String(m_item->id()) +
+                        "</b>&nbsp; "_l1 +
                         m_item->name() +
-                        QLatin1String("</center>"));
+                        "</center>"_l1);
     } else {
         w_text->setText({ });
     }
 
     if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-        w_image->setText(QLatin1String("<center><i>") +
+        w_image->setText("<center><i>"_l1 +
                          tr("Please wait... updating") +
-                         QLatin1String("</i></center>"));
+                         "</i></center>"_l1);
     } else if (m_pic) {
         bool hasImage = !m_image.isNull();
         auto dpr = devicePixelRatioF();

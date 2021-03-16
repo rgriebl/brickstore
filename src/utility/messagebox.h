@@ -16,12 +16,14 @@
 #include <QMessageBox>
 #include <QPointer>
 
+#include "utility.h"
+
 QT_FORWARD_DECLARE_CLASS(QValidator)
 
 
 inline QString CMB_BOLD(const QString &str)
 {
-    return QLatin1String("<b>") + str + QLatin1String("</b>");
+    return "<b>"_l1 + str + "</b>"_l1;
 }
 
 

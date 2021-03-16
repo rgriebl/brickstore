@@ -39,7 +39,7 @@ static bool isReadOnly(QObject *obj)
 BrickLink::BrickLink(::BrickLink::Core *core)
     : d(core)
 {
-    setObjectName(QLatin1String("BrickLink"));
+    setObjectName("BrickLink"_l1);
 
     connect(core, &::BrickLink::Core::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
@@ -465,7 +465,7 @@ Lot Document::addLot(Item item, Color color)
 
 BrickStore::BrickStore()
 {
-    setObjectName(QLatin1String("BrickStore"));
+    setObjectName("BrickStore"_l1);
 
     auto checkActiveWindow = [this](Window *win) {
         Document *doc = documentForWindow(win);

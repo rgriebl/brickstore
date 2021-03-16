@@ -87,7 +87,7 @@ void Window::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)
     QString actionText;
     if (auto a = qobject_cast<QAction *>(sender())) {
         actionText = a->text();
-        if (actionText.endsWith(QLatin1String("...")))
+        if (actionText.endsWith("..."_l1))
             actionText.chop(3);
     }
 
@@ -273,7 +273,7 @@ void TableView::keyPressEvent(QKeyEvent *e)
 
 CheckColorTabBar::CheckColorTabBar()
 {
-    addTab(" ");
+    addTab(" "_l1);
 }
 
 QColor CheckColorTabBar::color() const
@@ -323,7 +323,7 @@ StatusBar::StatusBar(Window *window)
     if (m_doc->order()) {
         addSeparator();
         m_order = new QToolButton();
-        m_order->setIcon(QIcon::fromTheme("help-about"));
+        m_order->setIcon(QIcon::fromTheme("help-about"_l1));
         m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         m_order->setAutoRaise(true);
         layout->addWidget(m_order);
@@ -341,7 +341,7 @@ StatusBar::StatusBar(Window *window)
     m_differencesSeparator = addSeparator();
     m_differences = new QToolButton();
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified"));
+    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified"_l1));
     m_differences->setShortcut(tr("F5"));
     m_differences->setAutoRaise(true);
     connect(m_differences, &QToolButton::clicked,
@@ -351,7 +351,7 @@ StatusBar::StatusBar(Window *window)
     m_errorsSeparator = addSeparator();
     m_errors = new QToolButton();
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setIcon(QIcon::fromTheme("emblem-warning"));
+    m_errors->setIcon(QIcon::fromTheme("emblem-warning"_l1));
     m_errors->setShortcut(tr("F6"));
     m_errors->setAutoRaise(true);
     connect(m_errors, &QToolButton::clicked,
@@ -389,7 +389,7 @@ StatusBar::StatusBar(Window *window)
     m_blockProgress = new QProgressBar();
     blockLayout->addWidget(m_blockProgress, 1);
     m_blockCancel = new QToolButton();
-    m_blockCancel->setIcon(QIcon::fromTheme("process-stop"));
+    m_blockCancel->setIcon(QIcon::fromTheme("process-stop"_l1));
     m_blockCancel->setAutoRaise(true);
     blockLayout->addWidget(m_blockCancel);
 
@@ -452,7 +452,7 @@ void StatusBar::updateCurrencyRates()
 
 void StatusBar::documentCurrencyChanged(const QString &ccode)
 {
-    m_currency->setText(ccode + QLatin1String("  "));
+    m_currency->setText(ccode + "  "_l1);
     // the menu might still be open right now, so we need to delay deleting the actions
     QMetaObject::invokeMethod(this, &StatusBar::updateCurrencyRates, Qt::QueuedConnection);
 }
@@ -698,7 +698,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
         sortFilterSet = m_doc->restoreSortFilterState(sortFilterState);
 
     if (!columnsSet) {
-        auto layout = Config::inst()->columnLayout("user-default");
+        auto layout = Config::inst()->columnLayout("user-default"_l1);
         if (!w_header->restoreLayout(layout)) {
             resizeColumnsToDefault();
             w_header->setSortIndicator(0, Qt::AscendingOrder);
@@ -754,7 +754,7 @@ void Window::updateCaption()
     if (cap.isEmpty())
         cap = tr("Untitled");
 
-    cap += QLatin1String("[*]");
+    cap += "[*]"_l1;
 
     setWindowTitle(cap);
     setWindowModified(m_doc->isModified());
@@ -1182,11 +1182,11 @@ void Window::on_edit_filter_from_selection_triggered()
             }
             if (idx.column() == Document::Weight)
                 s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
-            if (s.isEmpty() || s.contains(QChar(' ')))
+            if (s.isEmpty() || s.contains(' '_l1))
                 s = u'"' % s % u'"';
 
             FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
-                                         % QLatin1String(" == ") % s);
+                                         % " == "_l1 % s);
         }
     }
 }
@@ -1471,7 +1471,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
         QString s = tr("Prices of the selected items have been updated to Price Guide values.");
         if (failCount) {
-            s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records or network errors.")
+            s = s % u"<br><br>" % tr("%1 have been skipped, because of missing Price Guide records or network errors.")
                     .arg(CMB_BOLD(QString::number(failCount)));
         }
 
@@ -2297,7 +2297,7 @@ void Window::closeEvent(QCloseEvent *e)
         FrameWork::inst()->setActiveWindow(this);
 
         QMessageBox msgBox(this);
-        msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace(QLatin1String("[*]"), QString()))));
+        msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace("[*]"_l1, QString()))));
         msgBox.setInformativeText(tr("Do you want to save your changes?"));
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
@@ -2374,7 +2374,7 @@ void Window::on_view_column_layout_save_triggered()
                               name)) {
         QString layoutId;
         if (name.isEmpty()) {
-            layoutId = "user-default";
+            layoutId = "user-default"_l1;
         } else {
             const auto allIds = Config::inst()->columnLayoutIds();
             for (const auto &id : allIds) {
@@ -2461,7 +2461,7 @@ void Window::print(bool as_pdf)
     QPrinter prt(QPrinter::HighResolution);
 
     if (as_pdf) {
-        QString pdfname = doctitle + QLatin1String(".pdf");
+        QString pdfname = doctitle + ".pdf"_l1;
 
         QDir d(Config::inst()->documentDir());
         if (d.exists())
@@ -2518,7 +2518,7 @@ void Window::print(bool as_pdf)
         if (msg.isEmpty())
             msg = tr("Printing failed.");
         else
-            msg.replace(QChar('\n'), QLatin1String("<br>"));
+            msg.replace('\n'_l1, "<br>"_l1);
         MessageBox::warning(nullptr, { }, msg);
     }
 }
@@ -2704,7 +2704,7 @@ void Window::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &
 
 
 static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
-static const QString autosaveTemplate = QLatin1String("brickstore_%1.autosave");
+static const QString autosaveTemplate = "brickstore_%1.autosave"_l1;
 
 void Window::deleteAutosave()
 {
@@ -2809,7 +2809,7 @@ void Window::autosave() const
 int Window::restorableAutosaves()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    return temp.entryList({ autosaveTemplate.arg("*") }).count();
+    return temp.entryList({ autosaveTemplate.arg("*"_l1) }).count();
 }
 
 const QVector<Window *> Window::processAutosaves(AutosaveAction action)
@@ -2817,7 +2817,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
     QVector<Window *> restored;
 
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    const QStringList ondisk = temp.entryList({ autosaveTemplate.arg("*") });
+    const QStringList ondisk = temp.entryList({ autosaveTemplate.arg("*"_l1) });
 
     for (const QString &filename : ondisk) {
         QFile f(temp.filePath(filename));

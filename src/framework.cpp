@@ -115,7 +115,7 @@ public:
                 QString s = f;
 #if !defined(Q_OS_MACOS)
                 if (++cnt < 10)
-                    s.prepend(QString("&%1   ").arg(cnt));
+                    s.prepend(QString("&%1   "_l1).arg(cnt));
 #endif
                 addAction(s)->setData(f);
             }
@@ -322,15 +322,15 @@ FrameWork::FrameWork(QWidget *parent)
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
     m_task_info = new TaskInfoWidget(nullptr);
-    m_task_info->setObjectName(QLatin1String("TaskInfo"));
+    m_task_info->setObjectName("TaskInfo"_l1);
     addDockWidget(Qt::LeftDockWidgetArea, createDock(m_task_info));
 
     m_task_appears = new TaskAppearsInWidget(nullptr);
-    m_task_appears->setObjectName(QLatin1String("TaskAppears"));
+    m_task_appears->setObjectName("TaskAppears"_l1);
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_appears), Qt::Vertical);
 
     m_task_priceguide = new TaskPriceGuideWidget(nullptr);
-    m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
+    m_task_priceguide->setObjectName("TaskPriceGuide"_l1);
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
     auto logDock = createDock(Application::inst()->logWidget());
@@ -339,7 +339,7 @@ FrameWork::FrameWork(QWidget *parent)
     addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);
 
     m_toolbar = new QToolBar(this);
-    m_toolbar->setObjectName(QLatin1String("toolbar"));
+    m_toolbar->setObjectName("toolbar"_l1);
     m_toolbar->setMovable(false);
 
     // ^^^ increase DockStateVersion if you change the dock/toolbar setup
@@ -442,7 +442,7 @@ FrameWork::FrameWork(QWidget *parent)
                                   }));
 
     QMenu *m = m_workspace->windowMenu(true, this);
-    m->menuAction()->setObjectName(QLatin1String("menu_window"));
+    m->menuAction()->setObjectName("menu_window"_l1);
     menuBar()->addMenu(m);
 
     menuBar()->addMenu(createMenu("menu_help", {
@@ -542,15 +542,15 @@ FrameWork::FrameWork(QWidget *parent)
 
     QByteArray ba;
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/Geometry")).toByteArray();
+    ba = Config::inst()->value("/MainWindow/Layout/Geometry"_l1).toByteArray();
     restoreGeometry(ba);
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/State")).toByteArray();
+    ba = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
     if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
 
     if (m_filter) {
-        ba = Config::inst()->value(QLatin1String("/MainWindow/Filter")).toByteArray();
+        ba = Config::inst()->value("/MainWindow/Filter"_l1).toByteArray();
         if (!ba.isEmpty()) {
             m_filter->restoreState(ba);
             m_filter->clear();
@@ -574,7 +574,7 @@ FrameWork::FrameWork(QWidget *parent)
 
     if (!restoreWindowsFromAutosave()) {
         if (Config::inst()->restoreLastSession()) {
-            const auto files = Config::inst()->value("/MainWindow/LastSessionDocuments").toStringList();
+            const auto files = Config::inst()->value("/MainWindow/LastSessionDocuments"_l1).toStringList();
             for (const auto &file : files)
                 openDocument(file);
         }
@@ -633,13 +633,13 @@ void FrameWork::languageChange()
     foreach (QDockWidget *dock, m_dock_widgets) {
         QString name = dock->objectName();
 
-        if (name == QLatin1String("Dock-TaskInfo"))
+        if (name == "Dock-TaskInfo"_l1)
             dock->setWindowTitle(tr("Info"));
-        if (name == QLatin1String("Dock-TaskPriceGuide"))
+        if (name == "Dock-TaskPriceGuide"_l1)
             dock->setWindowTitle(tr("Price Guide"));
-        if (name == QLatin1String("Dock-TaskAppears"))
+        if (name == "Dock-TaskAppears"_l1)
             dock->setWindowTitle(tr("Appears In Sets"));
-        if (name == QLatin1String("Dock-LogWidget"))
+        if (name == "Dock-LogWidget"_l1)
             dock->setWindowTitle(tr("Error Log"));
     }
     if (m_filter) {
@@ -705,8 +705,8 @@ void FrameWork::translateActions()
         { "document_close",                 tr("Close"),                              QKeySequence::Close },
         { "application_exit",               tr("Exit"),                               QKeySequence::Quit },
         { "menu_edit",                      tr("&Edit"),                              },
-        { "edit_undo",                      nullptr,                                  QKeySequence::Undo },
-        { "edit_redo",                      nullptr,                                  QKeySequence::Redo },
+        { "edit_undo",                      { },                                      QKeySequence::Undo },
+        { "edit_redo",                      { },                                      QKeySequence::Redo },
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
@@ -821,7 +821,7 @@ void FrameWork::translateActions()
                 defaultShortcut = QKeySequence(at.shortcut);
             a->setProperty("bsShortcut", QVariant::fromValue(defaultShortcut));
 
-            auto shortcut = customShortcuts.value(qL1S(at.name)).value<QKeySequence>();
+            auto shortcut = customShortcuts.value(QLatin1String(at.name)).value<QKeySequence>();
             if (shortcut.isEmpty())
                 shortcut = defaultShortcut;
 
@@ -832,7 +832,7 @@ void FrameWork::translateActions()
                 a->setToolTip(a->text());
 
             QString iconName = QString::fromLatin1(iconalias.value(at.name, at.name));
-            iconName.replace("_", "-");
+            iconName.replace("_"_l1, "-"_l1);
 
             QIcon icon = QIcon::fromTheme(iconName);
             if (!icon.isNull())
@@ -843,9 +843,9 @@ void FrameWork::translateActions()
 
 FrameWork::~FrameWork()
 {
-    Config::inst()->setValue("/MainWindow/Layout/State", saveState(DockStateVersion));
-    Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/Filter", m_filter->saveState());
+    Config::inst()->setValue("/MainWindow/Layout/State"_l1, saveState(DockStateVersion));
+    Config::inst()->setValue("/MainWindow/Layout/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/Filter"_l1, m_filter->saveState());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
@@ -897,7 +897,7 @@ QAction *FrameWork::findAction(const char *name) const
 QDockWidget *FrameWork::createDock(QWidget *widget)
 {
     QDockWidget *dock = new QDockWidget(QString(), this);
-    dock->setObjectName(QLatin1String("Dock-") + widget->objectName());
+    dock->setObjectName("Dock-"_l1 + widget->objectName());
     dock->setFeatures(QDockWidget::DockWidgetClosable);
     dock->setTitleBarWidget(new FancyDockTitleBar(dock));
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -989,7 +989,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     continue;
                 }
                 m_progress = new ProgressCircle();
-                m_progress->setIcon(QIcon(":/images/brickstore_icon.png"));
+                m_progress->setIcon(QIcon(":/images/brickstore_icon.png"_l1));
                 m_progress->setColor("#4ba2d8");
                 t->addWidget(m_progress);
 
@@ -1084,7 +1084,7 @@ void FrameWork::createActions()
     });
 
     auto rm = new RecentMenu(this);
-    rm->menuAction()->setObjectName("document_open_recent");
+    rm->menuAction()->setObjectName("document_open_recent"_l1);
     connect(rm, &RecentMenu::openRecent,
             this, &FrameWork::openDocument);
     connect(rm, &RecentMenu::clearRecent,
@@ -1140,9 +1140,9 @@ void FrameWork::createActions()
     a->setMenuRole(QAction::QuitRole);
 
     a = m_undogroup->createUndoAction(this);
-    a->setObjectName("edit_undo");
+    a->setObjectName("edit_undo"_l1);
     a = m_undogroup->createRedoAction(this);
-    a->setObjectName("edit_redo");
+    a->setObjectName("edit_redo"_l1);
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Delete)), this),
@@ -1257,7 +1257,7 @@ void FrameWork::createActions()
         setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
     });
 
-    m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
+    m_toolbar->toggleViewAction()->setObjectName("view_toolbar"_l1);
     m = newQMenu(this, "view_docks");
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
@@ -1271,8 +1271,8 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
-    lclm->menuAction()->setIcon(QIcon::fromTheme("object-columns"));
-    lclm->setObjectName("view_column_layout_list");
+    lclm->menuAction()->setIcon(QIcon::fromTheme("object-columns"_l1));
+    lclm->setObjectName("view_column_layout_list"_l1);
 
     (void) newQAction(this, "update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
@@ -1398,7 +1398,7 @@ void FrameWork::setupWindow(Window *win)
     setActiveWindow(win);
 
     if (win->document()->legacyCurrencyCode()
-            && (Config::inst()->defaultCurrencyCode() != QLatin1String("USD"))) {
+            && (Config::inst()->defaultCurrencyCode() != "USD"_l1)) {
         QMetaObject::invokeMethod(this, []() {
             MessageBox::information(nullptr, { }, tr("You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner."));
         }, Qt::QueuedConnection);
@@ -1778,7 +1778,7 @@ void FrameWork::transferJobProgressUpdate(int p, int t)
 
 void FrameWork::showSettings(const char *page)
 {
-    SettingsDialog d(page, this);
+    SettingsDialog d(QLatin1String(page), this);
     d.exec();
 }
 
@@ -1819,7 +1819,7 @@ void FrameWork::closeEvent(QCloseEvent *e)
         if (!fileName.isEmpty())
             files << fileName;
     }
-    Config::inst()->setValue("/MainWindow/LastSessionDocuments", files);
+    Config::inst()->setValue("/MainWindow/LastSessionDocuments"_l1, files);
 
     if (!closeAllWindows()) {
         e->ignore();
@@ -1861,7 +1861,7 @@ void FrameWork::showAddItemDialog()
 {
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
-        m_add_dialog->setObjectName(QLatin1String("additems"));
+        m_add_dialog->setObjectName("additems"_l1);
         m_add_dialog->attach(m_activeWin);
 
         connect(m_add_dialog, &AddItemDialog::closed,

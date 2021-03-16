@@ -20,6 +20,7 @@
 #include <QWidget>
 #include <QWindow>
 #include <QScreen>
+#include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
@@ -225,7 +226,7 @@ quint64 Utility::physicalMemory()
     }
 
 #elif defined(Q_OS_LINUX)
-    QFile f(QLatin1String("/proc/meminfo"));
+    QFile f("/proc/meminfo"_l1);
     if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QByteArray line;
         while (!(line = f.readLine()).isNull()) {

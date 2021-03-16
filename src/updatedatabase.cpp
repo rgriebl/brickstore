@@ -14,11 +14,13 @@
 
 #include <QFile>
 #include <QDateTime>
+#include <QStringBuilder>
 
 #include "updatedatabase.h"
 #include "lzmadec.h"
 #include "config.h"
 #include "bricklink.h"
+#include "utility.h"
 #include "progressdialog.h"
 
 
@@ -35,17 +37,17 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
     pd->setHeaderText(tr("Updating BrickLink Database"));
     pd->setMessageText(tr("Download: %p"));
 
-    QString remotefile = DATABASE_URL + BrickLink::core()->defaultDatabaseName();
-    QString localfile = BrickLink::core()->dataPath() + BrickLink::core()->defaultDatabaseName();
+    QString remotefile = QLatin1String(DATABASE_URL) % BrickLink::core()->defaultDatabaseName();
+    QString localfile = BrickLink::core()->dataPath() % BrickLink::core()->defaultDatabaseName();
 
     QDateTime dt;
     if (QFile::exists(localfile))
         dt = BrickLink::core()->databaseDate();
 
-    QFile *file = new QFile(localfile + ".lzma");
+    QFile *file = new QFile(localfile % u".lzma");
 
     if (file->open(QIODevice::WriteOnly)) {
-        pd->get(remotefile + ".lzma", dt, file);
+        pd->get(QString(remotefile % u".lzma"), dt, file);
     }
     else {
         pd->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));

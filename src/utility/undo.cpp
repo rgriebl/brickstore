@@ -25,6 +25,7 @@
 #include <QLayout>
 #include <QtDebug>
 
+#include "utility.h"
 #include "undo.h"
 
 
@@ -278,7 +279,7 @@ void UndoAction::setDescription(const QString &desc)
     m_desc = desc;
     QString str = (m_type == Undo) ? tr("Undo") : tr("Redo");
     if (!desc.isEmpty())
-        str.append(QString(" (%1)").arg(desc));
+        str.append(" (%1)"_l1.arg(desc));
     setText(str);
 }
 

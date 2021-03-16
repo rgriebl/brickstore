@@ -102,11 +102,11 @@ int RebuildDatabase::exec()
         if (username.isEmpty() || password.isEmpty())
             printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");
 
-        QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax");
+        QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
         QUrlQuery q;
-        q.addQueryItem("userid", username);
-        q.addQueryItem("password", password);
-        q.addQueryItem("keepme_loggedin", "1");
+        q.addQueryItem("userid"_l1, username);
+        q.addQueryItem("password"_l1, password);
+        q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
         url.setQuery(q);
 
         auto job = TransferJob::post(url);
@@ -130,7 +130,7 @@ int RebuildDatabase::exec()
                 this, &RebuildDatabase::downloadJobFinished);
 
         if (!httpReply.isEmpty())
-            return error(QByteArray("Failed to log into BrickLink:\n") + httpReply);
+            return error("Failed to log into BrickLink:\n"_l1 + QLatin1String(httpReply));
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ int RebuildDatabase::exec()
     printf("\nSTEP 3: Parsing downloaded files...\n");
 
     if (!blti.import(bl->dataPath()))
-        return error("failed to parse database files.");
+        return error("failed to parse database files."_l1);
 
     blti.exportTo(bl);
 
@@ -167,7 +167,7 @@ int RebuildDatabase::exec()
     blti.importInventories(invs);
 
     if ((invs.size() - size_t(std::count(invs.cbegin(), invs.cend(), nullptr))) > (blti.items().size() / 50))             // more than 2% have failed
-        return error("more than 2% of all inventories had errors.");
+        return error("more than 2% of all inventories had errors."_l1);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Computing the database...\n");
@@ -203,13 +203,13 @@ int RebuildDatabase::exec()
 static QList<QPair<QString, QString> > itemQuery(char item_type)
 {
     QList<QPair<QString, QString> > query;   //?a=a&viewType=0&itemType=X
-    query << QPair<QString, QString>("a", "a")
-            << QPair<QString, QString>("viewType", "0")
-            << QPair<QString, QString>("itemType", QChar(item_type))
-            << QPair<QString, QString>("selItemColor", "Y")  // special BrickStore flag to get default color - thanks Dan
-            << QPair<QString, QString>("selWeight", "Y")
-            << QPair<QString, QString>("selYear", "Y")
-            << QPair<QString, QString>("downloadType", "X");
+    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
+            << QPair<QString, QString>("viewType"_l1,     "0"_l1)
+            << QPair<QString, QString>("itemType"_l1,     QString(QLatin1Char(item_type)))
+            << QPair<QString, QString>("selItemColor"_l1, "Y"_l1)  // special BrickStore flag to get default color - thanks Dan
+            << QPair<QString, QString>("selWeight"_l1,    "Y"_l1)
+            << QPair<QString, QString>("selYear"_l1,      "Y"_l1)
+            << QPair<QString, QString>("downloadType"_l1, "X"_l1);
 
     return query;
 }
@@ -217,9 +217,9 @@ static QList<QPair<QString, QString> > itemQuery(char item_type)
 static QList<QPair<QString, QString> > dbQuery(int which)
 {
     QList<QPair<QString, QString> > query; //?a=a&viewType=X
-    query << QPair<QString, QString>("a", "a")
-            << QPair<QString, QString>("viewType", QString::number(which))
-            << QPair<QString, QString>("downloadType", "X");
+    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
+            << QPair<QString, QString>("viewType"_l1,     QString::number(which))
+            << QPair<QString, QString>("downloadType"_l1, "X"_l1);
 
     return query;
 }
@@ -330,7 +330,7 @@ bool RebuildDatabase::download()
     m_downloads_failed = 0;
 
     { // workaround for U type
-        QFile uif(path + "items_U.txt");
+        QFile uif(path % "items_U.txt"_l1);
         uif.open(QIODevice::WriteOnly);
     }
 
@@ -338,12 +338,13 @@ bool RebuildDatabase::download()
         auto *f = new QSaveFile(path % QLatin1String(tptr->m_file) % ".new"_l1);
 
         if (!f->open(QIODevice::WriteOnly)) {
-            m_error = QString("failed to write %1: %2").arg(tptr->m_file, f->errorString());
+            m_error = QString::fromLatin1("failed to write %1: %2")
+                    .arg(QLatin1String(tptr->m_file), f->errorString());
             delete f;
             failed = true;
             break;
         }
-        QUrl url(tptr->m_url);
+        QUrl url(QLatin1String(tptr->m_url));
         QUrlQuery query;
         query.setQueryItems(tptr->m_query);
         url.setQuery(query);
@@ -382,7 +383,7 @@ void RebuildDatabase::downloadJobFinished(TransferJob *job)
                 m_error = f->errorString();
         }
         else
-            m_error = QString("failed to download file: ") + job->errorString();
+            m_error = "Failed to download file: "_l1 + job->errorString();
 
         if (!ok)
             m_downloads_failed++;
@@ -404,7 +405,7 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
     m_downloads_in_progress = 0;
     m_downloads_failed = 0;
 
-    QUrl url("https://www.bricklink.com/catalogDownload.asp");
+    QUrl url("https://www.bricklink.com/catalogDownload.asp"_l1);
 
     for (const auto &item : invs) {
         if (item) {
@@ -412,20 +413,20 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
 
             if (!f || !f->isOpen()) {
                 if (f)
-                    m_error = QString("failed to write %1: %2").arg(f->fileName(), f->errorString());
+                    m_error = "failed to write %1: %2"_l1.arg(f->fileName(), f->errorString());
                 else
-                    m_error = QString("could not get a file handle to write inventory for %1").arg(item->id());
+                    m_error = "could not get a file handle to write inventory for %1"_l1.arg(QLatin1String(item->id()));
                 delete f;
                 failed = true;
                 break;
             }
 
             QList<QPair<QString, QString> > items {
-                { QPair<QString, QString>("a",            "a") },
-                { QPair<QString, QString>("viewType",     "4") },
-                { QPair<QString, QString>("itemTypeInv",  QChar(item->itemType()->id())) },
-                { QPair<QString, QString>("itemNo",       item->id()) },
-                { QPair<QString, QString>("downloadType", "X") }
+                { QPair<QString, QString>("a"_l1,            "a"_l1) },
+                { QPair<QString, QString>("viewType"_l1,     "4"_l1) },
+                { QPair<QString, QString>("itemTypeInv"_l1,  QString(QLatin1Char(item->itemType()->id()))) },
+                { QPair<QString, QString>("itemNo"_l1,       QLatin1String(item->id())) },
+                { QPair<QString, QString>("downloadType"_l1, "X"_l1) }
             };
             QUrlQuery query;
             query.setQueryItems(items);

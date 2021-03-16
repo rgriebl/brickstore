@@ -14,6 +14,7 @@
 #include <QDebug>
 
 #include "config.h"
+#include "utility.h"
 #include "settopriceguidedialog.h"
 
 
@@ -30,10 +31,10 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     w_type_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
     w_type_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
 
-    w_type_time->setCurrentIndex(Config::inst()->value(QLatin1String("/MainWindow/SetToPriceGuideDialog/Time"),
+    w_type_time->setCurrentIndex(Config::inst()->value("/MainWindow/SetToPriceGuideDialog/Time"_l1,
                                                        int(BrickLink::Time::PastSix)).toInt());
 
-    w_type_price->setCurrentIndex(Config::inst()->value(QLatin1String("/MainWindow/SetToPriceGuideDialog/Price"),
+    w_type_price->setCurrentIndex(Config::inst()->value("/MainWindow/SetToPriceGuideDialog/Price"_l1,
                                                         int(BrickLink::Price::Average)).toInt());
 
     auto toggleAdvancedOptions = [this](bool initialize = false) {
@@ -52,8 +53,8 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
 
 SetToPriceGuideDialog::~SetToPriceGuideDialog()
 {
-    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Time", w_type_time->currentIndex());
-    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Price", w_type_price->currentIndex());
+    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Time"_l1, w_type_time->currentIndex());
+    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Price"_l1, w_type_price->currentIndex());
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const

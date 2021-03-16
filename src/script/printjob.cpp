@@ -15,9 +15,10 @@
 #include <QPainter>
 #include <QPrinter>
 #include <QDebug>
+#include <QStringBuilder>
 
+#include "utility.h"
 #include "printjob.h"
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,9 +30,9 @@ namespace QmlWrapper {
 PrintPage::PrintPage(const PrintJob *job)
     : QObject(const_cast <PrintJob *>(job)), m_job(job)
 {
-    setObjectName(QString("Page%1").arg(job->pageCount() + 1));
+    setObjectName(u"Page" % QString::number(job->pageCount() + 1));
 
-    m_attr.m_font = QFont("Arial", 10);
+    m_attr.m_font = QFont("Arial"_l1, 10);
     m_attr.m_color = QColor(Qt::black);
     m_attr.m_bgcolor = QColor(Qt::white);
     m_attr.m_linewidth = 0.1;
@@ -317,7 +318,7 @@ PrintJob::PrintJob(QPaintDevice *pd)
     : QObject(nullptr)
     , m_pd(pd)
 {
-    setObjectName(QLatin1String("Job"));
+    setObjectName("Job"_l1);
 }
 
 PrintJob::~PrintJob()
@@ -335,7 +336,7 @@ PrintPage *PrintJob::addPage()
     auto *page = new PrintPage(this);
     m_pages.append(page);
     int pageNo = m_pages.size();
-    page->setObjectName(QLatin1String("Print page #") + QString::number(pageNo));
+    page->setObjectName("Print page #"_l1 + QString::number(pageNo));
     emit pageCountChanged(pageNo);
     return page;
 }

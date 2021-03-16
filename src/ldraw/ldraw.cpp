@@ -20,7 +20,8 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QDateTime>
-#include <QtDebug>
+#include <QDebug>
+#include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -524,10 +525,10 @@ bool LDraw::Core::isValidLDrawDir(const QString &ldir)
     if (fi.exists() && fi.isDir() && fi.isReadable()) {
         QDir dir(ldir);
 
-        if (dir.cd(QLatin1String("p")) || dir.cd(QLatin1String("P"))) {
-            if (dir.exists(QLatin1String("stud.dat")) || dir.exists(QLatin1String("STUD.DAT"))) {
-                if (dir.cd(QLatin1String("../parts")) || dir.cd(QLatin1String("../PARTS"))) {
-                    if (dir.exists(QLatin1String("3001.dat")) || dir.exists(QLatin1String("3001.DAT"))) {
+        if (dir.cd("p"_l1) || dir.cd("P"_l1)) {
+            if (dir.exists("stud.dat"_l1) || dir.exists("STUD.DAT"_l1)) {
+                if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
+                    if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
                         return true;
                     }
                 }
@@ -573,23 +574,23 @@ QStringList LDraw::Core::potentialDrawDirs()
 #elif defined(Q_OS_UNIX)
     {
         QStringList unixdirs;
-        unixdirs << "~/ldraw";
+        unixdirs << "~/ldraw"_l1;
 
 #  if defined(Q_OS_MACOS)
-        unixdirs << QLatin1String("~/Library/ldraw")
-                 << QLatin1String("~/Library/LDRAW")
-                 << QLatin1String("/Library/LDRAW")
-                 << QLatin1String("/Library/ldraw");
+        unixdirs << "~/Library/ldraw"_l1
+                 << "~/Library/LDRAW"_l1
+                 << "/Library/LDRAW"_l1
+                 << "/Library/ldraw"_l1;
 #  else
-        unixdirs << "/usr/share/ldraw";
-        unixdirs << "/var/lib/ldraw";
-        unixdirs << "/var/ldraw";
+        unixdirs << "/usr/share/ldraw"_l1;
+        unixdirs << "/var/lib/ldraw"_l1;
+        unixdirs << "/var/ldraw"_l1;
 #  endif
 
         QString homepath = QDir::homePath();
 
         foreach (QString d, unixdirs) {
-            d.replace(QLatin1String("~"), homepath);
+            d.replace("~"_l1, homepath);
             dirs << d;
         }
     }
@@ -662,9 +663,9 @@ QColor LDraw::Core::parse_color_string(const QString &cstr)
 {
     QString str(cstr);
 
-    if (str.startsWith(QLatin1String("0x")))
-        str.replace(0, 2, QLatin1String("#"));
-    if (str.startsWith(QLatin1String("#")))
+    if (str.startsWith("0x"_l1))
+        str.replace(0, 2, "#"_l1);
+    if (str.startsWith("#"_l1))
         return { str };
     else
         return {};
@@ -687,13 +688,13 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
             line = ts.readLine();
             lineno++;
 
-            QStringList sl = line.simplified().split(' ');
+            QStringList sl = line.simplified().split(' '_l1);
             if (sl.count() >= 9 &&
                 sl[0].toInt() == 0 &&
-                sl[1] == QLatin1String("!COLOUR") &&
-                sl[3] == QLatin1String("CODE") &&
-                sl[5] == QLatin1String("VALUE") &&
-                sl[7] == QLatin1String("EDGE")) {
+                sl[1] == "!COLOUR"_l1 &&
+                sl[3] == "CODE"_l1 &&
+                sl[5] == "VALUE"_l1 &&
+                sl[7] == "EDGE"_l1) {
                 // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]</params>
 
                 Color c;
@@ -710,21 +711,21 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
                 }
 
                 for (int idx = 9; idx < sl.count(); ++idx) {
-                    if (sl[idx] == QLatin1String("ALPHA")) {
+                    if (sl[idx] == "ALPHA"_l1) {
                         int alpha = sl[++idx].toInt();
                         c.color.setAlpha(alpha);
                         c.edgeColor.setAlpha(alpha);
-                    } else if (sl[idx] == QLatin1String("LUMINANCE")) {
+                    } else if (sl[idx] == "LUMINANCE"_l1) {
                         c.luminance = sl[++idx].toInt();
-                    } else if (sl[idx] == QLatin1String("CHROME")) {
+                    } else if (sl[idx] == "CHROME"_l1) {
                         c.chrome = true;
-                    } else if (sl[idx] == QLatin1String("PEARLESCENT")) {
+                    } else if (sl[idx] == "PEARLESCENT"_l1) {
                         c.pearlescent = true;
-                    } else if (sl[idx] == QLatin1String("RUBBER")) {
+                    } else if (sl[idx] == "RUBBER"_l1) {
                         c.rubber = true;
-                    } else if (sl[idx] == QLatin1String("MATTE_METALLIC")) {
+                    } else if (sl[idx] == "MATTE_METALLIC"_l1) {
                         c.matteMetallic = true;
-                    } else if (sl[idx] == QLatin1String("METAL")) {
+                    } else if (sl[idx] == "METAL"_l1) {
                         c.metal = true;
                     }
                 }

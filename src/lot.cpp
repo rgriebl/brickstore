@@ -189,10 +189,10 @@ bool Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
 
 void Lot::save(QDataStream &ds) const
 {
-    ds << QByteArray("II") << qint32(4)
-       << itemId()
-       << qint8(itemType() ? itemType()->id() : char(-1))
-       << uint(color() ? color()->id() : uint(0xffffffff))
+    ds << QByteArray("II") << qint32(3)
+       << QString::fromLatin1(itemId())
+       << qint8(itemType() ? itemType()->id() : BrickLink::ItemType::InvalidId)
+       << uint(color() ? color()->id() : BrickLink::Color::InvalidId)
        << qint8(m_status) << qint8(m_condition) << qint8(m_scondition) << qint8(m_retain ? 1 : 0)
        << qint8(m_stockroom) << m_lot_id << m_reserved << m_comments << m_remarks
        << m_quantity << m_bulk_quantity

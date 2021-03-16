@@ -32,6 +32,7 @@
 #include "humanreadabletimedelta.h"
 #include "framework.h"
 #include "version.h"
+#include "utility.h"
 #include "flowlayout.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
@@ -103,7 +104,7 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
     auto languageChange = [this](QAction *a) {
         setText(a->text());
         if (!a->shortcut().isEmpty()) {
-            QString desc = "<i>(" + tr("Shortcut:") + " %1)</i>";
+            QString desc = u"<i>(" % tr("Shortcut:") % u" %1)</i>";
             setDescription(desc.arg(a->shortcut().toString(QKeySequence::NativeText)));
         }
         setToolTip(a->toolTip());
@@ -133,7 +134,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     setAttribute(Qt::WA_Hover);
 
     // only Fusion seems to be able to draw QCommandLink buttons correctly
-    if (auto s = QStyleFactory::create("fusion")) {
+    if (auto s = QStyleFactory::create("fusion"_l1)) {
         s->setParent(this);
         setStyle(s);
     }
@@ -143,7 +144,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     setSizePolicy(policy);
 
     setIconSize({ 32, 32 });
-    setIcon(QIcon::fromTheme("go-next"));
+    setIcon(QIcon::fromTheme("go-next"_l1));
 
     resetTitleFont();
 }
@@ -284,7 +285,7 @@ void WelcomeButton::paintEvent(QPaintEvent *)
 
 WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
-    , m_docIcon(QLatin1String(":/images/brickstore_doc_icon"))
+    , m_docIcon(":/images/brickstore_doc_icon"_l1)
 {
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 

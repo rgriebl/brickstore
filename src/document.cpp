@@ -588,7 +588,7 @@ Document::Document(const DocumentIO::BsxContents &bsx, bool forceModified)
     setLotsDirect(bsx.lots);
 
     if (!bsx.currencyCode.isEmpty()) {
-        if (bsx.currencyCode == QLatin1String("$$$")) // legacy USD
+        if (bsx.currencyCode == "$$$"_l1) // legacy USD
             m_currencycode.clear();
         else
             m_currencycode = bsx.currencyCode;
@@ -1498,14 +1498,14 @@ QVariant Document::dataForFilterRole(const Lot *lot, Field f) const
                                                               : tr("U", "Filter>Condition>Used");
     case Stockroom:
         switch (lot->stockroom()) {
-        case BrickLink::Stockroom::A: return QString("A");
-        case BrickLink::Stockroom::B: return QString("B");
-        case BrickLink::Stockroom::C: return QString("C");
+        case BrickLink::Stockroom::A: return QStringLiteral("A");
+        case BrickLink::Stockroom::B: return QStringLiteral("B");
+        case BrickLink::Stockroom::C: return QStringLiteral("C");
         default                     : return tr("N", "Filter>Stockroom>None");
         }
     case Retain:
         return lot->retain() ? tr("Y", "Filter>Retain>Yes")
-                            : tr("N", "Filter>Retain>No");
+                             : tr("N", "Filter>Retain>No");
     default: {
         QVariant v = dataForEditRole(lot, f);
         if (v.isNull() || (v.userType() >= QMetaType::User))
@@ -1951,7 +1951,7 @@ LotList Document::sortLotList(const LotList &list) const
 ///////////////////////////////////////////////////////////////////////
 
 
-const char *DocumentLotsMimeData::s_mimetype = "application/x-bricklink-invlots";
+const QString DocumentLotsMimeData::s_mimetype = "application/x-bricklink-invlots"_l1;
 
 DocumentLotsMimeData::DocumentLotsMimeData(const LotList &lots)
     : QMimeData()
@@ -1970,8 +1970,8 @@ void DocumentLotsMimeData::setLots(const LotList &lots)
     for (const Lot *lot : lots) {
         lot->save(ds);
         if (!text.isEmpty())
-            text.append("\n");
-        text.append(lot->itemId());
+            text.append("\n"_l1);
+        text.append(QLatin1String(lot->itemId()));
     }
     setText(text);
     setData(s_mimetype, data);
@@ -2003,14 +2003,14 @@ QStringList DocumentLotsMimeData::formats() const
     static QStringList sl;
 
     if (sl.isEmpty())
-        sl << s_mimetype << "text/plain";
+        sl << s_mimetype << "text/plain"_l1;
 
     return sl;
 }
 
 bool DocumentLotsMimeData::hasFormat(const QString &mimeType) const
 {
-    return mimeType.compare(s_mimetype) || mimeType.compare("text/plain");
+    return mimeType.compare(s_mimetype) || mimeType.compare("text/plain"_l1);
 }
 
 

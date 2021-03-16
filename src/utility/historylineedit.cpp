@@ -24,6 +24,7 @@
 #include <QListView>
 #include <QDebug>
 
+#include "utility.h"
 #include "historylineedit.h"
 
 
@@ -110,7 +111,7 @@ HistoryLineEdit::HistoryLineEdit(QWidget *parent)
 
 HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     : QLineEdit(parent)
-    , m_deleteIcon(QIcon::fromTheme("window-close"))
+    , m_deleteIcon(QIcon::fromTheme("window-close"_l1))
     , m_maximumHistorySize(maximumHistorySize)
 {
     auto *comp = new QCompleter(&m_filterModel, this);
@@ -129,7 +130,8 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
     // only the right side of the icon will react to mouse clicks
-    QPixmap filterPix(QIcon::fromTheme("view-filter").pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));
+    QPixmap filterPix(QIcon::fromTheme("view-filter"_l1)
+                      .pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));
     {
         QPainter p(&filterPix);
         QStyleOption so;
@@ -149,7 +151,7 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     connect(a, &QAction::triggered,
             this, &HistoryLineEdit::showPopup);
 
-    m_reFilterAction = addAction(QIcon::fromTheme("view-refresh"), QLineEdit::TrailingPosition);
+    m_reFilterAction = addAction(QIcon::fromTheme("view-refresh"_l1), QLineEdit::TrailingPosition);
     m_reFilterAction->setVisible(false);
 }
 

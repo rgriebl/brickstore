@@ -109,7 +109,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole) {
         if (c->id()) {
-            res = QString(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)")
+            res = R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)"_l1
                     .arg(tr("RGB"), c->color().name(), c->color().name());
         } else {
             res = c->name();
@@ -289,7 +289,7 @@ QVariant BrickLink::CategoryModel::data(const QModelIndex &index, int role) cons
     const Category *c = category(index);
 
     if (role == Qt::DisplayRole)
-        res = c != AllCategories ? c->name() : QString("%1").arg(tr("All Items"));
+        res = c != AllCategories ? c->name() : tr("All Items");
     else if (role == CategoryPointerRole)
         res.setValue(c);
     return res;
@@ -584,7 +584,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
     m_filter_appearsIn.clear();
     m_filter_consistsOf.clear();
 
-    const QStringList sl = filter.simplified().split(QChar(' '));
+    const QStringList sl = filter.simplified().split(' '_l1);
 
     const QString consistsOfPrefix = tr("consists-of:", "Filter prefix");
     const QString appearsInPrefix = tr("appears-in:", "Filter prefix");
@@ -598,12 +598,12 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
         if (!quoted.isEmpty()) {
             quoted.append(s);
-            if (quoted.endsWith(QChar('"'))) {
+            if (quoted.endsWith('"'_l1)) {
                 quoted.chop(1);
                 m_filter_text << qMakePair(quotedNegate, quoted);
                 quoted.clear();
             } else {
-                quoted.append(QChar(' '));
+                quoted.append(' '_l1);
             }
 
         } else if (s.length() == 1) {
@@ -612,7 +612,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
         } else {
             const QChar first = s.at(0);
-            const bool negate = (first == QChar('-'));
+            const bool negate = (first == '-'_l1);
             auto str = negate ? s.mid(1) : s;
 
             if (str.startsWith(consistsOfPrefix)) {
@@ -621,7 +621,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 // contains either a minifig or a part, optionally with color-id
                 const BrickLink::Color *color = nullptr;
 
-                int atPos = str.lastIndexOf(QChar('@'));
+                int atPos = str.lastIndexOf('@'_l1);
                 if (atPos != -1) {
                     color = BrickLink::core()->color(str.mid(atPos + 1).toUInt());
                     str = str.left(atPos);
@@ -637,14 +637,14 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 str = str.mid(appearsInPrefix.length());
 
                 // appears-in either a minifig or a set
-                auto item = BrickLink::core()->item('M', str);
+                auto item = BrickLink::core()->item('M', str.toLatin1());
                 if (!item)
-                    item = BrickLink::core()->item('S', str);
+                    item = BrickLink::core()->item('S', str.toLatin1());
                 if (item)
                     m_filter_appearsIn << qMakePair(negate, item);
 
             } else {
-                const bool firstIsQuote = (str.at(0) == QChar('"'));
+                const bool firstIsQuote = (str.at(0) == '"'_l1);
 
                 if (firstIsQuote) {
                     quoted = str.mid(1) % u' ';
@@ -823,7 +823,7 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
 
     if (role == Qt::DisplayRole) {
         switch (col) {
-        case 0: res = appears->first < 0 ? QLatin1String("-") : QString::number(appears->first); break;
+        case 0: res = appears->first < 0 ? "-"_l1 : QString::number(appears->first); break;
         case 1: res = appears->second->id(); break;
         case 2: res = appears->second->name(); break;
         }
@@ -1020,7 +1020,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
 
     m_tooltip_pic = nullptr;
 
-    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<div class="tooltip_picture">)")) {
+    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<div class="tooltip_picture">)"_l1)) {
         const auto tlwidgets = QApplication::topLevelWidgets();
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {

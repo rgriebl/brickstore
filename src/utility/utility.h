@@ -18,12 +18,22 @@
 #include <QLocale>
 #include <QPair>
 #include <QKeySequence>
+#include <QStringBuilder>
 
 QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
-#define qL1S(x) QLatin1String(x)
+
+constexpr inline QLatin1String operator ""_l1(const char *c, size_t s)
+{
+    return QLatin1String(c, s);
+}
+
+constexpr inline QChar operator ""_l1(const char c)
+{
+    return QLatin1Char(c);
+}
 
 
 namespace Utility {

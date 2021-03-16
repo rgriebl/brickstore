@@ -67,15 +67,15 @@ bool BrickLink::TextImport::import(const QString &path)
 {
     try {
         // colors
-        readColors(path + "colors.xml");
-        readLDrawColors(path + "ldconfig.ldr");
+        readColors(path % u"colors.xml");
+        readLDrawColors(path % u"ldconfig.ldr");
         calculateColorPopularity();
 
         // categories
-        readCategories(path + "categories.xml");
+        readCategories(path % u"categories.xml");
 
         // itemtypes
-        readItemTypes(path + "itemtypes.xml");
+        readItemTypes(path % u"itemtypes.xml");
 
         // speed up loading (exactly 137522 items on 16.06.2020)
         m_items.reserve(200000);
@@ -98,9 +98,9 @@ bool BrickLink::TextImport::import(const QString &path)
             }
         }
 
-        readPartColorCodes(path + "part_color_codes.xml");
-        readInventoryList(path + "btinvlist.csv");
-        readChangeLog(path + "btchglog.csv");
+        readPartColorCodes(path % u"part_color_codes.xml");
+        readInventoryList(path % u"btinvlist.csv");
+        readChangeLog(path % u"btchglog.csv");
 
         return true;
     } catch (const ParseException &e) {
@@ -119,21 +119,21 @@ void BrickLink::TextImport::readColors(const QString &path)
 
         col->m_id       = colid;
         col->m_name     = p.elementText(e, "COLORNAME");
-        col->m_color    = QColor(QString('#') + p.elementText(e, "COLORRGB"));
+        col->m_color    = QColor(u'#' % p.elementText(e, "COLORRGB"));
 
         col->m_ldraw_id = -1;
         col->m_type     = Color::Type();
 
         auto type = p.elementText(e, "COLORTYPE");
-        if (type.contains("Transparent")) col->m_type |= Color::Transparent;
-        if (type.contains("Glitter"))     col->m_type |= Color::Glitter;
-        if (type.contains("Speckle"))     col->m_type |= Color::Speckle;
-        if (type.contains("Metallic"))    col->m_type |= Color::Metallic;
-        if (type.contains("Chrome"))      col->m_type |= Color::Chrome;
-        if (type.contains("Pearl"))       col->m_type |= Color::Pearl;
-        if (type.contains("Milky"))       col->m_type |= Color::Milky;
-        if (type.contains("Modulex"))     col->m_type |= Color::Modulex;
-        if (type.contains("Satin"))       col->m_type |= Color::Satin;
+        if (type.contains("Transparent"_l1)) col->m_type |= Color::Transparent;
+        if (type.contains("Glitter"_l1))     col->m_type |= Color::Glitter;
+        if (type.contains("Speckle"_l1))     col->m_type |= Color::Speckle;
+        if (type.contains("Metallic"_l1))    col->m_type |= Color::Metallic;
+        if (type.contains("Chrome"_l1))      col->m_type |= Color::Chrome;
+        if (type.contains("Pearl"_l1))       col->m_type |= Color::Pearl;
+        if (type.contains("Milky"_l1))       col->m_type |= Color::Milky;
+        if (type.contains("Modulex"_l1))     col->m_type |= Color::Modulex;
+        if (type.contains("Satin"_l1))       col->m_type |= Color::Satin;
         if (!col->m_type)
             col->m_type = Color::Solid;
 
@@ -211,14 +211,14 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p, itt](QDomElement e) {
         QScopedPointer<Item> item(new Item);
-        item->m_id        = p.elementText(e, "ITEMID");
+        item->m_id        = p.elementText(e, "ITEMID").toLatin1();
         item->m_name      = p.elementText(e, "ITEMNAME");
         item->m_item_type = itt;
 
         uint catId = p.elementText(e, "CATEGORY").toUInt();
         item->m_category = findCategory(catId);
         if (!item->m_category)
-            throw ParseException("item %1 has no category").arg(item->m_id);
+            throw ParseException("item %1 has no category").arg(QLatin1String(item->m_id));
 
         if (itt->hasYearReleased()) {
             uint y = p.elementText(e, "ITEMYEAR").toUInt() - 1900;
@@ -322,12 +322,12 @@ bool BrickLink::TextImport::readInventory(const Item *item)
         XmlHelpers::ParseXML p(f.take(), "INVENTORY", "ITEM");
         p.parse([this, &p, &inventory](QDomElement e) {
             char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
-            const QString itemId = p.elementText(e, "ITEMID");
+            const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
             uint colorId = p.elementText(e, "COLOR").toUInt();
             int qty = p.elementText(e, "QTY").toInt();
-            bool extra = (p.elementText(e, "EXTRA") == QLatin1String("Y"));
-            bool counterPart = (p.elementText(e, "COUNTERPART") == QLatin1String("Y"));
-            bool alternate = (p.elementText(e, "ALTERNATE") == QLatin1String("Y"));
+            bool extra = (p.elementText(e, "EXTRA") == "Y"_l1);
+            bool counterPart = (p.elementText(e, "COUNTERPART") == "Y"_l1);
+            bool alternate = (p.elementText(e, "ALTERNATE") == "Y"_l1);
             uint matchId = p.elementText(e, "MATCHID").toUInt();
 
             const Item *item = findItem(itemTypeId, itemId);
@@ -372,27 +372,27 @@ void BrickLink::TextImport::readLDrawColors(const QString &path)
     int matchCount = 0;
 
     while (!(line = in.readLine()).isNull()) {
-        if (!line.isEmpty() && line.at(0) == '0') {
-            const QStringList sl = line.simplified().split(' ');
+        if (!line.isEmpty() && line.at(0) == '0'_l1) {
+            const QStringList sl = line.simplified().split(' '_l1);
 
             if ((sl.count() >= 9)
-                    && (sl[1] == "!COLOUR")
-                    && (sl[3] == "CODE")
-                    && (sl[5] == "VALUE")
-                    && (sl[7] == "EDGE")) {
+                    && (sl[1] == "!COLOUR"_l1)
+                    && (sl[3] == "CODE"_l1)
+                    && (sl[5] == "VALUE"_l1)
+                    && (sl[7] == "EDGE"_l1)) {
                 QString name = sl[2];
                 int id = sl[4].toInt();
 
                 name = name.toLower();
-                if (name.startsWith("rubber"))
+                if (name.startsWith("rubber"_l1))
                     continue;
 
                 for (auto &&color : m_colors) {
                     QString blname = color->name()
                             .toLower()
-                            .replace(' ', '_')
-                            .replace('-', '_')
-                            .replace("gray", "grey");
+                            .replace(' '_l1, '_'_l1)
+                            .replace('-'_l1, '_'_l1)
+                            .replace("gray"_l1, "grey"_l1);
                     if (blname == name) {
                         const_cast<Color *>(color)->m_ldraw_id = id;
                         matchCount++;
@@ -417,7 +417,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
-        QStringList strs = line.split('\t');
+        QStringList strs = line.split('\t'_l1);
 
         if (strs.count() < 2)
             throw ParseException(&f, "expected at least 2 fields in line %1").arg(line);
@@ -468,7 +468,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
-        QStringList strs = line.split('\t');
+        QStringList strs = line.split('\t'_l1);
 
         if (strs.count() < 7)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(line);
