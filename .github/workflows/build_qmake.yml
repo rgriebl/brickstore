@@ -19,6 +19,8 @@ jobs:
           qt_arch: 'win32_msvc2019'
           openssl_version: 'Win32OpenSSL_Light-1_1_1j'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+          vcpkg_triplet: 'x86-windows'
+          vcpkg_packages: 'sentry-native'
 
         - name: "Windows 64bit"
           artifact: "Windows-x64"
@@ -27,16 +29,22 @@ jobs:
           qt_arch: 'win64_msvc2019_64'
           openssl_version: 'Win64OpenSSL_Light-1_1_1j'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          vcpkg_triplet: 'x64-windows'
+          vcpkg_packages: 'sentry-native'
 
         - name: "Ubuntu 20.04 64bit"
           artifact: "Ubuntu-20.04"
           os: ubuntu-20.04
+          vcpkg_triplet: 'x64-linux'
+          vcpkg_packages: 'sentry-native'
 
         - name: "Debian 11 Backend 64bit"
           artifact: "Debian-11-Backend"
           os: ubuntu-20.04
           debian_container: "buildpack-deps:bullseye"
           qmake_extra_config: "CONFIG+=backend-only"
+          vcpkg_triplet: 'x64-linux'
+          vcpkg_packages: 'sentry-native'
 
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
@@ -44,15 +52,31 @@ jobs:
           appimage: true
           qt_version: '5.15.2'
           qt_arch: ''
+          vcpkg_triplet: 'x64-linux'
+          vcpkg_packages: 'sentry-native'
 
         - name: "macOS 64bit"
           artifact: "macOS"
           os: macos-latest
           qt_version: '5.15.2'
           qt_arch: ''
+          vcpkg_triplet: 'x64-osx'
+          vcpkg_packages: 'sentry-native'
 
     steps:
     - uses: actions/checkout@v1
+
+    - name: Restore artifacts, or run vcpkg, build and cache artifacts
+      uses: lukka/run-vcpkg@main
+      id: runvcpkg
+      with:
+        vcpkgGitCommitId: 'df574baff7eee345ab9ed9bf28e2c38175412439'
+        vcpkgArguments: '${{ matrix.config.vcpkg_packages }}'
+        vcpkgTriplet: '${{ matrix.config.vcpkg_triplet }}'
+
+    - name: dir
+      run: find $RUNNER_WORKSPACE
+      shell: bash
 
     - name: Install Qt from qt.io
       if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
