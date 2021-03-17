@@ -35,6 +35,11 @@
 #  include "application.h"
 #endif
 
+#if defined(SENTRY_ENABLED)
+#  include "sentry.h"
+#  include "version.h"
+#endif
+
 // needed for themed common controls (e.g. file open dialogs)
 #if defined(Q_CC_MSVC)
 #  pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -130,12 +135,35 @@ int main(int argc, char **argv)
 #  endif
 
         Application a(argc, argv);
+
+#  if defined(SENTRY_ENABLED)
+        sentry_options_t* options = sentry_options_new();
+        sentry_options_set_dsn(options, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
+
+        const QByteArray appPath = QCoreApplication::applicationDirPath().toLocal8Bit();
+        const QByteArray crashHandler = appPath % "/crashpad_handler"
+#    if defined(Q_OS_WINDOWS)
+                                        % ".exe"
+#    endif
+        ;
+        sentry_options_set_handler_path(options, crashHandler.constData());
+        sentry_options_set_database_path(options, appPath.constData());
+        sentry_options_set_debug(options, 1);
+        sentry_options_set_release(options, "brickstore@" BRICKSTORE_BUILD_NUMBER);
+        if (sentry_init(options))
+            qWarning() << "Could not initialize sentry.io!";
+#  endif
+
         res = qApp->exec();
 
         // we are using QThreadStorage in thread-pool threads, so we have to make sure they are
         // all joined before destroying the static QThreadStorage objects.
         QThreadPool::globalInstance()->clear();
         QThreadPool::globalInstance()->waitForDone();
+
+#  if defined(SENTRY_ENABLED)
+        sentry_shutdown();
+#  endif
 #endif
     }
 

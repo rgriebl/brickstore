@@ -37,6 +37,7 @@ unix:!macos:TARGET = $$lower($$TARGET)
 CONFIG *= no_private_qt_headers_warning c++17
 CONFIG *= lrelease embed_translations
 
+
 sanitize:debug:unix {
   CONFIG *= sanitizer sanitize_address sanitize_undefined
   # CONFIG *= sanitizer sanitize_thread
@@ -105,6 +106,18 @@ qtPrepareTool(LUPDATE, lupdate)
 lupdate.commands = $$QMAKE_CD $$system_quote($$system_path($$PWD)) && $$LUPDATE $$_PRO_FILE_
 QMAKE_EXTRA_TARGETS += lupdate-all
 
+sentry {
+  isEmpty(VCPKG_PATH):error("You tried to enable crashpad, but didn't set VCPKG_PATH")
+  else:message("Building with crashpad/sentry.io support from $$VCPKG_PATH")
+
+  INCLUDEPATH *= $$VCPKG_PATH/include
+  CONFIG(debug, debug|release):LIBS += "-L$$VCPKG_PATH/debug/lib"
+  else:LIBS += "-L$$VCPKG_PATH/lib"
+  LIBS *= -lsentry
+  CONFIG *= force_debug_info
+
+  DEFINES *= SENTRY_ENABLED
+}
 
 #
 # Windows specific
@@ -152,6 +165,7 @@ win32 {
       OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
       !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL/bin"
     }
+    message("Trying to use OpenSSL from $$OPENSSL_PATH/$$OPENSSL_LIB")
 
     !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
 
@@ -169,6 +183,7 @@ win32 {
     installer.depends += deploy
     installer.commands += $$shell_path($$ISCC) \
                             /DSOURCE_DIR=$$shell_quote($$shell_path($$OUT_PWD/$$DESTDIR)) \
+                            /DVCPKG_PATH=$$shell_quote($$shell_path($$VCPKG_PATH)) \
                             /O$$shell_quote($$shell_path($$OUT_PWD)) \
                             /F$$shell_quote($${TARGET}-$${VERSION}) \
                             $$shell_quote($$shell_path($$PWD/windows/brickstore.iss))

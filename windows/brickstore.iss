@@ -6,10 +6,13 @@
 
 #define ApplicationVersionFull GetFileVersion(SOURCE_DIR + "\BrickStore.exe")
 #define ApplicationVersion RemoveFileExt(ApplicationVersionFull)
+#define ApplicationPublisher GetFileCompany(SOURCE_DIR + "\BrickStore.exe")
 
 [Setup]
 AppName=BrickStore
 AppVersion={#ApplicationVersion}
+AppPublisher={#ApplicationPublisher}
+AppPublisherURL={#ApplicationPublisher}
 VersionInfoVersion={#ApplicationVersionFull}
 DefaultDirName={commonpf}\BrickStore
 DefaultGroupName=BrickStore
@@ -41,6 +44,9 @@ Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 ; MSVC
 Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
 Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
+; Sentry
+Source: "{#VCPKG_PATH}/tools/sentry-native/crashpad_handler.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#VCPKG_PATH}/bin/sentry.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Run]
 Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
