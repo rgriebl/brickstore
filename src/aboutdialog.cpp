@@ -148,6 +148,11 @@ AboutDialog::AboutDialog(QWidget *parent)
     connect(w_browser, &QLabel::linkActivated,
             this, &AboutDialog::gotoPage);
 
+    // sentry crash handler test
+    w_buttons->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(w_buttons, &QDialogButtonBox::customContextMenuRequested,
+            this, []() { static_cast<int *>(0)[0] = 1; });
+
     setFixedSize(sizeHint());
 }
 
