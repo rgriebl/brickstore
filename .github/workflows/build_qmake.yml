@@ -124,8 +124,8 @@ jobs:
     - name: Upload PDBs to sentry.io on Windows
       if: startsWith(matrix.config.os, 'windows')
       run: |
-        curl.exe -L --output sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
-        sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore .
+        curl.exe -L --output ..\\sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
+        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore .
       shell: cmd
 
     - name: Create Sentry release
