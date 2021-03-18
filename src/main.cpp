@@ -137,21 +137,39 @@ int main(int argc, char **argv)
         Application a(argc, argv);
 
 #  if defined(SENTRY_ENABLED)
-        sentry_options_t* options = sentry_options_new();
-        sentry_options_set_dsn(options, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
+        auto *sentry = sentry_options_new();
+        sentry_options_set_debug(sentry, 1);
+        sentry_options_set_logger(sentry, [](sentry_level_t level, const char *message, va_list args, void *) {
+            QtMsgType t = QtDebugMsg;
+            switch (level) {
+            case SENTRY_LEVEL_DEBUG:   t = QtDebugMsg; break;
+            case SENTRY_LEVEL_INFO:    t = QtInfoMsg; break;
+            case SENTRY_LEVEL_WARNING: t = QtWarningMsg; break;
+            case SENTRY_LEVEL_ERROR:   t = QtCriticalMsg; break;
+            case SENTRY_LEVEL_FATAL:   t = QtFatalMsg; break;
+            default: break;
+            }
+            QDebug(t).noquote() << QString::vasprintf(QByteArray(message).replace("%S", "%ls").constData(), args);
+        }, nullptr);
+        sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
+        sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
 
-        const QByteArray appPath = QCoreApplication::applicationDirPath().toLocal8Bit();
-        const QByteArray crashHandler = appPath % "/crashpad_handler"
-#    if defined(Q_OS_WINDOWS)
-                                        % ".exe"
-#    endif
         ;
-        sentry_options_set_handler_path(options, crashHandler.constData());
-        sentry_options_set_database_path(options, appPath.constData());
-        sentry_options_set_debug(options, 1);
-        sentry_options_set_release(options, "brickstore@" BRICKSTORE_BUILD_NUMBER);
-        if (sentry_init(options))
+        QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % "/.sentry"_l1;
+        QString crashHandler = QCoreApplication::applicationDirPath() % "/crashpad_handler"_l1;
+
+#    if defined(Q_OS_WINDOWS)
+        crashHandler.append(".exe"_l1);
+        sentry_options_set_handler_pathw(sentry, reinterpret_cast<const wchar_t *>(crashHandler.utf16()));
+        sentry_options_set_database_pathw(sentry, reinterpret_cast<const wchar_t *>(dbPath.utf16()));
+#    else
+        sentry_options_set_handler_path(sentry, crashHandler.toLocal8Bit().constData());
+        sentry_options_set_database_path(sentry, dbPath.toLocal8Bit().constData());
+#    endif
+        if (sentry_init(sentry))
             qWarning() << "Could not initialize sentry.io!";
+        else
+            qWarning() << "Successfully initialized sentry.io";
 #  endif
 
         res = qApp->exec();

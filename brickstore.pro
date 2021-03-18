@@ -107,8 +107,10 @@ lupdate.commands = $$QMAKE_CD $$system_quote($$system_path($$PWD)) && $$LUPDATE 
 QMAKE_EXTRA_TARGETS += lupdate-all
 
 sentry {
-  isEmpty(VCPKG_PATH):error("You tried to enable crashpad, but didn't set VCPKG_PATH")
-  else:message("Building with crashpad/sentry.io support from $$VCPKG_PATH")
+  !build_pass {
+    isEmpty(VCPKG_PATH):error("You tried to enable crashpad, but didn't set VCPKG_PATH")
+    else:message("Building with crashpad/sentry.io support from $$VCPKG_PATH")
+  }
 
   INCLUDEPATH *= $$VCPKG_PATH/include
   CONFIG(debug, debug|release):LIBS += "-L$$VCPKG_PATH/debug/lib"
