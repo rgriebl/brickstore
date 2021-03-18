@@ -35,11 +35,6 @@
 #  include "application.h"
 #endif
 
-#if defined(SENTRY_ENABLED)
-#  include "sentry.h"
-#  include "version.h"
-#endif
-
 // needed for themed common controls (e.g. file open dialogs)
 #if defined(Q_CC_MSVC)
 #  pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -136,54 +131,13 @@ int main(int argc, char **argv)
 
         Application a(argc, argv);
 
-#  if defined(SENTRY_ENABLED)
-        auto *sentry = sentry_options_new();
-        sentry_options_set_debug(sentry, 1);
-        sentry_options_set_logger(sentry, [](sentry_level_t level, const char *message, va_list args, void *) {
-            QtMsgType t = QtDebugMsg;
-            switch (level) {
-            case SENTRY_LEVEL_DEBUG:   t = QtDebugMsg; break;
-            case SENTRY_LEVEL_INFO:    t = QtInfoMsg; break;
-            case SENTRY_LEVEL_WARNING: t = QtWarningMsg; break;
-            case SENTRY_LEVEL_ERROR:   t = QtCriticalMsg; break;
-            case SENTRY_LEVEL_FATAL:   t = QtFatalMsg; break;
-            default: break;
-            }
-            QDebug(t).noquote() << QString::vasprintf(QByteArray(message).replace("%S", "%ls").constData(), args);
-        }, nullptr);
-        sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
-        sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
-
-        ;
-        QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % "/.sentry"_l1;
-        QString crashHandler = QCoreApplication::applicationDirPath() % "/crashpad_handler"_l1;
-
-#    if defined(Q_OS_WINDOWS)
-        crashHandler.append(".exe"_l1);
-        sentry_options_set_handler_pathw(sentry, reinterpret_cast<const wchar_t *>(crashHandler.utf16()));
-        sentry_options_set_database_pathw(sentry, reinterpret_cast<const wchar_t *>(dbPath.utf16()));
-#    else
-        sentry_options_set_handler_path(sentry, crashHandler.toLocal8Bit().constData());
-        sentry_options_set_database_path(sentry, dbPath.toLocal8Bit().constData());
-#    endif
-        if (sentry_init(sentry))
-            qWarning() << "Could not initialize sentry.io!";
-        else
-            qWarning() << "Successfully initialized sentry.io";
-#  endif
-
         res = qApp->exec();
 
         // we are using QThreadStorage in thread-pool threads, so we have to make sure they are
         // all joined before destroying the static QThreadStorage objects.
         QThreadPool::globalInstance()->clear();
         QThreadPool::globalInstance()->waitForDone();
-
-#  if defined(SENTRY_ENABLED)
-        sentry_shutdown();
-#  endif
 #endif
     }
-
     return res;
 }

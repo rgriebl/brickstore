@@ -59,7 +59,11 @@ private slots:
 
 private:
     bool isClient(int timeout = 1000);
+    static void setupSentry();
+    static void shutdownSentry();
+    static void addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);
     void setupLogging();
+    static void messageHandler(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);
     void setIconTheme();
 
     bool initBrickLink();
@@ -78,7 +82,6 @@ private:
 
     QPointer<QPlainTextEdit> m_logWidget = nullptr;
     QtMessageHandler m_defaultMessageHandler = nullptr;
-    int m_logGuiLock = 0;
 
     static Application *s_inst;
 

@@ -24,8 +24,8 @@
 #include <QLocalServer>
 #include <QNetworkProxyFactory>
 #include <QPlainTextEdit>
-#include <QSyntaxHighlighter>
 #include <QStringBuilder>
+#include <QLoggingCategory>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -62,8 +62,11 @@
 #include "utility.h"
 #include "smartvalidator.h"
 
-#define XSTR(a) #a
-#define STR(a) XSTR(a)
+#if defined(SENTRY_ENABLED)
+#  include "sentry.h"
+#  include "version.h"
+Q_LOGGING_CATEGORY(LogSentry, "sentry")
+#endif
 
 using namespace std::chrono_literals;
 
@@ -131,6 +134,7 @@ Application::Application(int &_argc, char **_argv)
     new QApplication(_argc, _argv);
 
     setupLogging();
+    setupSentry();
     qApp->installEventFilter(this);
     setIconTheme();
 
@@ -236,6 +240,8 @@ Application::~Application()
     delete Config::inst();
 
     delete qApp;
+
+    shutdownSentry();
 }
 
 QStringList Application::externalResourceSearchPath(const QString &subdir) const
@@ -259,7 +265,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
         Q_UNUSED(isDeveloperBuild)
         baseSearchPath << appdir + "/../Resources"_l1;
 #elif defined(Q_OS_UNIX)
-        baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore");
+        baseSearchPath << QLatin1String(BS_STR(INSTALL_PREFIX) "/share/brickstore");
 
         if (isDeveloperBuild)
             baseSearchPath << appdir;
@@ -490,92 +496,65 @@ void Application::clientMessage()
     }
 }
 
-static const char16_t msgTypeNames[][5] = { u"DBG ", u"WARN", u"CRIT", u"FATL", u"INFO" };
-
-class LogHighlighter : public QSyntaxHighlighter
+void Application::setupSentry()
 {
-public:
-    explicit LogHighlighter(QTextDocument *parent)
-        : QSyntaxHighlighter(parent)
-    {
-        m_lvlFmt[QtDebugMsg].setForeground(Qt::black);
-        m_lvlFmt[QtDebugMsg].setBackground(Qt::green);
-        m_lvlFmt[QtWarningMsg].setForeground(Qt::black);
-        m_lvlFmt[QtWarningMsg].setBackground(Qt::yellow);
-        m_lvlFmt[QtCriticalMsg].setForeground(Qt::red);
-        m_lvlFmt[QtCriticalMsg].setBackground(Qt::black);
-        m_lvlFmt[QtFatalMsg].setForeground(Qt::white);
-        m_lvlFmt[QtFatalMsg].setBackground(Qt::red);
-        m_lvlFmt[QtInfoMsg].setForeground(Qt::black);
-        m_lvlFmt[QtInfoMsg].setBackground(Qt::blue);
-        for (int i = 0; i < 6; ++i) {
-            QColor c = QColor::fromHsl(60 *i, 210, 128);
-            m_catFmt[i].setForeground(c);
-            m_catFmt[i].clearBackground();
-            m_catFmt[i].setFontWeight(QFont::Bold);
+#if defined(SENTRY_ENABLED)
+    auto *sentry = sentry_options_new();
+    sentry_options_set_debug(sentry, 1);
+    sentry_options_set_logger(sentry, [](sentry_level_t level, const char *message, va_list args, void *) {
+        QDebug dbg(static_cast<QString *>(nullptr));
+        switch (level) {
+        default:
+        case SENTRY_LEVEL_DEBUG:   dbg = QMessageLogger().debug(LogSentry); break;
+        case SENTRY_LEVEL_INFO:    dbg = QMessageLogger().info(LogSentry); break;
+        case SENTRY_LEVEL_WARNING: dbg = QMessageLogger().warning(LogSentry); break;
+        case SENTRY_LEVEL_ERROR:
+        case SENTRY_LEVEL_FATAL:   dbg = QMessageLogger().critical(LogSentry); break;
         }
-        m_atFmt.setForeground(Qt::darkMagenta);
-        m_atFmt.setFontWeight(QFont::Bold);
-        m_lineFmt.setForeground(Qt::magenta);
-        m_lineFmt.setFontWeight(QFont::Bold);
-    }
+        dbg.noquote() << QString::vasprintf(QByteArray(message).replace("%S", "%ls").constData(), args);
+    }, nullptr);
+    sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
+    sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
 
-    void highlightBlock(const QString &text) override;
-private:
-    QTextCharFormat m_lvlFmt[QtInfoMsg + 1];
-    QTextCharFormat m_catFmt[6];
-    QTextCharFormat m_atFmt;
-    QTextCharFormat m_lineFmt;
-};
+    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % "/.sentry"_l1;
+    QString crashHandler = QCoreApplication::applicationDirPath() % "/crashpad_handler"_l1;
 
-void LogHighlighter::highlightBlock(const QString &text)
-{
-    ++Application::s_inst->m_logGuiLock;
-
-    int colonPos = int(text.indexOf(':'_l1, 1));
-    if (colonPos > 0) {
-        int atPos = int(text.lastIndexOf(" at "_l1));
-        int linePos = int(text.lastIndexOf(", line "_l1));
-
-        int atLen = 0;
-        int lineLen = 0;
-        bool hasLocation = (atPos > 0 && linePos > atPos);
-
-        if (hasLocation) {
-            atPos += 4;
-            atLen = linePos - atPos;
-            linePos += 7;
-            lineLen = int(text.length()) - linePos;
-        }
-
-        static const int lvlPos = 0;
-        static const int lvlLen = 4;
-        static const int catPos = lvlPos + lvlLen + 1;
-
-        int catLen = colonPos - catPos;
-
-        int msgType = -1;
-        for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
-            if (text.mid(lvlPos, lvlLen) == msgTypeNames[i])
-                msgType = i;
-        }
-
-        if (msgType >= 0) {
-            int catType = qHash(text.mid(catPos, catLen)) % 6;
-
-            setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
-            setFormat(catPos, catLen, m_catFmt[catType]);
-        }
-
-        if (hasLocation) {
-            setFormat(linePos, lineLen, m_lineFmt);
-            setFormat(atPos, atLen, m_atFmt);
-        }
-    }
-
-    --Application::s_inst->m_logGuiLock;
+#  if defined(Q_OS_WINDOWS)
+    crashHandler.append(".exe"_l1);
+    sentry_options_set_handler_pathw(sentry, reinterpret_cast<const wchar_t *>(crashHandler.utf16()));
+    sentry_options_set_database_pathw(sentry, reinterpret_cast<const wchar_t *>(dbPath.utf16()));
+#  else
+    sentry_options_set_handler_path(sentry, crashHandler.toLocal8Bit().constData());
+    sentry_options_set_database_path(sentry, dbPath.toLocal8Bit().constData());
+#  endif
+    if (sentry_init(sentry))
+        qCWarning(LogSentry) << "Could not initialize sentry.io!";
+    else
+        qCInfo(LogSentry) << "Successfully initialized sentry.io";
+#endif
 }
 
+void Application::shutdownSentry()
+{
+#if defined(SENTRY_ENABLED)
+    sentry_shutdown();
+#endif
+}
+
+void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg)
+{
+#if defined(SENTRY_ENABLED)
+    sentry_value_t crumb = sentry_value_new_breadcrumb("default", msg.toUtf8());
+    if (msgCtx.category)
+        sentry_value_set_by_key(crumb, "category", sentry_value_new_string(msgCtx.category));
+    msgType = qBound(QtDebugMsg, msgType, QtInfoMsg);
+    static const char *msgTypeLevels[5] = { "debug", "warning", "error", "fatal", "info" };
+    sentry_value_set_by_key(crumb, "level", sentry_value_new_string(msgTypeLevels[msgType]));
+    const auto now = QDateTime::currentSecsSinceEpoch();
+    sentry_value_set_by_key(crumb, "timestamp", sentry_value_new_int32(int32_t(now)));
+    sentry_add_breadcrumb(crumb);
+#endif
+}
 
 void Application::setupLogging()
 {
@@ -584,37 +563,56 @@ void Application::setupLogging()
     m_logWidget->setReadOnly(true);
     m_logWidget->setMaximumBlockCount(1000);
     m_logWidget->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    new LogHighlighter(m_logWidget->document());
 
-    auto msgHandler = [](QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg) {
-        if (s_inst && s_inst->m_defaultMessageHandler)
-            (*s_inst->m_defaultMessageHandler)(msgType, msgCtx, msg);
+    m_defaultMessageHandler = qInstallMessageHandler(&messageHandler);
+}
 
-        if (!s_inst || s_inst->m_logGuiLock || !s_inst->m_logWidget)
-            return;
+void Application::messageHandler(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg)
+{
+    if (s_inst && s_inst->m_defaultMessageHandler)
+        (*s_inst->m_defaultMessageHandler)(msgType, msgCtx, msg);
 
-        QString filename;
-        if (msgCtx.file && msgCtx.file[0] && msgCtx.line > 1) {
-            filename = QString::fromLocal8Bit(msgCtx.file);
-            int pos = -1;
-#if defined(Q_OS_WIN)
-            pos = filename.lastIndexOf('\\'_l1);
+    addSentryBreadcrumb(msgType, msgCtx, msg);
+
+    if (!s_inst || !s_inst->m_logWidget)
+        return;
+
+    static const char *msgTypeNames[] =   { "DBG ",   "WARN",   "CRIT",   "FATL",   "INFO" };
+    static const char *msgTypeColor[] =   { "000000", "000000", "ff0000", "ffffff", "ffffff" };
+    static const char *msgTypeBgColor[] = { "00ff00", "ffff00", "000000", "ff0000", "0000ff" };
+    static const char *fileColor = "800080";
+    static const char *lineColor = "ff00ff";
+    static const char *categoryColor[] = { "e81717", "e8e817", "17e817", "17e8e8", "1717e8", "e817e8" };
+
+    msgType = qBound(QtDebugMsg, msgType, QtInfoMsg);
+    QString filename;
+    if (msgCtx.file && msgCtx.file[0] && msgCtx.line > 1) {
+        filename = QString::fromLocal8Bit(msgCtx.file);
+        int pos = -1;
+#if defined(Q_OS_WINDOWS)
+        pos = filename.lastIndexOf('\\'_l1);
 #endif
-            if (pos < 0)
-                pos = int(filename.lastIndexOf('/'_l1));
-            filename = filename.mid(pos + 1);
-        }
+        if (pos < 0)
+            pos = int(filename.lastIndexOf('/'_l1));
+        filename = filename.mid(pos + 1);
+    }
 
-        QString str = QString() % msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)]
-                % u" " % QLatin1String(msgCtx.category)
-                % u": " % msg;
-        if (!filename.isEmpty())
-            str = str % u" at " % filename % u", line " % QString::number(msgCtx.line);
+    QString str = R"(<span style="color:#)"_l1 % QLatin1String(msgTypeColor[msgType])
+            % R"(;background-color:#)"_l1 % QLatin1String(msgTypeBgColor[msgType]) % R"(;">)"_l1
+            % QLatin1String(msgTypeNames[msgType]) % R"(</span>)"_l1
+            % R"(&nbsp;<span style="color:#)"_l1
+            % QLatin1String(categoryColor[qHashBits(msgCtx.category, qstrlen(msgCtx.category), 1) % 6])
+            % R"(;font-weight:bold;">)"_l1
+            % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1 % msg;
+    if (!filename.isEmpty()) {
+        str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
+                % R"(;font-weight:bold;">)"_l1 % filename
+                % R"(</span>, line <span style="color:#)"_l1 % QLatin1String(lineColor)
+                % R"(;font-weight:bold;">)"_l1 % QString::number(msgCtx.line) % R"(</span>)"_l1;
+    }
 
-        QMetaObject::invokeMethod(s_inst->m_logWidget, "appendPlainText", Qt::QueuedConnection,
-                                  Q_ARG(QString, str));
-    };
-    m_defaultMessageHandler = qInstallMessageHandler(msgHandler);
+    QMetaObject::invokeMethod(s_inst->m_logWidget, "appendHtml", Qt::QueuedConnection,
+                              Q_ARG(QString, str));
 }
 
 void Application::setIconTheme()
