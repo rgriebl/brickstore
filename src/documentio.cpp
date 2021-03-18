@@ -1396,8 +1396,6 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         }
     };
     static auto asString   = [](const QString &s)      { return s; };
-    static auto asL1String = [](const QByteArray &l1s) { return QString::fromLatin1(l1s); };
-    static auto asChar     = [](char c)                { return QString(QLatin1Char(c)); };
     static auto asCurrency = [](double d)              { return QString::number(d, 'f', 3); };
     static auto asInt      = [](auto i)                { return QString::number(i); };
 
@@ -1411,8 +1409,12 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         xml.writeStartElement("Item"_l1);
 
         // vvv Required Fields (part 1)
-        create(u"ItemID",       &Lot::itemId,       asL1String);
-        create(u"ItemTypeID",   &Lot::itemTypeId,   asChar);
+        create(u"ItemID",       &Lot::itemId,       [](auto l1s) {
+            return QString::fromLatin1(l1s); });
+        create(u"ItemTypeID",   &Lot::itemTypeId,   [](auto c) {
+            QChar qc = QLatin1Char(c);
+            return qc.isPrint() ? QString(qc) :QString();
+        });
         create(u"ColorID",      &Lot::colorId,      asInt);
 
         // vvv Redundancy Fields
