@@ -72,8 +72,8 @@ private:
     static Window *loadFrom(const QString &s);
     static bool saveTo(Window *win, const QString &s);
 
-    static bool parseLDrawModel(QFile *f, LotList &lots, int *invalidLots);
-    static bool parseLDrawModelInternal(QFile *f, const QString &modelName,
+    static bool parseLDrawModel(QFile *f, bool isStudio, LotList &lots, int *invalidLots);
+    static bool parseLDrawModelInternal(QFile *f, bool isStudio, const QString &modelName,
                                         QVector<Lot *> &lots,
                                         QHash<QString, QVector<Lot *> > &subCache,
                                         QVector<QString> &recursionDetection);

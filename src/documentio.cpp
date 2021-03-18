@@ -318,17 +318,18 @@ Document *DocumentIO::importLDrawModel()
     setLastDirectory(QFileInfo(fn).absolutePath());
 
     QScopedPointer<QFile> f;
+    bool isStudio = fn.endsWith(".io"_l1);
 
-    if (fn.endsWith(".io"_l1)) {
+    if (isStudio) {
         stopwatch unpack("unpack/decrypt studio zip");
 
-        // this is a zip file - unpack the encrypted model.ldr (pw: soho0909)
+        // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
 
         f.reset(new QTemporaryFile());
 
         if (f->open(QIODevice::ReadWrite)) {
             try {
-                MiniZip::unzip(fn, f.get(), "model.ldr", "soho0909");
+                MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
                 f->close();
             } catch (const Exception &e) {
                 MessageBox::warning(nullptr, { }, tr("Could not parse the Studio model:")
@@ -350,7 +351,7 @@ Document *DocumentIO::importLDrawModel()
     int invalidLots = 0;
     LotList lots; // we own the items
 
-    bool b = DocumentIO::parseLDrawModel(f.get(), lots, &invalidLots);
+    bool b = DocumentIO::parseLDrawModel(f.get(), isStudio, lots, &invalidLots);
     Document *doc = nullptr;
 
     QApplication::restoreOverrideCursor();
@@ -379,7 +380,7 @@ Document *DocumentIO::importLDrawModel()
     return doc;
 }
 
-bool DocumentIO::parseLDrawModel(QFile *f, LotList &lots, int *invalidLots)
+bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, LotList &lots, int *invalidLots)
 {
     QVector<QString> recursion_detection;
     QHash<QString, QVector<Lot *>> subCache;
@@ -388,7 +389,7 @@ bool DocumentIO::parseLDrawModel(QFile *f, LotList &lots, int *invalidLots)
     {
         stopwatch parse("parse ldraw model");
 
-        if (!parseLDrawModelInternal(f, QString(), ldrawLots, subCache, recursion_detection))
+        if (!parseLDrawModelInternal(f, isStudio, QString(), ldrawLots, subCache, recursion_detection))
             return false;
     }
     {
@@ -439,7 +440,7 @@ bool DocumentIO::parseLDrawModel(QFile *f, LotList &lots, int *invalidLots)
     return true;
 }
 
-bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
+bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString &modelName,
                                          QVector<Lot *> &lots,
                                          QHash<QString, QVector<Lot *>> &subCache,
                                          QVector<QString> &recursionDetection)
@@ -521,7 +522,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
 
                     const BrickLink::Item *itemp = BrickLink::core()->item('P', partid.toLatin1());
 
-                    if (!itemp) {
+                    if (!itemp && !partname.endsWith(".dat"_l1)) {
                         bool got_subfile = false;
                         QVector<Lot *> subLots;
 
@@ -529,7 +530,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                             qint64 oldpos = f->pos();
                             f->seek(0);
 
-                            got_subfile = parseLDrawModelInternal(f, partname, subLots, subCache, recursionDetection);
+                            got_subfile = parseLDrawModelInternal(f, isStudio, partname, subLots, subCache, recursionDetection);
 
                             f->seek(oldpos);
                         }
@@ -540,7 +541,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
 
                                 if (subf.open(QIODevice::ReadOnly)) {
 
-                                    (void) parseLDrawModelInternal(&subf, partname, subLots, subCache, recursionDetection);
+                                    (void) parseLDrawModelInternal(&subf, isStudio, partname, subLots, subCache, recursionDetection);
 
                                     got_subfile = true;
                                     break;
@@ -554,7 +555,8 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                         }
                     }
 
-                    const BrickLink::Color *colp = BrickLink::core()->colorFromLDrawId(colid);
+                    const BrickLink::Color *colp = isStudio ? BrickLink::core()->color(colid)
+                                                            : BrickLink::core()->colorFromLDrawId(colid);
 
                     auto *lot = new Lot(colp, itemp);
                     lot->setQuantity(1);
@@ -568,7 +570,10 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, const QString &modelName,
                             inc->m_itemtype_name = "Part"_l1;
                         }
                         if (!colp) {
-                            inc->m_color_name = "LDraw #"_l1 + QString::number(colid);
+                            if (isStudio)
+                                inc->m_color_id = colid;
+                            else
+                                inc->m_color_name = "LDraw #"_l1 + QString::number(colid);
                         }
                         lot->setIncomplete(inc);
                     }
