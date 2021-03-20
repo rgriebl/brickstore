@@ -274,23 +274,22 @@ Window *DocumentIO::loadFrom(const QString &name)
         BsxContents result = DocumentIO::parseBsxInventory(&f); // we own the items now
 
         if (result.invalidLotsCount) {
-            if (MessageBox::question(nullptr, { },
-                                     tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                        nullptr, result.invalidLotsCount)) == QMessageBox::Yes) {
-                result.invalidLotsCount = 0;
-            }
+            MessageBox::information(nullptr, { },
+                                    tr("This file contains %n unknown item(s).",
+                                       nullptr, result.invalidLotsCount));
         }
 
-        if (result.invalidLotsCount) {
-            qDeleteAll(result.lots);
-            return nullptr;
+        if (result.fixedLotsCount) {
+            MessageBox::information(nullptr, { },
+                                    tr("%n oudated item or color reference(s) in this file have been updated according to the BrickLink catalog.",
+                                       nullptr, result.fixedLotsCount));
         }
 
         if (result.currencyCode.isEmpty()) // flag as legacy currency
             result.currencyCode = "$$$"_l1;
 
         // Document owns the items now
-        auto doc = new Document(result);
+        auto doc = new Document(result, (result.fixedLotsCount != 0) /*forceModified*/);
         doc->setFileName(name);
         Config::inst()->addToRecentFiles(name);
 
@@ -1078,10 +1077,10 @@ void DocumentIO::exportBrickLinkXMLClipboard(const LotList &lots)
 
 
 
-bool DocumentIO::resolveIncomplete(Lot *lot)
+DocumentIO::ResolveResult DocumentIO::resolveIncomplete(Lot *lot)
 {
     if (!lot->isIncomplete())
-        return true;
+        return ResolveResult::Direct;
 
     BrickLink::Incomplete ic = *lot->isIncomplete();
 
@@ -1111,7 +1110,7 @@ bool DocumentIO::resolveIncomplete(Lot *lot)
 
     if (lot->item() && lot->color()) {
         lot->setIncomplete(nullptr);
-        return true;
+        return ResolveResult::Direct;
 
     } else {
         qWarning() << "failed: insufficient data (item=" << ic.m_item_id << ", itemtype="
@@ -1125,7 +1124,7 @@ bool DocumentIO::resolveIncomplete(Lot *lot)
         lot->setColor(color);
 
         Q_ASSERT(ok == !lot->isIncomplete());
-        return ok;
+        return ok ? ResolveResult::ChangeLog : ResolveResult::Fail;
     }
 }
 
@@ -1254,8 +1253,11 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                     }
                 }
 
-                if (!resolveIncomplete(lot))
-                    bsx.invalidLotsCount++;
+                switch (resolveIncomplete(lot)) {
+                case ResolveResult::Fail: bsx.invalidLotsCount++; break;
+                case ResolveResult::ChangeLog: bsx.fixedLotsCount++; break;
+                default: break;
+                }
 
                 // convert the legacy OrigQty / OrigPrice fields
                 if (!hasBaseValues && (legacyOrigPrice.isValid() || legacyOrigQty.isValid())) {
@@ -1277,7 +1279,7 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                                 (*it)(&base, attr.value().toString());
                             }
                         }
-                        if (!resolveIncomplete(&base)) {
+                        if (resolveIncomplete(&base) == ResolveResult::Fail) {
                             if (!base.item() && lot->item())
                                 base.setItem(lot->item());
                             if (!base.color() && lot->color())

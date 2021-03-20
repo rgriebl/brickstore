@@ -62,7 +62,9 @@ public:
         QByteArray guiColumnLayout;
         QByteArray guiSortFilterState;
 
-        int invalidLotsCount = 0; // parse only
+        // parse only
+        int invalidLotsCount = 0;
+        int fixedLotsCount = 0;
     };
 
     static QString toBrickLinkXML(const LotList &lots);
@@ -78,7 +80,8 @@ private:
                                         QHash<QString, QVector<Lot *> > &subCache,
                                         QVector<QString> &recursionDetection);
 
-    static bool resolveIncomplete(Lot *lot);
+    enum class ResolveResult { Fail, Direct, ChangeLog };
+    static ResolveResult resolveIncomplete(Lot *lot);
 
     static BsxContents parseBsxInventory(QIODevice *in);
     static bool createBsxInventory(QIODevice *out, const BsxContents &bsx);
