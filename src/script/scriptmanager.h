@@ -22,11 +22,8 @@ QT_FORWARD_DECLARE_CLASS(QQmlContext)
 QT_FORWARD_DECLARE_CLASS(QQmlComponent)
 
 class Script;
-
-namespace QmlWrapper {
-class BrickLink;
-class BrickStore;
-}
+class QmlBrickLink;
+class QmlBrickStore;
 
 
 class ScriptManager : public QObject
@@ -60,8 +57,8 @@ private:
 
     QVector<Script *> m_scripts;
 
-    QmlWrapper::BrickLink *m_brickLink = nullptr;
-    QmlWrapper::BrickStore *m_brickStore = nullptr;
+    QmlBrickLink *m_brickLink = nullptr;
+    QmlBrickStore *m_brickStore = nullptr;
 
     Q_DISABLE_COPY(ScriptManager)
 };

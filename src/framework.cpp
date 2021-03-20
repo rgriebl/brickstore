@@ -436,11 +436,15 @@ FrameWork::FrameWork(QWidget *parent)
                                       "view_column_layout_load"
                                   }));
 
-    menuBar()->addMenu(createMenu("menu_extras", {
-                                      "update_database",
-                                      "-",
-                                      "configure"
-                                  }));
+    m_extrasMenu = createMenu("menu_extras", {
+                                  "update_database",
+                                  "-",
+                                  "configure",
+                                  "-scripts-start",
+                                  "-scripts-end",
+                                  "reload_scripts",
+                              });
+    menuBar()->addMenu(m_extrasMenu);
 
     QMenu *m = m_workspace->windowMenu(true, this);
     m->menuAction()->setObjectName("menu_window"_l1);
@@ -593,15 +597,18 @@ void FrameWork::setupScripts()
     }
 
     auto reloadScripts = [this](const QVector<Script *> &scripts) {
+        QList<QAction *> extrasActions;
+
         for (auto script : scripts) {
             const auto extensionActions = script->extensionActions();
             for (auto extensionAction : extensionActions) {
                 auto action = new QAction(extensionAction->text(), extensionAction);
+                if (extensionAction->location() == ExtensionScriptAction::Location::ContextMenu)
+                    m_extensionContextActions.append(action);
+                else
+                    extrasActions.append(action);
 
-                ((extensionAction->location() == ExtensionScriptAction::Location::ContextMenu)
-                        ? m_extensionContextActions : m_extensionExtraActions).append(action);
-
-                connect(action, &QAction::triggered, this, [extensionAction]() {
+                connect(action, &QAction::triggered, extensionAction, [extensionAction]() {
                     try {
                         extensionAction->executeAction();
                     } catch (const Exception &e) {
@@ -610,21 +617,33 @@ void FrameWork::setupScripts()
                 });
             }
         }
-
+        if (!extrasActions.isEmpty()) {
+            auto actions = m_extrasMenu->actions();
+            QAction *position = actions.at(actions.size() - 2);
+            m_extrasMenu->insertActions(position, extrasActions);
+        }
     };
 
     connect(ScriptManager::inst(), &ScriptManager::aboutToReload,
             this, [this]() {
+        auto actions = m_extrasMenu->actions();
+        bool deleteRest = false;
+        for (QAction *a : qAsConst(actions)) {
+            qWarning() << a->objectName() << deleteRest;
+            if (a->objectName() == "scripts-start"_l1)
+                deleteRest = true;
+            else if (a->objectName() == "scripts-end"_l1)
+                break;
+            else if (deleteRest)
+                m_extrasMenu->removeAction(a);
+        }
         m_extensionContextActions.clear();
-        m_extensionExtraActions.clear();
     });
     connect(ScriptManager::inst(), &ScriptManager::reloaded,
-            this, [&reloadScripts]() {
+            this, [this, reloadScripts]() {
         reloadScripts(ScriptManager::inst()->extensionScripts());
     });
     reloadScripts(ScriptManager::inst()->extensionScripts());
-
-    //TODO: aboutToShow in Extra menu
 }
 
 void FrameWork::languageChange()
@@ -736,6 +755,7 @@ void FrameWork::translateActions()
         { "menu_extras",                    tr("E&xtras"),                            },
         { "update_database",                tr("Update Database"),                    },
         { "configure",                      tr("Settings..."),                        },
+        { "reload_scripts",                 tr("Reload user scripts"),                },
         { "menu_window",                    tr("&Windows"),                           },
         { "menu_help",                      tr("&Help"),                              },
         { "help_about",                     tr("About..."),                           },
@@ -923,12 +943,16 @@ QMenu *FrameWork::createMenu(const QByteArray &name, const QVector<QByteArray> &
     m->menuAction()->setObjectName(QLatin1String(name.constData()));
 
     foreach(const QByteArray &an, a_names) {
-        if (an == "-")
-            m->addSeparator();
-        else if (QAction *a = findAction(an))
+        if (an.startsWith("-")) {
+            auto *a = m->addSeparator();
+            if (an.length() > 1)
+                a->setObjectName(QString::fromLatin1(an.mid(1)));
+        } else if (QAction *a = findAction(an)) {
             m->addAction(a);
-        else
-            qWarning("Couldn't find action '%s' when creating menu '%s'", an.constData(), name.constData());
+        } else  {
+            qWarning("Couldn't find action '%s' when creating menu '%s'",
+                     an.constData(), name.constData());
+        }
     }
     return m;
 }
@@ -1282,7 +1306,7 @@ void FrameWork::createActions()
     a = newQAction(this, "configure", 0, false, this, [this]() { showSettings(); });
     a->setMenuRole(QAction::PreferencesRole);
 
-    //(void) newQAction(this, "help_whatsthis", 0, false, this, &FrameWork::whatsThis);
+    (void) newQAction(this, "reload_scripts", 0, false, ScriptManager::inst(), &ScriptManager::reload);
 
     a = newQAction(this, "help_about", 0, false, Application::inst(), [this]() {
         AboutDialog(this).exec();

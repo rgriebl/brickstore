@@ -129,12 +129,12 @@ private:
 
     Workspace *m_workspace;
     QPointer<Window> m_activeWin;
-    QList<QAction *> m_extensionExtraActions;
     QList<QAction *> m_extensionContextActions;
 
     ProgressCircle *m_progress;
     HistoryLineEdit *m_filter;
     QToolBar *m_toolbar;
+    QMenu *m_extrasMenu;
     QVector<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
     TaskPriceGuideWidget *m_task_priceguide;

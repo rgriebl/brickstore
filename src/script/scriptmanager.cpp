@@ -70,50 +70,44 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     if (m_brickLink || !core)
         return false;
 
-    m_brickLink = new QmlWrapper::BrickLink(core);
-    m_brickStore = new QmlWrapper::BrickStore();
+    m_brickLink = new QmlBrickLink(core);
+    m_brickStore = new QmlBrickStore();
 
     static auto *that = this; // workaround for qmlRegisterSingleton in Qt < 5.14
 
     QString cannotCreate = tr("Cannot create objects of type %1");
 
     QQmlEngine::setObjectOwnership(m_brickLink, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlWrapper::BrickLink>("BrickStore", 1, 0, "BrickLink",
-                             [](QQmlEngine *, QJSEngine *) -> QObject * {
+    qmlRegisterSingletonType<QmlBrickLink>("BrickStore", 1, 0, "BrickLink",
+                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
         return that->m_brickLink;
     });
     QQmlEngine::setObjectOwnership(m_brickStore, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlWrapper::BrickStore>("BrickStore", 1, 0, "BrickStore",
-                             [](QQmlEngine *, QJSEngine *) -> QObject * {
+    qmlRegisterSingletonType<QmlBrickStore>("BrickStore", 1, 0, "BrickStore",
+                                            [](QQmlEngine *, QJSEngine *) -> QObject * {
         return that->m_brickStore;
     });
 
-    qRegisterMetaType<QmlWrapper::Color>("Color");
-    qRegisterMetaType<QmlWrapper::ItemType>("ItemType");
-    qRegisterMetaType<QmlWrapper::Category>("Category");
-    qRegisterMetaType<QmlWrapper::Item>("Item");
-    qRegisterMetaType<QmlWrapper::Lot>("Lot");
-    qRegisterMetaType<QmlWrapper::PriceGuide>("PriceGuide");
-    qRegisterMetaType<QmlWrapper::Picture>("Picture");
-    qRegisterMetaType<QmlWrapper::Order>("Order");
-    qRegisterMetaType<QmlWrapper::BrickLink::Time>("BrickLink::Time");
-    qRegisterMetaType<QmlWrapper::BrickLink::Price>("BrickLink::Price");
-    qRegisterMetaType<QmlWrapper::BrickLink::Condition>("BrickLink::Condition");
-    qRegisterMetaType<QmlWrapper::BrickLink::SubCondition>("BrickLink::SubCondition");
-    qRegisterMetaType<QmlWrapper::BrickLink::Stockroom>("BrickLink::Stockroom");
-    qRegisterMetaType<QmlWrapper::BrickLink::Status>("BrickLink::Status");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::UpdateStatus");
-    qRegisterMetaType<QmlWrapper::BrickLink::OrderType>("BrickLink::OrderType");
+    qRegisterMetaType<QmlColor>("Color");
+    qRegisterMetaType<QmlItemType>("ItemType");
+    qRegisterMetaType<QmlCategory>("Category");
+    qRegisterMetaType<QmlItem>("Item");
+    qRegisterMetaType<QmlLot>("Lot");
+    qRegisterMetaType<QmlPriceGuide>("PriceGuide");
+    qRegisterMetaType<QmlPicture>("Picture");
+    qRegisterMetaType<QmlOrder>("Order");
+    qRegisterMetaType<QmlColumn>("Column");
+    qRegisterMetaType<Document::Field>("Document::Field");
 
-    qmlRegisterUncreatableType<QmlWrapper::Document>("BrickStore", 1, 0, "Document",
-                                                     cannotCreate.arg("Document"_l1));
+    qmlRegisterUncreatableType<QmlDocument>("BrickStore", 1, 0, "Document",
+                                            cannotCreate.arg("Document"_l1));
 
-    qmlRegisterUncreatableType<QmlWrapper::PrintJob>("BrickStore", 1, 0, "PrintJob",
-                                                     cannotCreate.arg("PrintJob"_l1));
-    qmlRegisterUncreatableType<QmlWrapper::PrintPage>("BrickStore", 1, 0, "Page",
-                                                      cannotCreate.arg("Page"_l1));
-    qRegisterMetaType<QmlWrapper::PrintPage::Alignment>("PrintPage::Alignment");
-    qRegisterMetaType<QmlWrapper::PrintPage::LineStyle>("PrintPage::LineStyle");
+    qmlRegisterUncreatableType<QmlPrintJob>("BrickStore", 1, 0, "PrintJob",
+                                            cannotCreate.arg("PrintJob"_l1));
+    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "Page",
+                                             cannotCreate.arg("Page"_l1));
+    qRegisterMetaType<QmlPrintPage::Alignment>("PrintPage::Alignment");
+    qRegisterMetaType<QmlPrintPage::LineStyle>("PrintPage::LineStyle");
 
     qmlRegisterType<Script>("BrickStore", 1, 0, "Script");
     qmlRegisterType<ExtensionScriptAction>("BrickStore", 1, 0, "ExtensionScriptAction");

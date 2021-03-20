@@ -20,11 +20,9 @@
 QT_FORWARD_DECLARE_CLASS(QQmlContext)
 QT_FORWARD_DECLARE_CLASS(QQmlComponent)
 
-namespace QmlWrapper {
-class PrintJob;
-class Document;
-class BrickStore;
-}
+class QmlPrintJob;
+class QmlDocument;
+class QmlBrickStore;
 
 class Window;
 class Script;
@@ -136,7 +134,7 @@ public:
 
     QQmlEngine *qmlEngine() const;
     QQmlContext *qmlContext() const;
-    QmlWrapper::BrickStore *brickStoreWrapper() const;
+    QmlBrickStore *brickStoreWrapper() const;
 
 signals:
     void nameChanged(QString name);
@@ -150,7 +148,7 @@ private:
     QString m_version;
     Type m_type = Type::ExtensionScript;
 
-    QmlWrapper::BrickStore *m_brickStore = nullptr;
+    QmlBrickStore *m_brickStore = nullptr;
 
     QString m_fileName;
     QScopedPointer<QQmlEngine> m_engine;

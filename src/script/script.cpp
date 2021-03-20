@@ -157,7 +157,7 @@ void PrintingScriptTemplate::componentComplete()
 
 void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly)
 {
-    QScopedPointer<QmlWrapper::PrintJob> job(new QmlWrapper::PrintJob(pd));
+    QScopedPointer<QmlPrintJob> job(new QmlPrintJob(pd));
 
     if (!m_printFunction.isCallable())
         throw Exception(tr("The printing script does not define a 'printFunction'."));
@@ -171,7 +171,7 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
                                                                  : win->document()->lots());
     QVariantList itemList;
     for (auto lot : lots)
-        itemList << QVariant::fromValue(QmlWrapper::Lot(lot, wrappedDoc));
+        itemList << QVariant::fromValue(QmlLot(lot, wrappedDoc));
 
     QQmlEngine *engine = m_script->qmlEngine();
     QJSValueList args = { engine->toScriptValue(job.data()),
@@ -281,7 +281,7 @@ QQmlContext *Script::qmlContext() const
     return m_context;
 }
 
-QmlWrapper::BrickStore *Script::brickStoreWrapper() const
+QmlBrickStore *Script::brickStoreWrapper() const
 {
     return m_brickStore;
 }

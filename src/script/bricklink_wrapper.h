@@ -19,21 +19,20 @@
 #include "document.h"
 #include "lot.h"
 
+QT_FORWARD_DECLARE_CLASS(QHeaderView)
 class Window;
 
-namespace QmlWrapper {
-
-class Color;
-class Category;
-class ItemType;
-class Item;
-class Lot;
-class PriceGuide;
-class Picture;
-class Document;
+class QmlColor;
+class QmlCategory;
+class QmlItemType;
+class QmlItem;
+class QmlLot;
+class QmlPriceGuide;
+class QmlPicture;
+class QmlDocument;
 
 
-template <typename T> class WrapperBase
+template <typename T> class QmlWrapperBase
 {
 public:
     inline T *wrappedObject() const
@@ -42,7 +41,7 @@ public:
     }
 
 protected:
-    WrapperBase(T *_wrappedObject)
+    QmlWrapperBase(T *_wrappedObject)
         : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
     { }
 
@@ -61,7 +60,7 @@ protected:
 };
 
 
-class BrickLink : public QObject
+class QmlBrickLink : public QObject
 {
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
@@ -73,11 +72,11 @@ class BrickLink : public QObject
     // const QImage noImage(const QSize &s) const;
     // const QImage colorImage(const Color *col, int w, int h) const;
 
-    Q_PROPERTY(Item noItem READ noItem CONSTANT)
-    Q_PROPERTY(Color noColor READ noColor CONSTANT)
+    Q_PROPERTY(QmlItem noItem READ noItem CONSTANT)
+    Q_PROPERTY(QmlColor noColor READ noColor CONSTANT)
 
 public:
-    BrickLink(::BrickLink::Core *core);
+    QmlBrickLink(BrickLink::Core *core);
 
     // copied from namespace BrickLink
     enum class Time          { PastSix, Current };
@@ -102,33 +101,33 @@ public:
     Q_ENUM(OrderType)
     Q_ENUM(OrderStatus)
 
-    Item noItem() const;
-    Color noColor() const;
+    QmlItem noItem() const;
+    QmlColor noColor() const;
 
-    Q_INVOKABLE Color color(int id) const;
-    Q_INVOKABLE Color colorFromName(const QString &name) const;
-    Q_INVOKABLE Color colorFromLDrawId(int ldrawId) const;
-    Q_INVOKABLE Category category(int id) const;
-    Q_INVOKABLE ItemType itemType(const QString &itemTypeId) const;
-    Q_INVOKABLE Item item(const QString &itemTypeId, const QString &itemId) const;
+    Q_INVOKABLE QmlColor color(int id) const;
+    Q_INVOKABLE QmlColor colorFromName(const QString &name) const;
+    Q_INVOKABLE QmlColor colorFromLDrawId(int ldrawId) const;
+    Q_INVOKABLE QmlCategory category(int id) const;
+    Q_INVOKABLE QmlItemType itemType(const QString &itemTypeId) const;
+    Q_INVOKABLE QmlItem item(const QString &itemTypeId, const QString &itemId) const;
 
-    Q_INVOKABLE PriceGuide priceGuide(Item item, Color color, bool highPriority = false);
+    Q_INVOKABLE QmlPriceGuide priceGuide(QmlItem item, QmlColor color, bool highPriority = false);
 
-    Q_INVOKABLE Picture picture(Item item, Color color, bool highPriority = false);
-    Q_INVOKABLE Picture largePicture(Item item, bool highPriority = false);
+    Q_INVOKABLE QmlPicture picture(QmlItem item, QmlColor color, bool highPriority = false);
+    Q_INVOKABLE QmlPicture largePicture(QmlItem item, bool highPriority = false);
 
 signals:
-    void priceGuideUpdated(QmlWrapper::PriceGuide pg);
-    void pictureUpdated(QmlWrapper::Picture inv);
+    void priceGuideUpdated(QmlPriceGuide pg);
+    void pictureUpdated(QmlPicture inv);
 
 private:
     static char firstCharInString(const QString &str);
 
-    ::BrickLink::Core *d;
+    BrickLink::Core *d;
 };
 
 
-class Category : public WrapperBase<const ::BrickLink::Category>
+class QmlCategory : public QmlWrapperBase<const BrickLink::Category>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
@@ -137,13 +136,13 @@ class Category : public WrapperBase<const ::BrickLink::Category>
     Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
 
 public:
-    Category(const ::BrickLink::Category *cat = nullptr);
+    QmlCategory(const BrickLink::Category *cat = nullptr);
 
-    friend class BrickLink;
+    friend class QmlBrickLink;
 };
 
 
-class ItemType : public WrapperBase<const ::BrickLink::ItemType>
+class QmlItemType : public QmlWrapperBase<const BrickLink::ItemType>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
@@ -160,15 +159,15 @@ class ItemType : public WrapperBase<const ::BrickLink::ItemType>
     Q_PRIVATE_PROPERTY(wrapped, QSize pictureSize READ pictureSize CONSTANT)
 
 public:
-    ItemType(const ::BrickLink::ItemType *itt = nullptr);
+    QmlItemType(const BrickLink::ItemType *itt = nullptr);
 
     QVariantList categories() const;
 
-    friend class BrickLink;
+    friend class QmlBrickLink;
 };
 
 
-class Color : public WrapperBase<const ::BrickLink::Color>
+class QmlColor : public QmlWrapperBase<const BrickLink::Color>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
@@ -190,35 +189,35 @@ class Color : public WrapperBase<const ::BrickLink::Color>
     Q_PROPERTY(QImage image READ image)
 
 public:
-    Color(const ::BrickLink::Color *col = nullptr);
+    QmlColor(const BrickLink::Color *col = nullptr);
 
     QImage image() const;
 
-    friend class BrickLink;
-    friend class Document;
-    friend class Lot;
+    friend class QmlBrickLink;
+    friend class QmlDocument;
+    friend class QmlLot;
 };
 
 
-class Item : public WrapperBase<const ::BrickLink::Item>
+class QmlItem : public QmlWrapperBase<const BrickLink::Item>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QString id READ id CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, ItemType itemType READ itemType CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, Category category READ category CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlItemType itemType READ itemType CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlCategory category READ category CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, bool hasInventory READ hasInventory CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, Color defaultColor READ defaultColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlColor defaultColor READ defaultColor CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, double weight READ weight CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int yearReleased READ yearReleased CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, bool hasKnownColors READ hasKnownColors CONSTANT)
     Q_PROPERTY(QVariantList knownColors READ knownColors CONSTANT)
 
 public:
-    Item(const ::BrickLink::Item *item = nullptr);
+    QmlItem(const BrickLink::Item *item = nullptr);
 
     QString id() const;
     QVariantList knownColors() const;
@@ -227,76 +226,76 @@ public:
 
     // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
 
-    friend class BrickLink;
-    friend class Document;
+    friend class QmlBrickLink;
+    friend class QmlDocument;
 };
 
 
-class Picture : public WrapperBase<::BrickLink::Picture>
+class QmlPicture : public QmlWrapperBase<BrickLink::Picture>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrapped, Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlItem item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlColor color READ color CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
+    Q_PROPERTY(QmlBrickLink::UpdateStatus updateStatus READ updateStatus)
     Q_PRIVATE_PROPERTY(wrapped, bool isValid READ isValid)
     Q_PRIVATE_PROPERTY(wrapped, QImage image READ image)
 
 public:
-    explicit Picture(::BrickLink::Picture *pic = nullptr);
-    Picture(const Picture &copy);
-    Picture &operator=(const Picture &assign);
-    virtual ~Picture();
+    explicit QmlPicture(BrickLink::Picture *pic = nullptr);
+    QmlPicture(const QmlPicture &copy);
+    QmlPicture &operator=(const QmlPicture &assign);
+    virtual ~QmlPicture();
 
-    BrickLink::UpdateStatus updateStatus() const;
+    QmlBrickLink::UpdateStatus updateStatus() const;
 
     Q_INVOKABLE void update(bool highPriority = false);
 
-    friend class BrickLink;
+    friend class QmlBrickLink;
 };
 
 
-class PriceGuide : public WrapperBase<::BrickLink::PriceGuide>
+class QmlPriceGuide : public QmlWrapperBase<BrickLink::PriceGuide>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrapped, Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlItem item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlColor color READ color CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDateTime lastUpdate READ lastUpdate)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
+    Q_PROPERTY(QmlBrickLink::UpdateStatus updateStatus READ updateStatus)
     Q_PRIVATE_PROPERTY(wrapped, bool isValid READ isValid)
 
 public:
-    explicit PriceGuide(::BrickLink::PriceGuide *pg = nullptr);
-    PriceGuide(const PriceGuide &copy);
-    PriceGuide &operator=(const PriceGuide &assign);
-    virtual ~PriceGuide();
+    explicit QmlPriceGuide(BrickLink::PriceGuide *pg = nullptr);
+    QmlPriceGuide(const QmlPriceGuide &copy);
+    QmlPriceGuide &operator=(const QmlPriceGuide &assign);
+    virtual ~QmlPriceGuide();
 
-    BrickLink::UpdateStatus updateStatus() const;
+    QmlBrickLink::UpdateStatus updateStatus() const;
 
     Q_INVOKABLE void update(bool highPriority = false);
 
-    Q_INVOKABLE int quantity(::BrickLink::Time time, ::BrickLink::Condition condition) const;
-    Q_INVOKABLE int lots(::BrickLink::Time time, ::BrickLink::Condition condition) const;
-    Q_INVOKABLE double price(::BrickLink::Time time, ::BrickLink::Condition condition,
-                             ::BrickLink::Price price) const;
+    Q_INVOKABLE int quantity(QmlBrickLink::Time time, QmlBrickLink::Condition condition) const;
+    Q_INVOKABLE int lots(QmlBrickLink::Time time, QmlBrickLink::Condition condition) const;
+    Q_INVOKABLE double price(QmlBrickLink::Time time, QmlBrickLink::Condition condition,
+                             QmlBrickLink::Price price) const;
 
-    friend class BrickLink;
+    friend class QmlBrickLink;
 };
 
 
-class Lot : WrapperBase<::Lot>
+class QmlLot : QmlWrapperBase<Lot>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PROPERTY(Item item READ item WRITE setItem)
-    Q_PROPERTY(Color color READ color WRITE setColor)
-    Q_PROPERTY(Category category READ category)
-    Q_PROPERTY(ItemType itemType READ itemType)
+    Q_PROPERTY(QmlItem item READ item WRITE setItem)
+    Q_PROPERTY(QmlColor color READ color WRITE setColor)
+    Q_PROPERTY(QmlCategory category READ category)
+    Q_PROPERTY(QmlItemType itemType READ itemType)
     Q_PROPERTY(QString itemId READ itemId)
     Q_PROPERTY(QString id READ itemId)
     Q_PROPERTY(QString itemName READ itemName)
@@ -306,9 +305,9 @@ class Lot : WrapperBase<::Lot>
     Q_PROPERTY(QString itemTypeName READ itemTypeName)
     Q_PROPERTY(int itemYearReleased READ itemYearReleased)
 
-    Q_PROPERTY(BrickLink::Status status READ status WRITE setStatus)
-    Q_PROPERTY(BrickLink::Condition condition READ condition WRITE setCondition)
-    Q_PROPERTY(BrickLink::SubCondition subCondition READ subCondition WRITE setSubCondition)
+    Q_PROPERTY(QmlBrickLink::Status status READ status WRITE setStatus)
+    Q_PROPERTY(QmlBrickLink::Condition condition READ condition WRITE setCondition)
+    Q_PROPERTY(QmlBrickLink::SubCondition subCondition READ subCondition WRITE setSubCondition)
 
     Q_PROPERTY(QString comments READ comments WRITE setComments)
     Q_PROPERTY(QString remarks READ remarks WRITE setRemarks)
@@ -329,7 +328,7 @@ class Lot : WrapperBase<::Lot>
 
     Q_PROPERTY(uint lotId READ lotId WRITE setLotId)
     Q_PROPERTY(bool retain READ retain WRITE setRetain)
-    Q_PROPERTY(BrickLink::Stockroom stockroom READ stockroom WRITE setStockroom)
+    Q_PROPERTY(QmlBrickLink::Stockroom stockroom READ stockroom WRITE setStockroom)
 
     Q_PROPERTY(double totalWeight READ totalWeight WRITE setTotalWeight)
     Q_PROPERTY(QString reserved READ reserved WRITE setReserved)
@@ -342,14 +341,14 @@ class Lot : WrapperBase<::Lot>
     Q_PROPERTY(QImage image READ image)
 
 public:
-    Lot(::Lot *lot = nullptr, Document *document = nullptr);
+    QmlLot(Lot *lot = nullptr, QmlDocument *document = nullptr);
 
-    Item item() const                  { return get()->item(); }
-    void setItem(Item item)            { set().to()->setItem(item.wrappedObject()); }
-    Color color() const                { return get()->color(); }
-    void setColor(Color color)         { set().to()->setColor(color.wrappedObject()); }
-    Category category() const          { return get()->category(); }
-    ItemType itemType() const          { return get()->itemType(); }
+    QmlItem item() const               { return get()->item(); }
+    void setItem(QmlItem item)         { set().to()->setItem(item.wrappedObject()); }
+    QmlColor color() const             { return get()->color(); }
+    void setColor(QmlColor color)      { set().to()->setColor(color.wrappedObject()); }
+    QmlCategory category() const       { return get()->category(); }
+    QmlItemType itemType() const       { return get()->itemType(); }
 
     QString itemId() const             { return QString::fromLatin1(get()->itemId()); }
     QString itemName() const           { return get()->itemName(); }
@@ -358,12 +357,12 @@ public:
     QString itemTypeName() const       { return get()->itemTypeName(); }
     int itemYearReleased() const       { return get()->itemYearReleased(); }
 
-    BrickLink::Status status() const                { return static_cast<BrickLink::Status>(get()->status()); }
-    void setStatus(BrickLink::Status s)             { set().to()->setStatus(static_cast<::BrickLink::Status>(s)); }
-    BrickLink::Condition condition() const          { return static_cast<BrickLink::Condition>(get()->condition()); }
-    void setCondition(BrickLink::Condition c)       { set().to()->setCondition(static_cast<::BrickLink::Condition>(c)); }
-    BrickLink::SubCondition subCondition() const    { return static_cast<BrickLink::SubCondition>(get()->subCondition()); }
-    void setSubCondition(BrickLink::SubCondition c) { set().to()->setSubCondition(static_cast<::BrickLink::SubCondition>(c)); }
+    QmlBrickLink::Status status() const                { return static_cast<QmlBrickLink::Status>(get()->status()); }
+    void setStatus(QmlBrickLink::Status s)             { set().to()->setStatus(static_cast<BrickLink::Status>(s)); }
+    QmlBrickLink::Condition condition() const          { return static_cast<QmlBrickLink::Condition>(get()->condition()); }
+    void setCondition(QmlBrickLink::Condition c)       { set().to()->setCondition(static_cast<BrickLink::Condition>(c)); }
+    QmlBrickLink::SubCondition subCondition() const    { return static_cast<QmlBrickLink::SubCondition>(get()->subCondition()); }
+    void setSubCondition(QmlBrickLink::SubCondition c) { set().to()->setSubCondition(static_cast<BrickLink::SubCondition>(c)); }
     QString comments() const           { return get()->comments(); }
     void setComments(const QString &n) { set().to()->setComments(n); }
     QString remarks() const            { return get()->remarks(); }
@@ -398,8 +397,8 @@ public:
 
     bool retain() const                { return get()->retain(); }
     void setRetain(bool r)             { set().to()->setRetain(r); }
-    BrickLink::Stockroom stockroom() const     { return static_cast<BrickLink::Stockroom>(get()->stockroom()); }
-    void setStockroom(BrickLink::Stockroom sr) { set().to()->setStockroom(static_cast<::BrickLink::Stockroom>(sr)); }
+    QmlBrickLink::Stockroom stockroom() const     { return static_cast<QmlBrickLink::Stockroom>(get()->stockroom()); }
+    void setStockroom(QmlBrickLink::Stockroom sr) { set().to()->setStockroom(static_cast<BrickLink::Stockroom>(sr)); }
 
     double totalWeight() const         { return get()->totalWeight(); }
     void setTotalWeight(double w)      { set().to()->setTotalWeight(w); }
@@ -423,31 +422,31 @@ private:
     class Setter
     {
     public:
-        Setter(Lot *lot);
-        ::Lot *to();
+        Setter(QmlLot *lot);
+        Lot *to();
         ~Setter();
 
     private:
-        Lot *m_lot;
-        ::Lot m_to;
+        QmlLot *m_lot;
+        Lot m_to;
     };
     Setter set();
-    ::Lot *get() const;
+    Lot *get() const;
 
-    Document *doc = nullptr;
+    QmlDocument *doc = nullptr;
 
-    friend class Document;
+    friend class QmlDocument;
     friend class Setter;
 };
 
 
-class Order : public WrapperBase<const ::BrickLink::Order>
+class QmlOrder : public QmlWrapperBase<const BrickLink::Order>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PRIVATE_PROPERTY(wrapped, QString id READ id CONSTANT)
-    Q_PROPERTY(BrickLink::OrderType type READ type CONSTANT)
+    Q_PROPERTY(QmlBrickLink::OrderType type READ type CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDate date READ date CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QDate statusChange READ statusChange CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString otherParty READ otherParty CONSTANT)
@@ -465,44 +464,73 @@ class Order : public WrapperBase<const ::BrickLink::Order>
     Q_PRIVATE_PROPERTY(wrapped, QString paymentCurrencyCode READ paymentCurrencyCode CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int itemCount READ itemCount CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int lotCount READ lotCount CONSTANT)
-    Q_PROPERTY(BrickLink::OrderStatus status READ status CONSTANT)
+    Q_PROPERTY(QmlBrickLink::OrderStatus status READ status CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString paymentType READ paymentType CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString trackingNumber READ trackingNumber CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString address READ address CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QString countryCode READ countryCode CONSTANT)
 
 public:
-    Order(const ::BrickLink::Order *order = nullptr);
+    QmlOrder(const BrickLink::Order *order = nullptr);
 
-    BrickLink::OrderType type() const;
-    BrickLink::OrderStatus status() const;
+    QmlBrickLink::OrderType type() const;
+    QmlBrickLink::OrderStatus status() const;
 
-    friend class BrickLink;
-    friend class Document;
+    friend class QmlBrickLink;
+    friend class QmlDocument;
 };
 
+class QmlColumn
+{
+    Q_GADGET
+    Q_PROPERTY(int position READ position CONSTANT)
+    Q_PROPERTY(Document::Field type READ type CONSTANT)
+    Q_PROPERTY(bool hidden READ hidden CONSTANT)
+    Q_PROPERTY(int width READ width CONSTANT)
+    Q_PROPERTY(QString title READ title CONSTANT)
+    Q_PROPERTY(Qt::Alignment alignment READ alignment CONSTANT)
 
-class Document : public QObject
+public:
+    QmlColumn();
+    QmlColumn(Window *win, int index);
+
+    int position() const;
+    Document::Field type() const;
+    bool hidden() const;
+    int width() const;
+    QString title() const;
+    Qt::Alignment alignment() const;
+
+private:
+    QHeaderView *header;
+    int vi;
+};
+
+class QmlDocument : public QObject
 {
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PRIVATE_PROPERTY(d, QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PRIVATE_PROPERTY(d, QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
     Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
-    Q_PRIVATE_PROPERTY(d, Order order READ order CONSTANT)
+    Q_PRIVATE_PROPERTY(d, QmlOrder order READ order CONSTANT)
+    Q_PRIVATE_PROPERTY(d, int lotCount READ lotCount NOTIFY lotCountChanged)
+    Q_PROPERTY(QVariantList columns READ columns CONSTANT)
     //TODO: missing: statistics
 
 public:
-    Document(::Document *doc);
-    bool isWrapperFor(::Document *doc) const;
+    Q_ENUMS(Document::Field)
 
-    bool changeLot(Lot *from, ::Lot &to);
+    QmlDocument(Window *win);
+    bool isWrapperFor(Window *win) const;
 
-    int count() const;
+    QVariantList columns() const;
 
-    Q_INVOKABLE Lot lot(int index);
-    Q_INVOKABLE void deleteLot(Lot ii);
-    Q_INVOKABLE Lot addLot(Item item, Color color);
+    bool changeLot(QmlLot *from, Lot &to);
+
+    Q_INVOKABLE QmlLot lot(int index);
+    Q_INVOKABLE void deleteLot(QmlLot ii);
+    Q_INVOKABLE QmlLot addLot(QmlItem item, QmlColor color);
 
 //    Q_INVOKABLE Lot addItem(Lot lot, Flags consolidate)
 //    {
@@ -514,34 +542,34 @@ public:
 signals:
     void titleChanged(const QString &title);
     void fileNameChanged(const QString &fileName);
-    void countChanged(int count);
+    void lotCountChanged(int count);
     void currencyCodeChanged(const QString &currencyCode);
     void filterChanged(const QString &filter);
 
 private:
-    ::Document *d;
+    Document *d;
+    Window *win;
 };
 
 
-class BrickStore : public QObject
+class QmlBrickStore : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QVector<Document *> documents READ documents NOTIFY documentsChanged)
-    Q_PROPERTY(Document *currentDocument READ currentDocument NOTIFY currentDocumentChanged)
+    Q_PROPERTY(QVector<QmlDocument *> documents READ documents NOTIFY documentsChanged)
+    Q_PROPERTY(QmlDocument *currentDocument READ currentDocument NOTIFY currentDocumentChanged)
     Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
 
 public:
-    BrickStore();
+    QmlBrickStore();
 
-    QVector<Document *> documents() const;
-    Document *currentDocument() const;
+    QVector<QmlDocument *> documents() const;
+    QmlDocument *currentDocument() const;
 
-    Document *documentForWindow(Window *win) const;
+    QmlDocument *documentForWindow(Window *win) const;
 
-    // the QmlWrapper:: prefix is needed, otherwise moc/qml get the return type wrong
-    Q_INVOKABLE QmlWrapper::Document *newDocument(const QString &title);
-    Q_INVOKABLE QmlWrapper::Document *openDocument(const QString &fileName);
-    Q_INVOKABLE QmlWrapper::Document *importBrickLinkStore(const QString &title = { });
+    Q_INVOKABLE QmlDocument *newDocument(const QString &title);
+    Q_INVOKABLE QmlDocument *openDocument(const QString &fileName);
+    Q_INVOKABLE QmlDocument *importBrickLinkStore(const QString &title = { });
 
     QString defaultCurrencyCode() const;
     Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
@@ -549,33 +577,32 @@ public:
     Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
 
 signals:
-    void documentsChanged(QVector<Document *> documents);
-    void currentDocumentChanged(Document *currentDocument);
+    void documentsChanged(QVector<QmlDocument *> documents);
+    void currentDocumentChanged(QmlDocument *currentDocument);
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
 
 private:
-    Document *setupDocument(Window *win, ::Document *doc, const QString &title = { });
+    QmlDocument *setupDocument(Window *win, Document *doc, const QString &title = { });
 
-    QVector<Document *> m_documents;
-    Document *m_currentDocument = nullptr;
+    QVector<QmlDocument *> m_documents;
+    QmlDocument *m_currentDocument = nullptr;
 };
 
-} // namespace QmlWrapper
-
-Q_DECLARE_METATYPE(QmlWrapper::Color)
-Q_DECLARE_METATYPE(QmlWrapper::Category)
-Q_DECLARE_METATYPE(QmlWrapper::ItemType)
-Q_DECLARE_METATYPE(QmlWrapper::Item)
-Q_DECLARE_METATYPE(QmlWrapper::Lot)
-Q_DECLARE_METATYPE(QmlWrapper::Picture)
-Q_DECLARE_METATYPE(QmlWrapper::PriceGuide)
-Q_DECLARE_METATYPE(QmlWrapper::Order)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Time)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Price)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Condition)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Stockroom)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Status)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::UpdateStatus)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink::OrderType)
-Q_DECLARE_METATYPE(QmlWrapper::BrickLink *)
-Q_DECLARE_METATYPE(QmlWrapper::Document *)
+Q_DECLARE_METATYPE(QmlColor)
+Q_DECLARE_METATYPE(QmlCategory)
+Q_DECLARE_METATYPE(QmlItemType)
+Q_DECLARE_METATYPE(QmlItem)
+Q_DECLARE_METATYPE(QmlLot)
+Q_DECLARE_METATYPE(QmlPicture)
+Q_DECLARE_METATYPE(QmlPriceGuide)
+Q_DECLARE_METATYPE(QmlOrder)
+Q_DECLARE_METATYPE(QmlBrickLink::Time)
+Q_DECLARE_METATYPE(QmlBrickLink::Price)
+Q_DECLARE_METATYPE(QmlBrickLink::Condition)
+Q_DECLARE_METATYPE(QmlBrickLink::Stockroom)
+Q_DECLARE_METATYPE(QmlBrickLink::Status)
+Q_DECLARE_METATYPE(QmlBrickLink::UpdateStatus)
+Q_DECLARE_METATYPE(QmlBrickLink::OrderType)
+Q_DECLARE_METATYPE(QmlBrickLink *)
+Q_DECLARE_METATYPE(QmlColumn)
+Q_DECLARE_METATYPE(QmlDocument *)

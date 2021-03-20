@@ -23,11 +23,9 @@ QT_FORWARD_DECLARE_CLASS(QPaintDevice)
 QT_FORWARD_DECLARE_CLASS(QPainter)
 
 
-namespace QmlWrapper {
+class QmlPrintJob;
 
-class PrintJob;
-
-class PrintPage : public QObject
+class QmlPrintPage : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int number READ pageNumber)
@@ -66,7 +64,7 @@ public:
     Q_INVOKABLE QSizeF textSize(const QString &text);
 
     Q_INVOKABLE void drawText(double left, double top, double width, double height,
-                              QmlWrapper::PrintPage::Alignment align, const QString &text);
+                              QmlPrintPage::Alignment align, const QString &text);
     Q_INVOKABLE void drawLine(double x1, double y1, double x2, double y2);
     Q_INVOKABLE void drawRect(double left, double top, double width, double height);
     Q_INVOKABLE void drawEllipse(double left, double top, double width, double height);
@@ -88,7 +86,7 @@ public:
     void setLineWidth(double linewidth);
 
 public:
-    PrintPage(const PrintJob *job);
+    QmlPrintPage(const QmlPrintJob *job);
 
     void dump();
     void print(QPainter *p, double scale [2]) const;
@@ -123,12 +121,12 @@ private:
 
 private:
     QVector<Cmd *> m_cmds;
-    const PrintJob *m_job;
+    const QmlPrintJob *m_job;
     AttrCmd m_attr;
 };
 
 
-class PrintJob : public QObject
+class QmlPrintJob : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int pageCount READ pageCount NOTIFY pageCountChanged)
@@ -137,8 +135,8 @@ class PrintJob : public QObject
     Q_PROPERTY(double scaling READ scaling WRITE setScaling NOTIFY scalingChanged)
 
 public:
-    Q_INVOKABLE QmlWrapper::PrintPage *addPage();
-    Q_INVOKABLE QmlWrapper::PrintPage *getPage(int i) const;
+    Q_INVOKABLE QmlPrintPage *addPage();
+    Q_INVOKABLE QmlPrintPage *getPage(int i) const;
     Q_INVOKABLE void abort();
 
     int pageCount() const;
@@ -152,8 +150,8 @@ signals:
     void scalingChanged(double s);
 
 public:
-    PrintJob(QPaintDevice *pd);
-    ~PrintJob() override;
+    QmlPrintJob(QPaintDevice *pd);
+    ~QmlPrintJob() override;
 
     QPaintDevice *paintDevice() const;
 
@@ -161,15 +159,13 @@ public:
     void dump();
 
 private:
-    QVector<PrintPage *> m_pages;
+    QVector<QmlPrintPage *> m_pages;
     QPaintDevice *m_pd;
     bool m_aborted = false;
     double m_scaling = 1.;
 };
 
-} // namespace QmlWrapper
-
-Q_DECLARE_METATYPE(QmlWrapper::PrintPage *)
-Q_DECLARE_METATYPE(QmlWrapper::PrintPage::Alignment)
-Q_DECLARE_METATYPE(QmlWrapper::PrintPage::LineStyle)
-Q_DECLARE_METATYPE(QmlWrapper::PrintJob *)
+Q_DECLARE_METATYPE(QmlPrintPage *)
+Q_DECLARE_METATYPE(QmlPrintPage::Alignment)
+Q_DECLARE_METATYPE(QmlPrintPage::LineStyle)
+Q_DECLARE_METATYPE(QmlPrintJob *)

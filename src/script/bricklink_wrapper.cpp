@@ -14,6 +14,7 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QHeaderView>
 
 #include "framework.h"
 #include "window.h"
@@ -23,8 +24,6 @@
 
 #include "bricklink_wrapper.h"
 
-
-namespace QmlWrapper {
 
 static bool isReadOnly(QObject *obj)
 {
@@ -36,77 +35,77 @@ static bool isReadOnly(QObject *obj)
 }
 
 
-BrickLink::BrickLink(::BrickLink::Core *core)
+QmlBrickLink::QmlBrickLink(BrickLink::Core *core)
     : d(core)
 {
     setObjectName("BrickLink"_l1);
 
     connect(core, &::BrickLink::Core::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
-        emit priceGuideUpdated(PriceGuide(pg));
+        emit priceGuideUpdated(QmlPriceGuide(pg));
     });
     connect(core, &::BrickLink::Core::pictureUpdated,
             this, [this](::BrickLink::Picture *pic) {
-        emit pictureUpdated(Picture(pic));
+        emit pictureUpdated(QmlPicture(pic));
     });
 }
 
-Item BrickLink::noItem() const
+QmlItem QmlBrickLink::noItem() const
 {
-    return Item { };
+    return QmlItem { };
 }
 
-Color BrickLink::noColor() const
+QmlColor QmlBrickLink::noColor() const
 {
-    return Color { };
+    return QmlColor { };
 }
 
-Color BrickLink::color(int id) const
+QmlColor QmlBrickLink::color(int id) const
 {
     return d->color(uint(id));
 }
 
-Color BrickLink::colorFromName(const QString &name) const
+QmlColor QmlBrickLink::colorFromName(const QString &name) const
 {
     return d->colorFromName(name);
 }
 
-Color BrickLink::colorFromLDrawId(int ldrawId) const
+QmlColor QmlBrickLink::colorFromLDrawId(int ldrawId) const
 {
     return d->colorFromLDrawId(ldrawId);
 }
 
-Category BrickLink::category(int id) const
+QmlCategory QmlBrickLink::category(int id) const
 {
     return d->category(uint(id));
 }
 
-ItemType BrickLink::itemType(const QString &itemTypeId) const
+QmlItemType QmlBrickLink::itemType(const QString &itemTypeId) const
 {
     return d->itemType(firstCharInString(itemTypeId));
 }
 
-Item BrickLink::item(const QString &itemTypeId, const QString &itemId) const
+QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) const
 {
     return d->item(firstCharInString(itemTypeId), itemId.toLatin1());
 }
 
-PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority)
+QmlPriceGuide QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
 {
-    return PriceGuide { d->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority) };
+    return QmlPriceGuide { d->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority) };
 }
 
-Picture BrickLink::picture(Item item, Color color, bool highPriority)
+QmlPicture QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
 {
-    return Picture { d->picture(item.wrappedObject(), color.wrappedObject(), highPriority) };
+    return QmlPicture { d->picture(item.wrappedObject(), color.wrappedObject(), highPriority) };
 }
 
-Picture BrickLink::largePicture(Item item, bool highPriority)
+QmlPicture QmlBrickLink::largePicture(QmlItem item, bool highPriority)
 {
-    return Picture { d->largePicture(item.wrappedObject(), highPriority) };
+    return QmlPicture { d->largePicture(item.wrappedObject(), highPriority) };
 }
 
-char BrickLink::firstCharInString(const QString &str)
+char QmlBrickLink::firstCharInString(const QString &str)
 {
     return (str.size() == 1) ? str.at(0).toLatin1() : 0;
 }
@@ -117,8 +116,8 @@ char BrickLink::firstCharInString(const QString &str)
 ///////////////////////////////////////////////////////////////////////
 
 
-Category::Category(const ::BrickLink::Category *cat)
-    : WrapperBase(cat)
+QmlCategory::QmlCategory(const BrickLink::Category *cat)
+    : QmlWrapperBase(cat)
 { }
 
 
@@ -127,16 +126,16 @@ Category::Category(const ::BrickLink::Category *cat)
 ///////////////////////////////////////////////////////////////////////
 
 
-ItemType::ItemType(const ::BrickLink::ItemType *itt)
-    : WrapperBase(itt)
+QmlItemType::QmlItemType(const BrickLink::ItemType *itt)
+    : QmlWrapperBase(itt)
 { }
 
-QVariantList ItemType::categories() const
+QVariantList QmlItemType::categories() const
 {
     auto cats = wrapped->categories();
     QVariantList result;
     for (auto cat : cats)
-        result.append(QVariant::fromValue(Category { cat }));
+        result.append(QVariant::fromValue(QmlCategory { cat }));
     return result;
 }
 
@@ -146,11 +145,11 @@ QVariantList ItemType::categories() const
 ///////////////////////////////////////////////////////////////////////
 
 
-Color::Color(const ::BrickLink::Color *col)
-    : WrapperBase(col)
+QmlColor::QmlColor(const BrickLink::Color *col)
+    : QmlWrapperBase(col)
 { }
 
-QImage Color::image() const
+QImage QmlColor::image() const
 {
     return ::BrickLink::core()->colorImage(wrapped, 20, 20);
 }
@@ -161,25 +160,25 @@ QImage Color::image() const
 ///////////////////////////////////////////////////////////////////////
 
 
-Item::Item(const ::BrickLink::Item *item)
-    : WrapperBase(item)
+QmlItem::QmlItem(const BrickLink::Item *item)
+    : QmlWrapperBase(item)
 { }
 
-QString Item::id() const
+QString QmlItem::id() const
 {
     return QString::fromLatin1(wrapped->id());
 }
 
-QVariantList Item::knownColors() const
+QVariantList QmlItem::knownColors() const
 {
     auto known = wrapped->knownColors();
     QVariantList result;
     for (auto c : known)
-        result.append(QVariant::fromValue(Color { c }));
+        result.append(QVariant::fromValue(QmlColor { c }));
     return result;
 }
 
-QVariantList Item::consistsOf() const
+QVariantList QmlItem::consistsOf() const
 {
 //    const auto consists = wrapped->consistsOf();
 //    QVariantList result;
@@ -195,36 +194,36 @@ QVariantList Item::consistsOf() const
 ///////////////////////////////////////////////////////////////////////
 
 
-Picture::Picture(::BrickLink::Picture *pic)
-    : WrapperBase(pic)
+QmlPicture::QmlPicture(BrickLink::Picture *pic)
+    : QmlWrapperBase(pic)
 {
     if (!isNull())
         wrappedObject()->addRef();
 }
 
-Picture::Picture(const Picture &copy)
-    : Picture(copy.wrappedObject())
+QmlPicture::QmlPicture(const QmlPicture &copy)
+    : QmlPicture(copy.wrappedObject())
 { }
 
-Picture &Picture::operator=(const Picture &assign)
+QmlPicture &QmlPicture::operator=(const QmlPicture &assign)
 {
-    this->~Picture();
-    WrapperBase::operator=(assign);
-    return *new (this) Picture(assign.wrappedObject());
+    this->~QmlPicture();
+    QmlWrapperBase::operator=(assign);
+    return *new (this) QmlPicture(assign.wrappedObject());
 }
 
-Picture::~Picture()
+QmlPicture::~QmlPicture()
 {
     if (!isNull())
         wrappedObject()->release();
 }
 
-BrickLink::UpdateStatus Picture::updateStatus() const
+QmlBrickLink::UpdateStatus QmlPicture::updateStatus() const
 {
-    return static_cast<BrickLink::UpdateStatus>(wrapped->updateStatus());
+    return static_cast<QmlBrickLink::UpdateStatus>(wrapped->updateStatus());
 }
 
-void Picture::update(bool highPriority)
+void QmlPicture::update(bool highPriority)
 {
     if (!isNull())
         wrappedObject()->update(highPriority);
@@ -236,55 +235,59 @@ void Picture::update(bool highPriority)
 ///////////////////////////////////////////////////////////////////////
 
 
-PriceGuide::PriceGuide(::BrickLink::PriceGuide *pg)
-    : WrapperBase(pg)
+QmlPriceGuide::QmlPriceGuide(BrickLink::PriceGuide *pg)
+    : QmlWrapperBase(pg)
 {
     if (!isNull())
         wrappedObject()->addRef();
 }
 
-PriceGuide::PriceGuide(const PriceGuide &copy)
-    : PriceGuide(copy.wrappedObject())
+QmlPriceGuide::QmlPriceGuide(const QmlPriceGuide &copy)
+    : QmlPriceGuide(copy.wrappedObject())
 { }
 
-PriceGuide &PriceGuide::operator=(const PriceGuide &assign)
+QmlPriceGuide &QmlPriceGuide::operator=(const QmlPriceGuide &assign)
 {
-    this->~PriceGuide();
-    WrapperBase::operator=(assign);
-    return *new (this) PriceGuide(assign.wrappedObject());
+    this->~QmlPriceGuide();
+    QmlWrapperBase::operator=(assign);
+    return *new (this) QmlPriceGuide(assign.wrappedObject());
 }
 
-PriceGuide::~PriceGuide()
+QmlPriceGuide::~QmlPriceGuide()
 {
     if (!isNull())
         wrappedObject()->release();
 }
 
-BrickLink::UpdateStatus PriceGuide::updateStatus() const
+QmlBrickLink::UpdateStatus QmlPriceGuide::updateStatus() const
 {
-    return static_cast<BrickLink::UpdateStatus>(wrapped->updateStatus());
+    return static_cast<QmlBrickLink::UpdateStatus>(wrapped->updateStatus());
 }
 
-void PriceGuide::update(bool highPriority)
+void QmlPriceGuide::update(bool highPriority)
 {
     if (!isNull())
         wrappedObject()->update(highPriority);
 }
 
-int PriceGuide::quantity(::BrickLink::Time time, ::BrickLink::Condition condition) const
+int QmlPriceGuide::quantity(QmlBrickLink::Time time, QmlBrickLink::Condition condition) const
 {
-    return wrapped->quantity(time, condition);
+    return wrapped->quantity(static_cast<BrickLink::Time>(time),
+                             static_cast<BrickLink::Condition>(condition));
 }
 
-int PriceGuide::lots(::BrickLink::Time time, ::BrickLink::Condition condition) const
+int QmlPriceGuide::lots(QmlBrickLink::Time time, QmlBrickLink::Condition condition) const
 {
-    return wrapped->lots(time, condition);
+    return wrapped->lots(static_cast<BrickLink::Time>(time),
+                         static_cast<BrickLink::Condition>(condition));
 }
 
-double PriceGuide::price(::BrickLink::Time time, ::BrickLink::Condition condition,
-                         ::BrickLink::Price price) const
+double QmlPriceGuide::price(QmlBrickLink::Time time, QmlBrickLink::Condition condition,
+                            QmlBrickLink::Price price) const
 {
-    return wrapped->price(time, condition, price);
+    return wrapped->price(static_cast<BrickLink::Time>(time),
+                          static_cast<BrickLink::Condition>(condition),
+                          static_cast<BrickLink::Price>(price));
 }
 
 
@@ -293,12 +296,12 @@ double PriceGuide::price(::BrickLink::Time time, ::BrickLink::Condition conditio
 ///////////////////////////////////////////////////////////////////////
 
 
-Lot::Lot(::Lot *lot, Document *document)
-    : WrapperBase(lot)
+QmlLot::QmlLot(Lot *lot, QmlDocument *document)
+    : QmlWrapperBase(lot)
     , doc(document)
 { }
 
-QImage Lot::image() const
+QImage QmlLot::image() const
 {
     auto pic = ::BrickLink::core()->picture(get()->item(), get()->color(), true);
     return pic->image();
@@ -334,30 +337,30 @@ QImage Lot::image() const
 //    set().to().setQuantity(q);
 //}
 
-Lot::Setter::Setter(Lot *lot)
+QmlLot::Setter::Setter(QmlLot *lot)
     : m_lot((lot && !lot->isNull()) ? lot : nullptr)
 {
     if (m_lot)
         m_to = *m_lot->wrapped;
 }
 
-::Lot *Lot::Setter::to()
+::Lot *QmlLot::Setter::to()
 {
     return &m_to;
 }
 
-Lot::Setter::~Setter()
+QmlLot::Setter::~Setter()
 {
     if (m_lot && (*m_lot->wrapped != m_to))
         m_lot->doc->changeLot(m_lot, m_to);
 }
 
-Lot::Setter Lot::set()
+QmlLot::Setter QmlLot::set()
 {
     return Setter(this);
 }
 
-::Lot *Lot::get() const
+::Lot *QmlLot::get() const
 {
     return wrapped;
 }
@@ -368,18 +371,18 @@ Lot::Setter Lot::set()
 ///////////////////////////////////////////////////////////////////////
 
 
-Order::Order(const ::BrickLink::Order *order)
-    : WrapperBase(order)
+QmlOrder::QmlOrder(const BrickLink::Order *order)
+    : QmlWrapperBase(order)
 { }
 
-BrickLink::OrderType Order::type() const
+QmlBrickLink::OrderType QmlOrder::type() const
 {
-    return static_cast<BrickLink::OrderType>(wrapped->type());
+    return static_cast<QmlBrickLink::OrderType>(wrapped->type());
 }
 
-BrickLink::OrderStatus Order::status() const
+QmlBrickLink::OrderStatus QmlOrder::status() const
 {
-    return static_cast<BrickLink::OrderStatus>(wrapped->status());
+    return static_cast<QmlBrickLink::OrderStatus>(wrapped->status());
 }
 
 
@@ -388,33 +391,38 @@ BrickLink::OrderStatus Order::status() const
 ///////////////////////////////////////////////////////////////////////
 
 
-Document::Document(::Document *doc)
-    : d(doc)
+QmlDocument::QmlDocument(Window *_win)
+    : d(_win->document())
+    , win(_win)
 {
-    connect(doc, &::Document::fileNameChanged,
-            this, &Document::fileNameChanged);
-    connect(doc, &::Document::titleChanged,
-            this, &Document::titleChanged);
-    connect(doc, &::Document::currencyCodeChanged,
-            this, &Document::currencyCodeChanged);
+    connect(d, &::Document::fileNameChanged,
+            this, &QmlDocument::fileNameChanged);
+    connect(d, &::Document::titleChanged,
+            this, &QmlDocument::titleChanged);
+    connect(d, &::Document::currencyCodeChanged,
+            this, &QmlDocument::currencyCodeChanged);
 
-    connect(doc, &::Document::filterChanged,
-            this, &Document::filterChanged);
+    connect(d, &::Document::filterChanged,
+            this, &QmlDocument::filterChanged);
 
-    connect(doc, &QAbstractItemModel::rowsInserted,
-            this, [this]() { emit countChanged(d->rowCount()); });
-    connect(doc, &QAbstractItemModel::rowsRemoved,
-            this, [this]() { emit countChanged(d->rowCount()); });
-    connect(doc, &QAbstractItemModel::layoutChanged,
-            this, [this]() { emit countChanged(d->rowCount()); });
+    connect(d, &::Document::lotCountChanged,
+            this, &QmlDocument::lotCountChanged);
 }
 
-bool Document::isWrapperFor(::Document *doc) const
+bool QmlDocument::isWrapperFor(Window *win) const
 {
-    return (d == doc);
+    return (this->win == win);
 }
 
-bool Document::changeLot(Lot *from, ::Lot &to)
+QVariantList QmlDocument::columns() const
+{
+    QVariantList cols;
+    for (int i = 0; i < Document::FieldCount; ++i)
+        cols.append(QVariant::fromValue(QmlColumn(win, i)));
+    return cols;
+}
+
+bool QmlDocument::changeLot(QmlLot *from, ::Lot &to)
 {
     if (isReadOnly(this))
         return false;
@@ -424,19 +432,14 @@ bool Document::changeLot(Lot *from, ::Lot &to)
     return true;
 }
 
-int Document::count() const
-{
-    return d->rowCount();
-}
-
-Lot Document::lot(int index)
+QmlLot QmlDocument::lot(int index)
 {
     if (index < 0 || index >= d->rowCount())
-        return Lot { };
-    return Lot(d->lots().at(index), this);
+        return QmlLot { };
+    return QmlLot(d->lots().at(index), this);
 }
 
-void Document::deleteLot(Lot ii)
+void QmlDocument::deleteLot(QmlLot ii)
 {
     if (isReadOnly(this))
         return;
@@ -445,16 +448,16 @@ void Document::deleteLot(Lot ii)
         d->removeLot(static_cast<::Lot *>(ii.wrapped));
 }
 
-Lot Document::addLot(Item item, Color color)
+QmlLot QmlDocument::addLot(QmlItem item, QmlColor color)
 {
     if (isReadOnly(this))
-        return Lot { };
+        return QmlLot { };
 
     auto di = new ::Lot();
     di->setItem(item.wrappedObject());
     di->setColor(color.wrappedObject());
     d->appendLot(di);
-    return Lot(di, this);
+    return QmlLot(di, this);
 }
 
 
@@ -463,12 +466,12 @@ Lot Document::addLot(Item item, Color color)
 ///////////////////////////////////////////////////////////////////////
 
 
-BrickStore::BrickStore()
+QmlBrickStore::QmlBrickStore()
 {
     setObjectName("BrickStore"_l1);
 
     auto checkActiveWindow = [this](Window *win) {
-        Document *doc = documentForWindow(win);
+        QmlDocument *doc = documentForWindow(win);
         if (doc != m_currentDocument) {
             m_currentDocument = doc;
             emit currentDocumentChanged(doc);
@@ -480,8 +483,8 @@ BrickStore::BrickStore()
 
     connect(FrameWork::inst(), &FrameWork::windowListChanged,
             this, [this, checkActiveWindow]() {
-        QVector<Document *> newDocs;
-        QVector<Document *> oldDocs = m_documents;
+        QVector<QmlDocument *> newDocs;
+        QVector<QmlDocument *> oldDocs = m_documents;
         const auto allWindows = FrameWork::inst()->allWindows();
         for (auto win : allWindows) {
             auto doc = documentForWindow(win);
@@ -489,7 +492,7 @@ BrickStore::BrickStore()
                 oldDocs.removeOne(doc);
                 newDocs.append(doc);
             } else {
-                doc = new Document(win->document());
+                doc = new QmlDocument(win);
                 QQmlEngine::setObjectOwnership(doc, QQmlEngine::CppOwnership);
                 newDocs.append(doc);
             }
@@ -508,20 +511,20 @@ BrickStore::BrickStore()
     });
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
-            this, &BrickStore::defaultCurrencyCodeChanged);
+            this, &QmlBrickStore::defaultCurrencyCodeChanged);
 }
 
-QVector<Document *> BrickStore::documents() const
+QVector<QmlDocument *> QmlBrickStore::documents() const
 {
     return m_documents;
 }
 
-Document *BrickStore::currentDocument() const
+QmlDocument *QmlBrickStore::currentDocument() const
 {
     return m_currentDocument;
 }
 
-Document *BrickStore::newDocument(const QString &title)
+QmlDocument *QmlBrickStore::newDocument(const QString &title)
 {
     if (isReadOnly(this))
         return nullptr;
@@ -529,7 +532,7 @@ Document *BrickStore::newDocument(const QString &title)
     return setupDocument(nullptr, ::DocumentIO::create(), title);
 }
 
-Document *BrickStore::openDocument(const QString &fileName)
+QmlDocument *QmlBrickStore::openDocument(const QString &fileName)
 {
     if (isReadOnly(this))
         return nullptr;
@@ -537,7 +540,7 @@ Document *BrickStore::openDocument(const QString &fileName)
     return setupDocument(::DocumentIO::open(fileName), nullptr);
 }
 
-Document *BrickStore::importBrickLinkStore(const QString &title)
+QmlDocument *QmlBrickStore::importBrickLinkStore(const QString &title)
 {
     if (isReadOnly(this))
         return nullptr;
@@ -545,12 +548,12 @@ Document *BrickStore::importBrickLinkStore(const QString &title)
     return setupDocument(nullptr, ::DocumentIO::importBrickLinkStore(), title);
 }
 
-QString BrickStore::defaultCurrencyCode() const
+QString QmlBrickStore::defaultCurrencyCode() const
 {
      return Config::inst()->defaultCurrencyCode();
 }
 
-QString BrickStore::symbolForCurrencyCode(const QString &currencyCode) const
+QString QmlBrickStore::symbolForCurrencyCode(const QString &currencyCode) const
 {
     static QHash<QString, QString> cache;
     QString s = cache.value(currencyCode);
@@ -569,28 +572,28 @@ QString BrickStore::symbolForCurrencyCode(const QString &currencyCode) const
     return s;
 }
 
-QString BrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
+QString QmlBrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
 {
     return QLocale::system().toCurrencyString(value, symbol, precision);
 }
 
-QString BrickStore::toWeightString(double value, bool showUnit) const
+QString QmlBrickStore::toWeightString(double value, bool showUnit) const
 {
     return Utility::weightToString(value, Config::inst()->measurementSystem(), true, showUnit);
 }
 
-Document *BrickStore::documentForWindow(Window *win) const
+QmlDocument *QmlBrickStore::documentForWindow(Window *win) const
 {
     if (win) {
         for (auto doc : m_documents) {
-            if (doc->isWrapperFor(win->document()))
+            if (doc->isWrapperFor(win))
                 return doc;
         }
     }
     return nullptr;
 }
 
-Document *BrickStore::setupDocument(::Window *win, ::Document *doc, const QString &title)
+QmlDocument *QmlBrickStore::setupDocument(::Window *win, ::Document *doc, const QString &title)
 {
     if ((!win && !doc) || (win && doc))
         return nullptr;
@@ -606,12 +609,52 @@ Document *BrickStore::setupDocument(::Window *win, ::Document *doc, const QStrin
         doc->setTitle(title);
 
     Q_ASSERT(currentDocument());
-    Q_ASSERT(currentDocument()->isWrapperFor(win->document()));
+    Q_ASSERT(currentDocument()->isWrapperFor(win));
 
     return currentDocument();
 }
 
-} // namespace QmlWrapper
+QmlColumn::QmlColumn()
+    : QmlColumn(nullptr, -1)
+{ }
+
+QmlColumn::QmlColumn(Window *win, int index)
+    : header(win ? win->headerView() : nullptr)
+    , vi(index)
+{ }
+
+int QmlColumn::position() const
+{
+    return vi;
+}
+
+Document::Field QmlColumn::type() const
+{
+    return static_cast<::Document::Field>(!header ? -1 : header->logicalIndex(vi));
+}
+
+bool QmlColumn::hidden() const
+{
+    return !header ? false : header->isSectionHidden(header->logicalIndex(vi));
+}
+
+int QmlColumn::width() const
+{
+    return !header ? -1 : header->sectionSize(header->logicalIndex(vi));
+}
+
+QString QmlColumn::title() const
+{
+    return !header ? QString{}
+                   : header->model()->headerData(header->logicalIndex(vi), Qt::Horizontal).toString();
+}
+
+Qt::Alignment QmlColumn::alignment() const
+{
+    return !header ? Qt::AlignCenter
+                   : header->model()->headerData(header->logicalIndex(vi), Qt::Horizontal, Qt::TextAlignmentRole)
+                         .value<Qt::Alignment>();
+}
 
 #include "moc_bricklink_wrapper.cpp"
 

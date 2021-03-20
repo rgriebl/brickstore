@@ -25,10 +25,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace QmlWrapper {
-
-PrintPage::PrintPage(const PrintJob *job)
-    : QObject(const_cast <PrintJob *>(job)), m_job(job)
+QmlPrintPage::QmlPrintPage(const QmlPrintJob *job)
+    : QObject(const_cast <QmlPrintJob *>(job)), m_job(job)
 {
     setObjectName(u"Page" % QString::number(job->pageCount() + 1));
 
@@ -39,7 +37,7 @@ PrintPage::PrintPage(const PrintJob *job)
     m_attr.m_linestyle = SolidLine;
 }
 
-int PrintPage::pageNumber() const
+int QmlPrintPage::pageNumber() const
 {
     for (int i = 0; i < m_job->pageCount(); i++) {
         if (m_job->getPage(i) == this)
@@ -48,7 +46,7 @@ int PrintPage::pageNumber() const
     return -1;
 }
 
-void PrintPage::dump()
+void QmlPrintPage::dump()
 {
     qDebug(" # of commands: %d", int(m_cmds.count()));
     qDebug(" ");
@@ -99,7 +97,7 @@ void PrintPage::dump()
     }
 }
 
-void PrintPage::print(QPainter *p, double scale [2]) const
+void QmlPrintPage::print(QPainter *p, double scale [2]) const
 {
     for (const Cmd *c : m_cmds) {
         if (c->m_cmd == Cmd::Attributes) {
@@ -174,32 +172,32 @@ void PrintPage::print(QPainter *p, double scale [2]) const
 }
 
 
-QFont PrintPage::font() const
+QFont QmlPrintPage::font() const
 {
     return m_attr.m_font;
 }
 
-QColor PrintPage::color() const
+QColor QmlPrintPage::color() const
 {
     return m_attr.m_color;
 }
 
-QColor PrintPage::bgColor() const
+QColor QmlPrintPage::bgColor() const
 {
     return m_attr.m_bgcolor;
 }
 
-int PrintPage::lineStyle() const
+int QmlPrintPage::lineStyle() const
 {
     return m_attr.m_linestyle;
 }
 
-double PrintPage::lineWidth() const
+double QmlPrintPage::lineWidth() const
 {
     return m_attr.m_linewidth;
 }
 
-void PrintPage::attr_cmd()
+void QmlPrintPage::attr_cmd()
 {
     auto *ac = new AttrCmd();
     *ac = m_attr;
@@ -207,38 +205,38 @@ void PrintPage::attr_cmd()
     m_cmds.append(ac);
 }
 
-void PrintPage::setFont(const QFont &font)
+void QmlPrintPage::setFont(const QFont &font)
 {
     m_attr.m_font = font;
     attr_cmd();
 }
 
-void PrintPage::setColor(const QColor &color)
+void QmlPrintPage::setColor(const QColor &color)
 {
     m_attr.m_color = color;
     attr_cmd();
 }
 
-void PrintPage::setBgColor(const QColor &color)
+void QmlPrintPage::setBgColor(const QColor &color)
 {
     m_attr.m_bgcolor = color;
     attr_cmd();
 }
 
-void PrintPage::setLineStyle(int linestyle)
+void QmlPrintPage::setLineStyle(int linestyle)
 {
     m_attr.m_linestyle = linestyle;
     attr_cmd();
 }
 
-void PrintPage::setLineWidth(double linewidth)
+void QmlPrintPage::setLineWidth(double linewidth)
 {
     m_attr.m_linewidth = linewidth;
     attr_cmd();
 }
 
 
-QSizeF PrintPage::textSize(const QString &text)
+QSizeF QmlPrintPage::textSize(const QString &text)
 {
     QFontMetrics fm(m_attr.m_font);
     QPaintDevice *pd = m_job->paintDevice();
@@ -247,7 +245,7 @@ QSizeF PrintPage::textSize(const QString &text)
                   s.height() * pd->heightMM() / pd->height());
 }
 
-void PrintPage::drawText(double left, double top, double width, double height, Alignment align,
+void QmlPrintPage::drawText(double left, double top, double width, double height, Alignment align,
                          const QString &text)
 {
     auto *dc = new DrawCmd();
@@ -261,7 +259,7 @@ void PrintPage::drawText(double left, double top, double width, double height, A
     m_cmds.append(dc);
 }
 
-void PrintPage::drawLine(double x1, double y1, double x2, double y2)
+void QmlPrintPage::drawLine(double x1, double y1, double x2, double y2)
 {
     auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Line;
@@ -272,7 +270,7 @@ void PrintPage::drawLine(double x1, double y1, double x2, double y2)
     m_cmds.append(dc);
 }
 
-void PrintPage::drawRect(double left, double top, double width, double height)
+void QmlPrintPage::drawRect(double left, double top, double width, double height)
 {
     auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Rect;
@@ -283,7 +281,7 @@ void PrintPage::drawRect(double left, double top, double width, double height)
     m_cmds.append(dc);
 }
 
-void PrintPage::drawEllipse(double left, double top, double width, double height)
+void QmlPrintPage::drawEllipse(double left, double top, double width, double height)
 {
     auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Ellipse;
@@ -294,7 +292,7 @@ void PrintPage::drawEllipse(double left, double top, double width, double height
     m_cmds.append(dc);
 }
 
-void PrintPage::drawImage(double left, double top, double width, double height, const QImage &image)
+void QmlPrintPage::drawImage(double left, double top, double width, double height, const QImage &image)
 {
     auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Image;
@@ -314,26 +312,26 @@ void PrintPage::drawImage(double left, double top, double width, double height, 
 
 
 
-PrintJob::PrintJob(QPaintDevice *pd)
+QmlPrintJob::QmlPrintJob(QPaintDevice *pd)
     : QObject(nullptr)
     , m_pd(pd)
 {
     setObjectName("Job"_l1);
 }
 
-PrintJob::~PrintJob()
+QmlPrintJob::~QmlPrintJob()
 {
     qDeleteAll(m_pages);
 }
 
-QPaintDevice *PrintJob::paintDevice() const
+QPaintDevice *QmlPrintJob::paintDevice() const
 {
     return m_pd;
 }
 
-PrintPage *PrintJob::addPage()
+QmlPrintPage *QmlPrintJob::addPage()
 {
-    auto *page = new PrintPage(this);
+    auto *page = new QmlPrintPage(this);
     m_pages.append(page);
     int pageNo = m_pages.size();
     page->setObjectName("Print page #"_l1 + QString::number(pageNo));
@@ -341,27 +339,27 @@ PrintPage *PrintJob::addPage()
     return page;
 }
 
-PrintPage *PrintJob::getPage(int i) const
+QmlPrintPage *QmlPrintJob::getPage(int i) const
 {
     return m_pages.value(i);
 }
 
-void PrintJob::abort()
+void QmlPrintJob::abort()
 {
     m_aborted = true;
 }
 
-bool PrintJob::isAborted() const
+bool QmlPrintJob::isAborted() const
 {
     return m_aborted;
 }
 
-double PrintJob::scaling() const
+double QmlPrintJob::scaling() const
 {
     return m_scaling;
 }
 
-void PrintJob::setScaling(double s)
+void QmlPrintJob::setScaling(double s)
 {
     if (!qFuzzyCompare(m_scaling, s)) {
         m_scaling = s;
@@ -369,17 +367,17 @@ void PrintJob::setScaling(double s)
     }
 }
 
-int PrintJob::pageCount() const
+int QmlPrintJob::pageCount() const
 {
     return m_pages.count();
 }
 
-QSizeF PrintJob::paperSize() const
+QSizeF QmlPrintJob::paperSize() const
 {
     return QSizeF(m_pd->widthMM(), m_pd->heightMM());
 }
 
-void PrintJob::dump()
+void QmlPrintJob::dump()
 {
     qDebug("Print Job Dump");
     qDebug(" # of pages: %d", int(m_pages.count()));
@@ -391,7 +389,7 @@ void PrintJob::dump()
     }
 }
 
-bool PrintJob::print(int from, int to)
+bool QmlPrintJob::print(int from, int to)
 {
     if (m_pages.isEmpty() || (from < 0) || (from > to) || (int(to) >= m_pages.count()))
         return false;
@@ -416,7 +414,7 @@ bool PrintJob::print(int from, int to)
     bool no_new_page = true;
 
     for (int i = from; i <= to; i++) {
-        PrintPage *page = m_pages.at(i);
+        QmlPrintPage *page = m_pages.at(i);
 
         if (!no_new_page && prt)
             prt->newPage();
@@ -426,8 +424,6 @@ bool PrintJob::print(int from, int to)
     }
     return true;
 }
-
-} // namespace QmlWrapper
 
 #include "moc_printjob.cpp"
 

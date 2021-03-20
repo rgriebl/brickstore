@@ -28,6 +28,7 @@ QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QTableView)
 QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
+QT_FORWARD_DECLARE_CLASS(QHeaderView)
 class FrameWork;
 class UndoStack;
 class HeaderView;
@@ -93,6 +94,7 @@ public:
 
     QByteArray currentColumnLayout() const;
 
+    QHeaderView *headerView() const;
 
     bool isBlockingOperationActive() const;
     void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
@@ -104,6 +106,7 @@ public:
 
     QString blockingOperationTitle() const;
     void setBlockingOperationTitle(const QString &title);
+
 public slots:
     void setSelection(const LotList &);
 

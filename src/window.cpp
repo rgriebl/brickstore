@@ -765,6 +765,11 @@ QByteArray Window::currentColumnLayout() const
     return w_header->saveLayout();
 }
 
+QHeaderView *Window::headerView() const
+{
+    return w_header;
+}
+
 bool Window::isBlockingOperationActive() const
 {
     return m_blocked;

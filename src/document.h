@@ -78,6 +78,7 @@ public:
 
         FieldCount
     };
+    Q_ENUMS(Field)
 
     enum ExtraRoles {
         FilterRole = Qt::UserRole,
@@ -160,6 +161,7 @@ public:
     void reSort();
     void reFilter();
 
+    inline int lotCount() const { return rowCount(); }
     LotList sortLotList(const LotList &list) const;
 
     QString filterToolTip() const;
@@ -346,5 +348,6 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(Document::MergeModes)
 
 Q_DECLARE_METATYPE(Document *)
+Q_DECLARE_METATYPE(Document::Field)
 Q_DECLARE_METATYPE(const Document *)
 Q_DECLARE_METATYPE(const Lot *)
