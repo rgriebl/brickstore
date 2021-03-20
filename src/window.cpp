@@ -1149,6 +1149,16 @@ void Window::on_edit_paste_triggered()
     }
 }
 
+void Window::on_edit_duplicate_triggered()
+{
+    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+        m_doc->insertLotsAfter(&from, { new Lot(from) });
+        // this isn't necessary and we should just return false, but the counter would be wrong then
+        to = from;
+        return true;
+    });
+}
+
 void Window::on_edit_delete_triggered()
 {
     if (!selectedLots().isEmpty())

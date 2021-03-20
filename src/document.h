@@ -195,7 +195,7 @@ public:
 
     void appendLot(Lot *lot);
     void appendLots(const LotList &lots);
-    void insertLotsAfter(Lot *afterLot, const LotList &lots);
+    void insertLotsAfter(const Lot *afterLot, const LotList &lots);
 
     void removeLots(const LotList &lots);
     void removeLot(Lot *lot);

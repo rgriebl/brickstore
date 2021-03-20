@@ -385,6 +385,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_cut",
                                       "edit_copy",
                                       "edit_paste",
+                                      "edit_duplicate",
                                       "edit_delete",
                                       "-",
                                       "edit_select_all",
@@ -710,6 +711,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
+        { "edit_duplicate",                 tr("Duplicate"),                          tr("Ctrl+D", "Edit|Duplicate") },
         { "edit_delete",                    tr("Delete"),                             QKeySequence::Delete },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
@@ -1148,11 +1150,12 @@ void FrameWork::createActions()
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Delete)), this),
             &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
+    connect(new QShortcut(QKeySequence(int(Qt::ControlModifier) + int(Qt::Key_Insert)), this),
             &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
             &QShortcut::activated, a, &QAction::trigger);
+    (void) newQAction(this, "edit_duplicate", NeedSelection(1));
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
     a = newQAction(this, "edit_additems", NeedDocument, false, this, &FrameWork::showAddItemDialog);
@@ -1329,6 +1332,7 @@ QList<QAction *> FrameWork::contextMenuActions() const
         "edit_cut",
         "edit_copy",
         "edit_paste",
+        "edit_duplicate",
         "edit_delete",
         "-",
         "edit_select_all",

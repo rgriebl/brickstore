@@ -663,14 +663,14 @@ void Document::appendLots(const LotList &lots)
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { }, lots));
 }
 
-void Document::insertLotsAfter(Lot *afterLot, const LotList &lots)
+void Document::insertLotsAfter(const Lot *afterLot, const LotList &lots)
 {
     if (lots.isEmpty())
         return;
 
-    int afterPos = m_lots.indexOf(afterLot) + 1;
-    int afterSortedPos = m_sortedLots.indexOf(afterLot) + 1;
-    int afterFilteredPos = m_filteredLots.indexOf(afterLot) + 1;
+    int afterPos = m_lots.indexOf(const_cast<Lot *>(afterLot)) + 1;
+    int afterSortedPos = m_sortedLots.indexOf(const_cast<Lot *>(afterLot)) + 1;
+    int afterFilteredPos = m_filteredLots.indexOf(const_cast<Lot *>(afterLot)) + 1;
 
     Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
     if (afterFilteredPos == 0)
