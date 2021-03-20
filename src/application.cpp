@@ -553,6 +553,10 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
     const auto now = QDateTime::currentSecsSinceEpoch();
     sentry_value_set_by_key(crumb, "timestamp", sentry_value_new_int32(int32_t(now)));
     sentry_add_breadcrumb(crumb);
+#else
+    Q_UNUSED(msgType)
+    Q_UNUSED(msgCtx)
+    Q_UNUSED(msg)
 #endif
 }
 
