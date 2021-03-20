@@ -88,6 +88,24 @@ public:
             case 2: return entry.defaultKey.toString(QKeySequence::NativeText);
             }
         }
+        else if (role == Qt::ToolTipRole) {
+
+            std::function<QStringList(QAction *)> buildPath = [&buildPath](QAction *a) {
+                QStringList path;
+                if (a && !a->text().isEmpty()) {
+                    //path << a->text().remove(QRegularExpression(R"(\&[a-zA-Z0-9])"_l1));
+                    path.prepend(a->text().remove(QRegularExpression(R"(\&(?!\&))"_l1)));
+
+                    const QList<QWidget *> widgets = a->associatedWidgets();
+                    for (auto w : widgets) {
+                        if (auto *m = qobject_cast<QMenu *>(w))
+                            path = buildPath(m->menuAction()) + path;
+                    }
+                }
+                return path;
+            };
+            return buildPath(entry.action).join(" / "_l1);
+        }
         return { };
     }
 
