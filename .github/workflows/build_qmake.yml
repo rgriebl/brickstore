@@ -55,30 +55,19 @@ jobs:
           qt_arch: ''
 
     steps:
-    - uses: actions/checkout@v1
-
-#    - name: Restore artifacts, or run vcpkg, build and cache artifacts
-#      if: matrix.config.vcpkg_packages
-#      uses: lukka/run-vcpkg@main
-#      id: runvcpkg
-#      with:
-#        vcpkgGitCommitId: 'df574baff7eee345ab9ed9bf28e2c38175412439'
-#        vcpkgArguments: '${{ matrix.config.vcpkg_packages }}'
-#        vcpkgTriplet: '${{ matrix.config.vcpkg_triplet }}'
-
-#    - name: Cache Qt from qt.io
-#      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
-#      id: cache-qt
-#      uses: actions/cache@v1
-#      with:
-#        path: ../Qt
-#        key: ${{ runner.os }}-QtCache
+    - name: Cache Qt from qt.io
+      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
+      id: cache-qt
+      uses: actions/cache@v1
+      with:
+        path: ../Qt
+        key: ${{ runner.os }}-{{ matrix.config.qt_arch }}-QtCache
 
     - name: Install Qt from qt.io
       if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
       uses: jurplel/install-qt-action@v2
       with:
-#        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
         modules: 'qtsvg qttools'
         arch: ${{ matrix.config.qt_arch }}
@@ -111,6 +100,10 @@ jobs:
       run: |
         c:\vcpkg\vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
       shell: cmd
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Build on Windows
       if: startsWith(matrix.config.os, 'windows')
@@ -202,7 +195,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Download Artifacts to Release
       uses: actions/download-artifact@v2
