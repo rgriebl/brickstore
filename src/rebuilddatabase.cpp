@@ -52,6 +52,9 @@ RebuildDatabase::RebuildDatabase(bool skipDownload)
     (void) freopen("CONIN$", "r", stdin);
     (void) freopen("CONOUT$", "w", stdout);
 #endif
+
+    // disable buffering on stdout
+    setbuf(stdout, NULL);
 }
 
 RebuildDatabase::~RebuildDatabase()
