@@ -61,7 +61,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ../Qt
-        key: ${{ runner.os }}-{{ matrix.config.qt_arch }}-QtCache
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_arch }}-QtCache
 
     - name: Install Qt from qt.io
       if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
