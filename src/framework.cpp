@@ -1463,20 +1463,32 @@ bool FrameWork::updateDatabase(bool forceSync)
         return false;
     }
 
+    QStringList files;
+    foreach (QWidget *w, m_workspace->windowList()) {
+        QString fileName = static_cast<Window *>(w)->document()->fileName();
+        if (!fileName.isEmpty())
+            files << fileName;
+    }
+
     if (noWindows || closeAllWindows()) {
         delete m_add_dialog;
         delete m_importinventory_dialog;
         delete m_importorder_dialog;
         delete m_importcart_dialog;
 
-        auto doUpdate = [this]() -> bool {
+        auto doUpdate = [this, files]() -> bool {
             if (!m_workspace->windowList().isEmpty())
                 return false;
 
             Transfer trans;
             ProgressDialog d(tr("Update Database"), &trans, this);
             UpdateDatabase update(&d);
-            return d.exec();
+            bool result = d.exec();
+
+            for (const auto &file : files)
+                openDocument(file);
+
+            return result;
         };
 
         if (forceSync || noWindows) {
