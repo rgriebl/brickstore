@@ -549,6 +549,8 @@ Document::Document()
         if (clean) {
             m_firstNonVisualIndex = 0;
             m_visuallyClean = true;
+        } else if (m_undo->cleanIndex() < 0) {
+            m_visuallyClean = false;
         }
         updateModified();
     });
