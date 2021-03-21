@@ -36,7 +36,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br&gt;See &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br&gt;See &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.&lt;/p&gt;&lt;p&gt;Only made possible by &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezek&apos;s&lt;/a&gt; support.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -132,6 +132,10 @@
     </message>
     <message>
         <source>Show additional input fields for sellers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Cost</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -619,6 +623,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <comment>Filter&gt;Stockroom&gt;None</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Marker</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DocumentDelegate</name>
@@ -860,10 +868,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Failed to import order %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This list contains items without a BrickLink Lot-ID.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -894,6 +898,20 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <source>Could not parse the Studio model:</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>This file contains %n unknown item(s).</source>
+        <translation>
+            <numerusform>This file contains one unknown item.</numerusform>
+            <numerusform>This file contains %n unknown items.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n oudated item or color reference(s) in this file have been updated according to the BrickLink catalog.</source>
+        <translation>
+            <numerusform>One oudated item or color reference in this file has been updated according to the BrickLink catalog.</numerusform>
+            <numerusform>%n oudated item or color references in this file have been updated according to the BrickLink catalog.</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -1606,6 +1624,35 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>LDraw or Studio Model...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Duplicate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+D</source>
+        <comment>Edit|Duplicate</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload user scripts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Marker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set marker text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set marker color...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear marker</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -1921,6 +1968,22 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Show</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import combined</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiple</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to import order %1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>IncDecPricesDialog</name>
@@ -1983,6 +2046,73 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Could not open the Studio ZIP file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OrderModel</name>
+    <message>
+        <source>Unknown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Processing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Packed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shipped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OCR</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NPB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NPX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NRS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NSS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancelled</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2727,6 +2857,49 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Open a Web-Browser window when exporting to the clipboard</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Keyboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Customize the global keyboard shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This shortcut is already used by another action.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutModel</name>
+    <message>
+        <source>Action name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Current</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SortCmd</name>
@@ -2908,25 +3081,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Error writing to file %1: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Utility</name>
-    <message>
-        <source>Could not rename %1 to %2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not backup %1 to %2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not delete %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not find %1.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3210,6 +3364,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
             <numerusform>%1 on one item</numerusform>
             <numerusform>%1 on %Ln items</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Enter the new marker text for all selected items:</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
