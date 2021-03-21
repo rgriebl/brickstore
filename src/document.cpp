@@ -939,11 +939,13 @@ void Document::updateLotFlags(const Lot *lot)
     quint64 errors = 0;
     quint64 updated = 0;
 
+    if (!lot->item())
+        errors |= (1ULL << PartNo);
     if (lot->price() <= 0)
         errors |= (1ULL << Price);
     if (lot->quantity() <= 0)
         errors |= (1ULL << Quantity);
-    if (lot->color() && lot->itemType() && ((lot->color()->id() != 0) && !lot->itemType()->hasColors()))
+    if (!lot->color() || (lot->itemType() && ((lot->color()->id() != 0) && !lot->itemType()->hasColors())))
         errors |= (1ULL << Color);
     if (lot->tierQuantity(0) && ((lot->tierPrice(0) <= 0) || (lot->tierPrice(0) >= lot->price())))
         errors |= (1ULL << TierP1);
