@@ -129,7 +129,7 @@ jobs:
         SENTRY_ORG: brickstore
         SENTRY_PROJECT: brickstore
       with:
-        version: "${{ github.run_number }}"
+        version: "brickstore@${{ github.run_number }}"
 
     - name: Upload Installer on Windows
       uses: actions/upload-artifact@v2
