@@ -1507,7 +1507,7 @@ bool FrameWork::updateDatabase(bool forceSync)
 void FrameWork::checkForUpdates(bool silent)
 {
     if (!m_checkForUpdates)
-        m_checkForUpdates = new CheckForUpdates(Application::inst()->applicationUrl(), this);
+        m_checkForUpdates = new CheckForUpdates(Application::inst()->gitHubUrl(), this);
     m_checkForUpdates->check(silent);
 }
 

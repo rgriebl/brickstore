@@ -328,6 +328,11 @@ QString Application::applicationUrl() const
     return QLatin1String(BRICKSTORE_URL);
 }
 
+QString Application::gitHubUrl() const
+{
+    return QLatin1String(BRICKSTORE_GITHUB_URL);
+}
+
 void Application::enableEmitOpenDocument(bool b)
 {
     if (b != m_enable_emit) {

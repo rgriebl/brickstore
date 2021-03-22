@@ -35,6 +35,7 @@ public:
     void enableEmitOpenDocument(bool b = true);
 
     QString applicationUrl() const;
+    QString gitHubUrl() const;
 
     bool isOnline() const;
 

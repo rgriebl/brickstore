@@ -18,6 +18,7 @@ else:MIN_QT_VERSION = 5.12.0
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
 COPYRIGHT   = "2004-2021 Robert Griebl"
+BRICKSTORE_URL = "brickforge.de/brickstore"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
 
 
@@ -132,7 +133,7 @@ win32 {
 
   # qmake uses these to generate a FILEVERSION record
   QMAKE_TARGET_COPYRIGHT   = "Copyright (c) $$COPYRIGHT"
-  QMAKE_TARGET_COMPANY     = "https://$$GITHUB_URL"
+  QMAKE_TARGET_COMPANY     = "https://$$BRICKSTORE_URL"
   QMAKE_TARGET_DESCRIPTION = "$$DESCRIPTION"
 
   win32-msvc* {

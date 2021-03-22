@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.3.2] - 2021-03-22
+### Added
+- Experimental support for a marker column that can be used for the multi-order picking: multiple
+  orders can be imported into the same document now. Markers are not saved at the moment.
+- All main window keyboard shortcuts are now configurable in the Settings dialog.
+
+### Improvements
+- When loading files with outdated item or color references, BrickStore will now mark the file as
+  modified after updating them.
+- BrickLink Studio models should now import without any missing parts or mismatched colors.
+- Added a quick way to duplicate selected lots: `Edit` > `Duplicate` or `Ctrl+D`.
+- The Windows x64 release will now automatically send anonymized crash reports to
+  [https://sentry.io]. This might be extended to the other platforms if it proves to be useful.
+
 ## [2021.3.1] - 2021-03-05
 ### Added
 - *Import LDraw Model* can now import BrickLink Studio models as well.
@@ -225,7 +239,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.2...HEAD
+[2021.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
 [2021.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.1
 [2021.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.2
 [2021.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.1
