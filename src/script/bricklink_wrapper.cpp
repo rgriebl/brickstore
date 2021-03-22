@@ -303,8 +303,9 @@ QmlLot::QmlLot(Lot *lot, QmlDocument *document)
 
 QImage QmlLot::image() const
 {
+    static QImage dummy;
     auto pic = ::BrickLink::core()->picture(get()->item(), get()->color(), true);
-    return pic->image();
+    return pic ? pic->image() : dummy;
 }
 
 //Item Lot::item() const
