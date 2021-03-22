@@ -357,20 +357,16 @@ Document *DocumentIO::importLDrawModel()
 
     if (b && !lots.isEmpty()) {
         if (invalidLots) {
-            if (MessageBox::question(nullptr, { },
-                                     tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                        nullptr, invalidLots)) == QMessageBox::Yes) {
-                invalidLots = 0;
-            }
+            MessageBox::information(nullptr, { },
+                                    tr("This file contains %n unknown item(s).",
+                                       nullptr, invalidLots));
         }
 
-        if (!invalidLots) {
-            DocumentIO::BsxContents bsx;
-            bsx.lots = lots;
-            doc = new Document(bsx); // Document owns the items now
-            lots.clear();
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
-        }
+        DocumentIO::BsxContents bsx;
+        bsx.lots = lots;
+        doc = new Document(bsx); // Document owns the items now
+        lots.clear();
+        doc->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
     } else {
         MessageBox::warning(nullptr, { }, tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(fn)));
     }

@@ -830,7 +830,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>This file contains one unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
             <numerusform>This file contains %n unknown items.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
         </translation>

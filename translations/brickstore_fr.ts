@@ -201,7 +201,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/application.cpp" line="643"/>
+        <location filename="../src/application.cpp" line="648"/>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>N&apos;est pas arrivé à initialiser le noyau BrickLink: &lt;br /&gt;&lt;br /&gt;%1</translation>
     </message>
@@ -930,7 +930,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="70"/>
-        <location filename="../src/documentio.cpp" line="609"/>
+        <location filename="../src/documentio.cpp" line="605"/>
         <source>BrickStore XML Data</source>
         <translation>Données BrickStore XML</translation>
     </message>
@@ -1003,7 +1003,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="238"/>
-        <location filename="../src/documentio.cpp" line="1036"/>
+        <location filename="../src/documentio.cpp" line="1032"/>
         <source>BrickLink XML File</source>
         <translation>Fichier XML BrickLink</translation>
     </message>
@@ -1015,7 +1015,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/documentio.cpp" line="252"/>
-        <location filename="../src/documentio.cpp" line="372"/>
+        <location filename="../src/documentio.cpp" line="369"/>
         <source>Import of %1</source>
         <translation>Import de %1</translation>
     </message>
@@ -1033,6 +1033,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <location filename="../src/documentio.cpp" line="278"/>
+        <location filename="../src/documentio.cpp" line="361"/>
         <source>This file contains %n unknown item(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1048,14 +1049,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="757"/>
+        <location filename="../src/documentio.cpp" line="753"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Ce document ne présente pas de différence qui puisse être exportée.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/documentio.cpp" line="361"/>
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Ce fichier contient %n article inconnu.&lt;br /&gt;&lt;br /&gt;Voulez-vous quand même ouvrir ce fichier?</numerusform>
             <numerusform>Ce fichier contient %n articles inconnus.&lt;br /&gt;&lt;br /&gt;Voulez-vous quand même ouvrir ce fichier?</numerusform>
         </translation>
@@ -1085,17 +1085,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="759"/>
+        <location filename="../src/documentio.cpp" line="755"/>
         <source>This list contains items without a BrickLink Lot-ID.</source>
         <translation>Cette liste contient des articles sans leur ID de lot BrickLink.</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="761"/>
+        <location filename="../src/documentio.cpp" line="757"/>
         <source>This list contains items with duplicate BrickLink Lot-IDs.</source>
         <translation>Cette liste contient des articles avec de doublons d&apos;ID de lot BrickLink.</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="765"/>
+        <location filename="../src/documentio.cpp" line="761"/>
         <source>There are problems: %1Do you really want to export this list?</source>
         <translation>Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste?</translation>
     </message>
@@ -1106,35 +1106,35 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation>Modèles LDraw</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="375"/>
+        <location filename="../src/documentio.cpp" line="371"/>
         <source>Could not parse the LDraw model in file %1.</source>
         <translation>N&apos;est pas arrivé à interpréter le modèle LDraw du fichier %1.</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="623"/>
+        <location filename="../src/documentio.cpp" line="619"/>
         <source>Save File as</source>
         <translation>Enregistrer le fichier sous</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="659"/>
-        <location filename="../src/documentio.cpp" line="1054"/>
-        <location filename="../src/documentio.cpp" line="1056"/>
+        <location filename="../src/documentio.cpp" line="655"/>
+        <location filename="../src/documentio.cpp" line="1050"/>
+        <location filename="../src/documentio.cpp" line="1052"/>
         <source>Failed to save data to file %1.</source>
         <translation>Echec lors de l&apos;enregistrement des données du fichier %1.</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="643"/>
-        <location filename="../src/documentio.cpp" line="1052"/>
+        <location filename="../src/documentio.cpp" line="639"/>
+        <location filename="../src/documentio.cpp" line="1048"/>
         <source>Failed to open file %1 for writing.</source>
         <translation>Echec lors de l&apos;ouverture pour écriture du fichier %1.</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="700"/>
+        <location filename="../src/documentio.cpp" line="696"/>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
         <translation>Entrez le numéro d&apos;ID de la liste des articles désirés (laisser vide pour liste par défaut)</translation>
     </message>
     <message>
-        <location filename="../src/documentio.cpp" line="1038"/>
+        <location filename="../src/documentio.cpp" line="1034"/>
         <source>Export File</source>
         <translation>Exporter un fichier</translation>
     </message>
