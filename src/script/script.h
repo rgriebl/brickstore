@@ -71,7 +71,7 @@ private:
 };
 
 
-class PrintingScriptTemplate : public QObject, public QQmlParserStatus
+class PrintingScriptAction : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -127,10 +127,10 @@ public:
     void setType(Type type);
 
     void addExtensionAction(ExtensionScriptAction *extensionAction);
-    void addPrintingTemplate(PrintingScriptTemplate *printingTemplate);
+    void addPrintingAction(PrintingScriptAction *printingAction);
 
     QVector<ExtensionScriptAction *> extensionActions() const;
-    QVector<PrintingScriptTemplate *> printingTemplates() const;
+    QVector<PrintingScriptAction *> printingActions() const;
 
     QQmlEngine *qmlEngine() const;
     QQmlContext *qmlContext() const;
@@ -156,11 +156,11 @@ private:
     QQmlComponent *m_component = nullptr;
 
     QVector<ExtensionScriptAction *> m_extensionActions;
-    QVector<PrintingScriptTemplate *> m_printingTemplates;
+    QVector<PrintingScriptAction *> m_printingActions;
 
     friend class ScriptManager;
 };
 
 Q_DECLARE_METATYPE(ExtensionScriptAction *)
-Q_DECLARE_METATYPE(PrintingScriptTemplate *)
+Q_DECLARE_METATYPE(PrintingScriptAction *)
 Q_DECLARE_METATYPE(Script *)

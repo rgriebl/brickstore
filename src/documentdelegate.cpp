@@ -184,7 +184,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     Qt::Alignment align = (Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()) & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
 
-    if (idx.column() == Document::Index) {
+    if ((idx.column() == Document::Index) && (p->device()->devType() != QInternal::Printer)) {
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
         QStyleOptionHeader headerOption;
         headerOption.initFrom(option.widget);
@@ -233,7 +233,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     int x = option.rect.x(), y = option.rect.y();
     int w = option.rect.width();
     int h = option.rect.height();
-    int margin = 2;
+    int margin = int(std::ceil(2 * float(p->device()->logicalDpiX()) / 96.f));
 
     struct Tag {
         QColor foreground { Qt::transparent };
@@ -288,7 +288,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         case Document::Quantity:
             if (lot->quantity() <= 0)
                 bg = (lot->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
-                                             : QColor::fromRgbF(1, 0, 0, 0.4);
+                                            : QColor::fromRgbF(1, 0, 0, 0.4);
             break;
 
         case Document::QuantityDiff:
@@ -532,8 +532,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     p->setPen(fg);
 
-    x++; // extra spacing
-    w -=2;
+    x += margin / 2; // extra spacing
+    w -= margin;
 
     if (checkmark != 0) {
         QStyleOptionViewItem opt(option);

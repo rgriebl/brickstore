@@ -43,8 +43,6 @@ public:
     bool reload();
 
     QVector<Script *> scripts() const;
-    QVector<Script *> extensionScripts() const;
-    QVector<Script *> printingScripts() const;
 
 signals:
     void aboutToReload();

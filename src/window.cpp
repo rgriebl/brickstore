@@ -36,6 +36,7 @@
 #include <QRegularExpression>
 #include <QDebug>
 #include <QColorDialog>
+#include <QPrintPreviewDialog>
 
 #include <QProgressBar>
 #include <QStackedLayout>
@@ -63,7 +64,6 @@
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
 #include "consolidateitemsdialog.h"
-#include "selectprintingtemplatedialog.h"
 
 using namespace std::chrono_literals;
 
@@ -763,11 +763,6 @@ void Window::updateCaption()
 QByteArray Window::currentColumnLayout() const
 {
     return w_header->saveLayout();
-}
-
-QHeaderView *Window::headerView() const
-{
-    return w_header;
 }
 
 bool Window::isBlockingOperationActive() const
@@ -2461,17 +2456,8 @@ void Window::on_document_print_pdf_triggered()
 
 void Window::print(bool as_pdf)
 {
-    if (m_doc->lots().isEmpty())
+    if (m_doc->filteredLots().isEmpty())
         return;
-
-    if (ScriptManager::inst()->printingScripts().isEmpty()) {
-        ScriptManager::inst()->reload();
-
-        if (ScriptManager::inst()->printingScripts().isEmpty()) {
-            MessageBox::warning(this, { }, tr("Couldn't find any print scripts."));
-            return;
-        }
-    }
 
     QString doctitle = m_doc->fileNameOrTitle();
 
@@ -2484,52 +2470,72 @@ void Window::print(bool as_pdf)
         if (d.exists())
             pdfname = d.filePath(pdfname);
 
-        pdfname = QFileDialog::getSaveFileName(this, tr("Save PDF as"), pdfname, tr("PDF Documents (*.pdf)"));
-
-        if (pdfname.isEmpty())
-            return;
-
-        // check if the file is actually writable - otherwise QPainter::begin() will fail
-        if (QFile::exists(pdfname) && !QFile(pdfname).open(QFile::ReadWrite)) {
-            MessageBox::warning(this, { }, tr("The PDF document already exists and is not writable."));
-            return;
-        }
+        auto pl = prt.pageLayout();
+        pl.setUnits(QPageLayout::Millimeter);
+        QMarginsF m = pl.minimumMargins();
+        m.setTop(qMax(m.top(), 10.));
+        m.setBottom(qMax(m.bottom(), 10.));
+        m.setLeft(qMax(m.left(), 10.));
+        m.setRight(qMax(m.right(), 10.));
+        pl.setMargins(m);
+        prt.setPageLayout(pl);
 
         prt.setOutputFileName(pdfname);
         prt.setOutputFormat(QPrinter::PdfFormat);
-    }
-    else {
+
+    } else {
         QPrintDialog pd(&prt, FrameWork::inst());
 
         pd.setOption(QAbstractPrintDialog::PrintToFile);
         pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
         pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
+        pd.setOption(QAbstractPrintDialog::PrintPageRange, false);
 
         if (!selectedLots().isEmpty())
             pd.setOption(QAbstractPrintDialog::PrintSelection);
 
         pd.setPrintRange(selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
-                                               : QAbstractPrintDialog::Selection);
+                                                  : QAbstractPrintDialog::Selection);
 
         if (pd.exec() != QDialog::Accepted)
             return;
     }
 
     prt.setDocName(doctitle);
+
+    bool selectionOnly = (prt.printRange() == QPrinter::Selection);
+    QPrintPreviewDialog ppd(&prt);
+    connect(&ppd, &QPrintPreviewDialog::paintRequested,
+            this, [=](QPrinter *previewPrt) {
+        printPages(previewPrt, selectionOnly ? selectedLots() : document()->filteredLots());
+    });
+    ppd.exec();
+}
+
+void Window::printScriptAction(PrintingScriptAction *printingAction)
+{
+    QPrinter prt(QPrinter::HighResolution);
+    QPrintDialog pd(&prt, FrameWork::inst());
+
+    pd.setOption(QAbstractPrintDialog::PrintToFile);
+    pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
+    pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
+    pd.setOption(QAbstractPrintDialog::PrintPageRange, false);
+
+    if (!selectedLots().isEmpty())
+        pd.setOption(QAbstractPrintDialog::PrintSelection);
+
+    pd.setPrintRange(selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
+                                              : QAbstractPrintDialog::Selection);
+
+    if (pd.exec() != QDialog::Accepted)
+        return;
+
+    prt.setDocName(document()->fileNameOrTitle());
     prt.setFullPage(true);
 
-    SelectPrintingTemplateDialog d(this);
-
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    PrintingScriptTemplate *prtTemplate = d.script();
-
-    if (!prtTemplate)
-        return;
-
     try {
-        prtTemplate->executePrint(&prt, this, prt.printRange() == QPrinter::Selection);
+        printingAction->executePrint(&prt, this, prt.printRange() == QPrinter::Selection);
     } catch (const Exception &e) {
         QString msg = e.error();
         if (msg.isEmpty())
@@ -2538,6 +2544,132 @@ void Window::print(bool as_pdf)
             msg.replace('\n'_l1, "<br>"_l1);
         MessageBox::warning(nullptr, { }, msg);
     }
+
+}
+
+bool Window::printPages(QPrinter *prt, const LotList &lots)
+{
+    QPainter p;
+    if (!p.begin(prt))
+        return false;
+
+    float prtDpi = (prt->logicalDpiX() + prt->logicalDpiY()) / 2;
+    float winDpi = (w_list->logicalDpiX() + w_list->logicalDpiY()) / 2;
+
+    QRectF pageRect = prt->pageLayout().paintRect(QPageLayout::Inch);
+    pageRect = QRectF(QPointF(), pageRect.size() * prtDpi);
+
+    float rowHeight = float(w_list->verticalHeader()->defaultSectionSize()) * prtDpi / winDpi;
+    int rowsPerPage = int((pageRect.height() - /* all headers and footers */ 2 * rowHeight) / rowHeight);
+    int pagesDown = (lots.size() + rowsPerPage - 1) / rowsPerPage;
+
+    QVector<QPair<Document::Field, float>> colWidths;
+    for (int f = Document::Index; f < Document::FieldCount; ++f) {
+        if (w_header->isSectionHidden(f))
+            continue;
+        int cw = w_header->sectionSize(f);
+        if (cw <= 0)
+            continue;
+        colWidths.append(qMakePair(Document::Field(f), cw * prtDpi / winDpi));
+    }
+    QVector<QVector<QPair<Document::Field, float>>> colWidthsPerPageAcross;
+    QVector<QPair<Document::Field, float>> curPageColWidths;
+    float cwUsed = 0;
+    for (const auto &cw : colWidths) {
+        if (cwUsed && ((cwUsed + cw.second) > pageRect.width())) {
+            colWidthsPerPageAcross.append(curPageColWidths);
+            curPageColWidths.clear();
+            cwUsed = 0;
+        }
+        auto cwClamped = qMakePair(cw.first, qMin(cw.second, float(pageRect.width())));
+        cwUsed += cwClamped.second;
+        curPageColWidths.append(cwClamped);
+    }
+    if (!curPageColWidths.isEmpty())
+        colWidthsPerPageAcross.append(curPageColWidths);
+
+    int pagesAcross = colWidthsPerPageAcross.size();
+    int pageCount = 0;
+
+    auto *dd = static_cast<DocumentDelegate *>(w_list->itemDelegate());
+
+    p.setFont(w_list->font());
+    QPen gridPen(Qt::darkGray, prtDpi / 96);
+    QColor headerTextColor(Qt::white);
+    float margin = 2 * prtDpi / 96;
+
+    int li = 0; // lot index
+    for (int pd = 0; pd < pagesDown; ++pd) {
+        for (int pa = 0; pa < pagesAcross; ++pa) {
+            if (pageCount++)
+                prt->newPage();
+
+            // print footer
+            {
+                QRectF footerRect(pageRect);
+                footerRect.setTop(footerRect.bottom() - rowHeight);
+
+                p.setPen(gridPen);
+                QRectF boundingRect;
+                p.drawText(footerRect, Qt::AlignRight | Qt::AlignBottom, tr("Page %1/%2")
+                           .arg(pageCount).arg(pagesAcross * pagesDown), &boundingRect);
+                footerRect.setWidth(footerRect.width() - boundingRect.width() - 5 * margin);
+                p.drawText(footerRect, Qt::AlignLeft | Qt::AlignBottom, document()->fileNameOrTitle());
+            }
+
+            const auto &colWidths = colWidthsPerPageAcross.at(pa);
+            float dx = pageRect.left();
+            bool firstColumn = true;
+
+            for (const auto &cw : colWidths) {
+                QString title = document()->headerData(cw.first, Qt::Horizontal).toString();
+                Qt::Alignment align = Qt::Alignment(document()->headerData(cw.first, Qt::Horizontal,
+                                                             Qt::TextAlignmentRole).toInt());
+                float w = cw.second;
+
+                float dy = pageRect.top();
+
+                // print header
+                QRectF headerRect(dx, dy, w, rowHeight);
+                p.setPen(gridPen);
+                p.fillRect(headerRect, gridPen.color());
+                p.drawRect(headerRect);
+
+                p.setPen(headerTextColor);
+                headerRect = headerRect.marginsRemoved({ margin, 0, margin, 0});
+                p.drawText(headerRect, align, title);
+
+                dy += rowHeight;
+
+                for (int l = li; l < qMin(li + rowsPerPage, lots.size()); ++l) {
+                    const Lot *lot = lots.at(l);
+                    QModelIndex idx = document()->index(lot, cw.first);
+
+                    QStyleOptionViewItem options = w_list->viewOptions();
+                    options.rect = QRectF(dx, dy, w, rowHeight).toRect();
+                    options.decorationSize *= (prtDpi / winDpi);
+                    options.font = p.font();
+                    options.fontMetrics = p.fontMetrics();
+                    options.index = idx;
+                    options.state &= ~QStyle::State_Selected;
+
+                    dd->paint(&p, options, idx);
+
+                    p.setPen(gridPen);
+                    p.drawLine(options.rect.topRight(), options.rect.bottomRight());
+                    p.drawLine(options.rect.bottomRight(), options.rect.bottomLeft());
+                    if (firstColumn)
+                        p.drawLine(options.rect.topLeft(), options.rect.bottomLeft());
+
+                    dy += rowHeight;
+                }
+                dx += w;
+                firstColumn = false;
+            }
+        }
+        li += rowsPerPage;
+    }
+    return true;
 }
 
 void Window::on_document_save_triggered()

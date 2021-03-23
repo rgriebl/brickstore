@@ -193,6 +193,7 @@ public:
 
     const LotList &lots() const;
     const LotList &sortedLots() const;
+    const LotList &filteredLots() const;
     bool clear();
 
     void appendLot(Lot *lot);

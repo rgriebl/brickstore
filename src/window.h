@@ -26,15 +26,16 @@
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
-QT_FORWARD_DECLARE_CLASS(QTableView)
 QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
-QT_FORWARD_DECLARE_CLASS(QHeaderView)
+QT_FORWARD_DECLARE_CLASS(QPrinter)
 class FrameWork;
 class UndoStack;
+class TableView;
 class HeaderView;
 class StatusBar;
 class ColumnChangeWatcher;
 class WindowProgress;
+class PrintingScriptAction;
 
 
 class Window : public QWidget
@@ -93,8 +94,6 @@ public:
     static ColumnLayoutCommand columnLayoutCommandFromId(const QString &id);
 
     QByteArray currentColumnLayout() const;
-
-    QHeaderView *headerView() const;
 
     bool isBlockingOperationActive() const;
     void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
@@ -201,6 +200,8 @@ public slots:
     void setRetain(bool retain);
     void setStockroom(BrickLink::Stockroom stockroom);
 
+    void printScriptAction(PrintingScriptAction *printingAction);
+
 signals:
     void selectedLotsChanged(const LotList &);
     void blockingOperationActiveChanged(bool blocked);
@@ -242,6 +243,8 @@ private:
     void resizeColumnDirect(int logical, int oldSize, int newSize);
     friend class ColumnCmd;
 
+    bool printPages(QPrinter *prt, const LotList &lots);
+
 private:
     Document *           m_doc;
     QItemSelectionModel *m_selection_model;
@@ -249,7 +252,7 @@ private:
     QTimer *             m_delayedSelectionUpdate = nullptr;
     QMenu *              m_contextMenu = nullptr;
     StatusBar *          w_statusbar;
-    QTableView *         w_list;
+    TableView *          w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;
     ColumnChangeWatcher *m_ccw = nullptr;

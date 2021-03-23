@@ -96,7 +96,6 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
     qRegisterMetaType<QmlPriceGuide>("PriceGuide");
     qRegisterMetaType<QmlPicture>("Picture");
     qRegisterMetaType<QmlOrder>("Order");
-    qRegisterMetaType<QmlColumn>("Column");
     qRegisterMetaType<Document::Field>("Document::Field");
 
     qmlRegisterUncreatableType<QmlDocument>("BrickStore", 1, 0, "Document",
@@ -111,7 +110,7 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
 
     qmlRegisterType<Script>("BrickStore", 1, 0, "Script");
     qmlRegisterType<ExtensionScriptAction>("BrickStore", 1, 0, "ExtensionScriptAction");
-    qmlRegisterType<PrintingScriptTemplate>("BrickStore", 1, 0, "PrintingScriptTemplate");
+    qmlRegisterType<PrintingScriptAction>("BrickStore", 1, 0, "PrintingScriptAction");
 
     reload();
     return true;
@@ -167,8 +166,6 @@ void ScriptManager::loadScript(const QString &fileName)
         throw Exception("The root element of the script %1 is not 'Script'").arg(fileName);
 
     auto script = static_cast<Script *>(root.take());
-    engine->rootContext()->setProperty("readOnlyContext",
-                                       script->type() == Script::Type::PrintingScript);
     script->m_engine.reset(engine.take());
     script->m_fileName = fileName;
     script->m_context = ctx;
@@ -210,26 +207,6 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
 QVector<Script *> ScriptManager::scripts() const
 {
     return m_scripts;
-}
-
-QVector<Script *> ScriptManager::extensionScripts() const
-{
-    QVector<Script *> result;
-    for (auto s : m_scripts) {
-        if (s->type() == Script::Type::ExtensionScript)
-            result << s;
-    }
-    return result;
-}
-
-QVector<Script *> ScriptManager::printingScripts() const
-{
-    QVector<Script *> result;
-    for (auto s : m_scripts) {
-        if (s->type() == Script::Type::PrintingScript)
-            result << s;
-    }
-    return result;
 }
 
 void ScriptManager::clearScripts()

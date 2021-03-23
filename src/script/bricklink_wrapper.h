@@ -480,32 +480,6 @@ public:
     friend class QmlDocument;
 };
 
-class QmlColumn
-{
-    Q_GADGET
-    Q_PROPERTY(int position READ position CONSTANT)
-    Q_PROPERTY(Document::Field type READ type CONSTANT)
-    Q_PROPERTY(bool hidden READ hidden CONSTANT)
-    Q_PROPERTY(int width READ width CONSTANT)
-    Q_PROPERTY(QString title READ title CONSTANT)
-    Q_PROPERTY(Qt::Alignment alignment READ alignment CONSTANT)
-
-public:
-    QmlColumn();
-    QmlColumn(Window *win, int index);
-
-    int position() const;
-    Document::Field type() const;
-    bool hidden() const;
-    int width() const;
-    QString title() const;
-    Qt::Alignment alignment() const;
-
-private:
-    QHeaderView *header;
-    int vi;
-};
-
 class QmlDocument : public QObject
 {
     Q_OBJECT
@@ -515,7 +489,6 @@ class QmlDocument : public QObject
     Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
     Q_PRIVATE_PROPERTY(d, QmlOrder order READ order CONSTANT)
     Q_PRIVATE_PROPERTY(d, int lotCount READ lotCount NOTIFY lotCountChanged)
-    Q_PROPERTY(QVariantList columns READ columns CONSTANT)
     //TODO: missing: statistics
 
 public:
@@ -523,8 +496,6 @@ public:
 
     QmlDocument(Window *win);
     bool isWrapperFor(Window *win) const;
-
-    QVariantList columns() const;
 
     bool changeLot(QmlLot *from, Lot &to);
 
@@ -538,6 +509,9 @@ public:
 //            ...
 //        }
 //    }
+
+    inline Document *document() { return d; }
+    inline Window *window() { return win; }
 
 signals:
     void titleChanged(const QString &title);
@@ -604,5 +578,4 @@ Q_DECLARE_METATYPE(QmlBrickLink::Status)
 Q_DECLARE_METATYPE(QmlBrickLink::UpdateStatus)
 Q_DECLARE_METATYPE(QmlBrickLink::OrderType)
 Q_DECLARE_METATYPE(QmlBrickLink *)
-Q_DECLARE_METATYPE(QmlColumn)
 Q_DECLARE_METATYPE(QmlDocument *)

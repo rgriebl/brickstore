@@ -4,14 +4,12 @@ import QtQuick 2.12
 Script {
     name: "Standard Print Script"
     author: "Robert Griebl"
-    version: "0.2"
-    type: Script.PrintingScript
+    version: "0.3"
+    type: Script.ExtensionScript
 
-    PrintingScriptTemplate {
-        text: "Standard Print Template"
-        printFunction: function(job, doc, lots) {
-            printJob(job, doc, lots)
-        }
+    PrintingScriptAction {
+        text: "Classic Print Template"
+        printFunction: printJob
     }
 
     function printJob(job, doc, lots)

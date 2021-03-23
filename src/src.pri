@@ -78,7 +78,6 @@ FORMS = \
   $$PWD/importorderdialog.ui \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectitemdialog.ui \
-  $$PWD/selectprintingtemplatedialog.ui \
   $$PWD/settingsdialog.ui \
   $$PWD/settopriceguidedialog.ui
 

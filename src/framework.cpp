@@ -616,7 +616,18 @@ void FrameWork::setupScripts()
                     }
                 });
             }
+            const auto printingActions = script->printingActions();
+            for (auto printingAction : printingActions) {
+                auto action = new QAction(printingAction->text(), printingAction);
+                extrasActions.append(action);
+
+                connect(action, &QAction::triggered, printingAction, [this, printingAction]() {
+                    if (activeWindow())
+                        activeWindow()->printScriptAction(printingAction);
+                });
+            }
         }
+
         if (!extrasActions.isEmpty()) {
             auto actions = m_extrasMenu->actions();
             QAction *position = actions.at(actions.size() - 2);
@@ -641,9 +652,9 @@ void FrameWork::setupScripts()
     });
     connect(ScriptManager::inst(), &ScriptManager::reloaded,
             this, [this, reloadScripts]() {
-        reloadScripts(ScriptManager::inst()->extensionScripts());
+        reloadScripts(ScriptManager::inst()->scripts());
     });
-    reloadScripts(ScriptManager::inst()->extensionScripts());
+    reloadScripts(ScriptManager::inst()->scripts());
 }
 
 void FrameWork::languageChange()

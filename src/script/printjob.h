@@ -132,7 +132,6 @@ class QmlPrintJob : public QObject
     Q_PROPERTY(int pageCount READ pageCount NOTIFY pageCountChanged)
 //  Q_PROPERTY(int paperFormat READ paperFormat)
     Q_PROPERTY(QSizeF paperSize READ paperSize CONSTANT)
-    Q_PROPERTY(double scaling READ scaling WRITE setScaling NOTIFY scalingChanged)
 
 public:
     Q_INVOKABLE QmlPrintPage *addPage();
@@ -142,12 +141,9 @@ public:
     int pageCount() const;
     QSizeF paperSize() const;
     bool isAborted() const;
-    double scaling() const;
-    void setScaling(double s);
 
 signals:
     void pageCountChanged(int pages);
-    void scalingChanged(double s);
 
 public:
     QmlPrintJob(QPaintDevice *pd);
@@ -162,7 +158,6 @@ private:
     QVector<QmlPrintPage *> m_pages;
     QPaintDevice *m_pd;
     bool m_aborted = false;
-    double m_scaling = 1.;
 };
 
 Q_DECLARE_METATYPE(QmlPrintPage *)

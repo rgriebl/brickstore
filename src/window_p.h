@@ -105,6 +105,8 @@ public:
         edit(idx, AllEditTriggers, &kp);
     }
 
+    using QTableView::viewOptions;
+
 protected:
     void keyPressEvent(QKeyEvent *e) override;
 };

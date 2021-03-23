@@ -116,12 +116,12 @@ void ExtensionScriptAction::componentComplete()
 ///////////////////////////////////////////////////////////////////////
 
 
-QString PrintingScriptTemplate::text() const
+QString PrintingScriptAction::text() const
 {
     return m_text;
 }
 
-void PrintingScriptTemplate::setText(const QString &text)
+void PrintingScriptAction::setText(const QString &text)
 {
     if (text != m_text) {
         m_text = text;
@@ -129,12 +129,12 @@ void PrintingScriptTemplate::setText(const QString &text)
     }
 }
 
-QJSValue PrintingScriptTemplate::printFunction() const
+QJSValue PrintingScriptAction::printFunction() const
 {
     return m_printFunction;
 }
 
-void PrintingScriptTemplate::setPrintFunction(const QJSValue &function)
+void PrintingScriptAction::setPrintFunction(const QJSValue &function)
 {
     if (!function.strictlyEquals(m_printFunction)) {
         m_printFunction = function;
@@ -142,20 +142,20 @@ void PrintingScriptTemplate::setPrintFunction(const QJSValue &function)
     }
 }
 
-void PrintingScriptTemplate::classBegin()
+void PrintingScriptAction::classBegin()
 { }
 
-void PrintingScriptTemplate::componentComplete()
+void PrintingScriptAction::componentComplete()
 {
     if (auto *script = qobject_cast<Script *>(parent())) {
-        script->addPrintingTemplate(this);
+        script->addPrintingAction(this);
         m_script = script;
     } else {
-        qmlWarning(this) << "PrintingScriptTemplate objects need to be nested inside Script objects";
+        qmlWarning(this) << "PrintingScriptAction objects need to be nested inside Script objects";
     }
 }
 
-void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly)
+void PrintingScriptAction::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly)
 {
     QScopedPointer<QmlPrintJob> job(new QmlPrintJob(pd));
 
@@ -256,9 +256,9 @@ void Script::addExtensionAction(ExtensionScriptAction *extensionAction)
     m_extensionActions << extensionAction;
 }
 
-void Script::addPrintingTemplate(PrintingScriptTemplate *printingTemplate)
+void Script::addPrintingAction(PrintingScriptAction *printingAction)
 {
-    m_printingTemplates << printingTemplate;
+    m_printingActions << printingAction;
 }
 
 QVector<ExtensionScriptAction *> Script::extensionActions() const
@@ -266,9 +266,9 @@ QVector<ExtensionScriptAction *> Script::extensionActions() const
     return m_extensionActions;
 }
 
-QVector<PrintingScriptTemplate *> Script::printingTemplates() const
+QVector<PrintingScriptAction *> Script::printingActions() const
 {
-    return m_printingTemplates;
+    return m_printingActions;
 }
 
 QQmlEngine *Script::qmlEngine() const

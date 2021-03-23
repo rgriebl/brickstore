@@ -628,6 +628,11 @@ const LotList &Document::sortedLots() const
     return m_sortedLots;
 }
 
+const LotList &Document::filteredLots() const
+{
+    return m_filteredLots;
+}
+
 Document::Statistics Document::statistics(const LotList &list, bool ignoreExcluded) const
 {
     return Statistics(this, list, ignoreExcluded);

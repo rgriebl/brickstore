@@ -14,7 +14,6 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
-#include <QHeaderView>
 
 #include "framework.h"
 #include "window.h"
@@ -23,16 +22,6 @@
 #include "currency.h"
 
 #include "bricklink_wrapper.h"
-
-
-static bool isReadOnly(QObject *obj)
-{
-    //TODO: engine == null for Document, which makes this mostly useless
-    //      BrickStore does have an engine and a context, so maybe we can have two sets of
-    //      Document wrappers: one read-write and the other read-only?
-    auto engine = obj ? qmlEngine(obj) : nullptr;
-    return engine ? engine->rootContext()->property("readOnlyContext").toBool() : false;
-}
 
 
 QmlBrickLink::QmlBrickLink(BrickLink::Core *core)
@@ -415,18 +404,8 @@ bool QmlDocument::isWrapperFor(Window *win) const
     return (this->win == win);
 }
 
-QVariantList QmlDocument::columns() const
-{
-    QVariantList cols;
-    for (int i = 0; i < Document::FieldCount; ++i)
-        cols.append(QVariant::fromValue(QmlColumn(win, i)));
-    return cols;
-}
-
 bool QmlDocument::changeLot(QmlLot *from, ::Lot &to)
 {
-    if (isReadOnly(this))
-        return false;
     if (this != from->doc)
         return false;
     d->changeLot(from->wrapped, to);
@@ -442,18 +421,12 @@ QmlLot QmlDocument::lot(int index)
 
 void QmlDocument::deleteLot(QmlLot ii)
 {
-    if (isReadOnly(this))
-        return;
-
     if (!ii.isNull() && ii.doc == this)
         d->removeLot(static_cast<::Lot *>(ii.wrapped));
 }
 
 QmlLot QmlDocument::addLot(QmlItem item, QmlColor color)
 {
-    if (isReadOnly(this))
-        return QmlLot { };
-
     auto di = new ::Lot();
     di->setItem(item.wrappedObject());
     di->setColor(color.wrappedObject());
@@ -527,25 +500,16 @@ QmlDocument *QmlBrickStore::currentDocument() const
 
 QmlDocument *QmlBrickStore::newDocument(const QString &title)
 {
-    if (isReadOnly(this))
-        return nullptr;
-
     return setupDocument(nullptr, ::DocumentIO::create(), title);
 }
 
 QmlDocument *QmlBrickStore::openDocument(const QString &fileName)
 {
-    if (isReadOnly(this))
-        return nullptr;
-
     return setupDocument(::DocumentIO::open(fileName), nullptr);
 }
 
 QmlDocument *QmlBrickStore::importBrickLinkStore(const QString &title)
 {
-    if (isReadOnly(this))
-        return nullptr;
-
     return setupDocument(nullptr, ::DocumentIO::importBrickLinkStore(), title);
 }
 
@@ -613,48 +577,6 @@ QmlDocument *QmlBrickStore::setupDocument(::Window *win, ::Document *doc, const 
     Q_ASSERT(currentDocument()->isWrapperFor(win));
 
     return currentDocument();
-}
-
-QmlColumn::QmlColumn()
-    : QmlColumn(nullptr, -1)
-{ }
-
-QmlColumn::QmlColumn(Window *win, int index)
-    : header(win ? win->headerView() : nullptr)
-    , vi(index)
-{ }
-
-int QmlColumn::position() const
-{
-    return vi;
-}
-
-Document::Field QmlColumn::type() const
-{
-    return static_cast<::Document::Field>(!header ? -1 : header->logicalIndex(vi));
-}
-
-bool QmlColumn::hidden() const
-{
-    return !header ? false : header->isSectionHidden(header->logicalIndex(vi));
-}
-
-int QmlColumn::width() const
-{
-    return !header ? -1 : header->sectionSize(header->logicalIndex(vi));
-}
-
-QString QmlColumn::title() const
-{
-    return !header ? QString{}
-                   : header->model()->headerData(header->logicalIndex(vi), Qt::Horizontal).toString();
-}
-
-Qt::Alignment QmlColumn::alignment() const
-{
-    return !header ? Qt::AlignCenter
-                   : header->model()->headerData(header->logicalIndex(vi), Qt::Horizontal, Qt::TextAlignmentRole)
-                         .value<Qt::Alignment>();
 }
 
 #include "moc_bricklink_wrapper.cpp"
