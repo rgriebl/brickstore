@@ -220,7 +220,7 @@ QString Currency::toString(double value, const QString &currencyCode, int precis
     if (currencyCode.isEmpty())
         return loc.toString(value, 'f', precision);
     else
-        return currencyCode % u' ' % loc.toString(value, 'f', precision);
+        return loc.toString(value, 'f', precision) % u' ' % currencyCode;
 }
 
 double Currency::fromString(const QString &str)

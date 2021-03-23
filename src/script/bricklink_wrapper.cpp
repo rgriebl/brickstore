@@ -539,7 +539,7 @@ QString QmlBrickStore::symbolForCurrencyCode(const QString &currencyCode) const
 
 QString QmlBrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
 {
-    return QLocale::system().toCurrencyString(value, symbol, precision);
+    return Currency::toString(value, symbol, precision);
 }
 
 QString QmlBrickStore::toWeightString(double value, bool showUnit) const
