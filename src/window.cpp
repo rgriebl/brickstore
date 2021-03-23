@@ -2563,14 +2563,14 @@ bool Window::printPages(QPrinter *prt, const LotList &lots)
     int rowsPerPage = int((pageRect.height() - /* all headers and footers */ 2 * rowHeight) / rowHeight);
     int pagesDown = (lots.size() + rowsPerPage - 1) / rowsPerPage;
 
-    QVector<QPair<Document::Field, float>> colWidths;
+    QMap<int, QPair<Document::Field, float>> colWidths;
     for (int f = Document::Index; f < Document::FieldCount; ++f) {
         if (w_header->isSectionHidden(f))
             continue;
         int cw = w_header->sectionSize(f);
         if (cw <= 0)
             continue;
-        colWidths.append(qMakePair(Document::Field(f), cw * prtDpi / winDpi));
+        colWidths.insert(w_header->visualIndex(f), qMakePair(Document::Field(f), cw * prtDpi / winDpi));
     }
     QVector<QVector<QPair<Document::Field, float>>> colWidthsPerPageAcross;
     QVector<QPair<Document::Field, float>> curPageColWidths;
