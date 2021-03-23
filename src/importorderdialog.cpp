@@ -440,14 +440,16 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
 
             QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
             auto matches = regExp.globalMatch(s);
+            if (order->type() == BrickLink::OrderType::Placed) {
+                // skip our own address
+                if (matches.hasNext())
+                    matches.next();
+            }
             if (matches.hasNext()) {
-                matches.next();
-                if (matches.hasNext()) { // skip our own address
-                    QRegularExpressionMatch match = matches.next();
-                    a = match.captured(1);
-                    a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"_l1), "\n"_l1);
-                    order->setAddress(a);
-                }
+                QRegularExpressionMatch match = matches.next();
+                a = match.captured(1);
+                a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"_l1), "\n"_l1);
+                order->setAddress(a);
             }
         }
         if (order->address().isEmpty())
