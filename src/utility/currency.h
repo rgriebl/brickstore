@@ -34,6 +34,7 @@ public:
     QHash<QString, qreal> rates() const;
     QHash<QString, qreal> customRates() const;
     qreal rate(const QString &currencyCode) const;
+    qreal crossRate(const QString &fromCode, const QString &toCode) const;
     qreal customRate(const QString &currencyCode) const;
     QStringList currencyCodes() const;
 

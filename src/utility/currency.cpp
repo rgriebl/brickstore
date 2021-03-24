@@ -131,6 +131,12 @@ qreal Currency::rate(const QString &currencyCode) const
     return m_rates.value(currencyCode);
 }
 
+qreal Currency::crossRate(const QString &fromCode, const QString &toCode) const
+{
+    qreal f = m_rates.value(fromCode);
+    return m_rates.value(toCode) / (qFuzzyIsNull(f) ? 1 : f);
+}
+
 qreal Currency::customRate(const QString &currencyCode) const
 {
     return m_customRates.value(currencyCode);

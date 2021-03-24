@@ -61,8 +61,9 @@ private:
     struct OrderDownload {
         OrderDownload() = default;
         OrderDownload(BrickLink::Order *order, TransferJob *xmlJob, TransferJob *addressJob,
-                      bool combine)
+                      bool combine, bool combineCCode)
             : m_order(order), m_xmlJob(xmlJob), m_addressJob(addressJob), m_combine(combine)
+            , m_combineCCode(combineCCode)
         { }
         BrickLink::Order *m_order;
         TransferJob *m_xmlJob;
@@ -70,7 +71,9 @@ private:
         QByteArray m_xmlData;
         bool m_finished = false;
         bool m_combine;
+        bool m_combineCCode;
     };
     QVector<OrderDownload> m_orderDownloads;
     OrderModel *m_orderModel;
+    QSet<QString> m_selectedCurrencyCodes;
 };

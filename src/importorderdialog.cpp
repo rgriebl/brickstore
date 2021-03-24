@@ -587,19 +587,33 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
             LotList lots;
 
             int orderCount = 0;
+            QString defaultCCode = Config::inst()->defaultCurrencyCode();
 
             for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ) {
                 if (it->m_combine) {
+                    double crate = 0;
+
+                    if (it->m_combineCCode && (it->m_order->currencyCode() != defaultCCode))
+                        crate = Currency::inst()->crossRate(it->m_order->currencyCode(), defaultCCode);
+
                     LotList orderLots = parseOrderXML(it->m_order, it->m_xmlData);
                     if (!orderLots.isEmpty()) {
                         QColor col = QColor::fromHsl(360 * orderCount / combinedCount, 128, 128);
                         for (auto &orderLot : orderLots) {
                             orderLot->setMarkerText(it->m_order->id() % u' ' % it->m_order->otherParty());
                             orderLot->setMarkerColor(col);
+
+                            if (crate) {
+                                orderLot->setCost(orderLot->cost() * crate);
+                                orderLot->setPrice(orderLot->price() * crate);
+                                for (int i = 0; i < 3; ++i)
+                                    orderLot->setTierPrice(i, orderLot->tierPrice(i) * crate);
+                            }
                         }
 
                         lots.append(orderLots);
-                        order->setCurrencyCode(it->m_order->currencyCode());
+                        order->setCurrencyCode(it->m_combineCCode ? defaultCCode
+                                                                  : it->m_order->currencyCode());
                         order->setItemCount(order->itemCount() + it->m_order->itemCount());
                         order->setLotCount(order->lotCount() + it->m_order->lotCount());
                     }
@@ -637,6 +651,18 @@ LotList ImportOrderDialog::parseOrderXML(BrickLink::Order *order, const QByteArr
 
 void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
 {
+    bool combineCCode = false;
+    if (combined && m_selectedCurrencyCodes.size() > 1) {
+        if (MessageBox::question(this, { },
+                                 tr("You have selected multiple orders with differing currencies, which cannot be combined as-is.")
+                                 % "<br><br>"_l1
+                                 % tr("Do you want to continue and convert all prices to your default currency (%1)?")
+                                 .arg(Config::inst()->defaultCurrencyCode())) == QMessageBox::No) {
+            return;
+        }
+        combineCCode = true;
+    }
+
     for (auto idx : rows) {
         auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
 
@@ -667,7 +693,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         auto orderCopy = new BrickLink::Order(*order);
         job->setUserData('o', orderCopy);
         addressJob->setUserData('a', orderCopy);
-        m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combined };
+        m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combined, combineCCode };
 
         m_trans->retrieve(job);
         m_trans->retrieve(addressJob);
@@ -689,23 +715,19 @@ void ImportOrderDialog::checkSelected()
     bool b = w_orders->selectionModel()->hasSelection();
     w_import->setEnabled(b);
     w_showOnBrickLink->setEnabled(b);
+    m_selectedCurrencyCodes.clear();
 
-    // combined import only makes sense for the same type with the same currency
+    // combined import only makes sense for the same type
 
     if (b) {
         BrickLink::OrderType otype = BrickLink::OrderType::Any;
-        QString ccode;
 
         const auto rows = w_orders->selectionModel()->selectedRows();
         if (rows.size() > 1) {
             for (auto idx : rows) {
                 auto order = idx.data(OrderPointerRole).value<const BrickLink::Order *>();
-                if (ccode.isEmpty()) {
-                    ccode = order->currencyCode();
-                } else if (ccode != order->currencyCode()) {
-                    ccode.clear();
-                    break;
-                }
+                m_selectedCurrencyCodes.insert(order->currencyCode());
+
                 if (otype == BrickLink::OrderType::Any) {
                     otype = order->type();
                 } else if (otype != order->type()) {
@@ -713,8 +735,6 @@ void ImportOrderDialog::checkSelected()
                     break;
                 }
             }
-            if (ccode.isEmpty())
-                b = false;
             if (otype == BrickLink::OrderType::Any)
                 b = false;
         } else {
