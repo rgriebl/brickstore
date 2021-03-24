@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.3.3] - 2021-03-25
+### Added
+- Printing a document will now print exactly what you see on the screen, using a preview window.
+  The old print script (and customized scripts) are still available in the `Extras` menu.
+
+### Improvements
+- The marker column can now be saved and reloaded.
+
+
 ## [2021.3.2] - 2021-03-22
 ### Added
 - Experimental support for a marker column that can be used for the multi-order picking: multiple
@@ -15,7 +24,8 @@ All notable changes to this project will be documented in this file.
 - BrickLink Studio models should now import without any missing parts or mismatched colors.
 - Added a quick way to duplicate selected lots: `Edit` > `Duplicate` or `Ctrl+D`.
 - The Windows x64 release will now automatically send anonymized crash reports to
-  [https://sentry.io]. This might be extended to the other platforms if it proves to be useful.
+  https://sentry.io This might be extended to the other platforms if it proves to be useful.
+
 
 ## [2021.3.1] - 2021-03-05
 ### Added
@@ -239,7 +249,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.3...HEAD
+[2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
 [2021.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
 [2021.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.1
 [2021.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.2
