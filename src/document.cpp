@@ -962,6 +962,8 @@ void Document::updateLotFlags(const Lot *lot)
         errors |= (1ULL << TierP3);
     if (lot->tierQuantity(2) && (lot->tierQuantity(2) <= lot->tierQuantity(1)))
         errors |= (1ULL << TierQ3);
+    if (lot->status() == BrickLink::Status::Exclude)
+        errors = 0;
 
     if (auto base = differenceBaseLot(lot)) {
         static const quint64 ignoreMask = 0ULL

@@ -235,9 +235,9 @@ void TaskInfoWidget::delayedSelectionUpdate()
         m_pic->setItemAndColor(m_selection.front()->item(), m_selection.front()->color());
         setCurrentWidget(m_pic);
     } else {
-        Document::Statistics stat(m_win->document(),
-                                  m_selection.isEmpty() ? m_win->document()->lots() : m_selection);
-
+        auto stat = m_win->document()->statistics(m_selection.isEmpty() ? m_win->document()->lots()
+                                                                        : m_selection,
+                                                  false /* ignoreExcluded */);
         QLocale loc;
         QString ccode = m_win->document()->currencyCode();
         QString wgtstr;

@@ -2730,7 +2730,7 @@ LotList Window::exportCheck() const
         }
     }
 
-    if (m_doc->statistics(lots).errors()) {
+    if (m_doc->statistics(lots, true /* ignoreExcluded */).errors()) {
         if (MessageBox::warning(nullptr, { },
                                 tr("This list contains items with errors.<br /><br />Do you really want to export this list?"),
                                 MessageBox::Yes | MessageBox::No, MessageBox::No

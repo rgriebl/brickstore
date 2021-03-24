@@ -106,8 +106,6 @@ public:
     class Statistics
     {
     public:
-        Statistics(const Document *doc, const LotList &list, bool ignoreExcluded = false);
-
         int lots() const             { return m_lots; }
         int items() const            { return m_items; }
         double value() const         { return m_val; }
@@ -120,6 +118,8 @@ public:
         QString currencyCode() const { return m_ccode; }
 
     private:
+        Statistics(const Document *doc, const LotList &list, bool ignoreExcluded);
+
         int m_lots;
         int m_items;
         double m_val;
@@ -130,6 +130,8 @@ public:
         int m_differences;
         int m_incomplete;
         QString m_ccode;
+
+        friend class Document;
     };
 
     // Itemviews API
@@ -207,7 +209,7 @@ public:
     void changeLots(const std::vector<std::pair<Lot *, Lot>> &changes,
                      Document::Field hint = Document::FieldCount);
 
-    Statistics statistics(const LotList &list, bool ignoreExcluded = false) const;
+    Statistics statistics(const LotList &list, bool ignoreExcluded) const;
 
     void setLotFlagsMask(QPair<quint64, quint64> flagsMask);
 
