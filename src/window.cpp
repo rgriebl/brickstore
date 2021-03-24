@@ -2478,36 +2478,31 @@ void Window::print(bool as_pdf)
 void Window::printScriptAction(PrintingScriptAction *printingAction)
 {
     QPrinter prt(QPrinter::HighResolution);
-    QPrintDialog pd(&prt, FrameWork::inst());
+    bool failOnce = false;
+    PrintDialog pd(&prt, this);
+    connect(&pd, &PrintDialog::paintRequested,
+            this, [&](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
+            uint *maxPageCount, double *maxWidth) {
+        try {
+            previewPrt->setFullPage(true);
+            printingAction->executePrint(previewPrt, this, previewPrt->printRange() == QPrinter::Selection);
+        } catch (const Exception &e) {
+            QString msg = e.error();
+            if (msg.isEmpty())
+                msg = tr("Printing failed.");
+            else
+                msg.replace('\n'_l1, "<br>"_l1);
 
-    pd.setOption(QAbstractPrintDialog::PrintToFile);
-    pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
-    pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
-    pd.setOption(QAbstractPrintDialog::PrintPageRange, false);
-
-    if (!selectedLots().isEmpty())
-        pd.setOption(QAbstractPrintDialog::PrintSelection);
-
-    pd.setPrintRange(selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
-                                              : QAbstractPrintDialog::Selection);
-
-    if (pd.exec() != QDialog::Accepted)
-        return;
-
-    prt.setDocName(document()->fileNameOrTitle());
-    prt.setFullPage(true);
-
-    try {
-        printingAction->executePrint(&prt, this, prt.printRange() == QPrinter::Selection);
-    } catch (const Exception &e) {
-        QString msg = e.error();
-        if (msg.isEmpty())
-            msg = tr("Printing failed.");
-        else
-            msg.replace('\n'_l1, "<br>"_l1);
-        MessageBox::warning(nullptr, { }, msg);
-    }
-
+            QMetaObject::invokeMethod(this, [=, &pd, &failOnce]() {
+                pd.close();
+                if (!failOnce) {
+                    failOnce = true;
+                    MessageBox::warning(nullptr, { }, msg);
+                }
+            }, Qt::QueuedConnection);
+        }
+    });
+    pd.exec();
 }
 
 bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,

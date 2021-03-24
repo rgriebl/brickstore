@@ -14,6 +14,7 @@
 #include <QPaintDevice>
 #include <QPainter>
 #include <QPrinter>
+#include <QPaintEngine>
 #include <QDebug>
 #include <QStringBuilder>
 
@@ -388,7 +389,8 @@ bool QmlPrintJob::print(int from, int to)
     QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : nullptr;
 
 #if defined(Q_OS_WIN) // workaround for QTBUG-5363
-    if (prt->fullPage() && !prt->printerName().isEmpty()) { // printing to a real printer
+    if (prt->fullPage() && !prt->printerName().isEmpty()
+            && (p.paintEngine()->type() != QPaintEngine::Picture)) { // printing to a real printer
         qreal l, t, r, b;
         prt->getPageMargins(&l, &t, &r, &b, QPrinter::DevicePixel);
         p.translate(-l, -t);
