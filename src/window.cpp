@@ -37,6 +37,7 @@
 #include <QDebug>
 #include <QColorDialog>
 #include <QPrintPreviewDialog>
+#include "printdialog.h"
 
 #include <QProgressBar>
 #include <QStackedLayout>
@@ -2459,57 +2460,19 @@ void Window::print(bool as_pdf)
     if (m_doc->filteredLots().isEmpty())
         return;
 
-    QString doctitle = m_doc->fileNameOrTitle();
-
     QPrinter prt(QPrinter::HighResolution);
-
-    if (as_pdf) {
-        QString pdfname = doctitle + ".pdf"_l1;
-
-        QDir d(Config::inst()->documentDir());
-        if (d.exists())
-            pdfname = d.filePath(pdfname);
-
-        auto pl = prt.pageLayout();
-        pl.setUnits(QPageLayout::Millimeter);
-        QMarginsF m = pl.minimumMargins();
-        m.setTop(qMax(m.top(), 10.));
-        m.setBottom(qMax(m.bottom(), 10.));
-        m.setLeft(qMax(m.left(), 10.));
-        m.setRight(qMax(m.right(), 10.));
-        pl.setMargins(m);
-        prt.setPageLayout(pl);
-
-        prt.setOutputFileName(pdfname);
-        prt.setOutputFormat(QPrinter::PdfFormat);
-
-    } else {
-        QPrintDialog pd(&prt, FrameWork::inst());
-
-        pd.setOption(QAbstractPrintDialog::PrintToFile);
-        pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
-        pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
-        pd.setOption(QAbstractPrintDialog::PrintPageRange, false);
-
-        if (!selectedLots().isEmpty())
-            pd.setOption(QAbstractPrintDialog::PrintSelection);
-
-        pd.setPrintRange(selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
-                                                  : QAbstractPrintDialog::Selection);
-
-        if (pd.exec() != QDialog::Accepted)
-            return;
-    }
-
-    prt.setDocName(doctitle);
+    if (as_pdf)
+        prt.setPrinterName(QString { });
 
     bool selectionOnly = (prt.printRange() == QPrinter::Selection);
-    QPrintPreviewDialog ppd(&prt);
-    connect(&ppd, &QPrintPreviewDialog::paintRequested,
-            this, [=](QPrinter *previewPrt) {
-        printPages(previewPrt, selectionOnly ? selectedLots() : document()->filteredLots());
+    PrintDialog pd(&prt, this);
+    connect(&pd, &PrintDialog::paintRequested,
+            this, [=](QPrinter *previewPrt, const QList<uint> &pages, float scaleFactor,
+            uint *maxPageCount, float *maxWidth) {
+        printPages(previewPrt, selectionOnly ? selectedLots() : document()->filteredLots(),
+                   pages, scaleFactor, maxPageCount, maxWidth);
     });
-    ppd.exec();
+    pd.exec();
 }
 
 void Window::printScriptAction(PrintingScriptAction *printingAction)
@@ -2547,20 +2510,35 @@ void Window::printScriptAction(PrintingScriptAction *printingAction)
 
 }
 
-bool Window::printPages(QPrinter *prt, const LotList &lots)
+bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,
+                        float scaleFactor, uint *maxPageCount, float *maxWidth)
 {
+    if (maxPageCount)
+        *maxPageCount = 0;
+    if (maxWidth)
+        *maxWidth = 0.;
+
+    if (!prt)
+        return false;
+
+    prt->setDocName(document()->fileNameOrTitle());
+
     QPainter p;
     if (!p.begin(prt))
         return false;
 
-    float prtDpi = (prt->logicalDpiX() + prt->logicalDpiY()) / 2;
-    float winDpi = (w_list->logicalDpiX() + w_list->logicalDpiY()) / 2;
+    float prtDpi = float(prt->logicalDpiX() + prt->logicalDpiY()) / 2;
+    float winDpi = float(w_list->logicalDpiX() + w_list->logicalDpiY()) / 2;
 
     QRectF pageRect = prt->pageLayout().paintRect(QPageLayout::Inch);
     pageRect = QRectF(QPointF(), pageRect.size() * prtDpi);
 
-    float rowHeight = float(w_list->verticalHeader()->defaultSectionSize()) * prtDpi / winDpi;
+    float rowHeight = float(w_list->verticalHeader()->defaultSectionSize()) * prtDpi / winDpi * scaleFactor;
     int rowsPerPage = int((pageRect.height() - /* all headers and footers */ 2 * rowHeight) / rowHeight);
+
+    if (rowsPerPage <= 0)
+        return false;
+
     int pagesDown = (lots.size() + rowsPerPage - 1) / rowsPerPage;
 
     QMap<int, QPair<Document::Field, float>> colWidths;
@@ -2570,8 +2548,12 @@ bool Window::printPages(QPrinter *prt, const LotList &lots)
         int cw = w_header->sectionSize(f);
         if (cw <= 0)
             continue;
-        colWidths.insert(w_header->visualIndex(f), qMakePair(Document::Field(f), cw * prtDpi / winDpi));
+        float fcw = cw * prtDpi / winDpi;
+        if (maxWidth)
+            *maxWidth += fcw;
+        colWidths.insert(w_header->visualIndex(f), qMakePair(Document::Field(f), fcw * scaleFactor));
     }
+
     QVector<QVector<QPair<Document::Field, float>>> colWidthsPerPageAcross;
     QVector<QPair<Document::Field, float>> curPageColWidths;
     float cwUsed = 0;
@@ -2590,19 +2572,34 @@ bool Window::printPages(QPrinter *prt, const LotList &lots)
 
     int pagesAcross = colWidthsPerPageAcross.size();
     int pageCount = 0;
+    bool needNewPage = false;
 
     auto *dd = static_cast<DocumentDelegate *>(w_list->itemDelegate());
 
     p.setFont(w_list->font());
-    QPen gridPen(Qt::darkGray, prtDpi / 96);
+    if (!qFuzzyCompare(scaleFactor, 1.f)) {
+        QFont f = p.font();
+        f.setPointSizeF(f.pointSizeF() * scaleFactor);
+        p.setFont(f);
+    }
+    QPen gridPen(Qt::darkGray, prtDpi / 96 * scaleFactor);
     QColor headerTextColor(Qt::white);
-    float margin = 2 * prtDpi / 96;
+    float margin = 2 * prtDpi / 96 * scaleFactor;
 
-    int li = 0; // lot index
+    if (maxPageCount)
+        *maxPageCount = pagesDown * pagesAcross;
+
     for (int pd = 0; pd < pagesDown; ++pd) {
         for (int pa = 0; pa < pagesAcross; ++pa) {
-            if (pageCount++)
+            pageCount++;
+
+            if (!pages.isEmpty() && !pages.contains(pageCount))
+                continue;
+
+            if (needNewPage)
                 prt->newPage();
+            else
+                needNewPage = true;
 
             // print footer
             {
@@ -2641,13 +2638,14 @@ bool Window::printPages(QPrinter *prt, const LotList &lots)
 
                 dy += rowHeight;
 
+                int li = pd * rowsPerPage; // start at lot index
                 for (int l = li; l < qMin(li + rowsPerPage, lots.size()); ++l) {
                     const Lot *lot = lots.at(l);
                     QModelIndex idx = document()->index(lot, cw.first);
 
                     QStyleOptionViewItem options = w_list->viewOptions();
                     options.rect = QRectF(dx, dy, w, rowHeight).toRect();
-                    options.decorationSize *= (prtDpi / winDpi);
+                    options.decorationSize *= (prtDpi / winDpi) * scaleFactor;
                     options.font = p.font();
                     options.fontMetrics = p.fontMetrics();
                     options.index = idx;
@@ -2667,7 +2665,6 @@ bool Window::printPages(QPrinter *prt, const LotList &lots)
                 firstColumn = false;
             }
         }
-        li += rowsPerPage;
     }
     return true;
 }

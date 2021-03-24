@@ -76,6 +76,7 @@ FORMS = \
   $$PWD/importinventorydialog.ui \
   $$PWD/importcartdialog.ui \
   $$PWD/importorderdialog.ui \
+  $$PWD/printdialog.ui \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectitemdialog.ui \
   $$PWD/settingsdialog.ui \

@@ -651,7 +651,7 @@ void FrameWork::setupScripts()
         m_extensionContextActions.clear();
     });
     connect(ScriptManager::inst(), &ScriptManager::reloaded,
-            this, [this, reloadScripts]() {
+            this, [reloadScripts]() {
         reloadScripts(ScriptManager::inst()->scripts());
     });
     reloadScripts(ScriptManager::inst()->scripts());

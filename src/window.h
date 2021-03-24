@@ -243,7 +243,8 @@ private:
     void resizeColumnDirect(int logical, int oldSize, int newSize);
     friend class ColumnCmd;
 
-    bool printPages(QPrinter *prt, const LotList &lots);
+    bool printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages, float scaleFactor,
+                    uint *maxPageCount, float *maxWidth);
 
 private:
     Document *           m_doc;
