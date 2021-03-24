@@ -2748,10 +2748,49 @@ LotList Window::exportCheck() const
 
 void Window::resizeColumnsToDefault(bool simpleMode)
 {
+    static const QVector<int> columnOrder { // invert
+        Document::Index,
+        Document::Status,
+        Document::Picture,
+        Document::PartNo,
+        Document::Description,
+        Document::Condition,
+        Document::Color,
+        Document::QuantityOrig,
+        Document::QuantityDiff,
+        Document::Quantity,
+        Document::PriceOrig,
+        Document::PriceDiff,
+        Document::Price,
+        Document::Total,
+        Document::Cost,
+        Document::Bulk,
+        Document::Sale,
+        Document::Marker,
+        Document::Comments,
+        Document::Remarks,
+        Document::Category,
+        Document::ItemType,
+        Document::TierQ1,
+        Document::TierP1,
+        Document::TierQ2,
+        Document::TierP2,
+        Document::TierQ3,
+        Document::TierP3,
+        Document::LotId,
+        Document::Retain,
+        Document::Stockroom,
+        Document::Reserved,
+        Document::Weight,
+        Document::YearReleased,
+    };
+
     int em = w_list->fontMetrics().averageCharWidth();
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
-        if (w_header->visualIndex(i) != i)
-            w_header->moveSection(w_header->visualIndex(i), i);
+        int vi = columnOrder.indexOf(i);
+
+        if (w_header->visualIndex(i) != vi)
+            w_header->moveSection(w_header->visualIndex(i), vi);
 
         if (w_header->isSectionAvailable(i))
             w_header->setSectionHidden(i, false);
