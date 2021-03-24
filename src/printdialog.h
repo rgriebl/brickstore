@@ -28,8 +28,8 @@ public:
     PrintDialog(QPrinter *printer, Window *window);
 
 signals:
-    void paintRequested(QPrinter *printer, const QList<uint> &pages, float scaleFactor,
-                        uint *maxPageCount, float *maxWidth);
+    void paintRequested(QPrinter *printer, const QList<uint> &pages, double scaleFactor,
+                        uint *maxPageCount, double *maxWidth);
 
 private:
     void updatePrinter(int idx);
@@ -48,8 +48,8 @@ private:
     QPrintPreviewWidget *w_print_preview;
     QPdfWriter *m_pdfWriter;
     QList<uint> m_pages;
-    float m_scaleFactor = 1.f;
+    double m_scaleFactor = 1.;
     uint m_maxPageCount = 0;
-    float m_maxWidth = 0.f;
+    double m_maxWidth = 0.;
     bool m_saveAsPdf = false;
 };

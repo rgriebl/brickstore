@@ -267,7 +267,7 @@ void PrintDialog::updatePageRange()
         const auto ranges = s.split(','_l1);
         for (const QString &range : ranges) {
             const QStringList fromTo = range.split('-'_l1);
-            uint from, to;
+            uint from = 0, to = 0;
             if (fromTo.size() == 1) {
                 from = to = fromTo.at(0).toUInt(&ok);
             } else if (fromTo.size() == 2) {
@@ -286,6 +286,8 @@ void PrintDialog::updatePageRange()
                     from = fromStr.toUInt(&ok);
                     to = toStr.toUInt(&ok);
                 }
+            } else {
+                ok = false;
             }
             if (ok && ((from < 1) || (to > m_maxPageCount) || (from > to)))
                 ok = false;
@@ -341,22 +343,20 @@ void PrintDialog::updateMargins()
 
 void PrintDialog::updateScaling()
 {
-    float scale = 1.f;
     int percent = 100;
     switch (w_scaleMode->currentIndex()) {
     case 1:
         if (!qFuzzyIsNull(m_maxWidth)) {
             QRectF pr = m_printer->pageLayout().paintRect(QPageLayout::Inch);
-            float dpi = float(m_printer->logicalDpiX() + m_printer->logicalDpiY()) / 2;
-            scale = pr.width() * dpi / m_maxWidth;
-            percent = std::floor(scale * 100);
+            double dpi = double(m_printer->logicalDpiX() + m_printer->logicalDpiY()) / 2;
+            percent = int(pr.width() * dpi / m_maxWidth * 100);
         }
         break;
     case 2:
         percent = w_scalePercent->value();
-        scale = float(percent) / 100.f;
         break;
     }
+    double scale = double(percent) / 100;
 
     if (!qFuzzyCompare(scale, m_scaleFactor)) {
         m_scaleFactor = scale;
