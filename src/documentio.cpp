@@ -1207,6 +1207,8 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
                                   v == "B"_l1 ? BrickLink::Stockroom::B :
                                   v == "C"_l1 ? BrickLink::Stockroom::C
                                               : BrickLink::Stockroom::None); } },
+            { u"MarkerText",   [](auto lot, auto v) { lot->setMarkerText(v); } },
+            { u"MarkerColor",  [](auto lot, auto v) { lot->setMarkerColor(QColor(v)); } },
             { u"OrigPrice",    [&legacyOrigPrice](auto lot, auto v) {
                 Q_UNUSED(lot)
                 legacyOrigPrice.setValue(v.toDouble());
@@ -1484,6 +1486,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
             create(u"TotalWeight", &Lot::totalWeight, [](double d) {
                 return QString::number(d, 'f', 4); }, Required);
         }
+        if (!lot->markerText().isEmpty())
+            create(u"MarkerText", &Lot::markerText, asString, Constant);
+        if (lot->markerColor().isValid())
+            create(u"MarkerColor", &Lot::markerColor, [](QColor c) { return c.name(); }, Constant);
 
         if (base && !baseValues.isEmpty()) {
             xml.writeStartElement("DifferenceBaseValues"_l1);

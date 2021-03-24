@@ -63,16 +63,20 @@ Item = element Item {
 
     element Stockroom    { string "A" | string "B" | string "C" }? &  # default: no stockroom
 
-    # Optional elements, useful to track an item across catalog updates
+    # Optional: useful to track an item across catalog updates
     element ItemName     { xsd:string }? &
     element ItemTypeName { xsd:string }? &
     element ColorName    { xsd:string }? &
     element CategoryID   { xsd:integer }? &
     element CategoryName { xsd:string }? &
 
-    # Deprecated - replaced by the more versatile DifferenceBaseValues
+    # Optional: deprecated - replaced by the more versatile DifferenceBaseValues
     element OrigQty      { xsd:integer }? &   # default: 0
     element OrigPrice    { xsd:double }? &    # default: 0
+
+    # Optional: new elements added in BrickStore 2021.3.3
+    element MarkerText   { xsd:string }? &    # default: no marker text
+    element MarkerColor  { xsd:string }? &    # default: no marker color, format: #RRGGBB
 
     # Difference mode base values:
     # All attributes are optional and have a corresponding element defined above

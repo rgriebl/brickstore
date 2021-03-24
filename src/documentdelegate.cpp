@@ -268,13 +268,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     if (!selected) {
         switch (idx.column()) {
-        case Document::Marker:
-            if (lot->isMarked()) {
-                bg = lot->markerColor();
-                fg = Utility::textColor(bg);
-            }
-            break;
-
         case Document::ItemType:
             if (lot->itemType())
                 bg = shadeColor(lot->itemType()->id(), 0.1);
@@ -346,8 +339,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     case Document::Marker: {
         if (lot->isMarked()) {
             selectionFrame = true;
-            selectionFrameFill = lot->markerColor();
-            fg = Utility::textColor(selectionFrameFill);
+            if (lot->markerColor().isValid()) {
+                selectionFrameFill = lot->markerColor();
+                fg = Utility::textColor(selectionFrameFill);
+            } else {
+                selectionFrameFill = bg;
+            }
         }
         break;
     }
