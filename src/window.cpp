@@ -2484,6 +2484,10 @@ void Window::printScriptAction(PrintingScriptAction *printingAction)
             this, [&](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         try {
+            Q_UNUSED(pages)
+            Q_UNUSED(scaleFactor)
+            Q_UNUSED(maxPageCount)
+            Q_UNUSED(maxWidth)
             previewPrt->setFullPage(true);
             printingAction->executePrint(previewPrt, this, previewPrt->printRange() == QPrinter::Selection);
         } catch (const Exception &e) {

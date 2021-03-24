@@ -73,7 +73,6 @@ public:
         Reserved,
         Weight,
         YearReleased,
-
         Marker,
 
         FieldCount
