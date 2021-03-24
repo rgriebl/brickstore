@@ -1030,10 +1030,8 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 m_progress->setColor("#4ba2d8");
                 t->addWidget(m_progress);
 
-                connect(m_progress, &ProgressCircle::cancelAll, this, []() {
-                    BrickLink::core()->cancelPictureTransfers();
-                    BrickLink::core()->cancelPriceGuideTransfers();
-                });
+                connect(m_progress, &ProgressCircle::cancelAll,
+                        BrickLink::core(), &BrickLink::Core::cancelTransfers);
             }
         } else if (QAction *a = findAction(an)) {
             t->addAction(a);
@@ -1904,8 +1902,7 @@ void FrameWork::cancelAllTransfers(bool force)
     if (force || (MessageBox::question(nullptr, { },
                                        tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?")
                                        ) == QMessageBox::Yes)) {
-        BrickLink::core()->cancelPictureTransfers();
-        BrickLink::core()->cancelPriceGuideTransfers();
+        BrickLink::core()->cancelTransfers();
     }
 }
 

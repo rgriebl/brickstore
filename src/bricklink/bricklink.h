@@ -694,8 +694,7 @@ public slots:
     void setOnlineStatus(bool on);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
-    void cancelPictureTransfers();
-    void cancelPriceGuideTransfers();
+    void cancelTransfers();
 
 signals:
     void databaseDateChanged(const QDateTime &date);

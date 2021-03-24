@@ -767,18 +767,12 @@ const PartColorCode *Core::partColorCode(uint id)
     return nullptr;
 }
 
-void Core::cancelPictureTransfers()
+void Core::cancelTransfers()
 {
+    if (m_transfer)
+        m_transfer->abortAllJobs();
     m_diskloadPool.clear();
     m_diskloadPool.waitForDone();
-    if (m_transfer)
-        m_transfer->abortAllJobs();
-}
-
-void Core::cancelPriceGuideTransfers()
-{
-    if (m_transfer)
-        m_transfer->abortAllJobs();
 }
 
 QString Core::defaultDatabaseName(DatabaseVersion version) const
@@ -798,8 +792,7 @@ bool Core::isDatabaseUpdateNeeded() const
 
 void Core::clear()
 {
-    cancelPictureTransfers();
-    cancelPriceGuideTransfers();
+    cancelTransfers();
 
     m_pg_cache.clear();
     m_pic_cache.clear();

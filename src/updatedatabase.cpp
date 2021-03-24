@@ -24,12 +24,14 @@
 #include "progressdialog.h"
 
 
-#define DATABASE_URL   "http://brickforge.de/brickstore-data/"
+#define DATABASE_URL   "https://brickforge.de/brickstore-data/"
 
 
 UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
     : m_progress(pd)
 {
+    BrickLink::core()->cancelTransfers();
+
     connect(pd, &ProgressDialog::transferFinished,
             this, &UpdateDatabase::gotten);
 
