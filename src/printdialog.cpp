@@ -21,6 +21,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QDebug>
+#include <QAbstractScrollArea>
 
 #include <cmath>
 
@@ -46,6 +47,10 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     setupUi(this);
 
     w_print_preview = new QPrintPreviewWidget(m_printer);
+    if (auto *asa = w_print_preview->findChild<QAbstractScrollArea *>()) {
+        // workaround for QTBUG-20677
+        asa->installEventFilter(this);
+    }
     connect(w_print_preview, &QPrintPreviewWidget::paintRequested,
             this, [=](QPrinter *prt) {
         emit paintRequested(prt, m_pages, m_scaleFactor, &m_maxPageCount, &m_maxWidth);
@@ -82,11 +87,8 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     connect(w_page_double, &QToolButton::clicked,
             w_print_preview, &QPrintPreviewWidget::setAllPagesViewMode);
 
-    // can't stay in the fit-to-width mode because of QTBUG-20677
-    connect(w_fit_width, &QToolButton::clicked, this, [=]() {
-        w_print_preview->fitToWidth();
-        w_print_preview->setZoomMode(QPrintPreviewWidget::CustomZoom);
-    });
+    connect(w_fit_width, &QToolButton::clicked,
+            w_print_preview, &QPrintPreviewWidget::fitToWidth);
     connect(w_fit_best, &QToolButton::clicked,
             w_print_preview, &QPrintPreviewWidget::fitInView);
 
@@ -172,6 +174,19 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
         w_printers->setCurrentIndex(defaultIdx);
         updatePrinter(defaultIdx);
     }, Qt::QueuedConnection);
+}
+
+bool PrintDialog::eventFilter(QObject *o, QEvent *e)
+{
+    if (qobject_cast<QAbstractScrollArea *>(o)) {
+        if (e->type() == QEvent::MetaCall) {
+            if (++m_freezeLoopWorkaround > 11)
+                return true;
+        } else {
+            m_freezeLoopWorkaround = 0;
+        }
+    }
+    return false;
 }
 
 void PrintDialog::updatePrinter(int idx)

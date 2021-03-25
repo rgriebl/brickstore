@@ -31,6 +31,9 @@ signals:
     void paintRequested(QPrinter *printer, const QList<uint> &pages, double scaleFactor,
                         uint *maxPageCount, double *maxWidth);
 
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override;
+
 private:
     void updatePrinter(int idx);
     void updatePageRange();
@@ -52,4 +55,5 @@ private:
     uint m_maxPageCount = 0;
     double m_maxWidth = 0.;
     bool m_saveAsPdf = false;
+    uint m_freezeLoopWorkaround = 0;
 };
