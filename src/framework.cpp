@@ -461,6 +461,7 @@ FrameWork::FrameWork(QWidget *parent)
                      "document_new",
                      "document_open",
                      "document_save",
+                     "document_print",
                      "-",
                      "document_import",
                      "document_export",
