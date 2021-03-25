@@ -694,7 +694,6 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
     QString wantedlist;
 
     if (MessageBox::getString(nullptr, { }, tr("Enter the ID number of Wanted List (leave blank for the default Wanted List)"), wantedlist)) {
-        static QLocale c = QLocale::c();
         XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
         for (const Lot *lot : lots) {
@@ -709,7 +708,7 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
             if (lot->quantity())
                 xml.createText("MINQTY", QString::number(lot->quantity()));
             if (!qFuzzyIsNull(lot->price()))
-                xml.createText("MAXPRICE", c.toCurrencyString(lot->price(), { }, 3));
+                xml.createText("MAXPRICE", QString::number(lot->price(), 'f', 3));
             if (!lot->remarks().isEmpty())
                 xml.createText("REMARKS", lot->remarks());
             if (lot->condition() == BrickLink::Condition::New)
@@ -764,7 +763,6 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
             return;
     }
 
-    static QLocale c = QLocale::c();
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
@@ -792,9 +790,9 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
             xml.createEmpty("DELETE");
 
         if (!qFuzzyCompare(base->price(), lot->price()))
-            xml.createText("PRICE", QString::number(lot->price(), {}, 3));
+            xml.createText("PRICE", QString::number(lot->price(), 'f', 3));
         if (!qFuzzyCompare(base->cost(), lot->cost()))
-            xml.createText("MYCOST", QString::number(lot->cost(), {}, 3));
+            xml.createText("MYCOST", QString::number(lot->cost(), 'f', 3));
         if (base->condition() != lot->condition())
             xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
         if (base->bulkQuantity() != lot->bulkQuantity())
@@ -811,15 +809,15 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
         if (base->tierQuantity(0) != lot->tierQuantity(0))
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
         if (!qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0)))
-            xml.createText("TP1", c.toCurrencyString(lot->tierPrice(0), {}, 3));
+            xml.createText("TP1", QString::number(lot->tierPrice(0), 'f', 3));
         if (base->tierQuantity(1) != lot->tierQuantity(1))
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
         if (!qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1)))
-            xml.createText("TP2", c.toCurrencyString(lot->tierPrice(1), {}, 3));
+            xml.createText("TP2", QString::number(lot->tierPrice(1), 'f', 3));
         if (base->tierQuantity(2) != lot->tierQuantity(2))
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
         if (!qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2)))
-            xml.createText("TP3", c.toCurrencyString(lot->tierPrice(2), {}, 3));
+            xml.createText("TP3", QString::number(lot->tierPrice(2), 'f', 3));
 
         if (base->subCondition() != lot->subCondition()) {
             const char16_t *st = nullptr;
@@ -858,7 +856,6 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
 
 QString DocumentIO::toBrickLinkXML(const LotList &lots)
 {
-    static QLocale c = QLocale::c();
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
@@ -871,7 +868,7 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
         xml.createText("COLOR", QString::number(lot->color()->id()));
         xml.createText("CATEGORY", QString::number(lot->category()->id()));
         xml.createText("QTY", QString::number(lot->quantity()));
-        xml.createText("PRICE", c.toCurrencyString(lot->price(), {}, 3));
+        xml.createText("PRICE", QString::number(lot->price(), 'f', 3));
         xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
 
         if (lot->bulkQuantity() != 1)   xml.createText("BULK", QString::number(lot->bulkQuantity()));
@@ -880,16 +877,16 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
         if (!lot->remarks().isEmpty())  xml.createText("REMARKS", lot->remarks());
         if (lot->retain())              xml.createText("RETAIN", u"Y");
         if (!lot->reserved().isEmpty()) xml.createText("BUYERUSERNAME", lot->reserved());
-        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", c.toCurrencyString(lot->cost(), {}, 3));
+        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", QString::number(lot->cost(), 'f', 3));
         if (lot->hasCustomWeight())     xml.createText("MYWEIGHT", QString::number(lot->weight(), 'f', 4));
 
         if (lot->tierQuantity(0)) {
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
-            xml.createText("TP1", c.toCurrencyString(lot->tierPrice(0), {}, 3));
+            xml.createText("TP1", QString::number(lot->tierPrice(0), 'f', 3));
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
-            xml.createText("TP2", c.toCurrencyString(lot->tierPrice(1), {}, 3));
+            xml.createText("TP2", QString::number(lot->tierPrice(1), 'f', 3));
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
-            xml.createText("TP3", c.toCurrencyString(lot->tierPrice(2), {}, 3));
+            xml.createText("TP3", QString::number(lot->tierPrice(2), 'f', 3));
         }
 
         if (lot->subCondition() != BrickLink::SubCondition::None) {

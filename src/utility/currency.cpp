@@ -168,7 +168,6 @@ void Currency::updateRates(bool silent)
                 auto r = reply->readAll();
                 QXmlStreamReader reader(r);
                 QHash<QString, qreal> newRates;
-                static QLocale c = QLocale::c();
 
                 while (!reader.atEnd()) {
                     if (reader.readNext() == QXmlStreamReader::StartElement &&
@@ -176,7 +175,7 @@ void Currency::updateRates(bool silent)
                         reader.attributes().hasAttribute("currency"_l1)) {
 
                         QString currency = reader.attributes().value("currency"_l1).toString();
-                        qreal rate = c.toDouble(reader.attributes().value("rate"_l1).toString());
+                        qreal rate = reader.attributes().value("rate"_l1).toDouble();
 
                         if (currency.length() == 3 && rate > 0)
                             newRates.insert(currency, rate);

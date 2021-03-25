@@ -227,12 +227,10 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
             item->m_year = 0;
         }
 
-        if (itt->hasWeight()) {
-            static QLocale c = QLocale::c();
-            item->m_weight = c.toFloat(p.elementText(e, "ITEMWEIGHT"));
-        } else {
+        if (itt->hasWeight())
+            item->m_weight = p.elementText(e, "ITEMWEIGHT").toFloat();
+        else
             item->m_weight = 0;
-        }
 
         try {
             item->m_color = findColor(p.elementText(e, "IMAGECOLOR").toUInt());
