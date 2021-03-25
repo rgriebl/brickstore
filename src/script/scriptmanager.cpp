@@ -122,11 +122,8 @@ bool ScriptManager::reload()
 
     clearScripts();
 
-    QStringList spath = { QStringLiteral(":/extensions") };
-
-    spath << Application::inst()->externalResourceSearchPath("extensions"_l1);
-
-    QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QStringList spath = { ":/extensions"_l1 };
+    QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + "/extensions"_l1);
 

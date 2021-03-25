@@ -26,6 +26,7 @@
 #include <QPlainTextEdit>
 #include <QStringBuilder>
 #include <QLoggingCategory>
+#include <QCommandLineParser>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -131,11 +132,18 @@ Application::Application(int &_argc, char **_argv)
     }
 #endif
 
-    new QApplication(_argc, _argv);
+    (void) new QApplication(_argc, _argv);
+
+    QCommandLineParser clp;
+    clp.addHelpOption();
+    clp.addVersionOption();
+    clp.addOption({ "load-translation"_l1, "Load the specified translation (testing only)."_l1, "qm-file"_l1 });
+    clp.addPositionalArgument("files"_l1, "The BSX documents to open, optionally."_l1, "[files...]"_l1);
+    clp.process(QCoreApplication::arguments());
 
     setupLogging();
     setupSentry();
-    qApp->installEventFilter(this);
+    QCoreApplication::instance()->installEventFilter(this);
     setIconTheme();
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
@@ -163,7 +171,7 @@ Application::Application(int &_argc, char **_argv)
 #endif
 
     m_default_fontsize = QGuiApplication::font().pointSizeF();
-    qApp->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
+    QCoreApplication::instance()->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
     auto setFontSizePercentLambda = [this](int p) {
         QFont f = QApplication::font();
@@ -209,11 +217,11 @@ Application::Application(int &_argc, char **_argv)
         BrickLink::core()->setLDrawDataPath(LDraw::core()->dataPath());
     }
 
-    updateTranslations();
+    updateTranslations(clp.value("load-translation"_l1));
     connect(Config::inst(), &Config::languageChanged,
-            this, &Application::updateTranslations);
+            this, []() { Application::inst()->updateTranslations();; });
 
-    m_files_to_open << QCoreApplication::arguments().mid(1);
+    m_files_to_open << clp.positionalArguments();
 
     MessageBox::setDefaultParent(FrameWork::inst());
 
@@ -244,82 +252,49 @@ Application::~Application()
     shutdownSentry();
 }
 
-QStringList Application::externalResourceSearchPath(const QString &subdir) const
-{
-    static QStringList baseSearchPath;
-    const bool isDeveloperBuild =
-#if defined(QT_NO_DEBUG)
-            false;
-#else
-            true;
-#endif
-
-    if (baseSearchPath.isEmpty()) {
-        QString appdir = QCoreApplication::applicationDirPath();
-#if defined(Q_OS_WINDOWS)
-        baseSearchPath << appdir;
-
-        if (isDeveloperBuild)
-            baseSearchPath << appdir + "/.."_l1;
-#elif defined(Q_OS_MACOS)
-        Q_UNUSED(isDeveloperBuild)
-        baseSearchPath << appdir + "/../Resources"_l1;
-#elif defined(Q_OS_UNIX)
-        baseSearchPath << QLatin1String(BS_STR(INSTALL_PREFIX) "/share/brickstore");
-
-        if (isDeveloperBuild)
-            baseSearchPath << appdir;
-#endif
-    }
-    if (subdir.isEmpty()) {
-        return baseSearchPath;
-    } else {
-        QStringList searchPath;
-        for (const QString &bsp : qAsConst(baseSearchPath))
-            searchPath << bsp + QDir::separator() + subdir;
-        return searchPath;
-    }
-}
-
 QPlainTextEdit *Application::logWidget() const
 {
     return m_logWidget;
 }
 
-void Application::updateTranslations()
+void Application::updateTranslations(const QString &translationOverride)
 {
     QString language = Config::inst()->language();
     if (language.isEmpty())
         return;
 
-    if (m_trans_qt)
-        QCoreApplication::removeTranslator(m_trans_qt.data());
-    if (m_trans_brickstore)
-        QCoreApplication::removeTranslator(m_trans_brickstore.data());
-    m_trans_qt.reset(new QTranslator());
-    m_trans_brickstore.reset(new QTranslator());
-    if (!m_trans_brickstore_en)
-        m_trans_brickstore_en.reset(new QTranslator());
-
     QString i18n = ":/i18n"_l1;
 
-    static bool once = false; // always load the english plural forms
+    static bool once = false; // always load english
     if (!once) {
-        if (m_trans_brickstore_en->load("brickstore_en"_l1, i18n))
-            QCoreApplication::installTranslator(m_trans_brickstore_en.data());
+        auto transQt = new QTranslator(this);
+        if (transQt->load("qtbase_en"_l1, i18n))
+            QCoreApplication::installTranslator(transQt);
+        auto transBrickStore = new QTranslator(this);
+        if (transBrickStore->load("brickstore_en"_l1, i18n))
+            QCoreApplication::installTranslator(transBrickStore);
         once = true;
     }
 
+    m_trans_qt.reset(new QTranslator);
+    m_trans_brickstore.reset(new QTranslator);
+
     if (language != "en"_l1) {
         if (m_trans_qt->load("qtbase_"_l1 + language, i18n))
-            QCoreApplication::installTranslator(m_trans_qt.data());
-        else
-            m_trans_qt.reset();
+            QCoreApplication::installTranslator(m_trans_qt.get());
+    }
+    if ((language != "en"_l1) || (!translationOverride.isEmpty())) {
+        QString translationFile = "brickstore_"_l1 % language;
+        QString translationDir = i18n;
 
-        if (m_trans_brickstore->load("brickstore_"_l1 + language, i18n))
-            QCoreApplication::installTranslator(m_trans_brickstore.data());
-        else
-            m_trans_brickstore.reset();
+        QFileInfo qm(translationOverride);
+        if (qm.isReadable()) {
+            translationFile = qm.fileName();
+            translationDir = qm.absolutePath();
+        }
+
+        if (m_trans_brickstore->load(translationFile, translationDir))
+            QCoreApplication::installTranslator(m_trans_brickstore.get());
     }
 }
 
@@ -361,7 +336,9 @@ bool Application::eventFilter(QObject *o, QEvent *e)
                 QMetaObject::invokeMethod(this, [tbptr]() {
                     if (tbptr && tbptr->autoRaise()) {
                         QPalette pal = tbptr->palette();
-                        pal.setColor(QPalette::Button, Utility::premultiplyAlpha(qApp->palette("QAbstractItemView").color(QPalette::Highlight)));
+                        pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
+                                         QCoreApplication::instance()->palette("QAbstractItemView")
+                                         .color(QPalette::Highlight)));
                         tbptr->setStyle(fusion);
                         tbptr->setPalette(pal);
                     }

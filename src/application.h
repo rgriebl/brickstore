@@ -39,12 +39,10 @@ public:
 
     bool isOnline() const;
 
-    QStringList externalResourceSearchPath(const QString &subdir = QString()) const;
-
     QPlainTextEdit *logWidget() const;
 
 public slots:
-    void updateTranslations();
+    void updateTranslations(const QString &translationOverride = { });
 
 signals:
     void openDocument(const QString &);
@@ -78,7 +76,6 @@ private:
     qreal m_default_fontsize = 0;
 
     QScopedPointer<QTranslator> m_trans_qt;
-    QScopedPointer<QTranslator> m_trans_brickstore_en;
     QScopedPointer<QTranslator> m_trans_brickstore;
 
     QPointer<QPlainTextEdit> m_logWidget = nullptr;
