@@ -158,7 +158,9 @@ void Currency::updateRates(bool silent)
         m_nam = new QNetworkAccessManager(this);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
         connect(m_nam, &QNetworkAccessManager::finished,
-                this, [this, silent](QNetworkReply *reply) {
+                this, [this](QNetworkReply *reply) {
+            bool silent = reply->property("bsSilent").toBool();
+
             if (reply->error() != QNetworkReply::NoError) {
                 if (Application::inst()->isOnline() && !silent)
                     MessageBox::warning(nullptr, { }, tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
@@ -201,7 +203,9 @@ void Currency::updateRates(bool silent)
         });
     }
     if (Application::inst()->isOnline()) {
-        m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
+        auto reply = m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
+        if (reply && silent)
+            reply->setProperty("bsSilent", true);
     }
 }
 
