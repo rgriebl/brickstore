@@ -385,6 +385,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_cut",
                                       "edit_copy",
                                       "edit_paste",
+                                      "edit_paste_silent",
                                       "edit_duplicate",
                                       "edit_delete",
                                       "-",
@@ -741,6 +742,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
+        { "edit_paste_silent",              tr("Paste silent"),                       tr("Ctrl+Shift+V", "Edit|Paste silent") },
         { "edit_duplicate",                 tr("Duplicate"),                          tr("Ctrl+D", "Edit|Duplicate") },
         { "edit_delete",                    tr("Delete"),                             QKeySequence::Delete },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
@@ -749,7 +751,7 @@ void FrameWork::translateActions()
         { "edit_partoutitems",              tr("Part out Item..."),                   },
         { "edit_copy_fields",               tr("Copy values from document..."),       },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
-        { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A") },
+        { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|Select None") },
         //                                                   QKeySequence::Deselect is only mapped on Linux
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
         { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
@@ -1188,6 +1190,7 @@ void FrameWork::createActions()
     a = newQAction(this, "edit_paste", NeedDocument);
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
             &QShortcut::activated, a, &QAction::trigger);
+    (void) newQAction(this, "edit_paste_silent", NeedSelection(1));
     (void) newQAction(this, "edit_duplicate", NeedSelection(1));
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 

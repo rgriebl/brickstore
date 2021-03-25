@@ -124,6 +124,7 @@ public slots:
     void on_edit_cut_triggered();
     void on_edit_copy_triggered();
     void on_edit_paste_triggered();
+    void on_edit_paste_silent_triggered();
     void on_edit_duplicate_triggered();
     void on_edit_delete_triggered();
 

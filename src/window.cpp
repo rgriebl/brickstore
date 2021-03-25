@@ -1148,6 +1148,13 @@ void Window::on_edit_paste_triggered()
     }
 }
 
+void Window::on_edit_paste_silent_triggered()
+{
+    LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
+    if (!lots.isEmpty())
+        addLots(lots, AddLotMode::AddAsNew);
+}
+
 void Window::on_edit_duplicate_triggered()
 {
     applyTo(selectedLots(), [=](const auto &from, auto &to) {
