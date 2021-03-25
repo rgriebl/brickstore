@@ -6,10 +6,15 @@ All notable changes to this project will be documented in this file.
 ## [2021.3.3] - 2021-03-25
 ### Added
 - Printing a document will now print exactly what you see on the screen, using a preview window.
-  The old print script (and customized scripts) are still available in the `Extras` menu.
+  The old print script (as well as any customized print scripts) are still available via the 
+  `Extras` menu.
+- Multiple orders with differing currencies can now be combined on import.
 
 ### Improvements
-- The marker column can now be saved and reloaded.
+- The marker column is now saved and restored.
+- In addition to the in-place duplication, there is now also a `Paste silent` functionality which
+  works just like `Paste`, but never asks about overwriting or consolidating - it just appends to
+  the document.
 
 
 ## [2021.3.2] - 2021-03-22
@@ -250,7 +255,7 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 
 
 [Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.3...HEAD
-[2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
+[2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.3
 [2021.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
 [2021.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.1
 [2021.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.2
