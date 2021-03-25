@@ -2720,27 +2720,15 @@ void Window::on_document_export_bl_wantedlist_clip_triggered()
 
 LotList Window::exportCheck() const
 {
-    LotList lots = m_doc->lots();
-
-    if (!selectedLots().isEmpty() && (selectedLots().count() != m_doc->lots().count())) {
-        if (MessageBox::question(nullptr, { },
-                                 tr("There are %n item(s) selected.<br /><br />Do you want to export only these items?",
-                                    nullptr, selectedLots().count()),
-                                 QMessageBox::Yes | QMessageBox::No, MessageBox::Yes
-                                 ) == QMessageBox::Yes) {
-            lots = selectedLots();
-        }
-    }
+    const LotList lots = selectedLots().isEmpty() ? m_doc->lots() : selectedLots();
 
     if (m_doc->statistics(lots, true /* ignoreExcluded */).errors()) {
-        if (MessageBox::warning(nullptr, { },
-                                tr("This list contains items with errors.<br /><br />Do you really want to export this list?"),
-                                MessageBox::Yes | MessageBox::No, MessageBox::No
-                                ) != MessageBox::Yes) {
-            lots.clear();
+        if (MessageBox::question(nullptr, { },
+                                 tr("This list contains items with errors.<br /><br />Do you really want to export this list?"))
+                != MessageBox::Yes) {
+            return { };
         }
     }
-
     return m_doc->sortLotList(lots);
 }
 
