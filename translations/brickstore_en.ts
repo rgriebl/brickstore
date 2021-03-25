@@ -828,13 +828,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Could not open file %1 for reading.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message numerus="yes">
-        <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
-        <translation type="vanished">
-            <numerusform>This file contains one unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
-            <numerusform>This file contains %n unknown items.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
-        </translation>
-    </message>
     <message>
         <source>LDraw Models</source>
         <translation type="unfinished"></translation>
@@ -1984,6 +1977,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Failed to import order %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>You have selected multiple orders with differing currencies, which cannot be combined as-is.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to continue and convert all prices to your default currency (%1)?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>IncDecPricesDialog</name>
@@ -2264,14 +2265,154 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>PrintingScriptModel</name>
+    <name>PrintDialog</name>
     <message>
-        <source>Name</source>
+        <source>Print preview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show first page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show previous page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show next page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show last page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show only one page at a time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show all pages side-by-side</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to window width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit one full page to window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Zoom in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Custom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid page range, use e.g. 1-5,8,11-13</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Layout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Portrait</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Landscape</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Black and white</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paper size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Margins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Minimum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print using the system dialog...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save as PDF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PDF Documents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PDF document already exists and is not writable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>e.g. 1-5,8,11-13</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>PrintingScriptTemplate</name>
+    <name>PrintingScriptAction</name>
     <message>
         <source>The printing script does not define a &apos;printFunction&apos;.</source>
         <translation type="unfinished"></translation>
@@ -2574,17 +2715,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Merge the text from the source and the destination</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>SelectPrintingTemplateDialog</name>
-    <message>
-        <source>Select Print Template</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Select a template for printing</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3209,18 +3339,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save PDF as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PDF Documents (*.pdf)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The PDF document already exists and is not writable.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3239,13 +3357,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <source>There are %n item(s) selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
-        <translation>
-            <numerusform>There is one item selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only this item?</numerusform>
-            <numerusform>There are %n items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
         <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>The quantity of one lot is not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
@@ -3254,10 +3365,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Couldn&apos;t find any print scripts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3367,6 +3474,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Enter the new marker text for all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Page %1/%2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
