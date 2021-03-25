@@ -345,7 +345,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="w_pageSelect"/>
+          <widget class="QLineEdit" name="w_pageSelect">
+           <property name="placeholderText">
+            <string>e.g. 1-5,8,11-13</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="w_pageSelectWarning">
@@ -357,6 +361,9 @@
            </property>
            <property name="text">
             <string>Invalid page range, use e.g. 1-5,8,11-13</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

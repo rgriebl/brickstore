@@ -154,12 +154,16 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     int defaultIdx = -1;
     QSignalBlocker blocker(w_printers); // delay initialization
     for (const QPrinterInfo &printer : printers) {
-        w_printers->addItem(printer.description(), printer.printerName());
+        w_printers->addItem(QIcon::fromTheme("document-print"_l1), printer.description(),
+                            printer.printerName());
         if (printer.isDefault())
             defaultIdx = idx;
         ++idx;
     }
-    w_printers->addItem(tr("Save as PDF"), QString::fromLatin1("__PDF__"));
+    if (w_printers->count())
+        w_printers->insertSeparator(w_printers->count());
+    w_printers->addItem(QIcon::fromTheme("document-save-as"_l1), tr("Save as PDF"),
+                        QString::fromLatin1("__PDF__"));
 
     if ((defaultIdx == -1) || (printer->outputFormat() == QPrinter::PdfFormat))
         defaultIdx = w_printers->count() - 1;
@@ -397,7 +401,7 @@ void PrintDialog::print()
         if (d.exists())
             pdfname = d.filePath(pdfname);
 
-        pdfname = QFileDialog::getSaveFileName(this, tr("Save PDF as"), pdfname,
+        pdfname = QFileDialog::getSaveFileName(this, tr("Save as PDF"), pdfname,
                                                tr("PDF Documents") % u" (*" % suffix % u")");
         if (pdfname.isEmpty())
             return;

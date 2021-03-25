@@ -36,9 +36,6 @@
 #include <QRegularExpression>
 #include <QDebug>
 #include <QColorDialog>
-#include <QPrintPreviewDialog>
-#include "printdialog.h"
-
 #include <QProgressBar>
 #include <QStackedLayout>
 
@@ -59,6 +56,7 @@
 #include "exception.h"
 #include "changecurrencydialog.h"
 
+#include "printdialog.h"
 #include "selectcolordialog.h"
 #include "selectitemdialog.h"
 #include "selectdocumentdialog.h"
