@@ -337,7 +337,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
                     if (tbptr && tbptr->autoRaise()) {
                         QPalette pal = tbptr->palette();
                         pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
-                                         QCoreApplication::instance()->palette("QAbstractItemView")
+                                         qApp->palette("QAbstractItemView")
                                          .color(QPalette::Highlight)));
                         tbptr->setStyle(fusion);
                         tbptr->setPalette(pal);
