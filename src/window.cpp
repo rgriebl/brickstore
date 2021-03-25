@@ -1157,12 +1157,23 @@ void Window::on_edit_paste_silent_triggered()
 
 void Window::on_edit_duplicate_triggered()
 {
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
-        m_doc->insertLotsAfter(&from, { new Lot(from) });
+    if (selectedLots().isEmpty())
+        return;
+
+    QItemSelection newSelection;
+
+    applyTo(selectedLots(), [this, &newSelection](const auto &from, auto &to) {
+        auto l = new Lot(from);
+        m_doc->insertLotsAfter(&from, { l });
+        QModelIndex idx = m_doc->index(l);
+        newSelection.merge(QItemSelection(idx, idx), QItemSelectionModel::Select);
         // this isn't necessary and we should just return false, but the counter would be wrong then
         to = from;
         return true;
     });
+
+    w_list->selectionModel()->select(newSelection, QItemSelectionModel::ClearAndSelect
+                                     | QItemSelectionModel::Rows | QItemSelectionModel::Current);
 }
 
 void Window::on_edit_delete_triggered()
