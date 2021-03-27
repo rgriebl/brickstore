@@ -61,7 +61,7 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     });
 
     QVBoxLayout *containerLayout = new QVBoxLayout(w_print_preview_container);
-    containerLayout->setMargin(0);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addWidget(w_print_preview);
 
     w_pageSelect->hide();
@@ -110,7 +110,12 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     connect(w_layout, QOverload<int>::of(&QComboBox::currentIndexChanged),
             [=](int idx) {
         if (w_print_preview)
-            w_print_preview->setOrientation(idx == 0 ? QPrinter::Portrait: QPrinter::Landscape);
+            w_print_preview->setOrientation(idx == 0 ?
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+                                                QPrinter::Portrait: QPrinter::Landscape);
+#else
+                                                QPageLayout::Orientation::Portrait : QPageLayout::Orientation::Landscape);
+#endif
     });
     connect(w_color, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PrintDialog::updateColorMode);
@@ -319,7 +324,11 @@ void PrintDialog::updatePageRange()
         }
     }
     if (ok) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
         m_pages = pages.toList();
+#else
+        m_pages = QList<uint>(pages.cbegin(), pages.cend());
+#endif
         w_print_preview->updatePreview();
     }
     w_pageSelectWarning->setVisible(!ok);

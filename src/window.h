@@ -28,6 +28,7 @@ QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 QT_FORWARD_DECLARE_CLASS(QPrinter)
+QT_FORWARD_DECLARE_CLASS(QMenu)
 class FrameWork;
 class UndoStack;
 class TableView;

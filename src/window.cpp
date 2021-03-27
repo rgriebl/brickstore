@@ -2608,7 +2608,7 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
         for (int pa = 0; pa < pagesAcross; ++pa) {
             pageCount++;
 
-            if (!pages.isEmpty() && !pages.contains(pageCount))
+            if (!pages.isEmpty() && !pages.contains(uint(pageCount)))
                 continue;
 
             if (needNewPage)
@@ -2658,7 +2658,12 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
                     const Lot *lot = lots.at(l);
                     QModelIndex idx = document()->index(lot, cw.first);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                     QStyleOptionViewItem options = w_list->viewOptions();
+#else
+                    QStyleOptionViewItem options;
+                    w_list->initViewItemOption(&options);
+#endif
                     options.rect = QRectF(dx, dy, w, rowHeight).toRect();
                     options.decorationSize *= (prtDpi / winDpi) * scaleFactor;
                     options.font = p.font();
