@@ -583,20 +583,29 @@ void Application::messageHandler(QtMsgType msgType, const QMessageLogContext &ms
         filename = filename.mid(pos + 1);
     }
 
-    QString str = R"(<span style="color:#)"_l1 % QLatin1String(msgTypeColor[msgType])
-            % R"(;background-color:#)"_l1 % QLatin1String(msgTypeBgColor[msgType]) % R"(;">)"_l1
-            % QLatin1String(msgTypeNames[msgType]) % R"(</span>)"_l1
-            % R"(&nbsp;<span style="color:#)"_l1
-            % QLatin1String(categoryColor[qHashBits(msgCtx.category, qstrlen(msgCtx.category), 1) % 6])
-            % R"(;font-weight:bold;">)"_l1
-            % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1 % msg;
-    if (!filename.isEmpty()) {
-        str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
-                % R"(;font-weight:bold;">)"_l1 % filename
-                % R"(</span>, line <span style="color:#)"_l1 % QLatin1String(lineColor)
-                % R"(;font-weight:bold;">)"_l1 % QString::number(msgCtx.line) % R"(</span>)"_l1;
+    QString str = "<pre>"_l1;
+    const auto lines = msg.splitRef('\n'_l1);
+    for (int i = 0; i < lines.count(); ++i) {
+        str = str % R"(<span style="color:#)"_l1 % QLatin1String(msgTypeColor[msgType])
+                % R"(;background-color:#)"_l1 % QLatin1String(msgTypeBgColor[msgType]) % R"(;">)"_l1
+                % QLatin1String(msgTypeNames[msgType]) % R"(</span>)"_l1
+                % R"(&nbsp;<span style="color:#)"_l1
+                % QLatin1String(categoryColor[qHashBits(msgCtx.category, qstrlen(msgCtx.category), 1) % 6])
+                % R"(;font-weight:bold;">)"_l1
+                % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1 % lines.at(i);
+        if (i == (lines.count() - 1)) {
+            if (!filename.isEmpty()) {
+                str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
+                        % R"(;font-weight:bold;">)"_l1 % filename
+                        % R"(</span>, line <span style="color:#)"_l1 % QLatin1String(lineColor)
+                        % R"(;font-weight:bold;">)"_l1 % QString::number(msgCtx.line) % R"(</span></pre>)"_l1;
+            } else {
+                str = str % "</pre>"_l1;
+            }
+        } else {
+            str = str % "&#x21a9;<br>"_l1;
+        }
     }
-
     QMetaObject::invokeMethod(s_inst->m_logWidget, "appendHtml", Qt::QueuedConnection,
                               Q_ARG(QString, str));
 }
