@@ -1,255 +1,238 @@
-function load ( )
-{
-    var res = {};
-    res["name"] = "Comments, no price";
-    return res;
-}
+import BrickStore 1.0
+import QtQuick 2.12
 
-function printDoc ( )
-{
-    if ( !Document. items. length )
-        return;
+Script {
+    name: "Print script (Comments, no price)"
+    author: "GreatBrickLab"
+    version: "0.2"
+    type: Script.ExtensionScript
 
-    var ps = {};
-    ps. x = 20.0;
-    ps. y = 10.0;
-    ps. w = Job. paperSize.width - ( 2 * ps. x );
-    ps. h = Job. paperSize.height - ( 2 * ps. y );
-    ps. pos = 0;
+    PrintingScriptAction {
+        text: "Print: Comments, no price"
+        printFunction: printJob
+    }
 
-    var pagecount = 0;
-    var itemh = 15;
-    var pageh = 10;
-    var reporth = 7.5;
-    var listh = 7.5;
-    var items_left = Document. items. length;
-    var itemflip = false;
-    var rfooter = false;
-    var page;
+    function printJob(job, doc, items)
+    {
+        if (!items.length)
+            return
 
-    var pagestat = {};
+        let ps = {};
+        ps.doc = doc
+        ps.ccode = BrickStore.symbolForCurrencyCode(doc.currencyCode)
+        ps. x = 20.0;
+        ps. y = 10.0;
+        ps. w = job. paperSize.width - ( 2 * ps. x );
+        ps. h = job. paperSize.height - ( 2 * ps. y );
+        ps. pos = 0;
 
-    while ( items_left || !rfooter ) {
-        page = Job. addPage ( );
+        let pagecount = 0;
+        let itemh = 15;
+        let pageh = 10;
+        let reporth = 7.5;
+        let listh = 7.5;
+        let items_left = items. length;
+        let itemflip = false;
+        let rfooter = false;
+        let page;
 
-        var fnt = new Font ( );
-        fnt. family = "Arial";
-        fnt. pointSize = 10;
+        let pagestat = {};
+        let jobstat = { }
+
+        jobstat.lots = 0
+        jobstat.items = 0
+        jobstat.total = 0
+
+        while ( items_left || !rfooter ) {
+            page = job. addPage ( );
+
+            ps. pos = 0;
+            pageHeader ( page, ps );
+
+            pagestat. lots = 0;
+            pagestat. items = 0;
+            pagestat. total = 0;
+
+            if ( job. pageCount == 1 ) {
+                reportHeader ( page, ps );
+            }
+
+            if ( items_left ) {
+                listHeader ( page, ps );
+            }
+
+            let items_on_page = false;
+
+            while ( items_left ) {
+                if ( ps. pos > ( ps. h - itemh - listh - pageh ))
+                    break;
+
+                let item = items [items. length - items_left];
+
+                listItem ( page, ps, item, itemflip );
+
+                pagestat. lots++;
+                pagestat. items += item. quantity;
+                pagestat. total += item. total;
+
+                jobstat.lots++
+                jobstat.items += item.quantity
+                jobstat.total += item.total
+
+                itemflip = itemflip ? false : true;
+                items_left--;
+                items_on_page = true;
+            }
+
+            if ( items_on_page ) {
+                listFooter ( page, ps, pagestat );
+            }
+
+            if ( !items_left && !rfooter && ( ps. pos <= ( ps. h - reporth - pageh ))) {
+                reportFooter ( page, ps, jobstat );
+                rfooter = true;
+            }
+
+            pageFooter ( page, ps );
+        }
+    }
+
+    function xs ( pw, x )
+    {
+        return x * pw / 170.0;
+    }
+
+    function pageHeader ( page, ps )
+    {
+        let y = ps. y + ps. pos;
+        let h = 10;
+
+        let f1 = Qt.font({ family: "Arial", pointSize: 12, bold: true })
+        page. font = f1;
+        page. drawText ( ps. x, y, ps. w / 2, h, Page.AlignLeft | Page.AlignVCenter,  "BrickStore" );
+
+        let f2 = Qt.font({ family: "Arial", pointSize: 12 })
+        page. font = f2;
+        let d = new Date ( );
+        page. drawText ( ps. x + ps. w / 2, y, ps. w / 2, h, Page.AlignRight | Page.AlignVCenter, Qt.formatDate(d));
+
+        ps. pos = h;
+    }
+
+    function pageFooter ( page, ps )
+    {
+        let y = ps. y + ps. h - 10;
+        let h = 10;
+
+        let f3 = Qt.font({ family: "Arial", pointSize: 12, italic: true })
+        page. font = f3;
+        page. drawText ( ps. x              , y, ps. w * .75, h, Page.AlignLeft  | Page.AlignVCenter, ps.doc. fileName );
+        page. drawText ( ps. x + ps. w * .75, y, ps. w * .25, h, Page.AlignRight | Page.AlignVCenter, "Page " + (page. number+1) );
+
+        ps. pos = y + h;
+    }
+
+    function reportHeader ( page, ps )
+    {
+    }
+
+    function reportFooter ( page, ps, jobstat )
+    {
+        let y = ps. y + ps. pos;
+        let h = 7.5;
+
+        let fnt = Qt.font({ family: "Arial", pointSize: 10 })
         page. font = fnt;
 
-        ps. pos = 0;
-        pageHeader ( page, ps );
+        page. backgroundColor = "#333333"
+        page. color = page. backgroundColor;
+        page. drawRect ( ps. x, y, ps. w, h );
 
-        pagestat. lots = 0;
-        pagestat. items = 0;
-        pagestat. total = 0;
+        page. color = "white"
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 )    , h, Page.AlignHCenter | Page.AlignVCenter, jobstat. lots );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 )    , h, Page.AlignHCenter | Page.AlignVCenter, jobstat. items );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, Page.AlignRight   | Page.AlignVCenter, BrickStore.toCurrencyString( jobstat. total, ps.ccode));
 
-        if ( Job. pageCount == 1 ) {
-            reportHeader ( page, ps );
-        }
+        page.font. bold = true;
+        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, Page.AlignLeft | Page.AlignVCenter, "Grand Total" );
 
-        if ( items_left ) {
-            listHeader ( page, ps );
-        }
+        page. backgroundColor = "white"
+        page. color = "black"
 
-        var items_on_page = false;
-
-        while ( items_left ) {
-            if ( ps. pos > ( ps. h - itemh - listh - pageh ))
-                break;
-
-            var item = Document. items [Document. items. length - items_left];
-
-            listItem ( page, ps, item, itemflip );
-
-            pagestat. lots++;
-            pagestat. items += item. quantity;
-            pagestat. total += item. total;
-
-            itemflip = itemflip ? false : true;
-            items_left--;
-            items_on_page = true;
-        }
-
-        if ( items_on_page ) {
-            listFooter ( page, ps, pagestat );
-        }
-
-        if ( !items_left && !rfooter && ( ps. pos <= ( ps. h - reporth - pageh ))) {
-            reportFooter ( page, ps );
-            rfooter = true;
-        }
-
-        pageFooter ( page, ps );
+        ps. pos += h;
     }
-}
 
-function xs ( pw, x )
-{
-    return x * pw / 170.0;
-}
+    function listHeader ( page, ps )
+    {
+        let y = ps. y + ps. pos;
+        let h = 7.5;
 
-function pageHeader ( page, ps )
-{
-    var oldfont = page. font;
+        let fnt = Qt.font({ family: "Arial", pointSize: 10 })
+        page. font = fnt;
 
-    var y = ps. y + ps. pos;
-    var h = 10;
+        page. backgroundColor = "#666666";
+        page. color = page. backgroundColor;
+        page. drawRect ( ps. x, y, ps. w, h );
 
-    var f1 = new Font ( );
-    f1. family = "Arial";
-    f1. pointSize = 12;
-    f1. bold = true;
+        page. color = "white"
+        page. drawText ( ps. x                   , y, xs( ps. w, 20 ), h, Page.AlignCenter, "Image" );
+        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, Page.AlignCenter, "Cond." );
+        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 75 ), h, Page.AlignCenter, "Part" );
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ), h, Page.AlignCenter, "Lots" );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, Page.AlignCenter, "Qty" );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 20 ), h, Page.AlignCenter, "Comments" );
+        page. backgroundColor = "white"
+        page. color = "black"
 
-    page. font = f1;
-    page. drawText ( ps. x, y, ps. w / 2, h, CReportPage.AlignLeft | CReportPage.AlignVCenter,  "BrickStock" );
+        ps. pos += h;
+    }
 
-    var f2 = new Font ( );
-    f2. family = "Arial";
-    f2. pointSize = 12;
+    function listFooter ( page, ps, pagestat )
+    {
+        let y = ps. y + ps. pos;
+        let h = 7.5;
 
-    page. font = f2;
-    var d = new Date ( );
-    page. drawText ( ps. x + ps. w / 2, y, ps. w / 2, h, CReportPage.AlignRight | CReportPage.AlignVCenter, Utility. localDateString ( d ));
+        let fnt = Qt.font({ family: "Arial", pointSize: 10 })
+        page. font = fnt;
 
-    page. font = oldfont;
+        page. backgroundColor = "#666666";
+        page. color = page. backgroundColor;
+        page. drawRect ( ps. x, y, ps. w, h );
 
-    ps. pos = h;
-}
+        page. color = "white";
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat. lots );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat. items );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, Page.AlignRight   | Page.AlignVCenter, BrickStore.toCurrencyString( pagestat. total, ps.ccode ));
 
-function pageFooter ( page, ps )
-{
-    var oldfont = page. font;
+        page.font. bold = true;
+        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, Page.AlignLeft | Page.AlignVCenter, "Total" );
+        page.color = "black"
+        page.backgroundColor = "white"
 
-    var y = ps. y + ps. h - 10;
-    var h = 10;
+        ps. pos += h;
+    }
 
-    var f3 = new Font ( );
-    f3. family = "Arial";
-    f3. pointSize = 12;
-    f3. italic = true;
+    function listItem ( page, ps, item, odd )
+    {
+        let y = ps. y + ps. pos;
+        let h = 15;
 
-    page. font = f3;
-    page. drawText ( ps. x              , y, ps. w * .75, h, CReportPage.AlignLeft  | CReportPage.AlignVCenter, Document. fileName );
-    page. drawText ( ps. x + ps. w * .75, y, ps. w * .25, h, CReportPage.AlignRight | CReportPage.AlignVCenter, "Page " + (page. number+1) );
+        let fnt = Qt.font({ family: "Arial", pointSize: 10 })
+        page. font = fnt;
 
-    page. font = oldfont;
+        page. backgroundColor = odd ? "#dddddd" : "#ffffff";
+        page. color = page. backgroundColor;
+        page. drawRect ( ps. x, y, ps. w, h );
 
-    ps. pos = y + h;
-}
+        page. color = "black";
+        page. backgroundColor = "white"
+        page. drawImage ( ps. x + 2, y, xs( ps. w, 15 ), h, item. image );
 
-function reportHeader ( page, ps )
-{
-}
+        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, Page.AlignHCenter | Page.AlignVCenter, item. condition. used ? "Used" : "New" );
+        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, Page.AlignLeft    | Page.AlignVCenter | Page.TextWordWrap, item. color. name + " " + item. name + " [" + item. id + "]" );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, Page.AlignHCenter | Page.AlignVCenter, item. quantity );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ), h, Page.AlignLeft   | Page.AlignVCenter, item. comments );
 
-function reportFooter ( page, ps )
-{
-    var oldfont = page. font;
-    var oldbg = page. backgroundColor;
-    var oldfg = page. color;
-
-    var y = ps. y + ps. pos;
-    var h = 7.5;
-
-    page. backgroundColor = new Color ( "#333333" );
-    page. color = page. backgroundColor;
-    page. drawRect ( ps. x, y, ps. w, h );
-
-    page. color = new Color ( "#ffffff" );
-    page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 )    , h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, Document. statistics. lots );
-    page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 )    , h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, Document. statistics. items );
-    page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, CReportPage.AlignRight   | CReportPage.AlignVCenter, Money. toLocalString ( Document. statistics. value, true ));
-
-    var fb = oldfont;
-    fb. bold = true;
-    page. font = fb;
-    page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, CReportPage.AlignLeft | CReportPage.AlignVCenter, "Grand Total" );
-
-    page. color = oldfg;
-    page. backgroundColor = oldbg;
-    page. font = oldfont;
-
-    ps. pos += h;
-}
-
-function listHeader ( page, ps )
-{
-    var oldbg = page. backgroundColor;
-    var oldfg = page. color;
-
-    var y = ps. y + ps. pos;
-    var h = 7.5;
-
-    page. backgroundColor = new Color ( "#666666" );
-    page. color = page. backgroundColor;
-    page. drawRect ( ps. x, y, ps. w, h );
-
-    page. color = new Color ( "#ffffff" );
-    page. drawText ( ps. x                   , y, xs( ps. w, 20 ), h, CReportPage.AlignCenter, "Image" );
-    page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, CReportPage.AlignCenter, "Cond." );
-    page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 75 ), h, CReportPage.AlignCenter, "Part" );
-    page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ), h, CReportPage.AlignCenter, "Lots" );
-    page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, CReportPage.AlignCenter, "Qty" );
-    page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 20 ), h, CReportPage.AlignCenter, "Comments" );
-
-    page. color = oldfg;
-    page. backgroundColor = oldbg;
-
-    ps. pos += h;
-}
-
-function listFooter ( page, ps, pagestat )
-{
-    var oldfont = page. font;
-    var oldbg = page. backgroundColor;
-    var oldfg = page. color;
-
-    var y = ps. y + ps. pos;
-    var h = 7.5;
-
-    page. backgroundColor = new Color ( "#666666" );
-    page. color = page. backgroundColor;
-    page. drawRect ( ps. x, y, ps. w, h );
-
-    page. color = new Color ( "#ffffff" );
-    page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ),     h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, pagestat. lots );
-    page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ),     h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, pagestat. items );
-    page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, CReportPage.AlignRight   | CReportPage.AlignVCenter, Money. toLocalString ( pagestat. total, true ));
-
-    var fb = oldfont;
-    fb. bold = true;
-    page. font = fb;
-    page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, CReportPage.AlignLeft | CReportPage.AlignVCenter, "Total" );
-
-    page. color = oldfg;
-    page. backgroundColor = oldbg;
-    page. font = oldfont;
-
-    ps. pos += h;
-}
-
-function listItem ( page, ps, item, odd )
-{
-    var oldbg = page. backgroundColor;
-    var oldfg = page. color;
-
-    var y = ps. y + ps. pos;
-    var h = 15;
-
-    page. backgroundColor = new Color ( odd ? "#dddddd" : "#ffffff" );
-    page. color = page. backgroundColor;
-    page. drawRect ( ps. x, y, ps. w, h );
-
-    page. color = new Color ( "#000000" );
-    page. drawPixmap ( ps. x + 2, y, xs( ps. w, 15 ), h, item. picture );
-
-    page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, item. condition. used ? "Used" : "New" );
-    page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, CReportPage.AlignLeft    | CReportPage.AlignVCenter | CReportPage.TextWordWrap, item. color. name + " " + item. name + " [" + item. id + "]" );
-    page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, CReportPage.AlignHCenter | CReportPage.AlignVCenter, item. quantity );
-    page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ), h, CReportPage.AlignLeft   | CReportPage.AlignVCenter, item. comments );
-
-    page. color = oldfg;
-    page. backgroundColor = oldbg;
-
-    ps. pos += h;
+        ps. pos += h;
+    }
 }
