@@ -1191,7 +1191,7 @@ void FrameWork::createActions()
     a = newQAction(this, "edit_paste", NeedDocument);
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
             &QShortcut::activated, a, &QAction::trigger);
-    (void) newQAction(this, "edit_paste_silent", NeedSelection(1));
+    (void) newQAction(this, "edit_paste_silent", NeedDocument);
     (void) newQAction(this, "edit_duplicate", NeedSelection(1));
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
@@ -1369,6 +1369,7 @@ QList<QAction *> FrameWork::contextMenuActions() const
         "edit_cut",
         "edit_copy",
         "edit_paste",
+        "edit_paste_silent",
         "edit_duplicate",
         "edit_delete",
         "-",
