@@ -30,6 +30,9 @@
 #include "application.h"
 
 
+Q_LOGGING_CATEGORY(LogScript, "script")
+
+
 class QmlException : public Exception
 {
 public:
@@ -128,10 +131,12 @@ bool ScriptManager::reload()
         spath.prepend(dataloc + "/extensions"_l1);
 
     for (const QString &path : qAsConst(spath)) {
-        qDebug() << "Loading scripts from directory:" << path;
         QDir dir(path);
-        if (!path.startsWith(':'_l1) && !dir.exists())
-            dir.mkpath('.'_l1);
+        if (!path.startsWith(':'_l1)) {
+            qCDebug(LogScript) << "Loading scripts from directory:" << path;
+            if (!dir.exists())
+                dir.mkpath('.'_l1);
+        }
 
         const QFileInfoList fis = dir.entryInfoList(QStringList("*.bs.qml"_l1), QDir::Files | QDir::Readable);
         for (const QFileInfo &fi : fis) {
@@ -142,10 +147,10 @@ bool ScriptManager::reload()
             try {
                 loadScript(filePath);
 
-                qDebug() << "  [ ok ]" << filePath;
+                qCDebug(LogScript) << "  [ ok ]" << filePath;
 
             } catch (const Exception &e) {
-                qWarning() << "  [fail]" << filePath << ":" << e.what();
+                qCWarning(LogScript) << "  [fail]" << filePath << ":" << e.what();
             }
         }
     }
@@ -183,9 +188,7 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
 
     connect(engine, &QQmlEngine::warnings,
             this, [](const QList<QQmlError> &list) {
-        static QLoggingCategory logQml("qml-engine");
-
-        if (!logQml.isWarningEnabled())
+        if (!LogScript().isWarningEnabled())
             return;
 
         for (auto &err : list) {
@@ -198,7 +201,7 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
             else
                 file = err.url().toDisplayString().toLocal8Bit();
 
-            QMessageLogger ml(file, err.line(), func, logQml.categoryName());
+            QMessageLogger ml(file, err.line(), func, LogScript().categoryName());
             ml.warning().nospace().noquote() << err.description();
         }
     });
