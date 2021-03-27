@@ -2,13 +2,13 @@ import BrickStore 1.0
 import QtQuick 2.12
 
 Script {
-    name: "Standard Print Script"
+    name: "Classic print script"
     author: "Robert Griebl"
-    version: "0.3"
+    version: "0.4"
     type: Script.ExtensionScript
 
     PrintingScriptAction {
-        text: "Classic Print Template"
+        text: "Print: classic layout"
         printFunction: printJob
     }
 

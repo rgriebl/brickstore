@@ -74,6 +74,7 @@ OTHER_FILES += \
   configure \
   translations/translations.xml \
   scripts/generate-assets.sh \
+  extensions/README.md \
   extensions/*.bs.qml \
   debian/* \
   unix/brickstore.desktop \

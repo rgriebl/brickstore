@@ -7,6 +7,6 @@
         <file alias="translations.xml">translations/translations.xml</file>
     </qresource>
     <qresource prefix="/">
-        <file>extensions/standard-print-template.bs.qml</file>
+        <file>extensions/classic-print-script.bs.qml</file>
     </qresource>
 </RCC>

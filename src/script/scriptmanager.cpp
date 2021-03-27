@@ -127,10 +127,13 @@ bool ScriptManager::reload()
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + "/extensions"_l1);
 
-    for (const QString &dir : qAsConst(spath)) {
-        qDebug() << "Loading scripts from directory:" << dir;
+    for (const QString &path : qAsConst(spath)) {
+        qDebug() << "Loading scripts from directory:" << path;
+        QDir dir(path);
+        if (!path.startsWith(':'_l1) && !dir.exists())
+            dir.mkpath('.'_l1);
 
-        const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.bs.qml"_l1), QDir::Files | QDir::Readable);
+        const QFileInfoList fis = dir.entryInfoList(QStringList("*.bs.qml"_l1), QDir::Files | QDir::Readable);
         for (const QFileInfo &fi : fis) {
             QString filePath = fi.absoluteFilePath();
             if (filePath.startsWith(u":"))
