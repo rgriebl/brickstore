@@ -17,7 +17,7 @@ jobs:
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
-          openssl_version: 'Win32OpenSSL_Light-1_1_1j'
+          openssl_version: 'Win32OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
           vcpkg_triplet: 'x86-windows'
 
@@ -26,7 +26,7 @@ jobs:
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
-          openssl_version: 'Win64OpenSSL_Light-1_1_1j'
+          openssl_version: 'Win64OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           qmake_extra_config: 'CONFIG+=sentry "VCPKG_PATH=c:\vcpkg\installed\x64-windows"'
           vcpkg_triplet: 'x64-windows'
