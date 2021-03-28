@@ -85,9 +85,4 @@ private:
 
     static BsxContents parseBsxInventory(QIODevice *in);
     static bool createBsxInventory(QIODevice *out, const BsxContents &bsx);
-
-    static QString lastDirectory();
-    static void setLastDirectory(const QString &dir);
-
-    static QString s_lastDirectory;
 };

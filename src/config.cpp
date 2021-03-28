@@ -494,6 +494,17 @@ void Config::setShortcuts(const QVariantMap &list)
     }
 }
 
+QString Config::lastDirectory() const
+{
+    return m_lastDirectory.isEmpty() ? documentDir() : m_lastDirectory;
+}
+
+void Config::setLastDirectory(const QString &dir)
+{
+    if (!dir.isEmpty())
+        m_lastDirectory = dir;
+}
+
 QPair<QString, QString> Config::loginForBrickLink() const
 {
     return qMakePair(value("BrickLink/Login/Username"_l1).toString(),

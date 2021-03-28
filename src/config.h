@@ -98,6 +98,9 @@ public:
     QVariantMap shortcuts() const;
     void setShortcuts(const QVariantMap &list);
 
+    QString lastDirectory() const;
+    void setLastDirectory(const QString &dir);
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -156,4 +159,5 @@ private:
     QLocale::MeasurementSystem m_measurement = QLocale::MetricSystem;
     mutable bool               m_translations_parsed = false;
     mutable QVector<Translation> m_translations;
+    QString                    m_lastDirectory;
 };

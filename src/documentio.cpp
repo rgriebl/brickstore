@@ -43,20 +43,6 @@
 #include "documentio.h"
 
 
-QString DocumentIO::s_lastDirectory { };
-
-QString DocumentIO::lastDirectory()
-{
-    return s_lastDirectory.isEmpty() ? Config::inst()->documentDir() : s_lastDirectory;
-}
-
-void DocumentIO::setLastDirectory(const QString &dir)
-{
-    if (!dir.isEmpty())
-        s_lastDirectory = dir;
-}
-
-
 Document *DocumentIO::create()
 {
     auto *doc = new Document();
@@ -70,11 +56,12 @@ Window *DocumentIO::open()
     filters << tr("BrickStore XML Data") % " (*.bsx)"_l1;
     filters << tr("All Files") % "(*)"_l1;
 
-    auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), lastDirectory(),
+    auto fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"),
+                                           Config::inst()->lastDirectory(),
                                            filters.join(";;"_l1));
     if (fn.isEmpty())
         return nullptr;
-    setLastDirectory(QFileInfo(fn).absolutePath());
+    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
     return open(fn);
 }
 
@@ -238,11 +225,12 @@ Document *DocumentIO::importBrickLinkXML()
     filters << tr("BrickLink XML File") % " (*.xml)"_l1;
     filters << tr("All Files") % "(*)"_l1;
 
-    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
+    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"),
+                                              Config::inst()->lastDirectory(),
                                              filters.join(";;"_l1));
     if (fn.isEmpty())
         return nullptr;
-    setLastDirectory(QFileInfo(fn).absolutePath());
+    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
     QFile f(fn);
     if (f.open(QIODevice::ReadOnly)) {
@@ -310,11 +298,12 @@ Document *DocumentIO::importLDrawModel()
     filters << tr("BrickLink Studio Models") % " (*.io)"_l1;
     filters << tr("All Files") % " (*)"_l1;
 
-    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), lastDirectory(),
-                                             filters.join(";;"_l1));
+    QString fn = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"),
+                                              Config::inst()->lastDirectory(),
+                                              filters.join(";;"_l1));
     if (fn.isEmpty())
         return nullptr;
-    setLastDirectory(QFileInfo(fn).absolutePath());
+    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
     QScopedPointer<QFile> f;
     bool isStudio = fn.endsWith(".io"_l1);
@@ -606,7 +595,7 @@ bool DocumentIO::saveAs(Window *win)
 
     QString fn = win->document()->fileName();
     if (fn.isEmpty()) {
-        fn = lastDirectory();
+        fn = Config::inst()->lastDirectory();
 
         if (!win->document()->title().isEmpty()) {
             QString t = Utility::sanitizeFileName(win->document()->title());
@@ -620,7 +609,7 @@ bool DocumentIO::saveAs(Window *win)
 
     if (fn.isEmpty())
         return false;
-    setLastDirectory(QFileInfo(fn).absolutePath());
+    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
     if (fn.right(4) != ".bsx"_l1)
         fn += ".bsx"_l1;
@@ -1040,11 +1029,12 @@ void DocumentIO::exportBrickLinkXML(const LotList &lots)
     QStringList filters;
     filters << tr("BrickLink XML File") % " (*.xml)"_l1;
 
-    QString fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), lastDirectory(),
+    QString fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"),
+                                              Config::inst()->lastDirectory(),
                                               filters.join(";;"_l1));
     if (fn.isEmpty())
         return;
-    setLastDirectory(QFileInfo(fn).absolutePath());
+    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
     if (fn.right(4) != ".xml"_l1)
         fn += ".xml"_l1;
