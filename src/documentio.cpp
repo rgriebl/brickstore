@@ -167,8 +167,8 @@ Document *DocumentIO::importBrickLinkStore()
     query.addQueryItem("invQtyMax"_l1,     "0"_l1);
     query.addQueryItem("invBrikTrak"_l1,   ""_l1);
     query.addQueryItem("invDesc"_l1,       ""_l1);
-    query.addQueryItem("frmUsername"_l1,   Config::inst()->loginForBrickLink().first);
-    query.addQueryItem("frmPassword"_l1,   Config::inst()->loginForBrickLink().second);
+    query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
+    query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
     url.setQuery(query);
 
     QByteArray xml;

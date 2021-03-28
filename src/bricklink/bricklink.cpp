@@ -379,7 +379,20 @@ Core *Core::create(const QString &datadir, QString *errstring)
 Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme("image-missing-large"_l1))
+    , m_transfer(new Transfer(this))
 {
+    connect(m_transfer, &Transfer::finished,
+            this, [this](TransferJob *job) {
+        if (job) {
+            if (Picture *pic = job->userData<Picture>('P'))
+                pictureJobFinished(job, pic);
+            else if (PriceGuide *pg = job->userData<PriceGuide>('G'))
+                priceGuideJobFinished(job, pg);
+        }
+    });
+    connect(m_transfer, &Transfer::progress,
+            this, &Core::transferProgress);
+
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
@@ -394,34 +407,7 @@ Core::Core(const QString &datadir)
 Core::~Core()
 {
     clear();
-
-    delete m_transfer;
     s_inst = nullptr;
-}
-
-void Core::setTransfer(Transfer *trans)
-{
-    Transfer *old = m_transfer;
-
-    m_transfer = trans;
-
-    if (old) { // disconnect
-        disconnect(old, &Transfer::finished, this, &Core::priceGuideJobFinished);
-        disconnect(old, &Transfer::finished, this, &Core::pictureJobFinished);
-
-        disconnect(old, &Transfer::progress, this, &Core::transferJobProgress);
-    }
-    if (trans) { // connect
-        connect(trans, &Transfer::finished, this, &Core::priceGuideJobFinished);
-        connect(trans, &Transfer::finished, this, &Core::pictureJobFinished);
-
-        connect(trans, &Transfer::progress, this, &Core::transferJobProgress);
-    }
-}
-
-Transfer *Core::transfer() const
-{
-    return m_transfer;
 }
 
 void Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)

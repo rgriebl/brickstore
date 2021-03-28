@@ -364,14 +364,8 @@ void BrickLink::Core::cancelPriceGuideUpdate(BrickLink::PriceGuide *pg)
 }
 
 
-void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
+void BrickLink::Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
 {
-    if (!j || !j->data())
-        return;
-    PriceGuide *pg = j->userData<PriceGuide>('G');
-    if (!pg)
-        return;
-
     pg->m_transferJob = nullptr;
     pg->m_update_status = UpdateStatus::UpdateFailed;
 

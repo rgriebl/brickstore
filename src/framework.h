@@ -92,7 +92,7 @@ private slots:
     void checkForUpdates(bool silent = false);
 
     void connectWindow(QWidget *w);
-    void transferJobProgressUpdate(int p, int t);
+    void transferProgressUpdate(int p, int t);
 
     void showSettings(const char *page = nullptr);
 

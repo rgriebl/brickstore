@@ -307,8 +307,8 @@ void ImportCartDialog::login()
 {
     QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
     QUrlQuery q;
-    q.addQueryItem("userid"_l1,          Config::inst()->loginForBrickLink().first);
-    q.addQueryItem("password"_l1,        Config::inst()->loginForBrickLink().second);
+    q.addQueryItem("userid"_l1,          Config::inst()->brickLinkCredentials().first);
+    q.addQueryItem("password"_l1,        Config::inst()->brickLinkCredentials().second);
     q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
     url.setQuery(q);
 

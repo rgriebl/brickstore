@@ -646,6 +646,8 @@ public:
     QFile *dataFile(QStringView fileName, QIODevice::OpenMode openMode, const Item *item,
                     const Color *color = nullptr) const;
 
+    void setCredentials(const QPair<QString, QString> &credentials);
+
     const std::vector<const Color *> &colors() const;
     const std::vector<const Category *> &categories() const;
     const std::vector<const ItemType *> &itemTypes() const;
@@ -683,9 +685,6 @@ public:
 
     QString countryIdFromName(const QString &name) const;
 
-    Transfer *transfer() const;
-    void setTransfer(Transfer *trans);
-
     bool readDatabase(QString *infoText = nullptr, const QString &filename = QString());
     bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version,
                        const QString &infoText = QString()) const;
@@ -702,7 +701,7 @@ signals:
     void pictureUpdated(BrickLink::Picture *inv);
     void itemImageScaleFactorChanged(qreal f);
 
-    void transferJobProgress(int, int);
+    void transferProgress(int progress, int total);
 
 private:
     Core(const QString &datadir);
@@ -743,8 +742,8 @@ private:
     static void writePCCToDatabase(const PartColorCode *pcc, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
-    void pictureJobFinished(TransferJob *j);
-    void priceGuideJobFinished(TransferJob *j);
+    void pictureJobFinished(TransferJob *j, Picture *pic);
+    void priceGuideJobFinished(TransferJob *j, PriceGuide *pg);
 
     void priceGuideLoaded(BrickLink::PriceGuide *pg);
     void pictureLoaded(BrickLink::Picture *pic);

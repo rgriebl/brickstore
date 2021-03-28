@@ -408,8 +408,8 @@ void ImportOrderDialog::updateOrders()
         query.addQueryItem("tYY"_l1,           QString::number(today.year()));
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
-        query.addQueryItem("frmUsername"_l1,   Config::inst()->loginForBrickLink().first);
-        query.addQueryItem("frmPassword"_l1,   Config::inst()->loginForBrickLink().second);
+        query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
+        query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
@@ -677,8 +677,8 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         query.addQueryItem("getDetail"_l1,     "y"_l1);
         query.addQueryItem("orderID"_l1,       order->id());
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
-        query.addQueryItem("frmUsername"_l1,   Config::inst()->loginForBrickLink().first);
-        query.addQueryItem("frmPassword"_l1,   Config::inst()->loginForBrickLink().second);
+        query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
+        query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);

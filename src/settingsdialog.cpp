@@ -526,7 +526,7 @@ void SettingsDialog::load()
 
     // --[ BRICKLINK ]-------------------------------------------------
 
-    QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
+    QPair<QString, QString> blcred = Config::inst()->brickLinkCredentials();
 
     w_bl_username->setText(blcred.first);
     w_bl_password->setText(blcred.second);
@@ -591,7 +591,7 @@ void SettingsDialog::save()
 
     // --[ BRICKLINK ]-----------------------------------------------------------------
 
-    Config::inst()->setLoginForBrickLink(w_bl_username->text(), w_bl_password->text());
+    Config::inst()->setBrickLinkCredentials(w_bl_username->text(), w_bl_password->text());
 
     // --[ LDRAW ]---------------------------------------------------------------------
 

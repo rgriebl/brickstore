@@ -63,6 +63,9 @@ Config::Config()
     m_measurement = (value("General/MeasurementSystem"_l1).toString() == "imperial"_l1)
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
+
+    m_bricklinkCredentials = qMakePair(value("BrickLink/Login/Username"_l1).toString(),
+                                       scramble(value("BrickLink/Login/Password"_l1).toString()));
 }
 
 Config::~Config()
@@ -106,13 +109,12 @@ QPair<QString, double> Config::legacyCurrencyCodeAndRate() const
     return qMakePair(QString(), 0);
 }
 
-void Config::upgrade(int vmajor, int vminor)
+void Config::upgrade(int vmajor, int vminor, int vpatch)
 {
     QStringList sl;
 
-    // no upgrades available, uncomment if needed later on
-    //int cfgver = value("General/ConfigVersion", 0).toInt();
-    setValue("General/ConfigVersion"_l1, mkver(vmajor, vminor, 0));
+    int cfgver = value("General/ConfigVersion"_l1, 0).toInt();
+    setValue("General/ConfigVersion"_l1, mkver(vmajor, vminor, vpatch));
 
     auto copyOldConfig = [this](const char *org, const char *app) -> bool {
         static const std::vector<const char *> ignore = {
@@ -154,6 +156,7 @@ void Config::upgrade(int vmajor, int vminor)
     }
 
     // do config upgrades as needed
+    Q_UNUSED(cfgver) // remove if upgrades are needed
 //    if (cfgver < mkver(2021, 1, 1)) {
 //    }
 }
@@ -240,15 +243,10 @@ void Config::setDocumentDir(const QString &dir)
 }
 
 
-QString Config::dataDir() const
+QString Config::brickLinkCacheDir() const
 {
     static QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    return value("BrickLink/DatDir"_l1, cacheDir).toString();
-}
-
-void Config::setDataDir(const QString &dir)
-{
-    setValue("BrickLink/DataDir"_l1, dir);
+    return value("BrickLink/CacheDir"_l1, cacheDir).toString();
 }
 
 QString Config::language() const
@@ -505,14 +503,15 @@ void Config::setLastDirectory(const QString &dir)
         m_lastDirectory = dir;
 }
 
-QPair<QString, QString> Config::loginForBrickLink() const
+QPair<QString, QString> Config::brickLinkCredentials() const
 {
-    return qMakePair(value("BrickLink/Login/Username"_l1).toString(),
-                     scramble(value("BrickLink/Login/Password"_l1).toString()));
+    return m_bricklinkCredentials;
 }
 
-void Config::setLoginForBrickLink(const QString &name, const QString &pass)
+void Config::setBrickLinkCredentials(const QString &name, const QString &pass)
 {
+    m_bricklinkCredentials = qMakePair(name, pass);
+
     setValue("BrickLink/Login/Username"_l1, name);
     setValue("BrickLink/Login/Password"_l1, scramble(pass));
 }

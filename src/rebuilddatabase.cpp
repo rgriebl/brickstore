@@ -98,8 +98,8 @@ int RebuildDatabase::exec()
         QString username = QString::fromLocal8Bit(qgetenv("BRICKSTORE_USERNAME"));
         QString password = QString::fromLocal8Bit(qgetenv("BRICKSTORE_PASSWORD"));
 #else
-        QString username = Config::inst()->loginForBrickLink().first;
-        QString password = Config::inst()->loginForBrickLink().second;
+        QString username = Config::inst()->brickLinkCredentials().first;
+        QString password = Config::inst()->brickLinkCredentials().second;
 #endif
 
         if (username.isEmpty() || password.isEmpty())

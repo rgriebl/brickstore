@@ -504,8 +504,8 @@ FrameWork::FrameWork(QWidget *parent)
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
     findAction("view_show_diff_indicators")->setChecked(Config::inst()->showDifferenceIndicators());
 
-    connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
-            this, &FrameWork::transferJobProgressUpdate);
+    connect(BrickLink::core(), &BrickLink::Core::transferProgress,
+            this, &FrameWork::transferProgressUpdate);
 
     bool dbok = BrickLink::core()->readDatabase();
 
@@ -532,7 +532,7 @@ FrameWork::FrameWork(QWidget *parent)
     auto winTaskbarButton = new QWinTaskbarButton(this);
     winTaskbarButton->setWindow(windowHandle());
 
-    connect(BrickLink::core(), &BrickLink::Core::transferJobProgress, this, [winTaskbarButton](int p, int t) {
+    connect(BrickLink::core(), &BrickLink::Core::transferProgress, this, [winTaskbarButton](int p, int t) {
         QWinTaskbarProgress *progress = winTaskbarButton->progress();
         if (p == t) {
             progress->reset();
@@ -1349,7 +1349,7 @@ void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int qu
 bool FrameWork::checkBrickLinkLogin()
 {
     forever {
-        QPair<QString, QString> auth = Config::inst()->loginForBrickLink();
+        QPair<QString, QString> auth = Config::inst()->brickLinkCredentials();
 
         if (!auth.first.isEmpty() && !auth.second.isEmpty())
             return true;
@@ -1817,7 +1817,7 @@ void FrameWork::modificationUpdate()
     findAction("document_save")->setEnabled((modified || hasNoFileName) && !blocked);
 }
 
-void FrameWork::transferJobProgressUpdate(int p, int t)
+void FrameWork::transferProgressUpdate(int p, int t)
 {
     if (!m_progress)
         return;

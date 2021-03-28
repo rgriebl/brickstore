@@ -32,7 +32,7 @@ public:
     ~Config() override;
     static Config *inst();
 
-    void upgrade(int vmajor, int vminor);
+    void upgrade(int vmajor, int vminor, int vpatch);
 
     QString language() const;
     QLocale::MeasurementSystem measurementSystem() const;
@@ -44,7 +44,7 @@ public:
 
     QString documentDir() const;
     QString ldrawDir() const;
-    QString dataDir() const;
+    QString brickLinkCacheDir() const;
 
     bool showInputErrors() const;
     bool showDifferenceIndicators() const;
@@ -73,7 +73,7 @@ public:
     static constexpr int MaxRecentFiles = 18;
     static constexpr int MaxFilterHistory = 20;
 
-    QPair<QString, QString> loginForBrickLink() const;
+    QPair<QString, QString> brickLinkCredentials() const;
     QMap<QByteArray, int> updateIntervals() const;
     QMap<QByteArray, int> updateIntervalsDefault() const;
 
@@ -109,7 +109,6 @@ public slots:
 
     void setDocumentDir(const QString &dir);
     void setLDrawDir(const QString &dir);
-    void setDataDir(const QString &dir);
 
     void setShowInputErrors(bool b);
     void setShowDifferenceIndicators(bool b);
@@ -118,7 +117,7 @@ public slots:
     void setRecentFiles(const QStringList &recent);
     void addToRecentFiles(const QString &file);
 
-    void setLoginForBrickLink(const QString &user, const QString &pass);
+    void setBrickLinkCredentials(const QString &user, const QString &pass);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void setIconSize(const QSize &iconSize);
@@ -160,4 +159,5 @@ private:
     mutable bool               m_translations_parsed = false;
     mutable QVector<Translation> m_translations;
     QString                    m_lastDirectory;
+    mutable QPair<QString, QString> m_bricklinkCredentials;
 };

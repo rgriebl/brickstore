@@ -170,6 +170,23 @@ Application::Application(int &_argc, char **_argv)
 #  endif
 #endif
 
+    checkNetwork();
+    auto *netcheck = new QTimer(this);
+    connect(netcheck, &QTimer::timeout,
+            this, &Application::checkNetwork);
+    netcheck->start(5s);
+
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
+
+    //TODO5: find out why we are blacklisted ... for now, fake the UA
+    Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
+                                  % u" (" + QSysInfo::prettyProductName() % u')');
+
+    // initialize config & resource
+    (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
+    (void) Currency::inst();
+    (void) ScriptManager::inst();
+
     m_default_fontsize = QGuiApplication::font().pointSizeF();
     QCoreApplication::instance()->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
@@ -190,23 +207,6 @@ Application::Application(int &_argc, char **_argv)
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
-
-    checkNetwork();
-    auto *netcheck = new QTimer(this);
-    connect(netcheck, &QTimer::timeout,
-            this, &Application::checkNetwork);
-    netcheck->start(5s);
-
-    QNetworkProxyFactory::setUseSystemConfiguration(true);
-
-    //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
-                                  % u" (" + QSysInfo::prettyProductName() % u')');
-
-    // initialize config & resource
-    (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR);
-    (void) Currency::inst();
-    (void) ScriptManager::inst();
 
     if (!initBrickLink()) {
         // we cannot call quit directly, since there is no event loop to quit from...
@@ -629,14 +629,13 @@ bool Application::initBrickLink()
 {
     QString errstring;
 
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->brickLinkCacheDir(), &errstring);
     if (!bl) {
         MessageBox::critical(nullptr, { }, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
     } else {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,
                 this, [](qreal p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
-        bl->setTransfer(new Transfer);
 
         connect(Config::inst(), &Config::updateIntervalsChanged,
                 BrickLink::core(), &BrickLink::Core::setUpdateIntervals);

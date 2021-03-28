@@ -261,14 +261,8 @@ void BrickLink::Core::cancelPictureUpdate(BrickLink::Picture *pic)
 }
 
 
-void BrickLink::Core::pictureJobFinished(TransferJob *j)
+void BrickLink::Core::pictureJobFinished(TransferJob *j, Picture *pic)
 {
-    if (!j)
-        return;
-    Picture *pic = j->userData<Picture>('P');
-    if (!pic)
-        return;
-
     pic->m_transferJob = nullptr;
     bool large = (!pic->color());
 
