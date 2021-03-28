@@ -39,12 +39,8 @@ public:
     void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
 
 protected slots:
-    void doUpdate();
     void pictureWasUpdated(BrickLink::Picture *);
     void redraw();
-    void showBLCatalogInfo();
-    void showBLPriceGuideInfo();
-    void showBLLotsForSale();
     void languageChange();
     void paletteChange();
 
@@ -53,6 +49,7 @@ protected:
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
     bool eventFilter(QObject *o, QEvent *e) override;
+    void contextMenuEvent(QContextMenuEvent *e) override;
 
 private:
     void updateButtons();
@@ -83,5 +80,12 @@ private:
     QToolButton *w_playPause = nullptr;
     QIcon m_playIcon;
     QIcon m_pauseIcon;
+
+    QAction *m_reload;
+    QAction *m_copyImage;
+    QAction *m_saveImageAs;
+    QAction *m_blCatalog;
+    QAction *m_blPriceGuide;
+    QAction *m_blLotsForSale;
 #endif
 };

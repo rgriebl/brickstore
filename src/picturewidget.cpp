@@ -21,6 +21,9 @@
 #include <QHelpEvent>
 #include <QToolButton>
 #include <QStyle>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QStringBuilder>
 
 #include "bricklink.h"
 #include "bricklink_model.h"
@@ -28,6 +31,7 @@
 #include "ldraw.h"
 #include "renderwidget.h"
 #include "utility.h"
+#include "config.h"
 
 
 PictureWidget::PictureWidget(QWidget *parent)
@@ -36,7 +40,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     setBackgroundRole(QPalette::Base);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAutoFillBackground(true);
-    setContextMenuPolicy(Qt::NoContextMenu);
 
     w_text = new QLabel();
     w_text->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
@@ -121,36 +124,55 @@ PictureWidget::PictureWidget(QWidget *parent)
     layout->addLayout(buttons);
 #endif
 
-    QAction *a;
-    a = new QAction(this);
-    a->setObjectName("picture_reload"_l1);
-    a->setIcon(QIcon::fromTheme("view-refresh"_l1));
-    connect(a, &QAction::triggered,
-            this, &PictureWidget::doUpdate);
-    addAction(a);
+    m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
+    connect(m_blCatalog, &QAction::triggered, this, [=]() {
+        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, m_item, m_color);
+    });
 
-    a = new QAction(this);
-    a->setSeparator(true);
-    addAction(a);
+    m_blPriceGuide = new QAction(QIcon::fromTheme("bricklink-priceguide"_l1), { }, this);
+    connect(m_blPriceGuide, &QAction::triggered, this, [=]() {
+        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, m_item, m_color);
+    });
 
-    a = new QAction(this);
-    a->setObjectName("picture_bl_catalog"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
-    connect(a, &QAction::triggered,
-            this, &PictureWidget::showBLCatalogInfo);
-    addAction(a);
-    a = new QAction(this);
-    a->setObjectName("picture_bl_priceguide"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
-    connect(a, &QAction::triggered,
-            this, &PictureWidget::showBLPriceGuideInfo);
-    addAction(a);
-    a = new QAction(this);
-    a->setObjectName("picture_bl_lotsforsale"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
-    connect(a, &QAction::triggered,
-            this, &PictureWidget::showBLLotsForSale);
-    addAction(a);
+    m_blLotsForSale = new QAction(QIcon::fromTheme("bricklink-lotsforsale"_l1), { }, this);
+    connect(m_blLotsForSale, &QAction::triggered, this, [=]() {
+        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, m_item, m_color);
+    });
+    m_reload = new QAction(QIcon::fromTheme("view-refresh"_l1), { }, this);
+    connect(m_reload, &QAction::triggered, this, [=]() {
+        if (m_pic) {
+            m_pic->update(true);
+            redraw();
+        }
+    });
+
+    m_copyImage = new QAction(QIcon::fromTheme("edit-copy"_l1), { }, this);
+    connect(m_copyImage, &QAction::triggered, this, [=]() {
+        if (!m_image.isNull()) {
+            auto clip = QGuiApplication::clipboard();
+            clip->setImage(m_image);
+        }
+    });
+
+    m_saveImageAs = new QAction(QIcon::fromTheme("document-save"_l1), { }, this);
+    connect(m_saveImageAs, &QAction::triggered, this, [=]() {
+        if (!m_image.isNull()) {
+            QStringList filters;
+            filters << tr("PNG Image") % " (*.png)"_l1;
+
+            QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
+                                                      Config::inst()->lastDirectory(),
+                                                      filters.join(";;"_l1));
+            if (fn.isEmpty())
+                return;
+            Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
+
+            if (fn.right(4) != ".png"_l1)
+                fn += ".png"_l1;
+
+            m_image.save(fn, "PNG");
+        }
+    });
 
     connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
             this, &PictureWidget::pictureWasUpdated);
@@ -162,10 +184,12 @@ PictureWidget::PictureWidget(QWidget *parent)
 
 void PictureWidget::languageChange()
 {
-    findChild<QAction *> ("picture_reload"_l1)->setText(tr("Update"));
-    findChild<QAction *> ("picture_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *> ("picture_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *> ("picture_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
+    m_reload->setText(tr("Update"));
+    m_copyImage->setText(tr("Copy image"));
+    m_saveImageAs->setText(tr("Save image as.."));
+    m_blCatalog->setText(tr("Show BrickLink Catalog Info..."));
+    m_blPriceGuide->setText(tr("Show BrickLink Price Guide Info..."));
+    m_blLotsForSale->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 void PictureWidget::paletteChange()
@@ -186,32 +210,6 @@ PictureWidget::~PictureWidget()
         m_pic->release();
     if (m_part)
         m_part->release();
-}
-
-void PictureWidget::doUpdate()
-{
-    if (m_pic) {
-        m_pic->update(true);
-        redraw();
-    }
-}
-
-void PictureWidget::showBLCatalogInfo()
-{
-    if (m_item)
-        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, m_item, m_color);
-}
-
-void PictureWidget::showBLPriceGuideInfo()
-{
-    if (m_item && m_color)
-        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, m_item, m_color);
-}
-
-void PictureWidget::showBLLotsForSale()
-{
-    if (m_item && m_color)
-        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, m_item, m_color);
 }
 
 void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
@@ -250,7 +248,9 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
             m_colorId = 7; // light gray
     }
 
-    setContextMenuPolicy(item ? Qt::ActionsContextMenu : Qt::NoContextMenu);
+    m_blCatalog->setVisible(item);
+    m_blPriceGuide->setVisible(item && color);
+    m_blLotsForSale->setVisible(item && color);
     redraw();
 }
 
@@ -308,7 +308,9 @@ void PictureWidget::redraw()
         w_image->setText({ });
     }
 
-    if (canShow3D() && prefer3D()) {
+    bool show3D = canShow3D() && prefer3D();
+
+    if (show3D) {
 #if !defined(QT_NO_OPENGL)
         w_image->hide();
 
@@ -327,6 +329,9 @@ void PictureWidget::redraw()
 #endif
         w_image->show();
     }
+    m_reload->setVisible(!show3D);
+    m_copyImage->setVisible(!show3D);
+    m_saveImageAs->setVisible(!show3D);
 
     updateButtons();
 }
@@ -365,6 +370,24 @@ bool PictureWidget::eventFilter(QObject *o, QEvent *e)
         }, Qt::QueuedConnection);
     }
     return QFrame::eventFilter(o, e);
+}
+
+void PictureWidget::contextMenuEvent(QContextMenuEvent *e)
+{
+    if (m_item) {
+        QMenu *m = new QMenu(this);
+        m->setAttribute(Qt::WA_DeleteOnClose);
+        m->addAction(m_blCatalog);
+        m->addAction(m_blPriceGuide);
+        m->addAction(m_blLotsForSale);
+        m->addSeparator();
+        m->addAction(m_reload);
+        m->addSeparator();
+        m->addAction(m_copyImage);
+        m->addAction(m_saveImageAs);
+        m->popup(e->globalPos());
+    }
+    e->accept();
 }
 
 void PictureWidget::updateButtons()
