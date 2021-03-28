@@ -948,6 +948,14 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
         bool retain = (p.elementText(e, "RETAIN", "") == "Y"_l1);
         QString reserved = p.elementText(e, "BUYERUSERNAME", "");
         double cost = p.elementText(e, "MYCOST", "0").toDouble();
+        int tq[3];
+        double tp[3];
+        tq[0] = p.elementText(e, "TQ1", "0").toInt();
+        tp[0] = p.elementText(e, "TP1", "0").toDouble();
+        tq[1] = p.elementText(e, "TQ2", "0").toInt();
+        tp[1] = p.elementText(e, "TP2", "0").toDouble();
+        tq[2] = p.elementText(e, "TQ3", "0").toInt();
+        tp[2] = p.elementText(e, "TP3", "0").toDouble();
         double weight = p.elementText(e, "MYWEIGHT", "0").toDouble();
         if (qFuzzyIsNull(weight))
             weight = p.elementText(e, "ITEMWEIGHT", "0").toDouble();
@@ -1009,6 +1017,10 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
         lot->setRetain(retain);
         lot->setReserved(reserved);
         lot->setCost(cost);
+        for (int i = 0; i < 3; ++i) {
+            lot->setTierQuantity(i, tq[i]);
+            lot->setTierPrice(i, tp[i]);
+        }
         lot->setWeight(weight);
         lot->setLotId(lotId);
         lot->setSubCondition(subCond);
