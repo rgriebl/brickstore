@@ -35,7 +35,7 @@ Only made possible by [Dan Jezek's](https://www.danjezek.com/) support
 
 ## 3rd-Party Components
 
-This projects contains 3rd-party components under different licenses:
-* src/minizip: see LICENSE.ZLIB
-* src/lzma: see LICENSE.LGPLv21
+This projects contains other open-source 3rd-party components under different licenses:
+* 3rdparty/minizip: see LICENSE.ZLIB
+* 3rdparty/lzma: see LICENSE.LGPLv21
 * assets/icons: see COPYING-ICONS and COPYING-FLAGS
