@@ -333,7 +333,7 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
         if (!m_win || m_selection.isEmpty())
             setItem(nullptr, nullptr);
         else if (m_selection.count() == 1)
-            setItem(m_selection.first()->item(), m_selection.first()->color());
+            setItem(m_selection.constFirst()->item(), m_selection.constFirst()->color());
         else
             setItems(m_selection);
     });

@@ -184,7 +184,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
 
     if (filterDelayTimer && filterDelayTimer->isActive())
         filterDelayTimer->stop();
-    invalidateFilterNow();
+    invalidateFilterInternal();
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
