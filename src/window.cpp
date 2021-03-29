@@ -2524,9 +2524,9 @@ void Window::printScriptAction(PrintingScriptAction *printingAction)
                 msg.replace('\n'_l1, "<br>"_l1);
 
             QMetaObject::invokeMethod(this, [=, &pd, &failOnce]() {
-                pd.close();
                 if (!failOnce) {
                     failOnce = true;
+                    pd.close();
                     MessageBox::warning(nullptr, { }, msg);
                 }
             }, Qt::QueuedConnection);
