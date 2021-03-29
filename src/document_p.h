@@ -101,7 +101,7 @@ private:
 class SortCmd : public QUndoCommand
 {
 public:
-    SortCmd(Document *doc, int column, Qt::SortOrder order);
+    SortCmd(Document *doc, QVector<int> columns, Qt::SortOrder order);
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
 
@@ -111,7 +111,7 @@ public:
 private:
     Document *m_doc;
     QDateTime m_created;
-    int m_column;
+    QVector<int> m_columns;
     Qt::SortOrder m_order;
     bool m_isSorted = false;
 

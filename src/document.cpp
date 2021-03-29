@@ -374,11 +374,11 @@ void ResetDifferenceModeCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-SortCmd::SortCmd(Document *doc, int column, Qt::SortOrder order)
+SortCmd::SortCmd(Document *doc, QVector<int> columns, Qt::SortOrder order)
     : QUndoCommand(qApp->translate("SortCmd", "Sorted the view"))
     , m_doc(doc)
     , m_created(QDateTime::currentDateTime())
-    , m_column(column)
+    , m_columns(columns)
     , m_order(order)
 { }
 
@@ -394,12 +394,12 @@ bool SortCmd::mergeWith(const QUndoCommand *other)
 
 void SortCmd::redo()
 {
-    int oldColumn = m_doc->sortColumn();
+    auto oldColumns = m_doc->sortColumns();
     Qt::SortOrder oldOrder = m_doc->sortOrder();
 
-    m_doc->sortDirect(m_column, m_order, m_isSorted, m_unsorted);
+    m_doc->sortDirect(m_columns, m_order, m_isSorted, m_unsorted);
 
-    m_column = oldColumn;
+    m_columns = oldColumns;
     m_order = oldOrder;
 }
 
@@ -1545,9 +1545,9 @@ bool Document::isSorted() const
     return m_isSorted;
 }
 
-int Document::sortColumn() const
+QVector<int> Document::sortColumns() const
 {
-    return m_sortColumn;
+    return m_sortColumns;
 }
 
 Qt::SortOrder Document::sortOrder() const
@@ -1557,15 +1557,22 @@ Qt::SortOrder Document::sortOrder() const
 
 void Document::sort(int column, Qt::SortOrder order)
 {
-    if ((column == -1) || ((column == m_sortColumn) && (order == m_sortOrder)))
+    return sort(QVector<int> { column }, order);
+}
+
+void Document::sort(const QVector<int> &columns, Qt::SortOrder order)
+{
+    if ((columns == QVector<int> { -1 })
+            || ((columns == m_sortColumns) && (order == m_sortOrder))) {
         return;
+    }
 
     if (m_undo && !m_nextSortFilterIsDirect) {
-        m_undo->push(new SortCmd(this, column, order));
+        m_undo->push(new SortCmd(this, columns, order));
     } else {
         bool dummy1;
         LotList dummy2;
-        sortDirect(column, order, dummy1, dummy2);
+        sortDirect(columns, order, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
 }
@@ -1603,17 +1610,17 @@ void Document::nextSortFilterIsDirect()
     m_nextSortFilterIsDirect = true;
 }
 
-void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
+void Document::sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool &sorted,
                           LotList &unsortedLots)
 {
     bool emitSortOrderChanged = (order != m_sortOrder);
-    bool emitSortColumnChanged = (column != m_sortColumn);
+    bool emitSortColumnsChanged = (columns != m_sortColumns);
     bool wasSorted = isSorted();
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
-    m_sortColumn = column;
+    m_sortColumns = columns;
     m_sortOrder = order;
 
     if (!unsortedLots.isEmpty()) {
@@ -1627,10 +1634,10 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
         m_isSorted = true;
         m_sortedLots = m_lots;
 
-        if (column >= 0) {
+        if (columns != QVector<int> { -1 }) {
             qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
-                          [column, this](const auto *lot1, const auto *lot2) {
-                return compare(lot1, lot2, column) < 0;
+                          [columns, this](const auto *lot1, const auto *lot2) {
+                return compare(lot1, lot2, columns) < 0;
             });
             if (order == Qt::DescendingOrder)
                 std::reverse(m_sortedLots.begin(), m_sortedLots.end());
@@ -1657,8 +1664,8 @@ void Document::sortDirect(int column, Qt::SortOrder order, bool &sorted,
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
-    if (emitSortColumnChanged)
-        emit sortColumnChanged(column);
+    if (emitSortColumnsChanged)
+        emit sortColumnsChanged(columns);
     if (emitSortOrderChanged)
         emit sortOrderChanged(order);
 
@@ -1713,9 +1720,12 @@ QByteArray Document::saveSortFilterState() const
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SFST") << qint32(2);
+    ds << QByteArray("SFST") << qint32(3);
 
-    ds << qint8(m_sortColumn) << qint8(m_sortOrder) << m_filterString;
+    ds << qint8(m_sortColumns.size());
+    for (int i = 0; i < m_sortColumns.size(); ++i)
+        ds << qint8(m_sortColumns.at(i));
+    ds << qint8(m_sortOrder) << m_filterString;
 
     ds << qint32(m_sortedLots.size());
     for (int i = 0; i < m_sortedLots.size(); ++i) {
@@ -1735,13 +1745,24 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version != 2))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version < 2) || (version > 3))
         return false;
     qint8 sortColumn, sortOrder;
+    QVector<int> sortColumns;
     QString filterString;
     qint32 viewSize;
 
-    ds >> sortColumn >> sortOrder >> filterString >> viewSize;
+    ds >> sortColumn;
+    if (version == 2) {
+        sortColumns << sortColumn;
+    } else {
+        for (int i = 0; i < sortColumn; ++i) {
+            qint8 sc;
+            ds >> sc;
+            sortColumns << sc;
+        }
+    }
+    ds >> sortOrder >> filterString >> viewSize;
     if ((ds.status() != QDataStream::Ok) || (viewSize != m_lots.size()))
         return false;
 
@@ -1767,7 +1788,7 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     auto filterList = m_filterParser->parse(filterString);
 
     bool willBeSorted = true;
-    sortDirect(sortColumn, Qt::SortOrder(sortOrder), willBeSorted, sortedLots);
+    sortDirect(sortColumns, Qt::SortOrder(sortOrder), willBeSorted, sortedLots);
     bool willBeFiltered = true;
     filterDirect(filterString, filterList, willBeFiltered, filteredLots);
     return true;
@@ -1781,7 +1802,7 @@ QString Document::filterToolTip() const
 void Document::reSort()
 {
     if (!isSorted())
-        m_undo->push(new SortCmd(this, m_sortColumn, m_sortOrder));
+        m_undo->push(new SortCmd(this, m_sortColumns, m_sortOrder));
 }
 
 void Document::reFilter()
@@ -1868,83 +1889,96 @@ static inline int doubleCompare(double d1, double d2)
     return qFuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
 }
 
-int Document::compare(const Lot *i1, const Lot *i2, int sortColumn) const
+int Document::compare(const Lot *i1, const Lot *i2, const QVector<int> &sortColumns) const
 {
-    switch (sortColumn) {
-    case Document::Index       : {
-        return m_lots.indexOf(const_cast<Lot *>(i1)) - m_lots.indexOf(const_cast<Lot *>(i2));
-    }
-    case Document::Status      : {
-        if (i1->counterPart() != i2->counterPart())
-            return boolCompare(i1->counterPart(), i2->counterPart());
-        else if (i1->alternateId() != i2->alternateId())
-            return uintCompare(i1->alternateId(), i2->alternateId());
-        else if (i1->alternate() != i2->alternate())
-            return boolCompare(i1->alternate(), i2->alternate());
-        else
-            return int(i1->status()) - int(i2->status());
-    }
-    case Document::Picture     :
-    case Document::PartNo      : return Utility::naturalCompare(QLatin1String(i1->itemId()),
-                                                                QLatin1String(i2->itemId()));
-    case Document::Description : return Utility::naturalCompare(i1->itemName(),
-                                                                i2->itemName());
+    int r = 0;
+    for (const int sc : sortColumns) {
+        switch (sc) {
+        case Document::Index       : {
+            r = m_lots.indexOf(const_cast<Lot *>(i1)) - m_lots.indexOf(const_cast<Lot *>(i2));
+            break;
+        }
+        case Document::Status      : {
+            if (i1->counterPart() != i2->counterPart())
+                r = boolCompare(i1->counterPart(), i2->counterPart());
+            else if (i1->alternateId() != i2->alternateId())
+                r = uintCompare(i1->alternateId(), i2->alternateId());
+            else if (i1->alternate() != i2->alternate())
+                r = boolCompare(i1->alternate(), i2->alternate());
+            else
+                r = int(i1->status()) - int(i2->status());
+            break;
+        }
+        case Document::Picture     :
+        case Document::PartNo      : r = Utility::naturalCompare(QLatin1String(i1->itemId()),
+                                                                    QLatin1String(i2->itemId())); break;
+        case Document::Description : r = Utility::naturalCompare(i1->itemName(),
+                                                                    i2->itemName()); break;
 
-    case Document::Color       : return i1->colorName().localeAwareCompare(i2->colorName());
-    case Document::Category    : return i1->categoryName().localeAwareCompare(i2->categoryName());
-    case Document::ItemType    : return i1->itemTypeName().localeAwareCompare(i2->itemTypeName());
+        case Document::Color       : r = i1->colorName().localeAwareCompare(i2->colorName()); break;
 
-    case Document::Comments    : return i1->comments().localeAwareCompare(i2->comments());
-    case Document::Remarks     : return i1->remarks().localeAwareCompare(i2->remarks());
+        case Document::Category    : r = i1->categoryName().localeAwareCompare(i2->categoryName()); break;
+        case Document::ItemType    : r = i1->itemTypeName().localeAwareCompare(i2->itemTypeName()); break;
 
-    case Document::LotId       : return uintCompare(i1->lotId(), i2->lotId());
-    case Document::Quantity    : return i1->quantity() - i2->quantity();
-    case Document::Bulk        : return i1->bulkQuantity() - i2->bulkQuantity();
-    case Document::Price       : return doubleCompare(i1->price(), i2->price());
-    case Document::Total       : return doubleCompare(i1->total(), i2->total());
-    case Document::Sale        : return i1->sale() - i2->sale();
-    case Document::Condition   : {
-        if (i1->condition() == i2->condition())
-            return int(i1->subCondition()) - int(i2->subCondition());
-        else
-            return int(i1->condition()) - int(i2->condition());
-    }
-    case Document::TierQ1      : return i1->tierQuantity(0) - i2->tierQuantity(0);
-    case Document::TierQ2      : return i1->tierQuantity(1) - i2->tierQuantity(1);
-    case Document::TierQ3      : return i1->tierQuantity(2) - i2->tierQuantity(2);
-    case Document::TierP1      : return doubleCompare(i1->tierPrice(0), i2->tierPrice(0));
-    case Document::TierP2      : return doubleCompare(i1->tierPrice(1), i2->tierPrice(1));
-    case Document::TierP3      : return doubleCompare(i1->tierPrice(2), i2->tierPrice(2));
-    case Document::Retain      : return boolCompare(i1->retain(), i2->retain());
-    case Document::Stockroom   : return int(i1->stockroom()) - int(i2->stockroom());
-    case Document::Reserved    : return i1->reserved().compare(i2->reserved());
-    case Document::Weight      : return doubleCompare(i1->totalWeight(), i2->totalWeight());
-    case Document::YearReleased: return i1->itemYearReleased() - i2->itemYearReleased();
-    case Document::PriceOrig   : {
-        auto base1 = differenceBaseLot(i1);
-        auto base2 = differenceBaseLot(i2);
-        return doubleCompare(base1 ? base1->price() : 0, base2 ? base2->price() : 0);
-    }
-    case Document::PriceDiff   : {
-        auto base1 = differenceBaseLot(i1);
-        auto base2 = differenceBaseLot(i2);
-        return doubleCompare(base1 ? i1->price() - base1->price() : 0,
-                             base2 ? i2->price() - base2->price() : 0);
-    }
-    case Document::QuantityOrig: {
-        auto base1 = differenceBaseLot(i1);
-        auto base2 = differenceBaseLot(i2);
-        return (base1 ? base1->quantity() : 0) - (base2 ? base2->quantity() : 0);
-    }
+        case Document::Comments    : r = i1->comments().localeAwareCompare(i2->comments()); break;
+        case Document::Remarks     : r = i1->remarks().localeAwareCompare(i2->remarks()); break;
 
-    case Document::QuantityDiff:  {
-        auto base1 = differenceBaseLot(i1);
-        auto base2 = differenceBaseLot(i2);
-        return (base1 ? i1->quantity() - base1->quantity() : 0)
-                - (base2 ? i2->quantity() - base2->quantity() : 0);
+        case Document::LotId       : r = uintCompare(i1->lotId(), i2->lotId()); break;
+        case Document::Quantity    : r = i1->quantity() - i2->quantity(); break;
+        case Document::Bulk        : r = i1->bulkQuantity() - i2->bulkQuantity(); break;
+        case Document::Price       : r = doubleCompare(i1->price(), i2->price()); break;
+        case Document::Total       : r = doubleCompare(i1->total(), i2->total()); break;
+        case Document::Sale        : r = i1->sale() - i2->sale(); break;
+        case Document::Condition   : {
+            if (i1->condition() == i2->condition())
+                r = int(i1->subCondition()) - int(i2->subCondition());
+            else
+                r = int(i1->condition()) - int(i2->condition());
+            break;
+        }
+        case Document::TierQ1      : r = i1->tierQuantity(0) - i2->tierQuantity(0); break;
+        case Document::TierQ2      : r = i1->tierQuantity(1) - i2->tierQuantity(1); break;
+        case Document::TierQ3      : r = i1->tierQuantity(2) - i2->tierQuantity(2); break;
+        case Document::TierP1      : r = doubleCompare(i1->tierPrice(0), i2->tierPrice(0)); break;
+        case Document::TierP2      : r = doubleCompare(i1->tierPrice(1), i2->tierPrice(1)); break;
+        case Document::TierP3      : r = doubleCompare(i1->tierPrice(2), i2->tierPrice(2)); break;
+        case Document::Retain      : r = boolCompare(i1->retain(), i2->retain()); break;
+        case Document::Stockroom   : r = int(i1->stockroom()) - int(i2->stockroom()); break;
+        case Document::Reserved    : r = i1->reserved().compare(i2->reserved()); break;
+        case Document::Weight      : r = doubleCompare(i1->totalWeight(), i2->totalWeight()); break;
+        case Document::YearReleased: r = i1->itemYearReleased() - i2->itemYearReleased(); break;
+        case Document::PriceOrig   : {
+            auto base1 = differenceBaseLot(i1);
+            auto base2 = differenceBaseLot(i2);
+            r = doubleCompare(base1 ? base1->price() : 0, base2 ? base2->price() : 0);
+            break;
+        }
+        case Document::PriceDiff   : {
+            auto base1 = differenceBaseLot(i1);
+            auto base2 = differenceBaseLot(i2);
+            r = doubleCompare(base1 ? i1->price() - base1->price() : 0,
+                              base2 ? i2->price() - base2->price() : 0);
+            break;
+        }
+        case Document::QuantityOrig: {
+            auto base1 = differenceBaseLot(i1);
+            auto base2 = differenceBaseLot(i2);
+            r = (base1 ? base1->quantity() : 0) - (base2 ? base2->quantity() : 0);
+            break;
+        }
+
+        case Document::QuantityDiff:  {
+            auto base1 = differenceBaseLot(i1);
+            auto base2 = differenceBaseLot(i2);
+            r = (base1 ? i1->quantity() - base1->quantity() : 0)
+                    - (base2 ? i2->quantity() - base2->quantity() : 0);
+             break;
+        }
+        }
+        if (r)
+            break;
     }
-    }
-    return 0;
+    return r;
 }
 
 LotList Document::sortLotList(const LotList &list) const

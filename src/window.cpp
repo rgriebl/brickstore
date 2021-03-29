@@ -618,22 +618,32 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
 
     connect(w_header, &QHeaderView::sectionClicked,
             this, [this](int section) {
-        if (!document()->isSorted() && (section == document()->sortColumn())) {
+        int firstSC = document()->sortColumns().constFirst();
+        if (!document()->isSorted() && (section == firstSC)) {
             document()->reSort();
             w_header->setSortIndicatorShown(true);
-            w_header->setSortIndicator(document()->sortColumn(), document()->sortOrder());
+            w_header->setSortIndicator(firstSC, document()->sortOrder());
         } else {
-            w_list->sortByColumn(section, w_header->sortIndicatorOrder());
+            if (qApp->keyboardModifiers() == Qt::ShiftModifier) {
+                auto sc = document()->sortColumns();
+                if (!sc.contains(section)) {
+                    sc.append(section);
+                    document()->sort(sc, document()->sortOrder());
+                }
+                w_header->setSortIndicator(firstSC, document()->sortOrder());
+            } else {
+                w_list->sortByColumn(section, w_header->sortIndicatorOrder());
+            }
         }
         w_list->scrollTo(m_selection_model->currentIndex());
     });
-    connect(doc, &Document::sortColumnChanged,
-            w_header, [this](int column) {
-        w_header->setSortIndicator(column, m_doc->sortOrder());
+    connect(doc, &Document::sortColumnsChanged,
+            w_header, [this](const QVector<int> &columns) {
+        w_header->setSortIndicator(columns.constFirst(), m_doc->sortOrder());
     });
     connect(doc, &Document::sortOrderChanged,
             w_header, [this](Qt::SortOrder order) {
-        w_header->setSortIndicator(m_doc->sortColumn(), order);
+        w_header->setSortIndicator(m_doc->sortColumns().constFirst(), order);
     });
     connect(doc, &Document::isSortedChanged,
             w_header, [this](bool b) {
