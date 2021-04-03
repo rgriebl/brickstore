@@ -113,7 +113,9 @@ void Currency::parseRates(const QStringList &ratesList, QHash<QString, double> &
 
 QStringList Currency::currencyCodes() const
 {
-    return m_rates.keys();
+    QStringList sl = m_rates.keys();
+    sl.sort();
+    return sl;
 }
 
 QHash<QString, qreal> Currency::rates() const
