@@ -129,8 +129,6 @@ ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
             this, &ColumnChangeWatcher::internalColumnMoved);
     connect(this, &ColumnChangeWatcher::internalColumnMoved,
             this, [this](int logical, int oldVisual, int newVisual) {
-        if (!m_header->isSectionAvailable(logical))
-            return;
         m_window->document()->undoStack()->push(new ColumnCmd(this, true,
                                                               ColumnCmd::Type::Move,
                                                               logical, oldVisual, newVisual));
@@ -139,8 +137,6 @@ ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
             this, &ColumnChangeWatcher::internalColumnResized);
     connect(this, &ColumnChangeWatcher::internalColumnResized,
             this, [this](int logical, int oldSize, int newSize) {
-        if (!m_header->isSectionAvailable(logical))
-            return;
         m_window->document()->undoStack()->push(new ColumnCmd(this, true,
                                                               ColumnCmd::Type::Resize,
                                                               logical, oldSize, newSize));
@@ -583,6 +579,8 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
 
     m_doc = doc;
 
+    bool isForceModified = doc->isModified();
+
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
@@ -598,7 +596,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     w_header->setSectionsMovable(true);
     w_header->setHighlightSections(false);
     w_list->setHorizontalHeader(w_header);
-    w_header->setSortIndicatorShown(true);
+    w_header->setSortIndicatorShown(false);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
     w_list->setAlternatingRowColors(true);
@@ -616,38 +614,30 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     m_selection_model = new QItemSelectionModel(m_doc, this);
     w_list->setSelectionModel(m_selection_model);
 
-    connect(w_header, &QHeaderView::sectionClicked,
-            this, [this](int section) {
-        int firstSC = document()->sortColumns().constFirst();
-        if (!document()->isSorted() && (section == firstSC)) {
+    connect(w_header, &HeaderView::isSortedChanged,
+            this, [=](bool b) {
+        if (b && !document()->isSorted()) {
             document()->reSort();
-            w_header->setSortIndicatorShown(true);
-            w_header->setSortIndicator(firstSC, document()->sortOrder());
-        } else {
-            if (qApp->keyboardModifiers() == Qt::ShiftModifier) {
-                auto sc = document()->sortColumns();
-                if (!sc.contains(section)) {
-                    sc.append(section);
-                    document()->sort(sc, document()->sortOrder());
-                }
-                w_header->setSortIndicator(firstSC, document()->sortOrder());
-            } else {
-                w_list->sortByColumn(section, w_header->sortIndicatorOrder());
-            }
+            w_list->scrollTo(m_selection_model->currentIndex());
         }
-        w_list->scrollTo(m_selection_model->currentIndex());
-    });
-    connect(doc, &Document::sortColumnsChanged,
-            w_header, [this](const QVector<int> &columns) {
-        w_header->setSortIndicator(columns.constFirst(), m_doc->sortOrder());
-    });
-    connect(doc, &Document::sortOrderChanged,
-            w_header, [this](Qt::SortOrder order) {
-        w_header->setSortIndicator(m_doc->sortColumns().constFirst(), order);
     });
     connect(doc, &Document::isSortedChanged,
-            w_header, [this](bool b) {
-        w_header->setSortIndicatorShown(b);
+            w_header, [=](bool b) {
+        if (b != w_header->isSorted())
+            w_header->setSorted(b);
+    });
+
+    connect(w_header, &HeaderView::sortColumnsChanged,
+            this, [=](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
+        if (document()->sortColumns() != sortColumns) {
+            document()->sort(sortColumns);
+            w_list->scrollTo(m_selection_model->currentIndex());
+        }
+    });
+    connect(doc, &Document::sortColumnsChanged,
+            w_header, [=](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
+        if (w_header->sortColumns() != sortColumns)
+            w_header->setSortColumns(sortColumns);
     });
 
     // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
@@ -710,7 +700,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
         auto layout = Config::inst()->columnLayout("user-default"_l1);
         if (!w_header->restoreLayout(layout)) {
             resizeColumnsToDefault();
-            w_header->setSortIndicator(0, Qt::AscendingOrder);
+//            w_header->setSortIndicator(0, Qt::AscendingOrder);
         }
         columnsSet = true;
     }
@@ -734,6 +724,12 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     m_autosaveTimer.start(1min); // every minute
 
     s_windows.append(this);
+
+    if (isForceModified)
+        doc->undoStack()->resetClean();
+    else
+        doc->unsetModified();
+
 }
 
 Window::~Window()
@@ -2811,8 +2807,7 @@ void Window::resizeColumnsToDefault(bool simpleMode)
         if (w_header->visualIndex(i) != vi)
             w_header->moveSection(w_header->visualIndex(i), vi);
 
-        if (w_header->isSectionAvailable(i))
-            w_header->setSectionHidden(i, false);
+        w_header->setSectionHidden(i, false);
 
         int mw = w_list->model()->headerData(i, Qt::Horizontal, Document::HeaderDefaultWidthRole).toInt();
         int width = qMax((mw < 0 ? -mw : mw * em) + 8, w_header->sectionSizeHint(i));

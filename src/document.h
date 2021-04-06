@@ -150,10 +150,9 @@ public:
     QVariant dataForFilterRole(const Lot *lot, Field f) const;
 
     bool isSorted() const;
-    QVector<int> sortColumns() const;
-    Qt::SortOrder sortOrder() const;
+    QVector<QPair<int, Qt::SortOrder>> sortColumns() const;
     void sort(int column, Qt::SortOrder order) override;
-    void sort(const QVector<int> &columns, Qt::SortOrder order);
+    void sort(const QVector<QPair<int, Qt::SortOrder>> &columns);
 
     bool isFiltered() const;
     QString filter() const;
@@ -250,8 +249,7 @@ signals:
     void currencyCodeChanged(const QString &ccode);
     void lotCountChanged(int lotCount);
     void filterChanged(const QString &filter);
-    void sortOrderChanged(Qt::SortOrder order);
-    void sortColumnsChanged(const QVector<int> &columns);
+    void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &columns);
     void lastCommandWasVisualChanged(bool b);
     void isSortedChanged(bool b);
     void isFilteredChanged(bool b);
@@ -274,7 +272,7 @@ private:
                                    &differenceBase);
     void filterDirect(const QString &filterString, const QVector<Filter> &filterList, bool &filtered,
                       LotList &unfiltered);
-    void sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool &sorted, LotList &unsorted);
+    void sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns, bool &sorted, LotList &unsorted);
 
     void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
     void emitStatisticsChanged();
@@ -283,7 +281,7 @@ private:
 
     void updateModified();
 
-    int compare(const Lot *i1, const Lot *i2, const QVector<int> &sortColumns) const;
+    int compare(const Lot *i1, const Lot *i2, const QVector<QPair<int, Qt::SortOrder>> &sortColumns) const;
     void languageChange();
 
     friend class AddRemoveCmd;
@@ -303,8 +301,7 @@ private:
     QHash<const Lot *, QPair<quint64, quint64>> m_lotFlags;
 
 
-    QVector<int> m_sortColumns = { -1 };
-    Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+    QVector<QPair<int, Qt::SortOrder>> m_sortColumns = { { -1, Qt::AscendingOrder } };
     QScopedPointer<Filter::Parser> m_filterParser;
     QString m_filterString;
     QVector<Filter> m_filterList;

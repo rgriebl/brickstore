@@ -16,6 +16,7 @@
 #include <QUndoCommand>
 #include <QFrame>
 #include <QTableView>
+#include <QKeyEvent>
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
@@ -87,7 +88,6 @@ private:
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-#include <QKeyEvent>
 
 class TableView : public QTableView
 {

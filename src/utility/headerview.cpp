@@ -12,6 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QContextMenuEvent>
+#include <QHelpEvent>
 #include <QMenu>
 #include <QLayout>
 #include <QDialogButtonBox>
@@ -20,8 +21,97 @@
 #include <QDialog>
 #include <QHeaderView>
 #include <QDebug>
+#include <QProxyStyle>
+#include <QApplication>
+#include <QPixmap>
+#include <QPainter>
+#include <QToolTip>
 
+#include "utility.h"
 #include "headerview.h"
+
+
+class MultipleSortColumnsProxyStyle : public QProxyStyle
+{
+public:
+    void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
+                     const QWidget *widget) const override;
+
+private:
+    union hashkey {
+        uint k;
+        struct {
+            uint size    : 16;
+            uint level   : 8;
+            uint mode    : 8;  // Qt::SortOrder + 2 == not sorted
+        };
+    };
+
+    mutable QHash<uint, QPixmap> m_cache;
+};
+
+void MultipleSortColumnsProxyStyle::drawControl(QStyle::ControlElement element,
+                                                const QStyleOption *opt, QPainter *p,
+                                                const QWidget *widget) const
+{
+    if (element == CE_HeaderLabel) {
+        if (const auto *headerView = qobject_cast<const HeaderView *>(widget)) {
+            if (const auto *headerOpt = qstyleoption_cast<const QStyleOptionHeader *>(opt)) {
+                QStyleOptionHeader myheaderOpt(*headerOpt);
+                // .iconAlignment only works in the vertical direction.
+                // switching to RTL is a very bad hack, but it gets the job done, even in the
+                // native platforms styles.
+                myheaderOpt.direction = Qt::RightToLeft;
+                int iconSize = pixelMetric(PM_SmallIconSize, opt);
+
+                auto sortColumns = headerView->sortColumns();
+                for (int i = 0; i < sortColumns.size(); ++i) {
+                    if (sortColumns.at(i).first == headerOpt->section) {
+                        hashkey k;
+                        k.size = iconSize;
+                        k.level = i;
+                        k.mode = headerView->isSorted() ? int(sortColumns.at(i).second) : 2;
+
+                        QPixmap pix = m_cache.value(k.k);
+                        if (pix.isNull()) {
+                            QString name = "view-sort"_l1;
+                            if (headerView->isSorted()) {
+                                name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
+                                               ? "-ascending"_l1 : "-descending"_l1);
+                            }
+                            pix = QIcon::fromTheme(name).pixmap(widget->window()->windowHandle(),
+                                                                QSize(iconSize, iconSize),
+                                                                (opt->state & State_Enabled) ?
+                                                                    QIcon::Normal : QIcon::Disabled);
+
+                            if (i > 0) {
+                                QPixmap pix2(pix.size());
+                                pix2.setDevicePixelRatio(pix.devicePixelRatio());
+                                pix2.fill(Qt::transparent);
+                                QPainter p(&pix2);
+                                p.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
+                                p.drawPixmap(pix2.rect(), pix);
+                                p.end();
+                                pix = pix2;
+                            }
+
+                            m_cache.insert(k.k, pix);
+                        }
+                        myheaderOpt.icon = QIcon(pix);
+                    }
+                }
+                QProxyStyle::drawControl(element, &myheaderOpt, p, widget);
+                return;
+            }
+        }
+    }
+    QProxyStyle::drawControl(element, opt, p, widget);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 class SectionItem : public QListWidgetItem
@@ -39,6 +129,12 @@ private:
 
 SectionItem::~SectionItem()
 { }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 
 class SectionConfigDialog : public QDialog
 {
@@ -64,12 +160,11 @@ public:
         for (int i = 0; i < m_header->count(); ++i) {
             SectionItem *it = nullptr;
 
-            if (m_header->isSectionAvailable(i)) {
-                it = new SectionItem();
-                it->setText(header->model()->headerData(i, m_header->orientation(), Qt::DisplayRole).toString());
-                it->setCheckState(header->isSectionHidden(i) ? Qt::Unchecked : Qt::Checked);
-                it->setLogicalIndex(i);
-            }
+            it = new SectionItem();
+            it->setText(header->model()->headerData(i, m_header->orientation(), Qt::DisplayRole).toString());
+            it->setCheckState(header->isSectionHidden(i) ? Qt::Unchecked : Qt::Checked);
+            it->setLogicalIndex(i);
+
             v[m_header->visualIndex(i)] = it;
         }
         foreach(SectionItem *si, v) {
@@ -124,12 +219,50 @@ private:
 };
 
 
-///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
     : QHeaderView(o, parent)
+    , m_proxyStyle(new MultipleSortColumnsProxyStyle)
 {
+    setStyle(m_proxyStyle);
+
+    connect(this, &QHeaderView::sectionClicked,
+            this, [this](int section) {
+        auto firstSC = m_sortColumns.constFirst();
+        if (!m_isSorted && (section == firstSC.first)) {
+            m_isSorted = true;
+            update();
+            emit isSortedChanged(m_isSorted);
+        } else {
+            if (qApp->keyboardModifiers() == Qt::ShiftModifier) {
+                bool found = false;
+                for (int i = 0; i < m_sortColumns.size(); ++i) {
+                    if (m_sortColumns.at(i).first == section) {
+                        m_sortColumns[i].second = Qt::SortOrder(1 - m_sortColumns.at(i).second);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    m_sortColumns.append(qMakePair(section, firstSC.second));
+            } else {
+                if (firstSC.first == section)
+                    m_sortColumns = { qMakePair(section, Qt::SortOrder(1 - firstSC.second)) };
+                else
+                    m_sortColumns = { qMakePair(section, Qt::AscendingOrder) };
+            }
+            emit sortColumnsChanged(m_sortColumns);
+        }
+    });
+}
+
+HeaderView::~HeaderView()
+{
+    delete m_proxyStyle;
 }
 
 void HeaderView::setModel(QAbstractItemModel *m)
@@ -152,8 +285,34 @@ void HeaderView::setModel(QAbstractItemModel *m)
     }
 
     QHeaderView::setModel(m);
+}
 
-    m_unavailable.clear();
+QVector<QPair<int, Qt::SortOrder> > HeaderView::sortColumns() const
+{
+    return m_sortColumns;
+}
+
+void HeaderView::setSortColumns(const QVector<QPair<int, Qt::SortOrder> > &sortColumns)
+{
+    if (sortColumns != m_sortColumns) {
+        m_sortColumns = sortColumns;
+        update();
+        emit sortColumnsChanged(sortColumns);
+    }
+}
+
+bool HeaderView::isSorted() const
+{
+    return m_isSorted;
+}
+
+void HeaderView::setSorted(bool b)
+{
+    if (m_isSorted != b) {
+        m_isSorted = b;
+        update();
+        emit isSortedChanged(b);
+    }
 }
 
 #define CONFIG_HEADER qint32(0x3b285931)
@@ -170,13 +329,24 @@ bool HeaderView::restoreLayout(const QByteArray &config)
 
     if ((ds.status() != QDataStream::Ok)
             || (magic != CONFIG_HEADER)
-            || (version != 2)) {
+            || (version < 2) || (version > 3)) {
         return false;
     }
 
-    qint32 sortIndicator = -1;
-    bool sortAscending = false;
-    ds >> sortIndicator >> sortAscending;
+    m_sortColumns.clear();
+    qint32 sortColumnCount = 1;
+    if (version == 3)
+        ds >> sortColumnCount;
+    for (int i = 0; i < sortColumnCount; ++i) {
+        qint32 sortIndicator = -1;
+        bool sortAscending = false;
+        ds >> sortIndicator >> sortAscending;
+
+        if ((sortIndicator >= 0) && (sortIndicator < count)) {
+            m_sortColumns.append(qMakePair(sortIndicator, sortAscending
+                                           ? Qt::AscendingOrder : Qt::DescendingOrder));
+        }
+    }
 
     QVector<qint32> sizes;
     QVector<qint32> positions;
@@ -195,8 +365,6 @@ bool HeaderView::restoreLayout(const QByteArray &config)
     // sanity checks...
     if (ds.status() != QDataStream::Ok)
         return false;
-    if ((sortIndicator < -1) || (sortIndicator >= count))
-        return false;
 
     for (int i = 0; i < count; ++i) {
         if ((sizes.at(i) < 0)
@@ -211,8 +379,7 @@ bool HeaderView::restoreLayout(const QByteArray &config)
         int li = positions.indexOf(vi);
         if (li >= this->count()) // ignore columns that we don't know about yet
             continue;
-        if (!isSectionInternal(li))
-            setSectionHidden(li, isHiddens.at(li));
+        setSectionHidden(li, isHiddens.at(li));
         moveSection(visualIndex(li), vi);
         resizeSection(li, sizes.at(li));
     }
@@ -220,21 +387,26 @@ bool HeaderView::restoreLayout(const QByteArray &config)
     for (int li = count; li < this->count(); ++li)
         setSectionHidden(li, true);
 
-    setSortIndicator(sortIndicator, sortAscending ? Qt::AscendingOrder : Qt::DescendingOrder);
+    m_isSorted = true;
+
+    emit isSortedChanged(m_isSorted);
+    emit sortColumnsChanged(m_sortColumns);
     return true;
 }
 
 QByteArray HeaderView::saveLayout() const
 {
-    //TODO: we are missing the lastSortColumn[] history here, as this is kept in DocumentProxyModel
-
     QByteArray config;
     QDataStream ds(&config, QIODevice::WriteOnly);
 
-    ds << CONFIG_HEADER << qint32(2) /*version*/
+    ds << CONFIG_HEADER << qint32(3) /*version*/
        << qint32(count())
-       << qint32(sortIndicatorSection())
-       << (sortIndicatorOrder() == Qt::AscendingOrder);
+       << qint32(m_sortColumns.size());
+
+    for (int i = 0; i < m_sortColumns.size(); ++i) {
+       ds << qint32(m_sortColumns.at(i).first)
+          << (m_sortColumns.at(i).second == Qt::AscendingOrder);
+    }
 
     for (int li = 0; li < count(); ++li ) {
         bool hidden = isSectionHidden(li);
@@ -250,41 +422,6 @@ QByteArray HeaderView::saveLayout() const
     return config;
 }
 
-
-
-bool HeaderView::isSectionAvailable(int section) const
-{
-    return !m_unavailable.contains(section);
-}
-
-void HeaderView::setSectionAvailable(int section, bool avail)
-{
-    if (isSectionAvailable(section) == avail)
-        return;
-
-    if (!avail) {
-        hideSection(section);
-        m_unavailable.append(section);
-    } else {
-        m_unavailable.removeOne(section);
-        showSection(section);
-    }
-}
-
-bool HeaderView::isSectionInternal(int section) const
-{
-    return m_internal.contains(section);
-}
-
-void HeaderView::setSectionInternal(int section, bool internal)
-{
-    if (isSectionInternal(section) == internal)
-        return;
-    if (internal)
-        m_internal.append(section);
-    else
-        m_internal.removeOne(section);
-}
 
 void HeaderView::setSectionHidden(int logicalIndex, bool hide)
 {
@@ -319,6 +456,20 @@ bool HeaderView::viewportEvent(QEvent *e)
         showMenu(static_cast<QContextMenuEvent *>(e)->globalPos());
         e->accept();
         return true;
+    case QEvent::ToolTip: {
+        auto he = static_cast<QHelpEvent *>(e);
+        int li = logicalIndexAt(he->pos());
+        if (li >= 0) {
+            QString t = model()->headerData(li, orientation()).toString() % "\n\n"_l1
+                    % tr("Click to set as primary sort column.") % "\n"_l1
+                    % tr("Shift-click to set as additional sort column.") % "\n"_l1
+                    % tr("Right-click for context menu.") % "\n"_l1
+                    % tr("Drag to reposition and resize.");
+            QToolTip::showText(he->globalPos(), t, this);
+        }
+        e->accept();
+        return true;
+    }
     default:
         break;
     }
@@ -339,13 +490,12 @@ void HeaderView::showMenu(const QPoint &pos)
     for (int li = 0; li < count(); ++li) {
         QAction *a = nullptr;
 
-        if (isSectionAvailable(li)) {
-            a = new QAction(&m);
-            a->setText(model()->headerData(li, Qt::Horizontal, Qt::DisplayRole).toString());
-            a->setCheckable(true);
-            a->setChecked(!isSectionHidden(li));
-            a->setData(li);
-        }
+        a = new QAction(&m);
+        a->setText(model()->headerData(li, Qt::Horizontal, Qt::DisplayRole).toString());
+        a->setCheckable(true);
+        a->setChecked(!isSectionHidden(li));
+        a->setData(li);
+
         actions[visualIndex(li)] = a;
     }
     foreach (QAction *a, actions) {
@@ -376,8 +526,6 @@ void HeaderView::sectionsRemoved(const QModelIndex &parent, int logicalFirst, in
         return;
 
     for (int i = logicalFirst; i <= logicalLast; ++i) {
-        m_unavailable.removeOne(i);
-        m_internal.removeOne(i);
         m_hiddenSizes.remove(i);
     }
 }

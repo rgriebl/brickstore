@@ -12,6 +12,10 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <utility>
+#if __has_include(<execution>) && (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
+#  include <execution>
+#  define AM_SORT_PARALLEL
+#endif
 
 #include <QApplication>
 #include <QCursor>
@@ -35,6 +39,7 @@
 #include "qparallelsort.h"
 #include "document.h"
 #include "document_p.h"
+#include "stopwatch.h"
 
 using namespace std::chrono_literals;
 
@@ -374,12 +379,11 @@ void ResetDifferenceModeCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-SortCmd::SortCmd(Document *doc, QVector<int> columns, Qt::SortOrder order)
+SortCmd::SortCmd(Document *doc, const QVector<QPair<int, Qt::SortOrder>> &columns)
     : QUndoCommand(qApp->translate("SortCmd", "Sorted the view"))
     , m_doc(doc)
     , m_created(QDateTime::currentDateTime())
     , m_columns(columns)
-    , m_order(order)
 { }
 
 int SortCmd::id() const
@@ -395,12 +399,10 @@ bool SortCmd::mergeWith(const QUndoCommand *other)
 void SortCmd::redo()
 {
     auto oldColumns = m_doc->sortColumns();
-    Qt::SortOrder oldOrder = m_doc->sortOrder();
 
-    m_doc->sortDirect(m_columns, m_order, m_isSorted, m_unsorted);
+    m_doc->sortDirect(m_columns, m_isSorted, m_unsorted);
 
     m_columns = oldColumns;
-    m_order = oldOrder;
 }
 
 void SortCmd::undo()
@@ -1545,34 +1547,27 @@ bool Document::isSorted() const
     return m_isSorted;
 }
 
-QVector<int> Document::sortColumns() const
+QVector<QPair<int, Qt::SortOrder>> Document::sortColumns() const
 {
     return m_sortColumns;
 }
 
-Qt::SortOrder Document::sortOrder() const
-{
-    return m_sortOrder;
-}
-
 void Document::sort(int column, Qt::SortOrder order)
 {
-    return sort(QVector<int> { column }, order);
+    return sort({ { column, order } });
 }
 
-void Document::sort(const QVector<int> &columns, Qt::SortOrder order)
+void Document::sort(const QVector<QPair<int, Qt::SortOrder>> &columns)
 {
-    if ((columns == QVector<int> { -1 })
-            || ((columns == m_sortColumns) && (order == m_sortOrder))) {
+    if (((columns.size() == 1) && (columns.at(0).first == -1)) || (columns == m_sortColumns))
         return;
-    }
 
     if (m_undo && !m_nextSortFilterIsDirect) {
-        m_undo->push(new SortCmd(this, columns, order));
+        m_undo->push(new SortCmd(this, columns));
     } else {
         bool dummy1;
         LotList dummy2;
-        sortDirect(columns, order, dummy1, dummy2);
+        sortDirect(columns, dummy1, dummy2);
         m_nextSortFilterIsDirect = false;
     }
 }
@@ -1610,10 +1605,9 @@ void Document::nextSortFilterIsDirect()
     m_nextSortFilterIsDirect = true;
 }
 
-void Document::sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool &sorted,
+void Document::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns, bool &sorted,
                           LotList &unsortedLots)
 {
-    bool emitSortOrderChanged = (order != m_sortOrder);
     bool emitSortColumnsChanged = (columns != m_sortColumns);
     bool wasSorted = isSorted();
 
@@ -1621,7 +1615,6 @@ void Document::sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool
     QModelIndexList before = persistentIndexList();
 
     m_sortColumns = columns;
-    m_sortOrder = order;
 
     if (!unsortedLots.isEmpty()) {
         m_isSorted = sorted;
@@ -1634,17 +1627,20 @@ void Document::sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool
         m_isSorted = true;
         m_sortedLots = m_lots;
 
-        if (columns != QVector<int> { -1 }) {
-            qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
-                          [columns, this](const auto *lot1, const auto *lot2) {
-                return compare(lot1, lot2, columns) < 0;
-            });
-            if (order == Qt::DescendingOrder)
-                std::reverse(m_sortedLots.begin(), m_sortedLots.end());
+        if ((columns.size() != 1) || (columns.at(0).first != -1)) {
+            // make the sort deterministic
+            auto columnsPlusIndex = columns;
+            columnsPlusIndex.append(qMakePair(0, columns.constFirst().second));
 
-            // c++17 alternatives, but not supported everywhere yet:
-            //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
-            //std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
+            std::sort(
+#ifdef AM_SORT_PARALLEL
+                        // c++17 parallel + vectorized, but not supported everywhere yet
+                        std::execution::par_unseq,
+#endif
+                        m_sortedLots.begin(), m_sortedLots.end(),
+                             [columnsPlusIndex, this](const auto *lot1, const auto *lot2) {
+                return compare(lot1, lot2, columnsPlusIndex) < 0;
+            });
         }
     }
 
@@ -1666,8 +1662,6 @@ void Document::sortDirect(const QVector<int> &columns, Qt::SortOrder order, bool
 
     if (emitSortColumnsChanged)
         emit sortColumnsChanged(columns);
-    if (emitSortOrderChanged)
-        emit sortOrderChanged(order);
 
     if (isSorted() != wasSorted)
         emit isSortedChanged(isSorted());
@@ -1724,8 +1718,8 @@ QByteArray Document::saveSortFilterState() const
 
     ds << qint8(m_sortColumns.size());
     for (int i = 0; i < m_sortColumns.size(); ++i)
-        ds << qint8(m_sortColumns.at(i));
-    ds << qint8(m_sortOrder) << m_filterString;
+        ds << qint8(m_sortColumns.at(i).first) << qint8(m_sortColumns.at(i).second);
+    ds << m_filterString;
 
     ds << qint32(m_sortedLots.size());
     for (int i = 0; i < m_sortedLots.size(); ++i) {
@@ -1748,21 +1742,22 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version < 2) || (version > 3))
         return false;
     qint8 sortColumn, sortOrder;
-    QVector<int> sortColumns;
+    QVector<QPair<int, Qt::SortOrder>> sortColumns;
     QString filterString;
     qint32 viewSize;
 
     ds >> sortColumn;
     if (version == 2) {
-        sortColumns << sortColumn;
+        ds >> sortOrder;
+        sortColumns << qMakePair(sortColumn, Qt::SortOrder(sortOrder));
     } else {
         for (int i = 0; i < sortColumn; ++i) {
-            qint8 sc;
-            ds >> sc;
-            sortColumns << sc;
+            qint8 sc, so;
+            ds >> sc >> so;
+            sortColumns << qMakePair(sc, Qt::SortOrder(so));
         }
     }
-    ds >> sortOrder >> filterString >> viewSize;
+    ds >> filterString >> viewSize;
     if ((ds.status() != QDataStream::Ok) || (viewSize != m_lots.size()))
         return false;
 
@@ -1788,7 +1783,7 @@ bool Document::restoreSortFilterState(const QByteArray &ba)
     auto filterList = m_filterParser->parse(filterString);
 
     bool willBeSorted = true;
-    sortDirect(sortColumns, Qt::SortOrder(sortOrder), willBeSorted, sortedLots);
+    sortDirect(sortColumns, willBeSorted, sortedLots);
     bool willBeFiltered = true;
     filterDirect(filterString, filterList, willBeFiltered, filteredLots);
     return true;
@@ -1802,7 +1797,7 @@ QString Document::filterToolTip() const
 void Document::reSort()
 {
     if (!isSorted())
-        m_undo->push(new SortCmd(this, m_sortColumns, m_sortOrder));
+        m_undo->push(new SortCmd(this, m_sortColumns));
 }
 
 void Document::reFilter()
@@ -1889,11 +1884,11 @@ static inline int doubleCompare(double d1, double d2)
     return qFuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
 }
 
-int Document::compare(const Lot *i1, const Lot *i2, const QVector<int> &sortColumns) const
+int Document::compare(const Lot *i1, const Lot *i2, const QVector<QPair<int, Qt::SortOrder>> &sortColumns) const
 {
     int r = 0;
-    for (const int sc : sortColumns) {
-        switch (sc) {
+    for (const auto sc : sortColumns) {
+        switch (sc.first) {
         case Document::Index       : {
             r = m_lots.indexOf(const_cast<Lot *>(i1)) - m_lots.indexOf(const_cast<Lot *>(i2));
             break;
@@ -1975,8 +1970,11 @@ int Document::compare(const Lot *i1, const Lot *i2, const QVector<int> &sortColu
              break;
         }
         }
-        if (r)
+        if (r) {
+            if (sc.second == Qt::DescendingOrder)
+                r = -r;
             break;
+        }
     }
     return r;
 }

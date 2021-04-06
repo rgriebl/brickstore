@@ -15,19 +15,16 @@
 
 #include <QHeaderView>
 
+QT_FORWARD_DECLARE_CLASS(QStyle)
+
 
 class HeaderView : public QHeaderView
 {
     Q_OBJECT
 public:
     HeaderView(Qt::Orientation orientation, QWidget *parent = nullptr);
+    ~HeaderView() override;
     
-    bool isSectionAvailable(int section) const;
-    void setSectionAvailable(int section, bool b);
-
-    bool isSectionInternal(int section) const;
-    void setSectionInternal(int section, bool internal);
-
     void setSectionHidden(int logicalIndex, bool hide);
     void showSection(int logicalIndex) { setSectionHidden(logicalIndex, false); }
     void hideSection(int logicalIndex) { setSectionHidden(logicalIndex, true); }
@@ -36,8 +33,17 @@ public:
 
     void setModel(QAbstractItemModel *model) override;
 
+    QVector<QPair<int, Qt::SortOrder>> sortColumns() const;
+    void setSortColumns(const QVector<QPair<int, Qt::SortOrder>> &sortColumns);
+    bool isSorted() const;
+    void setSorted(bool b);
+
     bool restoreLayout(const QByteArray &config);
     QByteArray saveLayout() const;
+
+signals:
+    void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &sortColumns);
+    void isSortedChanged(bool b);
 
 protected:
     bool viewportEvent(QEvent *e) override;
@@ -54,7 +60,8 @@ private slots:
     void sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast);
 
 private:
-    QVector<int> m_unavailable;
-    QVector<int> m_internal;
+    QStyle *m_proxyStyle;
     QHash<int, int> m_hiddenSizes;
+    QVector<QPair<int, Qt::SortOrder>> m_sortColumns;
+    bool m_isSorted = false;
 };
