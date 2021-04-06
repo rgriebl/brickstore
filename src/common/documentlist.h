@@ -30,6 +30,7 @@ public:
     const QVector<Document *> &documents() const;
 
     Document *documentForFile(const QString &fileName) const;
+    Document *documentForModel(DocumentModel *model) const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;

@@ -79,7 +79,6 @@ protected:
 private slots:
     void ensureLatestVisible();
     void updateCaption();
-    void updateMinimumSectionSize();
 
     void contextMenu(const QPoint &pos);
 

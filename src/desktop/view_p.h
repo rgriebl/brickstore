@@ -60,19 +60,15 @@ class TableView : public QTableView
 public:
     explicit TableView(QWidget *parent = nullptr);
 
-    void editCurrentItem(int column)
-    {
-        auto idx = currentIndex();
-        if (!idx.isValid())
-            return;
-        idx = idx.siblingAtColumn(column);
-        QKeyEvent kp(QEvent::KeyPress, Qt::Key_Execute, Qt::NoModifier);
-        edit(idx, AllEditTriggers, &kp);
-    }
+    void editCurrentItem(int column);
 
     using QTableView::initViewItemOption;
 
 protected:
+    void changeEvent(QEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
+
+private:
+    void updateMinimumSectionSize();
 };

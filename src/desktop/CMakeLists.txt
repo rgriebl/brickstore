@@ -19,9 +19,9 @@ qt_add_library(desktop_module STATIC
     changecurrencydialog.ui
     checkforupdates.cpp
     checkforupdates.h
-    consolidateitemsdialog.cpp
-    consolidateitemsdialog.h
-    consolidateitemsdialog.ui
+    consolidatedialog.cpp
+    consolidatedialog.h
+    consolidatedialog.ui
     desktopapplication.cpp
     desktopapplication.h
     desktopuihelpers.cpp
@@ -31,6 +31,8 @@ qt_add_library(desktop_module STATIC
     developerconsole.h
     documentdelegate.cpp
     documentdelegate.h
+    expandbutton.cpp
+    expandbutton.h
     filtertermwidget.cpp
     filtertermwidget.h
     flowlayout.cpp
@@ -92,6 +94,8 @@ qt_add_library(desktop_module STATIC
     selectitemdialog.cpp
     selectitemdialog.h
     selectitemdialog.ui
+    selectmergemode.cpp
+    selectmergemode.h
     settingsdialog.cpp
     settingsdialog.h
     settingsdialog.ui

@@ -57,19 +57,26 @@ void MobileApplication::init()
             return new QAction(this);
     });
 
-    Document::setLotConsolidationFunction([](Document::LotConsolidation &lc) -> QCoro::Task<> {
-        if (!lc.document || !MobileApplication::inst())
-            co_return;
-        emit lc.document->requestActivation();
+    DocumentModel::setConsolidateFunction([](DocumentModel *model, QVector<DocumentModel::Consolidate> &list, bool addItems) -> QCoro::Task<bool> {
+        auto *doc = DocumentList::inst()->documentForModel(model);
 
-        QString s = tr("Would you like to consolidate %L1 lots?").arg(lc.total);
+        if (!doc || !MobileApplication::inst())
+            co_return false;
 
-        lc.accepted = (co_await UIHelpers::question(s) == UIHelpers::Yes);
-        lc.consolidateToIndex = lc.preselectedIndex;
-        lc.repeatForRemaining = true;
-        lc.consolidateRemaining = lc.mode;
+        emit doc->requestActivation();
 
-        co_return;
+        QString s = tr("Would you like to consolidate %L1 lots?").arg(list.count());
+        if (co_await UIHelpers::question(s) == UIHelpers::Yes) {
+            const auto modes = DocumentModel::createFieldMergeModes(DocumentModel::MergeMode::MergeAverage);
+
+            for (auto &consolidate : list) {
+                consolidate.destinationIndex = 0;
+                consolidate.doNotDeleteEmpty = false;
+                consolidate.fieldMergeModes = modes;
+            }
+            co_return true;
+        }
+        co_return false;
     });
 
     m_engine->load(QUrl(u"Mobile/Main.qml"_qs));

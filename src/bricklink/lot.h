@@ -151,8 +151,6 @@ public:
     Incomplete *isIncomplete() const    { return m_incomplete.get(); }
     void setIncomplete(Incomplete *inc) { m_incomplete.reset(inc); }
 
-    bool mergeFrom(const Lot &merge, bool useCostQtyAg = false);
-
     void save(QDataStream &ds) const;
     static Lot *restore(QDataStream &ds);
 

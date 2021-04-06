@@ -60,6 +60,15 @@ Document *DocumentList::documentForFile(const QString &fileName) const
     return nullptr;
 }
 
+Document *DocumentList::documentForModel(DocumentModel *model) const
+{
+    for (auto *document : m_documents) {
+        if (document->model() == model)
+            return document;
+    }
+    return nullptr;
+}
+
 int DocumentList::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : int(m_documents.count());

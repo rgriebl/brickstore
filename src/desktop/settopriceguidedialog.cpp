@@ -26,6 +26,9 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
+
+    w_advanced_button->setResizeTopLevelOnExpand(true);
+    w_advanced_button->setExpandingWidget(w_advanced);
     
     w_type_time->addItem(tr("Last 6 Months Sales"), int(BrickLink::Time::PastSix));
     w_type_time->addItem(tr("Current Inventory"), int(BrickLink::Time::Current));
@@ -40,19 +43,6 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
 
     w_type_price->setCurrentIndex(Config::inst()->value(u"/MainWindow/SetToPriceGuideDialog/Price"_qs,
                                                         int(BrickLink::Price::Average)).toInt());
-
-    auto toggleAdvancedOptions = [this](bool initialize = false) {
-        bool visible = w_advanced->isVisible() || initialize;
-
-        w_advanced->setVisible(!visible);
-        w_advanced_button->setArrowType(!visible ? Qt::UpArrow : Qt::DownArrow);
-
-        QDialog::layout()->activate();
-        resize(minimumSizeHint());
-    };
-    connect(w_advanced_button, &QToolButton::clicked,
-            this, toggleAdvancedOptions);
-    toggleAdvancedOptions(true /* initialize */);
 
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
     auto ignoreDefaultKey = [](QObject *, QEvent *e) {

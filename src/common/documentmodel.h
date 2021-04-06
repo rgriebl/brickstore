@@ -160,6 +160,37 @@ public:
     Q_DECLARE_FLAGS(MergeModes, MergeMode)
     Q_FLAG(MergeMode)
 
+    using FieldMergeModes = QHash<Field, MergeMode>;
+
+    struct Consolidate
+    {
+        explicit Consolidate(const LotList &lots)
+            : lots(lots)
+        { }
+
+        BrickLink::LotList lots;          // in
+        int destinationIndex = -1;        // out (-1 for "just add")
+        bool doNotDeleteEmpty = false;    // out (not used for addItem mode)
+        FieldMergeModes fieldMergeModes;  // out
+    };
+
+    using ConsolidateFunction = QCoro::Task<bool> (DocumentModel *, QVector<Consolidate> &, bool /*add item*/);
+
+    enum class AddLotMode {
+        AddAsNew,
+        ConsolidateWithExisting,
+        ConsolidateInteractive,
+    };
+    QCoro::Task<int> addLots(BrickLink::LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
+    QCoro::Task<> consolidateLots(BrickLink::LotList lots);
+
+    static void setConsolidateFunction(std::function<ConsolidateFunction> consolidateFunction);
+
+    static MergeModes possibleMergeModesForField(Field field);
+    static FieldMergeModes createFieldMergeModes(MergeMode mergeMode = MergeMode::Ignore);
+    static bool canLotsBeMerged(const Lot &lot1, const Lot &lot2);
+    static bool mergeLotFields(const Lot &from, Lot &to, const FieldMergeModes &fieldMergeModes);
+
     static constexpr int maxQuantity = 9999999;
     static constexpr double maxPrice = 99999;
 
@@ -250,10 +281,6 @@ public:
     bool legacyCurrencyCode() const;
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, double crate = 1.);
-
-    static bool canLotsBeMerged(const Lot &lot1, const Lot &lot2);
-    static bool mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
-                                const QHash<Field, MergeMode> &fieldMerge = { });
 
     Filter::Parser *filterParser();
 
@@ -356,7 +383,6 @@ private:
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs
     QHash<const Lot *, QPair<quint64, quint64>> m_lotFlags;
 
-
     QVector<QPair<int, Qt::SortOrder>> m_sortColumns = { { -1, Qt::AscendingOrder } };
     std::unique_ptr<Filter::Parser> m_filterParser;
     QVector<Filter> m_filter;
@@ -377,6 +403,8 @@ private:
     QTimer *          m_delayedEmitOfStatisticsChanged = nullptr;
     QTimer *          m_delayedEmitOfDataChanged = nullptr;
     QPair<QPoint, QPoint> m_nextDataChangedEmit;
+
+    static std::function<ConsolidateFunction> s_consolidateFunction;
 };
 
 class DocumentLotsMimeData : public QMimeData

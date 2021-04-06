@@ -76,7 +76,7 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
     });
 }
 
-int DocumentDelegate::defaultItemHeight(const QWidget *w) const
+int DocumentDelegate::defaultItemHeight(const QWidget *w)
 {
     QSize picsize = BrickLink::core()->standardPictureSize()
             * double(Config::inst()->rowHeightPercent()) / 100.;

@@ -202,7 +202,34 @@ void ColumnChangeWatcher::disable()
 
 TableView::TableView(QWidget *parent)
     : QTableView(parent)
-{ }
+{
+    updateMinimumSectionSize();
+}
+
+void TableView::editCurrentItem(int column)
+{
+    auto idx = currentIndex();
+    if (!idx.isValid())
+        return;
+    idx = idx.siblingAtColumn(column);
+    QKeyEvent kp(QEvent::KeyPress, Qt::Key_Execute, Qt::NoModifier);
+    edit(idx, AllEditTriggers, &kp);
+}
+
+void TableView::updateMinimumSectionSize()
+
+{
+    int s = qMax(16, fontMetrics().height() * 2);
+    horizontalHeader()->setMinimumSectionSize(s);
+    setIconSize({ s, s });
+}
+
+void TableView::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::FontChange)
+        updateMinimumSectionSize();
+    QTableView::changeEvent(e);
+}
 
 void TableView::keyPressEvent(QKeyEvent *e)
 {
@@ -304,7 +331,7 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
                   if (!lots.empty())
-                      m_document->copyFields(lots, dlg.defaultMergeMode(), dlg.fieldMergeModes());
+                      m_document->copyFields(lots, dlg.fieldMergeModes());
                   qDeleteAll(lots);
               }
           } },
@@ -445,8 +472,6 @@ View::View(Document *document, QWidget *parent)
     connect(m_model, &DocumentModel::modificationChanged,
             this, &View::updateCaption);
 
-    updateMinimumSectionSize();
-
     m_ccw = new ColumnChangeWatcher(this, m_header);
 
     connect(m_document, &Document::blockingOperationActiveChanged,
@@ -513,8 +538,6 @@ void View::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         languageChange();
-    else if (e->type() == QEvent::FontChange)
-        updateMinimumSectionSize();
     QWidget::changeEvent(e);
 }
 
@@ -534,13 +557,6 @@ void View::updateCaption()
 
     setWindowTitle(cap);
     setWindowModified(m_model->isModified());
-}
-
-void View::updateMinimumSectionSize()
-{
-    int s = qMax(16, fontMetrics().height() * 2);
-    m_header->setMinimumSectionSize(s);
-    m_table->setIconSize({ s, s });
 }
 
 void View::ensureLatestVisible()

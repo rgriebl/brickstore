@@ -19,6 +19,7 @@
 #include "common/documentmodel.h"
 
 class DocumentModel;
+class SelectMergeMode;
 QT_FORWARD_DECLARE_CLASS(QListWidget)
 QT_FORWARD_DECLARE_CLASS(QRadioButton)
 QT_FORWARD_DECLARE_CLASS(QAbstractButton)
@@ -46,6 +47,7 @@ private:
     QListWidget *m_documentList;
 };
 
+
 class SelectDocumentDialog : public QDialog
 {
     Q_OBJECT
@@ -60,28 +62,6 @@ private:
     QAbstractButton *m_ok;
 };
 
-class SelectMergeMode : public QWidget
-{
-    Q_OBJECT
-public:
-    SelectMergeMode(DocumentModel::MergeMode defaultMode, QWidget *parent = nullptr);
-
-    DocumentModel::MergeMode defaultMergeMode() const;
-    QHash<DocumentModel::Field, DocumentModel::MergeMode> fieldMergeModes() const;
-
-    QByteArray saveState() const;
-    bool restoreState(const QByteArray &ba);
-
-signals:
-    void mergeModesChanged(bool valid);
-
-private:
-    void createFields(QWidget *parent);
-    void setDefaultMode(DocumentModel::MergeMode defaultMode);
-
-    QButtonGroup *m_allGroup;
-    QVector<QButtonGroup *> m_groups;
-};
 
 class SelectCopyMergeDialog : public QWizard
 {
@@ -92,14 +72,10 @@ public:
     ~SelectCopyMergeDialog() override;
 
     LotList lots() const;
-    DocumentModel::MergeMode defaultMergeMode() const;
     QHash<DocumentModel::Field, DocumentModel::MergeMode> fieldMergeModes() const;
 
 protected:
     void showEvent(QShowEvent *e) override;
-
-private:
-    void createFields(QWidget *parent);
 
     SelectDocument *m_sd;
     SelectMergeMode *m_mm;

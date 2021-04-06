@@ -570,6 +570,8 @@ QString DocumentStatistics::asHtmlTable() const
 // *****************************************************************************************
 // *****************************************************************************************
 
+std::function<DocumentModel::ConsolidateFunction> DocumentModel::s_consolidateFunction;
+
 
 DocumentModel *DocumentModel::createTemporary(const LotList &list, const QVector<int> &fakeIndexes)
 {
@@ -674,6 +676,371 @@ DocumentModel::~DocumentModel()
 
     //qWarning() << "~" << this;
 }
+
+QCoro::Task<int> DocumentModel::addLots(BrickLink::LotList &&lotsRef, AddLotMode addLotMode)
+{
+    if (!s_consolidateFunction)
+        co_return -1;
+
+    if (lotsRef.empty())
+        co_return -1;
+
+    // We own the items now, but we have to move them into a local variable, because
+
+    // the lotsRef reference might go out of scope when we co_await later
+    LotList lots(lotsRef);
+    lotsRef.clear();
+
+    if (addLotMode == AddLotMode::ConsolidateWithExisting) {
+        if (lots.size() != 1) {
+            qDeleteAll(lots);
+            co_return -1;
+        }
+    }
+
+    // the first lot in c.lots is either an existing lot for merges or nullptr for straight adds
+    QVector<Consolidate> interactiveConsolidateList;
+    QVector<Consolidate> quietConsolidateList;
+
+    // We cannot just concatenate both lists afterwards, because we would loose the the original
+    // order. Instead we remember here from which list to pick the next item when iterating
+    enum : char { CT_Quiet = 1, CT_Interactive, CT_Ignore };
+    QByteArray consolidationType(lots.size(), CT_Quiet);
+
+    // If we add 2 of the same, we would end up in a bad situation, if we handled each lot
+    // consolidation individually: both would have the same "mergeLot", but if the first
+    // wants to consolidate to the new one and the second on to the existing, the existing lot
+    // would have been deleted by the time we resolve the second consolidation.
+    // The old system popped up the consolidation dialog for each single lot while looping, so
+    // it didn't have to deal with this problem.
+    QMap<BrickLink::Lot *, qsizetype> mergedLots;
+    int mergedCount = 0;
+
+    for (int i = 0; i < lots.size(); ++i) {
+        Lot *lot = lots.at(i);
+
+        if (addLotMode != AddLotMode::AddAsNew) {
+            Lot *mergeLot = nullptr;
+
+            for (int j = int(m_sortedLots.count()) - 1; j >= 0; --j) {
+                Lot *otherLot = m_sortedLots.at(j);
+                if (canLotsBeMerged(*lot, *otherLot)) {
+                    mergeLot = otherLot;
+                    break;
+                }
+            }
+            if (!mergeLot) {  // record "lot" to be added
+                Consolidate c({ nullptr, lot });
+                quietConsolidateList.append(c);  // record "lot" to be added
+            } else {
+                auto mergedIndex = mergedLots.value(mergeLot, -1);
+
+                if (addLotMode == AddLotMode::ConsolidateWithExisting) {
+                    // record "lot" be quantity merged, destination == mergeLot
+                    if (mergedIndex == -1) {
+                        Consolidate c({ mergeLot, lot });
+                        c.destinationIndex = 0;
+                        quietConsolidateList.append(c);
+                        mergedLots.insert(mergeLot, quietConsolidateList.size() - 1);
+                    } else {
+                        Consolidate &c = quietConsolidateList[mergedIndex];
+                        c.lots.append(lot);
+                        ++mergedCount;
+                        consolidationType[i] = CT_Ignore;
+                    }
+                } else { // AddLotMode::ConsolidateInteractive
+                    if (mergedIndex == -1) {
+                        Consolidate c({ mergeLot, lot });
+                        interactiveConsolidateList.append(c);
+                        mergedLots.insert(mergeLot, interactiveConsolidateList.size() - 1);
+                        consolidationType[i] = CT_Interactive;
+                    } else {
+                        Consolidate &c = interactiveConsolidateList[mergedIndex];
+                        c.lots.append(lot);
+                        ++mergedCount;
+                        consolidationType[i] = CT_Ignore;
+                    }
+                }
+            }
+        } else {
+            Consolidate c({ nullptr, lot });
+            quietConsolidateList.append(c);  // record "lot" to be added
+        }
+    }
+
+    Q_ASSERT((interactiveConsolidateList.size() + quietConsolidateList.size() + mergedCount) == lots.size());
+    Q_ASSERT(consolidationType.count(CT_Interactive) == interactiveConsolidateList.size());
+    Q_ASSERT(consolidationType.count(CT_Quiet) == quietConsolidateList.size());
+
+    if (!interactiveConsolidateList.isEmpty()) {
+        if (!co_await s_consolidateFunction(this, interactiveConsolidateList, true /*add items*/)) {
+            qDeleteAll(lots);
+            co_return -1;
+        }
+    }
+
+    Lot *lastAdded = nullptr;
+    int addCount = 0;
+    int consolidateCount = 0;
+
+    auto quietIt = quietConsolidateList.cbegin();
+    auto interactiveIt = interactiveConsolidateList.cbegin();
+
+    beginMacro();
+
+    for (int i = 0; i < lots.size(); ++i) {
+        auto ct = consolidationType.at(i);
+        if (ct == CT_Ignore)
+            continue;
+        auto it = (ct == CT_Interactive) ? interactiveIt++ : quietIt++;
+        const Consolidate &consolidate = *it;
+        BrickLink::LotList newLotPtrs = consolidate.lots.mid(1);
+
+        Q_ASSERT(!newLotPtrs.isEmpty());
+
+        if (consolidate.destinationIndex < 0) { // just add all the new lots
+            for (auto *newLotPtr : newLotPtrs)
+                newLotPtr->setDateAdded(QDateTime::currentDateTimeUtc());
+            lastAdded = newLotPtrs.constLast();
+            appendLots(std::move(newLotPtrs));  // pass on ownership
+            ++addCount;
+        } else {
+            Q_ASSERT(consolidate.lots.size() >= 2);
+            Q_ASSERT(consolidate.destinationIndex < consolidate.lots.size());
+
+            auto *existingLotPtr = consolidate.lots.at(0);
+
+            Q_ASSERT(existingLotPtr);
+
+            if (consolidate.destinationIndex == 0) {
+                // merge all new lots into existing, delete all new
+                Lot consolidatedLot = *existingLotPtr;
+                for (auto *newLotPtr : newLotPtrs) {
+                    mergeLotFields(*newLotPtr, consolidatedLot, consolidate.fieldMergeModes);
+                    consolidatedLot.setQuantity(consolidatedLot.quantity() + newLotPtr->quantity());
+                }
+                changeLot(existingLotPtr, consolidatedLot);
+                qDeleteAll(newLotPtrs); // we own it, but we don't need it anymore
+                ++consolidateCount;
+            } else if (consolidate.destinationIndex > 0) {
+                // merge existing into new, merge all other new ones too, add one new,
+                // delete the others, remove existing
+                auto *newLotPtr = consolidate.lots[consolidate.destinationIndex];
+                for (auto *lotPtr : consolidate.lots) {
+                    if (newLotPtr == lotPtr)
+                        continue;
+                    mergeLotFields(*lotPtr, *newLotPtr, consolidate.fieldMergeModes);
+                    newLotPtr->setQuantity(newLotPtr->quantity() + lotPtr->quantity());
+                }
+                newLotPtr->setDateAdded(QDateTime::currentDateTimeUtc());
+
+                newLotPtrs.removeOne(newLotPtr);
+                qDeleteAll(newLotPtrs);
+
+                appendLot(std::move(newLotPtr)); // pass on ownership
+                removeLot(existingLotPtr);
+                ++consolidateCount;
+            }
+        }
+    }
+
+    Q_ASSERT(quietIt == quietConsolidateList.cend());
+    Q_ASSERT(interactiveIt == interactiveConsolidateList.cend());
+
+    endMacro(tr("Added %1, consolidated %2 items").arg(addCount).arg(consolidateCount));
+
+    lots.clear();
+
+    co_return lastAdded ? index(lastAdded).row() : -1;
+}
+
+
+QCoro::Task<> DocumentModel::consolidateLots(BrickLink::LotList lots)
+{
+    if (!s_consolidateFunction)
+        co_return;
+
+    if (lots.count() < 2)
+        co_return;
+
+    QVector<Consolidate> consolidateList;
+    LotList sourceLots = lots;
+
+    for (int i = 0; i < sourceLots.count(); ++i) {
+        Lot *lot = sourceLots.at(i);
+        LotList mergeLots;
+
+        for (int j = i + 1; j < sourceLots.count(); ++j) {
+            Lot *otherLot = sourceLots.at(j);
+            if (canLotsBeMerged(*lot, *otherLot))
+                mergeLots << sourceLots.takeAt(j--);
+        }
+        if (mergeLots.isEmpty())
+            continue;
+
+        mergeLots.prepend(sourceLots.at(i));
+        consolidateList.emplace_back(mergeLots);
+    }
+
+    if (consolidateList.isEmpty())
+        co_return;
+
+    if (!co_await s_consolidateFunction(this, consolidateList, false /*add items*/))
+        co_return;
+
+    bool startedMacro = false;
+    int consolidateCount = 0;
+
+    for (int cli = 0; cli < consolidateList.count(); ++cli) {
+        const Consolidate &consolidate = consolidateList.at(cli);
+        int destinationIndex = consolidate.destinationIndex;
+
+        if ((destinationIndex < 0) || (destinationIndex >= consolidate.lots.count()))
+            continue;
+
+        if (!startedMacro) {
+            beginMacro();
+            startedMacro = true;
+        }
+
+        Lot *destinationLotPtr = consolidate.lots.at(destinationIndex);
+        Lot consolidatedLot = *destinationLotPtr;
+
+        for (Lot *lotPtr : consolidate.lots) {
+            if (lotPtr != destinationLotPtr) {
+                mergeLotFields(*lotPtr, consolidatedLot, consolidate.fieldMergeModes);
+                consolidatedLot.setQuantity(consolidatedLot.quantity() + lotPtr->quantity());
+
+                if (consolidate.doNotDeleteEmpty) {
+                    Lot zeroedLot = *lotPtr;
+                    zeroedLot.setQuantity(0);
+                    changeLot(lotPtr, zeroedLot);
+                } else {
+                    removeLot(lotPtr);
+                }
+            }
+        }
+        changeLot(destinationLotPtr, consolidatedLot);
+
+        ++consolidateCount;
+    }
+    if (startedMacro)
+        endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
+
+}
+
+DocumentModel::MergeModes DocumentModel::possibleMergeModesForField(Field field)
+{
+    // make sure to keep this in sync with mergeLotFields() below and class SelectMergeMode
+    static const QHash<Field, MergeModes> possibleModes = {
+        { Price,     MergeMode::Copy | MergeMode::Merge | MergeMode::MergeAverage },
+        { Cost,      MergeMode::Copy | MergeMode::Merge | MergeMode::MergeAverage },
+        { TierP1,    MergeMode::Copy | MergeMode::Merge | MergeMode::MergeAverage },
+        { TierP2,    MergeMode::Copy | MergeMode::Merge | MergeMode::MergeAverage },
+        { TierP3,    MergeMode::Copy | MergeMode::Merge | MergeMode::MergeAverage },
+        { Quantity,  MergeMode::Copy | MergeMode::Merge },
+        { Bulk,      MergeMode::Copy | MergeMode::Merge },
+        { Sale,      MergeMode::Copy | MergeMode::Merge },
+        { Comments,  MergeMode::Copy | MergeMode::Merge | MergeMode::MergeText },
+        { Remarks,   MergeMode::Copy | MergeMode::Merge | MergeMode::MergeText },
+        { Reserved,  MergeMode::Copy | MergeMode::Merge },
+        { Retain,    MergeMode::Copy },
+        { Stockroom, MergeMode::Copy },
+    };
+    return possibleModes.value(field, MergeMode::Ignore);
+}
+
+DocumentModel::FieldMergeModes DocumentModel::createFieldMergeModes(MergeMode mergeMode)
+{
+    FieldMergeModes fmms;
+
+    if (mergeMode != MergeMode::Ignore) {
+        for (int i = 0; i < FieldCount; ++i) {
+            auto field = static_cast<Field>(i);
+            auto possibleModes = possibleMergeModesForField(field);
+            if (possibleModes != MergeMode::Ignore) {
+                MergeMode mode = mergeMode;
+                while ((mode != MergeMode::Ignore) && !possibleModes.testFlag(mode))
+                    mode = static_cast<MergeMode>(int(mode) >> 1);
+
+                if (mode != MergeMode::Ignore)
+                    fmms.insert(field, mode);
+            }
+        }
+    }
+    return fmms;
+}
+
+bool DocumentModel::canLotsBeMerged(const Lot &lot1, const Lot &lot2)
+{
+    return ((&lot1 != &lot2)
+            && !lot1.isIncomplete()
+            && !lot2.isIncomplete()
+            && (lot1.item() == lot2.item())
+            && (lot1.color() == lot2.color())
+            && (lot1.condition() == lot2.condition())
+            && (lot1.subCondition() == lot2.subCondition())
+            && ((lot1.status() == BrickLink::Status::Exclude) ==
+                (lot2.status() == BrickLink::Status::Exclude)));
+}
+
+bool DocumentModel::mergeLotFields(const Lot &from, Lot &to, const FieldMergeModes &fieldMergeModes)
+{
+    if (!canLotsBeMerged(from, to))
+        return false;
+
+    if (fieldMergeModes.isEmpty())
+        return false;
+
+    auto mergeModeFor = [&fieldMergeModes](Field f) -> MergeMode {
+        return fieldMergeModes.value(f, MergeMode::Ignore);
+    };
+
+    bool changed = false;
+
+    if (FieldOp<&Lot::price, &Lot::setPrice>::merge(from, to, mergeModeFor(Price)))
+        changed = true;
+    if (FieldOp<&Lot::cost, &Lot::setCost>::merge(from, to, mergeModeFor(Cost)))
+        changed = true;
+    if (FieldOp<&Lot::tierPrice0, &Lot::setTierPrice0>::merge(from, to, mergeModeFor(TierP1)))
+        changed = true;
+    if (FieldOp<&Lot::tierPrice1, &Lot::setTierPrice1>::merge(from, to, mergeModeFor(TierP2)))
+        changed = true;
+    if (FieldOp<&Lot::tierPrice2, &Lot::setTierPrice2>::merge(from, to, mergeModeFor(TierP3)))
+        changed = true;
+    if (FieldOp<&Lot::quantity, &Lot::setQuantity>::merge(from, to, mergeModeFor(Quantity)))
+        changed = true;
+    if (FieldOp<&Lot::bulkQuantity, &Lot::setBulkQuantity>::merge(from, to, mergeModeFor(Bulk)))
+        changed = true;
+    if (FieldOp<&Lot::sale, &Lot::setSale>::merge(from, to, mergeModeFor(Sale)))
+        changed = true;
+    if (FieldOp<&Lot::comments, &Lot::setComments>::merge(from, to, mergeModeFor(Comments)))
+        changed = true;
+    if (FieldOp<&Lot::remarks, &Lot::setRemarks>::merge(from, to, mergeModeFor(Remarks)))
+        changed = true;
+    if (FieldOp<&Lot::reserved, &Lot::setReserved>::merge(from, to, mergeModeFor(Reserved)))
+        changed = true;
+    if (FieldOp<&Lot::retain, &Lot::setRetain>::merge(from, to, mergeModeFor(Retain)))
+        changed = true;
+    if (FieldOp<&Lot::stockroom, &Lot::setStockroom>::merge(from, to, mergeModeFor(Stockroom)))
+        changed = true;
+
+    //TODO: merge markers
+
+    // this is not ideal, but should do the trick for the majority of cases
+    if (FieldOp<&Lot::dateAdded, &Lot::setDateAdded>::merge(from, to, MergeMode::Merge))
+        changed = true;
+    if (FieldOp<&Lot::dateLastSold, &Lot::setDateLastSold>::merge(from, to, MergeMode::Merge))
+        changed = true;
+
+    return changed;
+}
+
+void DocumentModel::setConsolidateFunction(std::function<ConsolidateFunction> consolidateFunction)
+{
+    s_consolidateFunction = consolidateFunction;
+}
+
 
 double DocumentModel::maxLocalPrice(const QString &currencyCode)
 {
@@ -1157,77 +1524,6 @@ void DocumentModel::setCurrencyCode(const QString &ccode, double crate)
 {
     if (ccode != currencyCode())
         m_undo->push(new CurrencyCmd(this, ccode, crate));
-}
-
-bool DocumentModel::canLotsBeMerged(const Lot &lot1, const Lot &lot2)
-{
-    return ((&lot1 != &lot2)
-            && !lot1.isIncomplete()
-            && !lot2.isIncomplete()
-            && (lot1.item() == lot2.item())
-            && (lot1.color() == lot2.color())
-            && (lot1.condition() == lot2.condition())
-            && (lot1.subCondition() == lot2.subCondition()));
-}
-
-bool DocumentModel::mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
-                               const QHash<Field, MergeMode> &fieldMerge)
-{
-    if (!canLotsBeMerged(from, to))
-        return false;
-
-    if (fieldMerge.isEmpty()) {
-        if (defaultMerge == MergeMode::Ignore) {
-            return false;
-        } else if (defaultMerge == MergeMode::Copy) {
-            to = from;
-            return true;
-        }
-    }
-
-    auto mergeModeFor = [&fieldMerge, defaultMerge](Field f) -> MergeMode {
-        auto mergeIt = fieldMerge.constFind(f);
-        return (mergeIt == fieldMerge.cend()) ? defaultMerge : mergeIt.value();
-    };
-
-    bool changed = false;
-
-    if (FieldOp<&Lot::quantity, &Lot::setQuantity>::merge(from, to, mergeModeFor(Quantity)))
-        changed = true;
-    if (FieldOp<&Lot::price, &Lot::setPrice>::merge(from, to, mergeModeFor(Price)))
-        changed = true;
-    if (FieldOp<&Lot::cost, &Lot::setCost>::merge(from, to, mergeModeFor(Cost)))
-        changed = true;
-    if (FieldOp<&Lot::bulkQuantity, &Lot::setBulkQuantity>::merge(from, to, mergeModeFor(Bulk)))
-        changed = true;
-    if (FieldOp<&Lot::sale, &Lot::setSale>::merge(from, to, mergeModeFor(Sale)))
-        changed = true;
-    if (FieldOp<&Lot::comments, &Lot::setComments>::merge(from, to, mergeModeFor(Comments)))
-        changed = true;
-    if (FieldOp<&Lot::remarks, &Lot::setRemarks>::merge(from, to, mergeModeFor(Remarks)))
-        changed = true;
-    if (FieldOp<&Lot::tierQuantity0, &Lot::setTierQuantity0>::merge(from, to, mergeModeFor(TierQ1)))
-        changed = true;
-    if (FieldOp<&Lot::tierPrice0, &Lot::setTierPrice0>::merge(from, to, mergeModeFor(TierP1)))
-        changed = true;
-    if (FieldOp<&Lot::tierQuantity1, &Lot::setTierQuantity1>::merge(from, to, mergeModeFor(TierQ2)))
-        changed = true;
-    if (FieldOp<&Lot::tierPrice1, &Lot::setTierPrice1>::merge(from, to, mergeModeFor(TierP2)))
-        changed = true;
-    if (FieldOp<&Lot::tierQuantity2, &Lot::setTierQuantity2>::merge(from, to, mergeModeFor(TierQ3)))
-        changed = true;
-    if (FieldOp<&Lot::tierPrice2, &Lot::setTierPrice2>::merge(from, to, mergeModeFor(TierP3)))
-        changed = true;
-    if (FieldOp<&Lot::retain, &Lot::setRetain>::merge(from, to, mergeModeFor(Retain)))
-        changed = true;
-    if (FieldOp<&Lot::stockroom, &Lot::setStockroom>::merge(from, to, mergeModeFor(Stockroom)))
-        changed = true;
-    if (FieldOp<&Lot::reserved, &Lot::setReserved>::merge(from, to, mergeModeFor(Reserved)))
-        changed = true;
-
-    //TODO: merge markers
-
-    return changed;
 }
 
 void DocumentModel::applyTo(const LotList &lots, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback,

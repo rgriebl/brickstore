@@ -93,7 +93,7 @@
 #include "managecolumnlayoutsdialog.h"
 #include "settingsdialog.h"
 #include "systeminfodialog.h"
-#include "consolidateitemsdialog.h"
+#include "consolidatedialog.h"
 
 
 using namespace std::chrono_literals;
@@ -308,27 +308,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(Config::inst(), &Config::toolBarActionsChanged,
             this, &MainWindow::setupToolBar);
 
-    Document::setLotConsolidationFunction([](Document::LotConsolidation &lc) -> QCoro::Task<> {
-        if (!lc.document || !MainWindow::inst())
-            co_return;
-        emit lc.document->requestActivation();
+    DocumentModel::setConsolidateFunction([](DocumentModel *model, QVector<DocumentModel::Consolidate> &list, bool addItems) -> QCoro::Task<bool> {
+        auto *doc = DocumentList::inst()->documentForModel(model);
+
+        if (!doc || !MainWindow::inst())
+            co_return false;
+
+        emit doc->requestActivation();
 
         auto *view = MainWindow::inst()->activeView();
+        if (!view || (view->document() != doc))
+            co_return false;
 
-        Q_ASSERT(view->document() == lc.document);
-
-        ConsolidateItemsDialog dlg(view, lc.lots, lc.preselectedIndex,
-                                   lc.mode, lc.current, lc.total, view);
+        ConsolidateDialog dlg(view, list, addItems);
         dlg.setWindowModality(Qt::ApplicationModal);
         dlg.show();
 
-        lc.accepted = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
-        lc.repeatForRemaining = dlg.repeatForAll();
-        lc.costQuantityAverage = dlg.costQuantityAverage();
-        lc.consolidateToIndex = dlg.consolidateToIndex();
-        lc.consolidateRemaining = dlg.consolidateRemaining();
-
-        co_return;
+        co_return (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
     });
 
     goHome(true);

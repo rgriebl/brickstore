@@ -39,7 +39,7 @@ public:
     void setReadOnly(bool ro);
     bool isReadOnly() const;
 
-    int defaultItemHeight(const QWidget *w = nullptr) const;
+    static int defaultItemHeight(const QWidget *w = nullptr);
 
     QSize sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const override;
     void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const override;

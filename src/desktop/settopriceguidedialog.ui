@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
-    <height>254</height>
+    <width>522</width>
+    <height>293</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,27 +32,9 @@
     </layout>
    </item>
    <item>
-    <widget class="QToolButton" name="w_advanced_button">
-     <property name="styleSheet">
-      <string notr="true">QToolButton {  border: none; background-color: &quot;transparent&quot; }</string>
-     </property>
+    <widget class="ExpandButton" name="w_advanced_button">
      <property name="text">
       <string>Advanced options</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="toolButtonStyle">
-      <enum>Qt::ToolButtonTextBesideIcon</enum>
-     </property>
-     <property name="autoRaise">
-      <bool>false</bool>
-     </property>
-     <property name="arrowType">
-      <enum>Qt::UpArrow</enum>
      </property>
     </widget>
    </item>
@@ -100,6 +82,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExpandButton</class>
+   <extends>QToolButton</extends>
+   <header>desktop/expandbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
