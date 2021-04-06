@@ -492,6 +492,20 @@ void Config::setShortcuts(const QVariantMap &list)
     }
 }
 
+QStringList Config::toolBarActions() const
+{
+    auto s = value("General/ToolBarActions"_l1).toString();
+    return s.isEmpty() ? QStringList { } : s.split(','_l1);
+}
+
+void Config::setToolBarActions(const QStringList &actions)
+{
+    if (toolBarActions() != actions) {
+        setValue("General/ToolBarActions"_l1, actions.join(','_l1));
+        emit toolBarActionsChanged(actions);
+    }
+}
+
 QString Config::lastDirectory() const
 {
     return m_lastDirectory.isEmpty() ? documentDir() : m_lastDirectory;

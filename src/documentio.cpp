@@ -1119,7 +1119,6 @@ DocumentIO::ResolveResult DocumentIO::resolveIncomplete(Lot *lot)
         if (ok) {
             qWarning().noquote() << " > resolved via CL to:" << QByteArray(1, item->itemTypeId())
                                  << item->id() << "@" << color->id();
-            lot->setResolvedThroughChangeLog(true);
         }
 
         lot->setItem(item);

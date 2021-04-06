@@ -24,6 +24,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QWidgetAction)
 
 class HistoryLineEdit;
 class Workspace;
@@ -114,7 +115,10 @@ private:
 
 public:
     QList<QAction *> contextMenuActions() const;
-    QList<QAction *> allActions() const;
+    QMultiMap<QString, QString> allActions() const;
+    QStringList toolBarActionNames() const;
+    QStringList defaultToolBarActionNames() const;
+    QAction *findAction(const QString &name) const;
     QAction *findAction(const char *name) const;
 
 private:
@@ -123,8 +127,9 @@ private:
     void createActions();
     void translateActions();
     void updateActions();
+    QMenu *createPopupMenu() override;
     QMenu *createMenu(const QByteArray &, const QVector<QByteArray> &);
-    bool setupToolBar(QToolBar *, const QVector<QByteArray> &);
+    bool setupToolBar();
     QDockWidget *createDock(QWidget *widget);
 
     Workspace *m_workspace;
@@ -132,7 +137,9 @@ private:
     QList<QAction *> m_extensionContextActions;
 
     ProgressCircle *m_progress;
+    QWidgetAction *m_progressAction;
     HistoryLineEdit *m_filter;
+    QWidgetAction *m_filterAction;
     QToolBar *m_toolbar;
     QMenu *m_extrasMenu;
     QVector<QDockWidget *> m_dock_widgets;

@@ -20,6 +20,15 @@
 #include <QSortFilterProxyModel>
 #include <QMenu>
 #include <QStringBuilder>
+#include <QMimeData>
+#include <QMouseEvent>
+
+#if defined(MODELTEST)
+#  include <QAbstractItemModelTester>
+#  define MODELTEST_ATTACH(x)   { (void) new QAbstractItemModelTester(x, QAbstractItemModelTester::FailureReportingMode::Warning, x); }
+#else
+#  define MODELTEST_ATTACH(x)   ;
+#endif
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -32,69 +41,174 @@
 #include "betteritemdelegate.h"
 
 
-class ShortcutModel : public QAbstractTableModel
+class ActionModel : public QAbstractItemModel
 {
     Q_OBJECT
-public:
-    ShortcutModel(const QList<QAction *> &actions, QObject *parent = nullptr)
-        : QAbstractTableModel(parent)
-    {
-        for (QAction *action : actions) {
-            if (!action->property("bsAction").toBool())
-                continue;
-            if (action->menu())
-                continue;
-            if (action->text().isEmpty())
-                continue;
+public:    
+    enum Option {
+        NoOptions = 0x00,
+        AddSubMenus = 0x01,
+        AddSeparators = 0x02,
+    };
+    Q_DECLARE_FLAGS(Options, Option)
 
-            Entry entry = { action, action->property("bsShortcut").value<QKeySequence>(),
-                            action->shortcut() };
-            m_entries << entry;
+    ActionModel(const QMultiMap<QString, QString> &actionNames, Options options, QObject *parent = nullptr)
+        : QAbstractItemModel(parent)
+        , m_actions(actionNames)
+    {
+        MODELTEST_ATTACH(this);
+
+        static const std::vector<std::pair<QString, const char *>> separators = {
+            { "-"_l1,  QT_TR_NOOP("Bar Separator") },
+            { "|"_l1,  QT_TR_NOOP("Space Separator") },
+            { "<>"_l1, QT_TR_NOOP("Flexible Space Separator") },
+        };
+        for (const auto &sep : separators) {
+            QAction *a = new QAction(this);
+            a->setObjectName(sep.first);
+            a->setText(tr(sep.second));
+            m_separatorActions.insert(sep.first, a);
+        }
+
+        if (options.testFlag(AddSeparators)) {
+            for (const QAction *a : m_separatorActions)
+                m_actions.insert(tr("Separators"), a->objectName());
+        }
+        if (!options.testFlag(AddSubMenus)) {
+            for (auto it = m_actions.begin(); it != m_actions.end(); ) {
+                if (QAction *a = FrameWork::inst()->findAction(*it)) {
+                    if (a->menu()) {
+                        it = m_actions.erase(it);
+                        continue;
+                    }
+                }
+                ++it;
+            }
         }
     }
 
-    void apply()
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override
     {
-        QVariantMap saved;
-        for (const Entry &entry : qAsConst(m_entries)) {
-            if (entry.action && (entry.key != entry.defaultKey))
-                saved.insert(entry.action->objectName(), entry.key);
+        if (hasIndex(row, column, parent)) {
+            quint32 id;
+            if (!parent.isValid())
+                id = row << 16 | 0x0000ffffu;
+            else
+                id = (parent.row() << 16) | (row & 0x0000ffff);
+            return createIndex(row, column, id);
         }
-        Config::inst()->setShortcuts(saved);
+        return {};
+    }
+
+    QModelIndex parent(const QModelIndex &idx) const override
+    {
+        if (!idx.isValid() || isCategory(idx))
+            return { };
+        else
+            return createIndex(categoryIndex(idx), 0, index(categoryIndex(idx), 0, { }).internalId());
     }
 
     int rowCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : m_entries.size();
+        if (parent.column() > 0)
+            return 0;
+        if (!parent.isValid()) {
+            return m_actions.uniqueKeys().size();
+        } else {
+            if (isCategory(parent))
+                return m_actions.values(m_actions.uniqueKeys().at(parent.row())).size();
+            else
+                return 0;
+        }
     }
 
     int columnCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : 3;
+        Q_UNUSED(parent);
+        return 1;
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+        if (index.isValid() && !isCategory(index))
+            flags |= Qt::ItemIsDragEnabled;
+        else
+            flags &= ~Qt::ItemIsSelectable;
+        return flags;
+    }
+
+    Qt::DropActions supportedDragActions() const override
+    {
+        return Qt::CopyAction;
+    }
+
+    QStringList mimeTypes() const override
+    {
+        return { "application/x-brickstore-toolbar-dnd"_l1 };
+    }
+
+    QMimeData *mimeData(const QModelIndexList &indexes) const override
+    {
+        if (indexes.size() != 1)
+            return nullptr;
+
+        QMimeData *mimeData = new QMimeData();
+        QByteArray encodedData;
+        QDataStream ds(&encodedData, QIODevice::WriteOnly);
+
+        ds << quintptr(this);
+
+        foreach (const QModelIndex &index, indexes) {
+            auto s = actionAt(index);
+            if (!s.isEmpty())
+                ds << index.row() << index.column() << s;
+        }
+
+        mimeData->setData(mimeTypes().constFirst(), encodedData);
+        return mimeData;
     }
 
     QVariant data(const QModelIndex &idx, int role) const override
     {
-        if (!idx.isValid() || idx.parent().isValid() || (idx.row() >= m_entries.count())
-                || (idx.column() >= columnCount())) {
+        if (!idx.isValid() || (idx.column() >= columnCount())) {
             return { };
         }
-        const Entry &entry = m_entries.at(idx.row());
 
-        if (role == Qt::DisplayRole) {
-            switch (idx.column()) {
-            case 0: return entry.action->text();
-            case 1: return entry.key.toString(QKeySequence::NativeText);
-            case 2: return entry.defaultKey.toString(QKeySequence::NativeText);
+        static auto removeMnemonic = [](const QString &s) {
+            QString s2(s);
+            s2.remove(QRegularExpression(R"(\&(?!\&))"_l1));
+            return s2;
+        };
+
+        if (isCategory(idx)) {
+            if ((idx.column() == 0) && (role == Qt::DisplayRole)) {
+                QString s = m_actions.uniqueKeys().at(categoryIndex(idx));
+                return removeMnemonic(s);
+            } else if (role == Qt::FontRole) {
+                auto fnt = qApp->font();
+                fnt.setBold(true);
+                return fnt;
             }
+            return { };
         }
-        else if (role == Qt::ToolTipRole) {
 
-            std::function<QStringList(QAction *)> buildPath = [&buildPath](QAction *a) {
+        const QAction *action = nullptr;
+        auto name = actionAt(idx);
+        if (m_separatorActions.contains(name))
+            action = m_separatorActions.value(name);
+        else
+            action = FrameWork::inst()->findAction(name);
+        if (!action)
+            return { };
+
+        switch (role) {
+        case Qt::ToolTipRole:
+        case Qt::DisplayRole: {
+            std::function<QStringList(const QAction *)> buildPath = [&buildPath](const QAction *a) {
                 QStringList path;
                 if (a && !a->text().isEmpty()) {
-                    //path << a->text().remove(QRegularExpression(R"(\&[a-zA-Z0-9])"_l1));
-                    path.prepend(a->text().remove(QRegularExpression(R"(\&(?!\&))"_l1)));
+                    path.prepend(removeMnemonic(a->text()));
 
                     const QList<QWidget *> widgets = a->associatedWidgets();
                     for (auto w : widgets) {
@@ -104,7 +218,270 @@ public:
                 }
                 return path;
             };
-            return buildPath(entry.action).join(" / "_l1);
+            QString s = m_textCache.value(action);
+            if (s.isEmpty()) {
+                auto sl = buildPath(action);
+                s = (sl.size() == 1) ? sl.constFirst() : sl.mid(1).join(" / "_l1);
+                m_textCache.insert(action, s);
+            }
+            return s;
+        }
+        case Qt::DecorationRole: {
+            QIcon ico = action->icon();
+            // returning the icon directly will create scaling artefacts
+            if (!ico.isNull()) {
+                return QIcon(ico.pixmap(64, QIcon::Normal, QIcon::On));
+            } else {
+                QPixmap pix(64, 64);
+                pix.fill(Qt::transparent);
+                return QIcon(pix);
+            }
+        }
+        }
+        return { };
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if ((section < 0) || (section >= columnCount()) || (orientation != Qt::Horizontal))
+            return { };
+        if (role == Qt::DisplayRole)
+            return tr("Action name");
+        return { };
+    }
+
+protected:
+    bool isCategory(const QModelIndex &idx) const
+    {
+        return (idx.internalId() & 0x0000ffffu) == 0x0000ffffu;
+    }
+    int categoryIndex(const QModelIndex &idx) const
+    {
+        return idx.internalId() >> 16;
+    }
+    QString actionAt(const QModelIndex &idx) const
+    {
+        if (!idx.isValid() || isCategory(idx))
+            return { };
+        return m_actions.values(m_actions.uniqueKeys().at(categoryIndex(idx)))
+                .at(int(idx.internalId() & 0x0000ffffu));
+    }
+
+    QMultiMap<QString, QString> m_actions;
+
+protected:
+    QMap<QString, QAction *> m_separatorActions;
+private:
+    mutable QHash<const QAction *, QString> m_textCache;
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ActionModel::Options)
+
+
+class ToolBarModel : public ActionModel
+{
+    Q_OBJECT
+public:
+    ToolBarModel(const QStringList &actions, QObject *parent)
+        : ActionModel({ }, NoOptions, parent)
+    {
+        m_category = tr("Toolbar");
+        for (auto it = actions.crbegin(); it != actions.crend(); ++it)
+            m_actions.insert(m_category, *it);
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        Qt::ItemFlags defaultFlags = ActionModel::flags(index);
+
+        if (index.isValid())
+            return Qt::ItemIsDragEnabled | defaultFlags;
+        else
+            return Qt::ItemIsDropEnabled | defaultFlags;
+    }
+
+    int rowCount(const QModelIndex &parent = { }) const override
+    {
+        return parent.isValid() ? 0 : m_actions.values().size();
+    }
+
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override
+    {
+        if (hasIndex(row, column, parent))
+            return createIndex(row, column, row);
+        return {};
+    }
+
+    QModelIndex parent(const QModelIndex &) const override
+    {
+        return { };
+    }
+
+    Qt::DropActions supportedDragActions() const override
+    {
+        return Qt::MoveAction;
+    }
+
+    Qt::DropActions supportedDropActions() const override
+    {
+        return Qt::CopyAction | Qt::MoveAction;
+    }
+
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override
+    {
+        if (!canDropMimeData(data, action, row, column, parent))
+            return false;
+        if (action == Qt::IgnoreAction)
+            return true;
+
+        if (row < 0)
+            return false;
+
+        QByteArray encodedData = data->data(mimeTypes().constFirst());
+        QDataStream ds(&encodedData, QIODevice::ReadOnly);
+        QString newAction;
+
+        quintptr source;
+        int sourceRow;
+        int sourceColumn;
+        ds >> source >> sourceRow >> sourceColumn >> newAction;
+
+        if (!newAction.isEmpty()) {
+            if (source == quintptr(this)) { // internal move
+                if ((row == sourceRow) || (row == (sourceRow + 1))) // no-op move
+                    return false;
+
+                beginMoveRows({ }, sourceRow, sourceRow, { }, row);
+                QStringList actions = m_actions.values(m_category);
+                actions.move(sourceRow, row < sourceRow ? row : row - 1);
+                m_actions.remove(m_category);
+                for (auto it = actions.crbegin(); it != actions.crend(); ++it)
+                    m_actions.insert(m_category, *it);
+                endMoveRows();
+                return false; // actually true, but QAIV would remove the sourceRow
+            } else {
+                QStringList actions = m_actions.values(m_category);
+
+                // no duplicated allowed
+                if (!m_separatorActions.contains(newAction) && actions.contains(newAction)) {
+                    int removeRow = actions.indexOf(newAction);
+
+                    if ((row == removeRow) || (row == (removeRow + 1))) // no-op
+                        return false;
+
+                    beginRemoveRows({ }, removeRow, removeRow);
+                    actions.removeAt(removeRow);
+                    endRemoveRows();
+
+                    if (row > removeRow)
+                        --row;
+                }
+
+                beginInsertRows({ }, row, row);
+                actions.insert(row, newAction);
+                m_actions.remove(m_category);
+                for (auto it = actions.crbegin(); it != actions.crend(); ++it)
+                    m_actions.insert(m_category, *it);
+                endInsertRows();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if ((section < 0) || (section >= columnCount()) || (orientation != Qt::Horizontal))
+            return { };
+        if (role == Qt::DisplayRole)
+            return tr("Toolbar");
+        return { };
+    }
+
+    void removeActionAt(int row)
+    {
+        if (row < 0 || row >= rowCount())
+            return;
+
+        QStringList actions = m_actions.values(m_category);
+
+        beginRemoveRows({ }, row, row);
+
+        actions.removeAt(row);
+        m_actions.remove(m_category);
+        for (auto it = actions.crbegin(); it != actions.crend(); ++it)
+            m_actions.insert(m_category, *it);
+
+        endRemoveRows();
+    }
+
+    void resetToDefaults()
+    {
+        auto actions = FrameWork::inst()->defaultToolBarActionNames();
+        beginResetModel();
+        m_actions.remove(m_category);
+        for (auto it = actions.crbegin(); it != actions.crend(); ++it)
+            m_actions.insert(m_category, *it);
+        endResetModel();
+    }
+
+    QStringList actionList() const
+    {
+        return m_actions.values(m_category);
+    }
+
+private:
+    QString m_category;
+};
+
+class ShortcutModel : public ActionModel
+{
+    Q_OBJECT
+public:
+    ShortcutModel(const QMultiMap<QString, QString> &actions, QObject *parent)
+        : ActionModel(actions, NoOptions, parent)
+    {
+        const auto list = m_actions.values();
+        for (const QString &actionName : list) {
+            if (QAction *action = FrameWork::inst()->findAction(actionName)) {
+                Entry entry = { action->property("bsShortcut").value<QKeySequence>(),
+                                action->shortcut() };
+                m_entries.insert(actionName, entry);
+            }
+        }
+    }
+
+    void apply()
+    {
+        QVariantMap saved;
+        for (auto it = m_entries.cbegin(); it != m_entries.cend(); ++it) {
+            if (it->key != it->defaultKey)
+                saved.insert(it.key(), it->key);
+        }
+        Config::inst()->setShortcuts(saved);
+    }
+
+    int columnCount(const QModelIndex &parent = { }) const override
+    {
+        Q_UNUSED(parent)
+        return ActionModel::columnCount() * 3;
+    }
+
+    QVariant data(const QModelIndex &idx, int role) const override
+    {
+        if (idx.column() == 0)
+            return ActionModel::data(idx, role);
+
+        if (!idx.isValid() || (idx.column() >= columnCount())) {
+            return { };
+        }
+        const Entry &entry = entryAt(idx);
+
+        if (role == Qt::DisplayRole) {
+            switch (idx.column()) {
+            case 1: return entry.key.toString(QKeySequence::NativeText);
+            case 2: return entry.defaultKey.toString(QKeySequence::NativeText);
+            }
         }
         return { };
     }
@@ -125,21 +502,20 @@ public:
 
     QKeySequence shortcut(const QModelIndex &idx) const
     {
-        return (idx.isValid() && (idx.row() < m_entries.size()))
-                ? m_entries.at(idx.row()).key : QKeySequence { };
+        return entryAt(idx).key;
     }
 
     QKeySequence defaultShortcut(const QModelIndex &idx) const
     {
-        return (idx.isValid() && (idx.row() < m_entries.size()))
-                ? m_entries.at(idx.row()).defaultKey : QKeySequence { };
+        return entryAt(idx).defaultKey;
     }
 
     bool setShortcut(const QModelIndex &idx, const QKeySequence &newShortcut)
     {
-        if (idx.isValid() && (idx.row() < m_entries.size())) {
-            int row = idx.row();
-            if (m_entries.at(row).key == newShortcut)
+        if (idx.isValid()) {
+            Entry &entry = entryAt(idx);
+
+            if (entry.key == newShortcut)
                 return true; // no change
 
             if (!newShortcut.isEmpty()) {
@@ -149,9 +525,9 @@ public:
                 }
             }
 
-            m_entries[row].key = newShortcut;
-            auto idx = index(row, 1);
-            emit dataChanged(idx, idx);
+            entry.key = newShortcut;
+            auto cidx = idx.siblingAtColumn(1);
+            emit dataChanged(cidx, cidx);
             return true;
         }
         return false;
@@ -159,26 +535,112 @@ public:
 
     bool resetShortcut(const QModelIndex &idx)
     {
-        if (idx.isValid() && (idx.row() < m_entries.size()))
-            return setShortcut(idx, m_entries.at(idx.row()).defaultKey);
-        return false;
+        return setShortcut(idx, entryAt(idx).defaultKey);
     }
 
     void resetAllShortcuts()
     {
+        beginResetModel();
         for (auto &entry : m_entries)
             entry.key = entry.defaultKey;
-        emit dataChanged(index(0, 1), index(rowCount() - 1, 1));
+        endResetModel();
     }
 
 private:
     struct Entry {
-        QPointer<QAction> action;
         QKeySequence defaultKey;
         QKeySequence key;
     };
-    QVector<Entry> m_entries;
+
+    Entry &entryAt(const QModelIndex &idx)
+    {
+        static Entry dummy;
+        if (idx.isValid() && !isCategory(idx)) {
+            QString s = actionAt(idx);
+            if (m_entries.contains(s))
+                return m_entries[s];
+        }
+        return dummy;
+    }
+
+    const Entry &entryAt(const QModelIndex &idx) const
+    {
+        return const_cast<ShortcutModel *>(this)->entryAt(idx);
+    }
+
+
+    QHash<QString, Entry> m_entries;
 };
+
+
+
+
+
+
+
+
+class ToolBarDelegate : public BetterItemDelegate
+{
+public:
+    ToolBarDelegate(Options options, QObject *parent);
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
+
+    bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option,
+                     const QModelIndex &index) override;
+
+private:
+    QIcon m_deleteIcon;
+};
+
+ToolBarDelegate::ToolBarDelegate(Options options, QObject *parent)
+    : BetterItemDelegate(options, parent)
+    , m_deleteIcon(QIcon::fromTheme("window-close"_l1))
+{ }
+
+void ToolBarDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                            const QModelIndex &index) const
+{
+    BetterItemDelegate::paint(painter, option, index);
+
+    if (option.state & QStyle::State_MouseOver) {
+        QRect r = option.rect;
+        r.setLeft(r.left() + r.width() - r.height());
+        const int margin = 2;
+        r.adjust(margin, margin, -margin, -margin);
+        m_deleteIcon.paint(painter, r);
+    }
+}
+
+bool ToolBarDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+                                  const QStyleOptionViewItem &option, const QModelIndex &index)
+{
+    if (event && (event->type() == QEvent::MouseButtonPress) && index.isValid()) {
+        auto me = static_cast<QMouseEvent *>(event);
+        int d = option.rect.height();
+
+        if (me->pos().x() > (option.rect.right() - d)) {
+            if (auto tbmodel = qobject_cast<ToolBarModel *>(model)) {
+                tbmodel->removeActionAt(index.row());
+                return true;
+            }
+        }
+    }
+    return BetterItemDelegate::editorEvent(event, model, option, index);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 static int sec2day(int s)
 {
@@ -305,19 +767,58 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         }
     });
 
-    m_sc_model = new ShortcutModel(FrameWork::inst()->allActions(), this);
+    const auto actions = FrameWork::inst()->allActions();
+
+    m_tb_model = new ActionModel(actions, ActionModel::AddSeparators | ActionModel::AddSubMenus, this);
+    m_tb_proxymodel = new QSortFilterProxyModel(this);
+    m_tb_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_tb_proxymodel->setRecursiveFilteringEnabled(true);
+    m_tb_proxymodel->setFilterKeyColumn(-1);
+    m_tb_proxymodel->setSourceModel(m_tb_model);
+    w_tb_actions->setModel(m_tb_proxymodel);
+    w_tb_actions->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    w_tb_actions->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_tb_actions->expandAll();
+    w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
+    w_tb_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
+
+    auto tbActionNames = FrameWork::inst()->toolBarActionNames();
+
+    m_tb_actions = new ToolBarModel(tbActionNames, this);
+    w_tb_toolbar->setModel(m_tb_actions);
+    w_tb_toolbar->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    w_tb_toolbar->setItemDelegate(new ToolBarDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+
+    connect(w_tb_reset, &QPushButton::clicked, this, [=]() {
+        m_tb_actions->resetToDefaults();
+        w_tb_filter->clear();
+        w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
+    });
+    connect(w_tb_filter, &QLineEdit::textChanged, this, [this](const QString &text) {
+        m_tb_proxymodel->setFilterFixedString(text);
+        w_tb_actions->expandAll();
+    });
+
+    m_sc_model = new ShortcutModel(actions, this);
     m_sc_proxymodel = new QSortFilterProxyModel(this);
     m_sc_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_sc_proxymodel->setFilterKeyColumn(-1);
+    m_sc_proxymodel->setRecursiveFilteringEnabled(true);
     m_sc_proxymodel->setSourceModel(m_sc_model);
     w_sc_list->setModel(m_sc_proxymodel);
     w_sc_list->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_sc_list->expandAll();
+    w_sc_list->sortByColumn(0, Qt::AscendingOrder);
     w_sc_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
 
-    connect(w_sc_list->selectionModel(), &QItemSelectionModel::currentChanged,
+    connect(w_sc_list->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, [=]() {
-        QModelIndex idx = m_sc_proxymodel->mapToSource(w_sc_list->currentIndex());
+        QModelIndexList idxs = w_sc_list->selectionModel()->selectedRows();
+        QModelIndex idx;
+        if (!idxs.isEmpty())
+            idx = m_sc_proxymodel->mapToSource(idxs.constFirst());
+
         w_sc_edit->setEnabled(idx.isValid());
         w_sc_reset->setEnabled(idx.isValid());
         if (idx.isValid()) {
@@ -366,9 +867,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     });
     connect(w_sc_reset_all, &QPushButton::clicked, this, [=]() {
         m_sc_model->resetAllShortcuts();
+        w_sc_filter->clear();
+        w_sc_list->sortByColumn(0, Qt::AscendingOrder);
+        w_sc_list->expandAll();
     });
     connect(w_sc_filter, &QLineEdit::textChanged, this, [this](const QString &text) {
         m_sc_proxymodel->setFilterFixedString(text);
+        w_sc_list->expandAll();
     });
 
     load();
@@ -546,7 +1051,6 @@ void SettingsDialog::load()
 
     // --[ SHORTCUTS ]-------------------------------------------------
 
-    w_sc_list->sortByColumn(0, Qt::AscendingOrder);
 }
 
 
@@ -609,6 +1113,9 @@ void SettingsDialog::save()
         MessageBox::information(nullptr, { }, tr("You have changed the LDraw directory. Please restart BrickStore to apply this setting."));
         Config::inst()->setLDrawDir(ldrawDir);
     }
+
+    // --[ TOOLBAR ]-------------------------------------------------------------------
+    Config::inst()->setToolBarActions(m_tb_actions->actionList());
 
     // --[ SHORTCUTS ]-----------------------------------------------------------------
 

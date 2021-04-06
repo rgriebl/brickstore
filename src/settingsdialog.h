@@ -20,6 +20,8 @@
 QT_FORWARD_DECLARE_CLASS(QHttp)
 QT_FORWARD_DECLARE_CLASS(QBuffer)
 QT_FORWARD_DECLARE_CLASS(QSortFilterProxyModel)
+class ActionModel;
+class ToolBarModel;
 class ShortcutModel;
 
 
@@ -50,6 +52,9 @@ protected:
 
 private:
     QString m_preferedCurrency;
+    ActionModel *m_tb_model;
+    ToolBarModel *m_tb_actions;
+    QSortFilterProxyModel *m_tb_proxymodel;
     ShortcutModel *m_sc_model;
     QSortFilterProxyModel *m_sc_proxymodel;
 };

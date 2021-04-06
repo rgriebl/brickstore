@@ -98,6 +98,9 @@ public:
     QVariantMap shortcuts() const;
     void setShortcuts(const QVariantMap &list);
 
+    QStringList toolBarActions() const;
+    void setToolBarActions(const QStringList &actions);
+
     QString lastDirectory() const;
     void setLastDirectory(const QString &dir);
 
@@ -157,6 +160,7 @@ signals:
     void columnLayoutIdsChanged(const QStringList &ids);
     void shortcutsChanged(const QVariantMap &list);
     void sentryConsentChanged(SentryConsent consent);
+    void toolBarActionsChanged(const QStringList &actions);
 
 protected:
     bool parseTranslations() const;

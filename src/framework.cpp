@@ -40,6 +40,7 @@
 #include <QLinearGradient>
 #include <QStringBuilder>
 #include <QDesktopServices>
+#include <QWidgetAction>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -466,39 +467,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "help_about"
                                   }));
 
-    setupToolBar(m_toolbar, {
-                     "document_new",
-                     "document_open",
-                     "document_save",
-                     "document_print",
-                     "-",
-                     "document_import",
-                     "document_export",
-                     "-",
-                     "edit_undo",
-                     "edit_redo",
-                     "-",
-                     "edit_cut",
-                     "edit_copy",
-                     "edit_paste",
-                     "edit_delete",
-                     "-",
-                     "edit_additems",
-                     "edit_subtractitems",
-                     "edit_mergeitems",
-                     "edit_partoutitems",
-                     "-",
-                     "edit_price_to_priceguide",
-                     "edit_price_inc_dec",
-                     "-",
-                     "view_column_layout_load",
-                     "|",
-                     "widget_filter",
-                     "|",
-                     "widget_progress",
-                     "|"
-                 });
-
+    setupToolBar();
     addToolBar(m_toolbar);
 
     m_workspace->setWelcomeWidget(new WelcomeWidget());
@@ -609,6 +578,8 @@ FrameWork::FrameWork(QWidget *parent)
 
     connect(Config::inst(), &Config::shortcutsChanged,
             this, &FrameWork::translateActions);
+    connect(Config::inst(), &Config::toolBarActionsChanged,
+            this, &FrameWork::setupToolBar);
 }
 
 void FrameWork::setupScripts()
@@ -865,7 +836,7 @@ void FrameWork::translateActions()
         { "edit_status_exclude", "vcs-removed" },
         { "edit_status_extra", "vcs-added" },
         { "edit_color", "color_management" },
-
+        { "edit_filter_focus", "view-filter" },
         { "document_import_bl_inv", "brick-1x1" },
         { "document_import_bl_xml", "dialog-xml-editor" },
         { "document_import_bl_order", "view-financial-list" },
@@ -951,14 +922,18 @@ void FrameWork::changeEvent(QEvent *e)
 
 QAction *FrameWork::findAction(const char *name) const
 {
+    return findAction(QString::fromLatin1(name));
+}
+
+QAction *FrameWork::findAction(const QString &name) const
+{
     static QHash<QString, QAction *> cache;
 
-    if (!name || !name[0])
+    if (name.isEmpty())
         return nullptr;
-    QString n = QLatin1String(name);
-    auto &action = cache[n];
+    auto &action = cache[name];
     if (!action)
-        action = findChild<QAction *>(n);
+        action = findChild<QAction *>(name);
     return action;
 }
 
@@ -993,7 +968,7 @@ QMenu *FrameWork::createMenu(const QByteArray &name, const QVector<QByteArray> &
             auto *a = m->addSeparator();
             if (an.length() > 1)
                 a->setObjectName(QString::fromLatin1(an.mid(1)));
-        } else if (QAction *a = findAction(an)) {
+        } else if (QAction *a = findAction(an.constData())) {
             m->addAction(a);
         } else  {
             qWarning("Couldn't find action '%s' when creating menu '%s'",
@@ -1004,79 +979,47 @@ QMenu *FrameWork::createMenu(const QByteArray &name, const QVector<QByteArray> &
 }
 
 
-bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
+bool FrameWork::setupToolBar()
 {
-    if (!t || a_names.isEmpty())
+    if (!m_toolbar)
         return false;
+    m_toolbar->clear();
 
-    foreach(const QByteArray &an, a_names) {
-        if (an == "-") {
-            t->addSeparator();
-        } else if (an == "|") {
+    QStringList actionNames = toolBarActionNames();
+    if (actionNames.isEmpty())
+        actionNames = defaultToolBarActionNames();
+
+    actionNames.append({ "|"_l1, "widget_progress"_l1, "|"_l1 });
+
+    for (const QString &an : actionNames) {
+        if (an == "-"_l1) {
+            m_toolbar->addSeparator()->setObjectName(an);
+        } else if (an == "|"_l1) {
             QWidget *spacer = new QWidget();
+            spacer->setObjectName(an);
             int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setFixedSize(sp, sp);
-            t->addWidget(spacer);
-        } else if (an == "<>") {
+            m_toolbar->addWidget(spacer);
+        } else if (an == "<>"_l1) {
             QWidget *spacer = new QWidget();
+            spacer->setObjectName(an);
             int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-            t->addWidget(spacer);
-        } else if (an.startsWith("widget_")) {
-            if (an == "widget_filter") {
-                if (m_filter) {
-                    qWarning("Only one filter widget can be added to toolbars");
-                    continue;
-                }
-
-                m_filter = new HistoryLineEdit(Config::MaxFilterHistory, this);
-                m_filter->setClearButtonEnabled(true);
-                m_filter_delay = new QTimer(this);
-                m_filter_delay->setInterval(800ms);
-                m_filter_delay->setSingleShot(true);
-
-                // a bit of a hack, but the action needs to be "used" for the shortcut to be
-                // active, but we don't want an icon in the filter edit.
-                m_filter->QWidget::addAction(findAction("edit_filter_focus"));
-
-                connect(m_filter->reFilterAction(), &QAction::triggered,
-                        this, &FrameWork::reFilter);
-
-                connect(m_filter, &QLineEdit::textChanged, [this]() {
-                    m_filter_delay->start();
-                });
-                connect(m_filter_delay, &QTimer::timeout, [this]() {
-                    if (m_filter)
-                        emit filterChanged(m_filter->text());
-                });
-                connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
-                        m_filter, &HistoryLineEdit::setToFavoritesMode);
-                m_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
-
-                t->addWidget(m_filter);
-            } else if (an == "widget_progress") {
-                if (m_progress) {
-                    qWarning("Only one progress widget can be added to toolbars");
-                    continue;
-                }
-                m_progress = new ProgressCircle();
-                m_progress->setIcon(QIcon(":/images/brickstore_icon.png"_l1));
-                m_progress->setColor("#4ba2d8");
-                t->addWidget(m_progress);
-
-                connect(m_progress, &ProgressCircle::cancelAll,
-                        BrickLink::core(), &BrickLink::Core::cancelTransfers);
-            }
+            m_toolbar->addWidget(spacer);
+        } else if (an == "edit_filter_focus"_l1) {
+            m_toolbar->addAction(m_filterAction);
+        } else if (an == "widget_progress"_l1) {
+            m_toolbar->addAction(m_progressAction);
         } else if (QAction *a = findAction(an)) {
-            t->addAction(a);
+            m_toolbar->addAction(a);
 
-            // workaround for Qt4 bug: can't set the popup mode on a QAction
+            // workaround for Qt bug: can't set the popup mode on a QAction
             QToolButton *tb;
-            if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
+            if (a->menu() && (tb = qobject_cast<QToolButton *>(m_toolbar->widgetForAction(a))))
                 tb->setPopupMode(QToolButton::InstantPopup);
         } else {
-            qWarning("Couldn't find action '%s'", an.constData());
+            qWarning() << "Couldn't find action" << an;
         }
     }
     return true;
@@ -1089,6 +1032,7 @@ inline static QMenu *newQMenu(QWidget *parent, const char *name, quint32 flags =
     m->menuAction()->setObjectName(QLatin1String(name));
     if (flags)
         m->menuAction()->setProperty("bsFlags", flags);
+    m->menuAction()->setProperty("bsAction", true);
     return m;
 }
 
@@ -1211,8 +1155,10 @@ void FrameWork::createActions()
 
     a = m_undogroup->createUndoAction(this);
     a->setObjectName("edit_undo"_l1);
+    a->setProperty("bsAction", true);
     a = m_undogroup->createRedoAction(this);
     a->setObjectName("edit_redo"_l1);
+    a->setProperty("bsAction", true);
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
     connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Delete)), this),
@@ -1376,8 +1322,44 @@ void FrameWork::createActions()
     a = newQAction(this, "check_for_updates", NeedNetwork, false,
                    this, [this]() { m_checkForUpdates->check(false /*not silent*/); });
     a->setMenuRole(QAction::ApplicationSpecificRole);
-}
 
+    m_filter = new HistoryLineEdit(Config::MaxFilterHistory, this);
+    m_filter->setClearButtonEnabled(true);
+    m_filter_delay = new QTimer(this);
+    m_filter_delay->setInterval(800ms);
+    m_filter_delay->setSingleShot(true);
+
+    // a bit of a hack, but the action needs to be "used" for the shortcut to be
+    // active, but we don't want an icon in the filter edit.
+    m_filter->QWidget::addAction(findAction("edit_filter_focus"));
+
+    connect(m_filter->reFilterAction(), &QAction::triggered,
+            this, &FrameWork::reFilter);
+
+    connect(m_filter, &QLineEdit::textChanged, [this]() {
+        m_filter_delay->start();
+    });
+    connect(m_filter_delay, &QTimer::timeout, [this]() {
+        if (m_filter)
+            emit filterChanged(m_filter->text());
+    });
+    connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
+            m_filter, &HistoryLineEdit::setToFavoritesMode);
+    m_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
+
+    m_filterAction = new QWidgetAction(this);
+    m_filterAction->setDefaultWidget(m_filter);
+
+    m_progress = new ProgressCircle();
+    m_progress->setIcon(QIcon(":/images/brickstore_icon.png"_l1));
+    m_progress->setColor("#4ba2d8");
+
+    connect(m_progress, &ProgressCircle::cancelAll,
+            BrickLink::core(), &BrickLink::Core::cancelTransfers);
+
+    m_progressAction = new QWidgetAction(this);
+    m_progressAction->setDefaultWidget(m_progress);
+}
 
 void FrameWork::openDocument(const QString &file)
 {
@@ -1453,9 +1435,72 @@ QList<QAction *> FrameWork::contextMenuActions() const
     return result;
 }
 
-QList<QAction *> FrameWork::allActions() const
+static QString rootMenu(const QAction *action)
 {
-    return findChildren<QAction *>();
+    QList<QWidget *> widgets = action->associatedWidgets();
+    for (QWidget *w : qAsConst(widgets)) {
+        if (auto m = qobject_cast<QMenu *>(w))
+            return rootMenu(m->menuAction());
+        else if (qobject_cast<QMenuBar *>(w))
+            return action->text();
+    }
+    return { };
+}
+
+QMultiMap<QString, QString> FrameWork::allActions() const
+{
+    QMultiMap<QString, QString> result;
+
+    const auto list = findChildren<QAction *>();
+    for (const auto *action : list) {
+        if (!action->property("bsAction").toBool())
+            continue;
+        QString mtitle = rootMenu(action);
+        if (mtitle.isEmpty())
+            mtitle = tr("Other");
+        result.insert(mtitle, action->objectName());
+    }
+    return result;
+}
+
+QStringList FrameWork::toolBarActionNames() const
+{
+    const QStringList actionNames = Config::inst()->toolBarActions();
+    return actionNames.isEmpty() ? defaultToolBarActionNames() : actionNames;
+}
+
+QStringList FrameWork::defaultToolBarActionNames() const
+{
+    static const QStringList actionNames = {
+        "document_new"_l1,
+        "document_open"_l1,
+        "document_save"_l1,
+        "document_print"_l1,
+        "-"_l1,
+        "document_import"_l1,
+        "document_export"_l1,
+        "-"_l1,
+        "edit_undo"_l1,
+        "edit_redo"_l1,
+        "-"_l1,
+        "edit_cut"_l1,
+        "edit_copy"_l1,
+        "edit_paste"_l1,
+        "edit_delete"_l1,
+        "-"_l1,
+        "edit_additems"_l1,
+        "edit_subtractitems"_l1,
+        "edit_mergeitems"_l1,
+        "edit_partoutitems"_l1,
+        "-"_l1,
+        "edit_price_to_priceguide"_l1,
+        "edit_price_inc_dec"_l1,
+        "-"_l1,
+        "view_column_layout_load"_l1,
+        "|"_l1,
+        "edit_filter_focus"_l1,
+    };
+    return actionNames;
 }
 
 bool FrameWork::restoreWindowsFromAutosave()
@@ -1769,6 +1814,17 @@ void FrameWork::updateActions()
         }
         a->setEnabled(b);
     }
+}
+
+QMenu *FrameWork::createPopupMenu()
+{
+    auto menu = QMainWindow::createPopupMenu();
+    if (menu) {
+        menu->addAction(tr("Customize Toolbar"), [=]() {
+            showSettings("toolbar");
+        });
+    }
+    return menu;
 }
 
 void FrameWork::selectionUpdate(const LotList &selection)
