@@ -592,7 +592,8 @@ void Application::messageHandler(QtMsgType msgType, const QMessageLogContext &ms
                 % R"(&nbsp;<span style="color:#)"_l1
                 % QLatin1String(categoryColor[qHashBits(msgCtx.category, qstrlen(msgCtx.category), 1) % 6])
                 % R"(;font-weight:bold;">)"_l1
-                % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1 % lines.at(i);
+                % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1
+                % lines.at(i).toString().toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if (!filename.isEmpty()) {
                 str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
