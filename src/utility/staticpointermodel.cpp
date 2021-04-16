@@ -129,16 +129,22 @@ void StaticPointerModel::invalidateFilterDelayed()
 {
     init();
 
-    emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
-
+    beginResetModel();
     invalidateFilterInternal();
+    endResetModel();
 
-    QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
-        after.append(index(pointer(idx), idx.column()));
-    changePersistentIndexList(before, after);
-    emit layoutChanged({ }, VerticalSortHint);
+// Using layoutChanged would be faster, but it leads to weird crashes in QListView in debug builds
+//
+//    emit layoutAboutToBeChanged({ }, VerticalSortHint);
+//    QModelIndexList before = persistentIndexList();
+//
+//    invalidateFilterInternal();
+//
+//    QModelIndexList after;
+//    foreach (const QModelIndex &idx, before)
+//        after.append(index(pointer(idx), idx.column()));
+//    changePersistentIndexList(before, after);
+//    emit layoutChanged({ }, VerticalSortHint);
 }
 
 void StaticPointerModel::invalidateFilterInternal()

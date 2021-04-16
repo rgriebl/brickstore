@@ -164,6 +164,8 @@ public:
         if (m_overlay->model()) {
             disconnect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
                        this, &CategoryTreeView::hideRowsInOverlay);
+            disconnect(m_overlay->model(), &QAbstractItemModel::modelReset,
+                       this, &CategoryTreeView::hideRowsInOverlay);
         }
 
         QTreeView::setModel(model);
@@ -171,6 +173,8 @@ public:
 
         if (m_overlay->model()) {
             connect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
+                    this, &CategoryTreeView::hideRowsInOverlay);
+            connect(m_overlay->model(), &QAbstractItemModel::modelReset,
                     this, &CategoryTreeView::hideRowsInOverlay);
         }
 
@@ -356,10 +360,7 @@ void SelectItem::init()
     d->w_thumbs->setUniformItemSizes(true);
     d->w_thumbs->setMovement(QListView::Static);
     d->w_thumbs->setViewMode(QListView::IconMode);
-#if !(defined(QT_DEBUG) && defined(Q_OS_WINDOWS))
-    // There's a weird crash in QBspTreeItem in Windows debug builds when this is enabled
-    d->w_thumbs->setLayoutMode(QListView::Batched);
-#endif
+    d->w_thumbs->setLayoutMode(QListView::SinglePass);
     d->w_thumbs->setResizeMode(QListView::Adjust);
     d->w_thumbs->setSpacing(5);
     d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
