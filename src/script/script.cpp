@@ -155,8 +155,11 @@ void PrintingScriptAction::componentComplete()
     }
 }
 
-void PrintingScriptAction::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly)
+void PrintingScriptAction::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly, uint *maxPageCount)
 {
+    if (maxPageCount)
+        *maxPageCount = 0;
+
     QScopedPointer<QmlPrintJob> job(new QmlPrintJob(pd));
 
     if (!m_printFunction.isCallable())
@@ -191,6 +194,9 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, Window *win, bool sele
 
     if (!job->print(0, job->pageCount() - 1))
         throw Exception(tr("Failed to start the print job."));
+
+    if (maxPageCount)
+        *maxPageCount = job->pageCount();
 }
 
 ///////////////////////////////////////////////////////////////////////

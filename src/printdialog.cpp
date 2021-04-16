@@ -198,25 +198,25 @@ void PrintDialog::updatePrinter(int idx)
 {
     QString printerKey = w_printers->itemData(idx).toString();
 
-    QList<QPageSize::PageSizeId> pageSizes;
-    QPageSize::PageSizeId defaultPageSize;
+    QList<QPageSize> pageSizes;
+    QPageSize defaultPageSize;
     QList<QPrinter::ColorMode> colorModes;
     QPrinter::ColorMode defaultColorMode;
 
     if (printerKey == "__PDF__"_l1) {
-        static const QList<QPageSize::PageSizeId> pdfPageSizes = {
-            QPageSize::Letter,
-            QPageSize::Legal,
-            QPageSize::ExecutiveStandard,
-            QPageSize::A3,
-            QPageSize::A4,
-            QPageSize::A5,
-            QPageSize::JisB4,
-            QPageSize::JisB5,
-            QPageSize::Prc16K,
+        static const QList<QPageSize> pdfPageSizes = {
+            QPageSize(QPageSize::Letter),
+            QPageSize(QPageSize::Legal),
+            QPageSize(QPageSize::ExecutiveStandard),
+            QPageSize(QPageSize::A3),
+            QPageSize(QPageSize::A4),
+            QPageSize(QPageSize::A5),
+            QPageSize(QPageSize::JisB4),
+            QPageSize(QPageSize::JisB5),
+            QPageSize(QPageSize::Prc16K),
         };
         pageSizes = pdfPageSizes;
-        defaultPageSize = m_pdfWriter->pageLayout().pageSize().id();
+        defaultPageSize = m_pdfWriter->pageLayout().pageSize();
 
         colorModes = { QPrinter::Color, QPrinter::GrayScale };
         defaultColorMode = QPrinter::Color;
@@ -225,12 +225,8 @@ void PrintDialog::updatePrinter(int idx)
     } else {
         auto printer = QPrinterInfo::printerInfo(printerKey);
 
-        const QList<QPageSize> pss = printer.supportedPageSizes();
-        for (const QPageSize &ps : pss) {
-            if (ps.id() != QPageSize::Custom)
-                pageSizes.append(ps.id());
-        }
-        defaultPageSize = printer.defaultPageSize().id();
+        pageSizes = printer.supportedPageSizes();
+        defaultPageSize = printer.defaultPageSize();
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
         colorModes = { QPrinter::Color, QPrinter::GrayScale };
@@ -239,7 +235,6 @@ void PrintDialog::updatePrinter(int idx)
         colorModes = printer.supportedColorModes();
         defaultColorMode = printer.defaultColorMode();
 #endif
-        printer.defaultPageSize();
 
         m_printer->setPrinterName(printerKey);
     }
@@ -247,9 +242,9 @@ void PrintDialog::updatePrinter(int idx)
     QSignalBlocker blocker(this);
 
     w_paperSize->clear();
-    for (const auto &psi : pageSizes)
-        w_paperSize->addItem(QPageSize::name(psi), psi);
-    w_paperSize->setCurrentIndex(w_paperSize->findData(int(defaultPageSize)));
+    for (const auto &ps : pageSizes)
+        w_paperSize->addItem(ps.name(), QVariant::fromValue(ps));
+    w_paperSize->setCurrentIndex(w_paperSize->findData(QVariant::fromValue(defaultPageSize)));
 
     w_color->clear();
     if (colorModes.contains(QPrinter::Color))
@@ -346,7 +341,7 @@ void PrintDialog::updatePaperSize()
 {
     if (!m_printer || !w_print_preview)
         return;
-    m_printer->setPageSize(QPageSize(QPageSize::PageSizeId(w_paperSize->currentData().toInt())));
+    m_printer->setPageSize(w_paperSize->currentData().value<QPageSize>());
     w_print_preview->updatePreview();
 }
 

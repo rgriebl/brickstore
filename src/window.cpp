@@ -2508,10 +2508,9 @@ void Window::printScriptAction(PrintingScriptAction *printingAction)
         try {
             Q_UNUSED(pages)
             Q_UNUSED(scaleFactor)
-            Q_UNUSED(maxPageCount)
             Q_UNUSED(maxWidth)
             previewPrt->setFullPage(true);
-            printingAction->executePrint(previewPrt, this, previewPrt->printRange() == QPrinter::Selection);
+            printingAction->executePrint(previewPrt, this, previewPrt->printRange() == QPrinter::Selection, maxPageCount);
         } catch (const Exception &e) {
             QString msg = e.error();
             if (msg.isEmpty())
