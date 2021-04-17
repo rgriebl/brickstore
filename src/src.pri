@@ -6,6 +6,12 @@ DEPENDPATH  += $$RELPWD
 QT *= core gui xml network # networkauth
 !backend-only:QT *= widgets printsupport qml quick
 
+linux {
+  # needed for C++17 parallel mode (std::execution::par_unseq)
+  CONFIG *= link_pkgconfig
+  PKGCONFIG *= tbb
+}
+
 win32:QT *= winextras widgets
 
 OTHER_FILES += \

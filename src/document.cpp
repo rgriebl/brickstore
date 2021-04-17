@@ -12,9 +12,12 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <utility>
-#if __has_include(<execution>) && (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
+#include <algorithm>
+#if __has_include(<execution>)
 #  include <execution>
-#  define AM_SORT_PARALLEL
+#  if (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
+#    define AM_SORT_PARALLEL
+#  endif
 #endif
 
 #include <QApplication>
