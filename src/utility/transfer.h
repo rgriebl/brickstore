@@ -27,7 +27,7 @@ class TransferJob
 public:
     ~TransferJob();
 
-    static TransferJob *get(const QUrl &url, QIODevice *file = nullptr);
+    static TransferJob *get(const QUrl &url, QIODevice *file = nullptr, uint retries = 0);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
     static TransferJob *post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
 
@@ -70,7 +70,7 @@ private:
     };
 
     static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
-                               QIODevice *file, bool noRedirects);
+                               QIODevice *file, bool noRedirects, uint retries = 0);
 
     void setStatus(Status st)  { m_status = st; }
     bool abort();
@@ -93,12 +93,16 @@ private:
     uint         m_respcode         : 16;
     uint         m_status           : 4;
     uint         m_http_method      : 1;
+    uint         m_retries_left     : 5;
     bool         m_was_not_modified : 1;
     bool         m_no_redirects     : 1;
 
     friend class Transfer;
     friend class TransferRetriever;
 };
+
+Q_DECLARE_METATYPE(TransferJob *)
+
 
 class TransferRetriever : public QObject
 {
@@ -118,6 +122,8 @@ signals:
     void jobProgress(TransferJob *job, int done, int total);
 
 private:
+    void downloadFinished(QNetworkReply *reply);
+
     Transfer *m_transfer;
     QNetworkAccessManager *m_nam = nullptr;
     QVector<TransferJob *> m_jobs;
@@ -126,6 +132,7 @@ private:
     int                    m_progressDone = 0;
     int                    m_progressTotal = 0;
 };
+
 
 class Transfer : public QObject
 {

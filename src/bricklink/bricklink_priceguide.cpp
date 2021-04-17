@@ -231,6 +231,8 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;"_l1, " "_l1);
 
+//    qWarning() << s;
+
     result = { };
 
     int matchCounter = 0;
@@ -337,7 +339,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
         query.addQueryItem("ajView"_l1,  "Y"_l1); // only the AJAX snippet
         query.addQueryItem("colorID"_l1, QString::number(pg->color()->id()));
         query.addQueryItem("itemID"_l1,  QLatin1String(pg->item()->id()));
-        query.addQueryItem("uncache"_l1, QString::number(QDateTime::currentSecsSinceEpoch()));
+        query.addQueryItem("uncache"_l1, QString::number(QDateTime::currentMSecsSinceEpoch()));
     } else {
         //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
         url = QUrl("https://www.bricklink.com/BTpriceSummary.asp"_l1);
@@ -351,7 +353,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
     url.setQuery(query);
 
     //qDebug ( "PG request started for %s", (const char *) url );
-    pg->m_transferJob = TransferJob::get(url);
+    pg->m_transferJob = TransferJob::get(url, nullptr, 2);
     pg->m_transferJob->setUserData('G', pg);
 
     m_transfer->retrieve(pg->m_transferJob, highPriority);
@@ -380,6 +382,8 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
             pg->saveToDisk(pg->m_fetched, pg->m_data);
             pg->m_update_status = UpdateStatus::Ok;
         }
+    } else {
+        qWarning() << "PriceGuide download failed:" << j->errorString() << "(" << j->responseCode() << ")";
     }
 
     emit priceGuideUpdated(pg);

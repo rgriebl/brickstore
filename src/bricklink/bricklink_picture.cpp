@@ -291,6 +291,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j, Picture *pic)
             TransferJob *job = TransferJob::get(url, f);
             job->setUserData<Picture>('P', pic);
             m_transfer->retrieve(job);
+            pic->m_transferJob = job;
 
             // the pic is still ref'ed: leave it that way for one more loop
             return;

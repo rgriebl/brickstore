@@ -34,9 +34,11 @@ TransferJob::~TransferJob()
     delete m_data;
 }
 
-TransferJob *TransferJob::get(const QUrl &url, QIODevice *file)
+TransferJob *TransferJob::get(const QUrl &url, QIODevice *file, uint retries)
 {
-    return create(HttpGet, url, QDateTime(), file, false);
+    Q_ASSERT(retries < 31);
+
+    return create(HttpGet, url, QDateTime(), file, false, retries);
 }
 
 TransferJob *TransferJob::getIfNewer(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
@@ -59,7 +61,7 @@ bool TransferJob::abort()
 }
 
 TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
-                                 QIODevice *file, bool noRedirects)
+                                 QIODevice *file, bool noRedirects, uint retries)
 {
     if (url.isEmpty())
         return nullptr;
@@ -73,6 +75,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     j->m_data = file ? nullptr : new QByteArray();
     j->m_file = file ? file : nullptr;
     j->m_http_method = method;
+    j->m_retries_left = retries;
     j->m_status = Inactive;
     j->m_respcode = 0;
     j->m_was_not_modified = false;
@@ -175,7 +178,7 @@ QString Transfer::defaultUserAgent()
 TransferRetriever::TransferRetriever(Transfer *transfer)
     : QObject()
     , m_transfer(transfer)
-    , m_maxConnections(6) // mirror the internal QNAM setting
+    , m_maxConnections(4) // mirror the internal QNAM setting
 { }
 
 TransferRetriever::~TransferRetriever()
@@ -231,6 +234,8 @@ void TransferRetriever::schedule()
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+        connect(m_nam, &QNetworkAccessManager::finished,
+                this, &TransferRetriever::downloadFinished);
     }
 
     while ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
@@ -263,59 +268,8 @@ void TransferRetriever::schedule()
             req.setUrl(url);
             j->m_reply = m_nam->post(req, postdata);
         }
-        connect(j->m_reply, &QNetworkReply::finished, this, [this, j]() {
-            auto error = j->m_reply->error();
 
-            j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
-            j->m_effective_url = j->m_reply->url();
-
-            if (error != QNetworkReply::NoError) {
-                j->m_error_string = j->m_reply->errorString();
-                j->setStatus(TransferJob::Failed);
-            } else {
-                switch (j->m_respcode) {
-                case 304:
-                    if (j->m_only_if_newer.isValid()) {
-                        j->m_was_not_modified = true;
-                        j->setStatus(TransferJob::Completed);
-                    }
-                    else {
-                        j->setStatus(TransferJob::Failed);
-                    }
-                    break;
-
-                case 200: {
-                    auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
-                    if (lastmod.isValid())
-                        j->m_last_modified = lastmod.toDateTime();
-                    if (j->m_data)
-                        *j->m_data = j->m_reply->readAll();
-                    else if (j->m_file) {
-                        j->m_file->write(j->m_reply->readAll());
-                        j->m_file->close();
-                    }
-                    j->setStatus(TransferJob::Completed);
-                    break;
-                }
-                default:
-                    j->setStatus(TransferJob::Failed);
-                    break;
-                }
-            }
-            j->m_reply->deleteLater();
-            j->m_reply = nullptr;
-
-            emit progress(++m_progressDone, m_progressTotal);
-            if (m_progressDone == m_progressTotal)
-                m_progressDone = m_progressTotal = 0;
-
-            emit finished(j); // the thread adapter lambda in Transfer will delete the job
-
-            m_currentJobs.removeAll(j);
-
-            QMetaObject::invokeMethod(this, &TransferRetriever::schedule, Qt::QueuedConnection);
-
-        });
+        j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
 
         connect(j->m_reply, &QNetworkReply::downloadProgress, this, [this, j](qint64 recv, qint64 total) {
             emit jobProgress(j, int(recv), int(total));
@@ -323,4 +277,68 @@ void TransferRetriever::schedule()
 
         m_currentJobs.append(j);
     }
+}
+
+void TransferRetriever::downloadFinished(QNetworkReply *reply)
+{
+    auto *j = reply->property("bsJob").value<TransferJob *>();
+    auto error = j->m_reply->error();
+
+    j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
+    j->m_effective_url = j->m_reply->url();
+
+    if (error != QNetworkReply::NoError) {
+        if ((j->m_respcode == 404) && j->m_retries_left) {
+            --j->m_retries_left;
+            j->m_reply->deleteLater();
+            j->m_reply = m_nam->get(j->m_reply->request());
+            j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
+            qWarning() << "Got a 404 on" << j->m_url << " ... retrying (still" << j->m_retries_left << "retries left)";
+            return;
+        }
+        j->m_error_string = j->m_reply->errorString();
+        j->setStatus(TransferJob::Failed);
+    } else {
+        switch (j->m_respcode) {
+        case 304:
+            if (j->m_only_if_newer.isValid()) {
+                j->m_was_not_modified = true;
+                j->setStatus(TransferJob::Completed);
+            }
+            else {
+                j->setStatus(TransferJob::Failed);
+            }
+            break;
+
+        case 200: {
+            auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
+            if (lastmod.isValid())
+                j->m_last_modified = lastmod.toDateTime();
+            if (j->m_data)
+                *j->m_data = j->m_reply->readAll();
+            else if (j->m_file) {
+                j->m_file->write(j->m_reply->readAll());
+                j->m_file->close();
+            }
+            j->setStatus(TransferJob::Completed);
+            break;
+        }
+        default:
+            j->setStatus(TransferJob::Failed);
+            break;
+        }
+    }
+    j->m_reply->deleteLater();
+    j->m_reply = nullptr;
+
+    emit progress(++m_progressDone, m_progressTotal);
+    if (m_progressDone == m_progressTotal)
+        m_progressDone = m_progressTotal = 0;
+
+    emit finished(j); // the thread adapter lambda in Transfer will delete the job
+
+    m_currentJobs.removeAll(j);
+
+    QMetaObject::invokeMethod(this, &TransferRetriever::schedule, Qt::QueuedConnection);
+
 }
