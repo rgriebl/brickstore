@@ -9,7 +9,8 @@ QT *= core gui xml network # networkauth
 linux {
   # needed for C++17 parallel mode (std::execution::par_unseq)
   CONFIG *= link_pkgconfig
-  PKGCONFIG *= tbb
+  packagesExist(tbb):PKGCONFIG *= tbb
+  else:message("No libtbb found: parallel STL algorithms will not be used.")
 }
 
 win32:QT *= winextras widgets
