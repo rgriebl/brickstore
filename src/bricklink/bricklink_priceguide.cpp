@@ -227,11 +227,12 @@ bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
 
 bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 {
-    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)"_l1);
+    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <)"_l1);
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;"_l1, " "_l1);
+    QLocale en_US("en_US"_l1);
 
-//    qWarning() << s;
+
 
     result = { };
 
@@ -242,6 +243,8 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
     bool hasCurrent = (currentPos > 0);
     int pastSixPos = s.indexOf("Past 6 Months Sales"_l1);
     bool hasPastSix = (pastSixPos > 0);
+
+//    qWarning() << s;
 
     for (int i = 0; i < 4; ++i) {
         auto m = re.match(s, startPos);
@@ -259,10 +262,15 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
                 ti = int(Time::PastSix);
 
             const QString condStr = m.captured(1);
-            if (condStr == "Used"_l1)
+            if (condStr == "Used"_l1) {
                 ci = int(Condition::Used);
-            else if (condStr == "New"_l1)
+            } else if (condStr == "New"_l1) {
                 ci = int(Condition::New);
+            } else if (condStr.isEmpty()) {
+                ci = int(Condition::New);
+                if (result.lots[ti][ci])
+                    ci = int(Condition::Used);
+            }
 
 //            qWarning() << i << ti << ci << m.capturedTexts().mid(1);
 //            qWarning() << "   start:" << startPos << "match start:" << matchPos << "match end:" << matchEnd;
@@ -270,12 +278,12 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
             if ((ti == -1) || (ci == -1))
                 continue;
 
-            result.lots[ti][ci]                         = m.captured(2).toInt();
-            result.quantities[ti][ci]                   = m.captured(3).toInt();
-            result.prices[ti][ci][int(Price::Lowest)]   = m.captured(4).toDouble();
-            result.prices[ti][ci][int(Price::Average)]  = m.captured(5).toDouble();
-            result.prices[ti][ci][int(Price::WAverage)] = m.captured(6).toDouble();
-            result.prices[ti][ci][int(Price::Highest)]  = m.captured(7).toDouble();
+            result.lots[ti][ci]                         = en_US.toInt(m.captured(2));
+            result.quantities[ti][ci]                   = en_US.toInt(m.captured(3));
+            result.prices[ti][ci][int(Price::Lowest)]   = en_US.toDouble(m.captured(4));
+            result.prices[ti][ci][int(Price::Average)]  = en_US.toDouble(m.captured(5));
+            result.prices[ti][ci][int(Price::WAverage)] = en_US.toDouble(m.captured(6));
+            result.prices[ti][ci][int(Price::Highest)]  = en_US.toDouble(m.captured(7));
 
             ++matchCounter;
             startPos = matchEnd;

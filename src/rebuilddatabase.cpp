@@ -352,7 +352,7 @@ bool RebuildDatabase::download()
         query.setQueryItems(tptr->m_query);
         url.setQuery(query);
 
-        TransferJob *job = TransferJob::get(url, f);
+        TransferJob *job = TransferJob::get(url, f, 2);
         m_trans->retrieve(job);
         m_downloads_in_progress++;
     }
