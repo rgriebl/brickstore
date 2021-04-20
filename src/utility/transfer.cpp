@@ -246,7 +246,9 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+        req.setAttribute(QNetworkRequest::HTTP2AllowedAttribute, true);
+#elif QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
 #endif
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
