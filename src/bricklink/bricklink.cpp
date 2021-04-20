@@ -328,8 +328,7 @@ QString Core::dataPath() const
     return m_datadir;
 }
 
-QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
-                       const Item *item, const Color *color) const
+QString Core::dataFileName(QStringView fileName, const Item *item, const Color *color) const
 {
     // Avoid huge directories with 1000s of entries.
     // sse4.2 is only used if a seed value is supplied
@@ -341,20 +340,30 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
             % (color ? QString::number(color->id()) : QString()) % (color ? u"/" : u"")
             % fileName;
 
-    if (openMode != QIODevice::ReadOnly) {
-        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
-            return nullptr;
-    }
-    auto f = new QFile(p);
-    if (!f->open(openMode)) {
-        if (openMode & QIODevice::WriteOnly) {
-            qWarning() << "BrickLink::Core::dataFile failed to open" << p << "for writing:"
-                       << f->errorString();
-        }
+    return p;
+}
+
+QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Color *color) const
+{
+    auto p = dataFileName(fileName, item, color);
+
+    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
+        return nullptr;
+
+    auto f = new QSaveFile(p);
+    if (!f->open(QIODevice::WriteOnly)) {
+        qWarning() << "BrickLink::Core::dataSaveFile failed to open" << f->fileName()
+                   << "for writing:" << f->errorString();
     }
     return f;
 }
 
+QFile *Core::dataReadFile(QStringView fileName, const Item *item, const Color *color) const
+{
+    auto f = new QFile(dataFileName(fileName, item, color));
+    f->open(QIODevice::ReadOnly);
+    return f;
+}
 
 
 Core *Core::s_inst = nullptr;

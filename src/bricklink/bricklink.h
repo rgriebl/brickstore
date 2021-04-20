@@ -44,6 +44,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 QT_FORWARD_DECLARE_CLASS(QFile)
+QT_FORWARD_DECLARE_CLASS(QSaveFile)
 
 
 namespace BrickLink {
@@ -335,7 +336,8 @@ private:
 private:
     Picture(const Item *item, const Color *color);
 
-    QFile *file(QIODevice::OpenMode openMode) const;
+    QFile *readFile() const;
+    QSaveFile *saveFile() const;
     bool loadFromDisk(QDateTime &fetched, QImage &image);
 
     friend class Core;
@@ -517,7 +519,6 @@ private:
 private:
     PriceGuide(const Item *item, const Color *color);
 
-    QFile *file(QIODevice::OpenMode openMode) const;
     bool loadFromDisk(QDateTime &fetched, Data &data) const;
     void saveToDisk(const QDateTime &fetched, const Data &data);
 
@@ -643,8 +644,10 @@ public:
     bool isDatabaseUpdateNeeded() const;
 
     QString dataPath() const;
-    QFile *dataFile(QStringView fileName, QIODevice::OpenMode openMode, const Item *item,
-                    const Color *color = nullptr) const;
+    QFile *dataReadFile(QStringView fileName, const Item *item,
+                        const Color *color = nullptr) const;
+    QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
+                            const Color *color = nullptr) const;
 
     void setCredentials(const QPair<QString, QString> &credentials);
 
@@ -714,6 +717,8 @@ private:
     friend Core *create(const QString &, QString *);
 
 private:
+    QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
+
     void updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority = false);
     void updatePicture(BrickLink::Picture *pic, bool highPriority = false);
     friend void PriceGuide::update(bool);

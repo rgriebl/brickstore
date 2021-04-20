@@ -309,7 +309,7 @@ bool BrickLink::TextImport::importInventories(std::vector<const Item *> &invs)
 
 bool BrickLink::TextImport::readInventory(const Item *item)
 {
-    QScopedPointer<QFile> f(BrickLink::core()->dataFile(u"inventory.xml", QIODevice::ReadOnly, item));
+    QScopedPointer<QFile> f(BrickLink::core()->dataReadFile(u"inventory.xml", item));
 
     if (!f || !f->isOpen() || (f->fileTime(QFileDevice::FileModificationTime) < item->inventoryUpdated()))
         return false;

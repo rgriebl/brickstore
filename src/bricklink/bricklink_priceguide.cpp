@@ -14,6 +14,7 @@
 #include <cstring>
 
 #include <QFile>
+#include <QSaveFile>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QLocale>
@@ -129,7 +130,7 @@ BrickLink::PriceGuide::~PriceGuide()
 
 void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
 {
-    QScopedPointer<QFile> f(file(QIODevice::WriteOnly));
+    QScopedPointer<QSaveFile> f(core()->dataSaveFile(u"priceguide.txt", m_item, m_color));
 
     if (f && f->isOpen()) {
         QTextStream ts(f.data());
@@ -148,12 +149,8 @@ void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &dat
                    << QString::number(data.prices[ti][ci][int(Price::Highest)], 'f', 3) << '\n';
             }
         }
+        f->commit();
     }
-}
-
-QFile *BrickLink::PriceGuide::file(QIODevice::OpenMode openMode) const
-{
-    return BrickLink::core()->dataFile(u"priceguide.txt", openMode, m_item, m_color);
 }
 
 bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
@@ -161,7 +158,7 @@ bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
     if (!m_item || !m_color)
         return false;
 
-    QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
+    QScopedPointer<QFile> f(core()->dataReadFile(u"priceguide.txt", m_item, m_color));
 
     if (f && f->isOpen()) {
         if (parse(f->readAll(), data)) {

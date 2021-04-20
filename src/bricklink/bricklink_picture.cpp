@@ -20,6 +20,7 @@
 #include <QUrlQuery>
 #include <QRunnable>
 #include <QStringBuilder>
+#include <QSaveFile>
 
 #include "utility.h"
 #include "bricklink.h"
@@ -152,13 +153,22 @@ int BrickLink::Picture::cost() const
         return 640*480*4;      // ~ 640*480 32bpp
 }
 
-QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
+QFile *BrickLink::Picture::readFile() const
 {
     bool large = (!m_color);
     bool hasColors = m_item->itemType()->hasColors();
 
-    return BrickLink::core()->dataFile(large ? u"large.jpg" : u"normal.png", openMode,
-                                       m_item, (!large && hasColors) ? m_color : nullptr);
+    return core()->dataReadFile(large ? u"large.jpg" : u"normal.png", m_item,
+                                (!large && hasColors) ? m_color : nullptr);
+}
+
+QSaveFile *BrickLink::Picture::saveFile() const
+{
+    bool large = (!m_color);
+    bool hasColors = m_item->itemType()->hasColors();
+
+    return core()->dataSaveFile(large ? u"large.jpg" : u"normal.png", m_item,
+                                (!large && hasColors) ? m_color : nullptr);
 }
 
 bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
@@ -166,7 +176,7 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
     if (!m_item)
         return false;
 
-    QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
+    QScopedPointer<QFile> f(readFile());
 
     bool isValid = false;
 
@@ -248,7 +258,7 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool highPriority)
     }
 
     //qDebug() << "PIC request started for" << url;
-    QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
+    QSaveFile *f = pic->saveFile();
     pic->m_transferJob = TransferJob::get(url, f);
     pic->m_transferJob->setUserData<Picture>('P', pic);
     m_transfer->retrieve(pic->m_transferJob, highPriority);
@@ -267,7 +277,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j, Picture *pic)
     bool large = (!pic->color());
 
     if (j->isCompleted() && j->file()) {
-        j->file()->close();
+        static_cast<QSaveFile *>(j->file())->commit();
 
         // the pic is still ref'ed, so we just forward it to the loader
         pic->m_update_status = UpdateStatus::Loading;
@@ -287,7 +297,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j, Picture *pic)
             QUrl url = j->url();
             url.setPath(url.path().replace(".jpg"_l1, ".gif"_l1));
 
-            QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
+            QSaveFile *f = pic->saveFile();
             TransferJob *job = TransferJob::get(url, f);
             job->setUserData<Picture>('P', pic);
             m_transfer->retrieve(job);

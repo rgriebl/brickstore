@@ -20,7 +20,6 @@
 #include <QNetworkReply>
 #include <QCoreApplication>
 #include <QUrlQuery>
-#include <QSaveFile>
 
 #include "utility.h"
 #include "transfer.h"
@@ -317,13 +316,8 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
                 j->m_last_modified = lastmod.toDateTime();
             if (j->m_data)
                 *j->m_data = j->m_reply->readAll();
-            else if (j->m_file) {
+            else if (j->m_file)
                 j->m_file->write(j->m_reply->readAll());
-                if (auto sf = qobject_cast<QSaveFile *>(j->m_file))
-                    sf->commit();
-                else
-                    j->m_file->close();
-            }
             j->setStatus(TransferJob::Completed);
             break;
         }

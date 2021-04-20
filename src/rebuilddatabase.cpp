@@ -338,7 +338,7 @@ bool RebuildDatabase::download()
     }
 
     for (tptr = table; tptr->m_url; tptr++) {
-        auto *f = new QSaveFile(path % QLatin1String(tptr->m_file) % ".new"_l1);
+        auto *f = new QSaveFile(path % QLatin1String(tptr->m_file));
 
         if (!f->open(QIODevice::WriteOnly)) {
             m_error = QString::fromLatin1("failed to write %1: %2")
@@ -412,7 +412,7 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
 
     for (const auto &item : invs) {
         if (item) {
-            QFile *f = BrickLink::core()->dataFile(u"inventory.xml.new", QIODevice::WriteOnly, item);
+            QSaveFile *f = BrickLink::core()->dataSaveFile(u"inventory.xml", item);
 
             if (!f || !f->isOpen()) {
                 if (f)
@@ -434,7 +434,7 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
             QUrlQuery query;
             query.setQueryItems(items);
             url.setQuery(query);
-            TransferJob *job = TransferJob::get(url, f);
+            TransferJob *job = TransferJob::get(url, f, 2);
             m_trans->retrieve(job);
             m_downloads_in_progress++;
         }
