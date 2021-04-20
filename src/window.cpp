@@ -849,8 +849,7 @@ int Window::addLots(const LotList &lots, AddLotMode addLotMode)
 
     bool startedMacro = false;
 
-    const auto documentLots = document()->sortedLots();
-    bool wasEmpty = documentLots.isEmpty();
+    bool wasEmpty = (document()->lotCount() == 0);
     Lot *lastAdded = nullptr;
     int addCount = 0;
     int consolidateCount = 0;
@@ -865,6 +864,7 @@ int Window::addLots(const LotList &lots, AddLotMode addLotMode)
         if (addLotMode != AddLotMode::AddAsNew) {
             Lot *mergeLot = nullptr;
 
+            const auto documentLots = document()->sortedLots();
             for (int j = documentLots.count() - 1; j >= 0; --j) {
                 Lot *otherLot = documentLots.at(j);
                 if ((!lot->isIncomplete() && !otherLot->isIncomplete())
