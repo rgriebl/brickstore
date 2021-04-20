@@ -1312,8 +1312,8 @@ PartColorCode *Core::readPCCFromDatabase(QDataStream &dataStream, Core::Database
 void Core::writePCCToDatabase(const PartColorCode *pcc,
                               QDataStream &dataStream, Core::DatabaseVersion)
 {
-    dataStream << pcc->id() << qint8(pcc->item()->itemType()->id()) << pcc->item()->id()
-               << pcc->color()->id();
+    dataStream << pcc->id() << qint8(pcc->item()->itemType()->id())
+               << QString::fromLatin1(pcc->item()->id()) << pcc->color()->id();
 }
 
 
