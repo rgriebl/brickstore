@@ -246,11 +246,22 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
+#endif
+        req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                              QNetworkRequest::ManualRedirectPolicy);
         }
+
+        auto ssl = req.sslConfiguration();
+        ssl.setSslOption(QSsl::SslOptionDisableSessionPersistence, false);
+        if (!m_sslSession.isEmpty())
+            ssl.setSessionTicket(m_sslSession);
+        req.setSslConfiguration(ssl);
+
         j->setStatus(TransferJob::Active);
         if (isget) {
             if (j->m_only_if_newer.isValid())
@@ -281,6 +292,8 @@ void TransferRetriever::schedule()
 
 void TransferRetriever::downloadFinished(QNetworkReply *reply)
 {
+    m_sslSession = reply->sslConfiguration().sessionTicket();
+
     auto *j = reply->property("bsJob").value<TransferJob *>();
     auto error = j->m_reply->error();
 
