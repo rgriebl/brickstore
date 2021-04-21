@@ -387,9 +387,6 @@ bool HeaderView::restoreLayout(const QByteArray &config)
     for (int li = count; li < this->count(); ++li)
         setSectionHidden(li, true);
 
-    m_isSorted = true;
-
-    emit isSortedChanged(m_isSorted);
     emit sortColumnsChanged(m_sortColumns);
     return true;
 }

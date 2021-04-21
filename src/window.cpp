@@ -2459,7 +2459,7 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
         Q_FALLTHROUGH();
     case ColumnLayoutCommand::User: {
         w_header->restoreLayout(userLayout);
-        w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
+//        w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
         break;
     }
     }
