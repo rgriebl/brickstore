@@ -178,7 +178,7 @@ QString Transfer::defaultUserAgent()
 TransferRetriever::TransferRetriever(Transfer *transfer)
     : QObject()
     , m_transfer(transfer)
-    , m_maxConnections(4) // mirror the internal QNAM setting
+    , m_maxConnections(6) // mirror the internal QNAM setting
 { }
 
 TransferRetriever::~TransferRetriever()

@@ -387,7 +387,7 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
             pg->saveToDisk(pg->m_fetched, pg->m_data);
             pg->m_update_status = UpdateStatus::Ok;
         }
-    } else {
+    } else if (!j->isAborted()) {
         qWarning() << "PriceGuide download failed:" << j->errorString() << "(" << j->responseCode() << ")";
     }
 
