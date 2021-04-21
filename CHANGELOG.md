@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.4.1] - 2021-04-21
+### Added
+- All item image views now have `Copy` and `Save` action in their context menus.
+- Documents can be sorted on multiple columns now: clicking the column header sets and toggles the
+  primary sort key, while shift-clicking sets and toggles the additional sort keys. You can sort by
+  as many additional columns as you like.
+
+### Please Note
+BrickLink's servers are very unstable right now (April 2021). This version of BrickStore tries to
+work around some of the problems, but the price guide download interface is still broken on
+BrickLink's side and may lead to invalid price guide data in BrickStore.
+
+See https://github.com/rgriebl/brickstore/issues/335 and https://www.bricklink.com/message.asp?ID=1266428
+for more information.
+
+The problem has been reported to BrickLink, but no feedback was received yet.
+
 ## [2021.3.3] - 2021-03-25
 ### Added
 - Printing a document will now print exactly what you see on the screen, using a preview window.
@@ -254,7 +271,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.3.3...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.4.1...HEAD
+[2021.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.4.1
 [2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.3
 [2021.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
 [2021.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.1
