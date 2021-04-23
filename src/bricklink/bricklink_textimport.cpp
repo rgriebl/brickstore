@@ -344,6 +344,9 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             co.m_cpart = counterPart;
 
             inventory.append(co);
+
+            if (!item->m_known_colors.contains(color->id()))
+                const_cast<Item *>(item)->m_known_colors << color->id();
         });
 
         for (const Item::ConsistsOf &co : qAsConst(inventory)) {
