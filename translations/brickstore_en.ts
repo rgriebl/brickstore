@@ -1663,6 +1663,22 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Configure columns...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Click to set as primary sort column.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shift-click to set as additional sort column.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Right-click for context menu.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Drag to reposition and resize.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HistoryLineEdit</name>
@@ -2147,6 +2163,22 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Please wait... updating</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PNG Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save image as</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save image as..</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
