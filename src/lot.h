@@ -147,39 +147,39 @@ public:
     static Lot *restore(QDataStream &ds);
 
 private:
-    const BrickLink::Item *     m_item;
-    const BrickLink::Color *    m_color;
+    const BrickLink::Item * m_item;
+    const BrickLink::Color *m_color;
 
     QScopedPointer<BrickLink::Incomplete> m_incomplete;
 
-    BrickLink::Status           m_status    : 3;
-    BrickLink::Condition        m_condition : 2;
-    BrickLink::SubCondition     m_scondition: 3;
-    bool             m_retain    : 1;
-    BrickLink::Stockroom        m_stockroom : 5;
-    bool             m_alternate : 1;
-    uint             m_alt_id    : 6;
-    bool             m_cpart     : 1;
+    BrickLink::Status       m_status    : 3;
+    BrickLink::Condition    m_condition : 2;
+    BrickLink::SubCondition m_scondition: 3;
+    int                     m_retain    : 1;
+    BrickLink::Stockroom    m_stockroom : 5;
+    int                     m_alternate : 1;
+    uint                    m_alt_id    : 6;
+    int                     m_cpart     : 1;
 
-    uint             m_lot_id = 0;
-    QString          m_reserved;
+    uint    m_lot_id = 0;
+    QString m_reserved;
 
-    QString          m_comments;
-    QString          m_remarks;
+    QString m_comments;
+    QString m_remarks;
 
-    int              m_quantity = 0;
-    int              m_bulk_quantity = 1;
-    int              m_tier_quantity[3] = { 0, 0, 0 };
-    int              m_sale = 0;
+    int     m_quantity = 0;
+    int     m_bulk_quantity = 1;
+    int     m_tier_quantity[3] = { 0, 0, 0 };
+    int     m_sale = 0;
 
-    double           m_price = 0;
-    double           m_cost = 0;
-    double           m_tier_price[3] = { 0, 0, 0 };
+    double  m_price = 0;
+    double  m_cost = 0;
+    double  m_tier_price[3] = { 0, 0, 0 };
 
-    double           m_weight = 0;
+    double  m_weight = 0;
 
-    QString          m_markerText;
-    QColor           m_markerColor;
+    QString m_markerText;
+    QColor  m_markerColor;
 
     friend class Core;
 };

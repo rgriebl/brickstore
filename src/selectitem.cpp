@@ -918,7 +918,7 @@ void SelectItem::showContextMenu(const QPoint &p)
         }
 
         // mini-fig special
-        if (item && item->itemType() && (item->itemType()->id() == 'M') && item->hasInventory()) {
+        if (item && item->itemType() && (item->itemTypeId() == 'M') && item->hasInventory()) {
             auto minifigParts = item->consistsOf();
 
             for (const BrickLink::Item::ConsistsOf &part : minifigParts) {

@@ -63,16 +63,14 @@ int BrickLink::ColorModel::pointerCount() const
 
 const void *BrickLink::ColorModel::pointerAt(int index) const
 {
-    return core()->colors()[size_t(index)];
+    return &core()->colors()[size_t(index)];
 }
 
 int BrickLink::ColorModel::pointerIndexOf(const void *pointer) const
 {
     const auto &colors = core()->colors();
-    auto it = std::find(colors.cbegin(), colors.cend(), static_cast<const Color *>(pointer));
-    if (it != colors.cend())
-        return int(std::distance(colors.cbegin(), it));
-    return -1;
+    auto d = static_cast<const Color *>(pointer) - colors.data();
+    return (d >= 0 && d < int(colors.size())) ? d : -1;
 }
 
 const BrickLink::Color *BrickLink::ColorModel::color(const QModelIndex &index) const
@@ -254,7 +252,7 @@ int BrickLink::CategoryModel::pointerCount() const
 
 const void *BrickLink::CategoryModel::pointerAt(int index) const
 {
-    return (index == 0) ? AllCategories : core()->categories()[size_t(index) - 1];
+    return (index == 0) ? AllCategories : &core()->categories()[size_t(index) - 1];
 }
 
 int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
@@ -262,12 +260,10 @@ int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
     if (pointer == AllCategories) {
         return 0;
     } else {
-        const auto &cats = core()->categories();
-        auto it = std::find(cats.cbegin(), cats.cend(), static_cast<const Category *>(pointer));
-        if (it != cats.cend())
-            return int(std::distance(cats.cbegin(), it)) + 1;
+        const auto &categories = core()->categories();
+        auto d = static_cast<const Category *>(pointer) - categories.data();
+        return (d >= 0 && d < int(categories.size())) ? d + 1 : -1;
     }
-    return -1;
 }
 
 const BrickLink::Category *BrickLink::CategoryModel::category(const QModelIndex &index) const
@@ -376,16 +372,14 @@ int BrickLink::ItemTypeModel::pointerCount() const
 
 const void *BrickLink::ItemTypeModel::pointerAt(int index) const
 {
-    return core()->itemTypes()[size_t(index)];
+    return &core()->itemTypes()[size_t(index)];
 }
 
 int BrickLink::ItemTypeModel::pointerIndexOf(const void *pointer) const
 {
-    const auto &itts = core()->itemTypes();
-    auto it = std::find(itts.cbegin(), itts.cend(), static_cast<const ItemType *>(pointer));
-    if (it != itts.cend())
-        return int(std::distance(itts.cbegin(), it));
-    return -1;
+    const auto &itemTypes = core()->itemTypes();
+    auto d = static_cast<const ItemType *>(pointer) - itemTypes.data();
+    return (d >= 0 && d < int(itemTypes.size())) ? d : -1;
 }
 
 const BrickLink::ItemType *BrickLink::ItemTypeModel::itemType(const QModelIndex &index) const
@@ -476,14 +470,14 @@ int BrickLink::ItemModel::pointerCount() const
 
 const void *BrickLink::ItemModel::pointerAt(int index) const
 {
-    return core()->items().at(size_t(index));
+    return &core()->items().at(size_t(index));
 }
 
 int BrickLink::ItemModel::pointerIndexOf(const void *pointer) const
 {
     const auto &items = core()->items();
-    auto it = std::find(items.cbegin(), items.cend(), static_cast<const Item *>(pointer));
-    return it != items.cend() ? int(std::distance(items.cbegin(), it)): -1;
+    auto d = static_cast<const Item *>(pointer) - items.data();
+    return (d >= 0 && d < int(items.size())) ? d : -1;
 }
 
 const BrickLink::Item *BrickLink::ItemModel::item(const QModelIndex &index) const

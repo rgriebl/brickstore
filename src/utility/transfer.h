@@ -79,8 +79,6 @@ private:
     Q_DISABLE_COPY(TransferJob)
 
     Transfer *   m_transfer = nullptr;
-    void *       m_user_ptr = nullptr;
-    int          m_user_tag = 0;
     QUrl         m_url;
     QUrl         m_effective_url;
     QByteArray * m_data = nullptr;
@@ -90,12 +88,15 @@ private:
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
 
+    void *       m_user_ptr = nullptr;
+    int          m_user_tag = 0;
+
     uint         m_respcode         : 16;
     uint         m_status           : 4;
     uint         m_http_method      : 1;
     uint         m_retries_left     : 5;
-    bool         m_was_not_modified : 1;
-    bool         m_no_redirects     : 1;
+    int          m_was_not_modified : 1;
+    int          m_no_redirects     : 1;
 
     friend class Transfer;
     friend class TransferRetriever;

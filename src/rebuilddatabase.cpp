@@ -150,32 +150,32 @@ int RebuildDatabase::exec()
     if (!blti.import(bl->dataPath()))
         return error("failed to parse database files."_l1);
 
-    blti.exportTo(bl);
-
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 4: Parsing inventories (part I)...\n");
 
-    auto invs = blti.items();
-    blti.importInventories(invs);
+    std::vector<bool> processedInvs(blti.items().size(), false);
+    blti.importInventories(processedInvs);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 5: Downloading missing/updated inventories...\n");
 
-    if (!downloadInventories(invs))
+    if (!downloadInventories(blti.items(), processedInvs))
         return error(m_error);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 6: Parsing inventories (part II)...\n");
 
-    blti.importInventories(invs);
+    blti.importInventories(processedInvs);
 
-    if ((invs.size() - size_t(std::count(invs.cbegin(), invs.cend(), nullptr))) > (blti.items().size() / 50))             // more than 2% have failed
+    if (std::count(processedInvs.cbegin(), processedInvs.cend(), false)
+            > (int(processedInvs.size()) / 50)) {            // more than 2% have failed
         return error("more than 2% of all inventories had errors."_l1);
+    }
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Computing the database...\n");
 
-    blti.exportInventoriesTo(bl);
+    blti.exportTo(bl);
 
     extern int _dwords_for_appears, _qwords_for_consists;
 
@@ -183,17 +183,20 @@ int RebuildDatabase::exec()
     printf("  > consists-of: %11d bytes\n", _qwords_for_consists * 8);
 
     /////////////////////////////////////////////////////////////////////////////////
-    BrickLink::Core::DatabaseVersion dbVersion = BrickLink::Core::DatabaseVersion::Latest;
     printf("\nSTEP 8: Writing the database to disk...\n");
 
-    while (dbVersion != BrickLink::Core::DatabaseVersion::Invalid) {
-        printf("  > version %d... ", int(dbVersion));
+    int dbVersionHighest = int(BrickLink::Core::DatabaseVersion::Latest);
+    int dbVersionLowest = int(BrickLink::Core::DatabaseVersion::Version_3);
+
+    Q_ASSERT(dbVersionHighest >= dbVersionLowest);
+
+    for (int v = dbVersionHighest; v >= dbVersionLowest; --v) {
+        printf("  > version %d... ", v);
+        auto dbVersion = static_cast<BrickLink::Core::DatabaseVersion>(v);
         if (bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(dbVersion), dbVersion))
             printf("done\n");
         else
             printf("failed\n");
-
-        dbVersion = static_cast<BrickLink::Core::DatabaseVersion>(int(dbVersion) - 1);
     }
 
     printf("\nFINISHED.\n\n");
@@ -402,7 +405,8 @@ void RebuildDatabase::downloadJobFinished(TransferJob *job)
 }
 
 
-bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Item *> &invs)
+bool RebuildDatabase::downloadInventories(const std::vector<BrickLink::Item> &invs,
+                                          const std::vector<bool> &processedInvs)
 {
     bool failed = false;
     m_downloads_in_progress = 0;
@@ -410,8 +414,9 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
 
     QUrl url("https://www.bricklink.com/catalogDownload.asp"_l1);
 
-    for (const auto &item : invs) {
-        if (item) {
+    for (uint i = 0; i < invs.size(); ++i) {
+        const BrickLink::Item *item = &invs[i];
+        if (!processedInvs[i]) {
             QSaveFile *f = BrickLink::core()->dataSaveFile(u"inventory.xml", item);
 
             if (!f || !f->isOpen()) {
@@ -427,7 +432,7 @@ bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Ite
             QList<QPair<QString, QString> > items {
                 { QPair<QString, QString>("a"_l1,            "a"_l1) },
                 { QPair<QString, QString>("viewType"_l1,     "4"_l1) },
-                { QPair<QString, QString>("itemTypeInv"_l1,  QString(QLatin1Char(item->itemType()->id()))) },
+                { QPair<QString, QString>("itemTypeInv"_l1,  QString(QLatin1Char(item->itemTypeId()))) },
                 { QPair<QString, QString>("itemNo"_l1,       QLatin1String(item->id())) },
                 { QPair<QString, QString>("downloadType"_l1, "X"_l1) }
             };

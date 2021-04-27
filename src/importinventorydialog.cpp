@@ -222,7 +222,7 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 {
     w_import->setEnabled((it));
 
-    if (it && it->itemType() && (it->itemType()->id() == 'S')) {
+    if (it && it->itemType() && (it->itemTypeId() == 'S')) {
         bool hasInstructions = (BrickLink::core()->item('I', it->id()));
         w_instructions->setEnabled(hasInstructions);
     }

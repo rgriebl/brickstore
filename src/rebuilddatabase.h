@@ -36,7 +36,7 @@ private:
     int error(const QString &);
 
     bool download();
-    bool downloadInventories(const std::vector<const BrickLink::Item *> &invs);
+    bool downloadInventories(const std::vector<BrickLink::Item> &invs, const std::vector<bool> &processedInvs);
 
 private:
     Transfer *m_trans;

@@ -38,6 +38,15 @@ QString BrickLink::Color::typeName(TypeFlag t)
 }
 
 
+const QVector<const BrickLink::Category *> BrickLink::ItemType::categories() const
+{
+    QVector<const BrickLink::Category *> result;
+    result.reserve(int(m_categoryIndexes.size()));
+    for (const quint16 idx : m_categoryIndexes)
+        result << &core()->categories()[idx];
+    return result;
+}
+
 QSize BrickLink::ItemType::pictureSize() const
 {
     QSize s = rawPictureSize();
@@ -57,15 +66,12 @@ QSize BrickLink::ItemType::rawPictureSize() const
 
 
 BrickLink::Item::~Item()
-{
-    delete [] m_appears_in;
-}
+{ }
 
-bool BrickLink::Item::lowerBound(const Item *item, const std::pair<char, QByteArray> &ids)
+bool BrickLink::Item::lessThan(const Item &item, const std::pair<char, QByteArray> &ids)
 {
-    int d = (item->m_item_type->id() - ids.first);
-
-    return d == 0 ? (item->m_id.compare(ids.second) < 0) : (d < 0);
+    int d = (item.m_itemTypeId - ids.first);
+    return d == 0 ? (item.m_id.compare(ids.second) < 0) : (d < 0);
 }
 
 extern int _dwords_for_appears;
@@ -74,82 +80,63 @@ extern int _qwords_for_consists;
 int _dwords_for_appears  = 0;
 int _qwords_for_consists = 0;
 
-void BrickLink::Item::setAppearsIn(const AppearsIn &map) const
+// color-idx -> { vector < qty, item-idx > }
+void BrickLink::Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash)
 {
-    delete [] m_appears_in;
+    // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
 
-    int s = 2;
+    m_appears_in.clear();
 
-    for (AppearsIn::const_iterator it = map.begin(); it != map.end(); ++it)
-        s += (1 + it.value().size());
+    for (auto it = appearHash.cbegin(); it != appearHash.cend(); ++it) {
+        const auto &colorVector = it.value();
 
-    _dwords_for_appears += s;
+        m_appears_in.push_back({ it.key() /*colorIndex*/, uint(colorVector.size()) /*vectorSize*/ });
 
-    auto *ptr = new quint32 [size_t(s)];
-    m_appears_in = ptr;
-
-    *ptr++ = quint32(map.size());   // how many colors
-    *ptr++ = quint32(s);             // only useful in save/restore ->size in DWORDs
-
-    for (AppearsIn::const_iterator it = map.begin(); it != map.end(); ++it) {
-        auto *color_header = reinterpret_cast <appears_in_record *>(ptr);
-
-        color_header->m12 = it.key()->id();        // color id
-        color_header->m20 = quint32(it.value().size());      // # of entries
-
-        ptr++;
-
-        for (AppearsInColor::const_iterator itvec = it.value().begin(); itvec != it.value().end(); ++itvec) {
-            auto *color_entry = reinterpret_cast <appears_in_record *>(ptr);
-
-            color_entry->m12 = quint32(itvec->first);            // qty
-            color_entry->m20 = itvec->second->m_index; // item index
-
-            ptr++;
-        }
+        for (auto vecIt = colorVector.cbegin(); vecIt != colorVector.cend(); ++vecIt)
+            m_appears_in.push_back({ uint(vecIt->first) /*quantity*/, vecIt->second /*itemIndex*/ });
     }
+    m_appears_in.shrink_to_fit();
+
+    _dwords_for_appears += int(m_appears_in.size());
 }
 
-BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
+BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *onlyColor) const
 {
-    AppearsIn map;
+    AppearsIn appearsHash;
 
-    const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    int count = int(BrickLink::core()->items().size());
+    for (auto it = m_appears_in.cbegin(); it != m_appears_in.cend(); ) {
+        // 1st level (color header):  m12: color index / m20: size of 2nd level vector
+        quint32 colorIndex = it->m12;
+        quint32 vectorSize = it->m20;
 
-    if (m_appears_in) {
-        quint32 *ptr = m_appears_in + 2;
+        ++it;
+        const Color *color = &core()->colors()[colorIndex];
 
-        for (quint32 i = 0; i < m_appears_in [0]; i++) {
-            const auto *color_header = reinterpret_cast <const appears_in_record *>(ptr);
-            ptr++;
+        if (!onlyColor || (color == onlyColor)) {
+            AppearsInColor &vec = appearsHash[color];
 
-            const BrickLink::Color *color = BrickLink::core()->color(color_header->m12);
+            for (quint32 i = 0; i < vectorSize; ++i, ++it) {
+                // 2nd level (color entry):   m12: quantity / m20: item index
 
-            if (color && (!only_color || (color == only_color))) {
-                AppearsInColor &vec = map[color];
+                int quantity = int(it->m12);
+                quint32 itemIndex = it->m20;
 
-                for (quint32 j = 0; j < color_header->m20; j++, ptr++) {
-                    const auto *color_entry = reinterpret_cast <const appears_in_record *>(ptr);
+                const Item *item = &core()->items()[itemIndex];
 
-                    int qty = color_entry->m12;    // qty
-                    int index = color_entry->m20;  // item index
-
-                    if (qty && (index < count))
-                        vec.append(qMakePair(qty, items[index]));
-                }
+                if (quantity)
+                    vec.append(qMakePair(quantity, item));
             }
-            else
-                ptr += color_header->m20; // skip
+        } else {
+            it += vectorSize; // skip 2nd level
         }
     }
-
-    return map;
+    return appearsHash;
 }
 
 void BrickLink::Item::setConsistsOf(const QVector<BrickLink::Item::ConsistsOf> &items)
 {
     m_consists_of = items;
+    _qwords_for_consists += m_consists_of.size();
 }
 
 const QVector<BrickLink::Item::ConsistsOf> &BrickLink::Item::consistsOf() const

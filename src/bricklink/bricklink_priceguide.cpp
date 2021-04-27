@@ -79,7 +79,7 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item,
     if (!item || !color)
         return nullptr;
 
-    quint64 key = quint64(color->id()) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index());
+    quint64 key = quint64(color->id()) << 32 | quint64(item->itemTypeId()) << 24 | quint64(item->index());
     PriceGuide *pg = m_pg_cache [key];
 
     bool needToLoad = false;
@@ -338,7 +338,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
 
     if (pg->m_scrapedHtml) {
         url = QUrl("https://www.bricklink.com/priceGuideSummary.asp"_l1);
-        query.addQueryItem("a"_l1,       QString(QLatin1Char(pg->item()->itemType()->id())));
+        query.addQueryItem("a"_l1,       QString(QLatin1Char(pg->item()->itemTypeId())));
         query.addQueryItem("vcID"_l1,    "1"_l1); // USD
         query.addQueryItem("vatInc"_l1,  "Y"_l1);
         query.addQueryItem("ajView"_l1,  "Y"_l1); // only the AJAX snippet
@@ -349,7 +349,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
         //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
         url = QUrl("https://www.bricklink.com/BTpriceSummary.asp"_l1);
 
-        query.addQueryItem(QString(QLatin1Char(pg->item()->itemType()->id())).toUpper(),
+        query.addQueryItem(QString(QLatin1Char(pg->item()->itemTypeId())).toUpper(),
                            QLatin1String(pg->item()->id()));
         query.addQueryItem("colorID"_l1,  QString::number(pg->color()->id()));
         query.addQueryItem("cCode"_l1,    "USD"_l1);

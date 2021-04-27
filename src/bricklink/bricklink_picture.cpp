@@ -86,7 +86,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!item)
         return nullptr;
 
-    quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
+    quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemTypeId()) << 24 | quint64(item->index() + 1);
 
     Picture *pic = m_pic_cache[key];
 

@@ -25,29 +25,29 @@
 #include "xmlhelpers.h"
 
 
-const BrickLink::Item *BrickLink::TextImport::findItem(char tid, const QByteArray &id) const
+int BrickLink::TextImport::findItemIndex(char tid, const QByteArray &id) const
 {
     auto needle = std::make_pair(tid, id);
-    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lowerBound);
-    if ((it != m_items.cend()) && ((*it)->itemType()->id() == tid) && ((*it)->id() == id))
-        return *it;
-    return nullptr;
+    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lessThan);
+    if ((it != m_items.cend()) && (it->itemTypeId() == tid) && (it->id() == id))
+        return std::distance(m_items.cbegin(), it);
+    return -1;
 }
 
-const BrickLink::Color *BrickLink::TextImport::findColor(uint id) const
+int BrickLink::TextImport::findColorIndex(uint id) const
 {
-    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, Color::lowerBound);
-    if ((it != m_colors.cend()) && ((*it)->id() == id))
-        return *it;
-    return nullptr;
+    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, Color::lessThan);
+    if ((it != m_colors.cend()) && (it->id() == id))
+        return std::distance(m_colors.cbegin(), it);
+    return -1;
 }
 
-const BrickLink::Category *BrickLink::TextImport::findCategory(uint id) const
+int BrickLink::TextImport::findCategoryIndex(uint id) const
 {
-    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, Category::lowerBound);
-    if ((it != m_categories.cend()) && ((*it)->id() == id))
-        return *it;
-    return nullptr;
+    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, Category::lessThan);
+    if ((it != m_categories.cend()) && (it->id() == id))
+        return std::distance(m_categories.cbegin(), it);
+    return -1;
 }
 
 
@@ -80,23 +80,8 @@ bool BrickLink::TextImport::import(const QString &path)
         // speed up loading (exactly 137522 items on 16.06.2020)
         m_items.reserve(200000);
 
-        for (const ItemType *itt : qAsConst(m_item_types))
-            readItems(path % u"items_" % QLatin1Char(itt->m_id) % u".xml", itt);
-
-
-        // we need to set index for faster reverse lookups
-        auto itp = const_cast<Item **>(m_items.data());
-
-        for (uint i = 0; i < m_items.size(); itp++, i++) {
-            auto item = *itp;
-            item->m_index = i;
-
-            if (auto *itt = const_cast<ItemType *>(item->m_item_type)) {
-                const Category *cat = item->m_category;
-                if (!itt->m_categories.contains(cat))
-                    itt->m_categories.append(cat);
-            }
-        }
+        for (ItemType &itt : m_item_types)
+            readItems(path % u"items_" % QLatin1Char(itt.m_id) % u".xml", &itt);
 
         readPartColorCodes(path % u"part_color_codes.xml");
         readInventoryList(path % u"btinvlist.csv");
@@ -114,48 +99,48 @@ void BrickLink::TextImport::readColors(const QString &path)
 {
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p](QDomElement e) {
-        QScopedPointer<Color> col(new Color);
+        Color col;
         uint colid = p.elementText(e, "COLOR").toUInt();
 
-        col->m_id       = colid;
-        col->m_name     = p.elementText(e, "COLORNAME");
-        col->m_color    = QColor(u'#' % p.elementText(e, "COLORRGB"));
+        col.m_id       = colid;
+        col.m_name     = p.elementText(e, "COLORNAME");
+        col.m_color    = QColor(u'#' % p.elementText(e, "COLORRGB"));
 
-        col->m_ldraw_id = -1;
-        col->m_type     = Color::Type();
+        col.m_ldraw_id = -1;
+        col.m_type     = Color::Type();
 
         auto type = p.elementText(e, "COLORTYPE");
-        if (type.contains("Transparent"_l1)) col->m_type |= Color::Transparent;
-        if (type.contains("Glitter"_l1))     col->m_type |= Color::Glitter;
-        if (type.contains("Speckle"_l1))     col->m_type |= Color::Speckle;
-        if (type.contains("Metallic"_l1))    col->m_type |= Color::Metallic;
-        if (type.contains("Chrome"_l1))      col->m_type |= Color::Chrome;
-        if (type.contains("Pearl"_l1))       col->m_type |= Color::Pearl;
-        if (type.contains("Milky"_l1))       col->m_type |= Color::Milky;
-        if (type.contains("Modulex"_l1))     col->m_type |= Color::Modulex;
-        if (type.contains("Satin"_l1))       col->m_type |= Color::Satin;
-        if (!col->m_type)
-            col->m_type = Color::Solid;
+        if (type.contains("Transparent"_l1)) col.m_type |= Color::Transparent;
+        if (type.contains("Glitter"_l1))     col.m_type |= Color::Glitter;
+        if (type.contains("Speckle"_l1))     col.m_type |= Color::Speckle;
+        if (type.contains("Metallic"_l1))    col.m_type |= Color::Metallic;
+        if (type.contains("Chrome"_l1))      col.m_type |= Color::Chrome;
+        if (type.contains("Pearl"_l1))       col.m_type |= Color::Pearl;
+        if (type.contains("Milky"_l1))       col.m_type |= Color::Milky;
+        if (type.contains("Modulex"_l1))     col.m_type |= Color::Modulex;
+        if (type.contains("Satin"_l1))       col.m_type |= Color::Satin;
+        if (!col.m_type)
+            col.m_type = Color::Solid;
 
         int partCnt    = p.elementText(e, "COLORCNTPARTS").toInt();
         int setCnt     = p.elementText(e, "COLORCNTSETS").toInt();
         int wantedCnt  = p.elementText(e, "COLORCNTWANTED").toInt();
         int forSaleCnt = p.elementText(e, "COLORCNTINV").toInt();
 
-        col->m_popularity = partCnt + setCnt + wantedCnt + forSaleCnt;
+        col.m_popularity = partCnt + setCnt + wantedCnt + forSaleCnt;
 
         // needs to be divided by the max. after all colors are parsed!
         // mark it as raw data meanwhile:
-        col->m_popularity = -col->m_popularity;
+        col.m_popularity = -col.m_popularity;
 
-        col->m_year_from = p.elementText(e, "COLORYEARFROM").toUShort();
-        col->m_year_to   = p.elementText(e, "COLORYEARTO").toUShort();
+        col.m_year_from = p.elementText(e, "COLORYEARFROM").toUShort();
+        col.m_year_to   = p.elementText(e, "COLORYEARTO").toUShort();
 
-        m_colors.emplace_back(col.take());
+        m_colors.push_back(col);
     });
 
     std::sort(m_colors.begin(), m_colors.end(), [](const auto &col1, const auto &col2) {
-        return Color::lowerBound(col1, col2->id());
+        return Color::lessThan(col1, col2.id());
     });
 }
 
@@ -163,17 +148,17 @@ void BrickLink::TextImport::readCategories(const QString &path)
 {
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p](QDomElement e) {
-        QScopedPointer<Category> cat(new Category);
+        Category cat;
         uint catid = p.elementText(e, "CATEGORY").toUInt();
 
-        cat->m_id   = catid;
-        cat->m_name = p.elementText(e, "CATEGORYNAME");
+        cat.m_id   = catid;
+        cat.m_name = p.elementText(e, "CATEGORYNAME");
 
-        m_categories.emplace_back(cat.take());
+        m_categories.push_back(cat);
     });
 
     std::sort(m_categories.begin(), m_categories.end(), [](const auto &cat1, const auto &cat2) {
-        return Category::lowerBound(cat1, cat2->id());
+        return Category::lessThan(cat1, cat2.id());
     });
 
 }
@@ -182,67 +167,73 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
 {
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p](QDomElement e) {
-        QScopedPointer<ItemType> itt(new ItemType);
+        ItemType itt;
         char c = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
 
         if (c == 'U')
             return;
 
-        itt->m_id   = c;
-        itt->m_name = p.elementText(e, "ITEMTYPENAME");
+        itt.m_id   = c;
+        itt.m_name = p.elementText(e, "ITEMTYPENAME");
 
-        itt->m_picture_id        = (c == 'I') ? 'S' : c;
-        itt->m_has_inventories   = false;
-        itt->m_has_colors        = (c == 'P' || c == 'G');
-        itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
-        itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
-        itt->m_has_subconditions = (c == 'S');
+        itt.m_picture_id        = (c == 'I') ? 'S' : c;
+        itt.m_has_inventories   = false;
+        itt.m_has_colors        = (c == 'P' || c == 'G');
+        itt.m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
+        itt.m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
+        itt.m_has_subconditions = (c == 'S');
 
-        m_item_types.emplace_back(itt.take());
+        m_item_types.push_back(itt);
     });
 
     std::sort(m_item_types.begin(), m_item_types.end(), [](const auto &itt1, const auto &itt2) {
-        return ItemType::lowerBound(itt1, itt2->id());
+        return ItemType::lessThan(itt1, itt2.id());
     });
 }
 
-void BrickLink::TextImport::readItems(const QString &path, const BrickLink::ItemType *itt)
+void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *itt)
 {
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p, itt](QDomElement e) {
-        QScopedPointer<Item> item(new Item);
-        item->m_id        = p.elementText(e, "ITEMID").toLatin1();
-        item->m_name      = p.elementText(e, "ITEMNAME");
-        item->m_item_type = itt;
+        Item item;
+        item.m_id = p.elementText(e, "ITEMID").toLatin1();
+        item.m_name = p.elementText(e, "ITEMNAME");
+        item.m_itemTypeIndex = (itt - m_item_types.data());
+        item.m_itemTypeId = itt->id();
 
         uint catId = p.elementText(e, "CATEGORY").toUInt();
-        item->m_category = findCategory(catId);
-        if (!item->m_category)
-            throw ParseException("item %1 has no category").arg(QLatin1String(item->m_id));
+        item.m_categoryIndex = findCategoryIndex(catId);
+        if (item.m_categoryIndex == -1)
+            throw ParseException("item %1 has no category").arg(QLatin1String(item.m_id));
+
+        // calculate the item-type -> category relation
+        auto &catv = itt->m_categoryIndexes;
+        if (std::find(catv.cbegin(), catv.cend(), item.m_categoryIndex) == catv.cend())
+            catv.emplace_back(item.m_categoryIndex);
 
         if (itt->hasYearReleased()) {
             uint y = p.elementText(e, "ITEMYEAR").toUInt() - 1900;
-            item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
+            item.m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
         } else {
-            item->m_year = 0;
+            item.m_year = 0;
         }
 
         if (itt->hasWeight())
-            item->m_weight = p.elementText(e, "ITEMWEIGHT").toFloat();
+            item.m_weight = p.elementText(e, "ITEMWEIGHT").toFloat();
         else
-            item->m_weight = 0;
+            item.m_weight = 0;
 
         try {
-            item->m_color = findColor(p.elementText(e, "IMAGECOLOR").toUInt());
+            item.m_defaultColorIndex = findColorIndex(p.elementText(e, "IMAGECOLOR").toUInt());
         } catch (...) {
-            item->m_color = nullptr;
+            item.m_defaultColorIndex = -1;
         }
 
-        m_items.emplace_back(item.take());
+        m_items.push_back(item);
     });
 
     std::sort(m_items.begin(), m_items.end(), [](const auto &item1, const auto &item2) {
-        return Item::lowerBound(item1, std::make_pair(item2->itemType()->id(), item2->id()));
+        return Item::lessThan(item1, std::make_pair(item2.itemTypeId(), item2.id()));
     });
 }
 
@@ -255,18 +246,19 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         const QString colorName = p.elementText(e, "COLOR");
         uint code = p.elementText(e, "CODENAME").toUInt();
 
-        if (const Item *item = findItem(itemTypeId, itemId)) {
+        int itemIndex = findItemIndex(itemTypeId, itemId);
+        if (itemIndex != -1) {
             bool found = false;
-            for (const Color *color : m_colors) {
-                if (color->name() == colorName) {
-                    if (!item->m_known_colors.contains(color->id()))
-                        const_cast<Item *>(item)->m_known_colors << color->id();
+            for (uint colorIndex = 0; colorIndex < m_colors.size(); ++colorIndex) {
+                if (m_colors[colorIndex].name() == colorName) {
+                    addToKnownColors(itemIndex, colorIndex);
+
                     if (code) {
-                        PartColorCode *pcc = new PartColorCode;
-                        pcc->m_id = code;
-                        pcc->m_item = item;
-                        pcc->m_color = color;
-                        m_pccs.emplace_back(pcc);
+                        PartColorCode pcc;
+                        pcc.m_id = code;
+                        pcc.m_itemIndex = itemIndex;
+                        pcc.m_colorIndex = colorIndex;
+                        m_pccs.push_back(pcc);
                     }
                     found = true;
                     break;
@@ -284,25 +276,19 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
     });
 
     std::sort(m_pccs.begin(), m_pccs.end(), [](const auto &item1, const auto &item2) {
-        return PartColorCode::lowerBound(item1, item2->id());
+        return PartColorCode::lessThan(item1, item2.id());
     });
 }
 
 
-bool BrickLink::TextImport::importInventories(std::vector<const Item *> &invs)
+bool BrickLink::TextImport::importInventories(std::vector<bool> &processedInvs)
 {
-    for (auto &&item : invs) {
-        if (!item) // already yanked
+    for (uint i = 0; i < m_items.size(); ++i) {
+        if (processedInvs[i]) // already yanked
             continue;
 
-        if (!item->hasInventory()) {
-            item = nullptr;  // no inv at all ->yank it
-            continue;
-        }
-
-        if (readInventory(item)) {
-            item = nullptr;
-        }
+        if (!m_items[i].hasInventory() || readInventory(&m_items[i]))
+            processedInvs[i] = true;
     }
     return true;
 }
@@ -328,16 +314,16 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             bool alternate = (p.elementText(e, "ALTERNATE") == "Y"_l1);
             uint matchId = p.elementText(e, "MATCHID").toUInt();
 
-            const Item *item = findItem(itemTypeId, itemId);
-            const Color *color = findColor(colorId);
+            int itemIndex = findItemIndex(itemTypeId, itemId);
+            int colorIndex = findColorIndex(colorId);
 
-            if (!item || !color || !qty)
-                throw Exception("Unknown item- or color-id or 0 qty");
+            if ((itemIndex == -1) || (colorIndex == -1) || !qty)
+                throw Exception("Unknown item-id or color-id or 0 qty");
 
             Item::ConsistsOf co;
             co.m_qty = qty;
-            co.m_index = item->index();
-            co.m_color = color->id();
+            co.m_itemIndex = itemIndex;
+            co.m_colorIndex = colorIndex;
             co.m_extra = extra;
             co.m_isalt = alternate;
             co.m_altid = matchId;
@@ -345,16 +331,17 @@ bool BrickLink::TextImport::readInventory(const Item *item)
 
             inventory.append(co);
 
-            if (!item->m_known_colors.contains(color->id()))
-                const_cast<Item *>(item)->m_known_colors << color->id();
+            addToKnownColors(itemIndex, colorIndex);
         });
 
+        uint itemIndex = item - items().data();;
+
         for (const Item::ConsistsOf &co : qAsConst(inventory)) {
-            AppearsInColor &vec = m_appears_in_hash[co.item()][co.color()];
-            vec.append(qMakePair(co.quantity(), item));
+            auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];
+            vec.append(qMakePair(co.quantity(), itemIndex));
         }
         // the hash owns the items now
-        m_consists_of_hash.insert(item, inventory);
+        m_consists_of_hash.insert(itemIndex, inventory);
         return true;
 
     } catch (const Exception &) {
@@ -388,14 +375,14 @@ void BrickLink::TextImport::readLDrawColors(const QString &path)
                 if (name.startsWith("rubber"_l1))
                     continue;
 
-                for (auto &&color : m_colors) {
-                    QString blname = color->name()
+                for (auto &color : m_colors) {
+                    QString blname = color.name()
                             .toLower()
                             .replace(' '_l1, '_'_l1)
                             .replace('-'_l1, '_'_l1)
                             .replace("gray"_l1, "grey"_l1);
                     if (blname == name) {
-                        const_cast<Color *>(color)->m_ldraw_id = id;
+                        color.m_ldraw_id = id;
                         matchCount++;
                         break;
                     }
@@ -429,8 +416,9 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         if (!itemTypeId || itemId.isEmpty())
             throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(line);
 
-        if (const Item *itm = findItem(itemTypeId, itemId)) {
-            auto t = time_t(0);   // 1.1.1970 00:00
+        int itemIndex = findItemIndex(itemTypeId, itemId);
+        if (itemIndex != -1) {
+            qint64 t(0);   // 1.1.1970 00:00
 
             if (strs.count() > 2) {
                 QString dtStr = strs.at(2);
@@ -448,8 +436,10 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
                     t = dt.toSecsSinceEpoch();
                 }
             }
-            const_cast <Item *>(itm)->m_last_inv_update = t;
-            const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
+            Item &item = m_items[itemIndex];
+            item.m_lastInventoryUpdate = t;
+            ItemType &itemType = m_item_types[item.m_itemTypeIndex];
+            itemType.m_has_inventories = true;
         } else {
             qWarning() << "WARNING: parsing btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
         }
@@ -506,41 +496,45 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
 
 void BrickLink::TextImport::exportTo(Core *bl)
 {
-    /// QMutexLocker lock(&m_corelock);
+    std::swap(bl->m_colors, m_colors);
+    std::swap(bl->m_item_types, m_item_types);
+    std::swap(bl->m_categories, m_categories);
+    std::swap(bl->m_items, m_items);
+    std::swap(bl->m_pccs, m_pccs);
+    std::swap(bl->m_changelog, m_changelog);
 
-    bl->m_colors     = m_colors;
-    bl->m_item_types = m_item_types;
-    bl->m_categories = m_categories;
-    bl->m_items      = m_items;
-    bl->m_pccs       = m_pccs;
+    for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
+        Item &item = bl->m_items[it.key()];
+        item.setConsistsOf(it.value());
+    }
 
-    bl->m_changelog = m_changelog;
+    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
+        Item &item = bl->m_items[it.key()];
+        item.setAppearsIn(it.value());
+    }
 }
-
-void BrickLink::TextImport::exportInventoriesTo(Core * /*bl*/)
-{
-    //QMutexLocker lock(&m_corelock);
-
-    for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it)
-        const_cast<Item *>(it.key())->setConsistsOf(it.value());
-
-    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it)
-        it.key()->setAppearsIn(it.value());
-}
-
 
 void BrickLink::TextImport::calculateColorPopularity()
 {
-    qreal maxpop = 0;
-    for (const auto &col : qAsConst(m_colors))
-        maxpop = qMin(maxpop, col->m_popularity);
-    for (const auto &col : qAsConst(m_colors)) {
-        qreal &pop = const_cast<Color *>(col)->m_popularity;
+    float maxpop = 0;
+    for (const auto &col : m_colors)
+        maxpop = qMin(maxpop, col.m_popularity);
+    for (auto &col : m_colors) {
+        float &pop = col.m_popularity;
 
         if (!qFuzzyIsNull(maxpop))
             pop /= maxpop;
         else
             pop = 0;
+    }
+}
+
+void BrickLink::TextImport::addToKnownColors(int itemIndex, int colorIndex)
+{
+    Item &item = m_items[itemIndex];
+    if (std::find(item.m_knownColorIndexes.cbegin(), item.m_knownColorIndexes.cend(),
+                  colorIndex) == item.m_knownColorIndexes.cend()) {
+        item.m_knownColorIndexes.emplace_back(colorIndex);
     }
 }
 

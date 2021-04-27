@@ -57,7 +57,7 @@ public:
     char id() const                 { return m_id; }
     QString name() const            { return m_name; }
 
-    const QVector<const Category *> categories() const  { return m_categories; }
+    const QVector<const Category *> categories() const;
     bool hasInventories() const     { return m_has_inventories; }
     bool hasColors() const          { return m_has_colors; }
     bool hasYearReleased() const    { return m_has_year; }
@@ -67,6 +67,7 @@ public:
     QSize pictureSize() const;
     QSize rawPictureSize() const;
 
+    ItemType() = default;
     ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
 
 private:
@@ -79,13 +80,13 @@ private:
     bool  m_has_year          : 1;
     bool  m_has_subconditions : 1;
 
-    QString m_name;
+    // 5 bytes padding here
 
-    QVector<const Category *> m_categories;
+    QString m_name;
+    std::vector<quint16> m_categoryIndexes;
 
 private:
-    ItemType() = default;
-    static bool lowerBound(const ItemType *itt, char id) { return itt->m_id < id; }
+    static bool lessThan(const ItemType &itt, char id) { return itt.m_id < id; }
 
     friend class Core;
     friend class TextImport;
@@ -100,15 +101,16 @@ public:
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
 
+    Category() = default;
     Category(std::nullptr_t) : Category() { } // for scripting only!
 
 private:
     uint     m_id = InvalidId;
+    // 4 bytes padding here
     QString  m_name;
 
 private:
-    Category() = default;
-    static bool lowerBound(const Category *cat, uint id) { return cat->m_id < id; }
+    static bool lessThan(const Category &cat, uint id) { return cat.m_id < id; }
 
     friend class Core;
     friend class TextImport;
@@ -158,6 +160,7 @@ public:
 
     static QString typeName(TypeFlag t);
 
+    Color() = default;
     Color(std::nullptr_t) : Color() { } // for scripting only!
 
 private:
@@ -166,13 +169,13 @@ private:
     int     m_ldraw_id = 0;
     QColor  m_color;
     Type    m_type = {};
-    qreal   m_popularity = 0;
+    float   m_popularity = 0;
     quint16 m_year_from = 0;
     quint16 m_year_to = 0;
+    // 4 bytes padding here
 
 private:
-    static bool lowerBound(const Color *color, uint id) { return color->m_id < id; }
-    Color() = default;
+    static bool lessThan(const Color &color, uint id) { return color.m_id < id; }
 
     friend class Core;
     friend class TextImport;
@@ -182,16 +185,17 @@ private:
 class Item
 {
 public:
-    QByteArray id() const                  { return m_id; }
-    QString name() const                   { return m_name; }
-    const ItemType *itemType() const       { return m_item_type; }
-    const Category *category() const       { return m_category; }
-    bool hasInventory() const              { return (m_last_inv_update >= 0); }
-    QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setSecsSinceEpoch(uint(m_last_inv_update)); return dt; }
-    const Color *defaultColor() const      { return m_color; }
+    inline QByteArray id() const           { return m_id; }
+    inline QString name() const            { return m_name; }
+    inline char itemTypeId() const         { return m_itemTypeId; }
+    const ItemType *itemType() const;
+    const Category *category() const;
+    inline bool hasInventory() const       { return (m_lastInventoryUpdate >= 0); }
+    QDateTime inventoryUpdated() const;
+    const Color *defaultColor() const;
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
-    bool hasKnownColors() const            { return !m_known_colors.isEmpty(); }
+    bool hasKnownColors() const            { return !m_knownColorIndexes.empty(); }
     const QVector<const Color *> knownColors() const;
 
     ~Item();
@@ -211,8 +215,8 @@ public:
     private:
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         quint64  m_qty      : 12;
-        quint64  m_index    : 20;
-        quint64  m_color    : 12;
+        quint64  m_itemIndex  : 20;
+        quint64  m_colorIndex : 12;
         quint64  m_extra    : 1;
         quint64  m_isalt    : 1;
         quint64  m_altid    : 6;
@@ -224,43 +228,36 @@ public:
         quint64  m_altid    : 6;
         quint64  m_isalt    : 1;
         quint64  m_extra    : 1;
-        quint64  m_color    : 12;
-        quint64  m_index    : 20;
+        quint64  m_colorIndex : 12;
+        quint64  m_itemIndex  : 20;
         quint64  m_qty      : 12;
 #endif
 
         friend class TextImport;
     };
+    Q_STATIC_ASSERT(sizeof(ConsistsOf) == 8);
 
     const QVector<ConsistsOf> &consistsOf() const;
 
-    uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
+    uint index() const;   // only for internal use (picture/priceguide hashes)
 
+    Item() = default;
     Item(std::nullptr_t) : Item() { } // for scripting only!
 
 private:
-    QString           m_name;
-    QByteArray        m_id;
-    const ItemType *  m_item_type = nullptr;
-    const Category *  m_category = nullptr;
-    const Color *     m_color = nullptr;
-    time_t            m_last_inv_update = -1;
-    float             m_weight = 0;
-    quint32           m_index : 24;
-    quint32           m_year  : 8;
-    QVector<uint>     m_known_colors;
+    QString    m_name;
+    QByteArray m_id;
+    qint16     m_itemTypeIndex = -1;
+    qint16     m_categoryIndex = -1;
+    qint16     m_defaultColorIndex = -1;
+    char       m_itemTypeId; // the same itemType()->id()
+    quint8     m_year = 0;
+    qint64     m_lastInventoryUpdate = -1;
+    float      m_weight = 0;
+    // 4 bytes padding here
+    std::vector<quint16> m_knownColorIndexes;
 
-    mutable quint32 * m_appears_in = nullptr;
-    QVector<ConsistsOf> m_consists_of;
-
-private:
-    Item() = default;
-    Q_DISABLE_COPY(Item)
-
-    void setAppearsIn(const AppearsIn &hash) const;
-    void setConsistsOf(const QVector<ConsistsOf> &items);
-
-    struct appears_in_record {
+    struct AppearsInRecord {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         quint32  m12  : 12;
         quint32  m20  : 20;
@@ -269,11 +266,21 @@ private:
         quint32  m12  : 12;
 #endif
     };
+    Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
+
+    std::vector<AppearsInRecord> m_appears_in;
+    QVector<ConsistsOf> m_consists_of;
+
+private:
+    void setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash);
+    void setConsistsOf(const QVector<ConsistsOf> &items);
+
 
     static int compare(const Item **a, const Item **b);
-    static bool lowerBound(const Item *item, const std::pair<char, QByteArray> &ids);
+    static bool lessThan(const Item &item, const std::pair<char, QByteArray> &ids);
 
     friend class Core;
+    friend class ItemType;
     friend class TextImport;
 };
 
@@ -281,18 +288,21 @@ private:
 class PartColorCode
 {
 public:
+    static constexpr uint InvalidId = static_cast<uint>(-1);
+
     uint id() const             { return m_id; }
-    const Item *item() const    { return m_item; }
-    const Color *color() const  { return m_color; }
+    const Item *item() const;
+    const Color *color() const;
+
+    PartColorCode();
 
 private:
-    uint         m_id = 0;
-    const Item * m_item = nullptr;
-    const Color *m_color = nullptr;
+    uint m_id = InvalidId;
+    signed int m_itemIndex  : 20;
+    signed int m_colorIndex : 12;
 
 private:
-    PartColorCode() = default;
-    static bool lowerBound(const PartColorCode *pcc, uint id) { return pcc->m_id < id; }
+    static bool lessThan(const PartColorCode &pcc, uint id) { return pcc.m_id < id; }
 
     friend class Core;
     friend class TextImport;
@@ -325,9 +335,10 @@ private:
 
     QDateTime     m_fetched;
 
-    bool          m_valid           : 1;
-    bool          m_updateAfterLoad : 1;
-    UpdateStatus  m_update_status   : 6;
+    bool          m_valid;
+    bool          m_updateAfterLoad;
+    // 2 bytes padding here
+    UpdateStatus  m_update_status;
 
     TransferJob * m_transferJob = nullptr;
 
@@ -501,9 +512,12 @@ private:
 
     QDateTime     m_fetched;
 
-    bool          m_valid           : 1;
-    bool          m_updateAfterLoad : 1;
-    UpdateStatus  m_update_status   : 6;
+    bool          m_valid;
+    bool          m_updateAfterLoad;
+    bool          m_scrapedHtml = s_scrapeHtml;
+    static bool   s_scrapeHtml;
+    // 1 byte padding here
+    UpdateStatus  m_update_status;
 
     TransferJob * m_transferJob = nullptr;
 
@@ -512,9 +526,6 @@ private:
         int    lots       [int(Time::Count)][int(Condition::Count)] = { };
         double prices     [int(Time::Count)][int(Condition::Count)][int(Price::Count)] = { };
     } m_data;
-
-    bool          m_scrapedHtml = s_scrapeHtml;
-    static bool   s_scrapeHtml;
 
 private:
     PriceGuide(const Item *item, const Color *color);
@@ -569,38 +580,39 @@ public:
     bool import(const QString &path);
     void exportTo(Core *);
 
-    bool importInventories(std::vector<const Item *> &items);
-    void exportInventoriesTo(Core *);
+    bool importInventories(std::vector<bool> &processedInvs);
 
-    const std::vector<const Item *> &items() const { return m_items; }
+    const std::vector<Item> &items() const { return m_items; }
 
 private:
     void readColors(const QString &path);
     void readCategories(const QString &path);
     void readItemTypes(const QString &path);
-    void readItems(const QString &path, const ItemType *itt);
+    void readItems(const QString &path, ItemType *itt);
     void readPartColorCodes(const QString &path);
     bool readInventory(const Item *item);
     void readLDrawColors(const QString &path);
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);
 
-    const Item *findItem(char type, const QByteArray &id) const;
-    const Color *findColor(uint id) const;
-    const BrickLink::Category *findCategory(uint id) const;
+    int findItemIndex(char type, const QByteArray &id) const;
+    int findColorIndex(uint id) const;
+    int findCategoryIndex(uint id) const;
 
     void calculateColorPopularity();
+    void addToKnownColors(int itemIndex, int colorIndex);
 
 private:
-    std::vector<const Color *>         m_colors;
-    std::vector<const ItemType *>      m_item_types;
-    std::vector<const Category *>      m_categories;
-    std::vector<const Item *>          m_items;
-    std::vector<QByteArray>            m_changelog;
-    std::vector<const PartColorCode *> m_pccs;
-    QHash<const Item *, AppearsIn>     m_appears_in_hash;
-    QHash<const Item *, QVector<Item::ConsistsOf>>   m_consists_of_hash;
-
+    std::vector<Color>         m_colors;
+    std::vector<ItemType>      m_item_types;
+    std::vector<Category>      m_categories;
+    std::vector<Item>          m_items;
+    std::vector<QByteArray>    m_changelog;
+    std::vector<PartColorCode> m_pccs;
+    // item-idx -> { color-idx -> { vector < qty, item-idx > } }
+    QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
+    // item-idx -> { vector < consists-of > }
+    QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
 };
 
 
@@ -632,11 +644,13 @@ public:
 
     enum class DatabaseVersion {
         Invalid,
-        Version_1,
-        Version_2,
+        Version_1, // deprecated
+        Version_2, // deprecated
         Version_3,
 
-        Latest = Version_3
+        Version_4,
+
+        Latest = Version_4
     };
 
     QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
@@ -651,10 +665,10 @@ public:
 
     void setCredentials(const QPair<QString, QString> &credentials);
 
-    const std::vector<const Color *> &colors() const;
-    const std::vector<const Category *> &categories() const;
-    const std::vector<const ItemType *> &itemTypes() const;
-    const std::vector<const Item *> &items() const;
+    inline const std::vector<Color> &colors() const         { return m_colors; }
+    inline const std::vector<Category> &categories() const  { return m_categories; }
+    inline const std::vector<ItemType> &itemTypes() const   { return m_item_types; }
+    inline const std::vector<Item> &items() const           { return m_items; }
 
     const QImage noImage(const QSize &s) const;
 
@@ -731,20 +745,20 @@ private:
 
     static bool updateNeeded(bool valid, const QDateTime &last, int iv);
 
-    static Color *readColorFromDatabase(QDataStream &dataStream, DatabaseVersion v);
-    static void writeColorToDatabase(const Color *color, QDataStream &dataStream, DatabaseVersion v);
+    static void readColorFromDatabase(Color &col, QDataStream &dataStream, DatabaseVersion v);
+    static void writeColorToDatabase(const Color &color, QDataStream &dataStream, DatabaseVersion v);
 
-    static Category *readCategoryFromDatabase(QDataStream &dataStream, DatabaseVersion v);
-    static void writeCategoryToDatabase(const Category *category, QDataStream &dataStream, DatabaseVersion v);
+    static void readCategoryFromDatabase(Category &cat, QDataStream &dataStream, DatabaseVersion v);
+    static void writeCategoryToDatabase(const Category &category, QDataStream &dataStream, DatabaseVersion v);
 
-    static ItemType *readItemTypeFromDatabase(QDataStream &dataStream, DatabaseVersion v);
-    static void writeItemTypeToDatabase(const ItemType *itemType, QDataStream &dataStream, DatabaseVersion v);
+    static void readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, DatabaseVersion v);
+    static void writeItemTypeToDatabase(const ItemType &itemType, QDataStream &dataStream, DatabaseVersion v);
 
-    static Item *readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v);
-    static void writeItemToDatabase(const Item *item, QDataStream &dataStream, DatabaseVersion v);
+    static void readItemFromDatabase(Item &item, QDataStream &dataStream, DatabaseVersion v);
+    static void writeItemToDatabase(const Item &item, QDataStream &dataStream, DatabaseVersion v);
 
-    PartColorCode *readPCCFromDatabase(QDataStream &dataStream, Core::DatabaseVersion v) const;
-    static void writePCCToDatabase(const PartColorCode *pcc, QDataStream &dataStream, DatabaseVersion v);
+    void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Core::DatabaseVersion v) const;
+    static void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
     void pictureJobFinished(TransferJob *j, Picture *pic);
@@ -766,12 +780,12 @@ private:
     mutable QHash<uint, QImage>     m_noImageCache;
     mutable QHash<uint, QImage>     m_colorImageCache;
 
-    std::vector<const Color *>      m_colors;      // id ->Color *
-    std::vector<const Category *>   m_categories;  // id ->Category *
-    std::vector<const ItemType *>   m_item_types;  // id ->ItemType *
-    std::vector<const Item *>       m_items;       // sorted array of Item *
-    std::vector<QByteArray>         m_changelog;
-    std::vector<const PartColorCode *> m_pccs;
+    std::vector<Color>         m_colors;
+    std::vector<Category>      m_categories;
+    std::vector<ItemType>      m_item_types;
+    std::vector<Item>          m_items;
+    std::vector<QByteArray>    m_changelog;
+    std::vector<PartColorCode> m_pccs;
 
     QPointer<Transfer>  m_transfer = nullptr;
 
@@ -796,6 +810,17 @@ inline Core *core() { return Core::inst(); }
 
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 
+inline const ItemType *Item::itemType() const
+{ return (m_itemTypeIndex != -1) ? &core()->itemTypes()[m_itemTypeIndex] : nullptr; }
+inline const Category *Item::category() const
+{ return (m_categoryIndex != -1) ? &core()->categories()[m_categoryIndex] : nullptr; }
+inline const Color *Item::defaultColor() const
+{ return (m_defaultColorIndex != -1) ? &core()->colors()[m_defaultColorIndex] : nullptr; }
+
+inline const Item *PartColorCode::item() const
+{ return (m_itemIndex != -1) ? &core()->items()[m_itemIndex] : nullptr; }
+inline const Color *PartColorCode::color() const
+{ return (m_colorIndex != -1) ? &core()->colors()[m_colorIndex] : nullptr; }
 
 } // namespace BrickLink
 

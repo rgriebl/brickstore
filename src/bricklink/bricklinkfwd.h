@@ -45,9 +45,9 @@ class AppearsInModel;
 class InternalAppearsInModel;
 class ItemDelegate;
 
-typedef QPair<int, const Item *>              AppearsInItem;
-typedef QVector<AppearsInItem>                AppearsInColor;
-typedef QHash<const Color *, AppearsInColor>  AppearsIn;
+typedef QPair<int, const Item *>             AppearsInItem;
+typedef QVector<AppearsInItem>               AppearsInColor;
+typedef QHash<const Color *, AppearsInColor> AppearsIn;
 
 enum class Time          { PastSix, Current, Count };
 enum class Price         { Lowest, Average, WAverage, Highest, Count };

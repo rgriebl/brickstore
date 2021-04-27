@@ -319,10 +319,10 @@ private:
 
     struct Color
     {
-        int id;
         QString name;
         QColor color;
         QColor edgeColor;
+        int id;
         int luminance;
         bool chrome : 1;
         bool metal : 1;

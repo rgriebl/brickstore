@@ -50,7 +50,7 @@ public:
     
     Q_DECLARE_FLAGS(Combinations, Combination)
 
-    Filter();
+    Filter() = default;
     
     bool operator==(const Filter &other) const
     {
@@ -102,13 +102,13 @@ public:
     };
     
 private:
+    QString     m_expression;
     int         m_field = -1;
     Comparison  m_comparison = Matches;
     Combination m_combination = And;
-    QString     m_expression;
-    bool        m_isInt    : 1;
-    bool        m_isDouble : 1;
-    bool        m_isRegExp : 1;
+    bool        m_isInt = false;
+    bool        m_isDouble = false;
+    bool        m_isRegExp = false;
     int         m_asInt = 0;
     double      m_asDouble = 0;
     QRegularExpression m_asRegExp;

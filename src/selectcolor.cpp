@@ -166,7 +166,7 @@ QByteArray SelectColor::saveState() const
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray("SC") << qint32(1)
        << (col ? col->id() : uint(-1))
-       << qint8(m_item && m_item->itemType() ? m_item->itemType()->id() : char(-1))
+       << qint8(m_item && m_item->itemType() ? m_item->itemTypeId() : char(-1))
        << (m_item ? QString::fromLatin1(m_item->id()) : QString())
        << w_filter->currentIndex()
        << (w_colors->header()->sortIndicatorOrder() == Qt::AscendingOrder);

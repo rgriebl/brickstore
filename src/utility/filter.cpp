@@ -23,12 +23,6 @@
 #include "filter.h"
 
 
-Filter::Filter()
-    : m_isInt(false)
-    , m_isDouble(false)
-    , m_isRegExp(false)
-{ }
-
 void Filter::setField(int field)
 {
     m_field = field;
