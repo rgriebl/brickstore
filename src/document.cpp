@@ -1927,6 +1927,7 @@ int Document::compare(const Lot *i1, const Lot *i2, const QVector<QPair<int, Qt:
         case Document::Quantity    : r = i1->quantity() - i2->quantity(); break;
         case Document::Bulk        : r = i1->bulkQuantity() - i2->bulkQuantity(); break;
         case Document::Price       : r = doubleCompare(i1->price(), i2->price()); break;
+        case Document::Cost        : r = doubleCompare(i1->cost(), i2->cost()); break;
         case Document::Total       : r = doubleCompare(i1->total(), i2->total()); break;
         case Document::Sale        : r = i1->sale() - i2->sale(); break;
         case Document::Condition   : {
