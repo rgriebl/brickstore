@@ -64,6 +64,7 @@
 #include "settingsdialog.h"
 #include "welcomewidget.h"
 #include "aboutdialog.h"
+#include "systeminfodialog.h"
 #include "managecolumnlayoutsdialog.h"
 #include "framework.h"
 #include "stopwatch.h"
@@ -72,6 +73,7 @@
 #include "importcartdialog.h"
 #include "historylineedit.h"
 #include "checkforupdates.h"
+#include "announcements.h"
 
 #include "scriptmanager.h"
 #include "script.h"
@@ -456,8 +458,10 @@ FrameWork::FrameWork(QWidget *parent)
                                       "check_for_updates",
                                       "-",
                                       "help_reportbug",
-                                      "help_knownissues",
+                                      "help_announcements",
                                       "help_releasenotes",
+                                      "-",
+                                      "help_systeminfo",
                                       "-",
                                       "help_about"
                                   }));
@@ -575,14 +579,25 @@ FrameWork::FrameWork(QWidget *parent)
 
     Currency::inst()->updateRates();
     auto *currencyUpdateTimer = new QTimer(this);
-    currencyUpdateTimer->setInterval(4h); // 4 hours
-    currencyUpdateTimer->start();
-    connect(currencyUpdateTimer, &QTimer::timeout,
-            Currency::inst(), []() { Currency::inst()->updateRates(true /*silent*/); });
+    currencyUpdateTimer->start(4h);
+    currencyUpdateTimer->callOnTimeout(Currency::inst(),
+                                       []() { Currency::inst()->updateRates(true /*silent*/); });
+
+    m_checkForUpdates = new CheckForUpdates(Application::inst()->gitHubUrl(), this);
+    m_announcements = new Announcements(Application::inst()->gitHubUrl(), this);
+    connect(m_announcements, &Announcements::newAnnouncements,
+            m_announcements, &Announcements::showNewAnnouncements);
+
+    m_checkForUpdates->check(true /*silent*/);
+    m_announcements->check();
+    auto checkTimer = new QTimer(this);
+    checkTimer->callOnTimeout(this, [=]() {
+        m_checkForUpdates->check(true /*silent*/);
+        m_announcements->check();
+    });
+    checkTimer->start(24h);
 
     setupScripts();
-
-    checkForUpdates(true /* silent */);
 
     if (!restoreWindowsFromAutosave()) {
         if (Config::inst()->restoreLastSession()) {
@@ -778,7 +793,8 @@ void FrameWork::translateActions()
         { "menu_window",                    tr("&Windows"),                           },
         { "menu_help",                      tr("&Help"),                              },
         { "help_about",                     tr("About..."),                           },
-        { "help_knownissues",               tr("Known issues..."),                    },
+        { "help_systeminfo",                tr("System Information..."),              },
+        { "help_announcements",             tr("Important Announcements..."),         },
         { "help_releasenotes",              tr("Release notes..."),                   },
         { "help_reportbug",                 tr("Report a bug..."),                    },
         { "check_for_updates",              tr("Check for Program Updates..."),       },
@@ -1332,13 +1348,15 @@ void FrameWork::createActions()
     a = newQAction(this, "help_about", 0, false, Application::inst(), [this]() {
         AboutDialog(this).exec();
     });
+    a = newQAction(this, "help_systeminfo", 0, false, Application::inst(), [this]() {
+        SystemInfoDialog(this).exec();
+    });
     a = newQAction(this, "help_reportbug", 0, false, Application::inst(), [this]() {
         QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
         QDesktopServices::openUrl(url);
     });
-    a = newQAction(this, "help_knownissues", 0, false, Application::inst(), [this]() {
-        QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/wiki/Known-Issues"_l1;
-        QDesktopServices::openUrl(url);
+    a = newQAction(this, "help_announcements", 0, false, Application::inst(), [this]() {
+        m_announcements->showAllAnnouncements();
     });
     a = newQAction(this, "help_releasenotes", 0, false, this, []() {
         QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/releases"_l1;
@@ -1346,7 +1364,8 @@ void FrameWork::createActions()
     });
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "check_for_updates", NeedNetwork, false, this, &FrameWork::checkForUpdates);
+    a = newQAction(this, "check_for_updates", NeedNetwork, false,
+                   this, [this]() { m_checkForUpdates->check(false /*not silent*/); });
     a->setMenuRole(QAction::ApplicationSpecificRole);
 }
 
@@ -1536,13 +1555,6 @@ bool FrameWork::updateDatabase(bool forceSync)
         }
     }
     return false;
-}
-
-void FrameWork::checkForUpdates(bool silent)
-{
-    if (!m_checkForUpdates)
-        m_checkForUpdates = new CheckForUpdates(Application::inst()->gitHubUrl(), this);
-    m_checkForUpdates->check(silent);
 }
 
 void FrameWork::connectAllActions(bool do_connect, Window *window)

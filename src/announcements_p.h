@@ -14,18 +14,28 @@
 #pragma once
 
 #include <QDialog>
+#include <QPixmap>
 
-namespace Ui {
-class AboutDialog;
-}
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QTextBrowser)
 
-class AboutDialog : public QDialog
+
+class AnnouncementsDialog : public QDialog
 {
     Q_OBJECT
 public:
-    AboutDialog(QWidget *parent = nullptr);
-    ~AboutDialog() override;
+    AnnouncementsDialog(const QString &markdown, QWidget *parent);
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override;
+    void resizeEvent(QResizeEvent *) override;
+    void paintEvent(QPaintEvent *pe) override;
 
 private:
-    Ui::AboutDialog *ui;
+    void sizeChange();
+    void paletteChange();
+
+    QPixmap m_stripes;
+    QLabel *m_header;
+    QTextBrowser *m_browser;
 };

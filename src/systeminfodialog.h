@@ -16,16 +16,17 @@
 #include <QDialog>
 
 namespace Ui {
-class AboutDialog;
+class SystemInfoDialog;
 }
 
-class AboutDialog : public QDialog
+class SystemInfoDialog : public QDialog
 {
     Q_OBJECT
+
 public:
-    AboutDialog(QWidget *parent = nullptr);
-    ~AboutDialog() override;
+    explicit SystemInfoDialog(QWidget *parent = nullptr);
+    ~SystemInfoDialog() override;
 
 private:
-    Ui::AboutDialog *ui;
+    Ui::SystemInfoDialog *ui;
 };

@@ -18,7 +18,6 @@
 #include <QTranslator>
 #include <QSysInfo>
 #include <QFileOpenEvent>
-#include <QProcess>
 #include <QDesktopServices>
 #include <QLocalSocket>
 #include <QLocalServer>
@@ -62,6 +61,7 @@
 #include "stopwatch.h"
 #include "utility.h"
 #include "smartvalidator.h"
+#include "systeminfo.h"
 
 #if defined(SENTRY_ENABLED)
 #  include "sentry.h"
@@ -187,6 +187,7 @@ Application::Application(int &_argc, char **_argv)
     checkSentryConsent();
     (void) Currency::inst();
     (void) ScriptManager::inst();
+    (void) SystemInfo::inst();
 
     m_default_fontsize = QGuiApplication::font().pointSizeF();
     QCoreApplication::instance()->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
@@ -532,6 +533,15 @@ void Application::setupSentry()
         qCWarning(LogSentry) << "Could not initialize sentry.io!";
     else
         qCInfo(LogSentry) << "Successfully initialized sentry.io";
+
+    connect(SystemInfo::inst(), &SystemInfo::initialized, []() {
+        auto sysInfo = SystemInfo::inst()->asMap();
+        for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
+            if (!it.key().startsWith("os."_l1))
+                sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
+        }
+        sentry_set_tag("language", Config::inst()->language().toUtf8().constData());
+    });
 #endif
 }
 

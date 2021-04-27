@@ -17,6 +17,7 @@
 #include <QColor>
 #include <QLocale>
 #include <QPair>
+#include <QImage>
 #include <QKeySequence>
 #include <QStringBuilder>
 
@@ -45,11 +46,11 @@ QColor textColor(const QColor &backgroundColor);
 QColor contrastColor(const QColor &c, qreal f);
 QColor premultiplyAlpha(const QColor &c);
 
+QImage stripeImage(int h, const QColor &stripeColor, const QColor &baseColor = Qt::transparent);
+
 void setPopupPos(QWidget *w, const QRect &pos);
 
 QString sanitizeFileName(const QString &name);
-
-quint64 physicalMemory();
 
 QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimize = false, bool show_unit = false);
 double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);

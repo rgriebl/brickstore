@@ -21,19 +21,8 @@
 #include <QWindow>
 #include <QScreen>
 #include <QStringBuilder>
-
-#if defined(Q_OS_WINDOWS)
-#  if defined(Q_CC_MINGW)
-#    define _WIN32_WINNT 0x0500
-#  endif
-#  include <windows.h>
-#elif defined(Q_OS_BSD4)
-#  include <sys/types.h>
-#  include <sys/sysctl.h>
-#else
-#  include <QFile>
-#  include <QByteArray>
-#endif
+#include <QPainter>
+#include <QLinearGradient>
 
 #include "utility.h"
 
@@ -192,61 +181,6 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
     w->resize(sh);
 }
 
-quint64 Utility::physicalMemory()
-{
-    quint64 physmem = 0;
-
-#if defined(Q_OS_BSD4)
-#if defined( HW_MEMSIZE )      // Darwin
-    const int sctl2 = HW_MEMSIZE;
-    uint64_t ram;
-#elif defined( HW_PHYSMEM64 )  // NetBSD, OpenBSD
-    const int sctl2 = HW_PHYSMEM64;
-    uint64_t ram;
-#else                          // legacy, 32bit only
-    const int sctl2 = HW_PHYSMEM;
-    unsigned int ram;
-#endif
-     int sctl[] = { CTL_HW, sctl2 };
-     size_t ramsize = sizeof(ram);
-
-    if (sysctl(sctl, 2, &ram, &ramsize, nullptr, 0) == 0)
-        physmem = quint64(ram);
-
-#elif defined(Q_OS_WINDOWS)
-    if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) >= QSysInfo::WV_2000) {
-        MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
-        GlobalMemoryStatusEx(&memstatex);
-        physmem = memstatex.ullTotalPhys;
-    }
-    else {
-        MEMORYSTATUS memstat = { sizeof(memstat) };
-        GlobalMemoryStatus(&memstat);
-        physmem = memstat.dwTotalPhys;
-    }
-
-#elif defined(Q_OS_LINUX)
-    QFile f("/proc/meminfo"_l1);
-    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QByteArray line;
-        while (!(line = f.readLine()).isNull()) {
-            if (line.startsWith("MemTotal:")) {
-                line.chop(3); // strip "kB\n" at the end
-                physmem = line.mid(9).trimmed().toULongLong() * 1024LL;
-                break;
-            }
-        }
-        f.close();
-    }
-
-#else
-#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
-#endif
-
-    return physmem;
-}
-
-
 QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
 {
     QLocale loc;
@@ -365,4 +299,30 @@ QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const
     if (!extended.isEmpty())
         extendedTable = fmtExt.arg(extended);
     return fmt.arg(label, color.name(), shortcut.toString(QKeySequence::NativeText), extendedTable);
+}
+
+QImage Utility::stripeImage(int h, const QColor &stripeColor, const QColor &baseColor)
+{
+    QImage img(2 * h, 2 * h, QImage::Format_ARGB32);
+    img.fill(baseColor);
+    QPainter imgp(&img);
+    imgp.setPen(Qt::transparent);
+    QLinearGradient grad(0, h, h, 0);
+    QColor c = stripeColor;
+    c.setAlpha(16);
+    grad.setColorAt(0, c);
+    c.setAlpha(64);
+    grad.setColorAt(0.2, c);
+    c.setAlpha(32);
+    grad.setColorAt(0.5, c);
+    c.setAlpha(64);
+    grad.setColorAt(0.8, c);
+    c.setAlpha(16);
+    grad.setColorAt(1, c);
+    imgp.setBrush(grad);
+    imgp.drawPolygon(QPolygon() << QPoint(h, 0) << QPoint(2 * h, 0) << QPoint(0, 2 * h) << QPoint(0, h));
+    imgp.setBrush(c);
+    imgp.drawPolygon(QPolygon() << QPoint(2 * h, h) << QPoint(2 * h, 2 * h) << QPoint(h, 2 * h));
+    imgp.end();
+    return img;
 }

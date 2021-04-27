@@ -446,19 +446,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int d = option.rect.height();
         QPixmap *pix = s_stripe_cache[d];
         if (!pix) {
-            pix = new QPixmap(2 * d, d);
-            pix->fill(Qt::transparent);
-            QPainter pixp(pix);
-            pixp.setPen(Qt::transparent);
-            QLinearGradient grad(pix->rect().bottomLeft(), pix->rect().topRight());
-            grad.setColorAt(0, QColor(255, 0, 0, 16));
-            grad.setColorAt(0.2, QColor(255, 0, 0, 64));
-            grad.setColorAt(0.6, QColor(255, 0, 0, 32));
-            grad.setColorAt(0.8, QColor(255, 0, 0, 64));
-            grad.setColorAt(1, QColor(255, 0, 0, 16));
-            pixp.setBrush(grad);
-            pixp.drawPolygon(QPolygon() << QPoint(d, 0) << QPoint(2 * d, 0) << QPoint(d, d) << QPoint(0, d));
-            pixp.end();
+            pix = new QPixmap(QPixmap::fromImage(Utility::stripeImage(d, Qt::red)));
             s_stripe_cache.insert(d, pix);
         }
         int offset = (option.features & QStyleOptionViewItem::Alternate) ? d : 0;

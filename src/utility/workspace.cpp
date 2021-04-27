@@ -24,16 +24,12 @@
 #include <QApplication>
 #include <QScreen>
 #include <QToolButton>
-#include <QPixmap>
-#include <QPainter>
-#include <QStyle>
-#include <QStyleOption>
-#include <QPaintEvent>
-#include <QTextDocument>
 #include <QShortcut>
 #include <QSizeGrip>
 #include <QDebug>
 #include <QStringBuilder>
+#include <QKeyEvent>
+#include <QMouseEvent>
 
 #include "utility.h"
 #include "workspace.h"

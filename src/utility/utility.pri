@@ -1,7 +1,6 @@
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
-QT *= core_private concurrent
-macos:!backend-only:QT *= gui_private
+QT *= core-private gui-private concurrent
 
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
@@ -13,6 +12,7 @@ HEADERS += \
     $$PWD/q3cache.h \
     $$PWD/q5hashfunctions.h \
     $$PWD/stopwatch.h \
+    $$PWD/systeminfo.h \
     $$PWD/transfer.h \
     $$PWD/utility.h \
     $$PWD/xmlhelpers.h
@@ -21,6 +21,7 @@ SOURCES += \
     $$PWD/chunkreader.cpp \
     $$PWD/exception.cpp \
     $$PWD/q5hashfunctions.cpp \
+    $$PWD/systeminfo.cpp \
     $$PWD/transfer.cpp \
     $$PWD/utility.cpp \
     $$PWD/xmlhelpers.cpp

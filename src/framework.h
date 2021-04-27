@@ -41,6 +41,7 @@ class ImportInventoryDialog;
 class ImportOrderDialog;
 class ImportCartDialog;
 class CheckForUpdates;
+class Announcements;
 
 
 class FrameWork : public QMainWindow
@@ -66,6 +67,8 @@ public:
     static constexpr double maxPrice = 99999;
 
 public slots:
+    void openDocument(const QString &file);
+
     void selectionUpdate(const LotList &selection);
     void blockUpdate(bool blocked);
     void modificationUpdate();
@@ -86,10 +89,7 @@ protected slots:
     void languageChange();
 
 private slots:
-    void openDocument(const QString &);
-
     bool updateDatabase(bool forceSync = false);
-    void checkForUpdates(bool silent = false);
 
     void connectWindow(QWidget *w);
     void transferProgressUpdate(int p, int t);
@@ -144,10 +144,10 @@ private:
     QPointer<ImportOrderDialog> m_importorder_dialog;
     QPointer<ImportCartDialog> m_importcart_dialog;
     QPointer<CheckForUpdates> m_checkForUpdates;
+    QPointer<Announcements> m_announcements;
     QTimer *m_filter_delay = nullptr;
     bool m_running;
     UndoGroup *m_undogroup;
 
-    friend class WelcomeWidget;
     friend class DocumentDelegate;
 };

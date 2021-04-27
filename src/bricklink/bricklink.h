@@ -703,9 +703,8 @@ public:
 
     QString countryIdFromName(const QString &name) const;
 
-    bool readDatabase(QString *infoText = nullptr, const QString &filename = QString());
-    bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version,
-                       const QString &infoText = QString()) const;
+    bool readDatabase(const QString &filename = QString());
+    bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version) const;
 
 public slots:
     void setOnlineStatus(bool on);

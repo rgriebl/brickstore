@@ -132,9 +132,13 @@
     </message>
 </context>
 <context>
-    <name>Announcement</name>
+    <name>AnnouncementsDialog</name>
     <message>
-        <source>Don&apos;t show this message again.</source>
+        <source>Important Announcements</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mark read</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1664,10 +1668,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Known issues...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Release notes...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1677,6 +1677,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>System Information...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Important Announcements...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

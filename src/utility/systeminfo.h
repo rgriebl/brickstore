@@ -13,19 +13,29 @@
 */
 #pragma once
 
-#include <QDialog>
+#include <QObject>
+#include <QVariantMap>
 
-namespace Ui {
-class AboutDialog;
-}
 
-class AboutDialog : public QDialog
+class SystemInfo : public QObject
 {
     Q_OBJECT
+
 public:
-    AboutDialog(QWidget *parent = nullptr);
-    ~AboutDialog() override;
+    static SystemInfo *inst();
+    ~SystemInfo();
+    QVariantMap asMap() const;
+    quint64 physicalMemory() const;
+
+signals:
+    void initialized();
 
 private:
-    Ui::AboutDialog *ui;
+    SystemInfo();
+    Q_DISABLE_COPY(SystemInfo)
+
+    static SystemInfo *s_inst;
+
+    QVariantMap m_map;
+    int m_futuresRunning;
 };

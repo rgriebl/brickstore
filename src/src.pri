@@ -41,6 +41,7 @@ HEADERS += \
 !backend-only {
 
 SOURCES += \
+  $$PWD/announcements.cpp \
   $$PWD/appearsinwidget.cpp \
   $$PWD/application.cpp \
   $$PWD/checkforupdates.cpp \
@@ -63,6 +64,8 @@ SOURCES += \
   $$PWD/window.cpp
 
 HEADERS += \
+  $$PWD/announcements.h \
+  $$PWD/announcements_p.h \
   $$PWD/appearsinwidget.h \
   $$PWD/application.h \
   $$PWD/checkforupdates.h \
@@ -98,7 +101,8 @@ FORMS = \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectitemdialog.ui \
   $$PWD/settingsdialog.ui \
-  $$PWD/settopriceguidedialog.ui
+  $$PWD/settopriceguidedialog.ui \
+  $$PWD/systeminfodialog.ui
 
 HEADERS += $$replace(FORMS, '\\.ui', '.h')
 SOURCES += $$replace(FORMS, '\\.ui', '.cpp')

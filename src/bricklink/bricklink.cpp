@@ -31,6 +31,7 @@
 
 #include "config.h"
 #include "utility.h"
+#include "systeminfo.h"
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #  include <qhashfunctions.h>
 #  define q5Hash qHash
@@ -412,7 +413,7 @@ Core::Core(const QString &datadir)
     m_online = true;
 
     // cache size is physical memory * 0.25, at least 128MB, at most 1GB
-    quint64 cachemem = qBound(128ULL *1024*1024, Utility::physicalMemory() / 4, 1024ULL *1024*1024);
+    quint64 cachemem = qBound(128ULL *1024*1024, SystemInfo::inst()->physicalMemory() / 4, 1024ULL *1024*1024);
     //quint64 cachemem = 1024*1024; // DEBUG
 
     m_pg_cache.setMaxCost(10000);            // each priceguide has a cost of 1
@@ -790,7 +791,7 @@ void Core::clear()
 // Database (de)serialization
 //
 
-bool Core::readDatabase(QString *infoText, const QString &filename)
+bool Core::readDatabase(const QString &filename)
 {
     try {
         clear();
@@ -798,9 +799,6 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
         stopwatch *sw = nullptr; //new stopwatch("Core::readDatabase()");
 
         QDateTime generationDate;
-        QString info;
-        if (infoText)
-            infoText->clear();
 
         QFile f(!filename.isEmpty() ? filename : dataPath() + defaultDatabaseName());
 
@@ -843,10 +841,6 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
 
         while (cr.startChunk()) {
             switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
-            case ChunkId('I','N','F','O') | 1ULL << 32: {
-                ds >> info;
-                break;
-            }
             case ChunkId('D','A','T','E') | 1ULL << 32: {
                 ds >> generationDate;
                 break;
@@ -976,10 +970,6 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
 
-        if (!info.isEmpty())
-            qDebug() << "Info :" << info;
-        if (infoText)
-            *infoText = info;
         return true;
 
     } catch (const Exception &e) {
@@ -990,8 +980,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
 }
 
 
-bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
-                         const QString &infoText) const
+bool Core::writeDatabase(const QString &filename, DatabaseVersion version) const
 {
     if (version <= DatabaseVersion::Invalid)
         return false; // too old
@@ -1013,12 +1002,6 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
         };
 
         check(cw.startChunk(ChunkId('B','S','D','B'), uint(version)));
-
-        if (!infoText.isEmpty()) {
-            check(cw.startChunk(ChunkId('I','N','F','O'), 1));
-            ds << infoText;
-            check(cw.endChunk());
-        }
 
         check(cw.startChunk(ChunkId('D','A','T','E'), 1));
         ds << QDateTime::currentDateTimeUtc();
