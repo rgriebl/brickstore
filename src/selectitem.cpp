@@ -929,7 +929,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
 
 
-                QString filter = u"consists-of:" % QLatin1String(partItem->id());
+                QString filter = BrickLink::ItemModel::tr("consists-of:") % QLatin1String(partItem->id());
                 if (partItem->itemType()->hasColors() && partColor)
                     filter = filter % u'@' % QString::number(partColor->id());
                 QIcon icon;

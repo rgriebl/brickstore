@@ -96,7 +96,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         QFontMetrics fm = QApplication::fontMetrics();
-        QImage img = core()->colorImage(c, fm.height(), fm.height());
+        QImage img = core()->colorImage(c, fm.height() + 4, fm.height() + 4);
         if (!img.isNull()) {
             QPixmap pix = QPixmap::fromImage(img);
             QIcon ico;
