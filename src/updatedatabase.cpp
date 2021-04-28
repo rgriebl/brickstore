@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QDateTime>
 #include <QStringBuilder>
+#include <QCryptographicHash>
 
 #include "updatedatabase.h"
 #include "lzmadec.h"
@@ -25,7 +26,7 @@
 
 
 #define DATABASE_URL   "https://brickforge.de/brickstore-data/"
-
+#define DATABASE_SHA   QCryptographicHash::Sha512
 
 UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
     : m_progress(pd)
@@ -117,6 +118,9 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
 
     QString loop_error;
 
+    QCryptographicHash sha(DATABASE_SHA);
+    QByteArray shaRead = sf.read(QCryptographicHash::hashLength(DATABASE_SHA));
+
     m_progress->setMessageText(tr("Decompressing database"));
     m_progress->setProgress(0, 0);
 
@@ -135,12 +139,18 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
         }
 
         qint64 write_size = qint64(CHUNKSIZE_OUT - strm.avail_out);
+        sha.addData(buffer_out, write_size);
         if (write_size != df.write(buffer_out, write_size)) {
             loop_error = tr("Error writing to file %1: %2").arg(dst, df.errorString());
             break;
         }
         if (ret == LZMADEC_STREAM_END) {
             lzmadec_end(&strm);
+
+            QByteArray shaCalculated = sha.result();
+            if (shaCalculated != shaRead)
+                loop_error = tr("Checksum mismatch after decompression");
+
             break;
         }
         m_progress->setProgress(int(sf.pos()), int(sf.size()));
@@ -148,6 +158,11 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
 
     delete [] buffer_in;
     delete [] buffer_out;
+
+    if (!loop_error.isEmpty()) {
+        df.close();
+        df.remove();
+    }
 
     return loop_error;
 }
