@@ -138,8 +138,8 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.exe"
 
-    - name: Build on Linux (native)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
+    - name: Build on Linux (native/appimage)
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
