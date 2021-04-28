@@ -178,7 +178,7 @@ QString Transfer::defaultUserAgent()
 TransferRetriever::TransferRetriever(Transfer *transfer)
     : QObject()
     , m_transfer(transfer)
-    , m_maxConnections(6) // mirror the internal QNAM setting
+    , m_maxConnections(4) // mirror the internal QNAM setting
 { }
 
 TransferRetriever::~TransferRetriever()
@@ -310,6 +310,18 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
             qWarning() << "Got a 404 on" << j->m_url << " ... retrying (still" << j->m_retries_left << "retries left)";
             return;
+        } else if ((j->m_respcode == 302) && (error == QNetworkReply::HostNotFoundError)) {
+            // this only happens on Windows, starting in April 2021: BL sends a relative redirect,
+            // but QNAM thinks it's absolute, leading to a host-not-found error.
+            if ((j->m_http_method == TransferJob::HttpGet) && j->m_reply->url().isRelative()) {
+                j->m_reply->deleteLater();
+                QUrl url = j->m_reply->url();
+                url.setHost(j->m_url.host());
+                url.setScheme(j->m_url.scheme());
+                j->m_reply = m_nam->get(QNetworkRequest(url));
+                j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
+                return;
+            }
         }
         j->m_error_string = j->m_reply->errorString();
         j->setStatus(TransferJob::Failed);
