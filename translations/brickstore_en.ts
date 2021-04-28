@@ -244,6 +244,10 @@
         <comment>Filter prefix</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>consists-of:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BrickLink::ItemTypeModel</name>
@@ -3253,6 +3257,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Error writing to file %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checksum mismatch after decompression</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

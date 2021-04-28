@@ -208,12 +208,12 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="292"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="288"/>
         <source>All Items</source>
         <translation>Alle Teile</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="301"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="297"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
@@ -221,22 +221,22 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="113"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="111"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="127"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="125"/>
         <source>Color by %1</source>
         <translation>Farbe nach: %1</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="127"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="125"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="127"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="125"/>
         <source>Hue</source>
         <translation>Farbton</translation>
     </message>
@@ -252,17 +252,17 @@
 <context>
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="847"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="841"/>
         <source>Qty.</source>
         <translation>Anz.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="848"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="842"/>
         <source>Set</source>
         <translation>Set</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="849"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="843"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -270,7 +270,7 @@
 <context>
     <name>BrickLink::ItemDelegate</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="1000"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="994"/>
         <source>[Image is loading]</source>
         <translation>[Bild wird geladen]</translation>
     </message>
@@ -278,32 +278,37 @@
 <context>
     <name>BrickLink::ItemModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="538"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="532"/>
         <source>Part #</source>
         <translation>Teile #</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="539"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="533"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="589"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="583"/>
         <source>consists-of:</source>
         <comment>Filter prefix</comment>
         <translation>besteht-aus:</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="590"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="584"/>
         <source>appears-in:</source>
         <comment>Filter prefix</comment>
         <translation>enthalten-in:</translation>
+    </message>
+    <message>
+        <location filename="../src/selectitem.cpp" line="932"/>
+        <source>consists-of:</source>
+        <translation>besteht-aus:</translation>
     </message>
 </context>
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="421"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="415"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -1139,92 +1144,92 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/utility/filter.cpp" line="334"/>
+        <location filename="../src/utility/filter.cpp" line="328"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Der Filterausdruck kann entweder in (fast) natürlicher Sprache oder mit logischen Operatoren eingegeben werden.&lt;br /&gt;Ein einzelner Ausdruck entspricht dabei folgendem Muster: &lt;b&gt;&lt;i&gt;FELDNAME VERGLEICH&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FELDNAME&lt;/i&gt;&lt;/b&gt; und &lt;b&gt;&lt;i&gt;VERGLEICH&lt;/i&gt;&lt;/b&gt; sind dabei optional und sind standardmässig  &lt;b&gt;in irgendeinem Feld&lt;/b&gt;, bzw. &lt;b&gt;beinhaltet&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Mehrere Ausdrücke können mit &lt;b&gt;KOMBINATIONs&lt;/b&gt; Symbolen verbunden werden.&lt;/p&gt;&lt;p&gt;Um z.B. nach irgendeinem Stein in  blau  zu suchen, könnte man schreiben: &lt;b&gt;brick und Farbe ist blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="341"/>
+        <location filename="../src/utility/filter.cpp" line="335"/>
         <source>Field names:</source>
         <translation>Feldnamen:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="346"/>
+        <location filename="../src/utility/filter.cpp" line="340"/>
         <source>Comparisons:</source>
         <translation>Vergleiche:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="351"/>
+        <location filename="../src/utility/filter.cpp" line="345"/>
         <source>Combinations:</source>
         <translation>Kombinationen:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="391"/>
+        <location filename="../src/utility/filter.cpp" line="385"/>
         <source>and</source>
         <translation>und</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="392"/>
+        <location filename="../src/utility/filter.cpp" line="386"/>
         <source>or</source>
         <translation>oder</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="419"/>
+        <location filename="../src/utility/filter.cpp" line="413"/>
         <source>is,equals</source>
         <translation>ist,ist gleich</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="420"/>
+        <location filename="../src/utility/filter.cpp" line="414"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation>ist nicht, ist nicht gleich,ist ungleich</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="421"/>
+        <location filename="../src/utility/filter.cpp" line="415"/>
         <source>less than</source>
         <translation>kleiner</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="422"/>
+        <location filename="../src/utility/filter.cpp" line="416"/>
         <source>less equal than</source>
         <translation>kleiner gleich</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="423"/>
+        <location filename="../src/utility/filter.cpp" line="417"/>
         <source>greater than</source>
         <translation>größer,grösser</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="424"/>
+        <location filename="../src/utility/filter.cpp" line="418"/>
         <source>greater equal than</source>
         <translation>größer gleich,grösser gleich</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="425"/>
+        <location filename="../src/utility/filter.cpp" line="419"/>
         <source>contains,matches</source>
         <translation>beinhaltet,entspricht</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="426"/>
+        <location filename="../src/utility/filter.cpp" line="420"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation>beinhaltet nicht,entspricht nicht</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="427"/>
+        <location filename="../src/utility/filter.cpp" line="421"/>
         <source>starts with,begins with</source>
         <translation>beginnt mit</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="428"/>
+        <location filename="../src/utility/filter.cpp" line="422"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation>beginnt nicht mit</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="429"/>
+        <location filename="../src/utility/filter.cpp" line="423"/>
         <source>ends with</source>
         <translation>endet auf</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="430"/>
+        <location filename="../src/utility/filter.cpp" line="424"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation>endet nicht auf</translation>
     </message>
@@ -3962,69 +3967,74 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>UpdateDatabase</name>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="39"/>
+        <location filename="../src/updatedatabase.cpp" line="40"/>
         <source>Updating BrickLink Database</source>
         <translation>BrickLink Datenbank wird aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="40"/>
+        <location filename="../src/updatedatabase.cpp" line="41"/>
         <source>Download: %p</source>
         <translation>Download: %p</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="55"/>
+        <location filename="../src/updatedatabase.cpp" line="56"/>
         <source>Could not write to file: %1</source>
         <translation>Konnte nicht in Datei schreiben: %1</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="67"/>
+        <location filename="../src/updatedatabase.cpp" line="68"/>
         <source>Already up-to-date.</source>
         <translation>Bereits auf dem aktuellen Stand.</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="78"/>
+        <location filename="../src/updatedatabase.cpp" line="79"/>
         <source>Finished.</source>
         <translation>Beendet.</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="82"/>
+        <location filename="../src/updatedatabase.cpp" line="83"/>
         <source>Could not load the new database.</source>
         <translation>Konnte die neue Datenbank nicht laden.</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="88"/>
+        <location filename="../src/updatedatabase.cpp" line="89"/>
         <source>Downloaded file is empty.</source>
         <translation>Gedownloadete Datei ist leer.</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="97"/>
+        <location filename="../src/updatedatabase.cpp" line="98"/>
         <source>Could not read downloaded file: %1</source>
         <translation>Konnte gedownloadete Datei nicht lesen: %1</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="99"/>
+        <location filename="../src/updatedatabase.cpp" line="100"/>
         <source>Could not write to database file: %1</source>
         <translation>Konnte nicht in Datenbankdatei schreiben: %1</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="113"/>
+        <location filename="../src/updatedatabase.cpp" line="114"/>
         <source>Could not initialize the LZMA decompressor</source>
         <translation>Konnte den LZMA Entpacker nicht initialisieren</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="120"/>
+        <location filename="../src/updatedatabase.cpp" line="124"/>
         <source>Decompressing database</source>
         <translation>Entpacke Datenbank</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="133"/>
+        <location filename="../src/updatedatabase.cpp" line="137"/>
         <source>Error while decompressing %1</source>
         <translation>Fehler beim Entpacken: %1</translation>
     </message>
     <message>
-        <location filename="../src/updatedatabase.cpp" line="139"/>
+        <location filename="../src/updatedatabase.cpp" line="144"/>
         <source>Error writing to file %1: %2</source>
         <translation>Fehler beim Schreiben in Datei %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/updatedatabase.cpp" line="152"/>
+        <source>Checksum mismatch after decompression</source>
+        <translation>Prüfsummenfehler nach Dekomprimierung</translation>
     </message>
 </context>
 <context>
