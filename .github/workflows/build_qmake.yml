@@ -73,8 +73,8 @@ jobs:
         arch: ${{ matrix.config.qt_arch }}
         tools: ${{ matrix.config.qt_tools }}
 
-    - name: Install Qt on Linux (native)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
+    - name: Install Qt on Linux (native/appimage)
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
         sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
@@ -138,8 +138,8 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.exe"
 
-    - name: Build on Linux (native/appimage)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
+    - name: Build on Linux (native)
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
