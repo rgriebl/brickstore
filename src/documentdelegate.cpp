@@ -270,12 +270,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         switch (idx.column()) {
         case Document::ItemType:
             if (lot->itemType())
-                bg = shadeColor(lot->itemType()->id(), 0.1);
+                bg = shadeColor(lot->itemTypeId(), 0.1);
             break;
 
         case Document::Category:
             if (lot->category())
-                bg = shadeColor(int(lot->category()->id()), 0.2);
+                bg = shadeColor(int(lot->categoryId()), 0.2);
             break;
 
         case Document::Quantity:

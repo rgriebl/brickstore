@@ -664,9 +664,9 @@ void DocumentIO::exportBrickLinkInvReqClipboard(const LotList &lots)
             continue;
 
         xml.createElement();
-        xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
-        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
-        xml.createText("COLOR", QString::number(lot->color()->id()));
+        xml.createText("ITEMID", QString::fromLatin1(lot->itemId()));
+        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
+        xml.createText("COLOR", QString::number(lot->colorId()));
         xml.createText("QTY", QString::number(lot->quantity()));
         if (lot->status() == BrickLink::Status::Extra)
             xml.createText("EXTRA", u"Y");
@@ -690,9 +690,9 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
                 continue;
 
             xml.createElement();
-            xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
-            xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
-            xml.createText("COLOR", QString::number(lot->color()->id()));
+            xml.createText("ITEMID", QString::fromLatin1(lot->itemId()));
+            xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
+            xml.createText("COLOR", QString::number(lot->colorId()));
 
             if (lot->quantity())
                 xml.createText("MINQTY", QString::number(lot->quantity()));
@@ -852,10 +852,10 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
             continue;
 
         xml.createElement();
-        xml.createText("ITEMID", QString::fromLatin1(lot->item()->id()));
-        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemType()->id())));
-        xml.createText("COLOR", QString::number(lot->color()->id()));
-        xml.createText("CATEGORY", QString::number(lot->category()->id()));
+        xml.createText("ITEMID", QString::fromLatin1(lot->itemId()));
+        xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
+        xml.createText("COLOR", QString::number(lot->colorId()));
+        xml.createText("CATEGORY", QString::number(lot->categoryId()));
         xml.createText("QTY", QString::number(lot->quantity()));
         xml.createText("PRICE", QString::number(lot->price(), 'f', 3));
         xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
