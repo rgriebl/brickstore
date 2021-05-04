@@ -8,7 +8,7 @@ Script {
     type: Script.ExtensionScript
 
     PrintingScriptAction {
-        text: "Print: classic layout"
+        text: "Print: Classic layout"
         printFunction: printJob
     }
 

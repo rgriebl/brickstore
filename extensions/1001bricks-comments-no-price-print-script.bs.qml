@@ -2,13 +2,13 @@ import BrickStore 1.0
 import QtQuick 2.12
 
 Script {
-    name: "Print script (Comments, no price)"
-    author: "GreatBrickLab"
+    name: "Classic print script (comments, no price)"
+    author: "1001bricks"
     version: "0.2"
     type: Script.ExtensionScript
 
     PrintingScriptAction {
-        text: "Print: Comments, no price"
+        text: "Print: Classic layout (comments, no price)"
         printFunction: printJob
     }
 
