@@ -1227,6 +1227,10 @@ void Core::writeItemToDatabase(const Item &item, QDataStream &dataStream, Databa
                    << item.m_weight;
     }
 
+    union {
+        quint32 ui32;
+        Item::AppearsInRecord ai;
+    } appearsInUnion;
     if (v <= DatabaseVersion::Version_3) {
         quint32 colorCount = 0;
         for (auto it = item.m_appears_in.cbegin(); it != item.m_appears_in.cend(); ) {
@@ -1236,16 +1240,24 @@ void Core::writeItemToDatabase(const Item &item, QDataStream &dataStream, Databa
         dataStream << colorCount; // color count
         if (colorCount)
             dataStream << quint32(2 + item.m_appears_in.size()); // dword count
+        for (auto it = item.m_appears_in.cbegin(); it != item.m_appears_in.cend(); ) {
+            appearsInUnion.ai = *it;
+            // fix color header (index -> id)
+            appearsInUnion.ai.m12 = quint32(core()->colors()[it->m12].id());
+            dataStream << appearsInUnion.ui32;
+            ++it;
+
+            for (uint i = 0; i < it->m20; ++i, ++it) {
+                appearsInUnion.ai = *it;
+                dataStream << appearsInUnion.ui32;
+            }
+        }
     } else {
         dataStream << quint32(item.m_appears_in.size());
-    }
-    union {
-        quint32 ui32;
-        Item::AppearsInRecord ai;
-    } appearsInUnion;
-    for (const auto &ai : item.m_appears_in) {
-        appearsInUnion.ai = ai;
-        dataStream << appearsInUnion.ui32;
+        for (const auto &ai : item.m_appears_in) {
+            appearsInUnion.ai = ai;
+            dataStream << appearsInUnion.ui32;
+        }
     }
 
     dataStream << quint32(item.m_consists_of.size());
