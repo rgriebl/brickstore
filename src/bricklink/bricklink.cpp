@@ -1241,13 +1241,15 @@ void Core::writeItemToDatabase(const Item &item, QDataStream &dataStream, Databa
         if (colorCount)
             dataStream << quint32(2 + item.m_appears_in.size()); // dword count
         for (auto it = item.m_appears_in.cbegin(); it != item.m_appears_in.cend(); ) {
-            appearsInUnion.ai = *it;
             // fix color header (index -> id)
-            appearsInUnion.ai.m12 = quint32(core()->colors()[it->m12].id());
+            uint colorCount = it->m20;
+            uint colorId = quint32(core()->colors()[it->m12].id());
+            appearsInUnion.ai.m12 = colorId;
+            appearsInUnion.ai.m20 = colorCount;
             dataStream << appearsInUnion.ui32;
             ++it;
 
-            for (uint i = 0; i < appearsInUnion.ai.m20; ++i, ++it) {
+            for (uint i = 0; i < colorCount; ++i, ++it) {
                 appearsInUnion.ai = *it;
                 dataStream << appearsInUnion.ui32;
             }
