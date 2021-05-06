@@ -1660,6 +1660,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <comment>Edit|Select None</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Known issues...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Release notes...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Report a bug...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>

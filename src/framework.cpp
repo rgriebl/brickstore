@@ -39,6 +39,7 @@
 #include <QStyle>
 #include <QLinearGradient>
 #include <QStringBuilder>
+#include <QDesktopServices>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -454,6 +455,10 @@ FrameWork::FrameWork(QWidget *parent)
     menuBar()->addMenu(createMenu("menu_help", {
                                       "check_for_updates",
                                       "-",
+                                      "help_reportbug",
+                                      "help_knownissues",
+                                      "help_releasenotes",
+                                      "-",
                                       "help_about"
                                   }));
 
@@ -773,6 +778,9 @@ void FrameWork::translateActions()
         { "menu_window",                    tr("&Windows"),                           },
         { "menu_help",                      tr("&Help"),                              },
         { "help_about",                     tr("About..."),                           },
+        { "help_knownissues",               tr("Known issues..."),                    },
+        { "help_releasenotes",              tr("Release notes..."),                   },
+        { "help_reportbug",                 tr("Report a bug..."),                    },
         { "check_for_updates",              tr("Check for Program Updates..."),       },
         { "edit_status",                    tr("Status"),                             },
         { "edit_status_include",            tr("Set status to Include"),              },
@@ -1323,6 +1331,18 @@ void FrameWork::createActions()
 
     a = newQAction(this, "help_about", 0, false, Application::inst(), [this]() {
         AboutDialog(this).exec();
+    });
+    a = newQAction(this, "help_reportbug", 0, false, Application::inst(), [this]() {
+        QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
+        QDesktopServices::openUrl(url);
+    });
+    a = newQAction(this, "help_knownissues", 0, false, Application::inst(), [this]() {
+        QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/wiki/Known-Issues"_l1;
+        QDesktopServices::openUrl(url);
+    });
+    a = newQAction(this, "help_releasenotes", 0, false, this, []() {
+        QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/releases"_l1;
+        QDesktopServices::openUrl(url);
     });
     a->setMenuRole(QAction::AboutRole);
 
