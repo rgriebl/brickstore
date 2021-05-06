@@ -1269,6 +1269,8 @@ void Core::writeItemToDatabase(const Item &item, QDataStream &dataStream, Databa
     } consistsOfUnion;
     for (const auto &co : item.m_consists_of) {
         consistsOfUnion.co = co;
+        if (v <= DatabaseVersion::Version_3) // fix color index -> id
+            consistsOfUnion.co.m_colorIndex = core()->colors()[consistsOfUnion.co.m_colorIndex].id();
         dataStream << consistsOfUnion.ui64;
     }
 

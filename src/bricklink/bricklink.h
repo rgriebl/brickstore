@@ -234,6 +234,7 @@ public:
 #endif
 
         friend class TextImport;
+        friend class Core;
     };
     Q_STATIC_ASSERT(sizeof(ConsistsOf) == 8);
 
