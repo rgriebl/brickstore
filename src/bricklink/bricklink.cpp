@@ -1247,7 +1247,7 @@ void Core::writeItemToDatabase(const Item &item, QDataStream &dataStream, Databa
             dataStream << appearsInUnion.ui32;
             ++it;
 
-            for (uint i = 0; i < it->m20; ++i, ++it) {
+            for (uint i = 0; i < appearsInUnion.ai.m20; ++i, ++it) {
                 appearsInUnion.ai = *it;
                 dataStream << appearsInUnion.ui32;
             }
