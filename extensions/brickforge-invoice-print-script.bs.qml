@@ -35,73 +35,67 @@ Script {
         ps.y = 10.0
         ps.w = job.paperSize.width - (2 * ps.x)
         ps.h = job.paperSize.height - (2 * ps.y)
-        ps.pos = 0
 
-        let pagecount = 0
-        let itemh = 15
-        let pageh = 10
-        let reporth = 7.5
-        let listh = 7.5
-        let items_left = items.length
-        let itemflip = false
-        let rfooter = false
-        let page
-
-        let pagestat = { }
-        let jobstat = { }
-
-        jobstat.lots = 0
-        jobstat.items = 0
-        jobstat.total = 0
-
-
-        while (items_left || !rfooter) {
-            page = job.addPage()
-
+        for (let duplicate = 0; duplicate <= 1; ++duplicate) {
             ps.pos = 0
-            pageHeader(page, ps)
 
-            pagestat.lots = 0
-            pagestat.items = 0
-            pagestat.total = 0
+            let pagecount = 0
+            let lineHeight = 6
+            let reportFooterHeight = 4 * lineHeight
+            let pageFooterHeight = 12
+            let itemsLeft = items.length
+            let itemEvenOdd = false
+            let reportFooterDone = false
+            let pageNumber = 0
+            let page
 
-            if (job.pageCount == 1)
-                reportHeader(page, ps)
+            let pagestat = { }
+            let jobstat = { }
 
-            if (items_left)
-                listHeader(page, ps)
+            jobstat.lots = 0
+            jobstat.items = 0
+            jobstat.total = 0
 
-            let items_on_page = false
 
-            while (items_left) {
-                if (ps.pos >(ps.h - itemh - listh - pageh))
-                    break
+            while (itemsLeft || !reportFooterDone) {
+                page = job.addPage()
+                pageNumber++
 
-                let item = items [items.length - items_left]
-                listItem(page, ps, item, itemflip)
+                ps.pos = 0
+                pageHeader(page, ps, pageNumber, duplicate)
 
-                pagestat.lots++
-                pagestat.items += item.quantity
-                pagestat.total += item.total
+                pagestat.lots = 0
+                pagestat.items = 0
+                pagestat.total = 0
 
-                jobstat.lots++
-                jobstat.items += item.quantity
-                jobstat.total += item.total
+                if (itemsLeft)
+                    listHeader(page, ps)
 
-                itemflip = itemflip ? false : true
-                items_left--
-                items_on_page = true
+                while (itemsLeft) {
+                    if (ps.pos > (ps.h - pageFooterHeight - lineHeight))
+                        break
+
+                    let item = items [items.length - itemsLeft]
+                    listItem(page, ps, item, itemEvenOdd)
+
+                    pagestat.lots++
+                    pagestat.items += item.quantity
+                    pagestat.total += item.total
+
+                    jobstat.lots++
+                    jobstat.items += item.quantity
+                    jobstat.total += item.total
+
+                    itemEvenOdd = itemEvenOdd ? false : true
+                    itemsLeft--
+                }
+
+                if (!itemsLeft && !reportFooterDone && (ps.pos <= (ps.h - pageFooterHeight - reportFooterHeight))) {
+                    reportFooter(page, ps, jobstat)
+                    reportFooterDone = true
+                }
+                pageFooter(page, ps)
             }
-
-            if (items_on_page) {
-                listFooter(page, ps, pagestat)
-            }
-
-            if (!items_left && !rfooter && (ps.pos <= (ps.h - reporth - pageh))) {
-                reportFooter(page, ps, jobstat)
-                rfooter = true
-            }
-            pageFooter(page, ps)
         }
     }
 
@@ -110,7 +104,7 @@ Script {
         return x * pw / 170.0
     }
 
-    function pageHeader(page, ps)
+    function pageHeader(page, ps, pageNumber, duplicate)
     {
 //      Fancy gradient, but hard on the cyan toner
 //        let c1 = Qt.rgba(.13, .4, .66, 1)
@@ -129,10 +123,16 @@ Script {
         page.color = "black"
         page.backgroundColor = "white"
 
-        page.font = Qt.font({ family: "Times", pointSize: 20, bold: true, italic: true })
+        page.font = Qt.font({ family: "Arial", pointSize: 20, bold: true })
+
+        if (duplicate) {
+            page.drawRect(10, 10, 40, 10)
+            page.drawText(10, 10, 40, 10, Page.AlignCenter, "DUPLIKAT")
+        }
 
         let ttitle = "BrickForge\nLEGO Online Shop auf BrickLink"
 
+        page.font.italic = true
         page.drawText(ps.x, ps.y, ps.w, 30, Page.AlignCenter, ttitle)
 
         page.font.pointSize = 7
@@ -164,7 +164,7 @@ Script {
 
         page.font.pointSize = 12
 
-        if (page.number == 0) {
+        if (pageNumber == 1) {
             page.drawText(ps.x, ps.y + 40, 85, 35, Page.AlignLeft | Page.AlignTop, ps.order.address)
         } else {
             page.drawText(ps.x, ps.y + 40, 85, 35, Page.AlignLeft | Page.AlignTop,
@@ -177,6 +177,11 @@ Script {
         page.drawText(ps.x, ps.y + 75, 85, 7, Page.AlignLeft | Page.AlignTop, "Rechnung")
 
         ps.pos = ps.y + 72
+
+        page.color = "#666"
+        page.drawLine(0, 87, 10, 87)
+        page.drawLine(0, 192, 10, 192)
+        page.color = "black"
     }
 
     function pageFooter(page, ps)
@@ -220,14 +225,12 @@ Script {
         ps.pos = y + h
     }
 
-    function reportHeader(page, ps)
-    {
-    }
-
     function reportFooter(page, ps)
     {
         let y = ps.y + ps.pos
-        let h = 8
+        let h = 6
+
+        page.font = Qt.font({ family: "Arial", pointSize: 9 })
 
         page.drawText(ps.x, y, xs(ps.w, 145), h, Page.AlignRight | Page.AlignVCenter,
                       "Summe")
@@ -241,13 +244,13 @@ Script {
                       BrickStore.toCurrencyString(ps.order.shipping, ps.ccode, 2))
 
         page.drawText(ps.x, y + 2 * h, xs(ps.w, 145), h, Page.AlignRight | Page.AlignVCenter,
-                      "Versandversicherung")
+                      "Gutschrift")
         page.drawText(ps.x + xs(ps.w, 149), y + 2 * h, xs(ps.w, 20), h,
                       Page.AlignRight | Page.AlignVCenter,
-                      BrickStore.toCurrencyString(-ps.order.insurance, ps.ccode, 2))
+                      BrickStore.toCurrencyString(-ps.order.credit, ps.ccode, 2))
 
         // order.grandTotal can be off by 0.01
-        let gtotal = ps.order.orderTotal + ps.order.shipping - ps.order.insurance
+        let gtotal = ps.order.orderTotal + ps.order.shipping - ps.order.credit
 
         page.drawText(ps.x, y + 3 * h, xs(ps.w, 145), h, Page.AlignRight | Page.AlignVCenter,
                       "Endbetrag")
@@ -288,25 +291,25 @@ Script {
         let oldlw = page.lineWidth
         page.lineWidth = 0.5
 
-        page.drawLine(ps.x + xs(ps.w, 150), y + 2 * h - 0.25, ps.x + xs(ps.w, 170), y + 2 * h - 0.25)
+        page.drawLine(ps.x + xs(ps.w, 150), y + 1 * h - 0.25, ps.x + xs(ps.w, 170), y + 1 * h - 0.25)
         page.drawLine(ps.x + xs(ps.w, 150), y + 4 * h - 0.25, ps.x + xs(ps.w, 170), y + 4 * h - 0.25)
 
         page.lineWidth = oldlw
 
-        ps.pos += h
+        ps.pos += 4 * h
     }
 
     function listHeader(page, ps)
     {
         let y = ps.y + ps.pos
-        let h = 8
+        let h = 6
 
         page.backgroundColor = "#bbb"
         page.color = page.backgroundColor
         page.drawRect(ps.x, y, ps.w, h)
 
         page.color = "black"
-        page.font = Qt.font({ family: "Times", pointSize: 10 })
+        page.font = Qt.font({ family: "Arial", pointSize: 9 })
 
         page.drawText(ps.x  + xs(ps.w,  1), y, xs(ps.w, 79), h, Page.AlignVCenter | Page.AlignLeft, "Artikel")
         page.drawText(ps.x + xs(ps.w,  80), y, xs(ps.w, 30), h, Page.AlignCenter, "Farbe")
@@ -334,14 +337,12 @@ Script {
         ps.pos += h
     }
 
-    function listFooter(page, ps, pagestat)
-    {
-    }
-
     function listItem(page, ps, item, odd)
     {
         let y = ps.y + ps.pos
-        let h = 8
+        let h = 6
+
+        page.font = Qt.font({ family: "Arial", pointSize: 9 })
 
         page.backgroundColor = odd ? "#eee" : "#fff"
         page.color = page.backgroundColor
@@ -349,11 +350,11 @@ Script {
 
         page.color = "black"
 
-        page.drawImage(ps.x + 1, y, xs(ps.w, 8), 8, item.image)
+        page.drawImage(ps.x + 1, y, xs(ps.w, 6), 6, item.image)
         page.drawText(ps.x + xs(ps.w, 10), y, xs(ps.w, 69), h, Page.AlignLeft | Page.AlignVCenter,
                       item.id + " " + item.name)
 
-        page.drawImage(ps.x + xs(ps.w, 81), y, xs(ps.w, 4), 8, item.color.image)
+        page.drawImage(ps.x + xs(ps.w, 81), y, xs(ps.w, 5), 6, item.color.image)
         page.drawText(ps.x + xs(ps.w, 86), y, xs(ps.w, 23), h, Page.AlignLeft | Page.AlignVCenter,
                       item.color.name)
 
