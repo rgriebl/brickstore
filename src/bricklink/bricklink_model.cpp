@@ -452,7 +452,7 @@ bool BrickLink::ItemTypeModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 
 BrickLink::ItemModel::ItemModel(QObject *parent)
-    : StaticPointerModel(parent), m_itemtype_filter(nullptr), m_category_filter(nullptr), m_inv_filter(false)
+    : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
     connect(core(), &Core::pictureUpdated, this, &ItemModel::pictureUpdated);
@@ -548,7 +548,8 @@ void BrickLink::ItemModel::pictureUpdated(Picture *pic)
 
 bool BrickLink::ItemModel::isFiltered() const
 {
-    return m_itemtype_filter || m_category_filter || m_inv_filter || !m_text_filter.isEmpty();
+    return m_itemtype_filter || m_category_filter || m_color_filter
+            || m_inv_filter || !m_text_filter.isEmpty();
 }
 
 void BrickLink::ItemModel::setFilterItemType(const ItemType *it)
@@ -565,6 +566,14 @@ void BrickLink::ItemModel::setFilterCategory(const Category *cat)
     if (cat == m_category_filter)
         return;
     m_category_filter = cat;
+    invalidateFilter();
+}
+
+void BrickLink::ItemModel::setFilterColor(const BrickLink::Color *col)
+{
+    if (col == m_color_filter)
+        return;
+    m_color_filter = col;
     invalidateFilter();
 }
 
@@ -682,6 +691,8 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && (item->category() != m_category_filter))
         return false;
     else if (m_inv_filter && !item->hasInventory())
+        return false;
+    else if (m_color_filter && !item->hasKnownColor(m_color_filter))
         return false;
     else {
         const QString matchStr = QLatin1String(item->id()) % u' ' % item->name();

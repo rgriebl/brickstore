@@ -532,9 +532,9 @@ void BrickLink::TextImport::calculateColorPopularity()
 void BrickLink::TextImport::addToKnownColors(int itemIndex, int colorIndex)
 {
     Item &item = m_items[itemIndex];
-    if (std::find(item.m_knownColorIndexes.cbegin(), item.m_knownColorIndexes.cend(),
-                  colorIndex) == item.m_knownColorIndexes.cend()) {
-        item.m_knownColorIndexes.emplace_back(colorIndex);
-    }
+    auto it = std::lower_bound(item.m_knownColorIndexes.begin(), item.m_knownColorIndexes.end(),
+                               colorIndex);
+    if ((it == item.m_knownColorIndexes.end()) || (*it != colorIndex))
+        item.m_knownColorIndexes.insert(it, colorIndex);
 }
 

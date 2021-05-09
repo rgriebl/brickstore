@@ -158,6 +158,11 @@ QString QmlItem::id() const
     return QString::fromLatin1(wrapped->id());
 }
 
+bool QmlItem::hasKnownColor(QmlColor color) const
+{
+    return wrapped->hasKnownColor(color.wrappedObject());
+}
+
 QVariantList QmlItem::knownColors() const
 {
     auto known = wrapped->knownColors();

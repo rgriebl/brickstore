@@ -16,7 +16,9 @@
 #include <QTreeView>
 #include <QEvent>
 #include <QComboBox>
+#include <QToolButton>
 
+#include "utility.h"
 #include "bricklink_model.h"
 #include "selectcolor.h"
 
@@ -57,6 +59,15 @@ SelectColor::SelectColor(QWidget *parent)
     }
     w_filter->setMaxVisibleItems(w_filter->count());
 
+    w_lock = new QToolButton();
+    w_lock->setIcon(QIcon::fromTheme("folder-locked"_l1));
+    w_lock->setAutoRaise(true);
+    w_lock->setCheckable(true);
+    w_lock->setChecked(false);
+    connect(w_lock, &QToolButton::toggled, this, [this](bool locked) {
+        emit colorLockChanged(locked ? currentColor() : nullptr);
+    });
+
     w_colors = new ColorTreeView();
     w_colors->setAlternatingRowColors(true);
     w_colors->setAllColumnsShowFocus(true);
@@ -90,8 +101,11 @@ SelectColor::SelectColor(QWidget *parent)
     lay->setContentsMargins(0, 0, 0, 0);
     lay->setRowStretch(0, 0);
     lay->setRowStretch(1, 1);
+    lay->setColumnStretch(0, 1);
+    lay->setColumnStretch(1, 0);
     lay->addWidget(w_filter, 0, 0);
-    lay->addWidget(w_colors, 1, 0);
+    lay->addWidget(w_lock, 0, 1);
+    lay->addWidget(w_colors, 1, 0, 1, 2);
 
     languageChange();
 }
@@ -108,6 +122,7 @@ void SelectColor::languageChange()
         if (!ctName.isEmpty())
             w_filter->setItemText(w_filter->findData(int(ct)), tr("Only \"%1\" Colors").arg(ctName));
     }
+    w_lock->setToolTip(tr("Lock color selection: only shows items known to be available in this color"));
 }
 
 void SelectColor::setWidthToContents(bool b)
@@ -156,6 +171,19 @@ const BrickLink::Color *SelectColor::currentColor() const
         return qvariant_cast<const BrickLink::Color *>(w_colors->model()->data(idx, BrickLink::ColorPointerRole));
     }
     return nullptr;
+}
+
+bool SelectColor::colorLock() const
+{
+    return w_lock->isChecked();
+}
+
+void SelectColor::unlockColor()
+{
+    if (colorLock()) {
+        w_lock->setChecked(false);
+        emit colorLockChanged(nullptr);
+    }
 }
 
 QByteArray SelectColor::saveState() const
@@ -224,17 +252,27 @@ void SelectColor::setCurrentColorAndItem(const BrickLink::Color *color, const Br
 {
     m_item = item;
 
-    w_colors->clearSelection();
     updateColorFilter(w_filter->currentIndex());
 
     auto colorIndex = m_colorModel->index(color);
-    w_colors->setCurrentIndex(colorIndex);
+    if (colorIndex.isValid())
+        w_colors->setCurrentIndex(colorIndex);
+    else
+        w_colors->clearSelection();
     w_colors->scrollTo(colorIndex);
 }
 
 void SelectColor::colorChanged()
 {
-    emit colorSelected(currentColor(), false);
+    auto col = currentColor();
+    emit colorSelected(col, false);
+    if (colorLock()) {
+        if (col)
+            emit colorLockChanged(col);
+        else
+            unlockColor();
+    }
+    w_lock->setEnabled(col);
 }
 
 void SelectColor::colorConfirmed()

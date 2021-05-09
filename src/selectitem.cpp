@@ -65,7 +65,7 @@ public:
     QTreeView *      w_items;
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
-    HistoryLineEdit * w_filter;
+    HistoryLineEdit *w_filter;
     QToolButton *    w_pcc;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
@@ -74,6 +74,7 @@ public:
     bool             m_inv_only;
     QTimer *         m_filter_delay;
     double           m_zoom = 0;
+    const BrickLink::Color *m_colorFilter;
 };
 
 
@@ -592,10 +593,32 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
         if (!d->categoryModel->index(oldCategory).isValid())
             oldCategory = BrickLink::CategoryModel::AllCategories;
         setCurrentCategory(oldCategory);
-        if (!d->itemModel->index(oldItem).isValid())
+        if (d->itemModel->index(oldItem).isValid())
             setCurrentItem(oldItem, false);
 
         d->m_inv_only = b;
+    }
+}
+
+const BrickLink::Color *SelectItem::colorFilter() const
+{
+    return d->m_colorFilter;
+}
+
+void SelectItem::setColorFilter(const BrickLink::Color *color)
+{
+    if (color != d->m_colorFilter) {
+        d->m_colorFilter = color;
+
+        if (currentItemType() && currentItemType()->hasColors()) {
+            const BrickLink::Item *oldItem = currentItem();
+            d->w_items->clearSelection();
+
+            d->itemModel->setFilterColor(color);
+
+            if (d->itemModel->index(oldItem).isValid())
+                setCurrentItem(oldItem, false);
+        }
     }
 }
 
@@ -615,6 +638,9 @@ void SelectItem::itemTypeUpdated()
     setCurrentItem(oldItem);
 
     d->w_itemthumbs->resizeColumnToContents(0);
+
+    if (!itemtype || !itemtype->hasColors())
+        d->itemModel->setFilterColor(nullptr);
 
     emit currentItemTypeChanged(itemtype);
     emit hasColors(itemtype ? itemtype->hasColors() : false);

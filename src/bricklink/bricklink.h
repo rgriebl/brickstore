@@ -195,7 +195,7 @@ public:
     const Color *defaultColor() const;
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
-    bool hasKnownColors() const            { return !m_knownColorIndexes.empty(); }
+    bool hasKnownColor(const Color *col) const;
     const QVector<const Color *> knownColors() const;
 
     ~Item();

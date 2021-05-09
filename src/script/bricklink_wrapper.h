@@ -213,13 +213,13 @@ class QmlItem : public QmlWrapperBase<const BrickLink::Item>
     Q_PRIVATE_PROPERTY(wrapped, QmlColor defaultColor READ defaultColor CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, double weight READ weight CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int yearReleased READ yearReleased CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, bool hasKnownColors READ hasKnownColors CONSTANT)
     Q_PROPERTY(QVariantList knownColors READ knownColors CONSTANT)
 
 public:
     QmlItem(const BrickLink::Item *item = nullptr);
 
     QString id() const;
+    Q_INVOKABLE bool hasKnownColor(QmlColor color) const;
     QVariantList knownColors() const;
 
     Q_INVOKABLE QVariantList consistsOf() const;

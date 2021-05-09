@@ -152,6 +152,7 @@ public:
     bool isFiltered() const override;
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *cat);
+    void setFilterColor(const Color *col);
     void setFilterText(const QString &filter);
     void setFilterWithoutInventory(bool on);
 
@@ -167,13 +168,14 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    const ItemType *m_itemtype_filter;
-    const Category *m_category_filter;
+    const ItemType *m_itemtype_filter = nullptr;
+    const Category *m_category_filter = nullptr;
+    const Color *   m_color_filter = nullptr;
     QString         m_text_filter;
     QVector<QPair<bool, QString>> m_filter_text;
     QVector<QPair<bool, QPair<const Item *, const Color *>>> m_filter_consistsOf;
     QVector<QPair<bool, const Item *>> m_filter_appearsIn;
-    bool            m_inv_filter;
+    bool            m_inv_filter = false;
 
     friend class Core;
 };

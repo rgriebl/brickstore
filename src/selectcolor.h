@@ -19,6 +19,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QTreeView)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QToolButton)
 
 
 class SelectColor : public QWidget
@@ -33,12 +34,16 @@ public:
     void setCurrentColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item);
     const BrickLink::Color *currentColor() const;
 
+    bool colorLock() const;
+    void unlockColor();
+
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
     static QByteArray defaultState();
 
 signals:
     void colorSelected(const BrickLink::Color *color, bool confirmed);
+    void colorLockChanged(const BrickLink::Color *color);
 
 protected slots:
     void colorChanged();
@@ -55,6 +60,7 @@ protected:
 protected:
     QComboBox *w_filter;
     QTreeView *w_colors;
+    QToolButton *w_lock;
     BrickLink::ColorModel *m_colorModel;
     const BrickLink::Item *m_item = nullptr;
 };

@@ -131,8 +131,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_select_item, &SelectItem::hasColors,
             this, [this](bool b) {
         w_select_color->setEnabled(b);
-        if (!b)
+        if (!b) {
             w_select_color->setCurrentColor(BrickLink::core()->color(0));
+            w_select_color->unlockColor();
+        }
     });
     connect(w_select_item, &SelectItem::hasSubConditions,
             w_subcondition, &QWidget::setEnabled);
@@ -154,6 +156,9 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         if (confirmed)
             w_add->animateClick();
     });
+    connect(w_select_color, &SelectColor::colorLockChanged,
+            w_select_item, &SelectItem::setColorFilter);
+
     connect(w_price, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
     connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),

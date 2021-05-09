@@ -34,6 +34,9 @@ public:
     bool hasExcludeWithoutInventoryFilter() const;
     void setExcludeWithoutInventoryFilter(bool b);
 
+    const BrickLink::Color *colorFilter() const;
+    void setColorFilter(const BrickLink::Color *color);
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
