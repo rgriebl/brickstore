@@ -159,7 +159,13 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
             url = "https://www.bricklink.com/inventory_detail.asp?"_l1;
             QUrlQuery query;
             query.addQueryItem("catType"_l1, QString(QLatin1Char(item->itemTypeId())));
-            query.addQueryItem("q"_l1, QLatin1String(item->id()));
+            QString queryTerm = QLatin1String(item->id());
+            if (queryTerm.contains('-'_l1)) {
+                queryTerm = item->name();
+                queryTerm.remove('('_l1);
+                queryTerm.remove(')'_l1);
+            }
+            query.addQueryItem("q"_l1, queryTerm);
             if (item->itemType()->hasColors() && color)
                 query.addQueryItem("ColorID"_l1, QString::number(color->id()));
             url.setQuery(query);
