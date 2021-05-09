@@ -1870,7 +1870,7 @@ void FrameWork::onlineStateChanged(bool isOnline)
 
 void FrameWork::setFilter(const QString &filter)
 {
-    if (m_filter)
+    if (m_filter && (filter != m_filter->text()))
         m_filter->setText(filter);
 }
 
