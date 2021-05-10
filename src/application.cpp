@@ -184,6 +184,7 @@ Application::Application(int &_argc, char **_argv)
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
+    checkSentryConsent();
     (void) Currency::inst();
     (void) ScriptManager::inst();
 
@@ -236,6 +237,23 @@ Application::Application(int &_argc, char **_argv)
 #elif defined(Q_OS_WIN)
     RegisterApplicationRestart(nullptr, 0); // make us restart-able by installers
 
+#endif
+
+#if defined(SENTRY_ENABLED)
+    if (Config::inst()->sentryConsent() == Config::SentryConsent::Unknown) {
+        QString text = tr("Enable anonymous crash reporting?<br><br>Please consider enabling this feature when available.<br>If you have any doubts about what information is being submitted and how it is used, please <a href='https://github.com/rgriebl/brickstore/wiki/Crash-Reporting'>see here</a>.<br><br>Crash reporting can be enabled or disabled at any time in the Settings dialog.");
+
+        switch (MessageBox::question(nullptr, { }, text)) {
+        case QMessageBox::Yes:
+            Config::inst()->setSentryConsent(Config::SentryConsent::Given);
+            break;
+        case QMessageBox::No:
+            Config::inst()->setSentryConsent(Config::SentryConsent::Revoked);
+            break;
+        default:
+            break;
+        }
+    }
 #endif
 }
 
@@ -497,6 +515,7 @@ void Application::setupSentry()
     }, nullptr);
     sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
     sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
+    sentry_options_set_require_user_consent(sentry, 1);
 
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % "/.sentry"_l1;
     QString crashHandler = QCoreApplication::applicationDirPath() % "/crashpad_handler"_l1;
@@ -520,6 +539,27 @@ void Application::shutdownSentry()
 {
 #if defined(SENTRY_ENABLED)
     sentry_shutdown();
+#endif
+}
+
+void Application::checkSentryConsent()
+{
+#if defined(SENTRY_ENABLED)
+    auto check = []() {
+        switch (Config::inst()->sentryConsent()) {
+        case Config::SentryConsent::Unknown:
+            sentry_user_consent_reset();
+            break;
+        case Config::SentryConsent::Given:
+            sentry_user_consent_give();
+            break;
+        case Config::SentryConsent::Revoked:
+            sentry_user_consent_revoke();
+            break;
+        }
+    };
+    connect(Config::inst(), &Config::sentryConsentChanged, check);
+    check();
 #endif
 }
 

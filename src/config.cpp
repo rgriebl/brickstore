@@ -503,6 +503,23 @@ void Config::setLastDirectory(const QString &dir)
         m_lastDirectory = dir;
 }
 
+Config::SentryConsent Config::sentryConsent() const
+{
+    int v = value("General/SentryConsent"_l1).toInt();
+    if ((v < int(SentryConsent::Unknown)) || (v > int(SentryConsent::Revoked)))
+         v = int(SentryConsent::Unknown);
+    return SentryConsent(v);
+
+}
+
+void Config::setSentryConsent(SentryConsent consent)
+{
+    if (sentryConsent() != consent) {
+        setValue("General/SentryConsent"_l1, int(consent));
+        emit sentryConsentChanged(consent);
+    }
+}
+
 QPair<QString, QString> Config::brickLinkCredentials() const
 {
     return m_bricklinkCredentials;

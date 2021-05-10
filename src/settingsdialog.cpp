@@ -502,6 +502,12 @@ void SettingsDialog::load()
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
 
+#if !defined(SENTRY_ENABLED)
+    w_crash_reports->setEnabled(false);
+#else
+    w_crash_reports->setChecked(Config::inst()->sentryConsent() == Config::SentryConsent::Given);
+#endif
+
     // --[ INTERFACE ]-------------------------------------------------
 
     int iconSizeIndex = 0;
@@ -564,6 +570,9 @@ void SettingsDialog::save()
         Config::inst()->setDocumentDir(dd.absolutePath());
     else
         MessageBox::warning(this, { }, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
+
+    Config::inst()->setSentryConsent(w_crash_reports->isChecked() ? Config::SentryConsent::Given
+                                                                  : Config::SentryConsent::Revoked);
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 

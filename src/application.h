@@ -60,6 +60,7 @@ private:
     bool isClient(int timeout = 1000);
     static void setupSentry();
     static void shutdownSentry();
+    static void checkSentryConsent();
     static void addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);
     void setupLogging();
     static void messageHandler(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);

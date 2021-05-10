@@ -101,6 +101,14 @@ public:
     QString lastDirectory() const;
     void setLastDirectory(const QString &dir);
 
+    enum class SentryConsent {
+        Unknown,
+        Given,
+        Revoked,
+    };
+    SentryConsent sentryConsent() const;
+    void setSentryConsent(SentryConsent consent);
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -148,6 +156,7 @@ signals:
     void columnLayoutIdsOrderChanged(const QStringList &ids);
     void columnLayoutIdsChanged(const QStringList &ids);
     void shortcutsChanged(const QVariantMap &list);
+    void sentryConsentChanged(SentryConsent consent);
 
 protected:
     bool parseTranslations() const;
