@@ -698,16 +698,9 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
 
     if (!columnsSet) {
         auto layout = Config::inst()->columnLayout("user-default"_l1);
-        if (!w_header->restoreLayout(layout)) {
+        if (!w_header->restoreLayout(layout))
             resizeColumnsToDefault();
-//            w_header->setSortIndicator(0, Qt::AscendingOrder);
-        }
         columnsSet = true;
-    }
-    if (columnsSet && !sortFilterSet) {
-        // ugly hack for older files without sort order to prevent an unclean undo stack
-        m_doc->nextSortFilterIsDirect();
-        w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
     }
 
     m_ccw = new ColumnChangeWatcher(this, w_header);
@@ -725,11 +718,9 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
 
     s_windows.append(this);
 
+    doc->undoStack()->clear();
     if (isForceModified)
         doc->undoStack()->resetClean();
-    else
-        doc->unsetModified();
-
 }
 
 Window::~Window()
