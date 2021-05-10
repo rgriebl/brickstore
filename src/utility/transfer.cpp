@@ -294,8 +294,6 @@ void TransferRetriever::schedule()
 
 void TransferRetriever::downloadFinished(QNetworkReply *reply)
 {
-    m_sslSession = reply->sslConfiguration().sessionTicket();
-
     auto *j = reply->property("bsJob").value<TransferJob *>();
     auto error = j->m_reply->error();
 
@@ -303,6 +301,8 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
     j->m_effective_url = j->m_reply->url();
 
     if (error != QNetworkReply::NoError) {
+        m_sslSession = reply->sslConfiguration().sessionTicket();
+
         if ((j->m_respcode == 404) && j->m_retries_left) {
             --j->m_retries_left;
             j->m_reply->deleteLater();
