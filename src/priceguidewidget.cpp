@@ -90,7 +90,6 @@ private:
     std::vector<cell>         m_cells;
     const cell *              m_cellUnderMouse = nullptr;
     QString                   m_ccode;
-    qreal                     m_crate = 0;
     PriceGuideWidget::Layout  m_layout = PriceGuideWidget::Normal;
     bool                      m_connected = false;
 
@@ -111,7 +110,8 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     , d(new PriceGuideWidgetPrivate(this))
 {
     d->m_ccode = Config::inst()->defaultCurrencyCode();
-    d->m_crate = Currency::inst()->rate(d->m_ccode);
+    connect(Currency::inst(), &Currency::ratesChanged,
+            this, &PriceGuideWidget::updateNonStaticCells);
 
     setMouseTracking(true);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -629,6 +629,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     bool is_updating = d->m_pg && (d->m_pg->updateStatus() == BrickLink::UpdateStatus::Updating);
 
     QString str = d->m_pg ? QStringLiteral("-") : QString();
+    auto crate = Currency::inst()->rate(d->m_ccode);
 
     for (const cell &c : qAsConst(d->m_cells)) {
         if ((e->rect() & c).isEmpty())
@@ -657,7 +658,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
             if (!is_updating) {
                 if (valid)
                     str = Currency::toDisplayString(d->m_pg->price(c.m_time, c.m_condition,
-                                                                   c.m_price) * d->m_crate);
+                                                                   c.m_price) * crate);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
                           (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->isValid());
@@ -799,7 +800,6 @@ void PriceGuideWidget::setCurrencyCode(const QString &code)
 {
     if (code != d->m_ccode) {
         d->m_ccode = code;
-        d->m_crate = Currency::inst()->rate(code);
         recalcLayout();
     }
 }
