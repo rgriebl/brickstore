@@ -168,7 +168,7 @@ Script {
             page.drawText(ps.x, ps.y + 40, 85, 35, Page.AlignLeft | Page.AlignTop, ps.order.address)
         } else {
             page.drawText(ps.x, ps.y + 40, 85, 35, Page.AlignLeft | Page.AlignTop,
-                           "\n  Seite " + (page.number + 1))
+                           "\n  Seite " + (pageNumber + 1))
         }
 
         page.font.bold = true
