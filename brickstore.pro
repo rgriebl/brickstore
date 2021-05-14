@@ -152,28 +152,32 @@ win32 {
       ISCC="$$INNO_PATH\\$$ISCC"
     }
 
+    !isEmpty(VCPKG_PATH):OPENSSL_PATHS *= $$VCPKG_PATH/bin
+
     contains(QMAKE_TARGET.arch, x86_64) {
-      TARCH=x64
-      OPENSSL_ARCH="-x64"
+      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
+      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL/bin"
+
+      OPENSSL_SSL_LIB="libssl-1_1-x64.dll"
+      OPENSSL_CRYPTO_LIB="libcrypto-1_1-x64.dll"
     } else {
-      TARCH=x86
-      OPENSSL_ARCH=""
+      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win32/bin"
+      OPENSSL_PATHS *= "$$getenv(ProgramFiles(x86))/OpenSSL/bin"
+
+      OPENSSL_SSL_LIB="libssl-1_1.dll"
+      OPENSSL_CRYPTO_LIB="libcrypto-1_1.dll"
     }
 
-    OPENSSL_LIB="libssl-1_1$${OPENSSL_ARCH}.dll"
-    equals(TARCH, x64) {
-      OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
-      !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL/bin"
+    OPENSSL_PATH=""
+    for (osslp, OPENSSL_PATHS) {
+      exists("$$osslp/$$OPENSSL_SSL_LIB"):isEmpty(OPENSSL_PATH):OPENSSL_PATH=$$osslp
     }
-    equals(TARCH, x86) {
-      OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
-      !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL/bin"
+    isEmpty(OPENSSL_PATH) {
+      error("Please install OpenSSL via VCPKG or from https://slproweb.com/products/Win32OpenSSL.html.")
+    } else {
+      OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
+      message("Found OpenSSL at $$OPENSSL_PATH")
     }
-    message("Trying to use OpenSSL from $$OPENSSL_PATH/$$OPENSSL_LIB")
-
-    !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
-
-    OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
 
     # The OpenSSL libs from the Qt installer require an ancient MSVC2010 C runtimes, but the
     # installer doesn't install them by default, plus there's no package for the x86 version anyway.
@@ -181,8 +185,8 @@ win32 {
     # we are installing anyway.
     deploy.depends += $(DESTDIR_TARGET)
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) --qmldir $$shell_quote($$shell_path($$PWD/extensions)) $(DESTDIR_TARGET)
-    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libcrypto-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
-    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libssl-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
+    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_SSL_LIB)) $(DESTDIR)
+    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_CRYPTO_LIB)) $(DESTDIR)
 
     installer.depends += deploy
     installer.commands += $$shell_path($$ISCC) \

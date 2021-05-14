@@ -88,11 +88,17 @@ jobs:
         sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
-    - name: Install OpenSSL on Windows
-      if: startsWith(matrix.config.os, 'windows')
+    - name: Install OpenSSL on Windows (slproweb)
+      if: false # startsWith(matrix.config.os, 'windows')
       run: |
         curl.exe --output openssl.msi "https://slproweb.com/download/${{ matrix.config.openssl_version }}.msi"
         msiexec /i openssl.msi /quiet /qn /norestart
+      shell: cmd
+
+    - name: Install OpenSSL on Windows (vcpkg)
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        c:\vcpkg\vcpkg install --recurse openssl --triplet ${{ matrix.config.vcpkg_triplet }}
       shell: cmd
 
     - name: Install sentry.io on Windows
