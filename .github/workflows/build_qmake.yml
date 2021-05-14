@@ -19,6 +19,7 @@ jobs:
           qt_arch: 'win32_msvc2019'
           openssl_version: 'Win32OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+          qmake_extra_config: 'CONFIG+=sentry "VCPKG_PATH=c:\vcpkg\installed\x86-windows"'
           vcpkg_triplet: 'x86-windows'
 
         - name: "Windows 64bit"
