@@ -398,7 +398,7 @@ void ImportOrderDialog::updateOrders()
         QUrlQuery query;
         query.addQueryItem("action"_l1,        "save"_l1);
         query.addQueryItem("orderType"_l1,     QLatin1String(type));
-        query.addQueryItem("viewType"_l1,      "X"_l1);    // XML - this has to go last, otherwise we get HTML
+        query.addQueryItem("viewType"_l1,      "X"_l1);
         query.addQueryItem("getOrders"_l1,     "date"_l1);
         query.addQueryItem("fMM"_l1,           QString::number(fromDate.month()));
         query.addQueryItem("fDD"_l1,           QString::number(fromDate.day()));
@@ -407,6 +407,7 @@ void ImportOrderDialog::updateOrders()
         query.addQueryItem("tDD"_l1,           QString::number(today.day()));
         query.addQueryItem("tYY"_l1,           QString::number(today.year()));
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
+        query.addQueryItem("getFiled"_l1,      "Y"_l1);
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
         query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
         query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
@@ -674,6 +675,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         query.addQueryItem("viewType"_l1,      "X"_l1);    // XML - this has to go last, otherwise we get HTML
         query.addQueryItem("getOrders"_l1,     ""_l1);
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
+        query.addQueryItem("getFiled"_l1,      "Y"_l1);
         query.addQueryItem("getDetail"_l1,     "y"_l1);
         query.addQueryItem("orderID"_l1,       order->id());
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
