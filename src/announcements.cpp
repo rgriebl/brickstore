@@ -242,7 +242,7 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
     m_browser->setReadOnly(true);
     m_browser->setFrameStyle(QFrame::NoFrame);
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    browser->setHtml(markdown);
+    m_browser->setPlainText(markdown);
 #else
     m_browser->setMarkdown(markdown % "\n\n___\n"_l1);
 #endif
