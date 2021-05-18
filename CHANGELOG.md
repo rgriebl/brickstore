@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.5.1] - 2021-05-18
+### Added
+- The list of items in the `Add Item` dialog can now also be filtered by known-colors by clicking
+  the new *lock* icon in the top, right of the color selector.
+- Added an announcement mechanism to be able to announce important changes or problem solutions to
+  all users.
+- Extended the `Help` menu with easy access to the project's resources on GitHub.
+
+### Improvements
+- Optimized database loading and access and improved the known-colors coverage.
+
+### Please Note
+BrickLink's server are still unstable, but this version adds yet more workarounds to better deal
+with this situation.
+
+
 ## [2021.4.1] - 2021-04-21
 ### Added
 - All item image views now have `Copy` and `Save` action in their context menus.
@@ -271,7 +287,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.4.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.5.1...HEAD
+[2021.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.1
 [2021.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.4.1
 [2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.3
 [2021.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.2
