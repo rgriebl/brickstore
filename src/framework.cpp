@@ -865,6 +865,14 @@ void FrameWork::translateActions()
         { "edit_status_exclude", "vcs-removed" },
         { "edit_status_extra", "vcs-added" },
         { "edit_color", "color_management" },
+
+        { "document_import_bl_inv", "brick-1x1" },
+        { "document_import_bl_xml", "dialog-xml-editor" },
+        { "document_import_bl_order", "view-financial-list" },
+        { "document_import_bl_cart", "bricklink-cart" },
+        { "document_import_bl_store_inv", "bricklink-store" },
+        { "document_import_ldraw_model", "bricklink-studio" },
+
     };
 
     QVariantMap customShortcuts = Config::inst()->shortcuts();

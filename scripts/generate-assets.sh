@@ -75,7 +75,11 @@ for color in "" "-dark"; do
   out="$b/icons/$theme$color/generated"
   mkdir -p "$out"
 
+  cp $tmp/brick-1x1$color.png $out/brick-1x1.png
   convert $cus/bricklink.png -colorspace sRGB -scale $s $out/bricklink.png
+  convert $cus/bricklink-studio.png -colorspace sRGB -scale $s $out/bricklink-studio.png
+  convert $cus/bricklink-cart$color.png -colorspace sRGB -scale $s $out/bricklink-cart.png
+  convert $cus/bricklink-store$color.png -colorspace sRGB -scale $s $out/bricklink-store.png
 
   convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_plus.png -scale $s -composite $out/edit-additems.png
   convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_divide.png -scale $s -composite $out/edit-qty-divide.png
@@ -107,6 +111,7 @@ for color in "" "-dark"; do
         \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
         \( $tmp/brick-1x1$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
         $out/bricklink-lotsforsale.png
+done
 
 rm -rf "$tmp"
 

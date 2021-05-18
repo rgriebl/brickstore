@@ -251,7 +251,7 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
     m_browser->viewport()->setAutoFillBackground(false);
     m_browser->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     m_browser->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    m_browser->setFixedWidth(fontMetrics().averageCharWidth() * 140);
+    m_browser->setFixedWidth(fontMetrics().averageCharWidth() * 100);
     m_browser->zoomIn(2);
 
 
