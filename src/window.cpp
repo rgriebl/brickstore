@@ -2056,8 +2056,6 @@ void Window::on_edit_subtractitems_triggered()
                 Lot &newItemRef = (change == changes.end()) ? newItem : change->second;
                 int qtyInItem = newItemRef.quantity();
 
-                qWarning() << "MATCH against" << lot->quantity() << lot->itemName();
-
                 if (qtyInItem >= qty) {
                     newItemRef.setQuantity(qtyInItem - qty);
                     qty = 0;
@@ -2065,8 +2063,16 @@ void Window::on_edit_subtractitems_triggered()
                     newItemRef.setQuantity(0);
                     qty -= qtyInItem;
                 }
-                if (&newItemRef == &newItem)
+
+                // make sure that this is the last entry in changes, so we can reference it
+                // easily below, if a qty is left
+                if (&newItemRef == &newItem) {
                     changes.emplace_back(lot, newItem);
+                } else {
+                    auto last = std::prev(changes.end());
+                    if (last != change)
+                        std::swap(*change, *last);
+                }
                 hadMatch = true;
 
                 if (qty == 0)
