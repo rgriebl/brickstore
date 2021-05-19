@@ -1356,21 +1356,22 @@ void FrameWork::createActions()
     a = newQAction(this, "help_about", 0, false, Application::inst(), [this]() {
         AboutDialog(this).exec();
     });
-    a = newQAction(this, "help_systeminfo", 0, false, Application::inst(), [this]() {
+    a->setMenuRole(QAction::AboutRole);
+
+    (void) newQAction(this, "help_systeminfo", 0, false, Application::inst(), [this]() {
         SystemInfoDialog(this).exec();
     });
-    a = newQAction(this, "help_reportbug", 0, false, Application::inst(), []() {
+    (void) newQAction(this, "help_reportbug", 0, false, Application::inst(), []() {
         QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
         QDesktopServices::openUrl(url);
     });
-    a = newQAction(this, "help_announcements", 0, false, Application::inst(), [this]() {
+    (void) newQAction(this, "help_announcements", 0, false, Application::inst(), [this]() {
         m_announcements->showAllAnnouncements();
     });
-    a = newQAction(this, "help_releasenotes", 0, false, this, []() {
+    (void) newQAction(this, "help_releasenotes", 0, false, Application::inst(), []() {
         QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/releases"_l1;
         QDesktopServices::openUrl(url);
     });
-    a->setMenuRole(QAction::AboutRole);
 
     a = newQAction(this, "check_for_updates", NeedNetwork, false,
                    this, [this]() { m_checkForUpdates->check(false /*not silent*/); });
