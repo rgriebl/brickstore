@@ -17,9 +17,6 @@
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0" columnstretch="0,1">
-   <property name="bottomMargin">
-    <number>15</number>
-   </property>
    <item row="0" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">

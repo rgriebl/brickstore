@@ -2545,7 +2545,7 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
         return false;
 
     double prtDpi = double(prt->logicalDpiX() + prt->logicalDpiY()) / 2;
-    double winDpi = double(w_list->logicalDpiX() + w_list->logicalDpiY()) / 2;
+    double winDpi = double(w_list->logicalDpiX() + w_list->logicalDpiX()) / 2 * w_list->devicePixelRatioF();
 
     QRectF pageRect = prt->pageLayout().paintRect(QPageLayout::Inch);
     pageRect = QRectF(QPointF(), pageRect.size() * prtDpi);
@@ -2593,12 +2593,10 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
 
     auto *dd = static_cast<DocumentDelegate *>(w_list->itemDelegate());
 
-    p.setFont(w_list->font());
-    if (!qFuzzyCompare(scaleFactor, 1.)) {
-        QFont f = p.font();
-        f.setPointSizeF(f.pointSizeF() * scaleFactor);
-        p.setFont(f);
-    }
+    QFont f = w_list->font();
+    f.setPointSizeF(f.pointSizeF() * scaleFactor / w_list->devicePixelRatioF());
+    p.setFont(f);
+
     QPen gridPen(Qt::darkGray, prtDpi / 96 * scaleFactor);
     QColor headerTextColor(Qt::white);
     double margin = 2 * prtDpi / 96 * scaleFactor;

@@ -402,7 +402,8 @@ void PrintDialog::updateActions()
     w_page_last->setEnabled(p < last);
 
     w_pages->setText(QString::number(p) % u" / " % QString::number(last));
-    w_zoom->setText(QString::number(int(w_print_preview->zoomFactor() * 100)) % u" %");
+    double z = w_print_preview->zoomFactor() * logicalDpiX() / physicalDpiX();
+    w_zoom->setText(QString::number(int(z * 100)) % u" %");
 }
 
 void PrintDialog::gotoPage(int page)
