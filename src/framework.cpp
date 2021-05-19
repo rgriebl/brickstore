@@ -1359,7 +1359,7 @@ void FrameWork::createActions()
     a = newQAction(this, "help_systeminfo", 0, false, Application::inst(), [this]() {
         SystemInfoDialog(this).exec();
     });
-    a = newQAction(this, "help_reportbug", 0, false, Application::inst(), [this]() {
+    a = newQAction(this, "help_reportbug", 0, false, Application::inst(), []() {
         QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
         QDesktopServices::openUrl(url);
     });

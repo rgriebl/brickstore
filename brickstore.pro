@@ -35,7 +35,7 @@ TEMPLATE = app
 TARGET = $$NAME
 unix:!macos:TARGET = $$lower($$TARGET)
 
-CONFIG *= no_private_qt_headers_warning c++17
+CONFIG *= no_private_qt_headers_warning no_include_pwd c++17
 CONFIG *= lrelease embed_translations
 
 
@@ -58,7 +58,7 @@ version_subst.input  = src/version.h.in
 version_subst.output = src/version.h
 QMAKE_SUBSTITUTES    = version_subst
 
-INCLUDEPATH += $$OUT_PWD/src  # for version.h
+INCLUDEPATH = $$OUT_PWD/src  # for version.h
 
 OTHER_FILES += \
   .gitignore \

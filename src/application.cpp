@@ -385,7 +385,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
         m_files_to_open.append(static_cast<QFileOpenEvent *>(e)->file());
         doEmitOpenDocument();
         return true;
-    case QEvent::PaletteChange:
+    case QEvent::ApplicationPaletteChange:
         setIconTheme();
         break;
     default:

@@ -38,6 +38,9 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
 {
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint);
 
+    qRegisterMetaType<QPageSize>();
+    QMetaType::registerEqualsComparator<QPageSize>();
+
     m_documentName = window->document()->fileName();
     if (!m_documentName.isEmpty())
         m_documentName = QFileInfo(m_documentName).completeBaseName();
@@ -242,7 +245,7 @@ void PrintDialog::updatePrinter(int idx)
     QSignalBlocker blocker(this);
 
     w_paperSize->clear();
-    for (const auto &ps : pageSizes)
+    for (const auto &ps : qAsConst(pageSizes))
         w_paperSize->addItem(ps.name(), QVariant::fromValue(ps));
     w_paperSize->setCurrentIndex(w_paperSize->findData(QVariant::fromValue(defaultPageSize)));
 
