@@ -2670,6 +2670,7 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
                     options.fontMetrics = p.fontMetrics();
                     options.index = idx;
                     options.state &= ~QStyle::State_Selected;
+                    options.palette = QPalette(Qt::lightGray);
 
                     dd->paint(&p, options, idx);
 
