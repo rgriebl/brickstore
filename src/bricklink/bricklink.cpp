@@ -1388,10 +1388,10 @@ bool Item::hasKnownColor(const Color *col) const
 {
     if (!col)
         return true;
-    return std::find(m_knownColorIndexes.cbegin(), m_knownColorIndexes.cend(),
-                     quint16(col - core()->colors().data())) != m_knownColorIndexes.cend();
-//    return std::binary_search(m_knownColorIndexes.cbegin(), m_knownColorIndexes.cend(),
-//                              quint16(col - core()->colors().data()));
+//    return std::find(m_knownColorIndexes.cbegin(), m_knownColorIndexes.cend(),
+//                     quint16(col - core()->colors().data())) != m_knownColorIndexes.cend();
+    return std::binary_search(m_knownColorIndexes.cbegin(), m_knownColorIndexes.cend(),
+                              quint16(col - core()->colors().data()));
 }
 
 const QVector<const Color *> Item::knownColors() const
