@@ -47,10 +47,10 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
 
     QString text = "### BrickStore " BRICKSTORE_VERSION " (build: " BRICKSTORE_BUILD_NUMBER ")\n\n"_l1;
     auto sysInfo = SystemInfo::inst()->asMap();
-    sysInfo.remove("os.memory"_l1);
     sysInfo.remove("os.type"_l1);
     sysInfo.remove("os.version"_l1);
-    sysInfo.remove("os.gpu.arch"_l1);
+    sysInfo.remove("hw.gpu.arch"_l1);
+    sysInfo.remove("hw.memory"_l1);
     sysInfo.remove("brickstore.version"_l1);
     sysInfo["brickstore.ldraw"_l1] = bool(LDraw::core());
 

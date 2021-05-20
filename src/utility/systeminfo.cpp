@@ -70,11 +70,11 @@ SystemInfo::SystemInfo()
     m_map["brickstore.version"_l1] = QCoreApplication::applicationVersion();
 
     // set below - may be delayed due to external processes involved
-    // m_map["os.cpu"_l1] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
-    // m_map["os.gpu"_l1] = "e.g. NVIDIA GeForce GTX 1650";
-    // m_map["os.gpu.arch"_l1] = "intel|amd|nvidia";
-    // m_map["os.memory"_l1] = physmem in bytes;
-    // m_map["os.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
+    // m_map["hw.cpu"_l1] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
+    // m_map["hw.gpu"_l1] = "e.g. NVIDIA GeForce GTX 1650";
+    // m_map["hw.gpu.arch"_l1] = "intel|amd|nvidia";
+    // m_map["hw.memory"_l1] = physmem in bytes;
+    // m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 
 
     // -- CPU ------------------------------------------------
@@ -107,7 +107,7 @@ SystemInfo::SystemInfo()
     auto cpuFutureWatcher = new QFutureWatcher<QString>();
     QObject::connect(cpuFutureWatcher, &QFutureWatcher<QString>::finished,
                      qApp, [this, cpuFutureWatcher]() {
-        m_map["os.cpu"_l1] = cpuFutureWatcher->result();
+        m_map["hw.cpu"_l1] = cpuFutureWatcher->result();
         cpuFutureWatcher->deleteLater();
         if (--m_futuresRunning == 0)
             emit initialized();
@@ -153,8 +153,8 @@ SystemInfo::SystemInfo()
     auto gpuFutureWatcher = new QFutureWatcher<QPair<QString, QString>>();
     connect(gpuFutureWatcher, &QFutureWatcher<QPair<QString, QString>>::finished,
             this, [this, gpuFutureWatcher]() {
-        m_map["os.gpu"_l1] = gpuFutureWatcher->result().first;
-        m_map["os.gpu.arch"_l1] = gpuFutureWatcher->result().second;
+        m_map["hw.gpu"_l1] = gpuFutureWatcher->result().first;
+        m_map["hw.gpu.arch"_l1] = gpuFutureWatcher->result().second;
         gpuFutureWatcher->deleteLater();
         if (--m_futuresRunning == 0)
             emit initialized();
@@ -197,8 +197,8 @@ SystemInfo::SystemInfo()
 #  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
 #endif
 
-    m_map["os.memory"_l1] = physmem;
-    m_map["os.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
+    m_map["hw.memory"_l1] = physmem;
+    m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 }
 
 QVariantMap SystemInfo::asMap() const
@@ -208,5 +208,5 @@ QVariantMap SystemInfo::asMap() const
 
 quint64 SystemInfo::physicalMemory() const
 {
-    return m_map["os.memory"_l1].toULongLong();
+    return m_map["hw.memory"_l1].toULongLong();
 }
