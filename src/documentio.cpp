@@ -1108,13 +1108,20 @@ DocumentIO::ResolveResult DocumentIO::resolveIncomplete(Lot *lot)
         return ResolveResult::Direct;
 
     } else {
-        qWarning() << "failed: insufficient data (item=" << ic.m_item_id << ", itemtype="
-           << QByteArray(1, ic.m_itemtype_id) << ", color=" << ic.m_color_id << ")";
-
         auto item = lot->item();
         auto color = lot->color();
 
+        qWarning().noquote() << "Unknown item/color id:" << QByteArray(1, ic.m_itemtype_id)
+                             << ic.m_item_id << "@" << ic.m_color_id;
+
         bool ok = BrickLink::core()->applyChangeLog(item, color, lot->isIncomplete());
+
+        if (ok) {
+            qWarning().noquote() << " > resolved via CL to:" << QByteArray(1, item->itemTypeId())
+                                 << item->id() << "@" << color->id();
+            lot->setResolvedThroughChangeLog(true);
+        }
+
         lot->setItem(item);
         lot->setColor(color);
 
