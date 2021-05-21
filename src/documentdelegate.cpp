@@ -152,7 +152,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     if (twoLiners.contains(idx.column())
             && (w > (idx.model()->headerData(idx.column(), Qt::Horizontal, Document::HeaderDefaultWidthRole).toInt()
                      * option1.fontMetrics.averageCharWidth()))) {
-        w = int(w / 1.9);  // we can wrap to two lines (plus 10% security margin)
+        w = int(w / 1.9);  // we can wrap to two lines (plus 10% safety margin)
     }
 
     if (idx.column() == Document::Color)
