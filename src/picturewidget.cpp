@@ -268,10 +268,18 @@ void PictureWidget::redraw()
     w_image->setPixmap({ });
 
     if (m_item) {
-        w_text->setText("<center><b>"_l1 +
-                        QLatin1String(m_item->id()) +
-                        "</b>&nbsp; "_l1 +
-                        m_item->name() +
+        QString cs;
+        if (m_color && m_color->id()) {
+            QColor color = m_color->color();
+            cs = R"(<b><font color=")"_l1 % Utility::textColor(color).name() %
+                    R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
+                    m_color->name() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
+        }
+
+        w_text->setText("<center><b>"_l1 %
+                        QLatin1String(m_item->id()) %
+                        "</b>&nbsp; "_l1 % cs %
+                        m_item->name() %
                         "</center>"_l1);
     } else {
         w_text->setText({ });
