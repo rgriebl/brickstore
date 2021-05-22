@@ -76,10 +76,12 @@
 #include "historylineedit.h"
 #include "checkforupdates.h"
 #include "announcements.h"
+#include "itemscanner.h"
 
 #include "scriptmanager.h"
 #include "script.h"
 #include "exception.h"
+
 
 using namespace std::chrono_literals;
 
@@ -605,6 +607,10 @@ FrameWork::FrameWork(QWidget *parent)
     } else {
         MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
     }
+
+#if defined(BS_HAS_OPENCV)
+    (void) ItemScanner::inst();
+#endif
 
     m_running = true;
 

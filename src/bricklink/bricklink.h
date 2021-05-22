@@ -733,9 +733,9 @@ private:
     friend Core *core();
     friend Core *create(const QString &, QString *);
 
-private:
     QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
 
+private:
     void updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority = false);
     void updatePicture(BrickLink::Picture *pic, bool highPriority = false);
     friend void PriceGuide::update(bool);

@@ -13,7 +13,7 @@
 */
 #include <utility>
 #include <algorithm>
-#if defined(AM_HAS_PARALLEL_STL) && __has_include(<execution>)
+#if defined(BS_HAS_PARALLEL_STL) && __has_include(<execution>)
 #  include <execution>
 #  if (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
 #    define AM_SORT_PARALLEL

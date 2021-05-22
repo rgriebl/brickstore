@@ -47,6 +47,7 @@
 #include "messagebox.h"
 #include "framework.h"
 #include "config.h"
+#include "itemscannerdialog.h"
 
 using namespace std::chrono_literals;
 
@@ -67,6 +68,7 @@ public:
     QListView *      w_thumbs;
     HistoryLineEdit *w_filter;
     QToolButton *    w_pcc;
+    QToolButton *    w_minifig = nullptr;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QToolButton *    w_zoomLevel;
@@ -288,6 +290,31 @@ void SelectItem::init()
         }
     });
 
+#if defined(BS_HAS_OPENCV)
+    d->w_minifig = new QToolButton;
+    d->w_minifig->setIcon(QIcon::fromTheme("minifig"_l1));
+    d->w_minifig->setAutoRaise(true);
+    connect(d->w_minifig, &QToolButton::clicked, this, [this]() {
+        ItemScannerDialog isd(this);
+        if (isd.exec() == QDialog::Accepted) {
+            auto items = isd.items();
+
+            if (!items.isEmpty()) {
+                const BrickLink::Item *oldItem = currentItem();
+                d->w_items->clearSelection();
+
+                QByteArrayList filter;
+                for (const auto *item : items)
+                    filter << item->id();
+                d->w_filter->setText(BrickLink::ItemModel::tr("id:") %
+                                     QString::fromLatin1(filter.join(',')));
+                if (d->itemModel->index(oldItem).isValid())
+                    setCurrentItem(oldItem, false);
+            }
+        }
+    });
+#endif
+
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
     d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"_l1));
@@ -464,6 +491,10 @@ void SelectItem::init()
     viewlay->setSpacing(0);
     viewlay->addSpacing(5);
     viewlay->addWidget(d->w_pcc);
+    if (d->w_minifig) {
+        viewlay->addSpacing(5);
+        viewlay->addWidget(d->w_minifig);
+    }
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomOut);
     viewlay->addWidget(d->w_zoomLevel);
@@ -518,6 +549,8 @@ void SelectItem::languageChange()
         b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
     };
     setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
+    if (d->w_minifig)
+        setToolTipOnButton(d->w_minifig, tr("Find a Minifig using a Webcam"));
     setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
@@ -600,11 +633,6 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
     }
 }
 
-const BrickLink::Color *SelectItem::colorFilter() const
-{
-    return d->m_colorFilter;
-}
-
 void SelectItem::setColorFilter(const BrickLink::Color *color)
 {
     if (color != d->m_colorFilter) {
@@ -641,6 +669,9 @@ void SelectItem::itemTypeUpdated()
 
     if (!itemtype || !itemtype->hasColors())
         d->itemModel->setFilterColor(nullptr);
+
+    if (d->w_minifig)
+        d->w_minifig->setEnabled(itemtype && itemtype->id() == 'M');
 
     emit currentItemTypeChanged(itemtype);
     emit hasColors(itemtype ? itemtype->hasColors() : false);
