@@ -1816,7 +1816,7 @@ QMenu *FrameWork::createPopupMenu()
 {
     auto menu = QMainWindow::createPopupMenu();
     if (menu) {
-        menu->addAction(tr("Customize Toolbar"), [=]() {
+        menu->addAction(tr("Customize Toolbar..."), [=]() {
             showSettings("toolbar");
         });
     }

@@ -33,6 +33,29 @@
     </message>
 </context>
 <context>
+    <name>ActionModel</name>
+    <message>
+        <source>Bar Separator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Space Separator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Flexible Space Separator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Separators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Action name</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AddItemDialog</name>
     <message>
         <source>Add Items to %1</source>
@@ -1683,6 +1706,24 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Important Announcements...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Del</source>
+        <comment>Edit|Delete</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+,</source>
+        <comment>Extras|Settings</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Customize Toolbar...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -2909,10 +2950,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Updates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Automatically update cached data</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3100,6 +3137,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Toolbar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Customize the main toolbar using drag-and-drop</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ShortcutModel</name>
@@ -3231,6 +3276,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Weight:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ToolBarModel</name>
+    <message>
+        <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
