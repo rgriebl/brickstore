@@ -159,7 +159,7 @@ signals:
     void columnLayoutIdsOrderChanged(const QStringList &ids);
     void columnLayoutIdsChanged(const QStringList &ids);
     void shortcutsChanged(const QVariantMap &list);
-    void sentryConsentChanged(SentryConsent consent);
+    void sentryConsentChanged(Config::SentryConsent consent);
     void toolBarActionsChanged(const QStringList &actions);
 
 protected:

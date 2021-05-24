@@ -77,7 +77,7 @@ public:
 
         FieldCount
     };
-    Q_ENUMS(Field)
+    Q_ENUM(Field)
 
     enum ExtraRoles {
         FilterRole = Qt::UserRole,

@@ -993,7 +993,7 @@ bool FrameWork::setupToolBar()
 
     actionNames.append({ "|"_l1, "widget_progress"_l1, "|"_l1 });
 
-    for (const QString &an : actionNames) {
+    for (const QString &an : qAsConst(actionNames)) {
         if (an == "-"_l1) {
             m_toolbar->addSeparator()->setObjectName(an);
         } else if (an == "|"_l1) {
@@ -1816,7 +1816,7 @@ QMenu *FrameWork::createPopupMenu()
 {
     auto menu = QMainWindow::createPopupMenu();
     if (menu) {
-        menu->addAction(tr("Customize Toolbar..."), [=]() {
+        menu->addAction(tr("Customize Toolbar..."), this, [=]() {
             showSettings("toolbar");
         });
     }

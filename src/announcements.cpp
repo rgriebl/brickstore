@@ -178,7 +178,7 @@ void Announcements::showNewAnnouncements()
     QString md;
     QVector<quint64> shownIds;
 
-    for (const auto &a : m_announcements) {
+    for (const auto &a : qAsConst(m_announcements)) {
         if (m_readIds.contains(a.m_id))
             continue;
         shownIds << a.m_id;

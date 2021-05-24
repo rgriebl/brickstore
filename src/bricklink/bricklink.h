@@ -761,8 +761,8 @@ private:
     static void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
-    void pictureJobFinished(TransferJob *j, Picture *pic);
-    void priceGuideJobFinished(TransferJob *j, PriceGuide *pg);
+    void pictureJobFinished(TransferJob *j, BrickLink::Picture *pic);
+    void priceGuideJobFinished(TransferJob *j, BrickLink::PriceGuide *pg);
 
     void priceGuideLoaded(BrickLink::PriceGuide *pg);
     void pictureLoaded(BrickLink::Picture *pic);

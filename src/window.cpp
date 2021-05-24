@@ -690,18 +690,16 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
             w_list, &QWidget::setDisabled);
 
     bool columnsSet = false;
-    bool sortFilterSet = false;
 
     if (!columnLayout.isEmpty())
         columnsSet = w_header->restoreLayout(columnLayout);
     if (!sortFilterState.isEmpty())
-        sortFilterSet = m_doc->restoreSortFilterState(sortFilterState);
+        m_doc->restoreSortFilterState(sortFilterState);
 
     if (!columnsSet) {
         auto layout = Config::inst()->columnLayout("user-default"_l1);
         if (!w_header->restoreLayout(layout))
             resizeColumnsToDefault();
-        columnsSet = true;
     }
 
     m_ccw = new ColumnChangeWatcher(this, w_header);
@@ -2898,12 +2896,12 @@ void Window::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &
 
 
 static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
-static const QString autosaveTemplate = "brickstore_%1.autosave"_l1;
+static const char *autosaveTemplate = "brickstore_%1.autosave";
 
 void Window::deleteAutosave()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    QString filename = autosaveTemplate.arg(m_uuid.toString());
+    QString filename = QString::fromLatin1(autosaveTemplate).arg(m_uuid.toString());
     temp.remove(filename);
 }
 
@@ -2937,7 +2935,7 @@ private:
 void AutosaveJob::run()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    QString fileName = autosaveTemplate.arg(m_uuid.toString());
+    QString fileName = QString::fromLatin1(autosaveTemplate).arg(m_uuid.toString());
     QString newFileName = fileName % u".new";
 
     { // reading is cheaper than writing, so check first
@@ -3003,7 +3001,7 @@ void Window::autosave() const
 int Window::restorableAutosaves()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    return temp.entryList({ autosaveTemplate.arg("*"_l1) }).count();
+    return temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) }).count();
 }
 
 const QVector<Window *> Window::processAutosaves(AutosaveAction action)
@@ -3011,7 +3009,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
     QVector<Window *> restored;
 
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    const QStringList ondisk = temp.entryList({ autosaveTemplate.arg("*"_l1) });
+    const auto ondisk = temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) });
 
     for (const QString &filename : ondisk) {
         QFile f(temp.filePath(filename));

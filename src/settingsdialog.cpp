@@ -71,7 +71,7 @@ public:
         }
 
         if (options.testFlag(AddSeparators)) {
-            for (const QAction *a : m_separatorActions)
+            for (const QAction *a : qAsConst(m_separatorActions))
                 m_actions.insert(tr("Separators"), a->objectName());
         }
         if (!options.testFlag(AddSubMenus)) {
@@ -302,7 +302,7 @@ public:
 
     int rowCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : m_actions.values().size();
+        return parent.isValid() ? 0 : m_actions.size();
     }
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const override
@@ -950,7 +950,9 @@ void SettingsDialog::accept()
 void SettingsDialog::showEvent(QShowEvent *e)
 {
     QDialog::showEvent(e);
-    resize(sizeHint());
+
+    w_sc_list->setColumnWidth(1, w_sc_list->width() * 2 / 5);
+    w_sc_list->setColumnWidth(2, w_sc_list->width() * 2 / 5);
 }
 
 void SettingsDialog::currenciesUpdated()
