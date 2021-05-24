@@ -736,7 +736,8 @@ void FrameWork::translateActions()
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
         { "edit_paste_silent",              tr("Paste silent"),                       tr("Ctrl+Shift+V", "Edit|Paste silent") },
         { "edit_duplicate",                 tr("Duplicate"),                          tr("Ctrl+D", "Edit|Duplicate") },
-        { "edit_delete",                    tr("Delete"),                             QKeySequence::Delete },
+        { "edit_delete",                    tr("Delete"),                             tr("Del", "Edit|Delete") },
+        // ^^ QKeySequence::Delete has Ctrl+D as secondary on macOS and Linux and this clashes with Duplicate
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
         { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
@@ -744,7 +745,7 @@ void FrameWork::translateActions()
         { "edit_copy_fields",               tr("Copy values from document..."),       },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|Select None") },
-        //                                                   QKeySequence::Deselect is only mapped on Linux
+        // ^^ QKeySequence::Deselect is only mapped on Linux
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
         { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
         { "menu_view",                      tr("&View"),                              },
@@ -759,7 +760,7 @@ void FrameWork::translateActions()
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
         { "menu_extras",                    tr("E&xtras"),                            },
         { "update_database",                tr("Update Database"),                    },
-        { "configure",                      tr("Settings..."),                        },
+        { "configure",                      tr("Settings..."),                        tr("Ctrl+,", "Extras|Settings") },
         { "reload_scripts",                 tr("Reload user scripts"),                },
         { "menu_window",                    tr("&Windows"),                           },
         { "menu_help",                      tr("&Help"),                              },
@@ -853,20 +854,21 @@ void FrameWork::translateActions()
             if (!at.text.isNull())
                 a->setText(at.text);
 
-            QKeySequence defaultShortcut;
+            QList<QKeySequence> defaultShortcuts;
             if (at.standardKey != QKeySequence::UnknownKey)
-                defaultShortcut = QKeySequence(at.standardKey);
+                defaultShortcuts = QKeySequence::keyBindings(at.standardKey);
             else if (!at.shortcut.isNull())
-                defaultShortcut = QKeySequence(at.shortcut);
-            a->setProperty("bsShortcut", QVariant::fromValue(defaultShortcut));
+                defaultShortcuts = QKeySequence::listFromString(at.shortcut);
+            a->setProperty("bsShortcut", QVariant::fromValue(defaultShortcuts));
 
-            auto shortcut = customShortcuts.value(QLatin1String(at.name)).value<QKeySequence>();
-            if (shortcut.isEmpty())
-                shortcut = defaultShortcut;
+            QList<QKeySequence> shortcuts = defaultShortcuts;
+            auto custom = customShortcuts.value(QLatin1String(at.name)).value<QKeySequence>();
+            if (!custom.isEmpty())
+                shortcuts = { custom };
 
-            a->setShortcut(shortcut);
-            if (!shortcut.isEmpty())
-                a->setToolTip(Utility::toolTipLabel(a->text(), shortcut));
+            a->setShortcuts(shortcuts);
+            if (!shortcuts.isEmpty())
+                a->setToolTip(Utility::toolTipLabel(a->text(), shortcuts));
             else
                 a->setToolTip(a->text());
 
@@ -1160,15 +1162,9 @@ void FrameWork::createActions()
     a->setObjectName("edit_redo"_l1);
     a->setProperty("bsAction", true);
 
-    a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Delete)), this),
-            &QShortcut::activated, a, &QAction::trigger);
-    a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(int(Qt::ControlModifier) + int(Qt::Key_Insert)), this),
-            &QShortcut::activated, a, &QAction::trigger);
-    a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
-            &QShortcut::activated, a, &QAction::trigger);
+    (void) newQAction(this, "edit_cut", NeedSelection(1));
+    (void) newQAction(this, "edit_copy", NeedSelection(1));
+    (void) newQAction(this, "edit_paste", NeedDocument);
     (void) newQAction(this, "edit_paste_silent", NeedDocument);
     (void) newQAction(this, "edit_duplicate", NeedSelection(1));
     (void) newQAction(this, "edit_delete", NeedSelection(1));

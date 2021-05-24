@@ -60,5 +60,6 @@ double roundTo(double f, int decimals);
 QString localForInternationalCurrencySymbol(const QString &international_symbol);
 
 QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
+QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcut = { }, const QString &extended = { });
 
 } // namespace Utility

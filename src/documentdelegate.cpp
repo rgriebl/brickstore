@@ -689,9 +689,10 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
     int key = -1;
 
     if (keypress) {
-        key = static_cast<QKeyEvent *>(e)->key();
-        fakeeditkey = (key == Qt::Key_Execute);
-        editkey = ((key == Qt::Key_Return) || (key == Qt::Key_Enter));
+        auto *ke = static_cast<QKeyEvent *>(e);
+        fakeeditkey = (ke->key() == Qt::Key_Execute);
+        editkey = ((ke->key() == Qt::Key_Return) || (ke->key() == Qt::Key_Enter))
+                && ((ke->modifiers() == Qt::NoModifier) || (ke->modifiers() == Qt::ControlModifier));
     }
 
     switch (idx.column()) {

@@ -140,7 +140,9 @@ UndoAction::UndoAction(Type t, QUndoStack *stack, QObject *parent)
     : QWidgetAction(parent)
     , m_type(t)
     , m_undoStack(stack)
-{ }
+{
+    setDescription({ });
+}
 
 UndoAction::UndoAction(Type t, QUndoGroup *group, QObject *parent)
     : UndoAction(t, group->activeStack(), parent)

@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 - The Toolbar is now fully customizable via the `Settings` dialog.
 
+### Improvements
+- Enabled most secondary keyboard shortcuts (e.g. `Ctrl+W` to close documents on Windows). See the
+  `Keyboard` page in the `Settings` dialog for a full list.
+
 ### Fixed
 - `Reset difference mode base values` is now only acting on the selected items again.
 - Fixed a few macOS printing bugs: the scaling was off, the wrong colors where used on dark themes

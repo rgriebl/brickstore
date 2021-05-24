@@ -289,6 +289,12 @@ double Utility::roundTo(double d, int n)
 
 QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
 {
+    return toolTipLabel(label, shortcut.isEmpty() ? QList<QKeySequence> { }
+                                                  : QList<QKeySequence> { shortcut }, extended);
+}
+
+QString Utility::toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts, const QString &extended)
+{
     static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
     static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
 
@@ -298,7 +304,11 @@ QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const
     QString extendedTable;
     if (!extended.isEmpty())
         extendedTable = fmtExt.arg(extended);
-    return fmt.arg(label, color.name(), shortcut.toString(QKeySequence::NativeText), extendedTable);
+    QString shortcutText;
+    if (!shortcuts.isEmpty())
+        shortcutText = QKeySequence::listToString(shortcuts, QKeySequence::NativeText);
+
+    return fmt.arg(label, color.name(), shortcutText, extendedTable);
 }
 
 QImage Utility::stripeImage(int h, const QColor &stripeColor, const QColor &baseColor)

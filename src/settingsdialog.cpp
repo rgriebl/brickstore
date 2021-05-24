@@ -444,8 +444,8 @@ public:
         const auto list = m_actions.values();
         for (const QString &actionName : list) {
             if (QAction *action = FrameWork::inst()->findAction(actionName)) {
-                Entry entry = { action->property("bsShortcut").value<QKeySequence>(),
-                                action->shortcut() };
+                Entry entry = { action->property("bsShortcut").value<QList<QKeySequence>>(),
+                                action->shortcuts() };
                 m_entries.insert(actionName, entry);
             }
         }
@@ -455,8 +455,8 @@ public:
     {
         QVariantMap saved;
         for (auto it = m_entries.cbegin(); it != m_entries.cend(); ++it) {
-            if (it->key != it->defaultKey)
-                saved.insert(it.key(), it->key);
+            if ((it->keys != it->defaultKeys) && !it->keys.isEmpty())
+                saved.insert(it.key(), QVariant::fromValue(it->keys.at(0)));
         }
         Config::inst()->setShortcuts(saved);
     }
@@ -477,11 +477,14 @@ public:
         }
         const Entry &entry = entryAt(idx);
 
-        if (role == Qt::DisplayRole) {
+        switch (role) {
+        case Qt::DisplayRole:
+        case Qt::ToolTipRole:
             switch (idx.column()) {
-            case 1: return entry.key.toString(QKeySequence::NativeText);
-            case 2: return entry.defaultKey.toString(QKeySequence::NativeText);
+            case 1: return QKeySequence::listToString(entry.keys, QKeySequence::NativeText);
+            case 2: return QKeySequence::listToString(entry.defaultKeys, QKeySequence::NativeText);
             }
+            break;
         }
         return { };
     }
@@ -500,32 +503,32 @@ public:
         return { };
     }
 
-    QKeySequence shortcut(const QModelIndex &idx) const
+    const QList<QKeySequence> shortcuts(const QModelIndex &idx) const
     {
-        return entryAt(idx).key;
+        return entryAt(idx).keys;
     }
 
-    QKeySequence defaultShortcut(const QModelIndex &idx) const
+    const QList<QKeySequence> defaultShortcuts(const QModelIndex &idx) const
     {
-        return entryAt(idx).defaultKey;
+        return entryAt(idx).defaultKeys;
     }
 
-    bool setShortcut(const QModelIndex &idx, const QKeySequence &newShortcut)
+    bool setShortcut(const QModelIndex &idx, const QList<QKeySequence> &newShortcuts)
     {
         if (idx.isValid()) {
             Entry &entry = entryAt(idx);
 
-            if (entry.key == newShortcut)
+            if (entry.keys == newShortcuts)
                 return true; // no change
 
-            if (!newShortcut.isEmpty()) {
+            if (!newShortcuts.isEmpty()) {
                 for (const Entry &entry : qAsConst(m_entries)) {
-                    if (entry.key == newShortcut)
+                    if (entry.keys == newShortcuts)
                         return false; // duplicate
                 }
             }
 
-            entry.key = newShortcut;
+            entry.keys = newShortcuts;
             auto cidx = idx.siblingAtColumn(1);
             emit dataChanged(cidx, cidx);
             return true;
@@ -535,21 +538,21 @@ public:
 
     bool resetShortcut(const QModelIndex &idx)
     {
-        return setShortcut(idx, entryAt(idx).defaultKey);
+        return setShortcut(idx, entryAt(idx).defaultKeys);
     }
 
     void resetAllShortcuts()
     {
         beginResetModel();
         for (auto &entry : m_entries)
-            entry.key = entry.defaultKey;
+            entry.keys = entry.defaultKeys;
         endResetModel();
     }
 
 private:
     struct Entry {
-        QKeySequence defaultKey;
-        QKeySequence key;
+        QList<QKeySequence> defaultKeys;
+        QList<QKeySequence> keys;
     };
 
     Entry &entryAt(const QModelIndex &idx)
@@ -822,10 +825,10 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         w_sc_edit->setEnabled(idx.isValid());
         w_sc_reset->setEnabled(idx.isValid());
         if (idx.isValid()) {
-            auto shortcut = m_sc_model->shortcut(idx);
-            auto defaultShortcut = m_sc_model->defaultShortcut(idx);
-            w_sc_edit->setKeySequence(shortcut);
-            w_sc_reset->setEnabled(shortcut != defaultShortcut);
+            auto shortcuts = m_sc_model->shortcuts(idx);
+            auto defaultShortcuts = m_sc_model->defaultShortcuts(idx);
+            w_sc_edit->setKeySequence(shortcuts.isEmpty() ? QKeySequence { } : shortcuts.at(0));
+            w_sc_reset->setEnabled(shortcuts != defaultShortcuts);
         }
     });
     connect(m_sc_model, &QAbstractItemModel::dataChanged,
@@ -833,10 +836,10 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         QModelIndex idx = m_sc_proxymodel->mapToSource(w_sc_list->currentIndex());
         if (idx.isValid() && QItemSelection(tl.siblingAtColumn(0), br.siblingAtColumn(0))
                 .contains(idx.siblingAtColumn(0))) {
-            auto shortcut = m_sc_model->shortcut(idx);
-            auto defaultShortcut = m_sc_model->defaultShortcut(idx);
-            w_sc_edit->setKeySequence(shortcut);
-            w_sc_reset->setEnabled(shortcut != defaultShortcut);
+            auto shortcuts = m_sc_model->shortcuts(idx);
+            auto defaultShortcuts = m_sc_model->defaultShortcuts(idx);
+            w_sc_edit->setKeySequence(shortcuts.isEmpty() ? QKeySequence { } : shortcuts.at(0));
+            w_sc_reset->setEnabled(shortcuts != defaultShortcuts);
         }
     });
     connect(w_sc_edit, &QKeySequenceEdit::editingFinished,
@@ -856,7 +859,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         }
 
         if (!m_sc_model->setShortcut(m_sc_proxymodel->mapToSource(w_sc_list->currentIndex()),
-                                     w_sc_edit->keySequence())) {
+                                     { w_sc_edit->keySequence() })) {
             MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
         }
     });
