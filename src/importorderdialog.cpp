@@ -472,7 +472,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
                     auto id = p.elementText(e, "ORDERID");
 
                     if (id.isEmpty())
-                        throw("Order without ORDERID");
+                        throw Exception("Order without ORDERID");
 
                     auto order = new BrickLink::Order(id, (type == 'r')
                                                       ? BrickLink::OrderType::Received
