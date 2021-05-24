@@ -1284,7 +1284,7 @@ void FrameWork::createActions()
                       Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_show_diff_indicators", 0, true,
                       Config::inst(), &Config::setShowDifferenceIndicators);
-    (void) newQAction(this, "view_reset_diff_mode", NeedDocument);
+    (void) newQAction(this, "view_reset_diff_mode", NeedSelection(1));
 
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);

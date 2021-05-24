@@ -1218,7 +1218,7 @@ void Window::on_edit_filter_from_selection_triggered()
 
 void Window::on_view_reset_diff_mode_triggered()
 {
-    m_doc->resetDifferenceMode();
+    m_doc->resetDifferenceMode(selectedLots());
 }
 
 void Window::on_edit_status_include_triggered()

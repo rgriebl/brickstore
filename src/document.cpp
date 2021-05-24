@@ -351,19 +351,18 @@ void CurrencyCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-ResetDifferenceModeCmd::ResetDifferenceModeCmd(Document *doc)
+ResetDifferenceModeCmd::ResetDifferenceModeCmd(Document *doc, const LotList &lots)
     : QUndoCommand(qApp->translate("ResetDifferenceModeCmd", "Reset difference mode base values"))
     , m_doc(doc)
-{ }
+    , m_differenceBase(doc->m_differenceBase)
+{
+    for (const Lot *lot : lots)
+        m_differenceBase.insert(lot, *lot);
+}
 
 int ResetDifferenceModeCmd::id() const
 {
     return CID_ResetDifferenceMode;
-}
-
-bool ResetDifferenceModeCmd::mergeWith(const QUndoCommand *other)
-{
-    return (other->id() == id());
 }
 
 void ResetDifferenceModeCmd::redo()
@@ -1000,19 +999,14 @@ void Document::updateLotFlags(const Lot *lot)
     setLotFlags(lot, errors, updated);
 }
 
-void Document::resetDifferenceMode()
+void Document::resetDifferenceMode(const LotList &lotList)
 {
-    m_undo->push(new ResetDifferenceModeCmd(this));
+    m_undo->push(new ResetDifferenceModeCmd(this, lotList.isEmpty() ? lots() : lotList));
 }
 
-void Document::resetDifferenceModeDirect(QHash<const Lot *, Lot>
-                                         &differenceBase) {
+void Document::resetDifferenceModeDirect(QHash<const Lot *, Lot> &differenceBase)
+{
     std::swap(m_differenceBase, differenceBase);
-
-    if (m_differenceBase.isEmpty()) {
-        for (const auto *lot : qAsConst(m_lots))
-            m_differenceBase.insert(lot, *lot);
-    }
 
     for (const auto *lot : qAsConst(m_lots))
         updateLotFlags(lot);

@@ -85,9 +85,8 @@ private:
 class ResetDifferenceModeCmd : public QUndoCommand
 {
 public:
-    ResetDifferenceModeCmd(Document *doc);
+    ResetDifferenceModeCmd(Document *doc, const LotList &lots);
     int id() const override;
-    bool mergeWith(const QUndoCommand *other) override;
 
     void redo() override;
     void undo() override;

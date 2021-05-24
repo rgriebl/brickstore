@@ -167,7 +167,7 @@ public:
 
     QString filterToolTip() const;
 
-    void resetDifferenceMode();
+    void resetDifferenceMode(const LotList &lotList);
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
