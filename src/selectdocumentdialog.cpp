@@ -30,6 +30,7 @@
 
 #include "utility.h"
 #include "document.h"
+#include "config.h"
 #include "selectdocumentdialog.h"
 
 
@@ -155,7 +156,7 @@ SelectMergeMode::SelectMergeMode(Document::MergeMode defaultMode, QWidget *paren
     : QWidget(parent)
 {
     createFields(this);
-    m_allGroup->button(int(defaultMode))->animateClick();
+    setDefaultMode(defaultMode);
 }
 
 Document::MergeMode SelectMergeMode::defaultMergeMode() const
@@ -177,6 +178,45 @@ QHash<Document::Field, Document::MergeMode> SelectMergeMode::fieldMergeModes() c
         }
     }
     return mergeModes;
+}
+
+QByteArray SelectMergeMode::saveState() const
+{
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SMM") << qint32(1);
+
+    ds << qint32(m_groups.size());
+    for (QButtonGroup *bg : m_groups)
+        ds << qint32(bg->checkedId());
+
+    return ba;
+}
+
+bool SelectMergeMode::restoreState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "SMM") || (version != 1))
+        return false;
+
+    qint32 size = -1;
+    ds >> size;
+    if (size != m_groups.size())
+        return false;
+
+    for (int i = 0; i < size; ++i) {
+        qint32 mode = qint32(Document::MergeMode::Ignore);
+        ds >> mode;
+        if (auto *button = m_groups.at(i)->button(mode))
+            button->setChecked(true);
+    }
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+    return true;
 }
 
 
@@ -266,19 +306,10 @@ void SelectMergeMode::createFields(QWidget *parent)
 #else
     connect(m_allGroup, &QButtonGroup::idClicked,
 #endif
-            this, [this](int mergeMode) {
-        for (QButtonGroup *group : qAsConst(m_groups)) {
-            int m = mergeMode;
-            while (true) {
-                if (auto *b = group->button(m)) {
-                    b->setChecked(true);
-                    break;
-                } else {
-                    m >>= 1;
-                }
-            }
-        }
-        emit mergeModesChanged(mergeMode != int(Document::MergeMode::Ignore));
+            this, [this](int id) {
+        auto mergeMode = Document::MergeMode(id);
+        setDefaultMode(mergeMode);
+        emit mergeModesChanged(mergeMode != Document::MergeMode::Ignore);
     });
 
     ++row;
@@ -328,6 +359,21 @@ void SelectMergeMode::createFields(QWidget *parent)
     }
 }
 
+void SelectMergeMode::setDefaultMode(Document::MergeMode defaultMode)
+{
+    for (QButtonGroup *group : qAsConst(m_groups)) {
+        int m = int(defaultMode);
+        while (true) {
+            if (auto *b = group->button(m)) {
+                b->setChecked(true);
+                break;
+            } else {
+                m >>= 1;
+            }
+        }
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -364,9 +410,7 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString
     : QWizard(parent)
 {
     setOptions(QWizard::IndependentPages);
-#ifdef Q_OS_WIN
     setWizardStyle(QWizard::ModernStyle);
-#endif
     QString title = tr("Copy or merge values");
 
     m_sd = new SelectDocument(self);
@@ -387,17 +431,33 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString
     mlayout->addWidget(m_mm);
     addPage(mpage);
 
+    connect(m_sd, &SelectDocument::documentSelected,
+            dpage, &WizardPage::setComplete);
+    connect(m_mm, &SelectMergeMode::mergeModesChanged,
+            mpage, &WizardPage::setComplete);
+
+    QByteArray ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/Geometry"_l1).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+
     dpage->adjustSize();
     mpage->adjustSize();
     QSize s = mpage->size().expandedTo(dpage->size());
     dpage->setFixedSize(s);
     mpage->setFixedSize(s);
 
-    connect(m_sd, &SelectDocument::documentSelected,
-            dpage, &WizardPage::setComplete);
-    connect(m_mm, &SelectMergeMode::mergeModesChanged,
-            mpage, &WizardPage::setComplete);
+    ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/MergeMode"_l1)
+            .toByteArray();
+    m_mm->restoreState(ba);
+
 }
+
+SelectCopyMergeDialog::~SelectCopyMergeDialog()
+{
+    Config::inst()->setValue("/MainWindow/SelectCopyMergeDialog/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue("/MainWindow/SelectCopyMergeDialog/MergeMode"_l1, m_mm->saveState());
+}
+
 
 LotList SelectCopyMergeDialog::lots() const
 {

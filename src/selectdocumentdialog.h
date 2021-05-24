@@ -70,11 +70,15 @@ public:
     Document::MergeMode defaultMergeMode() const;
     QHash<Document::Field, Document::MergeMode> fieldMergeModes() const;
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+
 signals:
     void mergeModesChanged(bool valid);
 
 private:
     void createFields(QWidget *parent);
+    void setDefaultMode(Document::MergeMode defaultMode);
 
     QButtonGroup *m_allGroup;
     QVector<QButtonGroup *> m_groups;
@@ -86,6 +90,7 @@ class SelectCopyMergeDialog : public QWizard
 public:
     SelectCopyMergeDialog(const Document *self, const QString &chooseDocText,
                           const QString &chooseFieldsText, QWidget *parent = nullptr);
+    ~SelectCopyMergeDialog() override;
 
     LotList lots() const;
     Document::MergeMode defaultMergeMode() const;
