@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.5.2] - 2021-05-24
+### Added
+- The Toolbar is now fully customizable via the `Settings` dialog.
+
+### Fixed
+- `Reset difference mode base values` is now only acting on the selected items again.
+- Fixed a few macOS printing bugs: the scaling was off, the wrong colors where used on dark themes
+  and the default paper size was not detected correctly.
+
+
 ## [2021.5.1] - 2021-05-18
 ### Added
 - The list of items in the `Add Item` dialog can now also be filtered by known-colors by clicking
@@ -287,7 +297,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.5.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.5.2...HEAD
+[2021.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.2
 [2021.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.1
 [2021.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.4.1
 [2021.3.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.3.3
