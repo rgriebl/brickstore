@@ -298,9 +298,9 @@ QString Utility::toolTipLabel(const QString &label, const QList<QKeySequence> &s
     static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
     static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
 
-    QColor color = gradientColor(qApp->palette().color(QPalette::Inactive, QPalette::ToolTipBase),
-                                 qApp->palette().color(QPalette::Inactive, QPalette::ToolTipText),
-                                 0.7);
+    QColor color = gradientColor(Utility::premultiplyAlpha(qApp->palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
+                                 Utility::premultiplyAlpha(qApp->palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),
+                                 0.8);
     QString extendedTable;
     if (!extended.isEmpty())
         extendedTable = fmtExt.arg(extended);
