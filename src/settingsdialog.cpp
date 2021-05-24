@@ -947,12 +947,12 @@ void SettingsDialog::accept()
     QDialog::accept();
 }
 
-void SettingsDialog::showEvent(QShowEvent *e)
+void SettingsDialog::resizeEvent(QResizeEvent *e)
 {
-    QDialog::showEvent(e);
+    QDialog::resizeEvent(e);
 
-    w_sc_list->setColumnWidth(1, w_sc_list->width() * 2 / 5);
-    w_sc_list->setColumnWidth(2, w_sc_list->width() * 2 / 5);
+    w_sc_list->setColumnWidth(1, e->size().width() / 6);
+    w_sc_list->setColumnWidth(2, e->size().width() / 6);
 }
 
 void SettingsDialog::currenciesUpdated()
