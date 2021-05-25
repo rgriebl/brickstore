@@ -81,7 +81,8 @@ Window *DocumentIO::open(const QString &s)
     return loadFrom(s);
 }
 
-Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item, int multiply,
+Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item,
+                                               const BrickLink::Color *color, int multiply,
                                                BrickLink::Condition condition,
                                                BrickLink::Status extraParts,
                                                bool includeInstructions)
@@ -97,9 +98,15 @@ Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item, int 
 
             for (const BrickLink::Item::ConsistsOf &part : parts) {
                 const BrickLink::Item *partItem = part.item();
+                const BrickLink::Color *partColor = part.color();
                 if (!partItem)
                     continue;
-                Lot *lot = new Lot(part.color(), partItem);
+                if (color && color->id() && partItem->itemType()->hasColors()
+                        && partColor && (partColor->id() == 0)) {
+                    partColor = color;
+                }
+
+                Lot *lot = new Lot(partColor, partItem);
                 lot->setQuantity(part.quantity() * multiply);
                 lot->setCondition(condition);
                 if (part.isExtra())

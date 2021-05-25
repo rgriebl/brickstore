@@ -78,7 +78,8 @@ public slots:
     void reFilter();
     void updateReFilterAction(bool isFiltered);
 
-    void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
+    void fileImportBrickLinkInventory(const BrickLink::Item *item,
+                                      const BrickLink::Color *color = nullptr, int quantity = 1,
                                       BrickLink::Condition condition = BrickLink::Condition::New);
 
 signals:

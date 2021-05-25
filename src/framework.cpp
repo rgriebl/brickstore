@@ -1362,13 +1362,14 @@ void FrameWork::openDocument(const QString &file)
     setupWindow(DocumentIO::open(file));
 }
 
-void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
-                                             BrickLink::Condition condition)
+void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item,
+                                             const BrickLink::Color *color,
+                                             int quantity, BrickLink::Condition condition)
 {
     if (!item)
         return;
 
-    if (auto doc = DocumentIO::importBrickLinkInventory(item, quantity, condition))
+    if (auto doc = DocumentIO::importBrickLinkInventory(item, color, quantity, condition))
         FrameWork::inst()->createWindow(doc);
 }
 

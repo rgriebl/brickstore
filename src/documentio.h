@@ -33,6 +33,7 @@ public:
     static Window *open();
     static Window *open(const QString &name);
     static Document *importBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
+                                              const BrickLink::Color *color = nullptr,
                                               int multiply = 1,
                                               BrickLink::Condition condition = BrickLink::Condition::New,
                                               BrickLink::Status extraParts = BrickLink::Status::Extra,

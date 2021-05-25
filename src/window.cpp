@@ -2149,14 +2149,20 @@ void Window::on_edit_partoutitems_triggered()
 
                         for (const BrickLink::Item::ConsistsOf &part : parts) {
                             auto partItem = part.item();
+                            auto partColor = part.color();
                             if (!partItem)
                                 continue;
-                            auto *newLot = new Lot(part.color(), partItem);
+                            if (lot->colorId() && partItem->itemType()->hasColors()
+                                    && partColor && (partColor->id() == 0)) {
+                                partColor = lot->color();
+                            }
+                            auto *newLot = new Lot(partColor, partItem);
                             newLot->setQuantity(part.quantity() * multiply);
                             newLot->setCondition(lot->condition());
                             newLot->setAlternate(part.isAlternate());
                             newLot->setAlternateId(part.alternateId());
                             newLot->setCounterPart(part.isCounterPart());
+
                             newLots << newLot;
                         }
                         m_doc->insertLotsAfter(lot, newLots);
@@ -2165,7 +2171,8 @@ void Window::on_edit_partoutitems_triggered()
                     }
                 }
             } else {
-                FrameWork::inst()->fileImportBrickLinkInventory(lot->item(), lot->quantity(), lot->condition());
+                FrameWork::inst()->fileImportBrickLinkInventory(lot->item(), lot->color(),
+                                                                lot->quantity(), lot->condition());
             }
         }
         if (inplace)

@@ -232,7 +232,7 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 
 void ImportInventoryDialog::importInventory()
 {
-    if (auto doc = DocumentIO::importBrickLinkInventory(item(), quantity(), condition(),
+    if (auto doc = DocumentIO::importBrickLinkInventory(item(), nullptr, quantity(), condition(),
                                                         extraParts(), includeInstructions())) {
         FrameWork::inst()->createWindow(doc);
     }
