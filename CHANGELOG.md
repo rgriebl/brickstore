@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2021.5.2] - 2021-05-24
+## [2021.5.2] - 2021-05-25
 ### Added
 - The Toolbar is now fully customizable via the `Settings` dialog.
 
