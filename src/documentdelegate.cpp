@@ -517,9 +517,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     p->setPen(fg);
 
-    x += margin / 2; // extra spacing
-    w -= margin;
-
     if (checkmark != 0) {
         QStyleOptionViewItem opt(option);
         opt.state &= ~QStyle::State_HasFocus;
@@ -532,11 +529,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 #else
         QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
 #endif
+        r = r.translated(-r.left() + opt.rect.left(), 0);
         int dx = margin;
         if (align & Qt::AlignHCenter)
-            dx = (opt.rect.width() - r.width()) / 2;
+            dx = (w - r.width()) / 2;
         else if (align & Qt::AlignRight)
-            dx = (opt.rect.width() - r.width() - margin);
+            dx = (w - r.width() - margin);
         opt.rect = r.translated(dx, 0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
@@ -551,9 +549,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QSize imgSize = image.size() / image.devicePixelRatio();
 
         if (align & Qt::AlignHCenter)
-            px = option.rect.left() + (option.rect.width() - imgSize.width()) / 2;
+            px = option.rect.left() + (w - imgSize.width()) / 2;
         if (align & Qt::AlignVCenter)
-            py = option.rect.top() + (option.rect.height() - imgSize.height()) / 2;
+            py = option.rect.top() + (h - imgSize.height()) / 2;
 
         p->drawImage(QPointF(px, py), image);
 
@@ -628,8 +626,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
             quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
 
-            if (align & Qt::AlignHCenter) // QTextLayout doesn't clip in this case
-                p->setClipRect(option.rect);
+            p->setClipRect(option.rect.adjusted(margin, 0, -margin, 0)); // QTextLayout doesn't clip
             tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
             if (lastLine.textStart() + lastLine.textLength() < str.length()) {
                 int elidePos = int(lastLine.naturalTextWidth());
