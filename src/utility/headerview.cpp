@@ -26,6 +26,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QToolTip>
+#include <QPixmapCache>
 
 #include "utility.h"
 #include "headerview.h"
@@ -34,24 +35,8 @@
 class MultipleSortColumnsProxyStyle : public QProxyStyle
 {
 public:
-    MultipleSortColumnsProxyStyle(QStyle *style = nullptr)
-        : QProxyStyle(style)
-    { }
-
     void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
                      const QWidget *widget) const override;
-
-private:
-    union hashkey {
-        uint k;
-        struct {
-            uint size    : 16;
-            uint level   : 8;
-            uint mode    : 8;  // Qt::SortOrder + 2 == not sorted
-        };
-    };
-
-    mutable QHash<uint, QPixmap> m_cache;
 };
 
 void MultipleSortColumnsProxyStyle::drawControl(QStyle::ControlElement element,
@@ -71,13 +56,12 @@ void MultipleSortColumnsProxyStyle::drawControl(QStyle::ControlElement element,
                 auto sortColumns = headerView->sortColumns();
                 for (int i = 0; i < sortColumns.size(); ++i) {
                     if (sortColumns.at(i).first == headerOpt->section) {
-                        hashkey k;
-                        k.size = iconSize;
-                        k.level = i;
-                        k.mode = headerView->isSorted() ? int(sortColumns.at(i).second) : 2;
+                        QString key = "hv_"_l1 % QString::number(iconSize) % "-"_l1 %
+                                QString::number(i) % "-"_l1 % QString::number(
+                                    headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
 
-                        QPixmap pix = m_cache.value(k.k);
-                        if (pix.isNull()) {
+                        QPixmap pix;
+                        if (!QPixmapCache::find(key, &pix)) {
                             QString name = "view-sort"_l1;
                             if (headerView->isSorted()) {
                                 name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
@@ -98,8 +82,7 @@ void MultipleSortColumnsProxyStyle::drawControl(QStyle::ControlElement element,
                                 p.end();
                                 pix = pix2;
                             }
-
-                            m_cache.insert(k.k, pix);
+                            QPixmapCache::insert(key, pix);
                         }
                         myheaderOpt.icon = QIcon(pix);
                     }
@@ -230,14 +213,15 @@ private:
 
 HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
     : QHeaderView(o, parent)
-    , m_proxyStyle(new MultipleSortColumnsProxyStyle(style()))
+    , m_proxyStyle(new MultipleSortColumnsProxyStyle())
 {
     setStyle(m_proxyStyle);
 
     connect(this, &QHeaderView::sectionClicked,
             this, [this](int section) {
-        auto firstSC = m_sortColumns.constFirst();
-        if (!m_isSorted && (section == firstSC.first)) {
+        auto firstSC = m_sortColumns.isEmpty() ? qMakePair(-1, Qt::AscendingOrder)
+                                               : m_sortColumns.constFirst();
+        if (!m_sortColumns.isEmpty() && !m_isSorted && (section == firstSC.first)) {
             m_isSorted = true;
             update();
             emit isSortedChanged(m_isSorted);
@@ -258,6 +242,10 @@ HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
                     m_sortColumns = { qMakePair(section, Qt::SortOrder(1 - firstSC.second)) };
                 else
                     m_sortColumns = { qMakePair(section, Qt::AscendingOrder) };
+            }
+            if (!m_isSorted) {
+                m_isSorted = true;
+                emit isSortedChanged(m_isSorted);
             }
             emit sortColumnsChanged(m_sortColumns);
         }

@@ -63,6 +63,8 @@ SOURCES += \
   $$PWD/welcomewidget.cpp \
   $$PWD/window.cpp
 
+macos:OBJECTIVE_SOURCES += $$PWD/application_mac.mm
+
 HEADERS += \
   $$PWD/announcements.h \
   $$PWD/announcements_p.h \

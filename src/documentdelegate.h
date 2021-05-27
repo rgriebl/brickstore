@@ -76,10 +76,6 @@ protected:
     mutable QSet<quint64> m_elided;
 
     static QVector<QColor> s_shades;
-    static QCache<quint64, QPixmap> s_status_cache;
-    static QCache<quint64, QPixmap> s_tag_cache;
-    static QCache<quint64, QPixmap> s_tagicon_cache;
-    static QCache<int, QPixmap> s_stripe_cache;
 
     struct TextLayoutCacheKey {
         QString text;
@@ -93,6 +89,4 @@ protected:
     };
     friend uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed);
     static QCache<TextLayoutCacheKey, QTextLayout> s_textLayoutCache;
-
-    static void clearCaches();
 };

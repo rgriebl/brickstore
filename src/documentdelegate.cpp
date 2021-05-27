@@ -31,6 +31,7 @@
 #include <QScopeGuard>
 #include <QStringBuilder>
 #include <QMetaProperty>
+#include <QPixmapCache>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -43,10 +44,6 @@
 
 
 QVector<QColor>                 DocumentDelegate::s_shades;
-QCache<quint64, QPixmap>        DocumentDelegate::s_status_cache;
-QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
-QCache<quint64, QPixmap>        DocumentDelegate::s_tagicon_cache;
-QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
 
 static const quint64 differenceWarningMask = 0ULL
@@ -89,25 +86,12 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
 {
     m_table->viewport()->setAttribute(Qt::WA_Hover);
 
-    static bool once = false;
-    if (!once) {
-        qAddPostRoutine(clearCaches);
-        once = false;
-    }
-
     new LanguageChangeHelper(this, table);
 
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
             this, [this]() {
         m_table->resizeRowsToContents();
     });
-}
-
-void DocumentDelegate::clearCaches()
-{
-    s_stripe_cache.clear();
-    s_tag_cache.clear();
-    s_status_cache.clear();
 }
 
 QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
@@ -215,7 +199,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     const QFontMetrics &fm = option.fontMetrics;
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-    QColor normalbg = option.palette.color(cg, (option.features & QStyleOptionViewItem::Alternate) ? QPalette::AlternateBase : QPalette::Base);
+    QColor normalbg = Utility::premultiplyAlpha(option.palette.color(cg, (option.features & QStyleOptionViewItem::Alternate) ? QPalette::AlternateBase : QPalette::Base));
     QColor bg = normalbg;
     QColor fg = option.palette.color(cg, QPalette::Text);
 
@@ -223,10 +207,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (m_read_only) {
             bg = Utility::gradientColor(bg, option.palette.color(cg, QPalette::Highlight));
         } else {
-            bg = option.palette.color(cg, QPalette::Highlight);
+            bg = Utility::premultiplyAlpha(option.palette.color(cg, QPalette::Highlight));
             if (!(option.state & QStyle::State_HasFocus))
                 bg.setAlphaF(0.5);
-            fg = option.palette.color(cg, QPalette::HighlightedText);
+            fg = Utility::premultiplyAlpha(option.palette.color(cg, QPalette::HighlightedText));
         }
     }
 
@@ -239,23 +223,21 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QColor foreground { Qt::transparent };
         QColor background { Qt::transparent };
         QString text;
-        QPixmap *icon = nullptr;
+        QPixmap icon;
         bool bold = false;
     } tag;
 
     if (differenceFlags & (1ULL << idx.column())) {
         bool warn = (differenceFlags & differenceWarningMask & (1ULL << idx.column()));
-
         int s = option.fontMetrics.height() / 10 * 8;
-        quint64 key = (warn ? 1ULL << 32 : 0ULL) | quint32(s);
+        QString key = "dd_ti_"_l1 % (warn ? "!"_l1 : ""_l1) % QString::number(s);
+        QPixmap pix;
 
-        QPixmap *pix = s_tagicon_cache[key];
-        if (!pix) {
+        if (!QPixmapCache::find(key, &pix)) {
             QIcon icon = warn ? QIcon::fromTheme("vcs-locally-modified-unstaged-small"_l1)
                               : QIcon::fromTheme("vcs-locally-modified-small"_l1);
-            pix = new QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
-            if (!s_tagicon_cache.insert(key, pix))
-                pix = nullptr;
+            pix = QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
+            QPixmapCache::insert(key, pix);
         }
         tag.icon = pix;
     }
@@ -350,12 +332,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
     case Document::Status: {
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
-        union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
-        key.s.i1 = iconSize;
-        key.s.i2 = quint32(lot->status());
+        QString key = "dd_st_"_l1 % QString::number(quint32(lot->status())) % "-"_l1 %
+                QString::number(iconSize);
+        QPixmap pix;
 
-        QPixmap *pix = s_status_cache[key.q];
-        if (!pix) {
+        if (!QPixmapCache::find(key, &pix)) {
             QIcon icon;
             switch (lot->status()) {
             case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"_l1); break;
@@ -363,12 +344,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             default                        :
             case BrickLink::Status::Include: icon = QIcon::fromTheme("vcs-normal"_l1); break;
             }
-            pix = new QPixmap(icon.pixmap(iconSize));
-            if (!s_tag_cache.insert(key.q, pix))
-                pix = nullptr;
+            pix = QPixmap(icon.pixmap(iconSize));
+            QPixmapCache::insert(key, pix);
         }
-        if (pix)
-            image = pix->toImage();
+        image = pix.toImage();
 
         uint altid = lot->alternateId();
         bool cp = lot->counterPart();
@@ -444,14 +423,15 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     if (nocolor || noitem) {
         int d = option.rect.height();
-        QPixmap *pix = s_stripe_cache[d];
-        if (!pix) {
-            pix = new QPixmap(QPixmap::fromImage(Utility::stripeImage(d, Qt::red)));
-            s_stripe_cache.insert(d, pix);
+        QString key = "dd_stripe_"_l1 % QString::number(d);
+        QPixmap pix;
+        if (!QPixmapCache::find(key, &pix)) {
+            pix = QPixmap::fromImage(Utility::stripeImage(d, Qt::red));
+            QPixmapCache::insert(key, pix);
         }
         int offset = (option.features & QStyleOptionViewItem::Alternate) ? d : 0;
         offset -= m_table->horizontalScrollBar()->value();
-        p->drawTiledPixmap(option.rect, *pix, QPoint(option.rect.left() - offset, 0));
+        p->drawTiledPixmap(option.rect, pix, QPoint(option.rect.left() - offset, 0));
     }
 
     if (!tag.text.isEmpty()) {
@@ -461,34 +441,28 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int itw = qMax(int(1.5 * fontmetrics.height()),
                        2 * fontmetrics.horizontalAdvance(tag.text));
 
-        union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
-        key.s.i1 = itw;
-        key.s.i2 = tag.background.rgba();
+        QString key = "dd_tag_"_l1 % QString::number(itw) % "-"_l1 % tag.background.name();
+        QPixmap pix;
+        if (!QPixmapCache::find(key, &pix)) {
+            pix = QPixmap(itw, itw);
+            pix.fill(Qt::transparent);
+            QPainter pixp(&pix);
 
-        QPixmap *pix = s_tag_cache[key.q];
-        if (!pix) {
-            pix = new QPixmap(itw, itw);
-            pix->fill(Qt::transparent);
-            QPainter pixp(pix);
-
-            QRadialGradient grad(pix->rect().bottomRight(), pix->width());
+            QRadialGradient grad(pix.rect().bottomRight(), pix.width());
             grad.setColorAt(0, tag.background);
             grad.setColorAt(0.6, tag.background);
             grad.setColorAt(1, Qt::transparent);
 
-            pixp.fillRect(pix->rect(), grad);
+            pixp.fillRect(pix.rect(), grad);
             pixp.end();
-            if (!s_tag_cache.insert(key.q, pix))
-                pix = nullptr;
+            QPixmapCache::insert(key, pix);
         }
+        int pw = qMin(pix.width(), option.rect.width());
+        int ph = qMin(pix.height(), option.rect.height());
 
-        if (pix) {
-            int pw = qMin(pix->width(), option.rect.width());
-            int ph = qMin(pix->height(), option.rect.height());
+        p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, pix,
+                      pix.width() - pw, pix.height() - ph, pw, ph);
 
-            p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, *pix,
-                          pix->width() - pw, pix->height() - ph, pw, ph);
-        }
         if (!tag.text.isEmpty()) {
             p->setPen(tag.foreground);
             QFont oldfont = p->font();
@@ -497,14 +471,14 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             p->setFont(oldfont);
         }
     }
-    if (tag.icon) {
-        int s = tag.icon->size().height();
+    if (!tag.icon.isNull()) {
+        int s = tag.icon.size().height();
 
         QRect r { option.rect.topLeft(), QSize(s, s) };
         if (align & Qt::AlignLeft)
             r.moveRight(option.rect.right());
         p->setOpacity(0.5);
-        p->drawPixmap(r, *tag.icon);
+        p->drawPixmap(r, tag.icon);
         p->setOpacity(1);
     }
 

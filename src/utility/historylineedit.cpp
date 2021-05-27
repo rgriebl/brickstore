@@ -128,27 +128,9 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     m_connection = connect(this, &QLineEdit::editingFinished,
                            this, &HistoryLineEdit::appendToModel, Qt::QueuedConnection);
 
-    // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
-    // only the right side of the icon will react to mouse clicks
-    QPixmap filterPix(QIcon::fromTheme("view-filter"_l1)
-                      .pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));
-    {
-        QPainter p(&filterPix);
-        QStyleOption so;
-        so.initFrom(this);
-        so.rect = filterPix.rect();
-        int mbi = style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &so, this);
-#if defined(Q_OS_MACOS)
-        mbi += 2;
-#else
-        mbi -= 6;
-#endif
-        so.rect = QRect(0, so.rect.bottom() - mbi, mbi, mbi);
-        style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, this);
-    }
-
-    auto *a = addAction(QIcon(filterPix), QLineEdit::LeadingPosition);
-    connect(a, &QAction::triggered,
+    m_popupAction = addAction(QIcon(), QLineEdit::LeadingPosition);
+    setFilterPixmap();
+    connect(m_popupAction, &QAction::triggered,
             this, &HistoryLineEdit::showPopup);
 
     m_reFilterAction = addAction(QIcon::fromTheme("view-refresh"_l1), QLineEdit::TrailingPosition);
@@ -246,6 +228,30 @@ void HistoryLineEdit::showPopup()
         m_filterModel.removeRow(0);
 }
 
+void HistoryLineEdit::setFilterPixmap()
+{
+    // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
+    // only the right side of the icon will react to mouse clicks
+    QPixmap filterPix(QIcon::fromTheme("view-filter"_l1)
+                      .pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));
+    {
+        QPainter p(&filterPix);
+        QStyleOption so;
+        so.initFrom(this);
+        so.rect = filterPix.rect();
+        int mbi = style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &so, this);
+#if defined(Q_OS_MACOS)
+        mbi += 2;
+#else
+        mbi -= 6;
+#endif
+        so.rect = QRect(0, so.rect.bottom() - mbi, mbi, mbi);
+        style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, this);
+    }
+    m_popupAction->setIcon(QIcon(filterPix));
+
+}
+
 void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
 {
     if (ke->key() == Qt::Key_Down && !ke->modifiers())
@@ -253,4 +259,17 @@ void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
     QLineEdit::keyPressEvent(ke);
     if ((ke->key() == Qt::Key_Return) || (ke->key() == Qt::Key_Enter))
         ke->accept(); // don't trigger the dialog's default button
+}
+
+void HistoryLineEdit::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::PaletteChange) {
+        // we need to delay this: otherwise macOS crashes on theme changes
+        QMetaObject::invokeMethod(this, [=]() {
+            setClearButtonEnabled(false);
+            setClearButtonEnabled(true);
+            setFilterPixmap();
+        }, Qt::QueuedConnection);
+    }
+    return QLineEdit::changeEvent(e);
 }

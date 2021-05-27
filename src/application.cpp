@@ -31,6 +31,7 @@
 #include <QToolButton>
 #include <QStyleFactory>
 #include <QMessageBox>
+#include <QPixmapCache>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -224,7 +225,7 @@ Application::Application(int &_argc, char **_argv)
 
     updateTranslations(clp.value("load-translation"_l1));
     connect(Config::inst(), &Config::languageChanged,
-            this, []() { Application::inst()->updateTranslations();; });
+            this, []() { Application::inst()->updateTranslations(); });
 
     m_files_to_open << clp.positionalArguments();
 
@@ -398,7 +399,11 @@ bool Application::eventFilter(QObject *o, QEvent *e)
         doEmitOpenDocument();
         return true;
     case QEvent::ApplicationPaletteChange:
-        setIconTheme();
+        // we need to delay this: otherwise macOS crashes on theme changes
+        QMetaObject::invokeMethod(this, [=]() {
+            QPixmapCache::clear();
+            setIconTheme();
+        }, Qt::QueuedConnection);
         break;
     default:
         break;
@@ -697,8 +702,20 @@ void Application::setUiTheme()
     auto theme = Config::inst()->uiTheme();
 
 #if defined(Q_OS_MACOS)
+    extern bool hasMacThemes();
+    extern void setCurrentMacTheme(Config::UiTheme);
+
     // on macOS, we are using the native theme switch
-    //TODO
+    if (!hasMacThemes()) {
+        if (!startup)
+            QMessageBox::information(FrameWork::inst(), QCoreApplication::applicationName(),
+                                     tr("Your macOS version is too old to support theme changes."));
+    } else if (!startup || (theme != Config::UiTheme::SystemDefault)) {
+        if (startup)
+            setCurrentMacTheme(theme);
+        else
+            QTimer::singleShot(0, qApp, [=]() { setCurrentMacTheme(theme); });
+    }
 #else
     // on Windows and Linux, we have to instantiate a Fusion style with a matching palette for
     // the Light and Dark styles. Switching on the fly is hard because of possible QProxyStyle

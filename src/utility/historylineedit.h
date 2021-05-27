@@ -41,13 +41,16 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *ke) override;
+    void changeEvent(QEvent *e) override;
 
 private:
     void appendToModel();
     void showPopup();
+    void setFilterPixmap();
 
     QStringListModel m_filterModel;
     QIcon m_deleteIcon;
+    QAction *m_popupAction;
     int m_maximumHistorySize;
     bool m_favoritesMode = false;
     QMetaObject::Connection m_connection;
