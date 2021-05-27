@@ -1500,6 +1500,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
                     .arg(CMB_BOLD(QString::number(failCount)));
         }
 
+        FrameWork::inst()->setActiveWindow(this);
         MessageBox::information(this, { }, s);
     }
 }
