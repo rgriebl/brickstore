@@ -27,6 +27,7 @@
 #include <QPainter>
 #include <QToolTip>
 #include <QPixmapCache>
+#include <QStyleFactory>
 
 #include "utility.h"
 #include "headerview.h"
@@ -35,6 +36,16 @@
 class MultipleSortColumnsProxyStyle : public QProxyStyle
 {
 public:
+    MultipleSortColumnsProxyStyle()
+        : QProxyStyle()
+    {
+        QStyle *style = QApplication::style();
+        if (!qstrcmp(style->metaObject()->className(), "QFusionStyle")) {
+            QStyle *baseStyle = QStyleFactory::create("fusion"_l1);
+            setBaseStyle(baseStyle);
+        }
+    }
+
     void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
                      const QWidget *widget) const override;
 };
