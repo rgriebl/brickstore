@@ -368,6 +368,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "-",
                                       "document_save",
                                       "document_save_as",
+                                      "document_save_all",
                                       "-",
                                       "document_import",
                                       "document_export",
@@ -711,6 +712,7 @@ void FrameWork::translateActions()
         { "document_open_recent",           tr("Open Recent"),                        },
         { "document_save",                  tr("Save"),                               QKeySequence::Save },
         { "document_save_as",               tr("Save As..."),                         QKeySequence::SaveAs },
+        { "document_save_all",              tr("Save All"),                           },
         { "document_print",                 tr("Print..."),                           QKeySequence::Print },
         { "document_print_pdf",             tr("Print to PDF..."),                    },
         { "document_import",                tr("Import"),                             },
@@ -1108,6 +1110,19 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "document_save");
     (void) newQAction(this, "document_save_as", NeedDocument);
+    (void) newQAction(this, "document_save_all", NeedDocument, false, this, [=]() {
+        auto oldActive = activeWindow();
+        const auto windows = allWindows();
+        for (Window *w : windows) {
+            if (w->document()->isModified()) {
+                if (w->document()->fileName().isEmpty())
+                    setActiveWindow(w);
+                w->on_document_save_triggered();
+            }
+        }
+        if (activeWindow() != oldActive)
+            setActiveWindow(oldActive);
+    });
     (void) newQAction(this, "document_print", NeedDocument | NeedLots);
     (void) newQAction(this, "document_print_pdf", NeedDocument | NeedLots);
 
