@@ -523,7 +523,6 @@ Config::SentryConsent Config::sentryConsent() const
     if ((v < int(SentryConsent::Unknown)) || (v > int(SentryConsent::Revoked)))
          v = int(SentryConsent::Unknown);
     return SentryConsent(v);
-
 }
 
 void Config::setSentryConsent(SentryConsent consent)
@@ -531,6 +530,22 @@ void Config::setSentryConsent(SentryConsent consent)
     if (sentryConsent() != consent) {
         setValue("General/SentryConsent"_l1, int(consent));
         emit sentryConsentChanged(consent);
+    }
+}
+
+Config::UiTheme Config::uiTheme() const
+{
+    int v = value("Interface/Theme"_l1).toInt();
+    if ((v < int(UiTheme::SystemDefault)) || (v > int(UiTheme::Dark)))
+         v = int(UiTheme::SystemDefault);
+    return UiTheme(v);
+}
+
+void Config::setUiTheme(UiTheme theme)
+{
+    if (uiTheme() != theme) {
+        setValue("Interface/Theme"_l1, int(theme));
+        emit uiThemeChanged(theme);
     }
 }
 

@@ -34,6 +34,10 @@
 class MultipleSortColumnsProxyStyle : public QProxyStyle
 {
 public:
+    MultipleSortColumnsProxyStyle(QStyle *style = nullptr)
+        : QProxyStyle(style)
+    { }
+
     void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
                      const QWidget *widget) const override;
 
@@ -226,7 +230,7 @@ private:
 
 HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
     : QHeaderView(o, parent)
-    , m_proxyStyle(new MultipleSortColumnsProxyStyle)
+    , m_proxyStyle(new MultipleSortColumnsProxyStyle(style()))
 {
     setStyle(m_proxyStyle);
 

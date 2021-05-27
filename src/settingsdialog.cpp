@@ -1032,6 +1032,8 @@ void SettingsDialog::load()
 
     w_item_image_size->setValue(Config::inst()->itemImageSizePercent() / 10);
 
+    w_theme->setCurrentIndex(int(Config::inst()->uiTheme()));
+
     // --[ UPDATES ]---------------------------------------------------
 
     QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
@@ -1096,6 +1098,8 @@ void SettingsDialog::save()
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
 
     Config::inst()->setItemImageSizePercent(w_item_image_size->value() * 10);
+
+    Config::inst()->setUiTheme(Config::UiTheme(w_theme->currentIndex()));
 
     // --[ UPDATES ]-------------------------------------------------------------------
 

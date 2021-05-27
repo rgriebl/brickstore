@@ -16,6 +16,7 @@
 
 #include <QThreadPool>
 #include <QStandardPaths>
+#include <QProcess>
 #if defined(Q_OS_WINDOWS)
 #  include <QMessageBox>
 #  include <QApplication>
@@ -138,6 +139,9 @@ int main(int argc, char **argv)
         // all joined before destroying the static QThreadStorage objects.
         QThreadPool::globalInstance()->clear();
         QThreadPool::globalInstance()->waitForDone();
+
+        if (a.shouldRestart())
+            QProcess::startDetached(qApp->applicationFilePath());
 #endif
     }
     return res;

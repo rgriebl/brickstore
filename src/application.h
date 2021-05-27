@@ -41,6 +41,8 @@ public:
 
     QPlainTextEdit *logWidget() const;
 
+    bool shouldRestart() const;
+
 public slots:
     void updateTranslations(const QString &translationOverride = { });
 
@@ -65,6 +67,7 @@ private:
     void setupLogging();
     static void messageHandler(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);
     void setIconTheme();
+    void setUiTheme();
 
     bool initBrickLink();
     void exitBrickLink();
@@ -72,7 +75,7 @@ private:
 private:
     QStringList m_files_to_open;
     bool m_enable_emit = false;
-
+    bool m_restart = false;
     bool m_online = true;
     qreal m_default_fontsize = 0;
 

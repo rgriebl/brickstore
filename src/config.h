@@ -112,6 +112,15 @@ public:
     SentryConsent sentryConsent() const;
     void setSentryConsent(SentryConsent consent);
 
+    enum class UiTheme {
+        SystemDefault,
+        Light,
+        Dark
+    };
+
+    UiTheme uiTheme() const;
+    void setUiTheme(UiTheme theme);
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -161,6 +170,7 @@ signals:
     void shortcutsChanged(const QVariantMap &list);
     void sentryConsentChanged(Config::SentryConsent consent);
     void toolBarActionsChanged(const QStringList &actions);
+    void uiThemeChanged(Config::UiTheme theme);
 
 protected:
     bool parseTranslations() const;

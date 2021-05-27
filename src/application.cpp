@@ -26,10 +26,11 @@
 #include <QStringBuilder>
 #include <QLoggingCategory>
 #include <QCommandLineParser>
-
+#include <QToolTip>
 #include <QToolBar>
 #include <QToolButton>
 #include <QStyleFactory>
+#include <QMessageBox>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -144,7 +145,6 @@ Application::Application(int &_argc, char **_argv)
     setupLogging();
     setupSentry();
     QCoreApplication::instance()->installEventFilter(this);
-    setIconTheme();
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
     QPixmap pix(":/images/brickstore_icon.png"_l1);
@@ -185,6 +185,9 @@ Application::Application(int &_argc, char **_argv)
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     checkSentryConsent();
+    setUiTheme();
+    connect(Config::inst(), &Config::uiThemeChanged, this, &Application::setUiTheme);
+    setIconTheme();
     (void) Currency::inst();
     (void) ScriptManager::inst();
     (void) SystemInfo::inst();
@@ -276,6 +279,11 @@ QPlainTextEdit *Application::logWidget() const
     return m_logWidget;
 }
 
+bool Application::shouldRestart() const
+{
+    return m_restart;
+}
+
 void Application::updateTranslations(const QString &translationOverride)
 {
     QString language = Config::inst()->language();
@@ -345,26 +353,30 @@ void Application::doEmitOpenDocument()
 
 bool Application::eventFilter(QObject *o, QEvent *e)
 {
-    // QToolButtons look really ugly on macOS, so we re-style them to the fusion style
-#if defined(Q_OS_MACOS)
-    static QStyle *fusion = QStyleFactory::create("fusion"_l1);
     if (e->type() == QEvent::ChildPolished) {
         if (auto *tb = qobject_cast<QToolButton *>(static_cast<QChildEvent *>(e)->child())) {
             if (!qobject_cast<QToolBar *>(o)) {
                 QPointer<QToolButton> tbptr(tb);
                 QMetaObject::invokeMethod(this, [tbptr]() {
                     if (tbptr && tbptr->autoRaise()) {
-                        QPalette pal = tbptr->palette();
-                        pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
-                                         qApp->palette("QAbstractItemView")
-                                         .color(QPalette::Highlight)));
+#if defined(Q_OS_MACOS)
+                        // QToolButtons look really ugly on macOS, so we re-style them
+                        static QStyle *fusion = QStyleFactory::create("fusion"_l1);
                         tbptr->setStyle(fusion);
-                        tbptr->setPalette(pal);
+#endif
+                        if (qstrcmp(tbptr->style()->metaObject()->className(), "QFusionStyle") == 0) {
+                            QPalette pal = tbptr->palette();
+                            pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
+                                             qApp->palette("QAbstractItemView")
+                                             .color(QPalette::Highlight)));
+                            tbptr->setPalette(pal);
+                        }
                     }
                 });
             }
         }
     }
+#if defined(Q_OS_MACOS)
     // the handling of emacs-style multi-key shortcuts is broken on macOS, because menu
     // shortcuts are handled directly in the QPA plugin, instad of going through the global
     // QShortcutMap. The workaround is override any shortcut while the map is in PartialMatch state.
@@ -674,6 +686,78 @@ void Application::setIconTheme()
     bool dark = ((winColor.lightnessF() * winColor.alphaF()) < 0.5);
 
     QIcon::setThemeName(dark ? "brickstore-breeze-dark"_l1 : "brickstore-breeze"_l1);
+}
+
+void Application::setUiTheme()
+{
+    static bool once = false;
+    bool startup = !once;
+    if (!once)
+        once = true;
+    auto theme = Config::inst()->uiTheme();
+
+#if defined(Q_OS_MACOS)
+    // on macOS, we are using the native theme switch
+    //TODO
+#else
+    // on Windows and Linux, we have to instantiate a Fusion style with a matching palette for
+    // the Light and Dark styles. Switching on the fly is hard because of possible QProxyStyle
+    // instances, so we better restart the app.
+
+    if (!startup) {
+        QMessageBox mb(QMessageBox::Question, QCoreApplication::applicationName(),
+                       tr("The theme change will take effect after a restart."),
+                       QMessageBox::Yes | QMessageBox::No, FrameWork::inst());
+        mb.setDefaultButton(QMessageBox::No);
+        mb.setButtonText(QMessageBox::Yes, tr("Restart now"));
+        mb.setButtonText(QMessageBox::No, tr("Later"));
+        mb.setTextFormat(Qt::RichText);
+
+        if (mb.exec() == QMessageBox::Yes) {
+            m_restart = true;
+            QCoreApplication::quit();
+        }
+        return;
+    }
+
+    switch (theme) {
+    default:
+    case Config::UiTheme::SystemDefault:
+        break;
+    case Config::UiTheme::Light:
+        QApplication::setStyle("fusion"_l1);
+        break;
+    case Config::UiTheme::Dark:
+        QApplication::setStyle("fusion"_l1);
+        auto palette = QApplication::style()->standardPalette();
+        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::WindowText, Qt::white);
+        palette.setColor(QPalette::Disabled, QPalette::WindowText,
+                         QColor(127, 127, 127));
+        palette.setColor(QPalette::Base, QColor(42, 42, 42));
+        palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+        palette.setColor(QPalette::Inactive, QPalette::ToolTipText, Qt::white);
+        palette.setColor(QPalette::Inactive, QPalette::ToolTipBase, QColor(53, 53, 53));
+        palette.setColor(QPalette::Text, Qt::white);
+        palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+        palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+        palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::ButtonText, Qt::white);
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText,
+                         QColor(127, 127, 127));
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
+        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+        palette.setColor(QPalette::HighlightedText, Qt::white);
+        palette.setColor(QPalette::Disabled, QPalette::HighlightedText,
+                         QColor(127, 127, 127));
+        QApplication::setPalette(palette);
+        QToolTip::setPalette(palette);
+        break;
+    }
+#endif
 }
 
 bool Application::initBrickLink()
