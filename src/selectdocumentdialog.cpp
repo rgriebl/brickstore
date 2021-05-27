@@ -427,14 +427,13 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString
     mpage->setTitle(title);
     mpage->setSubTitle(chooseFieldsText);
     mpage->setFinalPage(true);
+    mpage->setComplete(true);
     auto *mlayout = new QVBoxLayout(mpage);
     mlayout->addWidget(m_mm);
     addPage(mpage);
 
     connect(m_sd, &SelectDocument::documentSelected,
             dpage, &WizardPage::setComplete);
-    connect(m_mm, &SelectMergeMode::mergeModesChanged,
-            mpage, &WizardPage::setComplete);
 
     QByteArray ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/Geometry"_l1).toByteArray();
     if (!ba.isEmpty())
@@ -449,7 +448,6 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const Document *self, const QString
     ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/MergeMode"_l1)
             .toByteArray();
     m_mm->restoreState(ba);
-
 }
 
 SelectCopyMergeDialog::~SelectCopyMergeDialog()
