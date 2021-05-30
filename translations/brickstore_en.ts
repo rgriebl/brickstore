@@ -206,6 +206,10 @@
         <source>Later</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Your macOS version is too old to support theme changes.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BrickLink::CategoryModel</name>
@@ -1483,18 +1487,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show difference mode indicators</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset difference mode base values</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Copy values from document...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set status to Include</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1669,10 +1661,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reload user scripts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Marker</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1686,15 +1674,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Clear marker</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Paste silent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+Shift+V</source>
-        <comment>Edit|Paste silent</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1738,6 +1717,49 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Save All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paste Silent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+Shift+V</source>
+        <comment>Edit|Paste Silent</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy Values from Document...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go to the Next Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>F6</source>
+        <comment>View|Go to the Next Error</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Difference Mode Indicators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset Difference Mode Base Values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go to the Next Difference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>F5</source>
+        <comment>View|Go to the Next Difference</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload User Scripts</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3203,10 +3225,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>F6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Default currency (%1)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3231,10 +3249,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Currency:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>F5</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
