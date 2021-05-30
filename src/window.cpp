@@ -593,7 +593,6 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     w_header->setSectionsClickable(true);
     w_header->setSectionsMovable(true);
     w_header->setHighlightSections(false);
-    w_header->setMinimumSectionSize(qMax(16, fontMetrics().height() * 2));
     w_list->setHorizontalHeader(w_header);
     w_header->setSortIndicatorShown(false);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -687,6 +686,7 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     connect(this, &Window::blockingOperationActiveChanged,
             w_list, &QWidget::setDisabled);
 
+    updateMinimumSectionSize();
     bool columnsSet = false;
 
     if (!columnLayout.isEmpty())
@@ -738,6 +738,8 @@ void Window::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         updateCaption();
+    else if (e->type() == QEvent::FontChange)
+        updateMinimumSectionSize();
     QWidget::changeEvent(e);
 }
 
@@ -751,6 +753,13 @@ void Window::updateCaption()
 
     setWindowTitle(cap);
     setWindowModified(m_doc->isModified());
+}
+
+void Window::updateMinimumSectionSize()
+{
+    int s = qMax(16, fontMetrics().height() * 2);
+    w_header->setMinimumSectionSize(s);
+    w_list->setIconSize({ s, s });
 }
 
 QByteArray Window::currentColumnLayout() const

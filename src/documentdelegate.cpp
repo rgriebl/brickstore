@@ -140,7 +140,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     }
 
     if (idx.column() == Document::Color)
-        w += (option1.decorationSize.width() * 2 + 4);
+        w += (option1.decorationSize.width() + 4);
 
     QStyleOptionViewItem option(option1);
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
@@ -394,7 +394,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Color: {
-        image = BrickLink::core()->colorImage(lot->color(), option.decorationSize.width() * 3 / 2,
+        image = BrickLink::core()->colorImage(lot->color(), option.decorationSize.width(),
                                               option.rect.height());
         break;
     }

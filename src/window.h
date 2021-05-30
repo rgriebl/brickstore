@@ -222,6 +222,7 @@ protected:
 private slots:
     void ensureLatestVisible();
     void updateCaption();
+    void updateMinimumSectionSize();
     void updateSelection();
     void documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
