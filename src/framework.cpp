@@ -433,9 +433,11 @@ FrameWork::FrameWork(QWidget *parent)
                                       "view_fullscreen",
                                       "-",
                                       "view_show_input_errors",
+                                      "view_goto_next_input_error",
                                       "-",
                                       "view_show_diff_indicators",
                                       "view_reset_diff_mode",
+                                      "view_goto_next_diff",
                                       "-",
                                       "view_column_layout_save",
                                       "view_column_layout_manage",
@@ -480,8 +482,12 @@ FrameWork::FrameWork(QWidget *parent)
             this, &FrameWork::onlineStateChanged);
     onlineStateChanged(Application::inst()->isOnline());
 
-    findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
-    findAction("view_show_diff_indicators")->setChecked(Config::inst()->showDifferenceIndicators());
+    bool showInputErrors = Config::inst()->showInputErrors();
+    findAction("view_show_input_errors")->setChecked(showInputErrors);
+    findAction("view_goto_next_input_error")->setEnabled(showInputErrors);
+    bool showDiffIndicators = Config::inst()->showDifferenceIndicators();
+    findAction("view_show_diff_indicators")->setChecked(showDiffIndicators);
+    findAction("view_goto_next_diff")->setEnabled(showDiffIndicators);
 
     connect(BrickLink::core(), &BrickLink::Core::transferProgress,
             this, &FrameWork::transferProgressUpdate);
@@ -736,7 +742,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
-        { "edit_paste_silent",              tr("Paste silent"),                       tr("Ctrl+Shift+V", "Edit|Paste silent") },
+        { "edit_paste_silent",              tr("Paste Silent"),                       tr("Ctrl+Shift+V", "Edit|Paste Silent") },
         { "edit_duplicate",                 tr("Duplicate"),                          tr("Ctrl+D", "Edit|Duplicate") },
         { "edit_delete",                    tr("Delete"),                             tr("Del", "Edit|Delete") },
         // ^^ QKeySequence::Delete has Ctrl+D as secondary on macOS and Linux and this clashes with Duplicate
@@ -744,7 +750,7 @@ void FrameWork::translateActions()
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
         { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
         { "edit_partoutitems",              tr("Part out Item..."),                   },
-        { "edit_copy_fields",               tr("Copy values from document..."),       },
+        { "edit_copy_fields",               tr("Copy Values from Document..."),       },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|Select None") },
         // ^^ QKeySequence::Deselect is only mapped on Linux
@@ -755,15 +761,17 @@ void FrameWork::translateActions()
         { "view_docks",                     tr("View Info Docks"),                    },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
-        { "view_show_diff_indicators",      tr("Show difference mode indicators"),    },
-        { "view_reset_diff_mode",           tr("Reset difference mode base values"),  },
+        { "view_goto_next_input_error",     tr("Go to the Next Error"),               tr("F6", "View|Go to the Next Error") },
+        { "view_show_diff_indicators",      tr("Show Difference Mode Indicators"),    },
+        { "view_reset_diff_mode",           tr("Reset Difference Mode Base Values"),  },
+        { "view_goto_next_diff",            tr("Go to the Next Difference"),          tr("F5", "View|Go to the Next Difference") },
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
         { "menu_extras",                    tr("E&xtras"),                            },
         { "update_database",                tr("Update Database"),                    },
         { "configure",                      tr("Settings..."),                        tr("Ctrl+,", "Extras|Settings") },
-        { "reload_scripts",                 tr("Reload user scripts"),                },
+        { "reload_scripts",                 tr("Reload User Scripts"),                },
         { "menu_window",                    tr("&Windows"),                           },
         { "menu_help",                      tr("&Help"),                              },
         { "help_about",                     tr("About..."),                           },
@@ -846,7 +854,8 @@ void FrameWork::translateActions()
         { "document_import_bl_cart", "bricklink-cart" },
         { "document_import_bl_store_inv", "bricklink-store" },
         { "document_import_ldraw_model", "bricklink-studio" },
-
+        { "view_goto_next_diff", "vcs-locally-modified" },
+        { "view_goto_next_input_error", "emblem-warning" },
     };
 
     QVariantMap customShortcuts = Config::inst()->shortcuts();
@@ -1291,11 +1300,18 @@ void FrameWork::createActions()
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_show_input_errors", 0, true,
-                      Config::inst(), &Config::setShowInputErrors);
-    (void) newQAction(this, "view_show_diff_indicators", 0, true,
-                      Config::inst(), &Config::setShowDifferenceIndicators);
+    (void) newQAction(this, "view_show_input_errors", 0, true, this, [=](bool b) {
+        Config::inst()->setShowInputErrors(b);
+        findAction("view_goto_next_input_error")->setEnabled(b);
+    });
+    a = newQAction(this, "view_goto_next_input_error", NeedDocument | NeedLots);
+    a->setEnabled(Config::inst()->showInputErrors());
+    (void) newQAction(this, "view_show_diff_indicators", 0, true, this, [=](bool b) {
+        Config::inst()->setShowDifferenceIndicators(b);
+        findAction("view_goto_next_diff")->setEnabled(b);
+    });
     (void) newQAction(this, "view_reset_diff_mode", NeedSelection(1));
+    (void) newQAction(this, "view_goto_next_diff", NeedDocument | NeedLots);
 
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);

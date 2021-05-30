@@ -335,22 +335,20 @@ StatusBar::StatusBar(Window *window)
 
     m_differencesSeparator = addSeparator();
     m_differences = new QToolButton();
+    m_differences->setDefaultAction(FrameWork::inst()->findAction("view_goto_next_diff"));
+    connect(m_differences->defaultAction(), &QAction::changed,
+            this, &StatusBar::updateStatistics);
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setIcon(QIcon::fromTheme("vcs-locally-modified"_l1));
-    m_differences->setShortcut(tr("F5"));
     m_differences->setAutoRaise(true);
-    connect(m_differences, &QToolButton::clicked,
-            m_window, [this]() { m_window->gotoNextErrorOrDifference(true); });
     layout->addWidget(m_differences);
 
     m_errorsSeparator = addSeparator();
     m_errors = new QToolButton();
+    m_errors->setDefaultAction(FrameWork::inst()->findAction("view_goto_next_input_error"));
+    connect(m_errors->defaultAction(), &QAction::changed,
+            this, &StatusBar::updateStatistics);
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setIcon(QIcon::fromTheme("emblem-warning"_l1));
-    m_errors->setShortcut(tr("F6"));
     m_errors->setAutoRaise(true);
-    connect(m_errors, &QToolButton::clicked,
-            m_window, [this]() { m_window->gotoNextErrorOrDifference(false); });
     layout->addWidget(m_errors);
 
     addSeparator();
@@ -2220,6 +2218,8 @@ void Window::gotoNextErrorOrDifference(bool difference)
                     }
                 }
             }
+        } else if (wrapped && (row == startIdx.row())) {
+            return;
         }
         startCol = 0;
 
@@ -2469,6 +2469,16 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
     }
 
     document()->undoStack()->endMacro();
+}
+
+void Window::on_view_goto_next_diff_triggered()
+{
+    gotoNextErrorOrDifference(true);
+}
+
+void Window::on_view_goto_next_input_error_triggered()
+{
+    gotoNextErrorOrDifference(false);
 }
 
 void Window::on_document_print_triggered()

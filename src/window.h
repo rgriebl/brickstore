@@ -194,6 +194,8 @@ public slots:
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
 
+    void on_view_goto_next_diff_triggered();
+    void on_view_goto_next_input_error_triggered();
     void gotoNextErrorOrDifference(bool difference = false);
 
     void setStatus(BrickLink::Status status);
