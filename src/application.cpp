@@ -270,6 +270,7 @@ Application::~Application()
     delete Currency::inst();
     delete Config::inst();
 
+    s_inst = nullptr;
     delete qApp;
 
     shutdownSentry();
