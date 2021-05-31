@@ -41,6 +41,7 @@
 #include <QStringBuilder>
 #include <QDesktopServices>
 #include <QWidgetAction>
+#include <QPlainTextEdit>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -272,6 +273,103 @@ void FancyDockTitleBar::mouseReleaseEvent(QMouseEvent *ev)
 }
 
 
+class JSShellLineEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    JSShellLineEdit(QPlainTextEdit *logWidget)
+        : m_log(logWidget)
+    {
+        connect(this, &QLineEdit::returnPressed,
+                this, [=]() {
+            auto s = text();
+            if (!s.isEmpty()) {
+                if (ScriptManager::inst()->executeString(s)) {
+                    if (!m_history.endsWith(s))
+                        m_history.append(s);
+                }
+            }
+            clear();
+            m_historyIndex = m_history.size();
+        });
+
+        hide();
+
+        if (logWidget) {
+            logWidget->installEventFilter(this);
+            logWidget->appendHtml("<h3>Press ~ to open the developer console</h3>"_l1);
+        }
+    }
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
+
+private:
+    void activate(bool active)
+    {
+        if (active == m_active)
+            return;
+        m_active = active;
+        if (m_active) {
+            show();
+            setFocus();
+        } else {
+            hide();
+            if (m_log)
+                m_log->setFocus();
+        }
+        if (m_log) {
+            auto tc = m_log->textCursor();
+            if (!tc.atEnd()) {
+                tc.movePosition(QTextCursor::End);
+                m_log->setTextCursor(tc);
+            }
+            m_log->ensureCursorVisible();
+        }
+    }
+
+private:
+    QPlainTextEdit *m_log;
+    QStringList m_history;
+    int m_historyIndex = 0;
+    bool m_active = false;
+};
+
+bool JSShellLineEdit::eventFilter(QObject *o, QEvent *e)
+{
+    if ((e->type() == QEvent::KeyPress)
+            && (static_cast<QKeyEvent *>(e)->text() == "~"_l1)) {
+        activate(!m_active);
+    }
+    return QLineEdit::eventFilter(o, e);
+}
+
+void JSShellLineEdit::keyPressEvent(QKeyEvent *e)
+{
+    int hd = 0;
+    if (e->key() == Qt::Key_Up)
+        hd = -1;
+    else if (e->key() == Qt::Key_Down)
+        hd = 1;
+    if (hd) {
+        if (((m_historyIndex + hd) >= 0) && ((m_historyIndex + hd) < m_history.size())) {
+            m_historyIndex += hd;
+            setText(m_history.at(m_historyIndex));
+        }
+    } else if (e->key() == Qt::Key_Escape) {
+        clear();
+    } else {
+        QLineEdit::keyPressEvent(e);
+    }
+    if (text() == "~"_l1) {
+        clear();
+        activate(!m_active);
+    }
+}
+
+
+
 FrameWork *FrameWork::s_inst = nullptr;
 
 FrameWork *FrameWork::inst()
@@ -337,7 +435,12 @@ FrameWork::FrameWork(QWidget *parent)
     m_task_priceguide->setObjectName("TaskPriceGuide"_l1);
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
-    auto logDock = createDock(Application::inst()->logWidget());
+    QWidget *logWidget = new QWidget();
+    QVBoxLayout *logLayout = new QVBoxLayout(logWidget);
+    logLayout->setContentsMargins(0, 0, 0, 0);
+    logLayout->addWidget(Application::inst()->logWidget());
+    logLayout->addWidget(new JSShellLineEdit(Application::inst()->logWidget()));
+    auto logDock = createDock(logWidget);
     logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
     logDock->setVisible(false);
     addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);

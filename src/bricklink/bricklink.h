@@ -772,6 +772,10 @@ private slots:
     friend class PriceGuideLoaderJob;
     friend class PictureLoaderJob;
 
+public: // semi-public for the QML wrapper
+    QPair<int, int> pictureCacheStats() const;
+    QPair<int, int> priceGuideCacheStats() const;
+
 private:
     void clear();
 

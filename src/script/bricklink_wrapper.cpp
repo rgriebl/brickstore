@@ -14,6 +14,7 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
+#include "qqmlinfo.h"
 
 #include "framework.h"
 #include "window.h"
@@ -92,6 +93,23 @@ QmlPicture QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority
 QmlPicture QmlBrickLink::largePicture(QmlItem item, bool highPriority)
 {
     return QmlPicture { d->largePicture(item.wrappedObject(), highPriority) };
+}
+
+void QmlBrickLink::cacheStat() const
+{
+    auto pic = BrickLink::core()->pictureCacheStats();
+    auto pg = BrickLink::core()->priceGuideCacheStats();
+
+    QByteArray picBar(int(double(pic.first) / pic.second * 16), '=');
+    picBar.append(16 - picBar.length(), ' ');
+    QByteArray pgBar(int(double(pg.first) / pg.second * 16), '=');
+    pgBar.append(16 - pgBar.length(), ' ');
+
+    qmlDebug(this) << "Cache stats:\n"
+                   << "Pictures    : [" << picBar.constData() << "] " << (pic.first / 1000)
+                   << " / " << (pic.second / 1000) << " MB\n"
+                   << "Price guides: [" << pgBar.constData() << "] " << (pg.first)
+                   << " / " << pg.second << " entries";
 }
 
 char QmlBrickLink::firstCharInString(const QString &str)

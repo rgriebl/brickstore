@@ -20,6 +20,7 @@
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQmlInfo>
+#include <QQmlExpression>
 #include <QStringBuilder>
 
 #include "scriptmanager.h"
@@ -147,10 +148,10 @@ bool ScriptManager::reload()
             try {
                 loadScript(filePath);
 
-                qCDebug(LogScript) << "  [ ok ]" << filePath;
+                qCDebug(LogScript).noquote() << "  [ ok ]" << fi.fileName();
 
             } catch (const Exception &e) {
-                qCWarning(LogScript) << "  [fail]" << filePath << ":" << e.what();
+                qCWarning(LogScript).noquote() << "  [fail]" << fi.fileName() << ":" << e.what();
             }
         }
     }
@@ -210,6 +211,41 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
 QVector<Script *> ScriptManager::scripts() const
 {
     return m_scripts;
+}
+
+bool ScriptManager::executeString(const QString &s)
+{
+    if (!m_engine) {
+        m_engine.reset(new QQmlEngine(this));
+        redirectQmlEngineWarnings(m_engine.data());
+
+        const char script[] =
+                "import BrickStore 1.0\n"
+                "import QtQml 2.12\n"
+                "QtObject {\n"
+                "    property var bl: BrickLink\n"
+                "    property var bs: BrickStore\n"
+                "    property string help: \"Use 'bl'/'bs' to access the BrickLink/BrickStore singletons\"\n"
+                "}\n";
+
+        QQmlComponent component(m_engine.data());
+        component.setData(script, QUrl());
+        if (component.status() == QQmlComponent::Error)
+            qCWarning(LogScript) << "JS compile error:" << component.errorString();
+        m_rootObject = component.create();
+    }
+    QQmlExpression e(m_engine->rootContext(), m_rootObject, s);
+    qCDebug(LogScript).noquote() << "#" << s;
+    auto result = e.evaluate();
+    if (e.hasError()) {
+        qCWarning(LogScript).noquote() << "> ERROR:" << e.error().toString();
+        return false;
+    } else {
+        auto s = result.toString();
+        if (!s.isEmpty())
+            qCDebug(LogScript).noquote() << ">" << s;
+        return true;
+    }
 }
 
 void ScriptManager::clearScripts()

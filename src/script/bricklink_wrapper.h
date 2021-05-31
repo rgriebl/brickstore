@@ -116,6 +116,8 @@ public:
     Q_INVOKABLE QmlPicture picture(QmlItem item, QmlColor color, bool highPriority = false);
     Q_INVOKABLE QmlPicture largePicture(QmlItem item, bool highPriority = false);
 
+    Q_INVOKABLE void cacheStat() const;
+
 signals:
     void priceGuideUpdated(QmlPriceGuide pg);
     void pictureUpdated(QmlPicture inv);

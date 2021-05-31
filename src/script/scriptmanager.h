@@ -44,6 +44,8 @@ public:
 
     QVector<Script *> scripts() const;
 
+    bool executeString(const QString &s);
+
 signals:
     void aboutToReload();
     void reloaded();
@@ -55,6 +57,8 @@ private:
 
     QVector<Script *> m_scripts;
 
+    QScopedPointer<QQmlEngine> m_engine;
+    QObject *m_rootObject = nullptr;
     QmlBrickLink *m_brickLink = nullptr;
     QmlBrickStore *m_brickStore = nullptr;
 

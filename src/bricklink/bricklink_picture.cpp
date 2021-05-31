@@ -234,6 +234,16 @@ void BrickLink::Core::pictureLoaded(Picture *pic)
     }
 }
 
+QPair<int, int> BrickLink::Core::pictureCacheStats() const
+{
+    return qMakePair(m_pic_cache.totalCost(), m_pic_cache.maxCost());
+}
+
+QPair<int, int> BrickLink::Core::priceGuideCacheStats() const
+{
+    return qMakePair(m_pg_cache.totalCost(), m_pg_cache.maxCost());
+}
+
 void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool highPriority)
 {
     if (!pic || (pic->m_update_status == UpdateStatus::Updating))
