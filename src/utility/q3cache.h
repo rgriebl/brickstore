@@ -125,6 +125,7 @@ public:
     bool remove(const Key &key);
     T *take(const Key &key);
 
+    void setObjectCost(const Key &key, int cost);
     void clearRecursive();
 
 private:
@@ -224,6 +225,25 @@ void Q3Cache<Key, T>::clearRecursive()
     }
     clear();
 }
+
+template <class Key, class T>
+inline void Q3Cache<Key,T>::setObjectCost(const Key &key, int cost)
+{
+    // Reduce the cost if possible. Increasing is not possible, because the cache might
+    // overflow, leaving us in a weird state.
+    auto i = hash.find(key);
+    if (i != hash.end()) {
+        int d = cost - (*i).c;
+        if ((d > 0) && ((total + d) > mx)) {
+            qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
+        } else if (d != 0) {
+            (*i).c = cost;
+            total += d;
+            //qWarning() << "Adjusted cache object cost by" << d;
+        }
+    }
+}
+
 
 
 QT_END_NAMESPACE

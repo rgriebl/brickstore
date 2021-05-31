@@ -313,6 +313,8 @@ private:
 class Picture : public Ref
 {
 public:
+    static quint64 key(const Item *item, const Color *color);
+
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 

@@ -412,12 +412,20 @@ Core::Core(const QString &datadir)
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
-    // cache size is physical memory * 0.25, at least 128MB, at most 1GB
-    quint64 cachemem = qBound(128ULL *1024*1024, SystemInfo::inst()->physicalMemory() / 4, 1024ULL *1024*1024);
-    //quint64 cachemem = 1024*1024; // DEBUG
 
-    m_pg_cache.setMaxCost(10000);            // each priceguide has a cost of 1
-    m_pic_cache.setMaxCost(int(cachemem));   // each pic has roughly the cost of memory used
+    // the max. pic cache size is at least 1GB and at max half the physical memory on 64bit systems
+    // the max. pg cache size is at least 5.000 and 10.000 if more than 3GB of RAM are available
+    quint64 picCacheMem = 1'000'000'000ULL;
+    int pgCacheEntries = 5'000;
+
+#if Q_PROCESSOR_WORDSIZE >= 8
+    picCacheMem = qMax(picCacheMem, SystemInfo::inst()->physicalMemory() / 2);
+    if (SystemInfo::inst()->physicalMemory() >= 3'000'000'000ULL)
+        pgCacheEntries *= 2;
+#endif
+
+    m_pic_cache.setMaxCost(int(picCacheMem / 1024)); // each pic has the cost of memory used in KB
+    m_pg_cache.setMaxCost(10000); // each priceguide has a cost of 1
 }
 
 Core::~Core()

@@ -86,8 +86,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!item)
         return nullptr;
 
-    quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemTypeId()) << 24 | quint64(item->index() + 1);
-
+    quint64 key = Picture::key(item, color);
     Picture *pic = m_pic_cache[key];
 
     bool needToLoad = false;
@@ -106,6 +105,8 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         if (!pic->isValid()) {
             pic->m_valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
             pic->m_update_status = UpdateStatus::Ok;
+
+            m_pic_cache.setObjectCost(key, pic->cost());
         }
 
         if (updateNeeded(pic->isValid(), pic->lastUpdate(), m_pic_update_iv))
@@ -147,10 +148,10 @@ const QImage BrickLink::Picture::image() const
 
 int BrickLink::Picture::cost() const
 {
-    if (m_color)
-        return 80*60*4 + 128;  // 80x60 32bpp + data
+    if (m_image.isNull())
+        return 640*480*4 / 1024;      // ~ 640*480 32bpp
     else
-        return 640*480*4;      // ~ 640*480 32bpp
+        return m_image.sizeInBytes() / 1024;
 }
 
 QFile *BrickLink::Picture::readFile() const
@@ -200,6 +201,13 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
     return isValid;
 }
 
+quint64 BrickLink::Picture::key(const Item *item, const Color *color)
+{
+    return (quint64(color ? color->id() : uint(-1)) << 32)
+            | (quint64(item->itemTypeId()) << 24)
+            | (quint64(item->index() + 1));
+}
+
 void BrickLink::Picture::update(bool highPriority)
 {
     BrickLink::core()->updatePicture(this, highPriority);
@@ -221,6 +229,8 @@ void BrickLink::Core::pictureLoaded(Picture *pic)
         }
         emit pictureUpdated(pic);
         pic->release();
+
+        m_pic_cache.setObjectCost(Picture::key(pic->item(), pic->color()), pic->cost());
     }
 }
 
