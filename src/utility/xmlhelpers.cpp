@@ -101,7 +101,7 @@ void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback)
         if (node.nodeName() == m_elementNodeName) {
             try {
                 callback(node.toElement());
-            } catch (const ParseException &e) {
+            } catch (const Exception &e) {
                 throw ParseException(m_file, e.what());
             }
         }

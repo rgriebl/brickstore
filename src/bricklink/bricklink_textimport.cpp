@@ -88,7 +88,7 @@ bool BrickLink::TextImport::import(const QString &path)
         readChangeLog(path % u"btchglog.csv");
 
         return true;
-    } catch (const ParseException &e) {
+    } catch (const Exception &e) {
         qWarning() << "Error importing database:" << e.what();
         return false;
     }
