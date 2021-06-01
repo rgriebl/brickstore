@@ -425,7 +425,7 @@ Core::Core(const QString &datadir)
 #endif
 
     m_pic_cache.setMaxCost(int(picCacheMem / 1024)); // each pic has the cost of memory used in KB
-    m_pg_cache.setMaxCost(10000); // each priceguide has a cost of 1
+    m_pg_cache.setMaxCost(pgCacheEntries); // each priceguide has a cost of 1
 }
 
 Core::~Core()

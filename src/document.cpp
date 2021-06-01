@@ -1886,7 +1886,7 @@ static inline int doubleCompare(double d1, double d2)
 int Document::compare(const Lot *i1, const Lot *i2, const QVector<QPair<int, Qt::SortOrder>> &sortColumns) const
 {
     int r = 0;
-    for (const auto sc : sortColumns) {
+    for (const auto &sc : sortColumns) {
         switch (sc.first) {
         case Document::Index       : {
             r = m_lots.indexOf(const_cast<Lot *>(i1)) - m_lots.indexOf(const_cast<Lot *>(i2));

@@ -297,7 +297,7 @@ public:
 
         if (logWidget) {
             logWidget->installEventFilter(this);
-            logWidget->appendHtml("<h3>Press ~ to open the developer console</h3>"_l1);
+            logWidget->setToolTip("Press ~ to activate the developer console"_l1);
         }
     }
 
