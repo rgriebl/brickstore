@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.6.1] - 2021-06-02
+### Added
+- Added support for light and dark themes for all platforms. This uses the native themeing on
+  macOS, while it uses a custom style and color palette for the *Light* and *Dark* themes on
+  Windows and Linux.
+
+### Improvements
+- Adjusted the picture cache RAM consumption to avoid crashes on 32bit Windows because the 
+  BrickStore process is consuming too much memory. You should however use the 64bit version if
+  possible: the larger item images used nowadays fill up the cache quite quickly and force the
+  32bit version to constantly reload images from disk.
+- Parting out variable colored items (e.g. `973c00`) works correctly now.
+
+
 ## [2021.5.2] - 2021-05-25
 ### Added
 - The Toolbar is now fully customizable via the `Settings` dialog.
@@ -301,7 +315,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.5.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.6.1...HEAD
+[2021.6.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.6.1
 [2021.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.2
 [2021.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.1
 [2021.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.4.1
