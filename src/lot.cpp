@@ -144,7 +144,13 @@ bool Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
         return false;
 
     if (useCostQtyAg) {
-        setCost((cost() * quantity() + from.cost() * from.quantity()) / (quantity() + from.quantity()));
+        int fromQty = std::abs(from.quantity());
+        int toQty = std::abs(quantity());
+
+        if ((fromQty == 0) && (toQty == 0))
+            fromQty = toQty = 1;
+
+        setCost((cost() * toQty + from.cost() * fromQty) / (toQty + fromQty));
     } else if (!qFuzzyIsNull(from.cost()) && qFuzzyIsNull(cost())) {
         setCost(from.cost());
     }

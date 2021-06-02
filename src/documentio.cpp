@@ -43,6 +43,11 @@
 #include "documentio.h"
 
 
+inline static double fixFinite(double d)
+{
+    return std::isfinite(d) ? d : 0;
+}
+
 Document *DocumentIO::create()
 {
     auto *doc = new Document();
@@ -704,7 +709,7 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
             if (lot->quantity())
                 xml.createText("MINQTY", QString::number(lot->quantity()));
             if (!qFuzzyIsNull(lot->price()))
-                xml.createText("MAXPRICE", QString::number(lot->price(), 'f', 3));
+                xml.createText("MAXPRICE", QString::number(fixFinite(lot->price()), 'f', 3));
             if (!lot->remarks().isEmpty())
                 xml.createText("REMARKS", lot->remarks());
             if (lot->condition() == BrickLink::Condition::New)
@@ -786,9 +791,9 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
             xml.createEmpty("DELETE");
 
         if (!qFuzzyCompare(base->price(), lot->price()))
-            xml.createText("PRICE", QString::number(lot->price(), 'f', 3));
+            xml.createText("PRICE", QString::number(fixFinite(lot->price()), 'f', 3));
         if (!qFuzzyCompare(base->cost(), lot->cost()))
-            xml.createText("MYCOST", QString::number(lot->cost(), 'f', 3));
+            xml.createText("MYCOST", QString::number(fixFinite(lot->cost()), 'f', 3));
         if (base->condition() != lot->condition())
             xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
         if (base->bulkQuantity() != lot->bulkQuantity())
@@ -805,15 +810,15 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc, const LotLi
         if (base->tierQuantity(0) != lot->tierQuantity(0))
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
         if (!qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0)))
-            xml.createText("TP1", QString::number(lot->tierPrice(0), 'f', 3));
+            xml.createText("TP1", QString::number(fixFinite(lot->tierPrice(0)), 'f', 3));
         if (base->tierQuantity(1) != lot->tierQuantity(1))
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
         if (!qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1)))
-            xml.createText("TP2", QString::number(lot->tierPrice(1), 'f', 3));
+            xml.createText("TP2", QString::number(fixFinite(lot->tierPrice(1)), 'f', 3));
         if (base->tierQuantity(2) != lot->tierQuantity(2))
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
         if (!qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2)))
-            xml.createText("TP3", QString::number(lot->tierPrice(2), 'f', 3));
+            xml.createText("TP3", QString::number(fixFinite(lot->tierPrice(2)), 'f', 3));
 
         if (base->subCondition() != lot->subCondition()) {
             const char16_t *st = nullptr;
@@ -864,7 +869,7 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
         xml.createText("COLOR", QString::number(lot->colorId()));
         xml.createText("CATEGORY", QString::number(lot->categoryId()));
         xml.createText("QTY", QString::number(lot->quantity()));
-        xml.createText("PRICE", QString::number(lot->price(), 'f', 3));
+        xml.createText("PRICE", QString::number(fixFinite(lot->price()), 'f', 3));
         xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
 
         if (lot->bulkQuantity() != 1)   xml.createText("BULK", QString::number(lot->bulkQuantity()));
@@ -873,16 +878,16 @@ QString DocumentIO::toBrickLinkXML(const LotList &lots)
         if (!lot->remarks().isEmpty())  xml.createText("REMARKS", lot->remarks());
         if (lot->retain())              xml.createText("RETAIN", u"Y");
         if (!lot->reserved().isEmpty()) xml.createText("BUYERUSERNAME", lot->reserved());
-        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", QString::number(lot->cost(), 'f', 3));
-        if (lot->hasCustomWeight())     xml.createText("MYWEIGHT", QString::number(lot->weight(), 'f', 4));
+        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", QString::number(fixFinite(lot->cost()), 'f', 3));
+        if (lot->hasCustomWeight())     xml.createText("MYWEIGHT", QString::number(fixFinite(lot->weight()), 'f', 4));
 
         if (lot->tierQuantity(0)) {
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
-            xml.createText("TP1", QString::number(lot->tierPrice(0), 'f', 3));
+            xml.createText("TP1", QString::number(fixFinite(lot->tierPrice(0)), 'f', 3));
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
-            xml.createText("TP2", QString::number(lot->tierPrice(1), 'f', 3));
+            xml.createText("TP2", QString::number(fixFinite(lot->tierPrice(1)), 'f', 3));
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
-            xml.createText("TP3", QString::number(lot->tierPrice(2), 'f', 3));
+            xml.createText("TP3", QString::number(fixFinite(lot->tierPrice(2)), 'f', 3));
         }
 
         if (lot->subCondition() != BrickLink::SubCondition::None) {
@@ -932,9 +937,9 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
             // field is generated with thousands-separators enabled (e.g. 1,752 instead of 1752)
             qty = p.elementText(e, "QTY", "0").remove(QLatin1Char(',')).toInt();
         }
-        double price = p.elementText(e, "MAXPRICE", "-1").toDouble();
+        double price = fixFinite(p.elementText(e, "MAXPRICE", "-1").toDouble());
         if (price < 0)
-            price = p.elementText(e, "PRICE", "0").toDouble();
+            price = fixFinite(p.elementText(e, "PRICE", "0").toDouble());
         auto cond = p.elementText(e, "CONDITION", "N") == "N"_l1 ? BrickLink::Condition::New
                                                                              : BrickLink::Condition::Used;
         int bulk = p.elementText(e, "BULK", "1").toInt();
@@ -943,18 +948,18 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
         QString remarks = p.elementText(e, "REMARKS", "");
         bool retain = (p.elementText(e, "RETAIN", "") == "Y"_l1);
         QString reserved = p.elementText(e, "BUYERUSERNAME", "");
-        double cost = p.elementText(e, "MYCOST", "0").toDouble();
+        double cost = fixFinite(p.elementText(e, "MYCOST", "0").toDouble());
         int tq[3];
         double tp[3];
         tq[0] = p.elementText(e, "TQ1", "0").toInt();
-        tp[0] = p.elementText(e, "TP1", "0").toDouble();
+        tp[0] = fixFinite(p.elementText(e, "TP1", "0").toDouble());
         tq[1] = p.elementText(e, "TQ2", "0").toInt();
-        tp[1] = p.elementText(e, "TP2", "0").toDouble();
+        tp[1] = fixFinite(p.elementText(e, "TP2", "0").toDouble());
         tq[2] = p.elementText(e, "TQ3", "0").toInt();
-        tp[2] = p.elementText(e, "TP3", "0").toDouble();
-        double weight = p.elementText(e, "MYWEIGHT", "0").toDouble();
+        tp[2] = fixFinite(p.elementText(e, "TP3", "0").toDouble());
+        double weight = fixFinite(p.elementText(e, "MYWEIGHT", "0").toDouble());
         if (qFuzzyIsNull(weight))
-            weight = p.elementText(e, "ITEMWEIGHT", "0").toDouble();
+            weight = fixFinite(p.elementText(e, "ITEMWEIGHT", "0").toDouble());
         uint lotId = p.elementText(e, "LOTID", "").toUInt();
         QString subCondStr = p.elementText(e, "SUBCONDITION", "");
         auto subCond = (subCondStr == "I"_l1 ? BrickLink::SubCondition::Incomplete :
@@ -1183,7 +1188,7 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
             { u"ColorName",    [](auto lot, auto v) { lot->isIncomplete()->m_color_name = v; } },
             { u"CategoryName", [](auto lot, auto v) { lot->isIncomplete()->m_category_name = v; } },
             { u"ItemTypeName", [](auto lot, auto v) { lot->isIncomplete()->m_itemtype_name = v; } },
-            { u"Price",        [](auto lot, auto v) { lot->setPrice(v.toDouble()); } },
+            { u"Price",        [](auto lot, auto v) { lot->setPrice(fixFinite(v.toDouble())); } },
             { u"Bulk",         [](auto lot, auto v) { lot->setBulkQuantity(v.toInt()); } },
             { u"Qty",          [](auto lot, auto v) { lot->setQuantity(v.toInt()); } },
             { u"Sale",         [](auto lot, auto v) { lot->setSale(v.toInt()); } },
@@ -1192,14 +1197,14 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
             { u"TQ1",          [](auto lot, auto v) { lot->setTierQuantity(0, v.toInt()); } },
             { u"TQ2",          [](auto lot, auto v) { lot->setTierQuantity(1, v.toInt()); } },
             { u"TQ3",          [](auto lot, auto v) { lot->setTierQuantity(2, v.toInt()); } },
-            { u"TP1",          [](auto lot, auto v) { lot->setTierPrice(0, v.toDouble()); } },
-            { u"TP2",          [](auto lot, auto v) { lot->setTierPrice(1, v.toDouble()); } },
-            { u"TP3",          [](auto lot, auto v) { lot->setTierPrice(2, v.toDouble()); } },
+            { u"TP1",          [](auto lot, auto v) { lot->setTierPrice(0, fixFinite(v.toDouble())); } },
+            { u"TP2",          [](auto lot, auto v) { lot->setTierPrice(1, fixFinite(v.toDouble())); } },
+            { u"TP3",          [](auto lot, auto v) { lot->setTierPrice(2, fixFinite(v.toDouble())); } },
             { u"LotID",        [](auto lot, auto v) { lot->setLotId(v.toUInt()); } },
             { u"Retain",       [](auto lot, auto v) { lot->setRetain(v.isEmpty() || (v == "Y"_l1)); } },
             { u"Reserved",     [](auto lot, auto v) { lot->setReserved(v); } },
-            { u"TotalWeight",  [](auto lot, auto v) { lot->setTotalWeight(v.toDouble()); } },
-            { u"Cost",         [](auto lot, auto v) { lot->setCost(v.toDouble()); } },
+            { u"TotalWeight",  [](auto lot, auto v) { lot->setTotalWeight(fixFinite(v.toDouble())); } },
+            { u"Cost",         [](auto lot, auto v) { lot->setCost(fixFinite(v.toDouble())); } },
             { u"Condition",    [](auto lot, auto v) {
                 lot->setCondition(v == "N"_l1 ? BrickLink::Condition::New
                                               : BrickLink::Condition::Used); } },
@@ -1223,7 +1228,7 @@ DocumentIO::BsxContents DocumentIO::parseBsxInventory(QIODevice *in)
             { u"MarkerColor",  [](auto lot, auto v) { lot->setMarkerColor(QColor(v)); } },
             { u"OrigPrice",    [&legacyOrigPrice](auto lot, auto v) {
                 Q_UNUSED(lot)
-                legacyOrigPrice.setValue(v.toDouble());
+                legacyOrigPrice.setValue(fixFinite(v.toDouble()));
             } },
             { u"OrigQty",      [&legacyOrigQty](auto lot, auto v) {
                 Q_UNUSED(lot)
@@ -1408,7 +1413,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
         }
     };
     static auto asString   = [](const QString &s)      { return s; };
-    static auto asCurrency = [](double d)              { return QString::number(d, 'f', 3); };
+    static auto asCurrency = [](double d)              { return QString::number(fixFinite(d), 'f', 3); };
     static auto asInt      = [](auto i)                { return QString::number(i); };
 
 
@@ -1496,7 +1501,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
 
         if (lot->hasCustomWeight()) {
             create(u"TotalWeight", &Lot::totalWeight, [](double d) {
-                return QString::number(d, 'f', 4); }, Required);
+                return QString::number(fixFinite(d), 'f', 4); }, Required);
         }
         if (!lot->markerText().isEmpty())
             create(u"MarkerText", &Lot::markerText, asString, Constant);

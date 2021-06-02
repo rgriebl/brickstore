@@ -93,8 +93,11 @@ private:
                   const R defaultValue)
     {
         if (mergeMode == Document::MergeMode::MergeAverage) { // weighted by quantity
-            const int fromQty = from.quantity();
-            const int toQty = to.quantity();
+            int fromQty = std::abs(from.quantity());
+            int toQty = std::abs(to.quantity());
+
+            if ((fromQty == 0) && (toQty == 0))
+                fromQty = toQty = 1;
 
             (to.*S)(((to.*G)() * toQty + (from.*G)() * fromQty) / (toQty + fromQty));
             return true;
