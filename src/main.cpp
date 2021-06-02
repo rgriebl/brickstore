@@ -141,7 +141,7 @@ int main(int argc, char **argv)
         QThreadPool::globalInstance()->waitForDone();
 
         if (a.shouldRestart())
-            QProcess::startDetached(qApp->applicationFilePath());
+            QProcess::startDetached(qApp->applicationFilePath(), { });
 #endif
     }
     return res;
