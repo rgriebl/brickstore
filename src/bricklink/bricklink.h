@@ -683,6 +683,7 @@ public:
     const Category *category(uint id) const;
     const ItemType *itemType(char id) const;
     const Item *item(char tid, const QByteArray &id) const;
+    const Item *item(const std::string &tids, const QByteArray &id) const;
 
     const PartColorCode *partColorCode(uint id);
 

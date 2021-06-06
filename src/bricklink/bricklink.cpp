@@ -748,6 +748,17 @@ const Item *Core::item(char tid, const QByteArray &id) const
     return nullptr;
 }
 
+const Item *Core::item(const std::string &tids, const QByteArray &id) const
+{
+    for (const char &tid : tids) {
+        auto needle = std::make_pair(tid, id);
+        auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lessThan);
+        if ((it != m_items.cend()) && (it->m_itemTypeId == tid) && (it->m_id == id))
+            return &(*it);
+    }
+    return nullptr;
+}
+
 const PartColorCode *Core::partColorCode(uint id)
 {
     auto it = std::lower_bound(m_pccs.cbegin(), m_pccs.cend(), id, &PartColorCode::lessThan);

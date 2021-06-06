@@ -175,7 +175,11 @@ private:
     QVector<QPair<bool, QString>> m_filter_text;
     QVector<QPair<bool, QPair<const Item *, const Color *>>> m_filter_consistsOf;
     QVector<QPair<bool, const Item *>> m_filter_appearsIn;
+    QPair<bool, QVector<const Item *>> m_filter_ids;
     bool            m_inv_filter = false;
+    static QString  s_consistsOfPrefix;
+    static QString  s_appearsInPrefix;
+    static QString  s_idPrefix;
 
     friend class Core;
 };

@@ -451,10 +451,22 @@ bool BrickLink::ItemTypeModel::filterAccepts(const void *pointer) const
 // ITEMMODEL
 /////////////////////////////////////////////////////////////
 
+QString BrickLink::ItemModel::s_appearsInPrefix;
+QString BrickLink::ItemModel::s_consistsOfPrefix;
+QString BrickLink::ItemModel::s_idPrefix;
+
+
 BrickLink::ItemModel::ItemModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
+
+    if (s_consistsOfPrefix.isEmpty()) {
+        s_consistsOfPrefix = tr("consists-of:", "Filter prefix");
+        s_appearsInPrefix = tr("appears-in:", "Filter prefix");
+        s_idPrefix = tr("id:", "Id prefix");
+    }
+
     connect(core(), &Core::pictureUpdated, this, &ItemModel::pictureUpdated);
 }
 
@@ -586,11 +598,10 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
     m_filter_text.clear();
     m_filter_appearsIn.clear();
     m_filter_consistsOf.clear();
+    m_filter_ids.second.clear();
+    m_filter_ids.first = false;
 
     const QStringList sl = filter.simplified().split(' '_l1);
-
-    const QString consistsOfPrefix = tr("consists-of:", "Filter prefix");
-    const QString appearsInPrefix = tr("appears-in:", "Filter prefix");
 
     QString quoted;
     bool quotedNegate = false;
@@ -618,8 +629,8 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
             const bool negate = (first == '-'_l1);
             auto str = negate ? s.mid(1) : s;
 
-            if (str.startsWith(consistsOfPrefix)) {
-                str = str.mid(consistsOfPrefix.length());
+            if (str.startsWith(s_consistsOfPrefix)) {
+                str = str.mid(s_consistsOfPrefix.length());
 
                 // contains either a minifig or a part, optionally with color-id
                 const BrickLink::Color *color = nullptr;
@@ -630,21 +641,25 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                     str = str.left(atPos);
                 }
 
-                auto item = BrickLink::core()->item('M', str.toLatin1());
-                if (!item)
-                    item = BrickLink::core()->item('P', str.toLatin1());
-                if (item)
+                if (auto item = BrickLink::core()->item("MP", str.toLatin1()))
                     m_filter_consistsOf << qMakePair(negate, qMakePair(item, color));
 
-            } else if (str.startsWith(appearsInPrefix)) {
-                str = str.mid(appearsInPrefix.length());
+            } else if (str.startsWith(s_appearsInPrefix)) {
+                str = str.mid(s_appearsInPrefix.length());
 
                 // appears-in either a minifig or a set
-                auto item = BrickLink::core()->item('M', str.toLatin1());
-                if (!item)
-                    item = BrickLink::core()->item('S', str.toLatin1());
-                if (item)
+                if (auto item = BrickLink::core()->item("MS", str.toLatin1()))
                     m_filter_appearsIn << qMakePair(negate, item);
+
+            } else if (str.startsWith(s_idPrefix)) {
+                str = str.mid(s_idPrefix.length());
+                const auto ids = str.split(","_l1);
+
+                for (const auto &id : ids) {
+                    if (auto item = BrickLink::core()->item("MPSG", id.toLatin1()))
+                        m_filter_ids.second << item;
+                }
+                m_filter_ids.first = negate;
 
             } else {
                 const bool firstIsQuote = (str.at(0) == '"'_l1);
@@ -702,6 +717,15 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
         bool match = true;
         for (const auto &p : m_filter_text)
             match = match && (matchStr.contains(p.second, Qt::CaseInsensitive) == !p.first); // contains() xor negate
+
+        bool idMatched = m_filter_ids.second.isEmpty();
+        for (const auto &i : m_filter_ids.second) {
+            if (i == item) {
+                idMatched = true;
+                break;
+            }
+        }
+        match = match && (idMatched == !m_filter_ids.first); // found xor negate
 
         for (const auto &a : m_filter_appearsIn) {
             bool found = false;
