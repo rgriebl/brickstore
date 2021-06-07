@@ -187,11 +187,21 @@ win32 {
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) --qmldir $$shell_quote($$shell_path($$PWD/extensions)) $(DESTDIR_TARGET)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_SSL_LIB)) $(DESTDIR)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_CRYPTO_LIB)) $(DESTDIR)
+    opencv {
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/opencv_core.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/opencv_features2d.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/opencv_flann.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/opencv_imgproc.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/zlib1.dll)) $(DESTDIR)
+    }
+    sentry {
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/sentry.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/tools/sentry-native/crashpad_handler.exe)) $(DESTDIR)
+    }
 
     installer.depends += deploy
     installer.commands += $$shell_path($$ISCC) \
                             /DSOURCE_DIR=$$shell_quote($$shell_path($$OUT_PWD/$$DESTDIR)) \
-                            /DVCPKG_PATH=$$shell_quote($$shell_path($$VCPKG_PATH)) \
                             /O$$shell_quote($$shell_path($$OUT_PWD)) \
                             /F$$shell_quote($${TARGET}-$${VERSION}) \
                             $$shell_quote($$shell_path($$PWD/windows/brickstore.iss))

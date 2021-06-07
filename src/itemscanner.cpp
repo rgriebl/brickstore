@@ -22,7 +22,35 @@
 #include "bricklink.h"
 #include "exception.h"
 #include "utility.h"
+#include "version.h"
+#include "bs_lzma.h"
 #include "itemscanner.h"
+
+
+// Default parameters used for creating the database
+static const char *dbFileName = "image-search-database-v%1";
+static const char *dbType = "BrickStore Image Search DB";
+static qint32 dbVersion = 1;
+
+struct AkazeParams
+{
+    qint32 /*cv::AKAZE::DescriptorType*/ descriptor_type = cv::AKAZE::DESCRIPTOR_MLDB;
+    qint32 descriptor_size = 0;
+    qint32 descriptor_channels = 3;
+    float threshold = 0.001f;
+    qint32 nOctaves = 4;
+    qint32 nOctaveLayers = 4;
+    qint32 /*cv::KAZE::DiffusivityType*/ diffusivity = cv::KAZE::DIFF_PM_G2;
+};
+
+struct FlannLshParams
+{
+    qint32 table_number = 12;
+    qint32 key_size = 20;
+    qint32 multi_probe_level = 2;
+};
+
+
 
 class SaveableFlannMatcher : public cv::FlannBasedMatcher
 {
@@ -73,7 +101,10 @@ signals:
     void databaseLoaded(bool successful, QString error);
 
 private:
+    void downloadDatabase(const QString &filePath);
+
     ItemScannerPrivate *d;
+    Transfer *m_transfer = nullptr;
 };
 
 
@@ -92,6 +123,7 @@ public:
 
     bool dbLoading = true;
     bool dbLoaded = false;
+    bool dbTriedToDownload = false;
     QString dbError;
     int nextId = 0;
 };
@@ -147,15 +179,17 @@ ItemScanner::ItemScanner(bool createMode)
     d->opencvThread.start(QThread::LowPriority);
 
     if (createMode) {
-        //d->detector = cv::ORB::create();
-        //d->detector = cv::ORB::create(250, 1.2f, 8, 15, 0, 2, cv::ORB::HARRIS_SCORE, 15, 20);
-        d->detector = cv::AKAZE::create();
+        AkazeParams ap;
+        d->detector = cv::AKAZE::create(cv::AKAZE::DescriptorType(ap.descriptor_type),
+                                        ap.descriptor_size, ap.descriptor_channels, ap.threshold,
+                                        ap.nOctaves, ap.nOctaveLayers,
+                                        cv::KAZE::DiffusivityType(ap.diffusivity));
 
-        //d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(12, 20, 2));
-        d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(6, 12, 1));
+        FlannLshParams fp;
+        d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(
+                                                            fp.table_number,
+                                                            fp.key_size, fp.multi_probe_level));
     } else {
-        d->detector = cv::AKAZE::create();
-        d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(6, 12, 1));
         QMetaObject::invokeMethod(d->opencvWorker, "loadDatabase", Qt::QueuedConnection);
     }
 }
@@ -179,6 +213,9 @@ void ItemScanner::onWorkerDatabaseLoaded(bool successful, QString error)
     d->dbLoaded = successful;
     d->dbError = error;
     d->dbLoading = false;
+
+    if (!successful)
+        qWarning() << "Loading the image search database failed:" << error;
 
     emit databaseLoadingFinished();
 }
@@ -212,7 +249,7 @@ void OpencvWorker::scan(int id, QImage img)
             throw Exception("Too few keypoints (%1)").arg(keypoints.size());
 
         QVector<QPointF> points;
-        points.reserve(keypoints.size());
+        points.reserve(int(keypoints.size()));
         for (const auto &kp : qAsConst(keypoints))
             points.append({ kp.pt.x, kp.pt.y });
         emit scanStarted(id, points);
@@ -277,13 +314,48 @@ void OpencvWorker::loadDatabase()
     if (d->matcher)
         d->matcher->clear();
 
-    auto sw = new stopwatch("load matcher db");
+    QString fileName = QString::fromLatin1(dbFileName).arg(dbVersion);
+    QFile fdb(BrickLink::core()->dataPath() % u'/' % fileName);
 
-    QFile fdb(BrickLink::core()->dataPath() + "/opencv-orb_M"_l1);
-    if (fdb.exists() && (fdb.size() > 0) && fdb.open(QIODevice::ReadOnly)) {
+    try {
+        stopwatch sw("load image search db");
+
+
+        if (!fdb.open(QIODevice::ReadOnly))
+            throw Exception(&fdb, "Could not read the image search database");
+
         QDataStream ds(&fdb);
+        QByteArray type;
+        qint32 version;
+        AkazeParams ap;
+        FlannLshParams fp;
         qint32 s;
+
+        ds >> type >> version;
+        if (type != dbType || version != dbVersion) {
+            throw Exception("invalid type or version (%1 / %2").arg(QLatin1String(dbType))
+                    .arg(dbVersion);
+        }
+        ds >> ap.descriptor_type >> ap.descriptor_size >> ap.descriptor_channels >> ap.threshold
+                >> ap.nOctaves >> ap.nOctaveLayers >> ap.diffusivity;
+        ds >> fp.table_number >> fp.key_size >> fp.multi_probe_level;
+
+        d->detector = cv::AKAZE::create(cv::AKAZE::DescriptorType(ap.descriptor_type),
+                                        ap.descriptor_size, ap.descriptor_channels, ap.threshold,
+                                        ap.nOctaves, ap.nOctaveLayers,
+                                        cv::KAZE::DiffusivityType(ap.diffusivity));
+
+        d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(
+                                                            fp.table_number,
+                                                            fp.key_size, fp.multi_probe_level));
+
+        if (!d->detector || !d->matcher)
+            throw Exception("invalid OpenCV parameters");
         ds >> s;
+
+        if (s <= 0 || s > 1'000'000)
+            throw Exception("invalid item count (%1)").arg(s);
+
         d->items.reserve(s);
         while (s--) {
             qint8 itemType;
@@ -297,25 +369,92 @@ void OpencvWorker::loadDatabase()
                 d->matcher->add({ mat });
             }
         }
-    }
+        if (ds.status() != QDataStream::Ok)
+            throw Exception("invalid stream state (%1)").arg(ds.status());
 
-    delete sw;
-    sw = new stopwatch("train matcher db");
+        sw.restart("train image search db");
 
-    if (!d->items.isEmpty())
-        d->matcher->train();
+        if (!d->items.isEmpty() && d->matcher)
+            d->matcher->train();
 
-    //qWarning() << d->matcher.get();
-    //qWarning() << static_cast<SaveableFlannMatcher *>(d->matcher.get())->getFlannIndex();
-    //static_cast<SaveableFlannMatcher *>(d->matcher.get())->getFlannIndex()->save("c:\\users\\sandman\\xx.dat");
-
-
-    delete sw;
-
-    if (d->items.isEmpty())
-        emit databaseLoaded(false, tr("Could not read the image database"));
-    else
+        // This is how we could save the trained index
+//        if (d->matcher) {
+//            auto index = static_cast<SaveableFlannMatcher *>(d->matcher.get())->getFlannIndex();
+//            if (index)
+//                index->save("/tmp/flann.idx");
+//        }
         emit databaseLoaded(true, { });
+
+    } catch (const Exception &e) {
+        d->items.clear();
+        d->matcher.reset();
+        d->detector.reset();
+
+        if (d->dbTriedToDownload) { // only try downloading once
+            emit databaseLoaded(false,
+                                tr("Could not read the image database: %1").arg(e.error()));
+        } else {
+            d->dbTriedToDownload = true;
+            downloadDatabase(fdb.fileName());
+        }
+    }
+}
+
+void OpencvWorker::downloadDatabase(const QString &filePath)
+{
+    qWarning() << "Downloading the image search database";
+
+    TransferJob *transJob = nullptr;
+    if (!m_transfer)
+        m_transfer = new Transfer(this);
+
+    connect(m_transfer, &Transfer::finished, this, [this](TransferJob *job) {
+        auto *file = qobject_cast<QFile *>(job->file());
+
+        if (job->wasNotModifiedSince()) {
+            file->remove();
+            loadDatabase();
+
+        } else if (file && file->size()) {
+            QString basepath = file->fileName();
+            basepath.truncate(basepath.length() - 5);      // strip '.lzma'
+
+            qWarning() << "Decompressing the image search database";
+            int lastPct = -1;
+            QString error = LZMA::decompress(file->fileName(), basepath, [&lastPct](int p, int t) {
+                int pct = int(t ? (10 * qint64(p) / t) : 0);
+                if (pct != lastPct) {
+                    lastPct = pct;
+                    qWarning() << "  " << (pct * 10) << "%";
+                }
+            });
+
+            if (error.isNull())
+                loadDatabase();
+            else
+                emit databaseLoaded(false, error);
+        } else {
+            emit databaseLoaded(false, tr("Downloaded file is empty."));
+        }
+        m_transfer->deleteLater();
+        m_transfer = nullptr;
+    });
+
+    QFileInfo dbInfo(filePath);
+    QString remotefile = QLatin1String(BRICKSTORE_DATABASE_URL) % dbInfo.fileName();
+    QString localfile = filePath;
+
+    QDateTime dt;
+    if (dbInfo.exists() && dbInfo.isFile())
+        dt = dbInfo.fileTime(QFileDevice::FileModificationTime);
+
+    QFile *file = new QFile(localfile % u".lzma");
+
+    if (!file->open(QIODevice::WriteOnly))
+        throw Exception(tr("Could not write to file: %1").arg(file->fileName()));
+
+    transJob = TransferJob::getIfNewer(QUrl(remotefile % u".lzma"), dt, file);
+    m_transfer->retrieve(transJob);
 }
 
 
@@ -353,7 +492,7 @@ bool ItemScanner::createDatabase()
         return true;
     };
 
-    stopwatch sw ("create orb db");
+    stopwatch sw ("create image search db");
 
     QVector<BrickLink::Picture *> downloading;
     connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
@@ -362,7 +501,8 @@ bool ItemScanner::createDatabase()
         opencvDetect(pic);
     });
 
-    QFile fdb(BrickLink::core()->dataPath() + "/opencv-orb_M"_l1);
+    QFile fdb(BrickLink::core()->dataPath() % u'/' %
+              QString::fromLatin1(dbFileName).arg(dbVersion));
     if (fdb.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         const auto &items = BrickLink::core()->items();
         for (const BrickLink::Item &item : items) {
@@ -384,6 +524,16 @@ bool ItemScanner::createDatabase()
             QCoreApplication::processEvents();
 
         QDataStream ds(&fdb);
+        // type and version
+        ds << QByteArray(dbType) << qint32(dbVersion);
+        // AKAZE parameters
+        AkazeParams ap;
+        ds << ap.descriptor_type << ap.descriptor_size << ap.descriptor_channels << ap.threshold
+           << ap.nOctaves << ap.nOctaveLayers << ap.diffusivity;
+        // FLANN/LSH parameters
+        FlannLshParams fp;
+        ds << fp.table_number << fp.key_size << fp.multi_probe_level;
+        // the actual db entries
         ds << qint32(itemDescriptors.size());
         for (const auto &p : qAsConst(itemDescriptors))
             ds << qint8(p.first->itemTypeId()) << p.first->id() << p.second;

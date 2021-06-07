@@ -15,18 +15,15 @@
 #include <QFile>
 #include <QDateTime>
 #include <QStringBuilder>
-#include <QCryptographicHash>
 
+#include "bs_lzma.h"
 #include "updatedatabase.h"
-#include "lzmadec.h"
 #include "config.h"
 #include "bricklink.h"
 #include "utility.h"
+#include "version.h"
 #include "progressdialog.h"
 
-
-#define DATABASE_URL   "https://brickforge.de/brickstore-data/"
-#define DATABASE_SHA   QCryptographicHash::Sha512
 
 UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
     : m_progress(pd)
@@ -37,10 +34,10 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
             this, &UpdateDatabase::gotten);
 
     //pd->setAutoClose(false);
-    pd->setHeaderText(tr("Updating BrickLink Database"));
+    pd->setHeaderText(tr("Updating the BrickLink database"));
     pd->setMessageText(tr("Download: %p"));
 
-    QString remotefile = QLatin1String(DATABASE_URL) % BrickLink::core()->defaultDatabaseName();
+    QString remotefile = QLatin1String(BRICKSTORE_DATABASE_URL) % BrickLink::core()->defaultDatabaseName();
     QString localfile = BrickLink::core()->dataPath() % BrickLink::core()->defaultDatabaseName();
 
     QDateTime dt;
@@ -51,8 +48,7 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
 
     if (file->open(QIODevice::WriteOnly)) {
         pd->get(QString(remotefile % u".lzma"), dt, file);
-    }
-    else {
+    } else {
         pd->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
         delete file;
     }
@@ -67,104 +63,30 @@ void UpdateDatabase::gotten()
         file->remove();
         m_progress->setMessageText(tr("Already up-to-date."));
         m_progress->setFinished(true);
-    }
-    else if (file && file->size()) {
+
+    } else if (file && file->size()) {
         QString basepath = file->fileName();
         basepath.truncate(basepath.length() - 5);      // strip '.lzma'
 
-        QString error = decompress(file->fileName(), basepath);
+        m_progress->setMessageText(tr("Decompressing database"));
+        QString error = LZMA::decompress(file->fileName(), basepath, [=](int p, int t) {
+            m_progress->setProgress(p, t);
+        });
 
         if (error.isNull()) {
             if (BrickLink::core()->readDatabase()) {
                 m_progress->setMessageText(tr("Finished."));
                 m_progress->setFinished(true);
-            }
-            else
+            } else {
                 m_progress->setErrorText(tr("Could not load the new database."));
-        }
-        else
+            }
+        } else  {
             m_progress->setErrorText(error);
-    }
-    else
+        }
+    } else {
         m_progress->setErrorText(tr("Downloaded file is empty."));
+    }
 }
 
-QString UpdateDatabase::decompress(const QString &src, const QString &dst)
-{
-    QFile sf(src);
-    QFile df(dst);
-
-    if (!sf.open(QIODevice::ReadOnly))
-        return tr("Could not read downloaded file: %1").arg(src);
-    if (!df.open(QIODevice::WriteOnly))
-        return tr("Could not write to database file: %1").arg(dst);
-
-    static const int CHUNKSIZE_IN = 4096;
-    static const int CHUNKSIZE_OUT = 512 * 1024;
-
-    lzmadec_stream strm;
-
-    strm.lzma_alloc = nullptr;
-    strm.lzma_free = nullptr;
-    strm.opaque = nullptr;
-    strm.avail_in = 0;
-    strm.next_in = nullptr;
-
-    if (lzmadec_init(&strm) != LZMADEC_OK)
-        return tr("Could not initialize the LZMA decompressor");
-
-    char *buffer_in  = new char [CHUNKSIZE_IN];
-    char *buffer_out = new char [CHUNKSIZE_OUT];
-
-    QString loop_error;
-
-    QCryptographicHash sha(DATABASE_SHA);
-    QByteArray shaRead = sf.read(QCryptographicHash::hashLength(DATABASE_SHA));
-
-    m_progress->setMessageText(tr("Decompressing database"));
-    m_progress->setProgress(0, 0);
-
-    while (true) {
-        if (strm.avail_in == 0) {
-            strm.next_in  = reinterpret_cast<unsigned char *>(buffer_in);
-            strm.avail_in = static_cast<size_t>(sf.read(buffer_in, CHUNKSIZE_IN));
-        }
-        strm.next_out  = reinterpret_cast<unsigned char *>(buffer_out);
-        strm.avail_out = CHUNKSIZE_OUT;
-
-        int ret = lzmadec_decode(&strm, strm.avail_in == 0);
-        if (ret != LZMADEC_OK && ret != LZMADEC_STREAM_END) {
-            loop_error = tr("Error while decompressing %1").arg(src);
-            break;
-        }
-
-        qint64 write_size = qint64(CHUNKSIZE_OUT - strm.avail_out);
-        sha.addData(buffer_out, write_size);
-        if (write_size != df.write(buffer_out, write_size)) {
-            loop_error = tr("Error writing to file %1: %2").arg(dst, df.errorString());
-            break;
-        }
-        if (ret == LZMADEC_STREAM_END) {
-            lzmadec_end(&strm);
-
-            QByteArray shaCalculated = sha.result();
-            if (shaCalculated != shaRead)
-                loop_error = tr("Checksum mismatch after decompression");
-
-            break;
-        }
-        m_progress->setProgress(int(sf.pos()), int(sf.size()));
-    }
-
-    delete [] buffer_in;
-    delete [] buffer_out;
-
-    if (!loop_error.isEmpty()) {
-        df.close();
-        df.remove();
-    }
-
-    return loop_error;
-}
 
 #include "moc_updatedatabase.cpp"

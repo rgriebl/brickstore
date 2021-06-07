@@ -69,6 +69,7 @@ SystemInfo::SystemInfo()
     m_map["brickstore.locale"_l1] = QLocale().name().left(2);
     m_map["brickstore.version"_l1] = QCoreApplication::applicationVersion();
 
+    m_map["hw.cpu.arch"_l1] = QSysInfo::currentCpuArchitecture();
     // set below - may be delayed due to external processes involved
     // m_map["hw.cpu"_l1] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
     // m_map["hw.gpu"_l1] = "e.g. NVIDIA GeForce GTX 1650";

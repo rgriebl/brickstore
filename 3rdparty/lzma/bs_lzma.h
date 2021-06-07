@@ -13,19 +13,18 @@
 */
 #pragma once
 
-#include <QObject>
+#include <functional>
 
-class ProgressDialog;
+#include <QCoreApplication>
+#include <QCryptographicHash>
 
 
-class UpdateDatabase : public QObject
+class LZMA
 {
-    Q_OBJECT
-public:
-    UpdateDatabase(ProgressDialog *pd);
-private slots:
-    void gotten();
+    Q_DECLARE_TR_FUNCTIONS(MiniZip)
 
-private:
-    ProgressDialog *m_progress;
+public:
+    static QString decompress(const QString &src, const QString &dst,
+                              std::function<void (int, int)> progress = { },
+                              QCryptographicHash::Algorithm alg = QCryptographicHash::Sha512);
 };

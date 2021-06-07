@@ -37,16 +37,13 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Files]
-Source: "BrickStore.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 ; MSVC
 Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
 Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
-; Sentry
-Source: "{#VCPKG_PATH}/tools/sentry-native/crashpad_handler.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "{#VCPKG_PATH}/bin/sentry.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Run]
 Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; \

@@ -316,11 +316,6 @@ bool ItemScannerDialog::eventFilter(QObject *o, QEvent *e)
     if ((o == m_viewFinder) && (e->type() == QEvent::MouseButtonPress) && isEnabled())
         capture();
     return QDialog::eventFilter(o, e);
-
-    if ((o == m_viewFinder) && (e->type() == QEvent::Show)) {
-        if (m_camera)
-            m_camera->start();
-    }
 }
 
 void ItemScannerDialog::capture()

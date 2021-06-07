@@ -1727,7 +1727,7 @@ bool FrameWork::updateDatabase(bool forceSync)
             Transfer trans;
             ProgressDialog d(tr("Update Database"), &trans, this);
             UpdateDatabase update(&d);
-            bool result = d.exec();
+            bool result = (d.exec() == QDialog::Accepted);
 
             for (const auto &file : files)
                 openDocument(file);

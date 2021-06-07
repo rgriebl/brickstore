@@ -27,6 +27,10 @@ public:
     }
     ~stopwatch()
     {
+        restart();
+    }
+    void restart(const char *desc = nullptr)
+    {
         qint64 micros = m_timer.nsecsElapsed() / 1000;
 
         int sec = 0;
@@ -37,9 +41,11 @@ public:
         int msec = int(micros / 1000);
         int usec = micros % 1000;
 
-        qWarning("%s: %d'%03d.%03d", m_label, sec, msec, usec);
+        qWarning("%s: %ds %03dms %03dus", m_label ? m_label : "", sec, msec, usec);
+        m_label = desc;
         m_timer.restart();
     }
+
 private:
     Q_DISABLE_COPY(stopwatch)
 

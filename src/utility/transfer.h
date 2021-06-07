@@ -143,7 +143,7 @@ public:
     Transfer(QObject *parent = nullptr);
     ~Transfer() override;
 
-    bool retrieve(TransferJob *job, bool highPriority = false);
+    void retrieve(TransferJob *job, bool highPriority = false);
 
     void abortJob(TransferJob *job);
     void abortAllJobs();

@@ -134,7 +134,7 @@ void Transfer::setUserAgent(const QString &ua)
     m_user_agent = ua;
 }
 
-bool Transfer::retrieve(TransferJob *job, bool highPriority)
+void Transfer::retrieve(TransferJob *job, bool highPriority)
 {
     Q_ASSERT(!job->m_transfer);
     job->m_transfer = this;
@@ -142,7 +142,6 @@ bool Transfer::retrieve(TransferJob *job, bool highPriority)
     QMetaObject::invokeMethod(m_retriever, [this, job, highPriority]() {
         m_retriever->addJob(job, highPriority);
     }, Qt::QueuedConnection);
-    return true;
 }
 
 void Transfer::abortJob(TransferJob *job)
@@ -301,7 +300,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
     j->m_effective_url = j->m_reply->url();
 
     if (error != QNetworkReply::NoError) {
-        m_sslSession = reply->sslConfiguration().sessionTicket();
+        m_sslSession.clear();
 
         if ((j->m_respcode == 404) && j->m_retries_left) {
             --j->m_retries_left;
@@ -326,6 +325,8 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
         j->m_error_string = j->m_reply->errorString();
         j->setStatus(TransferJob::Failed);
     } else {
+        m_sslSession = reply->sslConfiguration().sessionTicket();
+
         switch (j->m_respcode) {
         case 304:
             if (j->m_only_if_newer.isValid()) {
