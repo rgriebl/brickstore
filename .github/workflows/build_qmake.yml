@@ -35,7 +35,6 @@ jobs:
         - name: "Ubuntu 20.04 64bit"
           artifact: "Ubuntu-20.04"
           os: ubuntu-20.04
-          qmake_extra_config: "CONFIG+=opencv"
 
         - name: "Debian 11 Backend 64bit"
           artifact: "Debian-11-Backend"
@@ -46,7 +45,6 @@ jobs:
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
           os: ubuntu-18.04
-          qmake_extra_config: "CONFIG+=opencv"
           appimage: true
           qt_version: '5.15.2'
           qt_arch: ''
@@ -80,7 +78,7 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
-        sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential libopencv-dev
+        sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev qtmultimedia5-dev lsb-release fakeroot build-essential libopencv-dev
       shell: bash
 
     - name: Install Qt on Linux (container)
@@ -88,7 +86,7 @@ jobs:
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec "debian-build" apt update
-        sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev qtmultimedia5-dev lsb-release fakeroot build-essential libopencv-dev
       shell: bash
 
     - name: Install OpenSSL on Windows (slproweb)
@@ -102,6 +100,12 @@ jobs:
       if: startsWith(matrix.config.os, 'windows')
       run: |
         c:\vcpkg\vcpkg install --recurse openssl --triplet ${{ matrix.config.vcpkg_triplet }}
+      shell: cmd
+
+    - name: Install OpenCV on Windows (vcpkg)
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        c:\vcpkg\vcpkg install --recurse opencv --triplet ${{ matrix.config.vcpkg_triplet }}
       shell: cmd
 
     - name: Install sentry.io on Windows

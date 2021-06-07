@@ -237,8 +237,7 @@ void OpencvWorker::scan(int id, QImage img)
         if (!d->dbLoaded)
             throw Exception("No OpenCV database available");
 
-        QImage cvimg = img;
-        cvimg.convertTo(QImage::Format_RGB888);
+        QImage cvimg = img.convertToFormat(QImage::Format_RGB888);
         cv::Mat input(cvimg.height(), cvimg.width(), CV_8UC3, cvimg.bits());
 
         std::vector<cv::KeyPoint> keypoints;
@@ -473,11 +472,10 @@ bool ItemScanner::createDatabase()
             return false;
         }
 
-        QImage cvimg = img;
+        QImage cvimg = img.convertToFormat(QImage::Format_RGB888);
         bool backAndFront = (img.width() > (img.height() * 7 / 6)); // most likely front + back
         if (backAndFront)
             cvimg = cvimg.copy(0, 0, cvimg.width() / 2, cvimg.height());
-        cvimg.convertTo(QImage::Format_RGB888);
 
         qWarning() << "Processing" << pic->item()->itemTypeId() << pic->item()->id()
                    << (backAndFront ? "( >8 )" : "");
