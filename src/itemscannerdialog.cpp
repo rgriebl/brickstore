@@ -251,8 +251,6 @@ void ItemScannerDialog::updateCamera(const QCameraInfo &camInfo)
                 break;
         }
 
-        qWarning() << "Capturing at:" << usedRes;
-
         QImageEncoderSettings ies = m_imageCapture->encodingSettings();
         ies.setResolution(usedRes);
         m_imageCapture->setEncodingSettings(ies);
@@ -268,14 +266,10 @@ void ItemScannerDialog::updateCamera(const QCameraInfo &camInfo)
             this, [=](int id, const QImage &rawimg) {
         Q_UNUSED(id)
 
-        qWarning() << "Raw image:" << rawimg.size();
-
         int scaleh = rawimg.height();
 
         int scalew = scaleh * 6 / 8;
         QImage img = rawimg.copy((rawimg.width() - scalew) / 2, 0, scalew, scaleh);
-
-        // img.load(QDir::home().absoluteFilePath("hol061.png"_l1));
 
         m_lastScanTime.restart();
 

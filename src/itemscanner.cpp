@@ -14,6 +14,7 @@
 #include <QSaveFile>
 #include <QDir>
 #include <QCoreApplication>
+#include <QPainter>
 
 #include <opencv2/features2d.hpp>
 #include <opencv2/opencv.hpp>
@@ -30,17 +31,19 @@
 // Default parameters used for creating the database
 static const char *dbFileName = "image-search-database-v%1";
 static const char *dbType = "BrickStore Image Search DB";
-static qint32 dbVersion = 1;
+static qint32 dbVersion = 2;
 
-struct AkazeParams
+struct OrbParams
 {
-    qint32 /*cv::AKAZE::DescriptorType*/ descriptor_type = cv::AKAZE::DESCRIPTOR_MLDB;
-    qint32 descriptor_size = 0;
-    qint32 descriptor_channels = 3;
-    float threshold = 0.001f;
-    qint32 nOctaves = 4;
-    qint32 nOctaveLayers = 4;
-    qint32 /*cv::KAZE::DiffusivityType*/ diffusivity = cv::KAZE::DIFF_PM_G2;
+    qint32 nfeatures = 500;
+    float scaleFactor = 1.2f;
+    qint32 nlevels = 8;
+    qint32 edgeThreshold = 31;
+    qint32 firstLevel = 0;
+    qint32 WTA_K = 2;
+    qint32 /*cv::ORB::ScoreType*/ scoreType = cv::ORB::HARRIS_SCORE;
+    qint32 patchSize = 31;
+    qint32 fastThreshold = 20;
 };
 
 struct FlannLshParams
@@ -114,7 +117,6 @@ public:
     QThread opencvThread;
     OpencvWorker *opencvWorker;
 
-    //std::shared_ptr<cv::ORB> detector;
     std::shared_ptr<cv::Feature2D> detector;
     std::shared_ptr<cv::FlannBasedMatcher> matcher;
     QVector<const BrickLink::Item *> items;
@@ -179,12 +181,10 @@ ItemScanner::ItemScanner(bool createMode)
     d->opencvThread.start(QThread::LowPriority);
 
     if (createMode) {
-        AkazeParams ap;
-        d->detector = cv::AKAZE::create(cv::AKAZE::DescriptorType(ap.descriptor_type),
-                                        ap.descriptor_size, ap.descriptor_channels, ap.threshold,
-                                        ap.nOctaves, ap.nOctaveLayers,
-                                        cv::KAZE::DiffusivityType(ap.diffusivity));
-
+        OrbParams op;
+        d->detector = cv::ORB::create(op.nfeatures, op.scaleFactor, op.nlevels, op.edgeThreshold,
+                                      op.firstLevel, op.WTA_K, cv::ORB::ScoreType(op.scoreType),
+                                      op.patchSize, op.fastThreshold);
         FlannLshParams fp;
         d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(
                                                             fp.table_number,
@@ -237,8 +237,8 @@ void OpencvWorker::scan(int id, QImage img)
         if (!d->dbLoaded)
             throw Exception("No OpenCV database available");
 
-        QImage cvimg = img.convertToFormat(QImage::Format_RGB888);
-        cv::Mat input(cvimg.height(), cvimg.width(), CV_8UC3, cvimg.bits());
+        QImage cvimg = img.convertToFormat(QImage::Format_BGR888);
+        cv::Mat input(cvimg.height(), cvimg.width(), CV_8UC3, cvimg.bits(), cvimg.bytesPerLine());
 
         std::vector<cv::KeyPoint> keypoints;
         cv::Mat output;
@@ -253,6 +253,20 @@ void OpencvWorker::scan(int id, QImage img)
             points.append({ kp.pt.x, kp.pt.y });
         emit scanStarted(id, points);
 
+//        {
+//            qWarning() << cvimg.size() << QDir::currentPath();
+//            cvimg.save("test.png"_l1);
+//            cv::imwrite("ctest.png", input);
+//            QPainter p(&cvimg);
+//            p.setPen(QPen(Qt::green, 5));
+//            p.drawPoints(points.constData(), points.size());
+//            p.end();
+//            cvimg.save("test2.png"_l1);
+//            cv::Mat inputwm;
+//            cv::drawKeypoints(input, keypoints, inputwm);
+//            cv::imwrite("ctest2.png", inputwm);
+//        }
+
         auto *sw = new stopwatch("match");
 
         std::vector<std::vector<cv::DMatch>> matches;
@@ -261,7 +275,7 @@ void OpencvWorker::scan(int id, QImage img)
 
         delete sw;
 
-        qWarning() << "MATCHES" << matches.size();
+        //qWarning() << "MATCHES" << matches.size();
         std::vector<cv::DMatch> results;
         for (const auto &m : matches) {
             if (k == 2) { // only take the better, if it is different enough
@@ -272,7 +286,7 @@ void OpencvWorker::scan(int id, QImage img)
                     results.push_back(mm);
             }
         }
-        qWarning() << "RESULTS" << results.size();
+        //qWarning() << "RESULTS" << results.size();
 
         QHash<int, QPair<int, double>> distances;
 
@@ -326,7 +340,7 @@ void OpencvWorker::loadDatabase()
         QDataStream ds(&fdb);
         QByteArray type;
         qint32 version;
-        AkazeParams ap;
+        OrbParams op;
         FlannLshParams fp;
         qint32 s;
 
@@ -335,15 +349,13 @@ void OpencvWorker::loadDatabase()
             throw Exception("invalid type or version (%1 / %2").arg(QLatin1String(dbType))
                     .arg(dbVersion);
         }
-        ds >> ap.descriptor_type >> ap.descriptor_size >> ap.descriptor_channels >> ap.threshold
-                >> ap.nOctaves >> ap.nOctaveLayers >> ap.diffusivity;
+        ds >> op.nfeatures >> op.scaleFactor >> op.nlevels >> op.edgeThreshold >> op.firstLevel
+                >> op.WTA_K >> op.scoreType >> op.patchSize >> op.fastThreshold;
         ds >> fp.table_number >> fp.key_size >> fp.multi_probe_level;
 
-        d->detector = cv::AKAZE::create(cv::AKAZE::DescriptorType(ap.descriptor_type),
-                                        ap.descriptor_size, ap.descriptor_channels, ap.threshold,
-                                        ap.nOctaves, ap.nOctaveLayers,
-                                        cv::KAZE::DiffusivityType(ap.diffusivity));
-
+        d->detector = cv::ORB::create(op.nfeatures, op.scaleFactor, op.nlevels, op.edgeThreshold,
+                                      op.firstLevel, op.WTA_K, cv::ORB::ScoreType(op.scoreType),
+                                      op.patchSize, op.fastThreshold);
         d->matcher = cv::makePtr<cv::FlannBasedMatcher>(cv::makePtr<cv::flann::LshIndexParams>(
                                                             fp.table_number,
                                                             fp.key_size, fp.multi_probe_level));
@@ -472,7 +484,7 @@ bool ItemScanner::createDatabase()
             return false;
         }
 
-        QImage cvimg = img.convertToFormat(QImage::Format_RGB888);
+        QImage cvimg = img.convertToFormat(QImage::Format_BGR888);
         bool backAndFront = (img.width() > (img.height() * 7 / 6)); // most likely front + back
         if (backAndFront)
             cvimg = cvimg.copy(0, 0, cvimg.width() / 2, cvimg.height());
@@ -480,7 +492,7 @@ bool ItemScanner::createDatabase()
         qWarning() << "Processing" << pic->item()->itemTypeId() << pic->item()->id()
                    << (backAndFront ? "( >8 )" : "");
 
-        cv::Mat input(cvimg.height(), cvimg.width(), CV_8UC3, cvimg.bits());
+        cv::Mat input(cvimg.height(), cvimg.width(), CV_8UC3, cvimg.bits(), cvimg.bytesPerLine());
         cv::Mat output;
         std::vector<cv::KeyPoint> cvKeypoints;
 
@@ -524,10 +536,10 @@ bool ItemScanner::createDatabase()
         QDataStream ds(&fdb);
         // type and version
         ds << QByteArray(dbType) << qint32(dbVersion);
-        // AKAZE parameters
-        AkazeParams ap;
-        ds << ap.descriptor_type << ap.descriptor_size << ap.descriptor_channels << ap.threshold
-           << ap.nOctaves << ap.nOctaveLayers << ap.diffusivity;
+        // ORB parameters
+        OrbParams op;
+        ds << op.nfeatures << op.scaleFactor << op.nlevels << op.edgeThreshold << op.firstLevel
+           << op.WTA_K << op.scoreType << op.patchSize << op.fastThreshold;
         // FLANN/LSH parameters
         FlannLshParams fp;
         ds << fp.table_number << fp.key_size << fp.multi_probe_level;
