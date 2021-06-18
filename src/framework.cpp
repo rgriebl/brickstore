@@ -438,6 +438,7 @@ FrameWork::FrameWork(QWidget *parent)
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
     QWidget *logWidget = new QWidget();
+    logWidget->setObjectName("ErrorLog"_l1);
     QVBoxLayout *logLayout = new QVBoxLayout(logWidget);
     logLayout->setContentsMargins(0, 0, 0, 0);
     logLayout->addWidget(Application::inst()->logWidget());
@@ -779,7 +780,7 @@ void FrameWork::languageChange()
             dock->setWindowTitle(tr("Price Guide"));
         if (name == "Dock-TaskAppears"_l1)
             dock->setWindowTitle(tr("Appears In Sets"));
-        if (name == "Dock-LogWidget"_l1)
+        if (name == "Dock-ErrorLog"_l1)
             dock->setWindowTitle(tr("Error Log"));
     }
     if (m_filter) {

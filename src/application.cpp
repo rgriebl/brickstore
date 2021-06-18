@@ -613,7 +613,6 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 void Application::setupLogging()
 {
     m_logWidget = new QPlainTextEdit();
-    m_logWidget->setObjectName("LogWidget"_l1);
     m_logWidget->setReadOnly(true);
     m_logWidget->setMaximumBlockCount(1000);
     m_logWidget->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
