@@ -4,7 +4,7 @@
 #define SOURCE_DIR "."
 #endif
 
-#define ApplicationVersionFull GetFileVersion(SOURCE_DIR + "\BrickStore.exe")
+#define ApplicationVersionFull GetVersionNumbersString(SOURCE_DIR + "\BrickStore.exe")
 #define ApplicationVersion RemoveFileExt(ApplicationVersionFull)
 #define ApplicationPublisher GetFileCompany(SOURCE_DIR + "\BrickStore.exe")
 
@@ -48,9 +48,10 @@ Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifs
 [Run]
 Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
     Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist; \
-
+    Check: noMSVCInstalled('x86')
 Filename: "{tmp}\vc_redist.x64.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
     Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist; \
+    Check: noMSVCInstalled('x64')
 
 Filename: {app}\BrickStore.exe; Flags: postinstall nowait skipifsilent
 
@@ -69,3 +70,17 @@ Root: HKCR; Subkey: "BrickStore.Document\shell\open\command"; ValueType: string;
 ; Association
 Root: HKCR; Subkey: ".bsx"; ValueType: string; \
     ValueData: "BrickStore.Document"; Flags: uninsdeletevalue uninsdeletekeyifempty
+
+[Code]
+function noMSVCInstalled(Arch: String): Boolean;
+var
+    Version: Int64;
+begin
+    Version := PackVersionComponents(14, 29, 30037, 0);
+    if Arch = 'x86' then
+        Result := not IsMsiProductInstalled('{65E5BD06-6392-3027-8C26-853107D3CF1A}', Version)
+    else if Arch = 'x64' then
+        Result := not IsMsiProductInstalled('{36F68A90-239C-34DF-B58C-64B30153CE35}', Version)
+    else
+        Result := True;
+end;
