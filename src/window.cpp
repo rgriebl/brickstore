@@ -1164,19 +1164,27 @@ void Window::on_edit_duplicate_triggered()
         return;
 
     QItemSelection newSelection;
+    const QModelIndex oldCurrentIdx = w_list->currentIndex();
+    QModelIndex newCurrentIdx;
 
-    applyTo(selectedLots(), [this, &newSelection](const auto &from, auto &to) {
+    applyTo(selectedLots(), [&](const auto &from, auto &to) {
         auto l = new Lot(from);
         m_doc->insertLotsAfter(&from, { l });
         QModelIndex idx = m_doc->index(l);
         newSelection.merge(QItemSelection(idx, idx), QItemSelectionModel::Select);
+        if (m_doc->lot(oldCurrentIdx) == &from)
+            newCurrentIdx = m_doc->index(idx.row(), oldCurrentIdx.column());
+
         // this isn't necessary and we should just return false, but the counter would be wrong then
         to = from;
         return true;
     });
 
     w_list->selectionModel()->select(newSelection, QItemSelectionModel::ClearAndSelect
-                                     | QItemSelectionModel::Rows | QItemSelectionModel::Current);
+                                     | QItemSelectionModel::Rows);
+    if (newCurrentIdx.isValid()) {
+        w_list->selectionModel()->setCurrentIndex(newCurrentIdx, QItemSelectionModel::Current);
+    }
 }
 
 void Window::on_edit_delete_triggered()
