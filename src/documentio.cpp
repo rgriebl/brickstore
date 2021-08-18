@@ -967,15 +967,15 @@ DocumentIO::BsxContents DocumentIO::fromBrickLinkXML(const QByteArray &xml)
         auto subCond = (subCondStr == "I"_l1 ? BrickLink::SubCondition::Incomplete :
                         subCondStr == "C"_l1 ? BrickLink::SubCondition::Complete :
                         subCondStr == "S"_l1 ? BrickLink::SubCondition::Sealed
-                                                         : BrickLink::SubCondition::None);
+                                             : BrickLink::SubCondition::None);
         auto stockroom = p.elementText(e, "STOCKROOM", "")
                 == "Y"_l1 ? BrickLink::Stockroom::A : BrickLink::Stockroom::None;
-        if (stockroom != BrickLink::Stockroom::None) {
-            QString stockroomId = p.elementText(e, "STOCKROOMID", "");
+        QString stockroomId = p.elementText(e, "STOCKROOMID", "");
+        if ((stockroom != BrickLink::Stockroom::None) && !stockroomId.isEmpty()) {
             stockroom = (stockroomId == "A"_l1 ? BrickLink::Stockroom::A :
                          stockroomId == "B"_l1 ? BrickLink::Stockroom::B :
                          stockroomId == "C"_l1 ? BrickLink::Stockroom::C
-                                                           : BrickLink::Stockroom::None);
+                                               : BrickLink::Stockroom::A);
         }
         QString ccode = p.elementText(e, "BASECURRENCYCODE", "");
         if (!ccode.isEmpty()) {
