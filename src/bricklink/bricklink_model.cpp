@@ -611,15 +611,12 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
             continue;
 
         if (!quoted.isEmpty()) {
-            quoted.append(s);
+            quoted = quoted % u' ' % s;
             if (quoted.endsWith('"'_l1)) {
                 quoted.chop(1);
                 m_filter_text << qMakePair(quotedNegate, quoted);
                 quoted.clear();
-            } else {
-                quoted.append(' '_l1);
             }
-
         } else if (s.length() == 1) {
             // just a single character -> search for it literally
             m_filter_text << qMakePair(false, s);
@@ -662,11 +659,14 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 m_filter_ids.first = negate;
 
             } else {
-                const bool firstIsQuote = (str.at(0) == '"'_l1);
+                const bool firstIsQuote = str.startsWith("\""_l1);
+                const bool lastIsQuote = str.endsWith("\""_l1);
 
-                if (firstIsQuote) {
-                    quoted = str.mid(1) % u' ';
+                if (firstIsQuote && !lastIsQuote) {
+                    quoted = str.mid(1);
                     quotedNegate = negate;
+                } else if (firstIsQuote && lastIsQuote) {
+                    m_filter_text << qMakePair(negate, str.mid(1, str.length() - 2));
                 } else {
                     m_filter_text << qMakePair(negate, str);
                 }
