@@ -52,7 +52,6 @@ private:
     void orderDownloadFinished(BrickLink::Order *order, TransferJob *job,
                                const QByteArray &xml = { });
 
-    Transfer *m_trans;
     QPushButton *w_import;
     QPushButton *w_importCombined;
     QPushButton *w_showOnBrickLink;

@@ -668,6 +668,9 @@ public:
 
     void setCredentials(const QPair<QString, QString> &credentials);
 
+    bool isAuthenticated() const;
+    void retrieveAuthenticated(TransferJob *job);
+
     inline const std::vector<Color> &colors() const         { return m_colors; }
     inline const std::vector<Category> &categories() const  { return m_categories; }
     inline const std::vector<ItemType> &itemTypes() const   { return m_item_types; }
@@ -722,6 +725,12 @@ signals:
     void itemImageScaleFactorChanged(qreal f);
 
     void transferProgress(int progress, int total);
+    void authenticatedTransferProgress(int progress, int total);
+    void authenticatedTransferJobProgress(TransferJob *job, int progress, int total);
+    void authenticatedTransferFinished(TransferJob *job);
+
+    void authenticationChanged(bool auth);
+    void authenticationFailed(const QString &userName, const QString &error);
 
 private:
     Core(const QString &datadir);
@@ -794,7 +803,11 @@ private:
     std::vector<QByteArray>    m_changelog;
     std::vector<PartColorCode> m_pccs;
 
-    QPointer<Transfer>  m_transfer = nullptr;
+    QPointer<Transfer>         m_transfer = nullptr;
+    QPointer<Transfer>         m_authenticatedTransfer = nullptr;
+    bool                       m_authenticated = false;
+    QPair<QString, QString>    m_credentials;
+    TransferJob *              m_loginJob = nullptr;
 
     int                          m_db_update_iv = 0;
     QDateTime                    m_databaseDate;

@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QObject>
+#include "transfer.h"
 
 class ProgressDialog;
 
@@ -22,10 +23,14 @@ class UpdateDatabase : public QObject
 {
     Q_OBJECT
 public:
-    UpdateDatabase(ProgressDialog *pd);
+    UpdateDatabase(QWidget *parent = nullptr);
+
+    int exec();
+
 private slots:
     void gotten();
 
 private:
-    ProgressDialog *m_progress;
+    ProgressDialog *m_progress = nullptr;
+    Transfer m_trans;
 };

@@ -171,6 +171,7 @@ signals:
     void sentryConsentChanged(Config::SentryConsent consent);
     void toolBarActionsChanged(const QStringList &actions);
     void uiThemeChanged(Config::UiTheme theme);
+    void brickLinkCredentialsChanged();
 
 protected:
     bool parseTranslations() const;

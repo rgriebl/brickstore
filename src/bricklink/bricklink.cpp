@@ -28,6 +28,8 @@
 #include <QUrlQuery>
 #include <QStringBuilder>
 #include <QDesktopServices>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "config.h"
 #include "utility.h"
@@ -365,6 +367,51 @@ QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Colo
     return f;
 }
 
+void Core::setCredentials(const QPair<QString, QString> &credentials)
+{
+    if (m_credentials != credentials) {
+        bool wasAuthenticated = m_authenticated;
+        m_authenticated = false;
+        if (m_authenticatedTransfer)
+            m_authenticatedTransfer->abortAllJobs();
+        m_credentials = credentials;
+        if (wasAuthenticated) {
+            emit authenticationChanged(false);
+
+            QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
+            QUrlQuery q;
+            q.addQueryItem("do_logout"_l1, "true"_l1);
+            url.setQuery(q);
+
+            auto logoutJob = TransferJob::get(url);
+            m_authenticatedTransfer->retrieve(logoutJob, true);
+        }
+    }
+}
+
+bool Core::isAuthenticated() const
+{
+    return m_authenticated;
+}
+
+void Core::retrieveAuthenticated(TransferJob *job)
+{
+    if (!m_authenticated) {
+        if (!m_loginJob) {
+            QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
+            QUrlQuery q;
+            q.addQueryItem("userid"_l1,          Utility::urlQueryEscape(m_credentials.first));
+            q.addQueryItem("password"_l1,        Utility::urlQueryEscape(m_credentials.second));
+            q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
+            url.setQuery(q);
+
+            m_loginJob = TransferJob::post(url, nullptr, true /* no redirects */);
+            m_authenticatedTransfer->retrieve(m_loginJob, true);
+        }
+    }
+    m_authenticatedTransfer->retrieve(job);
+}
+
 QFile *Core::dataReadFile(QStringView fileName, const Item *item, const Color *color) const
 {
     auto f = new QFile(dataFileName(fileName, item, color));
@@ -396,6 +443,7 @@ Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme("image-missing-large"_l1))
     , m_transfer(new Transfer(this))
+    , m_authenticatedTransfer(new Transfer(this))
 {
     connect(m_transfer, &Transfer::finished,
             this, [this](TransferJob *job) {
@@ -408,6 +456,40 @@ Core::Core(const QString &datadir)
     });
     connect(m_transfer, &Transfer::progress,
             this, &Core::transferProgress);
+
+    connect(m_authenticatedTransfer, &Transfer::finished,
+            this, [this](TransferJob *job) {
+        if (!job) {
+            return;
+        } else if (job == m_loginJob) {
+            m_loginJob = nullptr;
+
+            QString error;
+
+            if (job->responseCode() == 200 && job->data()) {
+                auto json = QJsonDocument::fromJson(*job->data());
+                if (!json.isNull()) {
+                    bool wasAuthenticated = m_authenticated;
+                    m_authenticated = (json.object().value("returnCode"_l1).toInt() == 0);
+                    if (!m_authenticated)
+                        error = json.object().value("returnMessage"_l1).toString();
+
+                    if (wasAuthenticated != m_authenticated)
+                        emit authenticationChanged(m_authenticated);
+                }
+            } else {
+                error = job->errorString();
+            }
+            if (!error.isEmpty())
+                emit authenticationFailed(m_credentials.first, error);
+        } else {
+            emit authenticatedTransferFinished(job);
+        }
+    });
+    connect(m_authenticatedTransfer, &Transfer::progress,
+            this, &Core::authenticatedTransferProgress);
+    connect(m_authenticatedTransfer, &Transfer::jobProgress,
+            this, &Core::authenticatedTransferJobProgress);
 
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;

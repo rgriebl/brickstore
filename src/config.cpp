@@ -556,10 +556,15 @@ QPair<QString, QString> Config::brickLinkCredentials() const
 
 void Config::setBrickLinkCredentials(const QString &name, const QString &pass)
 {
-    m_bricklinkCredentials = qMakePair(name, pass);
+    auto newCredentials = qMakePair(name, pass);
+    if (m_bricklinkCredentials != newCredentials) {
+        m_bricklinkCredentials = newCredentials;
 
-    setValue("BrickLink/Login/Username"_l1, name);
-    setValue("BrickLink/Login/Password"_l1, scramble(pass));
+        setValue("BrickLink/Login/Username"_l1, name);
+        setValue("BrickLink/Login/Password"_l1, scramble(pass));
+
+        emit brickLinkCredentialsChanged();
+    }
 }
 
 

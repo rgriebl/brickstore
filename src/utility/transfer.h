@@ -55,6 +55,8 @@ public:
     template<typename T>
     T *userData(int tag) const       { return tag == m_user_tag ? static_cast<T *>(m_user_ptr) : 0; }
 
+    Transfer *transfer() const       { return m_transfer; }
+
 private:
     enum Status : uint {
         Inactive = 0,

@@ -1725,10 +1725,8 @@ bool FrameWork::updateDatabase(bool forceSync)
             if (!m_workspace->windowList().isEmpty())
                 return false;
 
-            Transfer trans;
-            ProgressDialog d(tr("Update Database"), &trans, this);
-            UpdateDatabase update(&d);
-            bool result = (d.exec() == QDialog::Accepted);
+            UpdateDatabase update(this);
+            bool result = (update.exec() == QDialog::Accepted);
 
             for (const auto &file : files)
                 openDocument(file);

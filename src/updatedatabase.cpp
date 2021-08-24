@@ -25,17 +25,10 @@
 #include "progressdialog.h"
 
 
-UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
-    : m_progress(pd)
+UpdateDatabase::UpdateDatabase(QWidget *parent)
+    : QObject(parent)
 {
     BrickLink::core()->cancelTransfers();
-
-    connect(pd, &ProgressDialog::transferFinished,
-            this, &UpdateDatabase::gotten);
-
-    //pd->setAutoClose(false);
-    pd->setHeaderText(tr("Updating the BrickLink database"));
-    pd->setMessageText(tr("Download: %p"));
 
     QString remotefile = QLatin1String(BRICKSTORE_DATABASE_URL) % BrickLink::core()->defaultDatabaseName();
     QString localfile = BrickLink::core()->dataPath() % BrickLink::core()->defaultDatabaseName();
@@ -46,18 +39,39 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
 
     QFile *file = new QFile(localfile % u".lzma");
 
+    TransferJob *job = nullptr;
     if (file->open(QIODevice::WriteOnly)) {
-        pd->get(QString(remotefile % u".lzma"), dt, file);
+        job = TransferJob::getIfNewer(QUrl(remotefile % u".lzma"), dt, file);
+        m_trans.retrieve(job);
     } else {
-        pd->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
         delete file;
     }
+
+    m_progress = new ProgressDialog(tr("Update Database"), job, parent);
+    connect(m_progress, &ProgressDialog::transferFinished,
+            this, &UpdateDatabase::gotten);
+    connect(&m_trans, &Transfer::jobProgress, m_progress, &ProgressDialog::transferProgress);
+    connect(&m_trans, &Transfer::finished, m_progress, &ProgressDialog::transferDone);
+
+    if (!job)
+        m_progress->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
+
+    m_progress->setHeaderText(tr("Updating the BrickLink database"));
+    m_progress->setMessageText(tr("Download: %p"));
+}
+
+int UpdateDatabase::exec()
+{
+    return m_progress->exec();
 }
 
 void UpdateDatabase::gotten()
 {
     TransferJob *job = m_progress->job();
     auto *file = qobject_cast<QFile *>(job->file());
+
+    if (job->isFailed() || job->responseCode() != 200 || !file)
+        return;
 
     if (job->wasNotModifiedSince()) {
         file->remove();

@@ -786,6 +786,16 @@ bool Application::initBrickLink()
         connect(Config::inst(), &Config::updateIntervalsChanged,
                 BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
         BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
+        BrickLink::core()->setCredentials(Config::inst()->brickLinkCredentials());
+        connect(Config::inst(), &Config::brickLinkCredentialsChanged,
+                this, []() {
+            BrickLink::core()->setCredentials(Config::inst()->brickLinkCredentials());
+        });
+        connect(BrickLink::core(), &BrickLink::Core::authenticationFailed,
+                this, [](const QString &userName, const QString &error) {
+            MessageBox::warning(nullptr, { }, tr("Failed to authenticate with BrickLink as user %1")
+                                .arg(userName) % u"<br><b>" % error % u"</b>");
+        });
     }
     return bl;
 }

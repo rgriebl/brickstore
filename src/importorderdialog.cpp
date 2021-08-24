@@ -258,7 +258,6 @@ private:
 
 ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     : QDialog(parent)
-    , m_trans(new Transfer(this))
 {
     setupUi(this);
 
@@ -303,11 +302,14 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
             this, &ImportOrderDialog::checkSelected);
     connect(w_orders, &QTreeView::activated,
             this, [this]() { w_import->animateClick(); });
-    connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
+    connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferProgress,
+            this, [this](int done, int total) {
         w_progress->setVisible(done != total);
         w_progress->setMaximum(total);
         w_progress->setValue(done);
     });
+    connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferFinished,
+            this, &ImportOrderDialog::downloadFinished);
 
     languageChange();
 
@@ -316,9 +318,6 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     connect(t, &QTimer::timeout, this,
             &ImportOrderDialog::updateStatusLabel);
     t->start();
-
-    connect(m_trans, &Transfer::finished,
-            this, &ImportOrderDialog::downloadFinished);
 
     QMetaObject::invokeMethod(this, &ImportOrderDialog::updateOrders, Qt::QueuedConnection);
 
@@ -409,15 +408,15 @@ void ImportOrderDialog::updateOrders()
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
         query.addQueryItem("getFiled"_l1,      "Y"_l1);
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
-        query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
-        query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
+        query.addQueryItem("frmUsername"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().first));
+        query.addQueryItem("frmPassword"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().second));
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
         job->setUserData<void>(type[0], nullptr);
         m_currentUpdate << job;
 
-        m_trans->retrieve(job);
+        BrickLink::core()->retrieveAuthenticated(job);
     }
     updateStatusLabel();
 }
@@ -435,7 +434,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
     case 'a': {
         auto order = job->userData<BrickLink::Order>('a');
 
-        if (!job->data()->isEmpty()) {
+        if (!job->data()->isEmpty() && BrickLink::core()->isAuthenticated()) {
             QString s = QString::fromUtf8(*job->data());
             QString a;
 
@@ -463,7 +462,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
     case 'p': {
         QVector<BrickLink::Order *> orders;
 
-        if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
+        if (!job->data()->isEmpty() && (job->responseCode() == 200) && BrickLink::core()->isAuthenticated()) {
             auto buf = new QBuffer(job->data());
             buf->open(QIODevice::ReadOnly);
             try {
@@ -677,17 +676,17 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
         query.addQueryItem("getFiled"_l1,      "Y"_l1);
         query.addQueryItem("getDetail"_l1,     "y"_l1);
-        query.addQueryItem("orderID"_l1,       order->id());
+        query.addQueryItem("orderID"_l1,       Utility::urlQueryEscape(order->id()));
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
-        query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
-        query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
+        query.addQueryItem("frmUsername"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().first));
+        query.addQueryItem("frmPassword"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().second));
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
 
         QUrl addressUrl("https://www.bricklink.com/orderDetail.asp"_l1);
         QUrlQuery addressQuery;
-        addressQuery.addQueryItem("ID"_l1, order->id());
+        addressQuery.addQueryItem("ID"_l1, Utility::urlQueryEscape(order->id()));
         addressUrl.setQuery(addressQuery);
 
         auto addressJob = TransferJob::get(addressUrl);
@@ -697,8 +696,8 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         addressJob->setUserData('a', orderCopy);
         m_orderDownloads << OrderDownload { orderCopy, job, addressJob, combined, combineCCode };
 
-        m_trans->retrieve(job);
-        m_trans->retrieve(addressJob);
+        BrickLink::core()->retrieveAuthenticated(job);
+        BrickLink::core()->retrieveAuthenticated(addressJob);
     }
 }
 

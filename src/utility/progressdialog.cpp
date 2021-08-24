@@ -25,16 +25,12 @@
 #include "progressdialog.h"
 
 
-ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *parent)
+ProgressDialog::ProgressDialog(const QString &title, TransferJob *job, QWidget *parent)
     : QDialog(parent)
 {
     m_has_errors = false;
     m_autoclose = true;
-    m_job = nullptr;
-    m_trans = trans;
-
-    connect(m_trans, &Transfer::finished, this, &ProgressDialog::transferDone);
-    connect(m_trans, &Transfer::jobProgress, this, &ProgressDialog::transferProgress);
+    m_job = job;
 
     m_message_progress = false;
 
@@ -89,7 +85,7 @@ ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *p
 void ProgressDialog::done(int r)
 {
     if (m_job && m_job->isActive())
-        m_trans->abortJob(m_job);
+        m_job->transfer()->abortJob(m_job);
 
     QDialog::done(r);
 
@@ -202,8 +198,8 @@ void ProgressDialog::transferDone(TransferJob *j)
 
     if (j->isFailed() || j->isAborted())
         setErrorText(tr("Download failed: %1").arg(j->errorString()));
-    else
-        emit transferFinished();
+
+    emit transferFinished();
 
     if (m_job == j) // if we didn't immediately get a new job, then clear the pointer
         m_job = nullptr;
@@ -213,21 +209,6 @@ bool ProgressDialog::hasErrors() const
 {
     return m_has_errors;
 }
-
-bool ProgressDialog::post(const QUrl &url, QIODevice *file, bool noRedirects)
-{
-    m_job = TransferJob::post(url, file, noRedirects);
-    m_trans->retrieve(m_job);
-    return true;
-}
-
-bool ProgressDialog::get(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
-{
-    m_job = TransferJob::getIfNewer(url, ifnewer, file);
-    m_trans->retrieve(m_job);
-    return true;
-}
-
 
 void ProgressDialog::layout()
 {

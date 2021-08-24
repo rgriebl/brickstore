@@ -28,7 +28,7 @@ class ProgressDialog : public QDialog
 {
     Q_OBJECT
 public:
-    ProgressDialog(const QString &title, Transfer *trans, QWidget *parent = nullptr);
+    ProgressDialog(const QString &title, TransferJob *job, QWidget *parent = nullptr);
 
     void setAutoClose(bool ac);
     void setHeaderText(const QString &str);
@@ -37,9 +37,6 @@ public:
     void setFinished(bool ok);
     void setProgress(int steps, int total);
     void setProgressVisible(bool b);
-
-    bool post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
-    bool get(const QUrl &url, const QDateTime &ifnewer = QDateTime(), QIODevice *file = nullptr);
 
     TransferJob *job() const;
     bool hasErrors() const;
@@ -52,7 +49,7 @@ signals:
 protected slots:
     void done(int r) override;
 
-private slots:
+public slots:
     void transferProgress(TransferJob *job, int, int);
     void transferDone(TransferJob *j);
 
@@ -72,6 +69,5 @@ private:
     bool m_autoclose        : 1;
     bool m_override         : 1;
 
-    Transfer *m_trans;
     TransferJob *m_job;
 };

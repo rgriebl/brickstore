@@ -159,13 +159,6 @@ Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order, const LotLis
 
 Document *DocumentIO::importBrickLinkStore()
 {
-    Transfer trans;
-    ProgressDialog pd(tr("Import BrickLink Store Inventory"), &trans, FrameWork::inst());
-
-    pd.setHeaderText(tr("Importing BrickLink Store"));
-
-    pd.setMessageText(tr("Download: %p"));
-
     QUrl url("https://www.bricklink.com/invExcelFinal.asp"_l1);
     QUrlQuery query;
     query.addQueryItem("itemType"_l1,      ""_l1);
@@ -181,11 +174,24 @@ Document *DocumentIO::importBrickLinkStore()
     query.addQueryItem("invQtyMax"_l1,     "0"_l1);
     query.addQueryItem("invBrikTrak"_l1,   ""_l1);
     query.addQueryItem("invDesc"_l1,       ""_l1);
-    query.addQueryItem("frmUsername"_l1,   Config::inst()->brickLinkCredentials().first);
-    query.addQueryItem("frmPassword"_l1,   Config::inst()->brickLinkCredentials().second);
+    query.addQueryItem("frmUsername"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().first));
+    query.addQueryItem("frmPassword"_l1,   Utility::urlQueryEscape(Config::inst()->brickLinkCredentials().second));
     url.setQuery(query);
 
     QByteArray xml;
+
+    auto job = TransferJob::post(url);
+    BrickLink::core()->retrieveAuthenticated(job);
+
+    ProgressDialog pd(tr("Import BrickLink Store Inventory"), job, FrameWork::inst());
+    QObject::connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferJobProgress,
+                     &pd, &ProgressDialog::transferProgress);
+    QObject::connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferFinished,
+                     &pd, &ProgressDialog::transferDone);
+
+    pd.setHeaderText(tr("Importing BrickLink Store"));
+    pd.setMessageText(tr("Download: %p"));
+    pd.layout();
 
     QObject::connect(&pd, &ProgressDialog::transferFinished,
                      &pd, [&pd, &xml]() {
@@ -193,20 +199,14 @@ Document *DocumentIO::importBrickLinkStore()
         QByteArray *data = j->data();
         bool ok = false;
 
-        if (j->isFailed() || j->responseCode() != 200 || !j->data()) {
+        if (j->isFailed() || (j->responseCode() != 200) || !j->data()) {
             pd.setErrorText(tr("Failed to download the store inventory."));
-        } else if ((data->left(30).contains("<html") || data->left(30).contains("<HTML"))
-                   && data->contains("there was a problem during login")) {
-            pd.setErrorText(tr("Either your username or password are incorrect."));
         } else {
             xml = *data;
             ok = true;
         }
         pd.setFinished(ok);
     });
-
-    pd.post(url);
-    pd.layout();
 
     if (pd.exec() == QDialog::Accepted) {
         try {

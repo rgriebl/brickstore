@@ -190,7 +190,6 @@ private:
 
 ImportCartDialog::ImportCartDialog(QWidget *parent)
     : QDialog(parent)
-    , m_trans(new Transfer(this))
 {
     setupUi(this);
 
@@ -230,11 +229,14 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
             this, &ImportCartDialog::checkSelected);
     connect(w_carts, &QTreeView::activated,
             this, [this]() { w_import->animateClick(); });
-    connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
+    connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferProgress,
+            this, [this](int done, int total) {
         w_progress->setVisible(done != total);
         w_progress->setMaximum(total);
         w_progress->setValue(done);
     });
+    connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferFinished,
+            this, &ImportCartDialog::downloadFinished);
 
     languageChange();
 
@@ -244,10 +246,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
             &ImportCartDialog::updateStatusLabel);
     t->start();
 
-    connect(m_trans, &Transfer::finished,
-            this, &ImportCartDialog::downloadFinished);
-
-    QMetaObject::invokeMethod(this, &ImportCartDialog::login, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, &ImportCartDialog::updateCarts, Qt::QueuedConnection);
 
     QByteArray ba = Config::inst()->value("/MainWindow/ImportCartDialog/Geometry"_l1)
             .toByteArray();
@@ -303,28 +302,9 @@ void ImportCartDialog::languageChange()
     updateStatusLabel();
 }
 
-void ImportCartDialog::login()
-{
-    QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
-    QUrlQuery q;
-    q.addQueryItem("userid"_l1,          Config::inst()->brickLinkCredentials().first);
-    q.addQueryItem("password"_l1,        Config::inst()->brickLinkCredentials().second);
-    q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
-    url.setQuery(q);
-
-    auto job = TransferJob::post(url, nullptr, true /* no redirects */);
-    job->setUserData<void>('l', nullptr);
-    m_currentUpdate << job;
-
-    m_trans->retrieve(job);
-    updateStatusLabel();
-}
-
 void ImportCartDialog::updateCarts()
 {
     if (!m_currentUpdate.isEmpty())
-        return;
-    if (!m_loggedIn)
         return;
 
     w_update->setEnabled(false);
@@ -337,7 +317,7 @@ void ImportCartDialog::updateCarts()
     job->setUserData<void>('g', nullptr);
     m_currentUpdate << job;
 
-    m_trans->retrieve(job);
+    BrickLink::core()->retrieveAuthenticated(job);
     updateStatusLabel();
 }
 
@@ -346,19 +326,9 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
     int type = job->userData<void>().first; // l_ogin, g_lobal, c_art
 
     switch (type) {
-    case 'l': {
-        if (job->responseCode() == 200) {
-            m_loggedIn = true;
-            QMetaObject::invokeMethod(this, &ImportCartDialog::updateCarts, Qt::QueuedConnection);
-        } else {
-            MessageBox::warning(this, tr("Import BrickLink Cart"), tr("Could not login to BrickLink."));
-        }
-        m_currentUpdate.removeOne(job);
-        break;
-    }
     case 'g': {
         QVector<BrickLink::Cart *> carts;
-        if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
+        if (!job->data()->isEmpty() && (job->responseCode() == 200) && BrickLink::core()->isAuthenticated()) {
             try {
                 int pos = job->data()->indexOf("var GlobalCart");
                 if (pos < 0)
@@ -442,7 +412,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
         auto cart = job->userData<BrickLink::Cart>('c');
         QLocale en_US("en_US"_l1);
 
-        if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
+        if (!job->data()->isEmpty() && (job->responseCode() == 200) && BrickLink::core()->isAuthenticated()) {
             LotList lots;
 
             try {
@@ -521,7 +491,7 @@ void ImportCartDialog::importCarts(const QModelIndexList &rows)
 
         QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_l1);
         QUrlQuery query;
-        query.addQueryItem("sid"_l1, QString::number(cart->sellerId()));
+        query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(cart->sellerId())));
         url.setQuery(query);
 
         auto job = TransferJob::post(url, nullptr, true /* no redirects */);
@@ -529,7 +499,7 @@ void ImportCartDialog::importCarts(const QModelIndexList &rows)
         job->setUserData('c', new BrickLink::Cart(*cart));
         m_cartDownloads << job;
 
-        m_trans->retrieve(job);
+        BrickLink::core()->retrieveAuthenticated(job);
     }
 }
 
