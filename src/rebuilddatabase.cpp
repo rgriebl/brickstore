@@ -107,8 +107,8 @@ int RebuildDatabase::exec()
 
         QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
         QUrlQuery q;
-        q.addQueryItem("userid"_l1, username);
-        q.addQueryItem("password"_l1, password);
+        q.addQueryItem("userid"_l1, Utility::urlQueryEscape(username));
+        q.addQueryItem("password"_l1, Utility::urlQueryEscape(password));
         q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
         url.setQuery(q);
 

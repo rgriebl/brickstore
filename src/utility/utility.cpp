@@ -23,6 +23,7 @@
 #include <QStringBuilder>
 #include <QPainter>
 #include <QLinearGradient>
+#include <QUrl>
 
 #include "utility.h"
 
@@ -335,4 +336,9 @@ QImage Utility::stripeImage(int h, const QColor &stripeColor, const QColor &base
     imgp.drawPolygon(QPolygon() << QPoint(2 * h, h) << QPoint(2 * h, 2 * h) << QPoint(h, 2 * h));
     imgp.end();
     return img;
+}
+
+QString Utility::urlQueryEscape(const QString &str)
+{
+    return QString::fromUtf8(QUrl::toPercentEncoding(str));
 }

@@ -87,7 +87,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogPG.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), QLatin1String(item->id()));
+            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
             if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
@@ -111,7 +111,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
                 if (pos >= 0)
                     id.truncate(pos);
             }
-            query.addQueryItem("q"_l1, id);
+            query.addQueryItem("q"_l1, Utility::urlQueryEscape(id));
 
             if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
@@ -124,7 +124,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItemIn.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), QLatin1String(item->id()));
+            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
             query.addQueryItem("in"_l1, "S"_l1);
 
             if (item->itemType()->hasColors() && opt2)
@@ -141,7 +141,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_l1;
         QUrlQuery query;
         if (opt)
-            query.addQueryItem("q"_l1, QLatin1String(static_cast<const char *>(opt)));
+            query.addQueryItem("q"_l1, Utility::urlQueryEscape(static_cast<const char *>(opt)));
         url.setQuery(query);
         break;
     }
@@ -150,7 +150,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (lotId && *lotId) {
             url = "https://www.bricklink.com/inventory_detail.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem("invID"_l1, QString::number(*lotId));
+            query.addQueryItem("invID"_l1, Utility::urlQueryEscape(QString::number(*lotId)));
             url.setQuery(query);
         }
         break;
@@ -168,7 +168,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
                 queryTerm.remove('('_l1);
                 queryTerm.remove(')'_l1);
             }
-            query.addQueryItem("q"_l1, queryTerm);
+            query.addQueryItem("q"_l1, Utility::urlQueryEscape(queryTerm));
             if (item->itemType()->hasColors() && color)
                 query.addQueryItem("ColorID"_l1, QString::number(color->id()));
             url.setQuery(query);
@@ -180,7 +180,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (orderId && *orderId) {
             url = "https://www.bricklink.com/orderDetail.asp"_l1;
             QUrlQuery query;
-            query.addQueryItem("ID"_l1, QString::fromLatin1(orderId));
+            query.addQueryItem("ID"_l1, Utility::urlQueryEscape(orderId));
             url.setQuery(query);
         }
         break;
@@ -190,7 +190,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         if (shopId && *shopId) {
             url = "https://www.bricklink.com/v2/globalcart.page"_l1;
             QUrlQuery query;
-            query.addQueryItem("sid"_l1, QString::number(*shopId));
+            query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(*shopId)));
             url.setQuery(query);
         }
         break;

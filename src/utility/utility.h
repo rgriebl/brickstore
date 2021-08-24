@@ -62,4 +62,8 @@ QString localForInternationalCurrencySymbol(const QString &international_symbol)
 QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
 QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcut = { }, const QString &extended = { });
 
+QString urlQueryEscape(const QString &str);
+inline QString urlQueryEscape(const char *str)  { return urlQueryEscape(QString::fromLatin1(str)); }
+inline QString urlQueryEscape(const QByteArray &str)   { return urlQueryEscape(QString::fromLatin1(str)); }
+
 } // namespace Utility
