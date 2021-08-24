@@ -769,6 +769,20 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             w_bl_username->setPalette(pal);
         }
     });
+    w_bl_password_note->hide();
+    connect(w_bl_password, &QLineEdit::textChanged,
+            this, [this](const QString &s) {
+        bool b = (s.length() > 15);
+        if (w_bl_password_note->isVisible() != b) {
+            w_bl_password_note->setVisible(b);
+            QPalette pal = QApplication::palette("QLineEdit");
+            if (b) {
+                pal.setColor(QPalette::Base,
+                             Utility::gradientColor(pal.color(QPalette::Base), Qt::red, 0.25));
+            }
+            w_bl_password->setPalette(pal);
+        }
+    });
 
     const auto actions = FrameWork::inst()->allActions();
 
