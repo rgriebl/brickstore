@@ -1125,7 +1125,8 @@ DocumentIO::ResolveResult DocumentIO::resolveIncomplete(Lot *lot)
         auto item = lot->item();
         auto color = lot->color();
 
-        qWarning().noquote() << "Unknown item/color id:" << QByteArray(1, ic.m_itemtype_id)
+        qWarning().noquote() << "Unknown item/color id:"
+                             << (ic.m_itemtype_id ? QByteArray(1, ic.m_itemtype_id) : QByteArray("-"))
                              << ic.m_item_id << "@" << ic.m_color_id;
 
         bool ok = BrickLink::core()->applyChangeLog(item, color, lot->isIncomplete());
