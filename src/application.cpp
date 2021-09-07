@@ -654,7 +654,7 @@ void Application::messageHandler(QtMsgType msgType, const QMessageLogContext &ms
     }
 
     QString str = "<pre>"_l1;
-    const auto lines = msg.splitRef('\n'_l1);
+    const auto lines = msg.split('\n'_l1);
     for (int i = 0; i < lines.count(); ++i) {
         str = str % R"(<span style="color:#)"_l1 % QLatin1String(msgTypeColor[msgType])
                 % R"(;background-color:#)"_l1 % QLatin1String(msgTypeBgColor[msgType]) % R"(;">)"_l1
@@ -663,7 +663,7 @@ void Application::messageHandler(QtMsgType msgType, const QMessageLogContext &ms
                 % QLatin1String(categoryColor[qHashBits(msgCtx.category, qstrlen(msgCtx.category), 1) % 6])
                 % R"(;font-weight:bold;">)"_l1
                 % QLatin1String(msgCtx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1
-                % lines.at(i).toString().toHtmlEscaped();
+                % lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if (!filename.isEmpty()) {
                 str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
