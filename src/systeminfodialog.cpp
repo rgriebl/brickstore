@@ -33,7 +33,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     // sentry crash handler test
     ui->buttons->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->buttons, &QDialogButtonBox::customContextMenuRequested,
-            this, []() { static_cast<int *>(0)[0] = 1; });
+            this, []() { static_cast<int *>(nullptr)[0] = 1; });
 
     connect(ui->buttons, &QDialogButtonBox::accepted,
             this, [=]() {

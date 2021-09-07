@@ -213,6 +213,23 @@ public:
         clear();
     }
 
+    void setObjectCost(const Key &key, int cost)
+    {
+        // Reduce the cost if possible. Increasing is not possible, because the cache might
+        // overflow, leaving us in a weird state.
+        Node *n = d.findNode(key);
+        if (n) {
+            int d = cost - n->value.cost;
+            if ((d > 0) && ((total + d) > mx)) {
+                //qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
+            } else if (d != 0) {
+                n->value.cost = cost;
+                total += d;
+                //qWarning() << "Adjusted cache object cost by" << d;
+            }
+        }
+    }
+
 private:
     Q_DISABLE_COPY(Q3Cache)
 

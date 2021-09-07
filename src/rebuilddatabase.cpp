@@ -53,7 +53,7 @@ RebuildDatabase::RebuildDatabase(bool skipDownload)
 #endif
 
     // disable buffering on stdout
-    setbuf(stdout, NULL);
+    setbuf(stdout, nullptr);
 }
 
 RebuildDatabase::~RebuildDatabase()

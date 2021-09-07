@@ -39,8 +39,9 @@ PrintDialog::PrintDialog(QPrinter *printer, Window *window)
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint);
 
     qRegisterMetaType<QPageSize>();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMetaType::registerEqualsComparator<QPageSize>();
-
+#endif
     m_documentName = window->document()->fileName();
     if (!m_documentName.isEmpty())
         m_documentName = QFileInfo(m_documentName).completeBaseName();
