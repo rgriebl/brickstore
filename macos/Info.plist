@@ -14,8 +14,8 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
 
-    <key>CFBundleGetInfoString</key>
-    <string>Bundle for BrickStore</string>
+    <key>NSHumanrReadableCopyright</key>
+    <string>Copyright © @COPYRIGHT@</string>
 
     <key>CFBundleIdentifier</key>
     <string>de.softforge.@EXECUTABLE@</string>
@@ -30,10 +30,10 @@
     <string>BrickStore</string>
 
     <key>CFBundleShortVersionString</key>
-    <string>@FULL_VERSION@</string>
+    <string>@VERSION@</string>
 
     <key>CFBundleVersion</key>
-    <string>@FULL_VERSION@</string>
+    <string>@VERSION@</string>
 
     <key>CFBundleDocumentTypes</key>
     <array>

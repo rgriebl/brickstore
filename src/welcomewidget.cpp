@@ -285,7 +285,7 @@ void WelcomeButton::paintEvent(QPaintEvent *)
 
 WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
-    , m_docIcon(":/images/brickstore_doc_icon"_l1)
+    , m_docIcon(":/assets/generated-app-icons/brickstore_doc"_l1)
 {
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 

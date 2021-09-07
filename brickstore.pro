@@ -54,9 +54,22 @@ DEFINES *= QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
 
 DESTDIR = bin
 
-version_subst.input  = src/version.h.in
-version_subst.output = src/version.h
-QMAKE_SUBSTITUTES    = version_subst
+# cmake compatible substitutions
+defineTest(substitute) {
+  SIN = $$cat($$1, lines)
+  for(line, SIN) {
+    varname = $$section(line, "@", 1, 1)
+    !isEmpty(varname):line = $$replace(line, "@$${varname}@", "$$eval($${varname})")
+    SOUT += $$line
+  }
+  write_file($$2, SOUT)
+  return(true)
+}
+
+BrickStore_VERSION_MAJOR = $$VERSION_MAJOR
+BrickStore_VERSION_MINOR = $$VERSION_MINOR
+BrickStore_VERSION_PATCH = $$VERSION_PATCH
+substitute($$PWD/src/version.h.in, $$OUT_PWD/src/version.h)
 
 INCLUDEPATH = $$OUT_PWD/src  # for version.h
 
@@ -89,9 +102,17 @@ for(l, LANGUAGES) {
   exists($$qt_qm):qt_translations.files += $$qt_qm
 }
 qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
-qt_translations.prefix = i18n
+qt_translations.prefix = translations
+QM_FILES_RESOURCE_PREFIX = translations
 
-RESOURCES = brickstore.qrc qt_translations assets/icons assets/flags
+RESOURCES = \
+  qt_translations \
+  translations/translations.xml \
+  assets/generated-app-icons/brickstore.png \
+  assets/generated-app-icons/brickstore_doc.png \
+  assets/icons \
+  assets/flags \
+  extensions/classic-print-script.bs.qml \
 
 backend-only:DEFINES *= BRICKSTORE_BACKEND_ONLY
 
@@ -102,6 +123,8 @@ include(src/ldraw/ldraw.pri)
 include(src/script/script.pri)
 include(3rdparty/lzma.pri)
 include(3rdparty/minizip.pri)
+
+INCLUDEPATH *= 3rdparty/
 
 qtPrepareTool(LUPDATE, lupdate)
 
@@ -286,19 +309,18 @@ unix:!macos {
 #
 # Mac OS X specific
 #
-
 macos {
   LIBS += -framework SystemConfiguration
-
-  QMAKE_FULL_VERSION = $$VERSION
-  QMAKE_INFO_PLIST = macos/Info.plist
+  EXECUTABLE = $$TARGET
+  substitute($$PWD/macos/Info.plist, $$OUT_PWD/macos/Info.plist)
+  QMAKE_INFO_PLIST = $$OUT_PWD/macos/Info.plist
   bundle_icons.path = Contents/Resources
   bundle_icons.files = $$files("assets/generated-app-icons/*.icns")
   bundle_locversions.path = Contents/Resources
-  for(l, LANGUAGES) {
-    outpath = $$OUT_PWD/.locversions/$${l}.lproj
+  for(LANG, LANGUAGES) {
+    outpath = $$OUT_PWD/.locversions/$${LANG}.lproj
     mkpath($$outpath)
-    system(sed -e "s,@LANG@,$$l," < "$$PWD/macos/locversion.plist.in" > "$$outpath/locversion.plist")
+    substitute("$$PWD/macos/locversion.plist.in", "$$outpath/locversion.plist")
     bundle_locversions.files += $$outpath
   }
 

@@ -1490,7 +1490,7 @@ void FrameWork::createActions()
     m_filterAction->setDefaultWidget(m_filter);
 
     m_progress = new ProgressCircle();
-    m_progress->setIcon(QIcon(":/images/brickstore_icon.png"_l1));
+    m_progress->setIcon(QIcon(":/assets/generated-app-icons/brickstore.png"_l1));
     m_progress->setColor("#4ba2d8");
 
     connect(m_progress, &ProgressCircle::cancelAll,

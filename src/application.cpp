@@ -148,7 +148,7 @@ Application::Application(int &_argc, char **_argv)
     QCoreApplication::instance()->installEventFilter(this);
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
-    QPixmap pix(":/images/brickstore_icon.png"_l1);
+    QPixmap pix(":/assets/generated-app-icons/brickstore.png"_l1);
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
 #endif
@@ -295,7 +295,7 @@ void Application::updateTranslations(const QString &translationOverride)
     if (language.isEmpty())
         return;
 
-    QString i18n = ":/i18n"_l1;
+    QString i18n = ":/translations"_l1;
 
     static bool once = false; // always load english
     if (!once) {
