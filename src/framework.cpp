@@ -572,7 +572,9 @@ FrameWork::FrameWork(QWidget *parent)
                                       "help_releasenotes",
                                       "-",
                                       "help_systeminfo",
+#if !defined(Q_OS_MACOS) // this should be collapsed, but isn't
                                       "-",
+#endif
                                       "help_about"
                                   }));
 

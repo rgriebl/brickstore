@@ -42,3 +42,17 @@ void setCurrentMacTheme(Config::UiTheme theme)
        [NSApp setAppearance:appearance];
     }
 }
+
+void removeUnneededMacMenuItems()
+{
+    // from https://forum.qt.io/topic/60623/qt-5-4-2-os-x-10-11-el-capitan-how-to-remove-the-enter-full-screen-menu-item
+
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"NSDisabledDictationMenuItem"];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
+
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER
+    if ([NSWindow respondsToSelector:@selector(allowsAutomaticWindowTabbing)])
+        NSWindow.allowsAutomaticWindowTabbing = NO;
+#endif
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"NSFullScreenMenuItemEverywhere"];
+}

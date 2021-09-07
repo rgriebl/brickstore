@@ -161,6 +161,9 @@ Application::Application(int &_argc, char **_argv)
     void qt_set_sequence_auto_mnemonic(bool on);
     qt_set_sequence_auto_mnemonic(true);
 
+    extern void removeUnneededMacMenuItems();
+    removeUnneededMacMenuItems();
+
 #  if QT_VERSION <= QT_VERSION_CHECK(5, 15, 2)
     // the new default font San Francisco has rendering problems: QTBUG-88495
     if (QVersionNumber::fromString(QSysInfo::productVersion()).majorVersion() >= 11) {

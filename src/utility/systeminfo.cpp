@@ -140,6 +140,15 @@ SystemInfo::SystemInfo()
         p.waitForFinished(1000);
         vendor = QString::fromUtf8(p.readAllStandardOutput()).simplified().toUInt();
 
+#elif defined(Q_OS_MACOS)
+       QProcess p;
+       p.start("system_profiler"_l1, { "-json"_l1, "SPDisplaysDataType"_l1 }, QIODevice::ReadOnly);
+       p.waitForFinished(1000);
+       auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
+       auto o = json.object().value("SPDisplaysDataType"_l1).toArray().first().toObject();
+       result.first = o.value("sppci_model"_l1).toString();
+       result.second = o.value("spdisplays_vendor"_l1).toString().toLower();
+
 #endif
         if (vendor) {
             switch (vendor) {
