@@ -31,3 +31,4 @@ ui_*.h
 *.pr?.user
 .DS_Store
 translations/*.qm
+CMakeLists.txt.user
