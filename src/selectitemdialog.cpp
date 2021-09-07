@@ -15,9 +15,9 @@
 
 #include "selectitemdialog.h"
 #include "selectitem.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "config.h"
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 
 
 SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)

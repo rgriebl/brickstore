@@ -22,7 +22,7 @@
 #include <QStringBuilder>
 #include <QSaveFile>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "bricklink.h"
 
 

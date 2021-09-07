@@ -18,8 +18,8 @@
 #include <QDateTime>
 
 #include "ui_additemdialog.h"
-#include "currency.h"
-#include "bricklink.h"
+#include "utility/currency.h"
+#include "bricklink/bricklink.h"
 
 QT_FORWARD_DECLARE_CLASS(QValidator)
 QT_FORWARD_DECLARE_CLASS(QPushButton)

@@ -16,7 +16,7 @@
 #include <QDialog>
 #include <QScopedPointer>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QListViewItem)
 QT_FORWARD_DECLARE_CLASS(QIconViewItem)

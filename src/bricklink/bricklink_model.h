@@ -18,8 +18,8 @@
 #include <QStyledItemDelegate>
 
 #include "bricklink.h"
-#include "staticpointermodel.h"
-#include "betteritemdelegate.h"
+#include "utility/staticpointermodel.h"
+#include "utility/betteritemdelegate.h"
 
 
 namespace BrickLink {

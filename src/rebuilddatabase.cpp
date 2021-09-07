@@ -30,9 +30,8 @@
 #  include <windows.h>
 #endif
 
-#include "utility.h"
-#include "bricklink.h"
-#include "utility.h"
+#include "utility/utility.h"
+#include "bricklink/bricklink.h"
 #include "rebuilddatabase.h"
 
 #if !defined(BRICKSTORE_BACKEND_ONLY)

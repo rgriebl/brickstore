@@ -18,8 +18,8 @@
 #include <QComboBox>
 #include <QToolButton>
 
-#include "utility.h"
-#include "bricklink_model.h"
+#include "utility/utility.h"
+#include "bricklink/bricklink_model.h"
 #include "selectcolor.h"
 
 class ColorTreeView : public QTreeView

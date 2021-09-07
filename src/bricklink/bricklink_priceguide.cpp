@@ -22,7 +22,7 @@
 #include <QRegularExpression>
 #include <QRunnable>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "bricklink.h"
 
 

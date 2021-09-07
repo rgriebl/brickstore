@@ -30,11 +30,11 @@
 #include <QTimer>
 #include <QAction>
 
-#include "smartvalidator.h"
+#include "utility/smartvalidator.h"
 #include "config.h"
-#include "currency.h"
-#include "bricklink.h"
-#include "bricklink_model.h"
+#include "utility/currency.h"
+#include "bricklink/bricklink.h"
+#include "bricklink/bricklink_model.h"
 #include "window.h"
 #include "document.h"
 #include "picturewidget.h"
@@ -44,8 +44,8 @@
 #include "selectcolor.h"
 #include "framework.h"
 #include "additemdialog.h"
-#include "humanreadabletimedelta.h"
-#include "utility.h"
+#include "utility/humanreadabletimedelta.h"
+#include "utility/utility.h"
 
 using namespace std::chrono_literals;
 

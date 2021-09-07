@@ -15,7 +15,7 @@
 
 #include <QObject>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 QT_FORWARD_DECLARE_CLASS(QQmlContext)

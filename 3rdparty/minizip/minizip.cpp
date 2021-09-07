@@ -52,7 +52,7 @@
 #endif
 // ^^^ copied from minizip's miniunz.c
 
-#include "exception.h"
+#include "utility/exception.h"
 #include "minizip.h"
 
 

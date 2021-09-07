@@ -40,11 +40,11 @@
 #include <QShortcut>
 #include <QTimer>
 
-#include "utility.h"
-#include "historylineedit.h"
-#include "bricklink_model.h"
+#include "utility/utility.h"
+#include "utility/historylineedit.h"
+#include "bricklink/bricklink_model.h"
 #include "selectitem.h"
-#include "messagebox.h"
+#include "utility/messagebox.h"
 #include "framework.h"
 #include "config.h"
 #include "itemscannerdialog.h"

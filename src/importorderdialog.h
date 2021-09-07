@@ -16,7 +16,7 @@
 #include <QDialog>
 #include <QDateTime>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "lot.h"
 #include "ui_importorderdialog.h"
 

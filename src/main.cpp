@@ -28,8 +28,8 @@
 #  include <sys/resource.h>
 #endif
 
-#include "utility.h"
-#include "bricklink.h"
+#include "utility/utility.h"
+#include "bricklink/bricklink.h"
 #include "rebuilddatabase.h"
 #include "itemscanner.h"
 

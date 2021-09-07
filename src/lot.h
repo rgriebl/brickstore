@@ -18,7 +18,7 @@
 #include <QScopedPointer>
 #include <QColor>
 
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 
 
 class Lot

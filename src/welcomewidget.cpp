@@ -29,11 +29,11 @@
 
 #include "welcomewidget.h"
 #include "config.h"
-#include "humanreadabletimedelta.h"
+#include "utility/humanreadabletimedelta.h"
 #include "framework.h"
 #include "version.h"
-#include "utility.h"
-#include "flowlayout.h"
+#include "utility/utility.h"
+#include "utility/flowlayout.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction

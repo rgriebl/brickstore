@@ -32,19 +32,19 @@
 #include <QJsonObject>
 
 #include "config.h"
-#include "utility.h"
-#include "systeminfo.h"
+#include "utility/utility.h"
+#include "utility/systeminfo.h"
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #  include <qhashfunctions.h>
 #  define q5Hash qHash
 #else
-#  include "q5hashfunctions.h"
+#  include "utility/q5hashfunctions.h"
 #endif
-#include "stopwatch.h"
-#include "bricklink.h"
-#include "chunkreader.h"
-#include "chunkwriter.h"
-#include "exception.h"
+#include "utility/stopwatch.h"
+#include "bricklink/bricklink.h"
+#include "utility/chunkreader.h"
+#include "utility/chunkwriter.h"
+#include "utility/exception.h"
 
 
 namespace BrickLink {

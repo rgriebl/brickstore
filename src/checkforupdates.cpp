@@ -30,9 +30,9 @@
 #include <QStringBuilder>
 #include <QStandardPaths>
 
-#include "utility.h"
-#include "messagebox.h"
-#include "progressdialog.h"
+#include "utility/utility.h"
+#include "utility/messagebox.h"
+#include "utility/progressdialog.h"
 #include "checkforupdates.h"
 
 

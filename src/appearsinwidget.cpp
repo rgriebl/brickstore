@@ -18,10 +18,10 @@
 #include <QApplication>
 #include <QTimer>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "framework.h"
 #include "picturewidget.h"
-#include "bricklink_model.h"
+#include "bricklink/bricklink_model.h"
 
 #include "appearsinwidget.h"
 

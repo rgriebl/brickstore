@@ -15,9 +15,9 @@
 
 #include "selectcolordialog.h"
 #include "selectcolor.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "config.h"
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 
 
 SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)

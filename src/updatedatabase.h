@@ -14,7 +14,7 @@
 #pragma once
 
 #include <QObject>
-#include "transfer.h"
+#include "utility/transfer.h"
 
 class ProgressDialog;
 

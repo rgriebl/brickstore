@@ -13,7 +13,7 @@
 */
 #pragma once
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 #include <QDateTime>
 #include <QString>
@@ -37,10 +37,10 @@
 #include <ctime>
 
 #include "ref.h"
-#include "currency.h"
-#include "transfer.h"
-#include "staticpointermodel.h"
-#include "q3cache.h"
+#include "utility/currency.h"
+#include "utility/transfer.h"
+#include "utility/staticpointermodel.h"
+#include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 QT_FORWARD_DECLARE_CLASS(QFile)

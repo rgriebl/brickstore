@@ -25,10 +25,10 @@
 #include <QApplication>
 #include <QStringBuilder>
 
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 #include "config.h"
-#include "currency.h"
-#include "utility.h"
+#include "utility/currency.h"
+#include "utility/utility.h"
 #include "priceguidewidget.h"
 
 namespace {

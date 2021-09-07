@@ -32,8 +32,8 @@
 #include "announcements.h"
 #include "announcements_p.h"
 #include "config.h"
-#include "systeminfo.h"
-#include "utility.h"
+#include "utility/systeminfo.h"
+#include "utility/utility.h"
 
 
 Announcements::Announcements(const QString &baseUrl, QWidget *parent)

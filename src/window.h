@@ -18,11 +18,11 @@
 #include <QWidget>
 #include <QHash>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "document.h"
 #include "lot.h"
 #include "config.h"
-#include "currency.h"
+#include "utility/currency.h"
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)

@@ -11,11 +11,11 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include "ldraw.h"
+#include "ldraw/ldraw.h"
 #include "ldraw/renderwidget.h"
 #include "version.h"
 #include "config.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 

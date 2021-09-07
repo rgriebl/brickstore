@@ -32,13 +32,13 @@
 
 #include "settingsdialog.h"
 #include "config.h"
-#include "bricklink.h"
-#include "bricklink_model.h"
+#include "bricklink/bricklink.h"
+#include "bricklink/bricklink_model.h"
 #include "framework.h"
-#include "ldraw.h"
-#include "messagebox.h"
-#include "utility.h"
-#include "betteritemdelegate.h"
+#include "ldraw/ldraw.h"
+#include "utility/messagebox.h"
+#include "utility/utility.h"
+#include "utility/betteritemdelegate.h"
 
 
 class ActionModel : public QAbstractItemModel

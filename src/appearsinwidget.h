@@ -16,7 +16,7 @@
 #include <QTreeView>
 #include <QScopedPointer>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "lot.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)

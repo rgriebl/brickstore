@@ -25,12 +25,12 @@
 #include <QFileDialog>
 #include <QStringBuilder>
 
-#include "bricklink.h"
-#include "bricklink_model.h"
+#include "bricklink/bricklink.h"
+#include "bricklink/bricklink_model.h"
 #include "picturewidget.h"
-#include "ldraw.h"
-#include "renderwidget.h"
-#include "utility.h"
+#include "ldraw/ldraw.h"
+#include "ldraw/renderwidget.h"
+#include "utility/utility.h"
 #include "config.h"
 
 

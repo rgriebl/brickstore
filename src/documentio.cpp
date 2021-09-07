@@ -32,16 +32,16 @@
 #include <QDebug>
 
 #include "framework.h"
-#include "progressdialog.h"
-#include "messagebox.h"
-#include "exception.h"
-#include "xmlhelpers.h"
+#include "utility/progressdialog.h"
+#include "utility/messagebox.h"
+#include "utility/exception.h"
+#include "utility/xmlhelpers.h"
 #include "config.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "document.h"
 #include "window.h"
-#include "stopwatch.h"
-#include "minizip.h"
+#include "utility/stopwatch.h"
+#include "minizip/minizip.h"
 #include "documentio.h"
 
 

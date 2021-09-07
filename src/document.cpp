@@ -35,14 +35,14 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "config.h"
-#include "undo.h"
-#include "currency.h"
-#include "qparallelsort.h"
+#include "utility/undo.h"
+#include "utility/currency.h"
+#include "utility/qparallelsort.h"
 #include "document.h"
 #include "document_p.h"
-#include "stopwatch.h"
+#include "utility/stopwatch.h"
 
 using namespace std::chrono_literals;
 

@@ -17,7 +17,7 @@
 #include <QWizard>
 #include <QHash>
 #include "document.h"
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 class Document;
 QT_FORWARD_DECLARE_CLASS(QListWidget)

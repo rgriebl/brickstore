@@ -23,8 +23,8 @@
 #include <QApplication>
 #include <QStringBuilder>
 
-#include "bricklink.h"
-#include "utility.h"
+#include "bricklink/bricklink.h"
+#include "utility/utility.h"
 #include "config.h"
 #include "framework.h"
 

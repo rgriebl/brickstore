@@ -21,8 +21,8 @@
 #include <QTimeZone>
 
 #include "bricklink.h"
-#include "exception.h"
-#include "xmlhelpers.h"
+#include "utility/exception.h"
+#include "utility/xmlhelpers.h"
 
 
 int BrickLink::TextImport::findItemIndex(char tid, const QByteArray &id) const

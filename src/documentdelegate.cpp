@@ -36,10 +36,10 @@
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
 #include "selectcolordialog.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "framework.h"
-#include "smartvalidator.h"
-#include "bricklink_model.h"
+#include "utility/smartvalidator.h"
+#include "bricklink/bricklink_model.h"
 #include "config.h"
 
 

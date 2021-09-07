@@ -29,9 +29,9 @@
 #  include <shlobj.h>
 #endif
 
-#include "utility.h"
-#include "ldraw.h"
-#include "stopwatch.h"
+#include "utility/utility.h"
+#include "ldraw/ldraw.h"
+#include "utility/stopwatch.h"
 
 LDraw::Element *LDraw::Element::fromString(const QString &line, const QDir &dir)
 {

@@ -22,7 +22,7 @@
 #include <QMatrix4x4>
 
 #include "ref.h"
-#include "q3cache.h"
+#include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QDir)

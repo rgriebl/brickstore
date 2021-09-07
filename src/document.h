@@ -20,10 +20,10 @@
 #include <QMimeData>
 
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "lot.h"
 #include "documentio.h"
-#include "filter.h"
+#include "utility/filter.h"
 
 QT_FORWARD_DECLARE_CLASS(QUndoStack)
 class UndoStack;

@@ -16,7 +16,7 @@
 #include <QFrame>
 #include <QImage>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 namespace LDraw {
 class Part;

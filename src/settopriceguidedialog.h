@@ -15,7 +15,7 @@
 
 #include <QDialog>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "ui_settopriceguidedialog.h"
 
 

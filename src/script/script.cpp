@@ -19,8 +19,8 @@
 #include "bricklink_wrapper.h"
 #include "printjob.h"
 #include "window.h"
-#include "utility.h"
-#include "exception.h"
+#include "utility/utility.h"
+#include "utility/exception.h"
 
 
 static QString formatJSError(const QJSValue &error)

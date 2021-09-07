@@ -16,9 +16,9 @@
 #include <QGuiApplication>
 
 #include "version.h"
-#include "utility.h"
-#include "ldraw.h"
-#include "systeminfo.h"
+#include "utility/utility.h"
+#include "ldraw/ldraw.h"
+#include "utility/systeminfo.h"
 #include "systeminfodialog.h"
 #include "ui_systeminfodialog.h"
 

@@ -14,7 +14,7 @@
 #pragma once
 
 #include <QDialog>
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "ui_selectitemdialog.h"
 
 

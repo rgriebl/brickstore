@@ -26,8 +26,8 @@
 #include <cmath>
 
 #include "config.h"
-#include "messagebox.h"
-#include "utility.h"
+#include "utility/messagebox.h"
+#include "utility/utility.h"
 #include "window.h"
 
 

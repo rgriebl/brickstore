@@ -17,11 +17,11 @@
 #include <QShortcut>
 #include <QKeyEvent>
 
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 #include "config.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "documentio.h"
-#include "progressdialog.h"
+#include "utility/progressdialog.h"
 #include "framework.h"
 #include "importinventorydialog.h"
 

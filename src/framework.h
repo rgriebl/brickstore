@@ -20,7 +20,7 @@
 #include <QPointer>
 
 #include "document.h"
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)

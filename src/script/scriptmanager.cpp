@@ -27,7 +27,7 @@
 #include "script.h"
 #include "printjob.h"
 #include "bricklink_wrapper.h"
-#include "exception.h"
+#include "utility/exception.h"
 #include "application.h"
 
 

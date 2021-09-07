@@ -31,17 +31,18 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
-#include "bricklink.h"
-#include "transfer.h"
-#include "messagebox.h"
-#include "xmlhelpers.h"
-#include "exception.h"
+#include "bricklink/bricklink.h"
+#include "utility/transfer.h"
+#include "utility/messagebox.h"
+#include "utility/xmlhelpers.h"
+#include "utility/exception.h"
 #include "config.h"
 #include "framework.h"
 #include "documentio.h"
-#include "humanreadabletimedelta.h"
-#include "utility.h"
-#include "betteritemdelegate.h"
+#include "utility/humanreadabletimedelta.h"
+#include "utility/utility.h"
+#include "utility/betteritemdelegate.h"
+#include "utility/historylineedit.h"
 
 #include "importorderdialog.h"
 

@@ -49,21 +49,21 @@
 #  include <QtGui/private/qshortcutmap_p.h>
 #endif
 
-#include "progressdialog.h"
+#include "utility/progressdialog.h"
 #include "config.h"
-#include "bricklink.h"
-#include "ldraw.h"
-#include "messagebox.h"
+#include "bricklink/bricklink.h"
+#include "ldraw/ldraw.h"
+#include "utility/messagebox.h"
 #include "framework.h"
-#include "transfer.h"
-#include "currency.h"
-#include "scriptmanager.h"
+#include "utility/transfer.h"
+#include "utility/currency.h"
+#include "script/scriptmanager.h"
 #include "version.h"
 #include "application.h"
-#include "stopwatch.h"
-#include "utility.h"
-#include "smartvalidator.h"
-#include "systeminfo.h"
+#include "utility/stopwatch.h"
+#include "utility/utility.h"
+#include "utility/smartvalidator.h"
+#include "utility/systeminfo.h"
 
 #if defined(SENTRY_ENABLED)
 #  include "sentry.h"

@@ -15,7 +15,7 @@
 
 #include <QDialog>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QTreeView)
 QT_FORWARD_DECLARE_CLASS(QComboBox)

@@ -15,7 +15,7 @@
 
 #include <QQmlParserStatus>
 
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 #include "document.h"
 #include "lot.h"
 

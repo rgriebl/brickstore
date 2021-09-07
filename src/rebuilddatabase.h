@@ -16,8 +16,8 @@
 #include <QObject>
 #include <QDateTime>
 
-#include "bricklinkfwd.h"
-#include "transfer.h"
+#include "bricklink/bricklinkfwd.h"
+#include "utility/transfer.h"
 
 
 class RebuildDatabase : public QObject

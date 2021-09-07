@@ -16,8 +16,8 @@
 #include <QTreeView>
 #include <QScopedPointer>
 
-#include "currency.h"
-#include "bricklinkfwd.h"
+#include "utility/currency.h"
+#include "bricklink/bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 class PriceGuideWidgetPrivate;

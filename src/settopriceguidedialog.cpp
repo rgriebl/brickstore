@@ -14,7 +14,7 @@
 #include <QDebug>
 
 #include "config.h"
-#include "utility.h"
+#include "utility/utility.h"
 #include "settopriceguidedialog.h"
 
 

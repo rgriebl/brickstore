@@ -15,7 +15,7 @@
 
 #include <QtCore/qbasicatomic.h>
 
-#include "q3cache.h"
+#include "utility/q3cache.h"
 
 
 class Ref

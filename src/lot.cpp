@@ -14,7 +14,7 @@
 #include <QRegularExpression>
 #include <QStringBuilder>
 
-#include "bricklink.h"
+#include "bricklink/bricklink.h"
 #include "lot.h"
 
 

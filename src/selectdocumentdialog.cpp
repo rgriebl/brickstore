@@ -28,7 +28,7 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "document.h"
 #include "config.h"
 #include "selectdocumentdialog.h"

@@ -30,7 +30,7 @@
 
 #include "bricklink.h"
 #include "bricklink_model.h"
-#include "utility.h"
+#include "utility/utility.h"
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>

@@ -19,8 +19,8 @@
 #include "framework.h"
 #include "window.h"
 #include "documentio.h"
-#include "utility.h"
-#include "currency.h"
+#include "utility/utility.h"
+#include "utility/currency.h"
 
 #include "bricklink_wrapper.h"
 

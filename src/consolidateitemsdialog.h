@@ -13,7 +13,7 @@
 */
 #pragma once
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "window.h"
 #include "ui_consolidateitemsdialog.h"
 

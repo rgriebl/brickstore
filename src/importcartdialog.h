@@ -16,7 +16,7 @@
 #include <QDialog>
 #include <QDateTime>
 
-#include "bricklinkfwd.h"
+#include "bricklink/bricklinkfwd.h"
 #include "ui_importcartdialog.h"
 
 class Transfer;

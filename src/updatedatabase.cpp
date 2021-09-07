@@ -16,13 +16,13 @@
 #include <QDateTime>
 #include <QStringBuilder>
 
-#include "bs_lzma.h"
+#include "lzma/bs_lzma.h"
 #include "updatedatabase.h"
 #include "config.h"
-#include "bricklink.h"
-#include "utility.h"
+#include "bricklink/bricklink.h"
+#include "utility/utility.h"
 #include "version.h"
-#include "progressdialog.h"
+#include "utility/progressdialog.h"
 
 
 UpdateDatabase::UpdateDatabase(QWidget *parent)

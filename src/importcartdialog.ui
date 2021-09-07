@@ -136,7 +136,7 @@
   <customwidget>
    <class>HistoryLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>historylineedit.h</header>
+   <header>utility/historylineedit.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

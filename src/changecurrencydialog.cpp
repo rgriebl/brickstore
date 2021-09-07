@@ -5,10 +5,10 @@
 #include <QButtonGroup>
 #include <QMouseEvent>
 
-#include "currency.h"
-#include "utility.h"
+#include "utility/currency.h"
+#include "utility/utility.h"
 #include "config.h"
-#include "smartvalidator.h"
+#include "utility/smartvalidator.h"
 #include "changecurrencydialog.h"
 
 
