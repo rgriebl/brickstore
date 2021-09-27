@@ -23,14 +23,14 @@ class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialo
     Q_OBJECT
 
 public:
-    ConsolidateItemsDialog(const Window *win, const LotList &lots,
-                           int preselectedIndex, Window::Consolidate mode, int current, int total,
+    ConsolidateItemsDialog(const View *win, const LotList &lots,
+                           int preselectedIndex, View::Consolidate mode, int current, int total,
                            QWidget *parent = nullptr);
 
     int consolidateToIndex() const;
     bool repeatForAll() const;
     bool costQuantityAverage() const;
-    Window::Consolidate consolidateRemaining() const;
+    View::Consolidate consolidateRemaining() const;
 
 protected:
     QSize sizeHint() const override;

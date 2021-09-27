@@ -332,7 +332,7 @@ void AddItemDialog::updateCurrencyCode()
     w_radio_currency->setText(m_currency_code);
 }
 
-void AddItemDialog::attach(Window *w)
+void AddItemDialog::attach(View *w)
 {
     if (m_window) {
         disconnect(m_window->document(), &Document::titleChanged,
@@ -688,8 +688,8 @@ void AddItemDialog::addClicked()
         m_addHistory.pop_front();
     updateHistoryText();
 
-    m_window->addLots({ lot }, w_merge->isChecked() ? Window::AddLotMode::ConsolidateWithExisting
-                                                     : Window::AddLotMode::AddAsNew);
+    m_window->addLots({ lot }, w_merge->isChecked() ? View::AddLotMode::ConsolidateWithExisting
+                                                     : View::AddLotMode::AddAsNew);
 }
 
 #include "moc_additemdialog.cpp"

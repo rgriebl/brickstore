@@ -21,7 +21,7 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class Document;
-class Window;
+class View;
 
 
 class DocumentIO
@@ -30,8 +30,8 @@ class DocumentIO
 
 public:
     static Document *create();
-    static Window *open();
-    static Window *open(const QString &name);
+    static View *open();
+    static View *open(const QString &name);
     static Document *importBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
                                               const BrickLink::Color *color = nullptr,
                                               int multiply = 1,
@@ -44,8 +44,8 @@ public:
     static Document *importBrickLinkXML();
     static Document *importLDrawModel();
 
-    static bool save(Window *win);
-    static bool saveAs(Window *win);
+    static bool save(View *win);
+    static bool saveAs(View *win);
     static void exportBrickLinkXML(const LotList &lots);
     static void exportBrickLinkXMLClipboard(const LotList &itemlist);
     static void exportBrickLinkUpdateClipboard(const Document *doc,
@@ -72,8 +72,8 @@ public:
     static BsxContents fromBrickLinkXML(const QByteArray &xml);
 
 private:
-    static Window *loadFrom(const QString &s);
-    static bool saveTo(Window *win, const QString &s);
+    static View *loadFrom(const QString &s);
+    static bool saveTo(View *win, const QString &s);
 
     static bool parseLDrawModel(QFile *f, bool isStudio, LotList &lots, int *invalidLots);
     static bool parseLDrawModelInternal(QFile *f, bool isStudio, const QString &modelName,

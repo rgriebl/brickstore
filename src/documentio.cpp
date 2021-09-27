@@ -55,7 +55,7 @@ Document *DocumentIO::create()
     return doc;
 }
 
-Window *DocumentIO::open()
+View *DocumentIO::open()
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") % " (*.bsx)"_l1;
@@ -70,15 +70,15 @@ Window *DocumentIO::open()
     return open(fn);
 }
 
-Window *DocumentIO::open(const QString &s)
+View *DocumentIO::open(const QString &s)
 {
     if (s.isEmpty())
         return nullptr;
 
     QString fn = QFileInfo(s).absoluteFilePath();
 
-    const auto all = Window::allWindows();
-    for (Window *win : all) {
+    const auto all = View::allViews();
+    for (View *win : all) {
         if (QFileInfo(win->document()->fileName()).absoluteFilePath() == fn)
             return win;
     }
@@ -261,7 +261,7 @@ Document *DocumentIO::importBrickLinkXML()
     return nullptr;
 }
 
-Window *DocumentIO::loadFrom(const QString &name)
+View *DocumentIO::loadFrom(const QString &name)
 {
     QFile f(name);
 
@@ -293,7 +293,7 @@ Window *DocumentIO::loadFrom(const QString &name)
         doc->setFileName(name);
         Config::inst()->addToRecentFiles(name);
 
-        return new Window(doc, result.guiColumnLayout, result.guiSortFilterState);
+        return new View(doc, result.guiColumnLayout, result.guiSortFilterState);
 
     } catch (const Exception &e) {
         MessageBox::warning(nullptr, { }, tr("This XML document is not a valid BrickStoreXML file.")
@@ -590,7 +590,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
 ///////////////////////////////////////////////////////////////////////
 
 
-bool DocumentIO::save(Window *win)
+bool DocumentIO::save(View *win)
 {
     if (win->document()->fileName().isEmpty())
         return saveAs(win);
@@ -600,7 +600,7 @@ bool DocumentIO::save(Window *win)
 }
 
 
-bool DocumentIO::saveAs(Window *win)
+bool DocumentIO::saveAs(View *win)
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") % " (*.bsx)"_l1;
@@ -630,7 +630,7 @@ bool DocumentIO::saveAs(Window *win)
 }
 
 
-bool DocumentIO::saveTo(Window *win, const QString &s)
+bool DocumentIO::saveTo(View *win, const QString &s)
 {
     Document *doc = win->document();
 

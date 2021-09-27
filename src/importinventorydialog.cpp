@@ -234,7 +234,7 @@ void ImportInventoryDialog::importInventory()
 {
     if (auto doc = DocumentIO::importBrickLinkInventory(item(), nullptr, quantity(), condition(),
                                                         extraParts(), includeInstructions())) {
-        FrameWork::inst()->createWindow(doc);
+        FrameWork::inst()->createView(doc);
     }
 }
 

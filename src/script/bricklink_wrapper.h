@@ -20,7 +20,7 @@
 #include "lot.h"
 
 QT_FORWARD_DECLARE_CLASS(QHeaderView)
-class Window;
+class View;
 
 class QmlColor;
 class QmlCategory;
@@ -496,8 +496,8 @@ class QmlDocument : public QObject
 public:
     Q_ENUMS(Document::Field)
 
-    QmlDocument(Window *win);
-    bool isWrapperFor(Window *win) const;
+    QmlDocument(View *win);
+    bool isWrapperFor(View *win) const;
 
     bool changeLot(QmlLot *from, Lot &to);
 
@@ -513,7 +513,7 @@ public:
 //    }
 
     inline Document *document() { return d; }
-    inline Window *window() { return win; }
+    inline View *window() { return win; }
 
 signals:
     void titleChanged(const QString &title);
@@ -524,7 +524,7 @@ signals:
 
 private:
     Document *d;
-    Window *win;
+    View *win;
 };
 
 
@@ -541,7 +541,7 @@ public:
     QVector<QmlDocument *> documents() const;
     QmlDocument *currentDocument() const;
 
-    QmlDocument *documentForWindow(Window *win) const;
+    QmlDocument *documentForWindow(View *win) const;
 
     Q_INVOKABLE QmlDocument *newDocument(const QString &title);
     Q_INVOKABLE QmlDocument *openDocument(const QString &fileName);
@@ -558,7 +558,7 @@ signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
 
 private:
-    QmlDocument *setupDocument(Window *win, Document *doc, const QString &title = { });
+    QmlDocument *setupDocument(View *win, Document *doc, const QString &title = { });
 
     QVector<QmlDocument *> m_documents;
     QmlDocument *m_currentDocument = nullptr;

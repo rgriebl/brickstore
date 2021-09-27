@@ -25,7 +25,7 @@ QT_FORWARD_DECLARE_CLASS(QValidator)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
 QT_FORWARD_DECLARE_CLASS(QTimer)
 
-class Window;
+class View;
 
 
 class AddItemDialog : public QWidget, private Ui::AddItemDialog
@@ -35,7 +35,7 @@ public:
     AddItemDialog(QWidget *parent = nullptr);
     ~AddItemDialog() override;
 
-    void attach(Window *window);
+    void attach(View *window);
 
 signals:
     void closed();
@@ -68,7 +68,7 @@ private:
     bool restoreState(const QByteArray &ba);
 
 private:
-    QPointer<Window> m_window;
+    QPointer<View> m_window;
 
     QPushButton *w_add;
     QSpinBox *w_tier_qty[3];

@@ -29,9 +29,9 @@
 #include "config.h"
 
 
-ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
+ConsolidateItemsDialog::ConsolidateItemsDialog(const View *win,
                                                const LotList &lots,
-                                               int preselectedIndex, Window::Consolidate mode,
+                                               int preselectedIndex, View::Consolidate mode,
                                                int current, int total, QWidget *parent)
     : QDialog(parent)
 {
@@ -45,12 +45,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     bool newLots = (lots.count() == 2) && win->document()->lots().contains(lots.at(0))
             && !win->document()->lots().contains(lots.at(lots.count() - 1));
 
-    Q_ASSERT(newLots == (int(mode) >= int(Window::Consolidate::IntoExisting)));
+    Q_ASSERT(newLots == (int(mode) >= int(View::Consolidate::IntoExisting)));
 
-    for (int i = int(Window::Consolidate::IntoNew); i > int(Window::Consolidate::Not); --i) {
-        w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<Window::Consolidate>(i)));
+    for (int i = int(View::Consolidate::IntoNew); i > int(View::Consolidate::Not); --i) {
+        w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<View::Consolidate>(i)));
 
-        bool forNewOnly = (i >= int(Window::Consolidate::IntoExisting));
+        bool forNewOnly = (i >= int(View::Consolidate::IntoExisting));
         if (newLots != forNewOnly)
             w_prefer_remaining->removeItem(i);
     }
@@ -131,12 +131,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     }, Qt::QueuedConnection);
 }
 
-Window::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
+View::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
 {
     if (m_forAll)
-        return w_prefer_remaining->currentData().value<Window::Consolidate>();
+        return w_prefer_remaining->currentData().value<View::Consolidate>();
     else
-        return Window::Consolidate::Not;
+        return View::Consolidate::Not;
 }
 
 int ConsolidateItemsDialog::consolidateToIndex() const

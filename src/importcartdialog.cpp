@@ -474,7 +474,7 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
 
             if (!lots.isEmpty()) {
                 if (auto doc = DocumentIO::importBrickLinkCart(cart, lots))
-                    FrameWork::inst()->createWindow(doc);
+                    FrameWork::inst()->createView(doc);
             }
         }
         m_cartDownloads.removeOne(job);

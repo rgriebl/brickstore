@@ -29,7 +29,7 @@ QT_FORWARD_DECLARE_CLASS(QWidgetAction)
 class HistoryLineEdit;
 class Workspace;
 class ProgressCircle;
-class Window;
+class View;
 class UndoGroup;
 class TaskInfoWidget;
 class TaskPriceGuideWidget;
@@ -56,13 +56,13 @@ public:
     ~FrameWork() override;
     static FrameWork *inst();
 
-    bool closeAllWindows();
-    QVector<Window *> allWindows() const;
-    bool restoreWindowsFromAutosave();
-    void setupWindow(Window *win);
-    Window *createWindow(Document *doc);
-    Window *activeWindow() const;
-    void setActiveWindow(Window *window);
+    bool closeAllViews();
+    QVector<View *> allViews() const;
+    bool restoreViewsFromAutosave();
+    void setupView(View *win);
+    View *createView(Document *doc);
+    View *activeView() const;
+    void setActiveView(View *view);
 
     static constexpr int maxQuantity = 9999999;
     static constexpr double maxPrice = 99999;
@@ -83,8 +83,8 @@ public slots:
                                       BrickLink::Condition condition = BrickLink::Condition::New);
 
 signals:
-    void windowActivated(Window *);
-    void windowListChanged();
+    void viewActivated(View *);
+    void viewListChanged();
     void filterChanged(const QString &filter);
 
 protected slots:
@@ -93,7 +93,7 @@ protected slots:
 private slots:
     bool updateDatabase(bool forceSync = false);
 
-    void connectWindow(QWidget *w);
+    void connectView(QWidget *w);
     void transferProgressUpdate(int p, int t);
 
     void showSettings(const char *page = nullptr);
@@ -124,7 +124,7 @@ public:
 
 private:
     void setupScripts();
-    void connectAllActions(bool do_connect, Window *window);
+    void connectAllActions(bool do_connect, View *view);
     void createActions();
     void translateActions();
     void updateActions();
@@ -134,7 +134,7 @@ private:
     QDockWidget *createDock(QWidget *widget);
 
     Workspace *m_workspace;
-    QPointer<Window> m_activeWin;
+    QPointer<View> m_activeView;
     QList<QAction *> m_extensionContextActions;
 
     ProgressCircle *m_progress;

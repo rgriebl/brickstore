@@ -39,7 +39,7 @@ class WindowProgress;
 class PrintingScriptAction;
 
 
-class Window : public QWidget
+class View : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY(bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
@@ -47,11 +47,11 @@ class Window : public QWidget
     Q_PROPERTY(QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged)
 
 public:
-    Window(Document *doc, const QByteArray &columnLayout = { },
+    View(Document *doc, const QByteArray &columnLayout = { },
            const QByteArray &sortFilterState = { }, QWidget *parent = nullptr);
-    ~Window() override;
+    ~View() override;
 
-    static const QVector<Window *> &allWindows();
+    static const QVector<View *> &allViews();
 
     Document *document() const { return m_doc; }
 
@@ -73,7 +73,7 @@ public:
 
     static int restorableAutosaves();
     enum class AutosaveAction { Restore, Delete };
-    static const QVector<Window *> processAutosaves(AutosaveAction action);
+    static const QVector<View *> processAutosaves(AutosaveAction action);
 
     const LotList &selectedLots() const  { return m_selectedLots; }
 
@@ -288,9 +288,9 @@ private:
     QTimer               m_autosaveTimer;
     mutable bool         m_autosaveClean = true;
 
-    static QVector<Window *> s_windows;
+    static QVector<View *> s_views;
 
     friend class AutosaveJob;
 };
 
-Q_DECLARE_METATYPE(Window::Consolidate)
+Q_DECLARE_METATYPE(View::Consolidate)

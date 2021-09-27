@@ -78,7 +78,7 @@ static E nextEnumValue(E current, std::initializer_list<E> values)
 }
 
 
-void Window::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback)
+void View::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback)
 {
     if (lots.isEmpty())
         return;
@@ -119,9 +119,9 @@ void Window::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)
 ///////////////////////////////////////////////////////////////////////
 
 
-ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
-    : QObject(window)
-    , m_window(window)
+ColumnChangeWatcher::ColumnChangeWatcher(View *view, HeaderView *header)
+    : QObject(view)
+    , m_view(view)
     , m_header(header)
 {
     // redirect the signals, so that we can block the them while we are applying new values
@@ -129,7 +129,7 @@ ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
             this, &ColumnChangeWatcher::internalColumnMoved);
     connect(this, &ColumnChangeWatcher::internalColumnMoved,
             this, [this](int logical, int oldVisual, int newVisual) {
-        m_window->document()->undoStack()->push(new ColumnCmd(this, true,
+        m_view->document()->undoStack()->push(new ColumnCmd(this, true,
                                                               ColumnCmd::Type::Move,
                                                               logical, oldVisual, newVisual));
     });
@@ -137,7 +137,7 @@ ColumnChangeWatcher::ColumnChangeWatcher(Window *window, HeaderView *header)
             this, &ColumnChangeWatcher::internalColumnResized);
     connect(this, &ColumnChangeWatcher::internalColumnResized,
             this, [this](int logical, int oldSize, int newSize) {
-        m_window->document()->undoStack()->push(new ColumnCmd(this, true,
+        m_view->document()->undoStack()->push(new ColumnCmd(this, true,
                                                               ColumnCmd::Type::Resize,
                                                               logical, oldSize, newSize));
     });
@@ -291,10 +291,10 @@ QColor CheckColorTabBar::color() const
 ///////////////////////////////////////////////////////////////////////
 
 
-StatusBar::StatusBar(Window *window)
-    : QFrame(window)
-    , m_window(window)
-    , m_doc(window->document())
+StatusBar::StatusBar(View *view)
+    : QFrame(view)
+    , m_view(view)
+    , m_doc(view->document())
 {
     setAutoFillBackground(true);
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
@@ -326,7 +326,7 @@ StatusBar::StatusBar(Window *window)
         connect(m_order, &QToolButton::clicked,
                 this, [this]() {
             auto order = m_doc->order();
-            MessageBox::information(m_window, tr("Order information"), order->address());
+            MessageBox::information(m_view, tr("Order information"), order->address());
         });
     } else {
         m_order = nullptr;
@@ -398,20 +398,20 @@ StatusBar::StatusBar(Window *window)
             this, &StatusBar::documentCurrencyChanged);
     connect(m_doc, &Document::statisticsChanged,
             this, &StatusBar::updateStatistics);
-    connect(window, &Window::blockingOperationActiveChanged,
+    connect(view, &View::blockingOperationActiveChanged,
             this, &StatusBar::updateBlockState);
-    connect(window, &Window::blockingOperationTitleChanged,
+    connect(view, &View::blockingOperationTitleChanged,
             m_blockTitle, &QLabel::setText);
-    connect(window, &Window::blockingOperationCancelableChanged,
+    connect(view, &View::blockingOperationCancelableChanged,
             m_blockCancel, &QWidget::setEnabled);
-    connect(window, &Window::blockingOperationProgress,
+    connect(view, &View::blockingOperationProgress,
             this, [this](int done, int total) {
         if (m_blockProgress->maximum() != total)
             m_blockProgress->setRange(0, total);
         m_blockProgress->setValue(done);
     });
     connect(m_blockCancel, &QToolButton::clicked,
-            window, &Window::cancelBlockingOperation);
+            view, &View::cancelBlockingOperation);
 
     updateCurrencyRates();
     updateBlockState(false);
@@ -522,7 +522,7 @@ void StatusBar::updateBlockState(bool blocked)
 {
     m_stack->setCurrentIndex(blocked ? 1 : 0);
     if (blocked) {
-        m_blockTitle->setText(m_window->blockingOperationTitle());
+        m_blockTitle->setText(m_view->blockingOperationTitle());
         m_blockProgress->setRange(0, 0);
     } else {
         m_blockTitle->clear();
@@ -566,9 +566,9 @@ void StatusBar::changeEvent(QEvent *e)
 ///////////////////////////////////////////////////////////////////////
 
 
-QVector<Window *> Window::s_windows;
+QVector<View *> View::s_views;
 
-Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &sortFilterState,
+View::View(Document *doc, const QByteArray &columnLayout, const QByteArray &sortFilterState,
                QWidget *parent)
     : QWidget(parent)
     , m_uuid(QUuid::createUuid())
@@ -657,33 +657,33 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     toplay->addWidget(w_list, 10);
 
     connect(m_latest_timer, &QTimer::timeout,
-            this, &Window::ensureLatestVisible);
+            this, &View::ensureLatestVisible);
     connect(w_list, &QWidget::customContextMenuRequested,
-            this, &Window::contextMenu);
+            this, &View::contextMenu);
 
     connect(m_selection_model, &QItemSelectionModel::selectionChanged,
-            this, &Window::updateSelection);
+            this, &View::updateSelection);
 
     connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
-            this, &Window::priceGuideUpdated);
+            this, &View::priceGuideUpdated);
 
     connect(Config::inst(), &Config::showInputErrorsChanged,
-            this, &Window::updateItemFlagsMask);
+            this, &View::updateItemFlagsMask);
     connect(Config::inst(), &Config::showDifferenceIndicatorsChanged,
-            this, &Window::updateItemFlagsMask);
+            this, &View::updateItemFlagsMask);
     connect(Config::inst(), &Config::measurementSystemChanged,
             w_list->viewport(), QOverload<>::of(&QWidget::update));
 
     connect(m_doc, &Document::titleChanged,
-            this, &Window::updateCaption);
+            this, &View::updateCaption);
     connect(m_doc, &Document::fileNameChanged,
-            this, &Window::updateCaption);
+            this, &View::updateCaption);
     connect(m_doc, &Document::modificationChanged,
-            this, &Window::updateCaption);
+            this, &View::updateCaption);
     connect(m_doc, &Document::dataChanged,
-            this, &Window::documentDataChanged);
+            this, &View::documentDataChanged);
 
-    connect(this, &Window::blockingOperationActiveChanged,
+    connect(this, &View::blockingOperationActiveChanged,
             w_list, &QWidget::setDisabled);
 
     updateMinimumSectionSize();
@@ -710,31 +710,31 @@ Window::Window(Document *doc, const QByteArray &columnLayout, const QByteArray &
     connect(doc->undoStack(), &QUndoStack::indexChanged,
             this, [this]() { m_autosaveClean = false; });
     connect(&m_autosaveTimer, &QTimer::timeout,
-            this, &Window::autosave);
+            this, &View::autosave);
     m_autosaveTimer.start(1min); // every minute
 
-    s_windows.append(this);
+    s_views.append(this);
 
     doc->undoStack()->clear();
     if (isForceModified)
         doc->undoStack()->resetClean();
 }
 
-Window::~Window()
+View::~View()
 {
     m_autosaveTimer.stop();
     deleteAutosave();
-    s_windows.removeAll(this);
+    s_views.removeAll(this);
 
     delete m_doc;
 }
 
-const QVector<Window *> &Window::allWindows()
+const QVector<View *> &View::allViews()
 {
-    return s_windows;
+    return s_views;
 }
 
-void Window::changeEvent(QEvent *e)
+void View::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         updateCaption();
@@ -743,7 +743,7 @@ void Window::changeEvent(QEvent *e)
     QWidget::changeEvent(e);
 }
 
-void Window::updateCaption()
+void View::updateCaption()
 {
     QString cap = m_doc->fileNameOrTitle();
     if (cap.isEmpty())
@@ -755,34 +755,34 @@ void Window::updateCaption()
     setWindowModified(m_doc->isModified());
 }
 
-void Window::updateMinimumSectionSize()
+void View::updateMinimumSectionSize()
 {
     int s = qMax(16, fontMetrics().height() * 2);
     w_header->setMinimumSectionSize(s);
     w_list->setIconSize({ s, s });
 }
 
-QByteArray Window::currentColumnLayout() const
+QByteArray View::currentColumnLayout() const
 {
     return w_header->saveLayout();
 }
 
-bool Window::isBlockingOperationActive() const
+bool View::isBlockingOperationActive() const
 {
     return m_blocked;
 }
 
-QString Window::blockingOperationTitle() const
+QString View::blockingOperationTitle() const
 {
     return m_blockTitle;
 }
 
-bool Window::isBlockingOperationCancelable() const
+bool View::isBlockingOperationCancelable() const
 {
     return bool(m_blockCancelCallback);
 }
 
-void Window::setBlockingOperationCancelCallback(std::function<void ()> cancelCallback)
+void View::setBlockingOperationCancelCallback(std::function<void ()> cancelCallback)
 {
     const bool wasCancelable = isBlockingOperationCancelable();
     m_blockCancelCallback = cancelCallback;
@@ -790,7 +790,7 @@ void Window::setBlockingOperationCancelCallback(std::function<void ()> cancelCal
         emit blockingOperationCancelableChanged(!wasCancelable);
 }
 
-void Window::setBlockingOperationTitle(const QString &title)
+void View::setBlockingOperationTitle(const QString &title)
 {
     if (title != m_blockTitle) {
         m_blockTitle = title;
@@ -798,7 +798,7 @@ void Window::setBlockingOperationTitle(const QString &title)
     }
 }
 
-void Window::startBlockingOperation(const QString &title, std::function<void ()> cancelCallback)
+void View::startBlockingOperation(const QString &title, std::function<void ()> cancelCallback)
 {
     if (!m_blocked) {
         m_blocked = true;
@@ -809,7 +809,7 @@ void Window::startBlockingOperation(const QString &title, std::function<void ()>
     }
 }
 
-void Window::endBlockingOperation()
+void View::endBlockingOperation()
 {
     if (m_blocked) {
         m_blocked = false;
@@ -820,7 +820,7 @@ void Window::endBlockingOperation()
     }
 }
 
-void Window::cancelBlockingOperation()
+void View::cancelBlockingOperation()
 {
     if (m_blocked) {
         if (m_blockCancelCallback)
@@ -828,7 +828,7 @@ void Window::cancelBlockingOperation()
     }
 }
 
-void Window::ensureLatestVisible()
+void View::ensureLatestVisible()
 {
     if (m_latest_row >= 0) {
         int xOffset = w_list->horizontalScrollBar()->value();
@@ -837,7 +837,7 @@ void Window::ensureLatestVisible()
     }
 }
 
-int Window::addLots(const LotList &lots, AddLotMode addLotMode)
+int View::addLots(const LotList &lots, AddLotMode addLotMode)
 {
     // we own the items now
 
@@ -957,7 +957,7 @@ int Window::addLots(const LotList &lots, AddLotMode addLotMode)
 }
 
 
-void Window::consolidateLots(const LotList &lots)
+void View::consolidateLots(const LotList &lots)
 {
     if (lots.count() < 2)
         return;
@@ -1045,7 +1045,7 @@ void Window::consolidateLots(const LotList &lots)
         m_doc->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
 }
 
-int Window::consolidateLotsHelper(const LotList &lots, Consolidate conMode) const
+int View::consolidateLotsHelper(const LotList &lots, Consolidate conMode) const
 {
     switch (conMode) {
     case Consolidate::IntoTopSorted:
@@ -1073,27 +1073,27 @@ int Window::consolidateLotsHelper(const LotList &lots, Consolidate conMode) cons
 }
 
 static const struct {
-    Window::ColumnLayoutCommand cmd;
+    View::ColumnLayoutCommand cmd;
     const char *name;
     const char *id;
 } columnLayoutCommandList[] = {
-{ Window::ColumnLayoutCommand::BrickStoreDefault,
-    QT_TRANSLATE_NOOP("Window", "BrickStore default"), "brickstore-default" },
-{ Window::ColumnLayoutCommand::BrickStoreSimpleDefault,
-    QT_TRANSLATE_NOOP("Window", "BrickStore buyer/collector default"), "brickstore-simple-default" },
-{ Window::ColumnLayoutCommand::AutoResize,
-    QT_TRANSLATE_NOOP("Window", "Auto-resize once"), "auto-resize" },
-{ Window::ColumnLayoutCommand::UserDefault,
-    QT_TRANSLATE_NOOP("Window", "User default"), "user-default" },
+{ View::ColumnLayoutCommand::BrickStoreDefault,
+    QT_TRANSLATE_NOOP("View", "BrickStore default"), "brickstore-default" },
+{ View::ColumnLayoutCommand::BrickStoreSimpleDefault,
+    QT_TRANSLATE_NOOP("View", "BrickStore buyer/collector default"), "brickstore-simple-default" },
+{ View::ColumnLayoutCommand::AutoResize,
+    QT_TRANSLATE_NOOP("View", "Auto-resize once"), "auto-resize" },
+{ View::ColumnLayoutCommand::UserDefault,
+    QT_TRANSLATE_NOOP("View", "User default"), "user-default" },
 };
 
-std::vector<Window::ColumnLayoutCommand> Window::columnLayoutCommands()
+std::vector<View::ColumnLayoutCommand> View::columnLayoutCommands()
 {
     return { ColumnLayoutCommand::BrickStoreDefault, ColumnLayoutCommand::BrickStoreSimpleDefault,
                 ColumnLayoutCommand::AutoResize, ColumnLayoutCommand::UserDefault };
 }
 
-QString Window::columnLayoutCommandName(ColumnLayoutCommand clc)
+QString View::columnLayoutCommandName(ColumnLayoutCommand clc)
 {
     for (const auto cmd : columnLayoutCommandList) {
         if (cmd.cmd == clc)
@@ -1102,7 +1102,7 @@ QString Window::columnLayoutCommandName(ColumnLayoutCommand clc)
     return { };
 }
 
-QString Window::columnLayoutCommandId(Window::ColumnLayoutCommand clc)
+QString View::columnLayoutCommandId(View::ColumnLayoutCommand clc)
 {
     for (const auto cmd : columnLayoutCommandList) {
         if (cmd.cmd == clc)
@@ -1111,7 +1111,7 @@ QString Window::columnLayoutCommandId(Window::ColumnLayoutCommand clc)
     return { };
 }
 
-Window::ColumnLayoutCommand Window::columnLayoutCommandFromId(const QString &id)
+View::ColumnLayoutCommand View::columnLayoutCommandFromId(const QString &id)
 {
     for (const auto cmd : columnLayoutCommandList) {
         if (id == QLatin1String(cmd.id))
@@ -1121,7 +1121,7 @@ Window::ColumnLayoutCommand Window::columnLayoutCommandFromId(const QString &id)
 
 }
 
-void Window::on_edit_cut_triggered()
+void View::on_edit_cut_triggered()
 {
     if (!selectedLots().isEmpty()) {
         QApplication::clipboard()->setMimeData(new DocumentLotsMimeData(selectedLots()));
@@ -1129,13 +1129,13 @@ void Window::on_edit_cut_triggered()
     }
 }
 
-void Window::on_edit_copy_triggered()
+void View::on_edit_copy_triggered()
 {
     if (!selectedLots().isEmpty())
         QApplication::clipboard()->setMimeData(new DocumentLotsMimeData(selectedLots()));
 }
 
-void Window::on_edit_paste_triggered()
+void View::on_edit_paste_triggered()
 {
     LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
 
@@ -1151,14 +1151,14 @@ void Window::on_edit_paste_triggered()
     }
 }
 
-void Window::on_edit_paste_silent_triggered()
+void View::on_edit_paste_silent_triggered()
 {
     LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
     if (!lots.isEmpty())
         addLots(lots, AddLotMode::AddAsNew);
 }
 
-void Window::on_edit_duplicate_triggered()
+void View::on_edit_duplicate_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1187,23 +1187,23 @@ void Window::on_edit_duplicate_triggered()
     }
 }
 
-void Window::on_edit_delete_triggered()
+void View::on_edit_delete_triggered()
 {
     if (!selectedLots().isEmpty())
         m_doc->removeLots(selectedLots());
 }
 
-void Window::on_edit_select_all_triggered()
+void View::on_edit_select_all_triggered()
 {
     w_list->selectAll();
 }
 
-void Window::on_edit_select_none_triggered()
+void View::on_edit_select_none_triggered()
 {
     w_list->clearSelection();
 }
 
-void Window::on_edit_filter_from_selection_triggered()
+void View::on_edit_filter_from_selection_triggered()
 {
     if (selectedLots().count() == 1) {
         auto idx = m_selection_model->currentIndex();
@@ -1229,27 +1229,27 @@ void Window::on_edit_filter_from_selection_triggered()
     }
 }
 
-void Window::on_view_reset_diff_mode_triggered()
+void View::on_view_reset_diff_mode_triggered()
 {
     m_doc->resetDifferenceMode(selectedLots());
 }
 
-void Window::on_edit_status_include_triggered()
+void View::on_edit_status_include_triggered()
 {
     setStatus(BrickLink::Status::Include);
 }
 
-void Window::on_edit_status_exclude_triggered()
+void View::on_edit_status_exclude_triggered()
 {
     setStatus(BrickLink::Status::Exclude);
 }
 
-void Window::on_edit_status_extra_triggered()
+void View::on_edit_status_extra_triggered()
 {
     setStatus(BrickLink::Status::Extra);
 }
 
-void Window::on_edit_status_toggle_triggered()
+void View::on_edit_status_toggle_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setStatus(nextEnumValue(from.status(), { BrickLink::Status::Include,
@@ -1258,7 +1258,7 @@ void Window::on_edit_status_toggle_triggered()
     });
 }
 
-void Window::setStatus(BrickLink::Status status)
+void View::setStatus(BrickLink::Status status)
 {
     applyTo(selectedLots(), [status](const auto &from, auto &to) {
         (to = from).setStatus(status); return true;
@@ -1266,17 +1266,17 @@ void Window::setStatus(BrickLink::Status status)
 }
 
 
-void Window::on_edit_cond_new_triggered()
+void View::on_edit_cond_new_triggered()
 {
     setCondition(BrickLink::Condition::New);
 }
 
-void Window::on_edit_cond_used_triggered()
+void View::on_edit_cond_used_triggered()
 {
     setCondition(BrickLink::Condition::Used);
 }
 
-void Window::setCondition(BrickLink::Condition condition)
+void View::setCondition(BrickLink::Condition condition)
 {
     applyTo(selectedLots(), [condition](const auto &from, auto &to) {
         (to = from).setCondition(condition);
@@ -1285,27 +1285,27 @@ void Window::setCondition(BrickLink::Condition condition)
 }
 
 
-void Window::on_edit_subcond_none_triggered()
+void View::on_edit_subcond_none_triggered()
 {
     setSubCondition(BrickLink::SubCondition::None);
 }
 
-void Window::on_edit_subcond_sealed_triggered()
+void View::on_edit_subcond_sealed_triggered()
 {
     setSubCondition(BrickLink::SubCondition::Sealed);
 }
 
-void Window::on_edit_subcond_complete_triggered()
+void View::on_edit_subcond_complete_triggered()
 {
     setSubCondition(BrickLink::SubCondition::Complete);
 }
 
-void Window::on_edit_subcond_incomplete_triggered()
+void View::on_edit_subcond_incomplete_triggered()
 {
     setSubCondition(BrickLink::SubCondition::Incomplete);
 }
 
-void Window::setSubCondition(BrickLink::SubCondition subCondition)
+void View::setSubCondition(BrickLink::SubCondition subCondition)
 {
     applyTo(selectedLots(), [subCondition](const auto &from, auto &to) {
         (to = from).setSubCondition(subCondition); return true;
@@ -1313,24 +1313,24 @@ void Window::setSubCondition(BrickLink::SubCondition subCondition)
 }
 
 
-void Window::on_edit_retain_yes_triggered()
+void View::on_edit_retain_yes_triggered()
 {
     setRetain(true);
 }
 
-void Window::on_edit_retain_no_triggered()
+void View::on_edit_retain_no_triggered()
 {
     setRetain(false);
 }
 
-void Window::on_edit_retain_toggle_triggered()
+void View::on_edit_retain_toggle_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setRetain(!from.retain()); return true;
     });
 }
 
-void Window::setRetain(bool retain)
+void View::setRetain(bool retain)
 {
     applyTo(selectedLots(), [retain](const auto &from, auto &to) {
         (to = from).setRetain(retain); return true;
@@ -1338,27 +1338,27 @@ void Window::setRetain(bool retain)
 }
 
 
-void Window::on_edit_stockroom_no_triggered()
+void View::on_edit_stockroom_no_triggered()
 {
     setStockroom(BrickLink::Stockroom::None);
 }
 
-void Window::on_edit_stockroom_a_triggered()
+void View::on_edit_stockroom_a_triggered()
 {
     setStockroom(BrickLink::Stockroom::A);
 }
 
-void Window::on_edit_stockroom_b_triggered()
+void View::on_edit_stockroom_b_triggered()
 {
     setStockroom(BrickLink::Stockroom::B);
 }
 
-void Window::on_edit_stockroom_c_triggered()
+void View::on_edit_stockroom_c_triggered()
 {
     setStockroom(BrickLink::Stockroom::C);
 }
 
-void Window::setStockroom(BrickLink::Stockroom stockroom)
+void View::setStockroom(BrickLink::Stockroom stockroom)
 {
     applyTo(selectedLots(), [stockroom](const auto &from, auto &to) {
         (to = from).setStockroom(stockroom); return true;
@@ -1366,7 +1366,7 @@ void Window::setStockroom(BrickLink::Stockroom stockroom)
 }
 
 
-void Window::on_edit_price_set_triggered()
+void View::on_edit_price_set_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1381,7 +1381,7 @@ void Window::on_edit_price_set_triggered()
     }
 }
 
-void Window::on_edit_price_round_triggered()
+void View::on_edit_price_round_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         double price = int(from.price() * 100 + .5) / 100.;
@@ -1394,7 +1394,7 @@ void Window::on_edit_price_round_triggered()
 }
 
 
-void Window::on_edit_price_to_priceguide_triggered()
+void View::on_edit_price_to_priceguide_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1458,14 +1458,14 @@ void Window::on_edit_price_to_priceguide_triggered()
         }
 
         setBlockingOperationTitle(tr("Downloading price guide data from BrickLink"));
-        setBlockingOperationCancelCallback(std::bind(&Window::cancelPriceGuideUpdates, this));
+        setBlockingOperationCancelCallback(std::bind(&View::cancelPriceGuideUpdates, this));
 
         if (m_setToPG->priceGuides.isEmpty())
             priceGuideUpdated(nullptr);
     }
 }
 
-void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
+void View::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_setToPG && pg) {
         const auto lots = m_setToPG->priceGuides.values(pg);
@@ -1515,12 +1515,12 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
                     .arg(CMB_BOLD(QString::number(failCount)));
         }
 
-        FrameWork::inst()->setActiveWindow(this);
+        FrameWork::inst()->setActiveView(this);
         MessageBox::information(this, { }, s);
     }
 }
 
-void Window::cancelPriceGuideUpdates()
+void View::cancelPriceGuideUpdates()
 {
     if (m_setToPG) {
         m_setToPG->canceled = true;
@@ -1532,13 +1532,13 @@ void Window::cancelPriceGuideUpdates()
     }
 }
 
-void Window::editCurrentItem(int column)
+void View::editCurrentItem(int column)
 {
     static_cast<TableView *>(w_list)->editCurrentItem(column);
 }
 
 
-void Window::on_edit_price_inc_dec_triggered()
+void View::on_edit_price_inc_dec_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1584,7 +1584,7 @@ void Window::on_edit_price_inc_dec_triggered()
     }
 }
 
-void Window::on_edit_cost_set_triggered()
+void View::on_edit_cost_set_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1599,7 +1599,7 @@ void Window::on_edit_cost_set_triggered()
     }
 }
 
-void Window::on_edit_cost_round_triggered()
+void View::on_edit_cost_round_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         double cost = int(from.cost() * 100 + .5) / 100.;
@@ -1611,7 +1611,7 @@ void Window::on_edit_cost_round_triggered()
     });
 }
 
-void Window::on_edit_cost_inc_dec_triggered()
+void View::on_edit_cost_inc_dec_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1641,7 +1641,7 @@ void Window::on_edit_cost_inc_dec_triggered()
     }
 }
 
-void Window::on_edit_cost_spread_triggered()
+void View::on_edit_cost_spread_triggered()
 {
     if (selectedLots().size() < 2)
         return;
@@ -1666,7 +1666,7 @@ void Window::on_edit_cost_spread_triggered()
     }
 }
 
-void Window::on_edit_qty_divide_triggered()
+void View::on_edit_qty_divide_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1699,7 +1699,7 @@ void Window::on_edit_qty_divide_triggered()
     }
 }
 
-void Window::on_edit_qty_multiply_triggered()
+void View::on_edit_qty_multiply_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1732,7 +1732,7 @@ void Window::on_edit_qty_multiply_triggered()
     }
 }
 
-void Window::on_edit_sale_triggered()
+void View::on_edit_sale_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1747,7 +1747,7 @@ void Window::on_edit_sale_triggered()
     }
 }
 
-void Window::on_edit_bulk_triggered()
+void View::on_edit_bulk_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1762,7 +1762,7 @@ void Window::on_edit_bulk_triggered()
     }
 }
 
-void Window::on_edit_color_triggered()
+void View::on_edit_color_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1770,7 +1770,7 @@ void Window::on_edit_color_triggered()
     editCurrentItem(Document::Color);
 }
 
-void Window::on_edit_item_triggered()
+void View::on_edit_item_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1778,7 +1778,7 @@ void Window::on_edit_item_triggered()
     editCurrentItem(Document::Description);
 }
 
-void Window::on_edit_qty_set_triggered()
+void View::on_edit_qty_set_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1793,7 +1793,7 @@ void Window::on_edit_qty_set_triggered()
     }
 }
 
-void Window::on_edit_remark_set_triggered()
+void View::on_edit_remark_set_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1808,14 +1808,14 @@ void Window::on_edit_remark_set_triggered()
     }
 }
 
-void Window::on_edit_remark_clear_triggered()
+void View::on_edit_remark_clear_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setRemarks({ }); return true;
     });
 }
 
-void Window::on_edit_remark_add_triggered()
+void View::on_edit_remark_add_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1835,7 +1835,7 @@ void Window::on_edit_remark_add_triggered()
     }
 }
 
-void Window::on_edit_remark_rem_triggered()
+void View::on_edit_remark_rem_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1860,7 +1860,7 @@ void Window::on_edit_remark_rem_triggered()
 }
 
 
-void Window::on_edit_comment_set_triggered()
+void View::on_edit_comment_set_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1875,14 +1875,14 @@ void Window::on_edit_comment_set_triggered()
     }
 }
 
-void Window::on_edit_comment_clear_triggered()
+void View::on_edit_comment_clear_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setComments({ }); return true;
     });
 }
 
-void Window::on_edit_comment_add_triggered()
+void View::on_edit_comment_add_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1902,7 +1902,7 @@ void Window::on_edit_comment_add_triggered()
     }
 }
 
-void Window::on_edit_comment_rem_triggered()
+void View::on_edit_comment_rem_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1927,7 +1927,7 @@ void Window::on_edit_comment_rem_triggered()
 }
 
 
-void Window::on_edit_reserved_triggered()
+void View::on_edit_reserved_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1943,7 +1943,7 @@ void Window::on_edit_reserved_triggered()
     }
 }
 
-void Window::on_edit_marker_text_triggered()
+void View::on_edit_marker_text_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1959,7 +1959,7 @@ void Window::on_edit_marker_text_triggered()
     }
 }
 
-void Window::on_edit_marker_color_triggered()
+void View::on_edit_marker_color_triggered()
 {
     if (selectedLots().isEmpty())
         return;
@@ -1974,7 +1974,7 @@ void Window::on_edit_marker_color_triggered()
     }
 }
 
-void Window::on_edit_marker_clear_triggered()
+void View::on_edit_marker_clear_triggered()
 {
     applyTo(selectedLots(), [](const auto &from, auto &to) {
         (to = from).setMarkerText({ }); to.setMarkerColor({ }); return true;
@@ -1983,7 +1983,7 @@ void Window::on_edit_marker_clear_triggered()
 
 
 
-void Window::updateItemFlagsMask()
+void View::updateItemFlagsMask()
 {
     quint64 em = 0;
     quint64 dm = 0;
@@ -1997,7 +1997,7 @@ void Window::updateItemFlagsMask()
 }
 
 
-void Window::on_edit_copy_fields_triggered()
+void View::on_edit_copy_fields_triggered()
 {
     SelectCopyMergeDialog dlg(document(),
                               tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
@@ -2037,7 +2037,7 @@ void Window::on_edit_copy_fields_triggered()
     qDeleteAll(srcLots);
 }
 
-void Window::on_edit_subtractitems_triggered()
+void View::on_edit_subtractitems_triggered()
 {
     SelectDocumentDialog dlg(document(), tr("Which items should be subtracted from the current document:"));
 
@@ -2120,7 +2120,7 @@ void Window::on_edit_subtractitems_triggered()
     }
 }
 
-void Window::on_edit_mergeitems_triggered()
+void View::on_edit_mergeitems_triggered()
 {
     if (!selectedLots().isEmpty())
         consolidateLots(selectedLots());
@@ -2128,7 +2128,7 @@ void Window::on_edit_mergeitems_triggered()
         consolidateLots(m_doc->sortedLots());
 }
 
-void Window::on_edit_partoutitems_triggered()
+void View::on_edit_partoutitems_triggered()
 {
     if (selectedLots().count() >= 1) {
         auto pom = Config::inst()->partOutMode();
@@ -2198,7 +2198,7 @@ void Window::on_edit_partoutitems_triggered()
         QApplication::beep();
 }
 
-void Window::gotoNextErrorOrDifference(bool difference)
+void View::gotoNextErrorOrDifference(bool difference)
 {
     auto startIdx = m_selection_model->currentIndex();
     auto skipIdx = startIdx; // skip the field we're on right now...
@@ -2248,7 +2248,7 @@ void Window::gotoNextErrorOrDifference(bool difference)
     }
 }
 
-void Window::contextMenu(const QPoint &pos)
+void View::contextMenu(const QPoint &pos)
 {
     if (!m_contextMenu)
         m_contextMenu = new QMenu(this);
@@ -2342,15 +2342,15 @@ void Window::contextMenu(const QPoint &pos)
     m_contextMenu->popup(w_list->viewport()->mapToGlobal(pos), defaultAction);
 }
 
-void Window::on_document_close_triggered()
+void View::on_document_close_triggered()
 {
     close();
 }
 
-void Window::closeEvent(QCloseEvent *e)
+void View::closeEvent(QCloseEvent *e)
 {
     if (m_doc->isModified()) {
-        FrameWork::inst()->setActiveWindow(this);
+        FrameWork::inst()->setActiveView(this);
 
         QMessageBox msgBox(this);
         msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace("[*]"_l1, QString()))));
@@ -2384,7 +2384,7 @@ void Window::closeEvent(QCloseEvent *e)
 
 }
 
-void Window::on_bricklink_catalog_triggered()
+void View::on_bricklink_catalog_triggered()
 {
     if (!selectedLots().isEmpty()) {
         BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, (*selectedLots().front()).item(),
@@ -2392,7 +2392,7 @@ void Window::on_bricklink_catalog_triggered()
     }
 }
 
-void Window::on_bricklink_priceguide_triggered()
+void View::on_bricklink_priceguide_triggered()
 {
     if (!selectedLots().isEmpty()) {
         BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, (*selectedLots().front()).item(),
@@ -2400,7 +2400,7 @@ void Window::on_bricklink_priceguide_triggered()
     }
 }
 
-void Window::on_bricklink_lotsforsale_triggered()
+void View::on_bricklink_lotsforsale_triggered()
 {
     if (!selectedLots().isEmpty()) {
         BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, (*selectedLots().front()).item(),
@@ -2408,7 +2408,7 @@ void Window::on_bricklink_lotsforsale_triggered()
     }
 }
 
-void Window::on_bricklink_myinventory_triggered()
+void View::on_bricklink_myinventory_triggered()
 {
     if (!selectedLots().isEmpty()) {
         uint lotid = (*selectedLots().front()).lotId();
@@ -2421,7 +2421,7 @@ void Window::on_bricklink_myinventory_triggered()
     }
 }
 
-void Window::on_view_column_layout_save_triggered()
+void View::on_view_column_layout_save_triggered()
 {
     QString name;
 
@@ -2447,7 +2447,7 @@ void Window::on_view_column_layout_save_triggered()
     }
 }
 
-void Window::on_view_column_layout_list_load(const QString &layoutId)
+void View::on_view_column_layout_list_load(const QString &layoutId)
 {
     auto clc = columnLayoutCommandFromId(layoutId);
     QString undoName = columnLayoutCommandName(clc);
@@ -2488,27 +2488,27 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
     document()->undoStack()->endMacro();
 }
 
-void Window::on_view_goto_next_diff_triggered()
+void View::on_view_goto_next_diff_triggered()
 {
     gotoNextErrorOrDifference(true);
 }
 
-void Window::on_view_goto_next_input_error_triggered()
+void View::on_view_goto_next_input_error_triggered()
 {
     gotoNextErrorOrDifference(false);
 }
 
-void Window::on_document_print_triggered()
+void View::on_document_print_triggered()
 {
     print(false);
 }
 
-void Window::on_document_print_pdf_triggered()
+void View::on_document_print_pdf_triggered()
 {
     print(true);
 }
 
-void Window::print(bool as_pdf)
+void View::print(bool as_pdf)
 {
     if (m_doc->filteredLots().isEmpty())
         return;
@@ -2528,7 +2528,7 @@ void Window::print(bool as_pdf)
     pd.exec();
 }
 
-void Window::printScriptAction(PrintingScriptAction *printingAction)
+void View::printScriptAction(PrintingScriptAction *printingAction)
 {
     QPrinter prt(QPrinter::HighResolution);
     bool failOnce = false;
@@ -2561,7 +2561,7 @@ void Window::printScriptAction(PrintingScriptAction *printingAction)
     pd.exec();
 }
 
-bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,
+bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,
                         double scaleFactor, uint *maxPageCount, double *maxWidth)
 {
     if (maxPageCount)
@@ -2724,19 +2724,19 @@ bool Window::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &p
     return true;
 }
 
-void Window::on_document_save_triggered()
+void View::on_document_save_triggered()
 {
     DocumentIO::save(this);
     deleteAutosave();
 }
 
-void Window::on_document_save_as_triggered()
+void View::on_document_save_as_triggered()
 {
     DocumentIO::saveAs(this);
     deleteAutosave();
 }
 
-void Window::on_document_export_bl_xml_triggered()
+void View::on_document_export_bl_xml_triggered()
 {
     LotList lots = exportCheck();
 
@@ -2744,7 +2744,7 @@ void Window::on_document_export_bl_xml_triggered()
         DocumentIO::exportBrickLinkXML(lots);
 }
 
-void Window::on_document_export_bl_xml_clip_triggered()
+void View::on_document_export_bl_xml_clip_triggered()
 {
     LotList lots = exportCheck();
 
@@ -2752,7 +2752,7 @@ void Window::on_document_export_bl_xml_clip_triggered()
         DocumentIO::exportBrickLinkXMLClipboard(lots);
 }
 
-void Window::on_document_export_bl_update_clip_triggered()
+void View::on_document_export_bl_update_clip_triggered()
 {
     LotList lots = exportCheck();
 
@@ -2760,7 +2760,7 @@ void Window::on_document_export_bl_update_clip_triggered()
         DocumentIO::exportBrickLinkUpdateClipboard(m_doc, lots);
 }
 
-void Window::on_document_export_bl_invreq_clip_triggered()
+void View::on_document_export_bl_invreq_clip_triggered()
 {
     LotList lots = exportCheck();
 
@@ -2768,7 +2768,7 @@ void Window::on_document_export_bl_invreq_clip_triggered()
         DocumentIO::exportBrickLinkInvReqClipboard(lots);
 }
 
-void Window::on_document_export_bl_wantedlist_clip_triggered()
+void View::on_document_export_bl_wantedlist_clip_triggered()
 {
     LotList lots = exportCheck();
 
@@ -2776,7 +2776,7 @@ void Window::on_document_export_bl_wantedlist_clip_triggered()
         DocumentIO::exportBrickLinkWantedListClipboard(lots);
 }
 
-LotList Window::exportCheck() const
+LotList View::exportCheck() const
 {
     const LotList lots = selectedLots().isEmpty() ? m_doc->lots() : selectedLots();
 
@@ -2790,7 +2790,7 @@ LotList Window::exportCheck() const
     return m_doc->sortLotList(lots);
 }
 
-void Window::resizeColumnsToDefault(bool simpleMode)
+void View::resizeColumnsToDefault(bool simpleMode)
 {
     static const QVector<int> columnOrder { // invert
         Document::Index,
@@ -2880,7 +2880,7 @@ void Window::resizeColumnsToDefault(bool simpleMode)
     }
 }
 
-void Window::updateSelection()
+void View::updateSelection()
 {
     if (!m_delayedSelectionUpdate) {
         m_delayedSelectionUpdate = new QTimer(this);
@@ -2906,7 +2906,7 @@ void Window::updateSelection()
     m_delayedSelectionUpdate->start();
 }
 
-void Window::setSelection(const LotList &lst)
+void View::setSelection(const LotList &lst)
 {
     QItemSelection idxs;
 
@@ -2918,7 +2918,7 @@ void Window::setSelection(const LotList &lst)
                               | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-void Window::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+void View::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
     for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
         auto lot = m_doc->lot(topLeft.siblingAtRow(r));
@@ -2933,19 +2933,19 @@ void Window::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &
 static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
 static const char *autosaveTemplate = "brickstore_%1.autosave";
 
-void Window::deleteAutosave()
+void View::deleteAutosave()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     QString filename = QString::fromLatin1(autosaveTemplate).arg(m_uuid.toString());
     temp.remove(filename);
 }
 
-void Window::moveColumnDirect(int /*logical*/, int oldVisual, int newVisual)
+void View::moveColumnDirect(int /*logical*/, int oldVisual, int newVisual)
 {
     w_header->moveSection(oldVisual, newVisual);
 }
 
-void Window::resizeColumnDirect(int logical, int /*oldSize*/, int newSize)
+void View::resizeColumnDirect(int logical, int /*oldSize*/, int newSize)
 {
     w_header->resizeSection(logical, newSize);
 }
@@ -2953,7 +2953,7 @@ void Window::resizeColumnDirect(int logical, int /*oldSize*/, int newSize)
 class AutosaveJob : public QRunnable
 {
 public:
-    explicit AutosaveJob(Window *win, const QByteArray &contents)
+    explicit AutosaveJob(View *win, const QByteArray &contents)
         : QRunnable()
         , m_win(win)
         , m_uuid(win->m_uuid)
@@ -2962,7 +2962,7 @@ public:
 
     void run() override;
 private:
-    Window *m_win;
+    View *m_win;
     const QUuid m_uuid;
     const QByteArray m_contents;
 };
@@ -2989,9 +2989,9 @@ void AutosaveJob::run()
 
         temp.remove(fileName);
 
-        Window *win = m_win;
+        View *win = m_win;
         QMetaObject::invokeMethod(qApp, [=]() {
-            if (Window::allWindows().contains(win)) {
+            if (View::allViews().contains(win)) {
                 if (!QDir(temp).rename(newFileName, fileName))
                     qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
                 win->m_autosaveClean = true;
@@ -3001,7 +3001,7 @@ void AutosaveJob::run()
 }
 
 
-void Window::autosave() const
+void View::autosave() const
 {
     auto doc = document();
     auto lots = document()->lots();
@@ -3030,18 +3030,18 @@ void Window::autosave() const
 
     ds << QByteArray(autosaveMagic);
 
-    QThreadPool::globalInstance()->start(new AutosaveJob(const_cast<Window *>(this), ba));
+    QThreadPool::globalInstance()->start(new AutosaveJob(const_cast<View *>(this), ba));
 }
 
-int Window::restorableAutosaves()
+int View::restorableAutosaves()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     return temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) }).count();
 }
 
-const QVector<Window *> Window::processAutosaves(AutosaveAction action)
+const QVector<View *> View::processAutosaves(AutosaveAction action)
 {
-    QVector<Window *> restored;
+    QVector<View *> restored;
 
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     const auto ondisk = temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) });
@@ -3102,7 +3102,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                         doc->setTitle(restoredTag % u" " % savedTitle);
                     }
                     doc->restoreSortFilterState(savedSortFilterState);
-                    auto win = new Window(doc, savedColumnLayout);
+                    auto win = new View(doc, savedColumnLayout);
 
                     if (!savedFileName.isEmpty())
                         DocumentIO::save(win);

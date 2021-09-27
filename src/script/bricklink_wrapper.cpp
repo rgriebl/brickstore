@@ -404,7 +404,7 @@ QmlBrickLink::OrderStatus QmlOrder::status() const
 ///////////////////////////////////////////////////////////////////////
 
 
-QmlDocument::QmlDocument(Window *_win)
+QmlDocument::QmlDocument(View *_win)
     : d(_win->document())
     , win(_win)
 {
@@ -422,7 +422,7 @@ QmlDocument::QmlDocument(Window *_win)
             this, &QmlDocument::lotCountChanged);
 }
 
-bool QmlDocument::isWrapperFor(Window *win) const
+bool QmlDocument::isWrapperFor(View *win) const
 {
     return (this->win == win);
 }
@@ -467,7 +467,7 @@ QmlBrickStore::QmlBrickStore()
 {
     setObjectName("BrickStore"_l1);
 
-    auto checkActiveWindow = [this](Window *win) {
+    auto checkActiveWindow = [this](View *win) {
         QmlDocument *doc = documentForWindow(win);
         if (doc != m_currentDocument) {
             m_currentDocument = doc;
@@ -475,14 +475,14 @@ QmlBrickStore::QmlBrickStore()
         }
     };
 
-    connect(FrameWork::inst(), &FrameWork::windowActivated,
+    connect(FrameWork::inst(), &FrameWork::viewActivated,
             this, checkActiveWindow);
 
-    connect(FrameWork::inst(), &FrameWork::windowListChanged,
+    connect(FrameWork::inst(), &FrameWork::viewListChanged,
             this, [this, checkActiveWindow]() {
         QVector<QmlDocument *> newDocs;
         QVector<QmlDocument *> oldDocs = m_documents;
-        const auto allWindows = FrameWork::inst()->allWindows();
+        const auto allWindows = FrameWork::inst()->allViews();
         for (auto win : allWindows) {
             auto doc = documentForWindow(win);
             if (doc) {
@@ -504,7 +504,7 @@ QmlBrickStore::QmlBrickStore()
 
         // the windowActivated signal for new documents is sent way too early
         // before the windowListChanged signal. Check if the current still is valid.
-        checkActiveWindow(FrameWork::inst()->activeWindow());
+        checkActiveWindow(FrameWork::inst()->activeView());
     });
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
@@ -570,7 +570,7 @@ QString QmlBrickStore::toWeightString(double value, bool showUnit) const
     return Utility::weightToString(value, Config::inst()->measurementSystem(), true, showUnit);
 }
 
-QmlDocument *QmlBrickStore::documentForWindow(Window *win) const
+QmlDocument *QmlBrickStore::documentForWindow(View *win) const
 {
     if (win) {
         for (auto doc : m_documents) {
@@ -581,15 +581,15 @@ QmlDocument *QmlBrickStore::documentForWindow(Window *win) const
     return nullptr;
 }
 
-QmlDocument *QmlBrickStore::setupDocument(::Window *win, ::Document *doc, const QString &title)
+QmlDocument *QmlBrickStore::setupDocument(::View *win, ::Document *doc, const QString &title)
 {
     if ((!win && !doc) || (win && doc))
         return nullptr;
 
     if (!win) {
-        win = FrameWork::inst()->createWindow(doc);
+        win = FrameWork::inst()->createView(doc);
     } else {
-        FrameWork::inst()->setupWindow(win);
+        FrameWork::inst()->setupView(win);
         doc = win->document();
     }
 

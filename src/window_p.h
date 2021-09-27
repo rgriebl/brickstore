@@ -24,7 +24,7 @@ QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QProgressBar)
 
-class Window;
+class View;
 class Document;
 class HeaderView;
 
@@ -37,7 +37,7 @@ class ColumnChangeWatcher : public QObject
 {
     Q_OBJECT
 public:
-    ColumnChangeWatcher(Window *window, HeaderView *header);
+    ColumnChangeWatcher(View *view, HeaderView *header);
 
     void moveColumn(int logical, int oldVisual, int newVisual);
     void resizeColumn(int logical, int oldSize, int newSize);
@@ -52,7 +52,7 @@ signals:
     void internalColumnResized(int logical, int oldSize, int newSize);
 
 private:
-    Window *m_window;
+    View *m_view;
     HeaderView *m_header;
 };
 
@@ -138,7 +138,7 @@ class StatusBar : public QFrame
 {
     Q_OBJECT
 public:
-    StatusBar(Window *window);
+    StatusBar(View *view);
 
     void updateCurrencyRates();
     void documentCurrencyChanged(const QString &ccode);
@@ -152,7 +152,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    Window *m_window;
+    View *m_view;
     Document *m_doc;
     QToolButton *m_order;
     QWidget *m_differencesSeparator;

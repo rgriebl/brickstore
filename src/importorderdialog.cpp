@@ -562,7 +562,7 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
                 LotList lots = parseOrderXML(it->m_order, it->m_xmlData);
                 if (!lots.isEmpty()) {
                     if (auto doc = DocumentIO::importBrickLinkOrder(order, lots))
-                        FrameWork::inst()->createWindow(doc);
+                        FrameWork::inst()->createView(doc);
                 }
                 m_orderDownloads.erase(it);
             } else {
@@ -627,7 +627,7 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
             }
 
             if (auto doc = DocumentIO::importBrickLinkOrder(order, lots))
-                FrameWork::inst()->createWindow(doc);
+                FrameWork::inst()->createView(doc);
         }
     }
 }

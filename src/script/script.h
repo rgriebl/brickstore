@@ -24,7 +24,7 @@ class QmlPrintJob;
 class QmlDocument;
 class QmlBrickStore;
 
-class Window;
+class View;
 class Script;
 
 
@@ -85,7 +85,7 @@ public:
     QJSValue printFunction() const;
     void setPrintFunction(const QJSValue &function);
 
-    void executePrint(QPaintDevice *pd, Window *win, bool selectionOnly, uint *maxPageCount = nullptr);
+    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, uint *maxPageCount = nullptr);
 
 signals:
     void textChanged(const QString &text);

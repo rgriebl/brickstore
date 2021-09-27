@@ -155,7 +155,7 @@ void PrintingScriptAction::componentComplete()
     }
 }
 
-void PrintingScriptAction::executePrint(QPaintDevice *pd, Window *win, bool selectionOnly, uint *maxPageCount)
+void PrintingScriptAction::executePrint(QPaintDevice *pd, View *win, bool selectionOnly, uint *maxPageCount)
 {
     if (maxPageCount)
         *maxPageCount = 0;

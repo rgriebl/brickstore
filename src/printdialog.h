@@ -18,14 +18,14 @@
 #include "ui_printdialog.h"
 
 QT_FORWARD_DECLARE_CLASS(QPdfWriter)
-class Window;
+class View;
 
 class PrintDialog : public QDialog, private Ui::PrintDialog
 {
     Q_OBJECT
 
 public:
-    PrintDialog(QPrinter *printer, Window *window);
+    PrintDialog(QPrinter *printer, View *window);
 
 signals:
     void paintRequested(QPrinter *printer, const QList<uint> &pages, double scaleFactor,

@@ -31,7 +31,7 @@
 #include "window.h"
 
 
-PrintDialog::PrintDialog(QPrinter *printer, Window *window)
+PrintDialog::PrintDialog(QPrinter *printer, View *window)
     : QDialog(window)
     , m_printer(printer)
     , m_pdfWriter(new QPdfWriter(""_l1))

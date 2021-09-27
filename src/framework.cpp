@@ -156,9 +156,9 @@ public:
         connect(this, &QMenu::aboutToShow, this, [this]() {
             clear();
 
-            for (auto cl : Window::columnLayoutCommands()) {
-                addAction(Window::columnLayoutCommandName(cl))
-                        ->setData(Window::columnLayoutCommandId(cl));
+            for (auto cl : View::columnLayoutCommands()) {
+                addAction(View::columnLayoutCommandName(cl))
+                        ->setData(View::columnLayoutCommandId(cl));
             }
 
             auto ids = Config::inst()->columnLayoutIds();
@@ -402,17 +402,17 @@ FrameWork::FrameWork(QWidget *parent)
     connect(Application::inst(), &Application::openDocument,
             this, &FrameWork::openDocument);
 
-    m_activeWin = nullptr;
+    m_activeView = nullptr;
 
     m_workspace = new Workspace(this);
     connect(m_workspace, &Workspace::windowActivated,
-            this, &FrameWork::connectWindow);
+            this, &FrameWork::connectView);
 
     connect(m_workspace, &Workspace::windowCountChanged,
-            this, &FrameWork::windowListChanged);
+            this, &FrameWork::viewListChanged);
 
     connect(m_workspace, &Workspace::welcomeWidgetVisible,
-            this, [this]() { connectWindow(nullptr); });
+            this, [this]() { connectView(nullptr); });
 
     setCentralWidget(m_workspace);
 
@@ -612,7 +612,7 @@ FrameWork::FrameWork(QWidget *parent)
     m_running = true;
 
     updateActions();    // init enabled/disabled status of document actions
-    connectWindow(nullptr);
+    connectView(nullptr);
 
     // we need to show now, since most X11 window managers and macOS with
     // unified-toolbar look won't get the position right otherwise
@@ -681,7 +681,7 @@ FrameWork::FrameWork(QWidget *parent)
 
     setupScripts();
 
-    if (!restoreWindowsFromAutosave()) {
+    if (!restoreViewsFromAutosave()) {
         if (Config::inst()->restoreLastSession()) {
             const auto files = Config::inst()->value("/MainWindow/LastSessionDocuments"_l1).toStringList();
             for (const auto &file : files)
@@ -728,8 +728,8 @@ void FrameWork::setupScripts()
                 extrasActions.append(action);
 
                 connect(action, &QAction::triggered, printingAction, [this, printingAction]() {
-                    if (activeWindow())
-                        activeWindow()->printScriptAction(printingAction);
+                    if (activeView())
+                        activeView()->printScriptAction(printingAction);
                 });
             }
         }
@@ -785,8 +785,8 @@ void FrameWork::languageChange()
         // so we need to skip this event loop round
         QMetaObject::invokeMethod(this, [this]() {
             QString tt = findAction("edit_filter_focus")->toolTip();
-            if (m_activeWin)
-                tt.append(m_activeWin->document()->filterToolTip());
+            if (m_activeView)
+                tt.append(m_activeView->document()->filterToolTip());
             m_filter->setToolTip(tt);
         }, Qt::QueuedConnection);
     }
@@ -1210,10 +1210,10 @@ void FrameWork::createActions()
     QMenu *m;
 
     (void) newQAction(this, "document_new", 0, false, this, [this]() {
-        createWindow(DocumentIO::create());
+        createView(DocumentIO::create());
     });
     (void) newQAction(this, "document_open", 0, false, this, [this]() {
-        setupWindow(DocumentIO::open());
+        setupView(DocumentIO::open());
     });
 
     auto rm = new RecentMenu(this);
@@ -1226,17 +1226,17 @@ void FrameWork::createActions()
     (void) newQAction(this, "document_save");
     (void) newQAction(this, "document_save_as", NeedDocument);
     (void) newQAction(this, "document_save_all", NeedDocument, false, this, [=]() {
-        auto oldActive = activeWindow();
-        const auto windows = allWindows();
-        for (Window *w : windows) {
+        auto oldActive = activeView();
+        const auto windows = allViews();
+        for (View *w : windows) {
             if (w->document()->isModified()) {
                 if (w->document()->fileName().isEmpty())
-                    setActiveWindow(w);
+                    setActiveView(w);
                 w->on_document_save_triggered();
             }
         }
-        if (activeWindow() != oldActive)
-            setActiveWindow(oldActive);
+        if (activeView() != oldActive)
+            setActiveView(oldActive);
     });
     (void) newQAction(this, "document_print", NeedDocument | NeedLots);
     (void) newQAction(this, "document_print_pdf", NeedDocument | NeedLots);
@@ -1248,7 +1248,7 @@ void FrameWork::createActions()
         m_importinventory_dialog->show();
     }));
     m->addAction(newQAction(this, "document_import_bl_xml", 0, false, this, [this]() {
-        createWindow(DocumentIO::importBrickLinkXML());
+        createView(DocumentIO::importBrickLinkXML());
     }));
     m->addAction(newQAction(this, "document_import_bl_order", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin()) {
@@ -1259,7 +1259,7 @@ void FrameWork::createActions()
     }));
     m->addAction(newQAction(this, "document_import_bl_store_inv", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin())
-            createWindow(DocumentIO::importBrickLinkStore());
+            createView(DocumentIO::importBrickLinkStore());
     }));
     m->addAction(newQAction(this, "document_import_bl_cart", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin()) {
@@ -1269,7 +1269,7 @@ void FrameWork::createActions()
         }
     }));
     m->addAction(newQAction(this, "document_import_ldraw_model", 0, false, this, [this]() {
-        createWindow(DocumentIO::importLDrawModel());
+        createView(DocumentIO::importLDrawModel());
     }));
 
 
@@ -1496,7 +1496,7 @@ void FrameWork::createActions()
 
 void FrameWork::openDocument(const QString &file)
 {
-    setupWindow(DocumentIO::open(file));
+    setupView(DocumentIO::open(file));
 }
 
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item,
@@ -1507,7 +1507,7 @@ void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item,
         return;
 
     if (auto doc = DocumentIO::importBrickLinkInventory(item, color, quantity, condition))
-        FrameWork::inst()->createWindow(doc);
+        FrameWork::inst()->createView(doc);
 }
 
 bool FrameWork::checkBrickLinkLogin()
@@ -1637,34 +1637,34 @@ QStringList FrameWork::defaultToolBarActionNames() const
     return actionNames;
 }
 
-bool FrameWork::restoreWindowsFromAutosave()
+bool FrameWork::restoreViewsFromAutosave()
 {
-    int restorable = Window::restorableAutosaves();
+    int restorable = View::restorableAutosaves();
     if (restorable > 0) {
         bool b = (MessageBox::question(this, tr("Restore Documents"), tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
                                        % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
                                        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                   == QMessageBox::Yes);
 
-        auto restoredWindows = Window::processAutosaves(b ? Window::AutosaveAction::Restore
-                                                          : Window::AutosaveAction::Delete);
+        auto restoredWindows = View::processAutosaves(b ? View::AutosaveAction::Restore
+                                                          : View::AutosaveAction::Delete);
         for (auto window : restoredWindows) {
             m_undogroup->addStack(window->document()->undoStack());
             m_workspace->addWindow(window);
-            setActiveWindow(window);
+            setActiveView(window);
         }
     }
     return (restorable > 0);
 }
 
-void FrameWork::setupWindow(Window *win)
+void FrameWork::setupView(View *win)
 {
     if (!win)
         return;
 
     m_undogroup->addStack(win->document()->undoStack());
     m_workspace->addWindow(win);
-    setActiveWindow(win);
+    setActiveView(win);
 
     if (win->document()->legacyCurrencyCode()
             && (Config::inst()->defaultCurrencyCode() != "USD"_l1)) {
@@ -1674,25 +1674,25 @@ void FrameWork::setupWindow(Window *win)
     }
 }
 
-Window *FrameWork::createWindow(Document *doc)
+View *FrameWork::createView(Document *doc)
 {
     if (!doc)
         return nullptr;
 
-    Window *win = new Window(doc);
-    setupWindow(win);
+    View *win = new View(doc);
+    setupView(win);
     return win;
 }
 
-Window *FrameWork::activeWindow() const
+View *FrameWork::activeView() const
 {
-    return m_activeWin;
+    return m_activeView;
 }
 
-void FrameWork::setActiveWindow(Window *window)
+void FrameWork::setActiveView(View *view)
 {
-    m_workspace->setActiveWindow(window);
-    window->setFocus();
+    m_workspace->setActiveWindow(view);
+    view->setFocus();
 }
 
 bool FrameWork::updateDatabase(bool forceSync)
@@ -1706,12 +1706,12 @@ bool FrameWork::updateDatabase(bool forceSync)
 
     QStringList files;
     foreach (QWidget *w, m_workspace->windowList()) {
-        QString fileName = static_cast<Window *>(w)->document()->fileName();
+        QString fileName = static_cast<View *>(w)->document()->fileName();
         if (!fileName.isEmpty())
             files << fileName;
     }
 
-    if (noWindows || closeAllWindows()) {
+    if (noWindows || closeAllViews()) {
         delete m_add_dialog;
         delete m_importinventory_dialog;
         delete m_importorder_dialog;
@@ -1743,9 +1743,9 @@ bool FrameWork::updateDatabase(bool forceSync)
     return false;
 }
 
-void FrameWork::connectAllActions(bool do_connect, Window *window)
+void FrameWork::connectAllActions(bool do_connect, View *view)
 {
-    QMetaObject mo = Window::staticMetaObject;
+    QMetaObject mo = View::staticMetaObject;
     QObjectList list = findChildren<QObject *>();
 
     for (int i = 0; i < mo.methodCount(); ++i) {
@@ -1778,11 +1778,11 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             if (sigIndex < 0)
                 continue;
 
-            if (do_connect && window && QMetaObject::connect(co, sigIndex, window, i)) {
+            if (do_connect && view && QMetaObject::connect(co, sigIndex, view, i)) {
                 foundIt = true;
-            } else if (!do_connect && window) {
+            } else if (!do_connect && view) {
                 // ignore errors on disconnect
-                QMetaObject::disconnect(co, sigIndex, window, i);
+                QMetaObject::disconnect(co, sigIndex, view, i);
                 foundIt = true;
             }
 
@@ -1793,31 +1793,31 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             // we found our slot, now skip all overloads
             while (mo.method(i + 1).attributes() & QMetaMethod::Cloned)
                 ++i;
-        } else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
+        } else if (view && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
             qWarning("FrameWork::connectAllActions: No matching signal for %s", slot.constData());
         }
     }
 }
 
-void FrameWork::connectWindow(QWidget *w)
+void FrameWork::connectView(QWidget *w)
 {
-    if (w && w == m_activeWin)
+    if (w && w == m_activeView)
         return;
 
     QString filterToolTip;
 
-    if (m_activeWin) {
-        Document *doc = m_activeWin->document();
+    if (m_activeView) {
+        Document *doc = m_activeView->document();
 
-        connectAllActions(false, m_activeWin);
+        connectAllActions(false, m_activeView);
 
-        disconnect(m_activeWin.data(), &Window::windowTitleChanged,
+        disconnect(m_activeView.data(), &View::windowTitleChanged,
                    this, &FrameWork::titleUpdate);
         disconnect(doc, &Document::modificationChanged,
                    this, &FrameWork::modificationUpdate);
-        disconnect(m_activeWin.data(), &Window::selectedLotsChanged,
+        disconnect(m_activeView.data(), &View::selectedLotsChanged,
                    this, &FrameWork::selectionUpdate);
-        disconnect(m_activeWin.data(), &Window::blockingOperationActiveChanged,
+        disconnect(m_activeView.data(), &View::blockingOperationActiveChanged,
                    this, &FrameWork::blockUpdate);
         if (m_filter) {
             disconnect(this, &FrameWork::filterChanged,
@@ -1833,21 +1833,21 @@ void FrameWork::connectWindow(QWidget *w)
         }
         m_undogroup->setActiveStack(nullptr);
 
-        m_activeWin = nullptr;
+        m_activeView = nullptr;
     }
 
-    if (Window *window = qobject_cast<Window *>(w)) {
-        Document *doc = window->document();
+    if (View *view = qobject_cast<View *>(w)) {
+        Document *doc = view->document();
 
-        connectAllActions(true, window);
+        connectAllActions(true, view);
 
-        connect(window, &Window::windowTitleChanged,
+        connect(view, &View::windowTitleChanged,
                 this, &FrameWork::titleUpdate);
         connect(doc, &Document::modificationChanged,
                 this, &FrameWork::modificationUpdate);
-        connect(window, &Window::selectedLotsChanged,
+        connect(view, &View::selectedLotsChanged,
                 this, &FrameWork::selectionUpdate);
-        connect(window, &Window::blockingOperationActiveChanged,
+        connect(view, &View::blockingOperationActiveChanged,
                 this, &FrameWork::blockUpdate);
 
         if (m_filter) {
@@ -1868,32 +1868,32 @@ void FrameWork::connectWindow(QWidget *w)
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
-        m_activeWin = window;
+        m_activeView = view;
     }
 
     if (m_add_dialog) {
-        m_add_dialog->attach(m_activeWin);
-        if (!m_activeWin)
+        m_add_dialog->attach(m_activeView);
+        if (!m_activeView)
             m_add_dialog->close();
     }
 
-    selectionUpdate(m_activeWin ? m_activeWin->selectedLots() : LotList());
-    blockUpdate(m_activeWin ? m_activeWin->isBlockingOperationActive() : false);
+    selectionUpdate(m_activeView ? m_activeView->selectedLots() : LotList());
+    blockUpdate(m_activeView ? m_activeView->isBlockingOperationActive() : false);
     titleUpdate();
     modificationUpdate();
-    updateReFilterAction(m_activeWin ? m_activeWin->document()->isFiltered() : true);
+    updateReFilterAction(m_activeView ? m_activeView->document()->isFiltered() : true);
 
-    emit windowActivated(m_activeWin);
+    emit viewActivated(m_activeView);
 }
 
 void FrameWork::updateActions()
 {
     LotList selection;
-    if (m_activeWin)
-        selection = m_activeWin->selectedLots();
+    if (m_activeView)
+        selection = m_activeView->selectedLots();
     bool isOnline = Application::inst()->isOnline();
 
-    const auto *doc = m_activeWin ? m_activeWin->document() : nullptr;
+    const auto *doc = m_activeView ? m_activeView->document() : nullptr;
     int docItemCount = doc ? int(doc->rowCount()) : 0;
 
     foreach (QAction *a, findChildren<QAction *>()) {
@@ -1904,7 +1904,7 @@ void FrameWork::updateActions()
 
         bool b = true;
 
-        if (m_activeWin && m_activeWin->isBlockingOperationActive()
+        if (m_activeView && m_activeView->isBlockingOperationActive()
                 && (flags & (NeedDocument | NeedLots | NeedItemMask))) {
             b = false;
         }
@@ -1913,7 +1913,7 @@ void FrameWork::updateActions()
             b = b && isOnline;
 
         if (flags & NeedDocument) {
-            b = b && m_activeWin;
+            b = b && m_activeView;
 
             if (b) {
                 if (flags & NeedLots)
@@ -2015,8 +2015,8 @@ void FrameWork::blockUpdate(bool blocked)
 {
     static QUndoStack blockStack;
 
-    if (activeWindow())
-        m_undogroup->setActiveStack(blocked ? &blockStack : activeWindow()->document()->undoStack());
+    if (activeView())
+        m_undogroup->setActiveStack(blocked ? &blockStack : activeView()->document()->undoStack());
     if (m_filter)
         m_filter->setDisabled(blocked);
     updateActions();
@@ -2028,9 +2028,9 @@ void FrameWork::titleUpdate()
     QString title = QApplication::applicationName();
     QString file;
 
-    if (m_activeWin) {
-        title = m_activeWin->windowTitle() % u" \u2014 " % title;
-        file = m_activeWin->document()->fileName();
+    if (m_activeView) {
+        title = m_activeView->windowTitle() % u" \u2014 " % title;
+        file = m_activeView->document()->fileName();
     }
     setWindowTitle(title);
     setWindowFilePath(file);
@@ -2038,9 +2038,9 @@ void FrameWork::titleUpdate()
 
 void FrameWork::modificationUpdate()
 {
-    bool modified = m_activeWin ? m_activeWin->isWindowModified() : false;
-    bool blocked = m_activeWin ? m_activeWin->isBlockingOperationActive() : false;
-    bool hasNoFileName = (m_activeWin && m_activeWin->document()->fileName().isEmpty());
+    bool modified = m_activeView ? m_activeView->isWindowModified() : false;
+    bool blocked = m_activeView ? m_activeView->isBlockingOperationActive() : false;
+    bool hasNoFileName = (m_activeView && m_activeView->document()->fileName().isEmpty());
 
     setWindowModified(modified);
     findAction("document_save")->setEnabled((modified || hasNoFileName) && !blocked);
@@ -2085,8 +2085,8 @@ void FrameWork::setFilter(const QString &filter)
 
 void FrameWork::reFilter()
 {
-    if (m_filter && m_activeWin)
-        m_activeWin->document()->reFilter();
+    if (m_filter && m_activeView)
+        m_activeView->document()->reFilter();
 }
 
 void FrameWork::updateReFilterAction(bool isFiltered)
@@ -2099,13 +2099,13 @@ void FrameWork::closeEvent(QCloseEvent *e)
 {
     QStringList files;
     foreach (QWidget *w, m_workspace->windowList()) {
-        QString fileName = static_cast<Window *>(w)->document()->fileName();
+        QString fileName = static_cast<View *>(w)->document()->fileName();
         if (!fileName.isEmpty())
             files << fileName;
     }
     Config::inst()->setValue("/MainWindow/LastSessionDocuments"_l1, files);
 
-    if (!closeAllWindows()) {
+    if (!closeAllViews()) {
         e->ignore();
         return;
     }
@@ -2114,7 +2114,7 @@ void FrameWork::closeEvent(QCloseEvent *e)
 }
 
 
-bool FrameWork::closeAllWindows()
+bool FrameWork::closeAllViews()
 {
     foreach (QWidget *w, m_workspace->windowList()) {
         if (!w->close())
@@ -2123,11 +2123,11 @@ bool FrameWork::closeAllWindows()
     return true;
 }
 
-QVector<Window *> FrameWork::allWindows() const
+QVector<View *> FrameWork::allViews() const
 {
-    QVector<Window *> all;
+    QVector<View *> all;
     foreach(QWidget *w, m_workspace->windowList())
-        all << static_cast<Window *>(w);
+        all << static_cast<View *>(w);
     return all;
 }
 
@@ -2145,7 +2145,7 @@ void FrameWork::showAddItemDialog()
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName("additems"_l1);
-        m_add_dialog->attach(m_activeWin);
+        m_add_dialog->attach(m_activeView);
 
         connect(m_add_dialog, &AddItemDialog::closed,
                 this, [this]() {

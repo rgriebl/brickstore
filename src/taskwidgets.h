@@ -34,7 +34,7 @@ public:
     TaskPriceGuideWidget(QWidget *parent);
 
 protected slots:
-    void windowUpdate(Window *win);
+    void windowUpdate(View *win);
     void selectionUpdate(const LotList &list);
     void currencyUpdate(const QString &ccode);
     virtual void topLevelChanged(bool);
@@ -47,7 +47,7 @@ protected:
     void fixParentDockWindow();
 
 private:
-    QPointer<Window> m_win;
+    QPointer<View> m_win;
     QDockWidget *m_dock;
     QTimer m_delayTimer;
     LotList m_selection;
@@ -67,7 +67,7 @@ public:
     TaskInfoWidget(QWidget *parent);
 
 protected slots:
-    void windowUpdate(Window *win);
+    void windowUpdate(View *win);
     void selectionUpdate(const LotList &list);
     void statisticsUpdate();
     void currencyUpdate();
@@ -83,7 +83,7 @@ private:
 
     QLabel *m_text;
     PictureWidget *m_pic;
-    QPointer<Window> m_win;
+    QPointer<View> m_win;
     QTimer m_delayTimer;
     LotList m_selection;
 };
@@ -101,11 +101,11 @@ public:
     TaskAppearsInWidget(QWidget *parent);
 
 protected slots:
-    void windowUpdate(Window *win);
+    void windowUpdate(View *win);
     void selectionUpdate(const LotList &list);
 
 private:
-    QPointer<Window> m_win;
+    QPointer<View> m_win;
     QTimer m_delayTimer;
     LotList m_selection;
 };

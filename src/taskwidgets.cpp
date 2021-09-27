@@ -51,24 +51,24 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     });
 
 
-    connect(FrameWork::inst(), &FrameWork::windowActivated,
+    connect(FrameWork::inst(), &FrameWork::viewActivated,
             this, &TaskPriceGuideWidget::windowUpdate);
     connect(this, &PriceGuideWidget::priceDoubleClicked,
             this, &TaskPriceGuideWidget::setPrice);
     fixParentDockWindow();
 }
 
-void TaskPriceGuideWidget::windowUpdate(Window *win)
+void TaskPriceGuideWidget::windowUpdate(View *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectedLotsChanged,
+        disconnect(m_win.data(), &View::selectedLotsChanged,
                    this, &TaskPriceGuideWidget::selectionUpdate);
         disconnect(m_win->document(), &Document::currencyCodeChanged,
                    this, &TaskPriceGuideWidget::currencyUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectedLotsChanged,
+        connect(m_win.data(), &View::selectedLotsChanged,
                 this, &TaskPriceGuideWidget::selectionUpdate);
         connect(m_win->document(), &Document::currencyCodeChanged,
                 this, &TaskPriceGuideWidget::currencyUpdate);
@@ -179,16 +179,16 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     connect(&m_delayTimer, &QTimer::timeout,
             this, &TaskInfoWidget::delayedSelectionUpdate);
 
-    connect(FrameWork::inst(), &FrameWork::windowActivated,
+    connect(FrameWork::inst(), &FrameWork::viewActivated,
             this, &TaskInfoWidget::windowUpdate);
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &TaskInfoWidget::refresh);
 }
 
-void TaskInfoWidget::windowUpdate(Window *win)
+void TaskInfoWidget::windowUpdate(View *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectedLotsChanged,
+        disconnect(m_win.data(), &View::selectedLotsChanged,
                    this, &TaskInfoWidget::selectionUpdate);
         disconnect(m_win->document(), &Document::statisticsChanged,
                    this, &TaskInfoWidget::statisticsUpdate);
@@ -197,7 +197,7 @@ void TaskInfoWidget::windowUpdate(Window *win)
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectedLotsChanged,
+        connect(m_win.data(), &View::selectedLotsChanged,
                 this, &TaskInfoWidget::selectionUpdate);
         connect(m_win->document(), &Document::statisticsChanged,
                 this, &TaskInfoWidget::statisticsUpdate);
@@ -324,7 +324,7 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    connect(FrameWork::inst(), &FrameWork::windowActivated, this, &TaskAppearsInWidget::windowUpdate);
+    connect(FrameWork::inst(), &FrameWork::viewActivated, this, &TaskAppearsInWidget::windowUpdate);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
@@ -339,15 +339,15 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     });
 }
 
-void TaskAppearsInWidget::windowUpdate(Window *win)
+void TaskAppearsInWidget::windowUpdate(View *win)
 {
     if (m_win) {
-        disconnect(m_win.data(), &Window::selectedLotsChanged,
+        disconnect(m_win.data(), &View::selectedLotsChanged,
                    this, &TaskAppearsInWidget::selectionUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win.data(), &Window::selectedLotsChanged,
+        connect(m_win.data(), &View::selectedLotsChanged,
                 this, &TaskAppearsInWidget::selectionUpdate);
     }
 
