@@ -11,8 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <cmath>
-
 #include <QApplication>
 #include <QFileDialog>
 #include <QSaveFile>

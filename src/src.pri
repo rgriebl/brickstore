@@ -21,30 +21,6 @@ linux {
   }
 }
 
-opencv {
-  win32 {
-    !build_pass:isEmpty(VCPKG_PATH):error("VCPKG_PATH is not set")
-
-    INCLUDEPATH *= $$VCPKG_PATH/include
-    CONFIG(debug, debug|release):LIBS += "-L$$VCPKG_PATH/debug/lib"
-    else:LIBS += "-L$$VCPKG_PATH/lib"
-    CONFIG(debug, debug|release):LIBS *= -lopencv_cored -lopencv_features2dd -lopencv_flannd
-    else:LIBS *= -lopencv_core -lopencv_features2d -lopencv_flann
-    CONFIG(debug, debug|release):LIBS *= -L$$VCPKG_PATH/debug/bin
-    else:LIBS *= -L$$VCPKG_PATH/bin
-    CONFIG *= force_debug_info
-
-    DEFINES *= BS_HAS_OPENCV
-    QT *= multimedia multimediawidgets
-  } else:linux {
-    PKGCONFIG *= opencv4 # pkg-config is too coarse here, we don't need all of OpenCV
-    DEFINES *= BS_HAS_OPENCV
-    QT *= multimedia multimediawidgets
-  } else {
-    CONFIG -= opencv
-  }
-}
-
 win32 {
   QT *= winextras widgets
   DEFINES *= BS_HAS_PARALLEL_STL
@@ -87,10 +63,6 @@ SOURCES += \
   $$PWD/welcomewidget.cpp \
   $$PWD/window.cpp
 
-opencv:SOURCES += \
-  $$PWD/itemscanner.cpp \
-  $$PWD/itemscannerdialog.cpp \
-
 macos:OBJECTIVE_SOURCES += $$PWD/application_mac.mm
 
 HEADERS += \
@@ -118,10 +90,6 @@ HEADERS += \
   $$PWD/welcomewidget.h \
   $$PWD/window.h \
   $$PWD/window_p.h
-
-opencv:HEADERS += \
-  $$PWD/itemscanner.h \
-  $$PWD/itemscannerdialog.h \
 
 FORMS = \
   $$PWD/aboutdialog.ui \

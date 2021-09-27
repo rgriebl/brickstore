@@ -69,7 +69,6 @@ mkdir -p "$tmp"
 for color in "" "-dark"; do
 
   rsvg-convert $b/custom/brick-1x1$color.svg -w $s -h $s -f png -o $tmp/brick-1x1$color.png
-  rsvg-convert $b/custom/minifig$color.svg -w $s -h $s -f png -o $tmp/minifig$color.png
   rsvg-convert $b/icons/$theme$color/svg/taxes-finances.svg -w $s -h $s -f png -o $tmp/dollar$color.png
   rsvg-convert $b/icons/$theme$color/svg/help-about.svg -w $s -h $s -f png -o $tmp/info$color.png
 
@@ -77,7 +76,6 @@ for color in "" "-dark"; do
   mkdir -p "$out"
 
   cp $tmp/brick-1x1$color.png $out/brick-1x1.png
-  cp $tmp/minifig$color.png $out/minifig.png
   convert $cus/bricklink.png -colorspace sRGB -scale $s $out/bricklink.png
   convert $cus/bricklink-studio.png -colorspace sRGB -scale $s $out/bricklink-studio.png
   convert $cus/bricklink-cart$color.png -colorspace sRGB -scale $s $out/bricklink-cart.png

@@ -31,7 +31,6 @@
 #include "utility/utility.h"
 #include "bricklink/bricklink.h"
 #include "rebuilddatabase.h"
-#include "itemscanner.h"
 
 #if !defined(BRICKSTORE_BACKEND_ONLY)
 #  include "application.h"
@@ -54,13 +53,11 @@ int main(int argc, char **argv)
     bool rebuild_db = false;
     bool skip_download = false;
     bool show_usage = false;
-    bool create_image_db = false;
 
-    if ((argc == 2) && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    if ((argc == 2) && (!strcmp(argv [1], "-h") || !strcmp(argv [1], "--help"))) {
         show_usage = true;
-    } else if ((argc == 2) && !strcmp(argv[1], "--create-image-database")) {
-        create_image_db = true;
-    } else if ((argc >= 2) && !strcmp(argv[1], "--rebuild-database")) {
+    }
+    else if ((argc >= 2) && !strcmp(argv [1], "--rebuild-database")) {
         rebuild_db = true;
         if ((argc == 3) && !strcmp(argv[2], "--skip-download"))
             skip_download = true;
@@ -109,31 +106,6 @@ int main(int argc, char **argv)
         }, Qt::QueuedConnection);
 
         res = a.exec();
-    } else if (create_image_db) {
-#if defined(BS_HAS_OPENCV)
-        QCoreApplication a(argc, argv);
-
-        QString errstring;
-        BrickLink::Core *bl = BrickLink::create(QStandardPaths::writableLocation(QStandardPaths::CacheLocation), &errstring);
-
-        if (!bl) {
-            fprintf(stderr, "Could not initialize the BrickLink kernel:\n%s\n", qPrintable(errstring));
-            return 2;
-        }
-        if (!bl->readDatabase()) {
-            fprintf(stderr, "Could not read the BrickLink database\n");
-            return 3;
-        }
-
-        QMetaObject::invokeMethod(&a, []() {
-            qApp->exit(ItemScanner::createDatabase() ? 0 : 1);
-        }, Qt::QueuedConnection);
-
-        res = a.exec();
-#else
-        fprintf(stderr, "BrickStore was compiled without OpenCV support\n");
-        res = 2;
-#endif
     } else {
 #if !defined(BRICKSTORE_BACKEND_ONLY)
 #  if defined(Q_OS_UNIX)

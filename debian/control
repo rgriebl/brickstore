@@ -2,7 +2,7 @@ Source: brickstore
 Section: x11
 Priority: extra
 Maintainer: Robert Griebl <robert@griebl.org>
-Build-Depends: debhelper (>= 7.0.50~), qtbase5-dev (>= 5.12), qt5-qmake (>= 5.12), qtbase5-dev-tools (>= 5.12), qtchooser (>= 5.12), libqt5opengl5-dev (>= 5.12), qtdeclarative5-dev (>= 5.12), qtmultimedia5-dev (>= 5.12), qttools5-dev (>= 5.12), libtbb2 (>= 2020.0), libopencv-dev
+Build-Depends: debhelper (>= 7.0.50~), qtbase5-dev (>= 5.12), qt5-qmake (>= 5.12), qtbase5-dev-tools (>= 5.12), qtchooser (>= 5.12), libqt5opengl5-dev (>= 5.12), qtdeclarative5-dev (>= 5.12), qttools5-dev (>= 5.12), libtbb2 (>= 2020.0)
 Standards-Version: 4.5.0
 
 Package: brickstore

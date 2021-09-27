@@ -29,7 +29,7 @@ jobs:
           qt_arch: 'win64_msvc2019_64'
           openssl_version: 'Win64OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          qmake_extra_config: 'CONFIG+=sentry CONFIG+=opencv "VCPKG_PATH=c:\vcpkg\installed\x64-windows"'
+          qmake_extra_config: 'CONFIG+=sentry "VCPKG_PATH=c:\vcpkg\installed\x64-windows"'
           vcpkg_triplet: 'x64-windows'
 
         - name: "Ubuntu 20.04 64bit"
@@ -78,7 +78,7 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
-        sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev qtmultimedia5-dev lsb-release fakeroot build-essential libopencv-dev
+        sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt on Linux (container)
@@ -86,7 +86,7 @@ jobs:
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec "debian-build" apt update
-        sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev qtmultimedia5-dev lsb-release fakeroot build-essential libopencv-dev
+        sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install OpenSSL on Windows (slproweb)
@@ -100,12 +100,6 @@ jobs:
       if: startsWith(matrix.config.os, 'windows')
       run: |
         c:\vcpkg\vcpkg install --recurse openssl --triplet ${{ matrix.config.vcpkg_triplet }}
-      shell: cmd
-
-    - name: Install OpenCV on Windows (vcpkg)
-      if: startsWith(matrix.config.os, 'windows')
-      run: |
-        c:\vcpkg\vcpkg install --recurse opencv --triplet ${{ matrix.config.vcpkg_triplet }}
       shell: cmd
 
     - name: Install sentry.io on Windows
