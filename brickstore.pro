@@ -25,7 +25,7 @@ GITHUB_URL  = "github.com/rgriebl/brickstore"
 ##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
 
 
-requires(linux|macos|win32:!winrt:!android)
+requires(linux|macos|win32:!winrt)
 !versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
     error("$$escape_expand(\\n\\n) *** $$NAME needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
@@ -33,7 +33,7 @@ requires(linux|macos|win32:!winrt:!android)
 TEMPLATE = app
 
 TARGET = $$NAME
-unix:!macos:TARGET = $$lower($$TARGET)
+unix:!macos:!android:TARGET = $$lower($$TARGET)
 
 CONFIG *= no_private_qt_headers_warning no_include_pwd c++17
 CONFIG *= lrelease embed_translations
@@ -105,6 +105,7 @@ qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = translations
 QM_FILES_RESOURCE_PREFIX = translations
 
+QT *= svg
 RESOURCES = \
   qt_translations \
   translations/translations.xml \
@@ -234,7 +235,7 @@ win32 {
 # Unix specific
 #
 
-unix {
+unix:!android {
   debug:OBJECTS_DIR   = $$OUT_PWD/.obj/debug
   release:OBJECTS_DIR = $$OUT_PWD/.obj/release
   debug:MOC_DIR       = $$OUT_PWD/.moc/debug
@@ -250,7 +251,7 @@ unix {
 # Unix/X11 specific
 #
 
-unix:!macos {
+unix:!macos:!android {
   isEmpty(PREFIX):PREFIX = /usr/local
   DEFINES += INSTALL_PREFIX=\"$$PREFIX\"
   target.path = $$PREFIX/bin
@@ -339,3 +340,16 @@ macos {
 
   QMAKE_EXTRA_TARGETS += deploy installer
 }
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle.properties \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
+    android/gradlew.bat \
+    android/res/values/libs.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+android: include(C:/Android/sdk/android_openssl/openssl.pri)

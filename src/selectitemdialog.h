@@ -32,7 +32,7 @@ public:
     int execAtPosition(const QRect &pos = QRect());
 
 protected:
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     void changeEvent(QEvent *e) override;
 #elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
     bool event(QEvent *e) override;

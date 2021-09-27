@@ -81,7 +81,7 @@ SystemInfo::SystemInfo()
     // -- CPU ------------------------------------------------
 
     auto cpuFuture = QtConcurrent::run([]() -> QString {
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
         p.start("sh"_l1, { "-c"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
                 QIODevice::ReadOnly);
@@ -133,7 +133,7 @@ SystemInfo::SystemInfo()
                 vendor = gpuMap.value("vendorId"_l1).toUInt();
             }
         }
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
         p.start("sh"_l1, { "-c"_l1, R"(lspci -n | grep " 0300: " | cut -c 15-18)"_l1 },
                 QIODevice::ReadOnly);

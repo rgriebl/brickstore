@@ -89,7 +89,7 @@ int SelectItemDialog::execAtPosition(const QRect &pos)
     return QDialog::exec();
 }
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 
 void SelectItemDialog::changeEvent(QEvent *e)
 {

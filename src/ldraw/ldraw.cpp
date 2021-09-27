@@ -451,7 +451,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
 
         for (const QDir &sp : qAsConst(searchpath)) {
             QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
             if (!QFile::exists(testname))
                 testname = testname.toLower();
 #endif
@@ -462,7 +462,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
             }
         }
     } else {
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
         if (!QFile::exists(filename))
             filename = filename.toLower();
 #endif

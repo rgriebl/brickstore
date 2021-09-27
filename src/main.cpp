@@ -27,6 +27,9 @@
 #  include <sys/time.h>
 #  include <sys/resource.h>
 #endif
+#ifdef Q_OS_ANDROID
+# include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
+#endif
 
 #include "utility/utility.h"
 #include "bricklink/bricklink.h"

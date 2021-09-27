@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include "zlib_p.h"
 
-#if defined(USE_FILE32API)
+#if defined(USE_FILE32API) || defined(__ANDROID__)
 #define fopen64 fopen
 #define ftello64 ftell
 #define fseeko64 fseek

@@ -126,7 +126,7 @@ Application::Application(int &_argc, char **_argv)
 #  endif
 #endif
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     const QByteArray xdgDesktop = qgetenv("XDG_CURRENT_DESKTOP");
     for (const auto *gtkBased : { "GNOME", "MATE", "Cinnamon" }) {
         if (xdgDesktop.contains(gtkBased))
@@ -817,7 +817,7 @@ void Application::checkNetwork()
 {
     bool online = false;
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     int res = ::system("ip route get " CHECK_IP "/32 >/dev/null 2>/dev/null");
 
     //qWarning() << "Linux NET change: " << res << WIFEXITED(res) << WEXITSTATUS(res);

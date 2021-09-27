@@ -97,14 +97,17 @@ Transfer::Transfer(QObject *parent)
         s_default_user_agent = qApp->applicationName() % u'/' % qApp->applicationVersion();
     m_user_agent = s_default_user_agent;
 
-
     m_retriever = new TransferRetriever(this);
+#  if QT_CONFIG(cxx11_future)
     m_retrieverThread = QThread::create([this]() {
         QEventLoop eventLoop;
         int returnCode = eventLoop.exec();
         delete m_retriever;
         return returnCode;
     });
+#else
+    m_retrieverThread = new QThread(); // we're leaking m_retriever here
+#endif
     m_retriever->moveToThread(m_retrieverThread);
     m_retrieverThread->setObjectName("TransferRetriever"_l1);
     m_retrieverThread->setParent(this);
