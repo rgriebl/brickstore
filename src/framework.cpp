@@ -388,7 +388,6 @@ FrameWork::FrameWork(QWidget *parent)
     s_inst = this;
 
     m_running = false;
-    m_filter = nullptr;
     m_progress = nullptr;
 
     // keep QTBUG-39781 in mind: we cannot use QOpenGLWidget directly
@@ -545,6 +544,8 @@ FrameWork::FrameWork(QWidget *parent)
                                       "view_reset_diff_mode",
                                       "view_goto_next_diff",
                                       "-",
+                                      "view_filter",
+                                      "-",
                                       "view_column_layout_save",
                                       "view_column_layout_manage",
                                       "view_column_layout_load"
@@ -648,16 +649,6 @@ FrameWork::FrameWork(QWidget *parent)
     ba = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
     if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
-
-    if (m_filter) {
-        ba = Config::inst()->value("/MainWindow/Filter"_l1).toByteArray();
-        if (!ba.isEmpty()) {
-            m_filter->restoreState(ba);
-            m_filter->clear();
-        }
-        m_filter->setEnabled(false);
-    }
-
 
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
@@ -781,17 +772,6 @@ void FrameWork::languageChange()
         if (name == "Dock-ErrorLog"_l1)
             dock->setWindowTitle(tr("Error Log"));
     }
-    if (m_filter) {
-        m_filter->setPlaceholderText(tr("Filter"));
-        // DocumentProxyModel hasn't received the LanguageChange event yet,
-        // so we need to skip this event loop round
-        QMetaObject::invokeMethod(this, [this]() {
-            QString tt = findAction("edit_filter_focus")->toolTip();
-            if (m_activeView)
-                tt.append(m_activeView->document()->filterToolTip());
-            m_filter->setToolTip(tt);
-        }, Qt::QueuedConnection);
-    }
     if (m_progress) {
         m_progress->setToolTipTemplates(tr("Offline"),
                                         tr("No outstanding jobs"),
@@ -863,7 +843,6 @@ void FrameWork::translateActions()
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|Select None") },
         // ^^ QKeySequence::Deselect is only mapped on Linux
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
-        { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
         { "menu_view",                      tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
         { "view_docks",                     tr("View Info Docks"),                    },
@@ -873,6 +852,7 @@ void FrameWork::translateActions()
         { "view_show_diff_indicators",      tr("Show Difference Mode Indicators"),    },
         { "view_reset_diff_mode",           tr("Reset Difference Mode Base Values"),  },
         { "view_goto_next_diff",            tr("Go to the Next Difference"),          tr("F5", "View|Go to the Next Difference") },
+        { "view_filter",                    tr("Filter the Item List"),               QKeySequence::Find },
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
@@ -955,7 +935,6 @@ void FrameWork::translateActions()
         { "edit_status_exclude", "vcs-removed" },
         { "edit_status_extra", "vcs-added" },
         { "edit_color", "color_management" },
-        { "edit_filter_focus", "view-filter" },
         { "document_import_bl_inv", "brick-1x1" },
         { "document_import_bl_xml", "dialog-xml-editor" },
         { "document_import_bl_order", "view-financial-list" },
@@ -1005,7 +984,6 @@ FrameWork::~FrameWork()
 {
     Config::inst()->setValue("/MainWindow/Layout/State"_l1, saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/Filter"_l1, m_filter->saveState());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
@@ -1110,7 +1088,7 @@ bool FrameWork::setupToolBar()
     if (actionNames.isEmpty())
         actionNames = defaultToolBarActionNames();
 
-    actionNames.append({ "|"_l1, "widget_progress"_l1, "|"_l1 });
+    actionNames.append({ "<>"_l1, "widget_progress"_l1, "|"_l1 });
 
     for (const QString &an : qAsConst(actionNames)) {
         if (an == "-"_l1) {
@@ -1128,8 +1106,6 @@ bool FrameWork::setupToolBar()
             spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
             m_toolbar->addWidget(spacer);
-        } else if (an == "edit_filter_focus"_l1) {
-            m_toolbar->addAction(m_filterAction);
         } else if (an == "widget_progress"_l1) {
             m_toolbar->addAction(m_progressAction);
         } else if (QAction *a = findAction(an)) {
@@ -1311,10 +1287,6 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_select_all", NeedDocument | NeedLots);
     (void) newQAction(this, "edit_select_none", NeedDocument | NeedLots);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1, 1));
-    (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
-        if (m_filter)
-            m_filter->setFocus();
-    });
 
     m = newQMenu(this, "edit_status", NeedSelection(1));
     g = newQActionGroup(this, nullptr, true);
@@ -1420,6 +1392,7 @@ void FrameWork::createActions()
     });
     (void) newQAction(this, "view_reset_diff_mode", NeedSelection(1));
     (void) newQAction(this, "view_goto_next_diff", NeedDocument | NeedLots);
+    (void) newQAction(this, "view_filter", NeedDocument);
 
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
@@ -1457,33 +1430,6 @@ void FrameWork::createActions()
     a = newQAction(this, "check_for_updates", NeedNetwork, false,
                    this, [this]() { m_checkForUpdates->check(false /*not silent*/); });
     a->setMenuRole(QAction::ApplicationSpecificRole);
-
-    m_filter = new HistoryLineEdit(Config::MaxFilterHistory, this);
-    m_filter->setClearButtonEnabled(true);
-    m_filter_delay = new QTimer(this);
-    m_filter_delay->setInterval(800ms);
-    m_filter_delay->setSingleShot(true);
-
-    // a bit of a hack, but the action needs to be "used" for the shortcut to be
-    // active, but we don't want an icon in the filter edit.
-    m_filter->QWidget::addAction(findAction("edit_filter_focus"));
-
-    connect(m_filter->reFilterAction(), &QAction::triggered,
-            this, &FrameWork::reFilter);
-
-    connect(m_filter, &QLineEdit::textChanged, [this]() {
-        m_filter_delay->start();
-    });
-    connect(m_filter_delay, &QTimer::timeout, [this]() {
-        if (m_filter)
-            emit filterChanged(m_filter->text());
-    });
-    connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
-            m_filter, &HistoryLineEdit::setToFavoritesMode);
-    m_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
-
-    m_filterAction = new QWidgetAction(this);
-    m_filterAction->setDefaultWidget(m_filter);
 
     m_progress = new ProgressCircle();
     m_progress->setIcon(QIcon(":/assets/generated-app-icons/brickstore.png"_l1));
@@ -1633,8 +1579,6 @@ QStringList FrameWork::defaultToolBarActionNames() const
         "edit_price_inc_dec"_l1,
         "-"_l1,
         "view_column_layout_load"_l1,
-        "|"_l1,
-        "edit_filter_focus"_l1,
     };
     return actionNames;
 }
@@ -1806,8 +1750,6 @@ void FrameWork::connectView(QWidget *w)
     if (w && w == m_activeView)
         return;
 
-    QString filterToolTip;
-
     if (m_activeView) {
         Document *doc = m_activeView->document();
 
@@ -1821,18 +1763,6 @@ void FrameWork::connectView(QWidget *w)
                    this, &FrameWork::selectionUpdate);
         disconnect(m_activeView.data(), &View::blockingOperationActiveChanged,
                    this, &FrameWork::blockUpdate);
-        if (m_filter) {
-            disconnect(this, &FrameWork::filterChanged,
-                       doc, &Document::setFilter);
-            disconnect(doc, &Document::filterChanged,
-                       this, &FrameWork::setFilter);
-            disconnect(doc, &Document::isFilteredChanged,
-                       this, &FrameWork::updateReFilterAction);
-
-            m_filter->setText(QString());
-            m_filter->setEnabled(false);
-            m_filter->reFilterAction()->setVisible(false);
-        }
         m_undogroup->setActiveStack(nullptr);
 
         m_activeView = nullptr;
@@ -1852,23 +1782,6 @@ void FrameWork::connectView(QWidget *w)
         connect(view, &View::blockingOperationActiveChanged,
                 this, &FrameWork::blockUpdate);
 
-        if (m_filter) {
-            m_filter->setText(doc->filter());
-            filterToolTip = doc->filterToolTip();
-            connect(this, &FrameWork::filterChanged,
-                    doc, &Document::setFilter);
-            connect(doc, &Document::filterChanged,
-                    this, &FrameWork::setFilter);
-            connect(doc, &Document::isFilteredChanged,
-                    this, &FrameWork::updateReFilterAction);
-
-            if (auto a = findAction("edit_filter_focus"))
-                m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
-                                                           filterToolTip
-                                                           + m_filter->instructionToolTip()));
-            m_filter->setEnabled(true);
-        }
-
         m_undogroup->setActiveStack(doc->undoStack());
         m_activeView = view;
     }
@@ -1883,7 +1796,6 @@ void FrameWork::connectView(QWidget *w)
     blockUpdate(m_activeView ? m_activeView->isBlockingOperationActive() : false);
     titleUpdate();
     modificationUpdate();
-    updateReFilterAction(m_activeView ? m_activeView->document()->isFiltered() : true);
 
     emit viewActivated(m_activeView);
 }
@@ -2019,8 +1931,6 @@ void FrameWork::blockUpdate(bool blocked)
 
     if (activeView())
         m_undogroup->setActiveStack(blocked ? &blockStack : activeView()->document()->undoStack());
-    if (m_filter)
-        m_filter->setDisabled(blocked);
     updateActions();
     modificationUpdate();
 }
@@ -2077,24 +1987,6 @@ void FrameWork::onlineStateChanged(bool isOnline)
         cancelAllTransfers(true);
 
     updateActions();
-}
-
-void FrameWork::setFilter(const QString &filter)
-{
-    if (m_filter && (filter != m_filter->text()))
-        m_filter->setText(filter);
-}
-
-void FrameWork::reFilter()
-{
-    if (m_filter && m_activeView)
-        m_activeView->document()->reFilter();
-}
-
-void FrameWork::updateReFilterAction(bool isFiltered)
-{
-    if (m_filter)
-        m_filter->reFilterAction()->setVisible(!m_filter->text().isEmpty() && !isFiltered);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)

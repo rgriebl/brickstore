@@ -18,11 +18,16 @@
 #include <QTableView>
 #include <QKeyEvent>
 
+#include <utility/filter.h>
+
 QT_FORWARD_DECLARE_CLASS(QWidget)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QProgressBar)
+QT_FORWARD_DECLARE_CLASS(QButtonGroup)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QTimer)
 
 class View;
 class Document;
@@ -134,6 +139,43 @@ public:
 ///////////////////////////////////////////////////////////////////////
 
 
+class FilterTermWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    FilterTermWidget(View *doc, const Filter &filter, QWidget *parent = nullptr);
+
+    void resetCombination();
+
+    Filter::Combination combination() const;
+    const Filter &filter() const;
+    QString filterString() const;
+
+signals:
+    void combinationChanged(Filter::Combination combination);
+    void deleteClicked();
+    void filterChanged(const Filter &filter);
+
+protected:
+    void paintEvent(QPaintEvent *) override;
+    void emitFilterChanged();
+
+private:
+    View *m_view;
+    Filter m_filter;
+    QTimer *m_filter_delay = nullptr;
+    QComboBox *m_fields;
+    QComboBox *m_comparisons;
+    QComboBox *m_value;
+    QButtonGroup *m_andOrGroup;
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 class StatusBar : public QFrame
 {
     Q_OBJECT
@@ -145,6 +187,9 @@ public:
     void changeDocumentCurrency(QAction *a);
     void updateStatistics();
     void updateBlockState(bool blocked);
+    void addFilter(const Filter &filter = Filter());
+    void setFilter(const Filter &filter);
+    void focusFilter();
 
 protected:
     void languageChange();
@@ -152,8 +197,14 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
+    void updateFilterList();
+
     View *m_view;
     Document *m_doc;
+    QToolButton *m_filter;
+    QToolButton *m_refilter;
+    QWidget *m_filterFlow;
+    QVector<Filter> m_filterList;
     QToolButton *m_order;
     QWidget *m_differencesSeparator;
     QToolButton *m_differences;
@@ -171,4 +222,3 @@ private:
     QLabel *m_blockTitle;
     QToolButton *m_blockCancel;
 };
-

@@ -35,7 +35,7 @@ TEMPLATE = app
 TARGET = $$NAME
 unix:!macos:!android:TARGET = $$lower($$TARGET)
 
-CONFIG *= no_private_qt_headers_warning no_include_pwd c++17
+CONFIG *= no_private_qt_headers_warning no_include_pwd c++2a
 CONFIG *= lrelease embed_translations
 
 

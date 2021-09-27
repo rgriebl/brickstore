@@ -89,6 +89,8 @@ public:
         DifferenceFlagsRole,
 
         HeaderDefaultWidthRole,
+        HeaderValueModelRole,
+        HeaderFilterableRole,
     };
 
     enum class MergeMode {
@@ -155,8 +157,8 @@ public:
     void sort(const QVector<QPair<int, Qt::SortOrder>> &columns);
 
     bool isFiltered() const;
-    QString filter() const;
-    void setFilter(const QString &filter);
+    const QVector<Filter> &filter() const;
+    void setFilter(const QVector<Filter> &filterList);
 
     void nextSortFilterIsDirect(); // hack for the Window c'tor ... find something better
     void reSort();
@@ -224,6 +226,8 @@ public:
     static bool mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
                                 const QHash<Field, MergeMode> &fieldMerge = { });
 
+    Filter::Parser *filterParser();
+
 public slots:
     void setFileName(const QString &str);
     void setTitle(const QString &title);
@@ -248,7 +252,7 @@ signals:
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
     void lotCountChanged(int lotCount);
-    void filterChanged(const QString &filter);
+    void filterChanged(const QVector<Filter> &filter);
     void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &columns);
     void lastCommandWasVisualChanged(bool b);
     void isSortedChanged(bool b);
@@ -270,7 +274,7 @@ private:
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
     void resetDifferenceModeDirect(QHash<const Lot *, Lot>
                                    &differenceBase);
-    void filterDirect(const QString &filterString, const QVector<Filter> &filterList, bool &filtered,
+    void filterDirect(const QVector<Filter> &filterList, bool &filtered,
                       LotList &unfiltered);
     void sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns, bool &sorted, LotList &unsorted);
 
@@ -281,8 +285,9 @@ private:
 
     void updateModified();
 
-    int compare(const Lot *i1, const Lot *i2, const QVector<QPair<int, Qt::SortOrder>> &sortColumns) const;
     void languageChange();
+
+    void initializeColumns();
 
     friend class AddRemoveCmd;
     friend class ChangeCmd;
@@ -292,6 +297,22 @@ private:
     friend class ResetDifferenceModeCmd;
 
 private:
+    struct Column {
+        int defaultWidth = 8;
+        int alignment = Qt::AlignLeft;
+        bool editable = true;
+        bool checkable = false;
+        bool filterable = true;
+        const char *title;
+        std::function<QAbstractItemModel *()> valueModelFn = { };
+        std::function<QVariant(const Lot *)> dataFn = { };
+        std::function<void(Lot *, const QVariant &v)> setDataFn = { };
+        std::function<QVariant(const Lot *)> displayFn = { };
+        std::function<QVariant(const Lot *)> filterFn = { };
+        std::function<int(const Lot *, const Lot *)> compareFn;
+    };
+    QHash<int, Column> m_columns;
+
     QVector<Lot *> m_lots;
     QVector<Lot *> m_sortedLots;
     QVector<Lot *> m_filteredLots;
@@ -303,8 +324,7 @@ private:
 
     QVector<QPair<int, Qt::SortOrder>> m_sortColumns = { { -1, Qt::AscendingOrder } };
     QScopedPointer<Filter::Parser> m_filterParser;
-    QString m_filterString;
-    QVector<Filter> m_filterList;
+    QVector<Filter> m_filter;
 
     bool m_isSorted = false;   // freshly sorted, no changes
     bool m_isFiltered = false; // freshly filtered, no changes

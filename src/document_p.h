@@ -119,7 +119,7 @@ private:
 class FilterCmd : public QUndoCommand
 {
 public:
-    FilterCmd(Document *doc, const QString &filterString, const QVector<Filter> &filterList);
+    FilterCmd(Document *doc, const QVector<Filter> &filterList);
     int id() const override;
     bool mergeWith(const QUndoCommand *other) override;
 
@@ -129,7 +129,6 @@ public:
 private:
     Document *m_doc;
     QDateTime m_created;
-    QString m_filterString;
     QVector<Filter> m_filterList;
     bool m_isFiltered = false;
 

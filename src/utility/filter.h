@@ -78,9 +78,13 @@ public:
 
         QVector<Filter> parse(const QString &str);
 
-        void setFieldTokens(const QMultiMap<int, QString> &idToName);
-        void setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &comparisonToName);
-        void setCombinationTokens(const QMultiMap<Filter::Combination, QString> &combinationToName);
+        void setFieldTokens(const QVector<QPair<int, QString>> &idToName);
+        void setComparisonTokens(const QVector<QPair<Filter::Comparison, QString>> &comparisonToName);
+        void setCombinationTokens(const QVector<QPair<Filter::Combination, QString>> &combinationToName);
+
+        QVector<QPair<int, QString>> fieldTokens() const;
+        QVector<QPair<Filter::Comparison, QString>> comparisonTokens() const;
+        QVector<QPair<Filter::Combination, QString>> combinationTokens() const;
 
         void setStandardComparisonTokens(Filter::Comparisons);
         void setStandardCombinationTokens(Filter::Combinations);
@@ -90,15 +94,17 @@ public:
     private:
         bool eatWhiteSpace(int &pos, const QString &str);
 
-        template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T default_result, int *start_of_token = nullptr);
+        template<typename T> T matchTokens(int &pos, const QString &str,
+                                           const QVector<QPair<T, QString>> &tokens,
+                                           const T default_result, int *start_of_token = nullptr);
         QPair<QString, Filter::Combination> matchFilterAndCombination(int &pos, const QString &str);
 
-        QMultiMap<Filter::Comparison, QString> standardComparisonTokens(Filter::Comparisons mask);
-        QMultiMap<Filter::Combination, QString> standardCombinationTokens(Filter::Combinations mask);
-        
-        QMultiMap<int,                 QString> m_field_tokens;
-        QMultiMap<Filter::Comparison,  QString> m_comparison_tokens;
-        QMultiMap<Filter::Combination, QString> m_combination_tokens;
+        QVector<QPair<Filter::Comparison, QString>> standardComparisonTokens(Filter::Comparisons mask);
+        QVector<QPair<Filter::Combination, QString>> standardCombinationTokens(Filter::Combinations mask);
+
+        QVector<QPair<int,                 QString>> m_field_tokens;
+        QVector<QPair<Filter::Comparison,  QString>> m_comparison_tokens;
+        QVector<QPair<Filter::Combination, QString>> m_combination_tokens;
     };
     
 private:

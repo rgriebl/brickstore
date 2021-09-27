@@ -1392,10 +1392,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const BsxContents &bsx)
     const Lot *base;
     QXmlStreamAttributes baseValues;
 
-    enum { Required = 0, Optional = 1, Constant = 2, WriteEmpty = 8 };
+    enum CreateFlags { Required = 0, Optional = 1, Constant = 2, WriteEmpty = 8 };
 
     auto create = [&](QStringView tagName, auto getter, auto stringify,
-            int flags = Required, const QVariant &def = { }) {
+            int flags = CreateFlags::Required, const QVariant &def = { }) {
 
         auto v = (lot->*getter)();
         const QString t = tagName.toString();

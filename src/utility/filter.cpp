@@ -198,7 +198,7 @@ bool Filter::Parser::eatWhiteSpace(int &pos, const QString &str)
 }
 
 template<typename T>
-T Filter::Parser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T defaultresult, int *start_of_token)
+T Filter::Parser::matchTokens(int &pos, const QString &str, const QVector<QPair<T, QString>> &tokens, const T defaultresult, int *start_of_token)
 {
     int len = int(str.length());
 
@@ -207,21 +207,21 @@ T Filter::Parser::matchTokens(int &pos, const QString &str, const QMultiMap<T, Q
     int found_pos = -1;
   
     for (auto it = tokens.cbegin(); it != tokens.cend(); ++it) {
-        int flen = it.value().length();
+        int flen = it->second.length();
         
         if (len - pos >= flen) {    
             if (!start_of_token) {
-                if (!it.value().compare(str.mid(pos, flen), Qt::CaseInsensitive) && found_len < flen) {
-                    found_field = it.key();
+                if (!it->second.compare(str.mid(pos, flen), Qt::CaseInsensitive) && found_len < flen) {
+                    found_field = it->first;
                     found_len = flen;
                 }
             }
             else {
-                int fpos = str.indexOf(it.value(), pos, Qt::CaseInsensitive);
+                int fpos = str.indexOf(it->second, pos, Qt::CaseInsensitive);
                 
                 if (fpos >= 0 && (found_pos == -1 || fpos <= found_pos) && found_len < flen &&
                     (fpos == 0 || str[fpos - 1].isSpace())) {
-                    found_field = it.key();
+                    found_field = it->first;
                     found_len = flen;
                     found_pos = fpos;
                 }
@@ -296,25 +296,34 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
 }
 
 template<typename T>
-static QString toString(const QMultiMap<T, QString> &tokens, const QString &before, const QString &after,
+static QString toString(const QVector<QPair<T, QString>> &tokens, const QString &before, const QString &after,
                         const QString &key_before, const QString &key_after, const QString &key_separator,
                         const QString &value_before, const QString &value_after, const QString &value_separator)
 {
+    QVector<T> keys;
+    for (const auto &p : tokens) {
+        if (!keys.contains(p.first))
+            keys.append(p.first);
+    }
+
     QString res;
     bool first_key = true;
-    foreach (T key, tokens.uniqueKeys()) {
+    for (const T &key : qAsConst(keys)) {
         if (first_key)
             first_key = false;
         else
             res += key_separator;
         res += key_before;
         bool first_value = true;
-        foreach (const QString val, tokens.values(key)) {
+        for (const auto &p : tokens) {
+            if (p.first != key)
+                continue;
+
             if (first_value)
                 first_value = false;
             else
                 res += value_separator;
-            res = res + value_before + val.toHtmlEscaped() + value_after;
+            res = res + value_before + p.second.toHtmlEscaped() + value_after;
         }
         res += key_after;
     }
@@ -350,19 +359,34 @@ QString Filter::Parser::toolTip() const
     return tt;
 }
 
-void Filter::Parser::setFieldTokens(const QMultiMap<int, QString> &tokens)
+void Filter::Parser::setFieldTokens(const QVector<QPair<int, QString>> &tokens)
 {
     m_field_tokens = tokens;
 }
 
-void Filter::Parser::setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &tokens)
+void Filter::Parser::setComparisonTokens(const QVector<QPair<Filter::Comparison, QString>> &tokens)
 {
     m_comparison_tokens = tokens;
 }
 
-void Filter::Parser::setCombinationTokens(const QMultiMap<Filter::Combination, QString> &tokens)
+void Filter::Parser::setCombinationTokens(const QVector<QPair<Filter::Combination, QString>> &tokens)
 {
     m_combination_tokens = tokens;
+}
+
+QVector<QPair<int, QString>> Filter::Parser::fieldTokens() const
+{
+    return m_field_tokens;
+}
+
+QVector<QPair<Filter::Comparison, QString>> Filter::Parser::comparisonTokens() const
+{
+    return m_comparison_tokens;
+}
+
+QVector<QPair<Filter::Combination, QString>> Filter::Parser::combinationTokens() const
+{
+    return m_combination_tokens;
 }
 
 void Filter::Parser::setStandardComparisonTokens(Filter::Comparisons mask)
@@ -375,7 +399,7 @@ void Filter::Parser::setStandardCombinationTokens(Filter::Combinations mask)
     m_combination_tokens = standardCombinationTokens(mask);
 }
 
-QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationTokens(Filter::Combinations mask)
+QVector<QPair<Filter::Combination, QString>> Filter::Parser::standardCombinationTokens(Filter::Combinations mask)
 {
     struct token_table { 
         Filter::Combination m_combination;
@@ -388,22 +412,21 @@ QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationToken
         { Filter::And, nullptr, nullptr }
     };
     
-    QMultiMap<Filter::Combination, QString> dct;
+    QVector<QPair<Filter::Combination, QString>> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!(mask & tt->m_combination))
             continue;
     
-        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
-            dct.insert(tt->m_combination, symbol); 
-
         foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
-            dct.insert(tt->m_combination, word);
+            dct.append({ tt->m_combination, word });
+        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
+            dct.append({ tt->m_combination, symbol });
     }
     return dct;
 }
 
-QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(Filter::Comparisons mask)
+QVector<QPair<Filter::Comparison, QString>> Filter::Parser::standardComparisonTokens(Filter::Comparisons mask)
 {
     struct token_table { 
         Filter::Comparison m_comparison;
@@ -426,17 +449,16 @@ QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(
         { Filter::Is, nullptr, nullptr }
     };
     
-    QMultiMap<Filter::Comparison, QString> dct;
+    QVector<QPair<Filter::Comparison, QString>> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!(mask & tt->m_comparison))
             continue;
     
-        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
-            dct.insert(tt->m_comparison, symbol); 
-
         foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
-            dct.insert(tt->m_comparison, word);
+            dct.append({ tt->m_comparison, word });
+        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
+            dct.append({ tt->m_comparison, symbol });
     }
     return dct;
 }

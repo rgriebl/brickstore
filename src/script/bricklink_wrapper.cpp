@@ -414,9 +414,8 @@ QmlDocument::QmlDocument(View *_win)
             this, &QmlDocument::titleChanged);
     connect(d, &::Document::currencyCodeChanged,
             this, &QmlDocument::currencyCodeChanged);
-
-    connect(d, &::Document::filterChanged,
-            this, &QmlDocument::filterChanged);
+//    connect(d, &::Document::filterChanged,
+//            this, &QmlDocument::filterChanged);
 
     connect(d, &::Document::lotCountChanged,
             this, &QmlDocument::lotCountChanged);

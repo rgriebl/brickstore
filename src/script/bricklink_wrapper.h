@@ -488,7 +488,7 @@ class QmlDocument : public QObject
     Q_PRIVATE_PROPERTY(d, QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PRIVATE_PROPERTY(d, QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PRIVATE_PROPERTY(d, QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
-    Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
+    //Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
     Q_PRIVATE_PROPERTY(d, QmlOrder order READ order CONSTANT)
     Q_PRIVATE_PROPERTY(d, int lotCount READ lotCount NOTIFY lotCountChanged)
     //TODO: missing: statistics
@@ -520,7 +520,7 @@ signals:
     void fileNameChanged(const QString &fileName);
     void lotCountChanged(int count);
     void currencyCodeChanged(const QString &currencyCode);
-    void filterChanged(const QString &filter);
+    //void filterChanged(const QString &filter);
 
 private:
     Document *d;

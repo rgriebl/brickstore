@@ -74,9 +74,6 @@ public slots:
     void blockUpdate(bool blocked);
     void modificationUpdate();
     void titleUpdate();
-    void setFilter(const QString &filterText);
-    void reFilter();
-    void updateReFilterAction(bool isFiltered);
 
     void fileImportBrickLinkInventory(const BrickLink::Item *item,
                                       const BrickLink::Color *color = nullptr, int quantity = 1,
@@ -85,7 +82,6 @@ public slots:
 signals:
     void viewActivated(View *);
     void viewListChanged();
-    void filterChanged(const QString &filter);
 
 protected slots:
     void languageChange();
@@ -139,8 +135,6 @@ private:
 
     ProgressCircle *m_progress;
     QWidgetAction *m_progressAction;
-    HistoryLineEdit *m_filter;
-    QWidgetAction *m_filterAction;
     QToolBar *m_toolbar;
     QMenu *m_extrasMenu;
     QVector<QDockWidget *> m_dock_widgets;
@@ -153,7 +147,6 @@ private:
     QPointer<ImportCartDialog> m_importcart_dialog;
     QPointer<CheckForUpdates> m_checkForUpdates;
     QPointer<Announcements> m_announcements;
-    QTimer *m_filter_delay = nullptr;
     bool m_running;
     UndoGroup *m_undogroup;
 

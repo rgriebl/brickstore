@@ -13,6 +13,9 @@
 */
 #include <cmath>
 
+#include <QStyle>
+#include <QStyleFactory>
+#include <QProxyStyle>
 #include <QLayout>
 #include <QLabel>
 #include <QApplication>
@@ -38,6 +41,8 @@
 #include <QColorDialog>
 #include <QProgressBar>
 #include <QStackedLayout>
+#include <QButtonGroup>
+#include <QCompleter>
 
 #include "utility/messagebox.h"
 #include "config.h"
@@ -63,6 +68,82 @@
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
 #include "consolidateitemsdialog.h"
+#include "flowlayout.h"
+
+
+class TransparentComboProxyStyle : public QProxyStyle
+{
+    // macOS needs to be treated special, because Fusion's combo-box sizes the popup menu a few
+    // pixels to small on macOS, leading to weird layout issues.
+
+public:
+    TransparentComboProxyStyle()
+        : QProxyStyle()
+    {
+#if !defined(Q_OS_MACOS)
+        QStyle *baseStyle = QStyleFactory::create("fusion"_l1);
+        setBaseStyle(baseStyle);
+#endif
+    }
+
+#if defined(Q_OS_MACOS)
+    void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
+                            QPainter *painter, const QWidget *widget = nullptr) const override;
+#else
+    void drawPrimitive(PrimitiveElement elem, const QStyleOption *option, QPainter *painter,
+                       const QWidget *widget) const override;
+#endif
+};
+
+#if defined(Q_OS_MACOS)
+
+void TransparentComboProxyStyle::drawComplexControl(ComplexControl control,
+                                                    const QStyleOptionComplex *option,
+                                                    QPainter *painter, const QWidget *widget) const
+{
+    if (control == CC_ComboBox) {
+        if (qobject_cast<const QComboBox *>(widget)) {
+            if (const auto *comboOpt = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
+                if (!comboOpt->editable) {
+                    QStyleOptionComboBox opt(*comboOpt);
+                    opt.rect.setLeft(opt.rect.right() - 32);
+                    QProxyStyle::drawComplexControl(control, &opt, painter, widget);
+                    return;
+                }
+            }
+        }
+    }
+    return QProxyStyle::drawComplexControl(control, option, painter, widget);
+}
+
+#else
+
+void TransparentComboProxyStyle::drawPrimitive(PrimitiveElement elem, const QStyleOption *option,
+                                               QPainter *painter, const QWidget *widget) const
+{
+    if (elem == PE_PanelButtonCommand) {
+        if (qobject_cast<const QComboBox *>(widget)) {
+            if (option->state & State_HasFocus && option->state & State_KeyboardFocusChange) {
+                painter->save();
+
+                QRect r = option->rect.adjusted(0, 1, -1, 0);
+                painter->setRenderHint(QPainter::Antialiasing, true);
+                painter->translate(0.5, -0.5);
+
+                painter->setPen(option->palette.highlight().color());
+                painter->setBrush(Qt::NoBrush);
+                painter->drawRoundedRect(r, 2.0, 2.0);
+
+                painter->restore();
+            }
+            return;
+        }
+    }
+    QProxyStyle::drawPrimitive(elem, option, painter, widget);
+}
+
+#endif
+
 
 using namespace std::chrono_literals;
 
@@ -291,6 +372,210 @@ QColor CheckColorTabBar::color() const
 ///////////////////////////////////////////////////////////////////////
 
 
+FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *parent)
+    : QWidget(parent)
+    , m_view(view)
+    , m_filter(filter)
+{
+    m_filter_delay = new QTimer(this);
+    m_filter_delay->setInterval(800ms);
+    m_filter_delay->setSingleShot(true);
+
+    m_fields = new QComboBox();
+    m_fields->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    m_fields->setObjectName("filter-fields"_l1);
+    m_fields->setStyle(new TransparentComboProxyStyle());
+    m_comparisons = new QComboBox();
+    m_comparisons->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    m_comparisons->setObjectName("filter-comparisons"_l1);
+    m_comparisons->setStyle(new TransparentComboProxyStyle());
+    m_value = new QComboBox();
+    m_value->setEditable(true);
+    m_value->setMinimumContentsLength(20);
+    m_value->lineEdit()->setPlaceholderText(tr("Filter expression"));
+    m_value->lineEdit()->setClearButtonEnabled(true);
+    m_value->completer()->setCompletionMode(QCompleter::PopupCompletion);
+    m_value->setItemDelegate(new QStyledItemDelegate());
+    m_value->setMaxVisibleItems(30);
+    m_value->setStyle(new TransparentComboProxyStyle());
+    m_value->setObjectName("filter-value"_l1);
+    auto bdel = new QToolButton();
+    bdel->setAutoRaise(true);
+    bdel->setText(QString(QChar(0x00d7)));
+    bdel->setObjectName("filter-delete"_l1);
+    auto band = new QToolButton();
+    band->setAutoRaise(true);
+    band->setCheckable(true);
+    band->setObjectName("filter-and"_l1);
+    auto bor = new QToolButton();
+    bor->setAutoRaise(true);
+    bor->setCheckable(true);
+    bor->setObjectName("filter-or"_l1);
+
+    setFocusProxy(m_value);
+
+    m_andOrGroup = new QButtonGroup(this);
+    m_andOrGroup->addButton(band, int(Filter::Combination::And));
+    m_andOrGroup->addButton(bor, int(Filter::Combination::Or));
+
+    auto layout = new QHBoxLayout(this);
+    int d = this->fontMetrics().height() / 2;
+    layout->setContentsMargins(d, 0, d, 0);
+    layout->setSpacing(2);
+
+    layout->addWidget(bdel);
+    int frameStyle = int(QFrame::Plain) + QFrame::VLine;
+    auto f = new QFrame();
+    f->setFrameStyle(frameStyle);
+    layout->addWidget(f);
+    layout->addWidget(m_fields);
+    f = new QFrame();
+    f->setFrameStyle(frameStyle);
+    layout->addWidget(f);
+    layout->addWidget(m_comparisons);
+    f = new QFrame();
+    f->setFrameStyle(frameStyle);
+    layout->addWidget(f);
+    layout->addWidget(m_value, 10);
+    f = new QFrame();
+    f->setFrameStyle(frameStyle);
+    layout->addWidget(f);
+    layout->addWidget(band);
+    layout->addWidget(bor);
+
+    if (view && view->document()->filterParser()) {
+        const auto anyToken = view->document()->filterParser()->fieldTokens().constFirst();
+        m_fields->insertItem(m_fields->count(), anyToken.second, anyToken.first);
+
+        QVector<Document::Field> cols = view->currentColumnOrder();
+        for (const auto &col : cols) {
+            if (view->document()->headerData(col, Qt::Horizontal, Document::HeaderFilterableRole).toBool()) {
+                auto colName = view->document()->headerData(col, Qt::Horizontal).toString();
+                m_fields->insertItem(m_fields->count(), colName, int(col));
+            }
+        }
+        m_fields->setMaxVisibleItems(m_fields->count() + 1);
+        m_fields->setCurrentIndex(m_fields->findData(filter.field()));
+
+        const auto compTokens = view->document()->filterParser()->comparisonTokens();
+        Filter::Comparisons comp { };
+        for (const auto &token : compTokens) {
+            if (comp & token.first)
+                continue;
+            comp |= token.first;
+            m_comparisons->insertItem(m_comparisons->count(), token.second, token.first);
+            if (filter.comparison() == token.first)
+                m_comparisons->setCurrentIndex(m_comparisons->count() - 1);
+        }
+        m_comparisons->setMaxVisibleItems(m_comparisons->count());
+
+        const auto combTokens = view->document()->filterParser()->combinationTokens();
+        Filter::Combinations comb;
+        for (const auto &token : combTokens) {
+            if (comb & token.first)
+                continue;
+            comb |= token.first;
+            bool check = (filter.combination() == token.first);
+            if (token.first == Filter::Combination::And) {
+                band->setText(token.second);
+                band->setChecked(check);
+            } else if (token.first == Filter::Combination::Or) {
+                bor->setText(token.second);
+                bor->setChecked(check);
+            }
+        }
+    }
+
+    connect(bdel, &QToolButton::clicked, this, &FilterTermWidget::deleteClicked);
+    connect(m_andOrGroup, &QButtonGroup::idToggled, this, [=, this](int id, bool checked) {
+        if ((id > 0) && checked) {
+            emit combinationChanged(static_cast<Filter::Combination>(id));
+            emitFilterChanged();
+        }
+    });
+    connect(m_fields, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [&](int index) {
+        auto model = m_view->document()->headerData(m_fields->itemData(index).toInt(),
+                                                    Qt::Horizontal,
+                                                    Document::HeaderValueModelRole)
+                .value<QAbstractItemModel *>();
+        if (model) {
+            model->setParent(m_value); // the combobox now owns the model
+            m_value->setModel(model);
+        } else {
+            m_value->clear();
+        }
+        emitFilterChanged();
+    });
+    connect(m_comparisons, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &FilterTermWidget::emitFilterChanged);
+    connect(m_value, &QComboBox::currentTextChanged, [this]() {
+        m_filter_delay->start();
+    });
+    connect(m_filter_delay, &QTimer::timeout,
+            this, &FilterTermWidget::emitFilterChanged);
+}
+
+
+void FilterTermWidget::paintEvent(QPaintEvent *)
+{
+    QColor c = palette().color(QPalette::Window);
+    bool dark = ((c.lightnessF() * c.alphaF()) < 0.5);
+
+    QPainter p(this);
+    QLinearGradient g(0, 0, 0, 1);
+    g.setCoordinateMode(QGradient::ObjectMode);
+    g.setColorAt(0, dark ? QColor::fromRgbF(1, 1, 1, 0.3)
+                         : QColor::fromRgbF(0, 0, 0, 0.1));
+    g.setColorAt(1, dark ? QColor::fromRgbF(1, 1, 1, 0.1)
+                         : QColor::fromRgbF(0, 0, 0, 0.3));
+
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.translate(0.5, -0.5);
+    p.setPen(Qt::NoPen);
+    p.setBrush(g);
+    p.drawRoundedRect(rect(), height() / 2, height() / 2);
+}
+
+void FilterTermWidget::resetCombination()
+{
+    if (auto b = m_andOrGroup->checkedButton()) {
+        m_andOrGroup->setExclusive(false);
+        b->setChecked(false);
+        m_andOrGroup->setExclusive(true);
+    }
+}
+
+const Filter &FilterTermWidget::filter() const
+{
+    return m_filter;
+}
+
+QString FilterTermWidget::filterString() const
+{
+    QString s = m_fields->currentText() % u' ' % m_comparisons->currentText() %
+            u" '" % m_value->currentText() % u"'";
+    if (m_andOrGroup->checkedId() >= 0)
+        s = s % u' ' % m_andOrGroup->checkedButton()->text();
+    return s;
+}
+
+void FilterTermWidget::emitFilterChanged()
+{
+    m_filter.setField(m_fields->currentData().toInt());
+    m_filter.setComparison(static_cast<Filter::Comparison>(m_comparisons->currentData().toInt()));
+    m_filter.setExpression(m_value->currentText());
+    int combId = m_andOrGroup->checkedId();
+    m_filter.setCombination(combId == -1 ? Filter::Combination::And : static_cast<Filter::Combination>(combId));
+
+    emit filterChanged(m_filter);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 StatusBar::StatusBar(View *view)
     : QFrame(view)
     , m_view(view)
@@ -299,14 +584,12 @@ StatusBar::StatusBar(View *view)
     setAutoFillBackground(true);
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
 
-    int iconSize = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
-
     // hide the top and bottom frame
     setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
 
     auto page = new QWidget();
     auto layout = new QHBoxLayout(page);
-    layout->setContentsMargins(11, 4, 11, 4);
+    layout->setContentsMargins(11, 0, 11, 0);
 
     auto addSeparator = [&layout]() -> QWidget * {
             auto sep = new QFrame();
@@ -317,11 +600,42 @@ StatusBar::StatusBar(View *view)
             return sep;
     };
 
+    m_filter = new QToolButton();
+    m_filter->setIcon(QIcon::fromTheme("view-filter"_l1));
+    m_filter->setAutoRaise(true);
+    m_filter->setCheckable(true);
+    layout->addWidget(m_filter);
+
+    m_refilter = new QToolButton();
+    m_refilter->setIcon(QIcon::fromTheme("view-refresh"_l1));
+    m_refilter->setAutoRaise(true);
+    m_refilter->setVisible(false);
+    layout->addWidget(m_refilter);
+
+    addSeparator();
+
+    connect(m_filter, &QToolButton::toggled,
+            this, [this](bool checked) {
+        if (checked && m_filterList.isEmpty())
+            addFilter();
+        if (!checked)
+            m_doc->setFilter({ });
+        else
+            m_doc->setFilter(m_filterList);
+        m_filterFlow->setVisible(checked);
+    });
+    connect(m_refilter, &QToolButton::clicked,
+            this, [this]() {
+        m_doc->reFilter();
+    });
+    connect(m_doc, &Document::isFilteredChanged, this, [this](bool isFiltered) {
+        m_refilter->setVisible(!m_filterList.isEmpty() && !isFiltered);
+    });
+
     if (m_doc->order()) {
         addSeparator();
         m_order = new QToolButton();
         m_order->setIcon(QIcon::fromTheme("help-about"_l1));
-        m_order->setIconSize({ iconSize, iconSize });
         m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         m_order->setAutoRaise(true);
         layout->addWidget(m_order);
@@ -342,7 +656,6 @@ StatusBar::StatusBar(View *view)
     connect(m_differences->defaultAction(), &QAction::changed,
             this, &StatusBar::updateStatistics);
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setIconSize({ iconSize, iconSize });
     m_differences->setAutoRaise(true);
     layout->addWidget(m_differences);
 
@@ -352,7 +665,6 @@ StatusBar::StatusBar(View *view)
     connect(m_errors->defaultAction(), &QAction::changed,
             this, &StatusBar::updateStatistics);
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setIconSize({ iconSize, iconSize });
     m_errors->setAutoRaise(true);
     layout->addWidget(m_errors);
 
@@ -391,9 +703,18 @@ StatusBar::StatusBar(View *view)
     m_blockCancel->setAutoRaise(true);
     blockLayout->addWidget(m_blockCancel);
 
-    m_stack = new QStackedLayout(this);
+    auto *lay = new QVBoxLayout(this);
+    m_stack = new QStackedLayout(lay);
     m_stack->addWidget(page);
     m_stack->addWidget(blockPage);
+
+    m_filterFlow = new QWidget();
+    m_filterFlow->hide();
+    auto filterFlowLay = new FlowLayout(m_filterFlow, FlowLayout::HorizontalFirst, 0, 4, 1);
+    filterFlowLay->setContentsMargins(4, 0, 4, 0);
+    lay->addWidget(m_filterFlow);
+    lay->setContentsMargins(0, 4, 0, 4);
+    lay->setSpacing(2);
 
     connect(m_currency, &QToolButton::triggered,
             this, &StatusBar::changeDocumentCurrency);
@@ -417,6 +738,23 @@ StatusBar::StatusBar(View *view)
     });
     connect(m_blockCancel, &QToolButton::clicked,
             view, &View::cancelBlockingOperation);
+
+    auto setIconSizeLambda = [this](Config::IconSize iconSize) {
+        static const QMap<Config::IconSize, QStyle::PixelMetric> map = {
+            { Config::IconSize::System, QStyle::PM_SmallIconSize },
+            { Config::IconSize::Small, QStyle::PM_SmallIconSize },
+            { Config::IconSize::Large, QStyle::PM_ToolBarIconSize },
+        };
+        auto pm = map.value(iconSize, QStyle::PM_SmallIconSize);
+        int s = style()->pixelMetric(pm, nullptr, this);
+        for (QToolButton *tb : { m_filter, m_refilter, m_order, m_errors, m_differences}) {
+            if (tb)
+                tb->setIconSize(QSize(s, s));
+        }
+
+    };
+    connect(Config::inst(), &Config::iconSizeChanged, this, setIconSizeLambda);
+    setIconSizeLambda(Config::inst()->iconSize());
 
     updateCurrencyRates();
     updateBlockState(false);
@@ -533,6 +871,72 @@ void StatusBar::updateBlockState(bool blocked)
         m_blockTitle->clear();
         m_blockProgress->reset();
     }
+    m_filter->setEnabled(!blocked);
+    m_refilter->setEnabled(!blocked);
+    m_filterFlow->setEnabled(!blocked);
+}
+
+
+void StatusBar::updateFilterList()
+{
+    m_filterList.clear();
+    const auto ftws = m_filterFlow->findChildren<FilterTermWidget *>();
+    for (const auto &ftw : ftws) {
+        if (m_filterFlow->layout()->indexOf(ftw) >= 0)
+            m_filterList << ftw->filter();
+    }
+    m_view->document()->setFilter(m_filterList);
+}
+
+void StatusBar::addFilter(const Filter &filter)
+{
+    auto ftw = new FilterTermWidget(m_view, filter);
+    ftw->resetCombination();
+    m_filterFlow->layout()->addWidget(ftw);
+
+    connect(ftw, &FilterTermWidget::deleteClicked, this, [ftw, this]() {
+        QLayout *layout = m_filterFlow->layout();
+        bool wasLast = (layout->indexOf(ftw) == (layout->count() - 1));
+        ftw->deleteLater();
+        layout->removeWidget(ftw);
+        if (wasLast && layout->count()) {
+            auto lastFtw = static_cast<FilterTermWidget *>(layout->itemAt(layout->count() - 1)->widget());
+            if (lastFtw)
+                lastFtw->resetCombination();
+        }
+        updateFilterList();
+        if (m_filterList.isEmpty())
+            m_filter->setChecked(false);
+    });
+    connect(ftw, &FilterTermWidget::combinationChanged, this, [this, ftw](Filter::Combination) {
+        QLayout *layout = m_filterFlow->layout();
+        if (layout->indexOf(ftw) == (layout->count() - 1))
+            addFilter();
+    });
+    connect(ftw, &FilterTermWidget::filterChanged,
+            this, &StatusBar::updateFilterList);
+
+    updateFilterList();
+}
+
+void StatusBar::setFilter(const Filter &filter)
+{
+    m_filter->setChecked(true);
+    m_filterList.clear();
+    addFilter(filter);
+}
+
+void StatusBar::focusFilter()
+{
+    m_filter->toggle();
+
+    if (m_filter->isChecked()) {
+        QLayout *layout = m_filterFlow->layout();
+        auto lastFtw = static_cast<FilterTermWidget *>(layout->itemAt(layout->count() - 1)->widget());
+
+        if (lastFtw)
+            lastFtw->setFocus();
+    }
 }
 
 void StatusBar::paletteChange()
@@ -545,11 +949,14 @@ void StatusBar::paletteChange()
 
 void StatusBar::languageChange()
 {
+    m_filter->setToolTip(tr("Filter"));
+    m_refilter->setToolTip(tr("Re-apply filter"));
     m_differences->setToolTip(Utility::toolTipLabel(tr("Go to the next difference"),
                                                     m_differences->shortcut()));
     m_errors->setToolTip(Utility::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
 
     m_blockCancel->setToolTip(tr("Cancel the currently running blocking operation"));
+    m_filter->setText(tr("Filter"));
     if (m_order)
         m_order->setText(tr("Order information..."));
     m_value->setText(tr("Currency:"));
@@ -574,7 +981,7 @@ void StatusBar::changeEvent(QEvent *e)
 QVector<View *> View::s_views;
 
 View::View(Document *doc, const QByteArray &columnLayout, const QByteArray &sortFilterState,
-               QWidget *parent)
+           QWidget *parent)
     : QWidget(parent)
     , m_uuid(QUuid::createUuid())
 {
@@ -770,6 +1177,18 @@ void View::updateMinimumSectionSize()
 QByteArray View::currentColumnLayout() const
 {
     return w_header->saveLayout();
+}
+
+QVector<Document::Field> View::currentColumnOrder() const
+{
+    QVector<Document::Field> result;
+
+    for (int vi = 0; vi < w_header->count(); ++vi) {
+        int li = w_header->logicalIndex(vi);
+        if (!w_header->isSectionHidden(li))
+            result << Document::Field(li);
+    }
+    return result;
 }
 
 bool View::isBlockingOperationActive() const
@@ -1228,10 +1647,18 @@ void View::on_edit_filter_from_selection_triggered()
             if (s.isEmpty() || s.contains(' '_l1))
                 s = u'"' % s % u'"';
 
-            FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
-                                         % " == "_l1 % s);
+            Filter f;
+            f.setField(idx.column());
+            f.setComparison(Filter::Comparison::Is);
+            f.setExpression(s);
+            w_statusbar->setFilter(f);
         }
     }
+}
+
+void View::on_view_filter_triggered()
+{
+    w_statusbar->focusFilter();
 }
 
 void View::on_view_reset_diff_mode_triggered()

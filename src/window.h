@@ -96,6 +96,8 @@ public:
 
     QByteArray currentColumnLayout() const;
 
+    QVector<Document::Field> currentColumnOrder() const;
+
     bool isBlockingOperationActive() const;
     void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
     void endBlockingOperation();
@@ -189,6 +191,7 @@ public slots:
     void on_bricklink_lotsforsale_triggered();
     void on_bricklink_myinventory_triggered();
 
+    void on_view_filter_triggered();
     void on_view_reset_diff_mode_triggered();
 
     void on_view_column_layout_save_triggered();

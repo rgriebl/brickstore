@@ -42,6 +42,11 @@ constexpr inline QChar operator ""_l1(const char c)
     return QLatin1Char(c);
 }
 
+// just like qFuzzyCompare, but also usable around 0
+inline bool fuzzyCompare(double d1, double d2)
+{
+    return std::abs(d1 - d2) <= 1e-12 * std::max({ 1.0, std::abs(d1), std::abs(d2) });
+}
 
 namespace Utility {
 

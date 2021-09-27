@@ -91,7 +91,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     QVariant res;
     const Color *c = color(index);
 
-    if (role == Qt:: DisplayRole) {
+    if ((role == Qt::DisplayRole) || (role == Qt::EditRole)) {
         res = c->name();
     }
     else if (role == Qt::DecorationRole) {
