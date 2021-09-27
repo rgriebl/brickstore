@@ -32,9 +32,10 @@ jobs:
           qmake_extra_config: 'CONFIG+=sentry "VCPKG_PATH=c:\vcpkg\installed\x64-windows"'
           vcpkg_triplet: 'x64-windows'
 
-        - name: "Ubuntu 20.04 64bit"
-          artifact: "Ubuntu-20.04"
+        - name: "Ubuntu 21.04 64bit"
+          artifact: "Ubuntu-21.04"
           os: ubuntu-20.04
+          debian_container: "buildpack-deps:21.04"
 
         - name: "Debian 11 Backend 64bit"
           artifact: "Debian-11-Backend"

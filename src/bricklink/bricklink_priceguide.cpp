@@ -180,11 +180,7 @@ bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
         if (line.isEmpty() || (line[0] == '#'_l1) || (line[0] == '\r'_l1))         // skip comments fast
             continue;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        QStringList sl = line.split('\t'_l1, QString::KeepEmptyParts);
-#else
         QStringList sl = line.split('\t'_l1, Qt::KeepEmptyParts);
-#endif
 
         if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
             continue;

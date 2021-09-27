@@ -116,14 +116,12 @@ Application::Application(int &_argc, char **_argv)
     QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-#  if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
-#  else
+#else
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-#  endif
 #endif
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)

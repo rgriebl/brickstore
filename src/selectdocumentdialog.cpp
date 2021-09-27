@@ -301,11 +301,7 @@ void SelectMergeMode::createFields(QWidget *parent)
         ++col;
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(m_allGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
-#else
     connect(m_allGroup, &QButtonGroup::idClicked,
-#endif
             this, [this](int id) {
         auto mergeMode = Document::MergeMode(id);
         setDefaultMode(mergeMode);
@@ -342,11 +338,7 @@ void SelectMergeMode::createFields(QWidget *parent)
         }
         m_groups.append(group);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        connect(group, QOverload<int>::of(&QButtonGroup::buttonClicked),
-#else
         connect(group, &QButtonGroup::idClicked,
-#endif
                 this, [this]() {
             bool ignoreAll = true;
             for (QButtonGroup *bg : qAsConst(m_groups))

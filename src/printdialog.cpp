@@ -232,13 +232,8 @@ void PrintDialog::updatePrinter(int idx)
         pageSizes = printer.supportedPageSizes();
         defaultPageSize = printer.defaultPageSize();
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
-        colorModes = { QPrinter::Color, QPrinter::GrayScale };
-        defaultColorMode = QPrinter::Color;
-#else
         colorModes = printer.supportedColorModes();
         defaultColorMode = printer.defaultColorMode();
-#endif
 
         m_printer->setPrinterName(printerKey);
     }
@@ -323,11 +318,7 @@ void PrintDialog::updatePageRange()
         }
     }
     if (ok) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        m_pages = pages.toList();
-#else
         m_pages = QList<uint>(pages.cbegin(), pages.cend());
-#endif
         w_print_preview->updatePreview();
     }
     w_pageSelectWarning->setVisible(!ok);

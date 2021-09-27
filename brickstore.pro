@@ -12,8 +12,8 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 
-backend-only:MIN_QT_VERSION = 5.12.0
-else:MIN_QT_VERSION = 5.12.0
+backend-only:MIN_QT_VERSION = 5.14.0
+else:MIN_QT_VERSION = 5.14.0
 
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."

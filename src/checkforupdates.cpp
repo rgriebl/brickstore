@@ -179,14 +179,7 @@ void CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
                     .arg(s1, latestVersion.toString(), s2);
             const QString url = m_downloadUrl.arg(latestVersion.toString());
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-            md = QString::fromLatin1(R"(<h2>%1 %2</h2><hr><h2>%3</h2><h2><a href=")"
-                                     R"(https://github.com/rgriebl/brickstore/blob/master/CHANGELOG.md)"
-                                     R"(">Changelog on GitHub</a></h2>)")
-                    .arg(s1, latestVersion.toString(), s2, m_changelogUrl);
-#else
             md = top % md.mid(toHeader, fromHeader - toHeader);
-#endif
 
             QMetaObject::invokeMethod(this, [=]() {
                 QDialog d(m_parent);
@@ -194,11 +187,7 @@ void CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
                 auto layout = new QVBoxLayout(&d);
                 auto browser = new QTextBrowser();
                 browser->setReadOnly(true);
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-                browser->setHtml(md);
-#else
                 browser->setMarkdown(md);
-#endif
                 browser->setOpenLinks(true);
                 browser->setOpenExternalLinks(true);
                 browser->zoomIn();

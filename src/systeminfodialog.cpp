@@ -37,11 +37,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
 
     connect(ui->buttons, &QDialogButtonBox::accepted,
             this, [=]() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        QString text = ui->text->toPlainText();
-#else
         QString text = ui->text->toMarkdown();
-#endif
         QGuiApplication::clipboard()->setText(text);
     });
 
@@ -58,11 +54,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
         text = text % " * **"_l1 % it.key() % "**: "_l1 % it.value().toString() % "\n"_l1;
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    ui->text->setPlainText(text.remove("**"_l1));
-#else
     ui->text->setMarkdown(text);
-#endif
 }
 
 SystemInfoDialog::~SystemInfoDialog()

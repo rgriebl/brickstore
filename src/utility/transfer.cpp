@@ -248,9 +248,7 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        req.setAttribute(QNetworkRequest::HTTP2AllowedAttribute, true);
-#elif QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
 #endif
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
@@ -269,11 +267,7 @@ void TransferRetriever::schedule()
         j->setStatus(TransferJob::Active);
         if (isget) {
             if (j->m_only_if_newer.isValid())
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
                 req.setHeader(QNetworkRequest::IfModifiedSinceHeader, j->m_only_if_newer);
-#else
-                req.setRawHeader("if-modified-since", QVariant(j->m_only_if_newer).toByteArray());
-#endif
             j->m_reply = m_nam->get(req);
         }
         else {

@@ -498,11 +498,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         opt.features |= QStyleOptionViewItem::HasCheckIndicator;
 
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
-#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
-        QRect r = style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, option.widget);
-#else
         QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
-#endif
         r = r.translated(-r.left() + opt.rect.left(), 0);
         int dx = margin;
         if (align & Qt::AlignHCenter)
@@ -510,11 +506,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         else if (align & Qt::AlignRight)
             dx = (w - r.width() - margin);
         opt.rect = r.translated(dx, 0);
-#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
-        style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
-#else
         style->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &opt, p, option.widget);
-#endif
     }
     else if (!image.isNull()) {
         int px = x;
