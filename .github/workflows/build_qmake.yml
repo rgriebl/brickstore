@@ -78,16 +78,16 @@ jobs:
     - name: Install Qt on Linux (native/appimage)
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
-        sudo apt update
-        sudo apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo DEBIAN_FRONTEND=noninteractive apt update
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt on Linux (container)
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
-        sudo docker exec "debian-build" apt update
-        sudo docker exec "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt update
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install OpenSSL on Windows (slproweb)
@@ -156,7 +156,7 @@ jobs:
     - name: Build on Linux (container)
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
       run: |
-        sudo docker exec -w /build "debian-build" qmake CONFIG+=release "${{ matrix.config.qmake_extra_config }}"
+        sudo docker exec -w /build "debian-build" qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         sudo docker exec -w /build "debian-build" make package
       shell: bash
 
