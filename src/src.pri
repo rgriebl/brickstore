@@ -22,7 +22,8 @@ linux {
 }
 
 win32 {
-  QT *= winextras widgets
+  QT *= widgets
+  !versionAtLeast(QT_VERSION, 6.0.0):QT *= winextras
   DEFINES *= BS_HAS_PARALLEL_STL
 }
 

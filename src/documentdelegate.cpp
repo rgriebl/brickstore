@@ -146,8 +146,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
 }
 
-
-inline uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed)
+inline qHashResult qHash(const DocumentDelegate::TextLayoutCacheKey &key, qHashResult seed)
 {
     auto sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
     return qHash(key.text) ^ sizeHash ^ key.fontSize ^ seed;
@@ -252,66 +251,66 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         switch (idx.column()) {
         case Document::ItemType:
             if (lot->itemType())
-                bg = shadeColor(lot->itemTypeId(), 0.1);
+                bg = shadeColor(lot->itemTypeId(), 0.1f);
             break;
 
         case Document::Category:
             if (lot->category())
-                bg = shadeColor(int(lot->categoryId()), 0.2);
+                bg = shadeColor(int(lot->categoryId()), 0.2f);
             break;
 
         case Document::Quantity:
             if (lot->quantity() <= 0)
-                bg = (lot->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
-                                            : QColor::fromRgbF(1, 0, 0, 0.4);
+                bg = (lot->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4f)
+                                            : QColor::fromRgbF(1, 0, 0, 0.4f);
             break;
 
         case Document::QuantityDiff:
             if (base && (base->quantity() < lot->quantity()))
-                bg = QColor::fromRgbF(0, 1, 0, 0.3);
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
             else if (base && (base->quantity() > lot->quantity()))
-                bg = QColor::fromRgbF(1, 0, 0, 0.3);
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
             break;
 
         case Document::PriceOrig:
         case Document::QuantityOrig:
-            fg.setAlphaF(0.5);
+            fg.setAlphaF(0.5f);
             break;
 
         case Document::PriceDiff: {
             if (base && (base->price() < lot->price()))
-                bg = QColor::fromRgbF(0, 1, 0, 0.3);
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
             else if (base && (base->price() > lot->price()))
-                bg = QColor::fromRgbF(1, 0, 0, 0.3);
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
             break;
         }
         case Document::Total:
-            bg = QColor::fromRgbF(1, 1, 0, 0.1);
+            bg = QColor::fromRgbF(1, 1, 0, 0.1f);
             break;
 
         case Document::Condition:
             if (lot->condition() != BrickLink::Condition::New) {
                 bg = fg;
-                bg.setAlphaF(0.3);
+                bg.setAlphaF(0.3f);
             }
             break;
 
         case Document::TierP1:
         case Document::TierQ1:
             bg = fg;
-            bg.setAlphaF(0.06);
+            bg.setAlphaF(0.06f);
             break;
 
         case Document::TierP2:
         case Document::TierQ2:
             bg = fg;
-            bg.setAlphaF(0.12);
+            bg.setAlphaF(0.12f);
             break;
 
         case Document::TierP3:
         case Document::TierQ3:
             bg = fg;
-            bg.setAlphaF(0.18);
+            bg.setAlphaF(0.18f);
             break;
 
         }
@@ -357,7 +356,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             tag.foreground = fg;
             if (cp || selected) {
                 tag.background = fg;
-                tag.background.setAlphaF(0.3);
+                tag.background.setAlphaF(0.3f);
             } else {
                 tag.background = shadeColor(int(1 + altid), qreal(0.5));
             }
@@ -369,7 +368,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
-            tag.background.setAlphaF(0.3);
+            tag.background.setAlphaF(0.3f);
 
             if ((option.state & QStyle::State_MouseOver) && lot->quantity()) {
                 tag.foreground = option.palette.color(QPalette::HighlightedText);

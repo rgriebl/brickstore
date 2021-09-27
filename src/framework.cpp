@@ -42,7 +42,7 @@
 #include <QDesktopServices>
 #include <QWidgetAction>
 #include <QPlainTextEdit>
-#if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
 #  include <QtPlatformHeaders/QWindowsWindowFunctions>
@@ -619,7 +619,7 @@ FrameWork::FrameWork(QWidget *parent)
     // plus, on Windows, we need the window handle for the progress indicator
     show();
 
-#if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     auto winTaskbarButton = new QWinTaskbarButton(this);
     winTaskbarButton->setWindow(windowHandle());
 
