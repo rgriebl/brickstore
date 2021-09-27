@@ -105,7 +105,7 @@ qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = translations
 QM_FILES_RESOURCE_PREFIX = translations
 
-QT *= svg
+android:QT *= svg
 RESOURCES = \
   qt_translations \
   translations/translations.xml \
