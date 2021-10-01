@@ -949,7 +949,7 @@ BrickLink::ItemDelegate::ItemDelegate(Options options, QObject *parent)
 
 void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    BetterItemDelegate::extendedPaint(painter, option, index, [=]() {
+    BetterItemDelegate::extendedPaint(painter, option, index, [this, painter, option, index]() {
         bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
 
         if (firstColumnImageOnly) {

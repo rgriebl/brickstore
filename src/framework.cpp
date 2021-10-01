@@ -281,7 +281,7 @@ public:
         : m_log(logWidget)
     {
         connect(this, &QLineEdit::returnPressed,
-                this, [=]() {
+                this, [this]() {
             auto s = text();
             if (!s.isEmpty()) {
                 if (ScriptManager::inst()->executeString(s)) {
@@ -673,7 +673,7 @@ FrameWork::FrameWork(QWidget *parent)
     m_checkForUpdates->check(true /*silent*/);
     m_announcements->check();
     auto checkTimer = new QTimer(this);
-    checkTimer->callOnTimeout(this, [=]() {
+    checkTimer->callOnTimeout(this, [this]() {
         m_checkForUpdates->check(true /*silent*/);
         m_announcements->check();
     });
@@ -1225,7 +1225,7 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "document_save");
     (void) newQAction(this, "document_save_as", NeedDocument);
-    (void) newQAction(this, "document_save_all", NeedDocument, false, this, [=]() {
+    (void) newQAction(this, "document_save_all", NeedDocument, false, this, [this]() {
         auto oldActive = activeView();
         const auto windows = allViews();
         for (View *w : windows) {
@@ -1406,13 +1406,13 @@ void FrameWork::createActions()
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_show_input_errors", 0, true, this, [=](bool b) {
+    (void) newQAction(this, "view_show_input_errors", 0, true, this, [this](bool b) {
         Config::inst()->setShowInputErrors(b);
         findAction("view_goto_next_input_error")->setEnabled(b);
     });
     a = newQAction(this, "view_goto_next_input_error", NeedDocument | NeedLots);
     a->setEnabled(Config::inst()->showInputErrors());
-    (void) newQAction(this, "view_show_diff_indicators", 0, true, this, [=](bool b) {
+    (void) newQAction(this, "view_show_diff_indicators", 0, true, this, [this](bool b) {
         Config::inst()->setShowDifferenceIndicators(b);
         findAction("view_goto_next_diff")->setEnabled(b);
     });
@@ -1952,7 +1952,7 @@ QMenu *FrameWork::createPopupMenu()
 {
     auto menu = QMainWindow::createPopupMenu();
     if (menu) {
-        menu->addAction(tr("Customize Toolbar..."), this, [=]() {
+        menu->addAction(tr("Customize Toolbar..."), this, [this]() {
             showSettings("toolbar");
         });
     }

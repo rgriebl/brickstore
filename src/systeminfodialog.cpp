@@ -36,7 +36,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
             this, []() { static_cast<int *>(nullptr)[0] = 1; });
 
     connect(ui->buttons, &QDialogButtonBox::accepted,
-            this, [=]() {
+            this, [this]() {
         QString text = ui->text->toMarkdown();
         QGuiApplication::clipboard()->setText(text);
     });

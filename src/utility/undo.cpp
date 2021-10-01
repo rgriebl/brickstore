@@ -197,12 +197,12 @@ QWidget *UndoAction::createWidget(QWidget *parent)
 
         menu->setFocusProxy(list);
 
-        connect(list, &QListWidget::itemEntered, this, [=](QListWidgetItem *item) {
+        connect(list, &QListWidget::itemEntered, this, [list](QListWidgetItem *item) {
             if (list->currentItem() != item)
                 list->setCurrentItem(item);
         });
 
-        connect(list, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *item) {
+        connect(list, &QListWidget::currentItemChanged, this, [this, list, label](QListWidgetItem *item) {
             if (item) {
                 int currentIndex = list->row(item);
                 for (int i = 0; i < list->count(); i++)
@@ -212,14 +212,14 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         });
 
         connect(list, &QListWidget::itemClicked, list, &QListWidget::itemActivated);
-        connect(list, &QListWidget::itemActivated, this, [=](QListWidgetItem *item) {
+        connect(list, &QListWidget::itemActivated, this, [this, list, menu](QListWidgetItem *item) {
             if (item) {
                 menu->close();
                 emit triggered(list->row(item) + 1);
             }
         });
 
-        connect(menu, &QMenu::aboutToShow, this, [=]() {
+        connect(menu, &QMenu::aboutToShow, this, [this, list, label]() {
             list->clear();
 
             if (m_undoStack) {

@@ -70,7 +70,7 @@ using namespace std::chrono_literals;
 template <typename E>
 static E nextEnumValue(E current, std::initializer_list<E> values)
 {
-    for (size_t i = 0; i < values.size(); ++i) {
+    for (std::size_t i = 0; i < values.size(); ++i) {
         if (current == values.begin()[i])
             return values.begin()[(i + 1) % values.size()];
     }
@@ -613,27 +613,27 @@ View::View(Document *doc, const QByteArray &columnLayout, const QByteArray &sort
     w_list->setSelectionModel(m_selection_model);
 
     connect(w_header, &HeaderView::isSortedChanged,
-            this, [=](bool b) {
+            this, [this](bool b) {
         if (b && !document()->isSorted()) {
             document()->reSort();
             w_list->scrollTo(m_selection_model->currentIndex());
         }
     });
     connect(doc, &Document::isSortedChanged,
-            w_header, [=](bool b) {
+            w_header, [this](bool b) {
         if (b != w_header->isSorted())
             w_header->setSorted(b);
     });
 
     connect(w_header, &HeaderView::sortColumnsChanged,
-            this, [=](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
+            this, [this](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
         if (document()->sortColumns() != sortColumns) {
             document()->sort(sortColumns);
             w_list->scrollTo(m_selection_model->currentIndex());
         }
     });
     connect(doc, &Document::sortColumnsChanged,
-            w_header, [=](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
+            w_header, [this](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
         if (w_header->sortColumns() != sortColumns)
             w_header->setSortColumns(sortColumns);
     });
@@ -2520,7 +2520,7 @@ void View::print(bool as_pdf)
     bool selectionOnly = (prt.printRange() == QPrinter::Selection);
     PrintDialog pd(&prt, this);
     connect(&pd, &PrintDialog::paintRequested,
-            this, [=](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
+            this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         printPages(previewPrt, selectionOnly ? selectedLots() : document()->filteredLots(),
                    pages, scaleFactor, maxPageCount, maxWidth);

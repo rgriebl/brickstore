@@ -83,7 +83,7 @@ void UpdateDatabase::gotten()
         basepath.truncate(basepath.length() - 5);      // strip '.lzma'
 
         m_progress->setMessageText(tr("Decompressing database"));
-        QString error = LZMA::decompress(file->fileName(), basepath, [=](int p, int t) {
+        QString error = LZMA::decompress(file->fileName(), basepath, [this](int p, int t) {
             m_progress->setProgress(p, t);
         });
 

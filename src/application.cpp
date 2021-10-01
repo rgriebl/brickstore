@@ -402,7 +402,7 @@ bool Application::eventFilter(QObject *o, QEvent *e)
         return true;
     case QEvent::ApplicationPaletteChange:
         // we need to delay this: otherwise macOS crashes on theme changes
-        QMetaObject::invokeMethod(this, [=]() {
+        QMetaObject::invokeMethod(this, [this]() {
             QPixmapCache::clear();
             setIconTheme();
         }, Qt::QueuedConnection);

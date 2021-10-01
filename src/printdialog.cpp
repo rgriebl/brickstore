@@ -56,11 +56,11 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
         asa->installEventFilter(this);
     }
     connect(w_print_preview, &QPrintPreviewWidget::paintRequested,
-            this, [=](QPrinter *prt) {
+            this, [this](QPrinter *prt) {
         emit paintRequested(prt, m_pages, m_scaleFactor, &m_maxPageCount, &m_maxWidth);
     });
     connect(w_print_preview, &QPrintPreviewWidget::previewChanged,
-            this, [=]() {
+            this, [this]() {
         updateActions();
     });
 
@@ -75,17 +75,17 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     w_sysprint->setText(R"(<a href="sysprint">)"_l1 % tr("Print using the system dialog...") % "</a>"_l1);
 
     connect(w_page_first, &QToolButton::clicked,
-            this, [=]() { gotoPage(1); });
+            this, [this]() { gotoPage(1); });
     connect(w_page_prev, &QToolButton::clicked,
-            this, [=]() { gotoPage(w_print_preview->currentPage() - 1); });
+            this, [this]() { gotoPage(w_print_preview->currentPage() - 1); });
     connect(w_page_next, &QToolButton::clicked,
-            this, [=]() { gotoPage(w_print_preview->currentPage() + 1); });
+            this, [this]() { gotoPage(w_print_preview->currentPage() + 1); });
     connect(w_page_last, &QToolButton::clicked,
-            this, [=]() { gotoPage(w_print_preview->pageCount()); });
+            this, [this]() { gotoPage(w_print_preview->pageCount()); });
     connect(w_zoom_in, &QToolButton::clicked,
-            this, [=]() { w_print_preview->zoomIn(); updateActions(); });
+            this, [this]() { w_print_preview->zoomIn(); updateActions(); });
     connect(w_zoom_out, &QToolButton::clicked,
-            this, [=]() { w_print_preview->zoomOut(); updateActions(); });
+            this, [this]() { w_print_preview->zoomOut(); updateActions(); });
     connect(w_page_single, &QToolButton::clicked,
             w_print_preview, &QPrintPreviewWidget::setSinglePageViewMode);
     connect(w_page_double, &QToolButton::clicked,
@@ -105,14 +105,14 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     connect(w_printers, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PrintDialog::updatePrinter);
     connect(w_pageMode, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, [=](int idx) {
+            this, [this](int idx) {
         w_pageSelect->setVisible(idx == 1);
         updatePageRange();
     });
     connect(w_pageSelect, &QLineEdit::textChanged,
             this, &PrintDialog::updatePageRange);
     connect(w_layout, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            [=](int idx) {
+            [this](int idx) {
         if (w_print_preview)
             w_print_preview->setOrientation(idx == 0 ?
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -128,10 +128,10 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     connect(w_margins, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PrintDialog::updateMargins);
     connect(w_copies, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, [=](int v) { m_printer->setCopyCount(v); });
+            this, [this](int v) { m_printer->setCopyCount(v); });
 
     connect(w_scaleMode, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, [=](int idx) {
+            this, [this](int idx) {
         w_scalePercent->setVisible(idx == 2);
         updateScaling();
     });
@@ -139,7 +139,7 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
             this, &PrintDialog::updateScaling);
 
     connect(w_sysprint, &QLabel::linkActivated,
-            this, [=](const QString &) {
+            this, [this, window](const QString &) {
         if (m_saveAsPdf)
             m_printer->setPrinterName(QPrinter().printerName());
 

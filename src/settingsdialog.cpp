@@ -802,7 +802,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_tb_toolbar->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     w_tb_toolbar->setItemDelegate(new ToolBarDelegate(BetterItemDelegate::AlwaysShowSelection, this));
 
-    connect(w_tb_reset, &QPushButton::clicked, this, [=]() {
+    connect(w_tb_reset, &QPushButton::clicked, this, [this]() {
         m_tb_actions->resetToDefaults();
         w_tb_filter->clear();
         w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
@@ -826,7 +826,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_sc_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
 
     connect(w_sc_list->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, [=]() {
+            this, [this]() {
         QModelIndexList idxs = w_sc_list->selectionModel()->selectedRows();
         QModelIndex idx;
         if (!idxs.isEmpty())
@@ -842,7 +842,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         }
     });
     connect(m_sc_model, &QAbstractItemModel::dataChanged,
-            this, [=](const QModelIndex &tl, const QModelIndex &br) {
+            this, [this](const QModelIndex &tl, const QModelIndex &br) {
         QModelIndex idx = m_sc_proxymodel->mapToSource(w_sc_list->currentIndex());
         if (idx.isValid() && QItemSelection(tl.siblingAtColumn(0), br.siblingAtColumn(0))
                 .contains(idx.siblingAtColumn(0))) {
@@ -853,7 +853,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         }
     });
     connect(w_sc_edit, &QKeySequenceEdit::editingFinished,
-            this, [=]() {
+            this, [this]() {
         auto newShortcut = w_sc_edit->keySequence();
         // disallow Alt only shortcuts, because this interferes with standard menu handling
         for (int i = 0; i < newShortcut.count(); ++i) {
@@ -873,12 +873,12 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
         }
     });
-    connect(w_sc_reset, &QPushButton::clicked, this, [=]() {
+    connect(w_sc_reset, &QPushButton::clicked, this, [this]() {
         if (!m_sc_model->resetShortcut(m_sc_proxymodel->mapToSource(w_sc_list->currentIndex()))) {
             MessageBox::warning(this, { }, tr("This shortcut is already used by another action."));
         }
     });
-    connect(w_sc_reset_all, &QPushButton::clicked, this, [=]() {
+    connect(w_sc_reset_all, &QPushButton::clicked, this, [this]() {
         m_sc_model->resetAllShortcuts();
         w_sc_filter->clear();
         w_sc_list->sortByColumn(0, Qt::AscendingOrder);

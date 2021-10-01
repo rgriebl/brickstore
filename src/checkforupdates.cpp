@@ -114,7 +114,7 @@ void CheckForUpdates::check(bool silent)
         m_checking = false;
 
         if (!m_silent || (latestVersion > m_currentVersion)) {
-            QMetaObject::invokeMethod(this, [=]() {
+            QMetaObject::invokeMethod(this, [this, latestVersion]() {
                 if (latestVersion.isNull()) {
                     MessageBox::warning(m_parent, m_title,
                                         tr("Version information is not available."));
@@ -145,7 +145,7 @@ void CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
 {
     QNetworkReply *reply = m_nam.get(QNetworkRequest(m_changelogUrl));
 
-    connect(reply, &QNetworkReply::finished, this, [=]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, &latestVersion]() {
         reply->deleteLater();
 
         QString md = QString::fromUtf8(reply->readAll());
@@ -181,7 +181,7 @@ void CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
 
             md = top % md.mid(toHeader, fromHeader - toHeader);
 
-            QMetaObject::invokeMethod(this, [=]() {
+            QMetaObject::invokeMethod(this, [this, md, url]() {
                 QDialog d(m_parent);
                 d.setWindowTitle(m_title);
                 auto layout = new QVBoxLayout(&d);

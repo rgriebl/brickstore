@@ -137,7 +137,7 @@ public:
         } else if (role == Qt::BackgroundRole) {
             if (col == 1) {
                 QColor c(cart->domestic() ? Qt::green : Qt::blue);
-                c.setAlphaF(0.1);
+                c.setAlphaF(0.1f);
                 return c;
             }
         } else if (role == CartPointerRole) {

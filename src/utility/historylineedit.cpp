@@ -265,7 +265,7 @@ void HistoryLineEdit::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::PaletteChange) {
         // we need to delay this: otherwise macOS crashes on theme changes
-        QMetaObject::invokeMethod(this, [=]() {
+        QMetaObject::invokeMethod(this, [this]() {
             setClearButtonEnabled(false);
             setClearButtonEnabled(true);
             setFilterPixmap();

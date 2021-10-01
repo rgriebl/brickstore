@@ -57,7 +57,7 @@ void Announcements::check()
 {
     QNetworkReply *reply = m_nam.get(QNetworkRequest(m_rawAnnouncementsUrl));
 
-    connect(reply, &QNetworkReply::finished, this, [=]() {
+    connect(reply, &QNetworkReply::finished, this, [=, this]() {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError)

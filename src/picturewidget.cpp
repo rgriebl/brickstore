@@ -125,21 +125,21 @@ PictureWidget::PictureWidget(QWidget *parent)
 #endif
 
     m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
-    connect(m_blCatalog, &QAction::triggered, this, [=]() {
+    connect(m_blCatalog, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, m_item, m_color);
     });
 
     m_blPriceGuide = new QAction(QIcon::fromTheme("bricklink-priceguide"_l1), { }, this);
-    connect(m_blPriceGuide, &QAction::triggered, this, [=]() {
+    connect(m_blPriceGuide, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, m_item, m_color);
     });
 
     m_blLotsForSale = new QAction(QIcon::fromTheme("bricklink-lotsforsale"_l1), { }, this);
-    connect(m_blLotsForSale, &QAction::triggered, this, [=]() {
+    connect(m_blLotsForSale, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, m_item, m_color);
     });
     m_reload = new QAction(QIcon::fromTheme("view-refresh"_l1), { }, this);
-    connect(m_reload, &QAction::triggered, this, [=]() {
+    connect(m_reload, &QAction::triggered, this, [this]() {
         if (m_pic) {
             m_pic->update(true);
             redraw();
@@ -147,7 +147,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     m_copyImage = new QAction(QIcon::fromTheme("edit-copy"_l1), { }, this);
-    connect(m_copyImage, &QAction::triggered, this, [=]() {
+    connect(m_copyImage, &QAction::triggered, this, [this]() {
         if (!m_image.isNull()) {
             auto clip = QGuiApplication::clipboard();
             clip->setImage(m_image);
@@ -155,7 +155,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     m_saveImageAs = new QAction(QIcon::fromTheme("document-save"_l1), { }, this);
-    connect(m_saveImageAs, &QAction::triggered, this, [=]() {
+    connect(m_saveImageAs, &QAction::triggered, this, [this]() {
         if (!m_image.isNull()) {
             QStringList filters;
             filters << tr("PNG Image") % " (*.png)"_l1;

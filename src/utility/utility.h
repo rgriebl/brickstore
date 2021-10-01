@@ -26,7 +26,7 @@ QT_FORWARD_DECLARE_CLASS(QRect)
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
 
-constexpr inline QLatin1String operator ""_l1(const char *c, size_t s)
+constexpr inline QLatin1String operator ""_l1(const char *c, std::size_t s)
 {
     return QLatin1String(c, int(s));
 }
