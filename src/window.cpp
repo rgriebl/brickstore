@@ -299,6 +299,8 @@ StatusBar::StatusBar(View *view)
     setAutoFillBackground(true);
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
 
+    int iconSize = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+
     // hide the top and bottom frame
     setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
 
@@ -319,6 +321,7 @@ StatusBar::StatusBar(View *view)
         addSeparator();
         m_order = new QToolButton();
         m_order->setIcon(QIcon::fromTheme("help-about"_l1));
+        m_order->setIconSize({ iconSize, iconSize });
         m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         m_order->setAutoRaise(true);
         layout->addWidget(m_order);
@@ -339,6 +342,7 @@ StatusBar::StatusBar(View *view)
     connect(m_differences->defaultAction(), &QAction::changed,
             this, &StatusBar::updateStatistics);
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_differences->setIconSize({ iconSize, iconSize });
     m_differences->setAutoRaise(true);
     layout->addWidget(m_differences);
 
@@ -348,6 +352,7 @@ StatusBar::StatusBar(View *view)
     connect(m_errors->defaultAction(), &QAction::changed,
             this, &StatusBar::updateStatistics);
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_errors->setIconSize({ iconSize, iconSize });
     m_errors->setAutoRaise(true);
     layout->addWidget(m_errors);
 

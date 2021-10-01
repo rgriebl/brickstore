@@ -30,6 +30,7 @@
 #include <QStringBuilder>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QStyle>
 
 #include "utility.h"
 #include "workspace.h"
@@ -105,6 +106,8 @@ private:
 Workspace::Workspace(QWidget *parent)
     : QWidget(parent)
 {
+    int iconSize = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+
     m_tabs = new QTabWidget();
     m_tabs->setElideMode(Qt::ElideMiddle);
     m_tabs->setDocumentMode(true);
@@ -116,6 +119,7 @@ Workspace::Workspace(QWidget *parent)
 
     m_tablist = new QToolButton();
     m_tablist->setIcon(QIcon::fromTheme("tab-duplicate"_l1));
+    m_tablist->setIconSize({ iconSize, iconSize });
     m_tablist->setAutoRaise(true);
     m_tablist->setPopupMode(QToolButton::InstantPopup);
     m_tablist->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -124,6 +128,7 @@ Workspace::Workspace(QWidget *parent)
 
     m_tabhome = new QToolButton();
     m_tabhome->setIcon(QIcon::fromTheme("go-home"_l1));
+    m_tabhome->setIconSize({ iconSize, iconSize });
     m_tabhome->setAutoRaise(true);
     m_tabhome->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_tabs->setCornerWidget(m_tabhome, Qt::TopLeftCorner);
@@ -132,6 +137,7 @@ Workspace::Workspace(QWidget *parent)
 
     m_tabback = new QToolButton(m_welcomeWidget);
     m_tabback->setIcon(QIcon::fromTheme("go-previous"_l1));
+    m_tabback->setIconSize({ iconSize, iconSize });
     m_tabback->setAutoRaise(true);
     m_tabback->setToolButtonStyle(Qt::ToolButtonIconOnly);
     connect(m_tabback, &QToolButton::clicked,
@@ -274,6 +280,7 @@ int Workspace::windowCount() const
 bool Workspace::eventFilter(QObject *o, QEvent *e)
 {
     if ((o == m_welcomeWidget) && (e->type() == QEvent::Resize)) {
+        m_sizeGrip->resize(m_sizeGrip->sizeHint());
         m_sizeGrip->move(width() - m_sizeGrip->width(), height() - m_sizeGrip->height());
     } else if ((o == m_welcomeWidget) && m_welcomeActive && (m_tabs->count())) {
         // handle back keys and mouse buttons
