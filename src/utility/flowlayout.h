@@ -16,21 +16,25 @@
 #include <QLayout>
 #include <QRect>
 #include <QVector>
+#include <QStyle>
 
 // based on Qt's flowlayout example
 
 class FlowLayout : public QLayout
 {
 public:
-    explicit FlowLayout(QWidget *parent, int margin = -1, int spacing = -1);
-    explicit FlowLayout(int margin = -1, int spacing = -1);
+    enum FlowMode {
+        HorizontalFirst,
+        VerticalOnly,
+    };
+
+    explicit FlowLayout(QWidget *parent, FlowMode mode, int margin = -1, int hSpacing = -1,
+                        int vSpacing = -1);
+    explicit FlowLayout(FlowMode mode, int margin = -1, int hSpacing = -1, int vSpacing = -1);
     ~FlowLayout() override;
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    int spacing() const; //Qt6 override;
-#else
-    int spacing() const override;
-#endif
+    int horizontalSpacing() const;
+    int verticalSpacing() const;
 
     int count() const override;
     QLayoutItem *itemAt(int index) const override;
@@ -38,12 +42,18 @@ public:
     void addItem(QLayoutItem *item) override;
 
     bool hasHeightForWidth() const override;
+    int heightForWidth(int width) const override;
     QSize minimumSize() const override;
     QSize sizeHint() const override;
 
     void setGeometry(const QRect &rect) override;
 
 private:
+    int smartSpacing(QStyle::PixelMetric pm) const;
+    int doLayout(const QRect &rect, bool testOnly) const;
+
     QVector<QLayoutItem *> m_items;
-    int m_space;
+    FlowMode m_mode;
+    int m_hspace;
+    int m_vspace;
 };

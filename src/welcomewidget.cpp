@@ -305,7 +305,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     // recent
 
     m_recent_frame = new QGroupBox();
-    auto recent_layout = new FlowLayout();
+    auto recent_layout = new FlowLayout(FlowLayout::VerticalOnly);
     m_recent_frame->setLayout(recent_layout);
     layout->addWidget(m_recent_frame, 1, 1, 3, 1);
 
