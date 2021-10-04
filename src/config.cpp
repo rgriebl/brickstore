@@ -157,8 +157,13 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 
     // do config upgrades as needed
     Q_UNUSED(cfgver) // remove if upgrades are needed
-//    if (cfgver < mkver(2021, 1, 1)) {
-//    }
+    if (cfgver < mkver(2021, 10, 1)) {
+        // update IconSize to IconSizeEnum
+        int oldSize = value("Interface/IconSize"_l1, 0).toInt();
+        if (oldSize)
+            oldSize = qBound(0, (oldSize - 12) / 10, 2); // 22->1, 32->2
+        setValue("Interface/IconSizeEnum"_l1, oldSize);
+    }
 }
 
 QStringList Config::recentFiles() const
@@ -342,19 +347,6 @@ void Config::setFontSizePercent(int p)
     if (oldp != p) {
         setValue("Interface/FontSizePercent"_l1, qBound(50, p, 200));
         emit fontSizePercentChanged(p);
-    }
-}
-
-void Config::setIconSize(const QSize &iconSize)
-{
-    if (!iconSize.isValid() || (iconSize.width() != iconSize.height()))
-        return;
-
-    auto oldIconSize = this->iconSize();
-
-    if (oldIconSize != iconSize) {
-        setValue("Interface/IconSize"_l1, iconSize.width());
-        emit iconSizeChanged(iconSize);
     }
 }
 
@@ -647,10 +639,18 @@ int Config::itemImageSizePercent() const
     return value("Interface/ItemImageSizePercent"_l1, 100).toInt();
 }
 
-QSize Config::iconSize() const
+Config::IconSize Config::iconSize() const
 {
-    int s = value("Interface/IconSize"_l1, 0).toInt();
-    return { s, s };
+    int s = value("Interface/IconSizeEnum"_l1, 0).toInt();
+    return static_cast<IconSize>(qBound(0, s, 2));
+}
+
+void Config::setIconSize(IconSize iconSize)
+{
+    if (this->iconSize() != iconSize) {
+        setValue("Interface/IconSizeEnum"_l1, int(iconSize));
+        emit iconSizeChanged(iconSize);
+    }
 }
 
 bool Config::parseTranslations() const

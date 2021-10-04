@@ -1030,14 +1030,7 @@ void SettingsDialog::load()
 
     // --[ INTERFACE ]-------------------------------------------------
 
-    int iconSizeIndex = 0;
-    auto iconSize = Config::inst()->iconSize();
-    if (iconSize == QSize(22, 22))
-        iconSizeIndex = 1;
-    else if (iconSize == QSize(32, 32))
-        iconSizeIndex = 2;
-
-    w_icon_size->setCurrentIndex(iconSizeIndex);
+    w_icon_size->setCurrentIndex(int(Config::inst()->iconSize()));
     w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
 
     w_item_image_size->setValue(Config::inst()->itemImageSizePercent() / 10);
@@ -1097,14 +1090,7 @@ void SettingsDialog::save()
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 
-    int iconWidth = 0;
-    switch (w_icon_size->currentIndex()) {
-    case 1: iconWidth = 22; break;
-    case 2: iconWidth = 32; break;
-    default: break;
-    }
-
-    Config::inst()->setIconSize(QSize(iconWidth, iconWidth));
+    Config::inst()->setIconSize(static_cast<Config::IconSize>(w_icon_size->currentIndex()));
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
 
     Config::inst()->setItemImageSizePercent(w_item_image_size->value() * 10);

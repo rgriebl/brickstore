@@ -86,7 +86,15 @@ public:
 
     QVector<Translation> translations() const;
 
-    QSize iconSize() const;
+    enum class IconSize {
+        System,
+        Small,
+        Large,
+    };
+
+    IconSize iconSize() const;
+    void setIconSize(IconSize iconSize);
+
     int fontSizePercent() const;
     int itemImageSizePercent() const;
 
@@ -140,7 +148,6 @@ public slots:
     void setBrickLinkCredentials(const QString &user, const QString &pass);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
-    void setIconSize(const QSize &iconSize);
     void setFontSizePercent(int p);
     void setItemImageSizePercent(int p);
 
@@ -160,7 +167,7 @@ signals:
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void recentFilesChanged(const QStringList &recent);
-    void iconSizeChanged(const QSize &iconSize);
+    void iconSizeChanged(IconSize iconSize);
     void fontSizePercentChanged(int p);
     void itemImageSizePercentChanged(int p);
     void columnLayoutChanged(const QString &id, const QByteArray &layout);

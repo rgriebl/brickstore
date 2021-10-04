@@ -452,13 +452,15 @@ FrameWork::FrameWork(QWidget *parent)
 
     // ^^^ increase DockStateVersion if you change the dock/toolbar setup
 
-    auto setIconSizeLambda = [this](const QSize &iconSize) {
-        if (iconSize.isNull()) {
-            int s = style()->pixelMetric(QStyle::PM_ToolBarIconSize, nullptr, this);
-            m_toolbar->setIconSize(QSize(s, s));
-        } else {
-            m_toolbar->setIconSize(iconSize);
-        }
+    auto setIconSizeLambda = [this](Config::IconSize iconSize) {
+        static const QMap<Config::IconSize, QStyle::PixelMetric> map = {
+            { Config::IconSize::System, QStyle::PM_ToolBarIconSize },
+            { Config::IconSize::Small, QStyle::PM_SmallIconSize },
+            { Config::IconSize::Large, QStyle::PM_LargeIconSize },
+        };
+        auto pm = map.value(iconSize, QStyle::PM_ToolBarIconSize);
+        int s = style()->pixelMetric(pm, nullptr, this);
+        m_toolbar->setIconSize(QSize(s, s));
     };
     connect(Config::inst(), &Config::iconSizeChanged, this, setIconSizeLambda);
     setIconSizeLambda(Config::inst()->iconSize());
