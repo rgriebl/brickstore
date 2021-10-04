@@ -71,7 +71,7 @@ BrickStore_VERSION_MINOR = $$VERSION_MINOR
 BrickStore_VERSION_PATCH = $$VERSION_PATCH
 substitute($$PWD/src/version.h.in, $$OUT_PWD/src/version.h)
 
-INCLUDEPATH = $$OUT_PWD/src  # for version.h
+INCLUDEPATH *= $$OUT_PWD/src  # for version.h
 
 OTHER_FILES += \
   .gitignore \

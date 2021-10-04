@@ -13,6 +13,8 @@
 */
 #pragma once
 
+#include <algorithm>
+
 #include <QString>
 #include <QColor>
 #include <QLocale>
@@ -20,6 +22,10 @@
 #include <QImage>
 #include <QKeySequence>
 #include <QStringBuilder>
+
+#if defined(Q_OS_WINDOWS) && defined(max)
+#  undef max
+#endif
 
 QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)
