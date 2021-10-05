@@ -713,7 +713,7 @@ public:
     bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version) const;
 
 public slots:
-    void setOnlineStatus(bool on);
+    void setOnlineStatus(bool isOnline);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void cancelTransfers();

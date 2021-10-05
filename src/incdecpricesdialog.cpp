@@ -106,7 +106,7 @@ void IncDecPricesDialog::switchType(int type)
         m_value->setRange(-99, 1000);
         m_value->setDecimals(2);
     } else { // fixed
-        m_value->setRange(-FrameWork::maxPrice, FrameWork::maxPrice);
+        m_value->setRange(-Document::maxPrice, Document::maxPrice);
         m_value->setDecimals(3);
     }
 }

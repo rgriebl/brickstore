@@ -64,9 +64,6 @@ public:
     View *activeView() const;
     void setActiveView(View *view);
 
-    static constexpr int maxQuantity = 9999999;
-    static constexpr double maxPrice = 99999;
-
 public slots:
     void openDocument(const QString &file);
 
@@ -93,8 +90,6 @@ private slots:
     void transferProgressUpdate(int p, int t);
 
     void showSettings(const char *page = nullptr);
-
-    void cancelAllTransfers(bool force = false);
     void showAddItemDialog();
 
     void onlineStateChanged(bool isOnline);
@@ -107,7 +102,6 @@ protected:
    void closeEvent(QCloseEvent *e) override;
 
 private:
-    void setBrickLinkUpdateIntervals();
     bool checkBrickLinkLogin();
 
 public:
@@ -147,7 +141,6 @@ private:
     QPointer<ImportCartDialog> m_importcart_dialog;
     QPointer<CheckForUpdates> m_checkForUpdates;
     QPointer<Announcements> m_announcements;
-    bool m_running;
     UndoGroup *m_undogroup;
 
     friend class DocumentDelegate;

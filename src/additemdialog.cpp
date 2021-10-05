@@ -97,17 +97,17 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_appears_in->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_appears_in->setLineWidth(2);
 
-    w_qty->setRange(1, FrameWork::maxQuantity);
+    w_qty->setRange(1, Document::maxQuantity);
     w_qty->setValue(1);
     w_qty->installEventFilter(this);
 
-    w_bulk->setRange(1, FrameWork::maxQuantity);
+    w_bulk->setRange(1, Document::maxQuantity);
     w_bulk->setValue(1);
     w_bulk->installEventFilter(this);
 
-    w_price->setRange(0, FrameWork::maxPrice);
+    w_price->setRange(0, Document::maxPrice);
     w_price->installEventFilter(this);
-    w_cost->setRange(0, FrameWork::maxPrice);
+    w_cost->setRange(0, Document::maxPrice);
     w_cost->installEventFilter(this);
 
     w_tier_qty[0] = w_tier_qty_0;
@@ -118,8 +118,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_tier_price[2] = w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
-        w_tier_qty[i]->setRange(0, FrameWork::maxQuantity);
-        w_tier_price[i]->setRange(0, FrameWork::maxPrice);
+        w_tier_qty[i]->setRange(0, Document::maxQuantity);
+        w_tier_price[i]->setRange(0, Document::maxPrice);
         w_tier_qty[i]->setValue(0);
         w_tier_price[i]->setValue(0);
         w_tier_qty[i]->installEventFilter(this);
@@ -474,7 +474,7 @@ void AddItemDialog::setTierType(int type)
             tp->setRange(0, 99);
             tp->setDecimals(0);
         } else {
-            tp->setRange(0, FrameWork::maxPrice);
+            tp->setRange(0, Document::maxPrice);
             tp->setDecimals(3);
         }
         tp->setValue(0);

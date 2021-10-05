@@ -802,19 +802,19 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     case Document::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(R"([a-zA-Z0-9._-]+)"_l1), nullptr); break;
     case Document::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case Document::Quantity    :
-    case Document::QuantityDiff: valid = new SmartIntValidator(-FrameWork::maxQuantity,
-                                                               FrameWork::maxQuantity, 0, nullptr); break;
-    case Document::Bulk        : valid = new SmartIntValidator(1, FrameWork::maxQuantity, 1, nullptr); break;
+    case Document::QuantityDiff: valid = new SmartIntValidator(-Document::maxQuantity,
+                                                               Document::maxQuantity, 0, nullptr); break;
+    case Document::Bulk        : valid = new SmartIntValidator(1, Document::maxQuantity, 1, nullptr); break;
     case Document::TierQ1      :
     case Document::TierQ2      :
-    case Document::TierQ3      : valid = new SmartIntValidator(0, FrameWork::maxQuantity, 0, nullptr); break;
+    case Document::TierQ3      : valid = new SmartIntValidator(0, Document::maxQuantity, 0, nullptr); break;
     case Document::Price       :
     case Document::Cost        :
     case Document::TierP1      :
     case Document::TierP2      :
-    case Document::TierP3      : valid = new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, nullptr); break;
-    case Document::PriceDiff   : valid = new SmartDoubleValidator(-FrameWork::maxPrice,
-                                                                  FrameWork::maxPrice, 3, 0, nullptr); break;
+    case Document::TierP3      : valid = new SmartDoubleValidator(0, Document::maxPrice, 3, 0, nullptr); break;
+    case Document::PriceDiff   : valid = new SmartDoubleValidator(-Document::maxPrice,
+                                                                  Document::maxPrice, 3, 0, nullptr); break;
     case Document::Weight      : valid = new SmartDoubleValidator(0., 100000., 2, 0, nullptr); break;
     default                    : break;
     }

@@ -387,7 +387,6 @@ FrameWork::FrameWork(QWidget *parent)
 {
     s_inst = this;
 
-    m_running = false;
     m_progress = nullptr;
 
     // keep QTBUG-39781 in mind: we cannot use QOpenGLWidget directly
@@ -612,8 +611,6 @@ FrameWork::FrameWork(QWidget *parent)
         MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
     }
 
-    m_running = true;
-
     updateActions();    // init enabled/disabled status of document actions
     connectView(nullptr);
 
@@ -690,11 +687,6 @@ FrameWork::FrameWork(QWidget *parent)
 
 void FrameWork::setupScripts()
 {
-    if (!ScriptManager::inst()->initialize(BrickLink::core())) {
-        MessageBox::warning(nullptr, { }, tr("Could not initialize the JavaScript scripting environment."));
-        return;
-    }
-
     auto reloadScripts = [this](const QVector<Script *> &scripts) {
         QList<QAction *> extrasActions;
 
@@ -739,7 +731,6 @@ void FrameWork::setupScripts()
         auto actions = m_extrasMenu->actions();
         bool deleteRest = false;
         for (QAction *a : qAsConst(actions)) {
-            qWarning() << a->objectName() << deleteRest;
             if (a->objectName() == "scripts-start"_l1)
                 deleteRest = true;
             else if (a->objectName() == "scripts-end"_l1)
@@ -1980,12 +1971,8 @@ void FrameWork::showSettings(const char *page)
 
 void FrameWork::onlineStateChanged(bool isOnline)
 {
-    BrickLink::core()->setOnlineStatus(isOnline);
     if (m_progress)
         m_progress->setOnlineState(isOnline);
-    if (!isOnline)
-        cancelAllTransfers(true);
-
     updateActions();
 }
 
@@ -2023,15 +2010,6 @@ QVector<View *> FrameWork::allViews() const
     foreach(QWidget *w, m_workspace->windowList())
         all << static_cast<View *>(w);
     return all;
-}
-
-void FrameWork::cancelAllTransfers(bool force)
-{
-    if (force || (MessageBox::question(nullptr, { },
-                                       tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?")
-                                       ) == QMessageBox::Yes)) {
-        BrickLink::core()->cancelTransfers();
-    }
 }
 
 void FrameWork::showAddItemDialog()

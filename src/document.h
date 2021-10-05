@@ -103,6 +103,8 @@ public:
     Q_DECLARE_FLAGS(MergeModes, MergeMode)
     Q_FLAG(MergeMode)
 
+    static constexpr int maxQuantity = 9999999;
+    static constexpr double maxPrice = 99999;
 
     class Statistics
     {

@@ -192,7 +192,6 @@ Application::Application(int &_argc, char **_argv)
     connect(Config::inst(), &Config::uiThemeChanged, this, &Application::setUiTheme);
     setIconTheme();
     (void) Currency::inst();
-    (void) ScriptManager::inst();
     (void) SystemInfo::inst();
 
     m_default_fontsize = QGuiApplication::font().pointSizeF();
@@ -244,6 +243,9 @@ Application::Application(int &_argc, char **_argv)
     // tranform . or , into the local decimal separator in all QDoubleSpinBoxes and all
     // QLineEdits with a SmartDoubleValidator set
     DotCommaFilter::install();
+
+    if (!ScriptManager::inst()->initialize(BrickLink::core()))
+        MessageBox::warning(nullptr, { }, tr("Could not initialize the JavaScript scripting environment."));
 
     FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)
@@ -806,6 +808,8 @@ bool Application::initBrickLink()
             MessageBox::warning(nullptr, { }, tr("Failed to authenticate with BrickLink as user %1")
                                 .arg(userName) % u"<br><b>" % error % u"</b>");
         });
+        connect(this, &Application::onlineStateChanged,
+                BrickLink::core(), &BrickLink::Core::setOnlineStatus);
     }
     return bl;
 }

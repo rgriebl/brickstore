@@ -528,9 +528,11 @@ bool Core::updateNeeded(bool valid, const QDateTime &last, int iv)
     return (iv > 0) && (!valid || (last.secsTo(QDateTime::currentDateTime()) > iv));
 }
 
-void Core::setOnlineStatus(bool on)
+void Core::setOnlineStatus(bool isOnline)
 {
-    m_online = on;
+    m_online = isOnline;
+    if (!isOnline)
+        cancelTransfers();
 }
 
 bool Core::onlineStatus() const

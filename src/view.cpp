@@ -1853,7 +1853,7 @@ void View::on_edit_price_set_triggered()
     double price = selectedLots().front()->price();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
-                              m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), price, 0, Document::maxPrice, 3)) {
         applyTo(selectedLots(), [price](const auto &from, auto &to) {
             (to = from).setPrice(price); return true;
         });
@@ -2071,7 +2071,7 @@ void View::on_edit_cost_set_triggered()
     double cost = selectedLots().front()->cost();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
-                              m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), cost, 0, Document::maxPrice, 3)) {
         applyTo(selectedLots(), [cost](const auto &from, auto &to) {
             (to = from).setCost(cost); return true;
         });
@@ -2128,7 +2128,7 @@ void View::on_edit_cost_spread_triggered()
     double spreadAmount = 0;
 
     if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
-                              m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), spreadAmount, 0, Document::maxPrice, 3)) {
         double priceTotal = 0;
 
         foreach (Lot *item, selectedLots())
@@ -2191,7 +2191,7 @@ void View::on_edit_qty_multiply_triggered()
             return;
 
         int lotsTooLarge = 0;
-        int maxQty = FrameWork::maxQuantity / qAbs(factor);
+        int maxQty = Document::maxQuantity / qAbs(factor);
 
         foreach(Lot *item, selectedLots()) {
             if (qAbs(item->quantity()) > maxQty)
@@ -2201,7 +2201,7 @@ void View::on_edit_qty_multiply_triggered()
         if (lotsTooLarge) {
             MessageBox::information(this, { },
                                     tr("The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.<br><br>Nothing has been modified.",
-                                       nullptr, lotsTooLarge).arg(factor).arg(FrameWork::maxQuantity));
+                                       nullptr, lotsTooLarge).arg(factor).arg(Document::maxQuantity));
             return;
         }
 
@@ -2265,7 +2265,7 @@ void View::on_edit_qty_set_triggered()
     int quantity = selectedLots().front()->quantity();
 
     if (MessageBox::getInteger(this, { }, tr("Enter the new quantities for all selected items:"),
-                               QString(), quantity, -FrameWork::maxQuantity, FrameWork::maxQuantity)) {
+                               QString(), quantity, -Document::maxQuantity, Document::maxQuantity)) {
         applyTo(selectedLots(), [quantity](const auto &from, auto &to) {
             (to = from).setQuantity(quantity); return true;
         });
