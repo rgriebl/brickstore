@@ -45,7 +45,7 @@ jobs:
 
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
-          os: ubuntu-18.04
+          os: ubuntu-20.04
           appimage: true
           qt_version: '5.15.2'
           qt_arch: ''
