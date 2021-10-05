@@ -145,11 +145,11 @@ if (NOT BACKEND_ONLY)
         taskwidgets.h
         updatedatabase.cpp
         updatedatabase.h
+        view.cpp
+        view.h
+        view_p.h
         welcomewidget.cpp
         welcomewidget.h
-        window.cpp
-        window.h
-        window_p.h
 
         ldraw/renderwidget.h
         ldraw/renderwidget.cpp

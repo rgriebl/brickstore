@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.10.1] - 2021-10-07
+### Added
+- This release brings back the classic filter mechanism from the old BrickStore versions, but it
+  also adds a lot of convenience functionality:
+  - The fields to filter on are limited to the currently visible columns.
+  - If a fields has a limited set of possible values (e.g., colors, status, condition), these
+    values can be auto-completed while typing or just picked from a drop-down list.
+  - Even complex filters can be (de)activated by a single click on the filter icon.
+- Added support for simple calculations on all numeric document fields. Columns such as price or
+  quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation
+  term (e.g. `=+42` to add 42 to all selected values).
+
+  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being
+  a valid integer or floating-point number (depending on the column's data type).
+
+### Improvements
+- Fixed a few problems with failing authentications against the BrickLink servers.
+
+### Technical Changes
+- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20
+  respectively.
+- BrickStore can be built against Qt 6.2 now, but a few small features are still missing.
+
+
 ## [2021.6.1] - 2021-06-02
 ### Added
 - Added support for light and dark themes for all platforms. This uses the native themeing on
@@ -315,7 +339,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.6.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.10.1...HEAD
+[2021.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.1
 [2021.6.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.6.1
 [2021.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.2
 [2021.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.1
