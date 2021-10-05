@@ -626,8 +626,6 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     switch (e->type()) {
     case QEvent::KeyPress:
     case QEvent::MouseButtonDblClick: {
-        m_multiEdit = true; /*(e->type() == QEvent::KeyPress)
-                && (static_cast<QInputEvent *>(e)->modifiers() & Qt::ControlModifier);*/
         if (nonInlineEdit(e, option, idx))
             return true;
         break;
@@ -830,7 +828,6 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     if (valid)
         m_lineedit->setValidator(valid);
-    m_multiEdit = true; /*(qApp->keyboardModifiers() & Qt::ControlModifier);*/
 
     return m_lineedit;
 }
@@ -955,13 +952,9 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItemModel *model,
                                             const QModelIndex &index) const
 {
-    if (!m_multiEdit) {
-        model->setData(index, value);
-    } else {
-        auto selection = m_table->selectionModel()->selectedRows();
-        for (const auto &s : selection)
-            model->setData(index.siblingAtRow(s.row()), value);
-    }
+    auto selection = m_table->selectionModel()->selectedRows();
+    for (const auto &s : selection)
+        model->setData(index.siblingAtRow(s.row()), value);
 }
 
 QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool differenceBase)

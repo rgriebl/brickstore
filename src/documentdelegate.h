@@ -77,7 +77,6 @@ protected:
     QPointer<SelectItemDialog> m_select_item;
     QPointer<SelectColorDialog> m_select_color;
     mutable QPointer<QLineEdit> m_lineedit;
-    mutable bool m_multiEdit = false;
     bool m_read_only = false;
     mutable QSet<quint64> m_elided;
 
