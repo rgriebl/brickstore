@@ -32,6 +32,7 @@
 #include <QStyleFactory>
 #include <QMessageBox>
 #include <QPixmapCache>
+#include <QImageReader>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -209,8 +210,16 @@ Application::Application(int &_argc, char **_argv)
 
     // check for an already running instance
     if (isClient()) {
-        // we cannot call quit directly, since there is
-        // no event loop to quit from...
+        // we cannot call quit directly, since there is no event loop to quit from...
+        QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
+        return;
+    }
+
+    // sanity check - we might run into endless update loops later on if one of these is missing
+    const auto imgFormats = QImageReader::supportedImageFormats();
+    if (!imgFormats.contains("png") || !imgFormats.contains("jpg") || !imgFormats.contains("gif")) {
+        MessageBox::critical(nullptr, { }, tr("Your installation is broken: image format plugins are missing!"));
+        // we cannot call quit directly, since there is no event loop to quit from...
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
