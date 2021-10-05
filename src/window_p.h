@@ -161,6 +161,8 @@ signals:
 protected:
     void paintEvent(QPaintEvent *) override;
     void emitFilterChanged();
+    void updateValueModel(int field);
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     View *m_view;

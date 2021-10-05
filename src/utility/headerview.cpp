@@ -261,6 +261,12 @@ HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
             emit sortColumnsChanged(m_sortColumns);
         }
     });
+
+    connect(this, &QHeaderView::sectionMoved,
+            this, [this](int li, int oldVi, int newVi) {
+        if (!isSectionHidden(li) && (oldVi != newVi))
+            emit visualColumnOrderChanged(visualColumnOrder());
+    });
 }
 
 HeaderView::~HeaderView()
@@ -316,6 +322,18 @@ void HeaderView::setSorted(bool b)
         update();
         emit isSortedChanged(b);
     }
+}
+
+QVector<int> HeaderView::visualColumnOrder() const
+{
+    QVector<int> order;
+
+    for (int vi = 0; vi < count(); ++vi) {
+        int li = logicalIndex(vi);
+        if (!isSectionHidden(li))
+            order << li;
+    }
+    return order;
 }
 
 #define CONFIG_HEADER qint32(0x3b285931)
@@ -439,6 +457,8 @@ void HeaderView::setSectionHidden(int logicalIndex, bool hide)
             m_hiddenSizes.erase(it);
         }
     }
+    if (hide != hidden)
+        emit visualColumnOrderChanged(visualColumnOrder());
 }
 
 void HeaderView::resizeSection(int logicalIndex, int size)

@@ -43,6 +43,7 @@
 #include <QStackedLayout>
 #include <QButtonGroup>
 #include <QCompleter>
+#include <QStringListModel>
 
 #include "utility/messagebox.h"
 #include "config.h"
@@ -77,9 +78,11 @@ class TransparentComboProxyStyle : public QProxyStyle
     // pixels to small on macOS, leading to weird layout issues.
 
 public:
-    TransparentComboProxyStyle()
+    TransparentComboProxyStyle(QObject *parent = nullptr)
         : QProxyStyle()
     {
+        if (parent)
+            setParent(parent);
 #if !defined(Q_OS_MACOS)
         QStyle *baseStyle = QStyleFactory::create("fusion"_l1);
         setBaseStyle(baseStyle);
@@ -384,20 +387,24 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
     m_fields = new QComboBox();
     m_fields->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_fields->setObjectName("filter-fields"_l1);
-    m_fields->setStyle(new TransparentComboProxyStyle());
+    m_fields->setStyle(new TransparentComboProxyStyle(m_fields));
     m_comparisons = new QComboBox();
     m_comparisons->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_comparisons->setObjectName("filter-comparisons"_l1);
-    m_comparisons->setStyle(new TransparentComboProxyStyle());
+    m_comparisons->setStyle(new TransparentComboProxyStyle(m_comparisons));
     m_value = new QComboBox();
     m_value->setEditable(true);
-    m_value->setMinimumContentsLength(20);
+    m_value->setMinimumContentsLength(16);
+    m_value->setInsertPolicy(QComboBox::NoInsert);
+    m_value->setMaxVisibleItems(30);
     m_value->lineEdit()->setPlaceholderText(tr("Filter expression"));
     m_value->lineEdit()->setClearButtonEnabled(true);
+    m_value->completer()->setCaseSensitivity(Qt::CaseInsensitive);
     m_value->completer()->setCompletionMode(QCompleter::PopupCompletion);
-    m_value->setItemDelegate(new QStyledItemDelegate());
-    m_value->setMaxVisibleItems(30);
-    m_value->setStyle(new TransparentComboProxyStyle());
+    m_value->completer()->setFilterMode(Qt::MatchContains);
+    m_value->completer()->setMaxVisibleItems(m_value->maxVisibleItems());
+    m_value->setItemDelegate(new QStyledItemDelegate(m_value));
+    m_value->setStyle(new TransparentComboProxyStyle(m_value));
     m_value->setObjectName("filter-value"_l1);
     auto bdel = new QToolButton();
     bdel->setAutoRaise(true);
@@ -443,46 +450,51 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
     layout->addWidget(band);
     layout->addWidget(bor);
 
-    if (view && view->document()->filterParser()) {
-        const auto anyToken = view->document()->filterParser()->fieldTokens().constFirst();
+    auto populateFields = [this]() {
+        int oldField = m_filter.field();
+        m_fields->clear();
+
+        const auto anyToken = m_view->document()->filterParser()->fieldTokens().constFirst();
         m_fields->insertItem(m_fields->count(), anyToken.second, anyToken.first);
 
-        QVector<Document::Field> cols = view->currentColumnOrder();
-        for (const auto &col : cols) {
-            if (view->document()->headerData(col, Qt::Horizontal, Document::HeaderFilterableRole).toBool()) {
-                auto colName = view->document()->headerData(col, Qt::Horizontal).toString();
-                m_fields->insertItem(m_fields->count(), colName, int(col));
+        const QVector<int> cols = m_view->currentColumnOrder();
+        for (int col : cols) {
+            if (m_view->document()->headerData(col, Qt::Horizontal, Document::HeaderFilterableRole).toBool()) {
+                auto colName = m_view->document()->headerData(col, Qt::Horizontal).toString();
+                m_fields->insertItem(m_fields->count(), colName, col);
             }
         }
         m_fields->setMaxVisibleItems(m_fields->count() + 1);
-        m_fields->setCurrentIndex(m_fields->findData(filter.field()));
+        m_fields->setCurrentIndex(qMax(0, m_fields->findData(oldField)));
+    };
+    connect(m_view, &View::currentColumnOrderChanged, this, populateFields);
+    populateFields();
 
-        const auto compTokens = view->document()->filterParser()->comparisonTokens();
-        Filter::Comparisons comp { };
-        for (const auto &token : compTokens) {
-            if (comp & token.first)
-                continue;
-            comp |= token.first;
-            m_comparisons->insertItem(m_comparisons->count(), token.second, token.first);
-            if (filter.comparison() == token.first)
-                m_comparisons->setCurrentIndex(m_comparisons->count() - 1);
-        }
-        m_comparisons->setMaxVisibleItems(m_comparisons->count());
+    const auto compTokens = view->document()->filterParser()->comparisonTokens();
+    Filter::Comparisons comp { };
+    for (const auto &token : compTokens) {
+        if (comp & token.first)
+            continue;
+        comp |= token.first;
+        m_comparisons->insertItem(m_comparisons->count(), token.second, token.first);
+        if (filter.comparison() == token.first)
+            m_comparisons->setCurrentIndex(m_comparisons->count() - 1);
+    }
+    m_comparisons->setMaxVisibleItems(m_comparisons->count());
 
-        const auto combTokens = view->document()->filterParser()->combinationTokens();
-        Filter::Combinations comb;
-        for (const auto &token : combTokens) {
-            if (comb & token.first)
-                continue;
-            comb |= token.first;
-            bool check = (filter.combination() == token.first);
-            if (token.first == Filter::Combination::And) {
-                band->setText(token.second);
-                band->setChecked(check);
-            } else if (token.first == Filter::Combination::Or) {
-                bor->setText(token.second);
-                bor->setChecked(check);
-            }
+    const auto combTokens = view->document()->filterParser()->combinationTokens();
+    Filter::Combinations comb;
+    for (const auto &token : combTokens) {
+        if (comb & token.first)
+            continue;
+        comb |= token.first;
+        bool check = (filter.combination() == token.first);
+        if (token.first == Filter::Combination::And) {
+            band->setText(token.second);
+            band->setChecked(check);
+        } else if (token.first == Filter::Combination::Or) {
+            bor->setText(token.second);
+            bor->setChecked(check);
         }
     }
 
@@ -493,28 +505,66 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
             emitFilterChanged();
         }
     });
-    connect(m_fields, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [&](int index) {
-        auto model = m_view->document()->headerData(m_fields->itemData(index).toInt(),
-                                                    Qt::Horizontal,
-                                                    Document::HeaderValueModelRole)
-                .value<QAbstractItemModel *>();
-        if (model) {
-            model->setParent(m_value); // the combobox now owns the model
-            m_value->setModel(model);
-        } else {
-            m_value->clear();
-        }
+    connect(m_fields, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, [&](int index) {
+        updateValueModel(m_fields->itemData(index).toInt());
         emitFilterChanged();
+        m_value->setFocus();
     });
+    updateValueModel(filter.field());
+
+    int valueIndex = m_value->findText(filter.expression(), Qt::MatchFixedString);
+    if (valueIndex >= 0)
+        m_value->setCurrentIndex(valueIndex);
+    else
+        m_value->setCurrentText(filter.expression());
+
     connect(m_comparisons, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &FilterTermWidget::emitFilterChanged);
+            this, [&]() {
+        emitFilterChanged();
+        m_value->setFocus();
+    });
     connect(m_value, &QComboBox::currentTextChanged, [this]() {
         m_filter_delay->start();
     });
     connect(m_filter_delay, &QTimer::timeout,
             this, &FilterTermWidget::emitFilterChanged);
+
+    m_value->installEventFilter(this);
 }
 
+void FilterTermWidget::updateValueModel(int field)
+{
+    auto model = m_view->document()->headerData(field, Qt::Horizontal,
+                                                Document::HeaderValueModelRole)
+            .value<QAbstractItemModel *>();
+    QString oldEditText = m_value->currentText();
+    if (model) {
+        model->setParent(m_value); // the combobox now owns the model
+        m_value->setModel(model);
+        m_value->setCurrentIndex(-1);
+    } else {
+        m_value->setModel(new QStringListModel(m_value));
+    }
+    m_value->setEditText(oldEditText);
+}
+
+bool FilterTermWidget::eventFilter(QObject *o, QEvent *e)
+{
+    if ((o == m_value) && (e->type() == QEvent::FocusIn)) {
+        auto fe = static_cast<QFocusEvent *>(e);
+        static const QVector<Qt::FocusReason> validReasons = {
+            Qt::MouseFocusReason, Qt::TabFocusReason, Qt::BacktabFocusReason,
+            Qt::ShortcutFocusReason, Qt::OtherFocusReason
+        };
+        if (validReasons.contains(fe->reason())) {
+            QMetaObject::invokeMethod(m_value, [&]() {
+                m_value->completer()->complete();
+            }, Qt::QueuedConnection);
+        }
+    }
+    return QWidget::eventFilter(o, e);
+}
 
 void FilterTermWidget::paintEvent(QPaintEvent *)
 {
@@ -921,9 +971,11 @@ void StatusBar::addFilter(const Filter &filter)
 
 void StatusBar::setFilter(const Filter &filter)
 {
-    m_filter->setChecked(true);
     m_filterList.clear();
+    qDeleteAll(m_filterFlow->findChildren<FilterTermWidget *>());
     addFilter(filter);
+    if (!m_filter->isChecked())
+        m_filter->setChecked(true);
 }
 
 void StatusBar::focusFilter()
@@ -1049,6 +1101,8 @@ View::View(Document *doc, const QByteArray &columnLayout, const QByteArray &sort
         if (w_header->sortColumns() != sortColumns)
             w_header->setSortColumns(sortColumns);
     });
+    connect(w_header, &HeaderView::visualColumnOrderChanged,
+            this, &View::currentColumnOrderChanged);
 
     // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
     // items. The docs are a bit undecided if you should really do that, but it really helps
@@ -1179,16 +1233,9 @@ QByteArray View::currentColumnLayout() const
     return w_header->saveLayout();
 }
 
-QVector<Document::Field> View::currentColumnOrder() const
+QVector<int> View::currentColumnOrder() const
 {
-    QVector<Document::Field> result;
-
-    for (int vi = 0; vi < w_header->count(); ++vi) {
-        int li = w_header->logicalIndex(vi);
-        if (!w_header->isSectionHidden(li))
-            result << Document::Field(li);
-    }
-    return result;
+    return w_header->visualColumnOrder();
 }
 
 bool View::isBlockingOperationActive() const

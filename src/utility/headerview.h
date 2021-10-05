@@ -38,12 +38,15 @@ public:
     bool isSorted() const;
     void setSorted(bool b);
 
+    QVector<int> visualColumnOrder() const;
+
     bool restoreLayout(const QByteArray &config);
     QByteArray saveLayout() const;
 
 signals:
     void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &sortColumns);
     void isSortedChanged(bool b);
+    void visualColumnOrderChanged(const QVector<int> &newOrder);
 
 protected:
     bool viewportEvent(QEvent *e) override;

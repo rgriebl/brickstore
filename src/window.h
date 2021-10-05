@@ -96,7 +96,7 @@ public:
 
     QByteArray currentColumnLayout() const;
 
-    QVector<Document::Field> currentColumnOrder() const;
+    QVector<int> currentColumnOrder() const;
 
     bool isBlockingOperationActive() const;
     void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
@@ -215,6 +215,7 @@ signals:
     void blockingOperationCancelableChanged(bool cancelable);
     void blockingOperationTitleChanged(const QString &title);
     void blockingOperationProgress(int done, int total);
+    void currentColumnOrderChanged(const QVector<int> &newOrder);
 
 protected:
     void closeEvent(QCloseEvent *e) override;

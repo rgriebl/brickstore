@@ -1624,10 +1624,10 @@ void Document::initializeColumns()
           .title = QT_TR_NOOP("Color"),
           .valueModelFn = [&]() {
               auto model = new BrickLink::ColorModel(nullptr);
+              model->sort(0, Qt::AscendingOrder);
               QSet<const BrickLink::Color *> colors;
-              for (const auto &lot : qAsConst(m_lots)) {
+              for (const auto &lot : qAsConst(m_lots))
                   colors.insert(lot->color());
-              }
               model->setColorListFilter(QVector<const BrickLink::Color *>(colors.cbegin(), colors.cend()));
               return model;
           },
