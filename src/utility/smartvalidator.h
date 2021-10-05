@@ -16,6 +16,8 @@
 #include <QString>
 #include <QValidator>
 
+QT_FORWARD_DECLARE_CLASS(QRegularExpressionValidator)
+
 
 class SmartDoubleValidator : public QDoubleValidator
 {
@@ -26,11 +28,13 @@ public:
     SmartDoubleValidator(double bottom, double top, int decimals, double empty, QObject *parent);
 
 protected:
+    QValidator::State validate(QString &input, int &pos) const override;
     void fixup(QString &str) const override;
     bool event(QEvent *event) override;
 
 private:
     double m_empty;
+    QRegularExpressionValidator *m_regexp;
 };
 
 
@@ -43,11 +47,13 @@ public:
     SmartIntValidator(int bottom, int top, int empty, QObject *parent);
 
 protected:
+    QValidator::State validate(QString &input, int &pos) const override;
     void fixup(QString &str) const override;
     bool event(QEvent *event) override;
 
 private:
     int m_empty;
+    QRegularExpressionValidator *m_regexp;
 };
 
 

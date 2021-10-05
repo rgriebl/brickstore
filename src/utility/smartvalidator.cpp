@@ -15,8 +15,10 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QRegularExpressionValidator>
 #include <QDebug>
 
+#include "utility/utility.h"
 #include "smartvalidator.h"
 
 
@@ -79,17 +81,33 @@ bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
 
 
 SmartDoubleValidator::SmartDoubleValidator(QObject *parent)
-    : QDoubleValidator(parent)
-    , m_empty(0)
+    : SmartDoubleValidator(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(),
+                           1000, 0, parent)
+{ }
+
+SmartDoubleValidator::SmartDoubleValidator(double bottom, double top, int decimals, double empty,
+                                           QObject *parent)
+    : QDoubleValidator(bottom, top, decimals, parent)
+    , m_empty(empty)
+    , m_regexp(new QRegularExpressionValidator(QRegularExpression(R"(=[*\/\+-]-?[.,\d]+)"_l1), this))
 {
     DotCommaFilter::install();
 }
 
-SmartDoubleValidator::SmartDoubleValidator(double bottom, double top, int decimals, double empty, QObject *parent)
-    : QDoubleValidator(bottom, top, decimals, parent)
-    , m_empty(empty)
+QValidator::State SmartDoubleValidator::validate(QString &input, int &pos) const
 {
-    DotCommaFilter::install();
+    if (input.startsWith('='_l1)) {
+        auto v = m_regexp->validate(input, pos);
+        if (v == QValidator::Acceptable) {
+            bool ok = false;
+            locale().toDouble(input.mid(2), &ok);
+            if (!ok)
+                v = QValidator::Intermediate;
+        }
+        return v;
+    } else {
+        return QDoubleValidator::validate(input, pos);
+    }
 }
 
 void SmartDoubleValidator::fixup(QString &str) const
@@ -109,14 +127,22 @@ bool SmartDoubleValidator::event(QEvent *e)
 
 
 SmartIntValidator::SmartIntValidator(QObject *parent)
-    : QIntValidator(parent)
-    , m_empty(0)
+    : SmartIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), 0, parent)
 { }
 
 SmartIntValidator::SmartIntValidator(int bottom, int top, int empty, QObject *parent)
     : QIntValidator(bottom, top, parent)
     , m_empty(empty)
+    , m_regexp(new QRegularExpressionValidator(QRegularExpression(R"(=[*\/\+-]-?\d+)"_l1), this))
 { }
+
+QValidator::State SmartIntValidator::validate(QString &input, int &pos) const
+{
+    if (input.startsWith('='_l1))
+        return m_regexp->validate(input, pos);
+    else
+        return QIntValidator::validate(input, pos);
+}
 
 void SmartIntValidator::fixup(QString &str) const
 {
