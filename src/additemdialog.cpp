@@ -38,7 +38,7 @@
 #include "utility/currency.h"
 #include "bricklink/bricklink.h"
 #include "bricklink/bricklink_model.h"
-#include "window.h"
+#include "view.h"
 #include "document.h"
 #include "picturewidget.h"
 #include "priceguidewidget.h"

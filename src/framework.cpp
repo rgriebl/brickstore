@@ -50,7 +50,7 @@
 
 #include "application.h"
 #include "utility/messagebox.h"
-#include "window.h"
+#include "view.h"
 #include "document.h"
 #include "documentio.h"
 #include "config.h"

@@ -16,7 +16,7 @@
 #include <QStackedWidget>
 #include <QLabel>
 
-#include "window.h"
+#include "view.h"
 #include "document.h"
 #include "appearsinwidget.h"
 #include "priceguidewidget.h"

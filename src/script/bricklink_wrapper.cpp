@@ -17,7 +17,7 @@
 #include "qqmlinfo.h"
 
 #include "framework.h"
-#include "window.h"
+#include "view.h"
 #include "documentio.h"
 #include "utility/utility.h"
 #include "utility/currency.h"

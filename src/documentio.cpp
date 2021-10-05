@@ -39,7 +39,7 @@
 #include "config.h"
 #include "utility/utility.h"
 #include "document.h"
-#include "window.h"
+#include "view.h"
 #include "utility/stopwatch.h"
 #include "minizip/minizip.h"
 #include "documentio.h"

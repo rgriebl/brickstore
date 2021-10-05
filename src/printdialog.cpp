@@ -28,7 +28,7 @@
 #include "config.h"
 #include "utility/messagebox.h"
 #include "utility/utility.h"
-#include "window.h"
+#include "view.h"
 
 
 PrintDialog::PrintDialog(QPrinter *printer, View *window)

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "bricklink/bricklinkfwd.h"
-#include "window.h"
+#include "view.h"
 #include "ui_consolidateitemsdialog.h"
 
 

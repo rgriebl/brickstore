@@ -23,7 +23,7 @@
 #include "bricklink/bricklink.h"
 #include "consolidateitemsdialog.h"
 #include "utility/headerview.h"
-#include "window.h"
+#include "view.h"
 #include "document.h"
 #include "documentdelegate.h"
 #include "config.h"

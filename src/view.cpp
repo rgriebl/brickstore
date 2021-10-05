@@ -53,8 +53,8 @@
 #include "document.h"
 #include "documentio.h"
 #include "utility/undo.h"
-#include "window.h"
-#include "window_p.h"
+#include "view.h"
+#include "view_p.h"
 #include "utility/headerview.h"
 #include "documentdelegate.h"
 #include "script/scriptmanager.h"
@@ -3597,4 +3597,4 @@ const QVector<View *> View::processAutosaves(AutosaveAction action)
     return restored;
 }
 
-#include "moc_window.cpp"
+#include "moc_view.cpp"

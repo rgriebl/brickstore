@@ -61,8 +61,8 @@ SOURCES += \
   $$PWD/selectitem.cpp \
   $$PWD/taskwidgets.cpp \
   $$PWD/updatedatabase.cpp \
-  $$PWD/welcomewidget.cpp \
-  $$PWD/window.cpp
+  $$PWD/view.cpp \
+  $$PWD/welcomewidget.cpp
 
 macos:OBJECTIVE_SOURCES += $$PWD/application_mac.mm
 
@@ -88,9 +88,9 @@ HEADERS += \
   $$PWD/selectitem.h \
   $$PWD/taskwidgets.h \
   $$PWD/updatedatabase.h \
-  $$PWD/welcomewidget.h \
-  $$PWD/window.h \
-  $$PWD/window_p.h
+  $$PWD/view.h \
+  $$PWD/view_p.h \
+  $$PWD/welcomewidget.h
 
 FORMS = \
   $$PWD/aboutdialog.ui \
