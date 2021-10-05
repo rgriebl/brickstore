@@ -128,6 +128,8 @@ protected:
 
 class CheckColorTabBar : QTabBar
 {
+    Q_OBJECT
+
 public:
     CheckColorTabBar();
     QColor color() const;

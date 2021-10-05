@@ -4290,7 +4290,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>Window</name>
+    <name>View</name>
     <message>
         <location filename="../src/window.cpp" line="750"/>
         <source>Untitled</source>

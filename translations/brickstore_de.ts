@@ -4275,7 +4275,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
 </context>
 <context>
-    <name>Window</name>
+    <name>View</name>
     <message>
         <location filename="../src/window.cpp" line="750"/>
         <source>Untitled</source>

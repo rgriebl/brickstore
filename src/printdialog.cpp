@@ -40,7 +40,11 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
 
     qRegisterMetaType<QPageSize>();
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMetaType::registerEqualsComparator<QPageSize>();
+    static bool once = false;
+    if (!once) {
+        QMetaType::registerEqualsComparator<QPageSize>();
+        once = true;
+    }
 #endif
     m_documentName = window->document()->fileName();
     if (!m_documentName.isEmpty())
