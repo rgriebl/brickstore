@@ -929,6 +929,7 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
     QByteArray n = editor->metaObject()->userProperty().name();
     if (!n.isEmpty()) {
         QVariant v = editor->property(n);
+
         switch (static_cast<Document::Field>(index.column())) {
         case Document::Price:
         case Document::PriceDiff:
@@ -936,10 +937,12 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
         case Document::TierP1:
         case Document::TierP2:
         case Document::TierP3:
-            v = Currency::fromString(v.toString());
+            if (!v.toString().startsWith('='_l1))
+                v = Currency::fromString(v.toString());
             break;
         case Document::Weight:
-            v = Utility::stringToWeight(v.toString(), Config::inst()->measurementSystem());
+            if (!v.toString().startsWith('='_l1))
+                v = Utility::stringToWeight(v.toString(), Config::inst()->measurementSystem());
             break;
         default:
             break;
@@ -952,9 +955,51 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItemModel *model,
                                             const QModelIndex &index) const
 {
+    bool intCalc = false;
+    bool doubleCalc = false;
+    int intNumber = 0;
+    double doubleNumber = 0;
+    char op = 0;
+
+    QString str = value.toString();
+    if ((str.length() >= 3) && str.startsWith('='_l1)) {
+        auto type = model->data(index, Qt::EditRole).userType();
+        intCalc = (type == QMetaType::Int);
+        doubleCalc = (type == QMetaType::Double);
+        op = str.at(1).toLatin1();
+        if (QByteArray("+-*/").contains(op)) {
+            if (intCalc) {
+                intNumber = QLocale().toInt(str.mid(2));
+                if ((op == '/') && !intNumber)
+                    op = 0;
+            } else if (doubleCalc) {
+                doubleNumber = QLocale().toDouble(str.mid(2));
+                if ((op == '/') && qFuzzyIsNull(doubleNumber))
+                    op = 0;
+            }
+        }
+    }
+
     auto selection = m_table->selectionModel()->selectedRows();
-    for (const auto &s : selection)
-        model->setData(index.siblingAtRow(s.row()), value);
+    for (const auto &s : selection) {
+        QVariant newValue = value;
+
+        if (intCalc || doubleCalc) {
+            QVariant oldValue = model->data(index.siblingAtRow(s.row()), Qt::EditRole);
+            switch (op) {
+            case '+': intCalc ? newValue = oldValue.toInt() + intNumber
+                        : newValue = oldValue.toDouble() + doubleNumber; break;
+            case '-': intCalc ? newValue = oldValue.toInt() - intNumber
+                        : newValue = oldValue.toDouble() - doubleNumber; break;
+            case '*': intCalc ? newValue = oldValue.toInt() * intNumber
+                        : newValue = oldValue.toDouble() * doubleNumber; break;
+            case '/': intCalc ? newValue = oldValue.toInt() / intNumber
+                        : newValue = oldValue.toDouble() / doubleNumber; break;
+            default: newValue = oldValue; break;
+            }
+        }
+        model->setData(index.siblingAtRow(s.row()), newValue);
+    }
 }
 
 QString DocumentDelegate::displayData(const QModelIndex &idx, bool toolTip, bool differenceBase)
