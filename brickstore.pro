@@ -213,6 +213,7 @@ win32 {
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_CRYPTO_LIB)) $(DESTDIR)
     sentry {
       deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/sentry.dll)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/zlib1.dll)) $(DESTDIR)
       deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/tools/sentry-native/crashpad_handler.exe)) $(DESTDIR)
     }
 
