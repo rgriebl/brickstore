@@ -1420,7 +1420,7 @@ void Document::initializeColumns()
               case BrickLink::Status::Exclude: return tr("Exclude");
               }
           },
-          .compareFn = [&](const Lot *l1, const Lot *l2) -> bool {
+          .compareFn = [&](const Lot *l1, const Lot *l2) {
               if (l1->counterPart() != l2->counterPart()) {
                   return boolCompare(l1->counterPart(), l2->counterPart());
               } else if (l1->alternateId() != l2->alternateId()) {
