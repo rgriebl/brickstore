@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - This release brings back the classic filter mechanism from the old BrickStore versions, but it
   also adds a lot of convenience functionality:
   - The fields to filter on are limited to the currently visible columns.
-  - If a fields has a limited set of possible values (e.g., colors, status, condition), these
+  - If a field has a limited set of possible values (e.g., colors, status, condition), these
     values can be auto-completed while typing or just picked from a drop-down list.
   - Even complex filters can be (de)activated by a single click on the filter icon.
 - Added support for simple calculations on all numeric document fields. Columns such as price or
