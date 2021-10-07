@@ -225,8 +225,5 @@ jobs:
       # uses: rgriebl/git-release@testing
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CHANGELOG_FILE: 'CHANGELOG.md'
-        ALLOW_EMPTY_CHANGELOG: "false"
-        ALLOW_TAG_PREFIX: "true"
       with:
         args: artifacts/*
