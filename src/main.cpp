@@ -126,11 +126,11 @@ int main(int argc, char **argv)
             }
         }
         if (getrlimit(RLIMIT_NOFILE, &rlim) != 0) {
-            qWarning() << "\nCould not retrieve the number of file that are allowed to be opened at the"
-                          "same time. This may lead to image loading problems when opening huge files.\n";
+            qWarning() << "\nCould not retrieve the number of files that are allowed to be opened at the"
+                          "same time. This may lead to image loading problems when working on large lists.\n";
         } else if (rlim.rlim_cur < noFile) {
-            qWarning() << "\nYour system only allows for" << rlim.rlim_cur << "files to opened at the"
-                          "same time. This may lead to image loading problems when opening huge files.\n";
+            qWarning() << "\nYour system only allows for" << rlim.rlim_cur << "files to be opened at the"
+                          "same time. This may lead to image loading problems when working on large lists.\n";
         }
 #  endif
 
