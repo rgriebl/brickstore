@@ -1646,6 +1646,7 @@ void Document::initializeColumns()
               QStringList sl;
               const auto &cats = BrickLink::core()->categories();
               std::for_each(cats.cbegin(), cats.cend(), [&](const auto &cat) { sl << cat.name(); });
+              sl.sort(Qt::CaseInsensitive);
               return new QStringListModel(sl);
           },
           .displayFn = [&](const Lot *lot) { return lot->categoryName(); },
