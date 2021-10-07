@@ -18,9 +18,9 @@
 #include <QHash>
 #include <QDateTime>
 
-QT_FORWARD_DECLARE_CLASS(QKeyEvent)
+#include "qcoro/task.h"
+
 QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
-QT_FORWARD_DECLARE_CLASS(QBuffer)
 
 
 class Currency : public QObject
@@ -48,10 +48,11 @@ public:
     static double fromString(const QString &str);
 
 public slots:
-    void updateRates(bool silent = false);
+    QCoro::Task<> updateRates(bool silent = false);
 
 signals:
     void ratesChanged();
+    void updateRatesFailed(const QString &errorString);
 
 private:
     Currency();
@@ -64,4 +65,5 @@ private:
     QHash<QString, qreal> m_rates;
     QHash<QString, qreal> m_customRates;
     QDateTime m_lastUpdate;
+    bool m_silent = false;
 };

@@ -56,6 +56,16 @@ jobs:
           qt_version: '5.15.2'
           qt_arch: ''
 
+        - name: "Android ARM"
+          artifact: "Android-ARM"
+          mobile: true
+          os: ubuntu-20.04
+          qt_version: '6.2.1'
+          qt_arch: 'android_armv7'
+          qt_target: 'android'
+          qmake_extra_config: ''
+
+
     steps:
     - name: Cache Qt from qt.io
       if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
@@ -66,17 +76,28 @@ jobs:
         key: ${{ matrix.config.os }}-${{ matrix.config.qt_arch }}-QtCache
 
     - name: Install Qt from qt.io
-      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
+      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage || matrix.config.mobile)
       uses: jurplel/install-qt-action@v2
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
         modules: 'qtsvg qttools'
         arch: ${{ matrix.config.qt_arch }}
+        target: ${{ matrix.config.qt_target || 'desktop' }}
+        tools: ${{ matrix.config.qt_tools }}
+
+    - name: Install Qt from qt.io (OS version for cross-compiling)
+      if: (matrix.config.mobile)
+      uses: jurplel/install-qt-action@v2
+      with:
+        cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        version: ${{ matrix.config.qt_version }}
+        modules: 'qttools'
+        target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
 
     - name: Install Qt on Linux (native/appimage)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.mobile
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
@@ -147,7 +168,7 @@ jobs:
         path: "*.exe"
 
     - name: Build on Linux (native)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage && !matrix.config.mobile
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
@@ -163,24 +184,42 @@ jobs:
     - name: Build on Linux (appimage)
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage
       run: |
-        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10
+        qmake CONFIG+=release QMAKE_CXX=g++-10 QMAKE_CC=gcc-10 ${{ matrix.config.qmake_extra_config }}
         make
         make appimage
       shell: bash
 
+    - name: Build on Linux (Android)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      run: |
+        export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+        echo "Using NDK: $ANDROID_NDK_ROOT"
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        make
+        make apk
+      shell: bash
+
     - name: Upload DEB on Linux
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.appimage
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.appimage && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.deb"
 
     - name: Upload AppImage on Linux
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.AppImage"
+
+    - name: Upload Android APK on Linux
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: "*.apk"
 
     - name: Build on macOS
       if: (startsWith(matrix.config.os, 'mac'))

@@ -12,8 +12,12 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 
-backend-only:MIN_QT_VERSION = 5.14.0
-else:MIN_QT_VERSION = 5.14.0
+android|ios|force-mobile:CONFIG *= bs_mobile
+else:backend-only:CONFIG *= bs_backend
+else:CONFIG *= bs_desktop
+
+bs_mobile: MIN_QT_VERSION = 6.2.0
+else:      MIN_QT_VERSION = 5.15.0
 
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
@@ -25,7 +29,7 @@ GITHUB_URL  = "github.com/rgriebl/brickstore"
 ##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
 
 
-requires(linux|macos|win32:!winrt)
+requires(linux|macos|win32|ios:!winrt)
 !versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
     error("$$escape_expand(\\n\\n) *** $$NAME needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
@@ -38,6 +42,9 @@ unix:!macos:!android:TARGET = $$lower($$TARGET)
 CONFIG *= no_private_qt_headers_warning no_include_pwd c++2a
 CONFIG *= lrelease embed_translations
 
+bs_mobile:DEFINES *= BS_MOBILE
+bs_backend:DEFINES *= BS_BACKEND
+bs_desktop:DEFINES *= BS_DESKTOP
 
 sanitize:debug:unix {
   CONFIG *= sanitizer sanitize_address sanitize_undefined
@@ -51,8 +58,9 @@ modeltest:debug {
 }
 
 DEFINES *= QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
+DEFINES *= QT_MESSAGELOGCONTEXT
 
-DESTDIR = bin
+!android:DESTDIR = bin
 
 # cmake compatible substitutions
 defineTest(substitute) {
@@ -115,15 +123,10 @@ RESOURCES = \
   assets/flags \
   extensions/classic-print-script.bs.qml \
 
-backend-only:DEFINES *= BRICKSTORE_BACKEND_ONLY
-
-include(src/src.pri)
-include(src/utility/utility.pri)
-include(src/bricklink/bricklink.pri)
-include(src/ldraw/ldraw.pri)
-include(src/script/script.pri)
+!bs_backend:include(3rdparty/minizip.pri)
 include(3rdparty/lzma.pri)
-include(3rdparty/minizip.pri)
+include(3rdparty/qcoro.pri)
+include(src/src.pri)
 
 INCLUDEPATH *= 3rdparty/
 
@@ -161,9 +164,9 @@ win32 {
   QMAKE_TARGET_COMPANY     = "https://$$BRICKSTORE_URL"
   QMAKE_TARGET_DESCRIPTION = "$$DESCRIPTION"
 
-  win32-msvc* {
-    LIBS += user32.lib advapi32.lib wininet.lib
-  }
+  DEFINES *= NOMINMAX
+
+  LIBS += -luser32 -ladvapi32 -lwininet
 
   build_pass:CONFIG(release, debug|release) {
     ISCC="iscc.exe"
@@ -291,7 +294,7 @@ unix:!macos:!android {
     package.depends = $(TARGET)
     package.commands = scripts/create-debian-changelog.sh $$VERSION > debian/changelog
     package.commands += && export QMAKE_BIN=\"$$QMAKE_QMAKE\"
-    backend-only:package.commands += && export QMAKE_EXTRA_CONFIG=\"CONFIG+=backend-only\"
+    bs_backend:package.commands += && export QMAKE_EXTRA_CONFIG=\"CONFIG+=backend-only\"
     package.commands += && dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
                                              --unsigned-source --unsigned-changes --compression=xz
     package.commands += && mv ../brickstore*.deb .

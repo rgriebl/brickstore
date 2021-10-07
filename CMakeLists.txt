@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.16.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
@@ -11,6 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 option(BACKEND_ONLY "Backend only" OFF)
+option(FORCE_MOBILE "Force a mobile build on desktop" OFF)
 option(SANITIZE "Build with ASAN" OFF)
 option(MODELTEST "Build with modeltest" OFF)
 
@@ -28,21 +29,31 @@ project(BrickStore
     DESCRIPTION ${DESCRIPTION}
     LANGUAGES CXX C
 )
-if (NOT APPLE AND NOT WIN32)
-    set_target_properties(brickstore PROPERTIES OUTPUT_NAME "brickstore")
+
+if (ANDROID OR IOS OR FORCE_MOBILE)
+    set(BS_MOBILE ON)
+    add_compile_definitions(BS_MOBILE)
+elseif (BACKEND_ONLY)
+    set(BS_BACKEND ON)
+    add_compile_definitions(BS_BACKEND)
+else()
+    set(BS_DESKTOP ON)
+    add_compile_definitions(BS_DESKTOP)
 endif()
 
 find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools REQUIRED)
 
-if(NOT BACKEND_ONLY)
+if (BS_DESKTOP)
     find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick OpenGL OpenGLWidgets REQUIRED)
+elseif (BS_MOBILE)
+    find_package(Qt6 COMPONENTS Qml Quick OpenGL REQUIRED)
 endif()
 if(MODELTEST)
     find_package(Qt6 COMPONENTS TestLib REQUIRED)
 endif()
-if(WIN32)
-    find_package(Qt6 COMPONENTS WinExtras Widgets REQUIRED)
-endif()
+#if(WIN32)
+#    find_package(Qt6 COMPONENTS WinExtras Widgets REQUIRED)
+#endif()
 
 add_compile_definitions(
     QT_STRICT_ITERATORS
@@ -51,6 +62,10 @@ add_compile_definitions(
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+
+if (NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+    set_target_properties(brickstore PROPERTIES OUTPUT_NAME "brickstore")
+endif()
 
 if(SANITIZE)
     if (NOT (LINUX AND (GCC OR CLANG)))
@@ -67,9 +82,6 @@ if(MODELTEST)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::TestLib)
 endif()
 
-if(BACKEND_ONLY)
-    target_compile_definitions(${PROJECT_NAME} BRICKSTORE_BACKEND_ONLY)
-endif()
 
 file(GLOB_RECURSE ICONS_QRC CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/icons/*)
 file(GLOB_RECURSE FLAGS_QRC CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/flags/*)
@@ -87,7 +99,7 @@ target_sources(${PROJECT_NAME} PUBLIC ${TS_FILES})
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/qm")
 qt6_add_translation(QM_FILES ${TS_FILES})
 
-qt_add_resources(${PROJECT_NAME} qt_translations_qrc PREFIX /translations BASE "${qt_qm_base}" BASE FILES ${QT_QM_FILES})
+qt_add_resources(${PROJECT_NAME} qt_translations_qrc PREFIX /translations BASE "${qt_qm_base}" FILES ${QT_QM_FILES})
 qt_add_resources(${PROJECT_NAME} bs_translations_qrc PREFIX /translations BASE "${CMAKE_CURRENT_BINARY_DIR}/qm" FILES ${QM_FILES})
 qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
     translations/translations.xml
@@ -98,11 +110,11 @@ qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
     extensions/classic-print-script.bs.qml
 )
 
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
 
 include_directories(src)
 add_subdirectory(src)
@@ -111,7 +123,8 @@ include_directories(3rdparty)
 add_subdirectory(3rdparty)
 
 if(WIN32)
-    target_sources(${PROJECT_NAME} PUBLIC windows/rc)
+    #target_sources(${PROJECT_NAME} PUBLIC windows/brickstore.rc)
+    target_link_libraries(${PROJECT_NAME} PRIVATE user32 advapi32 wininet)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations)
 endif()

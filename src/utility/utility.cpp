@@ -14,16 +14,17 @@
 
 #include <cmath>
 
-#include <QColor>
-#include <QApplication>
-#include <QDir>
-#include <QWidget>
-#include <QWindow>
-#include <QScreen>
-#include <QStringBuilder>
-#include <QPainter>
-#include <QLinearGradient>
-#include <QUrl>
+#include <QtCore/QDir>
+#include <QtCore/QUrl>
+#include <QtCore/QStringBuilder>
+#include <QtGui/QColor>
+#include <QtGui/QPalette>
+#include <QtGui/QWindow>
+#include <QtGui/QScreen>
+#include <QtGui/QPainter>
+#include <QtGui/QLinearGradient>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QWidget>
 
 #include "utility.h"
 
@@ -157,31 +158,6 @@ QColor Utility::contrastColor(const QColor &c, qreal f)
     return QColor::fromHslF(h, s, l, a);
 }
 
-void Utility::setPopupPos(QWidget *w, const QRect &pos)
-{
-    QSize sh = w->sizeHint();
-    QRect screenRect = w->window()->windowHandle()->screen()->availableGeometry();
-
-    // center below pos
-    int x = pos.x() + (pos.width() - sh.width()) / 2;
-    int y = pos.y() + pos.height();
-
-    if ((y + sh.height()) > (screenRect.bottom() + 1)) {
-        int frameHeight = (w->frameSize().height() - w->size().height());
-        y = pos.y() - sh.height() - frameHeight;
-    }
-    if (y < screenRect.top())
-        y = screenRect.top();
-
-    if ((x + sh.width()) > (screenRect.right() + 1))
-        x = (screenRect.right() + 1) - sh.width();
-    if (x < screenRect.left())
-        x = screenRect.left();
-
-    w->move(x, y);
-    w->resize(sh);
-}
-
 QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
 {
     QLocale loc;
@@ -264,52 +240,11 @@ QColor Utility::premultiplyAlpha(const QColor &c)
 
 }
 
-QString Utility::sanitizeFileName(const QString &name)
-{
-    static QVector<char> illegal { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };
-    QString result;
-
-    for (int i = 0; i < name.count(); ++i) {
-        auto c = name.at(i);
-        auto u = c.unicode();
-
-        if ((u <= 31) || ((u < 128) && illegal.contains(char(u))))
-            c = QLatin1Char('_');
-
-        result.append(c);
-    }
-    return result.simplified();
-}
-
 double Utility::roundTo(double d, int n)
 {
     Q_ASSERT((n >= 0) && (n <= 4));
     const int f = n == 0 ? 1 : n == 1 ? 10 : n == 2 ? 100 : n == 3 ? 1000 : 10000;
     return std::round(d * f) / f;
-}
-
-QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
-{
-    return toolTipLabel(label, shortcut.isEmpty() ? QList<QKeySequence> { }
-                                                  : QList<QKeySequence> { shortcut }, extended);
-}
-
-QString Utility::toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts, const QString &extended)
-{
-    static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
-    static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
-
-    QColor color = gradientColor(Utility::premultiplyAlpha(qApp->palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
-                                 Utility::premultiplyAlpha(qApp->palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),
-                                 0.8);
-    QString extendedTable;
-    if (!extended.isEmpty())
-        extendedTable = fmtExt.arg(extended);
-    QString shortcutText;
-    if (!shortcuts.isEmpty())
-        shortcutText = QKeySequence::listToString(shortcuts, QKeySequence::NativeText);
-
-    return fmt.arg(label, color.name(), shortcutText, extendedTable);
 }
 
 QImage Utility::stripeImage(int h, const QColor &stripeColor, const QColor &baseColor)
@@ -342,3 +277,62 @@ QString Utility::urlQueryEscape(const QString &str)
 {
     return QString::fromUtf8(QUrl::toPercentEncoding(str));
 }
+
+#if defined(QT_WIDGETS_LIB)
+
+void Utility::setPopupPos(QWidget *w, const QRect &pos)
+{
+    QSize sh = w->sizeHint();
+    QRect screenRect = w->window()->windowHandle()->screen()->availableGeometry();
+
+    // center below pos
+    int x = pos.x() + (pos.width() - sh.width()) / 2;
+    int y = pos.y() + pos.height();
+
+    if ((y + sh.height()) > (screenRect.bottom() + 1)) {
+        int frameHeight = (w->frameSize().height() - w->size().height());
+        y = pos.y() - sh.height() - frameHeight;
+    }
+    if (y < screenRect.top())
+        y = screenRect.top();
+
+    if ((x + sh.width()) > (screenRect.right() + 1))
+        x = (screenRect.right() + 1) - sh.width();
+    if (x < screenRect.left())
+        x = screenRect.left();
+
+    w->move(x, y);
+    w->resize(sh);
+}
+#endif // defined(QT_WIDGETS_LIB)
+
+QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
+{
+    return toolTipLabel(label, shortcut.isEmpty() ? QList<QKeySequence> { }
+                                                  : QList<QKeySequence> { shortcut }, extended);
+}
+
+QString Utility::toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts, const QString &extended)
+{
+#if defined(QT_WIDGETS_LIB)
+    static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
+    static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
+
+    QColor color = gradientColor(Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
+                                 Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),
+                                 0.8);
+    QString extendedTable;
+    if (!extended.isEmpty())
+        extendedTable = fmtExt.arg(extended);
+    QString shortcutText;
+    if (!shortcuts.isEmpty())
+        shortcutText = QKeySequence::listToString(shortcuts, QKeySequence::NativeText);
+
+    return fmt.arg(label, color.name(), shortcutText, extendedTable);
+#else
+    Q_UNUSED(shortcuts)
+    Q_UNUSED(extended)
+    return label;
+#endif
+}
+

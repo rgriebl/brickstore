@@ -12,12 +12,16 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QtConcurrent>
-#include <QGuiApplication>
 #include <QProcess>
 #include <QLibraryInfo>
+#include <QCoreApplication>
 
 #if defined(Q_OS_WINDOWS)
+#  if !defined(BS_BACKEND)
+#    include <QGuiApplication>
+#  endif
 #  if defined(Q_CC_MINGW)
+#    undef _WIN32_WINNT
 #    define _WIN32_WINNT 0x0500
 #  endif
 #  include <windows.h>
@@ -26,10 +30,10 @@
 #  include <sys/types.h>
 #  include <sys/sysctl.h>
 #elif defined(Q_OS_LINUX)
-#  include <QFile>
-#  include <QByteArray>
+#  include <sys/sysinfo.h>
 #endif
 
+#include "qcoro/core/qcorofuture.h"
 #include "utility.h"
 #include "version.h"
 #include "systeminfo.h"
@@ -50,7 +54,7 @@ SystemInfo::~SystemInfo()
 }
 
 SystemInfo::SystemInfo()
-    : QObject(qApp)
+    : QObject(QCoreApplication::instance())
     , m_futuresRunning(2)
 {
     m_map["os.type"_l1] = QSysInfo::productType();
@@ -74,13 +78,46 @@ SystemInfo::SystemInfo()
     // m_map["hw.cpu"_l1] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
     // m_map["hw.gpu"_l1] = "e.g. NVIDIA GeForce GTX 1650";
     // m_map["hw.gpu.arch"_l1] = "intel|amd|nvidia";
-    // m_map["hw.memory"_l1] = physmem in bytes;
-    // m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
+
+    // -- Memory ---------------------------------------------
+
+    quint64 physmem = 0;
+
+#if defined(Q_OS_MACOS)
+    uint64_t ram;
+    int sctl[] = { CTL_HW, HW_MEMSIZE };
+    size_t ramsize = sizeof(ram);
+
+    if (sysctl(sctl, 2, &ram, &ramsize, nullptr, 0) == 0)
+        physmem = quint64(ram);
+
+#elif defined(Q_OS_WINDOWS)
+    MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
+    GlobalMemoryStatusEx(&memstatex);
+    physmem = memstatex.ullTotalPhys;
+
+#elif defined(Q_OS_LINUX)
+    struct sysinfo si;
+    if (sysinfo(&si) == 0)
+        physmem = quint64(si.totalram) * si.mem_unit;
+
+#else
+#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
+#endif
+
+    m_map["hw.memory"_l1] = physmem;
+    m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 
 
+    // we cannot use co-routines in a constructor
+    QMetaObject::invokeMethod(this, &SystemInfo::init, Qt::QueuedConnection);
+}
+
+QCoro::Task<> SystemInfo::init()
+{
     // -- CPU ------------------------------------------------
 
-    auto cpuFuture = QtConcurrent::run([]() -> QString {
+    m_map["hw.cpu"_l1] = co_await QtConcurrent::run([]() -> QString {
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
         p.start("sh"_l1, { "-c"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
@@ -88,7 +125,7 @@ SystemInfo::SystemInfo()
         p.waitForFinished(1000);
         return QString::fromUtf8(p.readAllStandardOutput()).simplified();
 
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WIN) && !defined(BS_BACKEND)
         QProcess p;
         p.start("wmic"_l1, { "/locale:ms_409"_l1, "cpu"_l1, "get"_l1, "name"_l1, "/value"_l1 },
                 QIODevice::ReadOnly);
@@ -96,29 +133,21 @@ SystemInfo::SystemInfo()
         return QString::fromUtf8(p.readAllStandardOutput()).simplified().mid(5);
 
 #elif defined(Q_OS_MACOS)
-        QProcess p;
-        p.start("sysctl"_l1, { "-n"_l1, "machdep.cpu.brand_string"_l1 }, QIODevice::ReadOnly);
-        p.waitForFinished(1000);
-        return QString::fromUtf8(p.readAllStandardOutput()).simplified();
+        char brand[1024];
+        size_t brandSize = sizeof(brand) - 1;
 
+        if (sysctlbyname("machdep.cpu.brand_string", brand, &brandSize, nullptr, 0) == 0)
+            return QString::fromLocal8Bit(brand, int(brandSize) - 1);
+        else
+            return "?"_l1;
 #else
         return "?"_l1;
 #endif
     });
-    auto cpuFutureWatcher = new QFutureWatcher<QString>();
-    QObject::connect(cpuFutureWatcher, &QFutureWatcher<QString>::finished,
-                     qApp, [this, cpuFutureWatcher]() {
-        m_map["hw.cpu"_l1] = cpuFutureWatcher->result();
-        cpuFutureWatcher->deleteLater();
-        if (--m_futuresRunning == 0)
-            emit initialized();
-    });
-    cpuFutureWatcher->setFuture(cpuFuture);
-
 
     // -- GPU ------------------------------------------------
 
-    auto gpuFuture = QtConcurrent::run([]() -> QPair<QString, QString> {
+    auto gpuResultPair = co_await QtConcurrent::run([]() -> QPair<QString, QString> {
         QPair<QString, QString> result;
         uint vendor = 0;
 
@@ -143,7 +172,7 @@ SystemInfo::SystemInfo()
 #elif defined(Q_OS_MACOS)
        QProcess p;
        p.start("system_profiler"_l1, { "-json"_l1, "SPDisplaysDataType"_l1 }, QIODevice::ReadOnly);
-       p.waitForFinished(1000);
+       p.waitForFinished(3000);
        auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
        auto o = json.object().value("SPDisplaysDataType"_l1).toArray().first().toObject();
        result.first = o.value("sppci_model"_l1).toString();
@@ -160,55 +189,10 @@ SystemInfo::SystemInfo()
         return result;
     });
 
-    auto gpuFutureWatcher = new QFutureWatcher<QPair<QString, QString>>();
-    connect(gpuFutureWatcher, &QFutureWatcher<QPair<QString, QString>>::finished,
-            this, [this, gpuFutureWatcher]() {
-        m_map["hw.gpu"_l1] = gpuFutureWatcher->result().first;
-        m_map["hw.gpu.arch"_l1] = gpuFutureWatcher->result().second;
-        gpuFutureWatcher->deleteLater();
-        if (--m_futuresRunning == 0)
-            emit initialized();
-    });
-    gpuFutureWatcher->setFuture(gpuFuture);
+    m_map["hw.gpu"_l1] = gpuResultPair.first;
+    m_map["hw.gpu.arch"_l1] = gpuResultPair.second;
 
-
-    // -- Memory ---------------------------------------------
-
-    quint64 physmem = 0;
-
-#if defined(Q_OS_MACOS)
-    uint64_t ram;
-    int sctl[] = { CTL_HW, HW_MEMSIZE };
-    size_t ramsize = sizeof(ram);
-
-    if (sysctl(sctl, 2, &ram, &ramsize, nullptr, 0) == 0)
-        physmem = quint64(ram);
-
-#elif defined(Q_OS_WINDOWS)
-    MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
-    GlobalMemoryStatusEx(&memstatex);
-    physmem = memstatex.ullTotalPhys;
-
-#elif defined(Q_OS_LINUX)
-    QFile f("/proc/meminfo"_l1);
-    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QByteArray line;
-        while (!(line = f.readLine()).isNull()) {
-            if (line.startsWith("MemTotal:")) {
-                line.chop(3); // strip "kB\n" at the end
-                physmem = line.mid(9).trimmed().toULongLong() * 1024LL;
-                break;
-            }
-        }
-        f.close();
-    }
-
-#else
-#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
-#endif
-
-    m_map["hw.memory"_l1] = physmem;
-    m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
+    emit initialized();
 }
 
 QVariantMap SystemInfo::asMap() const

@@ -5,8 +5,6 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD/minizip
 DEPENDPATH  += $$RELPWD/minizip
 
-!backend-only {
-
 HEADERS += \
   $$PWD/minizip/crypt.h \
   $$PWD/minizip/ioapi.h \
@@ -21,5 +19,3 @@ SOURCES += \
 
 win32:HEADERS += $$PWD/minizip/iowin32.h
 win32:SOURCES += $$PWD/minizip/iowin32.c
-
-}

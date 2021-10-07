@@ -16,6 +16,8 @@
 #include <QObject>
 #include <QVariantMap>
 
+#include "qcoro/task.h"
+
 
 class SystemInfo : public QObject
 {
@@ -32,6 +34,7 @@ signals:
 
 private:
     SystemInfo();
+    QCoro::Task<> init();
     Q_DISABLE_COPY(SystemInfo)
 
     static SystemInfo *s_inst;

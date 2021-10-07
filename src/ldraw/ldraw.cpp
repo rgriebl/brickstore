@@ -382,7 +382,7 @@ bool LDraw::Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
 void LDraw::Part::check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
 {
     while (cnt--) {
-        QVector3D vm = matrix * (*v);
+        QVector3D vm = matrix.map(*v);
 
         vmin = QVector3D(qMin(vmin.x(), vm.x()), qMin(vmin.y(), vm.y()), qMin(vmin.z(), vm.z()));
         vmax = QVector3D(qMax(vmax.x(), vm.x()), qMax(vmax.y(), vm.y()), qMax(vmax.z(), vm.z()));

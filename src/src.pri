@@ -4,9 +4,8 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 QT *= core gui xml network # networkauth
-!backend-only:QT *= widgets printsupport qml quick
 
-linux {
+linux:!android {
   # needed for C++17 parallel mode (std::execution::par_unseq)
   CONFIG *= link_pkgconfig
   packagesExist(tbb) {
@@ -22,92 +21,21 @@ linux {
 }
 
 win32 {
-  QT *= widgets
+  #QT *= widgets
   !versionAtLeast(QT_VERSION, 6.0.0):QT *= winextras
+  else:include(../3rdparty/qtwinextras.pri)
+
   DEFINES *= BS_HAS_PARALLEL_STL
 }
 
 OTHER_FILES += \
   $$PWD/version.h.in \
 
-SOURCES += \
-  $$PWD/main.cpp \
-  $$PWD/rebuilddatabase.cpp \
-  $$PWD/ref.cpp \
-
-HEADERS += \
-  $$PWD/rebuilddatabase.h \
-  $$PWD/ref.h \
-
-!backend-only {
-
-SOURCES += \
-  $$PWD/announcements.cpp \
-  $$PWD/appearsinwidget.cpp \
-  $$PWD/application.cpp \
-  $$PWD/checkforupdates.cpp \
-  $$PWD/config.cpp \
-  $$PWD/document.cpp \
-  $$PWD/documentio.cpp \
-  $$PWD/documentdelegate.cpp \
-  $$PWD/framework.cpp \
-  $$PWD/incdecpricesdialog.cpp \
-  $$PWD/lot.cpp \
-  $$PWD/managecolumnlayoutsdialog.cpp \
-  $$PWD/picturewidget.cpp \
-  $$PWD/priceguidewidget.cpp \
-  $$PWD/selectcolor.cpp \
-  $$PWD/selectdocumentdialog.cpp \
-  $$PWD/selectitem.cpp \
-  $$PWD/taskwidgets.cpp \
-  $$PWD/updatedatabase.cpp \
-  $$PWD/view.cpp \
-  $$PWD/welcomewidget.cpp
-
-macos:OBJECTIVE_SOURCES += $$PWD/application_mac.mm
-
-HEADERS += \
-  $$PWD/announcements.h \
-  $$PWD/announcements_p.h \
-  $$PWD/appearsinwidget.h \
-  $$PWD/application.h \
-  $$PWD/checkforupdates.h \
-  $$PWD/config.h \
-  $$PWD/document.h \
-  $$PWD/document_p.h \
-  $$PWD/documentio.h \
-  $$PWD/documentdelegate.h \
-  $$PWD/framework.h \
-  $$PWD/incdecpricesdialog.h \
-  $$PWD/lot.h \
-  $$PWD/managecolumnlayoutsdialog.h \
-  $$PWD/picturewidget.h \
-  $$PWD/priceguidewidget.h \
-  $$PWD/selectcolor.h \
-  $$PWD/selectdocumentdialog.h \
-  $$PWD/selectitem.h \
-  $$PWD/taskwidgets.h \
-  $$PWD/updatedatabase.h \
-  $$PWD/view.h \
-  $$PWD/view_p.h \
-  $$PWD/welcomewidget.h
-
-FORMS = \
-  $$PWD/aboutdialog.ui \
-  $$PWD/additemdialog.ui \
-  $$PWD/changecurrencydialog.ui \
-  $$PWD/consolidateitemsdialog.ui \
-  $$PWD/importinventorydialog.ui \
-  $$PWD/importcartdialog.ui \
-  $$PWD/importorderdialog.ui \
-  $$PWD/printdialog.ui \
-  $$PWD/selectcolordialog.ui \
-  $$PWD/selectitemdialog.ui \
-  $$PWD/settingsdialog.ui \
-  $$PWD/settopriceguidedialog.ui \
-  $$PWD/systeminfodialog.ui
-
-HEADERS += $$replace(FORMS, '\\.ui', '.h')
-SOURCES += $$replace(FORMS, '\\.ui', '.cpp')
-
-}
+include(utility/utility.pri)
+include(bricklink/bricklink.pri)
+include(ldraw/ldraw.pri)
+include(qmlapi/qmlapi.pri)
+include(common/common.pri)
+bs_mobile:include(mobile/mobile.pri)
+bs_desktop:include(desktop/desktop.pri)
+bs_backend:include(backend/backend.pri)

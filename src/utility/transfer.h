@@ -17,6 +17,9 @@
 #include <QUrl>
 #include <QThread>
 #include <QNetworkAccessManager>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(LogTransfer)
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 class Transfer;
@@ -33,7 +36,7 @@ public:
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
-    QString errorString() const      { return isFailed() ? m_error_string : QString(); }
+    QString errorString() const;
     int responseCode() const         { return m_respcode; }
     QIODevice *file() const          { return m_file; }
     QByteArray *data() const         { return m_data; }
@@ -46,16 +49,12 @@ public:
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
 
-    template<typename T>
-    void setUserData(int tag, T *t)  { m_user_tag = tag; m_user_ptr = static_cast<void *>(t); }
-
-    template<typename T>
-    QPair<int, T *> userData() const { return qMakePair(m_user_tag, static_cast<T *>(m_user_ptr)); }
-
-    template<typename T>
-    T *userData(int tag) const       { return tag == m_user_tag ? static_cast<T *>(m_user_ptr) : 0; }
+    void setUserData(const QByteArray &tag, const QVariant &v) { m_userTag = tag; m_userData = v; }
+    QVariant userData(const QByteArray &tag) const             { return m_userTag == tag ? m_userData : QVariant(); }
+    QByteArray userTag() const                                 { return m_userTag; }
 
     Transfer *transfer() const       { return m_transfer; }
+    void abort();
 
 private:
     enum Status : uint {
@@ -74,8 +73,8 @@ private:
     static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
                                QIODevice *file, bool noRedirects, uint retries = 0);
 
-    void setStatus(Status st)  { m_status = st; }
-    bool abort();
+    void setStatus(Status st)  { m_status = st; };
+    bool abortInternal();
 
     TransferJob() = default;
     Q_DISABLE_COPY(TransferJob)
@@ -90,14 +89,16 @@ private:
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
 
-    void *       m_user_ptr = nullptr;
-    int          m_user_tag = 0;
+    QByteArray   m_userTag;
+    QVariant     m_userData;
+//    void *       m_user_ptr = nullptr;
+//    int          m_user_tag = 0;
 
-    uint         m_respcode         : 16;
-    uint         m_status           : 4;
+    uint         m_respcode         : 16 = 0;
+    uint         m_status           : 4 = Inactive;
     uint         m_http_method      : 1;
     uint         m_retries_left     : 5;
-    int          m_was_not_modified : 1;
+    int          m_was_not_modified : 1 = false;
     int          m_no_redirects     : 1;
 
     friend class Transfer;
@@ -120,9 +121,10 @@ public:
     void schedule();
 
 signals:
-    void progress(int done, int total);
+    void overallProgress(int done, int total);
+    void started(TransferJob *job);
+    void progress(TransferJob *job, int done, int total);
     void finished(TransferJob *job);
-    void jobProgress(TransferJob *job, int done, int total);
 
 private:
     void downloadFinished(QNetworkReply *reply);
@@ -156,9 +158,10 @@ public:
     static QString defaultUserAgent();
 
 signals:
-    void progress(int done, int total);
+    void overallProgress(int done, int total);
+    void started(TransferJob *);
+    void progress(TransferJob *, int done, int total);
     void finished(TransferJob *);
-    void jobProgress(TransferJob *, int done, int total);
 
 protected:
 

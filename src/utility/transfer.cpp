@@ -21,9 +21,11 @@
 #include <QCoreApplication>
 #include <QUrlQuery>
 
+#include "common/config.h"
 #include "utility.h"
 #include "transfer.h"
-#include "config.h"
+
+Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
 
 
 TransferJob::~TransferJob()
@@ -51,7 +53,22 @@ TransferJob *TransferJob::post(const QUrl &url, QIODevice *file, bool noRedirect
     return create(HttpPost, url, QDateTime(), file, noRedirects);
 }
 
-bool TransferJob::abort()
+QString TransferJob::errorString() const
+{
+    return isFailed() ? m_error_string
+                      : (isAborted() ? QCoreApplication::translate("Transfer", "Aborted")
+                                     : QString { });
+}
+
+void TransferJob::abort()
+{
+    if (m_transfer)
+        m_transfer->abortJob(this);
+    else
+        setStatus(TransferJob::Aborted);
+}
+
+bool TransferJob::abortInternal()
 {
     if (m_reply)
         m_reply->abort();
@@ -76,13 +93,11 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     j->m_file = file ? file : nullptr;
     j->m_http_method = method;
     j->m_retries_left = retries;
-    j->m_status = Inactive;
-    j->m_respcode = 0;
-    j->m_was_not_modified = false;
     j->m_no_redirects = noRedirects;
 
     return j;
 }
+
 
 // ===========================================================================
 // ===========================================================================
@@ -113,16 +128,18 @@ Transfer::Transfer(QObject *parent)
     m_retrieverThread->setParent(this);
     m_retrieverThread->start(QThread::LowPriority);
 
+    connect(m_retriever, &TransferRetriever::started,
+            this, &Transfer::started, Qt::QueuedConnection);
     connect(m_retriever, &TransferRetriever::finished,
             this, [this](TransferJob *job) {
         if (!job->isActive())
             emit finished(job);
         delete job;
     }, Qt::QueuedConnection);
-    connect(m_retriever, &TransferRetriever::jobProgress,
-            this, &Transfer::jobProgress, Qt::QueuedConnection);
     connect(m_retriever, &TransferRetriever::progress,
             this, &Transfer::progress, Qt::QueuedConnection);
+    connect(m_retriever, &TransferRetriever::overallProgress,
+            this, &Transfer::overallProgress, Qt::QueuedConnection);
 }
 
 Transfer::~Transfer()
@@ -139,6 +156,8 @@ void Transfer::setUserAgent(const QString &ua)
 
 void Transfer::retrieve(TransferJob *job, bool highPriority)
 {
+    if (!job)
+        return;
     Q_ASSERT(!job->m_transfer);
     job->m_transfer = this;
 
@@ -156,7 +175,7 @@ void Transfer::abortJob(TransferJob *job)
 
 void Transfer::abortAllJobs()
 {
-    QMetaObject::invokeMethod(m_retriever, &TransferRetriever::abortAllJobs, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_retriever, &TransferRetriever::abortAllJobs, Qt::BlockingQueuedConnection);
 }
 
 QString Transfer::userAgent() const
@@ -190,24 +209,29 @@ TransferRetriever::~TransferRetriever()
 
 void TransferRetriever::addJob(TransferJob *job, bool highPriority)
 {
-    if (highPriority)
-        m_jobs.prepend(job);
-    else
-        m_jobs.append(job);
+    if (job->isAborted()) {
+        emit finished(job);
+        emit m_transfer->overallProgress(++m_progressDone, ++m_progressTotal);
+    } else {
+        if (highPriority)
+            m_jobs.prepend(job);
+        else
+            m_jobs.append(job);
 
-    emit m_transfer->progress(m_progressDone, ++m_progressTotal);
-    schedule();
+        emit m_transfer->overallProgress(m_progressDone, ++m_progressTotal);
+        schedule();
+    }
 }
 
 void TransferRetriever::abortJob(TransferJob *j)
 {
-    j->abort();
+    j->abortInternal();
 
     if (m_jobs.removeOne(j)) {
         emit finished(j);
 
         m_progressDone++;
-        emit progress(m_progressDone, m_progressTotal);
+        emit overallProgress(m_progressDone, m_progressTotal);
         if (m_progressDone == m_progressTotal)
             m_progressDone = m_progressTotal = 0;
     }
@@ -216,19 +240,19 @@ void TransferRetriever::abortJob(TransferJob *j)
 void TransferRetriever::abortAllJobs()
 {
     for (auto &j : qAsConst(m_jobs)) {
-        j->abort();
+        j->abortInternal();
         emit finished(j);
     }
 
     m_progressDone += m_jobs.size();
-    emit progress(m_progressDone, m_progressTotal);
+    emit overallProgress(m_progressDone, m_progressTotal);
     if (m_progressDone == m_progressTotal)
         m_progressDone = m_progressTotal = 0;
 
     m_jobs.clear();
 
     for (auto &j : qAsConst(m_currentJobs))
-        j->abort();
+        j->abortInternal();
 }
 
 void TransferRetriever::schedule()
@@ -278,13 +302,21 @@ void TransferRetriever::schedule()
             j->m_reply = m_nam->post(req, postdata);
         }
 
+        qCInfo(LogTransfer) << (isget ? ">> GET" : ">> POST") << req.url();
+        if (LogTransfer().isDebugEnabled()) {
+            const auto headers = j->m_reply->request().rawHeaderList();
+            for (const auto &header : headers)
+                qCDebug(LogTransfer()) << header << ":" << j->m_reply->request().rawHeader(header);
+        }
+
         j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
 
         connect(j->m_reply, &QNetworkReply::downloadProgress, this, [this, j](qint64 recv, qint64 total) {
-            emit jobProgress(j, int(recv), int(total));
+            emit progress(j, int(recv), int(total));
         });
 
         m_currentJobs.append(j);
+        emit started(j);
     }
 }
 
@@ -295,6 +327,13 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
 
     j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
     j->m_effective_url = j->m_reply->url();
+
+    qCInfo(LogTransfer) << "<< REPLY" << j->m_respcode << j->m_effective_url;
+    if (LogTransfer().isDebugEnabled()) {
+        const auto headers = j->m_reply->rawHeaderList();
+        for (const auto &header : headers)
+            qCDebug(LogTransfer()) << header << ":" << j->m_reply->rawHeader(header);
+    }
 
     if (error != QNetworkReply::NoError) {
         m_sslSession.clear();
@@ -354,7 +393,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
     j->m_reply->deleteLater();
     j->m_reply = nullptr;
 
-    emit progress(++m_progressDone, m_progressTotal);
+    emit overallProgress(++m_progressDone, m_progressTotal);
     if (m_progressDone == m_progressTotal)
         m_progressDone = m_progressTotal = 0;
 

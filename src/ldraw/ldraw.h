@@ -21,7 +21,7 @@
 #include <QVector3D>
 #include <QMatrix4x4>
 
-#include "ref.h"
+#include "utility/ref.h"
 #include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)

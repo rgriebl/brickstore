@@ -35,8 +35,12 @@ public:
         : Exception(QString::fromLatin1(message))
     { }
 
+    Exception(QFileDevice *f, const QString &message)
+        : Exception(message % fileMessage(f))
+    { }
+
     Exception(QFileDevice *f, const char *message)
-        : Exception(QLatin1String(message) % u" (" % f->fileName() % u"): " % f->errorString())
+        : Exception(QLatin1String(message) % fileMessage(f))
     { }
 
     template <typename T> Exception &arg(const T &t)
@@ -53,10 +57,15 @@ public:
     const char *what() const noexcept override;
 
 protected:
+    static QString fileMessage(QFileDevice *f)
+    {
+        return f ? QString(u" (" % f->fileName() % u"): " % f->errorString()) : QString();
+    }
+
     QString m_message;
+
 private:
     mutable QByteArray whatBuffer;
-
 };
 
 class ParseException : public Exception

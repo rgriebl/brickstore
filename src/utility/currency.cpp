@@ -15,24 +15,19 @@
 #include <clocale>
 #include <climits>
 
-#include <QApplication>
-#include <QLocale>
-#include <QValidator>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QDataStream>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QBuffer>
-#include <QXmlStreamReader>
-#include <QStringBuilder>
+#include <QtCore/QLocale>
+#include <QtCore/QStringBuilder>
+#include <QtCore/QDataStream>
+#include <QtCore/QBuffer>
+#include <QtCore/QXmlStreamReader>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
 
-#include "application.h"
-#include "config.h"
-#include "utility.h"
+#include "common/config.h"
+#include "common/onlinestate.h"
+#include "qcoro/network/qcoronetworkreply.h"
 #include "currency.h"
-#include "messagebox.h"
-#include "framework.h"
+#include "utility.h"
 
 
 // all rates as downloaded are relative to the Euro, but
@@ -154,60 +149,60 @@ void Currency::unsetCustomRate(const QString &currencyCode)
     m_customRates.remove(currencyCode);
 }
 
-void Currency::updateRates(bool silent)
+QCoro::Task<> Currency::updateRates(bool silent)
 {
+    if (!OnlineState::inst()->isOnline())
+        co_return;
+
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-        connect(m_nam, &QNetworkAccessManager::finished,
-                this, [this](QNetworkReply *reply) {
-            bool silent = reply->property("bsSilent").toBool();
+    }
 
-            if (reply->error() != QNetworkReply::NoError) {
-                if (Application::inst()->isOnline() && !silent)
-                    MessageBox::warning(nullptr, { }, tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
-            } else {
-                auto r = reply->readAll();
-                QXmlStreamReader reader(r);
-                QHash<QString, qreal> newRates;
+    m_silent = silent;
+    auto reply = co_await m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
 
-                while (!reader.atEnd()) {
-                    if (reader.readNext() == QXmlStreamReader::StartElement &&
-                        reader.name() == "Cube"_l1 &&
-                        reader.attributes().hasAttribute("currency"_l1)) {
+    if (reply->error() != QNetworkReply::NoError) {
+        if (OnlineState::inst()->isOnline() && !m_silent)
+            emit updateRatesFailed(tr("There was an error downloading the exchange rates from the ECB server:")
+                                   % u"<br>" % reply->errorString());
+    } else {
+        auto r = reply->readAll();
+        QXmlStreamReader reader(r);
+        QHash<QString, qreal> newRates;
 
-                        QString currency = reader.attributes().value("currency"_l1).toString();
-                        qreal rate = reader.attributes().value("rate"_l1).toDouble();
+        while (!reader.atEnd()) {
+            if (reader.readNext() == QXmlStreamReader::StartElement &&
+                reader.name() == "Cube"_l1 &&
+                reader.attributes().hasAttribute("currency"_l1)) {
 
-                        if (currency.length() == 3 && rate > 0)
-                            newRates.insert(currency, rate);
-                    }
-                }
-                baseConvert(newRates);
+                QString currency = reader.attributes().value("currency"_l1).toString();
+                qreal rate = reader.attributes().value("rate"_l1).toDouble();
 
-                if (reader.hasError() || newRates.isEmpty()) {
-                    if (!silent) {
-                        QString err;
-                        if (reader.hasError())
-                            err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
-                        else
-                            err = tr("no currency data found");
-                        MessageBox::warning(nullptr, { }, tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
-                    }
-                } else {
-                    m_rates = newRates;
-                    m_lastUpdate = QDateTime::currentDateTime();
-                    emit ratesChanged();
-                }
+                if (currency.length() == 3 && rate > 0)
+                    newRates.insert(currency, rate);
             }
-            reply->deleteLater();
-        });
+        }
+        baseConvert(newRates);
+
+        if (reader.hasError() || newRates.isEmpty()) {
+            if (!m_silent) {
+                QString err;
+                if (reader.hasError())
+                    err = tr("%1 (line %2, column %3)").arg(reader.errorString())
+                            .arg(reader.lineNumber()).arg(reader.columnNumber());
+                else
+                    err = tr("no currency data found");
+                emit updateRatesFailed(tr("There was an error parsing the exchange rates from the ECB server:")
+                                       % u"<br>" % err);
+            }
+        } else {
+            m_rates = newRates;
+            m_lastUpdate = QDateTime::currentDateTime();
+            emit ratesChanged();
+        }
     }
-    if (Application::inst()->isOnline()) {
-        auto reply = m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
-        if (reply && silent)
-            reply->setProperty("bsSilent", true);
-    }
+    reply->deleteLater();
 }
 
 QDateTime Currency::lastUpdate() const

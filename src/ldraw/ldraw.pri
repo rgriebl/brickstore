@@ -1,10 +1,9 @@
-QT *= opengl
-versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
-
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
+
+bs_desktop|bs_mobile:QT *= opengl
 
 HEADERS += \
   $$PWD/ldraw.h \
@@ -12,7 +11,9 @@ HEADERS += \
 SOURCES += \
   $$PWD/ldraw.cpp \
 
-!backend-only {
+bs_desktop {
+
+versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
 
 HEADERS += \
   $$PWD/renderwidget.h \

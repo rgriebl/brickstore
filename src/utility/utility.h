@@ -14,6 +14,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 
 #include <QString>
 #include <QColor>
@@ -42,6 +43,11 @@ constexpr inline QChar operator ""_l1(const char c)
     return QLatin1Char(c);
 }
 
+inline static double fixFinite(double d)
+{
+    return std::isfinite(d) ? d : 0;
+}
+
 // just like qFuzzyCompare, but also usable around 0
 inline bool fuzzyCompare(double d1, double d2)
 {
@@ -59,10 +65,6 @@ QColor premultiplyAlpha(const QColor &c);
 
 QImage stripeImage(int h, const QColor &stripeColor, const QColor &baseColor = Qt::transparent);
 
-void setPopupPos(QWidget *w, const QRect &pos);
-
-QString sanitizeFileName(const QString &name);
-
 QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimize = false, bool show_unit = false);
 double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 
@@ -70,11 +72,16 @@ double roundTo(double f, int decimals);
 
 QString localForInternationalCurrencySymbol(const QString &international_symbol);
 
-QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
-QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcut = { }, const QString &extended = { });
-
 QString urlQueryEscape(const QString &str);
+
 inline QString urlQueryEscape(const char *str)  { return urlQueryEscape(QString::fromLatin1(str)); }
 inline QString urlQueryEscape(const QByteArray &str)   { return urlQueryEscape(QString::fromLatin1(str)); }
+
+#if defined(QT_WIDGETS_LIB)
+void setPopupPos(QWidget *w, const QRect &pos);
+#endif
+
+QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
+QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcut = { }, const QString &extended = { });
 
 } // namespace Utility

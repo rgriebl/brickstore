@@ -12,22 +12,27 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <QApplication>
-#include <QToolBar>
-#include <QToolButton>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QLabel>
-#include <QMenu>
-#include <QWidgetAction>
-#include <QMouseEvent>
-#include <QStyle>
-#include <QLayout>
-#include <QtDebug>
+#include <QtGlobal>
+#include <QDebug>
+#if defined(QT_WIDGETS_LIB)
+#  include <QApplication>
+#  include <QToolBar>
+#  include <QToolButton>
+#  include <QListWidget>
+#  include <QListWidgetItem>
+#  include <QLabel>
+#  include <QMenu>
+#  include <QWidgetAction>
+#  include <QMouseEvent>
+#  include <QStyle>
+#  include <QLayout>
+#endif
 
 #include "utility.h"
 #include "undo.h"
 
+
+#if defined(QT_WIDGETS_LIB)
 
 class UndoAction : public QWidgetAction
 {
@@ -59,7 +64,7 @@ private:
     QUndoStack * m_undoStack;
 };
 
-
+#endif // defined(QT_WIDGETS_LIB)
 
 
 UndoStack::UndoStack(QObject *parent)
@@ -106,14 +111,23 @@ void UndoGroup::undoMultiple(int count)
 
 QAction *UndoGroup::createRedoAction(QObject *parent)
 {
+#if !defined(QT_WIDGETS_LIB)
+    return QUndoGroup::createRedoAction(parent);
+#else
     return UndoAction::create(UndoAction::Redo, this, parent);
+#endif
 }
 
 QAction *UndoGroup::createUndoAction(QObject *parent)
 {
+#if !defined(QT_WIDGETS_LIB)
+    return QUndoGroup::createUndoAction(parent);
+#else
     return UndoAction::create(UndoAction::Undo, this, parent);
+#endif
 }
 
+#if defined(QT_WIDGETS_LIB)
 
 template <typename T>
 QAction *UndoAction::create(UndoAction::Type type, T *stackOrGroup, QObject *parent)
@@ -283,6 +297,8 @@ QStringList UndoAction::descriptionList(QUndoStack *stack) const
     }
     return sl;
 }
+
+#endif // defined(QT_WIDGETS_LIB)
 
 #include "undo.moc"
 

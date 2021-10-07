@@ -19,7 +19,7 @@ if (NOT BACKEND_ONLY)
     )
 
     if(WIN32)
-        target_sources(${PROJECT_NAME}
+        target_sources(${PROJECT_NAME} PUBLIC
             minizip/iowin32.c
             minizip/iowin32.h
         )

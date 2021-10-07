@@ -19,6 +19,7 @@
 #include <QPair>
 #include <QRegularExpression>
 #include <QCoreApplication>
+#include <QDebug>
 
 
 class Filter
@@ -72,6 +73,7 @@ public:
 
     bool matches(const QVariant &v) const;
     
+
     class Parser {
     public:
         Parser() = default;
@@ -90,6 +92,8 @@ public:
         void setStandardCombinationTokens(Filter::Combinations);
 
         QString toolTip() const;
+
+        QString toString(const QVector<Filter> &filter, bool preferSymbolic = false) const;
 
     private:
         bool eatWhiteSpace(int &pos, const QString &str);
@@ -120,5 +124,8 @@ private:
     QRegularExpression m_asRegExp;
 };
 
+QDebug &operator<<(QDebug &dbg, const Filter &filter);
+
+Q_DECLARE_METATYPE(Filter)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparisons)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Combinations)

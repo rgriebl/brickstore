@@ -23,6 +23,15 @@
 #include "filter.h"
 
 
+static QString quote(const QString &str)
+{
+    if (str.isEmpty() || str.simplified() != str)
+        return u'"' % str % u'"';
+    else
+        return str;
+};
+
+
 void Filter::setField(int field)
 {
     m_field = field;
@@ -63,11 +72,11 @@ bool Filter::matches(const QVariant &v) const
     qint64 i1 = 0, i2 = 0;
     QString s1, s2;
     
-    switch (v.type()) {
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::LongLong:
-    case QVariant::ULongLong: {
+    switch (v.userType()) {
+    case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong: {
         if (!m_isInt)
             return false; // data is int, but expression is not
         i1 = m_asInt;
@@ -75,7 +84,7 @@ bool Filter::matches(const QVariant &v) const
         isInt = true;
         break;
     }   
-    case QVariant::Double: {
+    case QMetaType::Double: {
         if (!m_isDouble)
             return false;
         i1 = qRound64(m_asDouble * 1000.);
@@ -128,54 +137,116 @@ bool Filter::matches(const QVariant &v) const
     return false;
 }
 
+QString Filter::Parser::toString(const QVector<Filter> &filter, bool preferSymbolic) const
+{
+    QString result;
+
+    for (int i = 0; i < filter.size(); ++i) {
+        const Filter &f = filter.at(i);
+
+        if ((f.field() != -1) || (f.comparison() != Matches)) {
+            for (const auto &ft : m_field_tokens) {
+                if (ft.first == f.field()) {
+                    result = result % quote(ft.second);
+                    break;
+                }
+            }
+            for (const auto &ct : m_comparison_tokens) {
+                if (ct.first == f.comparison()) {
+                    if (preferSymbolic && ct.second.at(0).isLetterOrNumber())
+                        continue;
+                    result = result % u' ' % quote(ct.second) % u' ';
+                    break;
+                }
+            }
+        }
+        result = result % quote(f.expression());
+
+        if (i < (filter.size() - 1)) {
+            for (const auto &ct : m_combination_tokens) {
+                if (ct.first == f.combination()) {
+                    if (preferSymbolic && ct.second.at(0).isLetterOrNumber())
+                        continue;
+                    result = result % u' ' % quote(ct.second) % u' ';
+                    break;
+                }
+            }
+        }
+    }
+    if (result == R"("")"_l1)
+        result.clear();
+    return result;
+}
+
 
 enum State {
     StateStart,
     StateCompare,
-    StateFilter,
+    StateExpression,
+    StateCombination,
     StateInvalid
 };
 
 
-QVector<Filter> Filter::Parser::parse(const QString &str_)
+template <typename T>
+static T findInTokens(const QString &word, const QVector<QPair<T, QString>> &tokens, T notFound = T { })
 {
+    for (const auto &token : tokens) {
+        if (word.compare(token.second, Qt::CaseInsensitive) == 0)
+            return token.first;
+    }
+    return notFound;
+}
+
+QVector<Filter> Filter::Parser::parse(const QString &str)
+{
+    // match words, which are either quoted with ["], quoted with ['] or unquoted
+    static const QRegularExpression re(R"-("([^"]*)"|'([^']*)'|([^ ]+))-"_l1);
+    auto matches = re.globalMatch(str % " &&"_l1);
+
     QVector<Filter> filters;
-    int pos = 0;
     Filter f;
     State state = StateStart;
-    QString str = str_.simplified();
 
-    while (state != StateInvalid && pos < str.length()) {
-        
-        if (!eatWhiteSpace(pos, str))
-            break;
+    while (state != StateInvalid && matches.hasNext()) {
+        auto match = matches.next();
+        QString word = match.captured(1) % match.captured(2) % match.captured(3);
 
+retryState:
         switch(state) {
         case StateStart: {
-            int field = matchTokens(pos, str, m_field_tokens, -2);
+            int field = findInTokens(word, m_field_tokens, -2);
 
             if (field > -2) {
                 f.setField(field);
                 state = StateCompare;
             } else {
-                state = StateFilter;
+                state = StateExpression;
+                goto retryState;
             }
             break;
         }
         case StateCompare: {
-            f.setComparison(matchTokens(pos, str, m_comparison_tokens, Filter::Matches));
-            
-            state = StateFilter;
+            auto comparison = findInTokens(word, m_comparison_tokens, Filter::Matches);
+            f.setComparison(comparison);
+            state = StateExpression;
             break;
         }
-        case StateFilter: {
-            QPair<QString, Filter::Combination> res = matchFilterAndCombination(pos, str);
-            
-            f.setExpression(res.first);
-            f.setCombination(res.second);
-            filters.append(f);
-            state = StateStart;
-            f = Filter();
+        case StateExpression: {
+            f.setExpression(word);
+            state = StateCombination;
+            break;
+        }
+        case StateCombination: {
+            auto combination = findInTokens(word, m_combination_tokens, Combination(-1));
+            if (combination < 0) {
+                state = StateInvalid;
+            } else {
+                f.setCombination(combination);
+                filters.append(f);
+                f = Filter();
+                state = StateStart;
+            }
             break;
         }
         case StateInvalid:
@@ -185,120 +256,11 @@ QVector<Filter> Filter::Parser::parse(const QString &str_)
     return filters;
 }
 
-bool Filter::Parser::eatWhiteSpace(int &pos, const QString &str)
-{
-    int len = int(str.length());
-
-    // eat ws
-    while (pos < len && str[pos].isSpace())
-        pos++;
-
-    // empty or only ws
-    return (pos != len);
-}
 
 template<typename T>
-T Filter::Parser::matchTokens(int &pos, const QString &str, const QVector<QPair<T, QString>> &tokens, const T defaultresult, int *start_of_token)
-{
-    int len = int(str.length());
-
-    T found_field = defaultresult;
-    int found_len = -1;
-    int found_pos = -1;
-  
-    for (auto it = tokens.cbegin(); it != tokens.cend(); ++it) {
-        int flen = it->second.length();
-        
-        if (len - pos >= flen) {    
-            if (!start_of_token) {
-                if (!it->second.compare(str.mid(pos, flen), Qt::CaseInsensitive) && found_len < flen) {
-                    found_field = it->first;
-                    found_len = flen;
-                }
-            }
-            else {
-                int fpos = str.indexOf(it->second, pos, Qt::CaseInsensitive);
-                
-                if (fpos >= 0 && (found_pos == -1 || fpos <= found_pos) && found_len < flen &&
-                    (fpos == 0 || str[fpos - 1].isSpace())) {
-                    found_field = it->first;
-                    found_len = flen;
-                    found_pos = fpos;
-                }
-            }
-        }  
-    }
-    
-    // token not found:
-    //   start_of_token = -1
-    //   result = default
-    //   pos (unchanged)
-    
-    // token found:
-    //   start_of_token = found_pos (if start_of_token != 0)
-    //   found_field = it.key()
-    //   pos = (start_of_token ? found_pos + found_len : pos + found_len)
-    
-    if (found_len > 0) {
-        if (start_of_token) {
-            *start_of_token = found_pos;
-            pos = found_pos + found_len;
-        } else {
-            pos += found_len;
-        }
-    } else {
-        if (start_of_token)
-            *start_of_token = -1;
-    }
-    return found_len > 0 ? found_field : defaultresult;
-}
-
-QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(int &pos, const QString &str)
-{
-    QPair<QString, Filter::Combination> res;
-    res.second = Filter::And;
-    
-    int len = int(str.length());
-    QChar quote_char = str[pos];
-    bool quoted = false;
-    
-    if (quote_char == QLatin1Char('\'') || quote_char == QLatin1Char('"')) {
-        quoted = true;
-        pos++;
-    }
-    
-    if (quoted) {
-        int end = str.indexOf(quote_char, pos);
-        
-        if (end == -1) {
-            // missing quote end: just take everything as filter expr
-        
-            res.first = str.mid(pos);
-            pos = len;
-        } else {
-            res.first = str.mid(pos, end - pos);
-            pos = end + 1;
-            res.second = matchTokens(pos, str, m_combination_tokens, Filter::And);
-        }
-    } else {
-        int start_of_token = -1;
-        int oldpos = pos;
-        res.second = matchTokens(pos, str, m_combination_tokens, Filter::And, &start_of_token);
-        
-        if (start_of_token == -1) {
-            res.first = str.mid(pos);
-            pos += len;
-        } else {
-            res.first = str.mid(oldpos, start_of_token - oldpos).trimmed();
-        }
-    }
-    return res;
-}
-
-template<typename T>
-static QString toString(const QVector<QPair<T, QString>> &tokens, const QString &before, const QString &after,
-                        const QString &key_before, const QString &key_after, const QString &key_separator,
-                        const QString &value_before, const QString &value_after, const QString &value_separator)
+static QString toHtml(const QVector<QPair<T, QString>> &tokens, const QString &before, const QString &after,
+                      const QString &key_before, const QString &key_after, const QString &key_separator,
+                      const QString &value_before, const QString &value_after, const QString &value_separator)
 {
     QVector<T> keys;
     for (const auto &p : tokens) {
@@ -312,8 +274,8 @@ static QString toString(const QVector<QPair<T, QString>> &tokens, const QString 
         if (first_key)
             first_key = false;
         else
-            res += key_separator;
-        res += key_before;
+            res = res % key_separator;
+        res = res % key_before;
         bool first_value = true;
         for (const auto &p : tokens) {
             if (p.first != key)
@@ -322,13 +284,13 @@ static QString toString(const QVector<QPair<T, QString>> &tokens, const QString 
             if (first_value)
                 first_value = false;
             else
-                res += value_separator;
-            res = res + value_before + p.second.toHtmlEscaped() + value_after;
+                res = res % value_separator;
+            res = res % value_before % quote(p.second).toHtmlEscaped() % value_after;
         }
-        res += key_after;
+        res = res % key_after;
     }
     if (!res.isEmpty())
-        res = before + res + after;
+        res = before % res % after;
     return res;
 }
 
@@ -342,20 +304,20 @@ QString Filter::Parser::toolTip() const
 
     QString block = "<b><u>%1</u></b>%2"_l1;
     tt += block.arg(Filter::tr("Field names:"),
-                    toString(m_field_tokens,
-                             "<ul><li>"_l1, "</li></ul>"_l1,
-                             QString(),  QString(), ", "_l1,
-                             "<b>"_l1, "</b>"_l1, " / "_l1));
+                    toHtml(m_field_tokens,
+                           "<ul><li>"_l1, "</li></ul>"_l1,
+                           QString(),  QString(), ", "_l1,
+                           "<b>"_l1, "</b>"_l1, " / "_l1));
     tt += block.arg(Filter::tr("Comparisons:"),
-                    toString(m_comparison_tokens,
-                             "<ul>"_l1, "</ul>"_l1,
-                             "<li>"_l1, "</li>"_l1, QString(),
-                             "<b>"_l1, "</b>"_l1, " / "_l1));
+                    toHtml(m_comparison_tokens,
+                           "<ul>"_l1, "</ul>"_l1,
+                           "<li>"_l1, "</li>"_l1, QString(),
+                           "<b>"_l1, "</b>"_l1, " / "_l1));
     tt += block.arg(Filter::tr("Combinations:"),
-                    toString(m_combination_tokens,
-                             "<ul>"_l1, "</ul>"_l1,
-                             "<li>"_l1, "</li>"_l1, QString(),
-                             "<b>"_l1, "</b>"_l1, " / "_l1));
+                    toHtml(m_combination_tokens,
+                           "<ul>"_l1, "</ul>"_l1,
+                           "<li>"_l1, "</li>"_l1, QString(),
+                           "<b>"_l1, "</b>"_l1, " / "_l1));
     return tt;
 }
 
@@ -461,4 +423,10 @@ QVector<QPair<Filter::Comparison, QString>> Filter::Parser::standardComparisonTo
             dct.append({ tt->m_comparison, symbol });
     }
     return dct;
+}
+
+QDebug &operator<<(QDebug &dbg, const Filter &filter)
+{
+    dbg << "Filter { " << filter.field() << " " << filter.comparison() << " "  << filter.expression() << " "  << filter.combination() << " }";
+    return dbg;
 }

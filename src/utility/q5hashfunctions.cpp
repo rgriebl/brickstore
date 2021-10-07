@@ -12,7 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qglobal.h>
-#include <private/qsimd_p.h>
+#include <QtCore/private/qsimd_p.h>
 #include <qendian.h>
 
 #include "q5hashfunctions.h"

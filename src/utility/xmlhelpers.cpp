@@ -60,11 +60,16 @@ char XmlHelpers::firstCharInString(const QString &str)
 
 
 XmlHelpers::ParseXML::ParseXML(const QString &path, const char *rootNodeName, const char *elementNodeName)
-    : ParseXML(nullptr, rootNodeName, elementNodeName)
+    : ParseXML(openFile(path), rootNodeName, elementNodeName)
+{ }
+
+
+QIODevice *XmlHelpers::ParseXML::openFile(const QString &fileName)
 {
-    m_file = new QFile(path);
-    if (!m_file->open(QFile::ReadOnly))
-        throw ParseException(m_file, "could not open file");
+    std::unique_ptr<QFile> f { new QFile(fileName) };
+    if (!f->open(QFile::ReadOnly))
+        throw ParseException(f.get(), "could not open file");
+    return f.release();
 }
 
 XmlHelpers::ParseXML::ParseXML(QIODevice *file, const char *rootNodeName, const char *elementNodeName)
@@ -78,7 +83,8 @@ XmlHelpers::ParseXML::~ParseXML()
     delete m_file;
 }
 
-void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback)
+void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback,
+                                 std::function<void (QDomElement)> rootCallback)
 {
     QDomDocument doc;
     QString emsg;
@@ -89,22 +95,22 @@ void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback)
                 .arg(emsg).arg(eline).arg(ecolumn);
     }
 
-    QDomElement root = doc.documentElement().toElement();
+    auto root = doc.documentElement().toElement();
     if (root.nodeName() != m_rootNodeName) {
         throw ParseException(m_file, "expected root node %1, but got %2")
                 .arg(m_rootNodeName).arg(root.nodeName());
     }
 
-    int nodeCount = 0;
-    for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        ++nodeCount;
-        if (node.nodeName() == m_elementNodeName) {
-            try {
+    try {
+        if (rootCallback)
+            rootCallback(root.toElement());
+
+        for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+            if (node.nodeName() == m_elementNodeName)
                 callback(node.toElement());
-            } catch (const Exception &e) {
-                throw ParseException(m_file, e.what());
-            }
         }
+    } catch (const Exception &e) {
+        throw ParseException(m_file, e.what());
     }
 }
 
@@ -128,7 +134,6 @@ QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagNam
         return QLatin1String(defaultText);
     }
 }
-
 
 
 
