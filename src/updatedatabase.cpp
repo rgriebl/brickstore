@@ -54,7 +54,7 @@ UpdateDatabase::UpdateDatabase(QWidget *parent)
     connect(&m_trans, &Transfer::finished, m_progress, &ProgressDialog::transferDone);
 
     if (!job)
-        m_progress->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
+        m_progress->setErrorText(tr("Could not write to file: %1").arg(localfile));
 
     m_progress->setHeaderText(tr("Updating the BrickLink database"));
     m_progress->setMessageText(tr("Download: %p"));

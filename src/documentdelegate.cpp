@@ -968,15 +968,10 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
         doubleCalc = (type == QMetaType::Double);
         op = str.at(1).toLatin1();
         if (QByteArray("+-*/").contains(op)) {
-            if (intCalc) {
+            if (intCalc)
                 intNumber = QLocale().toInt(str.mid(2));
-                if ((op == '/') && !intNumber)
-                    op = 0;
-            } else if (doubleCalc) {
+            else if (doubleCalc)
                 doubleNumber = QLocale().toDouble(str.mid(2));
-                if ((op == '/') && qFuzzyIsNull(doubleNumber))
-                    op = 0;
-            }
         }
     }
 
@@ -993,8 +988,9 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
                         : newValue = oldValue.toDouble() - doubleNumber; break;
             case '*': intCalc ? newValue = oldValue.toInt() * intNumber
                         : newValue = oldValue.toDouble() * doubleNumber; break;
-            case '/': intCalc ? newValue = oldValue.toInt() / intNumber
-                        : newValue = oldValue.toDouble() / doubleNumber; break;
+            case '/': intCalc ? newValue = oldValue.toInt() / (intNumber ? intNumber : 1)
+                        : newValue = oldValue.toDouble() / (!qFuzzyIsNull(doubleNumber)
+                                                            ? doubleNumber : 1); break;
             default: newValue = oldValue; break;
             }
         }

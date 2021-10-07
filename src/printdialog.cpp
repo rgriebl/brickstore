@@ -116,7 +116,7 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     connect(w_pageSelect, &QLineEdit::textChanged,
             this, &PrintDialog::updatePageRange);
     connect(w_layout, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            [this](int idx) {
+            this, [this](int idx) {
         if (w_print_preview)
             w_print_preview->setOrientation(idx == 0 ?
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

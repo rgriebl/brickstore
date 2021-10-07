@@ -187,7 +187,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_toggles[1] = w_toggle_appears_in;
     w_toggles[2] = w_toggle_price_guide;
     for (int i = 0; i < 3; ++i) {
-        connect(w_toggles[i], &QToolButton::toggled, [this, i](bool on) {
+        connect(w_toggles[i], &QToolButton::toggled, this, [this, i](bool on) {
             w_splitter_bottom->widget(i)->setVisible(on);
         });
     }

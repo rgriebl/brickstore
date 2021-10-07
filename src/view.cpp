@@ -520,7 +520,7 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
         emitFilterChanged();
         m_value->setFocus();
     });
-    connect(m_value, &QComboBox::currentTextChanged, [this]() {
+    connect(m_value, &QComboBox::currentTextChanged, this, [this]() {
         m_filter_delay->start();
     });
     connect(m_filter_delay, &QTimer::timeout,

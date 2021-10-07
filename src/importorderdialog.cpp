@@ -576,7 +576,7 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
     if (hasCombinedFinished) {
         bool allCombinedFinished = true;
         int combinedCount = 0;
-        for (auto it = m_orderDownloads.begin(); it != m_orderDownloads.end(); ++it) {
+        for (auto it = m_orderDownloads.cbegin(); it != m_orderDownloads.cend(); ++it) {
             if (it->m_combine) {
                 allCombinedFinished = allCombinedFinished && it->m_finished;
                 ++combinedCount;
@@ -597,7 +597,7 @@ void ImportOrderDialog::orderDownloadFinished(BrickLink::Order *order, TransferJ
                     if (it->m_combineCCode && (it->m_order->currencyCode() != defaultCCode))
                         crate = Currency::inst()->crossRate(it->m_order->currencyCode(), defaultCCode);
 
-                    LotList orderLots = parseOrderXML(it->m_order, it->m_xmlData);
+                    const LotList orderLots = parseOrderXML(it->m_order, it->m_xmlData);
                     if (!orderLots.isEmpty()) {
                         QColor col = QColor::fromHsl(360 * orderCount / combinedCount, 128, 128);
                         for (auto &orderLot : orderLots) {

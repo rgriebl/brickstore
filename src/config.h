@@ -167,7 +167,7 @@ signals:
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void recentFilesChanged(const QStringList &recent);
-    void iconSizeChanged(IconSize iconSize);
+    void iconSizeChanged(Config::IconSize iconSize);
     void fontSizePercentChanged(int p);
     void itemImageSizePercentChanged(int p);
     void columnLayoutChanged(const QString &id, const QByteArray &layout);
