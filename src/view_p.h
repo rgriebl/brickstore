@@ -172,6 +172,7 @@ private:
     QComboBox *m_comparisons;
     QComboBox *m_value;
     QButtonGroup *m_andOrGroup;
+    bool m_nextMouseUpOpensPopup = false;
 };
 
 

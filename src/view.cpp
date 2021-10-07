@@ -399,10 +399,6 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
     m_value->setMaxVisibleItems(30);
     m_value->lineEdit()->setPlaceholderText(tr("Filter expression"));
     m_value->lineEdit()->setClearButtonEnabled(true);
-    m_value->completer()->setCaseSensitivity(Qt::CaseInsensitive);
-    m_value->completer()->setCompletionMode(QCompleter::PopupCompletion);
-    m_value->completer()->setFilterMode(Qt::MatchContains);
-    m_value->completer()->setMaxVisibleItems(m_value->maxVisibleItems());
     m_value->setItemDelegate(new QStyledItemDelegate(m_value));
     m_value->setStyle(new TransparentComboProxyStyle(m_value));
     m_value->setObjectName("filter-value"_l1);
@@ -531,6 +527,7 @@ FilterTermWidget::FilterTermWidget(View *view, const Filter &filter, QWidget *pa
             this, &FilterTermWidget::emitFilterChanged);
 
     m_value->installEventFilter(this);
+    m_value->lineEdit()->installEventFilter(this);
 }
 
 void FilterTermWidget::updateValueModel(int field)
@@ -558,11 +555,17 @@ bool FilterTermWidget::eventFilter(QObject *o, QEvent *e)
             Qt::ShortcutFocusReason, Qt::OtherFocusReason
         };
         if (validReasons.contains(fe->reason())) {
-            QMetaObject::invokeMethod(m_value, [&]() {
-                m_value->completer()->complete();
-            }, Qt::QueuedConnection);
+            m_nextMouseUpOpensPopup = (fe->reason() == Qt::MouseFocusReason);
+            if (!m_nextMouseUpOpensPopup)
+                m_value->showPopup();
         }
+    } else if ((e->type() == QEvent::MouseButtonRelease)
+               && m_nextMouseUpOpensPopup
+               && ((o == m_value) || (o == m_value->lineEdit()))) {
+        m_value->showPopup();
+        m_nextMouseUpOpensPopup = false;
     }
+
     return QWidget::eventFilter(o, e);
 }
 
