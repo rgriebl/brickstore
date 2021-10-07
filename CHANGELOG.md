@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.10.2] - 2021-10-07
+All of [2021.10.1] minus two bugs:
+- Fixed the status column not sorting correctly.
+- Fixed the Windows installer not shipping the newly required `zlib1.dll`.
+
 ## [2021.10.1] - 2021-10-07
 ### Added
 - This release brings back the classic filter mechanism from the old BrickStore versions, but it
@@ -339,7 +344,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.10.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.10.2...HEAD
+[2021.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.2
 [2021.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.1
 [2021.6.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.6.1
 [2021.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.5.2
