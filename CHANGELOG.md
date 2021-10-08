@@ -4,9 +4,32 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ## [2021.10.2] - 2021-10-07
-All of [2021.10.1] minus two bugs:
+This .2 release additionally fixes two bugs introduced in the 2021.10.1 release:
 - Fixed the status column not sorting correctly.
 - Fixed the Windows installer not shipping the newly required `zlib1.dll`.
+
+### Added
+- This release brings back the classic filter mechanism from the old BrickStore versions, but it
+  also adds a lot of convenience functionality:
+  - The fields to filter on are limited to the currently visible columns.
+  - If a field has a limited set of possible values (e.g., colors, status, condition), these
+    values can be auto-completed while typing or just picked from a drop-down list.
+  - Even complex filters can be (de)activated by a single click on the filter icon.
+- Added support for simple calculations on all numeric document fields. Columns such as price or
+  quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation
+  term (e.g. `=+42` to add 42 to all selected values).
+
+  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being
+  a valid integer or floating-point number (depending on the column's data type).
+
+### Improvements
+- Fixed a few problems with failing authentications against the BrickLink servers.
+
+### Technical Changes
+- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20
+  respectively.
+- BrickStore can be built against Qt 6.2 now, but a few small features are still missing.
+
 
 ## [2021.10.1] - 2021-10-07
 ### Added
