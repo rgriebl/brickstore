@@ -154,6 +154,8 @@ public slots:
     void on_edit_color_triggered();
     void on_edit_item_triggered();
     void on_edit_qty_set_triggered();
+    void on_edit_qty_need_triggered();
+    void on_edit_qty_have_triggered();
     void on_edit_qty_multiply_triggered();
     void on_edit_qty_divide_triggered();
     void on_edit_price_set_triggered();

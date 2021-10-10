@@ -700,7 +700,7 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const LotList &lots)
         XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
         for (const Lot *lot : lots) {
-            if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude))
+            if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude) || (lot->quantity() == 0))
                 continue;
 
             xml.createElement();

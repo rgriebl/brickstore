@@ -875,13 +875,15 @@ void FrameWork::translateActions()
         { "edit_color",                     tr("Set color..."),                       },
         { "edit_qty",                       tr("Quantity"),                           },
         { "edit_qty_set",                   tr("Set quantity..."),                    },
+        { "edit_qty_need",                  tr("Need it..."),                         tr("Ctrl++", "Edit|Quantity|Need it")},
+        { "edit_qty_have",                  tr("Have it..."),                         tr("Ctrl+-", "Edit|Quantity|Have it")},
         { "edit_qty_multiply",              tr("Multiply quantity..."),               tr("Ctrl+*", "Edit|Quantity|Multiply") },
         { "edit_qty_divide",                tr("Divide quantity..."),                 tr("Ctrl+/", "Edit|Quantity|Divide") },
         { "edit_price",                     tr("Price"),                              },
         { "edit_price_round",               tr("Round price to 2 decimals"),          },
         { "edit_price_set",                 tr("Set price..."),                       },
         { "edit_price_to_priceguide",       tr("Set price to guide..."),              tr("Ctrl+G", "Edit|Price|Set to PriceGuide") },
-        { "edit_price_inc_dec",             tr("Adjust price..."),                    tr("Ctrl++", "Edit|Price|Inc/Dec") },
+        { "edit_price_inc_dec",             tr("Adjust price..."),                    tr("Ctrl+=", "Edit|Price|Inc/Dec") },
         { "edit_cost",                      tr("Cost"),                               },
         { "edit_cost_round",                tr("Round cost to 2 decimals") ,          },
         { "edit_cost_set",                  tr("Set cost..."),                        },
@@ -1303,6 +1305,8 @@ void FrameWork::createActions()
 
     m = newQMenu(this, "edit_qty", NeedSelection(1));
     m->addAction(newQAction(this, "edit_qty_set", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_qty_need", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_qty_have", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_qty_multiply", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_qty_divide", NeedSelection(1)));
 

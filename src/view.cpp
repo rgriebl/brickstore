@@ -2148,6 +2148,47 @@ void View::on_edit_cost_spread_triggered()
     }
 }
 
+
+void View::on_edit_qty_need_triggered()
+{
+    if (selectedLots().isEmpty())
+        return;
+
+    applyTo(selectedLots(), [=](const auto &from, auto &to)
+            {
+                int quantity = from.quantity();
+
+                quantity += 1;
+
+                if (quantity >= 0)
+                {
+                    (to = from).setQuantity(quantity);
+                    return true;
+                }
+                return false;
+            });
+}
+
+void View::on_edit_qty_have_triggered()
+{
+    if (selectedLots().isEmpty())
+        return;
+
+    applyTo(selectedLots(), [=](const auto &from, auto &to)
+            {
+                int quantity = from.quantity();
+
+                quantity -= 1;
+
+                if (quantity >= 0)
+                {
+                    (to = from).setQuantity(quantity);
+                    return true;
+                }
+                return false;
+            });
+}
+
 void View::on_edit_qty_divide_triggered()
 {
     if (selectedLots().isEmpty())
@@ -2762,7 +2803,7 @@ void View::contextMenu(const QPoint &pos)
         case Document::QuantityOrig:
         case Document::QuantityDiff:
         case Document::Quantity:
-            actionNames = { "edit_qty_set", "edit_qty_multiply", "edit_qty_divide" };
+            actionNames = { "edit_qty_set", "edit_qty_need", "edit_qty_have", "edit_qty_multiply", "edit_qty_divide" };
             break;
         case Document::PriceOrig:
         case Document::PriceDiff:
