@@ -145,7 +145,7 @@ void CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
 {
     QNetworkReply *reply = m_nam.get(QNetworkRequest(m_changelogUrl));
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, &latestVersion]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, latestVersion]() {
         reply->deleteLater();
 
         QString md = QString::fromUtf8(reply->readAll());
