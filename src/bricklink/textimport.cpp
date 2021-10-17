@@ -469,34 +469,42 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         if (strs.count() < 7)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(line);
 
-        ChangeLogEntry::Type t;
         char c = XmlHelpers::firstCharInString(strs.at(2));
 
         switch (c) {
-        case 'I': t = ChangeLogEntry::ItemId; break;
-        case 'T': t = ChangeLogEntry::ItemType; break;
-        case 'M': t = ChangeLogEntry::ItemMerge; break;
-        case 'E': t = ChangeLogEntry::CategoryName; break;
-        case 'G': t = ChangeLogEntry::CategoryMerge; break;
-        case 'C': t = ChangeLogEntry::ColorName; break;
-        case 'A': t = ChangeLogEntry::ColorMerge; break;
+        case 'I':   // ItemId
+        case 'T':   // ItemType
+        case 'M': { // ItemMerge
+            QString fromType = strs.at(3);
+            QString fromId = strs.at(4);
+            QString toType = strs.at(5);
+            QString toId = strs.at(6);
+            if ((fromType.length() == 1) && (toType.length() == 1)
+                    && !fromId.isEmpty() && !toId.isEmpty()) {
+                m_itemChangelog.emplace_back((fromType % fromId).toLatin1(),
+                                             (toType % toId).toLatin1());
+            }
+            break;
+        }
+        case 'A': { // ColorMerge
+            bool fromOk = false, toOk = false;
+            uint fromId = strs.at(3).toUInt(&fromOk);
+            uint toId = strs.at(5).toUInt(&toOk);
+            if (fromOk && toOk)
+                m_colorChangelog.emplace_back(fromId, toId);
+            break;
+        }
+        case 'E':   // CategoryName
+        case 'G':   // CategoryMerge
+        case 'C':   // ColorName
+            break;
         default:
             qWarning("Parsing btchglog: skipping invalid change code %x", uint(c));
-            continue;
+            break;
         }
-
-        if (t == ChangeLogEntry::CategoryName || t == ChangeLogEntry::CategoryMerge || t == ChangeLogEntry::ColorName)
-            continue;
-
-        QByteArray ba;
-        ba.append(char(t));
-        for (int i = 0; i < 4; ++i) {
-            ba.append('\t');
-            ba.append(strs.at(3+i).toLatin1());
-        }
-
-        m_changelog.emplace_back(ba);
     }
+    std::sort(m_colorChangelog.begin(), m_colorChangelog.end());
+    std::sort(m_itemChangelog.begin(), m_itemChangelog.end());
 }
 
 void BrickLink::TextImport::exportTo(Core *bl)
@@ -506,7 +514,8 @@ void BrickLink::TextImport::exportTo(Core *bl)
     std::swap(bl->m_categories, m_categories);
     std::swap(bl->m_items, m_items);
     std::swap(bl->m_pccs, m_pccs);
-    std::swap(bl->m_changelog, m_changelog);
+    std::swap(bl->m_itemChangelog, m_itemChangelog);
+    std::swap(bl->m_colorChangelog, m_colorChangelog);
 
     for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
         Item &item = bl->m_items[it.key()];

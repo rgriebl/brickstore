@@ -21,6 +21,7 @@
 #include <QtCore/QVector>
 
 #include "global.h"
+#include "changelogentry.h"
 #include "item.h"
 
 
@@ -63,6 +64,8 @@ private:
     std::vector<Category>      m_categories;
     std::vector<Item>          m_items;
     std::vector<QByteArray>    m_changelog;
+    std::vector<ItemChangeLogEntry>  m_itemChangelog;
+    std::vector<ColorChangeLogEntry> m_colorChangelog;
     std::vector<PartColorCode> m_pccs;
     // item-idx -> { color-idx -> { vector < qty, item-idx > } }
     QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;

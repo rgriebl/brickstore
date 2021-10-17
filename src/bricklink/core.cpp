@@ -924,7 +924,8 @@ void Core::clear()
     m_categories.clear();
     m_items.clear();
     m_pccs.clear();
-    m_changelog.clear();
+    m_itemChangelog.clear();
+    m_colorChangelog.clear();
 }
 
 
@@ -966,7 +967,7 @@ bool Core::readDatabase(const QString &filename)
         }
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
-        bool gotChangeLog = false, gotPccs = false;
+        bool gotItemChangeLog = false, gotColorChangeLog = false, gotPccs = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -1043,20 +1044,32 @@ bool Core::readDatabase(const QString &filename)
                 gotItems = true;
                 break;
             }
-            case ChunkId('C','H','G','L') | 1ULL << 32: {
+            case ChunkId('I','C','H','G') | 1ULL << 32: {
                 quint32 clc = 0;
                 ds >> clc;
                 check();
                 sizeCheck(clc, 1'000'000);
 
-                m_changelog.reserve(clc);
-                for (quint32 i = clc; i; i--) {
-                    QByteArray entry;
-                    ds >> entry;
+                m_itemChangelog.resize(clc);
+                for (quint32 i = 0; i < clc; ++i) {
+                    readItemChangeLogFromDatabase(m_itemChangelog[i], ds, DatabaseVersion::Latest);
                     check();
-                    m_changelog.emplace_back(entry);
                 }
-                gotChangeLog = true;
+                gotItemChangeLog = true;
+                break;
+            }
+            case ChunkId('C','C','H','G') | 1ULL << 32: {
+                quint32 clc = 0;
+                ds >> clc;
+                check();
+                sizeCheck(clc, 1'000);
+
+                m_colorChangelog.resize(clc);
+                for (quint32 i = 0; i < clc; ++i) {
+                    readColorChangeLogFromDatabase(m_colorChangelog[i], ds, DatabaseVersion::Latest);
+                    check();
+                }
+                gotColorChangeLog = true;
                 break;
             }
             case ChunkId('P','C','C',' ') | 1ULL << 32: {
@@ -1094,7 +1107,8 @@ bool Core::readDatabase(const QString &filename)
 
         delete sw;
 
-        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog || !gotPccs) {
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotItemChangeLog
+                || !gotColorChangeLog || !gotPccs) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
@@ -1106,7 +1120,8 @@ bool Core::readDatabase(const QString &filename)
                  << "\n  Categories  :" << m_categories.size()
                  << "\n  Items       :" << m_items.size()
                  << "\n  PCCs        :" << m_pccs.size()
-                 << "\n  ChangeLog   :" << m_changelog.size();
+                 << "\n  ChangeLog I :" << m_itemChangelog.size()
+                 << "\n  ChangeLog C :" << m_colorChangelog.size();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
@@ -1172,11 +1187,30 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version) const
             writeItemToDatabase(item, ds, version);
         check(cw.endChunk());
 
-        check(cw.startChunk(ChunkId('C','H','G','L'), 1));
-        ds << quint32(m_changelog.size());
-        for (const QByteArray &cl : m_changelog)
-            ds << cl;
-        check(cw.endChunk());
+        if (version >= DatabaseVersion::Version_5) {
+            check(cw.startChunk(ChunkId('I','C','H','G'), 1));
+            ds << quint32(m_itemChangelog.size());
+            for (const ItemChangeLogEntry &e : m_itemChangelog)
+                writeItemChangeLogToDatabase(e, ds, version);
+            check(cw.endChunk());
+
+            check(cw.startChunk(ChunkId('C','C','H','G'), 1));
+            ds << quint32(m_colorChangelog.size());
+            for (const ColorChangeLogEntry &e : m_colorChangelog)
+                writeColorChangeLogToDatabase(e, ds, version);
+            check(cw.endChunk());
+        } else {
+            check(cw.startChunk(ChunkId('C','H','G','L'), 1));
+            for (const ItemChangeLogEntry &e : m_itemChangelog) {
+                ds << static_cast<QByteArray>("\x03\t" % QByteArray(1, e.fromItemTypeId()) % '\t' % e.fromItemId()
+                                              % '\t' % e.toItemTypeId() % '\t' % e.toItemId());
+            }
+            for (const ColorChangeLogEntry &e : m_colorChangelog) {
+                ds << static_cast<QByteArray>("\x07\t" % QByteArray::number(e.fromColorId()) % "\tx\t"
+                                              % QByteArray::number(e.toColorId()) % "\tx");
+            }
+            check(cw.endChunk());
+        }
 
         if (version >= DatabaseVersion::Version_3) {
             check(cw.startChunk(ChunkId('P','C','C',' '), 1));
@@ -1432,57 +1466,49 @@ void Core::writePCCToDatabase(const PartColorCode &pcc,
     }
 }
 
+void Core::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion) const
+{
+    dataStream >> e.m_fromTypeAndId >> e.m_toTypeAndId;
+}
+
+void Core::writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion)
+{
+    dataStream << e.m_fromTypeAndId << e.m_toTypeAndId;
+}
+
+void Core::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion) const
+{
+    dataStream >> e.m_fromColorId >> e.m_toColorId;
+}
+
+void Core::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion)
+{
+    dataStream << e.m_fromColorId << e.m_toColorId;
+}
+
 
 bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc)
 {
     if (!inc)
         return false;
 
-    const Item *fixed_item = item;
-    const Color *fixed_color = color;
+    if (!item) {
+        QByteArray itemTypeAndId = inc->m_itemtype_id % inc->m_item_id;
+        if (!inc->m_itemtype_name.isEmpty())
+            itemTypeAndId[0] = inc->m_itemtype_name.at(0).toUpper().toLatin1();
 
-    QByteArray itemtypeid { 1, inc->m_itemtype_id };
-    QByteArray itemid { inc->m_item_id };
-    uint colorid = inc->m_color_id;
-
-    if (!itemtypeid.isEmpty() && !inc->m_itemtype_name.isEmpty())
-        itemtypeid = inc->m_itemtype_name.toLatin1().toUpper().left(1);
-
-    for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
-        const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(size_t(i)));
-
-        if (!fixed_item) {
-            if ((cl.type() == ChangeLogEntry::ItemId) ||
-                    (cl.type() == ChangeLogEntry::ItemMerge) ||
-                    (cl.type() == ChangeLogEntry::ItemType)) {
-                if ((itemtypeid == cl.from(0).left(1)) &&
-                        (itemid == cl.from(1))) {
-                    itemtypeid = cl.to(0).left(1);
-                    itemid = cl.to(1);
-
-                    if (!itemtypeid.isEmpty() && !itemid.isEmpty())
-                        fixed_item = core()->item(itemtypeid.at(0), itemid);
-                }
-            }
-        }
-        if (!fixed_color) {
-            if (cl.type() == ChangeLogEntry::ColorMerge) {
-                if (colorid == cl.from(0).toUInt()) {
-                    bool ok;
-                    colorid = cl.to(0).toUInt(&ok);
-                    if (ok)
-                        fixed_color = core()->color(colorid);
-                }
-            }
-        }
+        auto it = std::lower_bound(m_itemChangelog.cbegin(), m_itemChangelog.cend(), itemTypeAndId);
+        if ((it != m_itemChangelog.cend()) && (*it == itemTypeAndId))
+            item = core()->item(it->toItemTypeId(), it->toItemId());
+    }
+    if (!color) {
+        uint colorId = inc->m_color_id;
+        auto it = std::lower_bound(m_colorChangelog.cbegin(), m_colorChangelog.cend(), colorId);
+        if ((it != m_colorChangelog.cend()) && (*it == colorId))
+            color = core()->color(it->toColorId());
     }
 
-    if (fixed_item && !item)
-        item = fixed_item;
-    if (fixed_color && !color)
-        color = fixed_color;
-
-    return (fixed_item && fixed_color);
+    return (item && color);
 }
 
 qreal Core::itemImageScaleFactor() const

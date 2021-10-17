@@ -14,38 +14,63 @@
 #pragma once
 
 #include <QtCore/QByteArray>
-#include <QtCore/QDateTime>
+#include <QDebug>
+
+#include "color.h"
 
 
 namespace BrickLink {
 
-class ChangeLogEntry
+class ColorChangeLogEntry
 {
 public:
-    enum Type {
-        Invalid,
-        ItemId,
-        ItemType,
-        ItemMerge,
-        CategoryName,
-        CategoryMerge,
-        ColorName,
-        ColorMerge
-    };
+    uint fromColorId() const  { return m_fromColorId; }
+    uint toColorId() const  { return m_toColorId; }
 
-    ChangeLogEntry(const char *data)
-        : m_data(QByteArray::fromRawData(data, int(qstrlen(data))))
+    friend bool operator==(const ColorChangeLogEntry &e, uint colorId)
+    { return e.m_fromColorId == colorId; }
+    friend bool operator<(const ColorChangeLogEntry &e, uint colorId)
+    { return e.m_fromColorId < colorId; }
+    friend bool operator<(const ColorChangeLogEntry &that, const ColorChangeLogEntry &other)
+    { return that.m_fromColorId < other.m_fromColorId; }
+
+    ColorChangeLogEntry(uint fromColorId = Color::InvalidId, uint toColorId = Color::InvalidId)
+        : m_fromColorId(fromColorId)
+        , m_toColorId(toColorId)
     { }
-    ~ChangeLogEntry() = default;
-
-    Type type() const              { return m_data.isEmpty() ? Invalid : Type(m_data.at(0)); }
-    QByteArray from(int idx) const { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+1]; }
-    QByteArray to(int idx) const   { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+3]; }
 
 private:
-    Q_DISABLE_COPY(ChangeLogEntry)
+    uint m_fromColorId;
+    uint m_toColorId;
 
-    const QByteArray m_data;
+    friend class Core;
+};
+
+
+class ItemChangeLogEntry
+{
+public:
+    char fromItemTypeId() const    { return m_fromTypeAndId.at(0); }
+    QByteArray fromItemId() const  { return m_fromTypeAndId.mid(1); }
+
+    char toItemTypeId() const    { return m_toTypeAndId.at(0); }
+    QByteArray toItemId() const  { return m_toTypeAndId.mid(1); }
+
+    friend bool operator==(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
+    { return e.m_fromTypeAndId == typeAndId; }
+    friend bool operator<(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
+    { return e.m_fromTypeAndId < typeAndId; }
+    friend bool operator<(const ItemChangeLogEntry &that, const ItemChangeLogEntry &other)
+    { return that.m_fromTypeAndId < other.m_fromTypeAndId; }
+
+    ItemChangeLogEntry(const QByteArray &fromTypeAndId = { }, const QByteArray &toTypeAndId = { })
+        : m_fromTypeAndId(fromTypeAndId)
+        , m_toTypeAndId(toTypeAndId)
+    { }
+
+private:
+    QByteArray m_fromTypeAndId;
+    QByteArray m_toTypeAndId;
 
     friend class Core;
 };

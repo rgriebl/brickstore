@@ -27,6 +27,7 @@
 #include <QtGui/QIcon>
 
 #include "bricklink/global.h"
+#include "bricklink/changelogentry.h"
 #include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
@@ -55,10 +56,10 @@ public:
         Version_1, // deprecated
         Version_2, // deprecated
         Version_3,
-
         Version_4,
+        Version_5,
 
-        Latest = Version_4
+        Latest = Version_5
     };
 
     QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
@@ -189,6 +190,11 @@ private:
     void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Core::DatabaseVersion v) const;
     static void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, DatabaseVersion v);
 
+    void readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Core::DatabaseVersion v) const;
+    static void writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion v);
+    void readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Core::DatabaseVersion v) const;
+    static void writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion v);
+
 private slots:
     void pictureJobFinished(TransferJob *j, BrickLink::Picture *pic);
     void priceGuideJobFinished(TransferJob *j, BrickLink::PriceGuide *pg);
@@ -217,7 +223,8 @@ private:
     std::vector<Category>      m_categories;
     std::vector<ItemType>      m_item_types;
     std::vector<Item>          m_items;
-    std::vector<QByteArray>    m_changelog;
+    std::vector<ItemChangeLogEntry>  m_itemChangelog;
+    std::vector<ColorChangeLogEntry> m_colorChangelog;
     std::vector<PartColorCode> m_pccs;
 
     Transfer *                 m_transfer = nullptr;
