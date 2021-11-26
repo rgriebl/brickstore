@@ -368,7 +368,7 @@ public:
     QString comments() const           { return get()->comments(); }
     void setComments(const QString &n) { set().to()->setComments(n); }
     QString remarks() const            { return get()->remarks(); }
-    void setRemarks(const QString &r)  { set().to()->setComments(r); }
+    void setRemarks(const QString &r)  { set().to()->setRemarks(r); }
 
     int quantity() const               { return get()->quantity(); }
     void setQuantity(int q)            { set().to()->setQuantity(q); }
