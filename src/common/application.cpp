@@ -125,6 +125,10 @@ void Application::init()
     if (fsp != 100)
         setFontSizePercentLambda(fsp);
 
+    updateTranslations();
+    connect(Config::inst(), &Config::languageChanged,
+            Application::inst(), &Application::updateTranslations);
+
     // sanity check - we might run into endless update loops later on if one of these is missing
     const auto imgFormats = QImageReader::supportedImageFormats();
     if (!imgFormats.contains("png") || !imgFormats.contains("jpg") || !imgFormats.contains("gif"))
@@ -145,13 +149,10 @@ void Application::init()
 
     m_undoGroup = new UndoGroup(this);
 
-    updateTranslations();
-    connect(Config::inst(), &Config::languageChanged,
-            Application::inst(), &Application::updateTranslations);
-
     auto *am = ActionManager::inst();
     connect(this, &Application::languageChanged,
             am, &ActionManager::retranslate);
+    am->retranslate();
 }
 
 void Application::afterInit()
@@ -374,6 +375,7 @@ void Application::updateTranslations()
         auto transQt = new QTranslator(this);
         if (transQt->load("qtbase_en"_l1, i18n))
             QCoreApplication::installTranslator(transQt);
+
         auto transBrickStore = new QTranslator(this);
         if (transBrickStore->load("brickstore_en"_l1, i18n))
             QCoreApplication::installTranslator(transBrickStore);

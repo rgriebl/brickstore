@@ -63,10 +63,7 @@ void MobileApplication::init()
 
     MobileUIHelpers::create(m_engine);
 
-    ActionManager *am = ActionManager::inst();
-
-    am->retranslate();
-    am->createAll([this](const ActionManager::Action *aa) {
+    ActionManager::inst()->createAll([this](const ActionManager::Action *aa) {
         if (aa->isUndo())
             return Application::inst()->undoGroup()->createUndoAction(this);
         else if (aa->isRedo())

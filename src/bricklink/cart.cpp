@@ -247,8 +247,8 @@ Carts::Carts(QObject *parent)
                 } else {
                     int invalidCount = parseSellerCart(*it, *job->data());
                     if (invalidCount) {
-                        message = tr("%n lot(s) of your Shopping Cart could not be imported.")
-                                .arg(invalidCount);
+                        message = tr("%n lot(s) of your Shopping Cart could not be imported.",
+                                     nullptr, invalidCount);
                     }
                     message.clear();
                 }
