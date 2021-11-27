@@ -190,14 +190,36 @@ jobs:
         make appimage
       shell: bash
 
+    - name: Set Android env vars
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      run: |
+        echo "ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
+        echo "ANDROID_BUILD_TOOLS_REVISION=30.0.3" >> $GITHUB_ENV
+
+    - name: Checkout Android openssl
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      run: |
+        cd $ANDROID_SDK_ROOT
+        echo "Checking out KDAB's OpenSSL into $ANDROID_SDK_ROOT"
+        sudo git clone https://github.com/KDAB/android_openssl.git
+
     - name: Build on Linux (Android)
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
       run: |
-        export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
         echo "Using NDK: $ANDROID_NDK_ROOT"
+        echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make
-        make apk
+        make package
+#        echo "==== ls SDK build-tools ===="
+#        ls -la /usr/local/lib/android/sdk/build-tools
+#        echo "==== gradle.properties ===="
+#        cat /home/runner/work/brickstore/brickstore/android-build/gradle.properties
+#        echo "==== build.gradle ===="
+#        cat /home/runner/work/brickstore/brickstore/android-build/build.gradle
+#        echo "==== android-BrickStore-deployment-settings.json ===="
+#        cat /home/runner/work/brickstore/brickstore/android-BrickStore-deployment-settings.json
+#        echo "======================================"
       shell: bash
 
     - name: Upload DEB on Linux

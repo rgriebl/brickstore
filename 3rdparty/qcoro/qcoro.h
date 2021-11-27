@@ -8,7 +8,7 @@
 // vv workaround for QtCreator's clang code model warnings vv
 
 // Bypass GCC / MSVC coroutine guards when using clang code model
-#if !defined(__APPLE__) && (defined(__GNUC__) || defined(_MSC_VER))
+#if !defined(__APPLE__) && !defined(__ANDROID__) && (defined(__GNUC__) || defined(_MSC_VER))
 #if defined(__GNUC__) && defined(__clang__) && !defined(__cpp_impl_coroutine)
 #define __cpp_impl_coroutine true
 #elif defined(_MSC_VER) && defined(__clang__) && !defined(__cpp_lib_coroutine)

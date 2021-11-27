@@ -355,5 +355,14 @@ DISTFILES += \
     android/gradlew.bat \
     android/res/values/libs.xml
 
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
-android: include(C:/Android/sdk/android_openssl/openssl.pri)
+android {
+  ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+  OPENSSL_PRI=$$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri
+  !exists($$OPENSSL_PRI):error("$$OPENSSL_PRI is missing")
+  include($$OPENSSL_PRI)
+
+  package.depends = apk
+  package.commands = cp $$OUT_PWD/android-build/build/outputs/apk/debug/android-build-debug.apk $$OUT_PWD/$${TARGET}-$${VERSION}.apk
+  QMAKE_EXTRA_TARGETS += package
+}
