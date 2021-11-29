@@ -37,7 +37,7 @@ requires(linux|macos|win32|ios:!winrt)
 TEMPLATE = app
 
 TARGET = $$NAME
-unix:!macos:!android:TARGET = $$lower($$TARGET)
+unix:!macos:!android:!ios:TARGET = $$lower($$TARGET)
 
 CONFIG *= no_private_qt_headers_warning no_include_pwd c++2a
 CONFIG *= lrelease embed_translations
@@ -101,6 +101,7 @@ OTHER_FILES += \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
+  ios/Info.plist.in \
 
 LANGUAGES = en de fr
 
@@ -305,16 +306,14 @@ unix:!macos:!android {
 
 
 #
-# Mac OS X specific
+# macOS and iOS specific
 #
-macos {
-  LIBS += -framework SystemConfiguration
-  EXECUTABLE = $$TARGET
-  substitute($$PWD/macos/Info.plist, $$OUT_PWD/macos/Info.plist)
-  QMAKE_INFO_PLIST = $$OUT_PWD/macos/Info.plist
-  bundle_icons.path = Contents/Resources
+
+macos|ios {
+  macos:bundle_icons.path = Contents/Resources
+  macos:bundle_locversions.path = Contents/Resources
+
   bundle_icons.files = $$files("assets/generated-app-icons/*.icns")
-  bundle_locversions.path = Contents/Resources
   for(LANG, LANGUAGES) {
     outpath = $$OUT_PWD/.locversions/$${LANG}.lproj
     mkpath($$outpath)
@@ -323,6 +322,28 @@ macos {
   }
 
   QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions
+}
+
+ios {
+  EXECUTABLE = $$TARGET
+  substitute($$PWD/macos/Info.ios.plist, $$OUT_PWD/ios/Info.plist)
+  QMAKE_INFO_PLIST = $$OUT_PWD/ios/Info.plist
+
+  CONFIG(release, debug|release) {
+    package.depends = $$TARGET
+    package.commands = cp -a $$OUT_PWD/Release-iphoneos/$${TARGET}.app $$OUT_PWD/$${TARGET}-$${VERSION}.app
+  } else {
+    package.CONFIG += recursive
+  }
+  QMAKE_EXTRA_TARGETS += package
+}
+
+macos {
+  EXECUTABLE = $$TARGET
+  substitute($$PWD/macos/Info.macos.plist, $$OUT_PWD/macos/Info.plist)
+  QMAKE_INFO_PLIST = $$OUT_PWD/macos/Info.plist
+
+  LIBS += -framework SystemConfiguration
 
   CONFIG(release, debug|release) {
     deploy.depends += $(DESTDIR_TARGET)

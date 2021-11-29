@@ -65,15 +65,23 @@ jobs:
           qt_target: 'android'
           qmake_extra_config: ''
 
+        - name: "iOS"
+          artifact: "iOS"
+          mobile: true
+          os: macos-latest
+          qt_version: '6.2.1'
+          qt_arch: ''
+          qt_target: 'ios'
+          qmake_extra_config: ''
 
     steps:
     - name: Cache Qt from qt.io
-      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage)
+      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage || matrix.config.mobile)
       id: cache-qt
       uses: actions/cache@v1
       with:
         path: ../Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_arch }}-QtCache
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_target }}-${{ matrix.config.qt_arch }}-QtCache
 
     - name: Install Qt from qt.io
       if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage || matrix.config.mobile)
@@ -208,18 +216,9 @@ jobs:
       run: |
         echo "Using NDK: $ANDROID_NDK_ROOT"
         echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
-        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        qmake -spec android-clang CONFIG+=release CONFIG+=qtquickcompiler${{ matrix.config.qmake_extra_config }}
         make
         make package
-#        echo "==== ls SDK build-tools ===="
-#        ls -la /usr/local/lib/android/sdk/build-tools
-#        echo "==== gradle.properties ===="
-#        cat /home/runner/work/brickstore/brickstore/android-build/gradle.properties
-#        echo "==== build.gradle ===="
-#        cat /home/runner/work/brickstore/brickstore/android-build/build.gradle
-#        echo "==== android-BrickStore-deployment-settings.json ===="
-#        cat /home/runner/work/brickstore/brickstore/android-BrickStore-deployment-settings.json
-#        echo "======================================"
       shell: bash
 
     - name: Upload DEB on Linux
@@ -243,20 +242,43 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.apk"
 
-    - name: Build on macOS
-      if: (startsWith(matrix.config.os, 'mac'))
+    - name: Build for macOS
+      if: startsWith(matrix.config.os, 'mac') && !matrix.config.mobile
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make
         make installer
       shell: bash
 
-    - name: Upload DMG on macOS
+    - name: Upload DMG for macOS
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'mac')
+      if: startsWith(matrix.config.os, 'mac') && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.dmg"
+
+    - name: Fix qmake script for iOS
+      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
+      run: |
+        # fix a bug in aqtinstall - the qmake script for iOS isn't patched correctly
+        cd ../Qt/${{ matrix.config.qt_version }}
+        ln -s macos clang_64
+      shell: bash
+
+    - name: Build for iOS
+      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
+      run: |
+        qmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        make
+        make package || true
+      shell: bash
+
+    - name: Upload Bundle for iOS
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: "*.app"
 
   release:
     needs: [ build ]
