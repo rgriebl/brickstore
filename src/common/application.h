@@ -57,6 +57,7 @@ signals:
     void languageChanged();
 
 protected:
+    void setupTerminateHandler();
     void setupLogging();
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);

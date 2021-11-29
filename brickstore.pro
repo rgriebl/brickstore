@@ -357,10 +357,16 @@ DISTFILES += \
 
 android {
   ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+  ANDROID_VERSION_CODE=$$num_add("$${VERSION_MAJOR}000000", "$${VERSION_MINOR}000", $$VERSION_PATCH)
+  ANDROID_VERSION_NAME=$$VERSION
 
   OPENSSL_PRI=$$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri
   !exists($$OPENSSL_PRI):error("$$OPENSSL_PRI is missing")
   include($$OPENSSL_PRI)
+
+  # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
+  # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
+  LIBS = -lunwind $$LIBS
 
   package.depends = apk
   package.commands = cp $$OUT_PWD/android-build/build/outputs/apk/debug/android-build-debug.apk $$OUT_PWD/$${TARGET}-$${VERSION}.apk

@@ -41,6 +41,7 @@
 #include "common/uihelpers.h"
 #include "ldraw/ldraw.h"
 #include "utility/currency.h"
+#include "utility/exception.h"
 #include "utility/systeminfo.h"
 #include "utility/transfer.h"
 #include "utility/undo.h"
@@ -51,6 +52,11 @@
 #  include "sentry.h"
 #  include "version.h"
 Q_LOGGING_CATEGORY(LogSentry, "sentry")
+#endif
+
+#if defined(Q_OS_UNIX) || defined(Q_CC_MINGW)
+#  define HAS_CXXABI 1
+#  include <cxxabi.h>
 #endif
 
 #if defined(STATIC_QT_BUILD) // this should be needed for linking against a static Qt, but it works without
@@ -85,6 +91,7 @@ void Application::init()
 {
     QCoreApplication::instance()->installEventFilter(this);
 
+    setupTerminateHandler();
     setupLogging();
     setupSentry();
 
@@ -350,6 +357,48 @@ Announcements *Application::announcements()
 UndoGroup *Application::undoGroup()
 {
     return m_undoGroup;
+}
+
+void Application::setupTerminateHandler()
+{
+    static size_t demangleBufferSize = 768;
+    static char *demangleBuffer = static_cast<char *>(malloc(demangleBufferSize));
+
+    std::set_terminate([]() {
+        char buffer [1024];
+
+        std::exception_ptr e = std::current_exception();
+
+        if (e) {
+            const char *typeName = "<unknown type>";
+#if defined(HAS_CXXABI)
+            if (auto type = abi::__cxa_current_exception_type()) {
+                typeName = type->name();
+                if (typeName) {
+                    int status;
+                    demangleBuffer = abi::__cxa_demangle(typeName, demangleBuffer, &demangleBufferSize, &status);
+                    if (status == 0 && *demangleBuffer)
+                        typeName = demangleBuffer;
+                }
+            }
+#endif
+            try {
+                std::rethrow_exception(e);
+            } catch (const std::exception &exc) {
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName, exc.what());
+            } catch (const std::exception *exc) {
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName, exc->what());
+            } catch (const char *exc) {
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type 'const char *' (%s)", exc);
+            } catch (...) {
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s", typeName);
+            }
+        } else {
+            snprintf(buffer, sizeof(buffer), "terminate was called although no exception was thrown");
+        }
+        qWarning().noquote() << buffer;
+        abort();
+    });
 }
 
 void Application::openQueuedDocuments()

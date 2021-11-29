@@ -160,7 +160,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
     }
 
     m_silent = silent;
-    auto reply = co_await m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
+    auto reply = co_await m_nam->get(QNetworkRequest(QUrl("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
 
     if (reply->error() != QNetworkReply::NoError) {
         if (OnlineState::inst()->isOnline() && !m_silent)
