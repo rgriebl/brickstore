@@ -21,9 +21,9 @@ QT_FORWARD_DECLARE_CLASS(QStyle)
 class HeaderView : public QHeaderView
 {
     Q_OBJECT
+
 public:
     HeaderView(Qt::Orientation orientation, QWidget *parent = nullptr);
-    ~HeaderView() override;
     
     void setSectionHidden(int logicalIndex, bool hide);
     void showSection(int logicalIndex) { setSectionHidden(logicalIndex, false); }
@@ -64,7 +64,6 @@ private slots:
     void sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast);
 
 private:
-    QStyle *m_proxyStyle;
     QHash<int, int> m_hiddenSizes;
     QVector<QPair<int, Qt::SortOrder>> m_sortColumns;
     bool m_isSorted = false;

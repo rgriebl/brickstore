@@ -33,8 +33,9 @@ public:
                             QPainter *painter, const QWidget *widget = nullptr) const override;
     void drawPrimitive(PrimitiveElement elem, const QStyleOption *option, QPainter *painter,
                        const QWidget *widget) const override;
+    void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
+                     const QWidget *widget) const override;
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
 };
-

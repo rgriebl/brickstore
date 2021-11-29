@@ -295,7 +295,7 @@ View::View(Document *document, QWidget *parent)
     m_latest_timer->setInterval(100ms);
 
     m_actionTable = {
-        { "edit_merge_items", [this]() {
+        { "edit_mergeitems", [this]() {
               if (!selectedLots().isEmpty())
                   consolidateLots(selectedLots());
               else

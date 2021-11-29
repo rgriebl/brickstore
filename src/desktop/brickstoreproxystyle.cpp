@@ -17,9 +17,11 @@
 #include <QPainter>
 #include <QApplication>
 #include <QPalette>
+#include <QPixmapCache>
 #include <QDynamicPropertyChangeEvent>
 
 #include "utility/utility.h"
+#include "desktop/headerview.h"
 #include "brickstoreproxystyle.h"
 
 
@@ -135,6 +137,64 @@ void BrickStoreProxyStyle::drawPrimitive(PrimitiveElement elem, const QStyleOpti
     }
 #endif
     QProxyStyle::drawPrimitive(elem, option, painter, widget);
+}
+
+void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOption *opt, QPainter *p, const QWidget *widget) const
+{
+    if (element == CE_HeaderLabel) {
+        if (qobject_cast<const HeaderView *>(widget)
+                && widget->property("multipleSortColumns").toBool()) {
+            if (const auto *headerOpt = qstyleoption_cast<const QStyleOptionHeader *>(opt)) {
+                QStyleOptionHeader myheaderOpt(*headerOpt);
+                // .iconAlignment only works in the vertical direction.
+                // switching to RTL is a very bad hack, but it gets the job done, even in the
+                // native platforms styles.
+                myheaderOpt.direction = Qt::RightToLeft;
+                int iconSize = pixelMetric(PM_SmallIconSize, opt);
+
+                const auto *headerView = static_cast<const HeaderView *>(widget);
+                const auto sortColumns = headerView->sortColumns();
+
+                for (int i = 0; i < sortColumns.size(); ++i) {
+                    if (sortColumns.at(i).first == headerOpt->section) {
+                        QString key = "hv_"_l1 % QString::number(iconSize) % "-"_l1 %
+                                QString::number(i) % "-"_l1 % QString::number(
+                                    headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
+
+                        QPixmap pix;
+                        if (!QPixmapCache::find(key, &pix)) {
+                            QString name = "view-sort"_l1;
+                            if (headerView->isSorted()) {
+                                name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
+                                               ? "-ascending"_l1 : "-descending"_l1);
+                            }
+                            pix = QIcon::fromTheme(name).pixmap(widget->window()->windowHandle(),
+                                                                QSize(iconSize, iconSize),
+                                                                (opt->state & State_Enabled) ?
+                                                                    QIcon::Normal : QIcon::Disabled);
+
+                            if (i > 0) {
+                                QPixmap pix2(pix.size());
+                                pix2.setDevicePixelRatio(pix.devicePixelRatio());
+                                pix2.fill(Qt::transparent);
+                                QPainter p(&pix2);
+                                p.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
+                                p.drawPixmap(pix2.rect(), pix);
+                                p.end();
+                                pix = pix2;
+                            }
+                            QPixmapCache::insert(key, pix);
+                        }
+                        myheaderOpt.icon = QIcon(pix);
+                    }
+                }
+                QProxyStyle::drawControl(element, &myheaderOpt, p, widget);
+                return;
+            }
+        }
+    }
+    QProxyStyle::drawControl(element, opt, p, widget);
+
 }
 
 bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)

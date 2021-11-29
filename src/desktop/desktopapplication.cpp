@@ -346,7 +346,6 @@ void DesktopApplication::setUiTheme()
     if (!once)
         once = true;
     auto theme = Config::inst()->uiTheme();
-    QStyle *systemStyle = nullptr;
 
 #if defined(Q_OS_MACOS)
     extern bool hasMacThemes();
@@ -417,6 +416,8 @@ void DesktopApplication::setUiTheme()
 
         QApplication::setPalette(palette);
         QToolTip::setPalette(palette);
+    } else {
+        QApplication::setStyle(new BrickStoreProxyStyle());
     }
 #endif // !Q_OS_MACOS
 }
