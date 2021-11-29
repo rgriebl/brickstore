@@ -122,3 +122,5 @@ void RecentFiles::open(int index)
 {
     emit openDocument(data(createIndex(index, 0), FilePathRole).toString());
 }
+
+#include "moc_recentfiles.cpp"

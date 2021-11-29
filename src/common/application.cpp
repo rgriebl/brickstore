@@ -665,3 +665,5 @@ void Application::exitBrickLink()
     delete BrickLink::core();
     delete LDraw::core();
 }
+
+#include "moc_application.cpp"

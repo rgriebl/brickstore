@@ -258,3 +258,5 @@ void ImportCartDialog::updateStatusLabel()
     }
     w_lastUpdated->setText(s);
 }
+
+#include "moc_importcartdialog.cpp"

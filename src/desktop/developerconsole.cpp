@@ -169,3 +169,5 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
     }
     QMetaObject::invokeMethod(m_log, "appendHtml", Qt::QueuedConnection, Q_ARG(QString, str));
 }
+
+#include "moc_developerconsole.cpp"

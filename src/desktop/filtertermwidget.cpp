@@ -599,3 +599,5 @@ void FilterWidget::setFilterText(const QVector<Filter> &filter)
     if (m_doc)
         m_edit->setText(m_doc->model()->filterParser()->toString(filter, true /*symbolic*/));
 }
+
+#include "moc_filtertermwidget.cpp"

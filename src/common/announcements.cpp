@@ -164,3 +164,5 @@ QString Announcements::announcementsWikiUrl() const
 {
     return m_wikiAnnouncementsUrl;
 }
+
+#include "moc_announcements.cpp"

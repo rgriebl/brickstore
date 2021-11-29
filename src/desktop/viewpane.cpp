@@ -34,10 +34,14 @@
 #include "changecurrencydialog.h"
 #include "filtertermwidget.h"
 #include "menucombobox.h"
-#include "viewpane.h"
 #include "view.h"
+#include "viewpane.h"
 
-class CollapsibleLabel : public QLabel {
+
+class CollapsibleLabel : public QLabel
+{
+    // Q_OBJECT
+
 public:
     CollapsibleLabel(const QString &str = { })  : QLabel(str)
     {
@@ -659,3 +663,6 @@ void ViewPane::createToolBar()
         layout()->invalidate();
     });
 }
+
+//#include "moc_viewpane.cpp"  // why does this not work?
+//#include "viewpane.moc"

@@ -298,8 +298,8 @@ QStringList UndoAction::descriptionList(QUndoStack *stack) const
     return sl;
 }
 
-#endif // defined(QT_WIDGETS_LIB)
-
 #include "undo.moc"
+
+#endif // defined(QT_WIDGETS_LIB)
 
 #include "moc_undo.cpp"

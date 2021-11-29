@@ -215,3 +215,6 @@ qint64 HashHeaderCheckFilter::writeData(const char *data, qint64 maxSize)
     }
     return maxSize;
 }
+
+
+#include "moc_bs_lzma.cpp"

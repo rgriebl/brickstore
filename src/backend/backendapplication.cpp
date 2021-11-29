@@ -61,3 +61,5 @@ void BackendApplication::afterInit()
 
 void BackendApplication::checkRestart()
 { }
+
+#include "moc_backendapplication.cpp"

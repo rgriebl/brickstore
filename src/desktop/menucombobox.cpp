@@ -70,3 +70,5 @@ void MenuComboBox::hidePopup()
         m_menu->hide();
     QComboBox::hidePopup();
 }
+
+#include "moc_menucombobox.cpp"

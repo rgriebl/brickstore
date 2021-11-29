@@ -73,3 +73,5 @@ void BetterItemDelegate::extendedPaint(QPainter *painter, const QStyleOptionView
         painter->restore();
     }
 }
+
+#include "moc_betteritemdelegate.cpp"

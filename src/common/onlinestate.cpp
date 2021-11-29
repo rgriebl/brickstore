@@ -142,3 +142,5 @@ bool OnlineState::checkOnline()
 #endif
     return online;
 }
+
+#include "moc_onlinestate.cpp"

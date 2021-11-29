@@ -1242,3 +1242,4 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
 }
 
 #include "moc_view.cpp"
+#include "moc_view_p.cpp"

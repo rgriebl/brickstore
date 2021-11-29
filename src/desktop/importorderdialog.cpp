@@ -328,3 +328,5 @@ void ImportOrderDialog::updateStatusLabel()
     }
     w_lastUpdated->setText(s);
 }
+
+#include "moc_importorderdialog.cpp"

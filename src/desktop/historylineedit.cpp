@@ -273,3 +273,5 @@ void HistoryLineEdit::changeEvent(QEvent *e)
     }
     return QLineEdit::changeEvent(e);
 }
+
+#include "moc_historylineedit.cpp"

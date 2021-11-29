@@ -435,3 +435,5 @@ void PrintDialog::print()
     w_print_preview->print();
     accept();
 }
+
+#include "moc_printdialog.cpp"

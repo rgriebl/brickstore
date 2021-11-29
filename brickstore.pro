@@ -101,7 +101,6 @@ OTHER_FILES += \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
-  ios/Info.plist.in \
 
 LANGUAGES = en de fr
 

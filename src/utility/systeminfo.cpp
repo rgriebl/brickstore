@@ -204,3 +204,5 @@ quint64 SystemInfo::physicalMemory() const
 {
     return m_map["hw.memory"_l1].toULongLong();
 }
+
+#include "moc_systeminfo.cpp"

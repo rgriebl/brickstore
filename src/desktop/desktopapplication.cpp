@@ -429,3 +429,5 @@ void DesktopApplication::setDesktopIconTheme()
 
     setIconTheme(dark ? DarkTheme : LightTheme);
 }
+
+#include "moc_desktopapplication.cpp"

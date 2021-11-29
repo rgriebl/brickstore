@@ -665,3 +665,5 @@ void ActionManager::disconnectActionTable(QObject *contextObject)
 {
     delete contextObject;
 }
+
+#include "moc_actionmanager.cpp"

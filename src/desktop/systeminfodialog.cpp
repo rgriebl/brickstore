@@ -61,3 +61,5 @@ SystemInfoDialog::~SystemInfoDialog()
 {
     delete ui;
 }
+
+#include "moc_systeminfodialog.cpp"

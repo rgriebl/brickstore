@@ -175,3 +175,5 @@ void AnnouncementsDialog::showNewAnnouncements(Announcements *announcements, QWi
             announcements->markAnnouncementRead(id);
     }
 }
+
+#include "moc_announcementsdialog.cpp"

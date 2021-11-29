@@ -168,3 +168,5 @@ void DocumentList::remove(Document *document)
     if (m_documents.isEmpty())
         emit lastDocumentClosed();
 }
+
+#include "moc_documentlist.cpp"

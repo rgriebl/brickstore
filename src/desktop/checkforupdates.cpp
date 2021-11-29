@@ -257,3 +257,5 @@ QCoro::Task<> CheckForUpdates::downloadInstaller()
         QDesktopServices::openUrl(QUrl::fromLocalFile(f.fileName()));
     }
 }
+
+#include "moc_checkforupdates.cpp"

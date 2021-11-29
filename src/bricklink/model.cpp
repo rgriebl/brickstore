@@ -930,3 +930,5 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         }
     }
 }
+
+#include "moc_model.cpp"

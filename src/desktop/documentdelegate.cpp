@@ -1158,3 +1158,5 @@ bool DocumentDelegate::isReadOnly() const
 {
     return m_read_only;
 }
+
+#include "moc_documentdelegate.cpp"

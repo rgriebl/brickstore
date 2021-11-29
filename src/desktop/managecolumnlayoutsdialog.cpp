@@ -110,3 +110,5 @@ void ManageColumnLayoutsDialog::changeEvent(QEvent *e)
         retranslateUi();
     QDialog::changeEvent(e);
 }
+
+#include "moc_managecolumnlayoutsdialog.cpp"

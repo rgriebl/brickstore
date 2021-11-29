@@ -35,6 +35,7 @@ class View;
 class ViewPane : public QWidget
 {
     Q_OBJECT
+
 public:
     ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate,
              std::function<void(ViewPane *)> viewPaneDelete, Document *activeDocument);

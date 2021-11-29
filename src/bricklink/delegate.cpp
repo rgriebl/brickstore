@@ -160,3 +160,5 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
         }
     }
 }
+
+#include "moc_delegate.cpp"

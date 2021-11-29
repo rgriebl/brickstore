@@ -100,3 +100,5 @@ void BrickLink::Store::cancelUpdate()
     if ((m_updateStatus == UpdateStatus::Updating) && m_job)
         m_job->abort();
 }
+
+#include "moc_store.cpp"
