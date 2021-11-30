@@ -65,14 +65,14 @@ jobs:
           qt_target: 'android'
           qmake_extra_config: ''
 
-        - name: "iOS"
-          artifact: "iOS"
-          mobile: true
-          os: macos-latest
-          qt_version: '6.2.1'
-          qt_arch: ''
-          qt_target: 'ios'
-          qmake_extra_config: ''
+#        - name: "iOS"
+#          artifact: "iOS"
+#          mobile: true
+#          os: macos-latest
+#          qt_version: '6.2.1'
+#          qt_arch: ''
+#          qt_target: 'ios'
+#          qmake_extra_config: ''
 
     steps:
     - name: Cache Qt from qt.io
