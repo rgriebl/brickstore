@@ -448,10 +448,12 @@ void FilterWidget::setDocument(Document *doc)
                 setFilter({ });
                 m_doc->setProperty("_viewPaneLastFilter", QVariant::fromValue(lastFilter));
             } else {
-                auto lastFilter = m_doc->property("_viewPaneLastFilter").value<QVector<Filter>>();
-                if (lastFilter.isEmpty())
-                    lastFilter.append(Filter { });
-                setFilter(lastFilter);
+                if (m_doc->model()->filter().isEmpty()) {
+                    auto lastFilter = m_doc->property("_viewPaneLastFilter").value<QVector<Filter>>();
+                    if (lastFilter.isEmpty())
+                        lastFilter.append(Filter { });
+                    setFilter(lastFilter);
+                }
             }
 
             setVisible(checked);
@@ -460,7 +462,7 @@ void FilterWidget::setDocument(Document *doc)
         connect(m_doc->model(), &DocumentModel::isFilteredChanged,
                 m_viewConnectionContext, [this](bool isFiltered) {
             bool hasFilters = !m_doc->model()->filter().isEmpty();
-            m_onOff->setChecked(isFiltered && hasFilters);
+            m_onOff->setChecked(hasFilters);
             m_refilter->setVisible(!isFiltered && hasFilters);
         });
         connect(m_doc->model(), &DocumentModel::filterChanged,
@@ -539,10 +541,10 @@ QVector<Filter> FilterWidget::filterFromTerms() const
 
 void FilterWidget::setFilterFromModel()
 {
-    auto filter = m_doc->model()->filter();
-    setFilterTerms(filter);
-    setFilterText(filter);
-    m_onOff->setChecked(!filter.isEmpty());
+    m_filter = m_doc->model()->filter();
+    setFilterTerms(m_filter);
+    setFilterText(m_filter);
+    m_onOff->setChecked(!m_filter.isEmpty());
 }
 
 void FilterWidget::addFilterTerm(const Filter &filter)

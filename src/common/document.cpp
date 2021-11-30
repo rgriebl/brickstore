@@ -753,8 +753,6 @@ void Document::setFilterFromSelection()
         }
         if (idx.column() == DocumentModel::Weight)
             s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
-        if (s.isEmpty() || s.contains(' '_l1))
-            s = u'"' % s % u'"';
 
         Filter f;
         f.setField(idx.column());
@@ -762,8 +760,6 @@ void Document::setFilterFromSelection()
         f.setExpression(s);
 
         m_model->setFilter({ f });
-
-        //        w_statusbar->setFilter(f);
     }
 }
 

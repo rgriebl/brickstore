@@ -25,7 +25,7 @@
 
 static QString quote(const QString &str)
 {
-    if (str.isEmpty() || str.simplified() != str)
+    if (str.isEmpty() || str.contains(' '_l1))
         return u'"' % str % u'"';
     else
         return str;
