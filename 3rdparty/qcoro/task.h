@@ -70,7 +70,7 @@ public:
         if (promise.mResumeAwaiter.exchange(true, std::memory_order_acq_rel)) {
             promise.mAwaitingCoroutine.resume();
         }
-        finishedCoroutine.destroy();
+        // finishedCoroutine.destroy(); //TODO: this is a memleak, but it fixes the qcoro issue #24
     }
 
     //! Called by the compiler when the just-finished coroutine should be resumed.
@@ -457,17 +457,22 @@ public:
 
     //! The task can be move-assigned.
     Task &operator=(Task &&other) noexcept {
-        if (mCoroutine) {
-            mCoroutine.destroy();
-        }
+        if (std::addressof(other) != this) {
+            if (mCoroutine) {
+                mCoroutine.destroy();
+            }
 
-        mCoroutine = other.mCoroutine;
-        other.mCoroutine = nullptr;
+            mCoroutine = other.mCoroutine;
+            other.mCoroutine = nullptr;
+        }
         return *this;
     }
 
     //! Destructor.
-    ~Task() = default;
+    ~Task() {
+//        if (mCoroutine)
+//            mCoroutine.destroy();
+    }
 
     //! Returns whether the task has finished.
     /*!
