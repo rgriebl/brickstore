@@ -109,48 +109,53 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(const QString &fileName)
     if (fn.isEmpty())
         co_return nullptr;
 
-    QScopedPointer<QFile> f;
-    bool isStudio = fn.endsWith(".io"_l1);
+    try {
+        QScopedPointer<QFile> f;
+        bool isStudio = fn.endsWith(".io"_l1);
 
-    if (isStudio) {
-        stopwatch unpack("unpack/decrypt studio zip");
+        if (isStudio) {
+            stopwatch unpack("unpack/decrypt studio zip");
 
-        // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
+            // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
 
-        f.reset(new QTemporaryFile());
+            f.reset(new QTemporaryFile());
 
-        if (f->open(QIODevice::ReadWrite)) {
-            try {
-                MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
-                f->close();
-            } catch (const Exception &e) {
-                throw Exception(tr("Could not parse the Studio model") % u": " % e.error());
+            if (f->open(QIODevice::ReadWrite)) {
+                try {
+                    MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
+                    f->close();
+                } catch (const Exception &e) {
+                    throw Exception(tr("Could not opene the Studio ZIP container") % u": " % e.error());
+                }
             }
+        } else {
+            f.reset(new QFile(fn));
         }
-    } else {
-        f.reset(new QFile(fn));
-    }
 
-    if (!f->open(QIODevice::ReadOnly))
-        throw Exception(f.get(), tr("Could not open file for reading"));
+        if (!f->open(QIODevice::ReadOnly))
+            throw Exception(f.get(), tr("Could not open LDraw file for reading"));
 
-    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    BrickLink::IO::ParseResult pr;
+        BrickLink::IO::ParseResult pr;
 
-    bool b = DocumentIO::parseLDrawModel(f.get(), isStudio, pr);
-    Document *document = nullptr;
+        bool b = DocumentIO::parseLDrawModel(f.get(), isStudio, pr);
+        Document *document = nullptr;
 
-    QGuiApplication::restoreOverrideCursor();
+        QGuiApplication::restoreOverrideCursor();
 
-    if (b && pr.hasLots()) {
+        if (!b || !pr.hasLots())
+            throw Exception(tr("Could not parse the LDraw data"));
+
         document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
         document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
-    } else {
-        throw Exception(tr("Could not parse the LDraw model in file %1.").arg(fn));
-    }
+        co_return document;
 
-    co_return document;
+    } catch (const Exception &e) {
+        UIHelpers::warning(tr("Failed to import the LDraw/Studio model %1")
+                           .arg(QFileInfo(fn).fileName()) % u":<br><br>" % e.error());
+    }
+    co_return nullptr;
 }
 
 bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, BrickLink::IO::ParseResult &pr)
