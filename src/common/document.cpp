@@ -1229,7 +1229,7 @@ void Document::clearMarker()
 
 QCoro::Task<> Document::exportBrickLinkXMLToFile()
 {
-    LotList lots = co_await exportCheck();
+    LotList lots = co_await exportCheck(ExportToFile);
     if (lots.isEmpty())
         co_return;
 
@@ -1265,7 +1265,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
 
 QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
 {
-    LotList lots = co_await exportCheck();
+    LotList lots = co_await exportCheck(ExportToClipboard);
 
     if (!lots.isEmpty()) {
         QString xml = BrickLink::IO::toBrickLinkXML(lots);
@@ -1278,7 +1278,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
 
 QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
 {
-    LotList lots = co_await exportCheck();
+    LotList lots; co_await exportCheck(ExportToClipboard | ExportUpdate);
 
     if (!lots.isEmpty()) {
         auto warnings = model()->hasDifferenceUpdateWarnings(lots);
@@ -1302,7 +1302,7 @@ QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
 
 QCoro::Task<> Document::exportBrickLinkInventoryRequestToClipboard()
 {
-    LotList lots = co_await exportCheck();
+    LotList lots = co_await exportCheck(ExportToClipboard);
 
     if (!lots.isEmpty()) {
         auto xml = BrickLink::IO::toInventoryRequest(lots);
@@ -1315,7 +1315,7 @@ QCoro::Task<> Document::exportBrickLinkInventoryRequestToClipboard()
 
 QCoro::Task<> Document::exportBrickLinkWantedListToClipboard()
 {
-    LotList lots = co_await exportCheck();
+    LotList lots = co_await exportCheck(ExportToClipboard);
 
     if (!lots.isEmpty()) {
         if (auto wantedList = co_await UIHelpers::getString(tr("Enter the ID number of Wanted List (leave blank for the default Wanted List)"))) {
@@ -1544,12 +1544,19 @@ BrickLink::Order *Document::order() const
     return m_order;
 }
 
-QCoro::Task<BrickLink::LotList> Document::exportCheck() const
+QCoro::Task<BrickLink::LotList> Document::exportCheck(int exportCheckMode) const
 {
     const LotList lots = selectedLots().isEmpty() ? m_model->lots() : selectedLots();
 
-    if (m_model->statistics(lots, true /* ignoreExcluded */).errors()) {
-        if (co_await UIHelpers::question(tr("This list contains items with errors.<br /><br />Do you really want to export this list?"))
+    if ((lots.size() > 1000) && (exportCheckMode & ExportToClipboard)) {
+        if (co_await UIHelpers::question(tr("You have selected more than 1,000 lots, but BrickLink's servers are unable to cope with this many lots at the same time.<br>You should better export multiple, smaller batches.<br><br>Do you want to export this list anyway?"))
+                != UIHelpers::Yes) {
+            co_return { };
+        }
+    }
+
+    if (m_model->statistics(lots, true /* ignoreExcluded */, exportCheckMode & ExportUpdate).errors()) {
+        if (co_await UIHelpers::question(tr("This list contains lots with errors.<br><br>Do you want to export this list anyway?"))
                 != UIHelpers::Yes) {
             co_return { };
         }

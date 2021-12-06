@@ -130,7 +130,8 @@ public:
         QString currencyCode() const { return m_ccode; }
 
     private:
-        Statistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded);
+        Statistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded,
+                   bool ignorePriceAndQuantityErrors = false);
 
         int m_lots;
         int m_items;
@@ -221,7 +222,8 @@ public:
     void changeLots(const std::vector<std::pair<Lot *, Lot>> &changes,
                      DocumentModel::Field hint = DocumentModel::FieldCount);
 
-    Statistics statistics(const LotList &list, bool ignoreExcluded) const;
+    Statistics statistics(const LotList &list, bool ignoreExcluded,
+                          bool ignorePriceAndQuantityErrors = false) const;
 
     void setLotFlagsMask(QPair<quint64, quint64> flagsMask);
 

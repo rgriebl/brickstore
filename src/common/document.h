@@ -274,7 +274,13 @@ private:
     void applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback);
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void cancelPriceGuideUpdates();
-    QCoro::Task<LotList> exportCheck() const;
+    enum ExportCheckMode {
+        ExportToFile = 0,
+        ExportToClipboard = 1,
+        ExportUpdate = 2
+    };
+
+    QCoro::Task<BrickLink::LotList> exportCheck(int exportCheckMode) const;
     void updateItemFlagsMask();
     void documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     static std::tuple<QVector<ColumnData>, QVector<QPair<int, Qt::SortOrder>>> parseColumnsState(const QByteArray &cl);

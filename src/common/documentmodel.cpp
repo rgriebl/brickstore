@@ -464,7 +464,8 @@ void FilterCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded)
+DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList &list,
+                                      bool ignoreExcluded, bool ignorePriceAndQuantityErrors)
 {
     m_lots = 0;
     m_items = 0;
@@ -500,8 +501,11 @@ DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList 
             weight_missing = true;
 
         auto flags = model->lotFlags(lot);
-        if (flags.first)
+        if (flags.first) {
+            if (ignorePriceAndQuantityErrors)
+                flags.first &= ((1ULL << PartNo) | (1ULL <<Color));
             m_errors += qPopulationCount(flags.first);
+        }
         if (flags.second)
             m_differences += qPopulationCount(flags.second);
 
@@ -641,9 +645,10 @@ const LotList &DocumentModel::filteredLots() const
     return m_filteredLots;
 }
 
-DocumentModel::Statistics DocumentModel::statistics(const LotList &list, bool ignoreExcluded) const
+DocumentModel::Statistics DocumentModel::statistics(const LotList &list, bool ignoreExcluded,
+                                                    bool ignorePriceAndQuantityErrors) const
 {
-    return Statistics(this, list, ignoreExcluded);
+    return Statistics(this, list, ignoreExcluded, ignorePriceAndQuantityErrors);
 }
 
 void DocumentModel::beginMacro(const QString &label)
