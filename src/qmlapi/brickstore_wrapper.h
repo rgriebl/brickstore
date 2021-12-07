@@ -67,12 +67,14 @@ signals:
 
 private:
     void update();
+    void emitForceLayout();
 
     QVector<int> l2v;
     QVector<int> v2l;
 
     QPointer<Document> m_doc;
     QObject *m_connectionContext = nullptr;
+    QTimer *m_forceLayoutDelay = nullptr;
 };
 
 

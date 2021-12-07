@@ -584,23 +584,33 @@ void Document::resizeColumnDirect(int logical, int newSize)
 {
     Q_ASSERT(logical >= 0 && logical < m_columnData.size());
 
-    m_columnData[logical].m_size = newSize;
-    emit columnSizeChanged(logical, newSize);
+    if (m_columnData.value(logical).m_size != newSize) {
+        m_columnData[logical].m_size = newSize;
+        emit columnSizeChanged(logical, newSize);
+    }
 }
 
 void Document::hideColumnDirect(int logical, bool newHidden)
 {
     Q_ASSERT(logical >= 0 && logical < m_columnData.size());
 
-    m_columnData[logical].m_hidden = newHidden;
-    emit columnHiddenChanged(logical, newHidden);
+    if (m_columnData.value(logical).m_hidden != newHidden) {
+        m_columnData[logical].m_hidden = newHidden;
+        emit columnHiddenChanged(logical, newHidden);
+    }
 }
 
 void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
 {
     auto current = m_columnData;
 
-    QSignalBlocker block(this);
+//    QBitArray check(columnData.size(), false);
+//    for (int i = 0; i < columnData.size(); ++i)
+//        check.toggleBit(columnData.at(i).m_visualIndex);
+//    if (check.count(true) != columnData.size()) {
+//        qWarning() << "Invalid column data!";
+//        return;
+//    }
 
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < DocumentModel::FieldCount; ++vi) {
@@ -613,20 +623,16 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
             continue;
         }
 
-        const auto &oldData = current.value(li);
         const auto &newData = columnData.value(li);
 
-//                qWarning() << "Col:" << DocumentModel::Field(li) << "move from" << oldData.m_visualIndex << "to"
-//                           << newData.m_visualIndex << " - resizing from" << oldData.m_size << "to"
-//                           << newData.m_size << " - hidden from" << oldData.m_hidden << "to"
-//                           << newData.m_hidden;
+//        qWarning() << "Col:" << DocumentModel::Field(li)
+//                   << "move to" << newData.m_visualIndex
+//                   << " - resize to" << newData.m_size
+//                   << " - hide?" << newData.m_hidden;
 
-        if (oldData.m_visualIndex != newData.m_visualIndex)
-            moveColumnDirect(li, newData.m_visualIndex);
-        if (oldData.m_size != newData.m_size)
-            resizeColumnDirect(li, newData.m_size);
-        if (oldData.m_hidden != newData.m_hidden)
-            hideColumnDirect(li, newData.m_hidden);
+        moveColumnDirect(li, newData.m_visualIndex);
+        resizeColumnDirect(li, newData.m_size);
+        hideColumnDirect(li, newData.m_hidden);
     }
     // hide columns that got added after this was saved
     for (int li = columnData.count(); li < DocumentModel::FieldCount; ++li) {
@@ -634,10 +640,6 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
         resizeColumnDirect(li, current.value(li).m_size);
         hideColumnDirect(li, true);
     }
-
-    std::swap(current, columnData);
-
-    block.unblock();
 
     emit columnLayoutChanged();
 }

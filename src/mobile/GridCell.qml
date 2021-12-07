@@ -20,10 +20,11 @@ Control {
     property int cellPadding: 2
 
     function delaySetText(delay) {
-        if (!delay || ((row + column) % delay !== 0))
+        if (delay && ((row + column) % delay !== 0) && this && delaySetText) {
             Qt.callLater(delaySetText, delay - 1)
-        else if (loaderText.status === Loader.Ready)
+        } else if (loaderText.status === Loader.Ready) {
             loaderText.item.text = Qt.binding(() => root.text)
+        }
     }
 
     TableView.onPooled: {

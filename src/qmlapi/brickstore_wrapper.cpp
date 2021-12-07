@@ -194,7 +194,13 @@ bool QmlBrickStore::updateDatabase()
 
 QmlDocumentProxyModel::QmlDocumentProxyModel(QObject *parent)
     : QAbstractProxyModel(parent)
-{ }
+    , m_forceLayoutDelay(new QTimer(this))
+{
+    m_forceLayoutDelay->setInterval(100);
+    m_forceLayoutDelay->setSingleShot(true);
+    connect(m_forceLayoutDelay, &QTimer::timeout,
+            this, &QmlDocumentProxyModel::forceLayout);
+}
 
 void QmlDocumentProxyModel::setDocument(Document *doc)
 {
@@ -214,21 +220,21 @@ void QmlDocumentProxyModel::setDocument(Document *doc)
             beginResetModel();
             update();
             endResetModel();
-            //emit forceLayout(); //TODO: check if needed
+            emitForceLayout(); //TODO: check if needed
         });
         connect(m_doc, &Document::columnSizeChanged,
                 m_connectionContext, [this](int li, int /*size*/) {
             emit headerDataChanged(Qt::Horizontal, l2v[li], l2v[li]);
-            emit forceLayout();
+            emitForceLayout();
         });
         connect(m_doc, &Document::columnHiddenChanged,
                 m_connectionContext, [this](int li, bool /*hidden*/) {
             emit headerDataChanged(Qt::Horizontal, l2v[li], l2v[li]);
-            emit forceLayout();
+            emitForceLayout();
         });
         connect(m_doc, &Document::columnLayoutChanged,
                 m_connectionContext, [this]() {
-            emit forceLayout();
+            emitForceLayout();
         });
 
         connect(m_doc->model(), &QAbstractItemModel::dataChanged,
@@ -390,6 +396,11 @@ void QmlDocumentProxyModel::update()
         l2v[li] = layout[li].m_visualIndex;
         v2l[l2v[li]] = li;
     }
+}
+
+void QmlDocumentProxyModel::emitForceLayout()
+{
+    m_forceLayoutDelay->start();
 }
 
 
