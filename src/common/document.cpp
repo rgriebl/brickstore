@@ -219,7 +219,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { } // { } to work around QtCreator being confused by the [] return tuple
         setColumnLayoutDirect(columnData);
     } catch (const Exception &) {
-        auto layout = Config::inst()->columnLayout("user-default"_l1);
+        auto layout = Config::inst()->columnLayout(columnLayoutCommandId(ColumnLayoutCommand::UserDefault));
 
         try {
             auto [columnData, sortColumns] = parseColumnsState(layout);
@@ -1776,7 +1776,7 @@ static const struct {
 { Document::ColumnLayoutCommand::AutoResize,
     QT_TRANSLATE_NOOP("Document", "Auto-resize once"), "@@auto-resize" },
 { Document::ColumnLayoutCommand::UserDefault,
-    QT_TRANSLATE_NOOP("Document", "User default"), "@@user-default" },
+    QT_TRANSLATE_NOOP("Document", "User default"), "user-default" },
 };
 
 std::vector<Document::ColumnLayoutCommand> Document::columnLayoutCommands()
@@ -1912,7 +1912,7 @@ QCoro::Task<> Document::saveCurrentColumnLayout()
     if (auto name = co_await UIHelpers::getString(tr("Enter an unique name for this column layout. Leave empty to change the user default layout."))) {
         QString layoutId;
         if (name->isEmpty()) {
-            layoutId = "user-default"_l1;
+            layoutId = columnLayoutCommandId(ColumnLayoutCommand::UserDefault);
         } else {
             const auto allIds = Config::inst()->columnLayoutIds();
             for (const auto &id : allIds) {
