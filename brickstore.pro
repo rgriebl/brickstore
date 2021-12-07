@@ -102,7 +102,7 @@ OTHER_FILES += \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
 
-LANGUAGES = en de fr
+LANGUAGES = en de fr cz pt
 
 for(l, LANGUAGES) {
   TRANSLATIONS += translations/brickstore_$${l}.ts

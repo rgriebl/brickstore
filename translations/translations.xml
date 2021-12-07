@@ -5,18 +5,40 @@
     <name>English</name>
     <name lang="de">Englisch</name>
     <name lang="fr">Anglais</name>
+    <name lang="cz">Angličtina</name>
+    <name lang="pt">Inglês</name>
   </translation>
 
   <translation lang="de" author="Robert Griebl" authoremail="robert@griebl.org">
     <name>German</name>
     <name lang="de">Deutsch</name>
     <name lang="fr">Allemand</name>
+    <name lang="cz">Němčina</name>
+    <name lang="pt">Alemão</name>
   </translation>
 
   <translation lang="fr" author="Sylvain Perez" authoremail="bricklink@1001bricks.com">
     <name>French</name>
     <name lang="de">Französisch</name>
     <name lang="fr">Français</name>
+    <name lang="cz">Francouzština</name>
+    <name lang="pt">Francês</name>
+  </translation>
+
+  <translation lang="cz" author="TBD" authoremail="TBD">
+    <name>Czech</name>
+    <name lang="de">Tschechisch</name>
+    <name lang="fr">Tchèque</name>
+    <name lang="cz">Česky</name>
+    <name lang="pt">Checo</name>
+  </translation>
+
+  <translation lang="pt" author="TBD" authoremail="TBD">
+    <name>Portuguese</name>
+    <name lang="de">Portugiesisch</name>
+    <name lang="fr">Portugais</name>
+    <name lang="cz">Portugalština</name>
+    <name lang="pt">Português</name>
   </translation>
 
 </translations>

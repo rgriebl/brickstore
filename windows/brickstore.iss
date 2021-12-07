@@ -32,9 +32,11 @@ WizardImageAlphaFormat=defined
 WizardSmallImageFile={#SourcePath}\..\assets\generated-installers\windows-installer.bmp
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "german"; MessagesFile: "compiler:Languages\German.isl"
-Name: "french"; MessagesFile: "compiler:Languages\French.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl"
+Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
+Name: "cz"; MessagesFile: "compiler:Languages\Czech.isl"
+Name: "pt"; MessagesFile: "compiler:Languages\Portuguese.isl"
 
 [Files]
 Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion
