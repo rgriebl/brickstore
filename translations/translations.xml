@@ -7,6 +7,7 @@
     <name lang="fr">Anglais</name>
     <name lang="cz">Angličtina</name>
     <name lang="pt">Inglês</name>
+    <name lang="es">Inglés</name>
   </translation>
 
   <translation lang="de" author="Robert Griebl" authoremail="robert@griebl.org">
@@ -15,6 +16,7 @@
     <name lang="fr">Allemand</name>
     <name lang="cz">Němčina</name>
     <name lang="pt">Alemão</name>
+    <name lang="es">Alemán</name>
   </translation>
 
   <translation lang="fr" author="Sylvain Perez" authoremail="bricklink@1001bricks.com">
@@ -23,6 +25,7 @@
     <name lang="fr">Français</name>
     <name lang="cz">Francouzština</name>
     <name lang="pt">Francês</name>
+    <name lang="es">Francés</name>
   </translation>
 
   <translation lang="cz" author="TBD" authoremail="TBD">
@@ -31,6 +34,7 @@
     <name lang="fr">Tchèque</name>
     <name lang="cz">Česky</name>
     <name lang="pt">Checo</name>
+    <name lang="es">Checa</name>
   </translation>
 
   <translation lang="pt" author="TBD" authoremail="TBD">
@@ -39,6 +43,16 @@
     <name lang="fr">Portugais</name>
     <name lang="cz">Portugalština</name>
     <name lang="pt">Português</name>
+    <name lang="es">Portugués</name>
+  </translation>
+
+  <translation lang="es" author="TBD" authoremail="TBD">
+    <name>Spanish</name>
+    <name lang="de">Spanisch</name>
+    <name lang="fr">Espagnol</name>
+    <name lang="cz">Španělština</name>
+    <name lang="pt">Espanhol</name>
+    <name lang="es">Español</name>
   </translation>
 
 </translations>
