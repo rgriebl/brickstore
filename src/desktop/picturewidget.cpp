@@ -189,7 +189,7 @@ void PictureWidget::languageChange()
 {
     m_reload->setText(tr("Update"));
     m_copyImage->setText(tr("Copy image"));
-    m_saveImageAs->setText(tr("Save image as.."));
+    m_saveImageAs->setText(tr("Save image as..."));
     m_blCatalog->setText(tr("Show BrickLink Catalog Info..."));
     m_blPriceGuide->setText(tr("Show BrickLink Price Guide Info..."));
     m_blLotsForSale->setText(tr("Show Lots for Sale on BrickLink..."));
