@@ -61,12 +61,15 @@ Dialog {
                         valueRole: "language"
                         enabled: BrickStore.config.availableLanguages.length > 0
                         delegate: ItemDelegate {
-                            text: langCombo.nameForLang(modelData.language, modelData.languageName)
+                            text: langCombo.nameForLang(modelData)
                         }
-                        displayText: nameForLang(currentValue, BrickStore.config.availableLanguages[currentIndex].languageName)
+                        displayText: nameForLang(BrickStore.config.availableLanguages[currentIndex])
 
-                        function nameForLang(lang, names) {
-                            return names["en"] + " (" + names[lang] + ")"
+                        function nameForLang(lang, map) {
+                            let name = map.name
+                            if (map.localName)
+                                name = map.localName + " (" + name + ")"
+                            return name
                         }
 
                         onActivated: { BrickStore.config.language = currentValue }

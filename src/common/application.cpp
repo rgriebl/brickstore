@@ -492,13 +492,12 @@ QVariantMap Application::about() const
             % license % "</div>"_l1;
 
     QString translators;
-    const QString transRow = R"(<tr><td>%1:</td><td width="2em"></td><td>%2 &lt;<a href="mailto:%3">%4</a>&gt;</td></tr>)"_l1;
+    const QString transRow = R"(<tr><td>%1</td><td width="2em">&nbsp;</td><td>%2 <a href="mailto:%3">%4</a></td></tr>)"_l1;
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
-        if (trans.language != "en"_l1) {
-            QString langname = trans.languageName.value(Config::inst()->language(),
-                                                        trans.languageName["en"_l1]);
-            translators = translators % transRow.arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
+        if (trans.language != "en"_l1 && !trans.author.isEmpty()) {
+            QString langname = trans.localName % " ("_l1 % trans.name % ")"_l1;
+            translators = translators % transRow.arg(langname, trans.author, trans.authorEmail, trans.authorEmail);
         }
     }
     translators = "<br><b>"_l1 % tr("Translators") % R"(</b><div style="margin-left: 10px">)"_l1

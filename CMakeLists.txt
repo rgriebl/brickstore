@@ -102,7 +102,7 @@ qt6_add_translation(QM_FILES ${TS_FILES})
 qt_add_resources(${PROJECT_NAME} qt_translations_qrc PREFIX /translations BASE "${qt_qm_base}" FILES ${QT_QM_FILES})
 qt_add_resources(${PROJECT_NAME} bs_translations_qrc PREFIX /translations BASE "${CMAKE_CURRENT_BINARY_DIR}/qm" FILES ${QM_FILES})
 qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
-    translations/translations.xml
+    translations/translations.json
     assets/generated-app-icons/brickstore.png
     assets/generated-app-icons/brickstore_doc.png
     ${ICONS_QRC}
@@ -164,7 +164,7 @@ add_custom_target(OtherFiles SOURCES
     LICENSE.GPL
     BrickStoreXML.rnc
     configure
-    translations/translations.xml
+    translations/translations.json
     scripts/generate-assets.sh
     extensions/README.md
     extensions/*.bs.qml

@@ -17,7 +17,8 @@
 #include <QGlobalStatic>
 #include <QStringList>
 #include <QDir>
-#include <QDomDocument>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QStandardPaths>
 #include <QSize>
 #include <QUuid>
@@ -168,21 +169,18 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 
 QVariantList Config::availableLanguages() const
 {
-    QVariantList lns;
+    QVariantList al;
     const auto trs = translations();
     for (const Translation &tr : trs) {
-        QVariantMap lnNames;
-        for (auto it = tr.languageName.cbegin(); it != tr.languageName.cend(); ++it)
-            lnNames.insert(it.key(), it.value());
-
-        lns.append(QVariantMap {
-                       { "language"_l1, tr.language },
-                       { "author"_l1, tr.author },
-                       { "authorEMail"_l1, tr.authorEMail },
-                       { "languageName"_l1, lnNames },
-                   });
+        al.append(QVariantMap {
+                      { "language"_l1, tr.language },
+                      { "name"_l1, tr.name },
+                      { "localName"_l1, tr.localName },
+                      { "author"_l1, tr.author },
+                      { "authorEMail"_l1, tr.authorEmail },
+                  });
     }
-    return lns;
+    return al;
 }
 
 QStringList Config::recentFiles() const
@@ -681,53 +679,46 @@ bool Config::parseTranslations() const
 {
     m_translations.clear();
 
-    QDomDocument doc;
-    QFile file(":/translations/translations.xml"_l1);
+    QFile file(":/translations/translations.json"_l1);
 
-    if (file.open(QIODevice::ReadOnly)) {
-        QString err_str;
-        int err_line = 0, err_col = 0;
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
 
-        if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
-            QDomElement root = doc.documentElement();
-
-            if (root.isElement() && root.nodeName() == "translations"_l1) {
-                for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-                    if (!node.isElement() || (node.nodeName() != "translation"_l1))
-                        continue;
-                    QDomNamedNodeMap map = node.attributes();
-                    Translation trans;
-
-                    trans.language = map.namedItem("lang"_l1).toAttr().value();
-                    trans.author = map.namedItem("author"_l1).toAttr().value();
-                    trans.authorEMail = map.namedItem("authoremail"_l1).toAttr().value();
-
-                    if (trans.language.isEmpty())
-                        goto error;
-
-                    for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
-                        if (!name.isElement() || (name.nodeName() != "name"_l1))
-                            continue;
-                        QDomNamedNodeMap nameAttribs = name.attributes();
-
-                        QString tr_id = nameAttribs.namedItem("lang"_l1).toAttr().value();
-                        QString tr_name = name.toElement().text();
-
-                        if (!tr_name.isEmpty())
-                            trans.languageName[tr_id.isEmpty() ? "en"_l1 : tr_id] = tr_name;
-                    }
-
-                    if (trans.languageName.isEmpty())
-                        goto error;
-
-                    m_translations << trans;
-                }
-                return true;
-            }
-        }
+    QJsonParseError parseError;
+    auto doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+    if (doc.isNull()) {
+        qWarning() << "Failed to parse translations.json at offset" << parseError.offset << ":"
+                   << parseError.errorString();
+        return false;
     }
-error:
-    return false;
+
+    const auto root = doc.object();
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        const QJsonObject value = it.value().toObject();
+
+        Translation trans;
+        trans.language = it.key();
+
+        trans.name = value["name"_l1].toString();
+        trans.localName = value["localName"_l1].toString();
+        trans.author = value["author"_l1].toString();
+        trans.authorEmail = value["authorEmail"_l1].toString();
+
+        if (trans.language.isEmpty() || trans.name.isEmpty())
+            continue;
+
+        m_translations << trans;
+    }
+    std::sort(m_translations.begin(), m_translations.end(), [](const auto &tr1, const auto &tr2) {
+        if (tr1.name == "en"_l1)
+            return false;
+        else if (tr2.name == "en"_l1)
+            return true;
+        else
+            return tr1.localName.localeAwareCompare(tr2.localName) < 0;
+    });
+
+    return true;
 }
 
 void Config::setDefaultCurrencyCode(const QString &currencyCode)

@@ -37,6 +37,7 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
 Name: "cz"; MessagesFile: "compiler:Languages\Czech.isl"
 Name: "pt"; MessagesFile: "compiler:Languages\Portuguese.isl"
+Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
 Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion

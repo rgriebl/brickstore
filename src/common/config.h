@@ -96,9 +96,10 @@ public:
 
     struct Translation {
         QString language;
+        QString name;
+        QString localName;
         QString author;
-        QString authorEMail;
-        QMap<QString, QString> languageName;
+        QString authorEmail;
     };
 
     QVector<Translation> translations() const;

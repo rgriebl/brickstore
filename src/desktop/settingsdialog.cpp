@@ -1015,13 +1015,11 @@ void SettingsDialog::load()
         const QString currentLanguage = Config::inst()->language();
 
         for (const auto &trans : translations) {
-            if (trans.language == "en"_l1) {
-                w_language->addItem(trans.languageName["en"_l1], trans.language);
-            } else {
-                QString s = trans.languageName["en"_l1] % u" ("
-                               % trans.languageName[trans.language] % u')';
-                w_language->addItem(s, trans.language);
-            }
+            QString s = trans.name;
+            if (!trans.localName.isEmpty())
+                s = trans.localName % u" (" % s % u')';
+            w_language->addItem(s, trans.language);
+
 
             if (currentLanguage == trans.language)
                 w_language->setCurrentIndex(w_language->count()-1);

@@ -93,7 +93,7 @@ OTHER_FILES += \
   LICENSE.GPL \
   BrickStoreXML.rnc \
   configure \
-  translations/translations.xml \
+  translations/translations.json \
   scripts/generate-assets.sh \
   extensions/README.md \
   extensions/*.bs.qml \
@@ -109,6 +109,7 @@ for(l, LANGUAGES) {
   qt_qm = $$[QT_INSTALL_TRANSLATIONS]/qtbase_$${l}.qm
   exists($$qt_qm):qt_translations.files += $$qt_qm
 }
+
 qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = translations
 QM_FILES_RESOURCE_PREFIX = translations
@@ -116,7 +117,7 @@ QM_FILES_RESOURCE_PREFIX = translations
 android:QT *= svg
 RESOURCES = \
   qt_translations \
-  translations/translations.xml \
+  translations/translations.json \
   assets/generated-app-icons/brickstore.png \
   assets/generated-app-icons/brickstore_doc.png \
   assets/icons \
