@@ -16,7 +16,7 @@
   },
   "cz": {
     "name":        "Czech",
-    "localName":   "Česky",
+    "localName":   "Česky"
   },
   "pt": {
     "name":        "Portuguese",
@@ -24,6 +24,8 @@
   },
   "es": {
     "name":        "Spanish",
-    "localName":   "Español"
+    "localName":   "Español",
+    "author":      "Sergio Sobrevela",
+    "authorEmail": "info@stellarbricks.com"
   }
 }

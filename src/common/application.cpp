@@ -361,9 +361,6 @@ UndoGroup *Application::undoGroup()
 
 void Application::setupTerminateHandler()
 {
-    static size_t demangleBufferSize = 768;
-    static char *demangleBuffer = static_cast<char *>(malloc(demangleBufferSize));
-
     std::set_terminate([]() {
         char buffer [1024];
 
@@ -372,6 +369,9 @@ void Application::setupTerminateHandler()
         if (e) {
             const char *typeName = "<unknown type>";
 #if defined(HAS_CXXABI)
+            static size_t demangleBufferSize = 768;
+            static char *demangleBuffer = static_cast<char *>(malloc(demangleBufferSize));
+
             if (auto type = abi::__cxa_current_exception_type()) {
                 typeName = type->name();
                 if (typeName) {
