@@ -1,0 +1,29 @@
+{
+  "en": {
+    "name":        "English"
+  },
+  "de": {
+    "name":        "German",
+    "localName":   "Deutsch",
+    "author":      "Robert Griebl",
+    "authorEmail": "robert@griebl.org"
+  },
+  "fr": {
+    "name":        "French",
+    "localName":   "Français",
+    "author":      "Sylvain Perez",
+    "authorEmail": "bricklink@1001bricks.com"
+  },
+  "cz": {
+    "name":        "Czech",
+    "localName":   "Česky",
+  },
+  "pt": {
+    "name":        "Portuguese",
+    "localName":   "Português"
+  },
+  "es": {
+    "name":        "Spanish",
+    "localName":   "Español"
+  }
+}
