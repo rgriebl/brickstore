@@ -3654,7 +3654,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="192"/>
-        <source>Save image as..</source>
+        <source>Save image as...</source>
         <translation>Bild speichern unter...</translation>
     </message>
     <message>

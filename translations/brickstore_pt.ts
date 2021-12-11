@@ -3180,7 +3180,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="192"/>
-        <source>Save image as..</source>
+        <source>Save image as...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
