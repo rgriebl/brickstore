@@ -2400,7 +2400,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/common/documentio.cpp" line="128"/>
-        <source>Could not opene the Studio ZIP container</source>
+        <source>Could not open the Studio ZIP container</source>
         <translation>Konnte die Studio ZIP Datei nicht öffnen</translation>
     </message>
     <message>
