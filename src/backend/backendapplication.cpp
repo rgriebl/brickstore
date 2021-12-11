@@ -16,10 +16,14 @@
 #include "backendapplication.h"
 #include "bricklink/core.h"
 #include "rebuilddatabase.h"
+#include "version.h"
 
 
 BackendApplication::BackendApplication(int &argc, char **argv)
 {
+    QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
+    QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
+
     (void) new QCoreApplication(argc, argv);
 
     m_clp.addHelpOption();
@@ -37,16 +41,17 @@ BackendApplication::~BackendApplication()
 
 void BackendApplication::init()
 {
+    //TODO5: find out why we are blacklisted ... for now, fake the UA
+    Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
+                                  % u" (" + QSysInfo::prettyProductName() % u')');
+
     QString errstring;
     BrickLink::Core *bl = BrickLink::create(QStandardPaths::writableLocation(QStandardPaths::CacheLocation),
                                             &errstring);
 
     if (!bl) {
         fprintf(stderr, "Could not initialize the BrickLink kernel:\n%s\n", qPrintable(errstring));
-
-        // we cannot call quit directly, since there is no event loop to quit from...
-        QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
-        return;
+        exit(2);
     }
 
     auto *rdb = new RebuildDatabase(m_clp.isSet("skip-download"_l1), this);
