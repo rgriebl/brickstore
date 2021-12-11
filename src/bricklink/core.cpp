@@ -1720,6 +1720,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool highPrior
         query.addQueryItem("a"_l1,       QString(QLatin1Char(pg->item()->itemTypeId())));
         query.addQueryItem("vcID"_l1,    "1"_l1); // USD
         query.addQueryItem("vatInc"_l1,  "Y"_l1);
+        query.addQueryItem("viewExclude"_l1, "Y"_l1);
         query.addQueryItem("ajView"_l1,  "Y"_l1); // only the AJAX snippet
         query.addQueryItem("colorID"_l1, QString::number(pg->color()->id()));
         query.addQueryItem("itemID"_l1,  Utility::urlQueryEscape(pg->item()->id()));
