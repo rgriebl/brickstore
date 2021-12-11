@@ -340,8 +340,10 @@ bool BrickLink::TextImport::readInventory(const Item *item)
         uint itemIndex = item - items().data();;
 
         for (const Item::ConsistsOf &co : qAsConst(inventory)) {
-            auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];
-            vec.append(qMakePair(co.quantity(), itemIndex));
+            if (!co.m_extra) {
+                auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];
+                vec.append(qMakePair(co.quantity(), itemIndex));
+            }
         }
         // the hash owns the items now
         m_consists_of_hash.insert(itemIndex, inventory);
