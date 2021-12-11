@@ -2457,7 +2457,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/common/documentio.cpp" line="128"/>
-        <source>Could not opene the Studio ZIP container</source>
+        <source>Could not open the Studio ZIP container</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -125,7 +125,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(const QString &fileName)
                     MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
                     f->close();
                 } catch (const Exception &e) {
-                    throw Exception(tr("Could not opene the Studio ZIP container") % u": " % e.error());
+                    throw Exception(tr("Could not open the Studio ZIP container") % u": " % e.error());
                 }
             }
         } else {
