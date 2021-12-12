@@ -1201,6 +1201,7 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version) const
             check(cw.endChunk());
         } else {
             check(cw.startChunk(ChunkId('C','H','G','L'), 1));
+            ds << quint32(m_itemChangelog.size() + m_colorChangelog.size());
             for (const ItemChangeLogEntry &e : m_itemChangelog) {
                 ds << static_cast<QByteArray>("\x03\t" % QByteArray(1, e.fromItemTypeId()) % '\t' % e.fromItemId()
                                               % '\t' % e.toItemTypeId() % '\t' % e.toItemId());
