@@ -1280,7 +1280,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
 
 QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
 {
-    LotList lots; co_await exportCheck(ExportToClipboard | ExportUpdate);
+    LotList lots = co_await exportCheck(ExportToClipboard | ExportUpdate);
 
     if (!lots.isEmpty()) {
         auto warnings = model()->hasDifferenceUpdateWarnings(lots);
