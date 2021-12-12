@@ -83,11 +83,6 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view,
     if (headerView->visualIndex(DocumentModel::Index) != 0)
         headerView->moveSection(headerView->visualIndex(DocumentModel::Index), 0);
 
-    w_list->setMinimumHeight(8 + w_list->frameWidth() * 2 +
-                             w_list->horizontalHeader()->height() +
-                             w_list->verticalHeader()->length() +
-                             w_list->style()->pixelMetric(QStyle::PM_ScrollBarExtent));
-
     w_list->selectionModel()->setCurrentIndex(docModel->index(preselectedIndex, 0),
                                               QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 
@@ -119,10 +114,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view,
     QMetaObject::invokeMethod(this, [this]() {
         QSize sh = sizeHint();
         QRect screenRect = windowHandle()->screen()->availableGeometry();
-        int maxWidth = (screenRect.width() * 7 / 8);
+        QSize maxSize = screenRect.size() * 7 / 8;
 
-        if (sh.width() > maxWidth)
-            sh.setWidth(maxWidth);
+        if (sh.width() > maxSize.width())
+            sh.setWidth(maxSize.width());
+        if (sh.height() > maxSize.height())
+            sh.setHeight(maxSize.height());
 
         int x = screenRect.x() + (screenRect.width() - sh.width()) / 2;
         int y = screenRect.y() + (screenRect.height() - sh.height()) / 2;
@@ -156,12 +153,24 @@ bool ConsolidateItemsDialog::costQuantityAverage() const
 
 QSize ConsolidateItemsDialog::sizeHint() const
 {
-    // try to fit as much information on the screen as possible
-    auto s = QDialog::sizeHint();
-    int listWidth = w_list->viewport()->width() + w_list->horizontalScrollBar()->maximum()
-            - w_list->horizontalScrollBar()->minimum();
-    s.setWidth(qMax(s.width(), listWidth + 50));
-    return s;
+    // Try to fit as much information on the screen as possible
+    // Ideally this should be the sizeHint() of the tableview, but we would need to derive from
+    // QTableView and register this class in the designer to make it work.
+    // This is ugly, but less hassle:
+
+    auto sh = QDialog::sizeHint();
+
+    int listWidth = w_list->horizontalHeader()->length()
+            + w_list->verticalScrollBar()->sizeHint().width()
+            + w_list->frameWidth() * 2;
+    int listHeight = w_list->verticalHeader()->length()
+            + w_list->horizontalHeader()->sizeHint().height()
+            + w_list->horizontalScrollBar()->sizeHint().height()
+            + w_list->frameWidth() * 2;
+
+    sh.setWidth(qMax(sh.width(), listWidth + layout()->contentsMargins().left() + layout()->contentsMargins().right()));
+    sh.setHeight(qMax(sh.height(), listHeight + sh.height() - w_list->sizeHint().height()));
+    return sh;
 }
 
 #include "moc_consolidateitemsdialog.cpp"
