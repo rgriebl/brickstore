@@ -170,11 +170,6 @@ QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
     return DocumentIO::nameFiltersForLDraw(includeAll);
 }
 
-bool QmlBrickStore::checkBrickLinkLogin()
-{
-    return Application::inst()->checkBrickLinkLogin();
-}
-
 bool QmlBrickStore::isDatabaseValid() const
 {
     return BrickLink::core()->isDatabaseValid();

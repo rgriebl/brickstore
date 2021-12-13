@@ -450,8 +450,7 @@ void Carts::startFetchLots(Cart *cart)
     job->setUserData("cart", QVariant::fromValue(cart->sellerId()));
     m_cartJobs << job;
 
-    BrickLink::core()->retrieveAuthenticated(job);
-
+    core()->retrieveAuthenticated(job);
 }
 
 QVector<Cart *> Carts::carts() const

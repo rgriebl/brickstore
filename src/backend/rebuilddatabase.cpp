@@ -35,10 +35,6 @@
 #include "bricklink/textimport.h"
 #include "rebuilddatabase.h"
 
-#if !defined(BS_BACKEND)
-#  include "config.h"
-#endif
-
 
 RebuildDatabase::RebuildDatabase(bool skipDownload, QObject *parent)
     : QObject(parent)
@@ -95,13 +91,8 @@ int RebuildDatabase::exec()
 
     // login hack
     {
-#if defined(BS_BACKEND)
         QString username = QString::fromLocal8Bit(qgetenv("BRICKLINK_USERNAME"));
         QString password = QString::fromLocal8Bit(qgetenv("BRICKLINK_PASSWORD"));
-#else
-        QString username = Config::inst()->brickLinkUsername();
-        QString password = Config::inst()->brickLinkPassword();
-#endif
 
         if (username.isEmpty() || password.isEmpty())
             printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");

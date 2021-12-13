@@ -43,7 +43,7 @@ public:
     void setUILoggingHandler(QtMessageHandler callback);
 
     virtual void checkRestart();
-    bool checkBrickLinkLogin();
+    QCoro::Task<bool> checkBrickLinkLogin();
     QCoro::Task<bool> updateDatabase();
 
     Announcements *announcements();

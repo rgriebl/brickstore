@@ -164,7 +164,7 @@ public slots:
     void setRecentFiles(const QStringList &recent);
 
     void setBrickLinkUsername(const QString &user);
-    void setBrickLinkPassword(const QString &pass);
+    void setBrickLinkPassword(const QString &pass, bool doNotSave = false);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void setFontSizePercent(int p);

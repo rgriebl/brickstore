@@ -940,16 +940,16 @@ void FrameWork::createActions()
                   m_importinventory_dialog = new ImportInventoryDialog(this);
               m_importinventory_dialog->show();
           } },
-        { "document_import_bl_order", [this](auto) {
-              if (!Application::inst()->checkBrickLinkLogin())
-                  return;
+        { "document_import_bl_order", [this](auto) -> QCoro::Task<> {
+              if (!co_await Application::inst()->checkBrickLinkLogin())
+                  co_return;
               if (!m_importorder_dialog)
                   m_importorder_dialog = new ImportOrderDialog(this);
               m_importorder_dialog->show();
           } },
-        { "document_import_bl_cart", [this](auto) {
-              if (!Application::inst()->checkBrickLinkLogin())
-                  return;
+        { "document_import_bl_cart", [this](auto) -> QCoro::Task<> {
+              if (!co_await Application::inst()->checkBrickLinkLogin())
+                  co_return;
 
               if (!m_importcart_dialog)
                   m_importcart_dialog = new ImportCartDialog(this);

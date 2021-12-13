@@ -564,11 +564,11 @@ void Config::setBrickLinkUsername(const QString &user)
     }
 }
 
-void Config::setBrickLinkPassword(const QString &pass)
+void Config::setBrickLinkPassword(const QString &pass, bool doNotSave)
 {
     if (m_bricklinkPassword != pass) {
         m_bricklinkPassword = pass;
-        setValue("BrickLink/Login/Password"_l1, scramble(pass));
+        setValue("BrickLink/Login/Password"_l1, doNotSave ? QString { } : scramble(pass));
         emit brickLinkCredentialsChanged();
     }
 }

@@ -170,7 +170,7 @@ void Application::afterInit()
         { "document_import_bl_xml", [](auto) { DocumentIO::importBrickLinkXML(); } },
         { "document_import_ldraw_model", [](auto) { DocumentIO::importLDrawModel(); } },
         { "document_import_bl_store_inv", [this](auto) -> QCoro::Task<> {
-              if (!checkBrickLinkLogin())
+              if (!co_await checkBrickLinkLogin())
                   co_return;
 
               auto store = BrickLink::core()->store();
@@ -182,7 +182,7 @@ void Application::afterInit()
                                                                 store,
                                                                 &BrickLink::Store::updateProgress,
                                                                 &BrickLink::Store::updateFinished,
-                                                                qOverload<>(&BrickLink::Store::startUpdate),
+                                                                &BrickLink::Store::startUpdate,
                                                                 &BrickLink::Store::cancelUpdate);
 
               if (success)
@@ -287,21 +287,25 @@ QString Application::gitHubUrl() const
 void Application::checkRestart()
 { }
 
-bool Application::checkBrickLinkLogin()
+QCoro::Task<bool> Application::checkBrickLinkLogin()
 {
-    if (!Config::inst()->brickLinkUsername().isEmpty()
-            && !Config::inst()->brickLinkPassword().isEmpty()) {
-        return true;
-    }
-
-    static auto avoidCoroReturnValue = []() -> QCoro::Task<> {
+    if (!Config::inst()->brickLinkUsername().isEmpty()) {
+        if (!Config::inst()->brickLinkPassword().isEmpty()) {
+            co_return true;
+        } else {
+            if (auto pw = co_await UIHelpers::getString(tr("Please enter the password for the BrickLink account %1:")
+                                                        .arg(u"<b>" % Config::inst()->brickLinkUsername() % u"</b>"))) {
+                Config::inst()->setBrickLinkPassword(*pw, true /*do not save*/);
+                co_return true;
+            }
+        }
+    } else {
         if (co_await UIHelpers::question(tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
                                          ) == UIHelpers::Yes) {
             emit Application::inst()->showSettings("bricklink"_l1);
         }
-    };
-    avoidCoroReturnValue();
-    return false;
+    }
+    co_return false;
 }
 
 QCoro::Task<bool> Application::updateDatabase()

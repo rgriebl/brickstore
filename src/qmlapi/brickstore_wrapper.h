@@ -136,8 +136,6 @@ public:
     Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
     Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
 
-    Q_INVOKABLE bool checkBrickLinkLogin();
-
     bool isDatabaseValid() const;
     QDateTime lastDatabaseUpdate() const;
     Q_INVOKABLE bool updateDatabase();
