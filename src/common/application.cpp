@@ -302,7 +302,7 @@ QCoro::Task<bool> Application::checkBrickLinkLogin()
     } else {
         if (co_await UIHelpers::question(tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
                                          ) == UIHelpers::Yes) {
-            emit Application::inst()->showSettings("bricklink"_l1);
+            showSettings("bricklink"_l1);
         }
     }
     co_return false;

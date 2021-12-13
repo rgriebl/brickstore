@@ -22,7 +22,7 @@
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
 #include "utility/utility.h"
-#include "framework.h"
+#include "common/document.h"
 #include "picturewidget.h"
 
 #include "appearsinwidget.h"
@@ -125,7 +125,7 @@ void AppearsInWidget::partOut()
     const BrickLink::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        FrameWork::inst()->fileImportBrickLinkInventory(ai->second);
+        Document::fromPartInventory(ai->second);
 }
 
 QSize AppearsInWidget::minimumSizeHint() const

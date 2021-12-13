@@ -552,12 +552,6 @@ QDockWidget *FrameWork::createDock(QWidget *widget, const char *name)
     return dock;
 }
 
-void FrameWork::manageLayouts()
-{
-    ManageColumnLayoutsDialog d(this);
-    d.exec();
-}
-
 void FrameWork::goHome(bool home)
 {
     if (home) {
@@ -567,8 +561,7 @@ void FrameWork::goHome(bool home)
         connectView(nullptr);
     } else {
         m_welcomeWidget->hide();
-        Q_ASSERT(m_activeViewPane);
-        if (m_activeViewPane->activeView())
+        if (m_activeViewPane && m_activeViewPane->activeView())
             m_activeViewPane->activeView()->setFocus();
     }
     m_goHome->setIcon(QIcon::fromTheme(home ? "go-previous"_l1 : "go-home"_l1));
@@ -956,7 +949,27 @@ void FrameWork::createActions()
               m_importcart_dialog->show();
           } },
         { "application_exit", [this](auto) { close(); } },
-        { "edit_additems", [this](auto) { showAddItemDialog(); } },
+        { "edit_additems", [this](auto) {
+              if (!m_add_dialog) {
+                  m_add_dialog = new AddItemDialog();
+                  m_add_dialog->setObjectName("additems"_l1);
+                  m_add_dialog->attach(m_activeView);
+
+                  connect(m_add_dialog, &AddItemDialog::closed,
+                          this, [this]() {
+                      show();
+                      raise();
+                      activateWindow();
+                  });
+              }
+
+              if (m_add_dialog->isVisible()) {
+                  m_add_dialog->raise();
+                  m_add_dialog->activateWindow();
+              } else {
+                  m_add_dialog->show();
+              }
+          } },
         { "view_fullscreen", [this](bool fullScreen) {
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
           } },
@@ -968,7 +981,10 @@ void FrameWork::createActions()
               if (m_activeViewPane)
                   m_activeViewPane->focusFilter();
           } },
-        { "view_column_layout_manage", [this](auto) { manageLayouts(); } },
+        { "view_column_layout_manage", [this](auto) {
+              ManageColumnLayoutsDialog d(this);
+              d.exec();
+          } },
         { "reload_scripts", [](auto) { ScriptManager::inst()->reload(); } },
     };
 
@@ -987,15 +1003,6 @@ void FrameWork::createActions()
 
     m_progressAction = new QWidgetAction(this);
     m_progressAction->setDefaultWidget(m_progress);
-}
-
-void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item,
-                                             const BrickLink::Color *color,
-                                             int quantity, BrickLink::Condition condition)
-{
-    if (!item)
-        return;
-    Document::fromPartInventory(item, color, quantity, condition);
 }
 
 QList<QAction *> FrameWork::contextMenuActions() const
@@ -1250,28 +1257,6 @@ bool FrameWork::closeAllViews()
     return true;
 }
 
-void FrameWork::showAddItemDialog()
-{
-    if (!m_add_dialog) {
-        m_add_dialog = new AddItemDialog();
-        m_add_dialog->setObjectName("additems"_l1);
-        m_add_dialog->attach(m_activeView);
-
-        connect(m_add_dialog, &AddItemDialog::closed,
-                this, [this]() {
-            show();
-            raise();
-            activateWindow();
-        });
-    }
-
-    if (m_add_dialog->isVisible()) {
-        m_add_dialog->raise();
-        m_add_dialog->activateWindow();
-    } else {
-        m_add_dialog->show();
-    }
-}
 
 #include "moc_framework.cpp"
 #include "moc_framework_p.cpp"

@@ -74,13 +74,8 @@ public slots:
     void blockUpdate(bool blocked);
     void titleUpdate();
 
-    void fileImportBrickLinkInventory(const BrickLink::Item *item,
-                                      const BrickLink::Color *color = nullptr, int quantity = 1,
-                                      BrickLink::Condition condition = BrickLink::Condition::New);
-
 signals:
     void documentActivated(Document *);
-    void viewAdded(View *view);
 
 protected slots:
     void languageChange();
@@ -90,9 +85,7 @@ private slots:
     void transferProgressUpdate(int p, int t);
 
     void showSettings(const QString &page = { });
-    void showAddItemDialog();
 
-    void manageLayouts();
     void goHome(bool home);
     void repositionHomeWidget();
 

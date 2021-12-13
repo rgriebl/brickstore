@@ -860,8 +860,8 @@ QCoro::Task<> View::partOutItems()
                     }
                 }
             } else {
-                FrameWork::inst()->fileImportBrickLinkInventory(lot->item(), lot->color(),
-                                                                lot->quantity(), lot->condition());
+                Document::fromPartInventory(lot->item(), lot->color(), lot->quantity(),
+                                            lot->condition());
             }
         }
         if (inplace)
