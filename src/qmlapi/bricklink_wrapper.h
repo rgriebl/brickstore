@@ -83,9 +83,6 @@ class QmlBrickLink : public QObject
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
     Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool ldrawEnabled READ isLDrawEnabled CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QString ldrawPath READ ldrawDataPath)
-    Q_PRIVATE_PROPERTY(d, bool online READ onlineStatus)   
 
     // const QImage noImage(const QSize &s) const;
     // const QImage colorImage(const Color *col, int w, int h) const;

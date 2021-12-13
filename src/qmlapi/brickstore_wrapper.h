@@ -110,6 +110,7 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(QVariantMap about READ about CONSTANT)
     Q_PROPERTY(bool databaseValid READ isDatabaseValid NOTIFY databaseValidChanged)
     Q_PROPERTY(QDateTime lastDatabaseUpdate READ lastDatabaseUpdate NOTIFY lastDatabaseUpdateChanged)
+    Q_PROPERTY(bool online READ onlineState NOTIFY onlineStateChanged)
 
 public:
     static void registerTypes();
@@ -124,10 +125,10 @@ public:
     QString buildNumber() const;
     RecentFiles *recentFiles() const;
     ColumnLayoutsModel *columnLayouts() const;
-
     QVariantMap about() const;
-
     QString defaultCurrencyCode() const;
+    bool onlineState() const;
+
     Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
     Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
     Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
@@ -145,6 +146,7 @@ signals:
     void showSettings(const QString &page);
     void databaseValidChanged(bool valid);
     void lastDatabaseUpdateChanged(const QDateTime &lastUpdate);
+    void onlineStateChanged(bool online);
 
 
 private:

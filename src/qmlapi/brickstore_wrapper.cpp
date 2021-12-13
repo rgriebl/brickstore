@@ -28,10 +28,50 @@
 #include "common/document.h"
 #include "common/documentmodel.h"
 #include "common/documentio.h"
+#include "common/onlinestate.h"
 #include "common/recentfiles.h"
 #include "brickstore_wrapper.h"
 #include "version.h"
 
+
+/*! \qmltype BrickStore
+    \inherits QtObject
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This singleton represents global settings and state.
+
+    A kitchen sink type singleton for all global state, settings and utility functions.
+*/
+
+/*! \qmlsignal BrickStore::showSettings(string page)
+    \internal
+*/
+
+/*! \qmlproperty string BrickStore::defaultCurrencyCode
+    \readonly
+    The user's default ISO currency code (e.g. \c EUR).
+*/
+/*! \qmlproperty string BrickStore::versionNumber
+    \readonly
+    BrickStore's version as a string (e.g. \c "2021.10.2").
+*/
+/*! \qmlproperty string BrickStore::buildNumber
+    \readonly
+    BrickStore's build number as a string (e.g. \c "42").
+*/
+/*! \qmlproperty bool BrickStore::databaseValid
+    \readonly
+    Returns whether the current database is valid or not.
+*/
+/*! \qmlproperty date BrickStore::lastDatabaseUpdate
+    \readonly
+    This property holds the date and time of the last successful database update.
+*/
+/*! \qmlproperty string BrickStore::online
+    \readonly
+    The current online state of the application. This is mirroring the operating system's online
+    state.
+*/
 
 QmlBrickStore *QmlBrickStore::s_inst = nullptr;
 
@@ -68,6 +108,9 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Application::inst(), &Application::showSettings,
             this, &QmlBrickStore::showSettings);
+
+    connect(OnlineState::inst(), &OnlineState::onlineStateChanged,
+            this, &QmlBrickStore::onlineStateChanged);
 
     connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
             this, &QmlBrickStore::lastDatabaseUpdateChanged);
@@ -122,9 +165,19 @@ QVariantMap QmlBrickStore::about() const
 
 QString QmlBrickStore::defaultCurrencyCode() const
 {
-     return Config::inst()->defaultCurrencyCode();
+    return Config::inst()->defaultCurrencyCode();
 }
 
+bool QmlBrickStore::onlineState() const
+{
+    return OnlineState::inst()->isOnline();
+}
+
+/*! \qmlmethod string BrickStore::symbolForCurrencyCode(string currencyCode)
+
+    Returns the currency symbol for the ISO \a currencyCode if available or the \a currencyCode
+    itself otherwise. E.g. \c EUR will be mapped to \c €.
+*/
 QString QmlBrickStore::symbolForCurrencyCode(const QString &currencyCode) const
 {
     static QHash<QString, QString> cache;
@@ -144,27 +197,58 @@ QString QmlBrickStore::symbolForCurrencyCode(const QString &currencyCode) const
     return s;
 }
 
+/*! \qmlmethod string BrickStore::toCurrencyString(real value, string symbol = "", int precision = 3)
+
+    Correctly formats the given currency \a value according to the user's locale and returns it as
+    a string. Also appends a currency \a symbol if provided.
+    The default number of decimal places is \c 3, but you can change this via the \a precision
+    parameter.
+*/
 QString QmlBrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
 {
     return Currency::toString(value, symbol, precision);
 }
 
+/*! \qmlmethod string BrickStore::toWeightString(real value, bool showUnit = false)
+
+    Correctly formats the given weight \a value according to the user's locale and the
+    metric/imperial setting in BrickStore and returns it as a string. Also
+    appends the corresponding unit if \a showUnit is set to \c true.
+*/
 QString QmlBrickStore::toWeightString(double value, bool showUnit) const
 {
     return Utility::weightToString(value, Config::inst()->measurementSystem(), true, showUnit);
 }
 
 
+/*! \qmlmethod stringlist BrickStore::nameFiltersForBrickLinkXML(bool includeAll = false)
+
+    Returns a list of file extension that can be used when creating a FileDialog to open
+    BrickLink XML files. If \a includeAll is set, a match-everything filter \c * will be added to
+    this list.
+*/
 QStringList QmlBrickStore::nameFiltersForBrickLinkXML(bool includeAll) const
 {
     return DocumentIO::nameFiltersForBrickLinkXML(includeAll);
 }
 
+/*! \qmlmethod stringlist BrickStore::nameFiltersForBrickStoreXML(bool includeAll = false)
+
+    Returns a list of file extension that can be used when creating a FileDialog to open
+    BrickStore document files. If \a includeAll is set, a match-everything filter \c * will be
+    added to this list.
+*/
 QStringList QmlBrickStore::nameFiltersForBrickStoreXML(bool includeAll) const
 {
     return DocumentIO::nameFiltersForBrickStoreXML(includeAll);
 }
 
+/*! \qmlmethod stringlist BrickStore::nameFiltersForLDraw(bool includeAll = false)
+
+    Returns a list of file extension that can be used when creating a FileDialog to open
+    LDraw files. If \a includeAll is set, a match-everything filter \c * will be added to this
+    list.
+*/
 QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
 {
     return DocumentIO::nameFiltersForLDraw(includeAll);
@@ -180,6 +264,11 @@ QDateTime QmlBrickStore::lastDatabaseUpdate() const
     return BrickLink::core()->databaseDate();
 }
 
+/*! \qmlmethod bool BrickStore::updateDatabase()
+
+    Starts an asychronous database update in the background. Returns \c true if the update was
+    started and \c false if it failed (e.g. there were documents with unsaved changes).
+*/
 bool QmlBrickStore::updateDatabase()
 {
     return QCoro::waitFor(Application::inst()->updateDatabase());

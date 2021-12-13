@@ -101,6 +101,9 @@ OTHER_FILES += \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
+  doc/apidocs.qdocconf \
+  doc/apidocs.qdoc \
+  doc/apidocs.css \
 
 LANGUAGES = en de fr cz pt es
 
@@ -150,6 +153,12 @@ sentry {
 
   DEFINES *= SENTRY_ENABLED
 }
+
+qtPrepareTool(QDOC, qdoc)
+#qtPrepareTool(QTATTRIBUTIONSCANNER, qtattributionscanner)
+
+apidocs.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/apidocs.qdocconf"
+QMAKE_EXTRA_TARGETS += apidocs
 
 #
 # Windows specific

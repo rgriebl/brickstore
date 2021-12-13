@@ -42,6 +42,7 @@ jobs:
           os: ubuntu-20.04
           debian_container: "buildpack-deps:bullseye"
           qmake_extra_config: "CONFIG+=backend-only"
+          generate_docs: true
 
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
@@ -279,6 +280,18 @@ jobs:
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.app"
+
+    - name: Generate Documentation
+      if: matrix.config.generate_docs
+      run: |
+        make apidocs
+
+    - name: Publish Documentation
+      if: matrix.config.generate_docs
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./doc/html/apidocs
 
   release:
     needs: [ build ]

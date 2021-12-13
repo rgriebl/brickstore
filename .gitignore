@@ -28,7 +28,8 @@ ldtest
 *.orig
 *.rej
 ui_*.h
-*.pr?.user
+*.pr?.user*
 .DS_Store
 translations/*.qm
 CMakeLists.txt.user
+doc/html
