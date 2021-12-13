@@ -257,7 +257,7 @@
         <location filename="../src/common/actionmanager.cpp" line="352"/>
         <source>Del</source>
         <comment>Edit|Delete</comment>
-        <translation>Sup</translation>
+        <translation>Del</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="354"/>
@@ -268,7 +268,7 @@
         <location filename="../src/common/actionmanager.cpp" line="354"/>
         <source>Insert</source>
         <comment>Edit|AddItems</comment>
-        <translation>Insertar</translation>
+        <translation>Insert</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="355"/>

@@ -273,7 +273,7 @@
         <location filename="../src/common/actionmanager.cpp" line="352"/>
         <source>Del</source>
         <comment>Edit|Delete</comment>
-        <translation>Supprimer</translation>
+        <translation>Del</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="354"/>
