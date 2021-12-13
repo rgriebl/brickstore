@@ -31,7 +31,7 @@
 #include "common/documentlist.h"
 #include "common/recentfiles.h"
 #include "utility/utility.h"
-#include "framework.h"
+#include "mainwindow.h"
 
 #include "taskwidgets.h"
 
@@ -56,7 +56,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     });
 
 
-    connect(FrameWork::inst(), &FrameWork::documentActivated,
+    connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, &TaskPriceGuideWidget::documentUpdate);
     connect(this, &PriceGuideWidget::priceDoubleClicked,
             this, &TaskPriceGuideWidget::setPrice);
@@ -184,7 +184,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     connect(&m_delayTimer, &QTimer::timeout,
             this, &TaskInfoWidget::delayedSelectionUpdate);
 
-    connect(FrameWork::inst(), &FrameWork::documentActivated,
+    connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, &TaskInfoWidget::documentUpdate);
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &TaskInfoWidget::refresh);
@@ -329,7 +329,7 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    connect(FrameWork::inst(), &FrameWork::documentActivated, this, &TaskAppearsInWidget::documentUpdate);
+    connect(MainWindow::inst(), &MainWindow::documentActivated, this, &TaskAppearsInWidget::documentUpdate);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
@@ -384,7 +384,7 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     setSelectionMode(QAbstractItemView::NoSelection);
     setModel(DocumentList::inst());
 
-    connect(FrameWork::inst(), &FrameWork::documentActivated,
+    connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, [this](Document *doc) {
         int row = DocumentList::inst()->documents().indexOf(doc);
         selectionModel()->select(DocumentList::inst()->index(row, 0),

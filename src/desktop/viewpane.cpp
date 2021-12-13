@@ -24,6 +24,7 @@
 #include <QProgressBar>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QMainWindow>
 #include <QDebug>
 
 #include "common/actionmanager.h"
@@ -136,6 +137,24 @@ ViewPane::~ViewPane()
         disconnect(w, &QObject::destroyed, this, nullptr);
         delete w;
     }
+}
+
+void ViewPane::newWindow()
+{
+    auto *nw = new QMainWindow(window());
+    nw->setAttribute(Qt::WA_DeleteOnClose);
+    auto *rootSplitter = new QSplitter();
+    rootSplitter->setObjectName("WindowSplitter"_l1);
+    auto *vp = m_viewPaneCreate(nullptr);
+    rootSplitter->addWidget(vp);
+    nw->setCentralWidget(rootSplitter);
+    nw->show();
+    vp->activateDocument(activeDocument());
+
+    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [nw, vp]() {
+        if (vp->m_viewStack->count() == 0)
+            nw->close();
+    });
 }
 
 void ViewPane::split(Qt::Orientation o)
@@ -506,6 +525,7 @@ void ViewPane::languageChange()
     m_splitH->setText(tr("Split horizontally"));
     m_splitV->setText(tr("Split vertically"));
     m_splitClose->setText(tr("Remove split"));
+    m_splitWindow->setText(tr("Open in new window"));
 
     updateStatistics();
 }
@@ -641,12 +661,16 @@ void ViewPane::createToolBar()
     m_splitV->setIcon(QIcon::fromTheme("view-split-top-bottom"_l1));
     m_splitClose = new QAction(this);
     m_splitClose->setIcon(QIcon::fromTheme("view-close"_l1));
+    m_splitWindow = new QAction(this);
+    m_splitWindow->setIcon(QIcon::fromTheme("document-new"_l1));
 
     QMenu *splitMenu = new QMenu(m_split);
     splitMenu->addAction(m_splitClose);
     splitMenu->addSeparator();
     splitMenu->addAction(m_splitH);
     splitMenu->addAction(m_splitV);
+    splitMenu->addSeparator();
+    splitMenu->addAction(m_splitWindow);
     m_split->setMenu(splitMenu);
 
     connect(splitMenu, &QMenu::aboutToShow, this, [this]() {
@@ -656,6 +680,7 @@ void ViewPane::createToolBar()
     connect(m_splitH, &QAction::triggered, this, [this]() { split(Qt::Horizontal); });
     connect(m_splitV, &QAction::triggered, this, [this]() { split(Qt::Vertical); });
     connect(m_splitClose, &QAction::triggered, this, [this]() { unsplit(); }, Qt::QueuedConnection);
+    connect(m_splitWindow, &QAction::triggered, this, [this]() { newWindow(); }, Qt::QueuedConnection);
 
     // workaround for flicker
     connect(m_filter, &FilterWidget::visibilityChanged,

@@ -79,8 +79,8 @@
 #include "checkforupdates.h"
 #include "desktopuihelpers.h"
 #include "developerconsole.h"
-#include "framework.h"
-#include "framework_p.h"
+#include "mainwindow.h"
+#include "mainwindow_p.h"
 #include "historylineedit.h"
 #include "progresscircle.h"
 #include "script.h"
@@ -108,21 +108,21 @@ enum {
 };
 
 
-FrameWork *FrameWork::s_inst = nullptr;
+MainWindow *MainWindow::s_inst = nullptr;
 
-FrameWork *FrameWork::inst()
+MainWindow *MainWindow::inst()
 {
-    if (s_inst == reinterpret_cast<FrameWork *>(-1)) // destructed
+    if (s_inst == reinterpret_cast<MainWindow *>(-1)) // destructed
         return nullptr;
 
     if (!s_inst)
-        (new FrameWork())->setAttribute(Qt::WA_DeleteOnClose);
+        (new MainWindow())->setAttribute(Qt::WA_DeleteOnClose);
     return s_inst;
 }
 
 
 
-FrameWork::FrameWork(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     s_inst = this;
@@ -133,8 +133,8 @@ FrameWork::FrameWork(QWidget *parent)
 
     m_devConsole = new DeveloperConsole();
     Application::inst()->setUILoggingHandler([](QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
-        if (FrameWork::inst())
-            FrameWork::inst()->m_devConsole->messageHandler(type, ctx, msg);
+        if (MainWindow::inst())
+            MainWindow::inst()->m_devConsole->messageHandler(type, ctx, msg);
     });
     connect(m_devConsole, &DeveloperConsole::execute,
             this, [](const QString &command, bool *successful) {
@@ -148,7 +148,7 @@ FrameWork::FrameWork(QWidget *parent)
     setAcceptDrops(true);
 
     connect(Application::inst(), &Application::showSettings,
-            this, &FrameWork::showSettings);
+            this, &MainWindow::showSettings);
 
     // vvv increase DockStateVersion if you change the dock/toolbar setup
 
@@ -225,7 +225,7 @@ FrameWork::FrameWork(QWidget *parent)
     ActionManager::inst()->qAction("view_goto_next_diff")->setEnabled(showDiffIndicators);
 
     connect(BrickLink::core(), &BrickLink::Core::transferProgress,
-            this, &FrameWork::transferProgressUpdate);
+            this, &MainWindow::transferProgressUpdate);
 
     connectView(nullptr);
 
@@ -316,10 +316,10 @@ FrameWork::FrameWork(QWidget *parent)
     });
 
     connect(Config::inst(), &Config::toolBarActionsChanged,
-            this, &FrameWork::setupToolBar);
+            this, &MainWindow::setupToolBar);
 }
 
-void FrameWork::setupScripts()
+void MainWindow::setupScripts()
 {
     auto reloadScripts = [this](const QVector<Script *> &scripts) {
         QList<QAction *> extrasActions;
@@ -381,7 +381,7 @@ void FrameWork::setupScripts()
     reloadScripts(ScriptManager::inst()->scripts());
 }
 
-void FrameWork::languageChange()
+void MainWindow::languageChange()
 {
     m_toolbar->setWindowTitle(tr("Toolbar"));
 
@@ -408,7 +408,7 @@ void FrameWork::languageChange()
     }
 }
 
-FrameWork::~FrameWork()
+MainWindow::~MainWindow()
 {
     Config::inst()->setValue("/MainWindow/Layout/State"_l1, saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry"_l1, saveGeometry());
@@ -418,10 +418,10 @@ FrameWork::~FrameWork()
     delete m_importorder_dialog.data();
     delete m_importcart_dialog.data();
 
-    s_inst = reinterpret_cast<FrameWork *>(-1);
+    s_inst = reinterpret_cast<MainWindow *>(-1);
 }
 
-void FrameWork::forEachViewPane(std::function<bool(ViewPane *)> callback)
+void MainWindow::forEachViewPane(std::function<bool(ViewPane *)> callback)
 {
     if (!callback)
         return;
@@ -442,7 +442,7 @@ void FrameWork::forEachViewPane(std::function<bool(ViewPane *)> callback)
     recurse(w);
 }
 
-void FrameWork::dragEnterEvent(QDragEnterEvent *e)
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 {
     if (e->mimeData()->hasUrls()) {
         e->setDropAction(Qt::CopyAction);
@@ -450,7 +450,7 @@ void FrameWork::dragEnterEvent(QDragEnterEvent *e)
     }
 }
 
-void FrameWork::dropEvent(QDropEvent *e)
+void MainWindow::dropEvent(QDropEvent *e)
 {
     foreach (QUrl u, e->mimeData()->urls())
         Document::load(u.toLocalFile());
@@ -459,14 +459,14 @@ void FrameWork::dropEvent(QDropEvent *e)
     e->accept();
 }
 
-void FrameWork::changeEvent(QEvent *e)
+void MainWindow::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         languageChange();
     QMainWindow::changeEvent(e);
 }
 
-void FrameWork::createCentralWidget()
+void MainWindow::createCentralWidget()
 {
     m_welcomeWidget = new WelcomeWidget(this);
     m_welcomeWidget->setAutoFillBackground(true);
@@ -483,6 +483,7 @@ void FrameWork::createCentralWidget()
             this, [this](QWidget *, QWidget *now) {
         for ( ; now; now = now->parentWidget()) {
             if (auto vp = qobject_cast<ViewPane *>(now)) {
+                goHome(false);
                 setActiveViewPane(vp);
                 break;
             }
@@ -491,7 +492,7 @@ void FrameWork::createCentralWidget()
     repositionHomeWidget();
 }
 
-void FrameWork::setActiveViewPane(ViewPane *newActive)
+void MainWindow::setActiveViewPane(ViewPane *newActive)
 {
     if (m_activeViewPane == newActive)
         return;
@@ -503,7 +504,7 @@ void FrameWork::setActiveViewPane(ViewPane *newActive)
         m_activeViewPane->setActive(true);
 }
 
-ViewPane *FrameWork::createViewPane(Document *activeDocument)
+ViewPane *MainWindow::createViewPane(Document *activeDocument)
 {
     auto vp = new ViewPane([this](Document *doc) { return createViewPane(doc); },
             [this](ViewPane *vp) { deleteViewPane(vp); },
@@ -519,7 +520,7 @@ ViewPane *FrameWork::createViewPane(Document *activeDocument)
     return vp;
 }
 
-void FrameWork::deleteViewPane(ViewPane *viewPane)
+void MainWindow::deleteViewPane(ViewPane *viewPane)
 {
     if (m_activeViewPane == viewPane) {
         ViewPane *newActive = nullptr;
@@ -540,7 +541,7 @@ void FrameWork::deleteViewPane(ViewPane *viewPane)
     viewPane->deleteLater();
 }
 
-QDockWidget *FrameWork::createDock(QWidget *widget, const char *name)
+QDockWidget *MainWindow::createDock(QWidget *widget, const char *name)
 {
     QDockWidget *dock = new QDockWidget(QString(), this);
     dock->setObjectName(QLatin1String(name));
@@ -552,7 +553,7 @@ QDockWidget *FrameWork::createDock(QWidget *widget, const char *name)
     return dock;
 }
 
-void FrameWork::goHome(bool home)
+void MainWindow::goHome(bool home)
 {
     if (home) {
         repositionHomeWidget();
@@ -569,7 +570,7 @@ void FrameWork::goHome(bool home)
     m_goHome->setEnabled(DocumentList::inst()->count() > 0);
 }
 
-void FrameWork::repositionHomeWidget()
+void MainWindow::repositionHomeWidget()
 {
     QRect r = rect();
     if (menuBar() && menuBar()->isVisible())
@@ -581,7 +582,7 @@ void FrameWork::repositionHomeWidget()
     m_welcomeWidget->raise();
 }
 
-void FrameWork::setupMenuBar()
+void MainWindow::setupMenuBar()
 {
     ActionManager *am = ActionManager::inst();
 
@@ -804,7 +805,7 @@ void FrameWork::setupMenuBar()
     menuBar()->addAction(am->qAction("menu_help"));
 }
 
-bool FrameWork::setupToolBar()
+bool MainWindow::setupToolBar()
 {
     if (!m_toolbar)
         return false;
@@ -849,7 +850,7 @@ bool FrameWork::setupToolBar()
     return true;
 }
 
-QMenu *FrameWork::setupMenu(const QByteArray &name, const QVector<QByteArray> &a_names)
+QMenu *MainWindow::setupMenu(const QByteArray &name, const QVector<QByteArray> &a_names)
 {
     if (a_names.isEmpty())
         return nullptr;
@@ -874,7 +875,7 @@ QMenu *FrameWork::setupMenu(const QByteArray &name, const QVector<QByteArray> &a
     return m;
 }
 
-void FrameWork::createActions()
+void MainWindow::createActions()
 {
     ActionManager *am = ActionManager::inst();
 
@@ -1005,7 +1006,7 @@ void FrameWork::createActions()
     m_progressAction->setDefaultWidget(m_progress);
 }
 
-QList<QAction *> FrameWork::contextMenuActions() const
+QList<QAction *> MainWindow::contextMenuActions() const
 {
     static const char *contextActions[] =  {
         "edit_cut",
@@ -1043,13 +1044,13 @@ QList<QAction *> FrameWork::contextMenuActions() const
     return result;
 }
 
-QStringList FrameWork::toolBarActionNames() const
+QStringList MainWindow::toolBarActionNames() const
 {
     const QStringList actionNames = Config::inst()->toolBarActions();
     return actionNames.isEmpty() ? defaultToolBarActionNames() : actionNames;
 }
 
-QStringList FrameWork::defaultToolBarActionNames() const
+QStringList MainWindow::defaultToolBarActionNames() const
 {
     static const QStringList actionNames = {
         "document_new"_l1,
@@ -1081,19 +1082,19 @@ QStringList FrameWork::defaultToolBarActionNames() const
     return actionNames;
 }
 
-View *FrameWork::activeView() const
+View *MainWindow::activeView() const
 {
     return m_activeView;
 }
 
-void FrameWork::setActiveView(View *view)
+void MainWindow::setActiveView(View *view)
 {
     if (!m_activeViewPane || !view || !view->document())
         return;
     m_activeViewPane->activateDocument(view->document());
 }
 
-void FrameWork::connectView(View *view)
+void MainWindow::connectView(View *view)
 {
     if (view && view == m_activeView)
         return;
@@ -1105,11 +1106,11 @@ void FrameWork::connectView(View *view)
         m_activeView->setActive(false);
 
         disconnect(m_activeView.data(), &View::windowTitleChanged,
-                   this, &FrameWork::titleUpdate);
+                   this, &MainWindow::titleUpdate);
         disconnect(model, &DocumentModel::modificationChanged,
                    this, &QWidget::setWindowModified);
         disconnect(document, &Document::blockingOperationActiveChanged,
-                   this, &FrameWork::blockUpdate);
+                   this, &MainWindow::blockUpdate);
         disconnect(m_loadColumnLayoutMenu, &LoadColumnLayoutMenuAdapter::load,
                    document, &Document::setColumnLayoutFromId);
 
@@ -1123,11 +1124,11 @@ void FrameWork::connectView(View *view)
         view->setActive(true);
 
         connect(view, &View::windowTitleChanged,
-                this, &FrameWork::titleUpdate);
+                this, &MainWindow::titleUpdate);
         connect(model, &DocumentModel::modificationChanged,
                 this, &QWidget::setWindowModified);
         connect(document, &Document::blockingOperationActiveChanged,
-                this, &FrameWork::blockUpdate);
+                this, &MainWindow::blockUpdate);
         connect(m_loadColumnLayoutMenu, &LoadColumnLayoutMenuAdapter::load,
                 document, &Document::setColumnLayoutFromId);
 
@@ -1147,7 +1148,7 @@ void FrameWork::connectView(View *view)
     emit documentActivated(m_activeView ? m_activeView->document() : nullptr);
 }
 
-QMenu *FrameWork::createPopupMenu()
+QMenu *MainWindow::createPopupMenu()
 {
     auto menu = QMainWindow::createPopupMenu();
     if (menu) {
@@ -1158,7 +1159,7 @@ QMenu *FrameWork::createPopupMenu()
     return menu;
 }
 
-void FrameWork::blockUpdate(bool blocked)
+void MainWindow::blockUpdate(bool blocked)
 {
     static QUndoStack blockStack;
 
@@ -1166,7 +1167,7 @@ void FrameWork::blockUpdate(bool blocked)
         Application::inst()->undoGroup()->setActiveStack(blocked ? &blockStack : m_activeView->model()->undoStack());
 }
 
-void FrameWork::titleUpdate()
+void MainWindow::titleUpdate()
 {
     QString title = QApplication::applicationName();
     QString file;
@@ -1179,7 +1180,7 @@ void FrameWork::titleUpdate()
     setWindowFilePath(file);
 }
 
-void FrameWork::transferProgressUpdate(int p, int t)
+void MainWindow::transferProgressUpdate(int p, int t)
 {
     if (!m_progress)
         return;
@@ -1193,13 +1194,13 @@ void FrameWork::transferProgressUpdate(int p, int t)
     }
 }
 
-void FrameWork::showSettings(const QString &page)
+void MainWindow::showSettings(const QString &page)
 {
     SettingsDialog d(page, this);
     d.exec();
 }
 
-void FrameWork::closeEvent(QCloseEvent *e)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
     //TODO move to Application
     QStringList files = DocumentList::inst()->allFiles();
@@ -1212,14 +1213,14 @@ void FrameWork::closeEvent(QCloseEvent *e)
     QMainWindow::closeEvent(e);
 }
 
-void FrameWork::resizeEvent(QResizeEvent *e)
+void MainWindow::resizeEvent(QResizeEvent *e)
 {
     QMainWindow::resizeEvent(e);
     repositionHomeWidget();
 }
 
 
-bool FrameWork::closeAllViews()
+bool MainWindow::closeAllViews()
 {
     auto oldView = m_activeView;
     auto oldViewPane = m_activeViewPane;
@@ -1258,5 +1259,5 @@ bool FrameWork::closeAllViews()
 }
 
 
-#include "moc_framework.cpp"
-#include "moc_framework_p.cpp"
+#include "moc_mainwindow.cpp"
+#include "moc_mainwindow_p.cpp"

@@ -22,7 +22,7 @@
 
 #include "incdecpricesdialog.h"
 #include "utility/utility.h"
-#include "framework.h"
+#include "mainwindow.h"
 
 
 IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,

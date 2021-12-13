@@ -17,11 +17,11 @@ HEADERS += \
     $$PWD/documentdelegate.h \
     $$PWD/filtertermwidget.h \
     $$PWD/flowlayout.h \
-    $$PWD/framework.h \
-    $$PWD/framework_p.h \
     $$PWD/headerview.h \
     $$PWD/historylineedit.h \
     $$PWD/incdecpricesdialog.h \
+    $$PWD/mainwindow.h \
+    $$PWD/mainwindow_p.h \
     $$PWD/managecolumnlayoutsdialog.h \
     $$PWD/menucombobox.h \
     $$PWD/picturewidget.h \
@@ -53,10 +53,10 @@ SOURCES += \
     $$PWD/documentdelegate.cpp \
     $$PWD/filtertermwidget.cpp \
     $$PWD/flowlayout.cpp \
-    $$PWD/framework.cpp \
     $$PWD/headerview.cpp \
     $$PWD/historylineedit.cpp \
     $$PWD/incdecpricesdialog.cpp \
+    $$PWD/mainwindow.cpp \
     $$PWD/managecolumnlayoutsdialog.cpp \
     $$PWD/menucombobox.cpp \
     $$PWD/picturewidget.cpp \

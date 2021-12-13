@@ -35,7 +35,7 @@ QT_FORWARD_DECLARE_CLASS(QFrame)
 QT_FORWARD_DECLARE_CLASS(QSizeGrip)
 QT_FORWARD_DECLARE_CLASS(QHeaderView)
 
-class FrameWork;
+class MainWindow;
 class Document;
 class TableView;
 class HeaderView;

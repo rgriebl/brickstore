@@ -51,7 +51,7 @@
 #include "common/config.h"
 #include "desktop/brickstoreproxystyle.h"
 #include "desktop/desktopuihelpers.h"
-#include "desktop/framework.h"
+#include "desktop/mainwindow.h"
 #include "desktop/scriptmanager.h"
 #include "desktop/smartvalidator.h"
 #include "utility/utility.h"
@@ -141,10 +141,10 @@ void DesktopApplication::init()
 
     ScriptManager::inst()->initialize();
 
-    FrameWork::inst()->show();
+    MainWindow::inst()->show();
 
 #if defined(Q_OS_MACOS)
-    FrameWork::inst()->raise();
+    MainWindow::inst()->raise();
 
 #elif defined(Q_OS_WINDOWS)
     RegisterApplicationRestart(nullptr, 0); // make us restart-able by installers
@@ -155,7 +155,7 @@ void DesktopApplication::init()
     if (Config::inst()->sentryConsent() == Config::SentryConsent::Unknown) {
         QString text = tr("Enable anonymous crash reporting?<br><br>Please consider enabling this feature when available.<br>If you have any doubts about what information is being submitted and how it is used, please <a href='https://github.com/rgriebl/brickstore/wiki/Crash-Reporting'>see here</a>.<br><br>Crash reporting can be enabled or disabled at any time in the Settings dialog.");
 
-        switch (QMessageBox::question(FrameWork::inst(), QCoreApplication::applicationName(), text)) {
+        switch (QMessageBox::question(MainWindow::inst(), QCoreApplication::applicationName(), text)) {
         case QMessageBox::Yes:
             Config::inst()->setSentryConsent(Config::SentryConsent::Given);
             break;
@@ -235,7 +235,7 @@ bool DesktopApplication::eventFilter(QObject *o, QEvent *e)
 
 QCoro::Task<bool> DesktopApplication::closeAllViews()
 {
-    co_return FrameWork::inst()->closeAllViews();
+    co_return MainWindow::inst()->closeAllViews();
 }
 
 bool DesktopApplication::notifyOtherInstance()
@@ -292,7 +292,7 @@ bool DesktopApplication::notifyOtherInstance()
                 m_queuedDocuments << files;
                 openQueuedDocuments();
 
-                if (auto fw = FrameWork::inst()) {
+                if (auto fw = MainWindow::inst()) {
                     fw->setWindowState(fw->windowState() & ~Qt::WindowMinimized);
                     fw->raise();
                     fw->activateWindow();
@@ -354,7 +354,7 @@ void DesktopApplication::setUiTheme()
     // on macOS, we are using the native theme switch
     if (!hasMacThemes()) {
         if (!startup)
-            QMessageBox::information(FrameWork::inst(), QCoreApplication::applicationName(),
+            QMessageBox::information(MainWindow::inst(), QCoreApplication::applicationName(),
                                      tr("Your macOS version is too old to support theme changes."));
     } else if (!startup || (theme != Config::UiTheme::SystemDefault)) {
         if (startup)
@@ -373,7 +373,7 @@ void DesktopApplication::setUiTheme()
     if (!startup) {
         QMessageBox mb(QMessageBox::Question, QCoreApplication::applicationName(),
                        tr("The theme change will take effect after a restart."),
-                       QMessageBox::Yes | QMessageBox::No, FrameWork::inst());
+                       QMessageBox::Yes | QMessageBox::No, MainWindow::inst());
         mb.setDefaultButton(QMessageBox::No);
         mb.setButtonText(QMessageBox::Yes, tr("Restart now"));
         mb.setButtonText(QMessageBox::No, tr("Later"));

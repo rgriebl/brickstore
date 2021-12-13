@@ -40,7 +40,7 @@
 #include "utility/currency.h"
 #include "utility/utility.h"
 #include "betteritemdelegate.h"
-#include "framework.h"
+#include "mainwindow.h"
 #include "settingsdialog.h"
 
 
@@ -446,7 +446,7 @@ public:
 
     void resetToDefaults()
     {
-        auto actions = FrameWork::inst()->defaultToolBarActionNames();
+        auto actions = MainWindow::inst()->defaultToolBarActionNames();
         beginResetModel();
         m_actions.remove(m_category);
         for (auto it = actions.crbegin(); it != actions.crend(); ++it)
@@ -813,7 +813,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
     w_tb_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
 
-    auto tbActionNames = FrameWork::inst()->toolBarActionNames();
+    auto tbActionNames = MainWindow::inst()->toolBarActionNames();
 
     m_tb_actions = new ToolBarModel(tbActionNames, this);
     w_tb_toolbar->setModel(m_tb_actions);

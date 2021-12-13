@@ -33,8 +33,7 @@
 #include "common/documentlist.h"
 #include "common/recentfiles.h"
 #include "utility/utility.h"
-#include "framework.h"
-#include "framework_p.h"
+#include "mainwindow.h"
 #include "view.h"
 
 
@@ -92,7 +91,7 @@ class WindowMenuAdapter : public QObject
 {
     Q_OBJECT
 public:
-    explicit WindowMenuAdapter(FrameWork *fw, QMenu *menu, bool shortcut = false)
+    explicit WindowMenuAdapter(MainWindow *fw, QMenu *menu, bool shortcut = false)
         : QObject(menu)
         , m_fw(fw)
         , m_menu(menu)
@@ -128,7 +127,7 @@ public:
     }
 
 private:
-    FrameWork *m_fw;
+    MainWindow *m_fw;
     QMenu *m_menu;
     bool m_shortcut;
 };
@@ -224,7 +223,7 @@ public:
         paletteChange();
 
         QMetaObject::invokeMethod(this, [this]() {
-            m_menu.reset(FrameWork::inst()->createPopupMenu());
+            m_menu.reset(MainWindow::inst()->createPopupMenu());
             m_button->setMenu(m_menu.get());
         }, Qt::QueuedConnection);
     }

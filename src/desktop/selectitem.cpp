@@ -49,7 +49,7 @@
 #include "common/config.h"
 #include "common/uihelpers.h"
 #include "utility/utility.h"
-#include "framework.h"
+#include "mainwindow.h"
 #include "historylineedit.h"
 #include "selectitem.h"
 

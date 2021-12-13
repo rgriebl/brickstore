@@ -66,7 +66,7 @@
 #include "changecurrencydialog.h"
 #include "documentdelegate.h"
 #include "flowlayout.h"
-#include "framework.h"
+#include "mainwindow.h"
 #include "headerview.h"
 #include "script.h"
 #include "scriptmanager.h"
@@ -956,7 +956,7 @@ void View::contextMenu(const QPoint &pos)
     if (!m_contextMenu->isEmpty())
         m_contextMenu->addSeparator();
 
-    const auto actions = FrameWork::inst()->contextMenuActions();
+    const auto actions = MainWindow::inst()->contextMenuActions();
     for (auto action : qAsConst(actions)) {
         if (action)
             m_contextMenu->addAction(action);

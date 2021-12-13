@@ -41,6 +41,7 @@ public:
              std::function<void(ViewPane *)> viewPaneDelete, Document *activeDocument);
     ~ViewPane() override;
 
+    void newWindow();
     void split(Qt::Orientation o);
     bool canUnsplit() const;
     void unsplit();
@@ -99,6 +100,7 @@ private:
     QAction *m_splitH;
     QAction *m_splitV;
     QAction *m_splitClose;
+    QAction *m_splitWindow;
 
     QStackedWidget *m_viewStack;
     QMap<Document *, View *> m_viewStackMapping;

@@ -53,16 +53,19 @@ class ViewPane;
 class LoadColumnLayoutMenuAdapter;
 
 
-class FrameWork : public QMainWindow
+//TODO rename to MainWindow and derive MainWindow -> Window -> QMainWindow
+//     Window has reduced functionality for "Open in new window"
+
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    FrameWork(QWidget *parent = nullptr);
-    static FrameWork *s_inst;
+    MainWindow(QWidget *parent = nullptr);
+    static MainWindow *s_inst;
 
 public:
-    ~FrameWork() override;
-    static FrameWork *inst();
+    ~MainWindow() override;
+    static MainWindow *inst();
 
     bool closeAllViews();
     View *activeView() const;
