@@ -281,17 +281,17 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.app"
 
-    - name: Generate Documentation
-      if: matrix.config.generate_docs
+    - name: Generate Documentation (Linux container)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && matrix.generate_docs
       run: |
-        make apidocs
+        sudo docker exec -w /build "debian-build" make apidocs
 
     - name: Publish Documentation
       if: matrix.config.generate_docs
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./doc/html/apidocs
+        publish_dir: ./doc/html
 
   release:
     needs: [ build ]
