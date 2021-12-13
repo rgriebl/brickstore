@@ -312,11 +312,6 @@ QCoro::Task<bool> Application::updateDatabase()
 {
     bool noWindows = (DocumentList::inst()->count() == 0);
 
-    if (!noWindows) {
-        qWarning() << "Cannot force a DB update, if windows are open";
-        co_return false;
-    }
-
     //TODO: block UI here
 
     QStringList files = DocumentList::inst()->allFiles();
