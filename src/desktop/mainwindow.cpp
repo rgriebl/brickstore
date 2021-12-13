@@ -483,7 +483,8 @@ void MainWindow::createCentralWidget()
             this, [this](QWidget *, QWidget *now) {
         for ( ; now; now = now->parentWidget()) {
             if (auto vp = qobject_cast<ViewPane *>(now)) {
-                goHome(false);
+                if (m_goHome->isChecked())
+                    goHome(false);
                 setActiveViewPane(vp);
                 break;
             }
