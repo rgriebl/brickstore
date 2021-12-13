@@ -38,4 +38,5 @@ private:
     QDoubleSpinBox *m_value;
     QButtonGroup *m_percentOrFixed;
     QCheckBox *m_applyToTiers = nullptr;
+    QString m_currencyCode;
 };

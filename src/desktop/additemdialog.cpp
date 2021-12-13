@@ -107,9 +107,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_bulk->setValue(1);
     w_bulk->installEventFilter(this);
 
-    w_price->setRange(0, DocumentModel::maxPrice);
+    double maxPrice = DocumentModel::maxLocalPrice(m_currency_code);
+
+    w_price->setRange(0, maxPrice);
     w_price->installEventFilter(this);
-    w_cost->setRange(0, DocumentModel::maxPrice);
+    w_cost->setRange(0, maxPrice);
     w_cost->installEventFilter(this);
 
     w_tier_qty[0] = w_tier_qty_0;
@@ -121,7 +123,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     for (int i = 0; i < 3; i++) {
         w_tier_qty[i]->setRange(0, DocumentModel::maxQuantity);
-        w_tier_price[i]->setRange(0, DocumentModel::maxPrice);
+        w_tier_price[i]->setRange(0, maxPrice);
         w_tier_qty[i]->setValue(0);
         w_tier_price[i]->setValue(0);
         w_tier_qty[i]->installEventFilter(this);
@@ -476,7 +478,7 @@ void AddItemDialog::setTierType(int type)
             tp->setRange(0, 99);
             tp->setDecimals(0);
         } else {
-            tp->setRange(0, DocumentModel::maxPrice);
+            tp->setRange(0, DocumentModel::maxLocalPrice(m_currency_code));
             tp->setDecimals(3);
         }
         tp->setValue(0);

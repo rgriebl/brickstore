@@ -28,6 +28,7 @@
 IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
                                        const QString &currencyCode, QWidget *parent)
     : QDialog(parent)
+    , m_currencyCode(currencyCode)
 {
     auto layout = new QVBoxLayout(this);
 
@@ -106,7 +107,9 @@ void IncDecPricesDialog::switchType(int type)
         m_value->setRange(-99, 1000);
         m_value->setDecimals(2);
     } else { // fixed
-        m_value->setRange(-DocumentModel::maxPrice, DocumentModel::maxPrice);
+        double maxPrice = DocumentModel::maxLocalPrice(m_currencyCode);
+
+        m_value->setRange(-maxPrice, maxPrice);
         m_value->setDecimals(3);
     }
 }

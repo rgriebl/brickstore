@@ -260,7 +260,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new price for all selected items:"),
                                                          m_model->currencyCode(),
                                                          selectedLots().front()->price(),
-                                                         0, DocumentModel::maxPrice, 3)) {
+                                                         0, DocumentModel::maxLocalPrice(m_model->currencyCode()), 3)) {
                   setPrice(*d);
               }
           } },
@@ -270,7 +270,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new cost for all selected items:"),
                                                          m_model->currencyCode(),
                                                          selectedLots().front()->cost(),
-                                                         0, DocumentModel::maxPrice, 3)) {
+                                                         0, DocumentModel::maxLocalPrice(m_model->currencyCode()), 3)) {
                   setCost(*d);
               }
           } },
@@ -279,7 +279,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
-                                                         0, DocumentModel::maxPrice, 3)) {
+                                                         0, DocumentModel::maxLocalPrice(m_model->currencyCode()), 3)) {
                   spreadCost(*d);
               }
           } },

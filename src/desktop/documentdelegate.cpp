@@ -810,13 +810,15 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     if (!idx.isValid())
         return nullptr;
 
+    auto *model = static_cast<const DocumentModel *>(idx.model());
+
     QValidator *valid = nullptr;
     switch (idx.column()) {
     case DocumentModel::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(R"([a-zA-Z0-9._-]+)"_l1), nullptr); break;
     case DocumentModel::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case DocumentModel::Quantity    :
     case DocumentModel::QuantityDiff: valid = new SmartIntValidator(-DocumentModel::maxQuantity,
-                                                               DocumentModel::maxQuantity, 0, nullptr); break;
+                                                                    DocumentModel::maxQuantity, 0, nullptr); break;
     case DocumentModel::Bulk        : valid = new SmartIntValidator(1, DocumentModel::maxQuantity, 1, nullptr); break;
     case DocumentModel::TierQ1      :
     case DocumentModel::TierQ2      :
@@ -825,9 +827,9 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     case DocumentModel::Cost        :
     case DocumentModel::TierP1      :
     case DocumentModel::TierP2      :
-    case DocumentModel::TierP3      : valid = new SmartDoubleValidator(0, DocumentModel::maxPrice, 3, 0, nullptr); break;
-    case DocumentModel::PriceDiff   : valid = new SmartDoubleValidator(-DocumentModel::maxPrice,
-                                                                  DocumentModel::maxPrice, 3, 0, nullptr); break;
+    case DocumentModel::TierP3      : valid = new SmartDoubleValidator(0, DocumentModel::maxLocalPrice(model->currencyCode()), 3, 0, nullptr); break;
+    case DocumentModel::PriceDiff   : valid = new SmartDoubleValidator(-DocumentModel::maxLocalPrice(model->currencyCode()),
+                                                                       DocumentModel::maxLocalPrice(model->currencyCode()), 3, 0, nullptr); break;
     case DocumentModel::Weight      : valid = new SmartDoubleValidator(0., 100000., 2, 0, nullptr); break;
     default                    : break;
     }

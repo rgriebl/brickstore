@@ -115,6 +115,8 @@ public:
     static constexpr int maxQuantity = 9999999;
     static constexpr double maxPrice = 99999;
 
+    static double maxLocalPrice(const QString &currencyCode);
+
     class Statistics
     {
     public:

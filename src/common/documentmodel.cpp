@@ -630,6 +630,20 @@ DocumentModel::~DocumentModel()
     //qWarning() << "~" << this;
 }
 
+double DocumentModel::maxLocalPrice(const QString &currencyCode)
+{
+    double crate = Currency::inst()->rate(currencyCode);
+    if (qFuzzyIsNull(crate))
+        return maxPrice;
+
+    // add or remove '9's to or from maxPrice, depending on the conversion rate:
+    //   crate = ]0.5 .. 5[ -> no change
+    //   crate = ]0.05 .. 0.5] -> remove one '9'
+    //   crate = [5 .. 50[ -> add one '9'
+    //   add or remove one more '9' for each factor of 10 in conversion rate
+    return pow(10, int(log10(maxPrice * crate) + .3)) - 1;
+}
+
 const LotList &DocumentModel::lots() const
 {
     return m_lots;
