@@ -51,6 +51,7 @@ signals:
 
 protected:
     QWidget *createWidget(QWidget *parent) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     UndoAction(Type t, QUndoStack *stack, QObject *parent);
@@ -265,9 +266,18 @@ QWidget *UndoAction::createWidget(QWidget *parent)
                                      + 2 * label->style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing));
         });
 
+        button->installEventFilter(this);
         return button;
     }
     return nullptr;
+}
+
+bool UndoAction::eventFilter(QObject *o, QEvent *e)
+{
+    if (qobject_cast<QToolButton *>(o) && (e->type() == QEvent::LanguageChange) && m_undoStack) {
+        setDescription(m_type == Undo ? m_undoStack->undoText() : m_undoStack->redoText());
+    }
+    return QWidgetAction::eventFilter(o, e);
 }
 
 void UndoAction::setDescription(const QString &desc)

@@ -571,9 +571,9 @@ void ActionManager::setupQAction(Action &aa)
 #if !defined(Q_OS_IOS)
     a->setShortcuts(shortcuts);
     if (!shortcuts.isEmpty())
-        a->setToolTip(Utility::toolTipLabel(text, shortcuts));
+        a->setToolTip(Utility::toolTipLabel(a->text(), shortcuts));
     else
-        a->setToolTip(text);
+        a->setToolTip(a->text());
 #endif
     a->setCheckable(aa.isCheckable());
 
