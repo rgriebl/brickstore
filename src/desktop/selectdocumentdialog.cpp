@@ -53,12 +53,12 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
 
     m_lotsFromClipboard = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
 
-    const auto ctrls = DocumentList::inst()->documents();
-    for (const Document *ctrl : ctrls) {
-        auto doc = ctrl->model();
-        if (doc != self) {
-            QListWidgetItem *item = new QListWidgetItem(ctrl->fileNameOrTitle(), m_documentList);
-            item->setData(Qt::UserRole, QVariant::fromValue(doc));
+    const auto docs = DocumentList::inst()->documents();
+    for (const Document *doc : docs) {
+        auto model = doc->model();
+        if (model != self) {
+            QListWidgetItem *item = new QListWidgetItem(doc->fileNameOrTitle(), m_documentList);
+            item->setData(Qt::UserRole, QVariant::fromValue(model));
         }
     }
 
@@ -94,10 +94,10 @@ LotList SelectDocument::lots() const
         srcList = m_lotsFromClipboard;
     } else {
         if (!m_documentList->selectedItems().isEmpty()) {
-            const auto *doc = m_documentList->selectedItems().constFirst()
-                    ->data(Qt::UserRole).value<const DocumentModel *>();
-            if (doc)
-                srcList = doc->lots();
+            const auto *model = m_documentList->selectedItems().constFirst()
+                    ->data(Qt::UserRole).value<DocumentModel *>();
+            if (model)
+                srcList = model->lots();
         }
     }
 
