@@ -142,6 +142,11 @@ ViewPane::~ViewPane()
 void ViewPane::newWindow()
 {
     auto *nw = new QMainWindow(window());
+    const auto allActions = ActionManager::inst()->allActions();
+    for (auto a : allActions) {
+        if (auto *qa = a->qAction())
+            nw->addAction(qa);
+    }
     nw->setAttribute(Qt::WA_DeleteOnClose);
     auto *rootSplitter = new QSplitter();
     rootSplitter->setObjectName("WindowSplitter"_l1);
