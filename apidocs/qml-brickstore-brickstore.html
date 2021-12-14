@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- brickstore_wrapper.cpp -->
+  <title>BrickStore QML Type | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/apidocs.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">BrickStore QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$BrickStore-brief -->
+<p>This singleton represents global settings and state. <a href="#details">More...</a></p>
+<!-- @@@BrickStore -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
+<li><a href="qml-brickstore-brickstore-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#buildNumber-prop">buildNumber</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#databaseValid-prop">databaseValid</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#defaultCurrencyCode-prop">defaultCurrencyCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#lastDatabaseUpdate-prop">lastDatabaseUpdate</a></b></b> : date</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#versionNumber-prop">versionNumber</a></b></b> : string</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">stringlist <b><b><a href="qml-brickstore-brickstore.html#nameFiltersForBrickLinkXML-method">nameFiltersForBrickLinkXML</a></b></b>(bool <i>includeAll</i>)</li>
+<li class="fn">stringlist <b><b><a href="qml-brickstore-brickstore.html#nameFiltersForBrickStoreXML-method">nameFiltersForBrickStoreXML</a></b></b>(bool <i>includeAll</i>)</li>
+<li class="fn">stringlist <b><b><a href="qml-brickstore-brickstore.html#nameFiltersForLDraw-method">nameFiltersForLDraw</a></b></b>(bool <i>includeAll</i>)</li>
+<li class="fn">string <b><b><a href="qml-brickstore-brickstore.html#symbolForCurrencyCode-method">symbolForCurrencyCode</a></b></b>(string <i>currencyCode</i>)</li>
+<li class="fn">string <b><b><a href="qml-brickstore-brickstore.html#toCurrencyString-method">toCurrencyString</a></b></b>(real <i>value</i>, string <i>symbol</i>, int <i>precision</i>)</li>
+<li class="fn">string <b><b><a href="qml-brickstore-brickstore.html#toWeightString-method">toWeightString</a></b></b>(real <i>value</i>, bool <i>showUnit</i>)</li>
+<li class="fn">bool <b><b><a href="qml-brickstore-brickstore.html#updateDatabase-method">updateDatabase</a></b></b>()</li>
+</ul>
+<!-- $$$BrickStore-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>A kitchen sink type singleton for all global state, settings and utility functions.</p>
+<!-- @@@BrickStore -->
+<h2>Property Documentation</h2>
+<!-- $$$buildNumber -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="buildNumber-prop">
+<td class="tblQmlPropNode"><p>
+<a name="buildNumber-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">buildNumber</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p><a href="qml-brickstore-brickstore.html">BrickStore</a>'s build number as a string (e.g&#x2e; <code>&quot;42&quot;</code>).</p>
+</div></div><!-- @@@buildNumber -->
+<br/>
+<!-- $$$databaseValid -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="databaseValid-prop">
+<td class="tblQmlPropNode"><p>
+<a name="databaseValid-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">databaseValid</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns whether the current database is valid or not.</p>
+</div></div><!-- @@@databaseValid -->
+<br/>
+<!-- $$$defaultCurrencyCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="defaultCurrencyCode-prop">
+<td class="tblQmlPropNode"><p>
+<a name="defaultCurrencyCode-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">defaultCurrencyCode</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The user's default ISO currency code (e.g&#x2e; <code>EUR</code>).</p>
+</div></div><!-- @@@defaultCurrencyCode -->
+<br/>
+<!-- $$$lastDatabaseUpdate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="lastDatabaseUpdate-prop">
+<td class="tblQmlPropNode"><p>
+<a name="lastDatabaseUpdate-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">lastDatabaseUpdate</span> : <span class="type">date</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the date and time of the last successful database update.</p>
+</div></div><!-- @@@lastDatabaseUpdate -->
+<br/>
+<!-- $$$online -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="online-prop">
+<td class="tblQmlPropNode"><p>
+<a name="online-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">online</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The current online state of the application. This is mirroring the operating system's online state.</p>
+</div></div><!-- @@@online -->
+<br/>
+<!-- $$$versionNumber -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="versionNumber-prop">
+<td class="tblQmlPropNode"><p>
+<a name="versionNumber-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">versionNumber</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p><a href="qml-brickstore-brickstore.html">BrickStore</a>'s version as a string (e.g&#x2e; <code>&quot;2021.10.2&quot;</code>).</p>
+</div></div><!-- @@@versionNumber -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$nameFiltersForBrickLinkXML[overload1]$$$nameFiltersForBrickLinkXMLbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="nameFiltersForBrickLinkXML-method">
+<td class="tblQmlFuncNode"><p>
+<a name="nameFiltersForBrickLinkXML-method"></a><span class="type">stringlist</span> <span class="name">nameFiltersForBrickLinkXML</span>(<span class="type">bool</span> <i>includeAll</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a list of file extension that can be used when creating a FileDialog to open <a href="qml-brickstore-bricklink.html">BrickLink</a> XML files. If <i>includeAll</i> is set, a match-everything filter <code>*</code> will be added to this list.</p>
+</div></div><!-- @@@nameFiltersForBrickLinkXML -->
+<br/>
+<!-- $$$nameFiltersForBrickStoreXML[overload1]$$$nameFiltersForBrickStoreXMLbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="nameFiltersForBrickStoreXML-method">
+<td class="tblQmlFuncNode"><p>
+<a name="nameFiltersForBrickStoreXML-method"></a><span class="type">stringlist</span> <span class="name">nameFiltersForBrickStoreXML</span>(<span class="type">bool</span> <i>includeAll</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a list of file extension that can be used when creating a FileDialog to open <a href="qml-brickstore-brickstore.html">BrickStore</a> document files. If <i>includeAll</i> is set, a match-everything filter <code>*</code> will be added to this list.</p>
+</div></div><!-- @@@nameFiltersForBrickStoreXML -->
+<br/>
+<!-- $$$nameFiltersForLDraw[overload1]$$$nameFiltersForLDrawbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="nameFiltersForLDraw-method">
+<td class="tblQmlFuncNode"><p>
+<a name="nameFiltersForLDraw-method"></a><span class="type">stringlist</span> <span class="name">nameFiltersForLDraw</span>(<span class="type">bool</span> <i>includeAll</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a list of file extension that can be used when creating a FileDialog to open LDraw files. If <i>includeAll</i> is set, a match-everything filter <code>*</code> will be added to this list.</p>
+</div></div><!-- @@@nameFiltersForLDraw -->
+<br/>
+<!-- $$$symbolForCurrencyCode[overload1]$$$symbolForCurrencyCodestring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="symbolForCurrencyCode-method">
+<td class="tblQmlFuncNode"><p>
+<a name="symbolForCurrencyCode-method"></a><span class="type">string</span> <span class="name">symbolForCurrencyCode</span>(<span class="type">string</span> <i>currencyCode</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the currency symbol for the ISO <i>currencyCode</i> if available or the <i>currencyCode</i> itself otherwise. E.g&#x2e; <code>EUR</code> will be mapped to <code>€</code>.</p>
+</div></div><!-- @@@symbolForCurrencyCode -->
+<br/>
+<!-- $$$toCurrencyString[overload1]$$$toCurrencyStringrealstringint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="toCurrencyString-method">
+<td class="tblQmlFuncNode"><p>
+<a name="toCurrencyString-method"></a><span class="type">string</span> <span class="name">toCurrencyString</span>(<span class="type">real</span> <i>value</i>, <span class="type">string</span> <i>symbol</i> = &quot;&quot;, <span class="type">int</span> <i>precision</i> = 3)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Correctly formats the given currency <i>value</i> according to the user's locale and returns it as a string. Also appends a currency <i>symbol</i> if provided. The default number of decimal places is <code>3</code>, but you can change this via the <i>precision</i> parameter.</p>
+</div></div><!-- @@@toCurrencyString -->
+<br/>
+<!-- $$$toWeightString[overload1]$$$toWeightStringrealbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="toWeightString-method">
+<td class="tblQmlFuncNode"><p>
+<a name="toWeightString-method"></a><span class="type">string</span> <span class="name">toWeightString</span>(<span class="type">real</span> <i>value</i>, <span class="type">bool</span> <i>showUnit</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Correctly formats the given weight <i>value</i> according to the user's locale and the metric/imperial setting in <a href="qml-brickstore-brickstore.html">BrickStore</a> and returns it as a string. Also appends the corresponding unit if <i>showUnit</i> is set to <code>true</code>.</p>
+</div></div><!-- @@@toWeightString -->
+<br/>
+<!-- $$$updateDatabase[overload1]$$$updateDatabase -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="updateDatabase-method">
+<td class="tblQmlFuncNode"><p>
+<a name="updateDatabase-method"></a><span class="type">bool</span> <span class="name">updateDatabase</span>()</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Starts an asychronous database update in the background. Returns <code>true</code> if the update was started and <code>false</code> if it failed (e.g&#x2e; there were documents with unsaved changes).</p>
+</div></div><!-- @@@updateDatabase -->
+<br/>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>
