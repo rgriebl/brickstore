@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- extensions.qdoc -->
+  <title>BrickStore Extensions Documentation | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<h1 class="title">BrickStore Extensions Documentation</h1>
+<span class="subtitle"></span>
+<!-- $$$index.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>BrickStore can be extended via JavaScript/QML based extensions.</p>
+<p>The QML <a href="qml-brickstore-brickstore.html">BrickStore</a> module provides the necessary types for scripting extension in the desktop version (as well as for creating complete mobile user interfaces).</p>
+<a name="installation"></a>
+<h2 id="installation">Installation</h2>
+<p>Installing an extension from a file, so that it can be used by BrickStore is covered here:</p>
+<p><a href="installation.html">BrickStore Extension Installation</a></p>
+<a name="porting-old-scripts"></a>
+<h2 id="porting-old-scripts">Porting old Scripts</h2>
+<p>Print scripts from old BrickStore (or BrickStock) versions are not compatible anymore and need to be ported manually. You can find a porting guide here:</p>
+<p><a href="porting.html">Porting old BrickStore and BrickStock Print Scripts</a></p>
+<a name="writing-extensions"></a>
+<h2 id="writing-extensions">Writing Extensions</h2>
+<p>Your best bet is to start by cloning an existing extension to get all the needed boiler plate code.</p>
+<p>Extensions are based on <a href="https://doc.qt.io/qt-5/qmlreference.html">QML</a> and JavaScript. These QML types can be imported into your application or extension using the following import statement in your <code>.qml</code> file:</p>
+<pre class="cpp plain">import BrickStore 1.0</pre>
+<p>Your root object is always Script followed by one or more child elements of type <a href="qml-brickstore-printingscriptaction.html">PrintingScriptAction</a> and <a href="qml-brickstore-extensionscriptaction.html">ExtensionScriptAction</a>. All the other types can not be instantiated in a declarative way, but are instead provided to your extensions interface functions as parameters, or they can be dynamically created/retrieved via the global singletons <a href="qml-brickstore-brickstore.html">BrickStore</a> and <a href="qml-brickstore-bricklink.html">BrickLink</a>.</p>
+<div class="table"><table class="annotated">
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-bricklink.html">BrickLink</a></p></td><td class="tblDescr"><p>Core singleton managing the data transfer from and to BrickLink</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-brickstore.html">BrickStore</a></p></td><td class="tblDescr"><p>This singleton represents global settings and state</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-category.html">Category</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item category</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-color.html">Color</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink color</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-document.html">Document</a></p></td><td class="tblDescr"><p>Each instance of this type represents an open document</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-extensionscriptaction.html">ExtensionScriptAction</a></p></td><td class="tblDescr"><p>Use this type to add an UI action to your extension</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-item.html">Item</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-itemtype.html">ItemType</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item type</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-lot.html">Lot</a></p></td><td class="tblDescr"><p>This value type represent a lot in a document</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-order.html">Order</a></p></td><td class="tblDescr"><p>This type holds the information about a BrickLink order</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-picture.html">Picture</a></p></td><td class="tblDescr"><p>This value type represents a picture of a BrickLink item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-priceguide.html">PriceGuide</a></p></td><td class="tblDescr"><p>This value type represents the price guide for a BrickLink item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-printjob.html">PrintJob</a></p></td><td class="tblDescr"><p>An instance of this type represents an active print job</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-printpage.html">PrintPage</a></p></td><td class="tblDescr"><p>An instance of this type represents the canvas of a printer page</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-printingscriptaction.html">PrintingScriptAction</a></p></td><td class="tblDescr"><p>Use this type to add a print action to your extension</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-script.html">Script</a></p></td><td class="tblDescr"><p>Root element of any BrickStore extension file</p></td></tr>
+</table></div>
+<a name="debugging"></a>
+<h2 id="debugging">Debugging</h2>
+<p>The JavaScript environment is very similiar to a web browser, so any <code>console.log()</code> calls end up in BrickStore's error log, which is available via the <code>View</code> &gt; <code>View info docks</code> menu.</p>
+<p>If you throw an <code>Error</code> object, the script execution will terminate and <code>message</code> property of the thrown object will be shown to the user in a message box.</p>
+</div>
+<!-- @@@index.html -->
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>

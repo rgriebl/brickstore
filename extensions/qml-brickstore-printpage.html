@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- printjob.cpp -->
+  <title>PrintPage QML Type | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">PrintPage QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$PrintPage-brief -->
+<p>An instance of this type represents the canvas of a printer page. <a href="#details">More...</a></p>
+<!-- @@@PrintPage -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
+<li><a href="qml-brickstore-printpage-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#backgroundColor-prop">backgroundColor</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#color-prop">color</a></b></b> : color</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#font-prop">font</a></b></b> : font</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#lineStyle-prop">lineStyle</a></b></b> : enumeration</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#lineWidth-prop">lineWidth</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#number-prop">number</a></b></b> : int</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#drawEllipse-method">drawEllipse</a></b></b>(real <i>left</i>, real <i>top</i>, real <i>width</i>, real <i>height</i>)</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#drawImage-method">drawImage</a></b></b>(real <i>left</i>, real <i>top</i>, real <i>width</i>, real <i>height</i>, image <i>image</i>)</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#drawLine-method">drawLine</a></b></b>(real <i>x1</i>, real <i>y1</i>, real <i>x2</i>, real <i>y2</i>)</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#drawRect-method">drawRect</a></b></b>(real <i>left</i>, real <i>top</i>, real <i>width</i>, real <i>height</i>)</li>
+<li class="fn"><b><b><a href="qml-brickstore-printpage.html#drawText-method">drawText</a></b></b>(real <i>left</i>, real <i>top</i>, real <i>width</i>, real <i>height</i>, int <i>flags</i>, string <i>text</i>)</li>
+<li class="fn">size <b><b><a href="qml-brickstore-printpage.html#textSize-method">textSize</a></b></b>(string <i>text</i>)</li>
+</ul>
+<!-- $$$PrintPage-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p><b>Note: </b>All coordinates are floating point values and the unit is <code>mm</code>. Check <a href="qml-brickstore-printjob.html#paperSize-prop">PrintJob::paperSize</a> to make sure you adapt to the paper format of the selected printer.</p>
+<!-- @@@PrintPage -->
+<h2>Property Documentation</h2>
+<!-- $$$backgroundColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="backgroundColor-prop">
+<td class="tblQmlPropNode"><p>
+<a name="backgroundColor-prop"></a><span class="name">backgroundColor</span> : <span class="type">color</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The currently selected background color, used for filling rectangles and ellipses. Set to <code>&quot;transparent&quot;</code> to prevent filling.</p>
+<p>See the <a href="https://doc.qt.io/qt-5/qml-color.html">QML color documentation</a>.</p>
+<pre class="cpp plain">...
+page.backgroundColor = Qt.rgba(.13, .4, .66, 1)
+..&#x2e;</pre>
+<p>The default is <code>&quot;white&quot;</code>.</p>
+</div></div><!-- @@@backgroundColor -->
+<br/>
+<!-- $$$color -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="color-prop">
+<td class="tblQmlPropNode"><p>
+<a name="color-prop"></a><span class="name">color</span> : <span class="type">color</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The currently selected color, used for drawing text, lines and the outlines of rectangles and ellipses.</p>
+<p>See the <a href="https://doc.qt.io/qt-5/qml-color.html">QML color documentation</a>.</p>
+<pre class="cpp plain">...
+page.color = active ? &quot;black&quot; : &quot;#808080&quot;
+..&#x2e;</pre>
+<p>The default is <code>&quot;black&quot;</code>.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$font -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="font-prop">
+<td class="tblQmlPropNode"><p>
+<a name="font-prop"></a><span class="name">font</span> : <span class="type">font</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The currently selected font. You can create and assing font objects using the <code>Qt.font()</code> factory function.</p>
+<p>See the <a href="https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method">Qt documentation for Qt.font</a> and the <a href="https://doc.qt.io/qt-5/qml-font.html">QML font documentation</a> for the available font properties.</p>
+<pre class="cpp plain">...
+page.font = Qt.font({ family: &quot;Times&quot;, pointSize: 12 })
+..&#x2e;</pre>
+<p>The default is <code>{ family: &quot;Arial&quot;, pointSize: 10 }</code>.</p>
+</div></div><!-- @@@font -->
+<br/>
+<!-- $$$lineStyle -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="lineStyle-prop">
+<td class="tblQmlPropNode"><p>
+<a name="lineStyle-prop"></a><span class="name">lineStyle</span> : <span class="type">enumeration</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The style of lines, used for drawing lines and the outlines of rectangles and ellipses.</p>
+<p>The available values for this line style enumeration are:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>PrintPage.SolidLine</code></td><td class="topAlign">A plain line.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.NoLine</code></td><td class="topAlign">No line at all. For example, <a href="qml-brickstore-printpage.html#drawRect-method">drawRect</a> fills but does not draw any outline.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.DashLine</code></td><td class="topAlign">Dashes separated by a few pixels.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.DotLine</code></td><td class="topAlign">Dots separated by a few pixels.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.DashDotLine</code></td><td class="topAlign">Alternate dots and dashes.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.DashDotDotLine</code></td><td class="topAlign">One dash, two dots, one dash, two dots.</td></tr>
+</table></div>
+<p>The default is <code>PrintPage.SolidLine</code>.</p>
+</div></div><!-- @@@lineStyle -->
+<br/>
+<!-- $$$lineWidth -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="lineWidth-prop">
+<td class="tblQmlPropNode"><p>
+<a name="lineWidth-prop"></a><span class="name">lineWidth</span> : <span class="type">real</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The width of a line, used for drawing lines and the outlines of rectangles and ellipses.</p>
+<p>A line width of zero indicates a cosmetic pen. This means that the pen width is always drawn one pixel wide, independent of the actual pixel density and resolution of the current output device.</p>
+<p>The default is <code>0.1</code>.</p>
+</div></div><!-- @@@lineWidth -->
+<br/>
+<!-- $$$number -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="number-prop">
+<td class="tblQmlPropNode"><p>
+<a name="number-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">number</span> : <span class="type">int</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The page index within the current print job.</p>
+<p><b>See also </b><a href="qml-brickstore-printjob.html">PrintJob</a>.</p>
+</div></div><!-- @@@number -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$drawEllipse[overload1]$$$drawEllipserealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="drawEllipse-method">
+<td class="tblQmlFuncNode"><p>
+<a name="drawEllipse-method"></a><span class="name">drawEllipse</span>(<span class="type">real</span> <i>left</i>, <span class="type">real</span> <i>top</i>, <span class="type">real</span> <i>width</i>, <span class="type">real</span> <i>height</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Draws an ellipse within the rectangle specified by the top-left corner at (<i>left</i>, <i>top</i>) and a size of (<i>width</i> x <i>height</i>).</p>
+<p>The ellipse is filled with <a href="qml-brickstore-printpage.html#backgroundColor-prop">backgroundColor</a> and the outline is drawn using a <a href="qml-brickstore-printpage.html#lineWidth-prop">lineWidth</a> thick pencil using the selected color and <a href="qml-brickstore-printpage.html#lineStyle-prop">lineStyle</a>.</p>
+</div></div><!-- @@@drawEllipse -->
+<br/>
+<!-- $$$drawImage[overload1]$$$drawImagerealrealrealrealimage -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="drawImage-method">
+<td class="tblQmlFuncNode"><p>
+<a name="drawImage-method"></a><span class="name">drawImage</span>(<span class="type">real</span> <i>left</i>, <span class="type">real</span> <i>top</i>, <span class="type">real</span> <i>width</i>, <span class="type">real</span> <i>height</i>, <span class="type">image</span> <i>image</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Draws the given <i>image</i> with its top-left corner at (<i>left</i>, <i>top</i>), scaled to the size (<i>width</i> x <i>height</i>).</p>
+</div></div><!-- @@@drawImage -->
+<br/>
+<!-- $$$drawLine[overload1]$$$drawLinerealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="drawLine-method">
+<td class="tblQmlFuncNode"><p>
+<a name="drawLine-method"></a><span class="name">drawLine</span>(<span class="type">real</span> <i>x1</i>, <span class="type">real</span> <i>y1</i>, <span class="type">real</span> <i>x2</i>, <span class="type">real</span> <i>y2</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Draws a line from (<i>x1</i>, <i>y1</i>) to (<i>x2</i>, <i>y2</i>) using color.</p>
+</div></div><!-- @@@drawLine -->
+<br/>
+<!-- $$$drawRect[overload1]$$$drawRectrealrealrealreal -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="drawRect-method">
+<td class="tblQmlFuncNode"><p>
+<a name="drawRect-method"></a><span class="name">drawRect</span>(<span class="type">real</span> <i>left</i>, <span class="type">real</span> <i>top</i>, <span class="type">real</span> <i>width</i>, <span class="type">real</span> <i>height</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Draws a rectangle with the top-left corner at (<i>left</i>, <i>top</i>) and a size of (<i>width</i> x <i>height</i>).</p>
+<p>The rectangle is filled with <a href="qml-brickstore-printpage.html#backgroundColor-prop">backgroundColor</a> and the outline is drawn using a <a href="qml-brickstore-printpage.html#lineWidth-prop">lineWidth</a> thick pencil using the selected color and <a href="qml-brickstore-printpage.html#lineStyle-prop">lineStyle</a>.</p>
+</div></div><!-- @@@drawRect -->
+<br/>
+<!-- $$$drawText[overload1]$$$drawTextrealrealrealrealintstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="drawText-method">
+<td class="tblQmlFuncNode"><p>
+<a name="drawText-method"></a><span class="name">drawText</span>(<span class="type">real</span> <i>left</i>, <span class="type">real</span> <i>top</i>, <span class="type">real</span> <i>width</i>, <span class="type">real</span> <i>height</i>, <span class="type">int</span> <i>flags</i>, <span class="type">string</span> <i>text</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Draws the given <i>text</i> within the rectangle specified by the top-left corner at (<i>left</i>, <i>top</i>) and a size of (<i>width</i> x <i>height</i>) using the currently selected font and color.</p>
+<p>If the text is larger than the specified rectangle, the text is clipped. You can use <a href="qml-brickstore-printpage.html#textSize-method">textSize()</a> to calculate the size needed to fit a specific text element. You can suppress this feature using the <code>TextDontClip</code> flag.</p>
+<p>The text can be aligned within this rectangle through the <i>flags</i> parameter. These possible are the possible values and can you can or them (<code>|</code>) together where it makes sense:</p>
+<div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignLeft</code></td><td class="topAlign">Aligns with the left edge.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignHCenter</code></td><td class="topAlign">Centers horizontally in the available space.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignRight</code></td><td class="topAlign">Aligns with the right edge.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignTop</code></td><td class="topAlign">Aligns with the top.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignVCenter</code></td><td class="topAlign">Centers vertically in the available space.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignBottom</code></td><td class="topAlign">Aligns with the bottom.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.AlignCenter</code></td><td class="topAlign">Centers in both dimensions.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.TextDontClip</code></td><td class="topAlign">If it's impossible to stay within the given bounds, it prints outside.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.TextWordWrap</code></td><td class="topAlign">Breaks lines at appropriate points, e.g&#x2e; at word boundaries.</td></tr>
+<tr><td class="topAlign"><code>PrintPage.TextWrapAnywhere</code></td><td class="topAlign">Breaks lines anywhere, even within words.</td></tr>
+</table></div>
+</div></div><!-- @@@drawText -->
+<br/>
+<!-- $$$textSize[overload1]$$$textSizestring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="textSize-method">
+<td class="tblQmlFuncNode"><p>
+<a name="textSize-method"></a><span class="type">size</span> <span class="name">textSize</span>(<span class="type">string</span> <i>text</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Calculates the size of string <i>text</i>, if it was rendered in the currently selected font.</p>
+</div></div><!-- @@@textSize -->
+<br/>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>

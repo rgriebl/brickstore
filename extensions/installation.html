@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- extensions.qdoc -->
+  <title>BrickStore Extension Installation | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">BrickStore Extension Installation</h1>
+<span class="subtitle"></span>
+<!-- $$$installation.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>BrickStore can be extended via JavaScript/QML based extensions.</p>
+<p><a href="https://github.com/rgriebl/brickstore/blob/main/extensions/">Click for a full list of all available extension in the BrickStore repository.</a></p>
+<p>Although the BrickStore repository itself already contains a few user provided scripts, only these scripts are bundled in an official BrickStore release.</p>
+<ul>
+<li><code>classic-print-script.bs.qml</code></li>
+</ul>
+<p>All others are provided by users to be shared with others. In order to install them on your system, first download them by clicking on the script you want to download, then on the script's page, right-click <code>Raw</code> on the top-right of the scripts source code and choose <code>Save Link as..&#x2e;</code> (or your browser's equivalent).</p>
+<p>Of course, scripts can also simply be shared between users via any other means!</p>
+<p>After downloading, you need to copy the script to where BrickStore can pick it up:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >OS</th><th >Directory</th></tr></thead>
+<tr valign="top" class="odd"><td >Windows</td><td ><code>%APPDATA%\BrickStore\extensions</code> <i>(copy)</i> In Explorer click the folder icon or the empty space in the address bar. <i>(paste)</i></td></tr>
+<tr valign="top" class="even"><td >macOS</td><td ><code>~/Library/Application Support/BrickStore/extensions</code> <i>(copy)</i> In Finder, choose <code>Go</code> &gt; <code>Go to Folder</code>. <i>(paste)</i></td></tr>
+<tr valign="top" class="odd"><td >Linux</td><td ><code>~/.local/share/BrickStore/extensions</code> <i>(copy)</i> In Files or Dolphin, press <code>Ctrl+L</code>. <i>(paste)</i></td></tr>
+</table></div>
+<p>BrickStore will now pick up all the scripts it finds in these directories when starting up. You can also dynamically reload the scripts while it is running via <code>Extras</code> &gt; <code>Reload user scripts</code>.</p>
+<p>If your script doesn't show up in the <code>Extras</code> (or context) menu, then most likely it has JavaScript syntax errors. Enable the <code>Error log</code> via the <code>View</code> &gt; <code>View info docks</code> menu.</p>
+<p><b>Note: </b>All script files have to have the file extensions <code>.bs.qml</code></p>
+</div>
+<!-- @@@installation.html -->
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>

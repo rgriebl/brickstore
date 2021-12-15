@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- script.cpp -->
+  <title>Script QML Type | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Script QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Script-brief -->
+<p>The root element of any BrickStore extension file. <a href="#details">More...</a></p>
+<!-- @@@Script -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
+<li><a href="qml-brickstore-script-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-brickstore-script.html#author-prop">author</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-script.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-script.html#version-prop">version</a></b></b> : string</li>
+</ul>
+<!-- $$$Script-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The Script type is root element for any extension. The <code>name</code>, <code>author</code> and <code>version</code> properties are optional meta-data that should make it easier to manage extensions.</p>
+<p>There are currently two different types of extensions: UI extensions and print scripts. Any extension file can implement one or multiple types, although is practice is probably doesn't make too much sense to mix an UI extension implementation with a printing script.</p>
+<p>Print scripts have to add one or more <a href="qml-brickstore-printingscriptaction.html">PrintingScriptAction</a> child elements to implement the actual printing.</p>
+<p>UI extensions have to add one or more <a href="qml-brickstore-extensionscriptaction.html">ExtensionScriptAction</a> child elements to create hooks into BrickStore's main UI.</p>
+<!-- @@@Script -->
+<h2>Property Documentation</h2>
+<!-- $$$author -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="author-prop">
+<td class="tblQmlPropNode"><p>
+<a name="author-prop"></a><span class="name">author</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p><i>(Optional)</i> The author's name and/or contact details.</p>
+</div></div><!-- @@@author -->
+<br/>
+<!-- $$$name -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="name-prop">
+<td class="tblQmlPropNode"><p>
+<a name="name-prop"></a><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p><i>(Optional)</i> The name of this extension. This string is not user visible, but should correspond to the author's preferred file name (without the <code>.bs.qml</code> extension).</p>
+</div></div><!-- @@@name -->
+<br/>
+<!-- $$$version -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="version-prop">
+<td class="tblQmlPropNode"><p>
+<a name="version-prop"></a><span class="name">version</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p><i>(Optional)</i> A version string for this script.</p>
+</div></div><!-- @@@version -->
+<br/>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>

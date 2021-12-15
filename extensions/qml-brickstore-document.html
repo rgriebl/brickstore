@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- document.cpp -->
+  <title>Document QML Type | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Document QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$Document-brief -->
+<p>Each instance of this type represents an open document. <a href="#details">More...</a></p>
+<!-- @@@Document -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
+<li><a href="qml-brickstore-document-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-brickstore-document.html#currencyCode-prop">currencyCode</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-document.html#fileName-prop">fileName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-document.html#lotCount-prop">lotCount</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-document.html#order-prop">order</a></b></b> : Order</li>
+<li class="fn"><b><b><a href="qml-brickstore-document.html#title-prop">title</a></b></b> : string</li>
+</ul>
+<!-- $$$Document-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<!-- @@@Document -->
+<h2>Property Documentation</h2>
+<!-- $$$currencyCode -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="currencyCode-prop">
+<td class="tblQmlPropNode"><p>
+<a name="currencyCode-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currencyCode</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The ISO currency code used in this document, e.g&#x2e; <code>EUR</code>.</p>
+</div></div><!-- @@@currencyCode -->
+<br/>
+<!-- $$$fileName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="fileName-prop">
+<td class="tblQmlPropNode"><p>
+<a name="fileName-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">fileName</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The file name of this document. New and imported documents that have not been saved yet will not have fileName set.</p>
+</div></div><!-- @@@fileName -->
+<br/>
+<!-- $$$lotCount -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="lotCount-prop">
+<td class="tblQmlPropNode"><p>
+<a name="lotCount-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">lotCount</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The number of lots in this document.</p>
+</div></div><!-- @@@lotCount -->
+<br/>
+<!-- $$$order -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="order-prop">
+<td class="tblQmlPropNode"><p>
+<a name="order-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">order</span> : <span class="type"><a href="qml-brickstore-order.html">Order</a></span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>An Order object or <code>null</code>, if this document is not a <a href="qml-brickstore-bricklink.html">BrickLink</a> order.</p>
+</div></div><!-- @@@order -->
+<br/>
+<!-- $$$title -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="title-prop">
+<td class="tblQmlPropNode"><p>
+<a name="title-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">title</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The title of this document. Documents loaded from files do not have titles, but documents created from online imports do. A store import would have a title like <code>Store import &lt;date&gt;</code>.</p>
+</div></div><!-- @@@title -->
+<br/>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- extensions.qdoc -->
+  <title>Porting old BrickStore and BrickStock Print Scripts | BrickStore</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#the-simple-ones">The simple ones:</a></li>
+<li class="level2"><a href="#intermediate">Intermediate:</a></li>
+<li class="level2"><a href="#complex">Complex</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Porting old BrickStore and BrickStock Print Scripts</h1>
+<span class="subtitle"></span>
+<!-- $$$porting.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was abandoned by the industry (see <a href="https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))">Wikipedia</a>).</p>
+<p>The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers (see <a href="https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)">QML JavaScript environment</a>).</p>
+<p>Sadly JS4 did a few things differently than today's JS7, so you have to adapt your scripts: some of these required changes are just simple search-and-replace jobs, while others require you to rewrite your code a bit.</p>
+<a name="the-simple-ones"></a>
+<h3 id="the-simple-ones">The simple ones:</h3>
+<ul>
+<li>Replace <code>var</code> with <code>let</code> for variable initialization</li>
+<li>Replace <code>CReportPage</code> with <code>Page</code></li>
+<li>Replace <code>Utility.localDateString(d)</code> with <code>Qt.formatDate(d)</code></li>
+</ul>
+<a name="intermediate"></a>
+<h3 id="intermediate">Intermediate:</h3>
+<ul>
+<li>Replace the <code>load()</code> function with a new file header. Just copy the one from [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml) (from file start up to <code>function printJob</code>) and change the <code>name</code>, <code>author</code> and <code>version</code> fields in the <code>Script</code> object. You can also set the text of the menu entry via the <code>text</code> property of <code>PrintingScriptAction</code>.</li>
+<li>Don't forget to add a <code></code>} add the end of the file afterwards to balance the scope: the old scripts only had global JS functions, but all functions are members of the <code>Script</code> object nowadays.</li>
+<li>Rename the existing <code>function printDoc()</code> function to <code>function printJob(job, doc, lots)</code>. See below on how to use the <code>job</code>, <code>doc</code> and <code>lots</code> parameters.</li>
+<li>Replace <code>Document</code> with <code>doc</code>. <code>Document</code> was a global object, but <code>doc</code> is now just a local function parameter to <code>printJob()</code>, so make sure to forward <code>doc</code> to sub-routines as needed.</li>
+<li>Replace <code>Job</code> with <code>job</code>. <code>Job</code> was a global object, but <code>job</code> is now just a local function parameter to <code>printJob()</code>, so make sure to forward <code>job</code> to sub-routines as needed.</li>
+<li>A lot (or row in the document) was wrongly called *item* in the old API, but this was just too confusing when full catalog access to the JS API, so it had to be renamed to *lot*. So, in order to iterate over all lots in a document, you now have to access <code>doc.lots</code> instead of <code>Document.items</code>.</li>
+<li>If you want to support printing just the selected lots, do not iterate over <code>doc.lots</code>, but use the <code>lots</code> parameter given to the <code>printJob</code> function.</li>
+<li>Replace <code>Money.toLocalString(m, showCurrencyCode)</code> with <code>BrickStore.toCurrencyString(m, currencyCode)</code>. The document's currencyCode is not set implicitly anymore, but needs to be retrieved via <code>doc.currencyCode</code> in the main <code>printJob()</code> function. Keep in mind to forward either <code>job</code> or the currency code to sub-routines if needed there.</li>
+</ul>
+<a name="complex"></a>
+<h3 id="complex">Complex</h3>
+<p>Font and Color objects changed a lot! The new JS engine is using the built-in Qt types for fonts and colors and these can be a bit weird, when compared to the old objects:</p>
+<ul>
+<li>Both cannot be created via the <code>new</code> operator anymore<ul>
+<li>For fonts, you have to use the factory function <code>Qt.font()</code>: see the <a href="https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method">Qt documentation for Qt.font</a> and the <a href="https://doc.qt.io/qt-5/qml-font.html">QML font documentation</a> for the available font properties.</li>
+<li>For colors, see the <a href="https://doc.qt.io/qt-5/qml-color.html">QML color documentation</a>.</li>
+</ul>
+</li>
+<li>Accessing the <code>page.font</code> and <code>page.color</code> properties now returns a reference to the current value, not a copy. This means that you cannot save the current value at the start of the function and reset the property to that value again when the function ends, because the &quot;saved&quot; value changes everytime you change the actual property. If you relied on this behavior (the default print script did), you have to change your approach here to always set the colors and fonts before drawing in a sub-routine.</li>
+</ul>
+<p>Have a look at the <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml">classic-print-script.bs.qml</a> to get an idea how to work with fonts and colors in the new JS engine.</p>
+</div>
+<!-- @@@porting.html -->
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</body>
+</html>
