@@ -48,7 +48,7 @@ CheckForUpdates::CheckForUpdates(const QString &baseUrl, QWidget *parent)
 
     m_changelogUrl = baseUrl;
     m_changelogUrl.replace("github.com"_l1, "https://raw.githubusercontent.com"_l1);
-    m_changelogUrl.append("/master/CHANGELOG.md"_l1);
+    m_changelogUrl.append("/main/CHANGELOG.md"_l1);
 
     m_downloadUrl = baseUrl;
     m_downloadUrl.prepend("https://"_l1);

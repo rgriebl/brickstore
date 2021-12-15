@@ -50,7 +50,7 @@ rewrite your code a bit.
 
 ### Intermediate:
  * Replace the `load()` function with a new file header. Just copy the one from
-   [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/master/extensions/classic-print-script.bs.qml)
+   [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml)
    (from file start up to `function printJob`) and change the `name`, `author` and `version` fields
    in the `Script` object.
    You can also set the text of the menu entry via the `text` property of `PrintingScriptAction`.
@@ -101,5 +101,5 @@ colors and these can be a bit weird, when compared to the old objects:
    If you relied on this behavior (the default print script did), you have to change your approach
    here to always set the colors and fonts before drawing in a sub-routine.
 
-Have a look at the [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/master/extensions/classic-print-script.bs.qml)
+Have a look at the [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml)
 to get an idea how to work with fonts and colors in the new JS engine.

@@ -1,6 +1,10 @@
 name: QMake Build Matrix
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build:
