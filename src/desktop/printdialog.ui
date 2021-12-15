@@ -336,6 +336,11 @@
            </item>
            <item>
             <property name="text">
+             <string>Selection Only</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
              <string>Custom</string>
             </property>
            </item>

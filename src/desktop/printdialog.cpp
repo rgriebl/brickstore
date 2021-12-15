@@ -48,8 +48,12 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     }
 #endif
     m_documentName = window->document()->fileNameOrTitle();
+    m_hasSelection = !window->selectedLots().isEmpty();
 
     setupUi(this);
+
+    if (!m_hasSelection)
+        w_pageMode->removeItem(1);
 
     w_print_preview = new QPrintPreviewWidget(m_printer);
     if (auto *asa = w_print_preview->findChild<QAbstractScrollArea *>()) {
@@ -107,7 +111,7 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
             this, &PrintDialog::updatePrinter);
     connect(w_pageMode, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, [this](int idx) {
-        w_pageSelect->setVisible(idx == 1);
+        w_pageSelect->setVisible(idx == (w_pageMode->count() - 1));
         updatePageRange();
     });
     connect(w_pageSelect, &QLineEdit::textChanged,
@@ -272,17 +276,21 @@ void PrintDialog::updatePageRange()
 {
     if (!m_printer || !w_print_preview)
         return;
-    bool allPages = (w_pageMode->currentIndex() != 1);
+    bool allPages = (w_pageMode->currentIndex() == 0);
+    bool selectionOnly = m_hasSelection && (w_pageMode->currentIndex() == 1);
+    bool customPages = (w_pageMode->currentIndex() == (w_pageMode->count() - 1));
+
     QString s = w_pageSelect->text().simplified().remove(' '_l1);
-    if (!allPages && s.isEmpty())
+    if (customPages && s.isEmpty())
         allPages = true;
 
-    m_printer->setPrintRange(allPages ? QPrinter::AllPages : QPrinter::PageRange);
+    m_printer->setPrintRange(selectionOnly ? QPrinter::Selection
+                                           : (allPages ? QPrinter::AllPages : QPrinter::PageRange));
 
     QSet<uint> pages;
     bool ok = true;
 
-    if (!allPages) {
+    if (customPages && !allPages) {
         const auto ranges = s.split(','_l1);
         for (const QString &range : ranges) {
             const QStringList fromTo = range.split('-'_l1);

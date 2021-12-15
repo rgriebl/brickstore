@@ -152,7 +152,7 @@ public:
 
     QPaintDevice *paintDevice() const;
 
-    bool print(int from, int to);
+    bool print(const QList<uint> &pages);
     void dump();
 
 private:

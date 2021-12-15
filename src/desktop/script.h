@@ -85,7 +85,7 @@ public:
     QJSValue printFunction() const;
     void setPrintFunction(const QJSValue &function);
 
-    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, uint *maxPageCount = nullptr);
+    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, const QList<uint> &pages, uint *maxPageCount = nullptr);
 
 signals:
     void textChanged(const QString &text);

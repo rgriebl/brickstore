@@ -546,9 +546,9 @@ void QmlPrintJob::dump()
     }
 }
 
-bool QmlPrintJob::print(int from, int to)
+bool QmlPrintJob::print(const QList<uint> &pages)
 {
-    if (m_pages.isEmpty() || (from < 0) || (from > to) || (int(to) >= m_pages.count()))
+    if (m_pages.isEmpty())
         return false;
 
     QPainter p;
@@ -570,7 +570,10 @@ bool QmlPrintJob::print(int from, int to)
     scaling [1] = double(m_pd->logicalDpiY()) / 25.4;
     bool no_new_page = true;
 
-    for (int i = from; i <= to; i++) {
+    for (int i = 0; i < pageCount(); ++i) {
+        if (!pages.isEmpty() && !pages.contains(uint(i)))
+            continue;
+
         QmlPrintPage *page = m_pages.at(i);
 
         if (!no_new_page && prt)
