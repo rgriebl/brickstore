@@ -69,6 +69,94 @@ private:
     friend class Order;
 };
 
+/*! \qmltype Order
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This type holds the information about a BrickLink order.
+*/
+/*! \qmlproperty string Order::id
+    \readonly
+    The order id.
+*/
+/*! \qmlproperty enumeration Order::type
+    \readonly
+    The type of order. The possible values are:
+    \value BrickLink.Received  A received order.
+    \value BrickLink.Placed    A placed order.
+*/
+/*! \qmlproperty date Order::date
+    \readonly
+    The date when the order was placed.
+*/
+/*! \qmlproperty date Order::lastUpdated
+    \readonly
+    The date when the order was last updated.
+*/
+/*! \qmlproperty string Order::otherParty
+    \readonly
+    The user-name of the other party (either buyer or seller, depending on the type).
+*/
+/*! \qmlproperty real Order::shipping
+    \readonly
+*/
+/*! \qmlproperty real Order::insurance
+    \readonly
+*/
+/*! \qmlproperty real Order::additionalCharges1
+    \readonly
+*/
+/*! \qmlproperty real Order::additionalCharges2
+    \readonly
+*/
+/*! \qmlproperty real Order::credit
+    \readonly
+*/
+/*! \qmlproperty real Order::creditCoupon
+    \readonly
+*/
+/*! \qmlproperty real Order::orderTotal
+    \readonly
+*/
+/*! \qmlproperty real Order::salesTax
+    \readonly
+*/
+/*! \qmlproperty real Order::grandTotal
+    \readonly
+*/
+/*! \qmlproperty real Order::vatCharges
+    \readonly
+*/
+/*! \qmlproperty string Order::currencyCode
+    \readonly
+*/
+/*! \qmlproperty string Order::paymentCurrencyCode
+    \readonly
+*/
+/*! \qmlproperty int Order::itemCount
+    \readonly
+    The number of items in this order.
+*/
+/*! \qmlproperty int Order::lotCount
+    \readonly
+    The number of lots in this order.
+*/
+/*! \qmlproperty enumeration Order::status
+    \readonly
+*/
+/*! \qmlproperty string Order::paymentType
+    \readonly
+*/
+/*! \qmlproperty string Order::trackingNumber
+    \readonly
+*/
+/*! \qmlproperty string Order::address
+    \readonly
+    The full address of the otherParty.
+*/
+/*! \qmlproperty string Order::countryCode
+    \readonly
+    The 2-letter country code of the otherParty.
+*/
 
 Order::Order(const QString &id, OrderType type)
     : QObject()

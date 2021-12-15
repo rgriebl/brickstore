@@ -5,7 +5,6 @@ Script {
     name: "Picklist print script"
     author: "GreatBrickLab"
     version: "0.2"
-    type: Script.ExtensionScript
 
     PrintingScriptAction {
         text: "Print: Picklist"
@@ -95,12 +94,12 @@ Script {
 
         let f1 = Qt.font({ family: "Arial", pointSize: 12, bold: true })
         page.font = f1
-        page.drawText(ps.x, y, ps.w *.75, h, Page.AlignLeft | Page.AlignVCenter, ps.doc.fileName)
+        page.drawText(ps.x, y, ps.w *.75, h, PrintPage.AlignLeft | PrintPage.AlignVCenter, ps.doc.fileName)
 
         let f2 = Qt.font({ family: "Arial", pointSize: 12 })
         page.font = f2
         let d = new Date()
-        page.drawText(ps.x + ps.w / 2, y, ps.w / 2, h, Page.AlignRight | Page.AlignVCenter, Qt.formatDate(d))
+        page.drawText(ps.x + ps.w / 2, y, ps.w / 2, h, PrintPage.AlignRight | PrintPage.AlignVCenter, Qt.formatDate(d))
 
         ps.pos = h
     }
@@ -112,8 +111,8 @@ Script {
 
         let f3 = Qt.font({ family: "Arial", pointSize: 12, italic: true })
         page.font = f3
-        page.drawText(ps.x              , y, ps.w * .75, h, Page.AlignLeft  | Page.AlignVCenter, ps.doc.fileName)
-        page.drawText(ps.x + ps.w * .75, y, ps.w * .25, h, Page.AlignRight | Page.AlignVCenter, "Page " + (page.number+1))
+        page.drawText(ps.x              , y, ps.w * .75, h, PrintPage.AlignLeft  | PrintPage.AlignVCenter, ps.doc.fileName)
+        page.drawText(ps.x + ps.w * .75, y, ps.w * .25, h, PrintPage.AlignRight | PrintPage.AlignVCenter, "Page " + (page.number+1))
 
         ps.pos = y + h
     }
@@ -131,13 +130,13 @@ Script {
         page.drawRect(ps.x, y, ps.w, h)
 
         page.color = "white"
-        page.drawText(ps.x                , y, xs(ps.w, 20), h, Page.AlignCenter, "Price")
-        page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 65), h, Page.AlignCenter, "Color and Part")
+        page.drawText(ps.x                , y, xs(ps.w, 20), h, PrintPage.AlignCenter, "Price")
+        page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 65), h, PrintPage.AlignCenter, "Color and Part")
 
-        page.drawText(ps.x + xs(ps.w,  85), y, xs(ps.w, 20), h, Page.AlignCenter, "BIN")
-        page.drawText(ps.x + xs(ps.w, 105), y, xs(ps.w, 15), h, Page.AlignCenter, "Image")
-        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 19), h, Page.AlignCenter, "QTY     Color")
-        page.drawText(ps.x + xs(ps.w, 142), y, xs(ps.w, 28), h, Page.AlignCenter, "Drawer")
+        page.drawText(ps.x + xs(ps.w,  85), y, xs(ps.w, 20), h, PrintPage.AlignCenter, "BIN")
+        page.drawText(ps.x + xs(ps.w, 105), y, xs(ps.w, 15), h, PrintPage.AlignCenter, "Image")
+        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 19), h, PrintPage.AlignCenter, "QTY     Color")
+        page.drawText(ps.x + xs(ps.w, 142), y, xs(ps.w, 28), h, PrintPage.AlignCenter, "Drawer")
         page.backgroundColor = "white"
         page.color = "black"
 
@@ -160,26 +159,26 @@ Script {
         page.backgroundColor = "white"
 
 
-        page.drawText(ps.x +            2, y, xs(ps.w, 16), h, Page.AlignHCenter | Page.AlignVCenter, ps.ccode + BrickStore.toCurrencyString(item.price))
+        page.drawText(ps.x +            2, y, xs(ps.w, 16), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, ps.ccode + BrickStore.toCurrencyString(item.price))
 
-        page.drawText(ps.x + xs(ps.w, 20), y, xs(ps.w, 65), h, Page.AlignLeft    | Page.AlignVCenter | Page.TextWordWrap, item.color.name + " " + item.name + " [" + item.id + "]")
+        page.drawText(ps.x + xs(ps.w, 20), y, xs(ps.w, 65), h, PrintPage.AlignLeft    | PrintPage.AlignVCenter | PrintPage.TextWordWrap, item.color.name + " " + item.name + " [" + item.id + "]")
 
         page.font = Qt.font({ family: "Times New Roman", pointSize: 22 })
 
-        page.drawText(ps.x + xs(ps.w, 87), y, xs(ps.w, 16), h, Page.AlignLeft  | Page.AlignVCenter | Page.TextWordWrap, item.comments)
+        page.drawText(ps.x + xs(ps.w, 87), y, xs(ps.w, 16), h, PrintPage.AlignLeft  | PrintPage.AlignVCenter | PrintPage.TextWordWrap, item.comments)
 
         page.drawImage(ps.x + xs(ps.w, 105), y, xs(ps.w, 15), h, item.image)
 
-        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 15), h, Page.AlignLeft | Page.AlignVCenter, "x" + item.quantity)
+        page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 15), h, PrintPage.AlignLeft | PrintPage.AlignVCenter, "x" + item.quantity)
 
         page.drawImage(ps.x + xs(ps.w, 135), y, xs(ps.w, 5), h, item.color.image)
 
         page.font = Qt.font({ family: "Arial", pointSize: 14 })
-        page.drawText(ps.x + xs(ps.w, 142), y, xs(ps.w, 28), h, Page.AlignLeft | Page.AlignVCenter | Page.TextWordWrap, item.remarks)
+        page.drawText(ps.x + xs(ps.w, 142), y, xs(ps.w, 28), h, PrintPage.AlignLeft | PrintPage.AlignVCenter | PrintPage.TextWordWrap, item.remarks)
 
 
         page.font = fnt
-        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 35), h, Page.AlignHLeft | Page.TextWordWrap, item.color.name)
+        page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 35), h, PrintPage.AlignHLeft | PrintPage.TextWordWrap, item.color.name)
 
         ps.pos += h
     }

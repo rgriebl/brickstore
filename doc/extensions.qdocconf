@@ -1,6 +1,8 @@
 project = BrickStore
-description = BrickStore scripting API
+description = BrickStore Extensions
 versionsym = BRICKSTORE_VERSION
+
+ignorewords += BrickStore
 
 sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
 headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
@@ -9,18 +11,22 @@ examples.imageextensions = "*.png *.jpg *.svg"
 
 headerdirs += \
     ../src/qmlapi/ \
+    ../src/bricklink/ \
+    ../src/common/ \
     ../src/desktop/ \
 
 sourcedirs += \
     . \
     ../src/qmlapi/ \
+    ../src/bricklink/ \
+    ../src/common/ \
     ../src/desktop/ \
 
 #depends += qtcore qtquick qtqml
 
-outputdir = html/apidocs
+outputdir = html/extensions
 
-HTML.stylesheets = apidocs.css
+HTML.stylesheets = extensions.css
 
 HTML.footer =  \
     "<div class=\"footer\">\n" \
@@ -33,7 +39,7 @@ HTML.footer =  \
     "</div>\n"
 
 HTML.headerstyles = \
-    "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/apidocs.css\" />\n"
+    "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/extensions.css\" />\n"
 
 HTML.endheader = \
     "</head>\n"

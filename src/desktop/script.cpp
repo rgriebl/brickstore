@@ -39,6 +39,14 @@ static QString formatJSError(const QJSValue &error)
 }
 
 
+/*! \qmltype ExtensionScriptAction
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief Use this type to add an UI action to your extension.
+
+    \note The documentation is missing on purpose - the API is not set in stone yet.
+*/
+
 QString ExtensionScriptAction::text() const
 {
     return m_text;
@@ -116,6 +124,49 @@ void ExtensionScriptAction::componentComplete()
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+/*! \qmltype PrintingScriptAction
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief Use this type to add a print action to your extension.
+*/
+/*! \qmlproperty string PrintingScriptAction::text
+    The user visible text of the menu entry in the \c Extras menu, that triggers the printFunction.
+*/
+/*! \qmlproperty string PrintingScriptAction::printFunction
+    This property holds a reference to the JavaScript function which should be called for printing.
+    The function is called with three parameters: \c{(job, document, lots)}.
+
+    \table
+    \header
+      \li Parameter
+      \li Type
+      \li Description
+    \row
+      \li \c job
+      \li PrintJob
+      \li The current print job.
+    \row
+      \li \c document
+      \li Document
+      \li The document that gets printed.
+    \row
+      \li \c lots
+      \li list<\l{Lot}>
+      \li The selected lots, or all lots if there is no selection.
+    \endtable
+
+    For example, the classic print script looks like this:
+    \badcode
+    PrintingScriptAction {
+        text: "Print: Classic layout"
+        printFunction: printJob
+    }
+
+    function printJob(job, doc, lots)
+    { ... }
+    \endcode
+*/
+
 
 QString PrintingScriptAction::text() const
 {
@@ -156,7 +207,7 @@ void PrintingScriptAction::componentComplete()
     }
 }
 
-void PrintingScriptAction::executePrint(QPaintDevice *pd, View *win, bool selectionOnly, uint *maxPageCount)
+void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selectionOnly, uint *maxPageCount)
 {
     if (maxPageCount)
         *maxPageCount = 0;
@@ -166,15 +217,15 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *win, bool select
     if (!m_printFunction.isCallable())
         throw Exception(tr("The printing script does not define a 'printFunction'."));
 
-    const auto lots = win->model()->sortLotList(selectionOnly ? win->selectedLots()
-                                                                 : win->model()->lots());
+    const auto lots = view->model()->sortLotList(selectionOnly ? view->selectedLots()
+                                                               : view->model()->lots());
     QVariantList itemList;
     for (auto lot : lots)
         itemList << QVariant::fromValue(QmlLot(lot));
 
     QQmlEngine *engine = m_script->qmlEngine();
     QJSValueList args = { engine->toScriptValue(job.data()),
-                          engine->toScriptValue(win->document()),
+                          engine->toScriptValue(view->document()),
                           engine->toScriptValue(itemList) };
     QJSValue result = m_printFunction.call(args);
 
@@ -199,6 +250,34 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *win, bool select
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+/*! \qmltype Script
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief The root element of any BrickStore extension file.
+
+    The Script type is root element for any extension. The \c name, \c author and \c version
+    properties are optional meta-data that should make it easier to manage extensions.
+
+    There are currently two different types of extensions: UI extensions and print scripts. Any
+    extension file can implement one or multiple types, although is practice is probably doesn't
+    make too much sense to mix an UI extension implementation with a printing script.
+
+    Print scripts have to add one or more PrintingScriptAction child elements to implement the
+    actual printing.
+
+    UI extensions have to add one or more ExtensionScriptAction child elements to create hooks
+    into BrickStore's main UI.
+*/
+/*! \qmlproperty string Script::name
+    \e {(Optional)} The name of this extension. This string is not user visible, but should correspond to the
+    author's preferred file name (without the \c .bs.qml extension).
+*/
+/*! \qmlproperty string Script::author
+    \e {(Optional)} The author's name and/or contact details.
+*/
+/*! \qmlproperty string Script::version
+    \e {(Optional)} A version string for this script.
+*/
 
 QString Script::name() const
 {
@@ -237,19 +316,6 @@ void Script::setVersion(QString version)
     if (m_version != version) {
         m_version = version;
         emit versionChanged(m_version);
-    }
-}
-
-Script::Type Script::type() const
-{
-    return m_type;
-}
-
-void Script::setType(Type type)
-{
-    if (m_type != type) {
-        m_type = type;
-        emit typeChanged(m_type);
     }
 }
 

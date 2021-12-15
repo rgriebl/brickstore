@@ -146,6 +146,33 @@ void ColumnLayoutCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+/*! \qmltype Document
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief Each instance of this type represents an open document.
+*/
+/*! \qmlproperty string Document::currencyCode
+    \readonly
+    The ISO currency code used in this document, e.g. \c EUR.
+*/
+/*! \qmlproperty string Document::lotCount
+    \readonly
+    The number of lots in this document.
+*/
+/*! \qmlproperty string Document::title
+    \readonly
+    The title of this document. Documents loaded from files do not have titles, but documents
+    created from online imports do. A store import would have a title like \c{Store import <date>}.
+*/
+/*! \qmlproperty string Document::fileName
+    \readonly
+    The file name of this document. New and imported documents that have not been saved yet will
+    not have fileName set.
+*/
+/*! \qmlproperty Order Document::order
+    \readonly
+    An Order object or \c null, if this document is not a BrickLink order.
+*/
 
 Document::Document(QObject *parent)
     : Document(new DocumentModel(), parent)

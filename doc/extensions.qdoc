@@ -1,0 +1,207 @@
+/*!
+\page index.html
+\keyword BrickStore Extensions Documentation
+\title BrickStore Extensions Documentation
+
+\section1 Overview
+
+BrickStore can be extended via JavaScript/QML based extensions.
+
+The QML \l{BrickStore} module provides the necessary types for scripting extension in the desktop
+version (as well as for creating complete mobile user interfaces).
+
+
+\section1 Installation
+
+Installing an extension from a file, so that it can be used by BrickStore is covered here:
+
+\l {BrickStore Extension Installation}
+
+
+\section1 Porting old Scripts
+
+Print scripts from old BrickStore (or BrickStock) versions are not compatible anymore and need
+to be ported manually. You can find a porting guide here:
+
+\l {Porting old BrickStore and BrickStock Print Scripts}
+
+
+\section1 Writing Extensions
+
+Your best bet is to start by cloning an existing extension to get all the needed boiler plate code.
+
+Extensions are based on \l {https://doc.qt.io/qt-5/qmlreference.html} {QML} and JavaScript.
+These QML types can be imported into your application or extension using the following import
+statement in your \c .qml file:
+
+\badcode
+import BrickStore 1.0
+\endcode
+
+Your root object is always Script followed by one or more child elements of type
+PrintingScriptAction and ExtensionScriptAction. All the other types can not be instantiated in
+a declarative way, but are instead provided to your extensions interface functions as parameters,
+or they can be dynamically created/retrieved via the global singletons \l BrickStore and BrickLink.
+
+\generatelist {qmltypesbymodule BrickStore}
+\noautolist
+
+
+\section1 Debugging
+
+The JavaScript environment is very similiar to a web browser, so any \c{console.log()} calls end
+up in BrickStore's error log, which is available via the \c View > \c {View info docks} menu.
+
+If you throw an \c Error object, the script execution will terminate and \c message property of the
+thrown object will be shown to the user in a message box.
+
+*/
+
+
+/*!
+\qmlmodule BrickStore 1.0
+\title BrickStore QML types
+\ingroup qmlmodules
+\brief Provides QML types for BrickStore.
+*/
+
+/*!
+\page installation.html
+\title BrickStore Extension Installation
+
+BrickStore can be extended via JavaScript/QML based extensions.
+
+\l {https://github.com/rgriebl/brickstore/blob/main/extensions/}
+{Click for a full list of all available extension in the BrickStore repository.}
+
+Although the BrickStore repository itself already contains a few user provided scripts, only these
+scripts are bundled in an official BrickStore release.
+
+\list
+\li \c classic-print-script.bs.qml
+\endlist
+
+All others are provided by users to be shared with others. In order to install them on your
+system, first download them by clicking on the script you want to download, then on the script's
+page, right-click \c{Raw} on the top-right of the scripts source code and choose
+\c{Save Link as...} (or your browser's equivalent).
+
+Of course, scripts can also simply be shared between users via any other means!
+
+After downloading, you need to copy the script to where BrickStore can pick it up:
+
+\table
+\header
+  \li OS
+  \li Directory
+\row
+  \li Windows
+  \li \c {%APPDATA%\BrickStore\extensions} \e{(copy)}
+    In Explorer click the folder icon or the empty space in the address bar. \e{(paste)}
+\row
+  \li macOS
+  \li \c {~/Library/Application Support/BrickStore/extensions} \e{(copy)}
+    In Finder, choose \c Go > \c {Go to Folder}. \e{(paste)}
+\row
+  \li Linux
+  \li \c {~/.local/share/BrickStore/extensions} \e{(copy)}
+    In Files or Dolphin, press \c{Ctrl+L}. \e{(paste)}
+\endtable
+
+BrickStore will now pick up all the scripts it finds in these directories when starting up. You
+can also dynamically reload the scripts while it is running via \c Extras > \c{Reload user
+scripts}.
+
+If your script doesn't show up in the \c Extras (or context) menu, then most likely it has
+JavaScript syntax errors. Enable the \c{Error log} via the \c View > \c {View info docks} menu.
+
+\note All script files have to have the file extensions \c .bs.qml
+
+*/
+
+/*!
+\page porting.html
+\title Porting old BrickStore and BrickStock Print Scripts
+
+The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was
+abandoned by the industry (see \l {https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))}
+{Wikipedia}).
+
+The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers
+(see \l {https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)} {QML JavaScript environment}).
+
+Sadly JS4 did a few things differently than today's JS7, so you have to adapt your scripts: some
+of these required changes are just simple search-and-replace jobs, while others require you to
+rewrite your code a bit.
+
+\section2 The simple ones:
+\list
+\li Replace \c{var} with \c{let} for variable initialization
+\li Replace \c{CReportPage} with \c{Page}
+\li Replace \c{Utility.localDateString(d)} with \c{Qt.formatDate(d)}
+\endlist
+
+\section2 Intermediate:
+\list
+\li Replace the \c{load()} function with a new file header. Just copy the one from
+   [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml)
+   (from file start up to \c{function printJob}) and change the \c{name}, \c{author} and \c{version} fields
+   in the \c{Script} object.
+   You can also set the text of the menu entry via the \c{text} property of \c{PrintingScriptAction}.
+
+\li Don't forget to add a \c{}} add the end of the file afterwards to balance the scope: the old
+   scripts only had global JS functions, but all functions are members of the \c{Script} object
+   nowadays.
+
+\li Rename the existing \c{function printDoc()} function to \c{function printJob(job, doc, lots)}.
+   See below on how to use the \c{job}, \c{doc} and \c{lots} parameters.
+
+\li Replace \c{Document} with \c{doc}.
+   \c{Document} was a global object, but \c{doc} is now just a local function parameter to \c{printJob()},
+   so make sure to forward \c{doc} to sub-routines as needed.
+
+\li Replace \c{Job} with \c{job}.
+   \c{Job} was a global object, but \c{job} is now just a local function parameter to \c{printJob()}, so
+   make sure to forward \c{job} to sub-routines as needed.
+
+\li A lot (or row in the document) was wrongly called *item* in the old API, but this was just too
+   confusing when full catalog access to the JS API, so it had to be renamed to *lot*.
+   So, in order to iterate over all lots in a document, you now have to access \c{doc.lots} instead
+   of \c{Document.items}.
+
+\li If you want to support printing just the selected lots, do not iterate over \c{doc.lots}, but use
+   the \c{lots} parameter given to the \c{printJob} function.
+
+\li Replace \c{Money.toLocalString(m, showCurrencyCode)} with \c{BrickStore.toCurrencyString(m, currencyCode)}.
+   The document's currencyCode is not set implicitly anymore, but needs to be retrieved via
+   \c{doc.currencyCode} in the main \c{printJob()} function. Keep in mind to forward either \c{job} or
+   the currency code to sub-routines if needed there.
+\endlist
+
+
+\section2 Complex
+
+Font and Color objects changed a lot! The new JS engine is using the built-in Qt types for fonts and
+colors and these can be a bit weird, when compared to the old objects:
+\list
+\li Both cannot be created via the \c{new} operator anymore
+  \list
+  \li For fonts, you have to use the factory function \c{Qt.font()}:
+      see the \l {https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method} {Qt documentation for Qt.font}
+      and the \l {https://doc.qt.io/qt-5/qml-font.html} {QML font documentation} for the available
+      font properties.
+  \li For colors, see the \l {https://doc.qt.io/qt-5/qml-color.html} {QML color documentation}.
+  \endlist
+
+\li Accessing the \c{page.font} and \c{page.color} properties now returns a reference to the current
+    value, not a copy. This means that you cannot save the current value at the start of the
+    function and reset the property to that value again when the function ends, because the "saved"
+    value changes everytime you change the actual property.
+    If you relied on this behavior (the default print script did), you have to change your approach
+    here to always set the colors and fonts before drawing in a sub-routine.
+\endlist
+
+Have a look at the \l {https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml}
+{classic-print-script.bs.qml} to get an idea how to work with fonts and colors in the new JS engine.
+
+*/

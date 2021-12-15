@@ -28,7 +28,7 @@ class QmlPrintJob;
 class QmlPrintPage : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int number READ pageNumber)
+    Q_PROPERTY(int number READ pageNumber CONSTANT)
     Q_PROPERTY(QFont font READ font WRITE setFont)
     Q_PROPERTY(QColor color READ color WRITE setColor)
     Q_PROPERTY(QColor backgroundColor READ bgColor WRITE setBgColor)
@@ -130,7 +130,6 @@ class QmlPrintJob : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int pageCount READ pageCount NOTIFY pageCountChanged)
-//  Q_PROPERTY(int paperFormat READ paperFormat)
     Q_PROPERTY(QSizeF paperSize READ paperSize CONSTANT)
 
 public:
