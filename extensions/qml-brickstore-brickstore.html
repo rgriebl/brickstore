@@ -40,11 +40,12 @@
 <a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#activeDocument-prop">activeDocument</a></b></b> : Document</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#buildNumber-prop">buildNumber</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#databaseValid-prop">databaseValid</a></b></b> : bool</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#defaultCurrencyCode-prop">defaultCurrencyCode</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#lastDatabaseUpdate-prop">lastDatabaseUpdate</a></b></b> : date</li>
-<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b></b> : bool</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#versionNumber-prop">versionNumber</a></b></b> : string</li>
 </ul>
 <a name="methods"></a>
@@ -64,6 +65,16 @@
 <p>A kitchen sink type singleton for all global state, settings and utility functions.</p>
 <!-- @@@BrickStore -->
 <h2>Property Documentation</h2>
+<!-- $$$activeDocument -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="activeDocument-prop">
+<td class="tblQmlPropNode"><p>
+<a name="activeDocument-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">activeDocument</span> : <span class="type"><a href="qml-brickstore-document.html">Document</a></span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The currently active document, i.e&#x2e; the document the user is working on. Can be <code>null</code>, if no documents are open, but also if the quickstart page is active.</p>
+</div></div><!-- @@@activeDocument -->
+<br/>
 <!-- $$$buildNumber -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -109,7 +120,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="online-prop">
 <td class="tblQmlPropNode"><p>
-<a name="online-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">online</span> : <span class="type">string</span></p></td></tr>
+<a name="online-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">online</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The current online state of the application. This is mirroring the operating system's online state.</p>
 </div></div><!-- @@@online -->
