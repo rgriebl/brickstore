@@ -106,6 +106,7 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT)
     Q_PROPERTY(RecentFiles *recentFiles READ recentFiles CONSTANT)
     Q_PROPERTY(DocumentList *documents READ documents CONSTANT)
+    Q_PROPERTY(Document *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
     Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
     Q_PROPERTY(QVariantMap about READ about CONSTANT)
     Q_PROPERTY(bool databaseValid READ isDatabaseValid NOTIFY databaseValidChanged)
@@ -141,13 +142,15 @@ public:
     QDateTime lastDatabaseUpdate() const;
     Q_INVOKABLE bool updateDatabase();
 
+    Document *activeDocument() const;
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);
     void databaseValidChanged(bool valid);
     void lastDatabaseUpdateChanged(const QDateTime &lastUpdate);
     void onlineStateChanged(bool online);
-
+    void activeDocumentChanged(Document *doc);
 
 private:
     static QmlBrickStore *s_inst;

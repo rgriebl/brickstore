@@ -93,8 +93,16 @@ ActionManager *ActionManager::inst()
     return s_inst;
 }
 
+Document *ActionManager::activeDocument() const
+{
+    return m_document;
+}
+
 void ActionManager::setActiveDocument(Document *document)
 {
+    if (m_document == document)
+        return;
+
     if (m_document) {
         m_document->setActive(false);
 
@@ -114,6 +122,8 @@ void ActionManager::setActiveDocument(Document *document)
     }
     setSelection(document ? document->selectedLots() : LotList { });
     updateActions(DocumentChanged);
+
+    emit activeDocumentChanged(m_document);
 }
 
 ActionManager::ActionManager()
