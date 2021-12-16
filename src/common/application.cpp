@@ -197,6 +197,10 @@ void Application::afterInit()
               ActionManager::inst()->qAction("view_goto_next_diff")->setEnabled(b);
           } },
         { "configure", [this](auto) { emit showSettings(); } },
+        { "help_extensions", [](auto) {
+              QString url = "https://"_l1 % Application::inst()->gitHubPagesUrl() % "/extensions/"_l1;
+              QDesktopServices::openUrl(url);
+        } },
         { "help_reportbug", [](auto) {
               QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
               QDesktopServices::openUrl(url);
@@ -282,6 +286,13 @@ QString Application::applicationUrl() const
 QString Application::gitHubUrl() const
 {
     return QLatin1String(BRICKSTORE_GITHUB_URL);
+}
+
+QString Application::gitHubPagesUrl() const
+{
+    const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split('/'_l1);
+    Q_ASSERT(sections.count() == 3);
+    return sections[1] % ".github.io/"_l1 % sections[2];
 }
 
 void Application::checkRestart()

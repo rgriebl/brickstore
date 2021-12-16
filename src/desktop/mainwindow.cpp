@@ -777,6 +777,8 @@ void MainWindow::setupMenuBar()
                                  "reload_scripts",
                              });
     setupMenu("menu_help", {
+                  "help_extensions",
+                  "-",
                   "check_for_updates",
                   "-",
                   "help_reportbug",

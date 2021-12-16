@@ -401,6 +401,7 @@ void ActionManager::initialize()
     A("help_announcements",       QT_TR_NOOP("Important Announcements..."));
     A("help_releasenotes",        QT_TR_NOOP("Release notes..."));
     A("help_reportbug",           QT_TR_NOOP("Report a bug..."));
+    A("help_extensions",          QT_TR_NOOP("Extensions Interface Documentation..."));
     A("check_for_updates",        QT_TR_NOOP("Check for Program Updates..."),    NeedNetwork, FlagRole(QAction::ApplicationSpecificRole));
     a->m_iconName = "update_none";
 
