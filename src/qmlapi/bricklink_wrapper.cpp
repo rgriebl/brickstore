@@ -75,10 +75,10 @@ void QmlImageItem::paint(QPainter *painter)
     well as giving access to the BrickLink item catalog, which is available through these types:
     \list
     \li ItemType
-    \li Category
-    \li Color
-    \li Item
-    \li Picture
+    \li \l Category
+    \li \l Color
+    \li \l Item
+    \li \l Picture
     \li PriceGuide
     \endlist
 */
@@ -139,7 +139,7 @@ QmlItem QmlBrickLink::noItem() const
 
 /*! \qmlproperty Color BrickLink::noColor
     \readonly
-    A special Color object denoting an invalid color. The object's Color::isNull returns \c true.
+    A special \l Color object denoting an invalid color. The object's Color::isNull returns \c true.
     Used as a return value for functions that can fail.
 */
 QmlColor QmlBrickLink::noColor() const
@@ -199,7 +199,7 @@ QmlItemType QmlBrickLink::itemType(const QString &itemTypeId) const
 }
 
 /*! \qmlmethod Item BrickLink::item(string itemTypeId, string itemId)
-    Returns an Item object corresponding to the given BrickLink \a itemTypeId and \a itemId. If
+    Returns an \l Item object corresponding to the given BrickLink \a itemTypeId and \a itemId. If
     there is no match, the returned object is noItem.
 */
 QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) const
@@ -231,7 +231,7 @@ QmlPriceGuide QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPr
     to see what has changed.
 */
 /*! \qmlmethod Picture BrickLink::picture(Item item, Color color, bool highPriority = false)
-    Creates a Picture object that asynchronously loads (or downloads) the picture for the given
+    Creates a \l Picture object that asynchronously loads (or downloads) the picture for the given
     \a item and \a color combination. If you set \a highPriority to \c true the load/download
     request will be pre-prended to the work queue instead of appended.
     You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
@@ -394,8 +394,8 @@ QmlCategory::QmlCategory(const BrickLink::Category *cat)
 */
 /*! \qmlproperty list<Category> ItemType::categories
     \readonly
-    A list of Category objects describing all the categories that are referencing at least one item
-    of the given item type.
+    A list of \l Category objects describing all the categories that are referencing at least one
+    item of the given item type.
 */
 /*! \qmlproperty bool ItemType::hasInventories
     \readonly
@@ -594,7 +594,7 @@ QImage QmlColor::image() const
 */
 /*! \qmlproperty list<Color> Item::knownColors
     \readonly
-    Returns a list of Color objects, containing all the colors the item is known to exist in.
+    Returns a list of \l Color objects, containing all the colors the item is known to exist in.
     \note An item might still exist in more colors than returned here: BrickStore is deriving this
           data by looking at all the known inventories and PCCs (part-color-codes).
 */
@@ -894,14 +894,14 @@ double QmlPriceGuide::price(QmlBrickLink::Time time, QmlBrickLink::Condition con
     cannot use the normal JavaScript \c null notation.
 */
 /*! \qmlproperty Item Lot::item
-    The Item represented by this lot. Can be a BrickLink::noItem, if there's no item set.
+    The \l Item represented by this lot. Can be a BrickLink::noItem, if there's no item set.
 */
 /*! \qmlproperty Color Lot::color
-    The Color selected for this lot. Can be BrickLink::noColor, if there's no color set.
+    The \l Color selected for this lot. Can be BrickLink::noColor, if there's no color set.
 */
 /*! \qmlproperty Category Lot::category
     \readonly
-    The Category of the lot's item or BrickLink::noCategory, if the lot's item is not valid.
+    The \l Category of the lot's item or BrickLink::noCategory, if the lot's item is not valid.
 */
 /*! \qmlproperty ItemType Lot::itemType
     \readonly
@@ -909,8 +909,8 @@ double QmlPriceGuide::price(QmlBrickLink::Time time, QmlBrickLink::Condition con
 */
 /*! \qmlproperty string Lot::itemId
     \readonly
-    The id of the lot's item. The same as \c{item.id}, but you don't have to
-    check for isNull on \c item.
+    The id of the lot's item. The same as \c{item.id}, but you don't have to check for isNull on
+    \c item.
 */
 /*! \qmlproperty string Lot::id
     \readonly

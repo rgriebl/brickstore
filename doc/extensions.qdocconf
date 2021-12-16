@@ -2,7 +2,10 @@ project = BrickStore
 description = BrickStore Extensions
 versionsym = BRICKSTORE_VERSION
 
-ignorewords += BrickStore
+ignorewords += BrickStore BrickLink
+
+navigation.homepage  = index.html
+navigation.hometitle = "BrickStore Extensions"
 
 sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
 headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
@@ -22,7 +25,7 @@ sourcedirs += \
     ../src/common/ \
     ../src/desktop/ \
 
-#depends += qtcore qtquick qtqml
+depends += qtcore qtqml qtquick qtquickcontrols qtquickdialogs
 
 outputdir = html/extensions
 
@@ -59,3 +62,9 @@ HTML.postpostheader = \
     "<div class=\"content\">\n" \
     "<div class=\"line\">\n" \
     "<div class=\"content mainContent\">\n" \
+
+HTML.extraimages += \
+    images/ico_out.png \
+    images/bullet_dn.png \
+    images/bgrContent.png \
+    images/favicon.ico \

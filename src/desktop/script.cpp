@@ -41,7 +41,7 @@ static QString formatJSError(const QJSValue &error)
 
 /*! \qmltype ExtensionScriptAction
     \inqmlmodule BrickStore
-    \ingroup qml-api
+    \ingroup qml-extension
     \brief Use this type to add an UI action to your extension.
 
     \note The documentation is missing on purpose - the API is not set in stone yet.
@@ -126,7 +126,7 @@ void ExtensionScriptAction::componentComplete()
 
 /*! \qmltype PrintingScriptAction
     \inqmlmodule BrickStore
-    \ingroup qml-api
+    \ingroup qml-extension
     \brief Use this type to add a print action to your extension.
 */
 /*! \qmlproperty string PrintingScriptAction::text
@@ -253,7 +253,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
 
 /*! \qmltype Script
     \inqmlmodule BrickStore
-    \ingroup qml-api
+    \ingroup qml-extension
     \brief The root element of any BrickStore extension file.
 
     The Script type is root element for any extension. The \c name, \c author and \c version

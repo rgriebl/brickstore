@@ -1,15 +1,11 @@
 /*!
 \page index.html
-\keyword BrickStore Extensions Documentation
 \title BrickStore Extensions Documentation
-
-\section1 Overview
 
 BrickStore can be extended via JavaScript/QML based extensions.
 
 The QML \l{BrickStore} module provides the necessary types for scripting extension in the desktop
 version (as well as for creating complete mobile user interfaces).
-
 
 \section1 Installation
 
@@ -30,7 +26,7 @@ to be ported manually. You can find a porting guide here:
 
 Your best bet is to start by cloning an existing extension to get all the needed boiler plate code.
 
-Extensions are based on \l {https://doc.qt.io/qt-5/qmlreference.html} {QML} and JavaScript.
+Extensions are based on \l{https://doc.qt.io/qt-5/qmlreference.html}{QML} and JavaScript.
 These QML types can be imported into your application or extension using the following import
 statement in your \c .qml file:
 
@@ -38,22 +34,32 @@ statement in your \c .qml file:
 import BrickStore 1.0
 \endcode
 
-Your root object is always Script followed by one or more child elements of type
+Your root object is always \l Script followed by one or more child elements of type
 PrintingScriptAction and ExtensionScriptAction. All the other types can not be instantiated in
 a declarative way, but are instead provided to your extensions interface functions as parameters,
 or they can be dynamically created/retrieved via the global singletons \l BrickStore and BrickLink.
 
-\generatelist {qmltypesbymodule BrickStore}
-\noautolist
+These types are available to setup and manage an extension:
 
+\annotatedlist qml-extension
+
+While the extension is active, you have acess to these types:
+
+\annotatedlist qml-api
+
+In addition to that, printing extensions also use these types:
+
+\annotatedlist qml-printing
+
+\noautolist
 
 \section1 Debugging
 
 The JavaScript environment is very similiar to a web browser, so any \c{console.log()} calls end
 up in BrickStore's error log, which is available via the \c View > \c {View info docks} menu.
 
-If you throw an \c Error object, the script execution will terminate and \c message property of the
-thrown object will be shown to the user in a message box.
+If you throw an \c Error object, the script execution will terminate and the \c message property
+of the thrown object will be shown to the user in a message box.
 
 */
 
@@ -71,7 +77,7 @@ thrown object will be shown to the user in a message box.
 
 BrickStore can be extended via JavaScript/QML based extensions.
 
-\l {https://github.com/rgriebl/brickstore/blob/main/extensions/}
+\l{https://github.com/rgriebl/brickstore/blob/main/extensions/}
 {Click for a full list of all available extension in the BrickStore repository.}
 
 Although the BrickStore repository itself already contains a few user provided scripts, only these
@@ -124,62 +130,61 @@ JavaScript syntax errors. Enable the \c{Error log} via the \c View > \c {View in
 \title Porting old BrickStore and BrickStock Print Scripts
 
 The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was
-abandoned by the industry (see \l {https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))}
-{Wikipedia}).
+abandoned by the industry (see \l{https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))}{Wikipedia}).
 
 The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers
-(see \l {https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)} {QML JavaScript environment}).
+(see \l{https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)}{QML JavaScript environment}).
 
 Sadly JS4 did a few things differently than today's JS7, so you have to adapt your scripts: some
 of these required changes are just simple search-and-replace jobs, while others require you to
 rewrite your code a bit.
 
-\section2 The simple ones:
+\section2 The simple changes
 \list
 \li Replace \c{var} with \c{let} for variable initialization
-\li Replace \c{CReportPage} with \c{Page}
+\li Replace \c{CReportPage} with \tt{PrintPage}
 \li Replace \c{Utility.localDateString(d)} with \c{Qt.formatDate(d)}
 \endlist
 
-\section2 Intermediate:
+\section2 Intermediate changes
 \list
 \li Replace the \c{load()} function with a new file header. Just copy the one from
-   [classic-print-script.bs.qml](https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml)
-   (from file start up to \c{function printJob}) and change the \c{name}, \c{author} and \c{version} fields
-   in the \c{Script} object.
-   You can also set the text of the menu entry via the \c{text} property of \c{PrintingScriptAction}.
+    \l{https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml}{classic-print-script.bs.qm}
+    (from the start of the file up to \c{function printJob}) and change the \c{name}, \c{author}
+    and \c{version} fields in the \tt{\l Script} object.
+    You can also set the text of the menu entry via the \c{text} property of PrintingScriptAction.
 
 \li Don't forget to add a \c{}} add the end of the file afterwards to balance the scope: the old
-   scripts only had global JS functions, but all functions are members of the \c{Script} object
-   nowadays.
+    scripts only had global JS functions, but all functions are members of the \l Script object
+    nowadays.
 
 \li Rename the existing \c{function printDoc()} function to \c{function printJob(job, doc, lots)}.
-   See below on how to use the \c{job}, \c{doc} and \c{lots} parameters.
+    See below on how to use the \c{job}, \c{doc} and \c{lots} parameters.
 
 \li Replace \c{Document} with \c{doc}.
-   \c{Document} was a global object, but \c{doc} is now just a local function parameter to \c{printJob()},
-   so make sure to forward \c{doc} to sub-routines as needed.
+    \c{Document} was a global object, but \c{doc} is now just a local function parameter to
+    \c{printJob()}, so make sure to forward \c{doc} to sub-routines as needed.
 
 \li Replace \c{Job} with \c{job}.
-   \c{Job} was a global object, but \c{job} is now just a local function parameter to \c{printJob()}, so
-   make sure to forward \c{job} to sub-routines as needed.
+    \c{Job} was a global object, but \c{job} is now just a local function parameter to
+    \c{printJob()}, so make sure to forward \c{job} to sub-routines as needed.
 
 \li A lot (or row in the document) was wrongly called *item* in the old API, but this was just too
    confusing when full catalog access to the JS API, so it had to be renamed to *lot*.
    So, in order to iterate over all lots in a document, you now have to access \c{doc.lots} instead
    of \c{Document.items}.
 
-\li If you want to support printing just the selected lots, do not iterate over \c{doc.lots}, but use
-   the \c{lots} parameter given to the \c{printJob} function.
+\li If you want to support printing just the selected lots, do not iterate over \c{doc.lots}, but
+    use the \c{lots} parameter given to the \c{printJob} function.
 
 \li Replace \c{Money.toLocalString(m, showCurrencyCode)} with \c{BrickStore.toCurrencyString(m, currencyCode)}.
-   The document's currencyCode is not set implicitly anymore, but needs to be retrieved via
-   \c{doc.currencyCode} in the main \c{printJob()} function. Keep in mind to forward either \c{job} or
-   the currency code to sub-routines if needed there.
+    The document's currencyCode is not set implicitly anymore, but needs to be retrieved via
+    \c{doc.currencyCode} in the main \c{printJob()} function. Keep in mind to forward either
+    \c{job} or the currency code to sub-routines if needed there.
 \endlist
 
 
-\section2 Complex
+\section2 Complex changes
 
 Font and Color objects changed a lot! The new JS engine is using the built-in Qt types for fonts and
 colors and these can be a bit weird, when compared to the old objects:

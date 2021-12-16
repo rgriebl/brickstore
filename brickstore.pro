@@ -157,7 +157,7 @@ sentry {
 qtPrepareTool(QDOC, qdoc)
 #qtPrepareTool(QTATTRIBUTIONSCANNER, qtattributionscanner)
 
-extensions_doc.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/extensions.qdocconf"
+extensions_doc.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/extensions.qdocconf" -indexdir "$$[QT_INSTALL_DOCS]"
 QMAKE_EXTRA_TARGETS += extensions_doc
 
 #

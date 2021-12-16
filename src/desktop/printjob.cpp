@@ -29,7 +29,7 @@
 
 /*! \qmltype PrintPage
     \inqmlmodule BrickStore
-    \ingroup qml-api
+    \ingroup qml-printing
     \brief An instance of this type represents the canvas of a printer page.
 
     \note All coordinates are floating point values and the unit is \c mm. Check
@@ -441,7 +441,7 @@ void QmlPrintPage::drawImage(double left, double top, double width, double heigh
 
 /*! \qmltype PrintJob
     \inqmlmodule BrickStore
-    \ingroup qml-api
+    \ingroup qml-printing
     \brief An instance of this type represents an active print job.
 */
 /*! \qmlproperty int PrintJob::pageCount
