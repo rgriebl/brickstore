@@ -91,12 +91,12 @@ jobs:
 
     - name: Cache vcpkg installed
       uses: actions/cache@v2
-      if: (!startsWith(matrix.config.os, 'ubuntu'))
+      if: matrix.config.vcpkg_triplet
       with:
         path: |
           $VCPKG_INSTALLATION_ROOT/installed
           $VCPKG_INSTALLATION_ROOT/downloads
-        key: ${{ runner.os }}-vcpkg-cache
+        key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
 
     - name: Cache Qt from qt.io
       id: cache-qt
