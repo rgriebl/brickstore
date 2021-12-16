@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
 <!-- bricklink_wrapper.cpp -->
-  <title>Item QML Type | BrickStore</title>
+  <title>Item QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
 <body>
@@ -12,6 +12,7 @@
     <div class="main-rounded">
         <div class="navigationbar">
         <ul>
+<li><a href="index.html">BrickStore Extensions</a></li>
     </ul>
     </div>
 </div>
@@ -31,7 +32,7 @@
 <h1 class="title">Item QML Type</h1>
 <span class="subtitle"></span>
 <!-- $$$Item-brief -->
-<p>This value type represents a <a href="qml-brickstore-bricklink.html">BrickLink</a> item. <a href="#details">More...</a></p>
+<p>This value type represents a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@Item -->
 <div class="table"><table class="alignedsummary">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
@@ -60,7 +61,7 @@
 <!-- $$$Item-description -->
 <a name="details"></a>
 <h2 id="details">Detailed Description</h2>
-<p>Each item in the <a href="qml-brickstore-bricklink.html">BrickLink</a> catalog is available as an Item object.</p>
+<p>Each item in the BrickLink catalog is available as an Item object.</p>
 <p>You cannot create Item objects yourself, but you can retrieve an Item object given the id via <a href="qml-brickstore-bricklink.html#item-method">BrickLink::item()</a>.</p>
 <p>See <a href="https://www.bricklink.com/catalog.asp">https://www.bricklink.com/catalog.asp</a></p>
 <!-- @@@Item -->
@@ -72,7 +73,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="category-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">category</span> : <span class="type"><a href="qml-brickstore-category.html">Category</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> category of this item.</p>
+<div class="qmldoc"><p>The BrickLink category of this item.</p>
 </div></div><!-- @@@category -->
 <br/>
 <!-- $$$defaultColor -->
@@ -82,7 +83,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="defaultColor-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">defaultColor</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns the default color used by <a href="qml-brickstore-bricklink.html">BrickLink</a> to display a large picture for this item.</p>
+<div class="qmldoc"><p>Returns the default color used by BrickLink to display a large picture for this item.</p>
 </div></div><!-- @@@defaultColor -->
 <br/>
 <!-- $$$hasInventory -->
@@ -102,7 +103,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="id-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> id of this item.</p>
+<div class="qmldoc"><p>The BrickLink id of this item.</p>
 </div></div><!-- @@@id -->
 <br/>
 <!-- $$$inventoryUpdated -->
@@ -132,7 +133,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="itemType-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">itemType</span> : <span class="type"><a href="qml-brickstore-itemtype.html">ItemType</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> item type of this item.</p>
+<div class="qmldoc"><p>The BrickLink item type of this item.</p>
 </div></div><!-- @@@itemType -->
 <br/>
 <!-- $$$knownColors -->
@@ -142,7 +143,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="knownColors-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">knownColors</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-brickstore-color.html">Color</a></span>&gt;</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns a list of Color objects, containing all the colors the item is known to exist in.</p>
+<div class="qmldoc"><p>Returns a list of <a href="qml-brickstore-color.html">Color</a> objects, containing all the colors the item is known to exist in.</p>
 <p><b>Note: </b>An item might still exist in more colors than returned here: BrickStore is deriving this data by looking at all the known inventories and PCCs (part-color-codes).</p>
 </div></div><!-- @@@knownColors -->
 <br/>
@@ -153,7 +154,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="name-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> name of this item.</p>
+<div class="qmldoc"><p>The BrickLink name of this item.</p>
 </div></div><!-- @@@name -->
 <br/>
 <!-- $$$weight -->

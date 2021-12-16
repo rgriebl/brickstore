@@ -1532,10 +1532,8 @@
                 <variable name="s_inst" fullname="BrickLink::ToolTip::s_inst" href="bricklink-tooltip.html#s_inst-var" status="internal" access="private" location="delegate.h" filepath="/build/src/bricklink/delegate.h" lineno="53" type="BrickLink::ToolTip *" static="true"/>
             </class>
         </namespace>
-        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="68" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle="" module="BrickStore"/>
+        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="74" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle="" module="BrickStore"/>
         <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="1" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="" module="BrickStore">
-            <keyword name="brickstore-extensions-documentation" title="BrickStore Extensions Documentation"/>
-            <contents name="overview" title="Overview" level="1"/>
             <contents name="installation" title="Installation" level="1"/>
             <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
             <contents name="writing-extensions" title="Writing Extensions" level="1"/>
@@ -3388,10 +3386,10 @@
             <variable name="m_online" fullname="OnlineState::m_online" href="onlinestate.html#m_online-var" status="internal" access="private" location="onlinestate.h" filepath="/build/src/common/onlinestate.h" lineno="39" type="bool" static="false"/>
             <variable name="s_inst" fullname="OnlineState::s_inst" href="onlinestate.html#s_inst-var" status="internal" access="private" location="onlinestate.h" filepath="/build/src/common/onlinestate.h" lineno="42" type="OnlineState *" static="true"/>
         </class>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="122" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="" module="BrickStore">
-            <contents name="the-simple-ones" title="The simple ones:" level="2"/>
-            <contents name="intermediate" title="Intermediate:" level="2"/>
-            <contents name="complex" title="Complex" level="2"/>
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="128" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="" module="BrickStore">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
         </page>
         <class name="PriceGuideWidget" href="priceguidewidget.html" status="internal" access="private" location="priceguidewidget.h" filepath="/build/src/desktop/priceguidewidget.h" lineno="30">
             <function name="changeEvent" fullname="PriceGuideWidget::changeEvent" href="priceguidewidget.html#changeEvent" status="internal" access="private" location="priceguidewidget.h" filepath="/build/src/desktop/priceguidewidget.h" lineno="69" meta="plain" virtual="non" const="false" static="false" final="false" override="true" type="void" signature="void changeEvent(int *e) override">
@@ -3629,7 +3627,7 @@
             <qmlproperty name="order" fullname="BrickStore.Document.order" href="qml-brickstore-document.html#order-prop" status="active" access="public" documented="true" type="Order" attached="false" writable="false"/>
             <qmlproperty name="title" fullname="BrickStore.Document.title" href="qml-brickstore-document.html#title-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" groups="qml-api" brief="Use this type to add an UI action to your extension"/>
+        <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" groups="qml-extension" brief="Use this type to add an UI action to your extension"/>
         <qmlclass name="Item" qml-module-name="BrickStore" fullname="BrickStore.Item" href="qml-brickstore-item.html" status="active" access="public" documented="true" title="Item" fulltitle="Item" subtitle="" groups="qml-api" brief="This value type represents a BrickLink item">
             <function name="hasKnownColor" fullname="BrickStore.Item.hasKnownColor" href="qml-brickstore-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <qmlproperty name="category" fullname="BrickStore.Item.category" href="qml-brickstore-item.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
@@ -3746,14 +3744,14 @@
             <qmlproperty name="lastUpdated" fullname="BrickStore.PriceGuide.lastUpdated" href="qml-brickstore-priceguide.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickStore.PriceGuide.updateStatus" href="qml-brickstore-priceguide.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="PrintJob" qml-module-name="BrickStore" fullname="BrickStore.PrintJob" href="qml-brickstore-printjob.html" status="active" access="public" documented="true" title="PrintJob" fulltitle="PrintJob" subtitle="" groups="qml-api" brief="An instance of this type represents an active print job">
+        <qmlclass name="PrintJob" qml-module-name="BrickStore" fullname="BrickStore.PrintJob" href="qml-brickstore-printjob.html" status="active" access="public" documented="true" title="PrintJob" fulltitle="PrintJob" subtitle="" groups="qml-printing" brief="An instance of this type represents an active print job">
             <function name="abort" fullname="BrickStore.PrintJob.abort" href="qml-brickstore-printjob.html#abort-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <function name="addPage" fullname="BrickStore.PrintJob.addPage" href="qml-brickstore-printjob.html#addPage-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <function name="getPage" fullname="BrickStore.PrintJob.getPage" href="qml-brickstore-printjob.html#getPage-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <qmlproperty name="pageCount" fullname="BrickStore.PrintJob.pageCount" href="qml-brickstore-printjob.html#pageCount-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
             <qmlproperty name="paperSize" fullname="BrickStore.PrintJob.paperSize" href="qml-brickstore-printjob.html#paperSize-prop" status="active" access="public" documented="true" type="size" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="PrintPage" qml-module-name="BrickStore" fullname="BrickStore.PrintPage" href="qml-brickstore-printpage.html" status="active" access="public" documented="true" title="PrintPage" fulltitle="PrintPage" subtitle="" groups="qml-api" brief="An instance of this type represents the canvas of a printer page">
+        <qmlclass name="PrintPage" qml-module-name="BrickStore" fullname="BrickStore.PrintPage" href="qml-brickstore-printpage.html" status="active" access="public" documented="true" title="PrintPage" fulltitle="PrintPage" subtitle="" groups="qml-printing" brief="An instance of this type represents the canvas of a printer page">
             <function name="drawEllipse" fullname="BrickStore.PrintPage.drawEllipse" href="qml-brickstore-printpage.html#drawEllipse-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <function name="drawImage" fullname="BrickStore.PrintPage.drawImage" href="qml-brickstore-printpage.html#drawImage-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <function name="drawLine" fullname="BrickStore.PrintPage.drawLine" href="qml-brickstore-printpage.html#drawLine-method" status="active" access="public" documented="true" meta="qmlmethod"/>
@@ -3767,7 +3765,7 @@
             <qmlproperty name="lineWidth" fullname="BrickStore.PrintPage.lineWidth" href="qml-brickstore-printpage.html#lineWidth-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
             <qmlproperty name="number" fullname="BrickStore.PrintPage.number" href="qml-brickstore-printpage.html#number-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="PrintingScriptAction" qml-module-name="BrickStore" fullname="BrickStore.PrintingScriptAction" href="qml-brickstore-printingscriptaction.html" status="active" access="public" documented="true" title="PrintingScriptAction" fulltitle="PrintingScriptAction" subtitle="" groups="qml-api" brief="Use this type to add a print action to your extension">
+        <qmlclass name="PrintingScriptAction" qml-module-name="BrickStore" fullname="BrickStore.PrintingScriptAction" href="qml-brickstore-printingscriptaction.html" status="active" access="public" documented="true" title="PrintingScriptAction" fulltitle="PrintingScriptAction" subtitle="" groups="qml-extension" brief="Use this type to add a print action to your extension">
             <qmlproperty name="printFunction" fullname="BrickStore.PrintingScriptAction.printFunction" href="qml-brickstore-printingscriptaction.html#printFunction-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
             <qmlproperty name="text" fullname="BrickStore.PrintingScriptAction.text" href="qml-brickstore-printingscriptaction.html#text-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
         </qmlclass>
@@ -4359,7 +4357,7 @@
             <variable name="m_printingActions" fullname="Script::m_printingActions" href="script.html#m_printingActions-var" status="internal" access="private" location="script.h" filepath="/build/src/desktop/script.h" lineno="157" type="int" static="false"/>
             <variable name="m_version" fullname="Script::m_version" href="script.html#m_version-var" status="internal" access="private" location="script.h" filepath="/build/src/desktop/script.h" lineno="149" type="int" static="false"/>
         </class>
-        <qmlclass name="Script" qml-module-name="BrickStore" fullname="BrickStore.Script" href="qml-brickstore-script.html" status="active" access="public" documented="true" title="Script" fulltitle="Script" subtitle="" groups="qml-api" brief="Root element of any BrickStore extension file">
+        <qmlclass name="Script" qml-module-name="BrickStore" fullname="BrickStore.Script" href="qml-brickstore-script.html" status="active" access="public" documented="true" title="Script" fulltitle="Script" subtitle="" groups="qml-extension" brief="Root element of any BrickStore extension file">
             <qmlproperty name="author" fullname="BrickStore.Script.author" href="qml-brickstore-script.html#author-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
             <qmlproperty name="name" fullname="BrickStore.Script.name" href="qml-brickstore-script.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
             <qmlproperty name="version" fullname="BrickStore.Script.version" href="qml-brickstore-script.html#version-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
@@ -4933,8 +4931,10 @@
             <variable name="m_menu" fullname="WindowMenuAdapter::m_menu" href="windowmenuadapter.html#m_menu-var" status="internal" access="private" location="mainwindow_p.h" filepath="/build/src/desktop/mainwindow_p.h" lineno="131" type="int *" static="false"/>
             <variable name="m_shortcut" fullname="WindowMenuAdapter::m_shortcut" href="windowmenuadapter.html#m_shortcut-var" status="internal" access="private" location="mainwindow_p.h" filepath="/build/src/desktop/mainwindow_p.h" lineno="132" type="bool" static="false"/>
         </class>
-        <group name="qml-api" href="qml-api.html" status="internal" seen="false" title="" members="Order,Document,PrintPage,PrintJob,ExtensionScriptAction,PrintingScriptAction,Script,BrickLink,Category,ItemType,Color,Item,Picture,PriceGuide,Lot,BrickStore"/>
+        <group name="qml-api" href="qml-api.html" status="internal" seen="false" title="" members="Order,Document,BrickLink,Category,ItemType,Color,Item,Picture,PriceGuide,Lot,BrickStore"/>
+        <group name="qml-extension" href="qml-extension.html" status="internal" seen="false" title="" members="ExtensionScriptAction,PrintingScriptAction,Script"/>
+        <group name="qml-printing" href="qml-printing.html" status="internal" seen="false" title="" members="PrintPage,PrintJob"/>
         <group name="qmlmodules" href="qmlmodules.html" status="internal" seen="false" title="" members="BrickStore"/>
-        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="61" documented="true" seen="true" title="BrickStore QML types" module="BrickStore" groups="qmlmodules" members="Order,Document,PrintPage,PrintJob,ExtensionScriptAction,PrintingScriptAction,Script,BrickLink,Category,ItemType,Color,Item,Picture,PriceGuide,Lot,BrickStore" brief="Provides QML types for BrickStore"/>
+        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="67" documented="true" seen="true" title="BrickStore QML types" module="BrickStore" groups="qmlmodules" members="Order,Document,PrintPage,PrintJob,ExtensionScriptAction,PrintingScriptAction,Script,BrickLink,Category,ItemType,Color,Item,Picture,PriceGuide,Lot,BrickStore" brief="Provides QML types for BrickStore"/>
     </namespace>
 </INDEX>
