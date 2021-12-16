@@ -149,12 +149,15 @@ public:
     QObject *connectActionTable(const ActionTable &actionTable);
     void disconnectActionTable(QObject *contextObject);
 
-    static ActionManager *inst();
+    void setSelection(const BrickLink::LotList &selection);
 
-public slots:
+    Document *activeDocument() const;
     void setActiveDocument(Document *document);
 
-    void setSelection(const BrickLink::LotList &selection);
+    static ActionManager *inst();
+
+signals:
+    void activeDocumentChanged(Document *doc);
 
 protected:
     bool event(QEvent *e) override;

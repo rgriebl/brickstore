@@ -1034,12 +1034,12 @@ void View::print(bool as_pdf)
     if (as_pdf)
         prt.setPrinterName(QString { });
 
-    bool selectionOnly = (prt.printRange() == QPrinter::Selection);
     PrintDialog pd(&prt, this);
     connect(&pd, &PrintDialog::paintRequested,
             this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
-        printPages(previewPrt, selectionOnly ? selectedLots() : model()->filteredLots(),
+        printPages(previewPrt, (previewPrt->printRange() == QPrinter::Selection)
+                   ? selectedLots() : model()->filteredLots(),
                    pages, scaleFactor, maxPageCount, maxWidth);
     });
     pd.exec();
@@ -1054,11 +1054,12 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
             this, [&](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         try {
-            Q_UNUSED(pages)
             Q_UNUSED(scaleFactor)
             Q_UNUSED(maxWidth)
             previewPrt->setFullPage(true);
-            printingAction->executePrint(previewPrt, this, previewPrt->printRange() == QPrinter::Selection, maxPageCount);
+            printingAction->executePrint(previewPrt, this,
+                                         previewPrt->printRange() == QPrinter::Selection,
+                                         pages, maxPageCount);
         } catch (const Exception &e) {
             QString msg = e.error();
             if (msg.isEmpty())

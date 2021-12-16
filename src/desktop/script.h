@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QtQml/QQmlParserStatus>
+#include <QtQml/QQmlInfo>
 #include <QtQuick/QQuickItem>
 #include <QAction> // moved from QtWidgets to QtGui in Qt 6
 
@@ -84,7 +85,7 @@ public:
     QJSValue printFunction() const;
     void setPrintFunction(const QJSValue &function);
 
-    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, uint *maxPageCount = nullptr);
+    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, const QList<uint> &pages, uint *maxPageCount = nullptr);
 
 signals:
     void textChanged(const QString &text);
@@ -107,14 +108,18 @@ class Script : public QQuickItem
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
     Q_PROPERTY(QString version READ version WRITE setVersion NOTIFY versionChanged)
-    Q_PROPERTY(Type type READ type WRITE setType NOTIFY typeChanged)
+
+    Q_PROPERTY(Type type READ type WRITE setType) // deprecated as of 2022.1.1, never been actually used
 
 public:
-    enum class Type {
+    enum class Type { // deprecated as of 2022.1.1, never been actually used
         ExtensionScript,
         PrintingScript,
     };
     Q_ENUM(Type)
+
+    Type type() const { return Type::ExtensionScript; }
+    void setType(Type) { qmlInfo(this) << "the 'type' property is deprecated and should be removed"; }
 
     QString name() const;
     QString author() const;
@@ -122,8 +127,6 @@ public:
     void setAuthor(QString author);
     QString version() const;
     void setVersion(QString version);
-    Type type() const;
-    void setType(Type type);
 
     void addExtensionAction(ExtensionScriptAction *extensionAction);
     void addPrintingAction(PrintingScriptAction *printingAction);
@@ -139,13 +142,11 @@ signals:
     void nameChanged(QString name);
     void authorChanged(QString author);
     void versionChanged(QString version);
-    void typeChanged(Script::Type type);
 
 private:
     QString m_name;
     QString m_author;
     QString m_version;
-    Type m_type = Type::ExtensionScript;
 
     QString m_fileName;
     QScopedPointer<QQmlEngine> m_engine;

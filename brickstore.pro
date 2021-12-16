@@ -93,6 +93,9 @@ OTHER_FILES += \
   LICENSE.GPL \
   BrickStoreXML.rnc \
   configure \
+  doc/extensions.css \
+  doc/extensions.qdoc \
+  doc/extensions.qdocconf \
   translations/translations.json \
   scripts/generate-assets.sh \
   extensions/README.md \
@@ -101,9 +104,6 @@ OTHER_FILES += \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
-  doc/apidocs.qdocconf \
-  doc/apidocs.qdoc \
-  doc/apidocs.css \
 
 LANGUAGES = en de fr cz pt es
 
@@ -157,8 +157,8 @@ sentry {
 qtPrepareTool(QDOC, qdoc)
 #qtPrepareTool(QTATTRIBUTIONSCANNER, qtattributionscanner)
 
-apidocs.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/apidocs.qdocconf"
-QMAKE_EXTRA_TARGETS += apidocs
+extensions_doc.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/extensions.qdocconf"
+QMAKE_EXTRA_TARGETS += extensions_doc
 
 #
 # Windows specific

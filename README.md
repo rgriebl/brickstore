@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/rgriebl/brickstore/master/assets/brickstore.png" align="right"
+<img src="https://raw.githubusercontent.com/rgriebl/brickstore/main/assets/brickstore.png" align="right"
      alt="BrickStore Logo" width="192" height="192">
 
 ![](https://github.com/rgriebl/brickstore/workflows/QMake%20Build%20Matrix/badge.svg)

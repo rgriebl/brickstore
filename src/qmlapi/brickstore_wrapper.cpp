@@ -23,6 +23,7 @@
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/order.h"
+#include "common/actionmanager.h"
 #include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
@@ -67,10 +68,15 @@
     \readonly
     This property holds the date and time of the last successful database update.
 */
-/*! \qmlproperty string BrickStore::online
+/*! \qmlproperty bool BrickStore::online
     \readonly
     The current online state of the application. This is mirroring the operating system's online
     state.
+*/
+/*! \qmlproperty Document BrickStore::activeDocument
+    \readonly
+    The currently active document, i.e. the document the user is working on. Can be \c null, if
+    no documents are open, but also if the quickstart page is active.
 */
 
 QmlBrickStore *QmlBrickStore::s_inst = nullptr;
@@ -111,6 +117,9 @@ QmlBrickStore::QmlBrickStore()
 
     connect(OnlineState::inst(), &OnlineState::onlineStateChanged,
             this, &QmlBrickStore::onlineStateChanged);
+
+    connect(ActionManager::inst(), &ActionManager::activeDocumentChanged,
+            this, &QmlBrickStore::activeDocumentChanged);
 
     connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
             this, &QmlBrickStore::lastDatabaseUpdateChanged);
@@ -272,6 +281,11 @@ QDateTime QmlBrickStore::lastDatabaseUpdate() const
 bool QmlBrickStore::updateDatabase()
 {
     return QCoro::waitFor(Application::inst()->updateDatabase());
+}
+
+Document *QmlBrickStore::activeDocument() const
+{
+    return ActionManager::inst()->activeDocument();
 }
 
 

@@ -94,7 +94,7 @@ class Document : public QObject
     Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
-    Q_PROPERTY(BrickLink::Order order READ order CONSTANT)
+    Q_PROPERTY(BrickLink::Order *order READ order CONSTANT)
     Q_PROPERTY(DocumentModel *model READ model CONSTANT)
     Q_PROPERTY(bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
     Q_PROPERTY(bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged)

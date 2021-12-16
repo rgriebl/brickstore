@@ -5,7 +5,6 @@ Script {
     name: "Classic print script (comments, no price)"
     author: "1001bricks"
     version: "0.2"
-    type: Script.ExtensionScript
 
     PrintingScriptAction {
         text: "Print: Classic layout (comments, no price)"
@@ -109,12 +108,12 @@ Script {
 
         let f1 = Qt.font({ family: "Arial", pointSize: 12, bold: true })
         page. font = f1;
-        page. drawText ( ps. x, y, ps. w / 2, h, Page.AlignLeft | Page.AlignVCenter,  "BrickStore" );
+        page. drawText ( ps. x, y, ps. w / 2, h, PrintPage.AlignLeft | PrintPage.AlignVCenter,  "BrickStore" );
 
         let f2 = Qt.font({ family: "Arial", pointSize: 12 })
         page. font = f2;
         let d = new Date ( );
-        page. drawText ( ps. x + ps. w / 2, y, ps. w / 2, h, Page.AlignRight | Page.AlignVCenter, Qt.formatDate(d));
+        page. drawText ( ps. x + ps. w / 2, y, ps. w / 2, h, PrintPage.AlignRight | PrintPage.AlignVCenter, Qt.formatDate(d));
 
         ps. pos = h;
     }
@@ -126,8 +125,8 @@ Script {
 
         let f3 = Qt.font({ family: "Arial", pointSize: 12, italic: true })
         page. font = f3;
-        page. drawText ( ps. x              , y, ps. w * .75, h, Page.AlignLeft  | Page.AlignVCenter, ps.doc. fileName );
-        page. drawText ( ps. x + ps. w * .75, y, ps. w * .25, h, Page.AlignRight | Page.AlignVCenter, "Page " + (page. number+1) );
+        page. drawText ( ps. x              , y, ps. w * .75, h, PrintPage.AlignLeft  | PrintPage.AlignVCenter, ps.doc. fileName );
+        page. drawText ( ps. x + ps. w * .75, y, ps. w * .25, h, PrintPage.AlignRight | PrintPage.AlignVCenter, "Page " + (page. number+1) );
 
         ps. pos = y + h;
     }
@@ -149,12 +148,12 @@ Script {
         page. drawRect ( ps. x, y, ps. w, h );
 
         page. color = "white"
-        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 )    , h, Page.AlignHCenter | Page.AlignVCenter, jobstat. lots );
-        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 )    , h, Page.AlignHCenter | Page.AlignVCenter, jobstat. items );
-        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, Page.AlignRight   | Page.AlignVCenter, BrickStore.toCurrencyString( jobstat. total, ps.ccode));
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 )    , h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, jobstat. lots );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 )    , h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, jobstat. items );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, PrintPage.AlignRight   | PrintPage.AlignVCenter, BrickStore.toCurrencyString( jobstat. total, ps.ccode));
 
         page.font. bold = true;
-        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, Page.AlignLeft | Page.AlignVCenter, "Grand Total" );
+        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, PrintPage.AlignLeft | PrintPage.AlignVCenter, "Grand Total" );
 
         page. backgroundColor = "white"
         page. color = "black"
@@ -175,12 +174,12 @@ Script {
         page. drawRect ( ps. x, y, ps. w, h );
 
         page. color = "white"
-        page. drawText ( ps. x                   , y, xs( ps. w, 20 ), h, Page.AlignCenter, "Image" );
-        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, Page.AlignCenter, "Cond." );
-        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 75 ), h, Page.AlignCenter, "Part" );
-        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ), h, Page.AlignCenter, "Lots" );
-        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, Page.AlignCenter, "Qty" );
-        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 20 ), h, Page.AlignCenter, "Comments" );
+        page. drawText ( ps. x                   , y, xs( ps. w, 20 ), h, PrintPage.AlignCenter, "Image" );
+        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, PrintPage.AlignCenter, "Cond." );
+        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 75 ), h, PrintPage.AlignCenter, "Part" );
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ), h, PrintPage.AlignCenter, "Lots" );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, PrintPage.AlignCenter, "Qty" );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 20 ), h, PrintPage.AlignCenter, "Comments" );
         page. backgroundColor = "white"
         page. color = "black"
 
@@ -200,12 +199,12 @@ Script {
         page. drawRect ( ps. x, y, ps. w, h );
 
         page. color = "white";
-        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat. lots );
-        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat. items );
-        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, Page.AlignRight   | Page.AlignVCenter, BrickStore.toCurrencyString( pagestat. total, ps.ccode ));
+        page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ),     h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, pagestat. lots );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ),     h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, pagestat. items );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, PrintPage.AlignRight   | PrintPage.AlignVCenter, BrickStore.toCurrencyString( pagestat. total, ps.ccode ));
 
         page.font. bold = true;
-        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, Page.AlignLeft | Page.AlignVCenter, "Total" );
+        page. drawText ( ps. x + 2, y, xs( ps. w, 100 ), h, PrintPage.AlignLeft | PrintPage.AlignVCenter, "Total" );
         page.color = "black"
         page.backgroundColor = "white"
 
@@ -228,10 +227,10 @@ Script {
         page. backgroundColor = "white"
         page. drawImage ( ps. x + 2, y, xs( ps. w, 15 ), h, item. image );
 
-        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, Page.AlignHCenter | Page.AlignVCenter, item. condition. used ? "Used" : "New" );
-        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, Page.AlignLeft    | Page.AlignVCenter | Page.TextWordWrap, item. color. name + " " + item. name + " [" + item. id + "]" );
-        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, Page.AlignHCenter | Page.AlignVCenter, item. quantity );
-        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ), h, Page.AlignLeft   | Page.AlignVCenter, item. comments );
+        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, item. condition. used ? "Used" : "New" );
+        page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, PrintPage.AlignLeft    | PrintPage.AlignVCenter | PrintPage.TextWordWrap, item. color. name + " " + item. name + " [" + item. id + "]" );
+        page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, item. quantity );
+        page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ), h, PrintPage.AlignLeft   | PrintPage.AlignVCenter, item. comments );
 
         ps. pos += h;
     }

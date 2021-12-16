@@ -55,5 +55,6 @@ private:
     uint m_maxPageCount = 0;
     double m_maxWidth = 0.;
     bool m_saveAsPdf = false;
+    bool m_hasSelection = false;
     uint m_freezeLoopWorkaround = 0;
 };

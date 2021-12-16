@@ -27,6 +27,133 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+/*! \qmltype PrintPage
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief An instance of this type represents the canvas of a printer page.
+
+    \note All coordinates are floating point values and the unit is \c mm. Check
+          PrintJob::paperSize to make sure you adapt to the paper format of the selected printer.
+*/
+/*! \qmlproperty int PrintPage::number
+    \readonly
+    The page index within the current print job.
+    \sa PrintJob
+*/
+/*! \qmlproperty font PrintPage::font
+    The currently selected font.
+    You can create and assing font objects using the \c{Qt.font()} factory function.
+
+    See the \l {https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method} {Qt documentation for Qt.font}
+    and the \l {https://doc.qt.io/qt-5/qml-font.html} {QML font documentation} for the available
+    font properties.
+
+    \badcode
+    ...
+    page.font = Qt.font({ family: "Times", pointSize: 12 })
+    ...
+    \endcode
+    The default is \c{{ family: "Arial", pointSize: 10 }}.
+*/
+/*! \qmlproperty color PrintPage::color
+    The currently selected color, used for drawing text, lines and the outlines of rectangles and
+    ellipses.
+
+    See the \l {https://doc.qt.io/qt-5/qml-color.html} {QML color documentation}.
+
+    \badcode
+    ...
+    page.color = active ? "black" : "#808080"
+    ...
+    \endcode
+
+    The default is \c{"black"}.
+*/
+/*! \qmlproperty color PrintPage::backgroundColor
+    The currently selected background color, used for filling rectangles and ellipses.
+    Set to \c{"transparent"} to prevent filling.
+
+    See the \l {https://doc.qt.io/qt-5/qml-color.html} {QML color documentation}.
+
+    \badcode
+    ...
+    page.backgroundColor = Qt.rgba(.13, .4, .66, 1)
+    ...
+    \endcode
+    The default is \c{"white"}.
+*/
+/*! \qmlproperty enumeration PrintPage::lineStyle
+    The style of lines, used for drawing lines and the outlines of rectangles and
+    ellipses.
+
+    The available values for this line style enumeration are:
+
+    \value PrintPage.SolidLine    A plain line.
+    \value PrintPage.NoLine       No line at all. For example, drawRect fills but does not draw any outline.
+    \value PrintPage.DashLine     Dashes separated by a few pixels.
+    \value PrintPage.DotLine      Dots separated by a few pixels.
+    \value PrintPage.DashDotLine  Alternate dots and dashes.
+    \value PrintPage.DashDotDotLine  One dash, two dots, one dash, two dots.
+
+    The default is \c{PrintPage.SolidLine}.
+*/
+/*! \qmlproperty real PrintPage::lineWidth
+    The width of a line, used for drawing lines and the outlines of rectangles and
+    ellipses.
+
+    A line width of zero indicates a cosmetic pen. This means that the pen width is always drawn
+    one pixel wide, independent of the actual pixel density and resolution of the current output
+    device.
+
+    The default is \c{0.1}.
+*/
+/*! \qmlmethod size PrintPage::textSize(string text)
+    Calculates the size of string \a text, if it was rendered in the currently selected font.
+*/
+/*! \qmlmethod PrintPage::drawText(real left, real top, real width, real height, int flags, string text)
+    Draws the given \a text within the rectangle specified by the top-left corner at (\a left, \a top)
+    and a size of (\a width x \a height) using the currently selected font and color.
+
+    If the text is larger than the specified rectangle, the text is clipped. You can use textSize()
+    to calculate the size needed to fit a specific text element. You can suppress this feature
+    using the \c TextDontClip flag.
+
+    The text can be aligned within this rectangle through the \a flags parameter. These possible
+    are the possible values and can you can or them (\c{|}) together where it makes sense:
+
+    \value PrintPage.AlignLeft     Aligns with the left edge.
+    \value PrintPage.AlignHCenter  Centers horizontally in the available space.
+    \value PrintPage.AlignRight    Aligns with the right edge.
+    \value PrintPage.AlignTop      Aligns with the top.
+    \value PrintPage.AlignVCenter  Centers vertically in the available space.
+    \value PrintPage.AlignBottom   Aligns with the bottom.
+    \value PrintPage.AlignCenter   Centers in both dimensions.
+    \value PrintPage.TextDontClip  If it's impossible to stay within the given bounds, it prints outside.
+    \value PrintPage.TextWordWrap  Breaks lines at appropriate points, e.g. at word boundaries.
+    \value PrintPage.TextWrapAnywhere  Breaks lines anywhere, even within words.
+*/
+/*! \qmlmethod PrintPage::drawLine(real x1, real y1, real x2, real y2)
+    Draws a line from (\a x1, \a y1) to (\a x2, \a y2) using color.
+*/
+/*! \qmlmethod PrintPage::drawRect(real left, real top, real width, real height)
+    Draws a rectangle with the top-left corner at (\a left, \a top) and a size of
+    (\a width x \a height).
+
+    The rectangle is filled with backgroundColor and the outline is drawn using a lineWidth thick
+    pencil using the selected color and lineStyle.
+*/
+/*! \qmlmethod PrintPage::drawEllipse(real left, real top, real width, real height)
+    Draws an ellipse within the rectangle specified by the top-left corner at (\a left, \a top)
+    and a size of (\a width x \a height).
+
+    The ellipse is filled with backgroundColor and the outline is drawn using a lineWidth thick
+    pencil using the selected color and lineStyle.
+*/
+/*! \qmlmethod PrintPage::drawImage(real left, real top, real width, real height, image image)
+    Draws the given \a image with its top-left corner at (\a left, \a top), scaled to the size
+    (\a width x \a height).
+*/
+
 QmlPrintPage::QmlPrintPage(const QmlPrintJob *job)
     : QObject(const_cast <QmlPrintJob *>(job)), m_job(job)
 {
@@ -312,7 +439,32 @@ void QmlPrintPage::drawImage(double left, double top, double width, double heigh
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-
+/*! \qmltype PrintJob
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief An instance of this type represents an active print job.
+*/
+/*! \qmlproperty int PrintJob::pageCount
+    \readonly
+    The number of pages added to this print job.
+*/
+/*! \qmlproperty size PrintJob::paperSize
+    \readonly
+    The paper size of a page in \c mm.
+*/
+/*! \qmlmethod PrintPage PrintJob::addPage()
+    Calling this function adds a new PrintPage to the print job and returns a reference to it for
+    painting.
+*/
+/*! \qmlmethod PrintPage PrintJob::getPage(int index)
+    Returns a reference to an already added PrintPage at \a index or \c null if the index is
+    invalid.
+*/
+/*! \qmlmethod PrintJob::abort()
+    Request this print job to be aborted.
+    \note Control will return back to the next JavaScript statement and you still have to return
+          normally from your extension's PrintingScriptAction::printFunction() function.
+*/
 
 void QmlPrintJob::registerTypes()
 {
@@ -320,10 +472,14 @@ void QmlPrintJob::registerTypes()
 
     qmlRegisterUncreatableType<QmlPrintJob>("BrickStore", 1, 0, "PrintJob",
                                             cannotCreate.arg("PrintJob"_l1));
-    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "Page",
-                                             cannotCreate.arg("Page"_l1));
+    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "PrintPage",
+                                             cannotCreate.arg("PrintPage"_l1));
     qRegisterMetaType<QmlPrintPage::Alignment>("PrintPage::Alignment");
     qRegisterMetaType<QmlPrintPage::LineStyle>("PrintPage::LineStyle");
+
+    // deprecated as of 2022.1.1 ... use PrintPage instead
+    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "Page",
+                                             cannotCreate.arg("Page"_l1));
 }
 
 QmlPrintJob::QmlPrintJob(QPaintDevice *pd)
@@ -390,9 +546,9 @@ void QmlPrintJob::dump()
     }
 }
 
-bool QmlPrintJob::print(int from, int to)
+bool QmlPrintJob::print(const QList<uint> &pages)
 {
-    if (m_pages.isEmpty() || (from < 0) || (from > to) || (int(to) >= m_pages.count()))
+    if (m_pages.isEmpty())
         return false;
 
     QPainter p;
@@ -414,7 +570,10 @@ bool QmlPrintJob::print(int from, int to)
     scaling [1] = double(m_pd->logicalDpiY()) / 25.4;
     bool no_new_page = true;
 
-    for (int i = from; i <= to; i++) {
+    for (int i = 0; i < pageCount(); ++i) {
+        if (!pages.isEmpty() && !pages.contains(uint(i)))
+            continue;
+
         QmlPrintPage *page = m_pages.at(i);
 
         if (!no_new_page && prt)
@@ -427,4 +586,3 @@ bool QmlPrintJob::print(int from, int to)
 }
 
 #include "moc_printjob.cpp"
-
