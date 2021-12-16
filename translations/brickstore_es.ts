@@ -848,7 +848,7 @@
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="121"/>
         <source>&amp;Cost</source>
-        <translation>&amp;Coste</translation>
+        <translation>C&amp;oste</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="138"/>
@@ -2687,7 +2687,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/historylineedit.cpp" line="173"/>
         <source>&lt;p&gt;Pressing &lt;b&gt;Return&lt;/b&gt; will save the current filter expression as a favorite. You can recall saved filters by clicking the filter icon on the left or by pressing &lt;b&gt;Down Arrow&lt;/b&gt; to open a drop down menu. The number of favorites is limited to the last %1, but you can delete saved filters from this drop down menu as well by clicking the &lt;b&gt;X&lt;/b&gt; button on the right.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Al presionar &lt;b&gt;Retorno&lt;/b&gt; se guardará el filtro actual como favorito. Puede recuperar los filtros guardados haciendo clic en el icono de filtro a la izquierda o presionando la &lt;b&gt;Flecha Abajo&lt;/b&gt; para abrir un menú desplegable. El número de favoritos está limitado al último%1, pero también puede eliminar los filtros guardados de este menú desplegable haciendo clic en el botón &lt;b&gt;X&lt;/b&gt; a la derecha.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Al presionar &lt;b&gt;Retorno&lt;/b&gt; se guardará el filtro actual como favorito. Puede recuperar los filtros guardados haciendo clic en el icono de filtro a la izquierda o presionando la &lt;b&gt;Flecha Abajo&lt;/b&gt; para abrir un menú desplegable. El número de favoritos está limitado a los últimos %1, pero también puede eliminar los filtros guardados de este menú desplegable haciendo clic en el botón &lt;b&gt;X&lt;/b&gt; a la derecha.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -3255,12 +3255,12 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/priceguidewidget.cpp" line="168"/>
         <source>Q.Avg.</source>
-        <translation>C.Med.</translation>
+        <translation>Med.C.</translation>
     </message>
     <message>
         <location filename="../src/desktop/priceguidewidget.cpp" line="169"/>
         <source>Max.</source>
-        <translation>Max.</translation>
+        <translation>Máx.</translation>
     </message>
     <message>
         <location filename="../src/desktop/priceguidewidget.cpp" line="170"/>
@@ -3684,7 +3684,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/selectcolor.cpp" line="127"/>
         <source>Only &quot;%1&quot; Colors</source>
-        <translation>Solo &quot;%1&quot; Colores</translation>
+        <translation>Solo Colores &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectcolor.cpp" line="129"/>
@@ -3767,7 +3767,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="502"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Mostrar solo los artículos que contengan todas las palabras ingresadas, independientemente del caso, ya sea en el nombre o en el número de pieza. Esto funciona de manera muy similar a un motor de búsqueda web: &lt;ul&gt;&lt;li&gt;para excluir palabras, antepóngalas con &lt;tt&gt;-&lt;/tt&gt;. (P.Ej. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para que coincida con una frase, colóquela entre comillas. (P.Ej. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar las partes que aparecen en un set específico, coloque &lt;tt&gt;aparece-en:&lt;/tt&gt; delante del nombre del set. (P.Ej.&lt;tt&gt; aparece en:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar sets o minifigs que consta de una pieza específica, coloque &lt;tt&gt;consta-de:&lt;/tt&gt; delante de la Id de la pieza. (P.Ej. &lt;tt&gt;consta-de: 3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Mostrar solo los artículos que contengan todas las palabras ingresadas, independientemente del caso, ya sea en el nombre o en el número de pieza. Esto funciona de manera muy similar a un motor de búsqueda web: &lt;ul&gt;&lt;li&gt;para excluir palabras, antepóngalas con &lt;tt&gt;-&lt;/tt&gt;. (P.Ej. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para que coincida con una frase, colóquela entre comillas. (P.Ej. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar las partes que aparecen en un set específico, coloque &lt;tt&gt;aparece-en:&lt;/tt&gt; delante del nombre del set. (P.Ej.&lt;tt&gt; aparece-en:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar sets o minifigs que consta de una pieza específica, coloque &lt;tt&gt;consta-de:&lt;/tt&gt; delante de la Id de la pieza. (P.Ej. &lt;tt&gt;consta-de:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="513"/>
@@ -4730,22 +4730,22 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="505"/>
         <source>Split</source>
-        <translation>Separar</translation>
+        <translation>Partir</translation>
     </message>
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="506"/>
         <source>Split horizontally</source>
-        <translation>Separar horizontalmente</translation>
+        <translation>Partir horizontalmente</translation>
     </message>
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="507"/>
         <source>Split vertically</source>
-        <translation>Separar verticalmente</translation>
+        <translation>Partir verticalmente</translation>
     </message>
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="508"/>
         <source>Remove split</source>
-        <translation>Eliminar separación</translation>
+        <translation>Eliminar partición</translation>
     </message>
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="574"/>
