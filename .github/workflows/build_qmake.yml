@@ -57,7 +57,7 @@ jobs:
 
         - name: "macOS 64bit"
           artifact: "macOS"
-          os: macos-10.15
+          os: macos-11
           qt_version: '5.15.2'
           qt_arch: ''
           qmake_extra_config: 'CONFIG+=sentry'
