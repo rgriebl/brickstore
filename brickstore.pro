@@ -149,6 +149,7 @@ sentry {
   CONFIG(debug, debug|release):LIBS += "-L$$VCPKG_PATH/debug/lib"
   else:LIBS += "-L$$VCPKG_PATH/lib"
   LIBS *= -lsentry
+  macos:LIBS *= -lcurl -lcrashpad_client -lmini_chromium -lcrashpad_util -lbsm -framework Security
   CONFIG *= force_debug_info
 
   DEFINES *= SENTRY_ENABLED
@@ -353,6 +354,12 @@ macos {
   QMAKE_INFO_PLIST = $$OUT_PWD/macos/Info.plist
 
   LIBS += -framework SystemConfiguration
+
+  sentry {
+    bundle_sentry.path = Contents/MacOS
+    bundle_sentry.files = $$VCPKG_PATH/tools/sentry-native/crashpad_handler
+    QMAKE_BUNDLE_DATA += bundle_sentry
+  }
 
   CONFIG(release, debug|release) {
     deploy.depends += $(DESTDIR_TARGET)
