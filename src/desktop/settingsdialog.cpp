@@ -59,7 +59,7 @@ public:
     ActionModel(Options options, QObject *parent = nullptr)
         : QAbstractItemModel(parent)
     {
-        MODELTEST_ATTACH(this);
+        MODELTEST_ATTACH(this)
 
         auto all = ActionManager::inst()->allActions();
         for (const auto &aa : all) {
@@ -120,9 +120,9 @@ public:
         if (hasIndex(row, column, parent)) {
             quint32 id;
             if (!parent.isValid())
-                id = row << 16 | 0x0000ffffu;
+                id = quint32(row) << 16 | 0x0000ffff;
             else
-                id = (parent.row() << 16) | (row & 0x0000ffff);
+                id = (quint32(parent.row()) << 16) | (row & 0x0000ffff);
             return createIndex(row, column, id);
         }
         return {};
@@ -152,7 +152,7 @@ public:
 
     int columnCount(const QModelIndex &parent = { }) const override
     {
-        Q_UNUSED(parent);
+        Q_UNUSED(parent)
         return 1;
     }
 
@@ -285,7 +285,7 @@ protected:
     }
     int categoryIndex(const QModelIndex &idx) const
     {
-        return idx.internalId() >> 16;
+        return int(idx.internalId() >> 16);
     }
     QString actionAt(const QModelIndex &idx) const
     {
@@ -337,7 +337,7 @@ public:
     QModelIndex index(int row, int column, const QModelIndex &parent) const override
     {
         if (hasIndex(row, column, parent))
-            return createIndex(row, column, row);
+            return createIndex(row, column, quint32(row));
         return {};
     }
 
@@ -876,7 +876,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         // disallow Alt only shortcuts, because this interferes with standard menu handling
         for (int i = 0; i < newShortcut.count(); ++i) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            auto mod = (newShortcut[i] & Qt::KeyboardModifierMask);
+            auto mod = Qt::KeyboardModifiers(newShortcut[uint(i)]) & Qt::KeyboardModifierMask;
 #else
             auto mod = newShortcut[i].keyboardModifiers();
 #endif

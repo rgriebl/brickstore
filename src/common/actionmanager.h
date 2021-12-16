@@ -111,7 +111,6 @@ public:
         const char *m_name;
         const char *m_text;
         const char *m_shortcut = nullptr;
-        QKeySequence::StandardKey m_standardKey = QKeySequence::UnknownKey;
         QList<QKeySequence> m_defaultShortcuts;
         ActionManager::Needs m_needs = ActionManager::NoNeed;
         int m_flags = NoFlag;

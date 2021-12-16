@@ -55,7 +55,6 @@ SystemInfo::~SystemInfo()
 
 SystemInfo::SystemInfo()
     : QObject(QCoreApplication::instance())
-    , m_futuresRunning(2)
 {
     m_map["os.type"_l1] = QSysInfo::productType();
     m_map["os.version"_l1] = QSysInfo::productVersion();

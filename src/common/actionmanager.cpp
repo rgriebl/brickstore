@@ -30,7 +30,6 @@ ActionManager::Action::Action(const char *name, const char *text, Needs needs, F
     : m_name(name)
     , m_text(text)
     , m_shortcut(shortcut)
-    , m_standardKey(key)
     , m_needs(needs)
     , m_flags(flags)
 {

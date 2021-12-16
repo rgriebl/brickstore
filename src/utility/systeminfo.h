@@ -25,7 +25,7 @@ class SystemInfo : public QObject
 
 public:
     static SystemInfo *inst();
-    ~SystemInfo();
+    ~SystemInfo() override;
     QVariantMap asMap() const;
     quint64 physicalMemory() const;
 
@@ -40,5 +40,4 @@ private:
     static SystemInfo *s_inst;
 
     QVariantMap m_map;
-    int m_futuresRunning;
 };
