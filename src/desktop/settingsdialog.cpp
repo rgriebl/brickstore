@@ -754,6 +754,9 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
     w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
+    w_bl_password_notice->setAttribute(Qt::WA_MacSmallSize);
+    w_bl_username->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
+    w_bl_password->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
