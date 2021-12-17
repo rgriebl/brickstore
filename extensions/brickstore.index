@@ -3387,6 +3387,7 @@
             <variable name="m_online" fullname="OnlineState::m_online" href="onlinestate.html#m_online-var" status="internal" access="private" location="onlinestate.h" filepath="/build/src/common/onlinestate.h" lineno="39" type="bool" static="false"/>
             <variable name="s_inst" fullname="OnlineState::s_inst" href="onlinestate.html#s_inst-var" status="internal" access="private" location="onlinestate.h" filepath="/build/src/common/onlinestate.h" lineno="42" type="OnlineState *" static="true"/>
         </class>
+        <class name="OrderInformationDialog" href="orderinformationdialog.html" status="internal" access="private" location="orderinformationdialog.h" filepath="/build/src/desktop/orderinformationdialog.h" lineno="22"/>
         <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/build/doc/extensions.qdoc" lineno="128" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="" module="BrickStore">
             <contents name="the-simple-changes" title="The simple changes" level="2"/>
             <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
