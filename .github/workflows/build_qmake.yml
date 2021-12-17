@@ -89,13 +89,22 @@ jobs:
     # Caching
     #################################################
 
-    - name: Cache vcpkg installed
+    - name: Cache vcpkg on Windows
       uses: actions/cache@v2
-      if: matrix.config.vcpkg_triplet
+      if: startsWith(matrix.config.os, 'windows') && matrix.config.vcpkg_triplet
       with:
         path: |
-          $VCPKG_INSTALLATION_ROOT/installed
-          $VCPKG_INSTALLATION_ROOT/downloads
+          C:\vcpkg\installed
+          C:\vcpkg\downloads
+        key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
+
+    - name: Cache vcpkg on macOS
+      uses: actions/cache@v2
+      if: (!startsWith(matrix.config.os, 'windows')) && matrix.config.vcpkg_triplet
+      with:
+        path: |
+          /usr/local/share/vcpkg/installed
+          /usr/local/share/vcpkg/downloads
         key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
 
     - name: Cache Qt from qt.io
