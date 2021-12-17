@@ -93,9 +93,6 @@ OTHER_FILES += \
   LICENSE.GPL \
   BrickStoreXML.rnc \
   configure \
-  doc/extensions.css \
-  doc/extensions.qdoc \
-  doc/extensions.qdocconf \
   translations/translations.json \
   scripts/generate-assets.sh \
   extensions/README.md \
@@ -131,6 +128,7 @@ RESOURCES = \
 include(3rdparty/lzma.pri)
 include(3rdparty/qcoro.pri)
 include(src/src.pri)
+include(doc/doc.pri)
 
 INCLUDEPATH *= 3rdparty/
 
@@ -155,11 +153,6 @@ sentry {
   DEFINES *= SENTRY_ENABLED
 }
 
-qtPrepareTool(QDOC, qdoc)
-#qtPrepareTool(QTATTRIBUTIONSCANNER, qtattributionscanner)
-
-extensions_doc.commands = $$QDOC -D VERSION=$$VERSION "$$PWD/doc/extensions.qdocconf" -indexdir "$$[QT_INSTALL_DOCS]"
-QMAKE_EXTRA_TARGETS += extensions_doc
 
 #
 # Windows specific
