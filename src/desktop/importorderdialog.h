@@ -39,12 +39,12 @@ protected slots:
     void updateStatusLabel();
 
     void importOrders(const QModelIndexList &rows, bool combined);
-    void showOrdersOnBrickLink();
 
 private:
     QPushButton *w_import;
     QPushButton *w_importCombined;
-    QPushButton *w_showOnBrickLink;
+    QAction *m_showOnBrickLink;
+    QAction *m_orderInformation;
     QSet<QString> m_selectedCurrencyCodes;
     QString m_updateMessage;
 };

@@ -35,6 +35,7 @@
 #include "changecurrencydialog.h"
 #include "filtertermwidget.h"
 #include "menucombobox.h"
+#include "orderinformationdialog.h"
 #include "view.h"
 #include "viewpane.h"
 
@@ -596,8 +597,8 @@ void ViewPane::createToolBar()
     connect(m_order, &QToolButton::clicked,
             this, [this]() {
         if (m_view && m_view->document()->order()) {
-            QMessageBox::information(m_view, tr("Order information"),
-                                     m_view->document()->order()->address());
+            OrderInformationDialog d(m_view->document()->order(), this);
+            d.exec();
         }
     });
 

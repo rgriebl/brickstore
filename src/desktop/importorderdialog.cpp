@@ -20,17 +20,20 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QMessageBox>
+#include <QMenu>
 
 #include "utility/currency.h"
 #include "utility/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "bricklink/core.h"
 #include "bricklink/order.h"
+#include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "betteritemdelegate.h"
 #include "historylineedit.h"
 #include "importorderdialog.h"
+#include "orderinformationdialog.h"
 
 using namespace std::chrono_literals;
 
@@ -49,6 +52,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     proxyModel->setFilterKeyColumn(-1);
     proxyModel->setSourceModel(BrickLink::core()->orders());
     w_orders->setModel(proxyModel);
+    w_orders->setContextMenuPolicy(Qt::CustomContextMenu);
     w_orders->header()->setSectionResizeMode(4, QHeaderView::Stretch);
     w_orders->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection
                                                      | BetterItemDelegate::MoreSpacing, w_orders));
@@ -68,11 +72,6 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
     connect(w_import, &QAbstractButton::clicked,
             this, [this]() { importOrders(w_orders->selectionModel()->selectedRows(), false); });
-    w_showOnBrickLink = new QPushButton();
-    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
-    w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
-    connect(w_showOnBrickLink, &QAbstractButton::clicked,
-            this, &ImportOrderDialog::showOrdersOnBrickLink);
 
     connect(w_update, &QToolButton::clicked,
             this, &ImportOrderDialog::updateOrders);
@@ -106,6 +105,35 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
         w_orders->setFocus();
 
         checkSelected();
+    });
+
+    m_orderInformation = new QAction(this);
+    m_orderInformation->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_import_bl_order")->iconName()));
+    connect(m_orderInformation, &QAction::triggered, this, [this]() {
+        const auto selection = w_orders->selectionModel()->selectedRows();
+        if (selection.size() == 1) {
+            auto order = selection.constFirst().data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
+            OrderInformationDialog d(order, this);
+            d.exec();
+        }
+    });
+    addAction(m_orderInformation);
+    m_showOnBrickLink = new QAction(this);
+    m_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
+    connect(m_showOnBrickLink, &QAction::triggered, this, [this]() {
+        const auto selection = w_orders->selectionModel()->selectedRows();
+        for (auto idx : selection) {
+            auto order = idx.data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
+            QByteArray orderId = order->id().toLatin1();
+            BrickLink::core()->openUrl(BrickLink::URL_OrderDetails, orderId.constData());
+        }
+    });
+    addAction(m_showOnBrickLink);
+
+    connect(w_orders, &QWidget::customContextMenuRequested,
+            this, [this](const QPoint &pos) {
+        //if (!w_orders->selectionModel()->selection().isEmpty())
+            QMenu::exec(actions(), w_orders->viewport()->mapToGlobal(pos));
     });
 
     languageChange();
@@ -173,8 +201,8 @@ void ImportOrderDialog::languageChange()
     w_importCombined->setText(tr("Import combined"));
     w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
                                                QKeySequence::Find, w_filter->instructionToolTip()));
-    w_showOnBrickLink->setText(tr("Show"));
-    w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
+    m_orderInformation->setText(tr("Show order information"));
+    m_showOnBrickLink->setText(tr("Show on BrickLink"));
     updateStatusLabel();
 }
 
@@ -260,21 +288,12 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     }
 }
 
-void ImportOrderDialog::showOrdersOnBrickLink()
-{
-    const auto selection = w_orders->selectionModel()->selectedRows();
-    for (auto idx : selection) {
-        auto order = idx.data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
-        QByteArray orderId = order->id().toLatin1();
-        BrickLink::core()->openUrl(BrickLink::URL_OrderDetails, orderId.constData());
-    }
-}
-
 void ImportOrderDialog::checkSelected()
 {
     bool b = w_orders->selectionModel()->hasSelection();
+    bool singleSelection = false;
     w_import->setEnabled(b);
-    w_showOnBrickLink->setEnabled(b);
+    m_showOnBrickLink->setEnabled(b);
     m_selectedCurrencyCodes.clear();
 
     // combined import only makes sense for the same type
@@ -300,7 +319,9 @@ void ImportOrderDialog::checkSelected()
         } else {
             b = false;
         }
+        singleSelection = (rows.size() == 1);
     }
+    m_orderInformation->setEnabled(singleSelection);
     w_importCombined->setEnabled(b);
 }
 
