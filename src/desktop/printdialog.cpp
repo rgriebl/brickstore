@@ -32,11 +32,14 @@
 #include "view.h"
 
 
-PrintDialog::PrintDialog(QPrinter *printer, View *window)
+PrintDialog::PrintDialog(bool asPdf, View *window)
     : QDialog(window)
-    , m_printer(printer)
+    , m_printer(new QPrinter(QPrinter::HighResolution))
     , m_pdfWriter(new QPdfWriter(""_l1))
 {
+    if (asPdf)
+        m_printer->setPrinterName(QString { });
+
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint);
 
     qRegisterMetaType<QPageSize>();
@@ -62,6 +65,8 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     }
     connect(w_print_preview, &QPrintPreviewWidget::paintRequested,
             this, [this](QPrinter *prt) {
+        if (!m_setupComplete)
+            return;
         emit paintRequested(prt, m_pages, m_scaleFactor, &m_maxPageCount, &m_maxWidth);
     });
     connect(w_print_preview, &QPrintPreviewWidget::previewChanged,
@@ -181,13 +186,20 @@ PrintDialog::PrintDialog(QPrinter *printer, View *window)
     w_printers->addItem(QIcon::fromTheme("document-save-as"_l1), tr("Save as PDF"),
                         QString::fromLatin1("__PDF__"));
 
-    if ((defaultIdx == -1) || (printer->outputFormat() == QPrinter::PdfFormat))
+    if ((defaultIdx == -1) || (m_printer->outputFormat() == QPrinter::PdfFormat))
         defaultIdx = w_printers->count() - 1;
 
     QMetaObject::invokeMethod(this, [this, defaultIdx]() {
         w_printers->setCurrentIndex(defaultIdx);
-        updatePrinter(defaultIdx);
-    }, Qt::QueuedConnection);
+        m_setupComplete = true;
+        w_print_preview->updatePreview();
+   }, Qt::QueuedConnection);
+}
+
+PrintDialog::~PrintDialog()
+{
+    delete m_pdfWriter;
+    delete m_printer;
 }
 
 bool PrintDialog::eventFilter(QObject *o, QEvent *e)
@@ -257,7 +269,7 @@ void PrintDialog::updatePrinter(int idx)
         w_color->addItem(tr("Black and white"), int(QPrinter::GrayScale));
     w_color->setCurrentIndex(w_color->findData(int(defaultColorMode)));
 
-    w_pageMode->setCurrentIndex(0);
+    w_pageMode->setCurrentIndex(m_hasSelection ? 1 : 0);
 
     updateColorMode();
     updateMargins();

@@ -1025,16 +1025,12 @@ void View::repositionBlockOverlay()
 }
 
 
-void View::print(bool as_pdf)
+void View::print(bool asPdf)
 {
     if (m_model->filteredLots().isEmpty())
         return;
 
-    QPrinter prt(QPrinter::HighResolution);
-    if (as_pdf)
-        prt.setPrinterName(QString { });
-
-    PrintDialog pd(&prt, this);
+    PrintDialog pd(asPdf, this);
     connect(&pd, &PrintDialog::paintRequested,
             this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
@@ -1047,11 +1043,13 @@ void View::print(bool as_pdf)
 
 void View::printScriptAction(PrintingScriptAction *printingAction)
 {
-    QPrinter prt(QPrinter::HighResolution);
-    bool failOnce = false;
-    PrintDialog pd(&prt, this);
-    connect(&pd, &PrintDialog::paintRequested,
-            this, [&](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
+    auto *pd = new PrintDialog(false /*asPdf*/, this);
+    pd->setModal(true);
+    pd->setAttribute(Qt::WA_DeleteOnClose);
+    pd->setProperty("bsFailOnce", false);
+
+    connect(pd, &PrintDialog::paintRequested,
+            this, [=](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         try {
             Q_UNUSED(scaleFactor)
@@ -1061,22 +1059,24 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
                                          previewPrt->printRange() == QPrinter::Selection,
                                          pages, maxPageCount);
         } catch (const Exception &e) {
-            QString msg = e.error();
-            if (msg.isEmpty())
-                msg = tr("Printing failed.");
-            else
-                msg.replace('\n'_l1, "<br>"_l1);
+            if (!pd->property("bsFailOnce").toBool()) {
+                pd->setProperty("bsFailOnce", true);
 
-            QMetaObject::invokeMethod(this, [=, &pd, &failOnce]() {
-                if (!failOnce) {
-                    failOnce = true;
-                    pd.close();
+                QString msg = e.error();
+                if (msg.isEmpty())
+                    msg = tr("Printing failed.");
+                else
+                    msg.replace('\n'_l1, "<br>"_l1);
+
+                QMetaObject::invokeMethod(this, [=]() {
                     UIHelpers::warning(msg);
-                }
-            }, Qt::QueuedConnection);
+                }, Qt::QueuedConnection);
+
+                pd->deleteLater();
+            }
         }
     });
-    pd.exec();
+    pd->open();
 }
 
 bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,

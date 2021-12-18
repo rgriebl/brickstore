@@ -558,7 +558,7 @@ bool QmlPrintJob::print(const QList<uint> &pages)
     QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : nullptr;
 
 #if defined(Q_OS_WIN) // workaround for QTBUG-5363
-    if (prt->fullPage() && !prt->printerName().isEmpty()
+    if (prt && prt->fullPage() && !prt->printerName().isEmpty()
             && (p.paintEngine()->type() != QPaintEngine::Picture)) { // printing to a real printer
         auto margins = prt->pageLayout().marginsPixels(prt->resolution());
         p.translate(-margins.left(), -margins.top());

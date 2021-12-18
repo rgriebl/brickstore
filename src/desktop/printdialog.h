@@ -25,7 +25,8 @@ class PrintDialog : public QDialog, private Ui::PrintDialog
     Q_OBJECT
 
 public:
-    PrintDialog(QPrinter *printer, View *window);
+    PrintDialog(bool asPdf, View *window);
+    ~PrintDialog() override;
 
 signals:
     void paintRequested(QPrinter *printer, const QList<uint> &pages, double scaleFactor,
@@ -57,4 +58,5 @@ private:
     bool m_saveAsPdf = false;
     bool m_hasSelection = false;
     uint m_freezeLoopWorkaround = 0;
+    bool m_setupComplete = false;
 };
