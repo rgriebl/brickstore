@@ -390,8 +390,10 @@ android {
   ANDROID_VERSION_CODE=$$num_add("$${VERSION_MAJOR}000000", "$${VERSION_MINOR}000", $$VERSION_PATCH)
   ANDROID_VERSION_NAME=$$VERSION
 
+  # We expect KDAB's OpenSSL libs in $ANDROID_SDK_ROOT/android_openssl
+  # cd $ANDROID_SDK_ROOT && git clone https://github.com/KDAB/android_openssl.git
   OPENSSL_PRI=$$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri
-  !exists($$OPENSSL_PRI):error("$$OPENSSL_PRI is missing")
+  !exists($$OPENSSL_PRI):error("$$OPENSSL_PRI is missing - please clone KDAB's android_openssl into $$(ANDROID_SDK_ROOT)")
   include($$OPENSSL_PRI)
 
   # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:

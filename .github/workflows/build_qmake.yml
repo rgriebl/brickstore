@@ -276,7 +276,7 @@ jobs:
       run: |
         echo "Using NDK: $ANDROID_NDK_ROOT"
         echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
-        qmake -spec android-clang CONFIG+=release CONFIG+=qtquickcompiler${{ matrix.config.qmake_extra_config }}
+        qmake -spec android-clang CONFIG+=release CONFIG+=qtquickcompiler ${{ matrix.config.qmake_extra_config }}
         make
         make package
       shell: bash
