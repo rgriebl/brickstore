@@ -136,11 +136,11 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     { u"COLOR",        [](auto *lot, auto &v) { lot->isIncomplete()->m_color_id = v.toUInt(); } },
     { u"CATEGORY",     [](auto *lot, auto &v) { lot->isIncomplete()->m_category_id = v.toUInt(); } },
     { u"ITEMTYPE",     [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = XmlHelpers::firstCharInString(v); } },
-    { hint == Hint::Wanted ? u"MAXPRICE" : u"PRICE",
-                       [](auto *lot, auto &v) { lot->setPrice(fixFinite(v.toDouble())); } },
+    { u"MAXPRICE",     [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setPrice(fixFinite(v.toDouble())); } },
+    { u"PRICE",        [](auto *lot, auto &v) { lot->setPrice(fixFinite(v.toDouble())); } },
     { u"BULK",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
-    { hint == Hint::Wanted ? u"MINQTY" : u"QTY",
-                       [](auto *lot, auto &v) { lot->setQuantity(QString(v).remove(u',').toInt()); } },
+    { u"MINQTY",       [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setQuantity(QString(v).remove(u',').toInt()); } },
+    { u"QTY",          [](auto *lot, auto &v) { lot->setQuantity(QString(v).remove(u',').toInt()); } },
     { u"SALE",         [](auto *lot, auto &v) { lot->setSale(v.toInt()); } },
     { u"DESCRIPTION",  [](auto *lot, auto &v) { lot->setComments(v); } },
     { u"REMARKS",      [](auto *lot, auto &v) { lot->setRemarks(v); } },
@@ -230,7 +230,10 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                     foundRoot = true;
                 } else if (tagName == "ITEM"_l1) {
                     auto *lot = new Lot();
-                    lot->setIncomplete(new BrickLink::Incomplete);
+                    auto inc = new BrickLink::Incomplete;
+                    inc->m_color_id = 0;
+                    inc->m_category_id = 0;
+                    lot->setIncomplete(inc);
 
                     while (xml.readNextStartElement()) {
                         auto it = itemTagHash.find(xml.name());

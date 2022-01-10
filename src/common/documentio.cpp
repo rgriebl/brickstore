@@ -82,7 +82,7 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(const QString &fileName)
     QFile f(fn);
     if (f.open(QIODevice::ReadOnly)) {
         try {
-            auto result = BrickLink::IO::fromBrickLinkXML(f.readAll());
+            auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(), BrickLink::IO::Hint::PlainOrWanted);
             auto *document = new Document(new DocumentModel(std::move(result))); // Document owns the items now
             document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
             co_return document;

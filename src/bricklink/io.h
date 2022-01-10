@@ -75,7 +75,7 @@ enum class Hint {
     Order = 0x04,
     Store = 0x08,
 
-    Any = Plain | Wanted | Order | Store
+    PlainOrWanted = Plain | Wanted
 };
 
 QString toBrickLinkXML(const LotList &lots);
