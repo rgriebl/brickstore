@@ -71,6 +71,7 @@ protected:
     void fontChange();
     void paletteChange();
     void changeEvent(QEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void createToolBar();

@@ -25,6 +25,7 @@
 #include <QMessageBox>
 #include <QSplitter>
 #include <QMainWindow>
+#include <QKeyEvent>
 #include <QDebug>
 
 #include "common/actionmanager.h"
@@ -34,6 +35,7 @@
 #include "utility/utility.h"
 #include "changecurrencydialog.h"
 #include "filtertermwidget.h"
+#include "helpers.h"
 #include "menucombobox.h"
 #include "orderinformationdialog.h"
 #include "view.h"
@@ -520,9 +522,9 @@ void ViewPane::paletteChange()
 
 void ViewPane::languageChange()
 {
-    m_differences->setToolTip(Utility::toolTipLabel(tr("Go to the next difference"),
+    m_differences->setToolTip(Helpers::toolTipLabel(tr("Go to the next difference"),
                                                     m_differences->shortcut()));
-    m_errors->setToolTip(Utility::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
+    m_errors->setToolTip(Helpers::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
 
     m_order->setToolTip(tr("Show order information"));
     m_value->setText(tr("Currency:"));
@@ -545,6 +547,20 @@ void ViewPane::changeEvent(QEvent *e)
         paletteChange();
     if (e->type() == QEvent::FontChange)
         fontChange();
+}
+
+void ViewPane::keyPressEvent(QKeyEvent *e)
+{
+    int d = Helpers::shouldSwitchViews(e);
+    if (d) {
+        int cnt = m_viewList->count();
+        if (cnt > 1) {
+            int idx = (m_viewList->currentIndex() + d + cnt) % cnt;
+            m_viewList->setCurrentIndex(idx);
+        }
+        e->accept();
+    }
+    QWidget::keyPressEvent(e);
 }
 
 void ViewPane::createToolBar()
@@ -575,12 +591,14 @@ void ViewPane::createToolBar()
     m_viewList->setMinimumContentsLength(12);
     m_viewList->setMaxVisibleItems(40);
     m_viewList->setSizePolicy({ QSizePolicy::Expanding, QSizePolicy::Expanding });
+    m_viewList->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_viewList, 1);
     addSeparator();
 
     m_closeView = new QToolButton();
     m_closeView->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_close")->iconName()));
     m_closeView->setAutoRaise(true);
+    m_closeView->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_closeView);
 
     connect(m_closeView, &QToolButton::clicked, this, [this]() {
@@ -592,6 +610,7 @@ void ViewPane::createToolBar()
     m_order = new QToolButton();
     m_order->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_import_bl_order")->iconName()));
     m_order->setAutoRaise(true);
+    m_order->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_order);
 
     connect(m_order, &QToolButton::clicked,
@@ -609,6 +628,7 @@ void ViewPane::createToolBar()
             this, &ViewPane::updateStatistics);
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_differences->setAutoRaise(true);
+    m_differences->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_differences);
 
     m_errorsSeparator = addSeparator();
@@ -618,6 +638,7 @@ void ViewPane::createToolBar()
             this, &ViewPane::updateStatistics);
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_errors->setAutoRaise(true);
+    m_errors->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_errors);
 
     addSeparator();
@@ -639,6 +660,7 @@ void ViewPane::createToolBar()
     m_currency->setPopupMode(QToolButton::InstantPopup);
     m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
     m_currency->setAutoRaise(true);
+    m_currency->setFocusPolicy(Qt::NoFocus);
     currencyLayout->addWidget(m_currency);
     pageLayout->addLayout(currencyLayout, 10'000);
     m_profit = new CollapsibleLabel();
@@ -650,6 +672,7 @@ void ViewPane::createToolBar()
     m_filterOnOff = new QToolButton();
     m_filterOnOff->setDefaultAction(m_filter->action());
     m_filterOnOff->setAutoRaise(true);
+    m_filterOnOff->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_filterOnOff);
 
     addSeparator();
@@ -659,6 +682,7 @@ void ViewPane::createToolBar()
     m_split->setAutoRaise(true);
     m_split->setPopupMode(QToolButton::InstantPopup);
     m_split->setProperty("noMenuArrow", true);
+    m_split->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_split);
 
     m_splitH = new QAction(this);

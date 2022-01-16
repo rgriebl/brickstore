@@ -49,8 +49,9 @@
 #include "common/config.h"
 #include "common/uihelpers.h"
 #include "utility/utility.h"
-#include "mainwindow.h"
+#include "helpers.h"
 #include "historylineedit.h"
+#include "mainwindow.h"
 #include "selectitem.h"
 
 using namespace std::chrono_literals;
@@ -510,11 +511,11 @@ void SelectItem::languageChange()
         " in front of the part id. (e.g. <tt>consists-of:3001</tt>)</li>" \
         "</ul></p>") + d->w_filter->instructionToolTip();
 
-    d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this expression"),
+    d->w_filter->setToolTip(Helpers::toolTipLabel(tr("Filter the list using this expression"),
                                                   QKeySequence::Find, filterToolTip));
 
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
-        b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
+        b->setToolTip(Helpers::toolTipLabel(text, b->shortcut()));
     };
     setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
     setToolTipOnButton(d->w_viewmode->button(0), tr("List"));

@@ -17,6 +17,7 @@
 #include "bricklink/item.h"
 #include "common/config.h"
 #include "utility/utility.h"
+#include "helpers.h"
 #include "selectitemdialog.h"
 #include "selectitem.h"
 
@@ -114,7 +115,7 @@ bool SelectItemDialog::event(QEvent *e)
     if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
         if (m_popupMode && m_popupPos.isValid()) {
             QMetaObject::invokeMethod(this, [this]() {
-                Utility::setPopupPos(this, m_popupPos);
+                Helpers::setPopupPos(this, m_popupPos);
                 m_geometryChanged = false;
             }, Qt::QueuedConnection);
             return true;
@@ -150,7 +151,7 @@ void SelectItemDialog::showEvent(QShowEvent *e)
             QMetaObject::invokeMethod(this, [this]() {
                 auto ba = Config::inst()->value(m_geometryConfigKey).toByteArray();
                 if (ba.isEmpty() || !restoreGeometry(ba)) {
-                    Utility::setPopupPos(this, m_popupPos);
+                    Helpers::setPopupPos(this, m_popupPos);
                     m_geometryChanged = false;
                 } else {
                     m_geometryChanged = true;

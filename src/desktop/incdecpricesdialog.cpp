@@ -20,8 +20,9 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 
-#include "incdecpricesdialog.h"
 #include "utility/utility.h"
+#include "helpers.h"
+#include "incdecpricesdialog.h"
 #include "mainwindow.h"
 
 
@@ -54,7 +55,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     percent->setCheckable(true);
     percent->setChecked(true);
     percent->setShortcut(tr("Ctrl+%"));
-    percent->setToolTip(Utility::toolTipLabel(tr("Percent"), percent->shortcut()));
+    percent->setToolTip(Helpers::toolTipLabel(tr("Percent"), percent->shortcut()));
     hlayout->addWidget(percent);
 
     auto fixed = new QToolButton();
@@ -62,7 +63,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     fixed->setText(currencyCode);
     fixed->setCheckable(true);
     fixed->setShortcut(tr("Ctrl+$"));
-    fixed->setToolTip(Utility::toolTipLabel(tr("Fixed %1 amount").arg(currencyCode),
+    fixed->setToolTip(Helpers::toolTipLabel(tr("Fixed %1 amount").arg(currencyCode),
                                             fixed->shortcut()));
     hlayout->addWidget(fixed);
     layout->addLayout(hlayout);

@@ -21,7 +21,6 @@
 #include <QLocale>
 #include <QPair>
 #include <QImage>
-#include <QKeySequence>
 #include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS) && defined(max)
@@ -76,12 +75,5 @@ QString urlQueryEscape(const QString &str);
 
 inline QString urlQueryEscape(const char *str)  { return urlQueryEscape(QString::fromLatin1(str)); }
 inline QString urlQueryEscape(const QByteArray &str)   { return urlQueryEscape(QString::fromLatin1(str)); }
-
-#if defined(QT_WIDGETS_LIB)
-void setPopupPos(QWidget *w, const QRect &pos);
-#endif
-
-QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
-QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcut = { }, const QString &extended = { });
 
 } // namespace Utility

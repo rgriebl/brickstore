@@ -22,6 +22,7 @@
 #include "actionmanager.h"
 #include "config.h"
 #include "document.h"
+#include "helpers.h"
 #include "onlinestate.h"
 
 
@@ -285,7 +286,7 @@ void ActionManager::updateShortcuts(Action *aa)
     if (aa->m_qaction) {
         aa->m_qaction->setShortcuts(aa->m_shortcuts);
         if (!aa->m_shortcuts.isEmpty())
-            aa->m_qaction->setToolTip(Utility::toolTipLabel(aa->m_transText, aa->m_shortcuts));
+            aa->m_qaction->setToolTip(Helpers::toolTipLabel(aa->m_transText, aa->m_shortcuts));
         else
             aa->m_qaction->setToolTip(aa->m_transText);
     }
@@ -581,7 +582,7 @@ void ActionManager::setupQAction(Action &aa)
 #if !defined(Q_OS_IOS)
     a->setShortcuts(shortcuts);
     if (!shortcuts.isEmpty())
-        a->setToolTip(Utility::toolTipLabel(a->text(), shortcuts));
+        a->setToolTip(Helpers::toolTipLabel(a->text(), shortcuts));
     else
         a->setToolTip(a->text());
 #endif
@@ -602,7 +603,7 @@ void ActionManager::setupQAction(Action &aa)
     connect(a, &QAction::changed, this, [a, &aa]() {
         if (a->text() != aa.m_transText) {
             if (!a->shortcuts().isEmpty())
-                a->setToolTip(Utility::toolTipLabel(a->text(), a->shortcuts()));
+                a->setToolTip(Helpers::toolTipLabel(a->text(), a->shortcuts()));
             else
                 a->setToolTip(a->text());
         }

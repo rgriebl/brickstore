@@ -66,6 +66,7 @@
 #include "changecurrencydialog.h"
 #include "documentdelegate.h"
 #include "flowlayout.h"
+#include "helpers.h"
 #include "mainwindow.h"
 #include "headerview.h"
 #include "script.h"
@@ -230,7 +231,14 @@ TableView::TableView(QWidget *parent)
 
 void TableView::keyPressEvent(QKeyEvent *e)
 {
+    // ignore ctrl/alt+tab ... ViewPane needs to handle that
+    if (Helpers::shouldSwitchViews(e)) {
+        e->ignore();
+        return;
+    }
+
     QTableView::keyPressEvent(e);
+
 #if !defined(Q_OS_MACOS)
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
         if (state() != EditingState) {
