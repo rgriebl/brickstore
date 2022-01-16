@@ -215,6 +215,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
             this, &Document::currencyCodeChanged);
     connect(model, &DocumentModel::lotCountChanged,
             this, &Document::lotCountChanged);
+    connect(model, &DocumentModel::modificationChanged,
+            this, &Document::modificationChanged);
 
     connect(m_selectionModel, &QItemSelectionModel::selectionChanged,
             this, &Document::updateSelection);

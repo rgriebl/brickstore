@@ -92,6 +92,7 @@ class Document : public QObject
     Q_OBJECT
     Q_PRIVATE_PROPERTY(model(), QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
     Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged)
+    Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PROPERTY(BrickLink::Order *order READ order CONSTANT)
@@ -266,6 +267,7 @@ signals:
     // relayed from Document for the QML API
     void currencyCodeChanged(const QString &ccode);
     void lotCountChanged(int lotCount);
+    void modificationChanged(bool modified);
 
     void columnLayoutChanged();
 

@@ -1103,14 +1103,13 @@ void MainWindow::connectView(View *view)
         return;
 
     if (m_activeView) {
-        DocumentModel *model = m_activeView->model();
         Document *document = m_activeView->document();
 
         m_activeView->setActive(false);
 
         disconnect(m_activeView.data(), &View::windowTitleChanged,
                    this, &MainWindow::titleUpdate);
-        disconnect(model, &DocumentModel::modificationChanged,
+        disconnect(document, &Document::modificationChanged,
                    this, &QWidget::setWindowModified);
         disconnect(document, &Document::blockingOperationActiveChanged,
                    this, &MainWindow::blockUpdate);
@@ -1121,14 +1120,13 @@ void MainWindow::connectView(View *view)
     }
 
     if (view) {
-        DocumentModel *model = view->model();
         Document *document = view->document();
 
         view->setActive(true);
 
         connect(view, &View::windowTitleChanged,
                 this, &MainWindow::titleUpdate);
-        connect(model, &DocumentModel::modificationChanged,
+        connect(document, &Document::modificationChanged,
                 this, &QWidget::setWindowModified);
         connect(document, &Document::blockingOperationActiveChanged,
                 this, &MainWindow::blockUpdate);
@@ -1147,6 +1145,7 @@ void MainWindow::connectView(View *view)
 
     blockUpdate(m_activeView ? m_activeView->document()->isBlockingOperationActive() : false);
     titleUpdate();
+    setWindowModified(m_activeView ? m_activeView->document()->model()->isModified() : false);
 
     emit documentActivated(m_activeView ? m_activeView->document() : nullptr);
 }
