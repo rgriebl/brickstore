@@ -64,9 +64,9 @@
 #include "utility/undo.h"
 #include "utility/utility.h"
 #include "changecurrencydialog.h"
+#include "desktopuihelpers.h"
 #include "documentdelegate.h"
 #include "flowlayout.h"
-#include "helpers.h"
 #include "mainwindow.h"
 #include "headerview.h"
 #include "script.h"
@@ -232,7 +232,7 @@ TableView::TableView(QWidget *parent)
 void TableView::keyPressEvent(QKeyEvent *e)
 {
     // ignore ctrl/alt+tab ... ViewPane needs to handle that
-    if (Helpers::shouldSwitchViews(e)) {
+    if (DesktopUIHelpers::shouldSwitchViews(e)) {
         e->ignore();
         return;
     }

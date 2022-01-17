@@ -17,7 +17,7 @@
 #include "bricklink/item.h"
 #include "common/config.h"
 #include "utility/utility.h"
-#include "helpers.h"
+#include "desktopuihelpers.h"
 #include "selectitemdialog.h"
 #include "selectitem.h"
 
@@ -100,7 +100,7 @@ void SelectItemDialog::changeEvent(QEvent *e)
             if (windowState() & Qt::WindowMaximized) {
                 QMetaObject::invokeMethod(this, [this]() {
                     setWindowState(Qt::WindowNoState | Qt::WindowActive);
-                    Utility::setPopupPos(this, m_popupPos);
+                    DesktopUIHelpers::setPopupPos(this, m_popupPos);
                     m_geometryChanged = false;
                 }, Qt::QueuedConnection);
             }
@@ -115,7 +115,7 @@ bool SelectItemDialog::event(QEvent *e)
     if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
         if (m_popupMode && m_popupPos.isValid()) {
             QMetaObject::invokeMethod(this, [this]() {
-                Helpers::setPopupPos(this, m_popupPos);
+                DesktopUIHelpers::setPopupPos(this, m_popupPos);
                 m_geometryChanged = false;
             }, Qt::QueuedConnection);
             return true;
@@ -151,7 +151,7 @@ void SelectItemDialog::showEvent(QShowEvent *e)
             QMetaObject::invokeMethod(this, [this]() {
                 auto ba = Config::inst()->value(m_geometryConfigKey).toByteArray();
                 if (ba.isEmpty() || !restoreGeometry(ba)) {
-                    Helpers::setPopupPos(this, m_popupPos);
+                    DesktopUIHelpers::setPopupPos(this, m_popupPos);
                     m_geometryChanged = false;
                 } else {
                     m_geometryChanged = true;

@@ -139,14 +139,17 @@ public:
 
     QAction *qAction(const char *name);
 
-    // These are templates so that instantiation happens only in calling code, when
-    // QQuickAction can be expected to be fully defined.
     Q_INVOKABLE QObject *quickAction(const QString &name);
 
     bool createAll(std::function<QAction *(const ActionManager::Action *)> creator);
 
     QObject *connectActionTable(const ActionTable &actionTable);
     void disconnectActionTable(QObject *contextObject);
+
+    static QString toolTipLabel(const QString &label, QKeySequence shortcut = { },
+                                const QString &extended = { });
+    static QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts = { },
+                                const QString &extended = { });
 
     void setSelection(const BrickLink::LotList &selection);
 

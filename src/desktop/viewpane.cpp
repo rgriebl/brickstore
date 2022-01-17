@@ -34,8 +34,8 @@
 #include "common/documentmodel.h"
 #include "utility/utility.h"
 #include "changecurrencydialog.h"
+#include "desktopuihelpers.h"
 #include "filtertermwidget.h"
-#include "helpers.h"
 #include "menucombobox.h"
 #include "orderinformationdialog.h"
 #include "view.h"
@@ -522,9 +522,9 @@ void ViewPane::paletteChange()
 
 void ViewPane::languageChange()
 {
-    m_differences->setToolTip(Helpers::toolTipLabel(tr("Go to the next difference"),
-                                                    m_differences->shortcut()));
-    m_errors->setToolTip(Helpers::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
+    m_differences->setToolTip(ActionManager::toolTipLabel(tr("Go to the next difference"),
+                                                          m_differences->shortcut()));
+    m_errors->setToolTip(ActionManager::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
 
     m_order->setToolTip(tr("Show order information"));
     m_value->setText(tr("Currency:"));
@@ -551,7 +551,7 @@ void ViewPane::changeEvent(QEvent *e)
 
 void ViewPane::keyPressEvent(QKeyEvent *e)
 {
-    int d = Helpers::shouldSwitchViews(e);
+    int d = DesktopUIHelpers::shouldSwitchViews(e);
     if (d) {
         int cnt = m_viewList->count();
         if (cnt > 1) {

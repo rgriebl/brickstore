@@ -31,7 +31,6 @@
 #include "common/config.h"
 #include "common/document.h"
 #include "betteritemdelegate.h"
-#include "helpers.h"
 #include "historylineedit.h"
 #include "importorderdialog.h"
 #include "orderinformationdialog.h"
@@ -200,8 +199,8 @@ void ImportOrderDialog::languageChange()
 
     w_import->setText(tr("Import"));
     w_importCombined->setText(tr("Import combined"));
-    w_filter->setToolTip(Helpers::toolTipLabel(tr("Filter the list for lines containing these words"),
-                                               QKeySequence::Find, w_filter->instructionToolTip()));
+    w_filter->setToolTip(ActionManager::toolTipLabel(tr("Filter the list for lines containing these words"),
+                                                     QKeySequence::Find, w_filter->instructionToolTip()));
     m_orderInformation->setText(tr("Show order information"));
     m_showOnBrickLink->setText(tr("Show on BrickLink"));
     updateStatusLabel();

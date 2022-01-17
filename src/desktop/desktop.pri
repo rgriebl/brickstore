@@ -18,7 +18,6 @@ HEADERS += \
     $$PWD/filtertermwidget.h \
     $$PWD/flowlayout.h \
     $$PWD/headerview.h \
-    $$PWD/helpers.h \
     $$PWD/historylineedit.h \
     $$PWD/incdecpricesdialog.h \
     $$PWD/mainwindow.h \
@@ -55,7 +54,6 @@ SOURCES += \
     $$PWD/filtertermwidget.cpp \
     $$PWD/flowlayout.cpp \
     $$PWD/headerview.cpp \
-    $$PWD/helpers.cpp \
     $$PWD/historylineedit.cpp \
     $$PWD/incdecpricesdialog.cpp \
     $$PWD/mainwindow.cpp \

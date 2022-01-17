@@ -31,6 +31,7 @@
 
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
+#include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "utility/currency.h"
@@ -38,7 +39,6 @@
 #include "utility/utility.h"
 #include "utility/xmlhelpers.h"
 #include "betteritemdelegate.h"
-#include "helpers.h"
 #include "historylineedit.h"
 #include "importcartdialog.h"
 
@@ -186,8 +186,8 @@ void ImportCartDialog::languageChange()
     retranslateUi(this);
 
     w_import->setText(tr("Import"));
-    w_filter->setToolTip(Helpers::toolTipLabel(tr("Filter the list for lines containing these words"),
-                                               QKeySequence::Find, w_filter->instructionToolTip()));
+    w_filter->setToolTip(ActionManager::toolTipLabel(tr("Filter the list for lines containing these words"),
+                                                     QKeySequence::Find, w_filter->instructionToolTip()));
     w_showOnBrickLink->setText(tr("Show"));
     w_showOnBrickLink->setToolTip(tr("Show on BrickLink"));
     updateStatusLabel();

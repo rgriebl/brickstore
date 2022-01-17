@@ -14,6 +14,8 @@
 #pragma once
 
 #include <QPointer>
+#include <QKeyEvent>
+#include <QRect>
 
 #include "common/uihelpers.h"
 
@@ -27,6 +29,10 @@ class DesktopUIHelpers : public UIHelpers
 public:
     static void create();
     static void setDefaultParent(QWidget *defaultParent);
+
+    static int shouldSwitchViews(QKeyEvent *e);
+
+    static void setPopupPos(QWidget *w, const QRect &pos);
 
 protected:
     QCoro::Task<StandardButton> showMessageBox(const QString &msg, UIHelpers::Icon icon,
@@ -53,6 +59,7 @@ protected:
 
     UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                             const QString &message) override;
+
 private:
     DesktopUIHelpers();
 

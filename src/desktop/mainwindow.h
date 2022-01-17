@@ -53,9 +53,6 @@ class ViewPane;
 class LoadColumnLayoutMenuAdapter;
 
 
-//TODO rename to MainWindow and derive MainWindow -> Window -> QMainWindow
-//     Window has reduced functionality for "Open in new window"
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

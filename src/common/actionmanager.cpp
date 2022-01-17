@@ -13,8 +13,11 @@
 */
 #include <QAction>
 #include <QActionGroup>
-#if defined(QT_QUICKTEMPLATES2_LIB)
+#if defined(BS_MOBILE)
 #  include <QtQuickTemplates2/private/qquickaction_p.h>
+#endif
+#if defined(BS_DESKTOP)
+#  include <QApplication>
 #endif
 #include <QDebug>
 
@@ -22,7 +25,6 @@
 #include "actionmanager.h"
 #include "config.h"
 #include "document.h"
-#include "helpers.h"
 #include "onlinestate.h"
 
 
@@ -282,14 +284,16 @@ void ActionManager::setChecked(const char *name, bool b)
 
 void ActionManager::updateShortcuts(Action *aa)
 {
-#if !defined(Q_OS_IOS)
+#if defined(BS_DESKTOP)
     if (aa->m_qaction) {
         aa->m_qaction->setShortcuts(aa->m_shortcuts);
         if (!aa->m_shortcuts.isEmpty())
-            aa->m_qaction->setToolTip(Helpers::toolTipLabel(aa->m_transText, aa->m_shortcuts));
+            aa->m_qaction->setToolTip(toolTipLabel(aa->m_transText, aa->m_shortcuts));
         else
             aa->m_qaction->setToolTip(aa->m_transText);
     }
+#else
+    Q_UNUSED(aa)
 #endif
 }
 
@@ -579,12 +583,22 @@ void ActionManager::setupQAction(Action &aa)
     auto shortcuts = aa.shortcuts();
     if (aa.hasText())
         a->setText(text);
-#if !defined(Q_OS_IOS)
+
+#if defined(BS_DESKTOP)
     a->setShortcuts(shortcuts);
     if (!shortcuts.isEmpty())
-        a->setToolTip(Helpers::toolTipLabel(a->text(), shortcuts));
+        a->setToolTip(toolTipLabel(a->text(), shortcuts));
     else
         a->setToolTip(a->text());
+
+    connect(a, &QAction::changed, this, [a, &aa]() {
+        if (a->text() != aa.m_transText) {
+            if (!a->shortcuts().isEmpty())
+                a->setToolTip(toolTipLabel(a->text(), a->shortcuts()));
+            else
+                a->setToolTip(a->text());
+        }
+    });
 #endif
     a->setCheckable(aa.isCheckable());
 
@@ -600,21 +614,13 @@ void ActionManager::setupQAction(Action &aa)
         }
         a->setActionGroup(ag);
     }
-    connect(a, &QAction::changed, this, [a, &aa]() {
-        if (a->text() != aa.m_transText) {
-            if (!a->shortcuts().isEmpty())
-                a->setToolTip(Helpers::toolTipLabel(a->text(), a->shortcuts()));
-            else
-                a->setToolTip(a->text());
-        }
-    });
 }
 
 QObject *ActionManager::quickAction(const QString &name)
 {
+#if defined(BS_MOBILE)
     if (auto aa = const_cast<Action *>(action(name.toLatin1().constData()))) {
         if (aa->m_qaction) {
-#if defined(QT_QUICKTEMPLATES2_LIB)
             QAction *a = aa->qAction();
             auto qa = new QQuickAction(a);
             qa->setObjectName(a->objectName());
@@ -637,10 +643,12 @@ QObject *ActionManager::quickAction(const QString &name)
             connect(a, &QAction::changed, qa, [a, qa]() { qa->setText(a->text()); });
 
             aa->m_qquickaction = qa;
-#endif
         }
         return aa->m_qquickaction;
     }
+#else
+    Q_UNUSED(name)
+#endif
     return nullptr;
 }
 
@@ -675,6 +683,38 @@ QObject *ActionManager::connectActionTable(const ActionTable &actionTable)
 void ActionManager::disconnectActionTable(QObject *contextObject)
 {
     delete contextObject;
+}
+
+QString ActionManager::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
+{
+    return toolTipLabel(label, shortcut.isEmpty() ? QList<QKeySequence> { }
+                                                  : QList<QKeySequence> { shortcut }, extended);
+}
+
+QString ActionManager::toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts, const QString &extended)
+{
+#if defined(BS_DESKTOP)
+
+    static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
+    static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
+
+    QColor color = Utility::gradientColor(Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
+                                          Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),
+                                          0.8);
+    QString extendedTable;
+    if (!extended.isEmpty())
+        extendedTable = fmtExt.arg(extended);
+    QString shortcutText;
+    if (!shortcuts.isEmpty())
+        shortcutText = QKeySequence::listToString(shortcuts, QKeySequence::NativeText);
+
+    return fmt.arg(label, color.name(), shortcutText, extendedTable);
+#else
+    Q_UNUSED(label)
+    Q_UNUSED(shortcuts)
+    Q_UNUSED(extended)
+    return { };
+#endif
 }
 
 #include "moc_actionmanager.cpp"

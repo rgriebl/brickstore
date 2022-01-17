@@ -175,7 +175,6 @@ protected:
     virtual UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                                     const QString &message) = 0;
 
-
     virtual QCoro::Task<StandardButton> showMessageBoxHelper(const QString &msg, UIHelpers::Icon icon,
                                                              StandardButtons buttons,
                                                              StandardButton defaultButton,

@@ -24,6 +24,8 @@
 #include <QDoubleSpinBox>
 #include <QProgressDialog>
 #include <QDialogButtonBox>
+#include <QScreen>
+#include <QWindow>
 #include <QDebug>
 
 #include "common/config.h"
@@ -46,6 +48,48 @@ void DesktopUIHelpers::setDefaultParent(QWidget *defaultParent)
 
 DesktopUIHelpers::DesktopUIHelpers()
 { }
+
+int DesktopUIHelpers::shouldSwitchViews(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
+        if ((e->modifiers() & ~Qt::ShiftModifier) ==
+        #if defined(Q_OS_MACOS)
+                Qt::AltModifier
+        #else
+                Qt::ControlModifier
+        #endif
+                ) {
+            return (e->key() == Qt::Key_Backtab) || (e->modifiers() & Qt::ShiftModifier) ? -1 : 1;
+        }
+    }
+    return 0;
+}
+
+void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
+{
+    QSize sh = w->sizeHint();
+    QRect screenRect = w->window()->windowHandle()->screen()->availableGeometry();
+
+    // center below pos
+    int x = pos.x() + (pos.width() - sh.width()) / 2;
+    int y = pos.y() + pos.height();
+
+    if ((y + sh.height()) > (screenRect.bottom() + 1)) {
+        int frameHeight = (w->frameSize().height() - w->size().height());
+        y = pos.y() - sh.height() - frameHeight;
+    }
+    if (y < screenRect.top())
+        y = screenRect.top();
+
+    if ((x + sh.width()) > (screenRect.right() + 1))
+        x = (screenRect.right() + 1) - sh.width();
+    if (x < screenRect.left())
+        x = screenRect.left();
+
+    w->move(x, y);
+    w->resize(sh);
+}
+
 
 QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(const QString &msg,
                                                                         UIHelpers::Icon icon,
@@ -286,6 +330,7 @@ UIHelpers_ProgressDialogInterface *DesktopUIHelpers::createProgressDialog(const 
 {
     return new DesktopPDI(title, message);
 }
+
 
 #include "moc_desktopuihelpers.cpp"
 #include "desktopuihelpers.moc"
