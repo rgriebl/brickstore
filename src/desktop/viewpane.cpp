@@ -466,10 +466,11 @@ View *ViewPane::newView(Document *doc)
 
 void ViewPane::focusFilter()
 {
-    m_filterOnOff->defaultAction()->toggle();
+    if (m_filter->hasFocus() || !m_filterOnOff->isChecked())
+        m_filterOnOff->defaultAction()->toggle();
 
     if (m_filterOnOff->isChecked())
-        m_filter->setFocus();
+        m_filter->setFocus(Qt::ShortcutFocusReason);
 }
 
 void ViewPane::fontChange()

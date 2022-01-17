@@ -42,14 +42,15 @@
 #include "utility/currency.h"
 #include "utility/humanreadabletimedelta.h"
 #include "utility/utility.h"
-#include "view.h"
+#include "additemdialog.h"
+#include "appearsinwidget.h"
+#include "desktopuihelpers.h"
 #include "picturewidget.h"
 #include "priceguidewidget.h"
-#include "appearsinwidget.h"
-#include "selectitem.h"
 #include "selectcolor.h"
+#include "selectitem.h"
 #include "smartvalidator.h"
-#include "additemdialog.h"
+#include "view.h"
 
 
 using namespace std::chrono_literals;
@@ -101,18 +102,18 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_qty->setRange(1, DocumentModel::maxQuantity);
     w_qty->setValue(1);
-    w_qty->installEventFilter(this);
+    w_qty->installEventFilter(DesktopUIHelpers::selectAllFilter());
 
     w_bulk->setRange(1, DocumentModel::maxQuantity);
     w_bulk->setValue(1);
-    w_bulk->installEventFilter(this);
+    w_bulk->installEventFilter(DesktopUIHelpers::selectAllFilter());
 
     double maxPrice = DocumentModel::maxLocalPrice(m_currency_code);
 
     w_price->setRange(0, maxPrice);
-    w_price->installEventFilter(this);
+    w_price->installEventFilter(DesktopUIHelpers::selectAllFilter());
     w_cost->setRange(0, maxPrice);
-    w_cost->installEventFilter(this);
+    w_cost->installEventFilter(DesktopUIHelpers::selectAllFilter());
 
     w_tier_qty[0] = w_tier_qty_0;
     w_tier_qty[1] = w_tier_qty_1;
@@ -126,8 +127,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_tier_price[i]->setRange(0, maxPrice);
         w_tier_qty[i]->setValue(0);
         w_tier_price[i]->setValue(0);
-        w_tier_qty[i]->installEventFilter(this);
-        w_tier_price[i]->installEventFilter(this);
+        w_tier_qty[i]->installEventFilter(DesktopUIHelpers::selectAllFilter());
+        w_tier_price[i]->installEventFilter(DesktopUIHelpers::selectAllFilter());
 
         connect(w_tier_qty[i], QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
@@ -392,14 +393,7 @@ void AddItemDialog::keyPressEvent(QKeyEvent *e)
 
 bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
 {
-    bool res = QWidget::eventFilter(watched, event);
-    if (event->type() == QEvent::FocusIn) {
-        if (auto *le = qobject_cast<QLineEdit *>(watched))
-            QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
-        else if (auto *sb = qobject_cast<QAbstractSpinBox *>(watched))
-            QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
-
-    } else if (event->type() == QEvent::ToolTip && watched == w_last_added) {
+    if (event->type() == QEvent::ToolTip && watched == w_last_added) {
         const auto *he = static_cast<QHelpEvent *>(event);
         if (m_addHistory.size() > 1) {
             static const QString pre = "<p style='white-space:pre'>"_l1;
@@ -413,7 +407,7 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
         }
         return true;
     }
-    return res;
+    return QWidget::eventFilter(watched, event);
 }
 
 void AddItemDialog::setSellerMode(bool b)

@@ -34,6 +34,8 @@ public:
 
     static void setPopupPos(QWidget *w, const QRect &pos);
 
+    static QObject *selectAllFilter();
+
 protected:
     QCoro::Task<StandardButton> showMessageBox(const QString &msg, UIHelpers::Icon icon,
                                                StandardButtons buttons, StandardButton defaultButton,
@@ -64,6 +66,7 @@ private:
     DesktopUIHelpers();
 
     static QPointer<QWidget> s_defaultParent;
+    QObject *m_selectAllFilter;
 
     friend class DesktopPDI;
 };

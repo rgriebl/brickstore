@@ -31,6 +31,7 @@
 
 #include "common/document.h"
 #include "utility/utility.h"
+#include "desktopuihelpers.h"
 #include "filtertermwidget.h"
 #include "flowlayout.h"
 #include "historylineedit.h"
@@ -250,8 +251,11 @@ bool FilterTermWidget::eventFilter(QObject *o, QEvent *e)
         };
         if (validReasons.contains(fe->reason())) {
             m_nextMouseUpOpensPopup = (fe->reason() == Qt::MouseFocusReason);
-            if (!m_nextMouseUpOpensPopup)
+            if (!m_nextMouseUpOpensPopup) {
+                QMetaObject::invokeMethod(m_value->lineEdit(), &QLineEdit::selectAll,
+                                          Qt::QueuedConnection);
                 m_value->showPopup();
+            }
         }
     } else if ((e->type() == QEvent::MouseButtonRelease)
                && m_nextMouseUpOpensPopup
@@ -360,6 +364,7 @@ FilterWidget::FilterWidget(QWidget *parent)
 
     m_edit = new HistoryLineEdit();
     m_edit->hide();
+    m_edit->installEventFilter(DesktopUIHelpers::selectAllFilter());
     layout->addWidget(m_edit, 1);
 
     m_menu = new QToolButton();
