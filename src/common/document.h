@@ -171,7 +171,10 @@ public:
     Q_INVOKABLE void toggleStatus();
     Q_INVOKABLE void toggleRetain();
     Q_INVOKABLE void setCost(double cost);
-    Q_INVOKABLE void spreadCost(double spreadAmount);
+
+    enum class SpreadCost { ByPrice, ByWeight };
+
+    Q_INVOKABLE void spreadCost(double spreadAmount, SpreadCost how);
     Q_INVOKABLE void roundCost();
     Q_INVOKABLE void setFilterFromSelection();
     Q_INVOKABLE void setPrice(double price);

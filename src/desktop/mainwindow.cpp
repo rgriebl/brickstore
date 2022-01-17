@@ -643,7 +643,8 @@ void MainWindow::setupMenuBar()
                   "edit_cost_set",
                   "edit_cost_inc_dec",
                   "edit_cost_round",
-                  "edit_cost_spread",
+                  "edit_cost_spread_price",
+                  "edit_cost_spread_weight",
               });
 
     setupMenu("edit_comment", {

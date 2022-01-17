@@ -72,7 +72,8 @@ Menu {
     ActionDelegate { actionName: "edit_cost_set"; visible: enabled && root.is(Document.Cost) }
     ActionDelegate { actionName: "edit_cost_inc_dec"; visible: enabled && root.is(Document.Cost) }
     ActionDelegate { actionName: "edit_cost_round"; visible: enabled && root.is(Document.Cost) }
-    ActionDelegate { actionName: "edit_cost_spread"; visible: enabled && root.is(Document.Cost) }
+    ActionDelegate { actionName: "edit_cost_spread_price"; visible: enabled && root.is(Document.Cost) }
+    ActionDelegate { actionName: "edit_cost_spread_weight"; visible: enabled && root.is(Document.Cost) }
     ActionDelegate { actionName: "edit_sale"; visible: enabled && root.is(Document.Sale) }
     ActionDelegate { actionName: "edit_bulk"; visible: enabled && root.is(Document.Bulk) }
     ActionDelegate { actionName: "edit_remark_set"; visible: enabled && root.is(Document.Remarks) }

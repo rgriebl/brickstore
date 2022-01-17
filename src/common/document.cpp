@@ -304,12 +304,20 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_cost_round", [this]() { roundCost(); } },
-        { "edit_cost_spread", [this]() -> QCoro::Task<> {
+        { "edit_cost_spread_price", [this]() -> QCoro::Task<> {
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
                                                          0, DocumentModel::maxLocalPrice(m_model->currencyCode()), 3)) {
-                  spreadCost(*d);
+                  spreadCost(*d, SpreadCost::ByPrice);
+              }
+          } },
+        { "edit_cost_spread_weight", [this]() -> QCoro::Task<> {
+              Q_ASSERT(selectedLots().size() >= 2);
+              if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
+                                                         m_model->currencyCode(), 0,
+                                                         0, DocumentModel::maxLocalPrice(m_model->currencyCode()), 3)) {
+                  spreadCost(*d, SpreadCost::ByWeight);
               }
           } },
         { "edit_qty_divide", [this]() -> QCoro::Task<> {
@@ -1034,20 +1042,24 @@ void Document::setCost(double cost)
     });
 }
 
-void Document::spreadCost(double spreadAmount)
+void Document::spreadCost(double spreadAmount, SpreadCost how)
 {
-    double priceTotal = 0;
+    double total = 0;
 
-    for (const Lot *lot : m_selectedLots)
-        priceTotal += (lot->price() * lot->quantity());
-    if (qFuzzyIsNull(priceTotal))
+    for (const Lot *lot : m_selectedLots) {
+        total += (how == SpreadCost::ByPrice) ? (lot->price() * lot->quantity())
+                                              : (lot->totalWeight());
+    }
+    if (qFuzzyIsNull(total))
         return;
-    double f = spreadAmount / priceTotal;
+    double f = spreadAmount / total;
     if (qFuzzyCompare(f, 1))
         return;
 
     applyTo(selectedLots(), [=](const auto &from, auto &to) {
-        (to = from).setCost(from.price() * f); return true;
+        (to = from).setCost(f * ((how == SpreadCost::ByPrice) ? from.price()
+                                                              : from.weight()));
+        return true;
     });
 }
 

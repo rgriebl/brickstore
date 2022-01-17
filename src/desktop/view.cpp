@@ -923,7 +923,7 @@ void View::contextMenu(const QPoint &pos)
             break;
         case DocumentModel::Cost:
             actionNames = { "edit_cost_set", "edit_cost_inc_dec", "edit_cost_round",
-                            "edit_cost_spread" };
+                            "edit_cost_spread_price", "edit_cost_spread_weight" };
             break;
         case DocumentModel::Bulk:
             actionNames = { "edit_bulk" };

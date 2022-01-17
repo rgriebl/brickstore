@@ -440,7 +440,8 @@ void ActionManager::initialize()
     A("edit_cost_round",          QT_TR_NOOP("Round cost to 2 decimals"),        NeedSelection(1));
     A("edit_cost_set",            QT_TR_NOOP("Set cost..."),                     NeedSelection(1));
     A("edit_cost_inc_dec",        QT_TR_NOOP("Adjust cost..."),                  NeedSelection(1));
-    A("edit_cost_spread",         QT_TR_NOOP("Spread Cost Amount..."),           NeedSelection(2));
+    A("edit_cost_spread_price",   QT_TR_NOOP("Spread cost relative to price..."),  NeedSelection(2));
+    A("edit_cost_spread_weight",  QT_TR_NOOP("Spread cost relative to weight..."), NeedSelection(2));
     A("edit_bulk",                QT_TR_NOOP("Set bulk quantity..."),            NeedSelection(1));
     A("edit_sale",                QT_TR_NOOP("Set sale..."),                     QT_TR_NOOP("Ctrl+%", "Edit|Sale"),                    NeedSelection(1));
     A("edit_comment",             QT_TR_NOOP("Comment"),                         NeedSelection(1), FlagMenu);
