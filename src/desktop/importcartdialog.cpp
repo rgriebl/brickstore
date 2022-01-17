@@ -239,7 +239,7 @@ void ImportCartDialog::updateStatusLabel()
 {
     QString s;
 
-    switch (BrickLink::core()->carts()->updateStatus()) {\
+    switch (BrickLink::core()->carts()->updateStatus()) {
     case BrickLink::UpdateStatus::Ok:
         s = tr("Last updated %1").arg(
                     HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),

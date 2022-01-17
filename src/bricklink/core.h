@@ -72,6 +72,7 @@ public:
     QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
                             const Color *color = nullptr) const;
     void setCredentials(const QPair<QString, QString> &credentials);
+    QString userId() const;
 
     bool isAuthenticated() const;
     void retrieveAuthenticated(TransferJob *job);
@@ -147,6 +148,8 @@ signals:
 
     void authenticationChanged(bool auth);
     void authenticationFailed(const QString &userName, const QString &error);
+
+    void userIdChanged(const QString &userId);
 
 private:
     Core(const QString &datadir);

@@ -550,6 +550,10 @@ QString Order::statusToString(OrderStatus status, bool translated)
 Orders::Orders(QObject *parent)
     : QAbstractTableModel(parent)
 {
+    m_userId = core()->userId();
+    connect(core(), &Core::userIdChanged,
+            this, &Orders::reloadOrdersFromCache);
+
     connect(core(), &Core::databaseDateChanged,
             this, [this]() {
         static bool once = false;
@@ -557,29 +561,18 @@ Orders::Orders(QObject *parent)
             return;
         once = true;
 
-        stopwatch sw("Loading orders from cache");
-
-        QDirIterator dit(core()->dataPath() % u"orders", { "*.order.xml"_l1 },
-                         QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
-        while (dit.hasNext()) {
-            try {
-                dit.next();
-                std::unique_ptr<Order> order(Orders::orderFromXML(dit.filePath()));
-                QDir d = dit.fileInfo().absoluteDir();
-                QString addressFileName = order->id() % u".address.txt";
-                if (d.exists(addressFileName)) {
-                    QFile f(d.absoluteFilePath(addressFileName));
-                    if (f.open(QIODevice::ReadOnly) && (f.size() < 2000)) {
-                        QString address = QString::fromUtf8(f.readAll());
-                        order->setAddress(address);
-                    }
-                }
-                appendOrderToModel(std::move(order));
-            } catch (const Exception &e) {
-                // keep this UI silent for now
-                qWarning() << "Failed to load order XML:" << e.error();
-            }
+        //TODO: Remove in 2022.6.x
+        QDir legacyPath(core()->dataPath() % u"orders/");
+        if (legacyPath.cd("received"_l1)) {
+            legacyPath.removeRecursively();
+            legacyPath.cdUp();
         }
+        if (legacyPath.cd("placed"_l1)) {
+            legacyPath.removeRecursively();
+            legacyPath.cdUp();
+        }
+
+        reloadOrdersFromCache();
     }, Qt::QueuedConnection);
 
     connect(core(), &Core::authenticatedTransferStarted,
@@ -651,7 +644,7 @@ Orders::Orders(QObject *parent)
                     //TODO: this in inefficient. We should rather use QXmlStreamReader
 
                     XmlHelpers::ParseXML p(buf, "ORDERS", "ORDER");
-                    p.parse([&p, &updatedXmlFiles, orderType](QDomElement e) {
+                    p.parse([this, &p, &updatedXmlFiles, orderType](QDomElement e) {
                         auto id = p.elementText(e, "ORDERID");
                         if (id.isEmpty())
                             throw Exception("Order without ORDERID");
@@ -696,6 +689,7 @@ Orders::Orders(QObject *parent)
             }
             m_jobResult[job] = qMakePair(success, message);
             m_jobs.removeOne(job);
+
             if (m_jobs.isEmpty()) {
                 bool overallSuccess = true;
                 QString overallMessage;
@@ -705,8 +699,14 @@ Orders::Orders(QObject *parent)
                         overallMessage = pair.second;
                 }
                 m_updateStatus = overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
-                if (overallSuccess)
+                QFile stampFile(core()->dataPath() % u"orders/" % m_userId % u"/.stamp");
+                if (overallSuccess) {
                     m_lastUpdated = QDateTime::currentDateTime();
+                    stampFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+                    stampFile.close();
+                } else {
+                    stampFile.remove();
+                }
                 m_jobProgress.clear();
                 m_jobResult.clear();
 
@@ -714,6 +714,48 @@ Orders::Orders(QObject *parent)
             }
         }
     });
+}
+
+void Orders::reloadOrdersFromCache()
+{
+    beginResetModel();
+    qDeleteAll(m_orders);
+    m_orders.clear();
+    endResetModel();
+
+    m_userId = core()->userId();
+    if (m_userId.isEmpty())
+        return;
+
+    stopwatch sw("Loading orders from cache");
+
+    QString path = core()->dataPath() % u"orders/" % m_userId;
+
+    QFileInfo stamp(path % u"/.stamp");
+    m_lastUpdated = stamp.lastModified();
+    m_updateStatus = stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
+
+    QDirIterator dit(path, { "*.order.xml"_l1 },
+                     QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
+    while (dit.hasNext()) {
+        try {
+            dit.next();
+            std::unique_ptr<Order> order(Orders::orderFromXML(dit.filePath()));
+            QDir d = dit.fileInfo().absoluteDir();
+            QString addressFileName = order->id() % u".address.txt";
+            if (d.exists(addressFileName)) {
+                QFile f(d.absoluteFilePath(addressFileName));
+                if (f.open(QIODevice::ReadOnly) && (f.size() < 2000)) {
+                    QString address = QString::fromUtf8(f.readAll());
+                    order->setAddress(address);
+                }
+            }
+            appendOrderToModel(std::move(order));
+        } catch (const Exception &e) {
+            // keep this UI silent for now
+            qWarning() << "Failed to load order XML:" << e.error();
+        }
+    }
 }
 
 Order *Orders::orderFromXML(const QString &fileName)
@@ -861,12 +903,12 @@ QString Orders::parseAddress(OrderType type, const QByteArray &data)
     return { };
 };
 
-QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDate &date)
+QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const
 {
     // Avoid huge directories with 1000s of entries.
 
-    QString p = core()->dataPath() % "orders/"_l1
-            % ((type == OrderType::Received) ? "received/"_l1: "placed/"_l1 )
+    QString p = core()->dataPath() % "orders/"_l1 % m_userId
+            % ((type == OrderType::Received) ? "/received/"_l1: "/placed/"_l1 )
             % QString::number(date.year()) % u'/'
             % QString("%1"_l1).arg(date.month(), 2, 10, '0'_l1) % u'/'
             % fileName;
@@ -929,7 +971,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         }
         query.addQueryItem("getStatusSel"_l1,  "I"_l1);
         query.addQueryItem("getFiled"_l1,      "Y"_l1);
-        query.addQueryItem("getDetail"_l1,      "y"_l1);
+        query.addQueryItem("getDetail"_l1,     "y"_l1);
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
         url.setQuery(query);
 

@@ -208,6 +208,7 @@ signals:
 
 private:
     Orders(QObject *parent = nullptr);
+    void reloadOrdersFromCache();
     static Order *orderFromXML(const QString &fileName);
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);
     void updateOrder(std::unique_ptr<Order> order);
@@ -215,10 +216,11 @@ private:
     void emitDataChanged(int row, int col);
     void startUpdateAddress(Order *order);
     QString parseAddress(OrderType type, const QByteArray &data);
-    static QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date);
+    QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const;
 
     bool m_valid = false;
     BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
+    QString m_userId;
     QVector<TransferJob *> m_jobs;
     QVector<TransferJob *> m_addressJobs;
     QMap<TransferJob *, QPair<int, int>> m_jobProgress;

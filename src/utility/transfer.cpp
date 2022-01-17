@@ -68,6 +68,24 @@ void TransferJob::abort()
         setStatus(TransferJob::Aborted);
 }
 
+void TransferJob::resetForReuse()
+{
+    m_reset_for_reuse = true;
+    if (m_file) {
+        m_file->seek(0);
+        if (auto f = qobject_cast<QFileDevice *>(m_file))
+            f->resize(0);
+    } else {
+        m_data->clear();
+    }
+    m_respcode = 0;
+    m_status = Inactive;
+    m_was_not_modified = false;
+    m_effective_url.clear();
+    m_redirect_url.clear();
+    m_error_string.clear();
+}
+
 bool TransferJob::abortInternal()
 {
     if (m_reply)
@@ -132,8 +150,15 @@ Transfer::Transfer(QObject *parent)
             this, &Transfer::started, Qt::QueuedConnection);
     connect(m_retriever, &TransferRetriever::finished,
             this, [this](TransferJob *job) {
-        if (!job->isActive())
+        if (!job->isActive()) {
             emit finished(job);
+
+            if (job->m_reset_for_reuse) {
+                job->m_reset_for_reuse = false;
+                job->m_transfer = nullptr;
+                return;
+            }
+        }
         delete job;
     }, Qt::QueuedConnection);
     connect(m_retriever, &TransferRetriever::progress,
@@ -374,6 +399,13 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             }
             break;
 
+        case 302:
+        case 303:
+        case 307:
+            j->m_redirect_url = j->m_reply->header(QNetworkRequest::LocationHeader).toUrl();
+            j->setStatus(TransferJob::Completed);
+            break;
+
         case 200: {
             auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
             if (lastmod.isValid())
@@ -402,5 +434,4 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
     m_currentJobs.removeAll(j);
 
     QMetaObject::invokeMethod(this, &TransferRetriever::schedule, Qt::QueuedConnection);
-
 }

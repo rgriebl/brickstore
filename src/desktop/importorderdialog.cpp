@@ -239,8 +239,8 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     }
 
     QString defaultCCode = Config::inst()->defaultCurrencyCode();
-    BrickLink::Order combinedOrder(tr("Multiple"), BrickLink::OrderType::Any);
-    LotList combinedLots;
+
+    BrickLink::IO::ParseResult combinedPr;
     int orderCount = 0;
 
     for (auto idx : rows) {
@@ -270,22 +270,24 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
                         for (int i = 0; i < 3; ++i)
                             combinedLot->setTierPrice(i, orderLot->tierPrice(i) * crate);
                     }
-                    combinedLots.append(combinedLot);
+                    combinedPr.addLot(std::move(combinedLot));
                 }
-
-                combinedOrder.setCurrencyCode(combineCCode ? defaultCCode
-                                                           : order->currencyCode());
-                combinedOrder.setItemCount(combinedOrder.itemCount() + order->itemCount());
-                combinedOrder.setLotCount(combinedOrder.lotCount() + order->lotCount());
+                combinedPr.setCurrencyCode(combineCCode ? defaultCCode : order->currencyCode());
             }
         } else {
-            Document::fromOrder(order);
+            BrickLink::IO::ParseResult pr;
+            const auto lots = order->lots();
+            for (const auto *lot : lots)
+                pr.addLot(new Lot(*lot));
+            pr.setCurrencyCode(order->currencyCode());
+
+            new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now
         }
         ++orderCount;
     }
     if (combined) {
-        combinedOrder.setLots(std::move(combinedLots));
-        Document::fromOrder(&combinedOrder);
+        auto doc = new Document(new DocumentModel(std::move(combinedPr))); // Document owns the items now
+        doc->setTitle(tr("Multiple Orders"));
     }
 }
 
@@ -330,7 +332,7 @@ void ImportOrderDialog::updateStatusLabel()
 {
     QString s;
 
-    switch (BrickLink::core()->orders()->updateStatus()) {\
+    switch (BrickLink::core()->orders()->updateStatus()) {
     case BrickLink::UpdateStatus::Ok:
         s = tr("Last updated %1").arg(
                     HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),

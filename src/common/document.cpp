@@ -454,8 +454,6 @@ Document::~Document()
 {
     DocumentList::inst()->remove(this);
 
-    delete m_order;
-
     m_autosaveTimer.stop();
     deleteAutosave();
 
@@ -1491,19 +1489,6 @@ Document *Document::fromStore(BrickLink::Store *store)
     auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
     return document;
-}
-
-Document *Document::fromOrder(BrickLink::Order *order)
-{
-    Q_ASSERT(order);
-
-    BrickLink::IO::ParseResult pr;
-    const auto lots = order->lots();
-    for (const auto *lot : lots)
-        pr.addLot(new Lot(*lot));
-    pr.setCurrencyCode(order->currencyCode());
-
-    return new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now
 }
 
 Document *Document::fromCart(BrickLink::Cart *cart)

@@ -287,6 +287,7 @@ Carts::Carts(QObject *parent)
                     message = message % u": " % e.error();
                 }
             }
+            m_lastUpdated = QDateTime::currentDateTime();
             m_updateStatus = success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
             emit updateFinished(success, success ? QString { } : message);
             m_job = nullptr;

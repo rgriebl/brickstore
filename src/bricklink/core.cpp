@@ -384,6 +384,7 @@ void Core::setCredentials(const QPair<QString, QString> &credentials)
         m_authenticated = false;
         if (m_authenticatedTransfer)
             m_authenticatedTransfer->abortAllJobs();
+        bool newUserId = (credentials.first != m_credentials.first);
         m_credentials = credentials;
         if (wasAuthenticated) {
             emit authenticationChanged(false);
@@ -396,7 +397,14 @@ void Core::setCredentials(const QPair<QString, QString> &credentials)
             auto logoutJob = TransferJob::get(url);
             m_authenticatedTransfer->retrieve(logoutJob, true);
         }
+        if (newUserId)
+            emit userIdChanged(m_credentials.first);
     }
+}
+
+QString Core::userId() const
+{
+    return m_credentials.first;
 }
 
 bool Core::isAuthenticated() const
@@ -513,7 +521,19 @@ Core::Core(const QString &datadir)
             if (!m_authenticated)
                 m_authenticatedTransfer->abortAllJobs();
         } else {
-            emit authenticatedTransferFinished(job);
+            if (job->responseCode() == 302 &&
+                    (job->redirectUrl().toString().contains("v2/login.page"_l1)
+                     || job->redirectUrl().toString().contains("login.asp?"_l1))) {
+                m_authenticated = false;
+                emit authenticationChanged(m_authenticated);
+
+                job->resetForReuse();
+                QMetaObject::invokeMethod(this, [=, this]() {
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
+            } else {
+                emit authenticatedTransferFinished(job);
+            }
         }
     });
     connect(m_authenticatedTransfer, &Transfer::overallProgress,

@@ -38,6 +38,7 @@ public:
     QUrl effectiveUrl() const        { return m_effective_url; }
     QString errorString() const;
     int responseCode() const         { return m_respcode; }
+    QUrl redirectUrl() const         { return m_redirect_url; }
     QIODevice *file() const          { return m_file; }
     QByteArray *data() const         { return m_data; }
     QDateTime lastModified() const   { return m_last_modified; }
@@ -55,6 +56,8 @@ public:
 
     Transfer *transfer() const       { return m_transfer; }
     void abort();
+
+    void resetForReuse();
 
 private:
     enum Status : uint {
@@ -82,6 +85,7 @@ private:
     Transfer *   m_transfer = nullptr;
     QUrl         m_url;
     QUrl         m_effective_url;
+    QUrl         m_redirect_url;
     QByteArray * m_data = nullptr;
     QIODevice *  m_file = nullptr;
     QString      m_error_string;
@@ -97,7 +101,8 @@ private:
     uint         m_respcode         : 16 = 0;
     uint         m_status           : 4 = Inactive;
     uint         m_http_method      : 1;
-    uint         m_retries_left     : 5;
+    int          m_reset_for_reuse  : 1 = false;
+    uint         m_retries_left     : 4;
     int          m_was_not_modified : 1 = false;
     int          m_no_redirects     : 1;
 

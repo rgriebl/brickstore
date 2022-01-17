@@ -234,7 +234,6 @@ public:
 
 public:
     static Document *fromStore(BrickLink::Store *store);
-    static Document *fromOrder(BrickLink::Order *order);
     static Document *fromCart(BrickLink::Cart *cart);
     static Document *fromPartInventory(const BrickLink::Item *preselect = nullptr,
                                          const BrickLink::Color *color = nullptr, int multiply = 1,
@@ -327,7 +326,7 @@ private:
     QString               m_filename;
     QString               m_title;
 
-    BrickLink::Order *    m_order = nullptr;
+    QPointer<BrickLink::Order> m_order;
 
     bool                  m_blocked = false;
     QString               m_blockTitle;
