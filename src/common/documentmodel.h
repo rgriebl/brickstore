@@ -205,6 +205,7 @@ public:
     int invalidLotCount() const  { return m_invalidLotCount; }
 
     bool isModified() const;
+    bool canBeSaved() const;
     void unsetModified(); // only for DocumentIO::fileSaveTo
     QHash<const Lot *, Lot> differenceBase() const; // only for DocumentIO::fileSaveTo
 

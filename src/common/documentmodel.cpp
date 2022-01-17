@@ -1188,6 +1188,11 @@ bool DocumentModel::isModified() const
     return modified;
 }
 
+bool DocumentModel::canBeSaved() const
+{
+    return !m_undo->isClean();
+}
+
 void DocumentModel::unsetModified()
 {
     m_undo->setClean();

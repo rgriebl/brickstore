@@ -1433,7 +1433,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
             fn = *f;
         else
             fn.clear();
-    } else if (model()->isModified()) {
+    } else if (model()->canBeSaved()) {
         fn = fileName();
     }
 

@@ -253,11 +253,11 @@ void ActionManager::updateActions(int updateReason)
         }
     }
 
-    bool modified = m_document ? m_document->model()->isModified() : false;
+    bool canBeSaved = m_document ? m_document->model()->canBeSaved() : false;
     bool blocked = m_document ? m_document->isBlockingOperationActive() : false;
     bool hasNoFileName = m_document && m_document->fileName().isEmpty();
 
-    setEnabled("document_save", (modified || hasNoFileName) && !blocked);
+    setEnabled("document_save", (canBeSaved || hasNoFileName) && !blocked);
 }
 
 void ActionManager::updateActionsBlockingChanged()
