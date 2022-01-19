@@ -19,6 +19,7 @@
 #include "bricklink/core.h"
 #include "bricklink/lot.h"
 
+class Document;
 class DocumentModel;
 class UpdateDatabase;
 class QmlColor;
@@ -26,6 +27,7 @@ class QmlCategory;
 class QmlItemType;
 class QmlItem;
 class QmlLot;
+class QmlLots;
 class QmlPriceGuide;
 class QmlPicture;
 
@@ -363,7 +365,7 @@ class QmlLot : QmlWrapperBase<BrickLink::Lot>
     Q_PROPERTY(QImage image READ image)
 
 public:
-    QmlLot(BrickLink::Lot *lot = nullptr, DocumentModel *document = nullptr);
+    QmlLot(BrickLink::Lot *lot = nullptr, DocumentModel *model = nullptr);
 
     QmlItem item() const               { return get()->item(); }
     void setItem(QmlItem item)         { set().to()->setItem(item.wrappedObject()); }
@@ -455,11 +457,27 @@ private:
     Setter set();
     BrickLink::Lot *get() const;
 
-    DocumentModel *document = nullptr;
+    DocumentModel *m_model = nullptr;
 
     friend class Setter;
+    friend class QmlLots;
 };
 
+class QmlLots : public QObject
+{
+    Q_OBJECT
+
+public:
+    QmlLots(DocumentModel *model);
+
+    Q_INVOKABLE int add(QmlItem item, QmlColor color);
+    Q_INVOKABLE void remove(QmlLot lot);
+    Q_INVOKABLE void removeAt(int index);
+    Q_INVOKABLE QmlLot at(int index);
+
+private:
+    DocumentModel *m_model;
+};
 
 Q_DECLARE_METATYPE(QmlColor)
 Q_DECLARE_METATYPE(QmlCategory)

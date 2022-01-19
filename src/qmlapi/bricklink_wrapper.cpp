@@ -24,7 +24,7 @@
 #include "bricklink/order.h"
 #include "bricklink/store.h"
 #include "bricklink_wrapper.h"
-#include "common/documentmodel.h"
+#include "common/document.h"
 
 
 QmlImageItem::QmlImageItem(QQuickItem *parent)
@@ -108,8 +108,14 @@ void QmlBrickLink::registerTypes()
                                                  cannotCreate.arg("Order"_l1));
     qmlRegisterUncreatableType<BrickLink::Store>("BrickStore", 1, 0, "Store",
                                                  cannotCreate.arg("Store"_l1));
+    qmlRegisterUncreatableType<QmlLots>("BrickStore", 1, 0, "Lots",
+                                        cannotCreate.arg("Lots"_l1));
 
     qmlRegisterType<QmlImageItem>("BrickStore", 1, 0, "QImageItem");
+
+    Document::setQmlLotsFactory([](Document *doc) -> QObject * {
+        return new QmlLots(doc->model());
+    });
 }
 
 QmlBrickLink::QmlBrickLink(BrickLink::Core *core)
@@ -1064,9 +1070,9 @@ double QmlPriceGuide::price(QmlBrickLink::Time time, QmlBrickLink::Condition con
           downloaded) at runtime. See the Picture type for more information.
 */
 
-QmlLot::QmlLot(BrickLink::Lot *lot, DocumentModel *document)
+QmlLot::QmlLot(BrickLink::Lot *lot, DocumentModel *model)
     : QmlWrapperBase(lot)
-    , document(document)
+    , m_model(model)
 { }
 
 QImage QmlLot::image() const
@@ -1090,14 +1096,14 @@ BrickLink::Lot *QmlLot::Setter::to()
 
 QmlLot::Setter::~Setter()
 {
-    if (!m_lot->document) {
+    if (!m_lot->m_model) {
         qmlWarning(nullptr) << "Cannot modify a const Lot";
         return;
     }
 
     if (m_lot && (*m_lot->wrapped != m_to)) {
-        if (m_lot->document)
-            m_lot->document->changeLot(m_lot->wrapped, m_to);
+        if (m_lot->m_model)
+            m_lot->m_model->changeLot(m_lot->wrapped, m_to);
         else
             *m_lot->wrapped = m_to;
     }
@@ -1113,4 +1119,46 @@ BrickLink::Lot *QmlLot::get() const
     return wrapped;
 }
 
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlLots::QmlLots(DocumentModel *model)
+    : QObject(model)
+    , m_model(model)
+{ }
+
+int QmlLots::add(QmlItem item, QmlColor color)
+{
+    auto lot = new Lot();
+    lot->setItem(item.wrappedObject());
+    lot->setColor(color.wrappedObject());
+    m_model->appendLot(std::move(lot));
+    return m_model->lots().indexOf(lot);
+}
+
+void QmlLots::remove(QmlLot lot)
+{
+    if (!lot.isNull() && m_model && (lot.m_model == m_model))
+        m_model->removeLot(lot.wrappedObject());
+}
+
+void QmlLots::removeAt(int index)
+{
+    if ((index >= 0) && (index < m_model->lotCount())) {
+        Lot *lot = m_model->lots().at(index);
+        m_model->removeLot(lot);
+    }
+}
+
+QmlLot QmlLots::at(int index)
+{
+    if (index < 0 || index >= m_model->lotCount())
+        return QmlLot { };
+    return QmlLot(m_model->lots().at(index), m_model);
+}
+
 #include "moc_bricklink_wrapper.cpp"
+

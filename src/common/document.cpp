@@ -150,6 +150,9 @@ void ColumnLayoutCmd::undo()
     \inqmlmodule BrickStore
     \ingroup qml-api
     \brief Each instance of this type represents an open document.
+
+    \note The \e index paramter of the lot API is the index into the internal data structure and
+          not related to any sorting or filtering in the visible document window.
 */
 /*! \qmlproperty string Document::currencyCode
     \readonly
@@ -173,6 +176,23 @@ void ColumnLayoutCmd::undo()
     \readonly
     An Order object or \c null, if this document is not a BrickLink order.
 */
+/*! \qmlmethod Lot Document::lots.at(int index)
+    Returns the lot at the specified \a index.
+*/
+/*! \qmlmethod Document::lots.removeAt(int index)
+    Removes the lot at the specified \a index from the document.
+*/
+/*! \qmlmethod Document::lots.remove(Lot lot)
+    Removes the specified \a lot from the document.
+*/
+/*! \qmlmethod int Document::lots.add(Item item, Color color)
+    Adds a new lot for the given \a item and \a color combination to the document.
+    Returns the index of the newly created lot.
+*/
+
+
+std::function<QObject *(Document *)> Document::s_qmlLotsFactory { };
+
 
 Document::Document(QObject *parent)
     : Document(new DocumentModel(), parent)
@@ -1469,6 +1489,19 @@ QCoro::Task<bool> Document::save(bool saveAs)
     co_return false;
 }
 
+void Document::setQmlLotsFactory(std::function<QObject *(Document *)> factory)
+{
+    s_qmlLotsFactory = factory;
+}
+
+QObject *Document::lots()
+{
+    if (!m_qmlLots && s_qmlLotsFactory) {
+        m_qmlLots = s_qmlLotsFactory(this);
+        m_qmlLots->setParent(this);
+    }
+    return m_qmlLots;
+}
 
 void Document::saveToFile(const QString &fileName)
 {

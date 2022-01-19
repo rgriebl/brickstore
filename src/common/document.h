@@ -32,6 +32,7 @@ QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class DocumentModel;
 class Document;
 class ColumnChangeWatcher;
+class QmlLots;
 
 
 enum {
@@ -103,6 +104,7 @@ class Document : public QObject
     Q_PROPERTY(LotList selectedLots READ selectedLots NOTIFY selectedLotsChanged)
     Q_PROPERTY(bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT)
     Q_PROPERTY(QItemSelectionModel *selectionModel READ selectionModel CONSTANT)
+    Q_PROPERTY(QObject *lots READ lots NOTIFY lotsChanged) // QML lots API adapter
     Q_ENUMS(DocumentModel::Field)
 
 public:
@@ -235,6 +237,9 @@ public:
     void saveToFile(const QString &fileName);
     QCoro::Task<bool> save(bool saveAs);
 
+    static void setQmlLotsFactory(std::function<QObject *(Document *)> factory);
+    QObject *lots();
+
 public:
     static Document *fromStore(BrickLink::Store *store);
     static Document *fromCart(BrickLink::Cart *cart);
@@ -260,6 +265,7 @@ signals:
     void columnPositionChanged(int logical, int newVisual);
     void columnSizeChanged(int logical, int newSize);
     void columnHiddenChanged(int logical, bool newHidden);
+    void columnLayoutChanged();
 
     void blockingOperationActiveChanged(bool blocked);
     void blockingOperationCancelableChanged(bool cancelable);
@@ -271,7 +277,7 @@ signals:
     void lotCountChanged(int lotCount);
     void modificationChanged(bool modified);
 
-    void columnLayoutChanged();
+    void lotsChanged();
 
 private:
     QString actionText() const;
@@ -339,6 +345,9 @@ private:
     QTimer                m_autosaveTimer;
     mutable bool          m_autosaveClean = true;
     bool                  m_restoredFromAutosave = false;
+
+    static std::function<QObject *(Document *)> s_qmlLotsFactory;
+    QPointer<QObject>     m_qmlLots;
 
     friend class AutosaveJob;
     friend void ColumnCmd::redo();
