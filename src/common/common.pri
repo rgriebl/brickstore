@@ -4,15 +4,6 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 HEADERS += \
-    $$PWD/onlinestate.h \
-
-SOURCES += \
-    $$PWD/main.cpp \
-    $$PWD/onlinestate.cpp \
-
-bs_desktop|bs_mobile {
-
-HEADERS += \
     $$PWD/actionmanager.h \
     $$PWD/announcements.h \
     $$PWD/application.h \
@@ -22,6 +13,7 @@ HEADERS += \
     $$PWD/documentlist.h \
     $$PWD/documentmodel.h \
     $$PWD/documentmodel_p.h \
+    $$PWD/onlinestate.h \
     $$PWD/recentfiles.h \
     $$PWD/uihelpers.h \
 
@@ -34,7 +26,6 @@ SOURCES += \
     $$PWD/documentio.cpp \
     $$PWD/documentlist.cpp \
     $$PWD/documentmodel.cpp \
+    $$PWD/onlinestate.cpp \
     $$PWD/recentfiles.cpp \
     $$PWD/uihelpers.cpp \
-
-}

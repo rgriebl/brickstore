@@ -82,22 +82,25 @@ substitute($$PWD/src/version.h.in, $$OUT_PWD/src/version.h)
 INCLUDEPATH *= $$OUT_PWD/src  # for version.h
 
 OTHER_FILES += \
-  .gitignore \
   .gitattributes \
-  .tag \
+  .gitignore \
   .github/workflows/*.yml \
   .qmake.conf \
-  VERSION \
-  README.md \
+  .tag \
   CHANGELOG.md \
   LICENSE.GPL \
+  README.md \
+  VERSION \
   BrickStoreXML.rnc \
   configure \
-  translations/translations.json \
-  scripts/generate-assets.sh \
+  debian/* \
+  docker/Dockerfile \
+  docker/entrypoint.sh \
   extensions/README.md \
   extensions/*.bs.qml \
-  debian/* \
+  macos/* \
+  scripts/*.sh \
+  translations/translations.json \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \

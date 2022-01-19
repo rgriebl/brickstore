@@ -1,3 +1,6 @@
 .tag                    export-subst
 .gitignore              export-ignore
 .gitattributes          export-ignore
+
+*.sh text eol=lf
+VERSION text eol=lf

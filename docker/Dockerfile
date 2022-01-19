@@ -17,11 +17,14 @@ RUN /bin/bash -c 'URL=$(wget -q -nv -O- https://api.github.com/repos/rgriebl/bri
   '
   
 RUN mkdir /data
-ENV XDG_CACHE_HOME=/data 
 VOLUME /data
 
-## ENV BRICKSTORE_USERNAME
-## ENV BRICKSTORE_PASSWORD
+ENV DB_PATH=/data/db
+ENV CACHE_PATH=/data/cache
+ENV LOG_PATH=/data/cache
+
+## ENV BRICKLINK_USERNAME
+## ENV BRICKLINK_PASSWORD
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh

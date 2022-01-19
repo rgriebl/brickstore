@@ -3,13 +3,21 @@
 #set -x
 
 failcnt=0
+project="${project}"
+
+red=$'\e[31m'
+green=$'\e[32m'
+yellow=$'\e[33m'
+blue=$'\e[34m'
+purple=$'\e[35m'
+off=$'\e[0m'
 
 function status() 
 {
   if [ "$?" == "0" ]; then
-    echo -e "\e[32m$1\e[0m"
+    echo -e "$green$1$off"
   else
-    echo -e "\e[31m$2\e[0m"
+    echo -e "$red$2$off"
     failcnt=$((failcnt + 1))
   fi
 }
@@ -47,11 +55,11 @@ grep -s -q CHANGELOG.md -e "^## \\[$version\\] - $(date +%Y-%m-%d)\$"
 status "ok" "not from today"
 
 echo -n "Checking CHANGELOG link entry... "
-grep -s -q CHANGELOG.md -e "^\\[$version\\]: https://github.com/rgriebl/brickstore/releases/tag/v"
+grep -s -q CHANGELOG.md -e "^\\[$version\\]: https://github.com/${project}/releases/tag/v"
 status "ok" "not found"
 
 echo -n "Checking CHANGELOG link entry tag... "
-grep -s -q CHANGELOG.md -e "^\\[$version\\]: https://github.com/rgriebl/brickstore/releases/tag/v$version\$"
+grep -s -q CHANGELOG.md -e "^\\[$version\\]: https://github.com/${project}/releases/tag/v$version\$"
 status "ok" "links wrong tag"
 
 echo
@@ -69,7 +77,19 @@ echo
 status "RELEASE $version IS READY TO GO"
 echo
 
-read -p "Tag and push to GitHub now? (y/N) " -n 1 -r
+echo -n -e "Are the ${yellow}translations${off} up to date?"
+read -p " (y/N) " -n 1 -r
+if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo
+  echo "ABORTED BY USER"
+  exit 1
+fi
+
+echo
+echo
+
+echo -n -e "Tag and push to ${purple}GitHub${off} now?"
+read -p " (y/N) " -n 1 -r
 if ! [[ $REPLY =~ ^[Yy]$ ]]; then
   echo
   echo "ABORTED BY USER"
@@ -90,5 +110,5 @@ status "ok" "failed"
 echo
 status "RELEASE DONE"
 echo
-echo "Check GitHub for build progress: https://github.com/rgriebl/brickstore/actions"
+echo -e "Check GitHub for build progress: ${blue}https://github.com/${project}/actions${off}"
 echo

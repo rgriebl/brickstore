@@ -28,6 +28,9 @@ win32 {
   DEFINES *= BS_HAS_PARALLEL_STL
 }
 
+SOURCES += \
+  $$PWD/main.cpp \
+
 OTHER_FILES += \
   $$PWD/version.h.in \
 
@@ -35,7 +38,7 @@ include(utility/utility.pri)
 include(bricklink/bricklink.pri)
 include(ldraw/ldraw.pri)
 include(qmlapi/qmlapi.pri)
-include(common/common.pri)
+bs_mobile|bs_desktop:include(common/common.pri)
 bs_mobile:include(mobile/mobile.pri)
 bs_desktop:include(desktop/desktop.pri)
 bs_backend:include(backend/backend.pri)
