@@ -3,6 +3,36 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.1.1] - 2022-01-20
+
+### Added
+- Replaced the document selector tabs with a drop-down list, which scales a lot better with multiple
+  open documents.
+- The info "docks" are now really dockable and can be rearranged (and even stacked) to your liking
+  by dragging them around. Also added two new docks: a list of recent documents and currently
+  open documents.
+- Windows can now be split horizontally and vertically (as often as you like) to make working on
+  multiple documents in parallel easier.
+- Filters can now be edited both via UI controls and in text form: just click the dots menu on the
+  right of the filter controls and switch to "text only mode". Copying and pasting filters in UI
+  mode is also available via this menu.
+- The JavaScript scripting API has been heavily extended and documented. The printing part is more
+  or less stable by now, the UI extension part still needs some testing.
+  [The documentation](https://rgriebl.github.io/brickstore/extensions/) is auto generated from the
+  code.
+- Thanks to Sergio, we now have a complete Spanish translation.
+
+### Fixed
+- Printing only the selected items also does work now using the default print preview mechanism.
+- Version 2021.10 broke the update check mechanism, so the automatic check in these versions will
+  not report that a newer update is available. The affected users will be notified via the
+  Announcements mechanism instead, but they will have to install the update manually.
+
+This release also adds a rudimentary mobile port for Android tablets, but the UI part is far from
+being finished. Most of the functionality of the desktop version is there, but not accessible yet.
+An improved UI and iPadOS support is planned for the upcoming releases.
+
+
 ## [2021.10.2] - 2021-10-07
 This .2 release additionally fixes two bugs introduced in the 2021.10.1 release:
 - Fixed the status column not sorting correctly.
@@ -367,7 +397,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.10.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.1.1...HEAD
+[2022.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.1
 [2021.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.2
 [2021.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.1
 [2021.6.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.6.1
