@@ -14,14 +14,6 @@
     "author":      "Sylvain Perez",
     "authorEmail": "bricklink@1001bricks.com"
   },
-  "cz": {
-    "name":        "Czech",
-    "localName":   "Česky"
-  },
-  "pt": {
-    "name":        "Portuguese",
-    "localName":   "Português"
-  },
   "es": {
     "name":        "Spanish",
     "localName":   "Español",
