@@ -1317,83 +1317,83 @@
 <context>
     <name>BrickLink::Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="615"/>
+        <location filename="../src/bricklink/order.cpp" line="651"/>
         <source>Address not available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="624"/>
+        <location filename="../src/bricklink/order.cpp" line="667"/>
         <source>Cannot write order address to cache</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="663"/>
+        <location filename="../src/bricklink/order.cpp" line="706"/>
         <source>Cannot save order to file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="668"/>
+        <location filename="../src/bricklink/order.cpp" line="711"/>
         <source>Cannot write order XML to cache</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="675"/>
-        <location filename="../src/bricklink/order.cpp" line="685"/>
+        <location filename="../src/bricklink/order.cpp" line="718"/>
+        <location filename="../src/bricklink/order.cpp" line="728"/>
         <source>Could not parse the received order XML data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="765"/>
+        <location filename="../src/bricklink/order.cpp" line="811"/>
         <source>Cannot open order XML</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1029"/>
+        <location filename="../src/bricklink/order.cpp" line="1087"/>
         <source>Received</source>
         <translation>Reçue</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1029"/>
+        <location filename="../src/bricklink/order.cpp" line="1087"/>
         <source>Placed</source>
         <translation>Passée</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1099"/>
+        <location filename="../src/bricklink/order.cpp" line="1157"/>
         <source>Date</source>
         <translation>Date</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1100"/>
+        <location filename="../src/bricklink/order.cpp" line="1158"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1101"/>
+        <location filename="../src/bricklink/order.cpp" line="1159"/>
         <source>Status</source>
         <translation>Statut</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1102"/>
+        <location filename="../src/bricklink/order.cpp" line="1160"/>
         <source>Order ID</source>
         <translation>Numéro</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1103"/>
+        <location filename="../src/bricklink/order.cpp" line="1161"/>
         <source>Buyer/Seller</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1104"/>
+        <location filename="../src/bricklink/order.cpp" line="1162"/>
         <source>Items</source>
         <translation>Items</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1105"/>
+        <location filename="../src/bricklink/order.cpp" line="1163"/>
         <source>Lots</source>
         <translation>Lots</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1106"/>
+        <location filename="../src/bricklink/order.cpp" line="1164"/>
         <source>Total</source>
         <translation>Total</translation>
     </message>
@@ -4108,92 +4108,102 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation>Statut</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="107"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="106"/>
         <source>Last updated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="124"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="123"/>
         <source>Tracking Number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="398"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="397"/>
         <source>Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="465"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="461"/>
+        <source>Phone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="499"/>
         <source>Currency Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="482"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="516"/>
         <source>Shipping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="523"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="557"/>
         <source>Insurance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="564"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="598"/>
         <source>Additional Charges 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="605"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="639"/>
         <source>Additional Charges 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="646"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="680"/>
         <source>Credit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="687"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="721"/>
         <source>Credit Coupon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="728"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="762"/>
         <source>Order Total</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="769"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="803"/>
         <source>Sales Tax</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="810"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="844"/>
         <source>Grand Total</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="851"/>
-        <source>VAT Charges</source>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="885"/>
+        <source>%1 VAT Charge (Seller)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="51"/>
-        <source>Order %1, %2 %3 on %4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="53"/>
-        <source>received from</source>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="926"/>
+        <source>%1 VAT Charge (BrickLink)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.cpp" line="54"/>
+        <source>Order %1, %2 %3 on %4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="56"/>
+        <source>received from</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="57"/>
         <source>placed at</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="82"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="86"/>
         <source>Payment in</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4208,82 +4218,82 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="511"/>
+        <location filename="../src/bricklink/order.cpp" line="547"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="512"/>
+        <location filename="../src/bricklink/order.cpp" line="548"/>
         <source>Pending</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="513"/>
+        <location filename="../src/bricklink/order.cpp" line="549"/>
         <source>Updated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="514"/>
+        <location filename="../src/bricklink/order.cpp" line="550"/>
         <source>Processing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="515"/>
+        <location filename="../src/bricklink/order.cpp" line="551"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="516"/>
+        <location filename="../src/bricklink/order.cpp" line="552"/>
         <source>Paid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="517"/>
+        <location filename="../src/bricklink/order.cpp" line="553"/>
         <source>Packed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="518"/>
+        <location filename="../src/bricklink/order.cpp" line="554"/>
         <source>Shipped</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="519"/>
+        <location filename="../src/bricklink/order.cpp" line="555"/>
         <source>Received</source>
         <translation type="unfinished">Reçue</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="520"/>
+        <location filename="../src/bricklink/order.cpp" line="556"/>
         <source>Completed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="521"/>
+        <location filename="../src/bricklink/order.cpp" line="557"/>
         <source>OCR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="522"/>
+        <location filename="../src/bricklink/order.cpp" line="558"/>
         <source>NPB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="523"/>
+        <location filename="../src/bricklink/order.cpp" line="559"/>
         <source>NPX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="524"/>
+        <location filename="../src/bricklink/order.cpp" line="560"/>
         <source>NRS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="525"/>
+        <location filename="../src/bricklink/order.cpp" line="561"/>
         <source>NSS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="526"/>
+        <location filename="../src/bricklink/order.cpp" line="562"/>
         <source>Cancelled</source>
         <translation type="unfinished"></translation>
     </message>

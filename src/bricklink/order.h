@@ -45,9 +45,10 @@ class Order : public QObject
     Q_PROPERTY(double credit READ credit NOTIFY creditChanged)
     Q_PROPERTY(double creditCoupon READ creditCoupon NOTIFY creditCouponChanged)
     Q_PROPERTY(double orderTotal READ orderTotal NOTIFY orderTotalChanged)
-    Q_PROPERTY(double salesTax READ salesTax NOTIFY salesTaxChanged)
+    Q_PROPERTY(double usSalesTax READ usSalesTax NOTIFY usSalesTaxChanged)
     Q_PROPERTY(double grandTotal READ grandTotal NOTIFY grandTotalChanged)
-    Q_PROPERTY(double vatCharges READ vatCharges NOTIFY vatChargesChanged)
+    Q_PROPERTY(double vatChargeSeller READ vatChargeSeller NOTIFY vatChargeSellerChanged)
+    Q_PROPERTY(double vatChargeBrickLink READ vatChargeBrickLink NOTIFY vatChargeBrickLinkChanged)
     Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
     Q_PROPERTY(QString paymentCurrencyCode READ paymentCurrencyCode NOTIFY paymentCurrencyCodeChanged)
     Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
@@ -56,6 +57,7 @@ class Order : public QObject
     Q_PROPERTY(QString paymentType READ paymentType NOTIFY paymentTypeChanged)
     Q_PROPERTY(QString trackingNumber READ trackingNumber NOTIFY trackingNumberChanged)
     Q_PROPERTY(QString address READ address NOTIFY addressChanged)
+    Q_PROPERTY(QString phone READ phone NOTIFY phoneChanged)
     Q_PROPERTY(QString countryCode READ countryCode NOTIFY countryCodeChanged)
 
 public:
@@ -77,9 +79,10 @@ public:
     double credit() const;
     double creditCoupon() const;
     double orderTotal() const;
-    double salesTax() const;
+    double usSalesTax() const;
     double grandTotal() const;
-    double vatCharges() const;
+    double vatChargeSeller() const;
+    double vatChargeBrickLink() const;
     QString currencyCode() const;
     QString paymentCurrencyCode() const;
     int itemCount() const;
@@ -88,6 +91,7 @@ public:
     QString paymentType() const;
     QString trackingNumber() const;
     QString address() const;
+    QString phone() const;
     QString countryCode() const;
 
     void setLots(LotList &&lots); // we take ownership
@@ -103,9 +107,10 @@ public:
     void setCredit(double m);
     void setCreditCoupon(double m);
     void setOrderTotal(double m);
-    void setSalesTax(double m);
+    void setUsSalesTax(double m);
     void setGrandTotal(double m);
-    void setVatCharges(double m);
+    void setVatChargeSeller(double m);
+    void setVatChargeBrickLink(double m);
     void setCurrencyCode(const QString &str);
     void setPaymentCurrencyCode(const QString &str);
     void setItemCount(int i);
@@ -114,6 +119,7 @@ public:
     void setPaymentType(const QString &str);
     void setTrackingNumber(const QString &str);
     void setAddress(const QString &str);
+    void setPhone(const QString &str);
     void setCountryCode(const QString &str);
 
     static OrderStatus statusFromString(const QString &s);
@@ -133,9 +139,10 @@ signals:
     void creditChanged(double m);
     void creditCouponChanged(double m);
     void orderTotalChanged(double m);
-    void salesTaxChanged(double m);
+    void usSalesTaxChanged(double m);
     void grandTotalChanged(double m);
-    void vatChargesChanged(double m);
+    void vatChargeSellerChanged(double m);
+    void vatChargeBrickLinkChanged(double m);
     void currencyCodeChanged(const QString &str);
     void paymentCurrencyCodeChanged(const QString &str);
 
@@ -145,6 +152,7 @@ signals:
     void paymentTypeChanged(const QString &str);
     void trackingNumberChanged(const QString &str);
     void addressChanged(const QString &str);
+    void phoneChanged(const QString &str);
     void countryCodeChanged(const QString &str);
 
 private:
@@ -215,7 +223,7 @@ private:
     void appendOrderToModel(std::unique_ptr<Order> order);
     void emitDataChanged(int row, int col);
     void startUpdateAddress(Order *order);
-    QString parseAddress(OrderType type, const QByteArray &data);
+    std::pair<QString, QString> parseAddressAndPhone(OrderType type, const QByteArray &data);
     QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const;
 
     bool m_valid = false;

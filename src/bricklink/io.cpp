@@ -113,9 +113,10 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
         rootTagHash.insert(u"ORDERCREDIT",       [](auto &pr, auto &v) { pr.order()->setCredit(v.toDouble()); } );
         rootTagHash.insert(u"ORDERCREDITCOUPON", [](auto &pr, auto &v) { pr.order()->setCreditCoupon(v.toDouble()); } );
         rootTagHash.insert(u"ORDERTOTAL",        [](auto &pr, auto &v) { pr.order()->setOrderTotal(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERSALESTAX",     [](auto &pr, auto &v) { pr.order()->setSalesTax(v.toDouble()); } );
         rootTagHash.insert(u"BASEGRANDTOTAL",    [](auto &pr, auto &v) { pr.order()->setGrandTotal(v.toDouble()); } );
-        rootTagHash.insert(u"VATCHARGES",        [](auto &pr, auto &v) { pr.order()->setVatCharges(v.toDouble()); } );
+        rootTagHash.insert(u"VATCHARGES",        [](auto &pr, auto &v) { pr.order()->setVatChargeSeller(v.toDouble()); } ); // VAT charge by seller
+        rootTagHash.insert(u"ORDERVAT",          [](auto &pr, auto &v) { pr.order()->setVatChargeBrickLink(v.toDouble()); } ); // VAT collected by BL
+        rootTagHash.insert(u"ORDERSALESTAX",     [](auto &pr, auto &v) { pr.order()->setUsSalesTax(v.toDouble()); } );   // US SalesTax collected by BL
         rootTagHash.insert(u"BASECURRENCYCODE",  [](auto &pr, auto &v) { pr.order()->setCurrencyCode(v); } );
         rootTagHash.insert(u"PAYCURRENCYCODE",   [](auto &pr, auto &v) { pr.order()->setPaymentCurrencyCode(v); } );
         rootTagHash.insert(u"ORDERITEMS",        [](auto &pr, auto &v) { pr.order()->setItemCount(v.toInt()); } );

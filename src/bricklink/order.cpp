@@ -20,6 +20,7 @@
 #include <QCoreApplication>
 #include <QUrlQuery>
 #include <QRegularExpression>
+#include <QJsonDocument>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
@@ -52,9 +53,10 @@ private:
     double    m_credit = 0;
     double    m_creditCoupon = 0;
     double    m_orderTotal = 0;
-    double    m_salesTax = 0;
+    double    m_usSalesTax = 0;
     double    m_grandTotal = 0;
-    double    m_vatCharges = 0;
+    double    m_vatChargeSeller = 0;
+    double    m_vatChargeBrickLink = 0;
     QString   m_currencyCode;
     QString   m_paymentCurrencyCode;
     int       m_itemCount = 0;
@@ -63,6 +65,7 @@ private:
     QString   m_paymentType;
     QString   m_trackingNumber;
     QString   m_address;
+    QString   m_phone;
     QString   m_countryCode;
     LotList   m_lots;
 
@@ -117,13 +120,16 @@ private:
 /*! \qmlproperty real Order::orderTotal
     \readonly
 */
-/*! \qmlproperty real Order::salesTax
+/*! \qmlproperty real Order::usSalesTax
     \readonly
 */
 /*! \qmlproperty real Order::grandTotal
     \readonly
 */
-/*! \qmlproperty real Order::vatCharges
+/*! \qmlproperty real Order::vatChargeSeller
+    \readonly
+*/
+/*! \qmlproperty real Order::vatChargeBrickLink
     \readonly
 */
 /*! \qmlproperty string Order::currencyCode
@@ -152,6 +158,10 @@ private:
 /*! \qmlproperty string Order::address
     \readonly
     The full address of the otherParty.
+*/
+/*! \qmlproperty string Order::phone
+    \readonly
+    The phone number of the otherParty.
 */
 /*! \qmlproperty string Order::countryCode
     \readonly
@@ -246,9 +256,9 @@ double Order::orderTotal() const
     return d->m_orderTotal;
 }
 
-double Order::salesTax() const
+double Order::usSalesTax() const
 {
-    return d->m_salesTax;
+    return d->m_usSalesTax;
 }
 
 double Order::grandTotal() const
@@ -256,9 +266,14 @@ double Order::grandTotal() const
     return d->m_grandTotal;
 }
 
-double Order::vatCharges() const
+double Order::vatChargeSeller() const
 {
-    return d->m_vatCharges;
+    return d->m_vatChargeSeller;
+}
+
+double Order::vatChargeBrickLink() const
+{
+    return d->m_vatChargeBrickLink;
 }
 
 QString Order::currencyCode() const
@@ -299,6 +314,11 @@ QString Order::trackingNumber() const
 QString Order::address() const
 {
     return d->m_address;
+}
+
+QString Order::phone() const
+{
+    return d->m_phone;
 }
 
 QString Order::countryCode() const
@@ -408,11 +428,11 @@ void Order::setOrderTotal(double m)
     }
 }
 
-void Order::setSalesTax(double m)
+void Order::setUsSalesTax(double m)
 {
-    if (d->m_salesTax != m) {
-        d->m_salesTax = m;
-        emit salesTaxChanged(m);
+    if (d->m_usSalesTax != m) {
+        d->m_usSalesTax = m;
+        emit usSalesTaxChanged(m);
     }
 }
 
@@ -424,11 +444,19 @@ void Order::setGrandTotal(double m)
     }
 }
 
-void Order::setVatCharges(double m)
+void Order::setVatChargeSeller(double m)
 {
-    if (d->m_vatCharges != m) {
-        d->m_vatCharges = m;
-        emit vatChargesChanged(m);
+    if (d->m_vatChargeSeller != m) {
+        d->m_vatChargeSeller = m;
+        emit vatChargeSellerChanged(m);
+    }
+}
+
+void Order::setVatChargeBrickLink(double m)
+{
+    if (d->m_vatChargeBrickLink != m) {
+        d->m_vatChargeBrickLink = m;
+        emit vatChargeBrickLinkChanged(m);
     }
 }
 
@@ -493,6 +521,14 @@ void Order::setAddress(const QString &str)
     if (d->m_address != str) {
         d->m_address = str;
         emit addressChanged(str);
+    }
+}
+
+void Order::setPhone(const QString &str)
+{
+    if (d->m_phone != str) {
+        d->m_phone = str;
+        emit phoneChanged(str);
     }
 }
 
@@ -610,12 +646,19 @@ Orders::Orders(QObject *parent)
                 int row = indexOfOrder(job->userData(type).toString());
                 if (row >= 0) {
                     Order *order = m_orders.at(row);
-                    QString address = parseAddress(order->type(), *job->data());
+                    auto [address, phone] = parseAddressAndPhone(order->type(), *job->data());
                     if (address.isEmpty())
                         address = tr("Address not available");
-                    QByteArray utf8 = address.toUtf8();
 
-                    auto saveFile = orderSaveFile(QString(order->id() % u".address.txt"),
+                    QVariantMap vm = {
+                        { "id"_l1, order->id() },
+                        { "address"_l1, address },
+                        { "phone"_l1, phone },
+                    };
+                    QJsonDocument json = QJsonDocument::fromVariant(vm);
+                    QByteArray utf8 = json.toJson();
+
+                    auto saveFile = orderSaveFile(QString(order->id() % u".brickstore.json"),
                                                   order->type(), order->date());
 
                     if (!saveFile
@@ -742,12 +785,15 @@ void Orders::reloadOrdersFromCache()
             dit.next();
             std::unique_ptr<Order> order(Orders::orderFromXML(dit.filePath()));
             QDir d = dit.fileInfo().absoluteDir();
-            QString addressFileName = order->id() % u".address.txt";
+            QString addressFileName = order->id() % u".brickstore.json";
             if (d.exists(addressFileName)) {
                 QFile f(d.absoluteFilePath(addressFileName));
-                if (f.open(QIODevice::ReadOnly) && (f.size() < 2000)) {
-                    QString address = QString::fromUtf8(f.readAll());
-                    order->setAddress(address);
+                if (f.open(QIODevice::ReadOnly) && (f.size() < 5000)) {
+                    auto json = QJsonDocument::fromJson(f.readAll());
+                    if (json.isObject()) {
+                        order->setAddress(json["address"_l1].toString());
+                        order->setPhone(json["phone"_l1].toString());
+                    }
                 }
             }
             appendOrderToModel(std::move(order));
@@ -795,12 +841,14 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
             order->setCreditCoupon(newOrder->creditCoupon());
         if (order->orderTotal() != newOrder->orderTotal())
             order->setOrderTotal(newOrder->orderTotal());
-        if (order->salesTax() != newOrder->salesTax())
-            order->setSalesTax(newOrder->salesTax());
+        if (order->usSalesTax() != newOrder->usSalesTax())
+            order->setUsSalesTax(newOrder->usSalesTax());
         if (order->grandTotal() != newOrder->grandTotal())
             order->setGrandTotal(newOrder->grandTotal());
-        if (order->vatCharges() != newOrder->vatCharges())
-            order->setVatCharges(newOrder->vatCharges());
+        if (order->vatChargeSeller() != newOrder->vatChargeSeller())
+            order->setVatChargeSeller(newOrder->vatChargeSeller());
+        if (order->vatChargeBrickLink() != newOrder->vatChargeBrickLink())
+            order->setVatChargeBrickLink(newOrder->vatChargeBrickLink());
         if (order->currencyCode() != newOrder->currencyCode())
             order->setCurrencyCode(newOrder->currencyCode());
         if (order->paymentCurrencyCode() != newOrder->paymentCurrencyCode())
@@ -880,8 +928,9 @@ void Orders::startUpdateAddress(Order *order)
     core()->retrieveAuthenticated(job);
 }
 
-QString Orders::parseAddress(OrderType type, const QByteArray &data)
+std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const QByteArray &data)
 {
+
     if (!data.isEmpty()) {
         QString s = QString::fromUtf8(data);
         QString a;
@@ -894,10 +943,19 @@ QString Orders::parseAddress(OrderType type, const QByteArray &data)
                 matches.next();
         }
         if (matches.hasNext()) {
+            std::pair<QString, QString> result;
+
             QRegularExpressionMatch match = matches.next();
             a = match.captured(1);
             a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"_l1), "\n"_l1);
-            return a;
+            result.first = a;
+
+            QRegularExpression phoneRegExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Phone:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
+
+            auto phoneMatch = phoneRegExp.match(s, match.capturedEnd());
+            if (phoneMatch.hasMatch())
+                result.second = phoneMatch.captured(1);
+            return result;
         }
     }
     return { };

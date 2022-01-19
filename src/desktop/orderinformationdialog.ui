@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>603</width>
-    <height>401</height>
+    <height>449</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,7 +55,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QWidget" name="" native="true">
+      <widget class="QWidget" name="widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>10</horstretch>
@@ -89,7 +89,6 @@
          <widget class="QLabel" name="w_status">
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -415,7 +414,7 @@
           </item>
          </layout>
         </item>
-        <item row="4" column="1">
+        <item row="5" column="1">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -428,6 +427,41 @@
           </property>
          </spacer>
         </item>
+        <item row="4" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLineEdit" name="w_phone">
+            <property name="text">
+             <string notr="true">xxx</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="w_phoneCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="w_phoneLabel">
+          <property name="text">
+           <string>Phone</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -439,7 +473,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QWidget" name="" native="true">
+      <widget class="QWidget" name="widget2" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>7</horstretch>
@@ -460,7 +494,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_13">
+         <widget class="QLabel" name="w_currencyCodeLabel">
           <property name="text">
            <string>Currency Code</string>
           </property>
@@ -477,7 +511,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="w_shippingLabel">
           <property name="text">
            <string>Shipping</string>
           </property>
@@ -518,7 +552,7 @@
          </layout>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="w_insuranceLabel">
           <property name="text">
            <string>Insurance</string>
           </property>
@@ -559,7 +593,7 @@
          </layout>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="w_addCharges1Label">
           <property name="text">
            <string>Additional Charges 1</string>
           </property>
@@ -600,7 +634,7 @@
          </layout>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="w_addCharges2Label">
           <property name="text">
            <string>Additional Charges 2</string>
           </property>
@@ -641,7 +675,7 @@
          </layout>
         </item>
         <item row="5" column="0">
-         <widget class="QLabel" name="label_7">
+         <widget class="QLabel" name="w_creditLabel">
           <property name="text">
            <string>Credit</string>
           </property>
@@ -682,7 +716,7 @@
          </layout>
         </item>
         <item row="6" column="0">
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="w_creditCouponLabel">
           <property name="text">
            <string>Credit Coupon</string>
           </property>
@@ -723,7 +757,7 @@
          </layout>
         </item>
         <item row="7" column="0">
-         <widget class="QLabel" name="label_9">
+         <widget class="QLabel" name="w_orderTotalLabel">
           <property name="text">
            <string>Order Total</string>
           </property>
@@ -764,7 +798,7 @@
          </layout>
         </item>
         <item row="8" column="0">
-         <widget class="QLabel" name="label_10">
+         <widget class="QLabel" name="w_salesTaxLabel">
           <property name="text">
            <string>Sales Tax</string>
           </property>
@@ -805,7 +839,7 @@
          </layout>
         </item>
         <item row="9" column="0">
-         <widget class="QLabel" name="label_11">
+         <widget class="QLabel" name="w_grandTotalLabel">
           <property name="text">
            <string>Grand Total</string>
           </property>
@@ -846,9 +880,9 @@
          </layout>
         </item>
         <item row="10" column="0">
-         <widget class="QLabel" name="label_12">
+         <widget class="QLabel" name="w_vatSellerLabel">
           <property name="text">
-           <string>VAT Charges</string>
+           <string>%1 VAT Charge (Seller)</string>
           </property>
          </widget>
         </item>
@@ -858,7 +892,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLineEdit" name="w_vat">
+           <widget class="QLineEdit" name="w_vatSeller">
             <property name="text">
              <string notr="true">xxx</string>
             </property>
@@ -871,7 +905,48 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="w_vatCopy">
+           <widget class="QToolButton" name="w_vatSellerCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="11" column="0">
+         <widget class="QLabel" name="w_vatBLLabel">
+          <property name="text">
+           <string>%1 VAT Charge (BrickLink)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_45">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="w_vatBL">
+            <property name="text">
+             <string notr="true">xxx</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="w_vatBLCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>

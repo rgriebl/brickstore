@@ -458,7 +458,7 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="408"/>
         <source>Extensions Interface Documentation...</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación para la Interfaz de Extensiones...</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="409"/>
@@ -627,12 +627,12 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="443"/>
         <source>Spread cost relative to price...</source>
-        <translation type="unfinished"></translation>
+        <translation>Repartir coste relativamente al precio...</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="444"/>
         <source>Spread cost relative to weight...</source>
-        <translation type="unfinished"></translation>
+        <translation>Repartir coste relativamente al peso...</translation>
     </message>
     <message>
         <source>Spread Cost Amount...</source>
@@ -1064,7 +1064,7 @@
     <message>
         <location filename="../src/common/application.cpp" line="307"/>
         <source>Please enter the password for the BrickLink account %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor ingrese la contraseña de la cuenta de BrickLink %1:</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="314"/>
@@ -1290,83 +1290,83 @@
 <context>
     <name>BrickLink::Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="615"/>
+        <location filename="../src/bricklink/order.cpp" line="651"/>
         <source>Address not available</source>
         <translation>Dirección no disponible</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="624"/>
+        <location filename="../src/bricklink/order.cpp" line="667"/>
         <source>Cannot write order address to cache</source>
         <translation>No se puede escribir la dirección del pedido en la caché</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="663"/>
+        <location filename="../src/bricklink/order.cpp" line="706"/>
         <source>Cannot save order to file</source>
         <translation>No se puede guardar el pedido en un archivo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="668"/>
+        <location filename="../src/bricklink/order.cpp" line="711"/>
         <source>Cannot write order XML to cache</source>
         <translation>No se puede escribir el pedido XML en la caché</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="675"/>
-        <location filename="../src/bricklink/order.cpp" line="685"/>
+        <location filename="../src/bricklink/order.cpp" line="718"/>
+        <location filename="../src/bricklink/order.cpp" line="728"/>
         <source>Could not parse the received order XML data</source>
         <translation>No se ha podido convertir los datos XML del pedido recibido</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="765"/>
+        <location filename="../src/bricklink/order.cpp" line="811"/>
         <source>Cannot open order XML</source>
         <translation>No se puede abir el XML del pedido</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1029"/>
+        <location filename="../src/bricklink/order.cpp" line="1087"/>
         <source>Received</source>
         <translation>Recibidos</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1029"/>
+        <location filename="../src/bricklink/order.cpp" line="1087"/>
         <source>Placed</source>
         <translation>Realizados</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1099"/>
+        <location filename="../src/bricklink/order.cpp" line="1157"/>
         <source>Date</source>
         <translation>Fecha</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1100"/>
+        <location filename="../src/bricklink/order.cpp" line="1158"/>
         <source>Type</source>
         <translation>Tipo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1101"/>
+        <location filename="../src/bricklink/order.cpp" line="1159"/>
         <source>Status</source>
         <translation>Estado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1102"/>
+        <location filename="../src/bricklink/order.cpp" line="1160"/>
         <source>Order ID</source>
         <translation>ID Pedido</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1103"/>
+        <location filename="../src/bricklink/order.cpp" line="1161"/>
         <source>Buyer/Seller</source>
         <translation>Comprador/Vendedor</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1104"/>
+        <location filename="../src/bricklink/order.cpp" line="1162"/>
         <source>Items</source>
         <translation>Artículos</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1105"/>
+        <location filename="../src/bricklink/order.cpp" line="1163"/>
         <source>Lots</source>
         <translation>Lotes</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1106"/>
+        <location filename="../src/bricklink/order.cpp" line="1164"/>
         <source>Total</source>
         <translation>Total</translation>
     </message>
@@ -2988,7 +2988,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/importorderdialog.cpp" line="289"/>
         <source>Multiple Orders</source>
-        <translation type="unfinished"></translation>
+        <translation>Múltiples Pedidos</translation>
     </message>
     <message>
         <location filename="../src/desktop/importorderdialog.cpp" line="336"/>
@@ -3162,175 +3162,189 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Estado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="107"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="106"/>
         <source>Last updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Última Actualización</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="124"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="123"/>
         <source>Tracking Number</source>
-        <translation type="unfinished"></translation>
+        <translation>Número de Seguimiento</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="398"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="397"/>
         <source>Address</source>
+        <translation>Dirección</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="461"/>
+        <source>Phone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="465"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="499"/>
         <source>Currency Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código de Moneda</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="482"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="516"/>
         <source>Shipping</source>
-        <translation type="unfinished"></translation>
+        <translation>Envío</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="523"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="557"/>
         <source>Insurance</source>
-        <translation type="unfinished"></translation>
+        <translation>Seguro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="564"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="598"/>
         <source>Additional Charges 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cargos Adicionales 1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="605"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="639"/>
         <source>Additional Charges 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Cargos Adicionales 2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="646"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="680"/>
         <source>Credit</source>
-        <translation type="unfinished"></translation>
+        <translation>Crédito</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="687"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="721"/>
         <source>Credit Coupon</source>
-        <translation type="unfinished"></translation>
+        <translation>Crédito de Cupón</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="728"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="762"/>
         <source>Order Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Total Pedido</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="769"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="803"/>
         <source>Sales Tax</source>
-        <translation type="unfinished"></translation>
+        <translation>Impuestos de Ventas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="810"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="844"/>
         <source>Grand Total</source>
+        <translation>Gran Total</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="885"/>
+        <source>%1 VAT Charge (Seller)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="851"/>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="926"/>
+        <source>%1 VAT Charge (BrickLink)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>VAT Charges</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="51"/>
-        <source>Order %1, %2 %3 on %4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="53"/>
-        <source>received from</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">Cargos de VAT</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.cpp" line="54"/>
-        <source>placed at</source>
-        <translation type="unfinished"></translation>
+        <source>Order %1, %2 %3 on %4</source>
+        <translation>Pedido %1, %2 %3 el %4</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="82"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="56"/>
+        <source>received from</source>
+        <translation>recibido de</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="57"/>
+        <source>placed at</source>
+        <translation>realizado en</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="86"/>
         <source>Payment in</source>
-        <translation type="unfinished"></translation>
+        <translation>Pago en</translation>
     </message>
 </context>
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="511"/>
+        <location filename="../src/bricklink/order.cpp" line="547"/>
         <source>Unknown</source>
         <translation>Desconocido</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="512"/>
+        <location filename="../src/bricklink/order.cpp" line="548"/>
         <source>Pending</source>
         <translation>Pendiente</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="513"/>
+        <location filename="../src/bricklink/order.cpp" line="549"/>
         <source>Updated</source>
         <translation>Actualizado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="514"/>
+        <location filename="../src/bricklink/order.cpp" line="550"/>
         <source>Processing</source>
         <translation>Precesando</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="515"/>
+        <location filename="../src/bricklink/order.cpp" line="551"/>
         <source>Ready</source>
         <translation>Listo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="516"/>
+        <location filename="../src/bricklink/order.cpp" line="552"/>
         <source>Paid</source>
         <translation>Pagado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="517"/>
+        <location filename="../src/bricklink/order.cpp" line="553"/>
         <source>Packed</source>
         <translation>Empaquetado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="518"/>
+        <location filename="../src/bricklink/order.cpp" line="554"/>
         <source>Shipped</source>
         <translation>Enviado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="519"/>
+        <location filename="../src/bricklink/order.cpp" line="555"/>
         <source>Received</source>
         <translation>Recibido</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="520"/>
+        <location filename="../src/bricklink/order.cpp" line="556"/>
         <source>Completed</source>
         <translation>Completado</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="521"/>
+        <location filename="../src/bricklink/order.cpp" line="557"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="522"/>
+        <location filename="../src/bricklink/order.cpp" line="558"/>
         <source>NPB</source>
         <translation>NPB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="523"/>
+        <location filename="../src/bricklink/order.cpp" line="559"/>
         <source>NPX</source>
         <translation>NPX</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="524"/>
+        <location filename="../src/bricklink/order.cpp" line="560"/>
         <source>NRS</source>
         <translation>NRS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="525"/>
+        <location filename="../src/bricklink/order.cpp" line="561"/>
         <source>NSS</source>
         <translation>NSS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="526"/>
+        <location filename="../src/bricklink/order.cpp" line="562"/>
         <source>Cancelled</source>
         <translation>Cancelado</translation>
     </message>
@@ -3617,7 +3631,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/printdialog.ui" line="339"/>
         <source>Selection Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Solo Selección</translation>
     </message>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="344"/>
@@ -4407,7 +4421,9 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <source>If you set a password, it is saved in your system: it is just scrambled, but **not** encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.
 
 If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
-        <translation type="unfinished"></translation>
+        <translation>Si establece una contraseña, ésta se guarda en su sistema: sólo está codificada, pero **no** encriptada, porque BrickStore necesita enviar esta contraseña al servidor de BrickLink cuando descargue datos en su nombre.
+
+Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que introduzca su contraseña la primera vez que BrickStore descargue datos en su nombre desde BrickLink después de iniciarse.</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="769"/>
@@ -4940,7 +4956,7 @@ If you do not want to save your password, then just leave this field empty and y
     <message>
         <location filename="../src/desktop/viewpane.cpp" line="537"/>
         <source>Open in new window</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir en nueva ventana</translation>
     </message>
     <message>
         <source>Order information</source>
