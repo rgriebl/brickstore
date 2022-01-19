@@ -27,11 +27,12 @@ class AppearsInWidget : public QTreeView
 {
     Q_OBJECT
 public:
-    AppearsInWidget(QWidget *parent = nullptr);
+    explicit AppearsInWidget(QWidget *parent);
+    explicit AppearsInWidget(bool allowPartOut, QWidget *parent = nullptr);
     ~AppearsInWidget() override;
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
-    void setItems(const LotList &lots);
+    void setItems(const BrickLink::LotList &lots);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;

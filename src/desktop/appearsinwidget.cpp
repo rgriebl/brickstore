@@ -34,6 +34,10 @@ public:
 };
 
 AppearsInWidget::AppearsInWidget(QWidget *parent)
+    : AppearsInWidget(false, parent)
+{ }
+
+AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
     : QTreeView(parent)
     , d(new AppearsInWidgetPrivate())
 {
@@ -51,17 +55,18 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::None, this));
 
     QAction *a;
-    a = new QAction(this);
-    a->setObjectName("appearsin_partoutitems"_l1);
-    a->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
-    connect(a, &QAction::triggered,
-            this, &AppearsInWidget::partOut);
-    addAction(a);
+    if (allowPartOut) {
+        a = new QAction(this);
+        a->setObjectName("appearsin_partoutitems"_l1);
+        a->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
+        connect(a, &QAction::triggered,
+                this, &AppearsInWidget::partOut);
+        addAction(a);
 
-    a = new QAction(this);
-    a->setSeparator(true);
-    addAction(a);
-
+        a = new QAction(this);
+        a->setSeparator(true);
+        addAction(a);
+    }
     a = new QAction(this);
     a->setObjectName("appearsin_bl_catalog"_l1);
     a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
@@ -97,7 +102,8 @@ AppearsInWidget::~AppearsInWidget()
 
 void AppearsInWidget::languageChange()
 {
-    findChild<QAction *>("appearsin_partoutitems"_l1)->setText(tr("Part out Item..."));
+    if (auto a = findChild<QAction *>("appearsin_partoutitems"_l1))
+        a->setText(tr("Part out Item..."));
     findChild<QAction *>("appearsin_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *>("appearsin_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *>("appearsin_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
