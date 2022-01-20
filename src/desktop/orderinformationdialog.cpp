@@ -87,17 +87,16 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
                                 % order->paymentCurrencyCode());
     }
 
-    double netGrandTotalSeller = order->grandTotal() - order->vatChargeSeller();
-    double vatPercentSeller = qFuzzyIsNull(netGrandTotalSeller)
-            ? 0 : (order->grandTotal() / netGrandTotalSeller - 1.0);
-    w_vatSellerLabel->setText(w_vatSellerLabel->text()
-                              .arg(loc.toString(vatPercentSeller, 'f', QLocale::FloatingPointShortest) % u'%'));
+    static auto setVatLabel = [](QLabel *l, const BrickLink::Order *order, double vatCharge) {
+        double gt = order->grandTotal() + order->credit() + order->creditCoupon();
+        double gtNet = gt - vatCharge;
 
-    double netGrandTotalBL = order->grandTotal() - order->vatChargeBrickLink();
-    double vatPercentBL = qFuzzyIsNull(netGrandTotalBL)
-            ? 0 : (order->grandTotal() / netGrandTotalBL - 1.0);
-    w_vatBLLabel->setText(w_vatBLLabel->text()
-                          .arg(loc.toString(vatPercentBL, 'f', QLocale::FloatingPointShortest) % u'%'));
+        double p = Utility::roundTo(100 * (gt / (qFuzzyIsNull(gtNet) ? gt : gtNet) - 1.0), 1);
+        l->setText(l->text().arg(QLocale().toString(p, 'f', QLocale::FloatingPointShortest) % u'%'));
+    };
+
+    setVatLabel(w_vatSellerLabel, order, order->vatChargeSeller());
+    setVatLabel(w_vatBLLabel, order, order->vatChargeBrickLink());
 
     setup(w_shipping,     w_shippingCopy,     Currency::toDisplayString(order->shipping(), { }, 2),
           !qFuzzyIsNull(order->shipping()), w_shippingLabel);
