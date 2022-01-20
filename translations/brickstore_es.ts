@@ -991,22 +991,22 @@
 <context>
     <name>AppearsInWidget</name>
     <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="100"/>
+        <location filename="../src/desktop/appearsinwidget.cpp" line="106"/>
         <source>Part out Item...</source>
         <translation>Despiezar Artículo...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="101"/>
+        <location filename="../src/desktop/appearsinwidget.cpp" line="107"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Mostar Información del Catálogo BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="102"/>
+        <location filename="../src/desktop/appearsinwidget.cpp" line="108"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Mostar Información de la Guía de Precios BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="103"/>
+        <location filename="../src/desktop/appearsinwidget.cpp" line="109"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Mostar Lotes a la Venta en BrickLink...</translation>
     </message>
@@ -1014,37 +1014,42 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="142"/>
+        <location filename="../src/common/application.cpp" line="127"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Su instalación está rota: faltan los plugins de formato de imagen!</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="146"/>
+        <location filename="../src/common/application.cpp" line="131"/>
         <source>Could not initialize the BrickLink kernel:</source>
         <translation>No se pudo inicializar nucleo de BrickLink:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="150"/>
+        <location filename="../src/common/application.cpp" line="135"/>
         <source>Failed to authenticate with BrickLink as user %1</source>
         <translation>Fallo de autenticación en BrickLink como usuario %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="180"/>
+        <location filename="../src/common/application.cpp" line="165"/>
         <source>Import BrickLink Store</source>
         <translation>Importar Tienda de BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="181"/>
+        <location filename="../src/common/application.cpp" line="166"/>
         <source>Importing BrickLink Store</source>
         <translation>Importando Tienda de BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="231"/>
+        <location filename="../src/common/application.cpp" line="181"/>
+        <source>Store %1</source>
+        <translation>Tienda %1</translation>
+    </message>
+    <message>
+        <location filename="../src/common/application.cpp" line="224"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>No se pudo cargar los archivos de base de datos de BrickLink.&lt;br /&gt;&lt;br /&gt;El programa no es funcional sin esos archivos.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/application.cpp" line="247"/>
+        <location filename="../src/common/application.cpp" line="240"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Parece que BrickStore dejó de funcionar mientras %n documento tenia modificaciones sin guardar.</numerusform>
@@ -1052,62 +1057,62 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="248"/>
+        <location filename="../src/common/application.cpp" line="241"/>
         <source>Should these documents be restored from their last available auto-save state?</source>
         <translation>¿Deben estos documentos ser restaurados desde el último estado de autoguardado disponible?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="249"/>
+        <location filename="../src/common/application.cpp" line="242"/>
         <source>Restore Documents</source>
         <translation>Restaurar Documentos</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="307"/>
+        <location filename="../src/common/application.cpp" line="300"/>
         <source>Please enter the password for the BrickLink account %1:</source>
         <translation>Por favor ingrese la contraseña de la cuenta de BrickLink %1:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="314"/>
+        <location filename="../src/common/application.cpp" line="307"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>No se han encontrado ajustes de ingreso a BrickLink válidos.&lt;br /&gt;&lt;br /&gt;¿Quire cambiar estos ajustes ahora?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="339"/>
+        <location filename="../src/common/application.cpp" line="332"/>
         <source>Update Database</source>
         <translation>Actualizar Base de Datos</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="340"/>
+        <location filename="../src/common/application.cpp" line="333"/>
         <source>Updating the BrickLink database</source>
         <translation>Actualizando la Base de Datos de BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="494"/>
+        <location filename="../src/common/application.cpp" line="487"/>
         <source>Version %1 (build: %2)</source>
         <translation>Versión %1 (compilación %2)</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="496"/>
+        <location filename="../src/common/application.cpp" line="489"/>
         <source>Copyright &amp;copy; %1</source>
         <translation>Derechos de Autor &amp;copy; %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="497"/>
+        <location filename="../src/common/application.cpp" line="490"/>
         <source>Visit %1</source>
         <translation>Visita %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="500"/>
+        <location filename="../src/common/application.cpp" line="493"/>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br/&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br/&gt;See &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.&lt;/p&gt;&lt;p&gt;Only made possible by &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezek&apos;s&lt;/a&gt; support.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Este programa es gratuito; puede ser distribuido y/o modificado bajo los términos de la GNU General Public License version 2 tal cual publicada por la Free Software Foundation y apareciendo en el archivo LICENSE.GPL incluido en este paquete de software.&lt;br/&gt;Este programa se proporcian TAL CUAL sin NINGUNA GARANTÍA DE NINGÚN TIPO, INCLUYEDO GARANTÍA DE DISEÑO, COMERCIABILIDAD Y ADECUACIÓN PARA USO PARTICULAR.&lt;br/&gt;Ver &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; para información de la licencia GPL.&lt;/p&gt;&lt;p&gt;Todos los datos de &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; son propiedad de BrickLink. Ambos BrickLink y LEGO son marcas registradas de the LEGO Group, que no patrocina, autoriza o avala este software.Todas las demas marcas registradas son reconocidas.&lt;/p&gt;&lt;p&gt;Solo hecho posible por el apollo de &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezek&lt;/a&gt;.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="501"/>
+        <location filename="../src/common/application.cpp" line="494"/>
         <source>License</source>
         <translation>Licencia</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="513"/>
+        <location filename="../src/common/application.cpp" line="506"/>
         <source>Translators</source>
         <translation>Traductores</translation>
     </message>
@@ -1500,17 +1505,17 @@
 <context>
     <name>ColumnCmd</name>
     <message>
-        <location filename="../src/common/document.cpp" line="69"/>
+        <location filename="../src/common/document.cpp" line="71"/>
         <source>Moved column %1</source>
         <translation>Movida columna %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="71"/>
+        <location filename="../src/common/document.cpp" line="73"/>
         <source>Show/hide column %1</source>
         <translation>Mostrar/ocultar columna %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="73"/>
+        <location filename="../src/common/document.cpp" line="75"/>
         <source>Resized column %1</source>
         <translation>Redimensionada columna %1</translation>
     </message>
@@ -1518,7 +1523,7 @@
 <context>
     <name>ColumnLayoutCmd</name>
     <message>
-        <location filename="../src/common/document.cpp" line="119"/>
+        <location filename="../src/common/document.cpp" line="121"/>
         <source>Changed column layout</source>
         <translation>Cambiada disposición de columnas</translation>
     </message>
@@ -1612,27 +1617,27 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="156"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="169"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>¿Abilitar reportes anónimos de fallos?&lt;br&gt;&lt;br&gt;Por favor considere activar esta función cuando esté disponible.&lt;br&gt;Si tiene alguna duda sobre qué información se envía y cómo es udada, por favor &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;vea aquí&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Reporte de fallos se puede activar o desactivar en cualquier momento desde la ventana de Ajustes.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="358"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="371"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Su versión de macOS es demasiado antigua para admitir cambios de tema.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="375"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="388"/>
         <source>The theme change will take effect after a restart.</source>
         <translation>El cambio de tema tendrá efecto al reiniciar.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="378"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="391"/>
         <source>Restart now</source>
         <translation>Reiniciar ahora</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="379"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="392"/>
         <source>Later</source>
         <translation>Más tarde</translation>
     </message>
@@ -1640,13 +1645,13 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>DeveloperConsole</name>
     <message>
-        <location filename="../src/desktop/developerconsole.cpp" line="118"/>
+        <location filename="../src/desktop/developerconsole.cpp" line="120"/>
         <source>`</source>
         <comment>Hotkey for DevConsole, key below ESC</comment>
         <translation>`</translation>
     </message>
     <message>
-        <location filename="../src/desktop/developerconsole.cpp" line="120"/>
+        <location filename="../src/desktop/developerconsole.cpp" line="122"/>
         <source>Press %1 to activate the developer console</source>
         <translation>Aprete %1 para activar la consola de desarollador</translation>
     </message>
@@ -1654,108 +1659,108 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>Document</name>
     <message>
-        <location filename="../src/common/document.cpp" line="210"/>
+        <location filename="../src/common/document.cpp" line="212"/>
         <source>Order %1 (%2)</source>
         <translation>Pedido %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="226"/>
+        <location filename="../src/common/document.cpp" line="228"/>
         <source>Untitled</source>
         <translation>Sin título</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="309"/>
+        <location filename="../src/common/document.cpp" line="311"/>
         <source>Enter the new price for all selected items:</source>
         <translation>Ingrese el nuevo precio para todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="319"/>
+        <location filename="../src/common/document.cpp" line="321"/>
         <source>Enter the new cost for all selected items:</source>
         <translation>Ingrese el nuevo coste para todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="329"/>
-        <location filename="../src/common/document.cpp" line="337"/>
+        <location filename="../src/common/document.cpp" line="331"/>
+        <location filename="../src/common/document.cpp" line="339"/>
         <source>Enter the cost amount to spread over all the selected items:</source>
         <translation>Ingrese el coste para repartir entre todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="344"/>
+        <location filename="../src/common/document.cpp" line="346"/>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)</source>
         <translation>Dividir las cantidades de todos los artículos selecionados por este número.&lt;br /&gt;&lt;br /&gt;(Se hace una comprobación de si todas las cantidades son divisibles exactamente sin resto, antes de realizar esta operación.)</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="350"/>
+        <location filename="../src/common/document.cpp" line="352"/>
         <source>Multiply the quantities of all selected items with this factor.</source>
         <translation>Multiplicar las cantidades de todos los artículos seleccionados por este factor.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="351"/>
+        <location filename="../src/common/document.cpp" line="353"/>
         <source>x</source>
         <translation>x</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="357"/>
+        <location filename="../src/common/document.cpp" line="359"/>
         <source>Set bulk quantity for the selected items:</source>
         <translation>Establecer la cantidad de volumen de los arículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="366"/>
+        <location filename="../src/common/document.cpp" line="368"/>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
         <translation>Establecer el porcentaje de descuento de los artículos seleccionados (esto &lt;u&gt;no&lt;/u&gt; cambia ningun precio).&lt;br /&gt;También se aceptan valores negativos.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="367"/>
+        <location filename="../src/common/document.cpp" line="369"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="374"/>
+        <location filename="../src/common/document.cpp" line="376"/>
         <source>Enter the new quantities for all selected items:</source>
         <translation>Ingrese la nueva cantidad para todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="382"/>
+        <location filename="../src/common/document.cpp" line="384"/>
         <source>Enter the new remark for all selected items:</source>
         <translation>Ingrese la nueva nota para todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="389"/>
+        <location filename="../src/common/document.cpp" line="391"/>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
         <translation>Ingrese el texto, que debe ser añadido a las notas de todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="394"/>
+        <location filename="../src/common/document.cpp" line="396"/>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
         <translation>Ingrese el texto, que debe ser eliminado de las notas de todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="400"/>
+        <location filename="../src/common/document.cpp" line="402"/>
         <source>Enter the new comment for all selected items:</source>
         <translation>Ingrese el nuevo comentario para todos los artículos selecionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="407"/>
+        <location filename="../src/common/document.cpp" line="409"/>
         <source>Enter the text, that should be added to the comments of all selected items:</source>
         <translation>Ingrese el texto, que debe ser añadido a los comentarios de todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="412"/>
+        <location filename="../src/common/document.cpp" line="414"/>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation>Ingrese el texto, que debe ser eliminado de los comentarios de todos los artículos seleccionados:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="418"/>
+        <location filename="../src/common/document.cpp" line="420"/>
         <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation>Reservar todos los artículos selecionados para este usuario específico (BrickLink username):</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="425"/>
+        <location filename="../src/common/document.cpp" line="427"/>
         <source>Enter the new marker text for all selected items:</source>
         <translation>Ingrese el nuevo texto marcador para todos los artículos seleccionados:</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="523"/>
+        <location filename="../src/common/document.cpp" line="525"/>
         <source>This file contains %n unknown item(s).</source>
         <translation>
             <numerusform>Este archivo contiene %n artículo desconocido.</numerusform>
@@ -1763,7 +1768,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="527"/>
+        <location filename="../src/common/document.cpp" line="529"/>
         <source>%n oudated item or color reference(s) in this file have been updated according to the BrickLink catalog.</source>
         <translation>
             <numerusform>%n artículo o referencia de color anticuado en este archivo ha sido actualizado de acuerdo con el catálogo de BrickLink.</numerusform>
@@ -1771,22 +1776,22 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="531"/>
+        <location filename="../src/common/document.cpp" line="533"/>
         <source>You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner.</source>
         <translation>Ha cargado un documento de estilo antiguo que no tiene ninguna información de moneda adjunta. Puede convertir este documento para incluir esta información utilizando el selector de código de moneda en la esquina superior derecha.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="887"/>
+        <location filename="../src/common/document.cpp" line="899"/>
         <source>Loading price guide data from disk</source>
         <translation>Cargando datos de la guía de precios desde el disco</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="935"/>
+        <location filename="../src/common/document.cpp" line="947"/>
         <source>Downloading price guide data from BrickLink</source>
         <translation>Descargando datos de la guía de precios de BrickLink</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="982"/>
+        <location filename="../src/common/document.cpp" line="994"/>
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform>Establecer precio de guía a %n artículo</numerusform>
@@ -1794,17 +1799,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="986"/>
+        <location filename="../src/common/document.cpp" line="998"/>
         <source>Prices of the selected items have been updated to Price Guide values.</source>
         <translation>Precios de los artículos seleccionados han sido actualizados con los valores de la Guía de Precios.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="988"/>
+        <location filename="../src/common/document.cpp" line="1000"/>
         <source>%1 have been skipped, because of missing Price Guide records or network errors.</source>
         <translation>%1 ha sido omitido, porque faltaban registros de la Guía de Precios o por errores de red.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1136"/>
+        <location filename="../src/common/document.cpp" line="1148"/>
         <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>La cantidad de %n lote no es divisible sin resto por %1.&lt;br /&gt;&lt;br /&gt;Nada ha sido modificado.</numerusform>
@@ -1812,7 +1817,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1160"/>
+        <location filename="../src/common/document.cpp" line="1172"/>
         <source>The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>La cantidad de %n lote excedería el máximo permitido de cantidad (%2) de artículo multiplicado por %1..&lt;br&gt;&lt;br&gt;Nada ha sido modificado.</numerusform>
@@ -1820,79 +1825,77 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1299"/>
+        <location filename="../src/common/document.cpp" line="1311"/>
         <source>Export File</source>
         <translation>Exportar Archivo</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1316"/>
+        <location filename="../src/common/document.cpp" line="1328"/>
         <source>Failed to open file %1 for writing.</source>
         <translation>Fallo al abrir archivo %1 para escritura.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1318"/>
-        <location filename="../src/common/document.cpp" line="1320"/>
+        <location filename="../src/common/document.cpp" line="1330"/>
+        <location filename="../src/common/document.cpp" line="1332"/>
         <source>Failed to save data to file %1.</source>
         <translation>Fallo al guardad los datos al archivo %1.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1348"/>
+        <location filename="../src/common/document.cpp" line="1360"/>
         <source>There are problems: %1Do you really want to export this list?</source>
         <translation>Hay problemas: ¿%1Quiere realmente exportar esta lista?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1382"/>
+        <location filename="../src/common/document.cpp" line="1394"/>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
         <translation>Ingrese el número ID de la Lista de Deseos (deje en blanco para la Lista de Deseos predeterminada)</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1415"/>
+        <location filename="../src/common/document.cpp" line="1427"/>
         <source>Open File</source>
         <translation>Abrir Archivo</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1449"/>
+        <location filename="../src/common/document.cpp" line="1461"/>
         <source>Failed to load document %1: %2</source>
         <translation>Fallo al cargar documento %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1464"/>
+        <location filename="../src/common/document.cpp" line="1476"/>
         <source>Save File as</source>
         <translation>Guardar Archivo como</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1511"/>
-        <location filename="../src/common/document.cpp" line="1514"/>
+        <location filename="../src/common/document.cpp" line="1523"/>
+        <location filename="../src/common/document.cpp" line="1526"/>
         <source>Failed to save document</source>
         <translation>Fallo al guardar documento</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1535"/>
         <source>Store %1</source>
-        <translation>Tienda %1</translation>
+        <translation type="vanished">Tienda %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1550"/>
         <source>Cart in store %1</source>
-        <translation>Cesta en tienda %1</translation>
+        <translation type="vanished">Cesta en tienda %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1599"/>
+        <location filename="../src/common/document.cpp" line="1580"/>
         <source>Inventory for %1</source>
         <translation>Inventario de %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1613"/>
+        <location filename="../src/common/document.cpp" line="1614"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Ha seleccionado más de 1000 lotes, pero los servidores de BrickLink no pueden aguantar tantos lotes al mismo tiempo. &lt;br&gt; Debería exportar varios grupos de lotes más pequeños. &lt;br&gt;&lt;br&gt; ¿Desea exportar esta lista de todos modos?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1620"/>
+        <location filename="../src/common/document.cpp" line="1621"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Esta lista contiene lotes con errores. &lt;br&gt;&lt;br&gt;¿Desea exportar esta lista de todos modos?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1691"/>
+        <location filename="../src/common/document.cpp" line="1692"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform>Copiado o combinado %n artículo</numerusform>
@@ -1900,7 +1903,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1767"/>
+        <location filename="../src/common/document.cpp" line="1768"/>
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform>Sustraído %n artículo</numerusform>
@@ -1908,37 +1911,37 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1832"/>
+        <location filename="../src/common/document.cpp" line="1833"/>
         <source>BrickStore default</source>
         <translation>BrickStore predeterminado</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1834"/>
+        <location filename="../src/common/document.cpp" line="1835"/>
         <source>BrickStore buyer/collector default</source>
         <translation>BrickStore comprador/coleccionista predeterminado</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1836"/>
+        <location filename="../src/common/document.cpp" line="1837"/>
         <source>Auto-resize once</source>
         <translation>Cambiar tamaño automáticamente una vez</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1838"/>
+        <location filename="../src/common/document.cpp" line="1839"/>
         <source>User default</source>
         <translation>Usuario predeterminado</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1971"/>
+        <location filename="../src/common/document.cpp" line="1972"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation>Ingrete un nombre único para esta disposición de columnas. Deje en blanco para cambiar la disposición del usuario predeterminado.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2003"/>
+        <location filename="../src/common/document.cpp" line="2004"/>
         <source>Set column layout:</source>
         <translation>Establecer disposición de columnas:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2343"/>
+        <location filename="../src/common/document.cpp" line="2344"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>Restaurado</translation>
@@ -2802,42 +2805,47 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     </message>
     <message>
         <location filename="../src/desktop/importcartdialog.cpp" line="124"/>
-        <location filename="../src/desktop/importcartdialog.cpp" line="128"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="136"/>
         <source>Import Cart</source>
         <translation>Importar Cesta</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="188"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="133"/>
+        <source>Cart in store %1</source>
+        <translation>Cesta en tienda %1</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importcartdialog.cpp" line="196"/>
         <source>Import</source>
         <translation>Importar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="189"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="197"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrar la lista para líneas que contengan esta palabras</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="191"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="199"/>
         <source>Show</source>
         <translation>Mostrar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="192"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="200"/>
         <source>Show on BrickLink</source>
         <translation>Mostrar en BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="244"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="252"/>
         <source>Last updated %1</source>
         <translation>Última actualización %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="250"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="258"/>
         <source>Currently updating carts</source>
         <translation>Actualizando las cestas actualmente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="254"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="262"/>
         <source>Last update failed</source>
         <translation>Última actualización ha fallado</translation>
     </message>
@@ -3179,7 +3187,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="461"/>
         <source>Phone</source>
-        <translation type="unfinished"></translation>
+        <translation>Teléfono</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="499"/>
@@ -3234,12 +3242,12 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="885"/>
         <source>%1 VAT Charge (Seller)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cargo %1 IVA (Vendedor)</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="926"/>
         <source>%1 VAT Charge (BrickLink)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cargo %1 IVA (BrickLink)</translation>
     </message>
     <message>
         <source>VAT Charges</source>
@@ -4904,57 +4912,57 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
 <context>
     <name>ViewPane</name>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="353"/>
+        <location filename="../src/desktop/viewpane.cpp" line="348"/>
         <source>Default currency (%1)</source>
         <translation>Moneda predeterminada (%1)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="418"/>
+        <location filename="../src/desktop/viewpane.cpp" line="413"/>
         <source>Items</source>
         <translation>Artículos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="526"/>
+        <location filename="../src/desktop/viewpane.cpp" line="524"/>
         <source>Go to the next difference</source>
         <translation>Ir a la siguiente diferencia</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="528"/>
+        <location filename="../src/desktop/viewpane.cpp" line="526"/>
         <source>Go to the next error</source>
         <translation>Ir al siguiente erro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="530"/>
+        <location filename="../src/desktop/viewpane.cpp" line="528"/>
         <source>Show order information</source>
         <translation>Mostrar información del pedido</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="531"/>
+        <location filename="../src/desktop/viewpane.cpp" line="529"/>
         <source>Currency:</source>
         <translation>Moneda:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="533"/>
+        <location filename="../src/desktop/viewpane.cpp" line="531"/>
         <source>Split</source>
         <translation>Partir</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="534"/>
+        <location filename="../src/desktop/viewpane.cpp" line="532"/>
         <source>Split horizontally</source>
         <translation>Partir horizontalmente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="535"/>
+        <location filename="../src/desktop/viewpane.cpp" line="533"/>
         <source>Split vertically</source>
         <translation>Partir verticalmente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="536"/>
+        <location filename="../src/desktop/viewpane.cpp" line="534"/>
         <source>Remove split</source>
         <translation>Eliminar partición</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="537"/>
+        <location filename="../src/desktop/viewpane.cpp" line="535"/>
         <source>Open in new window</source>
         <translation>Abrir en nueva ventana</translation>
     </message>
