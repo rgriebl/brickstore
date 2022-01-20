@@ -36,17 +36,16 @@ void MenuComboBox::showPopup()
     QAction *current = nullptr;
 
     for (int i = 0; i < model()->rowCount(); ++i) {
-        QAction *a = m_menu->addAction(model()->index(i, 0).data().toString());
-        bool hasIcon = !a->icon().isNull();
+        auto index = model()->index(i, 0);
+        QAction *a = m_menu->addAction(index.data().toString());
         if (i == currentIndex()) {
             current = a;
             m_menu->setActiveAction(a);
-            if (!hasIcon) {
-                a->setCheckable(true);
-                a->setChecked(true);
-            }
-        } else {
+            a->setCheckable(true);
+            a->setChecked(true);
             a->setIconVisibleInMenu(false);
+        } else {
+            a->setIcon(index.data(Qt::DecorationRole).value<QIcon>());
         }
         a->setData(i);
         connect(a, &QAction::triggered, this, [this]() {

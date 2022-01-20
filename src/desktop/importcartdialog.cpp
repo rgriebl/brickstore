@@ -123,7 +123,15 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
         if (!success) {
             QMessageBox::warning(this, tr("Import Cart"), message);
         } else {
-            Document::fromCart(cart);
+            BrickLink::IO::ParseResult pr;
+            const auto lots = cart->lots();
+            for (const auto *lot : lots)
+                pr.addLot(new Lot(*lot));
+            pr.setCurrencyCode(cart->currencyCode());
+
+            auto *document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
+            document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
+
             if (!message.isEmpty())
                 QMessageBox::information(this, tr("Import Cart"), message);
         }

@@ -119,7 +119,11 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
         return s;
     }
     case Qt::DecorationRole:
-        return docIcon;
+        if (!document->thumbnail().isNull())
+            return QIcon(QPixmap::fromImage(document->thumbnail()));
+        else
+            return docIcon;
+
     case Qt::UserRole:
         return QVariant::fromValue(document);
     }

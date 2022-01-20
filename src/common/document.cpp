@@ -18,6 +18,7 @@
 #include <QtCore/QBitArray>
 #include <QtGui/QClipboard>
 #include <QtGui/QCursor>
+#include <QtGui/QImage>
 #include <QtGui/QFont>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QGuiApplication>
@@ -27,6 +28,7 @@
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
 #include "bricklink/order.h"
+#include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/store.h"
 #include "utility/currency.h"
@@ -588,6 +590,16 @@ void Document::setTitle(const QString &str)
         m_title = str;
         emit titleChanged(m_title);
     }
+}
+
+QImage Document::thumbnail() const
+{
+    return m_thumbnail;
+}
+
+void Document::setThumbnail(const QImage &thumbnail)
+{
+    m_thumbnail = thumbnail;
 }
 
 QModelIndex Document::currentIndex() const
@@ -1520,41 +1532,10 @@ void Document::saveToFile(const QString &fileName)
     deleteAutosave();
 }
 
-Document *Document::fromStore(BrickLink::Store *store)
-{
-    Q_ASSERT(store);
-    Q_ASSERT(store && store->isValid());
-
-    BrickLink::IO::ParseResult pr;
-    const auto lots = store->lots();
-    for (const auto *lot : lots)
-        pr.addLot(new Lot(*lot));
-    pr.setCurrencyCode(store->currencyCode());
-
-    auto *document = new Document(new DocumentModel(std::move(pr)));
-    document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
-    return document;
-}
-
-Document *Document::fromCart(BrickLink::Cart *cart)
-{
-    Q_ASSERT(cart);
-
-    BrickLink::IO::ParseResult pr;
-    const auto lots = cart->lots();
-    for (const auto *lot : lots)
-        pr.addLot(new Lot(*lot));
-    pr.setCurrencyCode(cart->currencyCode());
-
-    auto *document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
-    document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
-    return document;
-}
-
 Document *Document::fromPartInventory(const BrickLink::Item *item,
-                                          const BrickLink::Color *color, int multiply,
-                                          BrickLink::Condition condition, BrickLink::Status extraParts,
-                                          bool includeInstructions)
+                                      const BrickLink::Color *color, int multiply,
+                                      BrickLink::Condition condition, BrickLink::Status extraParts,
+                                      bool includeInstructions)
 {
     Q_ASSERT(item);
     Q_ASSERT(item && item->hasInventory());
@@ -1597,6 +1578,26 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
 
     auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
     document->setTitle(tr("Inventory for %1").arg(QLatin1String(item->id())));
+
+    auto thumbnail = BrickLink::core()->picture(item, color, true);
+    if (thumbnail) {
+        if (thumbnail->isValid()) {
+            document->setThumbnail(thumbnail->image());
+        } else {
+            thumbnail->addRef();
+            QMetaObject::Connection *conn = new QMetaObject::Connection;
+            *conn = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+                            document, [=](BrickLink::Picture *pic) {
+                if (pic == thumbnail) {
+                    if (thumbnail->isValid())
+                        document->setThumbnail(thumbnail->image());
+                    thumbnail->release();
+                    QObject::disconnect(*conn);
+                    delete conn;
+                }
+            });
+        }
+    }
     return document;
 }
 

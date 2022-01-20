@@ -96,6 +96,7 @@ class Document : public QObject
     Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
+    Q_PROPERTY(QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged)
     Q_PROPERTY(BrickLink::Order *order READ order CONSTANT)
     Q_PROPERTY(DocumentModel *model READ model CONSTANT)
     Q_PROPERTY(bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
@@ -126,6 +127,9 @@ public:
     QString title() const;
     void setTitle(const QString &title);
     QString fileNameOrTitle() const;
+
+    QImage thumbnail() const;
+    void setThumbnail(const QImage &image);
 
     void updateSelection();
 
@@ -241,13 +245,11 @@ public:
     QObject *lots();
 
 public:
-    static Document *fromStore(BrickLink::Store *store);
-    static Document *fromCart(BrickLink::Cart *cart);
     static Document *fromPartInventory(const BrickLink::Item *preselect = nullptr,
-                                         const BrickLink::Color *color = nullptr, int multiply = 1,
-                                         BrickLink::Condition condition = BrickLink::Condition::New,
-                                         BrickLink::Status extraParts = BrickLink::Status::Extra,
-                                         bool includeInstructions = false);
+                                       const BrickLink::Color *color = nullptr, int multiply = 1,
+                                       BrickLink::Condition condition = BrickLink::Condition::New,
+                                       BrickLink::Status extraParts = BrickLink::Status::Extra,
+                                       bool includeInstructions = false);
 
     static int restorableAutosaves();
     enum class AutosaveAction { Restore, Delete };
@@ -256,6 +258,7 @@ public:
 signals:
     void fileNameChanged(const QString &fileName);
     void titleChanged(const QString &title);
+    void thumbnailChanged(const QImage &image);
     void selectedLotsChanged(const LotList &);
     void ensureVisible(const QModelIndex &idx, bool centerItem = false);
 
@@ -334,6 +337,7 @@ private:
 
     QString               m_filename;
     QString               m_title;
+    QImage                m_thumbnail;
 
     QPointer<BrickLink::Order> m_order;
 

@@ -185,8 +185,16 @@ void Application::afterInit()
                                                                 &BrickLink::Store::startUpdate,
                                                                 &BrickLink::Store::cancelUpdate);
 
-              if (success)
-                  Document::fromStore(store);
+              if (success && store->isValid()) {
+                  BrickLink::IO::ParseResult pr;
+                  const auto lots = store->lots();
+                  for (const auto *lot : lots)
+                      pr.addLot(new Lot(*lot));
+                  pr.setCurrencyCode(store->currencyCode());
+
+                  auto *document = new Document(new DocumentModel(std::move(pr)));
+                  document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
+              }
           } },
         { "view_show_input_errors", [](bool b) {
               Config::inst()->setShowInputErrors(b);

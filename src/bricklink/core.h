@@ -137,7 +137,7 @@ public slots:
 signals:
     void databaseDateChanged(const QDateTime &date);
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
-    void pictureUpdated(BrickLink::Picture *inv);
+    void pictureUpdated(BrickLink::Picture *pic);
     void itemImageScaleFactorChanged(qreal f);
 
     void transferProgress(int progress, int total);
