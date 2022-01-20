@@ -18,7 +18,7 @@ jobs:
         config:
         - name: "Windows 32bit"
           artifact: "Windows-x86"
-          os: windows-latest
+          os: windows-2019
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
           openssl_version: 'Win32OpenSSL_Light-1_1_1k'
@@ -28,7 +28,7 @@ jobs:
 
         - name: "Windows 64bit"
           artifact: "Windows-x64"
-          os: windows-latest
+          os: windows-2019
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
           openssl_version: 'Win64OpenSSL_Light-1_1_1k'
