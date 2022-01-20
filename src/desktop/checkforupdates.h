@@ -35,7 +35,7 @@ protected:
 
 private:
     void languageChange();
-    QCoro::Task<> showVersionChanges(const QVersionNumber &latestVersion);
+    QCoro::Task<> showVersionChanges(const QVersionNumber latestVersion);
     QCoro::Task<> downloadInstaller();
 
     QNetworkAccessManager m_nam;

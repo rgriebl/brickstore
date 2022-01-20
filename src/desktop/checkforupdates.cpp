@@ -142,7 +142,7 @@ void CheckForUpdates::languageChange()
     m_title = tr("Update");
 }
 
-QCoro::Task<> CheckForUpdates::showVersionChanges(const QVersionNumber &latestVersion)
+QCoro::Task<> CheckForUpdates::showVersionChanges(const QVersionNumber latestVersion)
 {
     QNetworkReply *reply = co_await m_nam.get(QNetworkRequest(m_changelogUrl));
 
