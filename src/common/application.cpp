@@ -95,8 +95,6 @@ void Application::init()
     setupLogging();
     setupSentry();
 
-    m_announcements = new Announcements(Application::inst()->gitHubUrl(), this);
-
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
