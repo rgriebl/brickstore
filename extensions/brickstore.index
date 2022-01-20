@@ -1658,8 +1658,8 @@
                 <parameter type="int *" name="e" default=""/>
             </function>
             <function name="languageChange" fullname="CheckForUpdates::languageChange" href="checkforupdates.html#languageChange" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="37" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="void" signature="void languageChange()"/>
-            <function name="showVersionChanges" fullname="CheckForUpdates::showVersionChanges" href="checkforupdates.html#showVersionChanges" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="38" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showVersionChanges(const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="showVersionChanges" fullname="CheckForUpdates::showVersionChanges" href="checkforupdates.html#showVersionChanges" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="38" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showVersionChanges(const int )">
+                <parameter type="const int" name="" default=""/>
             </function>
             <variable name="m_changelogUrl" fullname="CheckForUpdates::m_changelogUrl" href="checkforupdates.html#m_changelogUrl-var" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="43" type="int" static="false"/>
             <variable name="m_checkUrl" fullname="CheckForUpdates::m_checkUrl" href="checkforupdates.html#m_checkUrl-var" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="42" type="int" static="false"/>
