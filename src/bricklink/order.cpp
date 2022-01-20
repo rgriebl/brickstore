@@ -761,6 +761,9 @@ Orders::Orders(QObject *parent)
 
 void Orders::reloadOrdersFromCache()
 {
+    if (!core()->isDatabaseValid())
+        return;
+
     beginResetModel();
     qDeleteAll(m_orders);
     m_orders.clear();
@@ -770,7 +773,7 @@ void Orders::reloadOrdersFromCache()
     if (m_userId.isEmpty())
         return;
 
-    stopwatch sw("Loading orders from cache");
+    //stopwatch sw("Loading orders from cache");
 
     QString path = core()->dataPath() % u"orders/" % m_userId;
 

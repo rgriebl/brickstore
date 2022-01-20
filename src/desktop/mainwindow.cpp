@@ -838,6 +838,8 @@ bool MainWindow::setupToolBar()
             spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
             m_toolbar->addWidget(spacer);
+        } else if (an == "edit_filter_focus"_l1) {
+            // the old filter control - ignore
         } else if (an == "widget_progress"_l1) {
             m_toolbar->addAction(m_progressAction);
         } else if (QAction *a = ActionManager::inst()->qAction(an.toLatin1().constData())) {
