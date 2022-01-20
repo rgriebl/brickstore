@@ -67,11 +67,6 @@ ViewPane::ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate, std::fu
 {
     Q_ASSERT(viewPaneCreate);
 
-    //setAutoFillBackground(true);
-
-    // Windows' menu font is slightly larger, making the ViewPane look odd in comparison
-    setFont(qApp->font("QMenuBar"));
-
     auto *top = new QFrame(this);
     top->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Plain));
     top->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -475,11 +470,14 @@ void ViewPane::focusFilter()
 
 void ViewPane::fontChange()
 {
-    if (!m_viewList)
-        return;
-    QFont f = font();
-    f.setBold(m_active);
-    m_viewList->setFont(f);
+    // Windows' menu font is slightly larger, making the ViewPane look odd in comparison
+    m_toolBar->parentWidget()->setFont(qApp->font("QMenuBar"));
+
+    if (m_viewList) {
+        QFont f = font();
+        f.setBold(m_active);
+        m_viewList->setFont(f);
+    }
 }
 
 void ViewPane::paletteChange()
@@ -541,13 +539,13 @@ void ViewPane::languageChange()
 
 void ViewPane::changeEvent(QEvent *e)
 {
-    QWidget::changeEvent(e);
     if (e->type() == QEvent::LanguageChange)
         languageChange();
-    if (e->type() == QEvent::PaletteChange)
+    else if (e->type() == QEvent::PaletteChange)
         paletteChange();
-    if (e->type() == QEvent::FontChange)
+    else if (e->type() == QEvent::FontChange)
         fontChange();
+    QWidget::changeEvent(e);
 }
 
 void ViewPane::keyPressEvent(QKeyEvent *e)

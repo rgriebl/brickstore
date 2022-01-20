@@ -26,7 +26,6 @@ DeveloperConsole::DeveloperConsole(QWidget *parent)
     m_log = new QPlainTextEdit(this);
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
-    m_log->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     m_log->installEventFilter(this);
 
     m_cmd = new QLineEdit(this);
@@ -54,6 +53,7 @@ DeveloperConsole::DeveloperConsole(QWidget *parent)
     layout->addWidget(m_cmd);
 
     languageChange();
+    fontChange();
 }
 
 bool DeveloperConsole::eventFilter(QObject *o, QEvent *e)
@@ -90,6 +90,8 @@ void DeveloperConsole::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         languageChange();
+    else if (e->type() == QEvent::FontChange)
+        fontChange();
     QWidget::changeEvent(e);
 }
 
@@ -118,6 +120,13 @@ void DeveloperConsole::languageChange()
     m_consoleKey = tr("`", "Hotkey for DevConsole, key below ESC");
 
     m_log->setToolTip(tr("Press %1 to activate the developer console").arg(m_consoleKey));
+}
+
+void DeveloperConsole::fontChange()
+{
+    QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    f.setPointSizeF(font().pointSizeF());
+    m_log->setFont(f);
 }
 
 

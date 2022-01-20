@@ -85,7 +85,6 @@ protected:
     QString m_translationOverride;
     QStringList m_queuedDocuments;
     bool m_canEmitOpenDocuments = false;
-    qreal m_defaultFontSize = 0;
 
     QScopedPointer<QTranslator> m_trans_qt;
     QScopedPointer<QTranslator> m_trans_brickstore;

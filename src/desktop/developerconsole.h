@@ -39,6 +39,7 @@ protected:
 private:
     void activateConsole(bool b);
     void languageChange();
+    void fontChange();
 
     QPlainTextEdit *m_log;
     QLineEdit *m_cmd;

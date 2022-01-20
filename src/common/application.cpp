@@ -117,19 +117,6 @@ void Application::init()
     connect(this, &Application::openDocument,
             this, &Document::load);
 
-    m_defaultFontSize = QGuiApplication::font().pointSizeF();
-    QCoreApplication::instance()->setProperty("_bs_defaultFontSize", m_defaultFontSize); // the settings dialog needs this
-
-    auto setFontSizePercentLambda = [this](int p) {
-        QFont f = QGuiApplication::font();
-        f.setPointSizeF(m_defaultFontSize * qreal(qBound(50, p, 200)) / 100.);
-        QGuiApplication::setFont(f);
-    };
-    connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
-    int fsp = Config::inst()->fontSizePercent();
-    if (fsp != 100)
-        setFontSizePercentLambda(fsp);
-
     updateTranslations();
     connect(Config::inst(), &Config::languageChanged,
             Application::inst(), &Application::updateTranslations);

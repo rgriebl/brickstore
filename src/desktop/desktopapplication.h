@@ -41,6 +41,7 @@ private:
     void setDesktopIconTheme();
 
 private:
+    qreal m_defaultFontSize = 0;
     bool m_restart = false;
     QCommandLineParser m_clp;
 };

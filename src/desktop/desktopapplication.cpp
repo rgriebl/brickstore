@@ -127,6 +127,19 @@ void DesktopApplication::init()
     setUiTheme();
     setDesktopIconTheme();
 
+    m_defaultFontSize = QGuiApplication::font().pointSizeF();
+    QCoreApplication::instance()->setProperty("_bs_defaultFontSize", m_defaultFontSize); // the settings dialog needs this
+
+    auto setFontSizePercentLambda = [this](int p) {
+        QFont f = QApplication::font();
+        f.setPointSizeF(m_defaultFontSize * qreal(qBound(50, p, 200)) / 100.);
+        QApplication::setFont(f);
+    };
+    connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
+    int fsp = Config::inst()->fontSizePercent();
+    if (fsp != 100)
+        setFontSizePercentLambda(fsp);
+
     if (!m_startupErrors.isEmpty()) {
         QCoro::waitFor(UIHelpers::critical(m_startupErrors.join("\n\n"_l1)));
 
