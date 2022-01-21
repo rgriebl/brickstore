@@ -17,6 +17,7 @@
 #include <QMultiMap>
 #include <QVector>
 #include <QPair>
+#include <QDateTime>
 #include <QRegularExpression>
 #include <QCoreApplication>
 #include <QDebug>
@@ -121,6 +122,7 @@ private:
     bool        m_isRegExp = false;
     int         m_asInt = 0;
     double      m_asDouble = 0;
+    QDateTime   m_asDateTime;
     QRegularExpression m_asRegExp;
 };
 

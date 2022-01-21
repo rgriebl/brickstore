@@ -815,10 +815,18 @@ void Document::setFilterFromSelection()
         static QLocale loc;
 
         switch (v.userType()) {
-        case QMetaType::Double : s = loc.toString(v.toDouble(), 'f', 3); break;
-        case QMetaType::Int    : s = loc.toString(v.toInt()); break;
+        case QMetaType::Double   : s = loc.toString(v.toDouble(), 'f', 3); break;
+        case QMetaType::Int      : s = loc.toString(v.toInt()); break;
+        case QMetaType::QDateTime: {
+            const auto dt = v.toDateTime();
+            if (dt.isValid() && (dt.time() == QTime(0, 0)))
+                s = loc.toString(dt.date(), QLocale::ShortFormat);
+            else
+                s = loc.toString(dt.toLocalTime(), QLocale::ShortFormat);
+            break;
+        }
         default:
-        case QMetaType::QString: s = v.toString(); break;
+        case QMetaType::QString  : s = v.toString(); break;
         }
         if (idx.column() == DocumentModel::Weight)
             s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());

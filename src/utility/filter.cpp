@@ -54,6 +54,23 @@ void Filter::setExpression(const QString &expr)
         m_asRegExp.setPattern(QRegularExpression::wildcardToRegularExpression(expr));
         m_asRegExp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     }
+    m_asDateTime = QDateTime { };
+    for (auto fmt : { QLocale::LongFormat, QLocale::ShortFormat, QLocale::NarrowFormat }) {
+        m_asDateTime = loc.toDateTime(expr, fmt);
+        if (m_asDateTime.isValid())
+            break;
+    }
+    if (!m_asDateTime.isValid()) {
+        for (auto fmt : { QLocale::LongFormat, QLocale::ShortFormat, QLocale::NarrowFormat }) {
+            QDate d = loc.toDate(expr, fmt);
+            if (d.isValid()) {
+                m_asDateTime.setDate(d);
+                m_asDateTime.setTime(QTime(0, 0));
+                m_asDateTime.setTimeSpec(Qt::UTC);
+                break;
+            }
+        }
+    }
 }
 
 void Filter::setComparison(Comparison cmp)
@@ -91,7 +108,15 @@ bool Filter::matches(const QVariant &v) const
         i2 = qRound64(v.toDouble() * 1000.);
         isInt = true;
         break;
-    }    
+    }
+    case QMetaType::QDateTime: {
+        if (!m_asDateTime.isValid())
+            return false;
+        i1 = m_asDateTime.toSecsSinceEpoch();
+        i2 = v.toDateTime().toSecsSinceEpoch();
+        isInt = true;
+        break;
+    }
     default:
         s1 = m_expression;
         s2 = v.toString();
@@ -124,7 +149,7 @@ bool Filter::matches(const QVariant &v) const
         if (m_isRegExp) {
             // We are using QRegularExpressions in multiple threads here, although the class is not
             // marked thread-safe. We are relying on the const match() function to be thread-safe,
-            // which it currently is up to Qt 6.0.
+            // which it currently is up to Qt 6.2.
 
             bool res = m_asRegExp.match(v.toString()).hasMatch();
             return (comparison() == Matches) ? res : !res;

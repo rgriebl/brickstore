@@ -212,7 +212,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                         h += 12;
                     auto dt = QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
                                         { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
-                    lot->setDateLastSold(dt.toUTC());
+                    lot->setDateLastSold(dt);
                 }
             }
         });

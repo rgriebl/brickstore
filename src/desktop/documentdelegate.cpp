@@ -1130,12 +1130,12 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
     }
     case DocumentModel::DateAdded:
     case DocumentModel::DateLastSold: {
-        QDateTime dt = display.toDateTime().toLocalTime();
-        if (dt.isValid() && (dt.time() == QTime(0, 0))) { // a QDateTime without a time is set to midnight
+        QDateTime dt = display.toDateTime();
+        if (dt.isValid() && (dt.time() == QTime(0, 0))) {
             return loc.toString(dt.date(), QLocale::ShortFormat);
             //return HumanReadableTimeDelta::toString(QDate::currentDate().startOfDay(), dt);
         } else {
-            return dt.isValid() ? loc.toString(dt, QLocale::ShortFormat) : dash;
+            return dt.isValid() ? loc.toString(dt.toLocalTime(), QLocale::ShortFormat) : dash;
             //return HumanReadableTimeDelta::toString(QDateTime::currentDateTime(), dt);
         }
     }
