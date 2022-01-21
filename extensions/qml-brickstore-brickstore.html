@@ -3,20 +3,21 @@
 <head>
   <meta charset="utf-8">
 <!-- brickstore_wrapper.cpp -->
-  <title>BrickStore QML Type | BrickStore Extensions</title>
+  <title>BrickStore QML Type | BrickStore</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
 <body>
-<div class="main">
-<div class="main-rounded">
-<div class="navigationbar">
-    <ul>
-<li><a href="index.html">BrickStore Extensions</a></li>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
     </ul>
+    </div>
 </div>
 <div class="content">
-    <div class="line">
-        <div class="content mainContent">
+<div class="line">
+<div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
 <h3><a name="toc">Contents</a></h3>
@@ -27,7 +28,6 @@
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
-<div class="context">
 <h1 class="title">BrickStore QML Type</h1>
 <span class="subtitle"></span>
 <!-- $$$BrickStore-brief -->
@@ -40,12 +40,11 @@
 <a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#activeDocument-prop">activeDocument</a></b></b> : Document</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#buildNumber-prop">buildNumber</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#databaseValid-prop">databaseValid</a></b></b> : bool</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#defaultCurrencyCode-prop">defaultCurrencyCode</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#lastDatabaseUpdate-prop">lastDatabaseUpdate</a></b></b> : date</li>
-<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-brickstore.html#versionNumber-prop">versionNumber</a></b></b> : string</li>
 </ul>
 <a name="methods"></a>
@@ -65,16 +64,6 @@
 <p>A kitchen sink type singleton for all global state, settings and utility functions.</p>
 <!-- @@@BrickStore -->
 <h2>Property Documentation</h2>
-<!-- $$$activeDocument -->
-<div class="qmlitem"><div class="qmlproto">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="activeDocument-prop">
-<td class="tblQmlPropNode"><p>
-<a name="activeDocument-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">activeDocument</span> : <span class="type"><a href="qml-brickstore-document.html">Document</a></span></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>The currently active document, i.e&#x2e; the document the user is working on. Can be <code>null</code>, if no documents are open, but also if the quickstart page is active.</p>
-</div></div><!-- @@@activeDocument -->
-<br/>
 <!-- $$$buildNumber -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -120,7 +109,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="online-prop">
 <td class="tblQmlPropNode"><p>
-<a name="online-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">online</span> : <span class="type">bool</span></p></td></tr>
+<a name="online-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">online</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The current online state of the application. This is mirroring the operating system's online state.</p>
 </div></div><!-- @@@online -->
@@ -143,7 +132,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="nameFiltersForBrickLinkXML-method"></a><span class="type">stringlist</span> <span class="name">nameFiltersForBrickLinkXML</span>(<span class="type">bool</span> <i>includeAll</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns a list of file extension that can be used when creating a FileDialog to open BrickLink XML files. If <i>includeAll</i> is set, a match-everything filter <code>*</code> will be added to this list.</p>
+<div class="qmldoc"><p>Returns a list of file extension that can be used when creating a FileDialog to open <a href="qml-brickstore-bricklink.html">BrickLink</a> XML files. If <i>includeAll</i> is set, a match-everything filter <code>*</code> will be added to this list.</p>
 </div></div><!-- @@@nameFiltersForBrickLinkXML -->
 <br/>
 <!-- $$$nameFiltersForBrickStoreXML[overload1]$$$nameFiltersForBrickStoreXMLbool -->
@@ -206,15 +195,11 @@
 <div class="qmldoc"><p>Starts an asychronous database update in the background. Returns <code>true</code> if the update was started and <code>false</code> if it failed (e.g&#x2e; there were documents with unsaved changes).</p>
 </div></div><!-- @@@updateDatabase -->
 <br/>
-</div>
-   <p class="copy-notice">
+<div class="footer">
+   <p>
    <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
    All trademarks are property of their respective owners.</p>
-</div>
-</div>
-</div>
-</div>
 </div>
 </body>
 </html>
