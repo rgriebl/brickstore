@@ -3,7 +3,7 @@
 #set -x
 
 failcnt=0
-project="${project}"
+project="rgriebl/brickstore"
 
 red=$'\e[31m'
 green=$'\e[32m'

@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2022.1.1] - 2022-01-20
+## [2022.1.1] - 2022-01-21
 
 ### Added
 - Replaced the document selector tabs with a drop-down list, which scales a lot better with multiple
