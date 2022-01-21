@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>626</width>
-    <height>493</height>
+    <height>524</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -801,7 +801,7 @@
         <item row="8" column="0">
          <widget class="QLabel" name="w_salesTaxLabel">
           <property name="text">
-           <string>Sales Tax</string>
+           <string>US Sales Tax</string>
           </property>
          </widget>
         </item>
@@ -839,7 +839,7 @@
           </item>
          </layout>
         </item>
-        <item row="9" column="1">
+        <item row="10" column="1">
          <widget class="Line" name="line_3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -855,14 +855,14 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="0">
+        <item row="11" column="0">
          <widget class="QLabel" name="w_grandTotalLabel">
           <property name="text">
            <string>Grand Total</string>
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
+        <item row="11" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_49">
           <property name="spacing">
            <number>0</number>
@@ -896,7 +896,7 @@
           </item>
          </layout>
         </item>
-        <item row="11" column="0">
+        <item row="13" column="0">
          <widget class="QLabel" name="w_vatInfoLabel">
           <property name="font">
            <font>
@@ -912,14 +912,14 @@
           </property>
          </widget>
         </item>
-        <item row="12" column="0">
+        <item row="14" column="0">
          <widget class="QLabel" name="w_netGrandTotalLabel">
           <property name="text">
            <string>Net Grand Total</string>
           </property>
          </widget>
         </item>
-        <item row="12" column="1">
+        <item row="14" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <property name="spacing">
            <number>0</number>
@@ -953,20 +953,20 @@
           </item>
          </layout>
         </item>
-        <item row="13" column="0">
-         <widget class="QLabel" name="w_vatLabel">
+        <item row="15" column="0">
+         <widget class="QLabel" name="w_vatSellerLabel">
           <property name="text">
-           <string comment="x% VAT (Seller or BrickLink)">%1 VAT (%2)</string>
+           <string comment="x% VAT (Seller or BrickLink)">%1 VAT (Seller)</string>
           </property>
          </widget>
         </item>
-        <item row="13" column="1">
+        <item row="15" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_44">
           <property name="spacing">
            <number>0</number>
           </property>
           <item>
-           <widget class="QLineEdit" name="w_vat">
+           <widget class="QLineEdit" name="w_vatSeller">
             <property name="text">
              <string notr="true">xxx</string>
             </property>
@@ -979,7 +979,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="w_vatCopy">
+           <widget class="QToolButton" name="w_vatSellerCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>
@@ -994,14 +994,14 @@
           </item>
          </layout>
         </item>
-        <item row="14" column="0">
+        <item row="16" column="0">
          <widget class="QLabel" name="w_grossGrandTotalLabel">
           <property name="text">
            <string>Gross Grand Total</string>
           </property>
          </widget>
         </item>
-        <item row="14" column="1">
+        <item row="16" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <property name="spacing">
            <number>0</number>
@@ -1035,7 +1035,7 @@
           </item>
          </layout>
         </item>
-        <item row="11" column="1">
+        <item row="13" column="1">
          <widget class="QLabel" name="w_vatSeparator">
           <property name="frameShape">
            <enum>QFrame::HLine</enum>
@@ -1044,6 +1044,63 @@
            <string notr="true"/>
           </property>
          </widget>
+        </item>
+        <item row="9" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="w_vatBL">
+            <property name="text">
+             <string notr="true">xxx</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="w_vatBLCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="w_vatBLLabel">
+          <property name="text">
+           <string>%1 VAT (BrickLink)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="1">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>2</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>

@@ -3691,6 +3691,11 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Gutschrift Coupon</translation>
     </message>
     <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
+        <source>US Sales Tax</source>
+        <translation>US &quot;Sales Tax&quot;</translation>
+    </message>
+    <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="911"/>
         <source>VAT Information:</source>
         <translation>Mehrwertsteuer:</translation>
@@ -3702,9 +3707,19 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="959"/>
+        <source>%1 VAT (Seller)</source>
+        <comment>x% VAT (Seller or BrickLink)</comment>
+        <translation>%1 MwSt. (Verkäufer)</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="1085"/>
+        <source>%1 VAT (BrickLink)</source>
+        <translation>%1 MwSt. (BrickLink)</translation>
+    </message>
+    <message>
         <source>%1 VAT (%2)</source>
         <comment>x% VAT (Seller or BrickLink)</comment>
-        <translation>%1 MwSt. (%2)</translation>
+        <translation type="vanished">%1 MwSt. (%2)</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="1000"/>
@@ -3717,9 +3732,8 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Bestellwert</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
         <source>Sales Tax</source>
-        <translation>US &quot;Sales Tax&quot;</translation>
+        <translation type="vanished">US &quot;Sales Tax&quot;</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="861"/>
@@ -3759,16 +3773,14 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Bezahlung in</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="112"/>
         <source>Seller</source>
         <comment>x% VAT (Seller)</comment>
-        <translation>Verkäufer</translation>
+        <translation type="vanished">Verkäufer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="113"/>
         <source>BrickLink</source>
         <comment>x% VAT (BrickLink)</comment>
-        <translation>BrickLink</translation>
+        <translation type="vanished">BrickLink</translation>
     </message>
 </context>
 <context>

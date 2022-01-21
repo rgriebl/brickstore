@@ -88,14 +88,24 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     }
 
     bool vatFromSeller = !qFuzzyIsNull(order->vatChargeSeller());
-    double vatCharge = vatFromSeller ? order->vatChargeSeller() : order->vatChargeBrickLink();
-    bool hasVat = !qFuzzyIsNull(vatCharge);
+    bool vatSalesTax = !qFuzzyIsNull(order->usSalesTax());
+    bool vatFromBL = !qFuzzyIsNull(order->vatChargeBrickLink());
+
+    double vatCharge = vatFromSeller ? order->vatChargeSeller()
+                                     : vatSalesTax ? order->usSalesTax()
+                                                   : vatFromBL ? order->vatChargeBrickLink()
+                                                               : 0;
+    QLabel *vatLabel = vatFromSeller ? w_vatSellerLabel
+                                     : vatFromBL ? w_vatBLLabel : nullptr;
+
     double coupon = order->creditCoupon();
-    double gtGross = order->grandTotal() + coupon; // see below for why creditCoupon is needed here
+    double gtGross = order->grandTotal();
+    if (vatFromSeller)
+        gtGross += coupon; // see below for why creditCoupon is needed here
     double gtNet = gtGross - vatCharge;
     double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
 
-    if (!qFuzzyIsNull(coupon)) {
+    if (!qFuzzyIsNull(coupon) && vatFromSeller) {
         // the vatCharge values are wrong when a orderCoupon is active
         // we can however re-calculate this value
         double netFix = coupon * 100 / (100 + vatPercent);
@@ -105,12 +115,12 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
         vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
     }
 
-    w_vatInfoLabel->setVisible(hasVat);
-    w_vatSeparator->setVisible(hasVat);
-    w_vatLabel->setText(w_vatLabel->text()
-                        .arg(QLocale().toString(vatPercent, 'f', QLocale::FloatingPointShortest) % u'%')
-                        .arg(vatFromSeller ? tr("Seller",    "x% VAT (Seller)")
-                                           : tr("BrickLink", "x% VAT (BrickLink)")));
+    w_vatInfoLabel->setVisible(vatFromSeller);
+    w_vatSeparator->setVisible(vatFromSeller);
+    if (vatLabel) {
+        vatLabel->setText(vatLabel->text()
+                          .arg(loc.toString(vatPercent, 'f', QLocale::FloatingPointShortest) % u'%'));
+    }
 
     setup(w_shipping,        w_shippingCopy,        Currency::toDisplayString(order->shipping(), { }, 2),
           !qFuzzyIsNull(order->shipping()),         w_shippingLabel);
@@ -126,12 +136,14 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
           !qFuzzyIsNull(order->creditCoupon()),     w_creditCouponLabel);
     setup(w_total,           w_totalCopy,           Currency::toDisplayString(order->orderTotal(), { }, 2));
     setup(w_salesTax,        w_salesTaxCopy,        Currency::toDisplayString(order->usSalesTax(), { }, 2),
-          !qFuzzyIsNull(order->usSalesTax()),       w_salesTaxLabel);
+          vatSalesTax,       w_salesTaxLabel);
+    setup(w_vatBL,           w_vatBLCopy,           Currency::toDisplayString(order->vatChargeBrickLink(), { }, 2),
+          vatFromBL,         w_vatBLLabel);
     setup(w_grandTotal,      w_grandTotalCopy,      Currency::toDisplayString(order->grandTotal(), { }, 2));
     setup(w_grossGrandTotal, w_grossGrandTotalCopy, Currency::toDisplayString(gtGross, { }, 2),
-          hasVat,            w_grossGrandTotalLabel);
+          vatFromSeller,     w_grossGrandTotalLabel);
     setup(w_netGrandTotal,   w_netGrandTotalCopy,   Currency::toDisplayString(gtNet, { }, 2),
-          hasVat,            w_netGrandTotalLabel);
-    setup(w_vat,             w_vatCopy,             Currency::toDisplayString(vatCharge, { }, 2),
-          hasVat,            w_vatLabel);
+          vatFromSeller,     w_netGrandTotalLabel);
+    setup(w_vatSeller,       w_vatSellerCopy,       Currency::toDisplayString(vatCharge, { }, 2),
+          vatFromSeller,     w_vatSellerLabel);
 }

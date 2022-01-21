@@ -265,7 +265,7 @@ double Order::grandTotal() const
 {
     // return d->m_grandTotal; // this is sometimes off by 1 cent
     return orderTotal() + shipping() + insurance() + additionalCharges1() + additionalCharges2()
-            - credit() - creditCoupon() + usSalesTax();
+            - credit() - creditCoupon() + usSalesTax() + vatChargeBrickLink();
 }
 
 double Order::vatChargeSeller() const

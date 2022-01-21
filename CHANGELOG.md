@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 - The info "docks" are now really dockable and can be rearranged (and even stacked) to your liking
   by dragging them around. Also added two new docks: a list of recent documents and currently
   open documents.
+- Detailed information about orders is now available in the order import dialog (right-click on any
+  order) and also by clicking the order information button in the document toolbar after importing.
 - Windows can now be split horizontally and vertically (as often as you like) to make working on
   multiple documents in parallel easier.
 - Filters can now be edited both via UI controls and in text form: just click the dots menu on the

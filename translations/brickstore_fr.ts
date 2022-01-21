@@ -4171,6 +4171,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
+        <source>US Sales Tax</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="911"/>
         <source>VAT Information:</source>
         <translation type="unfinished"></translation>
@@ -4182,8 +4187,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="959"/>
-        <source>%1 VAT (%2)</source>
+        <source>%1 VAT (Seller)</source>
         <comment>x% VAT (Seller or BrickLink)</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="1085"/>
+        <source>%1 VAT (BrickLink)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4194,11 +4204,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="517"/>
         <source>Order Total</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
-        <source>Sales Tax</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4224,18 +4229,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.cpp" line="86"/>
         <source>Payment in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="112"/>
-        <source>Seller</source>
-        <comment>x% VAT (Seller)</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="113"/>
-        <source>BrickLink</source>
-        <comment>x% VAT (BrickLink)</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -3225,6 +3225,11 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Crédito de Cupón</translation>
     </message>
     <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
+        <source>US Sales Tax</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="911"/>
         <source>VAT Information:</source>
         <translation type="unfinished"></translation>
@@ -3236,9 +3241,19 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="959"/>
+        <source>%1 VAT (Seller)</source>
+        <comment>x% VAT (Seller or BrickLink)</comment>
+        <translation>%1 IVA (Vendedor)</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/orderinformationdialog.ui" line="1085"/>
+        <source>%1 VAT (BrickLink)</source>
+        <translation>%1 IVA (BrickLink)</translation>
+    </message>
+    <message>
         <source>%1 VAT (%2)</source>
         <comment>x% VAT (Seller or BrickLink)</comment>
-        <translation>%1 VAT (%2)</translation>
+        <translation type="vanished">%1 VAT (%2)</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="1000"/>
@@ -3251,9 +3266,8 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Total Pedido</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
         <source>Sales Tax</source>
-        <translation>Impuestos de Ventas</translation>
+        <translation type="vanished">Impuestos de Ventas</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="861"/>
@@ -3293,16 +3307,14 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Pago en</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="112"/>
         <source>Seller</source>
         <comment>x% VAT (Seller)</comment>
-        <translation>Vendedor</translation>
+        <translation type="vanished">Vendedor</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="113"/>
         <source>BrickLink</source>
         <comment>x% VAT (BrickLink)</comment>
-        <translation>BrickLink</translation>
+        <translation type="vanished">BrickLink</translation>
     </message>
 </context>
 <context>
