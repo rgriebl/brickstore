@@ -3227,17 +3227,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="804"/>
         <source>US Sales Tax</source>
-        <translation type="unfinished"></translation>
+        <translation>Sales Tax US</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="911"/>
         <source>VAT Information:</source>
-        <translation type="unfinished"></translation>
+        <translation>Información IVA:</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="918"/>
         <source>Net Grand Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Gran Total Neto</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="959"/>
@@ -3258,7 +3258,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="1000"/>
         <source>Gross Grand Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Gran Total Bruto</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="517"/>
