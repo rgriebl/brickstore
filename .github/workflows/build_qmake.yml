@@ -5,6 +5,8 @@ on:
     workflow_dispatch:
     branches:
       - main
+    tags:
+      - v*
 
 jobs:
   build:
