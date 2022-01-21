@@ -87,35 +87,51 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
                                 % order->paymentCurrencyCode());
     }
 
-    static auto setVatLabel = [](QLabel *l, const BrickLink::Order *order, double vatCharge) {
-        double gt = order->grandTotal() + order->credit() + order->creditCoupon();
-        double gtNet = gt - vatCharge;
+    bool vatFromSeller = !qFuzzyIsNull(order->vatChargeSeller());
+    double vatCharge = vatFromSeller ? order->vatChargeSeller() : order->vatChargeBrickLink();
+    bool hasVat = !qFuzzyIsNull(vatCharge);
+    double coupon = order->creditCoupon();
+    double gtGross = order->grandTotal() + coupon; // see below for why creditCoupon is needed here
+    double gtNet = gtGross - vatCharge;
+    double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
 
-        double p = Utility::roundTo(100 * (gt / (qFuzzyIsNull(gtNet) ? gt : gtNet) - 1.0), 1);
-        l->setText(l->text().arg(QLocale().toString(p, 'f', QLocale::FloatingPointShortest) % u'%'));
-    };
+    if (!qFuzzyIsNull(coupon)) {
+        // the vatCharge values are wrong when a orderCoupon is active
+        // we can however re-calculate this value
+        double netFix = coupon * 100 / (100 + vatPercent);
+        gtNet -= netFix;
+        gtGross -= coupon;
+        vatCharge = gtGross - gtNet;
+        vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
+    }
 
-    setVatLabel(w_vatSellerLabel, order, order->vatChargeSeller());
-    setVatLabel(w_vatBLLabel, order, order->vatChargeBrickLink());
+    w_vatInfoLabel->setVisible(hasVat);
+    w_vatSeparator->setVisible(hasVat);
+    w_vatLabel->setText(w_vatLabel->text()
+                        .arg(QLocale().toString(vatPercent, 'f', QLocale::FloatingPointShortest) % u'%')
+                        .arg(vatFromSeller ? tr("Seller",    "x% VAT (Seller)")
+                                           : tr("BrickLink", "x% VAT (BrickLink)")));
 
-    setup(w_shipping,     w_shippingCopy,     Currency::toDisplayString(order->shipping(), { }, 2),
-          !qFuzzyIsNull(order->shipping()), w_shippingLabel);
-    setup(w_insurance,    w_insuranceCopy,    Currency::toDisplayString(order->insurance(), { }, 2),
-          !qFuzzyIsNull(order->insurance()), w_insuranceLabel);
-    setup(w_addCharges1,  w_addCharges1Copy,  Currency::toDisplayString(order->additionalCharges1(), { }, 2),
+    setup(w_shipping,        w_shippingCopy,        Currency::toDisplayString(order->shipping(), { }, 2),
+          !qFuzzyIsNull(order->shipping()),         w_shippingLabel);
+    setup(w_insurance,       w_insuranceCopy,       Currency::toDisplayString(order->insurance(), { }, 2),
+          !qFuzzyIsNull(order->insurance()),        w_insuranceLabel);
+    setup(w_addCharges1,     w_addCharges1Copy,     Currency::toDisplayString(order->additionalCharges1(), { }, 2),
           !qFuzzyIsNull(order->additionalCharges1()), w_addCharges1Label);
-    setup(w_addCharges2,  w_addCharges2Copy,  Currency::toDisplayString(order->additionalCharges2(), { }, 2),
+    setup(w_addCharges2,     w_addCharges2Copy,     Currency::toDisplayString(order->additionalCharges2(), { }, 2),
           !qFuzzyIsNull(order->additionalCharges2()), w_addCharges2Label);
-    setup(w_credit,       w_creditCopy,       Currency::toDisplayString(order->credit(), { }, 2),
-          !qFuzzyIsNull(order->credit()), w_creditLabel);
-    setup(w_creditCoupon, w_creditCouponCopy, Currency::toDisplayString(order->creditCoupon(), { }, 2),
-          !qFuzzyIsNull(order->creditCoupon()), w_creditCouponLabel);
-    setup(w_total,        w_totalCopy,        Currency::toDisplayString(order->orderTotal(), { }, 2));
-    setup(w_salesTax,     w_salesTaxCopy,     Currency::toDisplayString(order->usSalesTax(), { }, 2),
-          !qFuzzyIsNull(order->usSalesTax()), w_salesTaxLabel);
-    setup(w_grandTotal,   w_grandTotalCopy,   Currency::toDisplayString(order->grandTotal(), { }, 2));
-    setup(w_vatSeller,    w_vatSellerCopy,    Currency::toDisplayString(order->vatChargeSeller(), { }, 2),
-          !qFuzzyIsNull(order->vatChargeSeller()), w_vatSellerLabel);
-    setup(w_vatBL,        w_vatBLCopy,        Currency::toDisplayString(order->vatChargeBrickLink(), { }, 2),
-          !qFuzzyIsNull(order->vatChargeBrickLink()), w_vatBLLabel);
+    setup(w_credit,          w_creditCopy,          Currency::toDisplayString(order->credit(), { }, 2),
+          !qFuzzyIsNull(order->credit()),           w_creditLabel);
+    setup(w_creditCoupon,    w_creditCouponCopy,    Currency::toDisplayString(order->creditCoupon(), { }, 2),
+          !qFuzzyIsNull(order->creditCoupon()),     w_creditCouponLabel);
+    setup(w_total,           w_totalCopy,           Currency::toDisplayString(order->orderTotal(), { }, 2));
+    setup(w_salesTax,        w_salesTaxCopy,        Currency::toDisplayString(order->usSalesTax(), { }, 2),
+          !qFuzzyIsNull(order->usSalesTax()),       w_salesTaxLabel);
+    setup(w_grandTotal,      w_grandTotalCopy,      Currency::toDisplayString(order->grandTotal(), { }, 2));
+    setup(w_grossGrandTotal, w_grossGrandTotalCopy, Currency::toDisplayString(gtGross, { }, 2),
+          hasVat,            w_grossGrandTotalLabel);
+    setup(w_netGrandTotal,   w_netGrandTotalCopy,   Currency::toDisplayString(gtNet, { }, 2),
+          hasVat,            w_netGrandTotalLabel);
+    setup(w_vat,             w_vatCopy,             Currency::toDisplayString(vatCharge, { }, 2),
+          hasVat,            w_vatLabel);
 }

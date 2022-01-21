@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
-    <height>449</height>
+    <width>626</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -89,6 +89,7 @@
          <widget class="QLabel" name="w_status">
           <property name="font">
            <font>
+            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -141,6 +142,37 @@
           </item>
           <item>
            <widget class="QToolButton" name="w_trackingCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>24</number>
+          </property>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Address</string>
+            </property>
+           </widget>
+          </item>
+          <item alignment="Qt::AlignRight">
+           <widget class="QToolButton" name="w_addressCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>
@@ -383,49 +415,12 @@
           </item>
          </layout>
         </item>
-        <item row="3" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>24</number>
+        <item row="4" column="0">
+         <widget class="QLabel" name="w_phoneLabel">
+          <property name="text">
+           <string>Phone</string>
           </property>
-          <property name="sizeConstraint">
-           <enum>QLayout::SetDefaultConstraint</enum>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Address</string>
-            </property>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignRight">
-           <widget class="QToolButton" name="w_addressCopy">
-            <property name="text">
-             <string notr="true">C</string>
-            </property>
-            <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="5" column="1">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+         </widget>
         </item>
         <item row="4" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -455,12 +450,18 @@
           </item>
          </layout>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="w_phoneLabel">
-          <property name="text">
-           <string>Phone</string>
+        <item row="5" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -511,13 +512,54 @@
          </widget>
         </item>
         <item row="1" column="0">
+         <widget class="QLabel" name="w_orderTotalLabel">
+          <property name="text">
+           <string>Order Total</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_38">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="w_total">
+            <property name="text">
+             <string notr="true">xxx</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="w_totalCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0">
          <widget class="QLabel" name="w_shippingLabel">
           <property name="text">
            <string>Shipping</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="2" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_24">
           <property name="spacing">
            <number>0</number>
@@ -551,14 +593,14 @@
           </item>
          </layout>
         </item>
-        <item row="2" column="0">
+        <item row="3" column="0">
          <widget class="QLabel" name="w_insuranceLabel">
           <property name="text">
            <string>Insurance</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="3" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_25">
           <property name="spacing">
            <number>0</number>
@@ -592,14 +634,14 @@
           </item>
          </layout>
         </item>
-        <item row="3" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="w_addCharges1Label">
           <property name="text">
            <string>Additional Charges 1</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="4" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_27">
           <property name="spacing">
            <number>0</number>
@@ -633,14 +675,14 @@
           </item>
          </layout>
         </item>
-        <item row="4" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="w_addCharges2Label">
           <property name="text">
            <string>Additional Charges 2</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
+        <item row="5" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_40">
           <property name="spacing">
            <number>0</number>
@@ -674,14 +716,14 @@
           </item>
          </layout>
         </item>
-        <item row="5" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="w_creditLabel">
           <property name="text">
            <string>Credit</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
+        <item row="6" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_39">
           <property name="spacing">
            <number>0</number>
@@ -715,14 +757,14 @@
           </item>
          </layout>
         </item>
-        <item row="6" column="0">
+        <item row="7" column="0">
          <widget class="QLabel" name="w_creditCouponLabel">
           <property name="text">
            <string>Credit Coupon</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
+        <item row="7" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_43">
           <property name="spacing">
            <number>0</number>
@@ -742,47 +784,6 @@
           </item>
           <item>
            <widget class="QToolButton" name="w_creditCouponCopy">
-            <property name="text">
-             <string notr="true">C</string>
-            </property>
-            <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="w_orderTotalLabel">
-          <property name="text">
-           <string>Order Total</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_38">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLineEdit" name="w_total">
-            <property name="text">
-             <string notr="true">xxx</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="w_totalCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>
@@ -838,14 +839,30 @@
           </item>
          </layout>
         </item>
-        <item row="9" column="0">
+        <item row="9" column="1">
+         <widget class="Line" name="line_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>10</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
          <widget class="QLabel" name="w_grandTotalLabel">
           <property name="text">
            <string>Grand Total</string>
           </property>
          </widget>
         </item>
-        <item row="9" column="1">
+        <item row="10" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_49">
           <property name="spacing">
            <number>0</number>
@@ -879,20 +896,77 @@
           </item>
          </layout>
         </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="w_vatSellerLabel">
+        <item row="11" column="0">
+         <widget class="QLabel" name="w_vatInfoLabel">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="text">
-           <string>%1 VAT Charge (Seller)</string>
+           <string>VAT Information:</string>
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
+        <item row="12" column="0">
+         <widget class="QLabel" name="w_netGrandTotalLabel">
+          <property name="text">
+           <string>Net Grand Total</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="w_netGrandTotal">
+            <property name="text">
+             <string notr="true">xxx</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="w_netGrandTotalCopy">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy">
+              <normaloff>.</normaloff>.</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="13" column="0">
+         <widget class="QLabel" name="w_vatLabel">
+          <property name="text">
+           <string comment="x% VAT (Seller or BrickLink)">%1 VAT (%2)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_44">
           <property name="spacing">
            <number>0</number>
           </property>
           <item>
-           <widget class="QLineEdit" name="w_vatSeller">
+           <widget class="QLineEdit" name="w_vat">
             <property name="text">
              <string notr="true">xxx</string>
             </property>
@@ -905,7 +979,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="w_vatSellerCopy">
+           <widget class="QToolButton" name="w_vatCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>
@@ -920,20 +994,20 @@
           </item>
          </layout>
         </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="w_vatBLLabel">
+        <item row="14" column="0">
+         <widget class="QLabel" name="w_grossGrandTotalLabel">
           <property name="text">
-           <string>%1 VAT Charge (BrickLink)</string>
+           <string>Gross Grand Total</string>
           </property>
          </widget>
         </item>
-        <item row="11" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_45">
+        <item row="14" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <property name="spacing">
            <number>0</number>
           </property>
           <item>
-           <widget class="QLineEdit" name="w_vatBL">
+           <widget class="QLineEdit" name="w_grossGrandTotal">
             <property name="text">
              <string notr="true">xxx</string>
             </property>
@@ -946,7 +1020,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="w_vatBLCopy">
+           <widget class="QToolButton" name="w_grossGrandTotalCopy">
             <property name="text">
              <string notr="true">C</string>
             </property>
@@ -960,6 +1034,16 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="11" column="1">
+         <widget class="QLabel" name="w_vatSeparator">
+          <property name="frameShape">
+           <enum>QFrame::HLine</enum>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
