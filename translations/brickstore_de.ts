@@ -2798,7 +2798,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     <message>
         <location filename="../src/utility/filter.cpp" line="399"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
-        <translation>ist nicht, ist nicht gleich,ist ungleich</translation>
+        <translation type="unfinished">ist nicht,ist nicht gleich,ist ungleich</translation>
     </message>
     <message>
         <location filename="../src/utility/filter.cpp" line="400"/>
