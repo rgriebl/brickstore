@@ -210,13 +210,9 @@ void Application::afterInit()
 
     ActionManager::inst()->connectActionTable(applicationActionTable);
 
-    connect(DocumentList::inst(), &DocumentList::documentAdded,
+    connect(DocumentList::inst(), &DocumentList::documentCreated,
             this, [this](Document *document) {
         m_undoGroup->addStack(document->model()->undoStack());
-    });
-    connect(DocumentList::inst(), &DocumentList::documentRemoved,
-            this, [this](Document *document) {
-        m_undoGroup->removeStack(document->model()->undoStack());
     });
 
     if (!BrickLink::core()->isDatabaseValid() || BrickLink::core()->isDatabaseUpdateNeeded()) {

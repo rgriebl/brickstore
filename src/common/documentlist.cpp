@@ -140,6 +140,8 @@ QHash<int, QByteArray> DocumentList::roleNames() const
 
 void DocumentList::add(Document *document)
 {
+    emit documentCreated(document);
+
     beginInsertRows({ }, rowCount(), rowCount());
     m_documents.append(document);
     endInsertRows();

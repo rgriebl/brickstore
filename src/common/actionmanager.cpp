@@ -627,6 +627,7 @@ QObject *ActionManager::quickAction(const QString &name)
             qa->setObjectName(a->objectName());
             qa->setText(a->text());
             qa->setCheckable(a->isCheckable());
+            qa->setEnabled(a->isEnabled());
             if (!aa->iconName().isEmpty()) {
                 QQuickIcon qi = qa->icon();
                 qi.setName(aa->iconName());

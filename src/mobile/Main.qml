@@ -223,17 +223,17 @@ ApplicationWindow {
         console.log("Go to doc: " + doc + " @" + index)
         if (index >= 0) {
             let view = views[index]
-            if (stack.depth == 1) {
+            if (stack.depth === 1) {
                 console.log("pushing");
                 stack.push(view)
                 console.log("done");
             } else if (stack.get(1) !== view) {
                 stack.replace(stack.get(1), view)
             }
-            ActionManager.setActiveDocument(view.document)
+            ActionManager.activeDocument = view.document
         } else {
             stack.pop(null)
-            ActionManager.setActiveDocument(null)
+            ActionManager.activeDocument = null
         }
     }
 

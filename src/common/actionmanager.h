@@ -29,6 +29,7 @@ QT_FORWARD_DECLARE_CLASS(QQuickAction)
 class ActionManager : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(Document *activeDocument READ activeDocument WRITE setActiveDocument NOTIFY activeDocumentChanged)
 
 public:
     enum Need {

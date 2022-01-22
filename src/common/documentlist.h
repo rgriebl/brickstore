@@ -41,6 +41,7 @@ signals:
     void countChanged(int count);
     void documentAdded(Document *document);
     void documentRemoved(Document *document);
+    void documentCreated(Document *document);
 
 private:
     DocumentList() = default;
