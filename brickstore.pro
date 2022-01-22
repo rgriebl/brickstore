@@ -1,4 +1,6 @@
 
+##NOTE: a lot of variables are already set at this point via .qmake.conf
+
 android|ios|force-mobile:CONFIG *= bs_mobile
 else:backend-only:CONFIG *= bs_backend
 else:CONFIG *= bs_desktop
@@ -11,10 +13,7 @@ DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
 COPYRIGHT   = "2004-2022 Robert Griebl"
 BRICKSTORE_URL = "brickforge.de/brickstore"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
-
-
-##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
-
+VERSION     = $$VERSION_NUMBER
 
 requires(linux|macos|win32|ios:!winrt)
 !versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
@@ -77,7 +76,7 @@ OTHER_FILES += \
   CHANGELOG.md \
   LICENSE.GPL \
   README.md \
-  VERSION \
+  VERSION_NUMBER \
   BrickStoreXML.rnc \
   configure \
   debian/* \

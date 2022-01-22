@@ -3,4 +3,4 @@
 .gitattributes          export-ignore
 
 *.sh text eol=lf
-VERSION text eol=lf
+VERSION_NUMBER text eol=lf
