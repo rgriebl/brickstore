@@ -25,7 +25,7 @@ logged into GitHub (this is a GitHub limitation).
 
 ## License
 
-BrickStore is copyrighted &copy;2004-2021 by Robert Griebl, licensed under the
+BrickStore is copyrighted &copy;2004-2022 by Robert Griebl, licensed under the
 [GNU General Public License (GPL) version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 All data from [www.bricklink.com](https://www.bricklink.com) is owned by BrickLink. Both BrickLink
 and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this
@@ -38,4 +38,6 @@ Only made possible by [Dan Jezek's](https://www.danjezek.com/) support
 This projects contains other open-source 3rd-party components under different licenses:
 * 3rdparty/minizip: see LICENSE.ZLIB
 * 3rdparty/lzma: see LICENSE.LGPLv21
+* 3rdparty/qcoro: see LICENSE.MIT
+* 3rdpath/qtwinextras: see LICENSE.GPL
 * assets/icons: see COPYING-ICONS and COPYING-FLAGS

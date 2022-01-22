@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Copyright (C) 2004-2021 Robert Griebl. All rights reserved.
+## Copyright (C) 2004-2022 Robert Griebl. All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##

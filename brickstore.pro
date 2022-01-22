@@ -1,16 +1,3 @@
-## Copyright (C) 2004-2021 Robert Griebl. All rights reserved.
-##
-## This file is part of BrickStore.
-##
-## This file may be distributed and/or modified under the terms of the GNU
-## General Public License version 2 as published by the Free Software Foundation
-## and appearing in the file LICENSE.GPL included in the packaging of this file.
-##
-## This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-## WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-##
-## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
-
 
 android|ios|force-mobile:CONFIG *= bs_mobile
 else:backend-only:CONFIG *= bs_backend
@@ -21,7 +8,7 @@ else:      MIN_QT_VERSION = 5.15.0
 
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
-COPYRIGHT   = "2004-2021 Robert Griebl"
+COPYRIGHT   = "2004-2022 Robert Griebl"
 BRICKSTORE_URL = "brickforge.de/brickstore"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
 

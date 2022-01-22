@@ -17,7 +17,7 @@ option(MODELTEST "Build with modeltest" OFF)
 
 set(NAME "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")
-set(COPYRIGHT      "2004-2021 Robert Griebl")
+set(COPYRIGHT      "2004-2022 Robert Griebl")
 set(BRICKSTORE_URL "brickforge.de/brickstore")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
 file(STRINGS "VERSION" VERSION)
