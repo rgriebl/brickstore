@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8">
 <!-- order.cpp -->
-  <title>Order QML Type | BrickStore</title>
+  <title>Order QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
 <body>
-<div class="header" id="qtdocheader">
-    <div class="main">
-    <div class="main-rounded">
-        <div class="navigationbar">
-        <ul>
+<div class="main">
+<div class="main-rounded">
+<div class="navigationbar">
+    <ul>
+<li><a href="index.html">BrickStore Extensions</a></li>
     </ul>
-    </div>
 </div>
 <div class="content">
-<div class="line">
-<div class="content mainContent">
+    <div class="line">
+        <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
 <h3><a name="toc">Contents</a></h3>
@@ -27,10 +26,11 @@
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="context">
 <h1 class="title">Order QML Type</h1>
 <span class="subtitle"></span>
 <!-- $$$Order-brief -->
-<p>This type holds the information about a <a href="qml-brickstore-bricklink.html">BrickLink</a> order. <a href="#details">More...</a></p>
+<p>This type holds the information about a BrickLink order. <a href="#details">More...</a></p>
 <!-- @@@Order -->
 <div class="table"><table class="alignedsummary">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
@@ -57,12 +57,14 @@
 <li class="fn"><b><b><a href="qml-brickstore-order.html#otherParty-prop">otherParty</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#paymentCurrencyCode-prop">paymentCurrencyCode</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#paymentType-prop">paymentType</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-order.html#salesTax-prop">salesTax</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-brickstore-order.html#phone-prop">phone</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#shipping-prop">shipping</a></b></b> : real</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#status-prop">status</a></b></b> : enumeration</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#trackingNumber-prop">trackingNumber</a></b></b> : string</li>
 <li class="fn"><b><b><a href="qml-brickstore-order.html#type-prop">type</a></b></b> : enumeration</li>
-<li class="fn"><b><b><a href="qml-brickstore-order.html#vatCharges-prop">vatCharges</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-brickstore-order.html#usSalesTax-prop">usSalesTax</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-brickstore-order.html#vatChargeBrickLink-prop">vatChargeBrickLink</a></b></b> : real</li>
+<li class="fn"><b><b><a href="qml-brickstore-order.html#vatChargeSeller-prop">vatChargeSeller</a></b></b> : real</li>
 </ul>
 <!-- $$$Order-description -->
 <a name="details"></a>
@@ -239,14 +241,15 @@
 </table></div></div>
 <div class="qmldoc"></div></div><!-- @@@paymentType -->
 <br/>
-<!-- $$$salesTax -->
+<!-- $$$phone -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="salesTax-prop">
+<tr valign="top" class="odd" id="phone-prop">
 <td class="tblQmlPropNode"><p>
-<a name="salesTax-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">salesTax</span> : <span class="type">real</span></p></td></tr>
+<a name="phone-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">phone</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"></div></div><!-- @@@salesTax -->
+<div class="qmldoc"><p>The phone number of the <a href="qml-brickstore-order.html#otherParty-prop">otherParty</a>.</p>
+</div></div><!-- @@@phone -->
 <br/>
 <!-- $$$shipping -->
 <div class="qmlitem"><div class="qmlproto">
@@ -289,20 +292,42 @@
 </table></div>
 </div></div><!-- @@@type -->
 <br/>
-<!-- $$$vatCharges -->
+<!-- $$$usSalesTax -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="vatCharges-prop">
+<tr valign="top" class="odd" id="usSalesTax-prop">
 <td class="tblQmlPropNode"><p>
-<a name="vatCharges-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vatCharges</span> : <span class="type">real</span></p></td></tr>
+<a name="usSalesTax-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">usSalesTax</span> : <span class="type">real</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"></div></div><!-- @@@vatCharges -->
+<div class="qmldoc"></div></div><!-- @@@usSalesTax -->
 <br/>
-<div class="footer">
-   <p>
-   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+<!-- $$$vatChargeBrickLink -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="vatChargeBrickLink-prop">
+<td class="tblQmlPropNode"><p>
+<a name="vatChargeBrickLink-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vatChargeBrickLink</span> : <span class="type">real</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"></div></div><!-- @@@vatChargeBrickLink -->
+<br/>
+<!-- $$$vatChargeSeller -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="vatChargeSeller-prop">
+<td class="tblQmlPropNode"><p>
+<a name="vatChargeSeller-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">vatChargeSeller</span> : <span class="type">real</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"></div></div><!-- @@@vatChargeSeller -->
+<br/>
+</div>
+   <p class="copy-notice">
+   <acronym title="Copyright">&copy;</acronym> 2004-2022 Robert Griebl.
    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
    All trademarks are property of their respective owners.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>

@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8">
 <!-- bricklink_wrapper.cpp -->
-  <title>Picture QML Type | BrickStore</title>
+  <title>Picture QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
 <body>
-<div class="header" id="qtdocheader">
-    <div class="main">
-    <div class="main-rounded">
-        <div class="navigationbar">
-        <ul>
+<div class="main">
+<div class="main-rounded">
+<div class="navigationbar">
+    <ul>
+<li><a href="index.html">BrickStore Extensions</a></li>
     </ul>
-    </div>
 </div>
 <div class="content">
-<div class="line">
-<div class="content mainContent">
+    <div class="line">
+        <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
 <h3><a name="toc">Contents</a></h3>
@@ -28,10 +27,11 @@
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="context">
 <h1 class="title">Picture QML Type</h1>
 <span class="subtitle"></span>
 <!-- $$$Picture-brief -->
-<p>This value type represents a picture of a <a href="qml-brickstore-bricklink.html">BrickLink</a> item. <a href="#details">More...</a></p>
+<p>This value type represents a picture of a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@Picture -->
 <div class="table"><table class="alignedsummary">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
@@ -56,7 +56,7 @@
 <!-- $$$Picture-description -->
 <a name="details"></a>
 <h2 id="details">Detailed Description</h2>
-<p>Each picture of an item in the <a href="qml-brickstore-bricklink.html">BrickLink</a> catalog is available as a Picture object.</p>
+<p>Each picture of an item in the BrickLink catalog is available as a Picture object.</p>
 <p>You cannot create Picture objects yourself, but you can retrieve a Picture object given the item and color id via <a href="qml-brickstore-bricklink.html#picture-method">BrickLink::picture()</a> or <a href="qml-brickstore-bricklink.html#largePicture-method">BrickLink::largePicture()</a>.</p>
 <p><b>Note: </b>Pictures aren't readily available, but need to be asynchronously loaded (or even downloaded) at runtime. You need to connect to the signal <a href="qml-brickstore-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated()</a> to know when the data has been loaded.</p>
 <!-- @@@Picture -->
@@ -68,7 +68,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="color-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> color reference this picture is requested for.</p>
+<div class="qmldoc"><p>The BrickLink color reference this picture is requested for.</p>
 </div></div><!-- @@@color -->
 <br/>
 <!-- $$$image -->
@@ -108,7 +108,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="item-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-brickstore-item.html">Item</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The <a href="qml-brickstore-bricklink.html">BrickLink</a> item reference this picture is requested for.</p>
+<div class="qmldoc"><p>The BrickLink item reference this picture is requested for.</p>
 </div></div><!-- @@@item -->
 <br/>
 <!-- $$$lastUpdated -->
@@ -132,8 +132,8 @@
 <div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
 <tr><td class="topAlign"><code>BrickLink::Ok</code></td><td class="topAlign">The last picture load (or download) was successful.</td></tr>
 <tr><td class="topAlign"><code>BrickLink::Loading</code></td><td class="topAlign">BrickStore is currently loading the picture from the local cache.</td></tr>
-<tr><td class="topAlign"><code>BrickLink::Updating</code></td><td class="topAlign">BrickStore is currently downloading the picture from <a href="qml-brickstore-bricklink.html">BrickLink</a>.</td></tr>
-<tr><td class="topAlign"><code>BrickLink::UpdateFailed</code></td><td class="topAlign">The last download from <a href="qml-brickstore-bricklink.html">BrickLink</a> failed. <a href="qml-brickstore-picture.html#isValid-prop">isValid</a> might still be <code>true</code>, if there was a valid picture available before the failed update!</td></tr>
+<tr><td class="topAlign"><code>BrickLink::Updating</code></td><td class="topAlign">BrickStore is currently downloading the picture from BrickLink.</td></tr>
+<tr><td class="topAlign"><code>BrickLink::UpdateFailed</code></td><td class="topAlign">The last download from BrickLink failed. <a href="qml-brickstore-picture.html#isValid-prop">isValid</a> might still be <code>true</code>, if there was a valid picture available before the failed update!</td></tr>
 </table></div>
 </div></div><!-- @@@updateStatus -->
 <br/>
@@ -145,14 +145,18 @@
 <td class="tblQmlFuncNode"><p>
 <a name="update-method"></a><span class="name">update</span>(<span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Tries to re-download the picture from the <a href="qml-brickstore-bricklink.html">BrickLink</a> server. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended.</p>
+<div class="qmldoc"><p>Tries to re-download the picture from the BrickLink server. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended.</p>
 </div></div><!-- @@@update -->
 <br/>
-<div class="footer">
-   <p>
-   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+</div>
+   <p class="copy-notice">
+   <acronym title="Copyright">&copy;</acronym> 2004-2022 Robert Griebl.
    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
    All trademarks are property of their respective owners.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>

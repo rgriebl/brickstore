@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8">
 <!-- bricklink_wrapper.cpp -->
-  <title>BrickLink QML Type | BrickStore</title>
+  <title>BrickLink QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
 <body>
-<div class="header" id="qtdocheader">
-    <div class="main">
-    <div class="main-rounded">
-        <div class="navigationbar">
-        <ul>
+<div class="main">
+<div class="main-rounded">
+<div class="navigationbar">
+    <ul>
+<li><a href="index.html">BrickStore Extensions</a></li>
     </ul>
-    </div>
 </div>
 <div class="content">
-<div class="line">
-<div class="content mainContent">
+    <div class="line">
+        <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
 <h3><a name="toc">Contents</a></h3>
@@ -29,6 +28,7 @@
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="context">
 <h1 class="title">BrickLink QML Type</h1>
 <span class="subtitle"></span>
 <!-- $$$BrickLink-brief -->
@@ -71,10 +71,10 @@
 <p>This singleton is responsible for handling all communications with the BrickLink servers, as well as giving access to the BrickLink item catalog, which is available through these types:</p>
 <ul>
 <li><a href="qml-brickstore-itemtype.html">ItemType</a></li>
-<li>Category</li>
-<li>Color</li>
-<li>Item</li>
-<li>Picture</li>
+<li><a href="qml-brickstore-category.html">Category</a></li>
+<li><a href="qml-brickstore-color.html">Color</a></li>
+<li><a href="qml-brickstore-item.html">Item</a></li>
+<li><a href="qml-brickstore-picture.html">Picture</a></li>
 <li><a href="qml-brickstore-priceguide.html">PriceGuide</a></li>
 </ul>
 <!-- @@@BrickLink -->
@@ -86,7 +86,7 @@
 <td class="tblQmlPropNode"><p>
 <a name="noColor-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">noColor</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>A special Color object denoting an invalid color. The object's <a href="qml-brickstore-color.html#isNull-prop">Color::isNull</a> returns <code>true</code>. Used as a return value for functions that can fail.</p>
+<div class="qmldoc"><p>A special <a href="qml-brickstore-color.html">Color</a> object denoting an invalid color. The object's <a href="qml-brickstore-color.html#isNull-prop">Color::isNull</a> returns <code>true</code>. Used as a return value for functions that can fail.</p>
 </div></div><!-- @@@noColor -->
 <br/>
 <!-- $$$noItem -->
@@ -130,7 +130,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="category-method"></a><span class="type"><a href="qml-brickstore-category.html">Category</a></span> <span class="name">category</span>(<span class="type">int</span> <i>categoryId</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns a Category object corresponding to the given <a href="qml-brickstore-bricklink.html">BrickLink</a> <i>categoryId</i>. If there is no match, the returned object is noCategory.</p>
+<div class="qmldoc"><p>Returns a Category object corresponding to the given BrickLink <i>categoryId</i>. If there is no match, the returned object is noCategory.</p>
 </div></div><!-- @@@category -->
 <br/>
 <!-- $$$color$$$coloruint -->
@@ -140,7 +140,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="color-method-2"></a><span class="type"><a href="qml-brickstore-color.html">Color</a></span> <span class="name">color</span>(<span class="type">uint</span> <i>colorId</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns a Color object corresponding to the given <a href="qml-brickstore-bricklink.html">BrickLink</a> <i>colorId</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noColor-prop">noColor</a>.</p>
+<div class="qmldoc"><p>Returns a Color object corresponding to the given BrickLink <i>colorId</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noColor-prop">noColor</a>.</p>
 </div></div><!-- @@@color -->
 <br/>
 <!-- $$$color$$$colorstring -->
@@ -150,7 +150,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="color-method-1"></a><span class="type"><a href="qml-brickstore-color.html">Color</a></span> <span class="name">color</span>(<span class="type">string</span> <i>colorName</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns a Color object corresponding to the given <a href="qml-brickstore-bricklink.html">BrickLink</a> <i>colorName</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noColor-prop">noColor</a>.</p>
+<div class="qmldoc"><p>Returns a Color object corresponding to the given BrickLink <i>colorName</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noColor-prop">noColor</a>.</p>
 </div></div><!-- @@@color -->
 <br/>
 <!-- $$$color[overload1]$$$colorvar -->
@@ -180,7 +180,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="item-method"></a><span class="type"><a href="qml-brickstore-item.html">Item</a></span> <span class="name">item</span>(<span class="type">string</span> <i>itemTypeId</i>, <span class="type">string</span> <i>itemId</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns an Item object corresponding to the given <a href="qml-brickstore-bricklink.html">BrickLink</a> <i>itemTypeId</i> and <i>itemId</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noItem-prop">noItem</a>.</p>
+<div class="qmldoc"><p>Returns an <a href="qml-brickstore-item.html">Item</a> object corresponding to the given BrickLink <i>itemTypeId</i> and <i>itemId</i>. If there is no match, the returned object is <a href="qml-brickstore-bricklink.html#noItem-prop">noItem</a>.</p>
 </div></div><!-- @@@item -->
 <br/>
 <!-- $$$itemType[overload1]$$$itemTypestring -->
@@ -190,7 +190,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="itemType-method"></a><span class="type"><a href="qml-brickstore-itemtype.html">ItemType</a></span> <span class="name">itemType</span>(<span class="type">string</span> <i>itemTypeId</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns an <a href="qml-brickstore-itemtype.html">ItemType</a> object corresponding to the given <a href="qml-brickstore-bricklink.html">BrickLink</a> <i>itemTypeId</i>. If there is no match, the returned object is noItemType.</p>
+<div class="qmldoc"><p>Returns an <a href="qml-brickstore-itemtype.html">ItemType</a> object corresponding to the given BrickLink <i>itemTypeId</i>. If there is no match, the returned object is noItemType.</p>
 <p><b>Note: </b>The id is a single letter string and has to be one of <code>PCGIMOPS</code>.</p>
 </div></div><!-- @@@itemType -->
 <br/>
@@ -222,7 +222,7 @@
 <td class="tblQmlFuncNode"><p>
 <a name="picture-method"></a><span class="type"><a href="qml-brickstore-picture.html">Picture</a></span> <span class="name">picture</span>(<span class="type"><a href="qml-brickstore-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-brickstore-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Creates a Picture object that asynchronously loads (or downloads) the picture for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-brickstore-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated()</a> to know when the data has been loaded.</p>
+<div class="qmldoc"><p>Creates a <a href="qml-brickstore-picture.html">Picture</a> object that asynchronously loads (or downloads) the picture for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-brickstore-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated()</a> to know when the data has been loaded.</p>
 <p><b>See also </b><a href="qml-brickstore-picture.html">Picture</a>.</p>
 </div></div><!-- @@@picture -->
 <br/>
@@ -237,11 +237,15 @@
 <p><b>See also </b><a href="qml-brickstore-priceguide.html">PriceGuide</a>.</p>
 </div></div><!-- @@@priceGuide -->
 <br/>
-<div class="footer">
-   <p>
-   <acronym title="Copyright">&copy;</acronym> 2021 Robert Griebl.
+</div>
+   <p class="copy-notice">
+   <acronym title="Copyright">&copy;</acronym> 2004-2022 Robert Griebl.
    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
    All trademarks are property of their respective owners.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>
