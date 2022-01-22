@@ -36,7 +36,7 @@ QStringList DocumentList::allFiles() const
 {
     QStringList files;
     for (const auto *doc : m_documents) {
-        QString fileName = doc->fileName();
+        QString fileName = doc->filePath();
         if (!fileName.isEmpty())
             files << fileName;
     }
@@ -53,7 +53,7 @@ Document *DocumentList::documentForFile(const QString &fileName) const
     QString afp = QFileInfo(fileName).absoluteFilePath();
 
     for (auto *document : m_documents) {
-        if (QFileInfo(document->fileName()).absoluteFilePath() == afp)
+        if (QFileInfo(document->filePath()).absoluteFilePath() == afp)
             return document;
     }
     return nullptr;
@@ -74,7 +74,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     Document *document = m_documents.at(index.row());
     switch (role) {
     case Qt::ToolTipRole: {
-        QString s = document->fileNameOrTitle();
+        QString s = document->filePathOrTitle();
         if (document->model()->isModified())
             s.append("*"_l1);
         return s;
@@ -82,14 +82,14 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         QString s = document->title();
         if (s.isEmpty()) {
-            QFileInfo fi(document->fileName());
+            QFileInfo fi(document->filePath());
             s = fi.fileName();
 
             QStringList clashes;
             std::for_each(m_documents.cbegin(), m_documents.cend(),
                           [s, document, &clashes](const Document *otherDoc) {
                 if ((otherDoc != document) && otherDoc->title().isEmpty()) {
-                    QFileInfo otherFi(otherDoc->fileName());
+                    QFileInfo otherFi(otherDoc->filePath());
                     if (otherFi.fileName() == s)
                         clashes << otherFi.absolutePath();
                 }
@@ -148,7 +148,7 @@ void DocumentList::add(Document *document)
         int row = m_documents.indexOf(document);
         emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
     };
-    connect(document, &Document::fileNameChanged,
+    connect(document, &Document::filePathChanged,
             this, updateDisplay);
     connect(document, &Document::titleChanged,
             this, updateDisplay);

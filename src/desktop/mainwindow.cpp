@@ -911,7 +911,7 @@ void MainWindow::createActions()
 
               for (const auto doc : docs) {
                   if (doc->model()->isModified()) {
-                      if (doc->fileName().isEmpty()) {
+                      if (doc->filePath().isEmpty()) {
                           QVector<ViewPane *> possibleVPs;
                           forEachViewPane([doc, &possibleVPs](ViewPane *vp) {
                               if (vp->viewForDocument(doc))
@@ -1179,7 +1179,7 @@ void MainWindow::titleUpdate()
 
     if (m_activeView) {
         title = m_activeView->windowTitle() % u" \u2014 " % title;
-        file = m_activeView->document()->fileName();
+        file = m_activeView->document()->filePath();
     }
     setWindowTitle(title);
     setWindowFilePath(file);

@@ -255,7 +255,7 @@ void ActionManager::updateActions(int updateReason)
 
     bool canBeSaved = m_document ? m_document->model()->canBeSaved() : false;
     bool blocked = m_document ? m_document->isBlockingOperationActive() : false;
-    bool hasNoFileName = m_document && m_document->fileName().isEmpty();
+    bool hasNoFileName = m_document && m_document->filePath().isEmpty();
 
     setEnabled("document_save", (canBeSaved || hasNoFileName) && !blocked);
 }

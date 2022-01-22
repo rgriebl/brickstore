@@ -323,7 +323,7 @@ AddItemDialog::~AddItemDialog()
 
 void AddItemDialog::updateCaption()
 {
-    setWindowTitle(m_caption_fmt.arg(m_view ? m_view->document()->fileNameOrTitle()
+    setWindowTitle(m_caption_fmt.arg(m_view ? m_view->document()->filePathOrTitle()
                                               : QString { }));
 }
 

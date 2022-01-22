@@ -471,7 +471,7 @@ View::View(Document *document, QWidget *parent)
 
     connect(m_document, &Document::titleChanged,
             this, &View::updateCaption);
-    connect(m_document, &Document::fileNameChanged,
+    connect(m_document, &Document::filePathChanged,
             this, &View::updateCaption);
     connect(m_model, &DocumentModel::modificationChanged,
             this, &View::updateCaption);
@@ -547,7 +547,7 @@ void View::languageChange()
 
 void View::updateCaption()
 {
-    QString cap = m_document->fileNameOrTitle();
+    QString cap = m_document->filePathOrTitle();
     if (cap.isEmpty())
         cap = tr("Untitled");
 
@@ -1098,7 +1098,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
     if (!prt)
         return false;
 
-    prt->setDocName(document()->fileNameOrTitle());
+    prt->setDocName(document()->filePathOrTitle());
 
     QPainter p;
     if (!p.begin(prt))
@@ -1186,7 +1186,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
                 p.drawText(footerRect, Qt::AlignRight | Qt::AlignBottom, tr("Page %1/%2")
                            .arg(pageCount).arg(pagesAcross * pagesDown), &boundingRect);
                 footerRect.setWidth(footerRect.width() - boundingRect.width() - 5 * margin);
-                p.drawText(footerRect, Qt::AlignLeft | Qt::AlignBottom, document()->fileNameOrTitle());
+                p.drawText(footerRect, Qt::AlignLeft | Qt::AlignBottom, document()->filePathOrTitle());
             }
 
             const auto &colWidths = colWidthsPerPageAcross.at(pa);

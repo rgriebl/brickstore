@@ -534,7 +534,7 @@ void Document::setActive(bool active)
                 }
 
                 if (!messages.isEmpty()) {
-                    const QString msg = u"<b>" % fileNameOrTitle() % u"</b><br><ul><li>"
+                    const QString msg = u"<b>" % filePathOrTitle() % u"</b><br><ul><li>"
                             % messages.join("</li><li>"_l1) % u"</li></ul>";
 
                     static auto notifyUser = [](QString s) -> QCoro::Task<> {
@@ -552,31 +552,37 @@ void Document::setActive(bool active)
     m_model->undoStack()->setActive(active);
 }
 
-QString Document::fileName() const
+QString Document::filePath() const
 {
-    return m_filename;
+    return m_filePath;
 }
 
-void Document::setFileName(const QString &str)
+QString Document::fileName() const
 {
-    if (str != m_filename) {
-        m_filename = str;
-        emit fileNameChanged(str);
+    return QFileInfo(m_filePath).fileName();
+}
+
+void Document::setFilePath(const QString &str)
+{
+    if (str != m_filePath) {
+        m_filePath = str;
+        emit filePathChanged(str);
+        emit fileNameChanged(fileName());
 
         setTitle({ });
     }
 }
 
-QString Document::fileNameOrTitle() const
+QString Document::filePathOrTitle() const
 {
-    QFileInfo fi(m_filename);
+    QFileInfo fi(m_filePath);
     if (fi.exists())
         return QDir::toNativeSeparators(fi.absoluteFilePath());
 
     if (!m_title.isEmpty())
         return m_title;
 
-    return m_filename;
+    return m_filePath;
 }
 
 QString Document::title() const
@@ -1462,7 +1468,7 @@ Document *Document::loadFromFile(const QString &fileName)
 
     try {
         auto doc = DocumentIO::parseBsxInventory(&f);
-        doc->setFileName(fileName);
+        doc->setFilePath(fileName);
         RecentFiles::inst()->add(fileName);
         return doc;
     } catch (const Exception &e) {
@@ -1476,8 +1482,8 @@ QCoro::Task<bool> Document::save(bool saveAs)
     QString fn;
     const auto filters = DocumentIO::nameFiltersForBrickStoreXML(false);
 
-    if (saveAs || fileName().isEmpty()) {
-        fn = fileName();
+    if (saveAs || filePath().isEmpty()) {
+        fn = filePath();
         if (fn.right(4) == ".xml"_l1)
             fn.truncate(fn.length() - 4);
 
@@ -1486,7 +1492,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
         else
             fn.clear();
     } else if (model()->canBeSaved()) {
-        fn = fileName();
+        fn = filePath();
     }
 
     if (!fn.isEmpty()) {
@@ -1534,7 +1540,7 @@ void Document::saveToFile(const QString &fileName)
         throw Exception(&f, tr("Failed to save document"));
 
     model()->unsetModified();
-    setFileName(fileName);
+    setFilePath(fileName);
 
     RecentFiles::inst()->add(fileName);
     deleteAutosave();
@@ -2274,7 +2280,7 @@ void Document::autosave() const
     ds << QByteArray(autosaveMagic)
        << qint32(5) // version
        << title()
-       << fileName()
+       << filePath()
        << m_model->currencyCode()
        << saveColumnsState()
        << model()->saveSortFilterState()

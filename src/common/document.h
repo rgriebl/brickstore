@@ -95,7 +95,8 @@ class Document : public QObject
     Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged)
     Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
-    Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
+    Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PROPERTY(QString fileName READ fileName NOTIFY fileNameChanged)
     Q_PROPERTY(QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged)
     Q_PROPERTY(BrickLink::Order *order READ order CONSTANT)
     Q_PROPERTY(DocumentModel *model READ model CONSTANT)
@@ -122,11 +123,12 @@ public:
 
     void setActive(bool active);
 
+    QString filePath() const;
     QString fileName() const;
-    void setFileName(const QString &str);
+    void setFilePath(const QString &str);
     QString title() const;
     void setTitle(const QString &title);
-    QString fileNameOrTitle() const;
+    QString filePathOrTitle() const;
 
     QImage thumbnail() const;
     void setThumbnail(const QImage &image);
@@ -256,6 +258,7 @@ public:
     static int processAutosaves(AutosaveAction action);
 
 signals:
+    void filePathChanged(const QString &filePath);
     void fileNameChanged(const QString &fileName);
     void titleChanged(const QString &title);
     void thumbnailChanged(const QImage &image);
@@ -335,7 +338,7 @@ private:
 
     QVector<ColumnData>   m_columnData;
 
-    QString               m_filename;
+    QString               m_filePath;
     QString               m_title;
     QImage                m_thumbnail;
 

@@ -50,7 +50,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
         once = true;
     }
 #endif
-    m_documentName = window->document()->fileNameOrTitle();
+    m_documentName = window->document()->filePathOrTitle();
     m_hasSelection = !window->selectedLots().isEmpty();
 
     setupUi(this);

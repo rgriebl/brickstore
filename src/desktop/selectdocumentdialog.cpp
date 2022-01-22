@@ -57,7 +57,7 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
     for (const Document *doc : docs) {
         auto model = doc->model();
         if (model != self) {
-            QListWidgetItem *item = new QListWidgetItem(doc->fileNameOrTitle(), m_documentList);
+            QListWidgetItem *item = new QListWidgetItem(doc->filePathOrTitle(), m_documentList);
             item->setData(Qt::UserRole, QVariant::fromValue(model));
         }
     }

@@ -224,7 +224,7 @@ void ViewPane::setupViewStack()
         auto *doc = m_viewList->itemData(docIdx).value<Document *>();
         if (doc)
             activateDocument(doc);
-        m_viewList->setToolTip(doc ? doc->fileNameOrTitle() : QString());
+        m_viewList->setToolTip(doc ? doc->filePathOrTitle() : QString());
     });
 
     connect(DocumentList::inst(), &DocumentList::rowsAboutToBeRemoved,
