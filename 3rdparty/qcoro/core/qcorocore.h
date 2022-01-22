@@ -4,7 +4,6 @@
 
 #include "config.h"
 
-//#include "iodevice.h"
 #include "qcoroiodevice.h"
 #if !defined(Q_OS_IOS)
 #  include "qcoroprocess.h"
@@ -13,6 +12,6 @@
 #include "qcorotimer.h"
 
 #ifdef QCORO_QT_HAS_COMPAT_ABI
-    #include "future.h"
+    #include "qcorofuture.h"
 #endif
 

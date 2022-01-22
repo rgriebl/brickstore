@@ -10,6 +10,8 @@
 #include <atomic>
 #include <variant>
 #include <memory>
+#include <type_traits>
+#include <optional>
 
 #include <QDebug>
 #include <QEventLoop>
@@ -39,7 +41,7 @@ public:
      * \param[in] awaitingCoroutine handle of the coroutine that is co_awaiting the current
      * coroutine (continuation).
      */
-    explicit TaskFinalSuspend(QCORO_STD::coroutine_handle<> awaitingCoroutine)
+    explicit TaskFinalSuspend(std::coroutine_handle<> awaitingCoroutine)
         : mAwaitingCoroutine(awaitingCoroutine) {}
 
     //! Returns whether the just finishing coroutine should do final suspend or not
@@ -64,18 +66,16 @@ public:
      * \param[in] finishedCoroutine handle of the just finished coroutine
      */
     template<typename _Promise>
-    void await_suspend(QCORO_STD::coroutine_handle<_Promise> finishedCoroutine) noexcept {
+    void await_suspend(std::coroutine_handle<_Promise> finishedCoroutine) noexcept {
         auto &promise = finishedCoroutine.promise();
-
-        promise.mInFinalSuspend = true;
 
         if (promise.mResumeAwaiter.exchange(true, std::memory_order_acq_rel)) {
             promise.mAwaitingCoroutine.resume();
         }
-        if (promise.mDestroyOnFinalSuspend) {
+
+        // The handle will be destroyed here only if the associated Task has already been destroyed
+        if (promise.setDestroyHandle()) {
             finishedCoroutine.destroy();
-        } else {
-            promise.mInFinalSuspend = false;
         }
     }
 
@@ -88,7 +88,7 @@ public:
 
 private:
     //! Handle of the coroutine co_awaiting the current coroutine.
-    QCORO_STD::coroutine_handle<> mAwaitingCoroutine;
+    std::coroutine_handle<> mAwaitingCoroutine;
 };
 
 //! Base class for the \c Task<T> promise_type.
@@ -139,7 +139,7 @@ public:
      * it as a regular function, therefore it returns `std::suspend_never` awaitable, which
      * indicates that the coroutine should not be suspended.
      * */
-    QCORO_STD::suspend_never initial_suspend() const noexcept {
+    std::suspend_never initial_suspend() const noexcept {
         return {};
     }
 
@@ -225,7 +225,7 @@ public:
      *                          represented by this promise. When our coroutine finishes, it's
      *                          our job to resume the awaiting coroutine.
      */
-    bool setAwaitingCoroutine(QCORO_STD::coroutine_handle<> awaitingCoroutine) {
+    bool setAwaitingCoroutine(std::coroutine_handle<> awaitingCoroutine) {
         mAwaitingCoroutine = awaitingCoroutine;
         return !mResumeAwaiter.exchange(true, std::memory_order_acq_rel);
     }
@@ -234,23 +234,20 @@ public:
         return mAwaitingCoroutine != nullptr;
     }
 
-    bool isInFinalSuspend() const {
-        return mInFinalSuspend;
-    }
-
-    void setDestroyOnFinalSuspend() {
-        mDestroyOnFinalSuspend = true;
+    bool setDestroyHandle() noexcept {
+        return mDestroyHandle.exchange(true, std::memory_order_acq_rel);
     }
 
 private:
     friend class TaskFinalSuspend;
 
     //! Handle of the coroutine that is currently co_awaiting this Awaitable
-    QCORO_STD::coroutine_handle<> mAwaitingCoroutine;
+    std::coroutine_handle<> mAwaitingCoroutine;
     //! Indicates whether the awaiter should be resumed when it tries to co_await on us.
     std::atomic<bool> mResumeAwaiter{false};
-    std::atomic<bool> mInFinalSuspend{false};
-    std::atomic<bool> mDestroyOnFinalSuspend{false};
+
+    //! Indicates whether we can destroy the coroutine handle
+    std::atomic<bool> mDestroyHandle{false};
 };
 
 //! The promise_type for Task<T>
@@ -291,12 +288,12 @@ public:
         mValue = value;
     }
 
-    template<typename U> requires QCoro::concepts::constructible_from<T, U>
+    template<typename U> requires concepts::constructible_from<T, U>
     void return_value(U &&value) noexcept {
         mValue = std::move(value);
     }
 
-    template<typename U> requires QCoro::concepts::constructible_from<T, U>
+    template<typename U> requires concepts::constructible_from<T, U>
     void return_value(const U &value) noexcept {
         mValue = value;
     }
@@ -308,6 +305,7 @@ public:
      */
     T &result() & {
         if (std::holds_alternative<std::exception_ptr>(mValue)) {
+            Q_ASSERT(std::get<std::exception_ptr>(mValue) != nullptr);
             std::rethrow_exception(std::get<std::exception_ptr>(mValue));
         }
 
@@ -317,6 +315,7 @@ public:
     //! \copydoc T &QCoro::TaskPromise<T>::result() &
     T &&result() && {
         if (std::holds_alternative<std::exception_ptr>(mValue)) {
+            Q_ASSERT(std::get<std::exception_ptr>(mValue) != nullptr);
             std::rethrow_exception(std::get<std::exception_ptr>(mValue));
         }
 
@@ -407,7 +406,7 @@ public:
      * co_awaited coroutine has finished synchronously and the co_awaiting coroutine doesn't
      * have to suspend.
      */
-    bool await_suspend(QCORO_STD::coroutine_handle<> awaitingCoroutine) noexcept {
+    bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
         return mAwaitedCoroutine.promise().setAwaitingCoroutine(awaitingCoroutine);
     }
 
@@ -416,11 +415,11 @@ protected:
     /*!
      * \param[in] coroutine hande for the coroutine that is being co_awaited.
      */
-    TaskAwaiterBase(QCORO_STD::coroutine_handle<_Promise> awaitedCoroutine)
+    TaskAwaiterBase(std::coroutine_handle<_Promise> awaitedCoroutine)
         : mAwaitedCoroutine(awaitedCoroutine) {}
 
     //! Handle of the coroutine that is being co_awaited by this awaiter
-    QCORO_STD::coroutine_handle<_Promise> mAwaitedCoroutine = {};
+    std::coroutine_handle<_Promise> mAwaitedCoroutine = {};
 };
 
 } // namespace detail
@@ -459,7 +458,7 @@ public:
     /*!
      * \param[in] coroutine handle of the coroutine that has constructed the task.
      */
-    explicit Task(QCORO_STD::coroutine_handle<promise_type> coroutine) : mCoroutine(coroutine) {}
+    explicit Task(std::coroutine_handle<promise_type> coroutine) : mCoroutine(coroutine) {}
 
     //! Task cannot be copy-constructed.
     Task(const Task &) = delete;
@@ -475,7 +474,10 @@ public:
     Task &operator=(Task &&other) noexcept {
         if (std::addressof(other) != this) {
             if (mCoroutine) {
-                mCoroutine.destroy();
+                // The coroutine handle will be destroyed only after TaskFinalSuspend
+                if (mCoroutine.promise().setDestroyHandle()) {
+                    mCoroutine.destroy();
+                }
             }
 
             mCoroutine = other.mCoroutine;
@@ -486,13 +488,13 @@ public:
 
     //! Destructor.
     ~Task() {
-        if (mCoroutine) {
-            if (mCoroutine.done() && !mCoroutine.promise().isInFinalSuspend())
-                mCoroutine.destroy();
-            else
-                mCoroutine.promise().setDestroyOnFinalSuspend();
+        if (!mCoroutine) return;
+
+        // The coroutine handle will be destroyed only after TaskFinalSuspend
+        if (mCoroutine.promise().setDestroyHandle()) {
+            mCoroutine.destroy();
         }
-    }
+    };
 
     //! Returns whether the task has finished.
     /*!
@@ -510,11 +512,11 @@ public:
      * object, that is an object that the co_await keyword uses to suspend and
      * resume the coroutine.
      */
-    auto operator co_await() const &noexcept {
+    auto operator co_await() const noexcept {
         //! Specialization of the TaskAwaiterBase that returns the promise result by value
         class TaskAwaiter : public detail::TaskAwaiterBase<promise_type> {
         public:
-            TaskAwaiter(QCORO_STD::coroutine_handle<promise_type> awaitedCoroutine)
+            TaskAwaiter(std::coroutine_handle<promise_type> awaitedCoroutine)
                 : detail::TaskAwaiterBase<promise_type>{awaitedCoroutine} {}
 
             //! Called when the co_awaited coroutine is resumed.
@@ -523,36 +525,144 @@ public:
              * value co_returned by the coroutine. */
             auto await_resume() {
                 Q_ASSERT(this->mAwaitedCoroutine != nullptr);
-                return this->mAwaitedCoroutine.promise().result();
+                if constexpr (!std::is_void_v<T>) {
+                    return std::move(this->mAwaitedCoroutine.promise().result());
+                } else {
+                    // Wil re-throw exception, if any is stored
+                    this->mAwaitedCoroutine.promise().result();
+                }
             }
         };
 
         return TaskAwaiter{mCoroutine};
     }
 
-    //! \copydoc QCoro::Task::operator co_await() const & noexcept
-    auto operator co_await() const &&noexcept {
-        //! Specialization of the TaskAwaiterBase that returns the promise result as an r-value reference.
-        class TaskAwaiter : public detail::TaskAwaiterBase<promise_type> {
-        public:
-            TaskAwaiter(QCORO_STD::coroutine_handle<promise_type> awaitedCoroutine)
-                : detail::TaskAwaiterBase<promise_type>{awaitedCoroutine} {}
+    //! A callback to be invoked when the asynchronous task finishes.
+    /*!
+     * In some scenarios it is not possible to co_await a coroutine (for example from
+     * a third-party code that cannot be changed to be a coroutine). In that case,
+     * chaining a then() callback is a possible solution how to handle a result
+     * of a coroutine without co_awaiting it.
+     *
+     * @param callback A function or a function object that can be invoked with a single
+     * argument of type T (that is type matching the return type of the coroutine).
+     *
+     * @return Returns Task<R> where R is the return type of the callback, so that the
+     * result of the then() action can be co_awaited, if desired. If the callback
+     * returns an awaitable (Task<R>) then the result of then is the awaitable.
+     */
+    template<typename ThenCallback>
+    requires (std::is_void_v<T> && std::invocable<ThenCallback>) || std::invocable<ThenCallback, T>
+    auto then(ThenCallback &&callback) {
+        return thenImpl(std::forward<ThenCallback>(callback));
+    }
 
-            //! Called when the co_awaited coroutine is resumed.
-            /*
-             * \return an r-value reference to the coroutine's promise result, factically
-             *  a value co_returned by the coroutine. */
-            auto await_resume() {
-                Q_ASSERT(this->mAwaitedCoroutine != nullptr);
-                if constexpr (std::is_void_v<T>) {
-                    this->mAwaitedCoroutine.promise().result();
+    template<typename ThenCallback, typename ErrorCallback>
+    requires (((std::is_void_v<T> && std::invocable<ThenCallback>) || std::invocable<ThenCallback, T>) &&
+            std::invocable<ErrorCallback, const std::exception &>)
+    auto then(ThenCallback &&callback, ErrorCallback &&errorCallback) {
+        return thenImpl(std::forward<ThenCallback>(callback), std::forward<ErrorCallback>(errorCallback));
+    }
+
+private:
+    template<typename ThenCallback, typename Arg = T>
+    struct invoke_result: std::invoke_result<ThenCallback, T> {};
+    template<typename ThenCallback>
+    struct invoke_result<ThenCallback, void>: std::invoke_result<ThenCallback> {};
+    template<typename ThenCallback, typename Arg>
+    using invoke_result_t = typename invoke_result<ThenCallback, Arg>::type;
+
+    // Implementation of then() for callbacks that return Task<R>
+    template<typename ThenCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires QCoro::Awaitable<R>
+    auto thenImpl(ThenCallback &&callback) -> R {
+        const auto cb = std::move(callback);
+        if constexpr (std::is_void_v<value_type>) {
+            co_await *this;
+            co_return co_await cb();
+        } else {
+            co_return co_await cb(co_await *this);
+        }
+    }
+
+    template<typename ThenCallback, typename ErrorCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires QCoro::Awaitable<R>
+    auto thenImpl(ThenCallback &&thenCallback, ErrorCallback &&errorCallback) -> R {
+        const auto thenCb = std::move(thenCallback);
+        const auto errCb = std::move(errorCallback);
+        if constexpr (std::is_void_v<value_type>) {
+            try {
+                co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<typename R::value_type>) {
+                    co_return {};
                 } else {
-                    return std::move(this->mAwaitedCoroutine.promise().result());
+                    co_return;
                 }
             }
-        };
+            co_return co_await thenCb();
+        } else {
+            std::optional<T> v;
+            try {
+                v = co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<typename R::value_type>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return co_await thenCb(std::move(*v));
+        }
+    }
 
-        return TaskAwaiter{mCoroutine};
+
+    // Implementation of then() for callbacks that return R, which is not Task<S>
+    template<typename ThenCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires (!QCoro::Awaitable<R>)
+    auto thenImpl(ThenCallback &&callback) -> Task<R> {
+        const auto cb = std::move(callback);
+        if constexpr (std::is_void_v<value_type>) {
+            co_await *this;
+            co_return cb();
+        } else {
+            co_return cb(co_await *this);
+        }
+    }
+
+    template<typename ThenCallback, typename ErrorCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires (!QCoro::Awaitable<R>)
+    auto thenImpl(ThenCallback &&thenCallback, ErrorCallback &&errorCallback) -> Task<R> {
+        const auto thenCb = std::move(thenCallback);
+        const auto errCb = std::move(errorCallback);
+        if constexpr (std::is_void_v<value_type>) {
+            try {
+                co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<R>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return thenCb();
+        } else {
+            std::optional<T> v;
+            try {
+                v = co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<R>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return thenCb(std::move(*v));
+        }
     }
 
 private:
@@ -561,18 +671,18 @@ private:
      * In other words, this is a handle to the coroutine that has constructed and
      * returned this Task<T>.
      * */
-    QCORO_STD::coroutine_handle<promise_type> mCoroutine = {};
+    std::coroutine_handle<promise_type> mCoroutine = {};
 };
 
 namespace detail {
 
 template<typename T>
 inline Task<T> TaskPromise<T>::get_return_object() noexcept {
-    return Task<T>{QCORO_STD::coroutine_handle<TaskPromise>::from_promise(*this)};
+    return Task<T>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
 }
 
 Task<void> inline TaskPromise<void>::get_return_object() noexcept {
-    return Task<void>{QCORO_STD::coroutine_handle<TaskPromise>::from_promise(*this)};
+    return Task<void>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
 }
 
 } // namespace detail
