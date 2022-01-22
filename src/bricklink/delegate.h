@@ -45,7 +45,7 @@ public:
     bool show(const Item *item, const Color *color, const QPoint &globalPos, QWidget *parent);
 
 private slots:
-    void pictureUpdated(Picture *pic);
+    void pictureUpdated(BrickLink::Picture *pic);
 
 private:
     QString createToolTip(const Item *item, Picture *pic) const;

@@ -259,7 +259,7 @@ public:
     QStringList hasDifferenceUpdateWarnings(const LotList &lots);
 
 signals:
-    void lotFlagsChanged(const Lot *);
+    void lotFlagsChanged(const BrickLink::Lot *);
     void statisticsChanged();
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);

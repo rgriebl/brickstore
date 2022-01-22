@@ -136,7 +136,7 @@ signals:
     void updateStarted();
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
-    void fetchLotsFinished(Cart *cart, bool success, const QString &message);
+    void fetchLotsFinished(BrickLink::Cart *cart, bool success, const QString &message);
 
 private:
     Carts(QObject *parent = nullptr);

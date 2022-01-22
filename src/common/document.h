@@ -180,7 +180,7 @@ public:
 
     enum class SpreadCost { ByPrice, ByWeight };
 
-    Q_INVOKABLE void spreadCost(double spreadAmount, SpreadCost how);
+    Q_INVOKABLE void spreadCost(double spreadAmount, Document::SpreadCost how);
     Q_INVOKABLE void roundCost();
     Q_INVOKABLE void setFilterFromSelection();
     Q_INVOKABLE void setPrice(double price);
@@ -259,7 +259,7 @@ signals:
     void fileNameChanged(const QString &fileName);
     void titleChanged(const QString &title);
     void thumbnailChanged(const QImage &image);
-    void selectedLotsChanged(const LotList &);
+    void selectedLotsChanged(const BrickLink::LotList &);
     void ensureVisible(const QModelIndex &idx, bool centerItem = false);
 
     void requestActivation();

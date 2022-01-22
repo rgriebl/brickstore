@@ -37,7 +37,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const LotList &list);
+    void selectionUpdate(const BrickLink::LotList &list);
     void currencyUpdate(const QString &ccode);
     virtual void topLevelChanged(bool);
     virtual void dockLocationChanged(Qt::DockWidgetArea);
@@ -70,7 +70,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const LotList &list);
+    void selectionUpdate(const BrickLink::LotList &list);
     void statisticsUpdate();
     void currencyUpdate();
 
@@ -104,7 +104,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const LotList &list);
+    void selectionUpdate(const BrickLink::LotList &list);
 
 private:
     QPointer<Document> m_document;
