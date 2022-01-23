@@ -414,6 +414,8 @@ bool Core::isAuthenticated() const
 
 void Core::retrieveAuthenticated(TransferJob *job)
 {
+    job->setNoRedirects(true);
+
     if (!m_authenticated) {
         if (!m_loginJob) {
             QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);

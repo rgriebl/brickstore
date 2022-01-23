@@ -50,6 +50,7 @@ public:
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
 
+    void setNoRedirects(bool noRedirects) { m_no_redirects = noRedirects; }
     void setUserData(const QByteArray &tag, const QVariant &v) { m_userTag = tag; m_userData = v; }
     QVariant userData(const QByteArray &tag) const             { return m_userTag == tag ? m_userData : QVariant(); }
     QByteArray userTag() const                                 { return m_userTag; }

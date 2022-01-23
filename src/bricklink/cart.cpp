@@ -423,7 +423,7 @@ void Carts::startUpdate()
 
     QUrl url("https://www.bricklink.com/v2/globalcart.page"_l1);
 
-    auto job = TransferJob::post(url, nullptr, true /* no redirects */);
+    auto job = TransferJob::post(url);
     job->setUserData("globalCart", true);
     m_job = job;
 
@@ -446,7 +446,7 @@ void Carts::startFetchLots(Cart *cart)
     query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(cart->sellerId())));
     url.setQuery(query);
 
-    auto job = TransferJob::post(url, nullptr, true /* no redirects */);
+    auto job = TransferJob::post(url);
 
     job->setUserData("cart", QVariant::fromValue(cart->sellerId()));
     m_cartJobs << job;

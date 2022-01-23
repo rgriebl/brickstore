@@ -1038,7 +1038,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
         url.setQuery(query);
 
-        auto job = TransferJob::post(url, nullptr, true /* no redirects */);
+        auto job = TransferJob::post(url);
         job->setUserData(type, true);
         m_jobs << job;
 
