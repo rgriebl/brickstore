@@ -83,8 +83,10 @@ bool BrickLink::TextImport::import(const QString &path)
         // speed up loading (exactly 137522 items on 16.06.2020)
         m_items.reserve(200000);
 
-        for (ItemType &itt : m_item_types)
+        for (ItemType &itt : m_item_types) {
             readItems(path % u"items_" % QLatin1Char(itt.m_id) % u".xml", &itt);
+            readAdditionalItemCategories(path % u"items_" % QLatin1Char(itt.m_id) % u".csv", &itt);
+        }
 
         readPartColorCodes(path % u"part_color_codes.xml");
         readInventoryList(path % u"btinvlist.csv");
@@ -166,6 +168,73 @@ void BrickLink::TextImport::readCategories(const QString &path)
 
 }
 
+void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, BrickLink::ItemType *itt)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(&f, "could not open file");
+
+    QTextStream ts(&f);
+    ts.readLine(); // skip header
+    ts.readLine(); // skip empty line
+    ts.readLine(); // skip empty line
+    ts.readLine(); // skip merge cat
+    int lineNumber = 4;
+
+    while (!ts.atEnd()) {
+        ++lineNumber;
+        QString line = ts.readLine();
+        if (line.isEmpty())
+            continue;
+        QStringList strs = line.split('\t'_l1);
+
+        if (strs.count() < 3)
+            throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
+
+        const QByteArray itemId = strs.at(2).toLatin1();
+        int itemIndex = findItemIndex(itt->m_id, itemId);
+
+        if (itemIndex == -1)
+            throw ParseException(&f, "expected a valid item-id field in line %1").arg(lineNumber);
+        if (m_items.at(itemIndex).m_categoryIndex == -1)
+            throw ParseException(&f, "item has no main category in line %1").arg(lineNumber);
+
+        QString catStr = strs.at(1);
+        const Category &mainCat = m_categories.at(m_items.at(itemIndex).m_categoryIndex);
+        if (!catStr.startsWith(mainCat.name()))
+            throw ParseException(&f, "additional categories do not start with the main category in line %1").arg(lineNumber);
+        if (strs.at(0).toUInt() != mainCat.m_id)
+            throw ParseException(&f, "the main category id does not match the XML in line %1").arg(lineNumber);
+
+        catStr = catStr.mid(mainCat.name().length() + 3);
+
+        const QStringList cats = catStr.split(" / "_l1);
+        for (int i = 0; i < cats.count(); ++i) {
+            for (qint16 catIndex = 0; catIndex < qint16(m_categories.size()); ++catIndex) {
+                const QString catName = m_categories.at(catIndex).name();
+                bool disambiguate = catName.contains(" / "_l1);
+                qint16 addCatIndex = -1;
+
+                // The " / " sequence is used to separate the fields, but it also appears in
+                // category names like "String Reel / Winch"
+
+                if (disambiguate) {
+                    const auto catNameList = catName.split(" / "_l1);
+                    if (catNameList == cats.mid(i, catNameList.size())) {
+                        addCatIndex = catIndex;
+                        i += (catNameList.size() - 1);
+                    }
+                } else if (catName == cats.at(i)) {
+                    addCatIndex = catIndex;
+                }
+
+                if (addCatIndex != -1)
+                    m_items[itemIndex].m_additionalCategoryIndexes.push_back(addCatIndex);
+            }
+        }
+    }
+}
+
 void BrickLink::TextImport::readItemTypes(const QString &path)
 {
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
@@ -183,7 +252,6 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
         itt.m_has_inventories   = false;
         itt.m_has_colors        = (c == 'P' || c == 'G');
         itt.m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
-        itt.m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
         itt.m_has_subconditions = (c == 'S');
 
         m_item_types.push_back(itt);
@@ -209,17 +277,9 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
         if (item.m_categoryIndex == -1)
             throw ParseException("item %1 has no category").arg(QLatin1String(item.m_id));
 
-        // calculate the item-type -> category relation
-        auto &catv = itt->m_categoryIndexes;
-        if (std::find(catv.cbegin(), catv.cend(), item.m_categoryIndex) == catv.cend())
-            catv.emplace_back(item.m_categoryIndex);
-
-        if (itt->hasYearReleased()) {
-            uint y = p.elementText(e, "ITEMYEAR").toUInt() - 1900;
-            item.m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
-        } else {
-            item.m_year = 0;
-        }
+        uint y = p.elementText(e, "ITEMYEAR", "0").toUInt();
+        item.m_year_from = ((y > 1900) && (y < 2155)) ? (y - 1900) : 0; // we only have 8 bits for the year
+        item.m_year_to = item.m_year_from;
 
         if (itt->hasWeight())
             item.m_weight = p.elementText(e, "ITEMWEIGHT").toFloat();
@@ -431,22 +491,22 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         throw ParseException(&f, "could not open file");
 
     QTextStream ts(&f);
-    int line = 0;
+    int lineNumber = 0;
     while (!ts.atEnd()) {
-        ++line;
+        ++lineNumber;
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
         QStringList strs = line.split('\t'_l1);
 
         if (strs.count() < 2)
-            throw ParseException(&f, "expected at least 2 fields in line %1").arg(line);
+            throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
 
         char itemTypeId = XmlHelpers::firstCharInString(strs.at(0));
         const QByteArray itemId = strs.at(1).toLatin1();
 
         if (!itemTypeId || itemId.isEmpty())
-            throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(line);
+            throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(lineNumber);
 
         int itemIndex = findItemIndex(itemTypeId, itemId);
         if (itemIndex != -1) {
@@ -485,16 +545,16 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         throw ParseException(&f, "could not open file");
 
     QTextStream ts(&f);
-    int line = 0;
+    int lineNumber = 0;
     while (!ts.atEnd()) {
-        ++line;
+        ++lineNumber;
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
         QStringList strs = line.split('\t'_l1);
 
         if (strs.count() < 7)
-            throw ParseException(&f, "expected at least 7 fields in line %1").arg(line);
+            throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);
 
         char c = XmlHelpers::firstCharInString(strs.at(2));
 
@@ -567,6 +627,85 @@ void BrickLink::TextImport::calculateColorPopularity()
             pop /= maxpop;
         else
             pop = 0;
+    }
+}
+
+void BrickLink::TextImport::calculateItemTypeCategories()
+{
+    for (const auto &item : m_items) {
+        // calculate the item-type -> category relation
+        auto catIndexes = item.m_additionalCategoryIndexes;
+        catIndexes.push_back(item.m_categoryIndex);
+
+        ItemType &itemType = m_item_types[item.m_itemTypeIndex];
+        auto &catv = itemType.m_categoryIndexes;
+
+        for (const auto &catIndex : catIndexes) {
+            if (std::find(catv.cbegin(), catv.cend(), catIndex) == catv.cend())
+                catv.push_back(catIndex);
+        }
+    }
+}
+
+void BrickLink::TextImport::calculateCategoryRecency()
+{
+    QHash<uint, std::pair<quint64, quint32>> catCounter;
+
+    for (const auto &item : m_items) {
+        if (item.m_year_from && item.m_year_to) {
+            auto catIndexes = item.m_additionalCategoryIndexes;
+            if (item.m_categoryIndex != -1)
+                catIndexes.push_back(item.m_categoryIndex);
+
+            for (qint16 catIndex : catIndexes) {
+                auto &cc = catCounter[catIndex];
+                cc.first += (item.m_year_from + item.m_year_to);
+                cc.second += 2;
+
+                auto &cat = m_categories[catIndex];
+                cat.m_year_from = cat.m_year_from ? std::min(cat.m_year_from, item.m_year_from)
+                                                  : item.m_year_from;
+                cat.m_year_to = std::max(cat.m_year_to, item.m_year_to);
+            }
+        }
+    }
+    for (uint catIndex = 0; catIndex < m_categories.size(); ++catIndex) {
+        auto cc = catCounter.value(catIndex);
+        if (cc.first && cc.second) {
+            auto y = quint8(qBound(0ULL, cc.first / cc.second, 255ULL));
+            m_categories[catIndex].m_year_recency = y;
+        }
+    }
+}
+
+void BrickLink::TextImport::calculatePartsYearUsed()
+{
+    // Parts have no "yearReleased" in the downloaded XMLs. We can however calculate a
+    // "last recently used" value, which is much more useful for parts anyway.
+
+    // we make 2 passes:
+    //   #1 for parts in non-parts (these all have a year-released) and
+    //   #2 for parts in parts (which by then should hopefully all have a year-released
+
+    for (int pass = 1; pass <= 2; ++pass) {
+        for (uint itemIndex = 0; itemIndex < m_items.size(); ++itemIndex) {
+            Item &item = m_items[itemIndex];
+
+            bool isPart = (item.itemTypeId() == 'P');
+
+            if ((pass == 1 ? !isPart : isPart) && item.hasInventory() && item.yearReleased()) {
+                const auto itemParts = m_consists_of_hash[itemIndex];
+
+                for (const BrickLink::Item::ConsistsOf &part : itemParts) {
+                    Item &partItem = m_items[part.m_itemIndex];
+                    if (partItem.m_itemTypeId == 'P') {
+                        partItem.m_year_from = partItem.m_year_from ? std::min(partItem.m_year_from, item.m_year_from)
+                                                                    : item.m_year_from;
+                        partItem.m_year_to   = std::max(partItem.m_year_to, item.m_year_to);
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -38,6 +38,10 @@ public:
 
     bool importInventories(std::vector<bool> &processedInvs);
 
+    void calculateCategoryRecency();
+    void calculatePartsYearUsed();
+    void calculateItemTypeCategories();
+
     const std::vector<Item> &items() const { return m_items; }
 
 private:
@@ -45,6 +49,7 @@ private:
     void readCategories(const QString &path);
     void readItemTypes(const QString &path);
     void readItems(const QString &path, ItemType *itt);
+    void readAdditionalItemCategories(const QString &path, BrickLink::ItemType *itt);
     void readPartColorCodes(const QString &path);
     bool readInventory(const Item *item);
     void readLDrawColors(const QString &path);

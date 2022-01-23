@@ -103,6 +103,16 @@ const BrickLink::Category *BrickLink::Item::category() const
     return (m_categoryIndex != -1) ? &core()->categories()[m_categoryIndex] : nullptr;
 }
 
+const QVector<const BrickLink::Category *> BrickLink::Item::additionalCategories(bool includeMainCategory) const
+{
+    QVector<const BrickLink::Category *> cats;
+    if (includeMainCategory && (m_categoryIndex != 1))
+        cats << &core()->categories()[m_categoryIndex];
+    for (const auto catIndex : m_additionalCategoryIndexes)
+        cats << &core()->categories()[catIndex];
+    return cats;
+}
+
 const BrickLink::Color *BrickLink::Item::defaultColor() const
 {
     return (m_defaultColorIndex != -1) ? &core()->colors()[m_defaultColorIndex] : nullptr;

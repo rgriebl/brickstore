@@ -465,7 +465,7 @@ void Database::write(const QString &filename, Version version) const
         writeItemToDatabase(item, ds, version);
     check(cw.endChunk());
 
-    if (version >= Version::Version_5) {
+    if (version >= Version::V5) {
         check(cw.startChunk(ChunkId('I','C','H','G'), 1));
         ds << quint32(m_itemChangelog.size());
         for (const ItemChangeLogEntry &e : m_itemChangelog)
@@ -527,12 +527,14 @@ void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, V
 
 void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, Version)
 {
-    dataStream >> cat.m_id >> cat.m_name;
+    dataStream >> cat.m_id >> cat.m_name >> cat.m_year_from >> cat.m_year_to >> cat.m_year_recency;
 }
 
-void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version) const
+void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version v) const
 {
     dataStream << cat.m_id << cat.m_name;
+    if (v >= Version::V6)
+        dataStream << cat.m_year_from << cat.m_year_to << cat.m_year_recency;
 }
 
 
@@ -552,7 +554,6 @@ void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, 
     itt.m_has_inventories   = flags & 0x01;
     itt.m_has_colors        = flags & 0x02;
     itt.m_has_weight        = flags & 0x04;
-    itt.m_has_year          = flags & 0x08;
     itt.m_has_subconditions = flags & 0x10;
 }
 
@@ -562,7 +563,7 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     flags |= (itt.m_has_inventories   ? 0x01 : 0);
     flags |= (itt.m_has_colors        ? 0x02 : 0);
     flags |= (itt.m_has_weight        ? 0x04 : 0);
-    flags |= (itt.m_has_year          ? 0x08 : 0);
+    flags |= (true                    ? 0x08 : 0); // was: m_has_year
     flags |= (itt.m_has_subconditions ? 0x10 : 0);
 
     dataStream << qint8(itt.m_id) << qint8(itt.m_picture_id) << itt.m_name << flags
@@ -576,8 +577,8 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
 void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version)
 {
     dataStream >> item.m_id >> item.m_name >> item.m_itemTypeIndex >> item.m_categoryIndex
-            >> item.m_defaultColorIndex >> (qint8 &) item.m_itemTypeId >> item.m_year
-            >> item.m_lastInventoryUpdate >> item.m_weight;
+            >> item.m_defaultColorIndex >> (qint8 &) item.m_itemTypeId >> item.m_year_from
+            >> item.m_lastInventoryUpdate >> item.m_weight >> item.m_year_to;
 
     quint32 appearsInSize = 0;
     dataStream >> appearsInSize;
@@ -616,20 +617,34 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_knownColorIndexes.clear();
     item.m_knownColorIndexes.reserve(knownColorsSize);
 
-    quint16 colorIndex;
-
     while (knownColorsSize-- > 0) {
+        quint16 colorIndex;
         dataStream >> colorIndex;
         item.m_knownColorIndexes.push_back(colorIndex);
     }
     item.m_knownColorIndexes.shrink_to_fit();
+
+    quint32 additonalCategoriesSize;
+    dataStream >> additonalCategoriesSize;
+    item.m_additionalCategoryIndexes.clear();
+    item.m_additionalCategoryIndexes.reserve(additonalCategoriesSize);
+
+    while (additonalCategoriesSize-- > 0) {
+        qint16 catIndex;
+        dataStream >> catIndex;
+        item.m_additionalCategoryIndexes.push_back(catIndex);
+    }
+    item.m_additionalCategoryIndexes.shrink_to_fit();
 }
 
-void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version) const
+void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
 {
     dataStream << item.m_id << item.m_name << item.m_itemTypeIndex << item.m_categoryIndex
-               << item.m_defaultColorIndex << qint8(item.m_itemTypeId) << item.m_year
+               << item.m_defaultColorIndex << qint8(item.m_itemTypeId) << item.m_year_from
                << item.m_lastInventoryUpdate << item.m_weight;
+
+    if (v >= Version::V6)
+        dataStream << item.m_year_to;
 
     union {
         quint32 ui32;
@@ -655,6 +670,12 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
     dataStream << quint32(item.m_knownColorIndexes.size());
     for (const quint16 colorIndex : item.m_knownColorIndexes)
         dataStream << colorIndex;
+
+    if (v >= Version::V6) {
+        dataStream << quint32(item.m_additionalCategoryIndexes.size());
+        for (const qint16 categoryIndex : item.m_additionalCategoryIndexes)
+            dataStream << categoryIndex;
+    }
 }
 
 void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Version)

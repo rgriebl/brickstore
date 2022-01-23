@@ -29,12 +29,19 @@ public:
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
 
+    int yearReleased() const     { return m_year_from ? m_year_from + 1900 : 0; }
+    int yearLastProduced() const { return m_year_to ? m_year_to + 1900 : 0; }
+    int yearRecency() const      { return m_year_recency ? m_year_recency + 1900 : 0; }
+
     Category() = default;
     Category(std::nullptr_t) : Category() { } // for scripting only!
 
 private:
     uint     m_id = InvalidId;
-    // 4 bytes padding here
+    quint8   m_year_from = 0;
+    quint8   m_year_to = 0;
+    quint8   m_year_recency = 0;
+    // 1 byte padding
     QString  m_name;
 
 private:

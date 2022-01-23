@@ -76,6 +76,7 @@ public:
     QListView *      w_thumbs;
     HistoryLineEdit *w_filter;
     QToolButton *    w_pcc;
+    QToolButton *    w_dateFilter;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QToolButton *    w_zoomLevel;
@@ -290,6 +291,15 @@ void SelectItem::init()
         }
     });
 
+    d->w_dateFilter = new QToolButton();
+    d->w_dateFilter->setIcon(QIcon::fromTheme("appointment-new"_l1));
+    d->w_dateFilter->setAutoRaise(true);
+    connect(d->w_dateFilter, &QToolButton::clicked, this, [this]() {
+        int minYear = QInputDialog::getInt(this, tr("Min Year"), tr("MinYear"), 1950);
+        int maxYear = QInputDialog::getInt(this, tr("Max Year"), tr("MaxYear"), 2050);
+        d->itemModel->setFilterYearRange(minYear, maxYear);
+    });
+
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
     d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"_l1));
@@ -449,22 +459,23 @@ void SelectItem::init()
 
     auto *lay = new QGridLayout(this);
     lay->setContentsMargins(0, 0, 0, 0);
-    lay->setColumnStretch(1, 25);
-    lay->setColumnStretch(2, 75);
+    lay->setColumnStretch(0, 25);
+    lay->setColumnStretch(1, 75);
     lay->setRowStretch(0, 0);
     lay->setRowStretch(1, 1);
 
-    lay->addWidget(d->w_item_types_label, 0, 0);
-    lay->addWidget(d->w_item_types, 0, 1);
+    auto *ittlay = new QHBoxLayout();
+    ittlay->addWidget(d->w_item_types_label);
+    ittlay->addWidget(d->w_item_types, 10);
+    //ittlay->addWidget(d->w_dateFilter);
+    lay->addLayout(ittlay, 0, 0);
 
-    lay->addWidget(d->w_categories, 1, 0, 1, 2);
-
-    lay->addWidget(d->w_filter, 0, 2);
+    lay->addWidget(d->w_categories, 1, 0, 1, 1);
 
     auto *viewlay = new QHBoxLayout();
     viewlay->setContentsMargins(0, 0, 0, 0);
     viewlay->setSpacing(0);
-    viewlay->addSpacing(5);
+    viewlay->addWidget(d->w_filter);
     viewlay->addWidget(d->w_pcc);
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomOut);
@@ -474,10 +485,10 @@ void SelectItem::init()
     viewlay->addWidget(d->w_viewmode->button(0));
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
-    lay->addLayout(viewlay, 0, 3);
+    lay->addLayout(viewlay, 0, 1);
 
     d->m_stack = new QStackedLayout();
-    lay->addLayout(d->m_stack, 1, 2, 1, 2);
+    lay->addLayout(d->m_stack, 1, 1, 1, 1);
 
     d->m_stack->addWidget(d->w_items);
     d->m_stack->addWidget(d->w_itemthumbs);
@@ -931,11 +942,6 @@ void SelectItem::showContextMenu(const QPoint &p)
         if (idx.isValid())
             item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-        if (item && item->category() != currentCategory()) {
-            connect(m->addAction(tr("Switch to the item's category")), &QAction::triggered,
-                    this, [this, item]() { setCurrentItem(item, true); });
-        }
-
         if (currentCategory() != BrickLink::CategoryModel::AllCategories) {
             QString allCatName = d->categoryModel->index(BrickLink::CategoryModel::AllCategories)
                     .data(Qt::DisplayRole).toString();
@@ -943,6 +949,18 @@ void SelectItem::showContextMenu(const QPoint &p)
                     &QAction::triggered, this, [this]() {
                 setCurrentCategory(BrickLink::CategoryModel::AllCategories);
             });
+        }
+
+        if (item) {
+            const auto cats = item->additionalCategories(true);
+            for (const auto &cat : cats) {
+                if (cat != currentCategory()) {
+                    connect(m->addAction(tr("Switch to the item's \"%1\" category").arg(cat->name())),
+                            &QAction::triggered, this, [this, cat]() {
+                        setCurrentCategory(cat);
+                    });
+                }
+            }
         }
 
         // mini-fig special

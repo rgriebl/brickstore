@@ -33,11 +33,13 @@ public:
     inline char itemTypeId() const         { return m_itemTypeId; }
     const ItemType *itemType() const;
     const Category *category() const;
+    const QVector<const Category *> additionalCategories(bool includeMainCategory = false) const;
     inline bool hasInventory() const       { return (m_lastInventoryUpdate >= 0); }
     QDateTime inventoryUpdated() const;
     const Color *defaultColor() const;
     double weight() const                  { return double(m_weight); }
-    int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
+    int yearReleased() const               { return m_year_from ? m_year_from + 1900 : 0; }
+    int yearLastProduced() const           { return m_year_to ? m_year_to + 1900 : yearReleased(); }
     bool hasKnownColor(const Color *col) const;
     const QVector<const Color *> knownColors() const;
 
@@ -95,11 +97,13 @@ private:
     qint16     m_itemTypeIndex = -1;
     qint16     m_categoryIndex = -1;
     qint16     m_defaultColorIndex = -1;
-    char       m_itemTypeId; // the same itemType()->id()
-    quint8     m_year = 0;
+    quint8     m_year_from = 0;
+    quint8     m_year_to = 0;
     qint64     m_lastInventoryUpdate = -1;
     float      m_weight = 0;
-    // 4 bytes padding here
+    char       m_itemTypeId; // the same itemType()->id()
+    // 3 bytes padding here
+    std::vector<qint16> m_additionalCategoryIndexes;
     std::vector<quint16> m_knownColorIndexes;
 
     struct AppearsInRecord {

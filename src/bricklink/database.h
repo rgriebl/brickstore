@@ -44,15 +44,16 @@ public:
 
     enum class Version {
         Invalid,
-        Version_1, // deprecated
-        Version_2, // deprecated
-        Version_3, // deprecated
-        Version_4, // 2021.5.1
-        Version_5, // 2022.1.1
+        V1, // deprecated
+        V2, // deprecated
+        V3, // deprecated
+        V4, // 2021.5.1
+        V5, // 2022.1.1
+        V6, // 2022.2.1
 
-        OldestStillSupported = Version_4,
+        OldestStillSupported = V4,
 
-        Latest = Version_5
+        Latest = V6
     };
 
     Q_INVOKABLE bool isUpdateNeeded() const;

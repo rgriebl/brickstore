@@ -60,7 +60,7 @@ public:
     bool isModulex() const     { return m_type & Modulex; }
     bool isSatin() const       { return m_type & Satin; }
 
-    qreal popularity() const   { return m_popularity < 0 ? 0 : m_popularity; }
+    double popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
 
     static QString typeName(TypeFlag t);
 

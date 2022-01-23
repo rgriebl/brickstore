@@ -165,6 +165,10 @@ int RebuildDatabase::exec()
         return error("more than 2% of all inventories had errors."_l1);
     }
 
+    blti.calculateItemTypeCategories();
+    blti.calculatePartsYearUsed();
+    blti.calculateCategoryRecency();
+
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Computing the database...\n");
 
@@ -199,6 +203,17 @@ int RebuildDatabase::exec()
 
     qInstallMessageHandler(nullptr);
     return 0;
+}
+
+static QList<QPair<QString, QString> > partCategoriesQuery(char item_type)
+{
+    QList<QPair<QString, QString> > query;
+    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
+            << QPair<QString, QString>("viewType"_l1,     "0"_l1)
+            << QPair<QString, QString>("itemType"_l1,     QString(QLatin1Char(item_type)))
+            << QPair<QString, QString>("downloadType"_l1, "T"_l1);
+
+    return query;
 }
 
 static QList<QPair<QString, QString> > itemQuery(char item_type)
@@ -320,6 +335,14 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.xml"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.xml"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('S'), "items_S.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('P'), "items_P.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('M'), "items_M.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('B'), "items_B.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('G'), "items_G.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('C'), "items_C.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('I'), "items_I.csv" },
+        { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('O'), "items_O.csv" },
         { "https://www.bricklink.com/btinvlist.asp",       { },            "btinvlist.csv"   },
         { "https://www.bricklink.com/btchglog.asp",        { },            "btchglog.csv" },
         { "https://www.ldraw.org/library/official/ldconfig.ldr", { },      "ldconfig.ldr" },

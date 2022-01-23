@@ -429,11 +429,6 @@ QmlCategory::QmlCategory(const BrickLink::Category *cat)
     \readonly
     Returns \c true if items under this type can have colors, or \c false otherwise.
 */
-/*! \qmlproperty bool ItemType::hasYearReleased
-    \readonly
-    Returns \c true if items under this type have data about the year the item was release,
-    or \c false otherwise.
-*/
 /*! \qmlproperty bool ItemType::hasWeight
     \readonly
     Returns \c true if items under this type can have weights, or \c false otherwise.

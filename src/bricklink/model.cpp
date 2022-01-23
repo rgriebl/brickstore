@@ -154,7 +154,7 @@ void BrickLink::ColorModel::unsetFilter()
     invalidateFilter();
 }
 
-void BrickLink::ColorModel::setFilterPopularity(qreal p)
+void BrickLink::ColorModel::setFilterPopularity(double p)
 {
     if (qFuzzyCompare(p, m_popularity_filter))
         return;
@@ -681,6 +681,17 @@ void BrickLink::ItemModel::setFilterWithoutInventory(bool b)
     invalidateFilter();
 }
 
+void BrickLink::ItemModel::setFilterYearRange(int minYear, int maxYear)
+{
+    if (m_year_min_filter == minYear && m_year_max_filter == maxYear)
+        return;
+    if (minYear && maxYear && minYear > maxYear)
+        std::swap(minYear, maxYear);
+    m_year_min_filter = minYear;
+    m_year_max_filter = maxYear;
+    invalidateFilter();
+}
+
 bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) const
 {
     const Item *i1 = static_cast<const Item *>(p1);
@@ -698,11 +709,15 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
         return false;
     else if (m_itemtype_filter && item->itemType() != m_itemtype_filter)
         return false;
-    else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && (item->category() != m_category_filter))
+    else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && !item->additionalCategories(true).contains(m_category_filter))
         return false;
     else if (m_inv_filter && !item->hasInventory())
         return false;
     else if (m_color_filter && !item->hasKnownColor(m_color_filter))
+        return false;
+    else if (m_year_min_filter && (!item->yearReleased() || (item->yearReleased() < m_year_min_filter)))
+        return false;
+    else if (m_year_max_filter && (!item->yearLastProduced() || (item->yearLastProduced() > m_year_max_filter)))
         return false;
     else {
         const QString matchStr = QLatin1String(item->id()) % u' ' % item->name();

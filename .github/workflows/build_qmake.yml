@@ -5,6 +5,7 @@ on:
     workflow_dispatch:
     branches:
       - main
+      - next
     tags:
       - v*
 

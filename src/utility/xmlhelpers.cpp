@@ -122,7 +122,7 @@ QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagNam
                 .arg(QLatin1String(tagName)).arg(dnl.size());
     }
     // the contents are double XML escaped. QDom unescaped once already, now have to do one more
-    return decodeEntities(dnl.at(0).toElement().text().simplified());
+    return decodeEntities(dnl.at(0).toElement().text().trimmed());
 }
 
 QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagName,

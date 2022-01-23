@@ -34,7 +34,6 @@ public:
     const QVector<const Category *> categories() const;
     bool hasInventories() const     { return m_has_inventories; }
     bool hasColors() const          { return m_has_colors; }
-    bool hasYearReleased() const    { return m_has_year; }
     bool hasWeight() const          { return m_has_weight; }
     bool hasSubConditions() const   { return m_has_subconditions; }
     char pictureId() const          { return m_picture_id; }
@@ -51,7 +50,6 @@ private:
     bool  m_has_inventories   : 1;
     bool  m_has_colors        : 1;
     bool  m_has_weight        : 1;
-    bool  m_has_year          : 1;
     bool  m_has_subconditions : 1;
 
     // 5 bytes padding here

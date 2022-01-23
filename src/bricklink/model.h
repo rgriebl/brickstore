@@ -43,7 +43,7 @@ public:
     void unsetFilter();
     void setFilterItemType(const ItemType *it);
     void setFilterType(Color::Type type);
-    void setFilterPopularity(qreal p);
+    void setFilterPopularity(double p);
     void setColorListFilter(const QVector<const Color *> &colorList);
 
 protected:
@@ -57,7 +57,7 @@ protected:
 private:
     const ItemType *m_itemtype_filter = nullptr;
     Color::Type m_type_filter {};
-    qreal m_popularity_filter = 0;
+    double m_popularity_filter = 0;
     QVector<const Color *> m_color_filter;
 
     friend class Core;
@@ -155,6 +155,7 @@ public:
     void setFilterColor(const Color *col);
     void setFilterText(const QString &filter);
     void setFilterWithoutInventory(bool on);
+    void setFilterYearRange(int minYear, int maxYear);
 
 protected slots:
     void pictureUpdated(BrickLink::Picture *);
@@ -177,6 +178,8 @@ private:
     QVector<QPair<bool, const Item *>> m_filter_appearsIn;
     QPair<bool, QVector<const Item *>> m_filter_ids;
     bool            m_inv_filter = false;
+    int             m_year_min_filter = 0;
+    int             m_year_max_filter = 0;
     static QString  s_consistsOfPrefix;
     static QString  s_appearsInPrefix;
     static QString  s_idPrefix;

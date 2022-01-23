@@ -152,11 +152,11 @@ void SelectColor::updateColorFilter(int index)
         m_colorModel->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
         m_colorModel->setFilterPopularity(0);
     } else if (filter < 0){
-        qreal popularity = 0;
+        double popularity = 0;
         if (filter == -2)
-            popularity = qreal(0.005);
+            popularity = 0.005;
         else if (filter == -3)
-            popularity = qreal(0.05);
+            popularity = 0.05;
 
         // Modulex colors are fine in their own category, but not in the 'all' lists
         m_colorModel->setFilterType(BrickLink::Color::Type(BrickLink::Color::Mask) & ~BrickLink::Color::Modulex);

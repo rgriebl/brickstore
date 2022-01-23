@@ -67,6 +67,7 @@ public:
                                                            : (m_incomplete ? m_incomplete->m_itemtype_name
                                                                            : QString()); }
     int itemYearReleased() const       { return m_item ? m_item->yearReleased() : 0; }
+    int itemYearLastProduced() const   { return m_item ? m_item->yearLastProduced() : 0; }
 
     Status status() const              { return m_status; }
     void setStatus(Status s)           { m_status = s; }

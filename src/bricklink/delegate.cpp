@@ -117,12 +117,18 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
 
 QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
 {
-    static const QString str = QLatin1String(R"(<div class="tooltip_picture">%2<br><b>%3</b><br>%1</div>)");
+    static const QString str = QLatin1String(R"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)");
     static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
     QString note_left = u"<i>" % BrickLink::ItemDelegate::tr("[Image is loading]") % u"</i>";
+    QString yearStr;
+
+    if (item->yearReleased())
+        yearStr = QString::number(item->yearReleased());
+    if (item->yearLastProduced() && (item->yearLastProduced() != item->yearReleased()))
+        yearStr = yearStr % u'-' % QString::number(item->yearLastProduced());
 
     if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
-        return str.arg(note_left, QLatin1String(item->id()), item->name());
+        return str.arg(note_left, QLatin1String(item->id()), item->name(), yearStr);
     } else {
         QByteArray ba;
         QBuffer buffer(&ba);
@@ -131,7 +137,7 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
         img.save(&buffer, "PNG");
 
         return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
-                       QLatin1String(item->id()), item->name());
+                       QLatin1String(item->id()), item->name(), yearStr);
     }
 }
 
@@ -142,7 +148,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
 
     m_tooltip_pic = nullptr;
 
-    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<div class="tooltip_picture">)"_l1)) {
+    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<table class="tooltip_picture")"_l1)) {
         const auto tlwidgets = QApplication::topLevelWidgets();
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {
