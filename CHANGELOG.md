@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2022.1.2] - 2022-01-24
+This is a bug-fix release.
+
+### Fixed
+- Some people experienced crashes when closing message dialogs.
+- Closing documents that had been split off into floating windows could lead to crashes.
+- Filtering by `<` or `>` on the new date based columns failed.
+- Downloading the store contents could stop working after some time.
+
 ## [2022.1.1] - 2022-01-21
 
 ### Added
@@ -399,7 +409,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.1.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.1.2...HEAD
+[2022.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.2
 [2022.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.1
 [2021.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.2
 [2021.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.1
