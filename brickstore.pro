@@ -79,6 +79,8 @@ OTHER_FILES += \
   VERSION_NUMBER \
   BrickStoreXML.rnc \
   configure \
+  assets/COPYING-ICONS \
+  assets/COPYING-FLAGS \
   debian/* \
   docker/Dockerfile \
   docker/entrypoint.sh \
