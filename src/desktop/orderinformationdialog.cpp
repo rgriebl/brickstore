@@ -80,6 +80,18 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     setup(w_address8, w_address8Copy, adr.value(7), adrSize >= 8);
     setup(w_phone, w_phoneCopy, order->phone(), !order->phone().isEmpty(), w_phoneLabel);
 
+    w_countryFlag->setPixmap(QPixmap(u":/assets/flags/" % order->countryCode()));
+
+    w_paymentType->setText(order->paymentType());
+    if (!order->paymentStatus().isEmpty() && !order->paymentLastUpdated().isValid()) {
+        w_paymentStatus->setText(order->paymentStatus() % u" ("
+                                 % loc.toString(order->paymentLastUpdated(), QLocale::ShortFormat)
+                                 % u')');
+    } else {
+        w_paymentStatus->hide();
+        w_paymentStatusLabel->hide();
+    }
+
     if (order->currencyCode() == order->paymentCurrencyCode()) {
         w_currencyCode->setText(order->currencyCode());
     } else {
@@ -146,4 +158,6 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
           vatFromSeller,     w_netGrandTotalLabel);
     setup(w_vatSeller,       w_vatSellerCopy,       Currency::toDisplayString(vatCharge, { }, 2),
           vatFromSeller,     w_vatSellerLabel);
+
+    resize(sizeHint());
 }

@@ -35,9 +35,9 @@ class Order : public QObject
     Q_OBJECT
     Q_PROPERTY(QString id READ id NOTIFY idChanged)
     Q_PROPERTY(BrickLink::OrderType type READ type NOTIFY typeChanged)
+    Q_PROPERTY(QString otherParty READ otherParty NOTIFY otherPartyChanged)
     Q_PROPERTY(QDate date READ date NOTIFY dateChanged)
     Q_PROPERTY(QDate lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
-    Q_PROPERTY(QString otherParty READ otherParty NOTIFY otherPartyChanged)
     Q_PROPERTY(double shipping READ shipping NOTIFY shippingChanged)
     Q_PROPERTY(double insurance READ insurance NOTIFY insuranceChanged)
     Q_PROPERTY(double additionalCharges1 READ additionalCharges1 NOTIFY additionalCharges1Changed)
@@ -46,19 +46,23 @@ class Order : public QObject
     Q_PROPERTY(double creditCoupon READ creditCoupon NOTIFY creditCouponChanged)
     Q_PROPERTY(double orderTotal READ orderTotal NOTIFY orderTotalChanged)
     Q_PROPERTY(double usSalesTax READ usSalesTax NOTIFY usSalesTaxChanged)
-    Q_PROPERTY(double grandTotal READ grandTotal NOTIFY grandTotalChanged)
-    Q_PROPERTY(double vatChargeSeller READ vatChargeSeller NOTIFY vatChargeSellerChanged)
     Q_PROPERTY(double vatChargeBrickLink READ vatChargeBrickLink NOTIFY vatChargeBrickLinkChanged)
     Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
+    Q_PROPERTY(double grandTotal READ grandTotal NOTIFY grandTotalChanged)
     Q_PROPERTY(QString paymentCurrencyCode READ paymentCurrencyCode NOTIFY paymentCurrencyCodeChanged)
-    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
     Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged)
+    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
+    Q_PROPERTY(double cost READ cost NOTIFY costChanged)
     Q_PROPERTY(BrickLink::OrderStatus status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString paymentType READ paymentType NOTIFY paymentTypeChanged)
+    Q_PROPERTY(QString remarks READ remarks NOTIFY remarksChanged)
     Q_PROPERTY(QString trackingNumber READ trackingNumber NOTIFY trackingNumberChanged)
+    Q_PROPERTY(QString paymentStatus READ paymentStatus NOTIFY paymentStatusChanged)
+    Q_PROPERTY(QDate paymentLastUpdated READ paymentLastUpdated NOTIFY paymentLastUpdatedChanged)
+    Q_PROPERTY(double vatChargeSeller READ vatChargeSeller NOTIFY vatChargeSellerChanged)
+    Q_PROPERTY(QString countryCode READ countryCode NOTIFY countryCodeChanged)
     Q_PROPERTY(QString address READ address NOTIFY addressChanged)
     Q_PROPERTY(QString phone READ phone NOTIFY phoneChanged)
-    Q_PROPERTY(QString countryCode READ countryCode NOTIFY countryCodeChanged)
 
 public:
     Order();
@@ -69,9 +73,9 @@ public:
     const LotList &lots() const;
     QString id() const;
     OrderType type() const;
+    QString otherParty() const;
     QDate date() const;
     QDate lastUpdated() const;
-    QString otherParty() const;
     double shipping() const;
     double insurance() const;
     double additionalCharges1() const;
@@ -80,26 +84,30 @@ public:
     double creditCoupon() const;
     double orderTotal() const;
     double usSalesTax() const;
-    double grandTotal() const;
-    double vatChargeSeller() const;
     double vatChargeBrickLink() const;
     QString currencyCode() const;
+    double grandTotal() const;
     QString paymentCurrencyCode() const;
-    int itemCount() const;
     int lotCount() const;
+    int itemCount() const;
+    double cost() const;
     OrderStatus status() const;
     QString paymentType() const;
+    QString remarks() const;
     QString trackingNumber() const;
+    QString paymentStatus() const;
+    QDate paymentLastUpdated() const;
+    double vatChargeSeller() const;
+    QString countryCode() const;
     QString address() const;
     QString phone() const;
-    QString countryCode() const;
 
     void setLots(LotList &&lots); // we take ownership
     void setId(const QString &id);
     void setType(OrderType type);
+    void setOtherParty(const QString &str);
     void setDate(const QDate &dt);
     void setLastUpdated(const QDate &dt);
-    void setOtherParty(const QString &str);
     void setShipping(double m);
     void setInsurance(double m);
     void setAdditionalCharges1(double m);
@@ -108,19 +116,23 @@ public:
     void setCreditCoupon(double m);
     void setOrderTotal(double m);
     void setUsSalesTax(double m);
-    void setGrandTotal(double m);
-    void setVatChargeSeller(double m);
     void setVatChargeBrickLink(double m);
     void setCurrencyCode(const QString &str);
+    void setGrandTotal(double m);
     void setPaymentCurrencyCode(const QString &str);
-    void setItemCount(int i);
     void setLotCount(int i);
+    void setItemCount(int i);
+    void setCost(double c);
     void setStatus(OrderStatus status);
     void setPaymentType(const QString &str);
+    void setRemarks(const QString &str);
     void setTrackingNumber(const QString &str);
+    void setPaymentStatus(const QString &str);
+    void setPaymentLastUpdated(const QDate &dt);
+    void setVatChargeSeller(double m);
+    void setCountryCode(const QString &str);
     void setAddress(const QString &str);
     void setPhone(const QString &str);
-    void setCountryCode(const QString &str);
 
     static OrderStatus statusFromString(const QString &s);
     static QString statusToString(OrderStatus status, bool translated = true);
@@ -128,9 +140,9 @@ public:
 signals:
     void idChanged(const QString &id);
     void typeChanged(BrickLink::OrderType type);
+    void otherPartyChanged(const QString &str);
     void dateChanged(const QDate &dt);
     void lastUpdatedChanged(const QDate &dt);
-    void otherPartyChanged(const QString &str);
 
     void shippingChanged(double m);
     void insuranceChanged(double m);
@@ -140,20 +152,23 @@ signals:
     void creditCouponChanged(double m);
     void orderTotalChanged(double m);
     void usSalesTaxChanged(double m);
-    void grandTotalChanged(double m);
-    void vatChargeSellerChanged(double m);
     void vatChargeBrickLinkChanged(double m);
     void currencyCodeChanged(const QString &str);
+    void grandTotalChanged(double m);
     void paymentCurrencyCodeChanged(const QString &str);
-
-    void itemCountChanged(int i);
     void lotCountChanged(int i);
+    void itemCountChanged(int i);
+    void costChanged(double d);
     void statusChanged(BrickLink::OrderStatus status);
     void paymentTypeChanged(const QString &str);
+    void remarksChanged(const QString &str);
     void trackingNumberChanged(const QString &str);
+    void paymentStatusChanged(const QString &str);
+    void paymentLastUpdatedChanged(const QDate &dt);
+    void vatChargeSellerChanged(double m);
+    void countryCodeChanged(const QString &str);
     void addressChanged(const QString &str);
     void phoneChanged(const QString &str);
-    void countryCodeChanged(const QString &str);
 
 private:
     QScopedPointer<OrderPrivate> d;

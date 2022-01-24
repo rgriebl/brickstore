@@ -43,9 +43,9 @@ public:
 private:
     QString   m_id;
     OrderType m_type;
+    QString   m_otherParty;
     QDateTime m_date;
     QDateTime m_lastUpdate;
-    QString   m_otherParty;
     double    m_shipping = 0;
     double    m_insurance = 0;
     double    m_addCharges1 = 0;
@@ -54,19 +54,23 @@ private:
     double    m_creditCoupon = 0;
     double    m_orderTotal = 0;
     double    m_usSalesTax = 0;
-    double    m_grandTotal = 0;
-    double    m_vatChargeSeller = 0;
     double    m_vatChargeBrickLink = 0;
     QString   m_currencyCode;
+    double    m_grandTotal = 0;
     QString   m_paymentCurrencyCode;
-    int       m_itemCount = 0;
     int       m_lotCount = 0;
+    int       m_itemCount = 0;
+    double    m_cost;
     OrderStatus m_status;
     QString   m_paymentType;
+    QString   m_remarks;
     QString   m_trackingNumber;
+    QString   m_paymentStatus;
+    QDateTime m_paymentLastUpdate;
+    double    m_vatChargeSeller = 0;
+    QString   m_countryCode;
     QString   m_address;
     QString   m_phone;
-    QString   m_countryCode;
     LotList   m_lots;
 
     friend class Order;
@@ -288,14 +292,19 @@ QString Order::paymentCurrencyCode() const
     return d->m_paymentCurrencyCode;
 }
 
+int Order::lotCount() const
+{
+    return d->m_lotCount;
+}
+
 int Order::itemCount() const
 {
     return d->m_itemCount;
 }
 
-int Order::lotCount() const
+double Order::cost() const
 {
-    return d->m_lotCount;
+    return d->m_cost;
 }
 
 OrderStatus Order::status() const
@@ -308,9 +317,24 @@ QString Order::paymentType() const
     return d->m_paymentType;
 }
 
+QString Order::remarks() const
+{
+    return d->m_remarks;
+}
+
 QString Order::trackingNumber() const
 {
     return d->m_trackingNumber;
+}
+
+QString Order::paymentStatus() const
+{
+    return d->m_paymentStatus;
+}
+
+QDate Order::paymentLastUpdated() const
+{
+    return d->m_paymentLastUpdate.date();
 }
 
 QString Order::address() const
@@ -486,6 +510,14 @@ void Order::setItemCount(int i)
     }
 }
 
+void Order::setCost(double c)
+{
+    if (d->m_cost != c) {
+        d->m_cost = c;
+        emit costChanged(c);
+    }
+}
+
 void Order::setLotCount(int i)
 {
     if (d->m_lotCount != i) {
@@ -510,11 +542,35 @@ void Order::setPaymentType(const QString &str)
     }
 }
 
+void Order::setRemarks(const QString &str)
+{
+    if (d->m_remarks != str) {
+        d->m_remarks = str;
+        emit remarksChanged(str);
+    }
+}
+
 void Order::setTrackingNumber(const QString &str)
 {
     if (d->m_trackingNumber != str) {
         d->m_trackingNumber = str;
         emit trackingNumberChanged(str);
+    }
+}
+
+void Order::setPaymentStatus(const QString &str)
+{
+    if (d->m_paymentStatus != str) {
+        d->m_paymentStatus = str;
+        emit paymentStatusChanged(str);
+    }
+}
+
+void Order::setPaymentLastUpdated(const QDate &dt)
+{
+    if (d->m_paymentLastUpdate.date() != dt) {
+        d->m_paymentLastUpdate.setDate(dt);
+        emit paymentLastUpdatedChanged(dt);
     }
 }
 
