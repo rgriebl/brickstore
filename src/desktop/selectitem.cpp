@@ -49,6 +49,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "utility/utility.h"
+#include "desktopuihelpers.h"
 #include "historylineedit.h"
 #include "mainwindow.h"
 #include "selectitem.h"
@@ -264,6 +265,8 @@ void SelectItem::init()
     connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
             d->w_filter, &HistoryLineEdit::setToFavoritesMode);
     d->w_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
+
+    d->w_filter->installEventFilter(DesktopUIHelpers::selectAllFilter());
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);
