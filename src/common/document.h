@@ -123,6 +123,8 @@ public:
 
     void setActive(bool active);
 
+    QCoro::Task<bool> requestClose();
+
     QString filePath() const;
     QString fileName() const;
     void setFilePath(const QString &str);
@@ -258,6 +260,8 @@ public:
     static int processAutosaves(AutosaveAction action);
 
 signals:
+    void closeAllViews();
+
     void filePathChanged(const QString &filePath);
     void fileNameChanged(const QString &fileName);
     void titleChanged(const QString &title);

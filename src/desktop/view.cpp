@@ -297,6 +297,9 @@ View::View(Document *document, QWidget *parent)
     m_model = document->model();
     m_document->ref();
 
+    connect(m_document, &Document::closeAllViews,
+            this, [this]() { delete this; });
+
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
@@ -378,7 +381,6 @@ View::View(Document *document, QWidget *parent)
 
         { "document_print", [this]() { print(false); } },
         { "document_print_pdf", [this]() { print(true); } },
-        { "document_close", [this]() { close(); } },
     };
 
     m_table = new TableView(this);
@@ -972,43 +974,6 @@ void View::contextMenu(const QPoint &pos)
             m_contextMenu->addSeparator();
     }
     m_contextMenu->popup(m_table->viewport()->mapToGlobal(pos), defaultAction);
-}
-
-
-void View::closeEvent(QCloseEvent *e)
-{
-    if (m_model->isModified()) {
-        QMessageBox msgBox(this);
-        msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace("[*]"_l1, QString()))));
-        msgBox.setInformativeText(tr("Do you want to save your changes?"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        msgBox.setWindowModality(Qt::WindowModal);
-
-        switch (msgBox.exec()) {
-        case QMessageBox::Save:
-            m_document->save(false);
-
-            if (!m_model->isModified())
-                e->accept();
-            else
-                e->ignore();
-            break;
-
-        case QMessageBox::Discard:
-            e->accept();
-            break;
-
-        default:
-            e->ignore();
-            break;
-        }
-    }
-    else {
-        e->accept();
-    }
-    if (e->isAccepted())
-        delete this;
 }
 
 void View::resizeEvent(QResizeEvent *e)

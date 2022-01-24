@@ -248,7 +248,7 @@ bool DesktopApplication::eventFilter(QObject *o, QEvent *e)
 
 QCoro::Task<bool> DesktopApplication::closeAllViews()
 {
-    co_return MainWindow::inst()->closeAllViews();
+    return MainWindow::inst()->closeAllViews();
 }
 
 bool DesktopApplication::notifyOtherInstance()

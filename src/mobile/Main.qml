@@ -98,6 +98,7 @@ ApplicationWindow {
                         MenuItem { action: ActionManager.quickAction("document_export_bl_update_clip") }
                         MenuItem { action: ActionManager.quickAction("document_export_bl_wantedlist_clip") }
                     }
+                    MenuItem { action: ActionManager.quickAction("document_close") }
                 }
             }
         }

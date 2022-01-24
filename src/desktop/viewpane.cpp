@@ -120,6 +120,8 @@ ViewPane::ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate, std::fu
     paletteChange();
     languageChange();
 
+    m_viewStack->setMinimumHeight(qMax(m_viewStack->minimumHeight(), fontMetrics().height() * 20));
+
     setupViewStack();
 
     if (activeDocument)
@@ -154,9 +156,11 @@ void ViewPane::newWindow()
     nw->show();
     vp->activateDocument(activeDocument());
 
-    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [nw, vp]() {
-        if (vp->m_viewStack->count() == 0)
+    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [this, nw, vp]() {
+        if (vp->m_viewStack->count() == 0) {
+            m_viewPaneDelete(vp);
             nw->close();
+        }
     });
 }
 
@@ -602,7 +606,7 @@ void ViewPane::createToolBar()
 
     connect(m_closeView, &QToolButton::clicked, this, [this]() {
         if (auto *view = activeView())
-            view->close();
+            view->document()->requestClose();
     });
 
     m_orderSeparator = addSeparator();

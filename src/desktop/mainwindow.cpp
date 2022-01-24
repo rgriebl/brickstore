@@ -1207,14 +1207,15 @@ void MainWindow::showSettings(const QString &page)
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-    //TODO move to Application
+    //TODO move to Application and get rid of QCoro::waitFor
     QStringList files = DocumentList::inst()->allFiles();
     Config::inst()->setValue("/MainWindow/LastSessionDocuments"_l1, files);
 
-    if (!closeAllViews()) {
+    if (!QCoro::waitFor(closeAllViews())) {
         e->ignore();
         return;
     }
+    e->accept();
     QMainWindow::closeEvent(e);
 }
 
@@ -1225,7 +1226,7 @@ void MainWindow::resizeEvent(QResizeEvent *e)
 }
 
 
-bool MainWindow::closeAllViews()
+QCoro::Task<bool> MainWindow::closeAllViews()
 {
     auto oldView = m_activeView;
     auto oldViewPane = m_activeViewPane;
@@ -1248,8 +1249,8 @@ bool MainWindow::closeAllViews()
             allViews.remove(m_activeViewPane);
             Q_ASSERT(view == m_activeViewPane->activeView());
 
-            if (!view->close())
-                return false;
+            if (!co_await view->document()->requestClose())
+                co_return false;
         }
 
         qDeleteAll(allViews);
@@ -1260,7 +1261,7 @@ bool MainWindow::closeAllViews()
     delete m_importorder_dialog;
     delete m_importcart_dialog;
 
-    return true;
+    co_return true;
 }
 
 

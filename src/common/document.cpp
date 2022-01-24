@@ -444,6 +444,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
 
         { "document_save", [this]() { save(false); } },
         { "document_save_as", [this]() { save(true); } },
+        { "document_close", [this]() { requestClose(); } },
         { "document_export_bl_xml", [this]() { exportBrickLinkXMLToFile(); } },
         { "document_export_bl_xml_clip", [this]() { exportBrickLinkXMLToClipboard(); } },
         { "document_export_bl_update_clip", [this]() { exportBrickLinkUpdateXMLToClipboard(); } },
@@ -550,6 +551,33 @@ void Document::setActive(bool active)
         m_actionConnectionContext = nullptr;
     }
     m_model->undoStack()->setActive(active);
+}
+
+QCoro::Task<bool> Document::requestClose()
+{
+    bool doClose = true;
+
+    if (m_model->isModified()) {
+        switch (co_await UIHelpers::question(tr("The document %1 has been modified.").arg(CMB_BOLD(fileName()))
+                                             % "<br><br>"_l1 % tr("Do you want to save your changes?"),
+                                             UIHelpers::Save | UIHelpers::Discard | UIHelpers::Cancel,
+                                             UIHelpers::Save)) {
+        case UIHelpers::Save:
+            save(false);
+            doClose = (!m_model->isModified());
+            break;
+
+        case UIHelpers::Discard:
+            break;
+
+        default:
+            doClose = false;
+            break;
+        }
+    }
+    if (doClose)
+        emit closeAllViews();
+    co_return doClose;
 }
 
 QString Document::filePath() const

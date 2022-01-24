@@ -87,7 +87,6 @@ signals:
     void currentColumnOrderChanged(const QVector<int> &newOrder);
 
 protected:
-    void closeEvent(QCloseEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
 
