@@ -315,7 +315,7 @@ private:
     void deleteAutosave();
 
 private:
-    QBasicAtomicInt      m_ref;
+    QBasicAtomicInt      m_ref = 0;
     DocumentModel *      m_model;
     QItemSelectionModel *m_selectionModel;
     LotList              m_selectedLots;
