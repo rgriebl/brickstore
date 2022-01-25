@@ -277,7 +277,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
             { } // { } to work around QtCreator being confused by the [] return tuple
             setColumnLayoutDirect(columnData);
         } catch (const Exception &) {
-            resizeColumnsToDefault();
+            auto cd = defaultColumnLayout();
+            setColumnLayoutDirect(cd);
         }
     }
 
