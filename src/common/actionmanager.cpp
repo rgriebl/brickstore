@@ -45,6 +45,11 @@ ActionManager::Action::Action(const char *name, const char *text, Needs needs, F
     else if (shortcut)
         m_defaultShortcuts = QKeySequence::listFromString(QString::fromLatin1(shortcut));
     m_shortcuts = m_defaultShortcuts;
+
+#if defined(BS_DESKTOP)
+    Q_UNUSED(m_qquickaction)
+#endif
+
 }
 
 ActionManager::Action::Action(const char *name, const char *text, const char *shortcut, Needs needs,

@@ -53,11 +53,13 @@ public:
         setMinimumSize(0, 0);
     }
 
-    QSize minimumSizeHint() const override
-    {
-        return QSize(0, 0);
-    }
+    QSize minimumSizeHint() const override;
 };
+
+QSize CollapsibleLabel::minimumSizeHint() const
+{
+    return QSize(0, 0);
+}
 
 
 ViewPane::ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate, std::function<void (ViewPane *)> viewPaneDelete, Document *activeDocument)

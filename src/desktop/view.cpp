@@ -93,17 +93,6 @@ using namespace std::chrono_literals;
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-class ViewControllerInterface
-{
-public:
-    virtual void uiColumnMoved(int logical, int oldVisual, int newVisual) = 0;
-    virtual void uiColumnResized(int logical, int oldVisual, int newVisual) = 0;
-
-    virtual void moveColumn(int logical, int oldVisual, int newVisual) = 0;
-    virtual void resizeColumn(int logical, int oldSize, int newSize) = 0;
-
-};
-
 
 ColumnChangeWatcher::ColumnChangeWatcher(View *view, HeaderView *header)
     : QObject(view)
@@ -1022,7 +1011,7 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
     pd->setProperty("bsFailOnce", false);
 
     connect(pd, &PrintDialog::paintRequested,
-            this, [=](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
+            this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         try {
             Q_UNUSED(scaleFactor)
@@ -1127,7 +1116,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
     double margin = 2 * prtDpi / 96 * scaleFactor;
 
     if (maxPageCount)
-        *maxPageCount = pagesDown * pagesAcross;
+        *maxPageCount = uint(pagesDown * pagesAcross);
 
     for (int pd = 0; pd < pagesDown; ++pd) {
         for (int pa = 0; pa < pagesAcross; ++pa) {
@@ -1174,7 +1163,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
 
                 p.setPen(headerTextColor);
                 headerRect = headerRect.marginsRemoved({ margin, 0, margin, 0});
-                p.drawText(headerRect, align, title);
+                p.drawText(headerRect, int(align), title);
 
                 dy += rowHeight;
 
