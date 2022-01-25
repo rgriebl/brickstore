@@ -47,12 +47,22 @@ protected:
     bool eventFilter(QObject *o, QEvent *e) override
     {
         if (e->type() == QEvent::FocusIn) {
-            if (auto *le = qobject_cast<QLineEdit *>(o))
-                QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
-            else if (auto *cb = qobject_cast<QComboBox *>(o))
-                QMetaObject::invokeMethod(cb->lineEdit(), &QLineEdit::selectAll, Qt::QueuedConnection);
-            else if (auto *sb = qobject_cast<QAbstractSpinBox *>(o))
-                QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
+            QFocusEvent *fe = static_cast<QFocusEvent *>(e);
+            static const QVector validReasons = {
+                Qt::MouseFocusReason,
+                Qt::TabFocusReason,
+                Qt::BacktabFocusReason,
+                Qt::ActiveWindowFocusReason,
+                Qt::ShortcutFocusReason
+            };
+            if (validReasons.contains(fe->reason())) {
+                if (auto *le = qobject_cast<QLineEdit *>(o))
+                    QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
+                else if (auto *cb = qobject_cast<QComboBox *>(o))
+                    QMetaObject::invokeMethod(cb->lineEdit(), &QLineEdit::selectAll, Qt::QueuedConnection);
+                else if (auto *sb = qobject_cast<QAbstractSpinBox *>(o))
+                    QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
+            }
         }
         return QObject::eventFilter(o, e);
     }
