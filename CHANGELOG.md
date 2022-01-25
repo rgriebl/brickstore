@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
-## [2022.1.2] - 2022-01-24
+## [2022.1.2] - 2022-01-25
 This is a bug-fix release.
 
 ### Fixed
+- Documents could not be closed on macOS.
 - Some people experienced crashes when closing message dialogs.
 - Closing documents that had been split off into floating windows could lead to crashes.
 - Filtering by `<` or `>` on the new date based columns failed.
