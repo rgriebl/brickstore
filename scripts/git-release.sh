@@ -22,9 +22,9 @@ function status()
   fi
 }
 
-[ ! -e VERSION ] && { echo "Please call this script from the root source dir."; exit 2; }
+[ ! -e VERSION_NUMBER ] && { echo "Please call this script from the root source dir."; exit 2; }
 
-version=$(cat VERSION)
+version=$(cat VERSION_NUMBER)
 
 echo -n "Checking release version... "
 [ -n "$version" ]
