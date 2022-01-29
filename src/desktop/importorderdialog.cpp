@@ -133,7 +133,8 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
     connect(w_orders, &QWidget::customContextMenuRequested,
             this, [this](const QPoint &pos) {
-        //if (!w_orders->selectionModel()->selection().isEmpty())
+        QModelIndex idx = w_orders->indexAt(pos);
+        if (idx.isValid())
             QMenu::exec(actions(), w_orders->viewport()->mapToGlobal(pos));
     });
 
