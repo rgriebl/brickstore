@@ -152,33 +152,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // vvv increase DockStateVersion if you change the dock/toolbar setup
 
-    setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-    setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-    setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-    setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
-
-    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks);
-
-    auto dockInfo = createDock(new TaskInfoWidget, "dock_info");
-    auto dockOpen = createDock(new TaskOpenDocumentsWidget, "dock_opendocuments");
-    auto dockRecent = createDock(new TaskRecentDocumentsWidget, "dock_recentdocuments");
-    auto dockAppearsIn = createDock(new TaskAppearsInWidget, "dock_appearsin");
-    auto dockPriceGuide = createDock(new TaskPriceGuideWidget, "dock_priceguide");
-
-    addDockWidget(Qt::LeftDockWidgetArea, dockInfo);
-    addDockWidget(Qt::LeftDockWidgetArea, dockOpen);
-    addDockWidget(Qt::LeftDockWidgetArea, dockRecent);
-    addDockWidget(Qt::LeftDockWidgetArea, dockAppearsIn);
-    addDockWidget(Qt::LeftDockWidgetArea, dockPriceGuide);
-    tabifyDockWidget(dockRecent, dockOpen);
-    tabifyDockWidget(dockOpen, dockInfo);
-    tabifyDockWidget(dockAppearsIn, dockPriceGuide);
-
-    auto logDock = createDock(m_devConsole, "dock_errorlog");
-    logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    logDock->setVisible(false);
-    addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);
-
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName("toolbar"_l1);
     m_toolbar->setMovable(false);
@@ -188,8 +161,6 @@ MainWindow::MainWindow(QWidget *parent)
         if (m_welcomeWidget->isVisible())
             repositionHomeWidget();
     });
-
-    // ^^^ increase DockStateVersion if you change the dock/toolbar setup
 
     auto setIconSizeLambda = [this](Config::IconSize iconSize) {
         static const QMap<Config::IconSize, QStyle::PixelMetric> map = {
@@ -208,6 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenuBar();
     setupToolBar();
     addToolBar(m_toolbar);
+    setupDockWidgets();
 
     createCentralWidget();
 
@@ -854,6 +826,38 @@ bool MainWindow::setupToolBar()
         }
     }
     return true;
+}
+
+void MainWindow::setupDockWidgets()
+{
+    // vvv increase DockStateVersion if you change the dock/toolbar setup
+
+    setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+    setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+
+    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks);
+
+    auto dockInfo = createDock(new TaskInfoWidget, "dock_info");
+    auto dockOpen = createDock(new TaskOpenDocumentsWidget, "dock_opendocuments");
+    auto dockRecent = createDock(new TaskRecentDocumentsWidget, "dock_recentdocuments");
+    auto dockAppearsIn = createDock(new TaskAppearsInWidget, "dock_appearsin");
+    auto dockPriceGuide = createDock(new TaskPriceGuideWidget, "dock_priceguide");
+
+    addDockWidget(Qt::LeftDockWidgetArea, dockInfo);
+    addDockWidget(Qt::LeftDockWidgetArea, dockOpen);
+    addDockWidget(Qt::LeftDockWidgetArea, dockRecent);
+    addDockWidget(Qt::LeftDockWidgetArea, dockAppearsIn);
+    addDockWidget(Qt::LeftDockWidgetArea, dockPriceGuide);
+    tabifyDockWidget(dockRecent, dockOpen);
+    tabifyDockWidget(dockOpen, dockInfo);
+    tabifyDockWidget(dockAppearsIn, dockPriceGuide);
+
+    auto logDock = createDock(m_devConsole, "dock_errorlog");
+    logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    logDock->setVisible(false);
+    addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);
 }
 
 QMenu *MainWindow::setupMenu(const QByteArray &name, const QVector<QByteArray> &a_names)

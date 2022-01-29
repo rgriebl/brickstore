@@ -108,6 +108,7 @@ private:
     QMenu *setupMenu(const QByteArray &, const QVector<QByteArray> &);
     void setupMenuBar();
     bool setupToolBar();
+    void setupDockWidgets();
     QDockWidget *createDock(QWidget *widget, const char *name);
     void forEachViewPane(std::function<bool(ViewPane *)> callback);
     void setActiveViewPane(ViewPane *newActive);
