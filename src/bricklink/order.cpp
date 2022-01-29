@@ -799,7 +799,8 @@ Orders::Orders(QObject *parent)
                     if (overallMessage.isEmpty()) // only show the first error message
                         overallMessage = pair.second;
                 }
-                m_updateStatus = overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
+                setUpdateStatus(overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+
                 QFile stampFile(core()->dataPath() % u"orders/" % m_userId % u"/.stamp");
                 if (overallSuccess) {
                     m_lastUpdated = QDateTime::currentDateTime();
@@ -837,7 +838,7 @@ void Orders::reloadOrdersFromCache()
 
     QFileInfo stamp(path % u"/.stamp");
     m_lastUpdated = stamp.lastModified();
-    m_updateStatus = stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
+    setUpdateStatus(stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
     QDirIterator dit(path, { "*.order.xml"_l1 },
                      QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
@@ -884,48 +885,33 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
         Q_ASSERT(order->type() == newOrder->type());
         Q_ASSERT(order->date() == newOrder->date());
 
-        if (order->lastUpdated() != newOrder->lastUpdated())
-            order->setLastUpdated(newOrder->lastUpdated());
-        if (order->otherParty() != newOrder->otherParty())
-            order->setOtherParty(newOrder->otherParty());
-        if (order->shipping() != newOrder->shipping())
-            order->setShipping(newOrder->shipping());
-        if (order->insurance() != newOrder->insurance())
-            order->setInsurance(newOrder->insurance());
-        if (order->additionalCharges1() != newOrder->additionalCharges1())
-            order->setAdditionalCharges1(newOrder->additionalCharges1());
-        if (order->additionalCharges2() != newOrder->additionalCharges2())
-            order->setAdditionalCharges2(newOrder->additionalCharges2());
-        if (order->credit() != newOrder->credit())
-            order->setCredit(newOrder->credit());
-        if (order->creditCoupon() != newOrder->creditCoupon())
-            order->setCreditCoupon(newOrder->creditCoupon());
-        if (order->orderTotal() != newOrder->orderTotal())
-            order->setOrderTotal(newOrder->orderTotal());
-        if (order->usSalesTax() != newOrder->usSalesTax())
-            order->setUsSalesTax(newOrder->usSalesTax());
-        if (order->grandTotal() != newOrder->grandTotal())
-            order->setGrandTotal(newOrder->grandTotal());
-        if (order->vatChargeSeller() != newOrder->vatChargeSeller())
-            order->setVatChargeSeller(newOrder->vatChargeSeller());
-        if (order->vatChargeBrickLink() != newOrder->vatChargeBrickLink())
-            order->setVatChargeBrickLink(newOrder->vatChargeBrickLink());
-        if (order->currencyCode() != newOrder->currencyCode())
-            order->setCurrencyCode(newOrder->currencyCode());
-        if (order->paymentCurrencyCode() != newOrder->paymentCurrencyCode())
-            order->setPaymentCurrencyCode(newOrder->paymentCurrencyCode());
-        if (order->itemCount() != newOrder->itemCount())
-            order->setItemCount(newOrder->itemCount());
-        if (order->lotCount() != newOrder->lotCount())
-            order->setLotCount(newOrder->lotCount());
-        if (order->status() != newOrder->status())
-            order->setStatus(newOrder->status());
-        if (order->paymentType() != newOrder->paymentType())
-            order->setPaymentType(newOrder->paymentType());
-        if (order->address() != newOrder->address())
-            order->setAddress(newOrder->address());
-        if (order->countryCode() != newOrder->countryCode())
-            order->setCountryCode(newOrder->countryCode());
+        order->setLastUpdated(newOrder->lastUpdated());
+        order->setOtherParty(newOrder->otherParty());
+        order->setShipping(newOrder->shipping());
+        order->setInsurance(newOrder->insurance());
+        order->setAdditionalCharges1(newOrder->additionalCharges1());
+        order->setAdditionalCharges2(newOrder->additionalCharges2());
+        order->setCredit(newOrder->credit());
+        order->setCreditCoupon(newOrder->creditCoupon());
+        order->setOrderTotal(newOrder->orderTotal());
+        order->setUsSalesTax(newOrder->usSalesTax());
+        order->setVatChargeBrickLink(newOrder->vatChargeBrickLink());
+        order->setCurrencyCode(newOrder->currencyCode());
+        order->setGrandTotal(newOrder->grandTotal());
+        order->setPaymentCurrencyCode(newOrder->paymentCurrencyCode());
+        order->setLotCount(newOrder->lotCount());
+        order->setItemCount(newOrder->itemCount());
+        order->setCost(newOrder->cost());
+        order->setStatus(newOrder->status());
+        order->setPaymentType(newOrder->paymentType());
+        order->setRemarks(newOrder->remarks());
+        order->setTrackingNumber(newOrder->trackingNumber());
+        order->setPaymentStatus(newOrder->paymentStatus());
+        order->setPaymentLastUpdated(newOrder->paymentLastUpdated());
+        order->setVatChargeSeller(newOrder->vatChargeSeller());
+        order->setCountryCode(newOrder->countryCode());
+        order->setAddress(newOrder->address());
+        order->setPhone(newOrder->phone());
 
         order->setLots(newOrder->takeLots());
 
@@ -962,6 +948,14 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     m_orders.append(o);
 
     endInsertRows();
+}
+
+void Orders::setUpdateStatus(UpdateStatus updateStatus)
+{
+    if (updateStatus != m_updateStatus) {
+        m_updateStatus = updateStatus;
+        emit updateStatusChanged(updateStatus);
+    }
 }
 
 void Orders::emitDataChanged(int row, int col)
@@ -1070,7 +1064,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
     if (updateStatus() == UpdateStatus::Updating)
         return;
     Q_ASSERT(m_jobs.isEmpty());
-    m_updateStatus = UpdateStatus::Updating;
+    setUpdateStatus(UpdateStatus::Updating);
 
     static const char *types[] = { "received", "placed" };
     for (auto &type : types) {

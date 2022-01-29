@@ -180,7 +180,7 @@ class Orders : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateFinished)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)
     Q_PROPERTY(QVector<Order *> orders READ orders NOTIFY updateFinished)
 
@@ -223,11 +223,13 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 signals:
     void updateStarted();
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
+    void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
     Orders(QObject *parent = nullptr);
@@ -236,6 +238,7 @@ private:
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);
     void updateOrder(std::unique_ptr<Order> order);
     void appendOrderToModel(std::unique_ptr<Order> order);
+    void setUpdateStatus(UpdateStatus updateStatus);
     void emitDataChanged(int row, int col);
     void startUpdateAddress(Order *order);
     std::pair<QString, QString> parseAddressAndPhone(OrderType type, const QByteArray &data);
