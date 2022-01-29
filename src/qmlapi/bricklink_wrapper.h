@@ -83,6 +83,7 @@ protected:
 class QmlBrickLink : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
     Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
     Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
 

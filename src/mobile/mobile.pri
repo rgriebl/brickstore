@@ -19,7 +19,7 @@ QML_FILES += \
     $$PWD/AboutDialog.qml \
     $$PWD/ActionDelegate.qml \
     $$PWD/AutoSizingMenu.qml \
-    $$PWD/DocumentProxyModel.qml \
+    $$PWD/DocumentProxyModelJS.qml \
     $$PWD/GridCell.qml \
     $$PWD/GridHeader.qml \
     $$PWD/Main.qml \
@@ -38,5 +38,3 @@ qml.files = $$QML_FILES
 RESOURCES *= qml
 
 OTHER_FILES *= $$QMLFILES
-
-DISTFILES += \

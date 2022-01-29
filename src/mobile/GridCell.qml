@@ -5,11 +5,10 @@ import QtQuick.Controls.Material
 Control {
     id: root
 
-    // we expect to be inside a TableView.delegate for a Document
-    required property int documentField
-    required property int row
-    required property int column
-    required property bool selected
+    // we expect to be inside a TableView.delegate
+    required property int row       // from TableView
+    required property int column    // from TableView
+    required property bool selected // from TableView
     required property var textAlignment
     required property var display
 
@@ -18,6 +17,7 @@ Control {
     property color tint: "transparent"
     property int textLeftPadding: 0
     property int cellPadding: 2
+    property bool asynchronous: true
 
     function delaySetText(delay) {
         if (delay && ((row + column) % delay !== 0) && this && delaySetText) {
@@ -28,21 +28,24 @@ Control {
     }
 
     TableView.onPooled: {
-        if (loaderText.status === Loader.Ready)
+        if ((loaderText.status === Loader.Ready) && root.asynchronous)
             loaderText.item.text = ""
         //console.log("POOLED")
     }
     TableView.onReused: {
-        if (loaderText.status === Loader.Ready)
+        if ((loaderText.status === Loader.Ready) && root.asynchronous)
             Qt.callLater(delaySetText, 6)
         //console.log("REUSED")
     }
     //Component.onCompleted: console.log("NEW")
 
+    implicitWidth: loaderText.implicitWidth
+    implicitHeight: loaderText.implicitHeight
+
     Loader {
         id: loaderText
         anchors.fill: parent
-        asynchronous: true
+        asynchronous: root.asynchronous
 //        active: root.text !== ""
         sourceComponent: Component {
 

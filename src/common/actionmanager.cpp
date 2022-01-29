@@ -15,6 +15,8 @@
 #include <QActionGroup>
 #if defined(BS_MOBILE)
 #  include <QtQuickTemplates2/private/qquickaction_p.h>
+#  include <QJSValue>
+#  include <QJSValueIterator>
 #endif
 #if defined(BS_DESKTOP)
 #  include <QApplication>
@@ -690,6 +692,34 @@ QObject *ActionManager::connectActionTable(const ActionTable &actionTable)
 void ActionManager::disconnectActionTable(QObject *contextObject)
 {
     delete contextObject;
+}
+
+QObject *ActionManager::connectQuickActionTable(const QJSValue &nameToCallable)
+{
+    QObject *contextObject = new QObject(this);
+
+#if defined(BS_MOBILE)
+    QJSValueIterator it(nameToCallable);
+    while (it.hasNext()) {
+        it.next();
+
+        QJSValue target = it.value();
+        if (!target.isCallable()) {
+            qWarning() << "connectQuickActionTable: connect" << it.name()
+                       << "tries to connect to non-callable";
+            continue;
+        }
+
+        if (QAction *a = qAction(it.name().toLatin1().constData())) {
+            QObject::connect(a, &QAction::triggered, contextObject, [=](bool b) {
+                target.call({ b });
+            });
+        }
+    }
+#else
+    Q_UNUSED(nameToCallable)
+#endif
+    return contextObject;
 }
 
 QString ActionManager::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)

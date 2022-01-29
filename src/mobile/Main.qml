@@ -7,6 +7,7 @@ import BrickStore 1.0
 import QtQuick.Controls.Material
 import "./uihelpers" as UIHelpers
 
+
 ApplicationWindow {
     id: root
     visible: true

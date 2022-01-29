@@ -117,8 +117,8 @@ public:
     Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave, QObject *parent = nullptr);
     ~Document() override;
 
-    void ref();
-    void deref();
+    Q_INVOKABLE void ref();
+    Q_INVOKABLE void deref();
     int refCount() const;
 
     void setActive(bool active);

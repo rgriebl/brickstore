@@ -24,6 +24,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
 QT_FORWARD_DECLARE_CLASS(QQuickAction)
+QT_FORWARD_DECLARE_CLASS(QJSValue)
 
 
 class ActionManager : public QObject
@@ -146,6 +147,8 @@ public:
 
     QObject *connectActionTable(const ActionTable &actionTable);
     void disconnectActionTable(QObject *contextObject);
+
+    Q_INVOKABLE QObject *connectQuickActionTable(const QJSValue &nameToCallable);
 
     static QString toolTipLabel(const QString &label, QKeySequence shortcut = { },
                                 const QString &extended = { });

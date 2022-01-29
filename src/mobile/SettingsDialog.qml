@@ -65,7 +65,7 @@ Dialog {
                         }
                         displayText: nameForLang(BrickStore.config.availableLanguages[currentIndex])
 
-                        function nameForLang(lang, map) {
+                        function nameForLang(map) {
                             let name = map.name
                             if (map.localName)
                                 name = map.localName + " (" + name + ")"

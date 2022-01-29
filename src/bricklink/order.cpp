@@ -942,6 +942,8 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
 void Orders::appendOrderToModel(std::unique_ptr<Order> order)
 {
     Order *o = order.release();
+    o->setParent(this); // needed to prevent QML from taking ownership
+
     int row = m_orders.count();
     beginInsertRows({ }, m_orders.count(), m_orders.count());
 
