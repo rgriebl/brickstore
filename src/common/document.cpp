@@ -637,6 +637,14 @@ void Document::setThumbnail(const QImage &thumbnail)
     m_thumbnail = thumbnail;
 }
 
+void Document::setThumbnail(const QString &iconName)
+{
+    QIcon ico = QIcon::fromTheme(iconName);
+    if (!ico.isNull())
+        setThumbnail(ico.pixmap(64).toImage());
+}
+
+
 QModelIndex Document::currentIndex() const
 {
     return m_selectionModel->currentIndex();

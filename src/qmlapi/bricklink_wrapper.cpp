@@ -19,6 +19,7 @@
 
 #include "utility/utility.h"
 #include "utility/currency.h"
+#include "bricklink/cart.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/order.h"
@@ -106,6 +107,8 @@ void QmlBrickLink::registerTypes()
     QString cannotCreate = tr("Cannot create objects of type %1");
     qmlRegisterUncreatableType<BrickLink::Order>("BrickStore", 1, 0, "Order",
                                                  cannotCreate.arg("Order"_l1));
+    qmlRegisterUncreatableType<BrickLink::Cart>("BrickStore", 1, 0, "Cart",
+                                                cannotCreate.arg("Cart"_l1));
     qmlRegisterUncreatableType<BrickLink::Store>("BrickStore", 1, 0, "Store",
                                                  cannotCreate.arg("Store"_l1));
     qmlRegisterUncreatableType<QmlLots>("BrickStore", 1, 0, "Lots",
@@ -293,6 +296,16 @@ void QmlBrickLink::cacheStat() const
 BrickLink::Store *QmlBrickLink::store() const
 {
     return BrickLink::core()->store();
+}
+
+BrickLink::Orders *QmlBrickLink::orders() const
+{
+    return BrickLink::core()->orders();
+}
+
+BrickLink::Carts *QmlBrickLink::carts() const
+{
+    return BrickLink::core()->carts();
 }
 
 

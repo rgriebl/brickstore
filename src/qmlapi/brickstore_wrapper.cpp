@@ -263,6 +263,21 @@ QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
     return DocumentIO::nameFiltersForLDraw(includeAll);
 }
 
+Document *QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
+{
+    return DocumentIO::importBrickLinkStore(store);
+}
+
+Document *QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
+{
+    return DocumentIO::importBrickLinkOrder(order);
+}
+
+Document *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
+{
+    return DocumentIO::importBrickLinkCart(cart);
+}
+
 bool QmlBrickStore::isDatabaseValid() const
 {
     return BrickLink::core()->isDatabaseValid();

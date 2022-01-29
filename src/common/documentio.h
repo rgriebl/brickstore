@@ -50,6 +50,10 @@ public:
         QByteArray guiSortFilterState;
     };
 
+    static Document *importBrickLinkStore(BrickLink::Store *store);
+    static Document *importBrickLinkOrder(BrickLink::Order *order);
+    static Document *importBrickLinkCart(BrickLink::Cart *cart);
+
     static QCoro::Task<Document *> importBrickLinkXML(const QString &fileName = { });
     static QCoro::Task<Document *> importLDrawModel(const QString &fileName = { });
 

@@ -138,6 +138,10 @@ public:
     Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
     Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
 
+    Q_INVOKABLE Document *importBrickLinkStore(BrickLink::Store *store);
+    Q_INVOKABLE Document *importBrickLinkOrder(BrickLink::Order *order);
+    Q_INVOKABLE Document *importBrickLinkCart(BrickLink::Cart *cart);
+
     bool isDatabaseValid() const;
     QDateTime lastDatabaseUpdate() const;
     Q_INVOKABLE bool updateDatabase();

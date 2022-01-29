@@ -29,8 +29,11 @@
 #include "utility/utility.h"
 #include "utility/stopwatch.h"
 #include "minizip/minizip.h"
+#include "bricklink/cart.h"
 #include "bricklink/core.h"
 #include "bricklink/io.h"
+#include "bricklink/order.h"
+#include "bricklink/store.h"
 
 #include "common/document.h"
 #include "common/documentmodel.h"
@@ -65,6 +68,47 @@ QStringList DocumentIO::nameFiltersForLDraw(bool includeAll)
     if (includeAll)
         filters << tr("All Files") % " (*)"_l1;
     return filters;
+}
+
+Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
+{
+    BrickLink::IO::ParseResult pr;
+    const auto lots = store->lots();
+    for (const auto *lot : lots)
+        pr.addLot(new Lot(*lot));
+    pr.setCurrencyCode(store->currencyCode());
+
+    auto *document = new Document(new DocumentModel(std::move(pr)));
+    document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
+    document->setThumbnail("bricklink-store"_l1);
+    return document;
+}
+
+Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order)
+{
+    BrickLink::IO::ParseResult pr;
+    const auto lots = order->lots();
+    for (const auto *lot : lots)
+        pr.addLot(new Lot(*lot));
+    pr.setCurrencyCode(order->currencyCode());
+
+    auto *document = new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now
+    document->setThumbnail("view-financial-list"_l1);
+    return document;
+}
+
+Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
+{
+    BrickLink::IO::ParseResult pr;
+    const auto lots = cart->lots();
+    for (const auto *lot : lots)
+        pr.addLot(new Lot(*lot));
+    pr.setCurrencyCode(cart->currencyCode());
+
+    auto *document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
+    document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
+    document->setThumbnail("bricklink-cart"_l1);
+    return document;
 }
 
 QCoro::Task<Document *> DocumentIO::importBrickLinkXML(const QString &fileName)

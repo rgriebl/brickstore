@@ -134,6 +134,7 @@ public:
 
     QImage thumbnail() const;
     void setThumbnail(const QImage &image);
+    void setThumbnail(const QString &iconName);
 
     void updateSelection();
 

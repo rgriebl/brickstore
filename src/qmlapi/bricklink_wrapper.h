@@ -93,6 +93,8 @@ class QmlBrickLink : public QObject
     Q_PROPERTY(QmlItem noItem READ noItem CONSTANT)
     Q_PROPERTY(QmlColor noColor READ noColor CONSTANT)
     Q_PROPERTY(BrickLink::Store *store READ store CONSTANT)
+    Q_PROPERTY(BrickLink::Orders *orders READ orders CONSTANT)
+    Q_PROPERTY(BrickLink::Carts *carts READ carts CONSTANT)
 
 public:
     static void registerTypes();
@@ -141,6 +143,8 @@ public:
     Q_INVOKABLE void cacheStat() const;
 
     BrickLink::Store *store() const;
+    BrickLink::Orders *orders() const;
+    BrickLink::Carts *carts() const;
 
 signals:
     void priceGuideUpdated(QmlPriceGuide pg);

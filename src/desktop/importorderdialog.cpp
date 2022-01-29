@@ -30,6 +30,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
+#include "common/documentio.h"
 #include "betteritemdelegate.h"
 #include "historylineedit.h"
 #include "importorderdialog.h"
@@ -274,19 +275,14 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
                 combinedPr.setCurrencyCode(combineCCode ? defaultCCode : order->currencyCode());
             }
         } else {
-            BrickLink::IO::ParseResult pr;
-            const auto lots = order->lots();
-            for (const auto *lot : lots)
-                pr.addLot(new Lot(*lot));
-            pr.setCurrencyCode(order->currencyCode());
-
-            new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now
+            DocumentIO::importBrickLinkOrder(order);
         }
         ++orderCount;
     }
     if (combined) {
         auto doc = new Document(new DocumentModel(std::move(combinedPr))); // Document owns the items now
         doc->setTitle(tr("Multiple Orders"));
+        doc->setThumbnail("view-financial-list"_l1);
     }
 }
 
