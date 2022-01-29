@@ -516,9 +516,11 @@ void ViewPane::paletteChange()
                             { 1, win } });
         pal.setBrush(QPalette::All, QPalette::Window, gradient);
         pal.setColor(QPalette::All, QPalette::Text, text);
+        pal.setColor(QPalette::All, QPalette::ButtonText, text);
     } else {
         pal.setColor(QPalette::All, QPalette::Window, iwin);
         pal.setColor(QPalette::All, QPalette::Text, itext);
+        pal.setColor(QPalette::All, QPalette::ButtonText, itext);
     }
 
     m_viewList->setBackgroundRole(QPalette::Window);    
