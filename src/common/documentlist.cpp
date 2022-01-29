@@ -13,6 +13,7 @@
 */
 #include <QFileInfo>
 #include <QIcon>
+#include <QPainter>
 
 #include "utility/utility.h"
 #include "documentlist.h"
@@ -119,10 +120,22 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
         return s;
     }
     case Qt::DecorationRole:
-        if (!document->thumbnail().isNull())
-            return QIcon(QPixmap::fromImage(document->thumbnail()));
-        else
+        if (!document->thumbnail().isNull()) {
+            QImage img = document->thumbnail();
+            if (img.height() != img.width()) {
+                int d = qMax(img.height(), img.width());
+
+                QImage canvas({ d, d }, QImage::Format_ARGB32);
+                canvas.fill(Qt::transparent);
+                QPainter p(&canvas);
+                p.drawImage({ (d - img.width()) / 2, (d - img.height()) / 2 }, img, img.rect());
+                p.end();
+                img = canvas;
+            }
+            return QIcon(QPixmap::fromImage(img));
+        } else {
             return docIcon;
+        }
 
     case Qt::UserRole:
         return QVariant::fromValue(document);

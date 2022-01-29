@@ -24,9 +24,11 @@
 #include <QStringBuilder>
 #include <QStyledItemDelegate>
 #include <QItemSelectionModel>
+#include <QMenu>
 #include <QDebug>
 
 #include "bricklink/core.h"
+#include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/documentlist.h"
 #include "common/recentfiles.h"
@@ -374,15 +376,23 @@ void TaskAppearsInWidget::selectionUpdate(const LotList &list)
 TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
-    //setItemDelegate(new QStyledItemDelegate());
+    setContextMenuPolicy(Qt::CustomContextMenu);
     setAlternatingRowColors(true);
     setHeaderHidden(true);
     setAllColumnsShowFocus(true);
     setUniformRowHeights(true);
     setRootIsDecorated(false);
     setTextElideMode(Qt::ElideMiddle);
+    setWordWrap(true);
     setSelectionMode(QAbstractItemView::NoSelection);
     setModel(DocumentList::inst());
+    int is = style()->pixelMetric(QStyle::PM_ListViewIconSize, nullptr, this);
+    setIconSize({ int(is * 2), int(is * 2) });
+
+    m_closeDocument = new QAction(this);
+    m_closeDocument->setIcon(ActionManager::inst()->qAction("document_close")->icon());
+    addAction(m_closeDocument);
+
 
     connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, [this](Document *doc) {
@@ -397,6 +407,31 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
                 emit doc->requestActivation();
         }
     });
+
+    connect(this, &QWidget::customContextMenuRequested,
+            this, [this](const QPoint &pos) {
+        auto idx = indexAt(pos);
+        if (idx.isValid()) {
+            if (QMenu::exec(actions(), viewport()->mapToGlobal(pos)) == m_closeDocument) {
+                if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
+                    emit doc->requestClose();
+            }
+        }
+    });
+
+    languageChange();
+}
+
+void TaskOpenDocumentsWidget::languageChange()
+{
+    m_closeDocument->setText(ActionManager::inst()->qAction("document_close")->text());
+}
+
+void TaskOpenDocumentsWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    return QTreeView::changeEvent(e);
 }
 
 

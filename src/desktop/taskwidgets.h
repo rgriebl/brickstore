@@ -124,6 +124,13 @@ class TaskOpenDocumentsWidget : public QTreeView
 
 public:
     TaskOpenDocumentsWidget(QWidget *parent = nullptr);
+
+protected:
+    void languageChange();
+    void changeEvent(QEvent *e) override;
+
+private:
+    QAction *m_closeDocument;
 };
 
 
