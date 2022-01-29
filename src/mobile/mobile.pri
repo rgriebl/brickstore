@@ -22,6 +22,8 @@ QML_FILES += \
     $$PWD/DocumentProxyModelJS.qml \
     $$PWD/GridCell.qml \
     $$PWD/GridHeader.qml \
+    $$PWD/ImportCartDialog.qml \
+    $$PWD/ImportOrderDialog.qml \
     $$PWD/Main.qml \
     $$PWD/SettingsDialog.qml \
     $$PWD/View.qml \

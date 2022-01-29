@@ -12,6 +12,62 @@ Page {
 
     property Document document
 
+    header: ToolBar {
+        id: toolBar
+
+        // The text color might be off after switching themes:
+        // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
+
+        RowLayout {
+            anchors.fill: parent
+            ToolButton {
+                icon.name: "go-home"
+                onClicked: setActiveDocument(null)
+            }
+            ToolButton {
+                action: ActionManager.quickAction("edit_undo")
+                display: Button.IconOnly
+            }
+            ToolButton {
+                action: ActionManager.quickAction("edit_redo")
+                display: Button.IconOnly
+            }
+            Item { Layout.fillWidth: true }
+            ToolButton {
+                icon.name: "overflow-menu"
+                onClicked: viewMenu.open()
+
+                AutoSizingMenu {
+                    id: viewMenu
+                    x: parent.width - width
+                    transformOrigin: Menu.TopRight
+                    modal: true
+                    cascade: false
+
+                    MenuItem { action: ActionManager.quickAction("document_save") }
+                    MenuItem { action: ActionManager.quickAction("document_save_as") }
+                    AutoSizingMenu {
+                        title: ActionManager.quickAction("document_export").text
+                        modal: true
+                        cascade: false
+                        MenuItem { action: ActionManager.quickAction("document_export_bl_xml") }
+                        MenuItem { action: ActionManager.quickAction("document_export_bl_xml_clip") }
+                        MenuItem { action: ActionManager.quickAction("document_export_bl_update_clip") }
+                        MenuItem { action: ActionManager.quickAction("document_export_bl_wantedlist_clip") }
+                    }
+                    MenuItem { action: ActionManager.quickAction("document_close") }
+                }
+            }
+        }
+        Label {
+            anchors.centerIn: parent
+            scale: 1.3
+            text: root.title
+            elide: Label.ElideLeft
+            horizontalAlignment: Qt.AlignHCenter
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
