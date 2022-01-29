@@ -478,7 +478,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
           } },
     };
 
-    QMetaObject::invokeMethod(this, [this]() { DocumentList::inst()->add(this); }, Qt::QueuedConnection);
+    DocumentList::inst()->add(this);
 }
 
 

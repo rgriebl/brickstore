@@ -52,6 +52,8 @@ public:
 
     UndoGroup *undoGroup();
 
+    void raise();
+
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });

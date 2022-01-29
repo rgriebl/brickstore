@@ -140,25 +140,30 @@ QHash<int, QByteArray> DocumentList::roleNames() const
 
 void DocumentList::add(Document *document)
 {
-    emit documentCreated(document);
+    // Please note: Document might not be 100% initialized at this point, because we got called
+    // from the base constructor!
 
-    beginInsertRows({ }, rowCount(), rowCount());
-    m_documents.append(document);
-    endInsertRows();
+    QMetaObject::invokeMethod(this, [this, document]() {
+        emit documentCreated(document);
 
-    auto updateDisplay = [this, document]() {
-        int row = m_documents.indexOf(document);
-        emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
-    };
-    connect(document, &Document::filePathChanged,
-            this, updateDisplay);
-    connect(document, &Document::titleChanged,
-            this, updateDisplay);
-    connect(document->model(), &DocumentModel::modificationChanged,
-            this, updateDisplay);
+        beginInsertRows({ }, rowCount(), rowCount());
+        m_documents.append(document);
+        endInsertRows();
 
-    emit documentAdded(document);
-    emit countChanged(count());
+        auto updateDisplay = [this, document]() {
+            int row = m_documents.indexOf(document);
+            emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
+        };
+        connect(document, &Document::filePathChanged,
+                this, updateDisplay);
+        connect(document, &Document::titleChanged,
+                this, updateDisplay);
+        connect(document->model(), &DocumentModel::modificationChanged,
+                this, updateDisplay);
+
+        emit documentAdded(document);
+        emit countChanged(count());
+    }, Qt::QueuedConnection);
 }
 
 void DocumentList::remove(Document *document)
@@ -168,11 +173,13 @@ void DocumentList::remove(Document *document)
         beginRemoveRows({ }, row, row);
         m_documents.removeAt(row);
         endRemoveRows();
+
+        emit documentRemoved(document);
+        emit countChanged(count());
+
+        if (m_documents.isEmpty())
+            emit lastDocumentClosed();
     }
-    emit documentRemoved(document);
-    emit countChanged(count());
-    if (m_documents.isEmpty())
-        emit lastDocumentClosed();
 }
 
 #include "moc_documentlist.cpp"

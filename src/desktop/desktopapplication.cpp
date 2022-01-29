@@ -253,7 +253,10 @@ QCoro::Task<bool> DesktopApplication::closeAllViews()
 
 bool DesktopApplication::notifyOtherInstance()
 {
-    const int timeout = 1000;
+    // We need a long timeout here. If multiple docs are opened at the same time from the Windows
+    // Explorer, it will launch multiple BrickStore processes in parallel (one for each document).
+    // With a short timeout, the clients may not get back the confirmation ('X') in time.
+    const int timeout = 10000;
     enum { Undecided, Server, Client } state = Undecided;
     QString socketName = "BrickStore"_l1;
     QLocalServer *server = nullptr;
@@ -302,14 +305,10 @@ bool DesktopApplication::notifyOtherInstance()
                 }
                 client->write("X", 1);
 
-                m_queuedDocuments << files;
-                openQueuedDocuments();
+                for (const auto &f : qAsConst(files))
+                    QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
 
-                if (auto fw = MainWindow::inst()) {
-                    fw->setWindowState(fw->windowState() & ~Qt::WindowMinimized);
-                    fw->raise();
-                    fw->activateWindow();
-                }
+                raise();
             });
             state = Server;
         }

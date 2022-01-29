@@ -25,6 +25,7 @@
 #include <QtGui/QPixmapCache>
 #include <QtGui/QImageReader>
 #include <QtGui/QDesktopServices>
+#include <QtGui/QWindow>
 
 #include "bricklink/core.h"
 #include "bricklink/store.h"
@@ -358,6 +359,19 @@ UndoGroup *Application::undoGroup()
     return m_undoGroup;
 }
 
+void Application::raise()
+{
+    const auto tlWindows = qApp->topLevelWindows();
+    if (!tlWindows.isEmpty()) {
+        QWindow *win = tlWindows.constFirst();
+        if (win->windowState() == Qt::WindowMinimized)
+            win->setWindowStates(win->windowStates() & ~Qt::WindowMinimized);
+        win->raise();
+        if (!win->isActive())
+            win->requestActivate();
+    }
+}
+
 void Application::setupTerminateHandler()
 {
     std::set_terminate([]() {
@@ -404,10 +418,9 @@ void Application::openQueuedDocuments()
 {
     m_canEmitOpenDocuments = true;
 
-    QMetaObject::invokeMethod(this, [this]() {
-        while (!m_queuedDocuments.isEmpty())
-            emit openDocument(m_queuedDocuments.takeFirst());
-    }, Qt::QueuedConnection);
+    for (const auto &f : qAsConst(m_queuedDocuments))
+        QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
+    m_queuedDocuments.clear();
 }
 
 void Application::updateTranslations()
