@@ -873,7 +873,28 @@ Order *Orders::orderFromXML(const QString &fileName)
         throw Exception(&f, tr("Cannot open order XML"));
     auto xml = f.readAll();
     auto pr = IO::fromBrickLinkXML(xml, IO::Hint::Order);
-    return pr.takeOrder();
+    auto order = pr.takeOrder();
+
+    if (!qFuzzyIsNull(order->vatChargeSeller()) && !qFuzzyIsNull(order->creditCoupon())) {
+        // Fix the broken VAT calculation ... see https://www.bricklink.com/message.asp?ID=1323588
+        // The vatChargeSeller values are wrong when a creditCoupon is active.
+        // We can however re-calculate this value, but it only works for integer VAT rates as
+        // BL's rounding algorithm does some funky things...
+
+        double vatCharge = order->vatChargeSeller();
+        double coupon = order->creditCoupon();
+        double gtGross = order->grandTotal() + coupon; // here's the bug on BL's side
+        double gtNet = gtGross - vatCharge;
+        double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
+
+        double netFix = coupon * 100 / (100 + vatPercent);
+        gtNet -= netFix;
+        gtGross -= coupon;
+        vatCharge = gtGross - gtNet;
+
+        order->setVatChargeSeller(vatCharge);
+    }
+    return order;
 }
 
 void Orders::updateOrder(std::unique_ptr<Order> newOrder)
