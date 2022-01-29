@@ -1126,6 +1126,11 @@ void Orders::cancelUpdate()
     std::for_each(m_addressJobs.cbegin(), m_addressJobs.cend(), [](auto job) { job->abort(); });
 }
 
+const Order *Orders::order(int row) const
+{
+    return (row < 0 || row >= m_orders.size()) ? nullptr : m_orders.at(row);
+}
+
 QVector<Order *> Orders::orders() const
 {
     return m_orders;
@@ -1222,6 +1227,8 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         case LotCount:   return order->lotCount();
         case Total:      return order->grandTotal();
         }
+    } else if (role >= OrderFirstColumnRole && role < OrderLastColumnRole) {
+        return data(index.sibling(index.row(), role - OrderFirstColumnRole), Qt::DisplayRole);
     }
 
     return { };
@@ -1241,12 +1248,31 @@ QVariant Orders::headerData(int section, Qt::Orientation orient, int role) const
             case LotCount:   return tr("Lots");
             case Total:      return tr("Total");
             }
-        }
-        else if (role == Qt::TextAlignmentRole) {
+        } else if (role == Qt::TextAlignmentRole) {
             return (section == Total) ? Qt::AlignRight : Qt::AlignLeft;
         }
     }
     return { };
+}
+
+QHash<int, QByteArray> Orders::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "display" },
+        { Qt::TextAlignmentRole, "textAlignment" },
+        { Qt::DecorationRole, "decoration" },
+        { Qt::BackgroundRole, "background" },
+        { OrderPointerRole, "order" },
+        { int(OrderFirstColumnRole) + Date, "date" },
+        { int(OrderFirstColumnRole) + Type, "type" },
+        { int(OrderFirstColumnRole) + Status, "status" },
+        { int(OrderFirstColumnRole) + OrderId, "id" },
+        { int(OrderFirstColumnRole) + OtherParty, "otherParty" },
+        { int(OrderFirstColumnRole) + ItemCount, "itemCount" },
+        { int(OrderFirstColumnRole) + LotCount, "lotCount" },
+        { int(OrderFirstColumnRole) + Total, "grandTotal" },
+    };
+    return roles;
 }
 
 } // namespace BrickLink

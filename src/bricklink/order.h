@@ -201,6 +201,9 @@ public:
     enum Role {
         OrderPointerRole = Qt::UserRole + 1,
         OrderSortRole,
+
+        OrderFirstColumnRole,
+        OrderLastColumnRole = OrderFirstColumnRole + ColumnCount,
     };
 
     bool isValid() const          { return m_valid; }
@@ -214,6 +217,7 @@ public:
 
     //Q_INVOKABLE void trimDatabase(int keepLastNDays);
 
+    Q_INVOKABLE const BrickLink::Order *order(int row) const;
     QVector<Order *> orders() const;
 
     int indexOfOrder(const QString &orderId) const;

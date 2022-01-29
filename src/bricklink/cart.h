@@ -113,6 +113,9 @@ public:
     enum Role {
         CartPointerRole = Qt::UserRole + 1,
         CartSortRole,
+
+        CartFirstColumnRole,
+        CartLastColumnRole = CartFirstColumnRole + ColumnCount,
     };
 
     bool isValid() const          { return m_valid; }
@@ -131,6 +134,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 signals:
     void updateStarted();

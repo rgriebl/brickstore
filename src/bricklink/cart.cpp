@@ -519,6 +519,8 @@ QVariant Carts::data(const QModelIndex &index, int role) const
         case LotCount:  return cart->lotCount();
         case Total:     return cart->total();
         }
+    } else if (role >= CartFirstColumnRole && role < CartLastColumnRole) {
+        return data(index.sibling(index.row(), role - CartFirstColumnRole), Qt::DisplayRole);
     }
 
     return { };
@@ -536,12 +538,29 @@ QVariant Carts::headerData(int section, Qt::Orientation orient, int role) const
             case LotCount:  return tr("Lots");
             case Total:     return tr("Total");
             }
-        }
-        else if (role == Qt::TextAlignmentRole) {
+        } else if (role == Qt::TextAlignmentRole) {
             return (section == Total) ? Qt::AlignRight : Qt::AlignLeft;
         }
     }
     return { };
+}
+
+QHash<int, QByteArray> Carts::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "display" },
+        { Qt::TextAlignmentRole, "textAlignment" },
+        { Qt::DecorationRole, "decoration" },
+        { Qt::BackgroundRole, "background" },
+        { CartPointerRole, "cart" },
+        { int(CartFirstColumnRole) + Date, "date" },
+        { int(CartFirstColumnRole) + Type, "type" },
+        { int(CartFirstColumnRole) + Store, "store" },
+        { int(CartFirstColumnRole) + ItemCount, "itemCount" },
+        { int(CartFirstColumnRole) + LotCount, "lotCount" },
+        { int(CartFirstColumnRole) + Total, "total" },
+    };
+    return roles;
 }
 
 } // namespace BrickLink
