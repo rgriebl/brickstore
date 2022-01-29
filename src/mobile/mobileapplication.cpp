@@ -90,8 +90,9 @@ void MobileApplication::init()
         return;
     }
 
-    if (BrickLink::core()->isDatabaseValid())
-        openQueuedDocuments();
+    setUILoggingHandler([](QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
+        // just ignore for now, but we need to set one
+    });
 }
 
 void MobileApplication::updateIconTheme()

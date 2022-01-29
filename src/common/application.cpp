@@ -69,7 +69,9 @@ Q_IMPORT_PLUGIN(qgif)
 using namespace std::chrono_literals;
 
 
+QList<std::tuple<QtMsgType, QMessageLogContext *, QString>> Application::s_bufferedMessages;
 Application *Application::s_inst = nullptr;
+
 
 Application::Application(int &argc, char **argv)
     : QObject()
@@ -630,8 +632,12 @@ void Application::setupLogging()
 
         addSentryBreadcrumb(type, ctx, msg);
 
-        if (s_inst && s_inst->m_uiMessageHandler)
+        if (s_inst && s_inst->m_uiMessageHandler) {
             s_inst->m_uiMessageHandler(type, ctx, msg);
+        } else {
+            auto ctxCopy = new QMessageLogContext(ctx.file, ctx.line, ctx.function, ctx.category);
+            s_bufferedMessages.append({ type, ctxCopy, msg });
+        }
     };
     m_defaultMessageHandler = qInstallMessageHandler(messageHandler);
 }
@@ -639,6 +645,15 @@ void Application::setupLogging()
 void Application::setUILoggingHandler(QtMessageHandler callback)
 {
     m_uiMessageHandler = callback;
+
+    if (m_uiMessageHandler) {
+        for (const auto &t : qAsConst(s_bufferedMessages)) {
+            auto *ctx = std::get<1>(t);
+            m_uiMessageHandler(std::get<0>(t), *ctx, std::get<2>(t));
+            delete ctx;
+        }
+    }
+    s_bufferedMessages.clear();
 }
 
 void Application::setIconTheme(Theme theme)
