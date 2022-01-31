@@ -37,14 +37,8 @@
 #include "utility/transfer.h"
 #include "version.h"
 
-#include "bricklink/category.h"
-#include "bricklink/changelogentry.h"
-#include "bricklink/color.h"
 #include "bricklink/core.h"
 #include "bricklink/database.h"
-#include "bricklink/item.h"
-#include "bricklink/itemtype.h"
-#include "bricklink/partcolorcode.h"
 
 #include "lzma/bs_lzma.h"
 

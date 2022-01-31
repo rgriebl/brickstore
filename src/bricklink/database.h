@@ -17,6 +17,13 @@
 #include <QDateTime>
 
 #include "bricklink/global.h"
+#include "bricklink/color.h"
+#include "bricklink/category.h"
+#include "bricklink/item.h"
+#include "bricklink/itemtype.h"
+#include "bricklink/changelogentry.h"
+#include "bricklink/partcolorcode.h"
+
 
 class Transfer;
 
