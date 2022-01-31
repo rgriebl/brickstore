@@ -98,7 +98,7 @@ class Document : public QObject
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY(QString fileName READ fileName NOTIFY fileNameChanged)
     Q_PROPERTY(QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged)
-    Q_PROPERTY(BrickLink::Order *order READ order CONSTANT)
+    Q_PROPERTY(BrickLink::Order *order READ order NOTIFY orderChanged)
     Q_PROPERTY(DocumentModel *model READ model CONSTANT)
     Q_PROPERTY(bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
     Q_PROPERTY(bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged)
@@ -112,7 +112,6 @@ class Document : public QObject
 public:
     Document(QObject *parent = nullptr);
     Document(DocumentModel *model, QObject *parent = nullptr);
-    Document(DocumentModel *model, BrickLink::Order *order, QObject *parent = nullptr);
     Document(DocumentModel *model, const QByteArray &columnsState, QObject *parent = nullptr);
     Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave, QObject *parent = nullptr);
     ~Document() override;
@@ -139,6 +138,7 @@ public:
     void updateSelection();
 
     BrickLink::Order *order() const;
+    void setOrder(BrickLink::Order *order);
 
     DocumentModel *model() const { return m_model; }
     QItemSelectionModel *selectionModel() const { return m_selectionModel; }
@@ -289,6 +289,7 @@ signals:
     void modificationChanged(bool modified);
 
     void lotsChanged();
+    void orderChanged(BrickLink::Order *order);
 
 private:
     QString actionText() const;
@@ -347,7 +348,7 @@ private:
     QString               m_title;
     QImage                m_thumbnail;
 
-    QPointer<BrickLink::Order> m_order;
+    BrickLink::Order *    m_order;
 
     bool                  m_blocked = false;
     QString               m_blockTitle;

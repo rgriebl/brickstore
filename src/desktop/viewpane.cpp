@@ -280,9 +280,14 @@ void ViewPane::setView(View *view)
 
     m_filter->setDocument(view->document());
 
-    bool hasOrder = (view->document()->order());
-    m_order->setVisible(hasOrder);
-    m_orderSeparator->setVisible(hasOrder);
+    auto checkOrder = [this]() {
+        bool hasOrder = (m_view->document()->order());
+        m_order->setVisible(hasOrder);
+        m_orderSeparator->setVisible(hasOrder);
+    };
+    connect(m_view->document(), &Document::orderChanged,
+            m_viewConnectionContext, checkOrder);
+    checkOrder();
 
     updateCurrencyRates();
     updateBlockState(false);

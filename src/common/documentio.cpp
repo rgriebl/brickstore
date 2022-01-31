@@ -72,6 +72,8 @@ QStringList DocumentIO::nameFiltersForLDraw(bool includeAll)
 
 Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
 {
+    Q_ASSERT(store);
+
     BrickLink::IO::ParseResult pr;
     const auto lots = store->lots();
     for (const auto *lot : lots)
@@ -86,26 +88,32 @@ Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
 
 Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order)
 {
+    Q_ASSERT(order);
+
     BrickLink::IO::ParseResult pr;
     const auto lots = order->loadLots();
     for (auto *lot : lots)
         pr.addLot(std::move(lot));
     pr.setCurrencyCode(order->currencyCode());
 
-    auto *document = new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now
+    auto *document = new Document(new DocumentModel(std::move(pr)));
+    document->setOrder(order);
+    document->setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
     document->setThumbnail("view-financial-list"_l1);
     return document;
 }
 
 Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
 {
+    Q_ASSERT(cart);
+
     BrickLink::IO::ParseResult pr;
     const auto lots = cart->lots();
     for (const auto *lot : lots)
         pr.addLot(new Lot(*lot));
     pr.setCurrencyCode(cart->currencyCode());
 
-    auto *document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
+    auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
     document->setThumbnail("bricklink-cart"_l1);
     return document;

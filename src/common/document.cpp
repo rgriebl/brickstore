@@ -204,14 +204,6 @@ Document::Document(DocumentModel *model, QObject *parent)
     : Document(model, QByteArray { }, parent)
 { }
 
-Document::Document(DocumentModel *model, BrickLink::Order *order, QObject *parent)
-    : Document(model, QByteArray { }, parent)
-{
-    m_order = order;
-    if (order)
-        setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
-}
-
 Document::Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave,
                    QObject *parent)
     : Document(model, columnsState, parent)
@@ -1655,6 +1647,25 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
 BrickLink::Order *Document::order() const
 {
     return m_order;
+}
+
+void Document::setOrder(BrickLink::Order *order)
+{
+    if (m_order != order) {
+        if (m_order)
+            disconnect(m_order, &QObject::destroyed, this, nullptr);
+
+        m_order = order;
+
+        if (m_order) {
+            connect(m_order, &QObject::destroyed,
+                    this, [this]() {
+                m_order = nullptr;
+                emit orderChanged(m_order);
+            });
+        }
+        emit orderChanged(m_order);
+    }
 }
 
 QCoro::Task<BrickLink::LotList> Document::exportCheck(int exportCheckMode) const
