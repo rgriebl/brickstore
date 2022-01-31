@@ -69,8 +69,8 @@ public:
     Order(const QString &id, OrderType type);
     ~Order() override;
 
-    LotList takeLots();
-    const LotList &lots() const;
+    LotList loadLots() const; // ownership is transferred to the caller
+
     QString id() const;
     OrderType type() const;
     QString otherParty() const;
@@ -102,7 +102,6 @@ public:
     QString address() const;
     QString phone() const;
 
-    void setLots(LotList &&lots); // we take ownership
     void setId(const QString &id);
     void setType(OrderType type);
     void setOtherParty(const QString &str);
@@ -217,6 +216,8 @@ public:
 
     //Q_INVOKABLE void trimDatabase(int keepLastNDays);
 
+    LotList loadOrderLots(const Order *order) const;
+
     Q_INVOKABLE const BrickLink::Order *order(int row) const;
     QVector<Order *> orders() const;
 
@@ -238,6 +239,7 @@ signals:
 private:
     Orders(QObject *parent = nullptr);
     void reloadOrdersFromCache();
+    static QHash<Order *, QString> parseOrdersXML(const QByteArray &data_);
     static Order *orderFromXML(const QString &fileName);
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);
     void updateOrder(std::unique_ptr<Order> order);
@@ -247,6 +249,7 @@ private:
     void startUpdateAddress(Order *order);
     std::pair<QString, QString> parseAddressAndPhone(OrderType type, const QByteArray &data);
     QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const;
+    QString orderFilePath(QStringView fileName, OrderType type, const QDate &date) const;
 
     bool m_valid = false;
     BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;

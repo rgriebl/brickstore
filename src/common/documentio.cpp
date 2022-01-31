@@ -87,9 +87,9 @@ Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
 Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order)
 {
     BrickLink::IO::ParseResult pr;
-    const auto lots = order->lots();
-    for (const auto *lot : lots)
-        pr.addLot(new Lot(*lot));
+    const auto lots = order->loadLots();
+    for (auto *lot : lots)
+        pr.addLot(std::move(lot));
     pr.setCurrencyCode(order->currencyCode());
 
     auto *document = new Document(new DocumentModel(std::move(pr)), order); // Document owns the items now

@@ -95,43 +95,11 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     ParseResult pr;
     QXmlStreamReader xml(data);
     QString rootName = "INVENTORY"_l1;
+    if (hint == Hint::Order)
+        rootName = "ORDER"_l1;
+
     QHash<QStringView, std::function<void(ParseResult &pr, const QString &value)>> rootTagHash;
 
-    if (hint == Hint::Order) {
-        rootName = "ORDER"_l1;
-        pr.addOrder();
-
-        rootTagHash.insert(u"ORDERID",           [](auto &pr, auto &v) { pr.order()->setId(v); } );
-        rootTagHash.insert(u"BUYER",             [](auto &pr, auto &v) { pr.order()->setOtherParty(v); pr.order()->setType(OrderType::Received); } );
-        rootTagHash.insert(u"SELLER",            [](auto &pr, auto &v) { pr.order()->setOtherParty(v); pr.order()->setType(OrderType::Placed); } );
-        rootTagHash.insert(u"ORDERDATE",         [](auto &pr, auto &v) { pr.order()->setDate(QDate::fromString(v, "M/d/yyyy"_l1)); } );
-        rootTagHash.insert(u"ORDERSTATUSCHANGED",[](auto &pr, auto &v) { pr.order()->setLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
-        rootTagHash.insert(u"ORDERSHIPPING",     [](auto &pr, auto &v) { pr.order()->setShipping(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERINSURANCE",    [](auto &pr, auto &v) { pr.order()->setInsurance(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERADDCHRG1",     [](auto &pr, auto &v) { pr.order()->setAdditionalCharges1(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERADDCHRG2",     [](auto &pr, auto &v) { pr.order()->setAdditionalCharges2(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERCREDIT",       [](auto &pr, auto &v) { pr.order()->setCredit(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERCREDITCOUPON", [](auto &pr, auto &v) { pr.order()->setCreditCoupon(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERTOTAL",        [](auto &pr, auto &v) { pr.order()->setOrderTotal(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERSALESTAX",     [](auto &pr, auto &v) { pr.order()->setUsSalesTax(v.toDouble()); } );   // US SalesTax collected by BL
-        rootTagHash.insert(u"ORDERVAT",          [](auto &pr, auto &v) { pr.order()->setVatChargeBrickLink(v.toDouble()); } ); // VAT collected by BL
-        rootTagHash.insert(u"BASECURRENCYCODE",  [](auto &pr, auto &v) { pr.order()->setCurrencyCode(v); } );
-        rootTagHash.insert(u"BASEGRANDTOTAL",    [](auto &pr, auto &v) { pr.order()->setGrandTotal(v.toDouble()); } );
-        rootTagHash.insert(u"PAYCURRENCYCODE",   [](auto &pr, auto &v) { pr.order()->setPaymentCurrencyCode(v); } );
-        rootTagHash.insert(u"ORDERLOTS",         [](auto &pr, auto &v) { pr.order()->setLotCount(v.toInt()); } );
-        rootTagHash.insert(u"ORDERITEMS",        [](auto &pr, auto &v) { pr.order()->setItemCount(v.toInt()); } );
-        rootTagHash.insert(u"ORDERCOST",         [](auto &pr, auto &v) { pr.order()->setCost(v.toDouble()); } );
-        rootTagHash.insert(u"ORDERSTATUS",       [](auto &pr, auto &v) { pr.order()->setStatus(Order::statusFromString(v)); } );
-        rootTagHash.insert(u"PAYMENTTYPE",       [](auto &pr, auto &v) { pr.order()->setPaymentType(v); } );
-        rootTagHash.insert(u"ORDERREMARKS",      [](auto &pr, auto &v) { pr.order()->setRemarks(v); } );
-        rootTagHash.insert(u"ORDERTRACKNO",      [](auto &pr, auto &v) { pr.order()->setTrackingNumber(v); } );
-        rootTagHash.insert(u"PAYMENTSTATUS",     [](auto &pr, auto &v) { pr.order()->setPaymentStatus(v); } );
-        rootTagHash.insert(u"PAYMENTSTATUSCHANGED", [](auto &pr, auto &v) { pr.order()->setPaymentLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
-        rootTagHash.insert(u"VATCHARGES",        [](auto &pr, auto &v) { pr.order()->setVatChargeSeller(v.toDouble()); } ); // VAT charge by seller
-        rootTagHash.insert(u"LOCATION",          [](auto &pr, auto &v) {
-            if (!v.isEmpty())
-                pr.order()->setCountryCode(BrickLink::core()->countryIdFromName(v.section(", "_l1, 0, 0))); } );
-    }
 
     // The remove(',') on QTY is a workaround for the broken Order XML generator: the QTY
     // field is generated with thousands-separators enabled (e.g. 1,752 instead of 1752)
@@ -231,7 +199,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                 auto tagName = xml.name();
                 if (!foundRoot) { // check the root element
                     if (tagName.toString() != rootName)
-                        throw Exception("Expected %1 as root element, but got: %1").arg(rootName).arg(tagName);
+                        throw Exception("Expected %1 as root element, but got: %2").arg(rootName).arg(tagName);
                     foundRoot = true;
                 } else if (tagName == "ITEM"_l1) {
                     auto *lot = new Lot();
@@ -273,9 +241,6 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
 
                 if (pr.currencyCode().isEmpty())
                     pr.setCurrencyCode("USD"_l1);
-
-                if (pr.hasOrder())
-                    pr.order()->setLots(pr.takeLots());
 
                 return pr;
 
@@ -554,23 +519,18 @@ BrickLink::IO::ParseResult::ParseResult(const LotList &lots)
 BrickLink::IO::ParseResult::ParseResult(ParseResult &&pr)
     : m_lots(pr.m_lots)
     , m_currencyCode(pr.m_currencyCode)
-    , m_order(pr.m_order)
     , m_ownLots(pr.m_ownLots)
-    , m_ownOrder(pr.m_ownOrder)
     , m_invalidLotCount(pr.m_invalidLotCount)
     , m_fixedLotCount(pr.m_fixedLotCount)
     , m_differenceModeBase(pr.m_differenceModeBase)
 {
     pr.m_lots.clear();
-    pr.m_order = nullptr;
 }
 
 BrickLink::IO::ParseResult::~ParseResult()
 {
     if (m_ownLots)
         qDeleteAll(m_lots);
-    if (m_ownOrder)
-        delete m_order;
 }
 
 BrickLink::LotList BrickLink::IO::ParseResult::takeLots()
@@ -582,26 +542,10 @@ BrickLink::LotList BrickLink::IO::ParseResult::takeLots()
     return result;
 }
 
-BrickLink::Order *BrickLink::IO::ParseResult::takeOrder()
-{
-    Q_ASSERT(m_ownOrder);
-    m_ownOrder = false;
-    Order *result = nullptr;
-    std::swap(result, m_order);
-    return result;
-}
-
 void BrickLink::IO::ParseResult::addLot(Lot * &&lot)
 {
     Q_ASSERT(m_ownLots);
     m_lots << lot;
-}
-
-void BrickLink::IO::ParseResult::addOrder()
-{
-    Q_ASSERT(!m_order);
-    m_order = new Order();
-    m_ownOrder = true;
 }
 
 void BrickLink::IO::ParseResult::addToDifferenceModeBase(const Lot *lot, const Lot &base)

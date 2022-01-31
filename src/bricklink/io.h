@@ -37,8 +37,6 @@ public:
     const LotList &lots() const  { return m_lots; }
     LotList takeLots();
     QString currencyCode() const { return m_currencyCode; }
-    bool hasOrder() const        { return (m_order); }
-    Order *order() const         { return m_order; }
     Order *takeOrder();
     int invalidLotCount() const  { return m_invalidLotCount; }
     int fixedLotCount() const    { return m_fixedLotCount; }
@@ -46,7 +44,6 @@ public:
 
     void addLot(Lot *&&lot);
     void setCurrencyCode(const QString &ccode) { m_currencyCode = ccode; }
-    void addOrder();
     void incInvalidLotCount()    { ++m_invalidLotCount; }
     void incFixedLotCount()      { ++m_fixedLotCount; }
     void addToDifferenceModeBase(const Lot *lot, const Lot &base);
@@ -54,10 +51,8 @@ public:
 private:
     LotList m_lots;
     QString m_currencyCode;
-    Order *m_order = nullptr;
 
     bool m_ownLots = true;
-    bool m_ownOrder = true;
     int m_invalidLotCount = 0;
     int m_fixedLotCount = 0;
 

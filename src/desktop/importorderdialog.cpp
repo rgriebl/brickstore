@@ -253,28 +253,28 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
             if (combineCCode && (order->currencyCode() != defaultCCode))
                 crate = Currency::inst()->crossRate(order->currencyCode(), defaultCCode);
 
-            const LotList orderLots = order->lots();
+            LotList orderLots = order->loadLots(); // we own the Lots now
             if (!orderLots.isEmpty()) {
                 QColor col = QColor::fromHsl(360 * orderCount / rows.size(), 128, 128);
-                for (auto &orderLot : orderLots) {
-                    Lot *combinedLot = new Lot(*orderLot);
+                for (auto orderLot : orderLots) {
                     QString marker = orderLot->markerText();
 
-                    combinedLot->setMarkerText(order->id() % u' ' % order->otherParty() %
-                                               (marker.isEmpty() ? QString()
-                                                                 : QString(u' ' % tr("Batch") % u": " % marker)));
-                    combinedLot->setMarkerColor(col);
+                    orderLot->setMarkerText(order->id() % u' ' % order->otherParty() %
+                                            (marker.isEmpty() ? QString()
+                                                              : QString(u' ' % tr("Batch") % u": " % marker)));
+                    orderLot->setMarkerColor(col);
 
                     if (crate) {
-                        combinedLot->setCost(orderLot->cost() * crate);
-                        combinedLot->setPrice(orderLot->price() * crate);
+                        orderLot->setCost(orderLot->cost() * crate);
+                        orderLot->setPrice(orderLot->price() * crate);
                         for (int i = 0; i < 3; ++i)
-                            combinedLot->setTierPrice(i, orderLot->tierPrice(i) * crate);
+                            orderLot->setTierPrice(i, orderLot->tierPrice(i) * crate);
                     }
-                    combinedPr.addLot(std::move(combinedLot));
+                    combinedPr.addLot(std::move(orderLot));
                 }
                 combinedPr.setCurrencyCode(combineCCode ? defaultCCode : order->currencyCode());
             }
+            orderLots.clear();
         } else {
             DocumentIO::importBrickLinkOrder(order);
         }

@@ -21,6 +21,7 @@
 #include <QUrlQuery>
 #include <QRegularExpression>
 #include <QJsonDocument>
+#include <QXmlStreamReader>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
@@ -33,13 +34,11 @@
 #include "utility/utility.h"
 #include "utility/xmlhelpers.h"
 
+
 namespace BrickLink {
 
 class OrderPrivate
 {
-public:
-    ~OrderPrivate() { qDeleteAll(m_lots); }
-
 private:
     QString   m_id;
     OrderType m_type;
@@ -71,7 +70,6 @@ private:
     QString   m_countryCode;
     QString   m_address;
     QString   m_phone;
-    LotList   m_lots;
 
     friend class Order;
 };
@@ -183,22 +181,25 @@ Order::Order(const QString &id, OrderType type)
 Order::~Order()
 { }
 
-LotList Order::takeLots()
+LotList Order::loadLots() const
 {
-    LotList lots;
-    std::swap(lots, d->m_lots);
-    return lots;
+    if (auto orders = qobject_cast<Orders *>(parent())) {
+        try {
+            return orders->loadOrderLots(this);
+        } catch (const Exception &e) {
+            qWarning() << "Order::loadLots() failed:" << e.error();
+            return { };
+        }
+    } else {
+        qWarning() << "Order::loadLots() is not possible: wrong parent";
+        return { };
+    }
 }
 
 Order::Order()
     : Order({ }, OrderType::Received)
 { }
 
-
-const LotList &Order::lots() const
-{
-    return d->m_lots;
-}
 
 QString Order::id() const
 {
@@ -350,12 +351,6 @@ QString Order::phone() const
 QString Order::countryCode() const
 {
     return d->m_countryCode;
-}
-
-void Order::setLots(LotList &&lots)
-{
-    d->m_lots = lots;
-    lots.clear();
 }
 
 void Order::setId(const QString &id)
@@ -644,30 +639,20 @@ QString Order::statusToString(OrderStatus status, bool translated)
 Orders::Orders(QObject *parent)
     : QAbstractTableModel(parent)
 {
-    m_userId = core()->userId();
+    //TODO: Remove in 2022.6.x
+    QDir legacyPath(core()->dataPath() % u"orders/");
+    if (legacyPath.cd("received"_l1)) {
+        legacyPath.removeRecursively();
+        legacyPath.cdUp();
+    }
+    if (legacyPath.cd("placed"_l1)) {
+        legacyPath.removeRecursively();
+        legacyPath.cdUp();
+    }
+
     connect(core(), &Core::userIdChanged,
             this, &Orders::reloadOrdersFromCache);
-
-    connect(core(), &Core::databaseDateChanged,
-            this, [this]() {
-        static bool once = false;
-        if (once)
-            return;
-        once = true;
-
-        //TODO: Remove in 2022.6.x
-        QDir legacyPath(core()->dataPath() % u"orders/");
-        if (legacyPath.cd("received"_l1)) {
-            legacyPath.removeRecursively();
-            legacyPath.cdUp();
-        }
-        if (legacyPath.cd("placed"_l1)) {
-            legacyPath.removeRecursively();
-            legacyPath.cdUp();
-        }
-
-        reloadOrdersFromCache();
-    }, Qt::QueuedConnection);
+    reloadOrdersFromCache();
 
     connect(core(), &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
@@ -736,57 +721,40 @@ Orders::Orders(QObject *parent)
 
             if (jobCompleted) { // if there are no matching orders, we get an error reply back...
                 // step 1: split up the individual orders into <cache>/<year>/<month>/<id>.xml
-                QStringList updatedXmlFiles;
                 OrderType orderType = (type == "received") ? OrderType::Received : OrderType::Placed;
+                QHash<Order *, QString> orders;
 
-                auto buf = new QBuffer(job->data());
-                buf->open(QIODevice::ReadOnly);
                 try {
-                    //TODO: this in inefficient. We should rather use QXmlStreamReader
+                    orders = parseOrdersXML(*job->data());
 
-                    XmlHelpers::ParseXML p(buf, "ORDERS", "ORDER");
-                    p.parse([this, &p, &updatedXmlFiles, orderType](QDomElement e) {
-                        auto id = p.elementText(e, "ORDERID");
-                        if (id.isEmpty())
-                            throw Exception("Order without ORDERID");
+                    for (auto it = orders.cbegin(); it != orders.cend(); ++it) {
+                        Order *order = it.key();
+                        QByteArray orderXml = it.value().toUtf8();
 
-                        auto date = QDate::fromString(p.elementText(e, "ORDERDATE"), "M/d/yyyy"_l1);
-                        if (!date.isValid())
-                            throw Exception("Order %1 has an invalid ORDERDATE").arg(id);
+                        if (order->id().isEmpty() || !order->date().isValid())
+                            throw Exception("Invalid order without ID and DATE");
 
-                        QDomDocument orderDoc;
-                        auto orderNode = orderDoc.importNode(e, true /*deep*/);
-                        orderDoc.appendChild(orderNode);
-                        auto orderXml = orderDoc.toByteArray();
-
-                        auto saveFile = orderSaveFile(QString(id % u".order.xml"), orderType, date);
+                        auto saveFile = orderSaveFile(QString(order->id() % u".order.xml"),
+                                                      orderType, order->date());
                         if (!saveFile)
                             throw Exception(tr("Cannot save order to file"));
 
-                        if (!saveFile
-                                || (saveFile->write(orderXml) != orderXml.size())
+                        if ((saveFile->write(orderXml) != orderXml.size())
                                 || !saveFile->commit()) {
                             throw Exception(saveFile, tr("Cannot write order XML to cache"));
                         }
-                        updatedXmlFiles << saveFile->fileName();
-                    });
+                    }
 
+                    while (!orders.isEmpty()) {
+                        auto order = std::unique_ptr<Order> { *orders.keyBegin() };
+                        orders.remove(order.get());
+                        updateOrder(std::move(order));
+                    }
                 } catch (const Exception &e) {
                     success = false;
                     message = tr("Could not parse the received order XML data") % u": " % e.error();
                 }
-                if (success) {
-                    // step 2: re-read xml files
-                    for (const auto &fileName : qAsConst(updatedXmlFiles)) {
-                        try {
-                            std::unique_ptr<Order> order(Orders::orderFromXML(fileName));
-                            updateOrder(std::move(order));
-                        } catch (const Exception &e) {
-                            success = false;
-                            message = tr("Could not parse the received order XML data") % u": " % e.error();
-                        }
-                    }
-                }
+                qDeleteAll(orders.keyBegin(), orders.keyEnd());
             }
             m_jobResult[job] = qMakePair(success, message);
             m_jobs.removeOne(job);
@@ -801,7 +769,7 @@ Orders::Orders(QObject *parent)
                 }
                 setUpdateStatus(overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
-                QFile stampFile(core()->dataPath() % u"orders/" % m_userId % u"/.stamp");
+                QFile stampFile(core()->dataPath() % u"orders/" % core()->userId() % u"/.stamp");
                 if (overallSuccess) {
                     m_lastUpdated = QDateTime::currentDateTime();
                     stampFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -820,21 +788,17 @@ Orders::Orders(QObject *parent)
 
 void Orders::reloadOrdersFromCache()
 {
-    if (!core()->isDatabaseValid())
-        return;
-
     beginResetModel();
     qDeleteAll(m_orders);
     m_orders.clear();
     endResetModel();
 
-    m_userId = core()->userId();
-    if (m_userId.isEmpty())
+    if (core()->userId().isEmpty())
         return;
 
-    //stopwatch sw("Loading orders from cache");
+    stopwatch sw("Loading orders from cache");
 
-    QString path = core()->dataPath() % u"orders/" % m_userId;
+    QString path = core()->dataPath() % u"orders/" % core()->userId();
 
     QFileInfo stamp(path % u"/.stamp");
     m_lastUpdated = stamp.lastModified();
@@ -845,7 +809,14 @@ void Orders::reloadOrdersFromCache()
     while (dit.hasNext()) {
         try {
             dit.next();
-            std::unique_ptr<Order> order(Orders::orderFromXML(dit.filePath()));
+            QFile f(dit.filePath());
+            if (!f.open(QIODevice::ReadOnly))
+                throw Exception(&f, "Failed to open order XML");
+            auto orders = Orders::parseOrdersXML(f.readAll());
+            if (orders.size() != 1)
+                throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
+            std::unique_ptr<Order> order(*orders.keyBegin());
+
             QDir d = dit.fileInfo().absoluteDir();
             QString addressFileName = order->id() % u".brickstore.json";
             if (d.exists(addressFileName)) {
@@ -866,35 +837,124 @@ void Orders::reloadOrdersFromCache()
     }
 }
 
-Order *Orders::orderFromXML(const QString &fileName)
+QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
 {
-    QFile f(fileName);
-    if (!f.open(QIODevice::ReadOnly))
-        throw Exception(&f, tr("Cannot open order XML"));
-    auto xml = f.readAll();
-    auto pr = IO::fromBrickLinkXML(xml, IO::Hint::Order);
-    auto order = pr.takeOrder();
+    QString data = QString::fromUtf8(data_); // otherwise characterOffset doesn't match
+    QXmlStreamReader xml(data);
 
-    if (!qFuzzyIsNull(order->vatChargeSeller()) && !qFuzzyIsNull(order->creditCoupon())) {
-        // Fix the broken VAT calculation ... see https://www.bricklink.com/message.asp?ID=1323588
-        // The vatChargeSeller values are wrong when a creditCoupon is active.
-        // We can however re-calculate this value, but it only works for integer VAT rates as
-        // BL's rounding algorithm does some funky things...
+    QHash<Order *, QString> result;
+    Order *order = nullptr;
 
-        double vatCharge = order->vatChargeSeller();
-        double coupon = order->creditCoupon();
-        double gtGross = order->grandTotal() + coupon; // here's the bug on BL's side
-        double gtNet = gtGross - vatCharge;
-        double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
+    QHash<QStringView, std::function<void(Order *, const QString &)>> rootTagHash;
 
-        double netFix = coupon * 100 / (100 + vatPercent);
-        gtNet -= netFix;
-        gtGross -= coupon;
-        vatCharge = gtGross - gtNet;
+    rootTagHash.insert(u"ORDERID",           [](auto *o, auto &v) { o->setId(v); } );
+    rootTagHash.insert(u"BUYER",             [](auto *o, auto &v) { o->setOtherParty(v); o->setType(OrderType::Received); } );
+    rootTagHash.insert(u"SELLER",            [](auto *o, auto &v) { o->setOtherParty(v); o->setType(OrderType::Placed); } );
+    rootTagHash.insert(u"ORDERDATE",         [](auto *o, auto &v) { o->setDate(QDate::fromString(v, "M/d/yyyy"_l1)); } );
+    rootTagHash.insert(u"ORDERSTATUSCHANGED",[](auto *o, auto &v) { o->setLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
+    rootTagHash.insert(u"ORDERSHIPPING",     [](auto *o, auto &v) { o->setShipping(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERINSURANCE",    [](auto *o, auto &v) { o->setInsurance(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERADDCHRG1",     [](auto *o, auto &v) { o->setAdditionalCharges1(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERADDCHRG2",     [](auto *o, auto &v) { o->setAdditionalCharges2(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERCREDIT",       [](auto *o, auto &v) { o->setCredit(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERCREDITCOUPON", [](auto *o, auto &v) { o->setCreditCoupon(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERTOTAL",        [](auto *o, auto &v) { o->setOrderTotal(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERSALESTAX",     [](auto *o, auto &v) { o->setUsSalesTax(v.toDouble()); } );   // US SalesTax collected by BL
+    rootTagHash.insert(u"ORDERVAT",          [](auto *o, auto &v) { o->setVatChargeBrickLink(v.toDouble()); } ); // VAT collected by BL
+    rootTagHash.insert(u"BASECURRENCYCODE",  [](auto *o, auto &v) { o->setCurrencyCode(v); } );
+    rootTagHash.insert(u"BASEGRANDTOTAL",    [](auto *o, auto &v) { o->setGrandTotal(v.toDouble()); } );
+    rootTagHash.insert(u"PAYCURRENCYCODE",   [](auto *o, auto &v) { o->setPaymentCurrencyCode(v); } );
+    rootTagHash.insert(u"ORDERLOTS",         [](auto *o, auto &v) { o->setLotCount(v.toInt()); } );
+    rootTagHash.insert(u"ORDERITEMS",        [](auto *o, auto &v) { o->setItemCount(v.toInt()); } );
+    rootTagHash.insert(u"ORDERCOST",         [](auto *o, auto &v) { o->setCost(v.toDouble()); } );
+    rootTagHash.insert(u"ORDERSTATUS",       [](auto *o, auto &v) { o->setStatus(Order::statusFromString(v)); } );
+    rootTagHash.insert(u"PAYMENTTYPE",       [](auto *o, auto &v) { o->setPaymentType(v); } );
+    rootTagHash.insert(u"ORDERREMARKS",      [](auto *o, auto &v) { o->setRemarks(v); } );
+    rootTagHash.insert(u"ORDERTRACKNO",      [](auto *o, auto &v) { o->setTrackingNumber(v); } );
+    rootTagHash.insert(u"PAYMENTSTATUS",     [](auto *o, auto &v) { o->setPaymentStatus(v); } );
+    rootTagHash.insert(u"PAYMENTSTATUSCHANGED", [](auto *o, auto &v) { o->setPaymentLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
+    rootTagHash.insert(u"VATCHARGES",        [](auto *o, auto &v) { o->setVatChargeSeller(v.toDouble()); } ); // VAT charge by seller
+    rootTagHash.insert(u"LOCATION",          [](auto *o, auto &v) { if (!v.isEmpty()) o->setCountryCode(BrickLink::core()->countryIdFromName(v.section(", "_l1, 0, 0))); } );
 
-        order->setVatChargeSeller(vatCharge);
+    try {
+        qint64 startOfOrder = -1;
+
+        while (true) {
+            switch (xml.readNext()) {
+            case QXmlStreamReader::StartElement: {
+                auto tagName = xml.name();
+
+                if (tagName == "ORDER"_l1) {
+                    if (order || startOfOrder >= 0)
+                        throw Exception("Found a nested ORDER tag");
+                    startOfOrder = xml.characterOffset();
+                    order = new Order();
+
+                } else if (tagName != "ORDERS"_l1) {
+                    auto it = rootTagHash.find(xml.name());
+                    if (it != rootTagHash.end())
+                        (*it)(order, xml.readElementText());
+                    else
+                        xml.skipCurrentElement();
+                }
+
+                break;
+            }
+
+            case QXmlStreamReader::EndElement: {
+                auto tagName = xml.name();
+
+                if (tagName == "ORDER"_l1) {
+                    if (!order || (startOfOrder < 0))
+                        throw Exception("Found a ORDER end tag without a start tag");
+                    qint64 endOfOrder = xml.characterOffset();
+
+                    if (!qFuzzyIsNull(order->vatChargeSeller()) && !qFuzzyIsNull(order->creditCoupon())) {
+                        // Fix the broken VAT calculation ... see https://www.bricklink.com/message.asp?ID=1323588
+                        // The vatChargeSeller values are wrong when a creditCoupon is active.
+                        // We can however re-calculate this value, but it only works for integer VAT rates as
+                        // BL's rounding algorithm does some funky things...
+
+                        double vatCharge = order->vatChargeSeller();
+                        double coupon = order->creditCoupon();
+                        double gtGross = order->grandTotal() + coupon; // here's the bug on BL's side
+                        double gtNet = gtGross - vatCharge;
+                        double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
+
+                        double netFix = coupon * 100 / (100 + vatPercent);
+                        gtNet -= netFix;
+                        gtGross -= coupon;
+                        vatCharge = gtGross - gtNet;
+
+                        order->setVatChargeSeller(vatCharge);
+                    }
+
+                    QString header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_l1;
+                    QString footer = "\n"_l1;
+                    result.insert(order, header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
+
+                    order = nullptr;
+                    startOfOrder = endOfOrder = -1;
+                }
+                break;
+            }
+            case QXmlStreamReader::EndDocument:
+                return result;
+
+            case QXmlStreamReader::Invalid:
+                throw Exception(xml.errorString());
+
+            default:
+                break;
+            }
+        }
+    } catch (const Exception &e) {
+        delete order;
+        qDeleteAll(result.keys());
+        throw Exception("XML parse error at line %1, column %2: %3")
+                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
     }
-    return order;
+
 }
 
 void Orders::updateOrder(std::unique_ptr<Order> newOrder)
@@ -933,8 +993,6 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
         order->setCountryCode(newOrder->countryCode());
         order->setAddress(newOrder->address());
         order->setPhone(newOrder->phone());
-
-        order->setLots(newOrder->takeLots());
 
         newOrder.reset();
 
@@ -1042,12 +1100,7 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
 QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const
 {
     // Avoid huge directories with 1000s of entries.
-
-    QString p = core()->dataPath() % "orders/"_l1 % m_userId
-            % ((type == OrderType::Received) ? "/received/"_l1: "/placed/"_l1 )
-            % QString::number(date.year()) % u'/'
-            % QString("%1"_l1).arg(date.month(), 2, 10, '0'_l1) % u'/'
-            % fileName;
+    QString p = orderFilePath(fileName, type, date);
 
     if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
         return nullptr;
@@ -1058,6 +1111,15 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
                    << "for writing:" << f->errorString();
     }
     return f;
+}
+
+QString Orders::orderFilePath(QStringView fileName, OrderType type, const QDate &date) const
+{
+    return core()->dataPath() % "orders/"_l1 % core()->userId()
+            % ((type == OrderType::Received) ? "/received/"_l1: "/placed/"_l1 )
+            % QString::number(date.year()) % u'/'
+            % QString("%1"_l1).arg(date.month(), 2, 10, '0'_l1) % u'/'
+            % fileName;
 }
 
 
@@ -1083,6 +1145,8 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
                                  const QString &orderId)
 {
     if (updateStatus() == UpdateStatus::Updating)
+        return;
+    if (core()->userId().isEmpty())
         return;
     Q_ASSERT(m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
@@ -1124,6 +1188,17 @@ void Orders::cancelUpdate()
     if (m_updateStatus == UpdateStatus::Updating)
         std::for_each(m_jobs.cbegin(), m_jobs.cend(), [](auto job) { job->abort(); });
     std::for_each(m_addressJobs.cbegin(), m_addressJobs.cend(), [](auto job) { job->abort(); });
+}
+
+LotList Orders::loadOrderLots(const Order *order) const
+{
+    QString fileName = order->id() % ".order.xml"_l1;
+    QFile f(Orders::orderFilePath(fileName, order->type(), order->date()));
+    if (!f.open(QIODevice::ReadOnly))
+        throw Exception(&f, tr("Cannot open order XML"));
+    auto xml = f.readAll();
+    auto pr = IO::fromBrickLinkXML(xml, IO::Hint::Order);
+    return pr.takeLots();
 }
 
 const Order *Orders::order(int row) const
