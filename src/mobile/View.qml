@@ -235,6 +235,7 @@ Page {
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
+                DelegateChoice { roleValue: Document.PriceKilo; delegate: currencyDelegate }
                 DelegateChoice { roleValue: Document.Cost; delegate: currencyDelegate }
                 DelegateChoice { roleValue: Document.TierP1
                     GridCell {
