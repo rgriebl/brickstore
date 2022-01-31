@@ -8,7 +8,7 @@ import BrickStore
 
 Page {
     id: root
-    title: qsTr("Import Orders")
+    title: qsTr("Import Order")
 
     property var goBackFunction
 
