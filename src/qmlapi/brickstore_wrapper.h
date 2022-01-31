@@ -109,8 +109,6 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(Document *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
     Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
     Q_PROPERTY(QVariantMap about READ about CONSTANT)
-    Q_PROPERTY(bool databaseValid READ isDatabaseValid NOTIFY databaseValidChanged)
-    Q_PROPERTY(QDateTime lastDatabaseUpdate READ lastDatabaseUpdate NOTIFY lastDatabaseUpdateChanged)
     Q_PROPERTY(bool online READ onlineState NOTIFY onlineStateChanged)
 
 public:
@@ -142,8 +140,6 @@ public:
     Q_INVOKABLE Document *importBrickLinkOrder(BrickLink::Order *order);
     Q_INVOKABLE Document *importBrickLinkCart(BrickLink::Cart *cart);
 
-    bool isDatabaseValid() const;
-    QDateTime lastDatabaseUpdate() const;
     Q_INVOKABLE bool updateDatabase();
 
     Document *activeDocument() const;
@@ -151,8 +147,6 @@ public:
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);
-    void databaseValidChanged(bool valid);
-    void lastDatabaseUpdateChanged(const QDateTime &lastUpdate);
     void onlineStateChanged(bool online);
     void activeDocumentChanged(Document *doc);
 

@@ -121,13 +121,6 @@ QmlBrickStore::QmlBrickStore()
     connect(ActionManager::inst(), &ActionManager::activeDocumentChanged,
             this, &QmlBrickStore::activeDocumentChanged);
 
-    connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
-            this, &QmlBrickStore::lastDatabaseUpdateChanged);
-    connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
-            this, [this]() {
-        emit databaseValidChanged(BrickLink::core()->isDatabaseValid());
-    });
-
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
             this, &QmlBrickStore::defaultCurrencyCodeChanged);
 }
@@ -276,16 +269,6 @@ Document *QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
 Document *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
 {
     return DocumentIO::importBrickLinkCart(cart);
-}
-
-bool QmlBrickStore::isDatabaseValid() const
-{
-    return BrickLink::core()->isDatabaseValid();
-}
-
-QDateTime QmlBrickStore::lastDatabaseUpdate() const
-{
-    return BrickLink::core()->databaseDate();
 }
 
 /*! \qmlmethod bool BrickStore::updateDatabase()

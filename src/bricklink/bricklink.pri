@@ -10,6 +10,7 @@ HEADERS += \
   $$PWD/changelogentry.h \
   $$PWD/color.h \
   $$PWD/core.h \
+  $$PWD/database.h \
   $$PWD/global.h \
   $$PWD/item.h \
   $$PWD/itemtype.h \
@@ -18,13 +19,13 @@ HEADERS += \
   $$PWD/picture.h \
   $$PWD/priceguide.h \
   $$PWD/textimport.h \
-  $$PWD/updatedatabase.h \
 
 SOURCES += \
   $$PWD/category.cpp \
   $$PWD/changelogentry.cpp \
   $$PWD/color.cpp \
   $$PWD/core.cpp \
+  $$PWD/database.cpp \
   $$PWD/item.cpp \
   $$PWD/itemtype.cpp \
   $$PWD/lot.cpp \
@@ -32,7 +33,6 @@ SOURCES += \
   $$PWD/picture.cpp \
   $$PWD/priceguide.cpp \
   $$PWD/textimport.cpp \
-  $$PWD/updatedatabase.cpp \
 
 bs_mobile|bs_desktop {
 

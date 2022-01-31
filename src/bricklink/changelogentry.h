@@ -44,6 +44,7 @@ private:
     uint m_toColorId;
 
     friend class Core;
+    friend class Database;
 };
 
 
@@ -73,6 +74,7 @@ private:
     QByteArray m_toTypeAndId;
 
     friend class Core;
+    friend class Database;
 };
 
 } // namespace BrickLink

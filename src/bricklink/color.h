@@ -82,6 +82,7 @@ private:
     static bool lessThan(const Color &color, uint id) { return color.m_id < id; }
 
     friend class Core;
+    friend class Database;
     friend class TextImport;
 };
 

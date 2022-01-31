@@ -74,8 +74,9 @@ public:
         quint64  m_qty      : 12;
 #endif
 
-        friend class TextImport;
         friend class Core;
+        friend class Database;
+        friend class TextImport;
     };
     Q_STATIC_ASSERT(sizeof(ConsistsOf) == 8);
 
@@ -122,6 +123,7 @@ private:
     static bool lessThan(const Item &item, const std::pair<char, QByteArray> &ids);
 
     friend class Core;
+    friend class Database;
     friend class ItemType;
     friend class TextImport;
 };

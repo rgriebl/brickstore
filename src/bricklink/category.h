@@ -41,6 +41,7 @@ private:
     static bool lessThan(const Category &cat, uint id) { return cat.m_id < id; }
 
     friend class Core;
+    friend class Database;
     friend class TextImport;
 };
 

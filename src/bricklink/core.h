@@ -27,7 +27,7 @@
 #include <QtGui/QIcon>
 
 #include "bricklink/global.h"
-#include "bricklink/changelogentry.h"
+#include "bricklink/database.h"
 #include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
@@ -44,27 +44,11 @@ class Incomplete;
 class Core : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QDateTime databaseDate READ databaseDate NOTIFY databaseDateChanged)
 
 public:
     ~Core() override;
 
     void openUrl(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
-
-    enum class DatabaseVersion {
-        Invalid,
-        Version_1, // deprecated
-        Version_2, // deprecated
-        Version_3,
-        Version_4,
-        Version_5,
-
-        Latest = Version_5
-    };
-
-    QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
-    QDateTime databaseDate() const;
-    bool isDatabaseUpdateNeeded() const;
 
     QString dataPath() const;
     QFile *dataReadFile(QStringView fileName, const Item *item,
@@ -80,11 +64,15 @@ public:
     Store *store() const  { return m_store; }
     Orders *orders() const  { return m_orders; }
     Carts *carts() const  { return m_carts; }
+    Database *database() const  { return m_database; }
 
-    inline const std::vector<Color> &colors() const         { return m_colors; }
-    inline const std::vector<Category> &categories() const  { return m_categories; }
-    inline const std::vector<ItemType> &itemTypes() const   { return m_item_types; }
-    inline const std::vector<Item> &items() const           { return m_items; }
+    inline const std::vector<Color> &colors() const         { return database()->m_colors; }
+    inline const std::vector<Category> &categories() const  { return database()->m_categories; }
+    inline const std::vector<ItemType> &itemTypes() const   { return database()->m_itemTypes; }
+    inline const std::vector<Item> &items() const           { return database()->m_items; }
+    inline const std::vector<PartColorCode> &pccs() const   { return database()->m_pccs; }
+    inline const std::vector<ItemChangeLogEntry>  &itemChangelog() const  { return database()->m_itemChangelog; }
+    inline const std::vector<ColorChangeLogEntry> &colorChangelog() const { return database()->m_colorChangelog; }
 
     const QImage noImage(const QSize &s) const;
 
@@ -121,10 +109,6 @@ public:
 
     TransferJob *downloadDatabase(const QUrl &url = { }, const QString &filename = { });
 
-    bool isDatabaseValid() const;
-    bool readDatabase(const QString &filename = QString());
-    bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version) const;
-
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot);
 
@@ -135,7 +119,6 @@ public slots:
     void cancelTransfers();
 
 signals:
-    void databaseDateChanged(const QDateTime &date);
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *pic);
     void itemImageScaleFactorChanged(qreal f);
@@ -150,6 +133,9 @@ signals:
     void authenticationFailed(const QString &userName, const QString &error);
 
     void userIdChanged(const QString &userId);
+
+    void beginResetDatabase();
+    void endResetDatabase();
 
 private:
     Core(const QString &datadir);
@@ -178,26 +164,6 @@ private:
 
     static bool updateNeeded(bool valid, const QDateTime &last, int iv);
 
-    static void readColorFromDatabase(Color &col, QDataStream &dataStream, DatabaseVersion v);
-    static void writeColorToDatabase(const Color &color, QDataStream &dataStream, DatabaseVersion v);
-
-    static void readCategoryFromDatabase(Category &cat, QDataStream &dataStream, DatabaseVersion v);
-    static void writeCategoryToDatabase(const Category &category, QDataStream &dataStream, DatabaseVersion v);
-
-    static void readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, DatabaseVersion v);
-    static void writeItemTypeToDatabase(const ItemType &itemType, QDataStream &dataStream, DatabaseVersion v);
-
-    static void readItemFromDatabase(Item &item, QDataStream &dataStream, DatabaseVersion v);
-    static void writeItemToDatabase(const Item &item, QDataStream &dataStream, DatabaseVersion v);
-
-    void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Core::DatabaseVersion v) const;
-    static void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, DatabaseVersion v);
-
-    void readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Core::DatabaseVersion v) const;
-    static void writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion v);
-    void readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Core::DatabaseVersion v) const;
-    static void writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, DatabaseVersion v);
-
 private slots:
     void pictureJobFinished(TransferJob *j, BrickLink::Picture *pic);
     void priceGuideJobFinished(TransferJob *j, BrickLink::PriceGuide *pg);
@@ -222,23 +188,12 @@ private:
     mutable QHash<uint, QImage>     m_noImageCache;
     mutable QHash<uint, QImage>     m_colorImageCache;
 
-    std::vector<Color>         m_colors;
-    std::vector<Category>      m_categories;
-    std::vector<ItemType>      m_item_types;
-    std::vector<Item>          m_items;
-    std::vector<ItemChangeLogEntry>  m_itemChangelog;
-    std::vector<ColorChangeLogEntry> m_colorChangelog;
-    std::vector<PartColorCode> m_pccs;
-
     Transfer *                 m_transfer = nullptr;
     Transfer *                 m_authenticatedTransfer = nullptr;
     bool                       m_authenticated = false;
     QPair<QString, QString>    m_credentials;
     TransferJob *              m_loginJob = nullptr;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
-
-    int                          m_db_update_iv = 0;
-    QDateTime                    m_databaseDate;
 
     int                          m_pg_update_iv = 0;
     Q3Cache<quint64, PriceGuide> m_pg_cache;
@@ -254,8 +209,7 @@ private:
     Store *m_store = nullptr;
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
-
-    friend class TextImport;
+    Database *m_database = nullptr;
 };
 
 inline Core *core() { return Core::inst(); }

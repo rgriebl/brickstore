@@ -95,6 +95,7 @@ class QmlBrickLink : public QObject
     Q_PROPERTY(BrickLink::Store *store READ store CONSTANT)
     Q_PROPERTY(BrickLink::Orders *orders READ orders CONSTANT)
     Q_PROPERTY(BrickLink::Carts *carts READ carts CONSTANT)
+    Q_PROPERTY(BrickLink::Database *database READ database CONSTANT)
 
 public:
     static void registerTypes();
@@ -145,6 +146,7 @@ public:
     BrickLink::Store *store() const;
     BrickLink::Orders *orders() const;
     BrickLink::Carts *carts() const;
+    BrickLink::Database *database() const;
 
 signals:
     void priceGuideUpdated(QmlPriceGuide pg);

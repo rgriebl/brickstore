@@ -36,9 +36,12 @@ class Cart;
 class Carts;
 class Incomplete;
 class Core;
+class Database;
 class TextImport;
 class Store;
 class Lot;
+class ItemChangeLogEntry;
+class ColorChangeLogEntry;
 
 class ColorModel;
 class InternalColorModel;

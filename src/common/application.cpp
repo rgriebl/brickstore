@@ -29,7 +29,6 @@
 
 #include "bricklink/core.h"
 #include "bricklink/store.h"
-#include "bricklink/updatedatabase.h"
 #include "common/actionmanager.h"
 #include "common/announcements.h"
 #include "common/application.h"
@@ -210,12 +209,12 @@ void Application::afterInit()
         m_undoGroup->addStack(document->model()->undoStack());
     });
 
-    if (!BrickLink::core()->isDatabaseValid() || BrickLink::core()->isDatabaseUpdateNeeded()) {
+    if (!BrickLink::core()->database()->isValid() || BrickLink::core()->database()->isUpdateNeeded()) {
         if (!QCoro::waitFor(updateDatabase())) {
             QCoro::waitFor(UIHelpers::warning(tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files.")));
         }
     }
-    if (BrickLink::core()->isDatabaseValid()) {
+    if (BrickLink::core()->database()->isValid()) {
         openQueuedDocuments();
 
         // restore autosaves and/or last session
@@ -307,6 +306,9 @@ QCoro::Task<bool> Application::updateDatabase()
 {
     bool noWindows = (DocumentList::inst()->count() == 0);
 
+    if (BrickLink::core()->database()->updateStatus() == BrickLink::UpdateStatus::Updating)
+        co_return false;
+
     //TODO: block UI here
 
     QStringList files = DocumentList::inst()->allFiles();
@@ -318,15 +320,13 @@ QCoro::Task<bool> Application::updateDatabase()
         if (DocumentList::inst()->count())
             co_return false;
 
-        UpdateDatabase update;
-
         bool success = co_await UIHelpers::progressDialog(tr("Update Database"),
                                                           tr("Updating the BrickLink database"),
-                                                          &update,
-                                                          &UpdateDatabase::progress,
-                                                          &UpdateDatabase::finished,
-                                                          qOverload<>(&UpdateDatabase::start),
-                                                          &UpdateDatabase::cancel);
+                                                          BrickLink::core()->database(),
+                                                          &BrickLink::Database::updateProgress,
+                                                          &BrickLink::Database::updateFinished,
+                                                          qOverload<>(&BrickLink::Database::startUpdate),
+                                                          &BrickLink::Database::cancelUpdate);
         for (const auto &file : files)
             Document::load(file);
 
@@ -673,7 +673,11 @@ bool Application::initBrickLink(QString *errString)
             BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
                                                 Config::inst()->brickLinkPassword() });
         });
-        BrickLink::core()->readDatabase();
+        try {
+            BrickLink::core()->database()->read();
+        } catch (const Exception &) {
+            // this is not a critical error, but expected on the first run, so just ignore it
+        }
     }
     return bl;
 }

@@ -38,6 +38,7 @@ private:
     static bool lessThan(const PartColorCode &pcc, uint id) { return pcc.m_id < id; }
 
     friend class Core;
+    friend class Database;
     friend class TextImport;
 };
 

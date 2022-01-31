@@ -308,6 +308,11 @@ BrickLink::Carts *QmlBrickLink::carts() const
     return BrickLink::core()->carts();
 }
 
+BrickLink::Database *QmlBrickLink::database() const
+{
+    return BrickLink::core()->database();
+}
+
 
 char QmlBrickLink::firstCharInString(const QString &str)
 {

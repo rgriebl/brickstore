@@ -364,7 +364,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
     m_versions = new QLabel();
     m_versions->setAlignment(Qt::AlignCenter);
-    connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
+    connect(BrickLink::core()->database(), &BrickLink::Database::lastUpdatedChanged,
             this, &WelcomeWidget::updateVersionsText);
     layout->addWidget(m_versions, 4, 1, 1, 2);
 
@@ -378,7 +378,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 void WelcomeWidget::updateVersionsText()
 {
     auto delta = HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
-                                                  BrickLink::core()->databaseDate());
+                                                  BrickLink::core()->database()->lastUpdated());
 
     QString dbd = u"<b>" % delta % u"</b>";
     QString ver = u"<b>" % QLatin1String(BRICKSTORE_VERSION) % u"</b>";

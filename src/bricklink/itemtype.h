@@ -63,6 +63,7 @@ private:
     static bool lessThan(const ItemType &itt, char id) { return itt.m_id < id; }
 
     friend class Core;
+    friend class Database;
     friend class TextImport;
 };
 

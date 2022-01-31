@@ -507,23 +507,23 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
     std::sort(m_itemChangelog.begin(), m_itemChangelog.end());
 }
 
-void BrickLink::TextImport::exportTo(Core *bl)
+void BrickLink::TextImport::exportTo(Database *db)
 {
-    std::swap(bl->m_colors, m_colors);
-    std::swap(bl->m_item_types, m_item_types);
-    std::swap(bl->m_categories, m_categories);
-    std::swap(bl->m_items, m_items);
-    std::swap(bl->m_pccs, m_pccs);
-    std::swap(bl->m_itemChangelog, m_itemChangelog);
-    std::swap(bl->m_colorChangelog, m_colorChangelog);
+    std::swap(db->m_colors, m_colors);
+    std::swap(db->m_itemTypes, m_item_types);
+    std::swap(db->m_categories, m_categories);
+    std::swap(db->m_items, m_items);
+    std::swap(db->m_pccs, m_pccs);
+    std::swap(db->m_itemChangelog, m_itemChangelog);
+    std::swap(db->m_colorChangelog, m_colorChangelog);
 
     for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
-        Item &item = bl->m_items[it.key()];
+        Item &item = db->m_items[it.key()];
         item.setConsistsOf(it.value());
     }
 
     for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
-        Item &item = bl->m_items[it.key()];
+        Item &item = db->m_items[it.key()];
         item.setAppearsIn(it.value());
     }
 }

@@ -177,15 +177,15 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 8: Writing the database to disk...\n");
 
-    int dbVersionHighest = int(BrickLink::Core::DatabaseVersion::Latest);
-    int dbVersionLowest = int(BrickLink::Core::DatabaseVersion::Version_3);
+    int dbVersionHighest = int(BrickLink::Database::Version::Latest);
+    int dbVersionLowest = int(BrickLink::Database::Version::Version_3);
 
     Q_ASSERT(dbVersionHighest >= dbVersionLowest);
 
     for (int v = dbVersionHighest; v >= dbVersionLowest; --v) {
         printf("  > version %d... ", v);
-        auto dbVersion = static_cast<BrickLink::Core::DatabaseVersion>(v);
-        if (bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(dbVersion), dbVersion))
+        auto dbVersion = static_cast<BrickLink::Database::Version>(v);
+        if (bl->writeDatabase(bl->dataPath() + BrickLink::Database::defaultDatabaseName(dbVersion), dbVersion))
             printf("done\n");
         else
             printf("failed\n");

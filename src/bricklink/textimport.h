@@ -34,7 +34,7 @@ public:
     ~TextImport();
 
     bool import(const QString &path);
-    void exportTo(Core *);
+    void exportTo(Database *db);
 
     bool importInventories(std::vector<bool> &processedInvs);
 
