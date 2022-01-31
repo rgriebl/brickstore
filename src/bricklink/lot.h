@@ -86,6 +86,7 @@ public:
     int tierQuantity(int i) const      { return m_tier_quantity [qBound(0, i, 2)]; }
     void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
     double price() const               { return m_price; }
+    double priceKilo() const           { return price() > 0 && weight() > 0 ? price() / weight() * 1000 : 0; }
     void setPrice(double p)            { m_price = p; }
     double tierPrice(int i) const      { return m_tier_price[qBound(0, i, 2)]; }
     void setTierPrice(int i, double p) { m_tier_price[qBound(0, i, 2)] = p; }

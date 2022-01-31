@@ -1108,6 +1108,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
     case DocumentModel::PriceDiff:
     case DocumentModel::Price:
     case DocumentModel::Total:
+    case DocumentModel::PriceKilo:
     case DocumentModel::Cost:
     case DocumentModel::TierP1:
     case DocumentModel::TierP2:

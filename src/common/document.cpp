@@ -1863,6 +1863,7 @@ QVector<ColumnData> Document::defaultColumnLayout(bool simpleMode)
         DocumentModel::PriceDiff,
         DocumentModel::Price,
         DocumentModel::Total,
+        DocumentModel::PriceKilo,
         DocumentModel::Cost,
         DocumentModel::Bulk,
         DocumentModel::Sale,
@@ -1904,6 +1905,7 @@ QVector<ColumnData> Document::defaultColumnLayout(bool simpleMode)
         DocumentModel::DateLastSold,
         DocumentModel::PriceOrig,
         DocumentModel::PriceDiff,
+        DocumentModel::PriceKilo,
         DocumentModel::QuantityOrig,
         DocumentModel::QuantityDiff,
     };
