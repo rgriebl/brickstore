@@ -28,7 +28,7 @@ class Store : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateFinished)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)
     Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY updateFinished)
     Q_PROPERTY(int lotCount READ lotCount NOTIFY updateFinished)
@@ -48,13 +48,15 @@ signals:
     void updateStarted();
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
+    void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
     Store(QObject *parent = nullptr);
     ~Store();
+    void setUpdateStatus(UpdateStatus updateStatus);
 
     bool m_valid = false;
-    BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
+    UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;
     LotList m_lots;
     QDateTime m_lastUpdated;

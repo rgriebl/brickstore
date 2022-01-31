@@ -288,7 +288,7 @@ Carts::Carts(QObject *parent)
                 }
             }
             m_lastUpdated = QDateTime::currentDateTime();
-            m_updateStatus = success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
+            setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
             emit updateFinished(success, success ? QString { } : message);
             m_job = nullptr;
         }
@@ -413,13 +413,21 @@ void Carts::emitDataChanged(int row, int col)
     emit dataChanged(from, to);
 }
 
+void Carts::setUpdateStatus(UpdateStatus updateStatus)
+{
+    if (updateStatus != m_updateStatus) {
+        m_updateStatus = updateStatus;
+        emit updateStatusChanged(updateStatus);
+    }
+}
+
 
 void Carts::startUpdate()
 {
     if (updateStatus() == UpdateStatus::Updating)
         return;
     Q_ASSERT(!m_job);
-    m_updateStatus = UpdateStatus::Updating;
+    setUpdateStatus(UpdateStatus::Updating);
 
     QUrl url("https://www.bricklink.com/v2/globalcart.page"_l1);
 

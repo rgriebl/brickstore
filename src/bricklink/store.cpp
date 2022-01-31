@@ -54,7 +54,7 @@ BrickLink::Store::Store(QObject *parent)
             } else {
                 message = tr("Failed to download the store inventory") % u": " % job->errorString();
             }
-            m_updateStatus = success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed;
+            setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
             emit updateFinished(success, message);
             m_job = nullptr;
         }
@@ -66,12 +66,20 @@ BrickLink::Store::~Store()
     qDeleteAll(m_lots);
 }
 
+void BrickLink::Store::setUpdateStatus(UpdateStatus updateStatus)
+{
+    if (updateStatus != m_updateStatus) {
+        m_updateStatus = updateStatus;
+        emit updateStatusChanged(updateStatus);
+    }
+}
+
 bool BrickLink::Store::startUpdate()
 {
     if (updateStatus() == UpdateStatus::Updating)
         return false;
     Q_ASSERT(!m_job);
-    m_updateStatus = UpdateStatus::Updating;
+    setUpdateStatus(UpdateStatus::Updating);
 
     QUrl url("https://www.bricklink.com/invExcelFinal.asp"_l1);
     QUrlQuery query;

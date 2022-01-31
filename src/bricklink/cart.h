@@ -94,7 +94,7 @@ class Carts : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateFinished)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)
     Q_PROPERTY(QVector<Cart *> carts READ carts NOTIFY updateFinished)
 
@@ -141,15 +141,17 @@ signals:
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
     void fetchLotsFinished(BrickLink::Cart *cart, bool success, const QString &message);
+    void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
     Carts(QObject *parent = nullptr);
     QVector<Cart *> parseGlobalCart(const QByteArray &data);
     int parseSellerCart(Cart *cart, const QByteArray &data);
     void emitDataChanged(int row, int col);
+    void setUpdateStatus(UpdateStatus updateStatus);
 
     bool m_valid = false;
-    BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
+    UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;
     QVector<TransferJob *> m_cartJobs;
     QDateTime m_lastUpdated;
