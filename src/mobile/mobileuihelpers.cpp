@@ -65,11 +65,11 @@ QQuickDialog *MobileUIHelpers::createDialog(const QString &qmlFile, const QVaria
     return nullptr;
 }
 
-QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(const QString &msg,
+QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString msg,
                                                                        UIHelpers::Icon icon,
                                                                        StandardButtons buttons,
                                                                        StandardButton defaultButton,
-                                                                       const QString &title)
+                                                                       QString title)
 {
     Q_UNUSED(icon)
 
@@ -86,9 +86,9 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(const QSt
     co_return static_cast<StandardButton>(dialog->property("clickedButton").toInt());
 }
 
-QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(const QString &text,
-                                                                    const QString &initialValue,
-                                                                    const QString &title)
+QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text,
+                                                                    QString initialValue,
+                                                                    QString title)
 {
     auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
                                    { "title"_l1, title },
@@ -106,11 +106,11 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(const QStrin
         co_return { };
 }
 
-QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(const QString &text,
-                                                                   const QString &unit,
+QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(QString text,
+                                                                   QString unit,
                                                                    double initialValue,
                                                                    double minValue, double maxValue,
-                                                                   int decimals, const QString &title)
+                                                                   int decimals, QString title)
 {
     auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
                                    { "title"_l1, title },
@@ -132,10 +132,10 @@ QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(const QString
         co_return { };
 }
 
-QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(const QString &text,
-                                                                 const QString &unit,
+QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
+                                                                 QString unit,
                                                                  int initialValue, int minValue,
-                                                                 int maxValue, const QString &title)
+                                                                 int maxValue, QString title)
 {
     auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
                                    { "title"_l1, title },
@@ -157,16 +157,16 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(const QString &
 }
 
 
-QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(const QColor &initialColor,
-                                                                 const QString &title)
+QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(QColor initialColor,
+                                                                 QString title)
 {
     //TODO: port Qt5's DefaultColorDialog.qml to QQC2 and use it here
     co_return { };
 }
 
-QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, const QString &fileName,
-                                                                 const QStringList &filters,
-                                                                 const QString &title)
+QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QString fileName,
+                                                                 QStringList filters,
+                                                                 QString title)
 {    
     auto item = createItem("uihelpers/FileDialog.qml"_l1, {
                                { "fileMode"_l1, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
