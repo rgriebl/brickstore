@@ -293,7 +293,7 @@ bool DesktopApplication::notifyOtherInstance()
                 while (need) {
                     auto got = client->bytesAvailable();
                     if (got < need) {
-                        client->waitForReadyRead();
+                        client->waitForReadyRead(timeout);
                     } else if (header) {
                         need = 0;
                         ds >> need;
@@ -304,6 +304,7 @@ bool DesktopApplication::notifyOtherInstance()
                     }
                 }
                 client->write("X", 1);
+                client->close();
 
                 for (const auto &f : qAsConst(files))
                     QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
@@ -318,7 +319,7 @@ bool DesktopApplication::notifyOtherInstance()
 
         for (int i = 0; i < 2; ++i) { // try twice
             client.connectToServer(socketName);
-            if (client.waitForConnected(timeout / 2) || i)
+            if (client.waitForConnected(timeout) || i)
                 break;
             else
                 QThread::msleep(static_cast<unsigned long>(timeout) / 4);
@@ -338,9 +339,9 @@ bool DesktopApplication::notifyOtherInstance()
             ds << qint32(data.size() - int(sizeof(qint32)));
 
             bool res = (client.write(data) == data.size());
-            res = res && client.waitForBytesWritten(timeout / 2);
-            res = res && client.waitForReadyRead(timeout / 2);
-            res = res && (client.read(1) == QByteArray(1, 'X'));
+            res = res && client.waitForBytesWritten(timeout);
+//            res = res && client.waitForReadyRead(timeout);
+//            res = res && (client.read(1) == QByteArray(1, 'X'));
 
             if (res) {
                 delete server;
