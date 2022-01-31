@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2022.1.3] - 2022-01-31
+This is another bug-fix release.
+
+### Fixed
+- There were still a few crashes when closing message dialogs.
+- The filter fields behaved erratically when you saved favorite filters before.
+- Importing orders after updating the database produced broken item and color references.
+- Loading the cached order data is now done in a background thread to improve startup performance.
+
+
 ## [2022.1.2] - 2022-01-25
 This is a bug-fix release.
 
@@ -410,7 +420,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.1.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.1.3...HEAD
+[2022.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.3
 [2022.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.2
 [2022.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.1
 [2021.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.10.2
