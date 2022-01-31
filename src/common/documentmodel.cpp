@@ -1634,6 +1634,16 @@ void DocumentModel::initializeColumns()
               return doubleCompare(l1->total(), l2->total());
           },
       });
+    C(PriceKilo, Column {
+          .defaultWidth = 15,
+          .alignment = Qt::AlignRight,
+          .editable = false,
+          .title = QT_TR_NOOP("Price / kg"),
+          .displayFn = [&](const Lot *lot) { return lot->priceKilo(); },
+          .compareFn = [&](const Lot *l1, const Lot *l2) {
+              return doubleCompare(l1->priceKilo(), l2->priceKilo());
+          },
+      });
     C(Sale, Column {
           .defaultWidth = 5,
           .alignment = Qt::AlignRight,

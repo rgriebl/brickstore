@@ -61,6 +61,7 @@ public:
         PriceDiff,
         Price,
         Total,
+        PriceKilo,
         Cost,
         Bulk,
         Sale,
