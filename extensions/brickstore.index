@@ -1951,8 +1951,8 @@
                 <parameter type="int *" name="e" default=""/>
             </function>
             <function name="languageChange" fullname="CheckForUpdates::languageChange" href="checkforupdates.html#languageChange" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="37" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="void" signature="void languageChange()"/>
-            <function name="showVersionChanges" fullname="CheckForUpdates::showVersionChanges" href="checkforupdates.html#showVersionChanges" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="38" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showVersionChanges(const int )">
-                <parameter type="const int" name="" default=""/>
+            <function name="showVersionChanges" fullname="CheckForUpdates::showVersionChanges" href="checkforupdates.html#showVersionChanges" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="38" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showVersionChanges(int )">
+                <parameter type="int" name="" default=""/>
             </function>
             <variable name="m_changelogUrl" fullname="CheckForUpdates::m_changelogUrl" href="checkforupdates.html#m_changelogUrl-var" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="43" type="int" static="false"/>
             <variable name="m_checkUrl" fullname="CheckForUpdates::m_checkUrl" href="checkforupdates.html#m_checkUrl-var" status="internal" access="private" location="checkforupdates.h" filepath="/build/src/desktop/checkforupdates.h" lineno="42" type="int" static="false"/>
@@ -2358,12 +2358,12 @@
             <function name="shouldSwitchViews" fullname="DesktopUIHelpers::shouldSwitchViews" href="desktopuihelpers.html#shouldSwitchViews" status="internal" access="private" location="desktopuihelpers.h" filepath="/build/src/desktop/desktopuihelpers.h" lineno="33" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int shouldSwitchViews(int *e)">
                 <parameter type="int *" name="e" default=""/>
             </function>
-            <function name="showMessageBox" fullname="DesktopUIHelpers::showMessageBox" href="desktopuihelpers.html#showMessageBox" status="internal" access="private" location="desktopuihelpers.h" filepath="/build/src/desktop/desktopuihelpers.h" lineno="40" meta="plain" virtual="non" const="false" static="false" final="false" override="true" type="int" signature="int showMessageBox(const int &amp;, int , int , int , const int &amp;) override">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="showMessageBox" fullname="DesktopUIHelpers::showMessageBox" href="desktopuihelpers.html#showMessageBox" status="internal" access="private" location="desktopuihelpers.h" filepath="/build/src/desktop/desktopuihelpers.h" lineno="40" meta="plain" virtual="non" const="false" static="false" final="false" override="true" type="int" signature="int showMessageBox(int , int , int , int , int ) override">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
             <variable name="m_selectAllFilter" fullname="DesktopUIHelpers::m_selectAllFilter" href="desktopuihelpers.html#m_selectAllFilter-var" status="internal" access="private" location="desktopuihelpers.h" filepath="/build/src/desktop/desktopuihelpers.h" lineno="69" type="int *" static="false"/>
             <variable name="s_defaultParent" fullname="DesktopUIHelpers::s_defaultParent" href="desktopuihelpers.html#s_defaultParent-var" status="internal" access="private" location="desktopuihelpers.h" filepath="/build/src/desktop/desktopuihelpers.h" lineno="68" type="int" static="true"/>
@@ -2508,8 +2508,8 @@
             <function name="isBlockingOperationActive" fullname="Document::isBlockingOperationActive" href="document.html#isBlockingOperationActive" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="149" meta="plain" virtual="non" const="true" static="false" final="false" override="false" type="bool" signature="bool isBlockingOperationActive() const"/>
             <function name="isBlockingOperationCancelable" fullname="Document::isBlockingOperationCancelable" href="document.html#isBlockingOperationCancelable" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="153" meta="plain" virtual="non" const="true" static="false" final="false" override="false" type="bool" signature="bool isBlockingOperationCancelable() const"/>
             <function name="isRestoredFromAutosave" fullname="Document::isRestoredFromAutosave" href="document.html#isRestoredFromAutosave" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="160" meta="plain" virtual="non" const="true" static="false" final="false" override="false" type="bool" signature="bool isRestoredFromAutosave() const"/>
-            <function name="load" fullname="Document::load" href="document.html#load" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="244" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int load(const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="load" fullname="Document::load" href="document.html#load" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="244" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int load(int )">
+                <parameter type="int" name="" default=""/>
             </function>
             <function name="loadFromFile" fullname="Document::loadFromFile" href="document.html#loadFromFile" status="internal" access="private" location="document.h" filepath="/build/src/common/document.h" lineno="245" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="Document *" signature="Document * loadFromFile(const int &amp;fileName)">
                 <parameter type="const int &amp;" name="fileName" default=""/>
@@ -2858,11 +2858,11 @@
             <function name="importBrickLinkStore" fullname="DocumentIO::importBrickLinkStore" href="documentio.html#importBrickLinkStore" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="53" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int *" signature="int * importBrickLinkStore(int *)">
                 <parameter type="int *" name="" default=""/>
             </function>
-            <function name="importBrickLinkXML" fullname="DocumentIO::importBrickLinkXML" href="documentio.html#importBrickLinkXML" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="57" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int importBrickLinkXML(const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="importBrickLinkXML" fullname="DocumentIO::importBrickLinkXML" href="documentio.html#importBrickLinkXML" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="57" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int importBrickLinkXML(int )">
+                <parameter type="int" name="" default=""/>
             </function>
-            <function name="importLDrawModel" fullname="DocumentIO::importLDrawModel" href="documentio.html#importLDrawModel" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="58" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int importLDrawModel(const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="importLDrawModel" fullname="DocumentIO::importLDrawModel" href="documentio.html#importLDrawModel" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="58" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int importLDrawModel(int )">
+                <parameter type="int" name="" default=""/>
             </function>
             <function name="nameFiltersForBrickStoreXML" fullname="DocumentIO::nameFiltersForBrickStoreXML" href="documentio.html#nameFiltersForBrickStoreXML" status="internal" access="private" location="documentio.h" filepath="/build/src/common/documentio.h" lineno="39" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int nameFiltersForBrickStoreXML(bool )">
                 <parameter type="bool" name="" default=""/>
@@ -5073,45 +5073,45 @@
                 <parameter type="int" name="" default=""/>
             </function>
             <function name="UIHelpers" fullname="UIHelpers::UIHelpers" href="uihelpers.html#UIHelpers" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="211" meta="constructor" virtual="non" const="false" static="false" final="false" override="false" type="" signature="UIHelpers()"/>
-            <function name="critical" fullname="UIHelpers::critical" href="uihelpers.html#critical" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="119" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int critical(const int &amp;, int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="critical" fullname="UIHelpers::critical" href="uihelpers.html#critical" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="119" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int critical(int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
-            <function name="information" fullname="UIHelpers::information" href="uihelpers.html#information" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="102" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int information(const int &amp;, int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="information" fullname="UIHelpers::information" href="uihelpers.html#information" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="102" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int information(int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
             <function name="inst" fullname="UIHelpers::inst" href="uihelpers.html#inst" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="212" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="UIHelpers *" signature="UIHelpers * inst()"/>
             <function name="messageBoxClosed" fullname="UIHelpers::messageBoxClosed" href="uihelpers.html#messageBoxClosed" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="217" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int messageBoxClosed()"/>
-            <function name="question" fullname="UIHelpers::question" href="uihelpers.html#question" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="108" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int question(const int &amp;, int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="question" fullname="UIHelpers::question" href="uihelpers.html#question" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="108" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int question(int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
-            <function name="showMessageBox" fullname="UIHelpers::showMessageBox" href="uihelpers.html#showMessageBox" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="183" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showMessageBox(const int &amp;, int , int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="showMessageBox" fullname="UIHelpers::showMessageBox" href="uihelpers.html#showMessageBox" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="183" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showMessageBox(int , int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
-            <function name="showMessageBoxHelper" fullname="UIHelpers::showMessageBoxHelper" href="uihelpers.html#showMessageBoxHelper" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="178" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showMessageBoxHelper(const int &amp;, int , int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="showMessageBoxHelper" fullname="UIHelpers::showMessageBoxHelper" href="uihelpers.html#showMessageBoxHelper" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="178" meta="plain" virtual="non" const="false" static="false" final="false" override="false" type="int" signature="int showMessageBoxHelper(int , int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
-            <function name="warning" fullname="UIHelpers::warning" href="uihelpers.html#warning" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="114" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int warning(const int &amp;, int , int , const int &amp;)">
-                <parameter type="const int &amp;" name="" default=""/>
+            <function name="warning" fullname="UIHelpers::warning" href="uihelpers.html#warning" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="114" meta="plain" virtual="non" const="false" static="true" final="false" override="false" type="int" signature="int warning(int , int , int , int )">
                 <parameter type="int" name="" default=""/>
                 <parameter type="int" name="" default=""/>
-                <parameter type="const int &amp;" name="" default=""/>
+                <parameter type="int" name="" default=""/>
+                <parameter type="int" name="" default=""/>
             </function>
             <variable name="Icon" fullname="UIHelpers::Icon" href="uihelpers.html#Icon-var" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="60" type="int" static="false"/>
             <variable name="m_messageBoxCount" fullname="UIHelpers::m_messageBoxCount" href="uihelpers.html#m_messageBoxCount-var" status="internal" access="private" location="uihelpers.h" filepath="/build/src/common/uihelpers.h" lineno="218" type="int" static="false"/>
