@@ -796,45 +796,51 @@ void Orders::reloadOrdersFromCache()
     if (core()->userId().isEmpty())
         return;
 
-    stopwatch sw("Loading orders from cache");
-
     QString path = core()->dataPath() % u"orders/" % core()->userId();
 
     QFileInfo stamp(path % u"/.stamp");
     m_lastUpdated = stamp.lastModified();
     setUpdateStatus(stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
-    QDirIterator dit(path, { "*.order.xml"_l1 },
-                     QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
-    while (dit.hasNext()) {
-        try {
-            dit.next();
-            QFile f(dit.filePath());
-            if (!f.open(QIODevice::ReadOnly))
-                throw Exception(&f, "Failed to open order XML");
-            auto orders = Orders::parseOrdersXML(f.readAll());
-            if (orders.size() != 1)
-                throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
-            std::unique_ptr<Order> order(*orders.keyBegin());
+    QThreadPool::globalInstance()->start([this, path]() {
+        stopwatch sw("Loading orders from cache");
 
-            QDir d = dit.fileInfo().absoluteDir();
-            QString addressFileName = order->id() % u".brickstore.json";
-            if (d.exists(addressFileName)) {
-                QFile f(d.absoluteFilePath(addressFileName));
-                if (f.open(QIODevice::ReadOnly) && (f.size() < 5000)) {
-                    auto json = QJsonDocument::fromJson(f.readAll());
-                    if (json.isObject()) {
-                        order->setAddress(json["address"_l1].toString());
-                        order->setPhone(json["phone"_l1].toString());
+        QDirIterator dit(path, { "*.order.xml"_l1 },
+                         QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
+        while (dit.hasNext()) {
+            try {
+                dit.next();
+                QFile f(dit.filePath());
+                if (!f.open(QIODevice::ReadOnly))
+                    throw Exception(&f, "Failed to open order XML");
+                auto orders = Orders::parseOrdersXML(f.readAll());
+                if (orders.size() != 1)
+                    throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
+                Order *order = *orders.keyBegin();
+                order->moveToThread(this->thread());
+
+                QDir d = dit.fileInfo().absoluteDir();
+                QString addressFileName = order->id() % u".brickstore.json";
+                if (d.exists(addressFileName)) {
+                    QFile f(d.absoluteFilePath(addressFileName));
+                    if (f.open(QIODevice::ReadOnly) && (f.size() < 5000)) {
+                        auto json = QJsonDocument::fromJson(f.readAll());
+                        if (json.isObject()) {
+                            order->setAddress(json["address"_l1].toString());
+                            order->setPhone(json["phone"_l1].toString());
+                        }
                     }
                 }
+                QMetaObject::invokeMethod(this, [this, order]() {
+                    std::unique_ptr<Order> uniqueOrder { order };
+                    appendOrderToModel(std::move(uniqueOrder));
+                });
+            } catch (const Exception &e) {
+                // keep this UI silent for now
+                qWarning() << "Failed to load order XML:" << e.error();
             }
-            appendOrderToModel(std::move(order));
-        } catch (const Exception &e) {
-            // keep this UI silent for now
-            qWarning() << "Failed to load order XML:" << e.error();
         }
-    }
+    });
 }
 
 QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
