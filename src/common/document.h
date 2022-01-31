@@ -348,7 +348,7 @@ private:
     QString               m_title;
     QImage                m_thumbnail;
 
-    BrickLink::Order *    m_order;
+    BrickLink::Order *    m_order = nullptr;
 
     bool                  m_blocked = false;
     QString               m_blockTitle;
