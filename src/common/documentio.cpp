@@ -119,7 +119,7 @@ Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
     return document;
 }
 
-QCoro::Task<Document *> DocumentIO::importBrickLinkXML(const QString &fileName)
+QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {
@@ -149,7 +149,7 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(const QString &fileName)
 }
 
 
-QCoro::Task<Document *> DocumentIO::importLDrawModel(const QString &fileName)
+QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {

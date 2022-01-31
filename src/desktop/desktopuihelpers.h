@@ -37,27 +37,27 @@ public:
     static QObject *selectAllFilter();
 
 protected:
-    QCoro::Task<StandardButton> showMessageBox(const QString &msg, UIHelpers::Icon icon,
+    QCoro::Task<StandardButton> showMessageBox(QString msg, UIHelpers::Icon icon,
                                                StandardButtons buttons, StandardButton defaultButton,
-                                               const QString &title) override;
+                                               QString title) override;
 
-    QCoro::Task<std::optional<QString>> getInputString(const QString &text,
-                                                       const QString &initialValue,
-                                                       const QString &title) override;
-    QCoro::Task<std::optional<double>> getInputDouble(const QString &text, const QString &unit,
+    QCoro::Task<std::optional<QString>> getInputString(QString text,
+                                                       QString initialValue,
+                                                       QString title) override;
+    QCoro::Task<std::optional<double>> getInputDouble(QString text, QString unit,
                                                       double initialValue,  double minValue,
                                                       double maxValue, int decimals,
-                                                      const QString &title) override;
-    QCoro::Task<std::optional<int>> getInputInteger(const QString &text, const QString &unit,
+                                                      QString title) override;
+    QCoro::Task<std::optional<int>> getInputInteger(QString text, QString unit,
                                                     int initialValue, int minValue,
-                                                    int maxValue, const QString &title) override;
+                                                    int maxValue, QString title) override;
 
-    QCoro::Task<std::optional<QColor>> getInputColor(const QColor &initialcolor,
-                                                     const QString &title) override;
+    QCoro::Task<std::optional<QColor>> getInputColor(QColor initialcolor,
+                                                     QString title) override;
 
-    QCoro::Task<std::optional<QString>> getFileName(bool doSave, const QString &fileName,
-                                                    const QStringList &filters,
-                                                    const QString &title = { }) override;
+    QCoro::Task<std::optional<QString>> getFileName(bool doSave, QString fileName,
+                                                    QStringList filters,
+                                                    QString title = { }) override;
 
     UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                             const QString &message) override;

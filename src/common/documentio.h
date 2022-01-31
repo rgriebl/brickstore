@@ -54,8 +54,8 @@ public:
     static Document *importBrickLinkOrder(BrickLink::Order *order);
     static Document *importBrickLinkCart(BrickLink::Cart *cart);
 
-    static QCoro::Task<Document *> importBrickLinkXML(const QString &fileName = { });
-    static QCoro::Task<Document *> importLDrawModel(const QString &fileName = { });
+    static QCoro::Task<Document *> importBrickLinkXML(QString fileName = { });
+    static QCoro::Task<Document *> importLDrawModel(QString fileName = { });
 
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);

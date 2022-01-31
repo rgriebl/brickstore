@@ -241,7 +241,7 @@ public:
     Q_INVOKABLE QCoro::Task<> saveCurrentColumnLayout();
     Q_INVOKABLE void setColumnLayoutFromId(const QString &layoutId);
 
-    static QCoro::Task<Document *> load(const QString &fileName = { });
+    static QCoro::Task<Document *> load(QString fileName = { });
     static Document *loadFromFile(const QString &fileName);
     void saveToFile(const QString &fileName);
     QCoro::Task<bool> save(bool saveAs);

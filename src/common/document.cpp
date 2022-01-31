@@ -1462,7 +1462,7 @@ void Document::hideColumn(int logical, bool oldHidden, int newHidden)
                                              logical, oldHidden, newHidden));
 }
 
-QCoro::Task<Document *> Document::load(const QString &fileName)
+QCoro::Task<Document *> Document::load(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {

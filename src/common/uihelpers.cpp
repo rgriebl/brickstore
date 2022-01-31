@@ -46,10 +46,10 @@ QString UIHelpers::defaultTitle()
     return QCoreApplication::applicationName();
 }
 
-QCoro::Task<UIHelpers::StandardButton> UIHelpers::showMessageBoxHelper(const QString &msg, Icon icon,
+QCoro::Task<UIHelpers::StandardButton> UIHelpers::showMessageBoxHelper(QString msg, Icon icon,
                                                                        StandardButtons buttons,
                                                                        StandardButton defaultButton,
-                                                                       const QString &title)
+                                                                       QString title)
 {
     // we don't want more than 1 message box visible at any time
     while (m_messageBoxCount > 0)
@@ -71,10 +71,10 @@ UIHelpers *UIHelpers::inst()
     return s_inst;
 }
 
-QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, const QString &fileName,
-                                                                  const QString &fileTitle,
-                                                                  const QStringList &filters,
-                                                                  const QString &title)
+QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, QString fileName,
+                                                                  QString fileTitle,
+                                                                  QStringList filters,
+                                                                  QString title)
 {
     QString fn = Config::inst()->lastDirectory();
 

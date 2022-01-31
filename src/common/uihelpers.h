@@ -99,66 +99,66 @@ public:
 
     static QString defaultTitle();
 
-    static QCoro::Task<StandardButton> information(const QString &text, StandardButtons buttons = Ok,
+    static QCoro::Task<StandardButton> information(QString text, StandardButtons buttons = Ok,
                                                    StandardButton defaultButton = NoButton,
-                                                   const QString &title = { }) {
+                                                   QString title = { }) {
         return inst()->showMessageBoxHelper(text, Information, buttons, defaultButton, title);
     }
 
-    static QCoro::Task<StandardButton> question(const QString &text,
+    static QCoro::Task<StandardButton> question(QString text,
                                                 StandardButtons buttons = StandardButtons(Yes | No),
                                                 StandardButton defaultButton = NoButton,
-                                                const QString &title = { }) {
+                                                QString title = { }) {
         return inst()->showMessageBoxHelper(text, Question, buttons, defaultButton, title);
     }
-    static QCoro::Task<StandardButton> warning(const QString &text, StandardButtons buttons = Ok,
+    static QCoro::Task<StandardButton> warning(QString text, StandardButtons buttons = Ok,
                                                StandardButton defaultButton = NoButton,
-                                               const QString &title = { }) {
+                                               QString title = { }) {
         return inst()->showMessageBoxHelper(text, Warning, buttons, defaultButton, title);
     }
-    static QCoro::Task<StandardButton> critical(const QString &text, StandardButtons buttons = Ok,
+    static QCoro::Task<StandardButton> critical(QString text, StandardButtons buttons = Ok,
                                                 StandardButton defaultButton = NoButton,
-                                                const QString &title = { }) {
+                                                QString title = { }) {
         return inst()->showMessageBoxHelper(text, Critical, buttons, defaultButton, title);
     }
 
-    static QCoro::Task<std::optional<QString>> getString(const QString &text,
-                                                         const QString &initialValue = { },
-                                                         const QString &title = { }) {
+    static QCoro::Task<std::optional<QString>> getString(QString text,
+                                                         QString initialValue = { },
+                                                         QString title = { }) {
         return inst()->getInputString(text, initialValue, title);
     }
-    static QCoro::Task<std::optional<double>> getDouble(const QString &text, const QString &unit,
+    static QCoro::Task<std::optional<double>> getDouble(QString text, QString unit,
                                                         double initialValue,
                                                         double minValue = std::numeric_limits<double>::min(),
                                                         double maxValue = std::numeric_limits<double>::max(),
-                                                        int decimals = 1, const QString &title = { }) {
+                                                        int decimals = 1, QString title = { }) {
         return inst()->getInputDouble(text, unit, initialValue, minValue, maxValue, decimals, title);
     }
-    static QCoro::Task<std::optional<int>> getInteger(const QString &text, const QString &unit,
+    static QCoro::Task<std::optional<int>> getInteger(QString text, QString unit,
                                                       int initialValue,
                                                       int minValue = std::numeric_limits<int>::min(),
                                                       int maxValue = std::numeric_limits<int>::max(),
-                                                      const QString &title = { }) {
+                                                      QString title = { }) {
         return inst()->getInputInteger(text, unit, initialValue, minValue, maxValue, title);
     }
 
-    static QCoro::Task<std::optional<QColor>> getColor(const QColor &initialColor, const QString &title = { }) {
+    static QCoro::Task<std::optional<QColor>> getColor(QColor initialColor, QString title = { }) {
         return inst()->getInputColor(initialColor, title);
     }
 
-    static QCoro::Task<std::optional<QString>> getSaveFileName(const QString &fileName,
-                                                               const QStringList &filters,
-                                                               const QString &title = { },
-                                                               const QString &fileTitle = { }) {
+    static QCoro::Task<std::optional<QString>> getSaveFileName(QString fileName,
+                                                               QStringList filters,
+                                                               QString title = { },
+                                                               QString fileTitle = { }) {
         return inst()->getFileNameHelper(true, fileName, fileTitle, filters, title);
     }
 
-    static QCoro::Task<std::optional<QString>> getOpenFileName(const QStringList &filters,
-                                                               const QString &title = { }) {
+    static QCoro::Task<std::optional<QString>> getOpenFileName(QStringList filters,
+                                                               QString title = { }) {
         return inst()->getFileNameHelper(false, { }, { }, filters, title);
     }
 
-    static QCoro::Task<bool> progressDialog(const QString &title, const QString &message,
+    static QCoro::Task<bool> progressDialog(QString title, QString message,
                                             auto context, auto progress, auto finished, auto start, auto cancel) {
 
         QScopedPointer<UIHelpers_ProgressDialogInterface> pd(inst()->createProgressDialog(title, message));
@@ -175,38 +175,38 @@ protected:
     virtual UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                                     const QString &message) = 0;
 
-    virtual QCoro::Task<StandardButton> showMessageBoxHelper(const QString &msg, UIHelpers::Icon icon,
+    virtual QCoro::Task<StandardButton> showMessageBoxHelper(QString msg, UIHelpers::Icon icon,
                                                              StandardButtons buttons,
                                                              StandardButton defaultButton,
-                                                             const QString &title);
+                                                             QString title);
 
-    virtual QCoro::Task<StandardButton> showMessageBox(const QString &msg, UIHelpers::Icon icon,
+    virtual QCoro::Task<StandardButton> showMessageBox(QString msg, UIHelpers::Icon icon,
                                                        StandardButtons buttons,
                                                        StandardButton defaultButton,
-                                                       const QString &title = { }) = 0;
+                                                       QString title = { }) = 0;
 
-    virtual QCoro::Task<std::optional<QString>> getInputString(const QString &text,
-                                                               const QString &initialValue,
-                                                               const QString &title) = 0;
-    virtual QCoro::Task<std::optional<double>> getInputDouble(const QString &text, const QString &unit,
+    virtual QCoro::Task<std::optional<QString>> getInputString(QString text,
+                                                               QString initialValue,
+                                                               QString title) = 0;
+    virtual QCoro::Task<std::optional<double>> getInputDouble(QString text, QString unit,
                                                               double initialValue,  double minValue,
                                                               double maxValue, int decimals,
-                                                              const QString &title) = 0;
-    virtual QCoro::Task<std::optional<int>> getInputInteger(const QString &text, const QString &unit,
+                                                              QString title) = 0;
+    virtual QCoro::Task<std::optional<int>> getInputInteger(QString text, QString unit,
                                                             int initialValue, int minValue,
-                                                            int maxValue, const QString &title) = 0;
+                                                            int maxValue, QString title) = 0;
 
-    virtual QCoro::Task<std::optional<QColor>> getInputColor(const QColor &initialcolor,
-                                                             const QString &title) = 0;
+    virtual QCoro::Task<std::optional<QColor>> getInputColor(QColor initialcolor,
+                                                             QString title) = 0;
 
-    virtual QCoro::Task<std::optional<QString>> getFileName(bool doSave, const QString &fileName,
-                                                            const QStringList &filters,
-                                                            const QString &title = { }) = 0;
+    virtual QCoro::Task<std::optional<QString>> getFileName(bool doSave, QString fileName,
+                                                            QStringList filters,
+                                                            QString title = { }) = 0;
 
-    QCoro::Task<std::optional<QString>> getFileNameHelper(bool doSave, const QString &fileName,
-                                                          const QString &fileTitle,
-                                                          const QStringList &filters,
-                                                          const QString &title = { });
+    QCoro::Task<std::optional<QString>> getFileNameHelper(bool doSave, QString fileName,
+                                                          QString fileTitle,
+                                                          QStringList filters,
+                                                          QString title = { });
 
     UIHelpers();
     static UIHelpers *inst();

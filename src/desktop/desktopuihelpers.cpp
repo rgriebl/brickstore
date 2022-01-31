@@ -131,11 +131,11 @@ QObject *DesktopUIHelpers::selectAllFilter()
 }
 
 
-QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(const QString &msg,
+QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(QString msg,
                                                                         UIHelpers::Icon icon,
                                                                         StandardButtons buttons,
                                                                         StandardButton defaultButton,
-                                                                        const QString &title)
+                                                                        QString title)
 {
     if (qobject_cast<QApplication *>(qApp)) {
         QMessageBox mb(QMessageBox::Icon(icon), !title.isEmpty() ? title : defaultTitle(), msg,
@@ -169,9 +169,9 @@ QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(const QS
     }
 }
 
-QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(const QString &text,
-                                                                     const QString &initialValue,
-                                                                     const QString &title)
+QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(QString text,
+                                                                     QString initialValue,
+                                                                     QString title)
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
@@ -188,11 +188,11 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(const QStri
         co_return { };
 }
 
-QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(const QString &text,
-                                                                    const QString &unit,
+QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(QString text,
+                                                                    QString unit,
                                                                     double initialValue,
                                                                     double minValue, double maxValue,
-                                                                    int decimals, const QString &title)
+                                                                    int decimals, QString title)
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
@@ -221,10 +221,10 @@ QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(const QStrin
         co_return { };
 }
 
-QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(const QString &text,
-                                                                  const QString &unit,
+QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(QString text,
+                                                                  QString unit,
                                                                   int initialValue, int minValue,
-                                                                  int maxValue, const QString &title)
+                                                                  int maxValue, QString title)
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
@@ -252,8 +252,8 @@ QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(const QString 
         co_return { };
 }
 
-QCoro::Task<std::optional<QColor>> DesktopUIHelpers::getInputColor(const QColor &initialColor,
-                                                                   const QString &title)
+QCoro::Task<std::optional<QColor>> DesktopUIHelpers::getInputColor(QColor initialColor,
+                                                                   QString title)
 {
     QColorDialog dlg(s_defaultParent);
     dlg.setWindowFlag(Qt::Sheet);
@@ -270,9 +270,9 @@ QCoro::Task<std::optional<QColor>> DesktopUIHelpers::getInputColor(const QColor 
         co_return { };
 }
 
-QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, const QString &fileName,
-                                                                  const QStringList &filters,
-                                                                  const QString &title)
+QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, QString fileName,
+                                                                  QStringList filters,
+                                                                  QString title)
 {
     QFileDialog fd(s_defaultParent, !title.isEmpty() ? title : defaultTitle(), fileName,
                    filters.join(";;"_l1));
