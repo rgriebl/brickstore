@@ -560,8 +560,12 @@ void MainWindow::setupMenuBar()
     ActionManager *am = ActionManager::inst();
 
     auto *viewDocksMenu = am->qAction("view_docks")->menu();
-    for (QDockWidget *dock : qAsConst(m_dock_widgets))
-        viewDocksMenu->addAction(dock->toggleViewAction());
+    connect(viewDocksMenu, &QMenu::aboutToShow,
+            this, [this, viewDocksMenu]() {
+        viewDocksMenu->clear();
+        for (QDockWidget *dock : qAsConst(m_dock_widgets))
+            viewDocksMenu->addAction(dock->toggleViewAction());
+    });
 
     setupMenu("document_import", {
                   "document_import_bl_inv",
