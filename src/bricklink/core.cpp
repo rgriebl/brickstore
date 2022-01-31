@@ -432,8 +432,8 @@ Core *Core::create(const QString &datadir, QString *errstring)
 {
     if (!s_inst) {
         s_inst = new Core(datadir);
-#if !defined(BS_BACKEND)
         s_inst->m_database = new Database(s_inst);
+#if !defined(BS_BACKEND)
         s_inst->m_store = new Store(s_inst);
         s_inst->m_orders = new Orders(s_inst);
         s_inst->m_carts = new Carts(s_inst);

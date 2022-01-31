@@ -30,6 +30,7 @@
 #  include <windows.h>
 #endif
 
+#include "utility/exception.h"
 #include "utility/utility.h"
 #include "bricklink/core.h"
 #include "bricklink/textimport.h"
@@ -167,7 +168,7 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Computing the database...\n");
 
-    blti.exportTo(bl);
+    blti.exportTo(bl->database());
 
     extern int _dwords_for_appears, _qwords_for_consists;
 
@@ -185,10 +186,12 @@ int RebuildDatabase::exec()
     for (int v = dbVersionHighest; v >= dbVersionLowest; --v) {
         printf("  > version %d... ", v);
         auto dbVersion = static_cast<BrickLink::Database::Version>(v);
-        if (bl->writeDatabase(bl->dataPath() + BrickLink::Database::defaultDatabaseName(dbVersion), dbVersion))
+        try {
+            bl->database()->write(bl->dataPath() + BrickLink::Database::defaultDatabaseName(dbVersion), dbVersion);
             printf("done\n");
-        else
-            printf("failed\n");
+        } catch (const Exception &e) {
+            printf("failed: %s\n", e.what());
+        }
     }
 
     printf("\nFINISHED.\n\n");
