@@ -492,13 +492,11 @@ void Database::write(const QString &filename, Version version) const
         check(cw.endChunk());
     }
 
-    if (version >= Version::Version_3) {
-        check(cw.startChunk(ChunkId('P','C','C',' '), 1));
-        ds << quint32(m_pccs.size());
-        for (const PartColorCode &pcc : m_pccs)
-            writePCCToDatabase(pcc, ds, version);
-        check(cw.endChunk());
-    }
+    check(cw.startChunk(ChunkId('P','C','C',' '), 1));
+    ds << quint32(m_pccs.size());
+    for (const PartColorCode &pcc : m_pccs)
+        writePCCToDatabase(pcc, ds, version);
+    check(cw.endChunk());
 
     check(cw.endChunk()); // BSDB root chunk
 
@@ -521,15 +519,10 @@ void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, Versio
     col.m_type = static_cast<Color::Type>(flags);
 }
 
-void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, Version v) const
+void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, Version) const
 {
-    dataStream << col.m_id;
-    if (v <= Version::Version_3)
-        dataStream << col.m_name.toUtf8();
-    else
-        dataStream << col.m_name;
-    dataStream << col.m_ldraw_id << col.m_color << quint32(col.m_type) << col.m_popularity
-               << col.m_year_from << col.m_year_to;
+    dataStream << col.m_id << col.m_name << col.m_ldraw_id << col.m_color << quint32(col.m_type)
+               << col.m_popularity << col.m_year_from << col.m_year_to;
 }
 
 
@@ -538,13 +531,9 @@ void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, 
     dataStream >> cat.m_id >> cat.m_name;
 }
 
-void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version v) const
+void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version) const
 {
-    dataStream << cat.m_id;
-    if (v <= Version::Version_3)
-        dataStream << cat.m_name.toUtf8();
-    else
-        dataStream << cat.m_name;
+    dataStream << cat.m_id << cat.m_name;
 }
 
 
@@ -568,7 +557,7 @@ void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, 
     itt.m_has_subconditions = flags & 0x10;
 }
 
-void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStream, Version v) const
+void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStream, Version) const
 {
     quint8 flags = 0;
     flags |= (itt.m_has_inventories   ? 0x01 : 0);
@@ -577,19 +566,11 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     flags |= (itt.m_has_year          ? 0x08 : 0);
     flags |= (itt.m_has_subconditions ? 0x10 : 0);
 
-    dataStream << qint8(itt.m_id) << qint8(itt.m_picture_id);
-    if (v <= Version::Version_3)
-        dataStream << itt.m_name.toUtf8();
-    else
-        dataStream << itt.m_name;
-    dataStream << flags << quint32(itt.m_categoryIndexes.size());
+    dataStream << qint8(itt.m_id) << qint8(itt.m_picture_id) << itt.m_name << flags
+               << quint32(itt.m_categoryIndexes.size());
 
-    for (const quint16 catIdx : itt.m_categoryIndexes) {
-        if (v <= Version::Version_3)
-            dataStream << quint32(m_categories[catIdx].id());
-        else
-            dataStream << catIdx;
-    }
+    for (const quint16 catIdx : itt.m_categoryIndexes)
+        dataStream << catIdx;
 }
 
 
@@ -645,63 +626,21 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_knownColorIndexes.shrink_to_fit();
 }
 
-void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
+void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version) const
 {
-    dataStream << item.m_id;
-    if (v <= Version::Version_3) {
-        dataStream << item.m_name.toUtf8()
-                   << qint8(item.m_itemTypeId)
-                   << quint32(item.category()->id())
-                   << quint32((item.m_defaultColorIndex != -1) ? item.defaultColor()->id()
-                                                               : Color::InvalidId)
-                   << item.m_lastInventoryUpdate
-                   << item.m_weight
-                   << quint32(&item - m_items.data()) // the index
-                   << quint32(item.m_year);
-    } else {
-        dataStream << item.m_name
-                   << item.m_itemTypeIndex
-                   << item.m_categoryIndex
-                   << item.m_defaultColorIndex
-                   << qint8(item.m_itemTypeId)
-                   << item.m_year
-                   << item.m_lastInventoryUpdate
-                   << item.m_weight;
-    }
+    dataStream << item.m_id << item.m_name << item.m_itemTypeIndex << item.m_categoryIndex
+               << item.m_defaultColorIndex << qint8(item.m_itemTypeId) << item.m_year
+               << item.m_lastInventoryUpdate << item.m_weight;
 
     union {
         quint32 ui32;
         Item::AppearsInRecord ai;
     } appearsInUnion;
-    if (v <= Version::Version_3) {
-        quint32 colorCount = 0;
-        for (auto it = item.m_appears_in.cbegin(); it != item.m_appears_in.cend(); ) {
-            ++colorCount;
-            it += (1 + it->m20);
-        }
-        dataStream << colorCount; // color count
-        if (colorCount)
-            dataStream << quint32(2 + item.m_appears_in.size()); // dword count
-        for (auto it = item.m_appears_in.cbegin(); it != item.m_appears_in.cend(); ) {
-            // fix color header (index -> id)
-            uint colorCount = it->m20;
-            uint colorId = quint32(m_colors[it->m12].id());
-            appearsInUnion.ai.m12 = colorId;
-            appearsInUnion.ai.m20 = colorCount;
-            dataStream << appearsInUnion.ui32;
-            ++it;
 
-            for (uint i = 0; i < colorCount; ++i, ++it) {
-                appearsInUnion.ai = *it;
-                dataStream << appearsInUnion.ui32;
-            }
-        }
-    } else {
-        dataStream << quint32(item.m_appears_in.size());
-        for (const auto &ai : item.m_appears_in) {
-            appearsInUnion.ai = ai;
-            dataStream << appearsInUnion.ui32;
-        }
+    dataStream << quint32(item.m_appears_in.size());
+    for (const auto &ai : item.m_appears_in) {
+        appearsInUnion.ai = ai;
+        dataStream << appearsInUnion.ui32;
     }
 
     dataStream << quint32(item.m_consists_of.size());
@@ -711,18 +650,12 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
     } consistsOfUnion;
     for (const auto &co : item.m_consists_of) {
         consistsOfUnion.co = co;
-        if (v <= Version::Version_3) // fix color index -> id
-            consistsOfUnion.co.m_colorIndex = m_colors[consistsOfUnion.co.m_colorIndex].id();
         dataStream << consistsOfUnion.ui64;
     }
 
     dataStream << quint32(item.m_knownColorIndexes.size());
-    for (const quint16 colorIndex : item.m_knownColorIndexes) {
-        if (v <= Version::Version_3)
-            dataStream << quint32(m_colors[colorIndex].id());
-        else
-            dataStream << colorIndex;
-    }
+    for (const quint16 colorIndex : item.m_knownColorIndexes)
+        dataStream << colorIndex;
 }
 
 void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Version)
@@ -733,14 +666,9 @@ void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, 
     pcc.m_colorIndex = colorIndex;
 }
 
-void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version v) const
+void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version) const
 {
-    if (v <= Version::Version_3) {
-        dataStream << pcc.id() << qint8(pcc.item()->itemTypeId())
-                   << QString::fromLatin1(pcc.item()->id()) << pcc.color()->id();
-    } else {
-        dataStream << pcc.m_id << qint32(pcc.m_itemIndex) << qint32(pcc.m_colorIndex);
-    }
+    dataStream << pcc.m_id << qint32(pcc.m_itemIndex) << qint32(pcc.m_colorIndex);
 }
 
 void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Version)

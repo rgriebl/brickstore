@@ -44,9 +44,11 @@ public:
         Invalid,
         Version_1, // deprecated
         Version_2, // deprecated
-        Version_3,
-        Version_4,
-        Version_5,
+        Version_3, // deprecated
+        Version_4, // 2021.5.1
+        Version_5, // 2022.1.1
+
+        OldestStillSupported = Version_4,
 
         Latest = Version_5
     };
