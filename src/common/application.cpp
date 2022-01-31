@@ -627,7 +627,8 @@ void Application::setupLogging()
         if (s_inst && s_inst->m_uiMessageHandler) {
             s_inst->m_uiMessageHandler(type, ctx, msg);
         } else {
-            auto ctxCopy = new QMessageLogContext(ctx.file, ctx.line, ctx.function, ctx.category);
+            auto ctxCopy = new QMessageLogContext(qstrdup(ctx.file), ctx.line,
+                                                  qstrdup(ctx.function), qstrdup(ctx.category));
             s_bufferedMessages.append({ type, ctxCopy, msg });
         }
     };
@@ -642,6 +643,9 @@ void Application::setUILoggingHandler(QtMessageHandler callback)
         for (const auto &t : qAsConst(s_bufferedMessages)) {
             auto *ctx = std::get<1>(t);
             m_uiMessageHandler(std::get<0>(t), *ctx, std::get<2>(t));
+            delete [] ctx->category;
+            delete [] ctx->file;
+            delete [] ctx->function;
             delete ctx;
         }
     }
