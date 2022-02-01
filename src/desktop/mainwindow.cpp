@@ -1241,27 +1241,23 @@ QCoro::Task<bool> MainWindow::closeAllViews()
     const auto docs = DocumentList::inst()->documents();
 
     for (const auto doc : docs) {
-        QMap<ViewPane *, View *> allViews;
-        forEachViewPane([doc, &allViews](ViewPane *vp) {
-            if (auto *view = vp->viewForDocument(doc))
-                allViews.insert(vp, view);
-            return false;
-        });
-        Q_ASSERT(!allViews.isEmpty());
         if (doc->model()->isModified()) {
+            // bring a View of the doc to the front, preferably in the active ViewPane
+
+            QMap<ViewPane *, View *> allViews;
+            forEachViewPane([doc, &allViews](ViewPane *vp) {
+                if (auto *view = vp->viewForDocument(doc))
+                    allViews.insert(vp, view);
+                return false;
+            });
+            Q_ASSERT(!allViews.isEmpty());
+
             if (!allViews.contains(m_activeViewPane))
                 setActiveViewPane(allViews.firstKey());
             m_activeViewPane->activateDocument(doc);
-
-            View *view = allViews.value(m_activeViewPane);
-            allViews.remove(m_activeViewPane);
-            Q_ASSERT(view == m_activeViewPane->activeView());
-
-            if (!co_await view->document()->requestClose())
-                co_return false;
         }
-
-        qDeleteAll(allViews);
+        if (!co_await doc->requestClose())
+            co_return false;
     }
 
     delete m_add_dialog;

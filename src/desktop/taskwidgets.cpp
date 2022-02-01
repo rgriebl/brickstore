@@ -414,7 +414,7 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
         if (idx.isValid()) {
             if (QMenu::exec(actions(), viewport()->mapToGlobal(pos)) == m_closeDocument) {
                 if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
-                    emit doc->requestClose();
+                    doc->requestClose();
             }
         }
     });

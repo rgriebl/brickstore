@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- Closing the main window with a modified document in a split view would crash on exit.
+
 
 ## [2022.1.3] - 2022-01-31
 This is another bug-fix release.
@@ -23,6 +26,7 @@ This is a bug-fix release.
 - Closing documents that had been split off into floating windows could lead to crashes.
 - Filtering by `<` or `>` on the new date based columns failed.
 - Downloading the store contents could stop working after some time.
+
 
 ## [2022.1.1] - 2022-01-21
 
