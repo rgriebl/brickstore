@@ -11,55 +11,61 @@ on:
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.runs-on }}
     env:
       BUILD_NUMBER: ${{ github.run_number }}
+      BRICKSTORE_QT_MODULES: libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev
+
     strategy:
       fail-fast: false
       matrix:
         config:
         - name: "Windows 32bit"
           artifact: "Windows-x86"
-          os: windows-2019
+          runs-on: windows-2019
+          os: windows
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
-          openssl_version: 'Win32OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
           qmake_extra_config: 'CONFIG+=sentry'
           vcpkg_triplet: 'x86-windows'
 
         - name: "Windows 64bit"
           artifact: "Windows-x64"
-          os: windows-2019
+          runs-on: windows-2019
+          os: windows
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
-          openssl_version: 'Win64OpenSSL_Light-1_1_1k'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           qmake_extra_config: 'CONFIG+=sentry'
           vcpkg_triplet: 'x64-windows'
 
         - name: "Ubuntu 21.04 64bit"
           artifact: "Ubuntu-21.04"
-          os: ubuntu-20.04
+          runs-on: ubuntu-20.04
+          os: linux
           debian_container: "buildpack-deps:21.04"
 
         - name: "Debian 11 Backend 64bit"
           artifact: "Debian-11-Backend"
-          os: ubuntu-20.04
+          runs-on: ubuntu-20.04
+          os: linux
           debian_container: "buildpack-deps:bullseye"
           qmake_extra_config: "CONFIG+=backend-only"
           generate_docs: true
 
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
-          os: ubuntu-20.04
+          runs-on: ubuntu-20.04
+          os: linux
           appimage: true
           qt_version: '5.15.2'
           qt_arch: ''
 
         - name: "macOS 64bit"
           artifact: "macOS"
-          os: macos-11
+          runs-on: macos-11
+          os: macos
           qt_version: '5.15.2'
           qt_arch: ''
           qmake_extra_config: 'CONFIG+=sentry'
@@ -67,18 +73,18 @@ jobs:
 
         - name: "Android ARM"
           artifact: "Android-ARM"
-          mobile: true
-          os: ubuntu-20.04
-          qt_version: '6.2.1'
+          runs-on: ubuntu-20.04
+          os: android
+          qt_version: '6.2.2'
           qt_arch: 'android_armv7'
           qt_target: 'android'
           qmake_extra_config: ''
 
 #        - name: "iOS"
 #          artifact: "iOS"
-#          mobile: true
-#          os: macos-latest
-#          qt_version: '6.2.1'
+#          runs-on: macos-11
+#          os: ios
+#          qt_version: '6.2.2'
 #          qt_arch: ''
 #          qt_target: 'ios'
 #          qmake_extra_config: ''
@@ -93,16 +99,16 @@ jobs:
 
     - name: Cache vcpkg on Windows
       uses: actions/cache@v2
-      if: startsWith(matrix.config.os, 'windows') && matrix.config.vcpkg_triplet
+      if: (matrix.config.os == 'windows') && matrix.config.vcpkg_triplet
       with:
         path: |
           C:\vcpkg\installed
           C:\vcpkg\downloads
         key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
 
-    - name: Cache vcpkg on macOS
+    - name: Cache vcpkg on Unix
       uses: actions/cache@v2
-      if: (!startsWith(matrix.config.os, 'windows')) && matrix.config.vcpkg_triplet
+      if: (matrix.config.os != 'windows') && matrix.config.vcpkg_triplet
       with:
         path: |
           /usr/local/share/vcpkg/installed
@@ -111,10 +117,9 @@ jobs:
 
     - name: Cache Qt from qt.io
       id: cache-qt
-      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage || matrix.config.mobile)
+      if: (matrix.config.os != 'linux') || matrix.config.appimage
       uses: actions/cache@v1
       with:
-        py7zrversion: '>=0.17.0' # https://github.com/miurahr/aqtinstall/issues/438
         path: ../Qt
         key: ${{ matrix.config.os }}-${{ matrix.config.qt_target }}-${{ matrix.config.qt_arch }}-QtCache
 
@@ -122,7 +127,7 @@ jobs:
     #################################################
 
     - name: Install Qt from qt.io
-      if: (!startsWith(matrix.config.os, 'ubuntu') || matrix.config.appimage || matrix.config.mobile)
+      if: (matrix.config.os != 'linux') || matrix.config.appimage
       uses: jurplel/install-qt-action@v2
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -133,7 +138,7 @@ jobs:
         tools: ${{ matrix.config.qt_tools }}
 
     - name: Install Qt from qt.io (OS version for cross-compiling)
-      if: (matrix.config.mobile)
+      if: (matrix.config.os == 'android') || (matrix.config.os == 'ios')
       uses: jurplel/install-qt-action@v2
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -142,33 +147,33 @@ jobs:
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
 
-    - name: Install Qt on Linux (native/appimage)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.mobile
+    - name: Install Qt from Linux Distro (native/appimage)
+      if: (matrix.config.os == 'linux') && !matrix.config.debian_container
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo DEBIAN_FRONTEND=noninteractive apt -y update
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install $BRICKSTORE_QT_MODULES debhelper lsb-release fakeroot build-essential
       shell: bash
 
-    - name: Install Qt on Linux (container)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
+    - name: Install Qt from Linux Distro (container)
+      if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
-        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt update
-        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install debhelper libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install $BRICKSTORE_QT_MODULES debhelper lsb-release fakeroot build-essential
       shell: bash
 
     # Install dependencies using vcpkg
     #################################################
 
-    - name: Install OpenSSL and sentry.io on Windows (vcpkg)
-      if: startsWith(matrix.config.os, 'windows')
+    - name: Install OpenSSL and sentry.io for Windows (vcpkg)
+      if: (matrix.config.os == 'windows')
       run: |
         c:\vcpkg\vcpkg install --recurse openssl sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
         echo VCPKG_PATH=%VCPKG_INSTALLATION_ROOT%\installed\${{ matrix.config.vcpkg_triplet }} >> %GITHUB_ENV%
       shell: cmd
 
-    - name: Install sentry.io on macOS
-      if: startsWith(matrix.config.os, 'macos')
+    - name: Install sentry.io for macOS (vcpkg)
+      if: (matrix.config.os == 'macos')
       run: |
         vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
         echo "VCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" >> $GITHUB_ENV
@@ -181,11 +186,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Build on Windows
+    # Build for Windows
     #################################################
 
-    - name: Build on Windows
-      if: startsWith(matrix.config.os, 'windows')
+    - name: Build for Windows
+      if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }} VCPKG_PATH=%VCPKG_PATH%
@@ -193,49 +198,39 @@ jobs:
         nmake installer
       shell: cmd
 
-    - name: Upload Installer on Windows
+    - name: Upload Windows Installer
+      if: (matrix.config.os == 'windows')
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'windows')
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.exe"
 
-    - name: Upload PDBs to sentry.io on Windows
-      if: startsWith(matrix.config.os, 'windows')
+    - name: Upload Windows debug info to sentry.io
+      if: (matrix.config.os == 'windows')
       run: |
         curl.exe -L --output ..\\sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
         ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore .
       shell: cmd
 
-    - name: Create Sentry release
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage
-      uses: getsentry/action-release@v1
-      env:
-        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        SENTRY_ORG: brickstore
-        SENTRY_PROJECT: brickstore
-      with:
-        version: "brickstore@${{ github.run_number }}"
-
     # Build for Linux
     #################################################
 
-    - name: Build on Linux (native)
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container && !matrix.config.appimage && !matrix.config.mobile
+    - name: Build for Linux (native)
+      if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
       shell: bash
 
-    - name: Build on Linux (container)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && !matrix.config.appimage
+    - name: Build for Linux (container)
+      if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
         sudo docker exec -w /build "debian-build" qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         sudo docker exec -w /build "debian-build" make package
       shell: bash
 
-    - name: Build on Linux (appimage)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage
+    - name: Build for Linux (appimage)
+      if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10
         qmake CONFIG+=release QMAKE_CXX=g++-10 QMAKE_CC=gcc-10 ${{ matrix.config.qmake_extra_config }}
@@ -243,16 +238,16 @@ jobs:
         make appimage
       shell: bash
 
-    - name: Upload DEB on Linux
+    - name: Upload Linux DEB
+      if: (matrix.config.os == 'linux') && !matrix.config.appimage
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.appimage && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.deb"
 
-    - name: Upload AppImage on Linux
+    - name: Upload Linux AppImage
+      if: (matrix.config.os == 'linux') && matrix.config.appimage
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.appimage && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.AppImage"
@@ -261,20 +256,20 @@ jobs:
     #################################################
 
     - name: Set Android env vars
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      if: (matrix.config.os == 'android')
       run: |
         echo "ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
         echo "ANDROID_BUILD_TOOLS_REVISION=30.0.3" >> $GITHUB_ENV
 
     - name: Checkout Android openssl
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+      if: (matrix.config.os == 'android')
       run: |
         cd $ANDROID_SDK_ROOT
         echo "Checking out KDAB's OpenSSL into $ANDROID_SDK_ROOT"
         sudo git clone https://github.com/KDAB/android_openssl.git
 
-    - name: Build on Linux (Android)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
+    - name: Build for Android
+      if: (matrix.config.os == 'android')
       run: |
         echo "Using NDK: $ANDROID_NDK_ROOT"
         echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
@@ -283,9 +278,9 @@ jobs:
         make package
       shell: bash
 
-    - name: Upload Android APK on Linux
+    - name: Upload Android APK
+      if: (matrix.config.os == 'android')
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.apk"
@@ -294,25 +289,34 @@ jobs:
     #################################################
 
     - name: Build for macOS
-      if: startsWith(matrix.config.os, 'mac') && !matrix.config.mobile
+      if: (matrix.config.os == 'macos')
       run: |
         qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }} VCPKG_PATH=$VCPKG_PATH
         make
         make installer
       shell: bash
 
-    - name: Upload DMG for macOS
+    - name: Upload macOS DMG
+      if: (matrix.config.os == 'macos')
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'mac') && !matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.dmg"
+
+    - name: Upload macOS debug info to sentry.io
+      if: (matrix.config.os == 'macos')
+      run: |
+        brew install getsentry/tools/sentry-cli
+        brew link getsentry/tools/sentry-cli
+        # specifying just "." to make sentry-cli look for dSYM files on itself does not work on
+        # the CI ... the sentry-cli process will just freeze forever
+        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dsym --org brickstore --project brickstore bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
 
     # Build for iOS
     #################################################
 
     - name: Fix qmake script for iOS
-      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
+      if: (matrix.config.os == 'ios')
       run: |
         # fix a bug in aqtinstall - the qmake script for iOS isn't patched correctly
         cd ../Qt/${{ matrix.config.qt_version }}
@@ -320,16 +324,16 @@ jobs:
       shell: bash
 
     - name: Build for iOS
-      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
+      if: (matrix.config.os == 'ios')
       run: |
         qmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make
         make package || true
       shell: bash
 
-    - name: Upload Bundle for iOS
+    - name: Upload iOS Bundle
+      if: (matrix.config.os == 'ios')
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'mac') && matrix.config.mobile
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.app"
@@ -337,8 +341,8 @@ jobs:
     # Generate documentation
     #################################################
 
-    - name: Generate Documentation (Linux container)
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container && matrix.config.generate_docs
+    - name: Generate Documentation
+      if: (matrix.config.os == 'linux') && matrix.config.debian_container && matrix.config.generate_docs
       run: |
         sudo docker exec -w /build "debian-build" make extensions_doc
 
@@ -348,6 +352,7 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./doc/html
+
 
   # RELEASE
   #################################################
@@ -382,3 +387,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         args: artifacts/*
+
+    - name: Create release on sentry.io
+      uses: getsentry/action-release@v1
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_ORG: brickstore
+        SENTRY_PROJECT: brickstore
+      with:
+        version: "brickstore@${{ github.run_number }}"
