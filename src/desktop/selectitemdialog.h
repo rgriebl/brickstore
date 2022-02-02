@@ -32,11 +32,6 @@ public:
     void setPopupPosition(const QRect &pos = QRect());
 
 protected:
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    void changeEvent(QEvent *e) override;
-#elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
-    bool event(QEvent *e) override;
-#endif
     void moveEvent(QMoveEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
     void showEvent(QShowEvent *) override;
@@ -47,9 +42,12 @@ private slots:
     void checkItem(const BrickLink::Item *, bool);
 
 private:
+    void setPopupGeometryChanged(bool b);
+    bool isPopupGeometryChanged() const;
+
     bool m_popupMode = false;
     // only relevant when in popupMode and execAtPosition was called:
     QRect m_popupPos;
-    bool m_geometryChanged = false;
     QString m_geometryConfigKey;
+    QAction *m_resetGeometryAction = nullptr;
 };

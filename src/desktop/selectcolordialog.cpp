@@ -12,6 +12,8 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QPushButton>
+#include <QToolButton>
+#include <QAction>
 
 #include "bricklink/color.h"
 #include "bricklink/core.h"
@@ -40,6 +42,26 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
             this, &SelectColorDialog::checkColor);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
+
+    m_resetGeometryAction = new QAction(this);
+    m_resetGeometryAction->setIcon(QIcon::fromTheme("zoom-fit-best"_l1));
+    m_resetGeometryAction->setToolTip(tr("Reset the position to automatic mode"));
+    m_resetGeometryAction->setVisible(false);
+
+    connect(m_resetGeometryAction, &QAction::triggered, this, [this]() {
+        DesktopUIHelpers::setPopupPos(this, m_popupPos);
+        m_resetGeometryAction->setVisible(false);
+    }, Qt::QueuedConnection);
+
+    if (popupMode) {
+        auto reset = new QToolButton();
+        reset->setAutoRaise(true);
+        reset->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        reset->setDefaultAction(m_resetGeometryAction);
+
+        w_buttons->addButton(reset, QDialogButtonBox::ResetRole);
+    }
+
     setFocusProxy(w_sc);
 
     m_geometryConfigKey = popupMode ? "/MainWindow/ModifyColorPopup/Geometry"_l1
@@ -81,57 +103,33 @@ void SelectColorDialog::checkColor(const BrickLink::Color *col, bool ok)
         p->animateClick();
 }
 
+void SelectColorDialog::setPopupGeometryChanged(bool b)
+{
+    m_resetGeometryAction->setVisible(b);
+}
+
+bool SelectColorDialog::isPopupGeometryChanged() const
+{
+    return m_resetGeometryAction->isVisible();
+}
+
 void SelectColorDialog::setPopupPosition(const QRect &pos)
 {
     m_popupPos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
 }
 
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-
-void SelectColorDialog::changeEvent(QEvent *e)
-{
-    if (e->type() == QEvent::WindowStateChange) {
-        if (m_popupMode && m_popupPos.isValid()) {
-            if (windowState() & Qt::WindowMaximized) {
-                QMetaObject::invokeMethod(this, [this]() {
-                    setWindowState(Qt::WindowNoState | Qt::WindowActive);
-                    DesktopUIHelpers::setPopupPos(this, m_popupPos);
-                    m_geometryChanged = false;
-                }, Qt::QueuedConnection);
-            }
-        }
-    }
-    return QDialog::changeEvent(e);
-}
-#elif defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
-
-bool SelectColorDialog::event(QEvent *e)
-{
-    if (e->type() == QEvent::NonClientAreaMouseButtonDblClick) {
-        if (m_popupMode && m_popupPos.isValid()) {
-            QMetaObject::invokeMethod(this, [this]() {
-                DesktopUIHelpers::setPopupPos(this, m_popupPos);
-                m_geometryChanged = false;
-            }, Qt::QueuedConnection);
-            return true;
-        }
-    }
-    return QDialog::event(e);
-}
-#endif
-
 void SelectColorDialog::moveEvent(QMoveEvent *e)
 {
     QDialog::moveEvent(e);
     if (m_popupMode)
-        m_geometryChanged = true;
+        setPopupGeometryChanged(true);
 }
 
 void SelectColorDialog::resizeEvent(QResizeEvent *e)
 {
     QDialog::resizeEvent(e);
     if (m_popupMode)
-        m_geometryChanged = true;
+        setPopupGeometryChanged(true);
 }
 
 void SelectColorDialog::showEvent(QShowEvent *e)
@@ -147,9 +145,9 @@ void SelectColorDialog::showEvent(QShowEvent *e)
                 auto ba = Config::inst()->value(m_geometryConfigKey).toByteArray();
                 if (ba.isEmpty() || !restoreGeometry(ba)) {
                     DesktopUIHelpers::setPopupPos(this, m_popupPos);
-                    m_geometryChanged = false;
+                    setPopupGeometryChanged(false);
                 } else {
-                    m_geometryChanged = true;
+                    setPopupGeometryChanged(true);
                 }
             }, Qt::QueuedConnection);
         }
@@ -159,7 +157,7 @@ void SelectColorDialog::showEvent(QShowEvent *e)
 void SelectColorDialog::hideEvent(QHideEvent *e)
 {
     if (m_popupMode) {
-        if (m_geometryChanged)
+        if (isPopupGeometryChanged())
             Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
         else
             Config::inst()->remove(m_geometryConfigKey);
