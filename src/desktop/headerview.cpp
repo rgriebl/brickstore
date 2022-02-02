@@ -416,43 +416,41 @@ void HeaderView::showMenu(const QPoint &pos)
     if (!isEnabled())
         return;
 
-    QMenu m(this);
+    QVector<int> order;
+    for (int vi = 0; vi < count(); ++vi) {
+        int li = logicalIndex(vi);
+        order << li;
+    }
 
-    m.addAction(tr("Configure columns..."))->setData(-1);
-    m.addSeparator();
+    QMenu *m = new QMenu(this);
+    m->setAttribute(Qt::WA_DeleteOnClose);
 
-    QVector<QAction *> actions(count());
-    for (int li = 0; li < count(); ++li) {
-        QAction *a = nullptr;
+    m->addAction(tr("Configure columns..."))->setData(-1);
+    m->addSeparator();
 
-        a = new QAction(&m);
-        a->setText(model()->headerData(li, Qt::Horizontal, Qt::DisplayRole).toString());
+    for (int vi = 0; vi < order.count(); ++vi) {
+        int li = order.at(vi);
+
+        QAction *a = m->addAction(model()->headerData(li, Qt::Horizontal).toString());
         a->setCheckable(true);
         a->setChecked(!isSectionHidden(li));
         a->setData(li);
-
-        actions[visualIndex(li)] = a;
-    }
-    foreach (QAction *a, actions) {
-        if (a)
-            m.addAction(a);
     }
 
-    QAction *action = m.exec(pos);
+    connect(m, &QMenu::triggered, this, [this](QAction *a) {
+        int li = a->data().toInt();
+        bool on = a->isChecked();
 
-    if (!action)
-        return;
-    int idx = action->data().toInt();
-    bool on = action->isChecked();
+        if (li == -1) {
+            auto *dlg = new SectionConfigDialog(this);
+            dlg->setAttribute(Qt::WA_DeleteOnClose);
+            dlg->open();
+        } else if (li >= 0 && li < count()) {
+            setSectionHidden(li, !on);
+        }
+    });
 
-    if (idx >= 0 && idx < count()) {
-        setSectionHidden(idx, !on);
-    } else if (idx == -1) {
-        SectionConfigDialog d(this);
-        d.exec();
-    } else {
-        qWarning("HeaderView::menuActivated returned an invalid action");
-    }
+    m->popup(pos);
 }
 
 void HeaderView::sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast)

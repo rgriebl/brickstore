@@ -38,19 +38,14 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-protected slots:
-    void showBLCatalogInfo();
-    void showBLPriceGuideInfo();
-    void showBLLotsForSale();
+protected:
     void languageChange();
+    void changeEvent(QEvent *e) override;
 
 private slots:
-    void showContextMenu(const QPoint &);
     QCoro::Task<> partOut();
     void resizeColumns();
 
-protected:
-    void changeEvent(QEvent *e) override;
 
 private:
     const BrickLink::AppearsInItem *appearsIn() const;

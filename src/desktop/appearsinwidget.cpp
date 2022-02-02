@@ -31,7 +31,12 @@
 
 class AppearsInWidgetPrivate {
 public:
-    QTimer *                m_resize_timer;
+    QTimer *m_resize_timer;
+    QMenu *m_contextMenu;
+    QAction *m_partOutAction;
+    QAction *m_catalogAction;
+    QAction *m_priceGuideAction;
+    QAction *m_lotsForSaleAction;
 };
 
 AppearsInWidget::AppearsInWidget(QWidget *parent)
@@ -45,6 +50,8 @@ AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
     d->m_resize_timer = new QTimer(this);
     d->m_resize_timer->setSingleShot(true);
 
+    d->m_contextMenu = new QMenu(this);
+
     setAlternatingRowColors(true);
     setAllColumnsShowFocus(true);
     setUniformRowHeights(true);
@@ -55,44 +62,65 @@ AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
     setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::None, this));
 
-    QAction *a;
-    if (allowPartOut) {
-        a = new QAction(this);
-        a->setObjectName("appearsin_partoutitems"_l1);
-        a->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
-        connect(a, &QAction::triggered,
-                this, &AppearsInWidget::partOut);
-        addAction(a);
+    d->m_partOutAction = new QAction(this);
+    d->m_partOutAction->setObjectName("appearsin_partoutitems"_l1);
+    d->m_partOutAction->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
+    connect(d->m_partOutAction, &QAction::triggered,
+            this, &AppearsInWidget::partOut);
 
-        a = new QAction(this);
-        a->setSeparator(true);
-        addAction(a);
+    d->m_catalogAction = new QAction(this);
+    d->m_catalogAction->setObjectName("appearsin_bl_catalog"_l1);
+    d->m_catalogAction->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
+    connect(d->m_catalogAction, &QAction::triggered, this, [this]() {
+        const BrickLink::AppearsInItem *ai = appearsIn();
+
+        if (ai && ai->second)
+            BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, ai->second);
+    });
+
+    d->m_priceGuideAction = new QAction(this);
+    d->m_priceGuideAction->setObjectName("appearsin_bl_priceguide"_l1);
+    d->m_priceGuideAction->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
+    connect(d->m_priceGuideAction, &QAction::triggered, this, [this]() {
+        const BrickLink::AppearsInItem *ai = appearsIn();
+
+        if (ai && ai->second)
+            BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, ai->second,
+                                       BrickLink::core()->color(0));
+    });
+
+    d->m_lotsForSaleAction = new QAction(this);
+    d->m_lotsForSaleAction->setObjectName("appearsin_bl_lotsforsale"_l1);
+    d->m_lotsForSaleAction->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
+    connect(d->m_lotsForSaleAction, &QAction::triggered, this, [this]() {
+        const BrickLink::AppearsInItem *ai = appearsIn();
+
+        if (ai && ai->second)
+            BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, ai->second,
+                                       BrickLink::core()->color(0));
+    });
+
+    if (allowPartOut) {
+        d->m_contextMenu->addAction(d->m_partOutAction);
+        d->m_contextMenu->addSeparator();
     }
-    a = new QAction(this);
-    a->setObjectName("appearsin_bl_catalog"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
-    connect(a, &QAction::triggered,
-            this, &AppearsInWidget::showBLCatalogInfo);
-    addAction(a);
-    a = new QAction(this);
-    a->setObjectName("appearsin_bl_priceguide"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
-    connect(a, &QAction::triggered,
-            this, &AppearsInWidget::showBLPriceGuideInfo);
-    addAction(a);
-    a = new QAction(this);
-    a->setObjectName("appearsin_bl_lotsforsale"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
-    connect(a, &QAction::triggered,
-            this, &AppearsInWidget::showBLLotsForSale);
-    addAction(a);
+    d->m_contextMenu->addAction(d->m_catalogAction);
+    d->m_contextMenu->addAction(d->m_priceGuideAction);
+    d->m_contextMenu->addAction(d->m_lotsForSaleAction);
 
     connect(d->m_resize_timer, &QTimer::timeout,
             this, &AppearsInWidget::resizeColumns);
+
     connect(this, &QWidget::customContextMenuRequested,
-            this, &AppearsInWidget::showContextMenu);
-    connect(this, &QAbstractItemView::activated,
-            this, &AppearsInWidget::partOut);
+            this, [this](const QPoint &pos) {
+        if (appearsIn())
+            d->m_contextMenu->popup(viewport()->mapToGlobal(pos));
+    });
+
+    if (allowPartOut) {
+        connect(this, &QAbstractItemView::activated,
+                this, &AppearsInWidget::partOut);
+    }
 
     languageChange();
     setItem(nullptr, nullptr);
@@ -103,17 +131,10 @@ AppearsInWidget::~AppearsInWidget()
 
 void AppearsInWidget::languageChange()
 {
-    if (auto a = findChild<QAction *>("appearsin_partoutitems"_l1))
-        a->setText(tr("Part out Item..."));
-    findChild<QAction *>("appearsin_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *>("appearsin_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *>("appearsin_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
-}
-
-void AppearsInWidget::showContextMenu(const QPoint &pos)
-{
-    if (appearsIn())
-        QMenu::exec(actions(), viewport()->mapToGlobal(pos));
+    d->m_partOutAction->setText(tr("Part out Item..."));
+    d->m_catalogAction->setText(tr("Show BrickLink Catalog Info..."));
+    d->m_priceGuideAction->setText(tr("Show BrickLink Price Guide Info..."));
+    d->m_lotsForSaleAction->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 
@@ -193,30 +214,6 @@ void AppearsInWidget::changeEvent(QEvent *e)
     if (e->type() == QEvent::LanguageChange)
         languageChange();
     QTreeView::changeEvent(e);
-}
-
-void AppearsInWidget::showBLCatalogInfo()
-{
-    const BrickLink::AppearsInItem *ai = appearsIn();
-
-    if (ai && ai->second)
-        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, ai->second);
-}
-
-void AppearsInWidget::showBLPriceGuideInfo()
-{
-    const BrickLink::AppearsInItem *ai = appearsIn();
-
-    if (ai && ai->second)
-        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, ai->second, BrickLink::core()->color(0));
-}
-
-void AppearsInWidget::showBLLotsForSale()
-{
-    const BrickLink::AppearsInItem *ai = appearsIn();
-
-    if (ai && ai->second)
-        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0));
 }
 
 #include "moc_appearsinwidget.cpp"
