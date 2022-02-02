@@ -374,7 +374,7 @@ void Application::setupTerminateHandler()
         std::exception_ptr e = std::current_exception();
 
         if (e) {
-            const char *typeName = "<unknown type>";
+            const char *typeName = nullptr;
 #if defined(HAS_CXXABI)
             static size_t demangleBufferSize = 768;
             static char *demangleBuffer = static_cast<char *>(malloc(demangleBufferSize));
@@ -392,13 +392,13 @@ void Application::setupTerminateHandler()
             try {
                 std::rethrow_exception(e);
             } catch (const std::exception &exc) {
-                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName, exc.what());
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName ? typeName : typeid(exc).name(), exc.what());
             } catch (const std::exception *exc) {
-                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName, exc->what());
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s (%s)", typeName ? typeName : typeid(exc).name(), exc->what());
             } catch (const char *exc) {
                 snprintf(buffer, sizeof(buffer), "uncaught exception of type 'const char *' (%s)", exc);
             } catch (...) {
-                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s", typeName);
+                snprintf(buffer, sizeof(buffer), "uncaught exception of type %s", typeName ? typeName : "<unknown type>");
             }
         } else {
             snprintf(buffer, sizeof(buffer), "terminate was called although no exception was thrown");
