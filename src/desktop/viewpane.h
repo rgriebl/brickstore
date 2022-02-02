@@ -15,6 +15,7 @@
 
 #include <QFrame>
 
+#include <qcoro/task.h>
 #include <utility/filter.h>
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
@@ -48,7 +49,7 @@ public:
 
     void updateCurrencyRates();
     void documentCurrencyChanged(const QString &ccode);
-    void changeDocumentCurrency(QAction *a);
+    QCoro::Task<> changeDocumentCurrency(QAction *a);
     void updateStatistics();
     void updateBlockState(bool blocked);
     void focusFilter();

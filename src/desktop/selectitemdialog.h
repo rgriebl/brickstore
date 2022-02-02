@@ -29,7 +29,7 @@ public:
     void setItem(const BrickLink::Item *);
     const BrickLink::Item *item() const;
 
-    int execAtPosition(const QRect &pos = QRect());
+    void setPopupPosition(const QRect &pos = QRect());
 
 protected:
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)

@@ -108,34 +108,39 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
         checkSelected();
     });
 
+    m_contextMenu = new QMenu(this);
+
     m_orderInformation = new QAction(this);
     m_orderInformation->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_import_bl_order")->iconName()));
     connect(m_orderInformation, &QAction::triggered, this, [this]() {
         const auto selection = w_orders->selectionModel()->selectedRows();
         if (selection.size() == 1) {
-            auto order = selection.constFirst().data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
-            OrderInformationDialog d(order, this);
-            d.exec();
+            auto order = selection.constFirst().data(BrickLink::Orders::OrderPointerRole)
+                    .value<BrickLink::Order *>();
+            if (order) {
+                auto *dlg = new OrderInformationDialog(order, this);
+                dlg->setAttribute(Qt::WA_DeleteOnClose);
+                dlg->open();
+            }
         }
     });
-    addAction(m_orderInformation);
+    m_contextMenu->addAction(m_orderInformation);
+
     m_showOnBrickLink = new QAction(this);
     m_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
     connect(m_showOnBrickLink, &QAction::triggered, this, [this]() {
         const auto selection = w_orders->selectionModel()->selectedRows();
-        for (auto idx : selection) {
+        for (const auto &idx : selection) {
             auto order = idx.data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
             QByteArray orderId = order->id().toLatin1();
             BrickLink::core()->openUrl(BrickLink::URL_OrderDetails, orderId.constData());
         }
     });
-    addAction(m_showOnBrickLink);
+    m_contextMenu->addAction(m_showOnBrickLink);
 
     connect(w_orders, &QWidget::customContextMenuRequested,
             this, [this](const QPoint &pos) {
-        QModelIndex idx = w_orders->indexAt(pos);
-        if (idx.isValid())
-            QMenu::exec(actions(), w_orders->viewport()->mapToGlobal(pos));
+        m_contextMenu->popup(w_orders->viewport()->mapToGlobal(pos));
     });
 
     languageChange();

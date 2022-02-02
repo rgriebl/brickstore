@@ -26,6 +26,9 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
     : QDialog(parent)
     , m_popupMode(popupMode)
 {
+    if (popupMode)
+        setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
     setupUi(this);
 
     auto ba = Config::inst()->value("/MainWindow/ModifyColorDialog/SelectColor"_l1)
@@ -78,12 +81,9 @@ void SelectColorDialog::checkColor(const BrickLink::Color *col, bool ok)
         p->animateClick();
 }
 
-int SelectColorDialog::execAtPosition(const QRect &pos)
+void SelectColorDialog::setPopupPosition(const QRect &pos)
 {
-    setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-
     m_popupPos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
-    return QDialog::exec();
 }
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)

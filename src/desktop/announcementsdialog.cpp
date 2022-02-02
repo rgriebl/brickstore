@@ -26,6 +26,7 @@
 
 #include "utility/utility.h"
 #include "common/announcements.h"
+#include "qcoro/qcoro.h"
 #include "announcementsdialog.h"
 
 
@@ -147,10 +148,10 @@ void AnnouncementsDialog::paletteChange()
 }
 
 
-void AnnouncementsDialog::showNewAnnouncements(Announcements *announcements, QWidget *parent)
+QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcements, QWidget *parent)
 {
     if (!announcements || !announcements->hasNewAnnouncements())
-        return;
+        co_return;
 
     QString md;
     QVector<quint64> shownIds;
@@ -167,10 +168,12 @@ void AnnouncementsDialog::showNewAnnouncements(Announcements *announcements, QWi
     }
 
     if (shownIds.isEmpty())
-        return;
+        co_return;
 
-    auto ao = new AnnouncementsDialog(md, parent);
-    if (ao->exec() == QDialog::Accepted) {
+    AnnouncementsDialog dlg(md, parent);
+    dlg.open();
+
+    if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
         for (const auto &id : qAsConst(shownIds))
             announcements->markAnnouncementRead(id);
     }

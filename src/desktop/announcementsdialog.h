@@ -16,6 +16,8 @@
 #include <QDialog>
 #include <QPixmap>
 
+#include "qcoro/task.h"
+
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QTextBrowser)
 
@@ -27,7 +29,7 @@ class AnnouncementsDialog : public QDialog
 public:
     AnnouncementsDialog(const QString &markdown, QWidget *parent);
 
-    static void showNewAnnouncements(Announcements *announcements, QWidget *parent = nullptr);
+    static QCoro::Task<> showNewAnnouncements(Announcements *announcements, QWidget *parent = nullptr);
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;

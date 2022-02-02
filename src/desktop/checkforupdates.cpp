@@ -186,9 +186,9 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
         t.start(0);
         co_await t;
 
-        QDialog d(m_parent);
-        d.setWindowTitle(m_title);
-        auto layout = new QVBoxLayout(&d);
+        auto *dlg = new QDialog(m_parent);
+        dlg->setWindowTitle(m_title);
+        auto layout = new QVBoxLayout(dlg);
         auto browser = new QTextBrowser();
         browser->setReadOnly(true);
         browser->setMarkdown(md);
@@ -198,9 +198,9 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
         layout->addWidget(browser);
         auto buttons = new QDialogButtonBox(QDialogButtonBox::Close);
         auto showDL = new QPushButton(tr("Show"));
-        QObject::connect(showDL, &QPushButton::clicked, &d, [&d, url]() {
+        QObject::connect(showDL, &QPushButton::clicked, dlg, [dlg, url]() {
             QDesktopServices::openUrl(url);
-            d.close();
+            dlg->close();
         });
         bool canInstall = !m_installerUrl.isEmpty();
         showDL->setDefault(!canInstall);
@@ -210,15 +210,17 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
             auto install = new QPushButton(tr("Install"));
             install->setDefault(true);
             buttons->addButton(install, QDialogButtonBox::ActionRole);
-            QObject::connect(install, &QPushButton::clicked, &d, [this, &d]() {
+            QObject::connect(install, &QPushButton::clicked, dlg, [this, dlg]() {
                 downloadInstaller();
-                d.close();
+                dlg->close();
             });
         }
-        QObject::connect(buttons, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+        QObject::connect(buttons, &QDialogButtonBox::rejected, dlg, &QDialog::reject);
         layout->addWidget(buttons);
-        d.resize(d.fontMetrics().averageCharWidth() * 100, d.fontMetrics().height() * 30);
-        d.exec();
+        dlg->resize(dlg->fontMetrics().averageCharWidth() * 100, dlg->fontMetrics().height() * 30);
+
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->open();
     }
 }
 

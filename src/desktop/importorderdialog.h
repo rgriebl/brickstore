@@ -43,6 +43,7 @@ protected slots:
 private:
     QPushButton *w_import;
     QPushButton *w_importCombined;
+    QMenu *m_contextMenu;
     QAction *m_showOnBrickLink;
     QAction *m_orderInformation;
     QSet<QString> m_selectedCurrencyCodes;

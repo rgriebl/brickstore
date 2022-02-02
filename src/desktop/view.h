@@ -73,9 +73,9 @@ public:
 
     const LotList &selectedLots() const;
 
-    void addLots(LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
+    QCoro::Task<> addLots(LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
 
-    void consolidateLots(const LotList &lots);
+    QCoro::Task<> consolidateLots(const LotList &lots);
 
     void printScriptAction(PrintingScriptAction *printingAction);
 

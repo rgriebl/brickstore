@@ -303,22 +303,24 @@ View::View(Document *document, QWidget *parent)
                   consolidateLots(m_model->sortedLots());
           } },
         { "edit_partoutitems", [this]() { partOutItems(); } },
-        { "edit_copy_fields", [this]() {
+        { "edit_copy_fields", [this]() -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
                                         tr("Choose how fields are getting copied or merged."));
+              dlg.open();
 
-              if (dlg.exec() == QDialog::Accepted ) {
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
                   if (!lots.empty())
                       m_document->copyFields(lots, dlg.defaultMergeMode(), dlg.fieldMergeModes());
                   qDeleteAll(lots);
               }
           } },
-        { "edit_subtractitems", [this]() {
+        { "edit_subtractitems", [this]() -> QCoro::Task<> {
               SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"));
+              dlg.open();
 
-              if (dlg.exec() == QDialog::Accepted) {
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
                   if (!lots.empty())
                       m_document->subtractItems(lots);
@@ -344,26 +346,31 @@ View::View(Document *document, QWidget *parent)
               if (!lots.empty())
                   addLots(std::move(lots), AddLotMode::AddAsNew);
           } },
-        { "edit_price_to_priceguide", [this]() {
+        { "edit_price_to_priceguide", [this]() -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               //Q_ASSERT(m_setToPG.isNull());
 
               SetToPriceGuideDialog dlg(this);
+              dlg.open();
 
-              if (dlg.exec() == QDialog::Accepted)
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate());
           } },
-        { "edit_price_inc_dec", [this]() {
+        { "edit_price_inc_dec", [this]() -> QCoro::Task<> {
               bool showTiers = !m_header->isSectionHidden(DocumentModel::TierQ1);
               IncDecPricesDialog dlg(tr("Increase or decrease the prices of the selected items by"),
                                      showTiers, m_model->currencyCode(), this);
-              if (dlg.exec() == QDialog::Accepted)
+              dlg.open();
+
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->priceAdjust(dlg.isFixed(), dlg.value(), dlg.applyToTiers());
           } },
-        { "edit_cost_inc_dec", [this]() {
+        { "edit_cost_inc_dec", [this]() -> QCoro::Task<> {
               IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
                                      false, m_model->currencyCode(), this);
-              if (dlg.exec() == QDialog::Accepted)
+              dlg.open();
+
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->costAdjust(dlg.isFixed(), dlg.value());
           } },
         { "edit_color", [this]() { m_table->editCurrentItem(DocumentModel::Color); } },
@@ -565,12 +572,12 @@ void View::ensureLatestVisible()
     }
 }
 
-void View::addLots(LotList &&lots, AddLotMode addLotMode)
+QCoro::Task<> View::addLots(LotList &&lots, AddLotMode addLotMode)
 {
     // we own the items now
 
     if (lots.empty())
-        return;
+        co_return;
 
     bool startedMacro = false;
 
@@ -612,7 +619,9 @@ void View::addLots(LotList &&lots, AddLotMode addLotMode)
                     ConsolidateItemsDialog dlg(this, list,
                                                conMode == Consolidate::IntoExisting ? 0 : 1,
                                                conMode, i + 1, lots.size(), this);
-                    bool yesClicked = (dlg.exec() == QDialog::Accepted);
+                    dlg.open();
+
+                    bool yesClicked = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
                     repeatForRemaining = dlg.repeatForAll();
                     costQtyAvg = dlg.costQuantityAverage();
 
@@ -687,10 +696,10 @@ void View::addLots(LotList &&lots, AddLotMode addLotMode)
 }
 
 
-void View::consolidateLots(const LotList &lots)
+QCoro::Task<> View::consolidateLots(const LotList &lots)
 {
     if (lots.count() < 2)
-        return;
+        co_return;
 
     QVector<LotList> mergeList;
     LotList sourceLots = lots;
@@ -718,7 +727,7 @@ void View::consolidateLots(const LotList &lots)
     }
 
     if (mergeList.isEmpty())
-        return;
+        co_return;
 
     bool startedMacro = false;
 
@@ -734,7 +743,9 @@ void View::consolidateLots(const LotList &lots)
         if (!repeatForRemaining) {
             ConsolidateItemsDialog dlg(this, mergeLots, consolidateLotsHelper(mergeLots, conMode),
                                        conMode, mi + 1, mergeList.count(), this);
-            bool yesClicked = (dlg.exec() == QDialog::Accepted);
+            dlg.open();
+
+            bool yesClicked = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
             repeatForRemaining = dlg.repeatForAll();
             costQtyAvg = dlg.costQuantityAverage();
 
@@ -1001,15 +1012,16 @@ void View::print(bool asPdf)
     if (m_model->filteredLots().isEmpty())
         return;
 
-    PrintDialog pd(asPdf, this);
-    connect(&pd, &PrintDialog::paintRequested,
+    auto *dlg = new PrintDialog(asPdf, this);
+    connect(dlg, &PrintDialog::paintRequested,
             this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         printPages(previewPrt, (previewPrt->printRange() == QPrinter::Selection)
                    ? selectedLots() : model()->filteredLots(),
                    pages, scaleFactor, maxPageCount, maxWidth);
     });
-    pd.exec();
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->open();
 }
 
 void View::printScriptAction(PrintingScriptAction *printingAction)

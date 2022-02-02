@@ -149,23 +149,25 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
             this, &PrintDialog::updateScaling);
 
     connect(w_sysprint, &QLabel::linkActivated,
-            this, [this, window](const QString &) {
+            this, [this, window](const QString &) -> QCoro::Task<> {
         if (m_saveAsPdf)
             m_printer->setPrinterName(QPrinter().printerName());
 
-        QPrintDialog pd(m_printer, this);
+        QPrintDialog dlg(m_printer, this);
 
-        pd.setOption(QAbstractPrintDialog::PrintToFile);
-        pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
-        pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
-        pd.setOption(QAbstractPrintDialog::PrintPageRange);
+        dlg.setOption(QAbstractPrintDialog::PrintToFile);
+        dlg.setOption(QAbstractPrintDialog::PrintCollateCopies);
+        dlg.setOption(QAbstractPrintDialog::PrintShowPageSize);
+        dlg.setOption(QAbstractPrintDialog::PrintPageRange);
 
         if (!window->selectedLots().isEmpty())
-            pd.setOption(QAbstractPrintDialog::PrintSelection);
+            dlg.setOption(QAbstractPrintDialog::PrintSelection);
 
-        pd.setPrintRange(window->selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
+        dlg.setPrintRange(window->selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
                                                           : QAbstractPrintDialog::Selection);
-        if (pd.exec() == QDialog::Accepted)
+        dlg.open();
+
+        if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
             print();
     });
 

@@ -756,9 +756,16 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
             if (!m_select_item) {
                 m_select_item = new SelectItemDialog(true /*popup mode*/, m_table);
                 m_select_item->setWindowTitle(tr("Modify Item"));
+
+                connect(m_select_item, &QDialog::finished, this, [this](int result) {
+                    if (result == QDialog::Accepted) {
+                        auto idx = m_select_item->property("contextIndex").value<QModelIndex>();
+                        QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model());
+                        setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
+                    }
+                });
             }
             auto item = idx.data(Qt::EditRole).value<const BrickLink::Item *>();
-
             m_select_item->setItem(item);
 
             QRect centerOn;
@@ -767,8 +774,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
                                  option.rect.size());
             }
 
-            if (m_select_item->execAtPosition(centerOn) == QDialog::Accepted)
-                setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
+            m_select_item->setPopupPosition(centerOn);
+            m_select_item->setProperty("contextIndex", idx);
+            m_select_item->open();
         }
         break;
 
@@ -777,11 +785,18 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
             if (!m_select_color) {
                 m_select_color = new SelectColorDialog(true /*popup mode*/, m_table);
                 m_select_color->setWindowTitle(tr("Modify Color"));
+
+                connect(m_select_color, &QDialog::finished, this, [this](int result) {
+                    if (result == QDialog::Accepted) {
+                        auto idx = m_select_color->property("contextIndex").value<QModelIndex>();
+                        QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model());
+                        setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
+                    }
+                });
             }
             auto color = idx.data(Qt::EditRole).value<const BrickLink::Color *>();
             auto item = idx.siblingAtColumn(DocumentModel::Description).data(Qt::EditRole)
                     .value<const BrickLink::Item *>();
-
             m_select_color->setColorAndItem(color, item);
 
             QRect centerOn;
@@ -790,8 +805,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
                                  option.rect.size());
             }
 
-            if (m_select_color->execAtPosition(centerOn) == QDialog::Accepted)
-                setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
+            m_select_color->setPopupPosition(centerOn);
+            m_select_color->setProperty("contextIndex", idx);
+            m_select_color->open();
         }
         break;
 

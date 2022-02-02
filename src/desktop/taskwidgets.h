@@ -130,6 +130,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
+    QMenu *m_contextMenu;
     QAction *m_closeDocument;
 };
 

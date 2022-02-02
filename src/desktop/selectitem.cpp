@@ -924,7 +924,8 @@ QSize SelectItem::minimumSizeHint() const
 void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
-        QMenu m(this);
+        auto *m = new QMenu(this);
+        m->setAttribute(Qt::WA_DeleteOnClose);
 
         const BrickLink::Item *item = nullptr;
         QModelIndex idx = iv->indexAt(p);
@@ -932,14 +933,14 @@ void SelectItem::showContextMenu(const QPoint &p)
             item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
         if (item && item->category() != currentCategory()) {
-            connect(m.addAction(tr("Switch to the item's category")), &QAction::triggered,
+            connect(m->addAction(tr("Switch to the item's category")), &QAction::triggered,
                     this, [this, item]() { setCurrentItem(item, true); });
         }
 
         if (currentCategory() != BrickLink::CategoryModel::AllCategories) {
             QString allCatName = d->categoryModel->index(BrickLink::CategoryModel::AllCategories)
                     .data(Qt::DisplayRole).toString();
-            connect(m.addAction(tr("Switch to the \"%1\" category").arg(allCatName)),
+            connect(m->addAction(tr("Switch to the \"%1\" category").arg(allCatName)),
                     &QAction::triggered, this, [this]() {
                 setCurrentCategory(BrickLink::CategoryModel::AllCategories);
             });
@@ -964,19 +965,19 @@ void SelectItem::showContextMenu(const QPoint &p)
                 if (partPicture->isValid())
                     icon = QPixmap::fromImage(partPicture->image());
 
-                m.addSeparator();
+                m->addSeparator();
                 QString section;
                 if (partColor && partColor->id())
                     section = partColor->name() % u' ';
                 section = section % partItem->name() % u" [" % QLatin1String(partItem->id()) % u']';
-                m.addAction(icon, section)->setEnabled(false);
+                m->addAction(icon, section)->setEnabled(false);
 
-                connect(m.addAction(tr("Set filter to Minifigs consisting of this part")),
+                connect(m->addAction(tr("Set filter to Minifigs consisting of this part")),
                                     &QAction::triggered, this, [this, filter]() {
                     d->w_filter->setText(filter);
                 });
                 if (!d->w_filter->text().isEmpty()) {
-                    connect(m.addAction(tr("Narrow filter to Minifigs consisting of this part")),
+                    connect(m->addAction(tr("Narrow filter to Minifigs consisting of this part")),
                                         &QAction::triggered, this, [this, filter]() {
                         d->w_filter->setText(d->w_filter->text() % u' ' % filter);
                     });
@@ -984,8 +985,10 @@ void SelectItem::showContextMenu(const QPoint &p)
             }
         }
 
-        if (!m.isEmpty())
-            m.exec(iv->mapToGlobal(p));
+        if (!m->isEmpty())
+            m->popup(iv->mapToGlobal(p));
+        else
+            delete m;
     }
 }
 

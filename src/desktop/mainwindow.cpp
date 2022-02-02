@@ -1000,16 +1000,25 @@ void MainWindow::createActions()
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
           } },
         { "update_database", [](auto) { Application::inst()->updateDatabase(); } },
-        { "help_about", [this](auto) { AboutDialog(this).exec(); } },
-        { "help_systeminfo", [this](auto) { SystemInfoDialog(this).exec(); } },
+        { "help_about", [this](auto) {
+              auto *dlg = new AboutDialog(this);
+              dlg->setAttribute(Qt::WA_DeleteOnClose);
+              dlg->open();
+          } },
+        { "help_systeminfo", [this](auto) {
+              auto *dlg = new SystemInfoDialog(this);
+              dlg->setAttribute(Qt::WA_DeleteOnClose);
+              dlg->open();
+          } },
         { "check_for_updates", [this](auto) { m_checkForUpdates->check(false /*not silent*/); } },
         { "view_filter", [this](auto) {
               if (m_activeViewPane)
                   m_activeViewPane->focusFilter();
           } },
         { "view_column_layout_manage", [this](auto) {
-              ManageColumnLayoutsDialog d(this);
-              d.exec();
+              auto *dlg = new ManageColumnLayoutsDialog(this);
+              dlg->setAttribute(Qt::WA_DeleteOnClose);
+              dlg->open();
           } },
         { "reload_scripts", [](auto) { ScriptManager::inst()->reload(); } },
     };
@@ -1220,8 +1229,9 @@ void MainWindow::transferProgressUpdate(int p, int t)
 
 void MainWindow::showSettings(const QString &page)
 {
-    SettingsDialog d(page, this);
-    d.exec();
+    auto *dlg = new SettingsDialog(page, this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->open();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

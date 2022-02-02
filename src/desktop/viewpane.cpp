@@ -377,17 +377,19 @@ void ViewPane::documentCurrencyChanged(const QString &ccode)
     QMetaObject::invokeMethod(this, &ViewPane::updateCurrencyRates, Qt::QueuedConnection);
 }
 
-void ViewPane::changeDocumentCurrency(QAction *a)
+QCoro::Task<> ViewPane::changeDocumentCurrency(QAction *a)
 {
     if (!m_model)
-        return;
+        co_return;
 
     QString ccode = a->objectName();
 
     if (ccode != m_model->currencyCode()) {
-        ChangeCurrencyDialog d(m_model->currencyCode(), ccode, m_model->legacyCurrencyCode(), this);
-        if (d.exec() == QDialog::Accepted) {
-            double rate = d.exchangeRate();
+        ChangeCurrencyDialog dlg(m_model->currencyCode(), ccode, m_model->legacyCurrencyCode(), this);
+        dlg.open();
+
+        if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+            double rate = dlg.exchangeRate();
 
             if (rate > 0)
                 m_model->setCurrencyCode(ccode, rate);
@@ -628,8 +630,9 @@ void ViewPane::createToolBar()
     connect(m_order, &QToolButton::clicked,
             this, [this]() {
         if (m_view && m_view->document()->order()) {
-            OrderInformationDialog d(m_view->document()->order(), this);
-            d.exec();
+            auto *dlg = new OrderInformationDialog(m_view->document()->order(), this);
+            dlg->setAttribute(Qt::WA_DeleteOnClose);
+            dlg->open();
         }
     });
 

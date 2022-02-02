@@ -389,10 +389,20 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     int is = style()->pixelMetric(QStyle::PM_ListViewIconSize, nullptr, this);
     setIconSize({ int(is * 2), int(is * 2) });
 
+    m_contextMenu = new QMenu(this);
+
     m_closeDocument = new QAction(this);
     m_closeDocument->setIcon(ActionManager::inst()->qAction("document_close")->icon());
-    addAction(m_closeDocument);
 
+    connect(m_closeDocument, &QAction::triggered, this, [this]() {
+        auto idx = m_contextMenu->property("contextIndex").value<QModelIndex>();
+        if (idx.isValid()) {
+            if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
+                doc->requestClose();
+        }
+    });
+
+    m_contextMenu->addAction(m_closeDocument);
 
     connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, [this](Document *doc) {
@@ -412,10 +422,8 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
             this, [this](const QPoint &pos) {
         auto idx = indexAt(pos);
         if (idx.isValid()) {
-            if (QMenu::exec(actions(), viewport()->mapToGlobal(pos)) == m_closeDocument) {
-                if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
-                    doc->requestClose();
-            }
+            m_contextMenu->setProperty("contextIndex", idx);
+            m_contextMenu->popup(viewport()->mapToGlobal(pos));
         }
     });
 
