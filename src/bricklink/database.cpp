@@ -335,9 +335,6 @@ void Database::read(const QString &fileName)
                 break;
             }
             case ChunkId('P','C','C',' ') | 1ULL << 32: {
-                if (!gotItems || !gotColors)
-                    throw Exception("found a 'PCC ' chunk before the 'ITEM' and 'COL ' chunks");
-
                 quint32 pccc = 0;
                 ds >> pccc;
                 check();
