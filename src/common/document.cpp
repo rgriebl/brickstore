@@ -2414,7 +2414,11 @@ int Document::processAutosaves(AutosaveAction action)
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);
                         QString newFileName = fi.dir().filePath(restoredTag % u" " % fi.fileName());
-                        doc->saveToFile(newFileName);
+                        try {
+                            doc->saveToFile(newFileName);
+                        } catch (const Exception &) {
+                            // not really much we can do here
+                        }
                     } else {
                         doc->setTitle(restoredTag % u" " % savedTitle);
                     }
