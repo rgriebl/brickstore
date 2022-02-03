@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QKeyEvent>
+#include <QTimer>
 
 #include "utility/utility.h"
 #include "developerconsole.h"
@@ -22,7 +23,23 @@
 
 DeveloperConsole::DeveloperConsole(QWidget *parent)
     : QWidget(parent)
+    , m_messagesTimer(new QTimer(this))
 {
+    m_messagesTimer->setInterval(100);
+    m_messagesTimer->setSingleShot(true);
+    connect(m_messagesTimer, &QTimer::timeout,
+            this, [this]() {
+        m_messagesMutex.lock();
+        QString s;
+        for (int i = 0; (i < 100) && !m_messages.isEmpty(); ++i)
+            s.append(m_messages.takeFirst());
+        bool restart = !m_messages.isEmpty();
+        m_messagesMutex.unlock();
+        m_log->appendHtml(s);
+        if (restart)
+            m_messagesTimer->start();
+    });
+
     m_log = new QPlainTextEdit(this);
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
@@ -176,7 +193,14 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
             str = str % "&#x21a9;<br>"_l1;
         }
     }
-    QMetaObject::invokeMethod(m_log, "appendHtml", Qt::QueuedConnection, Q_ARG(QString, str));
+    // we may not be in the main thread here
+    m_messagesMutex.lock();
+    m_messages.append(str);
+    m_messagesMutex.unlock();
+    QMetaObject::invokeMethod(m_messagesTimer, [this]() {
+        if (!m_messagesTimer->isActive())
+            m_messagesTimer->start();
+    }, Qt::QueuedConnection);
 }
 
 #include "moc_developerconsole.cpp"

@@ -14,10 +14,12 @@
 #pragma once
 
 #include <QWidget>
+#include <QMutex>
 #include <QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 class DeveloperConsole : public QWidget
@@ -47,4 +49,7 @@ private:
     QString m_consoleKey;
     int m_historyIndex = 0;
     bool m_consoleActive = false;
+    QStringList m_messages;
+    QMutex m_messagesMutex;
+    QTimer *m_messagesTimer = nullptr;
 };
