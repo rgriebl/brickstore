@@ -79,13 +79,13 @@ protected slots:
 
 protected:
     void showEvent(QShowEvent *) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
     void changeEvent(QEvent *e) override;
 
 private:
     void init();
     void ensureSelectionVisible();
     void sortItems(int section, Qt::SortOrder order);
+    bool zoomFilter(QObject *o, QEvent *e);
 
 protected:
     QScopedPointer<SelectItemPrivate> d;

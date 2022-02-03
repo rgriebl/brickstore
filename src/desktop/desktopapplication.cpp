@@ -149,7 +149,7 @@ void DesktopApplication::init()
     }
 
     // tranform . or , into the local decimal separator in all QDoubleSpinBoxes and all
-    // QLineEdits with a SmartDoubleValidator set
+    // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();
 
     ScriptManager::inst()->initialize();

@@ -14,13 +14,17 @@
 #include <QPushButton>
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QMouseEvent>
 
 #include "version.h"
 #include "utility/utility.h"
+#include "utility/eventfilter.h"
+#include "utility/exception.h"
 #include "ldraw/ldraw.h"
 #include "utility/systeminfo.h"
 #include "systeminfodialog.h"
 #include "ui_systeminfodialog.h"
+
 
 SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     : QDialog(parent)
@@ -31,9 +35,16 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     ui->buttons->button(QDialogButtonBox::Ok)->setText(tr("Copy to clipboard"));
 
     // sentry crash handler test
-    ui->buttons->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->buttons, &QDialogButtonBox::customContextMenuRequested,
-            this, []() { static_cast<int *>(nullptr)[0] = 1; });
+    new EventFilter(ui->buttons->button(QDialogButtonBox::Ok), [](QObject *, QEvent *e) -> bool {
+        if (e->type() == QEvent::MouseButtonPress) {
+            auto *me = static_cast<QMouseEvent *>(e);
+            if (me->button() == Qt::RightButton)
+                static_cast<int *>(nullptr)[0] = 1;
+            else if (me->button() == Qt::MiddleButton)
+                throw Exception("Test exception");
+        }
+        return false;
+    });
 
     connect(ui->buttons, &QDialogButtonBox::accepted,
             this, [this]() {

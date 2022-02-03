@@ -35,7 +35,6 @@ signals:
     void execute(const QString &command, bool *successful);
 
 protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
     void changeEvent(QEvent *e) override;
 
 private:

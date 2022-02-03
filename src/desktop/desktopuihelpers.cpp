@@ -36,38 +36,6 @@
 #include "desktopuihelpers.h"
 
 
-class SelectAllFilter : public QObject
-{
-public:
-    SelectAllFilter(QObject *parent)
-        : QObject(parent)
-    { }
-
-protected:
-    bool eventFilter(QObject *o, QEvent *e) override
-    {
-        if (e->type() == QEvent::FocusIn) {
-            QFocusEvent *fe = static_cast<QFocusEvent *>(e);
-            static const QVector validReasons = {
-                Qt::MouseFocusReason,
-                Qt::TabFocusReason,
-                Qt::BacktabFocusReason,
-                Qt::ActiveWindowFocusReason,
-                Qt::ShortcutFocusReason
-            };
-            if (validReasons.contains(fe->reason())) {
-                if (auto *le = qobject_cast<QLineEdit *>(o))
-                    QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
-                else if (auto *cb = qobject_cast<QComboBox *>(o))
-                    QMetaObject::invokeMethod(cb->lineEdit(), &QLineEdit::selectAll, Qt::QueuedConnection);
-                else if (auto *sb = qobject_cast<QAbstractSpinBox *>(o))
-                    QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
-            }
-        }
-        return QObject::eventFilter(o, e);
-    }
-};
-
 QPointer<QWidget> DesktopUIHelpers::s_defaultParent;
 
 void DesktopUIHelpers::create()
@@ -81,7 +49,6 @@ void DesktopUIHelpers::setDefaultParent(QWidget *defaultParent)
 }
 
 DesktopUIHelpers::DesktopUIHelpers()
-    : m_selectAllFilter(new SelectAllFilter(this))
 { }
 
 int DesktopUIHelpers::shouldSwitchViews(QKeyEvent *e)
@@ -125,9 +92,27 @@ void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
     w->resize(sh);
 }
 
-QObject *DesktopUIHelpers::selectAllFilter()
+bool DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
 {
-    return static_cast<DesktopUIHelpers *>(s_inst)->m_selectAllFilter;
+    if (e->type() == QEvent::FocusIn) {
+        QFocusEvent *fe = static_cast<QFocusEvent *>(e);
+        static const QVector validReasons = {
+            Qt::MouseFocusReason,
+            Qt::TabFocusReason,
+            Qt::BacktabFocusReason,
+            Qt::ActiveWindowFocusReason,
+            Qt::ShortcutFocusReason
+        };
+        if (validReasons.contains(fe->reason())) {
+            if (auto *le = qobject_cast<QLineEdit *>(o))
+                QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
+            else if (auto *cb = qobject_cast<QComboBox *>(o))
+                QMetaObject::invokeMethod(cb->lineEdit(), &QLineEdit::selectAll, Qt::QueuedConnection);
+            else if (auto *sb = qobject_cast<QAbstractSpinBox *>(o))
+                QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
+        }
+    }
+    return false;
 }
 
 

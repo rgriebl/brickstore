@@ -28,7 +28,6 @@ public:
     double exchangeRate() const;
 
 protected:
-    bool eventFilter(QObject *, QEvent *) override;
     void changeEvent(QEvent *e) override;
 
 private slots:

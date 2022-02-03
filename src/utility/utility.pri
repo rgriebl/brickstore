@@ -8,6 +8,7 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
     $$PWD/chunkreader.h \
     $$PWD/chunkwriter.h \
+    $$PWD/eventfilter.h \
     $$PWD/exception.h \
     $$PWD/q3cache.h \
     $$PWD/ref.h \

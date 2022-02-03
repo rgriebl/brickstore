@@ -18,6 +18,7 @@
 #include <QRect>
 
 #include "common/uihelpers.h"
+#include "utility/eventfilter.h"
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
@@ -34,7 +35,7 @@ public:
 
     static void setPopupPos(QWidget *w, const QRect &pos);
 
-    static QObject *selectAllFilter();
+    static bool selectAllFilter(QObject *o, QEvent *e);
 
 protected:
     QCoro::Task<StandardButton> showMessageBox(QString msg, UIHelpers::Icon icon,
@@ -66,7 +67,6 @@ private:
     DesktopUIHelpers();
 
     static QPointer<QWidget> s_defaultParent;
-    QObject *m_selectAllFilter;
 
     friend class DesktopPDI;
 };

@@ -13,32 +13,34 @@
 */
 #pragma once
 
-#include <QDialog>
-#include <QPixmap>
+#include <algorithm>
 
-#include "qcoro/task.h"
+#include <QObject>
 
-QT_FORWARD_DECLARE_CLASS(QLabel)
-QT_FORWARD_DECLARE_CLASS(QTextBrowser)
 
-class Announcements;
-
-class AnnouncementsDialog : public QDialog
+class EventFilter : public QObject
 {
-    Q_OBJECT
 public:
-    AnnouncementsDialog(const QString &markdown, QWidget *parent);
+    typedef std::function<bool(QObject *, QEvent *e)> Type;
 
-    static QCoro::Task<> showNewAnnouncements(Announcements *announcements, QWidget *parent = nullptr);
-
+    inline explicit EventFilter(QObject *o, Type filter)
+        : EventFilter(o, filter, o)
+    { }
+    inline explicit EventFilter(QObject *o, Type filter, QObject *parent)
+        : QObject(parent)
+        , m_filter(filter)
+    {
+        Q_ASSERT(o);
+        Q_ASSERT(filter);
+        if (o)
+            o->installEventFilter(this);
+    }
 protected:
-    void resizeEvent(QResizeEvent *) override;
-    void paintEvent(QPaintEvent *pe) override;
+    bool eventFilter(QObject *o, QEvent *e) override
+    {
+        return m_filter ? m_filter(o, e) : false;
+    }
 
 private:
-    void paletteChange();
-
-    QPixmap m_stripes;
-    QLabel *m_header;
-    QTextBrowser *m_browser;
+    Type m_filter;
 };

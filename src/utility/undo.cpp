@@ -29,6 +29,7 @@
 #endif
 
 #include "utility.h"
+#include "eventfilter.h"
 #include "undo.h"
 
 
@@ -51,7 +52,6 @@ signals:
 
 protected:
     QWidget *createWidget(QWidget *parent) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     UndoAction(Type t, QUndoStack *stack, QObject *parent);
@@ -266,18 +266,14 @@ QWidget *UndoAction::createWidget(QWidget *parent)
                                      + 2 * label->style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing));
         });
 
-        button->installEventFilter(this);
+        new EventFilter(button, [this](QObject *, QEvent *e) {
+            if ((e->type() == QEvent::LanguageChange) && m_undoStack)
+                setDescription(m_type == Undo ? m_undoStack->undoText() : m_undoStack->redoText());
+            return false;
+        });
         return button;
     }
     return nullptr;
-}
-
-bool UndoAction::eventFilter(QObject *o, QEvent *e)
-{
-    if (qobject_cast<QToolButton *>(o) && (e->type() == QEvent::LanguageChange) && m_undoStack) {
-        setDescription(m_type == Undo ? m_undoStack->undoText() : m_undoStack->redoText());
-    }
-    return QWidgetAction::eventFilter(o, e);
 }
 
 void UndoAction::setDescription(const QString &desc)

@@ -33,6 +33,7 @@
 #include "common/config.h"
 #include "ldraw/ldraw.h"
 #include "ldraw/renderwidget.h"
+#include "utility/eventfilter.h"
 #include "utility/utility.h"
 #include "picturewidget.h"
 
@@ -52,7 +53,23 @@ PictureWidget::PictureWidget(QWidget *parent)
     QPalette pal = w_text->palette();
     pal.setColor(QPalette::Base, Qt::red);
     w_text->setPalette(pal);
-    w_text->installEventFilter(this);
+
+    new EventFilter(w_text, [this](QObject *, QEvent *e) {
+        if (e->type() == QEvent::ContextMenu) {
+            w_text->setContextMenuPolicy(w_text->hasSelectedText() ? Qt::DefaultContextMenu
+                                                                   : Qt::NoContextMenu);
+        } else if (e->type() == QEvent::Resize) {
+            // workaround for layouts breaking, if a rich-text label with word-wrap has
+            // more than one line
+            QMetaObject::invokeMethod(w_text, [this]() {
+                w_text->setMinimumHeight(0);
+                int h = w_text->heightForWidth(w_text->width());
+                if (h > 0)
+                    w_text->setMinimumHeight(h);
+            }, Qt::QueuedConnection);
+        }
+        return false;
+    });
 
     w_image = new QLabel();
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -363,24 +380,6 @@ bool PictureWidget::event(QEvent *e)
                                                 static_cast<QHelpEvent *>(e)->globalPos(), this);
     }
     return QFrame::event(e);
-}
-
-bool PictureWidget::eventFilter(QObject *o, QEvent *e)
-{
-    if ((o == w_text) && (e->type() == QEvent::ContextMenu)) {
-        w_text->setContextMenuPolicy(w_text->hasSelectedText() ? Qt::DefaultContextMenu
-                                                               : Qt::NoContextMenu);
-    } else if ((o == w_text) && (e->type() == QEvent::Resize)) {
-        // workaround for layouts breaking, if a rich-text label with word-wrap has
-        // more than one line
-        QMetaObject::invokeMethod(w_text, [this]() {
-            w_text->setMinimumHeight(0);
-            int h = w_text->heightForWidth(w_text->width());
-            if (h > 0)
-                w_text->setMinimumHeight(h);
-        }, Qt::QueuedConnection);
-    }
-    return QFrame::eventFilter(o, e);
 }
 
 void PictureWidget::contextMenuEvent(QContextMenuEvent *e)

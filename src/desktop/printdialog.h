@@ -32,9 +32,6 @@ signals:
     void paintRequested(QPrinter *printer, const QList<uint> &pages, double scaleFactor,
                         uint *maxPageCount, double *maxWidth);
 
-protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
-
 private:
     void updatePrinter(int idx);
     void updatePageRange();

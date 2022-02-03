@@ -40,6 +40,7 @@
 #include "common/document.h"
 #include "common/documentmodel.h"
 #include "utility/currency.h"
+#include "utility/eventfilter.h"
 #include "utility/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "additemdialog.h"
@@ -102,18 +103,18 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_qty->setRange(1, DocumentModel::maxQuantity);
     w_qty->setValue(1);
-    w_qty->installEventFilter(DesktopUIHelpers::selectAllFilter());
+    new EventFilter(w_qty, DesktopUIHelpers::selectAllFilter);
 
     w_bulk->setRange(1, DocumentModel::maxQuantity);
     w_bulk->setValue(1);
-    w_bulk->installEventFilter(DesktopUIHelpers::selectAllFilter());
+    new EventFilter(w_bulk, DesktopUIHelpers::selectAllFilter);
 
     double maxPrice = DocumentModel::maxLocalPrice(m_currency_code);
 
     w_price->setRange(0, maxPrice);
-    w_price->installEventFilter(DesktopUIHelpers::selectAllFilter());
+    new EventFilter(w_price, DesktopUIHelpers::selectAllFilter);
     w_cost->setRange(0, maxPrice);
-    w_cost->installEventFilter(DesktopUIHelpers::selectAllFilter());
+    new EventFilter(w_cost, DesktopUIHelpers::selectAllFilter);
 
     w_tier_qty[0] = w_tier_qty_0;
     w_tier_qty[1] = w_tier_qty_1;
@@ -127,8 +128,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_tier_price[i]->setRange(0, maxPrice);
         w_tier_qty[i]->setValue(0);
         w_tier_price[i]->setValue(0);
-        w_tier_qty[i]->installEventFilter(DesktopUIHelpers::selectAllFilter());
-        w_tier_price[i]->installEventFilter(DesktopUIHelpers::selectAllFilter());
+        new EventFilter(w_tier_qty[i], DesktopUIHelpers::selectAllFilter);
+        new EventFilter(w_tier_price[i], DesktopUIHelpers::selectAllFilter);
 
         connect(w_tier_qty[i], QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
@@ -247,7 +248,23 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             .toByteArray();
     restoreState(ba);
 
-    w_last_added->installEventFilter(this); // dynamic tooltip
+    new EventFilter(w_last_added, [this](QObject *, QEvent *e) { // dynamic tooltip
+        if (e->type() == QEvent::ToolTip) {
+            const auto *he = static_cast<QHelpEvent *>(e);
+            if (m_addHistory.size() > 1) {
+                static const QString pre = "<p style='white-space:pre'>"_l1;
+                static const QString post = "</p>"_l1;
+                QString tips;
+
+                for (const auto &entry : m_addHistory)
+                    tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
+
+                QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
+            }
+            return true;
+        }
+        return false;
+    });
 
     m_historyTimer = new QTimer(this);
     m_historyTimer->setInterval(30s);
@@ -389,25 +406,6 @@ void AddItemDialog::keyPressEvent(QKeyEvent *e)
     }
 
     QWidget::keyPressEvent(e);
-}
-
-bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
-{
-    if (event->type() == QEvent::ToolTip && watched == w_last_added) {
-        const auto *he = static_cast<QHelpEvent *>(event);
-        if (m_addHistory.size() > 1) {
-            static const QString pre = "<p style='white-space:pre'>"_l1;
-            static const QString post = "</p>"_l1;
-            QString tips;
-
-            for (const auto &entry : m_addHistory)
-                tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
-
-            QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
-        }
-        return true;
-    }
-    return QWidget::eventFilter(watched, event);
 }
 
 void AddItemDialog::setSellerMode(bool b)

@@ -364,7 +364,7 @@ FilterWidget::FilterWidget(QWidget *parent)
 
     m_edit = new HistoryLineEdit();
     m_edit->hide();
-    m_edit->installEventFilter(DesktopUIHelpers::selectAllFilter());
+    new EventFilter(m_edit, DesktopUIHelpers::selectAllFilter);
     layout->addWidget(m_edit, 1);
 
     m_menu = new QToolButton();

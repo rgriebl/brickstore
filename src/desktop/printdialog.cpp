@@ -28,6 +28,7 @@
 
 #include "common/config.h"
 #include "common/document.h"
+#include "utility/eventfilter.h"
 #include "utility/utility.h"
 #include "view.h"
 
@@ -61,7 +62,15 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     w_print_preview = new QPrintPreviewWidget(m_printer);
     if (auto *asa = w_print_preview->findChild<QAbstractScrollArea *>()) {
         // workaround for QTBUG-20677
-        asa->installEventFilter(this);
+        new EventFilter(asa, [this](QObject *, QEvent *e) {
+            if (e->type() == QEvent::MetaCall) {
+                if (++m_freezeLoopWorkaround > 11)
+                    return true;
+            } else {
+                m_freezeLoopWorkaround = 0;
+            }
+            return false;
+        });
     }
     connect(w_print_preview, &QPrintPreviewWidget::paintRequested,
             this, [this](QPrinter *prt) {
@@ -202,19 +211,6 @@ PrintDialog::~PrintDialog()
 {
     delete m_pdfWriter;
     delete m_printer;
-}
-
-bool PrintDialog::eventFilter(QObject *o, QEvent *e)
-{
-    if (qobject_cast<QAbstractScrollArea *>(o)) {
-        if (e->type() == QEvent::MetaCall) {
-            if (++m_freezeLoopWorkaround > 11)
-                return true;
-        } else {
-            m_freezeLoopWorkaround = 0;
-        }
-    }
-    return false;
 }
 
 void PrintDialog::updatePrinter(int idx)

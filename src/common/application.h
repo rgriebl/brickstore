@@ -80,8 +80,6 @@ protected:
 
     virtual QCoro::Task<bool> closeAllViews() = 0;
 
-    bool eventFilter(QObject *o, QEvent *e) override;
-
 protected:
     QStringList m_startupErrors;
     QString m_translationOverride;

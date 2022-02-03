@@ -34,7 +34,6 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
     : QDialog(parent, Qt::FramelessWindowHint)
 {
     setAttribute(Qt::WA_TranslucentBackground);
-    parentWidget()->installEventFilter(this);
 
     QVBoxLayout *top = new QVBoxLayout(this);
 
@@ -87,27 +86,15 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
         int h = m_browser->document()->size().toSize().height();
         m_browser->setFixedHeight(h);
         resize(sizeHint());
-
-        sizeChange();
     }, Qt::QueuedConnection);
-}
-
-bool AnnouncementsDialog::eventFilter(QObject *o, QEvent *e)
-{
-    bool b = QWidget::eventFilter(o, e);
-
-    if (e->type() == QEvent::Resize && o && o == parentWidget())
-        sizeChange();
-
-    if (e->type() == QEvent::PaletteChange)
-        paletteChange();
-
-    return b;
 }
 
 void AnnouncementsDialog::resizeEvent(QResizeEvent *)
 {
-    sizeChange();
+    // center in parent
+    auto p = parentWidget()->pos();
+    auto s = parentWidget()->frameSize();
+    move(p.x() + (s.width() - width()) / 2, p.y() + (s.height() - height()) / 2);
 }
 
 void AnnouncementsDialog::paintEvent(QPaintEvent *pe)
@@ -121,14 +108,6 @@ void AnnouncementsDialog::paintEvent(QPaintEvent *pe)
     p.setPen(pen);
     p.setBrush(m_stripes);
     p.drawRoundedRect(rect().adjusted(1, 1, -1, -1), r, r);
-}
-
-void AnnouncementsDialog::sizeChange()
-{
-    // center in parent
-    auto p = parentWidget()->pos();
-    auto s = parentWidget()->frameSize();
-    move(p.x() + (s.width() - width()) / 2, p.y() + (s.height() - height()) / 2);
 }
 
 void AnnouncementsDialog::paletteChange()

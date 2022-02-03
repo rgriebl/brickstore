@@ -41,6 +41,7 @@
 #include "common/uihelpers.h"
 #include "ldraw/ldraw.h"
 #include "utility/currency.h"
+#include "utility/eventfilter.h"
 #include "utility/exception.h"
 #include "utility/systeminfo.h"
 #include "utility/transfer.h"
@@ -91,7 +92,19 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
-    QCoreApplication::instance()->installEventFilter(this);
+    new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {
+        if (e->type() == QEvent::FileOpen) {
+            const QString file = static_cast<QFileOpenEvent *>(e)->file();
+            if (m_canEmitOpenDocuments)
+                emit openDocument(file);
+            else
+                m_queuedDocuments.append(file);
+            return true;
+        } else if (e->type() == QEvent::LanguageChange) {
+            emit languageChanged();
+        }
+        return false;
+    });
 
     setupTerminateHandler();
     setupLogging();
@@ -457,30 +470,6 @@ void Application::updateTranslations()
         if (m_trans_brickstore->load(translationFile, translationDir))
             QCoreApplication::installTranslator(m_trans_brickstore.get());
     }
-}
-
-bool Application::eventFilter(QObject *o, QEvent *e)
-{
-    if ((o != qApp) || !e)
-        return false;
-
-    switch (e->type()) {
-    case QEvent::FileOpen: {
-        const QString file = static_cast<QFileOpenEvent *>(e)->file();
-        if (m_canEmitOpenDocuments)
-            emit openDocument(file);
-        else
-            m_queuedDocuments.append(file);
-        return true;
-    }
-    case QEvent::LanguageChange: {
-        emit languageChanged();
-        break;
-    }
-    default:
-        break;
-    }
-    return QObject::eventFilter(o, e);
 }
 
 QVariantMap Application::about() const

@@ -40,6 +40,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "utility/currency.h"
+#include "utility/eventfilter.h"
 #include "utility/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "documentdelegate.h"
@@ -57,41 +58,20 @@ static const quint64 differenceWarningMask = 0ULL
         | (1ULL << DocumentModel::Reserved);
 
 
-// we can't use eventFilter() from anything derived from QAbstractItemDelegate:
-// the eventFilter() function there will filter ANY events, because it thinks
-// everything is an editor widget.
-class LanguageChangeHelper : public QObject
-{
-public:
-    LanguageChangeHelper(DocumentDelegate *dd, QWidget *watch)
-        : QObject(dd)
-        , m_dd(dd)
-    {
-        watch->installEventFilter(this);
-    }
-
-protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
-
-private:
-    DocumentDelegate *m_dd;
-};
-
-bool LanguageChangeHelper::eventFilter(QObject *o, QEvent *e)
-{
-    if (e->type() == QEvent::LanguageChange)
-        m_dd->languageChange();
-    return QObject::eventFilter(o, e);
-}
-
-
 DocumentDelegate::DocumentDelegate(QTableView *table)
     : QItemDelegate(table)
     , m_table(table)
 {
     m_table->viewport()->setAttribute(Qt::WA_Hover);
 
-    new LanguageChangeHelper(this, table);
+    // we can't use eventFilter() in anything derived from QAbstractItemDelegate:
+    // the eventFilter() function there will filter ANY event, because it thinks
+    // everything is an editor widget.
+    new EventFilter(table, [this](QObject *, QEvent *e) {
+        if (e->type() == QEvent::LanguageChange)
+            languageChange();
+        return false;
+    });
 
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
             this, [this]() {

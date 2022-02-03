@@ -48,7 +48,6 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
     void contextMenuEvent(QContextMenuEvent *e) override;
 
 private:
