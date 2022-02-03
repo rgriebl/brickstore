@@ -339,6 +339,33 @@ bool BrickLink::TextImport::readInventory(const Item *item)
 
         uint itemIndex = item - items().data();;
 
+
+        // BL bug: if an extra item is part of an alternative match set, then none of the
+        //         alternatives have the 'extra' flag set.
+        for (Item::ConsistsOf &co : inventory) {
+            if (co.m_isalt && !co.m_extra) {
+                for (const Item::ConsistsOf &mainCo : qAsConst(inventory)) {
+                    if ((mainCo.m_altid == co.m_altid) && !mainCo.m_isalt) {
+                        co.m_extra = mainCo.m_extra;
+                        break;
+                    }
+                }
+            }
+        }
+        // pre-sort to have a nice sorting order, even in unsorted views
+        std::sort(inventory.begin(), inventory.end(), [](const auto &co1, const auto &co2) {
+            if (co1.m_extra != co2.m_extra)
+                return co1.m_extra < co2.m_extra;
+            else if (co1.m_cpart != co2.m_cpart)
+                return co1.m_cpart < co2.m_cpart;
+            else if (co1.m_altid != co2.m_altid)
+                return co1.m_altid < co2.m_altid;
+            else if (co1.m_isalt != co2.m_isalt)
+                return co1.m_isalt < co2.m_isalt;
+            else
+                return co1.m_itemIndex < co2.m_itemIndex;
+        });
+
         for (const Item::ConsistsOf &co : qAsConst(inventory)) {
             if (!co.m_extra) {
                 auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];

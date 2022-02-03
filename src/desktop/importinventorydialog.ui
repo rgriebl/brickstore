@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1166</width>
-    <height>741</height>
+    <width>841</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,8 +34,8 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item alignment="Qt::AlignVCenter">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
       <widget class="QLabel" name="label_7">
        <property name="text">
         <string>&amp;Quantity:</string>
@@ -48,7 +48,7 @@
        </property>
       </widget>
      </item>
-     <item alignment="Qt::AlignVCenter">
+     <item>
       <widget class="QSpinBox" name="w_qty">
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -74,13 +74,13 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>11</width>
+         <width>20</width>
          <height>20</height>
         </size>
        </property>
       </spacer>
      </item>
-     <item alignment="Qt::AlignVCenter">
+     <item>
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Condition:</string>
@@ -90,22 +90,26 @@
        </property>
       </widget>
      </item>
-     <item alignment="Qt::AlignVCenter">
-      <widget class="QRadioButton" name="w_condition_new">
-       <property name="text">
-        <string>&amp;New</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item alignment="Qt::AlignVCenter">
-      <widget class="QRadioButton" name="w_condition_used">
-       <property name="text">
-        <string>&amp;Used</string>
-       </property>
-      </widget>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QRadioButton" name="w_condition_new">
+         <property name="text">
+          <string>&amp;New</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="w_condition_used">
+         <property name="text">
+          <string>&amp;Used</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">
@@ -117,30 +121,30 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>11</width>
+         <width>20</width>
          <height>20</height>
         </size>
        </property>
       </spacer>
      </item>
-     <item alignment="Qt::AlignVCenter">
+     <item>
       <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>E&amp;xtra parts</string>
+        <string>E&amp;xtra parts:</string>
        </property>
        <property name="buddy">
         <cstring>w_extra</cstring>
        </property>
       </widget>
      </item>
-     <item alignment="Qt::AlignVCenter">
+     <item>
       <widget class="QComboBox" name="w_extra">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
-         <string>Include</string>
+         <string extracomment="Extra parts state">Include</string>
         </property>
         <property name="icon">
          <iconset theme="vcs-normal">
@@ -168,37 +172,71 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>11</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item alignment="Qt::AlignVCenter">
-      <widget class="QCheckBox" name="w_instructions">
-       <property name="text">
-        <string>&amp;Include instructions</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>412</width>
-         <height>20</height>
+         <width>13</width>
+         <height>21</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string extracomment="Label on the left">Include:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_instructions">
+       <property name="text">
+        <string>&amp;Instructions</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_alternates">
+       <property name="text">
+        <string>&amp;Alternates</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_counterParts">
+       <property name="text">
+        <string>&amp;Counterparts</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>13</width>
+         <height>21</height>
         </size>
        </property>
       </spacer>
@@ -222,24 +260,17 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>w_qty</tabstop>
+  <tabstop>w_condition_new</tabstop>
+  <tabstop>w_condition_used</tabstop>
+  <tabstop>w_extra</tabstop>
+  <tabstop>w_instructions</tabstop>
+  <tabstop>w_alternates</tabstop>
+  <tabstop>w_counterParts</tabstop>
+ </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>w_buttons</sender>
-   <signal>accepted()</signal>
-   <receiver>ImportInventoryDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>322</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>248</x>
-     <y>341</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
@@ -247,8 +278,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>504</x>
-     <y>324</y>
+     <x>513</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>106</x>

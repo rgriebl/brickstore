@@ -33,6 +33,8 @@ public:
     BrickLink::Condition condition() const;
     BrickLink::Status extraParts() const;
     bool includeInstructions() const;
+    bool includeAlternates() const;
+    bool includeCounterParts() const;
 
 protected:
     void changeEvent(QEvent *e) override;

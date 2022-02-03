@@ -1578,7 +1578,8 @@ void Document::saveToFile(const QString &fileName)
 Document *Document::fromPartInventory(const BrickLink::Item *item,
                                       const BrickLink::Color *color, int multiply,
                                       BrickLink::Condition condition, BrickLink::Status extraParts,
-                                      bool includeInstructions)
+                                      bool includeInstructions, bool includeAlternates,
+                                      bool includeCounterParts)
 {
     Q_ASSERT(item);
     Q_ASSERT(item && item->hasInventory());
@@ -1597,6 +1598,39 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
                 && partColor && (partColor->id() == 0)) {
             partColor = color;
         }
+
+        if ((!includeAlternates && part.isAlternate())
+                || (!includeCounterParts && part.isCounterPart())) {
+            continue;
+        }
+
+        if (part.isExtra()) {
+            switch (extraParts) {
+            case BrickLink::Status::Include: {
+                bool found = false;
+                for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
+                    if (partItem == (*it)->item() && (partColor == (*it)->color())
+                            && (part.isAlternate() == (*it)->alternate())
+                            && (part.alternateId() == (*it)->alternateId())
+                            && (part.isCounterPart() == (*it)->counterPart())) {
+                        (*it)->setQuantity((*it)->quantity() + part.quantity());
+                        found = true;
+                        break;
+                    }
+                }
+                if (found)
+                    continue;
+                if (!found)
+                    qWarning() << "Couldn't consolidate extra part" << partItem->id();
+                break;
+            }
+            case BrickLink::Status::Exclude:
+                continue;
+            default:
+                break;
+            }
+        }
+
 
         Lot *lot = new Lot(partColor, partItem);
         lot->setQuantity(part.quantity() * multiply);

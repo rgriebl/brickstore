@@ -1465,14 +1465,16 @@ void DocumentModel::initializeColumns()
               }
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-              if (l1->counterPart() != l2->counterPart()) {
+              if (l1->status() != l2->status()) {
+                  return int(l1->status()) - int(l2->status());
+              } else if (l1->counterPart() != l2->counterPart()) {
                   return boolCompare(l1->counterPart(), l2->counterPart());
               } else if (l1->alternateId() != l2->alternateId()) {
                   return uintCompare(l1->alternateId(), l2->alternateId());
               } else if (l1->alternate() != l2->alternate()) {
                   return boolCompare(l1->alternate(), l2->alternate());
               } else {
-                  return int(l1->status()) - int(l2->status());
+                  return 0;
               }
           }
       });

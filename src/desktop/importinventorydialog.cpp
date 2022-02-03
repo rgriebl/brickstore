@@ -37,11 +37,12 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
             this, &ImportInventoryDialog::checkItem);
     connect(w_select, &SelectItem::currentItemTypeChanged,
             this, [this](const BrickLink::ItemType *itt) {
-        w_instructions->setVisible(itt && (itt->id() == 'S'));
+        bool b = itt && (itt->id() == 'S');
+        w_instructions->setEnabled(b);
     });
     w_import = new QPushButton();
     w_import->setDefault(true);
-    w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
+    w_buttons->addButton(w_import, QDialogButtonBox::AcceptRole);
     connect(w_import, &QAbstractButton::clicked,
             this, &ImportInventoryDialog::importInventory);
 
@@ -118,9 +119,17 @@ BrickLink::Status ImportInventoryDialog::extraParts() const
 
 bool ImportInventoryDialog::includeInstructions() const
 {
-    return !w_instructions->isHidden()
-            && w_instructions->isEnabled()
-            && w_instructions->isChecked();
+    return w_instructions->isEnabled() && w_instructions->isChecked();
+}
+
+bool ImportInventoryDialog::includeAlternates() const
+{
+    return w_alternates->isEnabled() && w_alternates->isChecked();
+}
+
+bool ImportInventoryDialog::includeCounterParts() const
+{
+    return w_counterParts->isEnabled() && w_counterParts->isChecked();
 }
 
 void ImportInventoryDialog::languageChange()
@@ -173,11 +182,13 @@ QByteArray ImportInventoryDialog::saveState() const
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("II") << qint32(2)
+    ds << QByteArray("II") << qint32(3)
        << w_condition_new->isChecked()
        << qint32(w_qty->value())
        << qint32(w_extra->currentIndex())
-       << w_instructions->isChecked();
+       << w_instructions->isChecked()
+       << w_alternates->isChecked()
+       << w_counterParts->isChecked();
     return ba;
 }
 
@@ -187,7 +198,7 @@ bool ImportInventoryDialog::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 2))
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 3))
         return false;
 
     bool isNew;
@@ -214,6 +225,18 @@ bool ImportInventoryDialog::restoreState(const QByteArray &ba)
         w_instructions->setChecked(instructions);
         w_extra->setCurrentIndex(extras);
     }
+    if (version >= 3) {
+        bool alternates;
+        bool counterParts;
+
+        ds >> alternates >> counterParts;
+
+        if (ds.status() != QDataStream::Ok)
+            return false;
+
+        w_alternates->setChecked(alternates);
+        w_counterParts->setChecked(counterParts);
+    }
 
     return true;
 }
@@ -226,6 +249,23 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
         bool hasInstructions = (BrickLink::core()->item('I', it->id()));
         w_instructions->setEnabled(hasInstructions);
     }
+    bool hasCounterParts = false;
+    bool hasAlternates = false;
+
+    if (it) {
+        const auto &inv = it->consistsOf();
+        for (const auto &co : inv) {
+            if (co.isExtra())
+                hasCounterParts = true;
+            if (co.isAlternate())
+                hasAlternates = true;
+            if (hasAlternates && hasCounterParts)
+                break;
+        }
+    }
+    w_alternates->setEnabled(hasAlternates);
+    w_counterParts->setEnabled(hasCounterParts);
+
     if (ok)
         w_import->animateClick();
 }
@@ -233,7 +273,8 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 void ImportInventoryDialog::importInventory()
 {
     Document::fromPartInventory(item(), nullptr, quantity(), condition(),
-                                  extraParts(), includeInstructions());
+                                extraParts(), includeInstructions(),
+                                includeAlternates(), includeCounterParts());
 }
 
 #include "moc_importinventorydialog.cpp"
