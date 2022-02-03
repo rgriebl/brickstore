@@ -568,6 +568,27 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                         baseValues.append("Price"_l1, QString::number(legacyOrigPrice.toDouble(), 'f', 3));
                 }
 
+                Lot base = *lot;
+                if (!baseValues.isEmpty()) {
+                    base.setIncomplete(new BrickLink::Incomplete);
+
+                    for (int i = 0; i < baseValues.size(); ++i) {
+                        auto attr = baseValues.at(i);
+                        auto it = tagHash.find(attr.name());
+                        if (it != tagHash.end()) {
+                            (*it)(&base, attr.value().toString());
+                        }
+                    }
+                    if (BrickLink::core()->resolveIncomplete(&base) == BrickLink::Core::ResolveResult::Fail) {
+                        if (!base.item() && lot->item())
+                            base.setItem(lot->item());
+                        if (!base.color() && lot->color())
+                            base.setColor(lot->color());
+                        base.setIncomplete(nullptr);
+                    }
+                }
+                bsx.addToDifferenceModeBase(lot, base);
+
                 bsx.addLot(std::move(lot));
             }
         };
