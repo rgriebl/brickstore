@@ -122,12 +122,12 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
             return;
 
         if (!success) {
-            QMessageBox::warning(this, tr("Import Cart"), message);
+            QMessageBox::warning(this, windowTitle(), message);
         } else {
             DocumentIO::importBrickLinkCart(cart);
 
             if (!message.isEmpty())
-                QMessageBox::information(this, tr("Import Cart"), message);
+                QMessageBox::information(this, windowTitle(), message);
         }
     });
 

@@ -122,12 +122,12 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
             return;
 
         if (!success) {
-            QMessageBox::warning(this, tr("Import Wanted List"), message);
+            QMessageBox::warning(this, windowTitle(), message);
         } else {
             DocumentIO::importBrickLinkWantedList(wantedList);
 
             if (!message.isEmpty())
-                QMessageBox::information(this, tr("Import Wanted List"), message);
+                QMessageBox::information(this, windowTitle(), message);
         }
     });
 

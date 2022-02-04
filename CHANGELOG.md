@@ -3,8 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.2.1] - 2022-02-06
+### Added
+- Wanted lists can now be imported via the UI, just like shopping carts and orders.
+
 ### Fixed
 - Closing the main window with a modified document in a split view would crash on exit.
+- Difference-mode base values were not restored when opening BSX files.
 
 
 ## [2022.1.3] - 2022-01-31
