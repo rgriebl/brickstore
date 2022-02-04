@@ -772,7 +772,9 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
         if (!isAppend) {
             m_lots.insert(*pos++, lot);
             m_sortedLots.insert(*sortedPos++, lot);
-            m_filteredLots.insert(*filteredPos++, lot);
+            int filteredIndex = *filteredPos++;
+            if (filteredIndex >= 0)
+                m_filteredLots.insert(filteredIndex, lot);
         } else {
             m_lots.append(lot);
             m_sortedLots.append(lot);
@@ -822,7 +824,8 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
         filteredPositions[i] = filterIdx;
         m_lots.removeAt(idx);
         m_sortedLots.removeAt(sortIdx);
-        m_filteredLots.removeAt(filterIdx);
+        if (filterIdx >= 0)
+            m_filteredLots.removeAt(filterIdx);
     }
 
     QModelIndexList after;
