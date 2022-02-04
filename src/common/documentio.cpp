@@ -108,7 +108,7 @@ Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
     Q_ASSERT(cart);
 
     BrickLink::IO::ParseResult pr;
-    const auto lots = cart->lots();
+    const auto &lots = cart->lots();
     for (const auto *lot : lots)
         pr.addLot(new Lot(*lot));
     pr.setCurrencyCode(cart->currencyCode());

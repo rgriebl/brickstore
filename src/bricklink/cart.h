@@ -58,7 +58,7 @@ public:
     int itemCount() const;
     int lotCount() const;
     QString countryCode() const;
-    LotList lots() const;
+    const LotList &lots() const;
 
     void setDomestic(bool domestic);
     void setSellerId(int id);
@@ -70,7 +70,7 @@ public:
     void setItemCount(int i);
     void setLotCount(int i);
     void setCountryCode(const QString &str);
-    void setLots(const LotList &lots);
+    void setLots(LotList &&lots);
 
 signals:
     void domesticChanged(bool domestic);

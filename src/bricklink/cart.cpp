@@ -63,7 +63,7 @@ Cart::Cart()
     , d(new CartPrivate)
 { }
 
-LotList Cart::lots() const
+const LotList &Cart::lots() const
 {
     return d->m_lots;
 }
@@ -118,10 +118,12 @@ QString Cart::countryCode() const
     return d->m_countryCode;
 }
 
-void Cart::setLots(const LotList &lots)
+void Cart::setLots(LotList &&lots)
 {
     if (d->m_lots != lots) {
+        qDeleteAll(d->m_lots);
         d->m_lots = lots;
+        lots.clear();
         emit lotsChanged(d->m_lots);
     }
 }
@@ -264,6 +266,7 @@ Carts::Carts(QObject *parent)
             if (success) {
                 try {
                     beginResetModel();
+                    qDeleteAll(m_carts);
                     m_carts.clear();
                     const auto carts = parseGlobalCart(*job->data());
                     for (auto &cart : carts) {
@@ -293,6 +296,13 @@ Carts::Carts(QObject *parent)
             emit updateFinished(success, success ? QString { } : message);
             m_job = nullptr;
         }
+    });
+    connect(core(), &BrickLink::Core::beginResetDatabase,
+            this, [this]() {
+        beginResetModel();
+        qDeleteAll(m_carts);
+        m_carts.clear();
+        endResetModel();
     });
 }
 
@@ -348,7 +358,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
             lots << lot;
         }
     }
-    cart->setLots(lots);
+    cart->setLots(std::move(lots));
     return invalidCount;
 }
 
