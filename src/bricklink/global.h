@@ -39,6 +39,8 @@ class Core;
 class Database;
 class TextImport;
 class Store;
+class WantedList;
+class WantedLists;
 class Lot;
 class ItemChangeLogEntry;
 class ColorChangeLogEntry;
@@ -83,6 +85,7 @@ enum UrlList {
     URL_StoreItemSearch,
     URL_OrderDetails,
     URL_ShoppingCart,
+    URL_WantedList,
 };
 
 enum ModelRoles {

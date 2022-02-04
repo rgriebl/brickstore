@@ -64,6 +64,7 @@ public:
     Store *store() const  { return m_store; }
     Orders *orders() const  { return m_orders; }
     Carts *carts() const  { return m_carts; }
+    WantedLists *wantedLists() const  { return m_wantedLists; }
     Database *database() const  { return m_database; }
 
     inline const std::vector<Color> &colors() const         { return database()->m_colors; }
@@ -209,6 +210,7 @@ private:
     Store *m_store = nullptr;
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
+    WantedLists *m_wantedLists = nullptr;
     Database *m_database = nullptr;
 };
 

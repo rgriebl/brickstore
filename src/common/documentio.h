@@ -53,6 +53,7 @@ public:
     static Document *importBrickLinkStore(BrickLink::Store *store);
     static Document *importBrickLinkOrder(BrickLink::Order *order);
     static Document *importBrickLinkCart(BrickLink::Cart *cart);
+    static Document *importBrickLinkWantedList(BrickLink::WantedList *wantedList);
 
     static QCoro::Task<Document *> importBrickLinkXML(QString fileName = { });
     static QCoro::Task<Document *> importLDrawModel(QString fileName = { });

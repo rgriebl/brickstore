@@ -34,6 +34,7 @@
 #include "bricklink/io.h"
 #include "bricklink/order.h"
 #include "bricklink/store.h"
+#include "bricklink/wantedlist.h"
 
 #include "common/document.h"
 #include "common/documentmodel.h"
@@ -116,6 +117,23 @@ Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
     auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
     document->setThumbnail("bricklink-cart"_l1);
+    return document;
+}
+
+Document *DocumentIO::importBrickLinkWantedList(BrickLink::WantedList *wantedList)
+{
+    Q_ASSERT(wantedList);
+
+    BrickLink::IO::ParseResult pr;
+    const auto &lots = wantedList->lots();
+    for (const auto *lot : lots)
+        pr.addLot(new Lot(*lot));
+
+    auto *document = new Document(new DocumentModel(std::move(pr)));
+    QString name = wantedList->name().isEmpty() ? QString::number(wantedList->id())
+                                                : wantedList->name();
+    document->setTitle(tr("Wanted List %1").arg(name));
+    document->setThumbnail("love-amarok"_l1);
     return document;
 }
 

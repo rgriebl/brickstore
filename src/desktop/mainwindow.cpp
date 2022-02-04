@@ -96,6 +96,7 @@
 #include "importcartdialog.h"
 #include "importinventorydialog.h"
 #include "importorderdialog.h"
+#include "importwantedlistdialog.h"
 #include "managecolumnlayoutsdialog.h"
 #include "settingsdialog.h"
 #include "systeminfodialog.h"
@@ -389,6 +390,7 @@ MainWindow::~MainWindow()
     delete m_importinventory_dialog.data();
     delete m_importorder_dialog.data();
     delete m_importcart_dialog.data();
+    delete m_importwanted_dialog.data();
 
     s_inst = reinterpret_cast<MainWindow *>(-1);
 }
@@ -573,6 +575,7 @@ void MainWindow::setupMenuBar()
                   "document_import_bl_order",
                   "document_import_bl_store_inv",
                   "document_import_bl_cart",
+                  "document_import_bl_wanted",
                   "document_import_ldraw_model",
               });
 
@@ -963,6 +966,14 @@ void MainWindow::createActions()
                   m_importcart_dialog = new ImportCartDialog(this);
               m_importcart_dialog->show();
           } },
+        { "document_import_bl_wanted", [this](auto) -> QCoro::Task<> {
+              if (!co_await Application::inst()->checkBrickLinkLogin())
+                  co_return;
+
+              if (!m_importwanted_dialog)
+                  m_importwanted_dialog = new ImportWantedListDialog(this);
+              m_importwanted_dialog->show();
+          } },
         { "application_exit", [this](auto) { close(); } },
         { "edit_additems", [this](auto) {
               if (!m_add_dialog) {
@@ -1264,6 +1275,7 @@ QCoro::Task<bool> MainWindow::closeAllViews()
     delete m_importinventory_dialog;
     delete m_importorder_dialog;
     delete m_importcart_dialog;
+    delete m_importwanted_dialog;
 
     co_return true;
 }

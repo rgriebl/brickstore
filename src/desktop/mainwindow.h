@@ -46,6 +46,7 @@ class ScriptManager;
 class ImportInventoryDialog;
 class ImportOrderDialog;
 class ImportCartDialog;
+class ImportWantedListDialog;
 class CheckForUpdates;
 class Announcements;
 class DeveloperConsole;
@@ -129,6 +130,7 @@ private:
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ImportOrderDialog> m_importorder_dialog;
     QPointer<ImportCartDialog> m_importcart_dialog;
+    QPointer<ImportWantedListDialog> m_importwanted_dialog;
     QPointer<CheckForUpdates> m_checkForUpdates;
     QPointer<Announcements> m_announcements;
 

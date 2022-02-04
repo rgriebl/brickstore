@@ -353,6 +353,8 @@ void ActionManager::initialize()
     a->m_iconName = "bricklink-store";
     A("document_import_bl_cart",        QT_TR_NOOP("BrickLink Shopping Cart..."),                 QT_TR_NOOP("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart"),   NeedNetwork);
     a->m_iconName = "bricklink-cart";
+    A("document_import_bl_wanted",      QT_TR_NOOP("BrickLink Wanted List..."),                   QT_TR_NOOP("Ctrl+I,Ctrl+W", "File|Import BrickLink Wanted List"),     NeedNetwork);
+    a->m_iconName = "love-amarok";
     A("document_import_ldraw_model",    QT_TR_NOOP("LDraw or Studio Model..."),                   QT_TR_NOOP("Ctrl+I,Ctrl+L", "File|Import LDraw Model"));
     a->m_iconName = "bricklink-studio";
     A("document_export",                QT_TR_NOOP("Export"), NoNeed, FlagMenu);

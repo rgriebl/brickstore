@@ -54,6 +54,7 @@
 #  include "bricklink/cart.h"
 #  include "bricklink/order.h"
 #  include "bricklink/store.h"
+#  include "bricklink/wantedlist.h"
 #endif
 
 
@@ -201,6 +202,16 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
             url = "https://www.bricklink.com/v2/globalcart.page"_l1;
             QUrlQuery query;
             query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(*shopId)));
+            url.setQuery(query);
+        }
+        break;
+    }
+    case URL_WantedList: {
+        auto wantedId = static_cast<const int *>(opt);
+        if (wantedId && (*wantedId >= 0)) {
+            url = "https://www.bricklink.com/v2/wanted/edit.page"_l1;
+            QUrlQuery query;
+            query.addQueryItem("wantedMoreID"_l1, Utility::urlQueryEscape(QString::number(*wantedId)));
             url.setQuery(query);
         }
         break;
@@ -437,6 +448,7 @@ Core *Core::create(const QString &datadir, QString *errstring)
         s_inst->m_store = new Store(s_inst);
         s_inst->m_orders = new Orders(s_inst);
         s_inst->m_carts = new Carts(s_inst);
+        s_inst->m_wantedLists = new WantedLists(s_inst);
 #endif
 
         QString test = s_inst->dataPath();
