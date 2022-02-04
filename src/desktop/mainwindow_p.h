@@ -121,7 +121,7 @@ public:
         connect(menu, &QMenu::triggered, this, [](QAction *a) {
             if (a) {
                 if (auto *doc = qvariant_cast<Document *>(a->data()))
-                    doc->requestActivation();
+                    emit doc->requestActivation();
             }
         });
     }

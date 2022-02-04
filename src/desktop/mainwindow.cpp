@@ -1244,7 +1244,7 @@ QCoro::Task<bool> MainWindow::closeAllViews()
         if (doc->model()->isModified()) {
             // bring a View of the doc to the front, preferably in the active ViewPane
 
-            QMap<ViewPane *, View *> allViews;
+            QHash<ViewPane *, View *> allViews;
             forEachViewPane([doc, &allViews](ViewPane *vp) {
                 if (auto *view = vp->viewForDocument(doc))
                     allViews.insert(vp, view);
@@ -1253,7 +1253,7 @@ QCoro::Task<bool> MainWindow::closeAllViews()
             Q_ASSERT(!allViews.isEmpty());
 
             if (!allViews.contains(m_activeViewPane))
-                setActiveViewPane(allViews.firstKey());
+                setActiveViewPane(*allViews.keyBegin());
             m_activeViewPane->activateDocument(doc);
         }
         if (!co_await doc->requestClose())

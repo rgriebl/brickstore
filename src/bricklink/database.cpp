@@ -140,19 +140,19 @@ bool Database::startUpdate(bool force)
     setUpdateStatus(UpdateStatus::Updating);
 
     connect(m_transfer, &Transfer::started,
-            [this, job](TransferJob *j) {
+            this, [this, job](TransferJob *j) {
         if (j != job)
             return;
         emit updateStarted();
     });
     connect(m_transfer, &Transfer::progress,
-            [this, job](TransferJob *j, int done, int total) {
+            this, [this, job](TransferJob *j, int done, int total) {
         if (j != job)
             return;
         emit updateProgress(done, total);
     });
     connect(m_transfer, &Transfer::finished,
-            [this, job, hhc, file](TransferJob *j) {
+            this, [this, job, hhc, file](TransferJob *j) {
         if (j != job)
             return;
 

@@ -204,8 +204,9 @@ public:
         }
 
         static auto removeMnemonic = [](const QString &s) {
+            static const QRegularExpression re(R"(\&(?!\&))"_l1);
             QString s2(s);
-            s2.remove(QRegularExpression(R"(\&(?!\&))"_l1));
+            s2.remove(re);
             return s2;
         };
 

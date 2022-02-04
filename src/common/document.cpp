@@ -1121,7 +1121,7 @@ void Document::spreadCost(double spreadAmount, SpreadCost how)
 {
     double total = 0;
 
-    for (const Lot *lot : m_selectedLots) {
+    for (const Lot *lot : qAsConst(m_selectedLots)) {
         total += (how == SpreadCost::ByPrice) ? (lot->price() * lot->quantity())
                                               : (lot->totalWeight());
     }
@@ -1182,7 +1182,7 @@ void Document::divideQuantity(int divisor)
 
     int lotsNotDivisible = 0;
 
-    for (const Lot *item : m_selectedLots) {
+    for (const Lot *item : qAsConst(m_selectedLots)) {
         if (qAbs(item->quantity()) % divisor)
             ++lotsNotDivisible;
     }
@@ -1206,7 +1206,7 @@ void Document::multiplyQuantity(int factor)
     int lotsTooLarge = 0;
     int maxQty = DocumentModel::maxQuantity / qAbs(factor);
 
-    for (const Lot *item : m_selectedLots) {
+    for (const Lot *item : qAsConst(m_selectedLots)) {
         if (qAbs(item->quantity()) > maxQty)
             lotsTooLarge++;
     }
@@ -2369,7 +2369,6 @@ int Document::processAutosaves(AutosaveAction action)
             QString savedCurrencyCode;
             QByteArray columnState;
             QByteArray savedSortFilterState;
-            QHash<const Lot *, Lot> differenceBase;
             qint32 count = 0;
 
             QDataStream ds(&f);

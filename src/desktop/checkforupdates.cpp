@@ -94,7 +94,7 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
             qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
         auto assets = doc["assets"_l1].toArray();
         m_installerUrl.clear();
-        for (const QJsonValue asset : assets) {
+        for (const QJsonValue &asset : assets) {
             QString name = asset["name"_l1].toString();
 #if defined(Q_OS_MACOS)
             if (name.startsWith("macOS-"_l1)) {
@@ -149,15 +149,16 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
     reply->deleteLater();
 
     QString md = QString::fromUtf8(reply->readAll());
-    QRegularExpression header(R"(^## \[([0-9.]+)\] - \d{4}-\d{2}-\d{2}$)"_l1);
-    header.setPatternOptions(QRegularExpression::MultilineOption);
+    static const QRegularExpression header(R"(^## \[([0-9.]+)\] - \d{4}-\d{2}-\d{2}$)"_l1,
+                                           QRegularExpression::MultilineOption);
 
     int fromHeader = 0;
     int toHeader = 0;
     int nextHeader = 0;
 
     while (!fromHeader || !toHeader) {
-        QRegularExpressionMatch match = header.match(md, nextHeader);
+        QRegularExpressionMatch match =
+                header.match(md, nextHeader);
         if (!match.hasMatch())
             break;
 

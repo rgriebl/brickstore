@@ -51,8 +51,8 @@ QCoro::Task<> Announcements::check()
         co_return;
 
     QString md = QString::fromUtf8(reply->readAll());
-    QRegularExpression header(R"(^## (.+?) - (\d{4})-(\d{2})-(\d{2}) \[\]\(([^)]*)\)$)"_l1);
-    header.setPatternOptions(QRegularExpression::MultilineOption);
+    static const QRegularExpression header(R"(^## (.+?) - (\d{4})-(\d{2})-(\d{2}) \[\]\(([^)]*)\)$)"_l1,
+                                           QRegularExpression::MultilineOption);
     // ## TITLE - YYYY-MM-DD [](<CONDITIONS>)
     // TEXT
 

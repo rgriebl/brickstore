@@ -955,7 +955,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
         }
     } catch (const Exception &e) {
         delete order;
-        qDeleteAll(result.keys());
+        qDeleteAll(result.keyBegin(), result.keyEnd());
         throw Exception("XML parse error at line %1, column %2: %3")
                 .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
     }
@@ -1076,7 +1076,7 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
         QString s = QString::fromUtf8(data);
         QString a;
 
-        QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
+        static const QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
         auto matches = regExp.globalMatch(s);
         if (type == OrderType::Placed) {
             // skip our own address
@@ -1088,10 +1088,11 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
 
             QRegularExpressionMatch match = matches.next();
             a = match.captured(1);
-            a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"_l1), "\n"_l1);
+            static const QRegularExpression breakRegExp(R"(<[bB][rR] ?/?>)"_l1);
+            a.replace(breakRegExp, "\n"_l1);
             result.first = a;
 
-            QRegularExpression phoneRegExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Phone:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
+            static const QRegularExpression phoneRegExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Phone:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
 
             auto phoneMatch = phoneRegExp.match(s, match.capturedEnd());
             if (phoneMatch.hasMatch())
