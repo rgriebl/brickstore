@@ -269,6 +269,7 @@ Carts::Carts(QObject *parent)
                     for (auto &cart : carts) {
                         int row = m_carts.count();
                         m_carts.append(cart);
+                        cart->setParent(this); // needed to prevent QML from taking ownership
 
                         connect(cart, &Cart::storeNameChanged, this, [this, row]() { emitDataChanged(row, Store); });
                         connect(cart, &Cart::sellerNameChanged, this, [this, row]() { emitDataChanged(row, Store); });

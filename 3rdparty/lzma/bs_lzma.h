@@ -58,6 +58,7 @@ class DecompressFilter : public QIODevice
 
 public:
     DecompressFilter(QIODevice *target, QObject* parent = nullptr);
+    ~DecompressFilter() override;
 
     bool open(OpenMode mode = WriteOnly) override;
     void close() override;

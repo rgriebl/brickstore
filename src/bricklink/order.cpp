@@ -18,6 +18,7 @@
 #include <QSaveFile>
 #include <QDirIterator>
 #include <QCoreApplication>
+#include <QScopedPointer>
 #include <QUrlQuery>
 #include <QRegularExpression>
 #include <QJsonDocument>
@@ -701,13 +702,13 @@ Orders::Orders(QObject *parent)
                     QJsonDocument json = QJsonDocument::fromVariant(vm);
                     QByteArray utf8 = json.toJson();
 
-                    auto saveFile = orderSaveFile(QString(order->id() % u".brickstore.json"),
-                                                  order->type(), order->date());
+                    QScopedPointer saveFile { orderSaveFile(QString(order->id() % u".brickstore.json"),
+                                                            order->type(), order->date()) };
 
                     if (!saveFile
                             || (saveFile->write(utf8) != utf8.size())
                             || !saveFile->commit()) {
-                        throw Exception(saveFile, tr("Cannot write order address to cache"));
+                        throw Exception(saveFile.get(), tr("Cannot write order address to cache"));
                     }
                     order->setAddress(address);
                 }
@@ -734,14 +735,12 @@ Orders::Orders(QObject *parent)
                         if (order->id().isEmpty() || !order->date().isValid())
                             throw Exception("Invalid order without ID and DATE");
 
-                        auto saveFile = orderSaveFile(QString(order->id() % u".order.xml"),
-                                                      orderType, order->date());
-                        if (!saveFile)
-                            throw Exception(tr("Cannot save order to file"));
-
-                        if ((saveFile->write(orderXml) != orderXml.size())
+                        QScopedPointer saveFile { orderSaveFile(QString(order->id() % u".order.xml"),
+                                                                orderType, order->date()) };
+                        if (!saveFile
+                                || (saveFile->write(orderXml) != orderXml.size())
                                 || !saveFile->commit()) {
-                            throw Exception(saveFile, tr("Cannot write order XML to cache"));
+                            throw Exception(saveFile.get(), tr("Cannot write order XML to cache"));
                         }
                     }
 

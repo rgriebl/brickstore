@@ -39,6 +39,11 @@ LZMA::DecompressFilter::DecompressFilter(QIODevice *target, QObject *parent)
     d->m_target = target;
 }
 
+LZMA::DecompressFilter::~DecompressFilter()
+{
+    delete d;
+}
+
 bool LZMA::DecompressFilter::open(OpenMode mode)
 {
     if (mode & ReadOnly)
