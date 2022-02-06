@@ -551,16 +551,23 @@ Core::Core(const QString &datadir)
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
-    // the max. pic cache size is at least 1GB and at max half the physical memory on 64bit systems
-    // the max. pg cache size is at least 5.000 and 10.000 if more than 3GB of RAM are available
+    // * The max. pic cache size is at least 1GB. On 64bit systems, this gets expanded to a quarter
+    //   of the physical memory, but it is capped at 4GB
+    // * The max. pg cache size is at least 5'000. On 64bit systems with more than 3GB of RAM this
+    //   gets doubled to 10'000.
     quint64 picCacheMem = 1'000'000'000ULL;
     int pgCacheEntries = 5'000;
 
 #if Q_PROCESSOR_WORDSIZE >= 8
-    picCacheMem = qMax(picCacheMem, SystemInfo::inst()->physicalMemory() / 2);
+    picCacheMem = qBound(picCacheMem, SystemInfo::inst()->physicalMemory() / 4, picCacheMem * 4);
     if (SystemInfo::inst()->physicalMemory() >= 3'000'000'000ULL)
         pgCacheEntries *= 2;
 #endif
+
+    qInfo().noquote() << "Caches:"
+                      << "\n  Pictures    :"
+                      << QByteArray::number(double(picCacheMem) / 1'000'000'000ULL, 'f', 1) << "GB"
+                      << "\n  Price guides:" << pgCacheEntries << "entries";
 
     m_pic_cache.setMaxCost(int(picCacheMem / 1024)); // each pic has the cost of memory used in KB
     m_pg_cache.setMaxCost(pgCacheEntries); // each priceguide has a cost of 1
