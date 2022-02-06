@@ -627,9 +627,13 @@ void Application::setupLogging()
         if (s_inst && s_inst->m_uiMessageHandler) {
             s_inst->m_uiMessageHandler(type, ctx, msg);
         } else {
-            auto ctxCopy = new QMessageLogContext(qstrdup(ctx.file), ctx.line,
-                                                  qstrdup(ctx.function), qstrdup(ctx.category));
-            s_bufferedMessages.append({ type, ctxCopy, msg });
+            try {
+                auto ctxCopy = new QMessageLogContext(qstrdup(ctx.file), ctx.line,
+                                                      qstrdup(ctx.function), qstrdup(ctx.category));
+                s_bufferedMessages.append({ type, ctxCopy, msg });
+            } catch (const std::bad_alloc &) {
+                // swallow bad-allocs and hope for sentry to log something useful
+            }
         }
     };
     m_defaultMessageHandler = qInstallMessageHandler(messageHandler);
