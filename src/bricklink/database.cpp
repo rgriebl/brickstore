@@ -372,16 +372,15 @@ void Database::read(const QString &fileName)
                 .arg(f.fileName());
         }
 
-        qDebug().noquote() << "Loaded database from" << f.fileName()
-                 << "\n  Generated at:" << QLocale().toString(generationDate)
-                 << "\n  Colors      :" << colors.size()
-                 << "\n  Item Types  :" << itemTypes.size()
-                 << "\n  Categories  :" << categories.size()
-                 << "\n  Items       :" << items.size()
-                 << "\n  PCCs        :" << pccs.size()
-                 << "\n  ChangeLog I :" << itemChangelog.size()
-                 << "\n  ChangeLog C :" << colorChangelog.size();
-
+        qInfo().noquote() << "Loaded database from" << f.fileName()
+                          << "\n  Generated at:" << generationDate.toString()
+                          << "\n  Colors      :" << colors.size()
+                          << "\n  Item Types  :" << itemTypes.size()
+                          << "\n  Categories  :" << categories.size()
+                          << "\n  Items       :" << items.size()
+                          << "\n  PCCs        :" << pccs.size()
+                          << "\n  ChangeLog I :" << itemChangelog.size()
+                          << "\n  ChangeLog C :" << colorChangelog.size();
 
         emit core()->beginResetDatabase();
 

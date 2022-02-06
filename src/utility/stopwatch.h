@@ -41,7 +41,7 @@ public:
         int msec = int(micros / 1000);
         int usec = micros % 1000;
 
-        qWarning("%s: %ds %03dms %03dus", m_label ? m_label : "", sec, msec, usec);
+        qInfo("%s: %ds %03dms %03dus", m_label ? m_label : "", sec, msec, usec);
         m_label = desc;
         m_timer.restart();
     }

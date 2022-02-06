@@ -164,7 +164,7 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
                 % QLatin1String(ctx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1
                 % lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
-            if (!filename.isEmpty()) {
+            if ((type != QtInfoMsg) && !filename.isEmpty()) {
                 str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
                         % R"(;font-weight:bold;">)"_l1 % filename
                         % R"(</span>, line <span style="color:#)"_l1 % QLatin1String(lineColor)

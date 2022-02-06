@@ -95,7 +95,7 @@ bool ScriptManager::reload()
     for (const QString &path : qAsConst(spath)) {
         QDir dir(path);
         if (!path.startsWith(':'_l1)) {
-            qCDebug(LogScript) << "Loading scripts from directory:" << path;
+            qCInfo(LogScript) << "Loading scripts from directory:" << path;
             if (!dir.exists())
                 dir.mkpath('.'_l1);
         }
@@ -109,7 +109,7 @@ bool ScriptManager::reload()
             try {
                 loadScript(filePath);
 
-                qCDebug(LogScript).noquote() << "  [ ok ]" << fi.fileName();
+                qCInfo(LogScript).noquote() << "  [ ok ]" << fi.fileName();
 
             } catch (const Exception &e) {
                 qCWarning(LogScript).noquote() << "  [fail]" << fi.fileName() << ":" << e.what();
