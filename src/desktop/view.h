@@ -75,7 +75,7 @@ public:
 
     QCoro::Task<> addLots(LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
 
-    QCoro::Task<> consolidateLots(const LotList &lots);
+    QCoro::Task<> consolidateLots(BrickLink::LotList lots);
 
     void printScriptAction(PrintingScriptAction *printingAction);
 

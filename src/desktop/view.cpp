@@ -696,7 +696,7 @@ QCoro::Task<> View::addLots(LotList &&lots, AddLotMode addLotMode)
 }
 
 
-QCoro::Task<> View::consolidateLots(const LotList &lots)
+QCoro::Task<> View::consolidateLots(BrickLink::LotList lots)
 {
     if (lots.count() < 2)
         co_return;
