@@ -342,12 +342,12 @@ jobs:
     #################################################
 
     - name: Generate Documentation
-      if: (matrix.config.os == 'linux') && matrix.config.debian_container && matrix.config.generate_docs
+      if: (matrix.config.os == 'linux') && matrix.config.debian_container && matrix.config.generate_docs && (github.ref == 'refs/heads/main')
       run: |
         sudo docker exec -w /build "debian-build" make extensions_doc
 
     - name: Publish Documentation
-      if: matrix.config.generate_docs
+      if: matrix.config.generate_docs && (github.ref == 'refs/heads/main')
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
