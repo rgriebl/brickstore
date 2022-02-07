@@ -254,7 +254,7 @@ WantedLists::WantedLists(QObject *parent)
         }
     });
 
-    connect(core(), &BrickLink::Core::beginResetDatabase,
+    connect(core()->database(), &BrickLink::Database::databaseAboutToBeReset,
             this, [this]() {
         beginResetModel();
         qDeleteAll(m_wantedLists);

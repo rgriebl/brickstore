@@ -135,9 +135,6 @@ signals:
 
     void userIdChanged(const QString &userId);
 
-    void beginResetDatabase();
-    void endResetDatabase();
-
 private:
     Core(const QString &datadir);
 

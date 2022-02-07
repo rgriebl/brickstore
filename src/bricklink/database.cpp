@@ -49,8 +49,11 @@ namespace BrickLink {
 Database::Database(QObject *parent)
     : QObject(parent)
     , m_transfer(new Transfer(this))
-{
+{ }
 
+Database::~Database()
+{
+    clear();
 }
 
 bool Database::isUpdateNeeded() const
@@ -382,7 +385,7 @@ void Database::read(const QString &fileName)
                           << "\n  ChangeLog I :" << itemChangelog.size()
                           << "\n  ChangeLog C :" << colorChangelog.size();
 
-        emit core()->beginResetDatabase();
+        emit databaseAboutToBeReset();
 
         m_colors = colors;
         m_categories = categories;
@@ -392,7 +395,7 @@ void Database::read(const QString &fileName)
         m_colorChangelog = colorChangelog;
         m_pccs = pccs;
 
-        emit core()->endResetDatabase();
+        emit databaseReset();
 
         if (generationDate != m_lastUpdated) {
             m_lastUpdated = generationDate;

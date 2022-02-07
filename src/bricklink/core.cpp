@@ -444,6 +444,10 @@ Core *Core::create(const QString &datadir, QString *errstring)
     if (!s_inst) {
         s_inst = new Core(datadir);
         s_inst->m_database = new Database(s_inst);
+
+        connect(s_inst->m_database, &Database::databaseAboutToBeReset,
+                s_inst, &Core::clear);
+
 #if !defined(BS_BACKEND)
         s_inst->m_store = new Store(s_inst);
         s_inst->m_orders = new Orders(s_inst);
@@ -930,8 +934,6 @@ void Core::clear()
 
     m_pg_cache.clear();
     m_pic_cache.clear();
-
-    database()->clear();
 }
 
 bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc)

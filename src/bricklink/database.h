@@ -40,6 +40,8 @@ class Database : public QObject
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
 
 public:
+    ~Database() override;
+
     enum class Version {
         Invalid,
         Version_1, // deprecated
@@ -75,6 +77,8 @@ signals:
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
     void lastUpdatedChanged(const QDateTime &lastUpdated);
     void validChanged(bool valid);
+    void databaseAboutToBeReset();
+    void databaseReset();
 
 private:
     Database(QObject *parent = nullptr);
