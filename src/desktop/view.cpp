@@ -80,6 +80,7 @@
 #include "selectdocumentdialog.h"
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
+#include "importinventorydialog.h"
 #include "consolidateitemsdialog.h"
 
 
@@ -803,7 +804,9 @@ int View::consolidateLotsHelper(const LotList &lots, Consolidate conMode) const
 
 QCoro::Task<> View::partOutItems()
 {
-    if (selectedLots().count() >= 1) {
+    const auto selection = selectedLots();
+
+    if (selection.count() >= 1) {
         auto pom = Config::inst()->partOutMode();
         bool inplace = (pom == Config::PartOutMode::InPlace);
 
@@ -826,41 +829,47 @@ QCoro::Task<> View::partOutItems()
 
         int partcount = 0;
 
-        foreach(Lot *lot, selectedLots()) {
+        for (Lot *lot : selection) {
+            if (!lot->item() || !lot->item()->hasInventory())
+                continue;
+
+            int quantity = lot->quantity();
+            auto condition = lot->condition();
+            bool includeInstructions = false;
+            bool includeAlternates = false;
+            bool includeCounterparts = false;
+            BrickLink::Status extraParts = BrickLink::Status::Extra;
+
+            if (!BrickLink::Item::ConsistsOf::isSimple(lot->item()->consistsOf())) {
+                ImportInventoryDialog dlg(lot->item(), quantity, condition, this);
+                dlg.open();
+                if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+                    quantity = dlg.quantity();
+                    condition = dlg.condition();
+                    includeInstructions = dlg.includeInstructions();
+                    includeAlternates = dlg.includeAlternates();
+                    includeCounterparts = dlg.includeCounterParts();
+                    extraParts = dlg.extraParts();
+                }
+            }
+
             if (inplace) {
-                if (lot->item()->hasInventory() && lot->quantity()) {
-                    const auto &parts = lot->item()->consistsOf();
-                    if (!parts.isEmpty()) {
-                        int multiply = lot->quantity();
-
-                        LotList newLots;
-
-                        for (const BrickLink::Item::ConsistsOf &part : parts) {
-                            auto partItem = part.item();
-                            auto partColor = part.color();
-                            if (!partItem)
-                                continue;
-                            if (lot->colorId() && partItem->itemType()->hasColors()
-                                    && partColor && (partColor->id() == 0)) {
-                                partColor = lot->color();
-                            }
-                            auto *newLot = new Lot(partColor, partItem);
-                            newLot->setQuantity(part.quantity() * multiply);
-                            newLot->setCondition(lot->condition());
-                            newLot->setAlternate(part.isAlternate());
-                            newLot->setAlternateId(part.alternateId());
-                            newLot->setCounterPart(part.isCounterPart());
-
-                            newLots << newLot;
-                        }
+                if (quantity) {
+                    auto pr = BrickLink::IO::fromPartInventory(lot->item(), lot->color(), quantity,
+                                                               condition, extraParts,
+                                                               includeInstructions, includeAlternates,
+                                                               includeCounterparts);
+                    auto newLots = pr.takeLots();
+                    if (!newLots.isEmpty()) {
                         m_model->insertLotsAfter(lot, std::move(newLots));
                         m_model->removeLot(lot);
                         partcount++;
                     }
                 }
             } else {
-                Document::fromPartInventory(lot->item(), lot->color(), lot->quantity(),
-                                            lot->condition());
+                Document::fromPartInventory(lot->item(), lot->color(), quantity, condition,
+                                            extraParts, includeInstructions, includeAlternates,
+                                            includeCounterparts);
             }
         }
         if (inplace)

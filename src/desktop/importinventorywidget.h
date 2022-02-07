@@ -16,48 +16,31 @@
 #include <QDialog>
 #include "bricklink/global.h"
 
-QT_FORWARD_DECLARE_CLASS(QPushButton)
-QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
-QT_FORWARD_DECLARE_CLASS(QLabel)
-
-class SelectItem;
-class ImportInventoryWidget;
+#include "ui_importinventorywidget.h"
 
 
-class ImportInventoryDialog : public QDialog
+class ImportInventoryWidget : public QWidget, private Ui::ImportInventoryWidget
 {
     Q_OBJECT
 public:
-    ImportInventoryDialog(const BrickLink::Item *item, int quantity,
-                          BrickLink::Condition condition, QWidget *parent = nullptr);
-    ImportInventoryDialog(QWidget *parent = nullptr);
-    ~ImportInventoryDialog() override;
+    ImportInventoryWidget(QWidget *parent = nullptr);
+    ~ImportInventoryWidget() override;
 
-    bool setItem(const BrickLink::Item *item);
-    const BrickLink::Item *item() const;
+    void setItem(const BrickLink::Item *item);
     int quantity() const;
+    void setQuantity(int qty);
     BrickLink::Condition condition() const;
+    void setCondition(BrickLink::Condition condition);
     BrickLink::Status extraParts() const;
     bool includeInstructions() const;
     bool includeAlternates() const;
     bool includeCounterParts() const;
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+
 protected:
     void changeEvent(QEvent *e) override;
-    void showEvent(QShowEvent *) override;
-    void keyPressEvent(QKeyEvent *e) override;
-    QSize sizeHint() const override;
 
     void languageChange();
-
-protected slots:
-    void checkItem(const BrickLink::Item *it, bool ok);
-    void importInventory();
-
-private:
-    const BrickLink::Item *m_verifyItem = nullptr;
-    SelectItem *m_select = nullptr;
-    QLabel *m_verifyLabel = nullptr;
-    ImportInventoryWidget *m_import;
-    QDialogButtonBox *m_buttons;
 };

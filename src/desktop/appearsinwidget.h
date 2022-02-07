@@ -18,6 +18,7 @@
 
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
+#include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 class AppearsInWidgetPrivate;
@@ -45,7 +46,7 @@ protected slots:
 
 private slots:
     void showContextMenu(const QPoint &);
-    void partOut();
+    QCoro::Task<> partOut();
     void resizeColumns();
 
 protected:

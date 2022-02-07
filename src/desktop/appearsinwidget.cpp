@@ -23,6 +23,7 @@
 #include "bricklink/model.h"
 #include "utility/utility.h"
 #include "common/document.h"
+#include "importinventorydialog.h"
 #include "picturewidget.h"
 
 #include "appearsinwidget.h"
@@ -126,12 +127,20 @@ const BrickLink::AppearsInItem *AppearsInWidget::appearsIn() const
         return nullptr;
 }
 
-void AppearsInWidget::partOut()
+QCoro::Task<> AppearsInWidget::partOut()
 {
     const BrickLink::AppearsInItem *ai = appearsIn();
 
-    if (ai && ai->second)
-        Document::fromPartInventory(ai->second);
+    if (ai && ai->second) {
+        ImportInventoryDialog dlg(ai->second, 1, BrickLink::Condition::New, this);
+        dlg.open();
+
+        if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+            Document::fromPartInventory(dlg.item(), nullptr, dlg.quantity(), dlg.condition(),
+                                        dlg.extraParts(), dlg.includeInstructions(),
+                                        dlg.includeAlternates(), dlg.includeCounterParts());
+        }
+    }
 }
 
 QSize AppearsInWidget::minimumSizeHint() const

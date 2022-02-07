@@ -24,118 +24,155 @@
 #include "common/documentio.h"
 #include "utility/utility.h"
 #include "importinventorydialog.h"
+#include "importinventorywidget.h"
+#include "selectitem.h"
 #include "progressdialog.h"
 
 
 ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
+    : ImportInventoryDialog(nullptr, 1, BrickLink::Condition::New, parent)
+{ }
+
+ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int quantity,
+                                             BrickLink::Condition condition, QWidget *parent)
     : QDialog(parent)
+    , m_verifyItem(item)
 {
-    setupUi(this);
+    setWindowTitle(tr("Import BrickLink Inventory"));
 
-    w_select->setExcludeWithoutInventoryFilter(true);
-    connect(w_select, &SelectItem::itemSelected,
-            this, &ImportInventoryDialog::checkItem);
-    connect(w_select, &SelectItem::currentItemTypeChanged,
-            this, [this](const BrickLink::ItemType *itt) {
-        bool b = itt && (itt->id() == 'S');
-        w_instructions->setEnabled(b);
-    });
-    w_import = new QPushButton();
-    w_import->setDefault(true);
-    w_buttons->addButton(w_import, QDialogButtonBox::AcceptRole);
-    connect(w_import, &QAbstractButton::clicked,
+    m_import = new ImportInventoryWidget(this);
+
+    if (!m_verifyItem) {
+        m_select = new SelectItem(this);
+        m_select->setExcludeWithoutInventoryFilter(true);
+        connect(m_select, &SelectItem::itemSelected,
+                this, &ImportInventoryDialog::checkItem);
+        setSizeGripEnabled(true);
+        setFocusProxy(m_select);
+    } else {
+        m_verifyLabel = new QLabel(this);
+        m_verifyLabel->setText(tr("Parting out:") % u" <b>" % QString::fromLatin1(m_verifyItem->id())
+                               % u" " % m_verifyItem->name() % u"</b");
+
+        setFocusProxy(m_import);
+    }
+
+    m_buttons = new QDialogButtonBox(this);
+    m_buttons->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Close);
+    connect(m_buttons, &QDialogButtonBox::accepted,
             this, &ImportInventoryDialog::importInventory);
+    connect(m_buttons, &QDialogButtonBox::rejected,
+            this, &ImportInventoryDialog::reject);
 
-    QByteArray ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Geometry"_l1).toByteArray();
-    if (!ba.isEmpty())
-        restoreGeometry(ba);
+    auto *layout = new QVBoxLayout(this);
+    if (m_select)
+        layout->addWidget(m_select, 10);
+    if (m_verifyLabel)
+        layout->addWidget(m_verifyLabel);
+    layout->addWidget(m_import);
+    layout->addWidget(m_buttons);
 
-    ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/SelectItem"_l1)
-            .toByteArray();
-    if (!w_select->restoreState(ba)) {
-        w_select->restoreState(SelectItem::defaultState());
-        w_select->setCurrentItemType(BrickLink::core()->itemType('S'));
+    if (m_select) {
+        QByteArray ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Geometry"_l1).toByteArray();
+        if (!ba.isEmpty())
+            restoreGeometry(ba);
+
+        ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/SelectItem"_l1)
+                .toByteArray();
+        if (!m_select->restoreState(ba)) {
+            m_select->restoreState(SelectItem::defaultState());
+            m_select->setCurrentItemType(BrickLink::core()->itemType('S'));
+        }
+
+        ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Details"_l1)
+                .toByteArray();
+        m_import->restoreState(ba);
+
+        if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
+            new QShortcut(a->shortcuts().constFirst(), this, [this]() {
+                if (const auto item = m_select->currentItem())
+                    BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item);
+            });
+        }
+        if (auto *a = ActionManager::inst()->action("bricklink_priceguide")) {
+            new QShortcut(a->shortcuts().constFirst(), this, [this]() {
+                const auto item = m_select->currentItem();
+                if (item && !item->itemType()->hasColors())
+                    BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item);
+            });
+        }
+        if (auto *a = ActionManager::inst()->action("bricklink_lotsforsale")) {
+            new QShortcut(a->shortcuts().constFirst(), this, [this]() {
+                const auto item = m_select->currentItem();
+                if (item && !item->itemType()->hasColors())
+                    BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item);
+            });
+        }
+        checkItem(m_select->currentItem(), false);
+    } else {
+        m_import->setQuantity(quantity);
+        m_import->setCondition(condition);
+
+        QMetaObject::invokeMethod(this, [this]() { setFixedSize(sizeHint()); }, Qt::QueuedConnection);
+
+        checkItem(m_verifyItem, false);
     }
 
-    ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Details"_l1)
-            .toByteArray();
-    restoreState(ba);
-
-    if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
-        new QShortcut(a->shortcuts().constFirst(), this, [this]() {
-            if (const auto item = w_select->currentItem())
-                BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item);
-        });
-    }
-    if (auto *a = ActionManager::inst()->action("bricklink_priceguide")) {
-        new QShortcut(a->shortcuts().constFirst(), this, [this]() {
-            const auto item = w_select->currentItem();
-            if (item && !item->itemType()->hasColors())
-                BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item);
-        });
-    }
-    if (auto *a = ActionManager::inst()->action("bricklink_lotsforsale")) {
-        new QShortcut(a->shortcuts().constFirst(), this, [this]() {
-            const auto item = w_select->currentItem();
-            if (item && !item->itemType()->hasColors())
-                BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item);
-        });
-    }
-    checkItem(w_select->currentItem(), false);
     languageChange();
 }
 
 ImportInventoryDialog::~ImportInventoryDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/SelectItem"_l1, w_select->saveState());
-    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Details"_l1, saveState());
+    if (!m_verifyItem) {
+        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry"_l1, saveGeometry());
+        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/SelectItem"_l1, m_select->saveState());
+        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Details"_l1, m_import->saveState());
+    }
 }
 
 bool ImportInventoryDialog::setItem(const BrickLink::Item *item)
 {
-    return w_select->setCurrentItem(item);
+    return m_select ? m_select->setCurrentItem(item) : false;
 }
 
 const BrickLink::Item *ImportInventoryDialog::item() const
 {
-    return w_select->currentItem();
+    return m_verifyItem ? m_verifyItem : m_select->currentItem();
 }
 
 int ImportInventoryDialog::quantity() const
 {
-    return qMax(1, w_qty->value());
+    return m_import->quantity();
 }
 
 BrickLink::Condition ImportInventoryDialog::condition() const
 {
-    return w_condition_used->isChecked() ? BrickLink::Condition::Used : BrickLink::Condition::New;
+    return m_import->condition();
 }
 
 BrickLink::Status ImportInventoryDialog::extraParts() const
 {
-    return static_cast<BrickLink::Status>(w_extra->currentIndex());
+    return m_import->extraParts();
 }
 
 bool ImportInventoryDialog::includeInstructions() const
 {
-    return w_instructions->isEnabled() && w_instructions->isChecked();
+    return m_import->includeInstructions();
 }
 
 bool ImportInventoryDialog::includeAlternates() const
 {
-    return w_alternates->isEnabled() && w_alternates->isChecked();
+    return m_import->includeAlternates();
 }
 
 bool ImportInventoryDialog::includeCounterParts() const
 {
-    return w_counterParts->isEnabled() && w_counterParts->isChecked();
+    return m_import->includeCounterParts();
 }
 
 void ImportInventoryDialog::languageChange()
 {
-    retranslateUi(this);
-    w_import->setText(tr("Import"));
+    m_buttons->button(QDialogButtonBox::Ok)->setText(tr("Import"));
 }
 
 void ImportInventoryDialog::changeEvent(QEvent *e)
@@ -149,7 +186,6 @@ void ImportInventoryDialog::showEvent(QShowEvent *e)
 {
     QDialog::showEvent(e);
     activateWindow();
-    w_select->setFocus();
 }
 
 void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
@@ -163,8 +199,9 @@ void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
         // we need the animateClick here instead of triggering directly: otherwise we
         // get interference from the itemActivated signal on the QTreeView, resulting in
         // double triggering
-        if (w_import->isVisible() && w_import->isEnabled())
-            w_import->animateClick();
+        auto *button = m_buttons->button(QDialogButtonBox::Ok);
+        if (button->isVisible() && button->isEnabled())
+            button->animateClick();
         return;
     }
 
@@ -174,107 +211,34 @@ void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
 
 QSize ImportInventoryDialog::sizeHint() const
 {
-    QFontMetrics fm(font());
-    return QSize(fm.horizontalAdvance("m"_l1) * 120, fm.height() * 30);
-}
-
-QByteArray ImportInventoryDialog::saveState() const
-{
-    QByteArray ba;
-    QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("II") << qint32(3)
-       << w_condition_new->isChecked()
-       << qint32(w_qty->value())
-       << qint32(w_extra->currentIndex())
-       << w_instructions->isChecked()
-       << w_alternates->isChecked()
-       << w_counterParts->isChecked();
-    return ba;
-}
-
-bool ImportInventoryDialog::restoreState(const QByteArray &ba)
-{
-    QDataStream ds(ba);
-    QByteArray tag;
-    qint32 version;
-    ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 3))
-        return false;
-
-    bool isNew;
-    qint32 qty;
-
-    ds >> isNew >> qty;
-
-    if (ds.status() != QDataStream::Ok)
-        return false;
-
-    w_condition_new->setChecked(isNew);
-    w_condition_used->setChecked(!isNew);
-    w_qty->setValue(qty);
-
-    if (version >= 2) {
-        qint32 extras;
-        bool instructions;
-
-        ds >> extras >> instructions;
-
-        if (ds.status() != QDataStream::Ok)
-            return false;
-
-        w_instructions->setChecked(instructions);
-        w_extra->setCurrentIndex(extras);
+    if (m_verifyItem) {
+        return QDialog::sizeHint();
+    } else {
+        QFontMetrics fm(font());
+        return QSize(fm.horizontalAdvance("m"_l1) * 120, fm.height() * 30);
     }
-    if (version >= 3) {
-        bool alternates;
-        bool counterParts;
-
-        ds >> alternates >> counterParts;
-
-        if (ds.status() != QDataStream::Ok)
-            return false;
-
-        w_alternates->setChecked(alternates);
-        w_counterParts->setChecked(counterParts);
-    }
-
-    return true;
 }
+
 
 void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 {
-    w_import->setEnabled((it));
+    m_import->setItem(it);
 
-    if (it && it->itemType() && (it->itemTypeId() == 'S')) {
-        bool hasInstructions = (BrickLink::core()->item('I', it->id()));
-        w_instructions->setEnabled(hasInstructions);
-    }
-    bool hasCounterParts = false;
-    bool hasAlternates = false;
-
-    if (it) {
-        const auto &inv = it->consistsOf();
-        for (const auto &co : inv) {
-            if (co.isExtra())
-                hasCounterParts = true;
-            if (co.isAlternate())
-                hasAlternates = true;
-            if (hasAlternates && hasCounterParts)
-                break;
-        }
-    }
-    w_alternates->setEnabled(hasAlternates);
-    w_counterParts->setEnabled(hasCounterParts);
-
+    auto *button = m_buttons->button(QDialogButtonBox::Ok);
+    button->setEnabled((it));
     if (ok)
-        w_import->animateClick();
+        button->animateClick();
 }
 
 void ImportInventoryDialog::importInventory()
 {
-    Document::fromPartInventory(item(), nullptr, quantity(), condition(),
-                                extraParts(), includeInstructions(),
-                                includeAlternates(), includeCounterParts());
+    if (m_verifyItem) {
+        accept();
+    } else {
+        Document::fromPartInventory(item(), nullptr, quantity(), condition(),
+                                    extraParts(), includeInstructions(),
+                                    includeAlternates(), includeCounterParts());
+    }
 }
 
 #include "moc_importinventorydialog.cpp"

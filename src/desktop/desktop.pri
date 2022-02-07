@@ -19,6 +19,7 @@ HEADERS += \
     $$PWD/flowlayout.h \
     $$PWD/headerview.h \
     $$PWD/historylineedit.h \
+    $$PWD/importinventorydialog.h \
     $$PWD/incdecpricesdialog.h \
     $$PWD/mainwindow.h \
     $$PWD/mainwindow_p.h \
@@ -55,6 +56,7 @@ SOURCES += \
     $$PWD/flowlayout.cpp \
     $$PWD/headerview.cpp \
     $$PWD/historylineedit.cpp \
+    $$PWD/importinventorydialog.cpp \
     $$PWD/incdecpricesdialog.cpp \
     $$PWD/mainwindow.cpp \
     $$PWD/managecolumnlayoutsdialog.cpp \
@@ -82,8 +84,8 @@ FORMS = \
     $$PWD/additemdialog.ui \
     $$PWD/changecurrencydialog.ui \
     $$PWD/consolidateitemsdialog.ui \
-    $$PWD/importinventorydialog.ui \
     $$PWD/importcartdialog.ui \
+    $$PWD/importinventorywidget.ui \
     $$PWD/importorderdialog.ui \
     $$PWD/importwantedlistdialog.ui \
     $$PWD/orderinformationdialog.ui \

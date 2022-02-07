@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ImportInventoryDialog</class>
- <widget class="QDialog" name="ImportInventoryDialog">
+ <class>ImportInventoryWidget</class>
+ <widget class="QWidget" name="ImportInventoryWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
-    <height>591</height>
+    <width>515</width>
+    <height>73</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Import BrickLink Inventory</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <property name="sizeGripEnabled">
-   <bool>true</bool>
+  <property name="windowTitle">
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="SelectItem" name="w_select" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-       <horstretch>100</horstretch>
-       <verstretch>100</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>50</width>
-       <height>50</height>
-      </size>
-     </property>
-    </widget>
-   </item>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -140,7 +139,7 @@
      <item>
       <widget class="QComboBox" name="w_extra">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <item>
         <property name="text">
@@ -243,49 +242,8 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QDialogButtonBox" name="w_buttons">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>SelectItem</class>
-   <extends>QWidget</extends>
-   <header>selectitem.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
- <tabstops>
-  <tabstop>w_qty</tabstop>
-  <tabstop>w_condition_new</tabstop>
-  <tabstop>w_condition_used</tabstop>
-  <tabstop>w_extra</tabstop>
-  <tabstop>w_instructions</tabstop>
-  <tabstop>w_alternates</tabstop>
-  <tabstop>w_counterParts</tabstop>
- </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>w_buttons</sender>
-   <signal>rejected()</signal>
-   <receiver>ImportInventoryDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>513</x>
-     <y>480</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>106</x>
-     <y>340</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
