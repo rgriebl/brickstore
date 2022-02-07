@@ -148,3 +148,12 @@ const BrickLink::Color *BrickLink::Item::ConsistsOf::color() const
 {
     return &core()->colors().at(m_colorIndex);
 }
+
+bool BrickLink::Item::ConsistsOf::isSimple(const QVector<ConsistsOf> &parts)
+{
+    for (const auto &co : parts) {
+        if (co.isExtra() || co.isCounterPart() || co.isAlternate())
+            return false;
+    }
+    return true;
+}

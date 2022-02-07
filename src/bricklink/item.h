@@ -53,6 +53,8 @@ public:
         uint alternateId() const    { return m_altid; }
         bool isCounterPart() const  { return m_cpart; }
 
+        static bool isSimple(const QVector<ConsistsOf> &parts);
+
     private:
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         quint64  m_qty      : 12;

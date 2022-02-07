@@ -432,3 +432,74 @@ void BrickLink::IO::ParseResult::addToDifferenceModeBase(const Lot *lot, const L
 {
     m_differenceModeBase.insert(lot, base);
 }
+
+BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, const Color *color, int quantity, Condition condition, Status extraParts, bool includeInstructions, bool includeAlternates, bool includeCounterParts)
+{
+    const auto &parts = item->consistsOf();
+    BrickLink::IO::ParseResult pr;
+
+    for (const BrickLink::Item::ConsistsOf &part : parts) {
+        const BrickLink::Item *partItem = part.item();
+        const BrickLink::Color *partColor = part.color();
+        if (!partItem)
+            continue;
+        if (color && color->id() && partItem->itemType()->hasColors()
+                && partColor && (partColor->id() == 0)) {
+            partColor = color;
+        }
+
+        if ((!includeAlternates && part.isAlternate())
+                || (!includeCounterParts && part.isCounterPart())) {
+            continue;
+        }
+
+        if (part.isExtra()) {
+            switch (extraParts) {
+            case BrickLink::Status::Include: {
+                bool found = false;
+                for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
+                    if (partItem == (*it)->item() && (partColor == (*it)->color())
+                            && (part.isAlternate() == (*it)->alternate())
+                            && (part.alternateId() == (*it)->alternateId())
+                            && (part.isCounterPart() == (*it)->counterPart())) {
+                        (*it)->setQuantity((*it)->quantity() + quantity * part.quantity());
+                        found = true;
+                        break;
+                    }
+                }
+                if (found)
+                    continue;
+                if (!found)
+                    qWarning() << "Couldn't consolidate extra part" << partItem->id();
+                break;
+            }
+            case BrickLink::Status::Exclude:
+                continue;
+            default:
+                break;
+            }
+        }
+
+
+        Lot *lot = new Lot(partColor, partItem);
+        lot->setQuantity(part.quantity() * quantity);
+        lot->setCondition(condition);
+        if (part.isExtra())
+            lot->setStatus(extraParts);
+        lot->setAlternate(part.isAlternate());
+        lot->setAlternateId(part.alternateId());
+        lot->setCounterPart(part.isCounterPart());
+
+        pr.addLot(std::move(lot));
+    }
+    if (includeInstructions) {
+        if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
+            auto *lot = new Lot(BrickLink::core()->color(0), instructions);
+            lot->setQuantity(quantity);
+            lot->setCondition(condition);
+
+            pr.addLot(std::move(lot));
+        }
+    }
+    return pr;
+}

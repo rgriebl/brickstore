@@ -1586,72 +1586,9 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
     Q_ASSERT(item && !item->consistsOf().isEmpty());
     Q_ASSERT(multiply != 0);
 
-    const auto &parts = item->consistsOf();
-    BrickLink::IO::ParseResult pr;
-
-    for (const BrickLink::Item::ConsistsOf &part : parts) {
-        const BrickLink::Item *partItem = part.item();
-        const BrickLink::Color *partColor = part.color();
-        if (!partItem)
-            continue;
-        if (color && color->id() && partItem->itemType()->hasColors()
-                && partColor && (partColor->id() == 0)) {
-            partColor = color;
-        }
-
-        if ((!includeAlternates && part.isAlternate())
-                || (!includeCounterParts && part.isCounterPart())) {
-            continue;
-        }
-
-        if (part.isExtra()) {
-            switch (extraParts) {
-            case BrickLink::Status::Include: {
-                bool found = false;
-                for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
-                    if (partItem == (*it)->item() && (partColor == (*it)->color())
-                            && (part.isAlternate() == (*it)->alternate())
-                            && (part.alternateId() == (*it)->alternateId())
-                            && (part.isCounterPart() == (*it)->counterPart())) {
-                        (*it)->setQuantity((*it)->quantity() + part.quantity());
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    continue;
-                if (!found)
-                    qWarning() << "Couldn't consolidate extra part" << partItem->id();
-                break;
-            }
-            case BrickLink::Status::Exclude:
-                continue;
-            default:
-                break;
-            }
-        }
-
-
-        Lot *lot = new Lot(partColor, partItem);
-        lot->setQuantity(part.quantity() * multiply);
-        lot->setCondition(condition);
-        if (part.isExtra())
-            lot->setStatus(extraParts);
-        lot->setAlternate(part.isAlternate());
-        lot->setAlternateId(part.alternateId());
-        lot->setCounterPart(part.isCounterPart());
-
-        pr.addLot(std::move(lot));
-    }
-    if (includeInstructions) {
-        if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
-            auto *lot = new Lot(BrickLink::core()->color(0), instructions);
-            lot->setQuantity(multiply);
-            lot->setCondition(condition);
-
-            pr.addLot(std::move(lot));
-        }
-    }
+    auto pr = BrickLink::IO::fromPartInventory(item, color, multiply, condition, extraParts,
+                                               includeInstructions, includeAlternates,
+                                               includeCounterParts);
 
     auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
     document->setTitle(tr("Inventory for %1").arg(QLatin1String(item->id())));
