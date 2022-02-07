@@ -249,7 +249,7 @@ void ImportWantedListDialog::updateStatusLabel()
         break;
 
     case BrickLink::UpdateStatus::Updating:
-        s = tr("Currently updating wantedLists");
+        s = tr("Currently updating wanted lists");
         break;
 
     case BrickLink::UpdateStatus::UpdateFailed:
