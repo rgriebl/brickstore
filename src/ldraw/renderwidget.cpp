@@ -26,12 +26,13 @@
 
 #include "ldraw.h"
 #include "renderwidget.h"
-#include "shaders.h"
 
 
 LDraw::GLRenderer::GLRenderer(QObject *parent)
     : QObject(parent)
 {
+    m_coreProfile = (QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile);
+
     m_animation = new QTimer(this);
     m_animation->setInterval(1000/60);
 
@@ -208,8 +209,12 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     glClearColor(.5, .5, .5, 0);
 
     m_program = new QOpenGLShaderProgram;
-    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSourcePhong20);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSourcePhong20);
+    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, m_coreProfile
+                                       ? QLatin1String(":/ldraw/shaders/phong_core.vert")
+                                       : QLatin1String(":/ldraw/shaders/phong.vert"));
+    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, m_coreProfile
+                                       ? QLatin1String(":/ldraw/shaders/phong_core.frag")
+                                       : QLatin1String(":/ldraw/shaders/phong.frag"));
     m_program->bindAttributeLocation("vertex", 0);
     m_program->bindAttributeLocation("normal", 1);
     m_program->bindAttributeLocation("color", 2);

@@ -123,7 +123,7 @@ private:
                     int dirty, std::vector<float> *buffers[VBO_Count]);
 
     QTimer *m_animation = nullptr;
-
+    bool m_coreProfile = false;
 
     Part *m_part = nullptr;
     int m_color = -1;

@@ -17,10 +17,18 @@ versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
 
 HEADERS += \
   $$PWD/renderwidget.h \
-  $$PWD/shaders.h \
 
 
 SOURCES += \
   $$PWD/renderwidget.cpp \
 
+RESOURCES += \
+    $$PWD/shaders.qrc
+
 }
+
+OTHER_FILES += \
+    $$PWD/shaders/phong.frag \
+    $$PWD/shaders/phong.vert \
+    $$PWD/shaders/phong_core.frag \
+    $$PWD/shaders/phong_core.vert

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/ldraw">
+        <file>shaders/phong.frag</file>
+        <file>shaders/phong.vert</file>
+        <file>shaders/phong_core.frag</file>
+        <file>shaders/phong_core.vert</file>
+    </qresource>
+</RCC>
