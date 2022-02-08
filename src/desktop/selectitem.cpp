@@ -295,8 +295,8 @@ void SelectItem::init()
     d->w_dateFilter->setIcon(QIcon::fromTheme("appointment-new"_l1));
     d->w_dateFilter->setAutoRaise(true);
     connect(d->w_dateFilter, &QToolButton::clicked, this, [this]() {
-        int minYear = QInputDialog::getInt(this, tr("Min Year"), tr("MinYear"), 1950);
-        int maxYear = QInputDialog::getInt(this, tr("Max Year"), tr("MaxYear"), 2050);
+        int minYear = QInputDialog::getInt(this, "Min Year"_l1, "Min Year"_l1, 1950);
+        int maxYear = QInputDialog::getInt(this, "Max Year"_l1, "Max Year"_l1, 2050);
         d->itemModel->setFilterYearRange(minYear, maxYear);
     });
 
