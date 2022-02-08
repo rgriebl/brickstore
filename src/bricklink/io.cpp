@@ -438,6 +438,16 @@ BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, co
     const auto &parts = item->consistsOf();
     BrickLink::IO::ParseResult pr;
 
+    if (includeInstructions) {
+        if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
+            auto *lot = new Lot(BrickLink::core()->color(0), instructions);
+            lot->setQuantity(quantity);
+            lot->setCondition(condition);
+
+            pr.addLot(std::move(lot));
+        }
+    }
+
     for (const BrickLink::Item::ConsistsOf &part : parts) {
         const BrickLink::Item *partItem = part.item();
         const BrickLink::Color *partColor = part.color();
@@ -491,15 +501,6 @@ BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, co
         lot->setCounterPart(part.isCounterPart());
 
         pr.addLot(std::move(lot));
-    }
-    if (includeInstructions) {
-        if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
-            auto *lot = new Lot(BrickLink::core()->color(0), instructions);
-            lot->setQuantity(quantity);
-            lot->setCondition(condition);
-
-            pr.addLot(std::move(lot));
-        }
     }
     return pr;
 }
