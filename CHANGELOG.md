@@ -4,14 +4,28 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
-## [2022.2.1] - 2022-02-05
+## [2022.2.1] - 2022-02-08
+This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch of new features.
+
 ### Added
 - Wanted lists can now be imported via the UI, just like shopping carts and orders.
+- The production span of an item is now calculated from the sets it is contained in and the years
+  those sets have been released in. This is currently accessible via tooltips and the `Year`
+  column in the document view.
+- Parting out from the *Appears-In* list will now ask the user for more details.
+- Parting out from a document item will also ask the user, but only if the inventory contains
+  extras, alternates or counterparts.
 
 ### Fixed
+- BrickLink's inventories do not correctly handle alternates on extra items: these are not marked
+  as *extra*. BrickStore will now detect this and will mark any alternates as *extra* as well.
 - Difference-mode base values were not restored when opening BSX files.
 - Closing the main window with a modified document in a split view would crash on exit.
 - Fixed a long-standing crash when consolidating currently filtered out lots.
+- The picture and price-guide cache was not reset after a manual database update and this could
+  lead to crashes.
+- Rendering 3D LDraw models on Windows should now also work even if you have bad OpenGL drivers
+  (or none at all).
 
 
 ## [2022.1.3] - 2022-01-31
