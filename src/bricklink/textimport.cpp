@@ -248,7 +248,6 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
         itt.m_id   = c;
         itt.m_name = p.elementText(e, "ITEMTYPENAME").simplified();
 
-        itt.m_picture_id        = (c == 'I') ? 'S' : c;
         itt.m_has_inventories   = false;
         itt.m_has_colors        = (c == 'P' || c == 'G');
         itt.m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' || c == 'M');

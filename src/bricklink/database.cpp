@@ -540,9 +540,10 @@ void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStr
 
 void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, Version)
 {
+    qint8 dummy = 0; //TODO: legacy, remove in one of the next DB upgrades
     quint8 flags = 0;
     quint32 catSize = 0;
-    dataStream >> (qint8 &) itt.m_id >> (qint8 &) itt.m_picture_id >> itt.m_name >> flags >> catSize;
+    dataStream >> (qint8 &) itt.m_id >> dummy >> itt.m_name >> flags >> catSize;
 
     itt.m_categoryIndexes.reserve(catSize);
     while (catSize-- > 0) {
@@ -566,7 +567,7 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     flags |= (true                    ? 0x08 : 0); // was: m_has_year
     flags |= (itt.m_has_subconditions ? 0x10 : 0);
 
-    dataStream << qint8(itt.m_id) << qint8(itt.m_picture_id) << itt.m_name << flags
+    dataStream << qint8(itt.m_id) << qint8(itt.m_id) << itt.m_name << flags
                << quint32(itt.m_categoryIndexes.size());
 
     for (const quint16 catIdx : itt.m_categoryIndexes)

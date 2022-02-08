@@ -36,7 +36,6 @@ public:
     bool hasColors() const          { return m_has_colors; }
     bool hasWeight() const          { return m_has_weight; }
     bool hasSubConditions() const   { return m_has_subconditions; }
-    char pictureId() const          { return m_picture_id; }
     QSize pictureSize() const;
     QSize rawPictureSize() const;
 
@@ -45,14 +44,13 @@ public:
 
 private:
     char  m_id = InvalidId;
-    char  m_picture_id = 0;
 
     bool  m_has_inventories   : 1;
     bool  m_has_colors        : 1;
     bool  m_has_weight        : 1;
     bool  m_has_subconditions : 1;
 
-    // 5 bytes padding here
+    // 6 bytes padding here
 
     QString m_name;
     std::vector<quint16> m_categoryIndexes;

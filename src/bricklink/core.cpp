@@ -1414,11 +1414,11 @@ void Core::updatePicture(Picture *pic, bool highPriority)
     QString url;
 
     if (large) {
-        url = u"https://img.bricklink.com/" % QLatin1Char(pic->item()->itemType()->pictureId())
+        url = u"https://img.bricklink.com/" % QLatin1Char(pic->item()->itemType()->id())
                 % u"L/" % QLatin1String(pic->item()->id()) % u".jpg";
     }
     else {
-        url = u"https://img.bricklink.com/ItemImage/" % QLatin1Char(pic->item()->itemType()->pictureId())
+        url = u"https://img.bricklink.com/ItemImage/" % QLatin1Char(pic->item()->itemType()->id())
                 % u"N/" % QString::number(pic->color()->id()) % u'/'
                 % QLatin1String(pic->item()->id()) % u".png";
     }

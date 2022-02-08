@@ -243,12 +243,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (m_pic)
         m_pic->release();
-    if (!item) {
-        m_pic = nullptr;
-    } else {
-        m_pic = item->itemType()->hasColors() ? BrickLink::core()->picture(item, color, true)
-                                              : BrickLink::core()->largePicture(item, true);
-    }
+    m_pic = item ? BrickLink::core()->picture(item, color, true) : nullptr;
     if (m_pic) {
         m_pic->addRef();
         if (m_pic->isValid())

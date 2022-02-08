@@ -437,11 +437,6 @@ QmlCategory::QmlCategory(const BrickLink::Category *cat)
     \readonly
     Returns \c true if items under this type can have sub-conditions, or \c false otherwise.
 */
-/*! \qmlproperty int ItemType::pictureId
-    \readonly
-    Item types may not have their own pictures, but use the pictures of another item type: in this
-    case you can get the id of the item type providing the pictures.
-*/
 /*! \qmlproperty size ItemType::pictureSize
     \readonly
     The default size and aspect ratio for item pictures of this type.

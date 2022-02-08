@@ -187,7 +187,6 @@ class QmlItemType : public QmlWrapperBase<const BrickLink::ItemType>
     Q_PRIVATE_PROPERTY(wrapped, bool hasColors READ hasColors CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, bool hasWeight READ hasWeight CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, bool hasSubConditions READ hasSubConditions CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, char pictureId READ pictureId CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QSize pictureSize READ pictureSize CONSTANT)
 
 public:
