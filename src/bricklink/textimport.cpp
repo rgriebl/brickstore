@@ -108,7 +108,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         uint colid = p.elementText(e, "COLOR").toUInt();
 
         col.m_id       = colid;
-        col.m_name     = p.elementText(e, "COLORNAME");
+        col.m_name     = p.elementText(e, "COLORNAME").simplified();
         col.m_color    = QColor(u'#' % p.elementText(e, "COLORRGB"));
 
         col.m_ldraw_id = -1;
@@ -157,7 +157,7 @@ void BrickLink::TextImport::readCategories(const QString &path)
         uint catid = p.elementText(e, "CATEGORY").toUInt();
 
         cat.m_id   = catid;
-        cat.m_name = p.elementText(e, "CATEGORYNAME");
+        cat.m_name = p.elementText(e, "CATEGORYNAME").simplified();
 
         m_categories.push_back(cat);
     });
@@ -199,7 +199,7 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
         if (m_items.at(itemIndex).m_categoryIndex == -1)
             throw ParseException(&f, "item has no main category in line %1").arg(lineNumber);
 
-        QString catStr = strs.at(1);
+        QString catStr = strs.at(1).simplified();
         const Category &mainCat = m_categories.at(m_items.at(itemIndex).m_categoryIndex);
         if (!catStr.startsWith(mainCat.name()))
             throw ParseException(&f, "additional categories do not start with the main category in line %1").arg(lineNumber);
@@ -246,7 +246,7 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
             return;
 
         itt.m_id   = c;
-        itt.m_name = p.elementText(e, "ITEMTYPENAME");
+        itt.m_name = p.elementText(e, "ITEMTYPENAME").simplified();
 
         itt.m_picture_id        = (c == 'I') ? 'S' : c;
         itt.m_has_inventories   = false;
@@ -268,7 +268,7 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
     p.parse([this, &p, itt](QDomElement e) {
         Item item;
         item.m_id = p.elementText(e, "ITEMID").toLatin1();
-        item.m_name = p.elementText(e, "ITEMNAME");
+        item.m_name = p.elementText(e, "ITEMNAME").simplified();
         item.m_itemTypeIndex = (itt - m_item_types.data());
         item.m_itemTypeId = itt->id();
 
@@ -306,8 +306,13 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
     p.parse([this, &p](QDomElement e) {
         char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
         const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
-        const QString colorName = p.elementText(e, "COLOR");
-        uint code = p.elementText(e, "CODENAME").toUInt();
+        const QString colorName = p.elementText(e, "COLOR").simplified();
+        bool numeric = false;
+        uint code = p.elementText(e, "CODENAME").toUInt(&numeric, 10);
+
+        if (!numeric) {
+            qWarning() << "Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME") << "is not numeric";
+        }
 
         int itemIndex = findItemIndex(itemTypeId, itemId);
         if (itemIndex != -1) {
@@ -316,7 +321,7 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
                 if (m_colors[colorIndex].name() == colorName) {
                     addToKnownColors(itemIndex, colorIndex);
 
-                    if (code) {
+                    if (numeric) {
                         PartColorCode pcc;
                         pcc.m_id = code;
                         pcc.m_itemIndex = itemIndex;
@@ -332,9 +337,6 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
                            << "on item" << itemTypeId << itemId;
         } else {
             qWarning() << "Parsing part_color_codes: skipping invalid item" << itemTypeId << itemId;
-        }
-        if (!code) {
-            qWarning() << "Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME") << "is not numeric";
         }
     });
 
@@ -472,7 +474,8 @@ void BrickLink::TextImport::readLDrawColors(const QString &path)
                             .toLower()
                             .replace(' '_l1, '_'_l1)
                             .replace('-'_l1, '_'_l1)
-                            .replace("gray"_l1, "grey"_l1);
+                            .replace("gray"_l1, "grey"_l1)
+                            .simplified();
                     if (blname == name) {
                         color.m_ldraw_id = id;
                         matchCount++;
