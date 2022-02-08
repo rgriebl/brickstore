@@ -445,8 +445,49 @@ Core *Core::create(const QString &datadir, QString *errstring)
         s_inst = new Core(datadir);
         s_inst->m_database = new Database(s_inst);
 
+        //TODO: See if we cannot make this cancellation a bit more robust.
+        //      Right now, cancelTransfers() is fully async. We could potentially detect when all
+        //      TransferJobs are handled, but the disk-load runnables are very tricky with their
+        //      cross-thread invokeMethod().
+        //      Right now, we are cancelling before the download even starts, which should give us
+        //      plenty of iterations through the event loop to handle all the cancelled jobs.
+
         connect(s_inst->m_database, &Database::databaseAboutToBeReset,
-                s_inst, &Core::clear);
+                s_inst, &Core::cancelTransfers);
+        connect(s_inst->m_database, &Database::databaseReset,
+                s_inst, []() {
+            // Ideally we would just clear() the caches here, but there could be ref'ed objects
+            // left, so we just trim the cache as much as possible and leak the remaining objects
+            // as a sort of damage control.
+
+            auto oldcost = s_inst->m_pg_cache.maxCost();
+            s_inst->m_pg_cache.setMaxCost(0);
+            s_inst->m_pg_cache.setMaxCost(oldcost);
+
+            if (!s_inst->m_pg_cache.isEmpty()) {
+                qWarning() << "PriceGuide cache:" << s_inst->m_pg_cache.count()
+                           << "objects still have a reference after a DB update";
+
+                // not deleting (but leaking) these might prevent a crash
+                const auto keys = s_inst->m_pg_cache.keys();
+                for (const auto &key : keys)
+                    s_inst->m_pg_cache.take(key);
+            }
+
+            oldcost = s_inst->m_pic_cache.maxCost();
+            s_inst->m_pic_cache.setMaxCost(0);
+            s_inst->m_pic_cache.setMaxCost(oldcost);
+
+            if (!s_inst->m_pic_cache.isEmpty()) {
+                qWarning() << "Picture cache:" << s_inst->m_pic_cache.count()
+                           << "objects still have a reference after a DB update";
+
+                // not deleting (but leaking) these might prevent a crash
+                const auto keys = s_inst->m_pic_cache.keys();
+                for (const auto &key : keys)
+                    s_inst->m_pic_cache.take(key);
+            }
+        });
 
 #if !defined(BS_BACKEND)
         s_inst->m_store = new Store(s_inst);
@@ -579,7 +620,11 @@ Core::Core(const QString &datadir)
 
 Core::~Core()
 {
-    clear();
+    // this is dangerous, as the contents might still be ref'ed, but we are going down
+    // right now
+    m_pg_cache.clear();
+    m_pic_cache.clear();
+
     s_inst = nullptr;
 }
 
@@ -926,14 +971,6 @@ void Core::cancelTransfers()
         m_authenticatedTransfer->abortAllJobs();
     m_diskloadPool.clear();
     m_diskloadPool.waitForDone();
-}
-
-void Core::clear()
-{
-    cancelTransfers();
-
-    m_pg_cache.clear();
-    m_pic_cache.clear();
 }
 
 bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc)

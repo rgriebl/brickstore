@@ -142,6 +142,8 @@ bool Database::startUpdate(bool force)
 
     setUpdateStatus(UpdateStatus::Updating);
 
+    emit databaseAboutToBeReset();
+
     connect(m_transfer, &Transfer::started,
             this, [this, job](TransferJob *j) {
         if (j != job)
@@ -179,6 +181,8 @@ bool Database::startUpdate(bool force)
                 emit updateFinished(true, { });
                 setUpdateStatus(UpdateStatus::Ok);
             }
+            emit databaseReset();
+
         } catch (const Exception &e) {
             emit updateFinished(false, tr("Could not load the new database:") % u"\n\n" % e.error());
             setUpdateStatus(UpdateStatus::UpdateFailed);
@@ -385,8 +389,6 @@ void Database::read(const QString &fileName)
                           << "\n  ChangeLog I :" << itemChangelog.size()
                           << "\n  ChangeLog C :" << colorChangelog.size();
 
-        emit databaseAboutToBeReset();
-
         m_colors = colors;
         m_categories = categories;
         m_itemTypes = itemTypes;
@@ -394,8 +396,6 @@ void Database::read(const QString &fileName)
         m_itemChangelog = itemChangelog;
         m_colorChangelog = colorChangelog;
         m_pccs = pccs;
-
-        emit databaseReset();
 
         if (generationDate != m_lastUpdated) {
             m_lastUpdated = generationDate;

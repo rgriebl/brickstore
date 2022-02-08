@@ -177,8 +177,6 @@ public: // semi-public for the QML wrapper
     QPair<int, int> priceGuideCacheStats() const;
 
 private:
-    void clear();
-
     QString  m_datadir;
     bool     m_online = false;
 
