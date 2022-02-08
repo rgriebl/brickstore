@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
-## [2022.2.1] - 2022-02-08
+## [2022.2.1] - 2022-02-09
 This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch of new features.
 
 ### Added
@@ -15,6 +15,8 @@ This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch o
 - Parting out from the *Appears-In* list will now ask the user for more details.
 - Parting out from a document item will also ask the user, but only if the inventory contains
   extras, alternates or counterparts.
+- Added a tag to the info dock and the tooltips to clarify which item-type the item belongs to
+  (a set, its instructions and original box all share the same id and name)
 
 ### Fixed
 - BrickLink's inventories do not correctly handle alternates on extra items: these are not marked
@@ -22,10 +24,11 @@ This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch o
 - Difference-mode base values were not restored when opening BSX files.
 - Closing the main window with a modified document in a split view would crash on exit.
 - Fixed a long-standing crash when consolidating currently filtered out lots.
-- The picture and price-guide cache was not reset after a manual database update and this could
-  lead to crashes.
+- The picture and price-guide cache was not reset correctly after a manual database update and this
+  could lead to crashes.
 - Rendering 3D LDraw models on Windows should now also work even if you have bad OpenGL drivers
   (or none at all).
+- Instructions no longer share the image with their corresponding set entry.
 
 
 ## [2022.1.3] - 2022-01-31
