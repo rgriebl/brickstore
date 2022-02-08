@@ -284,9 +284,15 @@ void PictureWidget::redraw()
 
     if (m_item) {
         QString cs;
+        if (!QByteArray("MP").contains(m_item->itemTypeId())) {
+            QColor color = palette().color(QPalette::Highlight);
+            cs = cs % R"(<i><font color=")"_l1 % Utility::textColor(color).name() %
+                    R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
+                    m_item->itemType()->name() % R"(&nbsp;</font></i>&nbsp;&nbsp;)"_l1;
+        }
         if (m_color && m_color->id()) {
             QColor color = m_color->color();
-            cs = R"(<b><font color=")"_l1 % Utility::textColor(color).name() %
+            cs = cs % R"(<b><font color=")"_l1 % Utility::textColor(color).name() %
                     R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
                     m_color->name() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
         }

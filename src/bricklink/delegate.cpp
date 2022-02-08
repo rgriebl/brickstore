@@ -121,14 +121,20 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
     static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
     QString note_left = u"<i>" % BrickLink::ItemDelegate::tr("[Image is loading]") % u"</i>";
     QString yearStr;
+    QString id = QString::fromLatin1(item->id());
 
     if (item->yearReleased())
         yearStr = QString::number(item->yearReleased());
     if (item->yearLastProduced() && (item->yearLastProduced() != item->yearReleased()))
         yearStr = yearStr % u'-' % QString::number(item->yearLastProduced());
 
+    QColor color = qApp->palette().color(QPalette::Highlight);
+    id = id % R"(&nbsp;&nbsp;<i><font color=")"_l1 % Utility::textColor(color).name() %
+            R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
+            item->itemType()->name() % R"(&nbsp;</font></i>)"_l1;
+
     if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
-        return str.arg(note_left, QLatin1String(item->id()), item->name(), yearStr);
+        return str.arg(note_left, id, item->name(), yearStr);
     } else {
         QByteArray ba;
         QBuffer buffer(&ba);
@@ -137,7 +143,7 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
         img.save(&buffer, "PNG");
 
         return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
-                       QLatin1String(item->id()), item->name(), yearStr);
+                       id, item->name(), yearStr);
     }
 }
 
