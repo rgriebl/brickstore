@@ -518,6 +518,11 @@ QString LDraw::Core::dataPath() const
     return m_datadir;
 }
 
+QDate LDraw::Core::lastUpdate() const
+{
+    return m_date;
+}
+
 bool LDraw::Core::isValidLDrawDir(const QString &ldir)
 {
     QFileInfo fi(ldir);
@@ -621,10 +626,13 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
         if (!ldrawdir.isEmpty()) {
             s_inst = new Core(ldrawdir);
 
-            if (s_inst->parse_ldconfig("LDConfig.ldr"))
+            if (s_inst->parse_ldconfig("LDConfig.ldr")) {
                 s_inst->parse_ldconfig("LDConfig_missing.ldr");
-            else
+                qInfo().noquote() << "Found LDraw at" << ldrawdir << "\n  Last updated:"
+                                  << s_inst->lastUpdate().toString();
+            } else {
                 error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
+            }
         } else {
             error = qApp->translate("LDraw", "The LDraw directory \'%1\' is not readable.").arg(datadir);
         }
@@ -689,6 +697,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
             lineno++;
 
             QStringList sl = line.simplified().split(' '_l1);
+
             if (sl.count() >= 9 &&
                 sl[0].toInt() == 0 &&
                 sl[1] == "!COLOUR"_l1 &&
@@ -734,6 +743,13 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
 
                     //qDebug() << "Got Color " << id << " : " << main << " // " << edge;
                 }
+            } else if (sl.count() >= 5 &&
+                    sl[0].toInt() == 0 &&
+                    sl[1] == "!LDRAW_ORG"_l1 &&
+                    sl[2] == "Configuration"_l1 &&
+                    sl[3] == "UPDATE"_l1) {
+                // 0 !LDRAW_ORG Configuration UPDATE yyyy-MM-dd
+                m_date = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
             }
         }
         for (auto it = edge_ids.constBegin(); it != edge_ids.constEnd(); ++it) {

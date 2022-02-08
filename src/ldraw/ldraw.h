@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QHash>
+#include <QDate>
 #include <QString>
 #include <QByteArray>
 #include <QVector>
@@ -287,6 +288,7 @@ public:
     ~Core();
 
     QString dataPath() const;
+    QDate lastUpdate() const;
 
     QColor color(int id, int baseid = -1) const;
     QColor edgeColor(int id) const;
@@ -333,6 +335,7 @@ private:
 
     QHash<int, Color> m_colors;  // id -> color struct
     Q3Cache<QString, Part> m_cache;  // path -> part
+    QDate m_date;
 
     friend class PartElement;
 };
