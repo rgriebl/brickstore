@@ -292,6 +292,7 @@ void SelectItem::init()
     });
 
     d->w_dateFilter = new QToolButton();
+    d->w_dateFilter->setVisible(false);
     d->w_dateFilter->setIcon(QIcon::fromTheme("appointment-new"_l1));
     d->w_dateFilter->setAutoRaise(true);
     connect(d->w_dateFilter, &QToolButton::clicked, this, [this]() {
@@ -467,7 +468,7 @@ void SelectItem::init()
     auto *ittlay = new QHBoxLayout();
     ittlay->addWidget(d->w_item_types_label);
     ittlay->addWidget(d->w_item_types, 10);
-    //ittlay->addWidget(d->w_dateFilter);
+    ittlay->addWidget(d->w_dateFilter);
     lay->addLayout(ittlay, 0, 0);
 
     lay->addWidget(d->w_categories, 1, 0, 1, 1);
