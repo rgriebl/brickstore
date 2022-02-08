@@ -2982,7 +2982,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/importinventorydialog.cpp" line="54"/>
         <source>Parting out:</source>
-        <translation type="unfinished"></translation>
+        <translation>Despiezando:</translation>
     </message>
     <message>
         <source>&amp;Quantity:</source>
@@ -3108,7 +3108,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <location filename="../src/desktop/importinventorywidget.ui" line="193"/>
         <source>Include:</source>
         <extracomment>Label on the left</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Incluir:</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="200"/>
@@ -4253,7 +4253,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/selectcolordialog.cpp" line="48"/>
         <source>Reset the position to automatic mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Restablecer la posición a modo automático</translation>
     </message>
 </context>
 <context>
@@ -4395,7 +4395,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/selectitemdialog.cpp" line="51"/>
         <source>Reset the position to automatic mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Restablecer la posición a modo automático</translation>
     </message>
 </context>
 <context>
