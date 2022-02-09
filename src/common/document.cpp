@@ -261,6 +261,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         auto [columnData, sortColumns] = parseColumnsState(columnsState);
         { } // { } to work around QtCreator being confused by the [] return tuple
         setColumnLayoutDirect(columnData);
+        m_model->sortDirectForDocument(sortColumns);
+
     } catch (const Exception &) {
         auto layout = Config::inst()->columnLayout(columnLayoutCommandId(ColumnLayoutCommand::UserDefault));
 
@@ -268,6 +270,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
             auto [columnData, sortColumns] = parseColumnsState(layout);
             { } // { } to work around QtCreator being confused by the [] return tuple
             setColumnLayoutDirect(columnData);
+            m_model->sortDirectForDocument(sortColumns);
         } catch (const Exception &) {
             auto cd = defaultColumnLayout();
             setColumnLayoutDirect(cd);

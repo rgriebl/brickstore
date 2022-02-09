@@ -415,6 +415,7 @@ View::View(Document *document, QWidget *parent)
         if (b != m_header->isSorted())
             m_header->setSorted(b);
     });
+    m_header->setSorted(m_model->isSorted());
 
     connect(m_header, &HeaderView::sortColumnsChanged,
             this, [this](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {

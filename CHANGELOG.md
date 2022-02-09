@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 
 
 ## [2022.2.2] - 2022-02-09
-This .2 release fixes a bug introduced in the 2022.2.1 release:
+This .2 release fixes two bugs:
 - Fixed a crash when adding and also consolidating lots.
+- If you had saved a custom *User Standard* column layout, the layout's sort order was not applied
+  to newly created documents.
 
 
 ## [2022.2.1] - 2022-02-09

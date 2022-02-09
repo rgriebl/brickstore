@@ -258,6 +258,8 @@ public:
 
     QStringList hasDifferenceUpdateWarnings(const LotList &lots);
 
+    void sortDirectForDocument(const QVector<QPair<int, Qt::SortOrder>> &columns);
+
 signals:
     void lotFlagsChanged(const BrickLink::Lot *);
     void statisticsChanged();

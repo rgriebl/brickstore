@@ -2202,6 +2202,14 @@ QStringList DocumentModel::hasDifferenceUpdateWarnings(const BrickLink::LotList 
     return warnings;
 }
 
+// TODO: the Document c'tor needs this to set the initial sort order. find something better
+void DocumentModel::sortDirectForDocument(const QVector<QPair<int, Qt::SortOrder> > &columns)
+{
+    bool dummy1;
+    LotList dummy2;
+    sortDirect(columns, dummy1, dummy2);
+}
+
 QString DocumentModel::filterToolTip() const
 {
     return m_filterParser->toolTip();
