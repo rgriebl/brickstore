@@ -455,7 +455,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.2.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.2.2...HEAD
+[2022.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.2
 [2022.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.1
 [2022.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.3
 [2022.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.2
