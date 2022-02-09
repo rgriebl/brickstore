@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2022.2.2] - 2022-02-09
+This .2 release fixes a bug introduced in the 2022.2.1 release:
+- Fixed a crash when adding and also consolidating lots.
+
+
 ## [2022.2.1] - 2022-02-09
 This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch of new features.
 

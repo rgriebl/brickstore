@@ -572,12 +572,14 @@ void View::ensureLatestVisible()
     }
 }
 
-QCoro::Task<> View::addLots(LotList &&lots, AddLotMode addLotMode)
+QCoro::Task<> View::addLots(LotList &&lotsRef, AddLotMode addLotMode)
 {
-    // we own the items now
-
-    if (lots.empty())
+    if (lotsRef.empty())
         co_return;
+
+    // we own the items now, but we have to move them into a local variable, because
+    // the lotsRef reference might go out of scope when we co_await later
+    LotList lots(lotsRef);
 
     bool startedMacro = false;
 
