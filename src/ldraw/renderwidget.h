@@ -100,25 +100,14 @@ private:
         VBO_ConditionalLines,
         VBO_Count
     };
-    enum VBOFields {
-        VBO_Offset_Vertex = 0,
-        VBO_Size_Vertex   = 3,  // QVector3D
-        VBO_Offset_Normal = (VBO_Offset_Vertex + VBO_Size_Vertex),
-        VBO_Size_Normal   = 3,  // QVector3D
-        VBO_Offset_Color  = (VBO_Offset_Normal + VBO_Size_Normal),
-        VBO_Size_Color    = 4,  // RGBA
 
-        VBO_Stride        = (VBO_Offset_Color + VBO_Size_Color)
-    };
-    int m_dirty = 0;
-
-    void renderVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, bool inverted,
-                    int dirty, std::vector<float> *buffers[VBO_Count]);
+    void fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, bool inverted, std::vector<float> *buffers[VBO_Count]);
 
     void rotateArcBall();
 
     QTimer *m_animation = nullptr;
     bool m_coreProfile = false;
+    bool m_dirty = false;
 
     Part *m_part = nullptr;
     int m_color = -1;
@@ -138,15 +127,9 @@ private:
 
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_vbos[VBO_Count];
-    int m_vboSizes[VBO_Count];
 
-    QOpenGLShaderProgram *m_program = nullptr;
-    int m_projMatrixLoc;
-    int m_modelMatrixLoc;
-    int m_viewMatrixLoc;
-    int m_normalMatrixLoc;
-    int m_lightPosLoc;
-    int m_cameraPosLoc;
+    QOpenGLShaderProgram *m_standardShader = nullptr;
+    QOpenGLShaderProgram *m_conditionalShader = nullptr;
 
     bool m_arcBallActive = false;
     QPoint m_arcBallMousePos;

@@ -11,7 +11,9 @@ uniform highp mat4 modelMatrix;
 uniform highp mat4 viewMatrix;
 uniform highp mat3 normalMatrix;
 
-void main() {
+
+void main()
+{
     n = normalMatrix * normal;
     v = vec3(modelMatrix * vec4(vertex, 1));
     gl_Position = projMatrix * viewMatrix * vec4(v, 1);

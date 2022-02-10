@@ -7,7 +7,8 @@ varying highp vec4 c;
 
 const highp vec3 lightColor = vec3(1.0, 1.0, 1.0);
 
-void main(void) {
+
+void main() {
     // ambient
     highp float ambientStrength = 0.4;
     highp vec3 ambient = ambientStrength * lightColor;

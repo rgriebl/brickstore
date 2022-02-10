@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Nicer and faster rendering of 3D parts and much more intuitive mouse controls for rotations.
 
 
 ## [2022.2.2] - 2022-02-09

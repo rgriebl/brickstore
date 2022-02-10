@@ -4,5 +4,7 @@
         <file>shaders/phong.vert</file>
         <file>shaders/phong_core.frag</file>
         <file>shaders/phong_core.vert</file>
+        <file>shaders/conditional_core.vert</file>
+        <file>shaders/conditional.vert</file>
     </qresource>
 </RCC>

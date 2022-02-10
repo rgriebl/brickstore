@@ -447,7 +447,8 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
         // search order is parentdir => p => parts => models
 
         QVector<QDir> searchpath = m_searchpath;
-        searchpath.prepend(parentdir);
+        if (parentdir != QDir::root() && !searchpath.contains(parentdir))
+            searchpath.prepend(parentdir);
 
         for (const QDir &sp : qAsConst(searchpath)) {
             QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
@@ -494,7 +495,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
 
 LDraw::Part *LDraw::Core::partFromFile(const QString &file)
 {
-    return findPart(file, QDir::current());
+    return findPart(file, QFileInfo(file).dir());
 }
 
 LDraw::Part *LDraw::Core::partFromId(const QByteArray &id)
@@ -654,9 +655,9 @@ LDraw::Core::Core(const QString &datadir)
 {
     static const char *subdirs[] =
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-        { "P", "p", "PARTS", "parts", "MODELS", "models", };
+        { "P/48", "p/48", "P", "p", "PARTS", "parts", "MODELS", "models", };
 #else
-        { "P", "PARTS", "MODELS" };
+        { "P/48", "P", "PARTS", "MODELS" };
 #endif
 
     for (auto subdir : subdirs) {
