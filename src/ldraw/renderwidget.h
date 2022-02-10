@@ -55,31 +55,24 @@ public:
     void setPartAndColor(Part *part, int basecolor);
     void setPartAndColor(Part *part, const QColor &color);
 
-    void setXTranslation(float t);
-    void setYTranslation(float t);
-    void setZTranslation(float t);
+    void resetTransformation();
 
-    void setXRotation(float r);
-    void setYRotation(float r);
-    void setZRotation(float r);
-
+    void setTranslation(const QVector3D &translation);
+    void setRotation(const QQuaternion &rotation);
     void setZoom(float r);
 
-    float xTranslation() const  { return m_tx; }
-    float yTranslation() const  { return m_ty; }
-    float zTranslation() const  { return m_tz; }
-
-    float xRotation() const     { return m_rx; }
-    float yRotation() const     { return m_ry; }
-    float zRotation() const     { return m_rz; }
-
-    float zoom() const          { return m_zoom; }
+    QVector3D translation() const  { return m_translation; }
+    QQuaternion rotation() const   { return m_rotation; }
+    float zoom() const             { return m_zoom; }
 
     bool isAnimationActive() const;
 
     void initializeGL(QOpenGLContext *context);
     void resizeGL(QOpenGLContext *context, int w, int h);
     void paintGL(QOpenGLContext *context);
+
+    void handleMouseEvent(QMouseEvent *e);
+    void handleWheelEvent(QWheelEvent *e);
 
 signals:
     void updateNeeded();
@@ -122,6 +115,8 @@ private:
     void renderVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, bool inverted,
                     int dirty, std::vector<float> *buffers[VBO_Count]);
 
+    void rotateArcBall();
+
     QTimer *m_animation = nullptr;
     bool m_coreProfile = false;
 
@@ -131,8 +126,8 @@ private:
     QColor m_edgeColor;
     QColor m_clearColor;
 
-    float m_rx = 0, m_ry = 0, m_rz = 0;
-    float m_tx = 0, m_ty = 0, m_tz = 0;
+    QVector3D m_translation;
+    QQuaternion m_rotation;
     float m_zoom = 1;
     QVector3D m_center;
     float m_radius = 0;
@@ -152,6 +147,11 @@ private:
     int m_normalMatrixLoc;
     int m_lightPosLoc;
     int m_cameraPosLoc;
+
+    bool m_arcBallActive = false;
+    QPoint m_arcBallMousePos;
+    QPoint m_arcBallPressPos;
+    QQuaternion m_arcBallPressRotation;
 };
 
 
@@ -195,7 +195,6 @@ protected:
 
 private:
     GLRenderer *m_renderer;
-    QPoint m_last_pos;
 };
 
 
@@ -237,7 +236,6 @@ protected:
 
 private:
     GLRenderer *m_renderer;
-    QPoint m_last_pos;
 };
 
 }

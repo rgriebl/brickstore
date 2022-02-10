@@ -20,6 +20,7 @@
 #include <QPainter>
 #include <QTimer>
 #include <QMatrix4x4>
+#include <QQuaternion>
 
 #include <cfloat>
 #include <cmath>
@@ -111,55 +112,19 @@ int LDraw::GLRenderer::color() const
 }
 
 
-void LDraw::GLRenderer::setXRotation(float r)
+void LDraw::GLRenderer::setTranslation(const QVector3D &translation)
 {
-    if (!qFuzzyCompare(m_rx, r)) {
-        m_rx = r;
+    if (m_translation != translation) {
+        m_translation = translation;
         updateWorldMatrix();
         emit updateNeeded();
     }
 }
 
-void LDraw::GLRenderer::setYRotation(float r)
+void LDraw::GLRenderer::setRotation(const QQuaternion &rotation)
 {
-    if (!qFuzzyCompare(m_ry, r)) {
-        m_ry = r;
-        updateWorldMatrix();
-        emit updateNeeded();
-    }
-}
-
-void LDraw::GLRenderer::setZRotation(float r)
-{
-    if (!qFuzzyCompare(m_rz, r)) {
-        m_rz = r;
-        updateWorldMatrix();
-        emit updateNeeded();
-    }
-}
-
-void LDraw::GLRenderer::setXTranslation(float t)
-{
-    if (!qFuzzyCompare(m_tx, t)) {
-        m_tx = t;
-        updateWorldMatrix();
-        emit updateNeeded();
-    }
-}
-
-void LDraw::GLRenderer::setYTranslation(float t)
-{
-    if (!qFuzzyCompare(m_ty, t)) {
-        m_ty = t;
-        updateWorldMatrix();
-        emit updateNeeded();
-    }
-}
-
-void LDraw::GLRenderer::setZTranslation(float t)
-{
-    if (!qFuzzyCompare(m_tz, t)) {
-        m_tz = t;
+    if (m_rotation != rotation) {
+        m_rotation = rotation;
         updateWorldMatrix();
         emit updateNeeded();
     }
@@ -191,12 +156,10 @@ void LDraw::GLRenderer::updateProjectionMatrix()
 void LDraw::GLRenderer::updateWorldMatrix()
 {
     m_model.setToIdentity();
-    m_model.translate(m_tx, m_ty, m_tz);
-    m_model.translate(m_center.x(), m_center.y(), m_center.z());
-    m_model.rotate(m_rx, 1, 0, 0);
-    m_model.rotate(m_ry, 0, 1, 0);
-    m_model.rotate(m_rz, 0, 0, 1);
-    m_model.translate(-m_center.x(), -m_center.y(), -m_center.z());
+    m_model.translate(m_translation);
+    m_model.translate(m_center);
+    m_model.rotate(m_rotation);
+    m_model.translate(-m_center);
     m_model.scale(m_zoom);
     m_dirty |= (1 << VBO_ConditionalLines);
 }
@@ -326,6 +289,90 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
     glDepthMask(GL_TRUE);
 
     m_program->release();
+}
+
+void LDraw::GLRenderer::resetTransformation()
+{
+    QMatrix4x4 rotation;
+    rotation.rotate(-180+30, 1, 0, 0);
+    rotation.rotate(-45, 0, 1, 0);
+    rotation.rotate(0, 0, 0, 1);
+
+    setTranslation({ 0, 0, 0 });
+    setRotation(QQuaternion::fromRotationMatrix(rotation.toGenericMatrix<3, 3>()));
+    setZoom(1);
+}
+
+void LDraw::GLRenderer::handleMouseEvent(QMouseEvent *e)
+{
+    switch (e->type()) {
+    case QEvent::MouseButtonPress:
+        stopAnimation();
+
+        m_arcBallPressRotation = m_rotation;
+        m_arcBallMousePos = m_arcBallPressPos = e->pos();
+        m_arcBallActive = true;
+        break;
+
+    case QEvent::MouseMove:
+        if (m_arcBallActive) {
+            m_arcBallMousePos = e->pos();
+            rotateArcBall();
+        }
+        break;
+
+    case QEvent::MouseButtonRelease:
+        m_arcBallActive = false;
+        break;
+
+    default: break;
+    }
+}
+
+void LDraw::GLRenderer::handleWheelEvent(QWheelEvent *e)
+{
+    float d = 1.0f + (float(e->angleDelta().y()) / 1200.0f);
+    setZoom(zoom() * d);
+}
+
+
+void LDraw::GLRenderer::rotateArcBall()
+{
+    // map the mouse coordiantes to the sphere describing this arcball
+    auto mapMouseToBall = [this](const QPoint &mouse) -> QVector3D {
+        // normalize mouse pos to -1..+1 and reverse y
+        QVector3D mouseView(
+                    2.f * mouse.x() / m_viewport.width() - 1.f,
+                    1.f - 2.f * mouse.y() / m_viewport.height(),
+                    0.f
+        );
+
+        QVector3D mapped = mouseView; // (mouseView - m_center)* (1.f / m_radius);
+        auto l2 = mapped.lengthSquared();
+        if (l2 > 1.f) {
+            mapped.normalize();
+            mapped[2] = 0.f;
+        } else {
+            mapped[2] = sqrt(1.f - l2);
+        }
+        return mapped;
+    };
+
+    // re-calculate the rotation given the current mouse position
+    auto from = mapMouseToBall(m_arcBallPressPos);
+    auto to = mapMouseToBall(m_arcBallMousePos);
+
+    // given these two vectors on the arcball sphere, calculate the quaternion for the arc between
+    // this is the correct rotation, but it follows too slow...
+    //auto q = QQuaternion::rotationTo(from, to);
+
+    // this one seems to work far better
+    auto q = QQuaternion(QVector3D::dotProduct(from, to), QVector3D::crossProduct(from, to));
+
+    m_rotation = q * m_arcBallPressRotation;
+
+    updateWorldMatrix();
+    emit updateNeeded();
 }
 
 void LDraw::GLRenderer::recreateVBOs()
@@ -528,9 +575,9 @@ bool LDraw::GLRenderer::isAnimationActive() const
 
 void LDraw::GLRenderer::animationStep()
 {
-    setXRotation(xRotation() + 0.5f / 4);
-    setYRotation(yRotation() + 0.375f / 4);
-    setZRotation(zRotation() + 0.25f / 4);
+    auto q = rotation();
+    QQuaternion r(100, 0.5, 0.375, 0.25);
+    setRotation(r.normalized() * q);
 }
 
 
@@ -582,42 +629,24 @@ QSize LDraw::RenderWidget::sizeHint() const
 
 void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
 {
-    m_last_pos = e->pos();
     setCursor(Qt::ClosedHandCursor);
+    m_renderer->handleMouseEvent(e);
 }
 
-void LDraw::RenderWidget::mouseReleaseEvent(QMouseEvent *)
+void LDraw::RenderWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+    m_renderer->handleMouseEvent(e);
     setCursor(Qt::OpenHandCursor);
 }
 
 void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    auto dx = float(e->x() - m_last_pos.x());
-    auto dy = float(e->y() - m_last_pos.y());
-
-    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
-        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
-        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
-        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9f : 1.1f));
-    }
-    m_last_pos = e->pos();
+    m_renderer->handleMouseEvent(e);
 }
 
 void LDraw::RenderWidget::wheelEvent(QWheelEvent *e)
 {
-    float d = 1.0f + (float(e->angleDelta().y()) / 1200.0f);
-    m_renderer->setZoom(m_renderer->zoom() * d);
+    m_renderer->handleWheelEvent(e);
 }
 
 void LDraw::RenderWidget::slotMakeCurrent()
@@ -648,16 +677,7 @@ void LDraw::RenderWidget::paintGL()
 void LDraw::RenderWidget::resetCamera()
 {
     stopAnimation();
-
-    m_renderer->setXRotation(-180+30);
-    m_renderer->setYRotation(45);
-    m_renderer->setZRotation(0);
-
-    m_renderer->setXTranslation(0);
-    m_renderer->setYTranslation(0);
-    m_renderer->setZTranslation(0);
-
-    m_renderer->setZoom(1);
+    m_renderer->resetTransformation();
 }
 
 void LDraw::RenderWidget::startAnimation()
@@ -706,42 +726,24 @@ void LDraw::RenderWindow::setClearColor(const QColor &color)
 
 void LDraw::RenderWindow::mousePressEvent(QMouseEvent *e)
 {
-    m_last_pos = e->pos();
     setCursor(Qt::ClosedHandCursor);
+    m_renderer->handleMouseEvent(e);
 }
 
-void LDraw::RenderWindow::mouseReleaseEvent(QMouseEvent *)
+void LDraw::RenderWindow::mouseReleaseEvent(QMouseEvent *e)
 {
+    m_renderer->handleMouseEvent(e);
     setCursor(Qt::OpenHandCursor);
 }
 
 void LDraw::RenderWindow::mouseMoveEvent(QMouseEvent *e)
 {
-    auto dx = float(e->x() - m_last_pos.x());
-    auto dy = float(e->y() - m_last_pos.y());
-
-    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
-        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
-        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
-        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9f : 1.1f));
-    }
-    m_last_pos = e->pos();
+    m_renderer->handleMouseEvent(e);
 }
 
 void LDraw::RenderWindow::wheelEvent(QWheelEvent *e)
 {
-    float d = 1.0f + (float(e->angleDelta().y()) / 1200.0f);
-    m_renderer->setZoom(m_renderer->zoom() * d);
+    m_renderer->handleWheelEvent(e);
 }
 
 bool LDraw::RenderWindow::event(QEvent *e)
@@ -754,11 +756,15 @@ bool LDraw::RenderWindow::event(QEvent *e)
             e->accept();
             return true;
         } else if (nge->gestureType() == Qt::SmartZoomNativeGesture) {
-            resetCamera();
+            m_renderer->resetTransformation();
             e->accept();
             return true;
         } else if (nge->gestureType() == Qt::RotateNativeGesture) {
-            m_renderer->setZRotation(m_renderer->zRotation() + float(nge->value()));
+            auto q = m_renderer->rotation();
+            float p, y, r;
+            q.getEulerAngles(&p, &y, &r);
+            r += float(nge->value());
+            m_renderer->setRotation(QQuaternion::fromEulerAngles(p, y, r));
             e->accept();
             return true;
         }
@@ -794,16 +800,7 @@ void LDraw::RenderWindow::paintGL()
 void LDraw::RenderWindow::resetCamera()
 {
     stopAnimation();
-
-    m_renderer->setXRotation(-180+30);
-    m_renderer->setYRotation(45);
-    m_renderer->setZRotation(0);
-
-    m_renderer->setXTranslation(0);
-    m_renderer->setYTranslation(0);
-    m_renderer->setZTranslation(0);
-
-    m_renderer->setZoom(1);
+    m_renderer->resetTransformation();
 }
 
 void LDraw::RenderWindow::startAnimation()
