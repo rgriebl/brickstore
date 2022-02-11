@@ -380,7 +380,7 @@ void Database::read(const QString &fileName)
         }
 
         qInfo().noquote() << "Loaded database from" << f.fileName()
-                          << "\n  Generated at:" << generationDate.toString()
+                          << "\n  Generated at:" << generationDate.toString(Qt::RFC2822Date)
                           << "\n  Colors      :" << colors.size()
                           << "\n  Item Types  :" << itemTypes.size()
                           << "\n  Categories  :" << categories.size()

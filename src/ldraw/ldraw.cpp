@@ -630,7 +630,7 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
             if (s_inst->parse_ldconfig("LDConfig.ldr")) {
                 s_inst->parse_ldconfig("LDConfig_missing.ldr");
                 qInfo().noquote() << "Found LDraw at" << ldrawdir << "\n  Last updated:"
-                                  << s_inst->lastUpdate().toString();
+                                  << s_inst->lastUpdate().toString(Qt::RFC2822Date);
             } else {
                 error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
             }
