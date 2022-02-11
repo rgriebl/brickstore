@@ -15,6 +15,7 @@
 #include <QProcess>
 #include <QLibraryInfo>
 #include <QCoreApplication>
+#include <QLocale>
 
 #if defined(Q_OS_WINDOWS)
 #  if !defined(BS_BACKEND)
@@ -66,8 +67,8 @@ SystemInfo::SystemInfo()
     m_map["build.arch"_l1] = QSysInfo::buildCpuArchitecture();
     m_map["build.host"_l1] = QLatin1String(BRICKSTORE_BUILD_HOST);
     m_map["build.qt.version"_l1] = QString::fromLatin1(QT_VERSION_STR);
-    m_map["build.date"_l1] = QDateTime::fromString(QString::fromLatin1(__DATE__ " " __TIME__)
-                                                   .simplified(), "MMM d yyyy HH:mm:ss"_l1);
+    m_map["build.date"_l1] = QLocale::c().toDateTime(QString::fromLatin1(__DATE__ " " __TIME__)
+                                                     .simplified(), "MMM d yyyy HH:mm:ss"_l1);
     m_map["build.number"_l1] = QLatin1String(BRICKSTORE_BUILD_NUMBER);
     m_map["brickstore.locale"_l1] = QLocale().name().left(2);
     m_map["brickstore.version"_l1] = QCoreApplication::applicationVersion();
