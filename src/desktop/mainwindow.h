@@ -119,7 +119,6 @@ private:
     Workspace *m_workspace;
     QList<QAction *> m_extensionContextActions;
 
-    DeveloperConsole *m_devConsole;
     ProgressCircle *m_progress;
     QWidgetAction *m_progressAction;
     QToolBar *m_toolbar;

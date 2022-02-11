@@ -69,7 +69,6 @@ Q_IMPORT_PLUGIN(qgif)
 using namespace std::chrono_literals;
 
 
-QList<std::tuple<QtMsgType, QMessageLogContext *, QString>> Application::s_bufferedMessages;
 Application *Application::s_inst = nullptr;
 
 
@@ -613,17 +612,8 @@ void Application::setupLogging()
 
         addSentryBreadcrumb(type, ctx, msg);
 
-        if (s_inst && s_inst->m_uiMessageHandler) {
-            s_inst->m_uiMessageHandler(type, ctx, msg);
-        } else {
-            try {
-                auto ctxCopy = new QMessageLogContext(qstrdup(ctx.file), ctx.line,
-                                                      qstrdup(ctx.function), qstrdup(ctx.category));
-                s_bufferedMessages.append({ type, ctxCopy, msg });
-            } catch (const std::bad_alloc &) {
-                // swallow bad-allocs and hope for sentry to log something useful
-            }
-        }
+        if (s_inst && s_inst->m_uiMessageHandler)
+            (*s_inst->m_uiMessageHandler)(type, ctx, msg);
     };
     m_defaultMessageHandler = qInstallMessageHandler(messageHandler);
 }
@@ -631,18 +621,6 @@ void Application::setupLogging()
 void Application::setUILoggingHandler(QtMessageHandler callback)
 {
     m_uiMessageHandler = callback;
-
-    if (m_uiMessageHandler) {
-        for (const auto &t : qAsConst(s_bufferedMessages)) {
-            auto *ctx = std::get<1>(t);
-            m_uiMessageHandler(std::get<0>(t), *ctx, std::get<2>(t));
-            delete [] ctx->category;
-            delete [] ctx->file;
-            delete [] ctx->function;
-            delete ctx;
-        }
-    }
-    s_bufferedMessages.clear();
 }
 
 void Application::setIconTheme(Theme theme)

@@ -61,7 +61,7 @@ signals:
 
 protected:
     void setupTerminateHandler();
-    void setupLogging();
+    virtual void setupLogging();
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);
 
@@ -91,7 +91,6 @@ protected:
 
     QtMessageHandler m_defaultMessageHandler = nullptr;
     QtMessageHandler m_uiMessageHandler = nullptr;
-    static QList<std::tuple<QtMsgType, QMessageLogContext *, QString>> s_bufferedMessages;
 
     QPointer<Announcements> m_announcements;
 

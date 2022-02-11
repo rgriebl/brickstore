@@ -19,6 +19,7 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QProcess>
+#include <QtCore/QMessageLogContext>
 #include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
 #include <QtWidgets/QProxyStyle>
@@ -51,6 +52,7 @@
 #include "common/config.h"
 #include "desktop/brickstoreproxystyle.h"
 #include "desktop/desktopuihelpers.h"
+#include "desktop/developerconsole.h"
 #include "desktop/mainwindow.h"
 #include "desktop/scriptmanager.h"
 #include "desktop/smartvalidator.h"
@@ -193,6 +195,20 @@ void DesktopApplication::checkRestart()
         QProcess::startDetached(qApp->applicationFilePath(), { });
 }
 
+DeveloperConsole *DesktopApplication::developerConsole()
+{
+    if (!m_devConsole) {
+        m_devConsole = new DeveloperConsole();
+        connect(m_devConsole, &DeveloperConsole::execute,
+                this, [](const QString &command, bool *successful) {
+            *successful = ScriptManager::inst()->executeString(command);
+        });
+        if (!m_loggingTimer.isActive())
+            m_loggingTimer.start();
+    }
+    return m_devConsole;
+}
+
 bool DesktopApplication::eventFilter(QObject *o, QEvent *e)
 {
     switch (e->type()) {
@@ -244,6 +260,66 @@ bool DesktopApplication::eventFilter(QObject *o, QEvent *e)
     }
 
     return Application::eventFilter(o, e);
+}
+
+void DesktopApplication::setupLogging()
+{
+    Application::setupLogging();
+
+    setUILoggingHandler([](QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
+        auto *that = inst();
+        if (!that)
+            return;
+
+        try {
+            // we may not be in the main thread here, but even if we are, we could be recursing
+
+            auto ctxCopy = new QMessageLogContext(qstrdup(ctx.file), ctx.line,
+                                                  qstrdup(ctx.function), qstrdup(ctx.category));
+            QMutexLocker locker(&that->m_loggingMutex);
+            that->m_loggingMessages.append({ type, ctxCopy, msg });
+            locker.unlock();
+
+            if (that->m_devConsole) {
+                // can't start a timer from another thread
+                QMetaObject::invokeMethod(that, []() {
+                    if (!inst()->m_loggingTimer.isActive())
+                        inst()->m_loggingTimer.start();
+                }, Qt::QueuedConnection);
+            }
+        } catch (const std::bad_alloc &) {
+            // swallow bad-allocs and hope for sentry to log something useful
+        }
+    });
+
+    m_loggingTimer.setInterval(100);
+    m_loggingTimer.setSingleShot(true);
+
+    connect(&m_loggingTimer, &QTimer::timeout, this, [this]() {
+        if (!m_devConsole)
+            return;
+
+        QMutexLocker locker(&m_loggingMutex);
+        if (m_loggingMessages.isEmpty())
+            return;
+        auto messages = m_loggingMessages.mid(0, 100); // don't overload the UI
+        m_loggingMessages.remove(0, messages.size());
+        bool restartTimer = !m_loggingMessages.isEmpty();
+        locker.unlock();
+
+        for (const auto &t : messages) {
+            auto *ctx = std::get<1>(t);
+
+            m_devConsole->messageHandler(std::get<0>(t), *ctx, std::get<2>(t));
+
+            delete [] ctx->category;
+            delete [] ctx->file;
+            delete [] ctx->function;
+            delete ctx;
+        }
+        if (restartTimer)
+            m_loggingTimer.start();
+    });
 }
 
 QCoro::Task<bool> DesktopApplication::closeAllViews()

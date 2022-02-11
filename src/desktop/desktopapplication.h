@@ -14,8 +14,13 @@
 #pragma once
 
 #include <QCommandLineParser>
+#include <QTimer>
+#include <QMutex>
 
 #include "common/application.h"
+
+
+class DeveloperConsole;
 
 
 class DesktopApplication : public Application
@@ -23,15 +28,19 @@ class DesktopApplication : public Application
     Q_OBJECT
 
 public:
+    static DesktopApplication *inst() { return qobject_cast<DesktopApplication *>(s_inst); }
+
     DesktopApplication(int &argc, char **argv);
     ~DesktopApplication() override;
 
     void init() override;
 
     void checkRestart() override;
+    DeveloperConsole *developerConsole();
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
+    void setupLogging() override;
 
     QCoro::Task<bool> closeAllViews() override;
 
@@ -44,5 +53,9 @@ private:
     qreal m_defaultFontSize = 0;
     bool m_restart = false;
     QCommandLineParser m_clp;
+    QPointer<DeveloperConsole> m_devConsole;
+    QTimer m_loggingTimer;
+    QMutex m_loggingMutex;
+    QVector<std::tuple<QtMsgType, QMessageLogContext *, QString>> m_loggingMessages;
 };
 

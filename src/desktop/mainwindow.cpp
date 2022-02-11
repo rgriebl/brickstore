@@ -77,6 +77,7 @@
 #include "utility/undo.h"
 #include "utility/utility.h"
 #include "checkforupdates.h"
+#include "desktopapplication.h"
 #include "desktopuihelpers.h"
 #include "developerconsole.h"
 #include "mainwindow.h"
@@ -131,16 +132,6 @@ MainWindow::MainWindow(QWidget *parent)
     DesktopUIHelpers::setDefaultParent(this);
 
     m_progress = nullptr;
-
-    m_devConsole = new DeveloperConsole();
-    Application::inst()->setUILoggingHandler([](QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
-        if (MainWindow::inst())
-            MainWindow::inst()->m_devConsole->messageHandler(type, ctx, msg);
-    });
-    connect(m_devConsole, &DeveloperConsole::execute,
-            this, [](const QString &command, bool *successful) {
-        *successful = ScriptManager::inst()->executeString(command);
-    });
 
     // keep QTBUG-39781 in mind: we cannot use QOpenGLWidget directly
     setUnifiedTitleAndToolBarOnMac(true);
@@ -861,7 +852,7 @@ void MainWindow::setupDockWidgets()
     tabifyDockWidget(dockOpen, dockInfo);
     tabifyDockWidget(dockAppearsIn, dockPriceGuide);
 
-    auto logDock = createDock(m_devConsole, "dock_errorlog");
+    auto logDock = createDock(DesktopApplication::inst()->developerConsole(), "dock_errorlog");
     logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
     logDock->setVisible(false);
     addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);

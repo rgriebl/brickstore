@@ -48,7 +48,4 @@ private:
     QString m_consoleKey;
     int m_historyIndex = 0;
     bool m_consoleActive = false;
-    QStringList m_messages;
-    QMutex m_messagesMutex;
-    QTimer *m_messagesTimer = nullptr;
 };
