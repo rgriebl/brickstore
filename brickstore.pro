@@ -141,6 +141,7 @@ sentry {
   macos:LIBS *= -lcurl -lcrashpad_client -lmini_chromium -lcrashpad_util -lbsm -framework Security
   CONFIG *= force_debug_info
   unix:CONFIG *= separate_debug_info
+  linux:LIBS *= -lcurl -ldl
 
   DEFINES *= SENTRY_ENABLED
 }
