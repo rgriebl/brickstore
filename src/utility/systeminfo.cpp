@@ -117,7 +117,7 @@ QCoro::Task<> SystemInfo::init()
 {
     // -- CPU ------------------------------------------------
 
-    m_map["hw.cpu"_l1] = co_await QtConcurrent::run([]() -> QString {
+    auto checkCpu = []() -> QString {
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
         p.start("sh"_l1, { "-c"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
@@ -143,11 +143,11 @@ QCoro::Task<> SystemInfo::init()
 #else
         return "?"_l1;
 #endif
-    });
+    };
 
     // -- GPU ------------------------------------------------
 
-    auto gpuResultPair = co_await QtConcurrent::run([]() -> QPair<QString, QString> {
+    auto checkGpu = []() -> QPair<QString, QString> {
         QPair<QString, QString> result;
         uint vendor = 0;
 
@@ -164,10 +164,18 @@ QCoro::Task<> SystemInfo::init()
         }
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
-        p.start("sh"_l1, { "-c"_l1, R"(lspci -n | grep " 0300: " | cut -c 15-18)"_l1 },
-                QIODevice::ReadOnly);
+        p.start("lspci"_l1, { "-d"_l1, "::0300"_l1, "-vmm"_l1, "-nn"_l1 }, QIODevice::ReadOnly);
         p.waitForFinished(1000);
-        vendor = QString::fromUtf8(p.readAllStandardOutput()).simplified().toUInt();
+
+        QStringList lspci = QString::fromUtf8(p.readAllStandardOutput()).split('\n'_l1);
+        for (const auto &line : lspci) {
+            if (line.startsWith("SDevice:"_l1))
+                result.first = line.mid(8).simplified().chopped(7);
+            else if (line.startsWith("Device:"_l1) && result.first.isEmpty())
+                result.first = line.mid(7).simplified().chopped(7);
+            else if (line.startsWith("Vendor:"_l1))
+                vendor = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
+        }
 
 #elif defined(Q_OS_MACOS)
        QProcess p;
@@ -181,14 +189,17 @@ QCoro::Task<> SystemInfo::init()
 #endif
         if (vendor) {
             switch (vendor) {
-                case 0x10de: result.second = "nvidia"_l1; break;
-                case 0x8086: result.second = "intel"_l1; break;
-                case 0x1002: result.second = "amd"_l1; break;
+            case 0x10de: result.second = "nvidia"_l1; break;
+            case 0x8086: result.second = "intel"_l1; break;
+            case 0x1002: result.second = "amd"_l1; break;
+            case 0x15ad: result.second = "vmware"_l1; break;
             }
         }
         return result;
-    });
+    };
 
+    m_map["hw.cpu"_l1] = co_await QtConcurrent::run(checkCpu);
+    auto gpuResultPair = co_await QtConcurrent::run(checkGpu);
     m_map["hw.gpu"_l1] = gpuResultPair.first;
     m_map["hw.gpu.arch"_l1] = gpuResultPair.second;
 
