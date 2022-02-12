@@ -29,7 +29,6 @@ class AppearsInWidget : public QTreeView
     Q_OBJECT
 public:
     explicit AppearsInWidget(QWidget *parent);
-    explicit AppearsInWidget(bool allowPartOut, QWidget *parent = nullptr);
     ~AppearsInWidget() override;
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
@@ -45,7 +44,6 @@ protected:
 private slots:
     QCoro::Task<> partOut();
     void resizeColumns();
-
 
 private:
     const BrickLink::AppearsInItem *appearsIn() const;

@@ -327,7 +327,7 @@ void TaskInfoWidget::changeEvent(QEvent *e)
 // ----------------------------------------------------------------------
 
 TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
-    : AppearsInWidget(true /*allowPartOut*/, parent), m_document(nullptr)
+    : AppearsInWidget(parent), m_document(nullptr)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 

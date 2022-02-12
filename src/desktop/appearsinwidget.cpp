@@ -40,10 +40,6 @@ public:
 };
 
 AppearsInWidget::AppearsInWidget(QWidget *parent)
-    : AppearsInWidget(false, parent)
-{ }
-
-AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
     : QTreeView(parent)
     , d(new AppearsInWidgetPrivate())
 {
@@ -100,10 +96,8 @@ AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
                                        BrickLink::core()->color(0));
     });
 
-    if (allowPartOut) {
-        d->m_contextMenu->addAction(d->m_partOutAction);
-        d->m_contextMenu->addSeparator();
-    }
+    d->m_contextMenu->addAction(d->m_partOutAction);
+    d->m_contextMenu->addSeparator();
     d->m_contextMenu->addAction(d->m_catalogAction);
     d->m_contextMenu->addAction(d->m_priceGuideAction);
     d->m_contextMenu->addAction(d->m_lotsForSaleAction);
@@ -117,10 +111,8 @@ AppearsInWidget::AppearsInWidget(bool allowPartOut, QWidget *parent)
             d->m_contextMenu->popup(viewport()->mapToGlobal(pos));
     });
 
-    if (allowPartOut) {
-        connect(this, &QAbstractItemView::activated,
-                this, &AppearsInWidget::partOut);
-    }
+    connect(this, &QAbstractItemView::doubleClicked,
+            this, &AppearsInWidget::partOut);
 
     languageChange();
     setItem(nullptr, nullptr);
