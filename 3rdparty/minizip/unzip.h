@@ -429,6 +429,9 @@ extern int ZEXPORT unzSetOffset64 (unzFile file, ZPOS64_T pos);
 extern int ZEXPORT unzSetOffset (unzFile file, uLong pos);
 
 
+// extension for BrickStore for fast content scanning
+extern int ZEXPORT unz__GetCurrentFilename(unzFile file, char **filename, int *filenameSize);
+
 
 #ifdef __cplusplus
 }

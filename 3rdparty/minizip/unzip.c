@@ -182,6 +182,7 @@ typedef struct
     unz_file_info64_internal cur_file_info_internal; /* private info about it*/
     file_in_zip64_read_info_s* pfile_in_zip_read; /* structure about the current
                                         file if we are decompressing it */
+    char cur_file_name[2048]; // extension for BrickStore for fast content scanning
     int encrypted;
 
     int isZip64;
@@ -756,6 +757,7 @@ local unzFile unzOpenInternal (const void *path,
     if( s != NULL)
     {
         *s=us;
+        s->cur_file_name[sizeof(s->cur_file_name) -1] = s->cur_file_name[0] = 0;
         unzGoToFirstFile((unzFile)s);
     }
     return (unzFile)s;
@@ -1186,7 +1188,7 @@ extern int ZEXPORT unzGoToFirstFile (unzFile file)
     s->num_file=0;
     err=unz64local_GetCurrentFileInfoInternal(file,&s->cur_file_info,
                                              &s->cur_file_info_internal,
-                                             NULL,0,NULL,0,NULL,0);
+                                             s->cur_file_name, sizeof(s->cur_file_name) - 1,NULL,0,NULL,0);
     s->current_file_ok = (err == UNZ_OK);
     return err;
 }
@@ -1214,8 +1216,8 @@ extern int ZEXPORT unzGoToNextFile (unzFile  file)
             s->cur_file_info.size_file_extra + s->cur_file_info.size_file_comment ;
     s->num_file++;
     err = unz64local_GetCurrentFileInfoInternal(file,&s->cur_file_info,
-                                               &s->cur_file_info_internal,
-                                               NULL,0,NULL,0,NULL,0);
+                                                &s->cur_file_info_internal,
+                                                s->cur_file_name, sizeof(s->cur_file_name) - 1,NULL,0,NULL,0);
     s->current_file_ok = (err == UNZ_OK);
     return err;
 }
@@ -2122,4 +2124,16 @@ extern int ZEXPORT unzSetOffset64(unzFile file, ZPOS64_T pos)
 extern int ZEXPORT unzSetOffset (unzFile file, uLong pos)
 {
     return unzSetOffset64(file,pos);
+}
+
+extern int ZEXPORT unz__GetCurrentFilename(unzFile file, char **filename, int *filenameSize)
+{
+    unz64_s *s = (unz64_s *) file;
+    if (s && filename && filenameSize && s->cur_file_info.size_filename) {
+        *filename = s->cur_file_name;
+        *filenameSize = s->cur_file_info.size_filename;
+        return UNZ_OK;
+    } else {
+        return UNZ_INTERNALERROR;
+    }
 }

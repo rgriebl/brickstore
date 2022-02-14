@@ -54,48 +54,154 @@
 
 #include "utility/exception.h"
 #include "minizip.h"
+#include "stopwatch.h"
 
 
-void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
-                    const char *extractFileName, const char *extractPassword)
+MiniZip::MiniZip(const QString &zipFilename)
+    : m_zipFileName(zipFilename)
+{ }
+
+MiniZip::~MiniZip()
 {
-    unzFile zip = { };
-    QString errorMsg;
+    close();
+}
+
+bool MiniZip::open()
+{
+    if (m_zip)
+        return false;
 
 #ifdef USEWIN32IOAPI
     zlib_filefunc64_def ffunc;
     fill_win32_filefunc64W(&ffunc);
-    const ushort *fn = zipFileName.utf16();
+    const ushort *fn = m_zipFileName.utf16();
 
-    zip = unzOpen2_64(fn, &ffunc);
+    m_zip = unzOpen2_64(fn, &ffunc);
 #else
-    QByteArray utf8Fn = zipFileName.toUtf8();
+    QByteArray utf8Fn = m_zipFileName.toUtf8();
     const char *fn = utf8Fn.constData();
 
-    zip = unzOpen64(fn);
+    m_zip = unzOpen64(fn);
 #endif
+    if (!m_zip)
+        return false;
 
-    if (zip) {
-        if (unzLocateFile(zip, extractFileName, 2 /*case insensitive*/) == UNZ_OK) {
-            if (unzOpenCurrentFilePassword(zip, extractPassword) == UNZ_OK) {
+    stopwatch sw("Reading ZIP directory");
+    do {
+        unz64_file_pos fpos;
+        if (unzGetFilePos64(m_zip, &fpos) != UNZ_OK)
+            break;
+
+        // extension for BrickStore for fast content scanning (50% faster)
+        char *filename;
+        int filenameSize;
+        if (unz__GetCurrentFilename(m_zip, &filename, &filenameSize) != UNZ_OK)
+            break;
+        auto buffer = QString::fromUtf8(QByteArray(filename, filenameSize)).toLower().toUtf8();
+
+        // this is slow, because unzGetCurrentFileInfo64() re-parses the file header
+        // which was already done in GoTo{First|Next}File()
+        //                QByteArray buffer;
+        //                buffer.resize(1024);
+        //                unz_file_info64 fileInfo;
+        //                if (unzGetCurrentFileInfo64(zip, &fileInfo, buffer.data(), buffer.size(), nullptr, 0, nullptr, 0) != UNZ_OK)
+        //                    break;
+
+        //                buffer.truncate(fileInfo.size_filename);
+        //                buffer.squeeze();
+
+        m_contents.insert(buffer, qMakePair(fpos.pos_in_zip_directory, fpos.num_of_file));
+    } while (unzGoToNextFile(m_zip) == UNZ_OK);
+
+    return true;
+}
+
+bool MiniZip::contains(const QString &fileName) const
+{
+    return m_contents.contains(fileName.toLower().toUtf8());
+}
+
+void MiniZip::close()
+{
+    if (m_zip) {
+        unzClose(m_zip);
+        m_zip = nullptr;
+    }
+    m_contents.clear();
+}
+
+QStringList MiniZip::fileList() const
+{
+    QStringList l;
+    l.reserve(m_contents.size());
+    for (auto it = m_contents.keyBegin(); it != m_contents.keyEnd(); ++it)
+        l << QString::fromUtf8(*it);
+    return l;
+}
+
+
+QByteArray MiniZip::readFile(const QString &fileName)
+{
+    if (!m_zip)
+        throw Exception(tr("ZIP file %1 has not been opened for reading")).arg(m_zipFileName);
+
+    QByteArray fn = fileName.toLower().toUtf8();
+    auto it = m_contents.constFind(fn);
+    if (it == m_contents.cend())
+        throw Exception(tr("Could not locate the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+
+    unz64_file_pos fpos { it.value().first, it.value().second };
+    if (unzGoToFilePos64(m_zip, &fpos) != UNZ_OK)
+        throw Exception(tr("Could not seek to thefile %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+
+    unz_file_info64 fileInfo;
+    if (unzGetCurrentFileInfo64(m_zip, &fileInfo, 0, 0, 0, 0, 0, 0) != UNZ_OK)
+        throw Exception(tr("Could not get info for the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+
+    if (fileInfo.uncompressed_size >= 0x8000000ULL)
+        throw Exception(tr("The file %1 within the ZIP file %3 is too big (%2 bytes).")).arg(fileName).arg(fileInfo.uncompressed_size).arg(m_zipFileName);
+
+    if (unzOpenCurrentFile(m_zip) != UNZ_OK)
+        throw Exception(tr("Could not open the file %1 within the ZIP file %2 for reading.")).arg(fileName).arg(m_zipFileName);
+
+    QByteArray data;
+    data.resize(fileInfo.uncompressed_size);
+    if (unzReadCurrentFile(m_zip, data.data(), data.size()) != data.size()) {
+        data.clear();
+        unzCloseCurrentFile(m_zip);
+        throw Exception(tr("Could not read the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+    }
+    unzCloseCurrentFile(m_zip);
+    return data;
+}
+
+void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
+                    const char *extractFileName, const char *extractPassword)
+{
+    QString errorMsg;
+    MiniZip zip(zipFileName);
+
+    if (zip.open()) {
+        if (unzLocateFile(zip.m_zip, extractFileName, 2 /*case insensitive*/) == UNZ_OK) {
+            if (unzOpenCurrentFilePassword(zip.m_zip, extractPassword) == UNZ_OK) {
                 QByteArray block;
                 block.resize(1024*1024);
                 int bytesRead;
                 do {
-                    bytesRead = unzReadCurrentFile(zip, block.data(), block.size());
+                    bytesRead = unzReadCurrentFile(zip.m_zip, block.data(), block.size());
                     if (bytesRead > 0)
                         destination->write(block.constData(), bytesRead);
                 } while (bytesRead > 0);
                 if (bytesRead < 0)
                     errorMsg = tr("Could not extract model.ldr from the Studio ZIP file.");
-                unzCloseCurrentFile(zip);
+                unzCloseCurrentFile(zip.m_zip);
             } else {
                 errorMsg = tr("Could not decrypt the model.ldr within the Studio ZIP file.");
             }
         } else {
             errorMsg = tr("Could not locate the model.ldr file within the Studio ZIP file.");
         }
-        unzClose(zip);
+        zip.close();
     } else {
         errorMsg = tr("Could not open the Studio ZIP file");
     }
