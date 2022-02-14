@@ -106,7 +106,7 @@ const BrickLink::Category *BrickLink::Item::category() const
 const QVector<const BrickLink::Category *> BrickLink::Item::additionalCategories(bool includeMainCategory) const
 {
     QVector<const BrickLink::Category *> cats;
-    if (includeMainCategory && (m_categoryIndex != 1))
+    if (includeMainCategory && (m_categoryIndex != -1))
         cats << &core()->categories()[m_categoryIndex];
     for (const auto catIndex : m_additionalCategoryIndexes)
         cats << &core()->categories()[catIndex];
