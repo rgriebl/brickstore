@@ -42,12 +42,12 @@ class GLRenderer;
 class Part;
 
 
-class RenderWidget : public QOpenGLWidget
+class RenderWindow : public QOpenGLWindow
 {
     Q_OBJECT
 public:
-    RenderWidget(QWidget *parent = nullptr);
-    ~RenderWidget() override;
+    RenderWindow();
+    ~RenderWindow() override;
 
     void setClearColor(const QColor &color);
 
@@ -55,9 +55,6 @@ public:
     int color() const;
     void setPartAndColor(Part *part, const QColor &color);
     void setPartAndColor(Part *part, int basecolor);
-
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
 
     bool isAnimationActive() const;
 
@@ -75,6 +72,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
+    bool event(QEvent *e) override;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;

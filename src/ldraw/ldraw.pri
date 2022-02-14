@@ -6,21 +6,25 @@ DEPENDPATH  += $$RELPWD
 bs_desktop|bs_mobile:QT *= opengl
 
 HEADERS += \
-  $$PWD/ldraw.h \
+    $$PWD/glrenderer.h \
+    $$PWD/ldraw.h \
+    $$PWD/renderwindow.h
 
 SOURCES += \
-  $$PWD/ldraw.cpp \
+    $$PWD/glrenderer.cpp \
+    $$PWD/ldraw.cpp \
+    $$PWD/renderwindow.cpp
 
 bs_desktop {
 
 versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
 
 HEADERS += \
-  $$PWD/renderwidget.h \
+    $$PWD/renderwidget.h \
 
 
 SOURCES += \
-  $$PWD/renderwidget.cpp \
+    $$PWD/renderwidget.cpp \
 
 RESOURCES += \
     $$PWD/shaders.qrc
