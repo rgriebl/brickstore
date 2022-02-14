@@ -32,7 +32,11 @@
 #include "bricklink/picture.h"
 #include "common/config.h"
 #include "ldraw/ldraw.h"
-#include "ldraw/renderwidget.h"
+#if defined(Q_OS_MACOS)
+#  include "ldraw/renderwindow.h"
+#else
+#  include "ldraw/renderwidget.h"
+#endif
 #include "utility/eventfilter.h"
 #include "utility/utility.h"
 #include "picturewidget.h"

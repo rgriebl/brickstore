@@ -17,6 +17,7 @@
 #include <QDate>
 #include <QString>
 #include <QByteArray>
+#include <QLoggingCategory>
 #include <QVector>
 #include <QColor>
 #include <QVector3D>
@@ -27,6 +28,10 @@
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QDir)
+
+Q_DECLARE_LOGGING_CATEGORY(LogLDraw)
+
+class MiniZip;
 
 namespace LDraw {
 
@@ -42,23 +47,22 @@ public:
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
     bool boundingBox(QVector3D &vmin, QVector3D &vmax);
-
-    void dump() const;
+    uint cost() const;
 
 protected:
     Part();
 
-    static Part *parse(QFile &file, const QDir &dir);
+    static Part *parse(const QByteArray &data, const QString &dir);
     friend class PartElement;
     friend class Core;
 
-    static void calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
-    static void check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
+    static void calculateBoundingBox(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
 
     QVector<Element *> m_elements;
-    bool m_bounding_calculated;
-    QVector3D m_bounding_min;
-    QVector3D m_bounding_max;
+    bool m_boundingCalculated;
+    QVector3D m_boundingMin;
+    QVector3D m_boundingMax;
+    uint m_cost = 0;
 };
 
 
@@ -75,13 +79,10 @@ public:
         CondLine
     };
 
-    static Element *fromString(const QString &line, const QDir &dir);
-
+    static Element *fromString(const QString &line, const QString &dir);
     inline Type type() const  { return m_type; }
-
     virtual ~Element() = default;
-
-    virtual void dump() const;
+    virtual uint size() const = 0;
 
 protected:
     Element(Type t)
@@ -97,19 +98,17 @@ class CommentElement : public Element
 {
 public:
     QString comment() const  { return m_comment; }
+    uint size() const override { return sizeof(*this) + m_comment.size() * 2; }
 
     static CommentElement *create(const QString &text);
-
-    void dump() const override;
 
 protected:
     CommentElement(Type t, const QString &text);
     CommentElement(const QString &);
 
-    QString m_comment;
-
 private:
     Q_DISABLE_COPY(CommentElement)
+    QString m_comment;
 };
 
 
@@ -129,16 +128,15 @@ public:
 protected:
     BfcCommandElement(const QString &);
 
-    bool m_certify = false;
-    bool m_nocertify = false;
-    bool m_clip = false;
-    bool m_noclip = false;
-    bool m_ccw = false;
-    bool m_cw = false;
-    bool m_invertNext = false;
-
 private:
     Q_DISABLE_COPY(BfcCommandElement)
+    bool m_certify    : 1 = false;
+    bool m_nocertify  : 1 = false;
+    bool m_clip       : 1 = false;
+    bool m_noclip     : 1 = false;
+    bool m_ccw        : 1 = false;
+    bool m_cw         : 1 = false;
+    bool m_invertNext : 1 = false;
     friend class CommentElement;
 };
 
@@ -148,19 +146,17 @@ class LineElement : public Element
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
+    uint size() const override      { return sizeof(*this); }
 
     static LineElement *create(int color, const QVector3D *points);
-
-    void dump() const override;
 
 protected:
     LineElement(int color, const QVector3D *points);
 
-    int       m_color;
-    QVector3D m_points[2];
-
 private:
     Q_DISABLE_COPY(LineElement)
+    int       m_color;
+    QVector3D m_points[2];
 };
 
 
@@ -169,19 +165,17 @@ class CondLineElement : public Element
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
+    uint size() const override      { return sizeof(*this); }
 
     static CondLineElement *create(int color, const QVector3D *points);
-
-    void dump() const override;
 
 protected:
     CondLineElement(int color, const QVector3D *points);
 
-    int       m_color;
-    QVector3D m_points[4];
-
 private:
     Q_DISABLE_COPY(CondLineElement)
+    int       m_color;
+    QVector3D m_points[4];
 };
 
 
@@ -190,19 +184,17 @@ class TriangleElement : public Element
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
+    uint size() const override      { return sizeof(*this); }
 
     static TriangleElement *create(int color, const QVector3D *points);
-
-    void dump() const override;
 
 protected:
     TriangleElement(int color, const QVector3D *points);
 
-    int       m_color;
-    QVector3D m_points[3];
-
 private:
     Q_DISABLE_COPY(TriangleElement)
+    int       m_color;
+    QVector3D m_points[3];
 };
 
 
@@ -211,18 +203,16 @@ class QuadElement : public Element
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
+    uint size() const override      { return sizeof(*this); }
 
     static QuadElement *create(int color, const QVector3D *points);
-
-    void dump() const override;
 
 protected:
     QuadElement(int color, const QVector3D *points);
 
+private:
     int       m_color;
     QVector3D m_points[4];
-
-private:
     Q_DISABLE_COPY(QuadElement)
 };
 
@@ -233,54 +223,23 @@ public:
     int color() const              { return m_color; }
     const QMatrix4x4 &matrix() const { return m_matrix; }
     LDraw::Part *part() const      { return m_part; }
+    uint size() const override      { return sizeof(*this); }
 
-    static PartElement *create(int color, const QMatrix4x4 &m, const QString &filename, const QDir &parentdir);
+    static PartElement *create(int color, const QMatrix4x4 &m, const QString &filename,
+                               const QString &parentdir);
 
     ~PartElement() override;
-    void dump() const override;
 
 protected:
     PartElement(int color, const QMatrix4x4 &m, LDraw::Part *part);
 
+private:
+    Q_DISABLE_COPY(PartElement)
     int          m_color;
     QMatrix4x4   m_matrix;
     LDraw::Part *m_part;
-
-private:
-    Q_DISABLE_COPY(PartElement)
 };
 
-/*
-class Color {
-public:
-    enum Material {
-        Plastic = 0,
-        Chrome,
-        Pearlescent,
-        Rubber,
-        MatteMetallic,
-        Metal,
-
-        Default = Plastic
-    };
-
-private:
-    uint     m_id;
-    char *   m_name;
-    float    m_luminance;
-    Material m_material;
-    QColor   m_color;
-    QColor   m_edgecolor;
-};
-
-class Item {
-private:
-    char *m_id;
-    char *m_name;
-    char *m_path;
-};
-
-*/
 
 class Core
 {
@@ -300,13 +259,12 @@ public:
     static bool isValidLDrawDir(const QString &dir);
 
 private:
-    bool create_part_list();
-    bool parse_ldconfig(const char *file);
-    QColor parse_color_string(const QString &str);
+    bool parseLDconfig(const char *file);
+    static QColor parseColorString(const QString &str);
 
     Core(const QString &datadir);
 
-    Part *findPart(const QString &filename, const QDir &parentdir);
+    Part *findPart(const QString &filename, const QString &parentdir = { });
 
     static Core *create(const QString &datadir, QString *errstring);
     static inline Core *inst() { return s_inst; }
@@ -317,7 +275,8 @@ private:
 
 private:
     QString m_datadir;
-    QVector<QDir> m_searchpath;
+    MiniZip *m_zip = nullptr;
+    QStringList m_searchpath;
 
     struct Color
     {
@@ -338,6 +297,7 @@ private:
     QDate m_date;
 
     friend class PartElement;
+    QByteArray readLDrawFile(const QString &filename);
 };
 
 inline Core *core() { return Core::inst(); }

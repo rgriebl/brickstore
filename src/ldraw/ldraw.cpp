@@ -19,6 +19,7 @@
 #include <QMap>
 #include <QDir>
 #include <QDirIterator>
+#include <QStringBuilder>
 #include <QDateTime>
 #include <QDebug>
 #include <QStringBuilder>
@@ -30,15 +31,29 @@
 #endif
 
 #include "utility/utility.h"
+#include "utility/exception.h"
 #include "ldraw/ldraw.h"
 #include "utility/stopwatch.h"
+#include "minizip/minizip.h"
 
-LDraw::Element *LDraw::Element::fromString(const QString &line, const QDir &dir)
+
+Q_LOGGING_CATEGORY(LogLDraw, "ldraw")
+
+
+LDraw::Element *LDraw::Element::fromString(const QString &line, const QString &dir)
 {
     Element *e = nullptr;
 
+    static auto parseVectors = []<typename T, const int N>(const QStringList &list) {
+        QVector3D v[N];
+
+        for (int i = 0; i < N; ++i)
+            v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
+        return T::create(list[0].toInt(), v);
+    };
+
     static const int element_count_lut[] = {
-        -1,
+         0,
         14,
          7,
         10,
@@ -53,74 +68,36 @@ LDraw::Element *LDraw::Element::fromString(const QString &line, const QDir &dir)
         list.removeFirst();
 
         if (t >= 0 && t <= 5) {
-            if (!t || element_count_lut[t] == list.size()) {
+            int count = element_count_lut[t];
+            if ((count == 0) || (list.size() == count)) {
                 switch (t) {
-                case 0: {
-                    e = CommentElement::create(line.simplified().mid(2));
+                case 0:
+                    e = CommentElement::create(line.mid(1).trimmed());
                     break;
-                }
+
                 case 1: {
-                    int color = list[0].toInt();
-                    QMatrix4x4 m(
-                        list[4].toFloat(),
-                        list[5].toFloat(),
-                        list[6].toFloat(),
-                        list[1].toFloat(),
-
-                        list[7].toFloat(),
-                        list[8].toFloat(),
-                        list[9].toFloat(),
-                        list[2].toFloat(),
-
-                        list[10].toFloat(),
-                        list[11].toFloat(),
-                        list[12].toFloat(),
-                        list[3].toFloat(),
-
+                    QMatrix4x4 m {
+                        list[4].toFloat(), list[5].toFloat(), list[6].toFloat(), list[1].toFloat(),
+                        list[7].toFloat(), list[8].toFloat(), list[9].toFloat(), list[2].toFloat(),
+                        list[10].toFloat(), list[11].toFloat(), list[12].toFloat(), list[3].toFloat(),
                         0, 0, 0, 1
-                    );
+                    };
                     m.optimize();
-
-                    e = PartElement::create(color, m, list[13], dir);
+                    e = PartElement::create(list[0].toInt(), m, list[13], dir);
                     break;
                 }
-                case 2: {
-                    int color = list[0].toInt();
-                    QVector3D v[2];
-
-                    for (int i = 0; i < 2; ++i)
-                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
-                    e = LineElement::create(color, v);
+                case 2:
+                    e = parseVectors.template operator()<LineElement, 2>(list);
                     break;
-                }
-                case 3: {
-                    int color = list[0].toInt();
-                    QVector3D v[3];
-
-                    for (int i = 0; i < 3; ++i)
-                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
-                    e = TriangleElement::create(color, v);
+                case 3:
+                    e = parseVectors.template operator()<TriangleElement, 3>(list);
                     break;
-                }
-                case 4: {
-                    int color = list[0].toInt();
-                    QVector3D v[4];
-
-                    for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
-                    e = QuadElement::create(color, v);
+                case 4:
+                    e = parseVectors.template operator()<QuadElement, 4>(list);
                     break;
-                }
-                case 5: {
-                    int color = list[0].toInt();
-                    QVector3D v[4];
-
-                    for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
-                    e = CondLineElement::create(color, v);
+                case 5:
+                    e = parseVectors.template operator()<CondLineElement, 4>(list);
                     break;
-                }
-                default: break;
                 }
             }
         }
@@ -129,13 +106,9 @@ LDraw::Element *LDraw::Element::fromString(const QString &line, const QDir &dir)
 }
 
 
-void LDraw::Element::dump() const
-{ }
-
 
 LDraw::CommentElement::CommentElement(const QString &text)
-    : Element(Comment)
-    , m_comment(text)
+    : CommentElement(Comment, text)
 { }
 
 LDraw::CommentElement::CommentElement(LDraw::Element::Type t, const QString &text)
@@ -151,12 +124,6 @@ LDraw::CommentElement *LDraw::CommentElement::create(const QString &text)
         return new CommentElement(text);
 }
 
-void LDraw::CommentElement::dump() const
-{
-    qDebug() << 0 << m_comment.constData();
-}
-
-
 
 LDraw::BfcCommandElement::BfcCommandElement(const QString &text)
     : CommentElement(BfcCommand, text)
@@ -166,13 +133,12 @@ LDraw::BfcCommandElement::BfcCommandElement(const QString &text)
         for (int i = 1; i < c.length(); ++i) {
             QString bfcCommand = c.at(i);
 
-            if (bfcCommand == "INVERTNEXT"_l1) {
+            if (bfcCommand == "INVERTNEXT"_l1)
                 m_invertNext = true;
-            } else if (bfcCommand == "CW"_l1) {
+            else if (bfcCommand == "CW"_l1)
                 m_cw = true;
-            } else if (bfcCommand == "CCW"_l1) {
+            else if (bfcCommand == "CCW"_l1)
                 m_ccw = true;
-            }
         }
     }
 }
@@ -194,13 +160,6 @@ LDraw::LineElement *LDraw::LineElement::create(int color, const QVector3D *v)
     return new LineElement(color, v);
 }
 
-void LDraw::LineElement::dump() const
-{
-    qDebug() << 2 << m_color
-             << m_points[0].x() << m_points[0].y() << m_points[0].z()
-             << m_points[1].x() << m_points[1].y() << m_points[1].z();
-}
-
 
 LDraw::CondLineElement::CondLineElement(int color, const QVector3D *v)
     : Element(CondLine), m_color(color)
@@ -211,15 +170,6 @@ LDraw::CondLineElement::CondLineElement(int color, const QVector3D *v)
 LDraw::CondLineElement *LDraw::CondLineElement::create(int color, const QVector3D *v)
 {
     return new CondLineElement(color, v);
-}
-
-void LDraw::CondLineElement::dump() const
-{
-    qDebug() << 5 << m_color
-             << m_points[0].x() << m_points[0].y() << m_points[0].z()
-             << m_points[1].x() << m_points[1].y() << m_points[1].z()
-             << m_points[2].x() << m_points[2].y() << m_points[2].z()
-             << m_points[3].x() << m_points[3].y() << m_points[3].z();
 }
 
 
@@ -234,35 +184,11 @@ LDraw::TriangleElement *LDraw::TriangleElement::create(int color, const QVector3
     return new TriangleElement(color, v);
 }
 
-void LDraw::TriangleElement::dump() const
-{
-    qDebug() << 3 << m_color
-             << m_points[0].x() << m_points[0].y() << m_points[0].z()
-             << m_points[1].x() << m_points[1].y() << m_points[1].z()
-             << m_points[2].x() << m_points[2].y() << m_points[2].z();
-}
-
 
 LDraw::QuadElement::QuadElement(int color, const QVector3D *v)
     : Element(Quad), m_color(color)
 {
     memcpy(m_points, v, sizeof(m_points));
-#if 0
-    //fix CCW order
-    // getting QVector3Ds from points
-    a10 = p0 - p1;
-    a12 = p2 - p1;
-    a13 = p3 - p1;
-    // building normals (with cross)
-    n0 = a12 * a10;
-    n1 = a10 * n0;
-    n2 = n0 * a12;
-    // checking skalar
-    s1=a13.dot(n1);
-    s2=a13.dot(n2);
-    if (s1 < 0) switch(p1,p2); // switch 1-2
-    if (s2 < 0) switch(p2,p3); // switch 2-3
-#endif
 }
 
 LDraw::QuadElement *LDraw::QuadElement::create(int color, const QVector3D *v)
@@ -270,14 +196,6 @@ LDraw::QuadElement *LDraw::QuadElement::create(int color, const QVector3D *v)
     return new QuadElement(color, v);
 }
 
-void LDraw::QuadElement::dump() const
-{
-    qDebug() << 4 << m_color
-             << m_points[0].x() << m_points[0].y() << m_points[0].z()
-             << m_points[1].x() << m_points[1].y() << m_points[1].z()
-             << m_points[2].x() << m_points[2].y() << m_points[2].z()
-             << m_points[3].x() << m_points[3].y() << m_points[3].z();
-}
 
 
 LDraw::PartElement::PartElement(int color, const QMatrix4x4 &matrix, LDraw::Part *p)
@@ -293,7 +211,8 @@ LDraw::PartElement::~PartElement()
         m_part->release();
 }
 
-LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matrix, const QString &filename, const QDir &parentdir)
+LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matrix,
+                                               const QString &filename, const QString &parentdir)
 {
     PartElement *e = nullptr;
     if (LDraw::Part *p = Core::inst()->findPart(filename, parentdir))
@@ -301,26 +220,9 @@ LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matr
     return e;
 }
 
-void LDraw::PartElement::dump() const
-{
-    qDebug() << 1 << m_color
-             << m_matrix(3, 0) << m_matrix(3, 1) << m_matrix(3, 2)
-             << m_matrix(0, 0) << m_matrix(1, 0) << m_matrix(2, 0)
-             << m_matrix(0, 1) << m_matrix(1, 1) << m_matrix(2, 1)
-             << m_matrix(0, 2) << m_matrix(1, 2) << m_matrix(2, 2);
-
-    if (m_part) {
-        qDebug(">> start of sub-part >>");
-        m_part->dump();
-        qDebug("<< end of sub-part <<\n");
-    } else {
-        qDebug(">> invalid sub-part <<\n");
-    }
-}
-
 
 LDraw::Part::Part()
-    : m_bounding_calculated(false)
+    : m_boundingCalculated(false)
 {
 }
 
@@ -329,10 +231,10 @@ LDraw::Part::~Part()
     qDeleteAll(m_elements);
 }
 
-LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
+LDraw::Part *LDraw::Part::parse(const QByteArray &data, const QString &dir)
 {
     Part *p = new Part();
-    QTextStream ts(&file);
+    QTextStream ts(data);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     ts.setCodec("UTF-8");
 #else
@@ -343,16 +245,15 @@ LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
     int lineno = 0;
     while (!ts.atEnd()) {
         line = ts.readLine();
-        if (line.isEmpty() && file.error() != QFile::NoError) {
-            qWarning() << "Read error in line" << lineno << ":" << line;
-            break;
-        }
         lineno++;
-        Element *e = Element::fromString(line, dir);
-        if (e)
+        if (line.isEmpty())
+            continue;
+        if (Element *e = Element::fromString(line, dir)) {
             p->m_elements.append(e);
-        else
-            qWarning() << "Could not parse line" << lineno << ":" << line;
+            p->m_cost += e->size();
+        } else {
+            qCWarning(LogLDraw) << "Could not parse line" << lineno << ":" << line;
+        }
     }
 
     if (p->m_elements.isEmpty()) {
@@ -364,102 +265,108 @@ LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
 
 bool LDraw::Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
 {
-    if (!m_bounding_calculated) {
+    if (!m_boundingCalculated) {
         QMatrix4x4 matrix;
-        m_bounding_min = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
-        m_bounding_max = QVector3D(FLT_MIN, FLT_MIN, FLT_MIN);
+        m_boundingMin = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
+        m_boundingMax = QVector3D(FLT_MIN, FLT_MIN, FLT_MIN);
 
-        calc_bounding_box(this, matrix, m_bounding_min, m_bounding_max);
-
-        m_bounding_calculated = true;
+        calculateBoundingBox(this, matrix, m_boundingMin, m_boundingMax);
+        m_boundingCalculated = true;
     }
-    vmin = m_bounding_min;
-    vmax = m_bounding_max;
-
+    vmin = m_boundingMin;
+    vmax = m_boundingMax;
     return true;
 }
 
-void LDraw::Part::check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
+uint LDraw::Part::cost() const
 {
-    while (cnt--) {
-        QVector3D vm = matrix.map(*v);
-
-        vmin = QVector3D(qMin(vmin.x(), vm.x()), qMin(vmin.y(), vm.y()), qMin(vmin.z(), vm.z()));
-        vmax = QVector3D(qMax(vmax.x(), vm.x()), qMax(vmax.y(), vm.y()), qMax(vmax.z(), vm.z()));
-
-        v++;
-    }
+    return m_cost;
 }
 
 
-
-void LDraw::Part::calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
+void LDraw::Part::calculateBoundingBox(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
 {
+    auto extend = [&matrix, &vmin, &vmax](int cnt, const QVector3D *v) {
+        while (cnt--) {
+            QVector3D vm = matrix.map(*v++);
+            vmin = QVector3D(qMin(vmin.x(), vm.x()), qMin(vmin.y(), vm.y()), qMin(vmin.z(), vm.z()));
+            vmax = QVector3D(qMax(vmax.x(), vm.x()), qMax(vmax.y(), vm.y()), qMax(vmax.z(), vm.z()));
+        }
+    };
+
     const auto elements = part->elements();
     for (const Element *e : elements) {
         switch (e->type()) {
-        case Element::Line: {
-            const auto *le = static_cast<const LineElement *>(e);
-
-            check_bounding(2, le->points(), matrix, vmin, vmax);
+        case Element::Line:
+            extend(2, static_cast<const LineElement *>(e)->points());
             break;
-        }
-        case Element::Triangle: {
-            const auto *te = static_cast<const TriangleElement *>(e);
 
-            check_bounding(3, te->points(), matrix, vmin, vmax);
+        case Element::Triangle:
+            extend(3, static_cast<const TriangleElement *>(e)->points());
             break;
-        }
-        case Element::Quad: {
-            const auto *qe = static_cast<const QuadElement *>(e);
 
-            check_bounding(4, qe->points(), matrix, vmin, vmax);
+        case Element::Quad:
+            extend(4, static_cast<const QuadElement *>(e)->points());
             break;
-        }
+
         case Element::Part: {
             const auto *pe = static_cast<const PartElement *>(e);
-
-            calc_bounding_box(pe->part(), matrix * pe->matrix(), vmin, vmax);
+            calculateBoundingBox(pe->part(), matrix * pe->matrix(), vmin, vmax);
             break;
         }
-        default: {
+        default:
             break;
-        }
         }
     }
 }
 
 
 
-void LDraw::Part::dump() const
-{
-    for (const Element *e : m_elements)
-        e->dump();
-}
-
-LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentdir)
+LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QString &_parentdir)
 {
     QString filename = _filename;
     filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    QString parentdir = _parentdir;
+    if (!parentdir.isEmpty() && !parentdir.startsWith("!ZIP!"_l1))
+        parentdir = QDir(parentdir).canonicalPath();
+
+    bool inZip = false;
     bool found = false;
 
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
 
-        QVector<QDir> searchpath = m_searchpath;
-        if (parentdir != QDir::root() && !searchpath.contains(parentdir))
+        QStringList searchpath = m_searchpath;
+        if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
             searchpath.prepend(parentdir);
 
-        for (const QDir &sp : qAsConst(searchpath)) {
-            QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
+        for (const QString &sp : qAsConst(searchpath)) {
+
+            if (sp.startsWith("!ZIP!"_l1)) {
+                filename = filename.toLower();
+                QString testname = sp.mid(5) % u'/' % filename;
+                if (m_zip->contains(testname)) {
+                    QFileInfo fi(filename);
+                    parentdir = sp;
+                    if (fi.path() != "."_l1)
+                        parentdir = parentdir % u'/' % fi.path();
+                    filename = testname;
+                    inZip = true;
+                    found = true;
+                    break;
+                }
+            } else {
+                QString testname = sp % u'/' % filename;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-            if (!QFile::exists(testname))
-                testname = testname.toLower();
+                if (!QFile::exists(testname))
+                    testname = testname.toLower();
 #endif
-            if (QFile::exists(testname)) {
-                filename = testname;
-                found = true;
-                break;
+                if (QFile::exists(testname)) {
+                    filename = testname;
+                    parentdir = QFileInfo(testname).path();
+                    found = true;
+                    break;
+                }
             }
         }
     } else {
@@ -467,26 +374,48 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
         if (!QFile::exists(filename))
             filename = filename.toLower();
 #endif
-        if (QFile::exists(filename))
+        if (QFile::exists(filename)) {
+            parentdir = QFileInfo(filename).path();
             found = true;
+        }
     }
 
     if (!found)
         return nullptr;
-
-    filename = QFileInfo(filename).canonicalFilePath();
+    if (!inZip)
+        filename = QFileInfo(filename).canonicalFilePath();
 
     Part *p = m_cache[filename];
-
     if (!p) {
-        QFile f(filename);
+        QByteArray data;
 
-        if (f.open(QIODevice::ReadOnly | QIODevice::Text))
-            p = Part::parse(f, QFileInfo(f).dir());
-        if (p) {
-            if (!m_cache.insert(filename, p)) {
-                qWarning("Unable to cache LDraw file %s", qPrintable(filename));
-                p = nullptr;
+        if (inZip) {
+            try {
+                data = m_zip->readFile(filename);
+            } catch (const Exception &e) {
+                qCWarning(LogLDraw) << "Failed to read from LDraw ZIP:" << e.error();
+            }
+        } else {
+            QFile f(filename);
+
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qCWarning(LogLDraw) << "Failed to open file" << filename << ":" << f.errorString();
+            } else {
+                data = f.readAll();
+                if (f.error() != QFile::NoError)
+                    qCWarning(LogLDraw) << "Failed to read file" << filename << ":" << f.errorString();
+                f.close();
+            }
+        }
+        if (!data.isEmpty()) {
+            p = Part::parse(data, parentdir);
+            if (p) {
+                if (!m_cache.insert(filename, p, p->cost())) {
+                    qCWarning(LogLDraw) << "Unable to cache file" << filename;
+                    p = nullptr;
+                }
+
+                //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
             }
         }
     }
@@ -495,21 +424,19 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
 
 LDraw::Part *LDraw::Core::partFromFile(const QString &file)
 {
-    return findPart(file, QFileInfo(file).dir());
+    return findPart(file, QFileInfo(file).path());
 }
 
 LDraw::Part *LDraw::Core::partFromId(const QByteArray &id)
 {
-    QDir parts(dataPath());
-    if (parts.cd("parts"_l1) || parts.cd("PARTS"_l1)) {
-        QString filename = QLatin1String(id) % u".dat";
-        return findPart(parts.absoluteFilePath(filename), QDir::root());
-    }
-    return nullptr;
+    QString filename = QLatin1String(id) % u".dat";
+    return findPart(filename);
 }
 
 LDraw::Core::~Core()
 {
+    delete m_zip;
+
     // the parts in cache are referencing each other, so a plain clear will not work
     m_cache.clearRecursive();
 }
@@ -627,15 +554,19 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
         if (!ldrawdir.isEmpty()) {
             s_inst = new Core(ldrawdir);
 
-            if (s_inst->parse_ldconfig("LDConfig.ldr")) {
-                s_inst->parse_ldconfig("LDConfig_missing.ldr");
-                qInfo().noquote() << "Found LDraw at" << ldrawdir << "\n  Last updated:"
-                                  << s_inst->lastUpdate().toString(Qt::RFC2822Date);
+            if (!s_inst->m_zip || s_inst->m_zip->open()) {
+                if (s_inst->parseLDconfig("LDConfig.ldr")) {
+                    s_inst->parseLDconfig("LDConfig_missing.ldr");
+                    qInfo().noquote() << "Found LDraw at" << ldrawdir << "\n  Last updated:"
+                                      << s_inst->lastUpdate().toString(Qt::RFC2822Date);
+                } else {
+                    error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
+                }
             } else {
-                error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
+                error = qApp->translate("LDraw", "The LDraw installation at \'%1\' is not usable.").arg(ldrawdir);
             }
         } else {
-            error = qApp->translate("LDraw", "The LDraw directory \'%1\' is not readable.").arg(datadir);
+            error = qApp->translate("LDraw", "No usable LDraw installation available.");
         }
 
         if (!error.isEmpty()) {
@@ -653,22 +584,38 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 LDraw::Core::Core(const QString &datadir)
     : m_datadir(datadir)
 {
-    static const char *subdirs[] =
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-        { "P/48", "p/48", "P", "p", "PARTS", "parts", "MODELS", "models", };
+    m_cache.setMaxCost(50 * 1024 * 1024); // 50MB
+
+    bool caseInsensitive =
+#if !defined(Q_OS_UNIX) || defined(Q_OS_MACOS)
+            false;
 #else
-        { "P/48", "P", "PARTS", "MODELS" };
+            true;
 #endif
 
-    for (auto subdir : subdirs) {
-        QDir sdir(m_datadir);
+    if (QFileInfo(datadir).isFile() && datadir.endsWith(".zip"_l1)) {
+        caseInsensitive = true;
+        m_zip = new MiniZip(datadir);
+    }
 
-        if (sdir.cd(QLatin1String(subdir)))
-            m_searchpath << sdir;
+    static const char *subdirs[] = { "p/48", "p", "parts", "models" };
+
+    for (auto subdir : subdirs) {
+        if (m_zip) {
+            m_searchpath << QString(u"!ZIP!ldraw/" % QLatin1String(subdir));
+        } else {
+            QDir sdir(m_datadir);
+            QString s = QLatin1String(subdir);
+
+            if (sdir.cd(s))
+                m_searchpath << sdir.canonicalPath();
+            else if (!caseInsensitive && sdir.cd(s.toLower()))
+                m_searchpath << sdir.canonicalPath();
+        }
     }
 }
 
-QColor LDraw::Core::parse_color_string(const QString &cstr)
+QColor LDraw::Core::parseColorString(const QString &cstr)
 {
     QString str(cstr);
 
@@ -680,92 +627,113 @@ QColor LDraw::Core::parse_color_string(const QString &cstr)
         return {};
 }
 
-bool LDraw::Core::parse_ldconfig(const char *filename)
+QByteArray LDraw::Core::readLDrawFile(const QString &filename)
 {
-    //stopwatch sw("LDraw: parse_ldconfig");
+    QByteArray data;
+    if (m_zip) {
+        QString zipFilename = "ldraw/"_l1 % filename;
+        if (m_zip->contains(zipFilename))
+            data = m_zip->readFile(zipFilename);
+    } else {
+        QFile f(dataPath() % u'/' % filename);
 
-    QDir ldrawdir(dataPath());
-    QFile f(ldrawdir.filePath(QLatin1String(filename)));
+        if (!f.open(QIODevice::ReadOnly))
+            throw Exception(&f, "Failed to read file");
 
-    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream ts(&f);
-        QMap<int, int> edge_ids;
+        data = f.readAll();
+        if (f.error() != QFileDevice::NoError)
+            throw Exception(&f, "Failed to read file");
+    }
+    return data;
+}
 
-        QString line;
-        int lineno = 0;
-        while (!ts.atEnd()) {
-            line = ts.readLine();
-            lineno++;
+bool LDraw::Core::parseLDconfig(const char *filename)
+{
+    //stopwatch sw("LDraw: parseLDconfig");
 
-            QStringList sl = line.simplified().split(' '_l1);
+    QByteArray data;
+    try {
+        data = readLDrawFile(QLatin1String(filename));
+    } catch (const Exception &) {
+        //qCWarning(LogLDraw) << "LDraw ZIP:" << e.error();
+        return false;
+    }
+    QTextStream ts(data);
+    QMap<int, int> edge_ids;
 
-            if (sl.count() >= 9 &&
+    QString line;
+    int lineno = 0;
+    while (!ts.atEnd()) {
+        line = ts.readLine();
+        lineno++;
+
+        QStringList sl = line.simplified().split(' '_l1);
+
+        if (sl.count() >= 9 &&
                 sl[0].toInt() == 0 &&
                 sl[1] == "!COLOUR"_l1 &&
                 sl[3] == "CODE"_l1 &&
                 sl[5] == "VALUE"_l1 &&
                 sl[7] == "EDGE"_l1) {
-                // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]</params>
+            // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]</params>
 
-                Color c;
+            Color c;
 
-                c.id = sl[4].toInt();
-                c.name = sl[2];
-                c.color = parse_color_string(sl[6]);
-                c.edgeColor = parse_color_string(sl[8]);
+            c.id = sl[4].toInt();
+            c.name = sl[2];
+            c.color = parseColorString(sl[6]);
+            c.edgeColor = parseColorString(sl[8]);
 
-                // edge is not a RGB color, but a color index (which could be not parsed yet...)
-                if (!c.edgeColor.isValid()) {
-                    edge_ids.insert(c.id, sl[8].toInt());
-                    c.edgeColor = Qt::green;
-                }
-
-                for (int idx = 9; idx < sl.count(); ++idx) {
-                    if (sl[idx] == "ALPHA"_l1) {
-                        int alpha = sl[++idx].toInt();
-                        c.color.setAlpha(alpha);
-                        c.edgeColor.setAlpha(alpha);
-                    } else if (sl[idx] == "LUMINANCE"_l1) {
-                        c.luminance = sl[++idx].toInt();
-                    } else if (sl[idx] == "CHROME"_l1) {
-                        c.chrome = true;
-                    } else if (sl[idx] == "PEARLESCENT"_l1) {
-                        c.pearlescent = true;
-                    } else if (sl[idx] == "RUBBER"_l1) {
-                        c.rubber = true;
-                    } else if (sl[idx] == "MATTE_METALLIC"_l1) {
-                        c.matteMetallic = true;
-                    } else if (sl[idx] == "METAL"_l1) {
-                        c.metal = true;
-                    }
-                }
-                if (c.color.isValid() && c.edgeColor.isValid()) {
-                    m_colors.insert(c.id, c);
-
-                    //qDebug() << "Got Color " << id << " : " << main << " // " << edge;
-                }
-            } else if (sl.count() >= 5 &&
-                    sl[0].toInt() == 0 &&
-                    sl[1] == "!LDRAW_ORG"_l1 &&
-                    sl[2] == "Configuration"_l1 &&
-                    sl[3] == "UPDATE"_l1) {
-                // 0 !LDRAW_ORG Configuration UPDATE yyyy-MM-dd
-                m_date = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
+            // edge is not a RGB color, but a color index (which could be not parsed yet...)
+            if (!c.edgeColor.isValid()) {
+                edge_ids.insert(c.id, sl[8].toInt());
+                c.edgeColor = Qt::green;
             }
-        }
-        for (auto it = edge_ids.constBegin(); it != edge_ids.constEnd(); ++it) {
-            auto set_edge = m_colors.find(it.key());
-            auto get_main = m_colors.constFind(it.value());
 
-            if ((set_edge != m_colors.end()) && (get_main != m_colors.constEnd())) {
-                set_edge.value().edgeColor = get_main.value().color;
-                // qDebug() << "Fixed edge color of" << it.key() << "to" << get_main.value().color;
+            for (int idx = 9; idx < sl.count(); ++idx) {
+                if (sl[idx] == "ALPHA"_l1) {
+                    int alpha = sl[++idx].toInt();
+                    c.color.setAlpha(alpha);
+                    c.edgeColor.setAlpha(alpha);
+                } else if (sl[idx] == "LUMINANCE"_l1) {
+                    c.luminance = sl[++idx].toInt();
+                } else if (sl[idx] == "CHROME"_l1) {
+                    c.chrome = true;
+                } else if (sl[idx] == "PEARLESCENT"_l1) {
+                    c.pearlescent = true;
+                } else if (sl[idx] == "RUBBER"_l1) {
+                    c.rubber = true;
+                } else if (sl[idx] == "MATTE_METALLIC"_l1) {
+                    c.matteMetallic = true;
+                } else if (sl[idx] == "METAL"_l1) {
+                    c.metal = true;
+                }
             }
-        }
+            if (c.color.isValid() && c.edgeColor.isValid()) {
+                m_colors.insert(c.id, c);
 
-        return true;
+                //qDebug() << "Got Color " << id << " : " << main << " // " << edge;
+            }
+        } else if (sl.count() >= 5 &&
+                   sl[0].toInt() == 0 &&
+                   sl[1] == "!LDRAW_ORG"_l1 &&
+                   sl[2] == "Configuration"_l1 &&
+                   sl[3] == "UPDATE"_l1) {
+            // 0 !LDRAW_ORG Configuration UPDATE yyyy-MM-dd
+            m_date = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
+        }
     }
-    return false;
+    for (auto it = edge_ids.constBegin(); it != edge_ids.constEnd(); ++it) {
+        auto set_edge = m_colors.find(it.key());
+        auto get_main = m_colors.constFind(it.value());
+
+        if ((set_edge != m_colors.end()) && (get_main != m_colors.constEnd())) {
+            set_edge.value().edgeColor = get_main.value().color;
+            // qDebug() << "Fixed edge color of" << it.key() << "to" << get_main.value().color;
+        }
+    }
+
+    return true;
 }
 
 
