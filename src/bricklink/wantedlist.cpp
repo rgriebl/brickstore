@@ -168,20 +168,21 @@ void WantedList::setLots(LotList &&lots)
 
 
 
-WantedLists::WantedLists(QObject *parent)
-    : QAbstractTableModel(parent)
+WantedLists::WantedLists(Core *core)
+    : QAbstractTableModel(core)
+    , m_core(core)
 {
-    connect(core(), &Core::authenticatedTransferStarted,
+    connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
         if ((m_updateStatus == UpdateStatus::Updating) && (m_job == job))
             emit updateStarted();
     });
-    connect(core(), &Core::authenticatedTransferProgress,
+    connect(core, &Core::authenticatedTransferProgress,
             this, [this](TransferJob *job, int progress, int total) {
         if ((m_updateStatus == UpdateStatus::Updating) && (m_job == job))
             emit updateProgress(progress, total);
     });
-    connect(core(), &Core::authenticatedTransferFinished,
+    connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
         bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
         QByteArray type = job->userTag();
@@ -254,7 +255,7 @@ WantedLists::WantedLists(QObject *parent)
         }
     });
 
-    connect(core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+    connect(core->database(), &BrickLink::Database::databaseAboutToBeReset,
             this, [this]() {
         beginResetModel();
         qDeleteAll(m_wantedLists);
@@ -344,7 +345,7 @@ void WantedLists::startUpdate()
     job->setUserData("globalWantedList", true);
     m_job = job;
 
-    core()->retrieveAuthenticated(m_job);
+    m_core->retrieveAuthenticated(m_job);
 }
 
 void WantedLists::cancelUpdate()
@@ -368,7 +369,7 @@ void WantedLists::startFetchLots(WantedList *wantedList)
     job->setUserData("wantedList", QVariant::fromValue(wantedList->id()));
     m_wantedListJobs << job;
 
-    core()->retrieveAuthenticated(job);
+    m_core->retrieveAuthenticated(job);
 }
 
 QVector<WantedList *> WantedLists::wantedLists() const

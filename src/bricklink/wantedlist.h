@@ -133,12 +133,13 @@ signals:
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
-    WantedLists(QObject *parent = nullptr);
+    WantedLists(Core *core);
     QVector<WantedList *> parseGlobalWantedList(const QByteArray &data);
     int parseWantedList(WantedList *wantedList, const QByteArray &data);
     void emitDataChanged(int row, int col);
     void setUpdateStatus(UpdateStatus updateStatus);
 
+    Core *m_core;
     bool m_valid = false;
     UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;

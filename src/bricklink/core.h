@@ -202,11 +202,11 @@ private:
 
     QString m_ldraw_datadir;
 
+    Database *m_database = nullptr;
     Store *m_store = nullptr;
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
     WantedLists *m_wantedLists = nullptr;
-    Database *m_database = nullptr;
 };
 
 inline Core *core() { return Core::inst(); }

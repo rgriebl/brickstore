@@ -144,12 +144,13 @@ signals:
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
-    Carts(QObject *parent = nullptr);
+    Carts(Core *core);
     QVector<Cart *> parseGlobalCart(const QByteArray &data);
     int parseSellerCart(Cart *cart, const QByteArray &data);
     void emitDataChanged(int row, int col);
     void setUpdateStatus(UpdateStatus updateStatus);
 
+    Core *m_core;
     bool m_valid = false;
     UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;

@@ -210,20 +210,21 @@ void Cart::setCountryCode(const QString &str)
 
 
 
-Carts::Carts(QObject *parent)
-    : QAbstractTableModel(parent)
+Carts::Carts(Core *core)
+    : QAbstractTableModel(core)
+    , m_core(core)
 {
-    connect(core(), &Core::authenticatedTransferStarted,
+    connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
         if ((m_updateStatus == UpdateStatus::Updating) && (m_job == job))
             emit updateStarted();
     });
-    connect(core(), &Core::authenticatedTransferProgress,
+    connect(core, &Core::authenticatedTransferProgress,
             this, [this](TransferJob *job, int progress, int total) {
         if ((m_updateStatus == UpdateStatus::Updating) && (m_job == job))
             emit updateProgress(progress, total);
     });
-    connect(core(), &Core::authenticatedTransferFinished,
+    connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
         bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
         QByteArray type = job->userTag();
@@ -297,7 +298,7 @@ Carts::Carts(QObject *parent)
             m_job = nullptr;
         }
     });
-    connect(core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+    connect(core->database(), &BrickLink::Database::databaseAboutToBeReset,
             this, [this]() {
         beginResetModel();
         qDeleteAll(m_carts);
@@ -334,8 +335,8 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
         if (itemSeq)
             itemId = itemId % '-' % QByteArray::number(itemSeq);
 
-        auto item = BrickLink::core()->item(itemTypeId, itemId);
-        auto color = BrickLink::core()->color(colorId);
+        auto item = m_core->item(itemTypeId, itemId);
+        auto color = m_core->color(colorId);
         if (!item || !color) {
             ++invalidCount;
         } else {
@@ -446,7 +447,7 @@ void Carts::startUpdate()
     job->setUserData("globalCart", true);
     m_job = job;
 
-    core()->retrieveAuthenticated(m_job);
+    m_core->retrieveAuthenticated(m_job);
 }
 
 void Carts::cancelUpdate()
@@ -470,7 +471,7 @@ void Carts::startFetchLots(Cart *cart)
     job->setUserData("cart", QVariant::fromValue(cart->sellerId()));
     m_cartJobs << job;
 
-    core()->retrieveAuthenticated(job);
+    m_core->retrieveAuthenticated(job);
 }
 
 QVector<Cart *> Carts::carts() const

@@ -637,11 +637,12 @@ QString Order::statusToString(OrderStatus status, bool translated)
 }
 
 
-Orders::Orders(QObject *parent)
-    : QAbstractTableModel(parent)
+Orders::Orders(Core *core)
+    : QAbstractTableModel(core)
+    , m_core(core)
 {
     //TODO: Remove in 2022.6.x
-    QDir legacyPath(core()->dataPath() % u"orders/");
+    QDir legacyPath(core->dataPath() % u"orders/");
     if (legacyPath.cd("received"_l1)) {
         legacyPath.removeRecursively();
         legacyPath.cdUp();
@@ -651,18 +652,18 @@ Orders::Orders(QObject *parent)
         legacyPath.cdUp();
     }
 
-    connect(core(), &Core::userIdChanged,
+    connect(core, &Core::userIdChanged,
             this, &Orders::reloadOrdersFromCache);
     reloadOrdersFromCache();
 
-    connect(core(), &Core::authenticatedTransferStarted,
+    connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
         if ((m_updateStatus == UpdateStatus::Updating) && !m_jobs.isEmpty()
                 && (m_jobs.constFirst() == job)) {
             emit updateStarted();
         }
     });
-    connect(core(), &Core::authenticatedTransferProgress,
+    connect(core, &Core::authenticatedTransferProgress,
             this, [this](TransferJob *job, int progress, int total) {
         if ((m_updateStatus == UpdateStatus::Updating) && m_jobs.contains(job)) {
             m_jobProgress[job] = qMakePair(progress, total);
@@ -675,7 +676,7 @@ Orders::Orders(QObject *parent)
             emit updateProgress(overallProgress, overallTotal);
         }
     });
-    connect(core(), &Core::authenticatedTransferFinished,
+    connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
         bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
         QByteArray type = job->userTag();
@@ -768,7 +769,7 @@ Orders::Orders(QObject *parent)
                 }
                 setUpdateStatus(overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
-                QFile stampFile(core()->dataPath() % u"orders/" % core()->userId() % u"/.stamp");
+                QFile stampFile(m_core->dataPath() % u"orders/" % m_core->userId() % u"/.stamp");
                 if (overallSuccess) {
                     m_lastUpdated = QDateTime::currentDateTime();
                     stampFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -792,10 +793,10 @@ void Orders::reloadOrdersFromCache()
     m_orders.clear();
     endResetModel();
 
-    if (core()->userId().isEmpty())
+    if (m_core->userId().isEmpty())
         return;
 
-    QString path = core()->dataPath() % u"orders/" % core()->userId();
+    QString path = m_core->dataPath() % u"orders/" % m_core->userId();
 
     QFileInfo stamp(path % u"/.stamp");
     m_lastUpdated = stamp.lastModified();
@@ -1001,7 +1002,7 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
 
         newOrder.reset();
 
-        if (order->address().isEmpty() && core()->isAuthenticated())
+        if (order->address().isEmpty() && m_core->isAuthenticated())
             startUpdateAddress(order);
 
         return;
@@ -1027,7 +1028,7 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     connect(o, &Order::grandTotalChanged, this, [this, row]() { emitDataChanged(row, Total); });
     connect(o, &Order::addressChanged, this, [this, row]() { emitDataChanged(row, -1); });
 
-    if (o->address().isEmpty() && core()->isAuthenticated())
+    if (o->address().isEmpty() && m_core->isAuthenticated())
         startUpdateAddress(o);
     m_orders.append(o);
 
@@ -1066,7 +1067,7 @@ void Orders::startUpdateAddress(Order *order)
     job->setUserData("address", order->id());
     m_addressJobs << job;
 
-    core()->retrieveAuthenticated(job);
+    m_core->retrieveAuthenticated(job);
 }
 
 std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const QByteArray &data)
@@ -1121,7 +1122,7 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
 
 QString Orders::orderFilePath(QStringView fileName, OrderType type, const QDate &date) const
 {
-    return core()->dataPath() % "orders/"_l1 % core()->userId()
+    return m_core->dataPath() % "orders/"_l1 % m_core->userId()
             % ((type == OrderType::Received) ? "/received/"_l1: "/placed/"_l1 )
             % QString::number(date.year()) % u'/'
             % QString("%1"_l1).arg(date.month(), 2, 10, '0'_l1) % u'/'
@@ -1152,7 +1153,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 {
     if (updateStatus() == UpdateStatus::Updating)
         return;
-    if (core()->userId().isEmpty())
+    if (m_core->userId().isEmpty())
         return;
     Q_ASSERT(m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
@@ -1185,7 +1186,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         job->setUserData(type, true);
         m_jobs << job;
 
-        core()->retrieveAuthenticated(job);
+        m_core->retrieveAuthenticated(job);
     }
 }
 

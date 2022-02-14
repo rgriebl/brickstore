@@ -51,10 +51,11 @@ signals:
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
-    Store(QObject *parent = nullptr);
+    Store(Core *core);
     ~Store();
     void setUpdateStatus(UpdateStatus updateStatus);
 
+    Core *m_core;
     bool m_valid = false;
     UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;

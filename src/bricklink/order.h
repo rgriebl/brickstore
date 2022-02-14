@@ -237,7 +237,7 @@ signals:
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
 
 private:
-    Orders(QObject *parent = nullptr);
+    Orders(Core *core);
     void reloadOrdersFromCache();
     static QHash<Order *, QString> parseOrdersXML(const QByteArray &data_);
     static Order *orderFromXML(const QString &fileName);
@@ -251,6 +251,7 @@ private:
     QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const;
     QString orderFilePath(QStringView fileName, OrderType type, const QDate &date) const;
 
+    Core *m_core;
     bool m_valid = false;
     BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
     QString m_userId;
