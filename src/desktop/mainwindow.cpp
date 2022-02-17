@@ -528,8 +528,10 @@ void MainWindow::goHome(bool home)
         connectView(nullptr);
     } else {
         m_welcomeWidget->hide();
-        if (m_activeViewPane && m_activeViewPane->activeView())
-            m_activeViewPane->activeView()->setFocus();
+        if (View *v = m_activeViewPane ? m_activeViewPane->activeView() : nullptr) {
+            v->setFocus();
+            connectView(v);
+        }
     }
     m_goHome->setIcon(QIcon::fromTheme(home ? "go-previous"_l1 : "go-home"_l1));
     m_goHome->setChecked(home);
