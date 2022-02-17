@@ -31,8 +31,7 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QSurfaceFormat fmt = format();
-    fmt.setAlphaBufferSize(8);
-    fmt.setSamples(4);
+    GLRenderer::adjustSurfaceFormat(fmt);
     setFormat(fmt);
 
     m_renderer = new GLRenderer(this);

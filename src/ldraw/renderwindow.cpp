@@ -27,9 +27,7 @@ LDraw::RenderWindow::RenderWindow()
     : QOpenGLWindow()
 {
     QSurfaceFormat fmt = format();
-    fmt.setAlphaBufferSize(8);
-    fmt.setDepthBufferSize(24);
-    fmt.setSamples(4);
+    GLRenderer::adjustSurfaceFormat(fmt);
     setFormat(fmt);
 
     m_renderer = new GLRenderer(this);

@@ -20,6 +20,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#include <QSurfaceFormat>
 #include <QMatrix4x4>
 #include <QQuaternion>
 #include <QScopedPointer>
@@ -48,6 +49,8 @@ class GLRenderer : public QObject, protected QOpenGLFunctions
 public:
     GLRenderer(QObject *parent = nullptr);
     virtual ~GLRenderer() override;
+
+    static void adjustSurfaceFormat(QSurfaceFormat &format);
 
     void cleanup();
 
@@ -93,11 +96,10 @@ private:
     void updateWorldMatrix();
     void recreateVBOs();
 
-    void renderLines(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix,
-                     std::vector<float> &buffer);
-
     enum VBOIndex {
         VBO_Surfaces,
+        VBO_TransparentSurfaces,
+        VBO_TransparentIndexes,
         VBO_Lines,
         VBO_ConditionalLines,
         VBO_Count
@@ -111,6 +113,9 @@ private:
     QTimer *m_animation = nullptr;
     bool m_coreProfile = false;
     bool m_dirty = false;
+
+    bool m_resortTransparentSurfaces = false;
+    std::vector<QVector3D> m_transparentCenters;
 
     Part *m_part = nullptr;
     int m_color = -1;
@@ -129,7 +134,7 @@ private:
     QMatrix4x4 m_model;
 
     QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_vbos[VBO_Count];
+    QOpenGLBuffer *m_vbos[VBO_Count];
 
     QOpenGLShaderProgram *m_standardShader = nullptr;
     QOpenGLShaderProgram *m_conditionalShader = nullptr;

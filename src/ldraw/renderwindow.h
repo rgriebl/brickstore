@@ -53,7 +53,7 @@ public:
     Part *part() const;
     int color() const;
     void setPartAndColor(Part *part, const QColor &color);
-    void setPartAndColor(Part *part, int basecolor);
+    void setPartAndColor(Part *part, int basecolor = -1);
 
     bool isAnimationActive() const;
 
