@@ -1163,10 +1163,10 @@ void SettingsDialog::checkLDrawDir()
     };
 
     if (path.isEmpty()) {
-        const auto ldrawDirs = LDraw::Core::potentialDrawDirs();
+        const auto ldrawDirs = LDraw::Library::potentialDrawDirs();
         QString ldrawDir;
         for (auto &ld : ldrawDirs) {
-            if (LDraw::Core::isValidLDrawDir(ld)) {
+            if (LDraw::Library::isValidLDrawDir(ld)) {
                 ldrawDir = ld;
                 break;
             }
@@ -1176,7 +1176,7 @@ void SettingsDialog::checkLDrawDir()
         else
             setStatus(false, tr("No LDraw installation could be auto-detected."));
     } else {
-        if (LDraw::Core::isValidLDrawDir(path))
+        if (LDraw::Library::isValidLDrawDir(path))
             setStatus(true, tr("Valid LDraw installation at:"), path);
         else
             setStatus(false, tr("Not a valid LDraw installation."));

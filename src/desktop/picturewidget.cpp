@@ -32,6 +32,7 @@
 #include "bricklink/picture.h"
 #include "common/config.h"
 #include "ldraw/ldraw.h"
+#include "ldraw/part.h"
 #if defined(Q_OS_MACOS)
 #  include "ldraw/renderwindow.h"
 #else
@@ -256,7 +257,8 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (m_part)
         m_part->release();
-    m_part = (LDraw::core() && item) ? LDraw::core()->partFromId(item->id()) : nullptr;
+    m_part = item ? LDraw::library()->partFromId(item->id()) : nullptr;
+//    m_part = LDraw::library()->partFromFile("C:/Users/sandman/git/lego-actros-tipper/actros.ldr"_l1);
     if (m_part) {
         m_part->addRef();
 

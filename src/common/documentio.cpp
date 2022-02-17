@@ -311,11 +311,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
     QString current_mpd_model;
     bool is_mpd_model_found = false;
 
-
     searchpath.append(QFileInfo(*f).dir().absolutePath());
-    if (!BrickLink::core()->ldrawDataPath().isEmpty()) {
-        searchpath.append(BrickLink::core()->ldrawDataPath() + "/models"_l1);
-    }
 
     if (f->isOpen()) {
         QTextStream in(f);

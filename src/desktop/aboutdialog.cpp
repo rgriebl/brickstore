@@ -31,7 +31,7 @@ AboutDialog::AboutDialog(QWidget *parent)
     int iconSize = fontMetrics().height() * 7;
     ui->icon->setFixedSize(iconSize, iconSize);
 
-    if (LDraw::Part *part = LDraw::core() ? LDraw::core()->partFromId("3833") : nullptr) {
+    if (LDraw::Part *part = LDraw::library()->partFromId("3833")) {
         auto ldraw_icon = new LDraw::RenderWidget();
         ldraw_icon->setPartAndColor(part, 321);
         ldraw_icon->startAnimation();

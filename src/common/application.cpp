@@ -150,8 +150,11 @@ void Application::init()
                             .arg(userName) % u"<br><b>" % error % u"</b>");
     });
 
-    if (LDraw::create(Config::inst()->ldrawDir(), &errString))
-        BrickLink::core()->setLDrawDataPath(LDraw::core()->dataPath());
+    auto ldrawDir = Config::inst()->ldrawDir();
+    if (ldrawDir.isEmpty())
+        ldrawDir = LDraw::Library::potentialDrawDirs().value(0);
+
+    LDraw::library()->setPath(ldrawDir);
 
     m_undoGroup = new UndoGroup(this);
 
@@ -660,7 +663,7 @@ bool Application::initBrickLink(QString *errString)
 void Application::exitBrickLink()
 {
     delete BrickLink::core();
-    delete LDraw::core();
+    delete LDraw::library();
 }
 
 #include "moc_application.cpp"

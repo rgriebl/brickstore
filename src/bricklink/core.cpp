@@ -1011,21 +1011,6 @@ void Core::setItemImageScaleFactor(qreal f)
     }
 }
 
-bool Core::isLDrawEnabled() const
-{
-    return !m_ldraw_datadir.isEmpty();
-}
-
-QString Core::ldrawDataPath() const
-{
-    return m_ldraw_datadir;
-}
-
-void Core::setLDrawDataPath(const QString &ldrawDataPath)
-{
-    m_ldraw_datadir = ldrawDataPath;
-}
-
 Core::ResolveResult Core::resolveIncomplete(Lot *lot)
 {
     if (!lot->isIncomplete())

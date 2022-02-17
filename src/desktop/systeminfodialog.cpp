@@ -59,7 +59,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     sysInfo.remove("hw.gpu.arch"_l1);
     sysInfo.remove("hw.memory"_l1);
     sysInfo.remove("brickstore.version"_l1);
-    sysInfo["brickstore.ldraw"_l1] = bool(LDraw::core());
+    sysInfo["brickstore.ldraw"_l1] = LDraw::library()->lastUpdated().toString(Qt::RFC2822Date);
 
     for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
         text = text % " * **"_l1 % it.key() % "**: "_l1 % it.value().toString() % "\n"_l1;

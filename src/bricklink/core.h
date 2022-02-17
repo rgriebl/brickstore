@@ -98,10 +98,6 @@ public:
     qreal itemImageScaleFactor() const;
     void setItemImageScaleFactor(qreal f);
 
-    bool isLDrawEnabled() const;
-    QString ldrawDataPath() const;
-    void setLDrawDataPath(const QString &ldrawDataPath);
-
     bool applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc);
 
     bool onlineStatus() const;
@@ -199,8 +195,6 @@ private:
     Q3Cache<quint64, Picture>    m_pic_cache;
 
     qreal m_item_image_scale_factor = 1.;
-
-    QString m_ldraw_datadir;
 
     Database *m_database = nullptr;
     Store *m_store = nullptr;
