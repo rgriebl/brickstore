@@ -269,9 +269,7 @@ double Order::usSalesTax() const
 
 double Order::grandTotal() const
 {
-    // return d->m_grandTotal; // this is sometimes off by 1 cent
-    return orderTotal() + shipping() + insurance() + additionalCharges1() + additionalCharges2()
-            - credit() - creditCoupon() + usSalesTax() + vatChargeBrickLink();
+    return d->m_grandTotal;
 }
 
 double Order::vatChargeSeller() const
@@ -849,7 +847,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     QXmlStreamReader xml(data);
 
     QHash<Order *, QString> result;
-    Order *order = nullptr;
+    QScopedPointer<Order> order;
 
     QHash<QStringView, std::function<void(Order *, const QString &)>> rootTagHash;
 
@@ -894,12 +892,12 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                     if (order || startOfOrder >= 0)
                         throw Exception("Found a nested ORDER tag");
                     startOfOrder = xml.characterOffset();
-                    order = new Order();
+                    order.reset(new Order());
 
                 } else if (tagName != "ORDERS"_l1) {
                     auto it = rootTagHash.find(xml.name());
                     if (it != rootTagHash.end())
-                        (*it)(order, xml.readElementText());
+                        (*it)(order.get(), xml.readElementText());
                     else
                         xml.skipCurrentElement();
                 }
@@ -914,33 +912,10 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                     if (!order || (startOfOrder < 0))
                         throw Exception("Found a ORDER end tag without a start tag");
                     qint64 endOfOrder = xml.characterOffset();
-
-                    if (!qFuzzyIsNull(order->vatChargeSeller()) && !qFuzzyIsNull(order->creditCoupon())) {
-                        // Fix the broken VAT calculation ... see https://www.bricklink.com/message.asp?ID=1323588
-                        // The vatChargeSeller values are wrong when a creditCoupon is active.
-                        // We can however re-calculate this value, but it only works for integer VAT rates as
-                        // BL's rounding algorithm does some funky things...
-
-                        double vatCharge = order->vatChargeSeller();
-                        double coupon = order->creditCoupon();
-                        double gtGross = order->grandTotal() + coupon; // here's the bug on BL's side
-                        double gtNet = gtGross - vatCharge;
-                        double vatPercent = Utility::roundTo(100 * (gtGross / (qFuzzyIsNull(gtNet) ? gtGross : gtNet) - 1.0), 0);
-
-                        double netFix = coupon * 100 / (100 + vatPercent);
-                        gtNet -= netFix;
-                        gtGross -= coupon;
-                        vatCharge = gtGross - gtNet;
-
-                        order->setVatChargeSeller(vatCharge);
-                    }
-
                     QString header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_l1;
                     QString footer = "\n"_l1;
-                    result.insert(order, header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
-
-                    order = nullptr;
-                    startOfOrder = endOfOrder = -1;
+                    result.insert(order.take(), header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
+                    startOfOrder = -1;
                 }
                 break;
             }
@@ -955,12 +930,10 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
             }
         }
     } catch (const Exception &e) {
-        delete order;
         qDeleteAll(result.keyBegin(), result.keyEnd());
         throw Exception("XML parse error at line %1, column %2: %3")
                 .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
     }
-
 }
 
 void Orders::updateOrder(std::unique_ptr<Order> newOrder)
