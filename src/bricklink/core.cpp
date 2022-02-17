@@ -1077,7 +1077,12 @@ public:
         : QRunnable()
         , m_pg(pg)
     {
+        pg->addRef();
         pg->m_update_status = UpdateStatus::Loading;
+    }
+    ~PriceGuideLoaderJob() override
+    {
+        m_pg->release();
     }
 
     void run() override;
@@ -1101,6 +1106,7 @@ void PriceGuideLoaderJob::run()
         bool valid = m_pg->loadFromDisk(fetched, data);
         auto pg = m_pg;
 
+        pg->addRef(); // the release will happen in Core::priceGuideLoaded
         QMetaObject::invokeMethod(core(), [=]() {
             pg->m_valid = valid;
             pg->m_update_status = UpdateStatus::Ok;
@@ -1144,7 +1150,6 @@ PriceGuide *Core::priceGuide(const Item *item, const Color *color, bool highPrio
             updatePriceGuide(pg, highPriority);
     }
     else if (needToLoad) {
-        pg->addRef();
         m_diskloadPool.start(new PriceGuideLoaderJob(pg));
     }
 
@@ -1255,7 +1260,12 @@ public:
         : QRunnable()
         , m_pic(pic)
     {
+        pic->addRef();
         pic->m_update_status = UpdateStatus::Loading;
+    }
+    ~PictureLoaderJob() override
+    {
+        m_pic->release();
     }
 
     void run() override;
@@ -1278,6 +1288,8 @@ void PictureLoaderJob::run()
         QImage image;
         bool valid = m_pic->loadFromDisk(fetched, image);
         auto pic = m_pic;
+
+        pic->addRef(); // the release will happen in Core::pictureLoaded
         QMetaObject::invokeMethod(core(), [=]() {
             pic->m_valid = valid;
             pic->m_update_status = UpdateStatus::Ok;
@@ -1332,7 +1344,6 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
             updatePicture(pic, highPriority);
 
     } else if (needToLoad) {
-        pic->addRef();
         m_diskloadPool.start(new PictureLoaderJob(pic));
     }
 
@@ -1427,9 +1438,9 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
     if (j->isCompleted() && j->file()) {
         static_cast<QSaveFile *>(j->file())->commit();
 
-        // the pic is still ref'ed, so we just forward it to the loader
         pic->m_update_status = UpdateStatus::Loading;
         m_diskloadPool.start(new PictureLoaderJob(pic));
+        pic->release();
         return;
 
     } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"_l1))) {

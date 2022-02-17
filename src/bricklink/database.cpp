@@ -712,8 +712,6 @@ void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QData
     dataStream << e.m_fromColorId << e.m_toColorId;
 }
 
-
-
 } // namespace BrickLink
 
-//#include "moc_database.cpp"
+//#include "moc_database.cpp" // QTBUG-98845

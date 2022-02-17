@@ -1600,8 +1600,8 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
     if (thumbnail) {
         if (thumbnail->isValid()) {
             document->setThumbnail(thumbnail->image());
-        } else {
-            thumbnail->addRef();
+        } else if ((thumbnail->updateStatus() == BrickLink::UpdateStatus::Loading)
+                   || (thumbnail->updateStatus() == BrickLink::UpdateStatus::Updating)) {
             QMetaObject::Connection *conn = new QMetaObject::Connection;
             *conn = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
                             document, [=](BrickLink::Picture *pic) {

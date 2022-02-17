@@ -126,4 +126,3 @@ private:
 };
 
 } // namespace BrickLink
-

@@ -143,3 +143,5 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
 
     resize(sizeHint());
 }
+
+#include "moc_orderinformationdialog.cpp"

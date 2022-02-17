@@ -734,5 +734,5 @@ void ViewPane::createToolBar()
     });
 }
 
-//#include "moc_viewpane.cpp"  // why does this not work?
+//#include "moc_viewpane.cpp"  // QTBUG-98845
 //#include "viewpane.moc"

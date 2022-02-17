@@ -514,8 +514,6 @@ View::View(Document *document, QWidget *parent)
 
     updateCaption();
 
-    setFocusProxy(m_table);
-
     languageChange();
 }
 
