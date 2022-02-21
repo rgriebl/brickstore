@@ -75,26 +75,6 @@ void Database::setUpdateStatus(UpdateStatus updateStatus)
     }
 }
 
-void Database::updateSuccessfull(const QDateTime &dt)
-{
-    if (dt != m_lastUpdated) {
-        m_lastUpdated = dt;
-        emit lastUpdatedChanged(dt);
-    }
-    if (!m_valid) {
-        m_valid = true;
-        emit validChanged(m_valid);
-    }
-}
-
-void Database::updateFailed()
-{
-    if (m_valid) {
-        m_valid = false;
-        emit validChanged(m_valid);
-    }
-}
-
 void Database::clear()
 {
     m_colors.clear();
@@ -169,12 +149,11 @@ bool Database::startUpdate(bool force)
                 emit updateFinished(true, tr("Already up-to-date."));
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (job->isFailed()) {
-                throw Exception(tr("Failed to download and decompress the database") % u": "
-                                % job->errorString());
+                throw Exception(tr("download and decompress failed") % u": " % job->errorString());
             } else if (!hhc->hasValidChecksum()) {
-                throw Exception(tr("Checksum mismatch after decompression"));
+                throw Exception(tr("checksum mismatch after decompression"));
             } else if (!file->commit()) {
-                throw Exception(tr("Could not save the database") % u": " % file->errorString());
+                throw Exception(tr("saving failed") % u": " % file->errorString());
             } else {
                 read(file->fileName());
 
@@ -184,7 +163,7 @@ bool Database::startUpdate(bool force)
             emit databaseReset();
 
         } catch (const Exception &e) {
-            emit updateFinished(false, tr("Could not load the new database:") % u"\n\n" % e.error());
+            emit updateFinished(false, tr("Could not load the new database") % u":\n\n" % e.error());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
     });

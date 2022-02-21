@@ -85,9 +85,6 @@ private:
     Database(QObject *parent = nullptr);
     void setUpdateStatus(UpdateStatus updateStatus);
 
-    void updateSuccessfull(const QDateTime &dt);
-    void updateFailed();
-
     void clear();
 
     bool m_valid = false;
