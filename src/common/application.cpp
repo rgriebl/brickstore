@@ -319,8 +319,6 @@ QCoro::Task<bool> Application::checkBrickLinkLogin()
 
 QCoro::Task<bool> Application::updateDatabase()
 {
-    bool noWindows = (DocumentList::inst()->count() == 0);
-
     if (BrickLink::core()->database()->updateStatus() == BrickLink::UpdateStatus::Updating)
         co_return false;
 
@@ -328,7 +326,7 @@ QCoro::Task<bool> Application::updateDatabase()
 
     QStringList files = DocumentList::inst()->allFiles();
 
-    if (noWindows || co_await closeAllViews()) {
+    if (co_await closeAllViews()) {
         if (DocumentList::inst()->count())
             co_await qCoro(DocumentList::inst(), &DocumentList::lastDocumentClosed);
 
