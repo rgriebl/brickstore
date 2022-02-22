@@ -617,10 +617,10 @@ Core::Core(const QString &datadir)
 
 Core::~Core()
 {
-    // this is dangerous, as the contents might still be ref'ed, but we are going down
-    // right now
-    m_pg_cache.clear();
-    m_pic_cache.clear();
+    cancelTransfers();
+
+    m_pg_cache.clearRecursive();
+    m_pic_cache.clearRecursive();
 
     s_inst = nullptr;
 }
