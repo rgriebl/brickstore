@@ -60,7 +60,7 @@ public:
 
     QString documentDir() const;
     QString ldrawDir() const;
-    QString brickLinkCacheDir() const;
+    QString cacheDir() const;
 
     bool showInputErrors() const;
     bool showDifferenceIndicators() const;
@@ -179,6 +179,7 @@ signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
     void documentDirChanged(const QString &dir);
+    void ldrawDirChanged(const QString &dir);
     void restoreLastSessionChanged(bool b);
     void partOutModeChanged(Config::PartOutMode partMode);
     void filtersInFavoritesModeChanged(bool favoritesMode);

@@ -165,6 +165,10 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
             oldSize = qBound(0, (oldSize - 12) / 10, 2); // 22->1, 32->2
         setValue("Interface/IconSizeEnum"_l1, oldSize);
     }
+    if (cfgver < mkver(2022, 2, 3)) {
+        // transition to new ldrawDir settings
+        setValue("General/LDrawTransition"_l1, true);
+    }
 }
 
 QVariantList Config::availableLanguages() const
@@ -228,7 +232,10 @@ void Config::setShowDifferenceIndicators(bool b)
 
 void Config::setLDrawDir(const QString &dir)
 {
-    setValue("General/LDrawDir"_l1, dir);
+    if (ldrawDir() != dir) {
+        setValue("General/LDrawDir"_l1, dir);
+        emit ldrawDirChanged(dir);
+    }
 }
 
 QString Config::ldrawDir() const
@@ -255,7 +262,7 @@ void Config::setDocumentDir(const QString &dir)
 }
 
 
-QString Config::brickLinkCacheDir() const
+QString Config::cacheDir() const
 {
     static QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     return value("BrickLink/CacheDir"_l1, cacheDir).toString();

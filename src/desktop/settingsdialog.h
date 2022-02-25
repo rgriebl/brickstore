@@ -39,7 +39,6 @@ protected:
 
 protected slots:
     void selectDocDir(int index);
-    void selectLDrawDir(int index);
     void resetUpdateIntervals();
     void currenciesUpdated();
     void currentCurrencyChanged(const QString &);

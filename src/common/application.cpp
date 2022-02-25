@@ -150,12 +150,6 @@ void Application::init()
                             .arg(userName) % u"<br><b>" % error % u"</b>");
     });
 
-    auto ldrawDir = Config::inst()->ldrawDir();
-    if (ldrawDir.isEmpty())
-        ldrawDir = LDraw::Library::potentialDrawDirs().value(0);
-
-    LDraw::library()->setPath(ldrawDir);
-
     m_undoGroup = new UndoGroup(this);
 
     auto *am = ActionManager::inst();
@@ -235,6 +229,8 @@ void Application::afterInit()
         // restore autosaves and/or last session
         QMetaObject::invokeMethod(this, [this]() { restoreLastSession(); }, Qt::QueuedConnection);
     }
+
+    QMetaObject::invokeMethod(this, [this]() { setupLDraw(); }, Qt::QueuedConnection);
 }
 
 QCoro::Task<> Application::restoreLastSession()
@@ -261,10 +257,55 @@ QCoro::Task<> Application::restoreLastSession()
     }
 }
 
+QCoro::Task<> Application::setupLDraw()
+{
+    auto ldrawDir = Config::inst()->ldrawDir();
+
+    if (Config::inst()->value("General/LDrawTransition"_l1).toBool()) {
+        if (ldrawDir.isEmpty())
+            ldrawDir = std::get<0>(LDraw::Library::potentialLDrawDirs().value(0));
+
+        auto msg1 = tr("The way BrickStore uses LDraw to render 3D models for parts has changed: "
+                       "by default it will now download and maintain its own LDraw installation.");
+        auto msg2 = tr("BrickStore was configured to use an existing LDraw installation on your "
+                       "computer in the past and you can switch back to this if you want.");
+        auto msg3 = tr("Please check the LDraw page in Settings.");
+
+        QString msg = msg1;
+        if (!ldrawDir.isEmpty())
+            msg = msg % u"<br><br>" % msg2;
+        msg = msg % u"<br><br>" % msg3;
+
+        UIHelpers::information(msg);
+
+        ldrawDir.clear();
+        Config::inst()->remove("General/LDrawTransition"_l1);
+        Config::inst()->setLDrawDir(ldrawDir);
+    }
+
+
+    auto loadLibrary = [](QString ldrawDir) -> QCoro::Task<> {
+        bool isInternalZip = ldrawDir.isEmpty();
+
+        if (isInternalZip)
+            ldrawDir = Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
+
+        co_await LDraw::library()->setPath(ldrawDir);
+
+        if (isInternalZip)
+            LDraw::library()->startUpdate();
+    };
+
+    connect(Config::inst(), &Config::ldrawDirChanged,
+            this, loadLibrary);
+
+    return loadLibrary(ldrawDir);
+}
+
 Application::~Application()
 {
-    exitBrickLink();
-
+    delete BrickLink::core();
+    delete LDraw::library();
     delete SystemInfo::inst();
     delete Currency::inst();
 //    delete DocumentList::inst();
@@ -633,7 +674,7 @@ void Application::setIconTheme(Theme theme)
 
 bool Application::initBrickLink(QString *errString)
 {
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->brickLinkCacheDir(), errString);
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), errString);
     if (bl) {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,
@@ -656,12 +697,6 @@ bool Application::initBrickLink(QString *errString)
         }
     }
     return bl;
-}
-
-void Application::exitBrickLink()
-{
-    delete BrickLink::core();
-    delete LDraw::library();
 }
 
 #include "moc_application.cpp"

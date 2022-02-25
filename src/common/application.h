@@ -66,7 +66,6 @@ protected:
     void setIconTheme(Theme theme);
 
     bool initBrickLink(QString *errString);
-    void exitBrickLink();
 
     void openQueuedDocuments();
     void updateTranslations();
@@ -77,6 +76,8 @@ protected:
     static void addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg);
 
     QCoro::Task<> restoreLastSession();
+
+    QCoro::Task<> setupLDraw();
 
     virtual QCoro::Task<bool> closeAllViews() = 0;
 

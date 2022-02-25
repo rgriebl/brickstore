@@ -14,6 +14,9 @@
 #include <QTabWidget>
 #include <QFileDialog>
 #include <QComboBox>
+#include <QButtonGroup>
+#include <QCompleter>
+#include <QFileSystemModel>
 #include <QStandardPaths>
 #include <QStyleFactory>
 #include <QImage>
@@ -766,13 +769,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     int is = fontMetrics().height();
     w_currency_update->setIconSize(QSize(is, is));
 
-    w_ldraw_dir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
-    w_ldraw_dir->insertSeparator(1);
-    w_ldraw_dir->insertItem(2, QIcon(), tr("Auto Detect"));
-    w_ldraw_dir->insertItem(3, QIcon(), tr("Other..."));
-
-    connect(w_ldraw_dir, QOverload<int>::of(&QComboBox::activated),
-            this, &SettingsDialog::selectLDrawDir);
     connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectDocDir);
     connect(w_upd_reset, &QAbstractButton::clicked,
@@ -802,6 +798,61 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             w_bl_password->setProperty("showInputError", b);
         }
     });
+
+    auto *fsCompleter = new QCompleter(this);
+    auto *fsModel = new QFileSystemModel(fsCompleter);
+    fsModel->setRootPath({ });
+    fsCompleter->setModel(fsModel);
+    w_ldraw_dir->setCompleter(fsCompleter);
+
+    connect(w_ldraw_dir, &QComboBox::editTextChanged,
+            this, &SettingsDialog::checkLDrawDir);
+
+    w_ldraw_dir_select->setIcon(style()->standardIcon(QStyle::SP_DirIcon));
+    connect(w_ldraw_dir_select, &QToolButton::clicked,
+            this, [this]() {
+        auto olddir = w_ldraw_dir->currentText();
+        auto newdir = QFileDialog::getOpenFileName(this, tr("LDraw directory location"), olddir,
+                                                   "LDConfig (LDConfig.ldr)"_l1);
+        if (!newdir.isEmpty()) {
+            w_ldraw_dir->setEditText(QDir::toNativeSeparators(QFileInfo(newdir).path()));
+            checkLDrawDir();
+        }
+    });
+
+
+    auto *ldrawGroup = new QButtonGroup(this);
+    ldrawGroup->addButton(w_ldraw_internal);
+    ldrawGroup->addButton(w_ldraw_external);
+    connect(ldrawGroup, &QButtonGroup::idToggled,
+            this, &SettingsDialog::checkLDrawDir);
+
+    connect(LDraw::library(), &LDraw::Library::updateStarted,
+            this, [this]() {
+        w_ldraw_update_message->setText(QString { });
+        w_ldraw_progress->setRange(0, 0);
+        w_ldraw_progress->setVisible(true);
+    });
+    connect(LDraw::library(), &LDraw::Library::updateProgress,
+            this, [this](int p, int t) {
+        w_ldraw_progress->setRange(0, t);
+        w_ldraw_progress->setValue(p);
+    });
+    connect(LDraw::library(), &LDraw::Library::updateFinished,
+            this, [this](bool success, const QString &message) {
+        Q_UNUSED(success);
+        w_ldraw_progress->setRange(0, 0);
+        w_ldraw_progress->setVisible(false);
+        w_ldraw_update_message->setText(message);
+        checkLDrawDir();
+    });
+    connect(w_ldraw_update, &QPushButton::clicked,
+            this, []() { LDraw::library()->startUpdate(); });
+    QSizePolicy p = w_ldraw_progress->sizePolicy();
+    p.setRetainSizeWhenHidden(true);
+    w_ldraw_progress->setSizePolicy(p);
+    w_ldraw_progress->setVisible(false);
+
 
     m_tb_model = new ActionModel(ActionModel::AddSeparators | ActionModel::AddSubMenus
                                  | ActionModel::RemoveGoHome, this);
@@ -949,24 +1000,6 @@ void SettingsDialog::selectDocDir(int index)
     w_docdir->setCurrentIndex(0);
 }
 
-void SettingsDialog::selectLDrawDir(int index)
-{
-    if (index == 2) {
-        // auto detect
-        w_ldraw_dir->setItemData(0, QString());
-        w_ldraw_dir->setItemText(0, w_ldraw_dir->itemText(2));
-    } if (index == 3) {
-        QString newdir = QFileDialog::getExistingDirectory(this, tr("LDraw directory location"),
-                                                           w_ldraw_dir->itemData(0).toString());
-        if (!newdir.isNull()) {
-            w_ldraw_dir->setItemData(0, QDir::toNativeSeparators(newdir));
-            w_ldraw_dir->setItemText(0, systemDirName(newdir));
-        }
-    }
-    w_ldraw_dir->setCurrentIndex(0);
-    checkLDrawDir();
-}
-
 void SettingsDialog::resetUpdateIntervals()
 {
     QMap<QByteArray, int> intervals = Config::inst()->updateIntervalsDefault();
@@ -1075,9 +1108,19 @@ void SettingsDialog::load()
 
     // --[ LDRAW ]-----------------------------------------------------
 
-    QString ldrawdir = QDir::toNativeSeparators(Config::inst()->ldrawDir());
-    w_ldraw_dir->setItemData(0, ldrawdir.isEmpty() ? QString() : ldrawdir);
-    w_ldraw_dir->setItemText(0, ldrawdir.isEmpty() ? w_ldraw_dir->itemText(2) : systemDirName(ldrawdir));
+    const auto potentialLDrawDirs = LDraw::Library::potentialLDrawDirs();
+    for (const auto &ldd : potentialLDrawDirs)
+        w_ldraw_dir->addItem(QDir::toNativeSeparators(std::get<0>(ldd)));
+
+    auto ldrawDir = Config::inst()->ldrawDir();
+    if (ldrawDir.isEmpty()) {
+        w_ldraw_internal->setChecked(true);
+        w_ldraw_dir->setCurrentIndex(-1);
+    } else {
+        w_ldraw_external->setChecked(true);
+        w_ldraw_dir->setCurrentText(ldrawDir);
+    }
+
     checkLDrawDir();
 
     // --[ SHORTCUTS ]-------------------------------------------------
@@ -1137,12 +1180,9 @@ void SettingsDialog::save()
 
     // --[ LDRAW ]---------------------------------------------------------------------
 
-    const QString ldrawDir = w_ldraw_dir->itemData(0).toString();
-    if (ldrawDir != Config::inst()->ldrawDir()) {
-        QMessageBox::information(this, QCoreApplication::applicationName(),
-                                 tr("You have changed the LDraw directory. Please restart BrickStore to apply this setting."));
+    const QString ldrawDir = w_ldraw_external->isChecked() ? w_ldraw_dir->currentText() : QString { };
+    if (ldrawDir != Config::inst()->ldrawDir())
         Config::inst()->setLDrawDir(ldrawDir);
-    }
 
     // --[ TOOLBAR ]-------------------------------------------------------------------
     Config::inst()->setToolBarActions(m_tb_actions->actionList());
@@ -1154,33 +1194,26 @@ void SettingsDialog::save()
 
 void SettingsDialog::checkLDrawDir()
 {
-    QString path = w_ldraw_dir->itemData(0).toString();
+    bool isExternal = w_ldraw_external->isChecked();
 
-    auto setStatus = [this](bool ok, const QString &status, const QString &path = { }) {
-        w_ldraw_status->setText(QString::fromLatin1("%1<br><i>%2</i>").arg(status, path));
-        auto icon = QIcon::fromTheme(ok ? "vcs-normal"_l1 : "vcs-removed"_l1);
-        w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
-    };
+    QString checkDir = isExternal
+            ? w_ldraw_dir->currentText()
+            : Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
 
-    if (path.isEmpty()) {
-        const auto ldrawDirs = LDraw::Library::potentialDrawDirs();
-        QString ldrawDir;
-        for (auto &ld : ldrawDirs) {
-            if (LDraw::Library::isValidLDrawDir(ld)) {
-                ldrawDir = ld;
-                break;
-            }
-        }
-        if (!ldrawDir.isEmpty())
-            setStatus(true, tr("Auto-detected an LDraw installation at:"), ldrawDir);
-        else
-            setStatus(false, tr("No LDraw installation could be auto-detected."));
-    } else {
-        if (LDraw::Library::isValidLDrawDir(path))
-            setStatus(true, tr("Valid LDraw installation at:"), path);
-        else
-            setStatus(false, tr("Not a valid LDraw installation."));
-    }
+    auto [valid, date] = LDraw::Library::checkLDrawDir(checkDir); { }
+
+    QString status = !valid
+            ? tr("Not a valid LDraw installation")
+            : tr("Valid LDraw installation from %1").arg(QLocale().toString(date, QLocale::ShortFormat));
+    w_ldraw_status_text->setText(status);
+
+    auto icon = QIcon::fromTheme(valid ? "vcs-normal"_l1 : "vcs-removed"_l1);
+    w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
+
+    w_ldraw_dir->lineEdit()->setProperty("showInputError", isExternal && !valid);
+
+    w_ldraw_update->setEnabled(!isExternal);
+    w_ldraw_update_message->setEnabled(!isExternal);
 }
 
 #include "moc_settingsdialog.cpp"

@@ -59,6 +59,7 @@ public:
     UpdateStatus updateStatus() const  { return m_updateStatus; }
 
     bool startUpdate();
+    bool startUpdate(bool force);
     void cancelUpdate();
 
     QColor color(int id, int baseid = -1) const;
@@ -67,8 +68,8 @@ public:
     Part *partFromId(const QByteArray &id);
     Part *partFromFile(const QString &filename);
 
-    static QStringList potentialDrawDirs();
-    static bool isValidLDrawDir(const QString &dir);
+    static QVector<std::tuple<QString, QDate> > potentialLDrawDirs();
+    static std::tuple<bool, QDate> checkLDrawDir(const QString &dir);
 
 signals:
     void updateStarted();
@@ -87,27 +88,6 @@ private:
     static Library *s_inst;
     friend Library *library();
 
-    Part *findPart(const QString &filename, const QString &parentdir = { });
-    bool parseLDconfig(const QString &file);
-    QByteArray readLDrawFile(const QString &filename);
-    void setUpdateStatus(UpdateStatus updateStatus);
-
-    void updateSuccessfull(const QDateTime &dt);
-    void updateFailed();
-
-    void clear();
-
-    bool m_valid = false;
-    UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
-    int m_updateInterval = 0;
-    QDate m_lastUpdated;
-    Transfer *m_transfer;
-
-    QString m_path;
-    bool m_isZip = false;
-    QScopedPointer<MiniZip> m_zip;
-    QStringList m_searchpath;
-
     struct Color
     {
         QString name;
@@ -122,6 +102,25 @@ private:
         bool pearlescent : 1;
     };
 
+    Part *findPart(const QString &filename, const QString &parentdir = { });
+    static std::tuple<QHash<int, Color>, QDate> parseLDconfig(const QByteArray &contents);
+    QByteArray readLDrawFile(const QString &filename);
+    void setUpdateStatus(UpdateStatus updateStatus);
+    QCoro::Task<> initialize(const QString &fileName);
+
+    void clear();
+
+    bool m_valid = false;
+    UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
+    int m_updateInterval = 0;
+    QDate m_lastUpdated;
+    Transfer *m_transfer;
+
+    QString m_path;
+    bool m_isZip = false;
+    bool m_locked = false; // during updates/loading
+    QScopedPointer<MiniZip> m_zip;
+    QStringList m_searchpath;
     QHash<int, Color> m_colors;  // id -> color struct
     Q3Cache<QString, Part> m_cache;  // path -> part
     friend class PartElement;

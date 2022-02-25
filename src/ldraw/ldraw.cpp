@@ -147,8 +147,11 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 }
 
 
-bool Library::isValidLDrawDir(const QString &ldir)
+std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
 {
+    bool ok = false;
+    QDate generated;
+
     QFileInfo fi(ldir);
 
     if (fi.exists() && fi.isDir() && fi.isReadable()) {
@@ -158,16 +161,33 @@ bool Library::isValidLDrawDir(const QString &ldir)
             if (dir.exists("stud.dat"_l1) || dir.exists("STUD.DAT"_l1)) {
                 if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
                     if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
-                        return true;
+                        QFile f(ldir % "/LDConfig.ldr"_l1);
+                        if (f.open(QIODevice::ReadOnly)) {
+                            auto [colors, date] = parseLDconfig(f.readAll()); { }
+                            if (!colors.isEmpty()) {
+                                ok = true;
+                                generated = date;
+                            }
+                        }
                     }
                 }
             }
         }
+    } else if (fi.exists() && fi.isFile() && fi.suffix() == "zip"_l1) {
+        QByteArray data;
+        QBuffer buffer(&data);
+        buffer.open(QIODevice::WriteOnly);
+        MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
+        auto [colors, date] = parseLDconfig(data); { }
+        if (!colors.isEmpty()) {
+            ok = true;
+            generated = date;
+        }
     }
-    return false;
+    return { ok, generated };
 }
 
-QStringList Library::potentialDrawDirs()
+QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
 {
     QStringList dirs;
     dirs << QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
@@ -224,8 +244,19 @@ QStringList Library::potentialDrawDirs()
         }
     }
 #endif
-    dirs.removeAll(QString()); // remove empty strings
-    return dirs;
+
+    QVector<std::tuple<QString, QDate>> result;
+
+    for (auto dir = dirs.begin(); dir != dirs.end(); ++dir) {
+        if (!dir->isEmpty()) {
+            auto [ok, date] = checkLDrawDir(*dir); { }
+            if (ok) {
+                result.append({ *dir, date });
+            }
+        }
+    }
+
+    return result;
 }
 
 
@@ -312,6 +343,9 @@ Part *Library::partFromFile(const QString &file)
 
 Part *Library::partFromId(const QByteArray &id)
 {
+    if (m_locked)
+        return nullptr;
+
     QString filename = QLatin1String(id) % u".dat";
     return findPart(filename);
 }
@@ -335,31 +369,45 @@ QCoro::Task<bool> Library::setPath(const QString &path)
 
     m_zip.reset();
     m_searchpath.clear();
-    m_path = path;
-    m_isZip = QFileInfo(path).isFile() && path.endsWith(".zip"_l1);
 
+    co_await initialize(path);
+
+    co_return true;
+}
+
+QCoro::Task<> Library::initialize(const QString &path)
+{
     bool caseSensitive =
 #if defined(Q_OS_LINUX)
             true;
 #else
             false;
 #endif
-
     bool valid = !path.isEmpty();
+    m_path = path;
+    m_isZip = (QFileInfo(path).suffix() == "zip"_l1);
 
     if (valid && m_isZip) {
+        QFileInfo(path).dir().mkpath("."_l1);
+
         caseSensitive = false;
-        QScopedPointer zip { new MiniZip(path) };
+        auto zip = std::make_unique<MiniZip>(path);
 
         if (co_await QtConcurrent::run([&zip]() { return zip->open(); }))
-            m_zip.reset(zip.take());
+            m_zip.reset(zip.release());
         else
             valid = false;
     }
-    if (valid && parseLDconfig("LDConfig.ldr"_l1))
-        parseLDconfig("LDConfig_missing.ldr"_l1);
-    else
-        valid = false;
+    if (valid) {
+        try {
+            auto ldConfig = readLDrawFile("LDConfig.ldr"_l1);
+            std::tie(m_colors, m_lastUpdated) = Library::parseLDconfig(ldConfig);
+            if (m_colors.isEmpty())
+                valid = false;
+        } catch (const Exception &) {
+            valid = false;
+        }
+    }
 
     if (valid) {
         static const char *subdirs[] = { "p/48", "p", "parts", "models" };
@@ -395,20 +443,104 @@ QCoro::Task<bool> Library::setPath(const QString &path)
     }
     if (valid)
         emit lastUpdatedChanged(m_lastUpdated);
-    co_return true;
 }
 
 bool Library::startUpdate()
 {
+    return startUpdate(false);
+}
+
+bool Library::startUpdate(bool force)
+{
     if (!m_isZip)
         return false;
-    return false;
+
+    if (updateStatus() == UpdateStatus::Updating)
+        return false;
+
+    QScopedValueRollback locker(m_locked, true);
+
+    emit libraryAboutToBeReset();
+
+    m_cache.clearRecursive();
+
+    QString remotefile = "https://www.ldraw.org/library/updates/complete.zip"_l1;
+    QString localfile = m_path;
+
+    QDateTime dt;
+    if (!force && QFile::exists(localfile))
+        dt = m_lastUpdated.startOfDay().addDays(7);
+
+    auto file = new QSaveFile(localfile);
+
+    TransferJob *job = nullptr;
+    if (file->open(QIODevice::WriteOnly)) {
+        job = TransferJob::getIfNewer(QUrl(remotefile), dt, file);
+        m_transfer->retrieve(job);
+    }
+    if (!job) {
+        delete file;
+        return false;
+    }
+
+    setUpdateStatus(UpdateStatus::Updating);
+
+    locker.commit();
+
+    connect(m_transfer, &Transfer::started,
+            this, [this, job](TransferJob *j) {
+        if (j != job)
+            return;
+        emit updateStarted();
+    });
+    connect(m_transfer, &Transfer::progress,
+            this, [this, job](TransferJob *j, int done, int total) {
+        if (j != job)
+            return;
+        emit updateProgress(done, total);
+    });
+    connect(m_transfer, &Transfer::finished,
+            this, [this, job, file](TransferJob *j) -> QCoro::Task<> {
+        if (j != job)
+            co_return;
+
+        Q_ASSERT(m_locked);
+        m_locked = false;
+
+        try {
+            if (!job->isFailed() && job->wasNotModifiedSince()) {
+                emit updateFinished(true, tr("Already up-to-date."));
+                setUpdateStatus(UpdateStatus::Ok);
+            } else if (job->isFailed()) {
+                throw Exception(tr("download failed") % u": " % job->errorString());
+            } else {
+                if (m_zip)
+                    m_zip->close();
+                if (!file->commit()) {
+                    initialize(m_path); // at least try to reload the old library
+                    throw Exception(tr("saving failed") % u": " % file->errorString());
+                }
+                co_await initialize(file->fileName());
+
+                emit updateFinished(true, { });
+                setUpdateStatus(UpdateStatus::Ok);
+            }
+            emit libraryReset();
+
+        } catch (const Exception &e) {
+            emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
+            setUpdateStatus(UpdateStatus::UpdateFailed);
+        }
+    });
+
+    return true;
 }
 
 void Library::cancelUpdate()
 {
+    if (m_updateStatus == UpdateStatus::Updating)
+        m_transfer->abortAllJobs();
 }
-
 
 QByteArray Library::readLDrawFile(const QString &filename)
 {
@@ -430,18 +562,20 @@ QByteArray Library::readLDrawFile(const QString &filename)
     return data;
 }
 
-bool Library::parseLDconfig(const QString &filename)
+void Library::setUpdateStatus(UpdateStatus updateStatus)
 {
-    //stopwatch sw("LDraw: parseLDconfig");
-
-    QByteArray data;
-    try {
-        data = readLDrawFile(filename);
-    } catch (const Exception &) {
-        //qCWarning(LogLDraw) << "LDraw ZIP:" << e.error();
-        return false;
+    if (updateStatus != m_updateStatus) {
+        m_updateStatus = updateStatus;
+        emit updateStatusChanged(updateStatus);
     }
-    QTextStream ts(data);
+}
+
+std::tuple<QHash<int, Library::Color>, QDate> Library::parseLDconfig(const QByteArray &contents)
+{
+    QHash<int, Color> colors;
+    QDate date;
+
+    QTextStream ts(contents);
 
     QString line;
     int lineno = 0;
@@ -486,7 +620,7 @@ bool Library::parseLDconfig(const QString &filename)
                 }
             }
             if (c.color.isValid() && c.edgeColor.isValid()) {
-                m_colors.insert(c.id, c);
+                colors.insert(c.id, c);
             } else {
                 qCWarning(LogLDraw) << "Got invalid color " << c.id << " : " << c.color << " // " << c.edgeColor;
             }
@@ -496,16 +630,19 @@ bool Library::parseLDconfig(const QString &filename)
                    sl[2] == "Configuration"_l1 &&
                    sl[3] == "UPDATE"_l1) {
             // 0 !LDRAW_ORG Configuration UPDATE yyyy-MM-dd
-            m_lastUpdated = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
+            date = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
         }
     }
 
-    return true;
+    return { colors, date };
 }
 
 
 QColor Library::edgeColor(int id) const
 {
+    if (m_locked)
+        return { };
+
     if (m_colors.contains(id)) {
         return m_colors.value(id).edgeColor;
     } else if (id >= 0 && id <= 15) {
@@ -537,6 +674,9 @@ QColor Library::edgeColor(int id) const
 
 QColor Library::color(int id, int baseid) const
 {
+    if (m_locked)
+        return { };
+
     if (baseid < 0 && (id == 16 || id == 24)) {
         qCWarning(LogLDraw) << "Called color() with meta color id" << id << "without specifying the base color";
         return {};
