@@ -68,50 +68,87 @@ MiniZip::~MiniZip()
 
 bool MiniZip::open()
 {
+    return openInternal(true);
+}
+
+bool MiniZip::openInternal(bool parseTOC)
+{
     if (m_zip)
         return false;
 
-#ifdef USEWIN32IOAPI
-    zlib_filefunc64_def ffunc;
-    fill_win32_filefunc64W(&ffunc);
-    const ushort *fn = m_zipFileName.utf16();
+    static auto openCallback = [](void *, const void *filename, int mode) -> void * {
+        if (filename && (mode == (ZLIB_FILEFUNC_MODE_READ | ZLIB_FILEFUNC_MODE_EXISTING))) {
+            auto f = std::make_unique<QFile>(*reinterpret_cast<const QString *>(filename));
+            if (f->open(QIODevice::ReadOnly))
+                return f.release();
+        }
+        return nullptr;
+    };
+    static auto readCallback = [](void *, void *stream, void *buf, unsigned long size) -> unsigned long {
+        return stream ? reinterpret_cast<QFile *>(stream)->read(reinterpret_cast<char *>(buf), size) : -1;
+    };
 
-    m_zip = unzOpen2_64(fn, &ffunc);
-#else
-    QByteArray utf8Fn = m_zipFileName.toUtf8();
-    const char *fn = utf8Fn.constData();
+    static auto tellCallback = [](void *, void *stream) -> quint64 {
+        return stream ? reinterpret_cast<QFile *>(stream)->pos() : -1;
+    };
+    static auto seekCallback = [](void *, void *stream, quint64 pos, int origin) -> long {
+        if (auto *f = reinterpret_cast<QFile *>(stream)) {
+            switch (origin) {
+            case ZLIB_FILEFUNC_SEEK_END: pos = f->size() - pos; break;
+            case ZLIB_FILEFUNC_SEEK_SET: break;
+            case ZLIB_FILEFUNC_SEEK_CUR: pos = f->pos() + pos; break;
+            default: return -1;
+            }
+            return f->seek(pos) ? 0 : -1;
+        }
+        return -1;
+    };
+    static auto closeCallback = [](void *, void *stream) -> int {
+        if (stream)
+            delete reinterpret_cast<QFile *>(stream);
+        return 0;
+    };
+    static auto errorCallback = [](void *, void *stream) -> int {
+        return stream && (reinterpret_cast<QFile *>(stream)->error() == QFileDevice::NoError) ? 0 : -1;
+    };
 
-    m_zip = unzOpen64(fn);
-#endif
+
+    zlib_filefunc64_def ffs { openCallback, readCallback, nullptr, tellCallback, seekCallback,
+                closeCallback, errorCallback, nullptr };
+
+    m_zip = unzOpen2_64(&m_zipFileName, &ffs);
+
     if (!m_zip)
         return false;
 
-    stopwatch sw("Reading ZIP directory");
-    do {
-        unz64_file_pos fpos;
-        if (unzGetFilePos64(m_zip, &fpos) != UNZ_OK)
-            break;
+    if (parseTOC) {
+        stopwatch sw("Reading ZIP directory");
+        do {
+            unz64_file_pos fpos;
+            if (unzGetFilePos64(m_zip, &fpos) != UNZ_OK)
+                break;
 
-        // extension for BrickStore for fast content scanning (50% faster)
-        char *filename;
-        int filenameSize;
-        if (unz__GetCurrentFilename(m_zip, &filename, &filenameSize) != UNZ_OK)
-            break;
-        auto buffer = QString::fromUtf8(QByteArray(filename, filenameSize)).toLower().toUtf8();
+            // extension for BrickStore for fast content scanning (50% faster)
+            char *filename;
+            int filenameSize;
+            if (unz__GetCurrentFilename(m_zip, &filename, &filenameSize) != UNZ_OK)
+                break;
+            auto buffer = QString::fromUtf8(QByteArray(filename, filenameSize)).toLower().toUtf8();
 
-        // this is slow, because unzGetCurrentFileInfo64() re-parses the file header
-        // which was already done in GoTo{First|Next}File()
-        //                QByteArray buffer;
-        //                buffer.resize(1024);
-        //                unz_file_info64 fileInfo;
-        //                if (unzGetCurrentFileInfo64(zip, &fileInfo, buffer.data(), buffer.size(), nullptr, 0, nullptr, 0) != UNZ_OK)
-        //                    break;
+            // this is slow, because unzGetCurrentFileInfo64() re-parses the file header
+            // which was already done in GoTo{First|Next}File()
+            //                QByteArray buffer;
+            //                buffer.resize(1024);
+            //                unz_file_info64 fileInfo;
+            //                if (unzGetCurrentFileInfo64(zip, &fileInfo, buffer.data(), buffer.size(), nullptr, 0, nullptr, 0) != UNZ_OK)
+            //                    break;
 
-        //                buffer.truncate(fileInfo.size_filename);
-        //                buffer.squeeze();
+            //                buffer.truncate(fileInfo.size_filename);
+            //                buffer.squeeze();
 
-        m_contents.insert(buffer, qMakePair(fpos.pos_in_zip_directory, fpos.num_of_file));
-    } while (unzGoToNextFile(m_zip) == UNZ_OK);
+            m_contents.insert(buffer, qMakePair(fpos.pos_in_zip_directory, fpos.num_of_file));
+        } while (unzGoToNextFile(m_zip) == UNZ_OK);
+    }
 
     return true;
 }
@@ -181,7 +218,7 @@ void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
     QString errorMsg;
     MiniZip zip(zipFileName);
 
-    if (zip.open()) {
+    if (zip.openInternal(false)) {
         if (unzLocateFile(zip.m_zip, extractFileName, 2 /*case insensitive*/) == UNZ_OK) {
             if (unzOpenCurrentFilePassword(zip.m_zip, extractPassword) == UNZ_OK) {
                 QByteArray block;
@@ -193,13 +230,16 @@ void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
                         destination->write(block.constData(), bytesRead);
                 } while (bytesRead > 0);
                 if (bytesRead < 0)
-                    errorMsg = tr("Could not extract model.ldr from the Studio ZIP file.");
+                    errorMsg = tr("Could not read the file %1 within the ZIP file %2.")
+                            .arg(QLatin1String(extractFileName)).arg(zipFileName);
                 unzCloseCurrentFile(zip.m_zip);
             } else {
-                errorMsg = tr("Could not decrypt the model.ldr within the Studio ZIP file.");
+                errorMsg = tr("Could not decrypt the file %1 within the ZIP file %2.")
+                        .arg(QLatin1String(extractFileName)).arg(zipFileName);
             }
         } else {
-            errorMsg = tr("Could not locate the model.ldr file within the Studio ZIP file.");
+            errorMsg = tr("Could not locate the file %1 within the ZIP file %2.")
+                    .arg(QLatin1String(extractFileName)).arg(zipFileName);
         }
         zip.close();
     } else {

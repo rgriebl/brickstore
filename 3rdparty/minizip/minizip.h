@@ -37,8 +37,10 @@ public:
                       const char *extractFileName, const char *extractPassword = nullptr);
 
 private:
+    bool openInternal(bool parseTOC);
+
     QString m_zipFileName;
-    QHash<QByteArray, QPair<quint32, quint32>> m_contents;
+    QHash<QByteArray, QPair<quint64, quint64>> m_contents;
     void *m_zip = nullptr;
 
 };
