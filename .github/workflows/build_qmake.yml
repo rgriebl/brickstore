@@ -76,7 +76,7 @@ jobs:
           artifact: "Android-ARM"
           runs-on: ubuntu-20.04
           os: android
-          qt_version: '6.2.2'
+          qt_version: '6.2.3'
           qt_arch: 'android_armv7'
           qt_target: 'android'
           qmake_extra_config: ''

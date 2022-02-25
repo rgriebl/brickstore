@@ -179,7 +179,7 @@ QStringList Library::potentialDrawDirs()
         DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
         if (l >= 0) {
             inidir [l] = 0;
-            dirs << QString::fromUtf16(reinterpret_cast<ushort *>(inidir));
+            dirs << QString::fromWCharArray(inidir);
         }
     }
 
@@ -193,7 +193,7 @@ QStringList Library::potentialDrawDirs()
 
                 if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
                     regdir [regdirsize / sizeof(WCHAR)] = 0;
-                    dirs << QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
+                    dirs << QString::fromWCharArray(regdir);
                 }
                 RegCloseKey(lkey);
             }

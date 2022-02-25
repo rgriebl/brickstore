@@ -88,7 +88,7 @@ class CommentElement : public Element
 {
 public:
     QString comment() const  { return m_comment; }
-    uint size() const override { return sizeof(*this) + m_comment.size() * 2; }
+    uint size() const override { return uint(sizeof(*this) + m_comment.size() * 2); }
 
     static CommentElement *create(const QString &text);
 

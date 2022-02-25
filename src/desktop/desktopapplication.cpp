@@ -29,6 +29,7 @@
 #include <QtWidgets/QToolTip>
 #include <QtWidgets/QStyleFactory>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStyle>
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
@@ -71,7 +72,10 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 
 #if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
+
+    // force ANGLE to cut down on the number of crashes in the Intel OpenGL drivers
+    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 #else
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
@@ -86,6 +90,8 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 #endif
 
     (void) new QApplication(argc, argv);
+
+    qInfo() << "Device pixel ratio:" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
 
     m_clp.addHelpOption();
     m_clp.addVersionOption();
@@ -462,13 +468,13 @@ void DesktopApplication::setUiTheme()
     if (!startup) {
         QMessageBox mb(QMessageBox::Question, QCoreApplication::applicationName(),
                        tr("The theme change will take effect after a restart."),
-                       QMessageBox::Yes | QMessageBox::No, MainWindow::inst());
-        mb.setDefaultButton(QMessageBox::No);
-        mb.setButtonText(QMessageBox::Yes, tr("Restart now"));
-        mb.setButtonText(QMessageBox::No, tr("Later"));
+                       QMessageBox::NoButton, MainWindow::inst());
+        mb.setDefaultButton(mb.addButton(tr("Later"), QMessageBox::NoRole));
+        auto restart = mb.addButton(tr("Restart now"), QMessageBox::YesRole);
         mb.setTextFormat(Qt::RichText);
+        mb.exec();
 
-        if (mb.exec() == QMessageBox::Yes) {
+        if (mb.clickedButton() == restart) {
             m_restart = true;
             QCoreApplication::quit();
         }

@@ -20,6 +20,7 @@
 #endif
 #if defined(BS_DESKTOP)
 #  include <QApplication>
+#  include <QPalette>
 #endif
 #include <QDebug>
 

@@ -175,41 +175,9 @@ win32 {
       ISCC="$$INNO_PATH\\$$ISCC"
     }
 
-    !isEmpty(VCPKG_PATH):OPENSSL_PATHS *= $$VCPKG_PATH/bin
-
-    contains(QMAKE_TARGET.arch, x86_64) {
-      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
-      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL/bin"
-
-      OPENSSL_SSL_LIB="libssl-1_1-x64.dll"
-      OPENSSL_CRYPTO_LIB="libcrypto-1_1-x64.dll"
-    } else {
-      OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win32/bin"
-      OPENSSL_PATHS *= "$$getenv(ProgramFiles(x86))/OpenSSL/bin"
-
-      OPENSSL_SSL_LIB="libssl-1_1.dll"
-      OPENSSL_CRYPTO_LIB="libcrypto-1_1.dll"
-    }
-
-    OPENSSL_PATH=""
-    for (osslp, OPENSSL_PATHS) {
-      exists("$$osslp/$$OPENSSL_SSL_LIB"):isEmpty(OPENSSL_PATH):OPENSSL_PATH=$$osslp
-    }
-    isEmpty(OPENSSL_PATH) {
-      error("Please install OpenSSL via VCPKG or from https://slproweb.com/products/Win32OpenSSL.html.")
-    } else {
-      OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
-      message("Found OpenSSL at $$OPENSSL_PATH")
-    }
-
-    # The OpenSSL libs from the Qt installer require an ancient MSVC2010 C runtimes, but the
-    # installer doesn't install them by default, plus there's no package for the x86 version anyway.
-    # The build from slwebpro.com on the other hand are built against a recent v14 runtime, which
-    # we are installing anyway.
     deploy.depends += $(DESTDIR_TARGET)
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) --qmldir $$shell_quote($$shell_path($$PWD/extensions)) $(DESTDIR_TARGET)
-    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_SSL_LIB)) $(DESTDIR)
-    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_CRYPTO_LIB)) $(DESTDIR)
+
     sentry {
       deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/sentry.dll)) $(DESTDIR)
       deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$VCPKG_PATH/bin/zlib1.dll)) $(DESTDIR)
@@ -222,6 +190,43 @@ win32 {
                             /O$$shell_quote($$shell_path($$OUT_PWD)) \
                             /F$$shell_quote($${TARGET}-$${VERSION}) \
                             $$shell_quote($$shell_path($$PWD/windows/brickstore.iss))
+
+    !versionAtLeast(QT_VERSION, 6.0.0) {
+      # The OpenSSL libs from the Qt installer require an ancient MSVC2010 C runtimes, but the
+      # installer doesn't install them by default, plus there's no package for the x86 version anyway.
+      # The build from slwebpro.com on the other hand are built against a recent v14 runtime, which
+      # we are installing anyway.
+
+      !isEmpty(VCPKG_PATH):OPENSSL_PATHS *= $$VCPKG_PATH/bin
+
+      contains(QMAKE_TARGET.arch, x86_64) {
+        OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
+        OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL/bin"
+
+        OPENSSL_SSL_LIB="libssl-1_1-x64.dll"
+        OPENSSL_CRYPTO_LIB="libcrypto-1_1-x64.dll"
+      } else {
+        OPENSSL_PATHS *= "$$getenv(ProgramFiles)/OpenSSL-Win32/bin"
+        OPENSSL_PATHS *= "$$getenv(ProgramFiles(x86))/OpenSSL/bin"
+
+        OPENSSL_SSL_LIB="libssl-1_1.dll"
+        OPENSSL_CRYPTO_LIB="libcrypto-1_1.dll"
+      }
+
+      OPENSSL_PATH=""
+      for (osslp, OPENSSL_PATHS) {
+        exists("$$osslp/$$OPENSSL_SSL_LIB"):isEmpty(OPENSSL_PATH):OPENSSL_PATH=$$osslp
+      }
+      isEmpty(OPENSSL_PATH) {
+        error("Please install OpenSSL via VCPKG or from https://slproweb.com/products/Win32OpenSSL.html.")
+      } else {
+        OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
+        message("Found OpenSSL at $$OPENSSL_PATH")
+      }
+
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_SSL_LIB)) $(DESTDIR)
+      deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/$$OPENSSL_CRYPTO_LIB)) $(DESTDIR)
+    }
   } else {
     deploy.CONFIG += recursive
     installer.CONFIG += recursive
