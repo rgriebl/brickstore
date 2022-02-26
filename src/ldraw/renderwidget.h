@@ -46,7 +46,6 @@ class RenderWidget : public QOpenGLWidget
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = nullptr);
-    ~RenderWidget() override;
 
     void setClearColor(const QColor &color);
 

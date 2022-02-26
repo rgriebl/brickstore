@@ -46,7 +46,6 @@ class RenderWindow : public QOpenGLWindow
     Q_OBJECT
 public:
     RenderWindow();
-    ~RenderWindow() override;
 
     void setClearColor(const QColor &color);
 

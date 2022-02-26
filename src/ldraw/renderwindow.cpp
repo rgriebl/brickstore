@@ -39,11 +39,6 @@ LDraw::RenderWindow::RenderWindow()
     setCursor(Qt::OpenHandCursor);
 }
 
-LDraw::RenderWindow::~RenderWindow()
-{
-    m_renderer->cleanup();
-}
-
 void LDraw::RenderWindow::setClearColor(const QColor &color)
 {
     m_renderer->setClearColor(color);

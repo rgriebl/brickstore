@@ -43,11 +43,6 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
     setCursor(Qt::OpenHandCursor);
 }
 
-LDraw::RenderWidget::~RenderWidget()
-{
-    m_renderer->cleanup();
-}
-
 void LDraw::RenderWidget::setClearColor(const QColor &color)
 {
     m_renderer->setClearColor(color);
