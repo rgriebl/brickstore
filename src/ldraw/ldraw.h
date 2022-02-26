@@ -50,7 +50,7 @@ public:
     ~Library() override;
 
     QString path() const;
-    QCoro::Task<bool> setPath(const QString &path);
+    QCoro::Task<bool> setPath(const QString &path, bool forceReload = false);
 
 //    Q_INVOKABLE bool isUpdateNeeded() const;
 
@@ -106,7 +106,6 @@ private:
     static std::tuple<QHash<int, Color>, QDate> parseLDconfig(const QByteArray &contents);
     QByteArray readLDrawFile(const QString &filename);
     void setUpdateStatus(UpdateStatus updateStatus);
-    QCoro::Task<> initialize(const QString &fileName);
 
     void clear();
 

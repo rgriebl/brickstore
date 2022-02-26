@@ -356,27 +356,19 @@ QString Library::path() const
     return m_path;
 }
 
-QCoro::Task<bool> Library::setPath(const QString &path)
+QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 {
-    if (m_path == path)
+    if ((m_path == path) && !forceReload)
         co_return false;
 
     emit libraryAboutToBeReset();
 
     m_cache.clearRecursive();
-    if (!m_cache.isEmpty())
+    if (!m_cache.isEmpty()) {
+        emit libraryReset();
         co_return false;
+    }
 
-    m_zip.reset();
-    m_searchpath.clear();
-
-    co_await initialize(path);
-
-    co_return true;
-}
-
-QCoro::Task<> Library::initialize(const QString &path)
-{
     bool caseSensitive =
 #if defined(Q_OS_LINUX)
             true;
@@ -386,6 +378,9 @@ QCoro::Task<> Library::initialize(const QString &path)
     bool valid = !path.isEmpty();
     m_path = path;
     m_isZip = (QFileInfo(path).suffix() == "zip"_l1);
+
+    m_zip.reset();
+    m_searchpath.clear();
 
     if (valid && m_isZip) {
         QFileInfo(path).dir().mkpath("."_l1);
@@ -443,6 +438,8 @@ QCoro::Task<> Library::initialize(const QString &path)
     }
     if (valid)
         emit lastUpdatedChanged(m_lastUpdated);
+
+    co_return true;
 }
 
 bool Library::startUpdate()
@@ -460,10 +457,6 @@ bool Library::startUpdate(bool force)
 
     QScopedValueRollback locker(m_locked, true);
 
-    emit libraryAboutToBeReset();
-
-    m_cache.clearRecursive();
-
     QString remotefile = "https://www.ldraw.org/library/updates/complete.zip"_l1;
     QString localfile = m_path;
 
@@ -476,6 +469,7 @@ bool Library::startUpdate(bool force)
     TransferJob *job = nullptr;
     if (file->open(QIODevice::WriteOnly)) {
         job = TransferJob::getIfNewer(QUrl(remotefile), dt, file);
+        // job = TransferJob::get(QUrl(remotefile), file); // for testing only
         m_transfer->retrieve(job);
     }
     if (!job) {
@@ -517,20 +511,21 @@ bool Library::startUpdate(bool force)
                 if (m_zip)
                     m_zip->close();
                 if (!file->commit()) {
-                    initialize(m_path); // at least try to reload the old library
+                    setPath(m_path, true); // at least try to reload the old library
                     throw Exception(tr("saving failed") % u": " % file->errorString());
                 }
-                co_await initialize(file->fileName());
+                if (!co_await setPath(file->fileName(), true))
+                    throw Exception(tr("reloading failed - please restart the application."));
 
                 emit updateFinished(true, { });
                 setUpdateStatus(UpdateStatus::Ok);
             }
-            emit libraryReset();
 
         } catch (const Exception &e) {
             emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
+        emit libraryReset();
     });
 
     return true;
