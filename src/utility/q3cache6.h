@@ -52,6 +52,7 @@ template <typename T> inline bool q3IsDetached(T &) { return true; }
 #pragma once
 
 #include <QtCore/qhash.h>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 
@@ -210,6 +211,8 @@ public:
                 break;
             s = new_s;
         }
+        if (s)
+            qWarning() << "Q3Cache::clearRecursive: clearing" << s << "entries with non-zero ref count";
         clear();
     }
 

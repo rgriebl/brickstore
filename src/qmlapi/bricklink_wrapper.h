@@ -64,6 +64,7 @@ protected:
     QmlWrapperBase(T *_wrappedObject)
         : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
     { }
+    virtual ~QmlWrapperBase() = default;
 
     static T *wrappedNull()
     {
@@ -276,7 +277,7 @@ public:
     explicit QmlPicture(BrickLink::Picture *pic = nullptr);
     QmlPicture(const QmlPicture &copy);
     QmlPicture &operator=(const QmlPicture &assign);
-    virtual ~QmlPicture();
+    ~QmlPicture() override;
 
     QmlBrickLink::UpdateStatus updateStatus() const;
 
@@ -301,7 +302,7 @@ public:
     explicit QmlPriceGuide(BrickLink::PriceGuide *pg = nullptr);
     QmlPriceGuide(const QmlPriceGuide &copy);
     QmlPriceGuide &operator=(const QmlPriceGuide &assign);
-    virtual ~QmlPriceGuide();
+    ~QmlPriceGuide() override;
 
     QmlBrickLink::UpdateStatus updateStatus() const;
 

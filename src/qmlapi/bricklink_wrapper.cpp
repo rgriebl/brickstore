@@ -128,11 +128,15 @@ QmlBrickLink::QmlBrickLink(BrickLink::Core *core)
 
     connect(core, &BrickLink::Core::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
-        emit priceGuideUpdated(QmlPriceGuide(pg));
+        static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::priceGuideUpdated);
+        if (isSignalConnected(sig))
+            emit priceGuideUpdated(QmlPriceGuide(pg));
     });
     connect(core, &BrickLink::Core::pictureUpdated,
             this, [this](::BrickLink::Picture *pic) {
-        emit pictureUpdated(QmlPicture(pic));
+        static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::pictureUpdated);
+        if (isSignalConnected(sig))
+            emit pictureUpdated(QmlPicture(pic));
     });
 }
 
@@ -722,8 +726,10 @@ QmlPicture::QmlPicture(const QmlPicture &copy)
 
 QmlPicture &QmlPicture::operator=(const QmlPicture &assign)
 {
+    if (&assign == this)
+        return *this;
+
     this->~QmlPicture();
-    QmlWrapperBase::operator=(assign);
     return *new (this) QmlPicture(assign.wrappedObject());
 }
 
@@ -847,8 +853,10 @@ QmlPriceGuide::QmlPriceGuide(const QmlPriceGuide &copy)
 
 QmlPriceGuide &QmlPriceGuide::operator=(const QmlPriceGuide &assign)
 {
+    if (&assign == this)
+        return *this;
+
     this->~QmlPriceGuide();
-    QmlWrapperBase::operator=(assign);
     return *new (this) QmlPriceGuide(assign.wrappedObject());
 }
 

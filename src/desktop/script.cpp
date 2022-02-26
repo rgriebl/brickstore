@@ -342,7 +342,7 @@ QVector<PrintingScriptAction *> Script::printingActions() const
 
 QQmlEngine *Script::qmlEngine() const
 {
-    return m_engine.data();
+    return m_engine.get();
 }
 
 QQmlContext *Script::qmlContext() const

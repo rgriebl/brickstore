@@ -149,7 +149,7 @@ private:
     QString m_version;
 
     QString m_fileName;
-    QScopedPointer<QQmlEngine> m_engine;
+    std::unique_ptr<QQmlEngine> m_engine;
     QQmlContext *m_context = nullptr;
     QQmlComponent *m_component = nullptr;
 

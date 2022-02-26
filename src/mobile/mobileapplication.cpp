@@ -55,6 +55,9 @@ void MobileApplication::init()
     m_engine->setBaseUrl(QUrl("qrc:/mobile/"_l1));
     redirectQmlEngineWarnings(m_engine, LogQml());
 
+    connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+            m_engine, &QQmlEngine::collectGarbage);
+
     connect(this, &Application::languageChanged,
             m_engine, &QQmlEngine::retranslate);
 

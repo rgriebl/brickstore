@@ -23,6 +23,8 @@
 #include <QQmlExpression>
 #include <QStringBuilder>
 
+#include "bricklink/core.h"
+#include "bricklink/database.h"
 #include "common/application.h"
 #include "qmlapi/common.h"
 #include "qmlapi/bricklink_wrapper.h"
@@ -123,23 +125,25 @@ bool ScriptManager::reload()
 
 void ScriptManager::loadScript(const QString &fileName)
 {
-    QScopedPointer<QQmlEngine> engine(new QQmlEngine(this));
-
+    auto engine = std::make_unique<QQmlEngine>(this);
     redirectQmlEngineWarnings(engine.get(), LogScript());
 
     auto comp = new QQmlComponent(engine.get(), fileName, engine.get());
     auto ctx = new QQmlContext(engine.get(), engine.get());
-    QScopedPointer<QObject> root(comp->create(ctx));
+    std::unique_ptr<QObject> root { comp->create(ctx) };
     if (!root)
         throw QmlException(comp->errors(), "Could not load QML file %1").arg(fileName);
-    if (root && !qobject_cast<Script *>(root.data()))
+    if (root && !qobject_cast<Script *>(root.get()))
         throw Exception("The root element of the script %1 is not 'Script'").arg(fileName);
 
-    auto script = static_cast<Script *>(root.take());
-    script->m_engine.reset(engine.take());
+    auto script = static_cast<Script *>(root.release());
+    script->m_engine.reset(engine.release());
     script->m_fileName = fileName;
     script->m_context = ctx;
     script->m_component = comp;
+
+    connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+            script->m_engine.get(), &QQmlEngine::collectGarbage);
 
     m_scripts.append(script);
 }
@@ -153,7 +157,10 @@ bool ScriptManager::executeString(const QString &s)
 {
     if (!m_engine) {
         m_engine.reset(new QQmlEngine(this));
-        redirectQmlEngineWarnings(m_engine.data(), LogScript());
+        redirectQmlEngineWarnings(m_engine.get(), LogScript());
+
+        connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+                m_engine.get(), &QQmlEngine::collectGarbage);
 
         const char script[] =
                 "import BrickStore 1.0\n"
@@ -164,7 +171,7 @@ bool ScriptManager::executeString(const QString &s)
                 "    property string help: \"Use 'bl'/'bs' to access the BrickLink/BrickStore singletons\"\n"
                 "}\n";
 
-        QQmlComponent component(m_engine.data());
+        QQmlComponent component(m_engine.get());
         component.setData(script, QUrl());
         if (component.status() == QQmlComponent::Error)
             qCWarning(LogScript) << "JS compile error:" << component.errorString();

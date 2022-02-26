@@ -56,7 +56,7 @@ private:
 
     QVector<Script *> m_scripts;
 
-    QScopedPointer<QQmlEngine> m_engine;
+    std::unique_ptr<QQmlEngine> m_engine;
     QObject *m_rootObject = nullptr;
 
     Q_DISABLE_COPY(ScriptManager)
