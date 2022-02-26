@@ -52,8 +52,6 @@ public:
     QString path() const;
     QCoro::Task<bool> setPath(const QString &path, bool forceReload = false);
 
-//    Q_INVOKABLE bool isUpdateNeeded() const;
-
     bool isValid() const               { return m_valid; }
     QDate lastUpdated() const          { return m_lastUpdated; }
     UpdateStatus updateStatus() const  { return m_updateStatus; }

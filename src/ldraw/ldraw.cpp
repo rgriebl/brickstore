@@ -46,275 +46,7 @@ Q_LOGGING_CATEGORY(LogLDraw, "ldraw")
 
 namespace LDraw {
 
-Part *Library::findPart(const QString &_filename, const QString &_parentdir)
-{
-    QString filename = _filename;
-    filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
-    QString parentdir = _parentdir;
-    if (!parentdir.isEmpty() && !parentdir.startsWith("!ZIP!"_l1))
-        parentdir = QDir(parentdir).canonicalPath();
-
-    bool inZip = false;
-    bool found = false;
-
-    if (QFileInfo(filename).isRelative()) {
-        // search order is parentdir => p => parts => models
-
-        QStringList searchpath = m_searchpath;
-        if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
-            searchpath.prepend(parentdir);
-
-        for (const QString &sp : qAsConst(searchpath)) {
-
-            if (sp.startsWith("!ZIP!"_l1)) {
-                filename = filename.toLower();
-                QString testname = sp.mid(5) % u'/' % filename;
-                if (m_zip->contains(testname)) {
-                    QFileInfo fi(filename);
-                    parentdir = sp;
-                    if (fi.path() != "."_l1)
-                        parentdir = parentdir % u'/' % fi.path();
-                    filename = testname;
-                    inZip = true;
-                    found = true;
-                    break;
-                }
-            } else {
-                QString testname = sp % u'/' % filename;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-                if (!QFile::exists(testname))
-                    testname = testname.toLower();
-#endif
-                if (QFile::exists(testname)) {
-                    filename = testname;
-                    parentdir = QFileInfo(testname).path();
-                    found = true;
-                    break;
-                }
-            }
-        }
-    } else {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-        if (!QFile::exists(filename))
-            filename = filename.toLower();
-#endif
-        if (QFile::exists(filename)) {
-            parentdir = QFileInfo(filename).path();
-            found = true;
-        }
-    }
-
-    if (!found)
-        return nullptr;
-    if (!inZip)
-        filename = QFileInfo(filename).canonicalFilePath();
-
-    Part *p = m_cache[filename];
-    if (!p) {
-        QByteArray data;
-
-        if (inZip) {
-            try {
-                data = m_zip->readFile(filename);
-            } catch (const Exception &e) {
-                qCWarning(LogLDraw) << "Failed to read from LDraw ZIP:" << e.error();
-            }
-        } else {
-            QFile f(filename);
-
-            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                qCWarning(LogLDraw) << "Failed to open file" << filename << ":" << f.errorString();
-            } else {
-                data = f.readAll();
-                if (f.error() != QFile::NoError)
-                    qCWarning(LogLDraw) << "Failed to read file" << filename << ":" << f.errorString();
-                f.close();
-            }
-        }
-        if (!data.isEmpty()) {
-            p = Part::parse(data, parentdir);
-            if (p) {
-                if (!m_cache.insert(filename, p, p->cost())) {
-                    qCWarning(LogLDraw) << "Unable to cache file" << filename;
-                    p = nullptr;
-                }
-
-                //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
-            }
-        }
-    }
-    return p;
-}
-
-
-std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
-{
-    bool ok = false;
-    QDate generated;
-
-    QFileInfo fi(ldir);
-
-    if (fi.exists() && fi.isDir() && fi.isReadable()) {
-        QDir dir(ldir);
-
-        if (dir.cd("p"_l1) || dir.cd("P"_l1)) {
-            if (dir.exists("stud.dat"_l1) || dir.exists("STUD.DAT"_l1)) {
-                if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
-                    if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
-                        QFile f(ldir % "/LDConfig.ldr"_l1);
-                        if (f.open(QIODevice::ReadOnly)) {
-                            auto [colors, date] = parseLDconfig(f.readAll()); { }
-                            if (!colors.isEmpty()) {
-                                ok = true;
-                                generated = date;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else if (fi.exists() && fi.isFile() && fi.suffix() == "zip"_l1) {
-        QByteArray data;
-        QBuffer buffer(&data);
-        buffer.open(QIODevice::WriteOnly);
-        MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
-        auto [colors, date] = parseLDconfig(data); { }
-        if (!colors.isEmpty()) {
-            ok = true;
-            generated = date;
-        }
-    }
-    return { ok, generated };
-}
-
-QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
-{
-    QStringList dirs;
-    dirs << QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
-
-#if defined(Q_OS_WINDOWS)
-    {
-        wchar_t inidir [MAX_PATH];
-
-        DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
-        if (l >= 0) {
-            inidir [l] = 0;
-            dirs << QString::fromWCharArray(inidir);
-        }
-    }
-
-    {
-        HKEY skey, lkey;
-
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-            if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                wchar_t regdir [MAX_PATH + 1];
-                DWORD regdirsize = MAX_PATH * sizeof(wchar_t);
-
-                if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                    regdir [regdirsize / sizeof(WCHAR)] = 0;
-                    dirs << QString::fromWCharArray(regdir);
-                }
-                RegCloseKey(lkey);
-            }
-            RegCloseKey(skey);
-        }
-    }
-#elif defined(Q_OS_UNIX)
-    {
-        QStringList unixdirs;
-        unixdirs << "~/ldraw"_l1;
-
-#  if defined(Q_OS_MACOS)
-        unixdirs << "~/Library/ldraw"_l1
-                 << "~/Library/LDRAW"_l1
-                 << "/Library/LDRAW"_l1
-                 << "/Library/ldraw"_l1;
-#  else
-        unixdirs << "/usr/share/ldraw"_l1;
-        unixdirs << "/var/lib/ldraw"_l1;
-        unixdirs << "/var/ldraw"_l1;
-#  endif
-
-        QString homepath = QDir::homePath();
-
-        foreach (QString d, unixdirs) {
-            d.replace("~"_l1, homepath);
-            dirs << d;
-        }
-    }
-#endif
-
-    QVector<std::tuple<QString, QDate>> result;
-
-    for (auto dir = dirs.begin(); dir != dirs.end(); ++dir) {
-        if (!dir->isEmpty()) {
-            auto [ok, date] = checkLDrawDir(*dir); { }
-            if (ok) {
-                result.append({ *dir, date });
-            }
-        }
-    }
-
-    return result;
-}
-
-
-
-
-
-
-
-
-
-
 Library *Library::s_inst = nullptr;
-
-//Library *Library::create()
-//{
-//    if (!s_inst) {
-//        QString error;
-//        QString ldrawdir = datadir;
-
-//        if (ldrawdir.isEmpty()) {
-//            const auto ldawDirs = potentialDrawDirs();
-//            for (auto &ld : ldawDirs) {
-//                if (isValidLDrawDir(ld)) {
-//                    ldrawdir = ld;
-//                    break;
-//                }
-//            }
-//        }
-
-//        if (!ldrawdir.isEmpty()) {
-//            s_inst = new Library(ldrawdir);
-
-//            if (!s_inst->m_zip || s_inst->m_zip->open()) {
-//                if (s_inst->parseLDconfig("LDConfig.ldr")) {
-//                    s_inst->parseLDconfig("LDConfig_missing.ldr");
-//                    qInfo().noquote() << "Found LDraw at" << ldrawdir << "\n  Last updated:"
-//                                      << s_inst->lastUpdated().toString(Qt::RFC2822Date);
-//                } else {
-//                    error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
-//                }
-//            } else {
-//                error = qApp->translate("LDraw", "The LDraw installation at \'%1\' is not usable.").arg(ldrawdir);
-//            }
-//        } else {
-//            error = qApp->translate("LDraw", "No usable LDraw installation available.");
-//        }
-
-//        if (!error.isEmpty()) {
-//            delete s_inst;
-//            s_inst = nullptr;
-
-//            if (errstring)
-//                *errstring = error;
-//        }
-//    }
-
-//    return s_inst;
-//}
 
 Library::Library(QObject *parent)
     : QObject(parent)
@@ -696,6 +428,219 @@ QColor Library::color(int id, int baseid) const
         qCWarning(LogLDraw) << "Called color() with an invalid color id:" << id;
         return Qt::yellow;
     }
+}
+
+Part *Library::findPart(const QString &_filename, const QString &_parentdir)
+{
+    QString filename = _filename;
+    filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    QString parentdir = _parentdir;
+    if (!parentdir.isEmpty() && !parentdir.startsWith("!ZIP!"_l1))
+        parentdir = QDir(parentdir).canonicalPath();
+
+    bool inZip = false;
+    bool found = false;
+
+    if (QFileInfo(filename).isRelative()) {
+        // search order is parentdir => p => parts => models
+
+        QStringList searchpath = m_searchpath;
+        if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
+            searchpath.prepend(parentdir);
+
+        for (const QString &sp : qAsConst(searchpath)) {
+
+            if (sp.startsWith("!ZIP!"_l1)) {
+                filename = filename.toLower();
+                QString testname = sp.mid(5) % u'/' % filename;
+                if (m_zip->contains(testname)) {
+                    QFileInfo fi(filename);
+                    parentdir = sp;
+                    if (fi.path() != "."_l1)
+                        parentdir = parentdir % u'/' % fi.path();
+                    filename = testname;
+                    inZip = true;
+                    found = true;
+                    break;
+                }
+            } else {
+                QString testname = sp % u'/' % filename;
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+                if (!QFile::exists(testname))
+                    testname = testname.toLower();
+#endif
+                if (QFile::exists(testname)) {
+                    filename = testname;
+                    parentdir = QFileInfo(testname).path();
+                    found = true;
+                    break;
+                }
+            }
+        }
+    } else {
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+        if (!QFile::exists(filename))
+            filename = filename.toLower();
+#endif
+        if (QFile::exists(filename)) {
+            parentdir = QFileInfo(filename).path();
+            found = true;
+        }
+    }
+
+    if (!found)
+        return nullptr;
+    if (!inZip)
+        filename = QFileInfo(filename).canonicalFilePath();
+
+    Part *p = m_cache[filename];
+    if (!p) {
+        QByteArray data;
+
+        if (inZip) {
+            try {
+                data = m_zip->readFile(filename);
+            } catch (const Exception &e) {
+                qCWarning(LogLDraw) << "Failed to read from LDraw ZIP:" << e.error();
+            }
+        } else {
+            QFile f(filename);
+
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qCWarning(LogLDraw) << "Failed to open file" << filename << ":" << f.errorString();
+            } else {
+                data = f.readAll();
+                if (f.error() != QFile::NoError)
+                    qCWarning(LogLDraw) << "Failed to read file" << filename << ":" << f.errorString();
+                f.close();
+            }
+        }
+        if (!data.isEmpty()) {
+            p = Part::parse(data, parentdir);
+            if (p) {
+                if (!m_cache.insert(filename, p, p->cost())) {
+                    qCWarning(LogLDraw) << "Unable to cache file" << filename;
+                    p = nullptr;
+                }
+
+                //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
+            }
+        }
+    }
+    return p;
+}
+
+
+std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
+{
+    bool ok = false;
+    QDate generated;
+
+    QFileInfo fi(ldir);
+
+    if (fi.exists() && fi.isDir() && fi.isReadable()) {
+        QDir dir(ldir);
+
+        if (dir.cd("p"_l1) || dir.cd("P"_l1)) {
+            if (dir.exists("stud.dat"_l1) || dir.exists("STUD.DAT"_l1)) {
+                if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
+                    if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
+                        QFile f(ldir % "/LDConfig.ldr"_l1);
+                        if (f.open(QIODevice::ReadOnly)) {
+                            auto [colors, date] = parseLDconfig(f.readAll()); { }
+                            if (!colors.isEmpty()) {
+                                ok = true;
+                                generated = date;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (fi.exists() && fi.isFile() && fi.suffix() == "zip"_l1) {
+        QByteArray data;
+        QBuffer buffer(&data);
+        buffer.open(QIODevice::WriteOnly);
+        MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
+        auto [colors, date] = parseLDconfig(data); { }
+        if (!colors.isEmpty()) {
+            ok = true;
+            generated = date;
+        }
+    }
+    return { ok, generated };
+}
+
+QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
+{
+    QStringList dirs;
+    dirs << QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
+
+#if defined(Q_OS_WINDOWS)
+    {
+        wchar_t inidir [MAX_PATH];
+
+        DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
+        if (l >= 0) {
+            inidir [l] = 0;
+            dirs << QString::fromWCharArray(inidir);
+        }
+    }
+
+    {
+        HKEY skey, lkey;
+
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
+            if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
+                wchar_t regdir [MAX_PATH + 1];
+                DWORD regdirsize = MAX_PATH * sizeof(wchar_t);
+
+                if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
+                    regdir [regdirsize / sizeof(WCHAR)] = 0;
+                    dirs << QString::fromWCharArray(regdir);
+                }
+                RegCloseKey(lkey);
+            }
+            RegCloseKey(skey);
+        }
+    }
+#elif defined(Q_OS_UNIX)
+    {
+        QStringList unixdirs;
+        unixdirs << "~/ldraw"_l1;
+
+#  if defined(Q_OS_MACOS)
+        unixdirs << "~/Library/ldraw"_l1
+                 << "~/Library/LDRAW"_l1
+                 << "/Library/LDRAW"_l1
+                 << "/Library/ldraw"_l1;
+#  else
+        unixdirs << "/usr/share/ldraw"_l1;
+        unixdirs << "/var/lib/ldraw"_l1;
+        unixdirs << "/var/ldraw"_l1;
+#  endif
+
+        QString homepath = QDir::homePath();
+
+        foreach (QString d, unixdirs) {
+            d.replace("~"_l1, homepath);
+            dirs << d;
+        }
+    }
+#endif
+
+    QVector<std::tuple<QString, QDate>> result;
+
+    for (auto dir = dirs.begin(); dir != dirs.end(); ++dir) {
+        if (!dir->isEmpty()) {
+            auto [ok, date] = checkLDrawDir(*dir); { }
+            if (ok) {
+                result.append({ *dir, date });
+            }
+        }
+    }
+
+    return result;
 }
 
 } // namespace LDraw
