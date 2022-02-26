@@ -98,7 +98,11 @@ void GLRenderer::setPartAndColor(Part *part, int basecolor)
     if ((m_part == part) && (m_color == basecolor))
         return;
 
+    if (m_part)
+        m_part->release();
     m_part = part;
+    if (m_part)
+        m_part->addRef();
     m_color = basecolor;
     m_dirty = true;
 

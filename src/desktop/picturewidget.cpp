@@ -86,7 +86,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     layout->addWidget(w_image, 10);
     layout->setContentsMargins(2, 6, 2, 2);
 
-#if !defined(QT_NO_OPENGL)
 #if defined(Q_OS_MACOS)
     w_ldrawWin = new LDraw::RenderWindow();
     w_ldraw = QWidget::createWindowContainer(w_ldrawWin, this);
@@ -147,7 +146,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     buttons->addWidget(w_3d, 10);
     buttons->addWidget(w_playPause, 10);
     layout->addLayout(buttons);
-#endif
 
     m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
     connect(m_blCatalog, &QAction::triggered, this, [this]() {
@@ -200,7 +198,22 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
-            this, &PictureWidget::pictureWasUpdated);
+            this, [this](BrickLink::Picture *pic) {
+        if (pic == m_pic) {
+            if (pic->isValid())
+                m_image = pic->image();
+            redraw();
+        }
+    });
+
+    connect(LDraw::library(), &LDraw::Library::libraryAboutToBeReset,
+            this, [this]() {
+        if (m_part) {
+            m_part->release();
+            m_part = nullptr;
+            redraw();
+        }
+    });
 
     paletteChange();
     languageChange();
@@ -258,7 +271,6 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     if (m_part)
         m_part->release();
     m_part = item ? LDraw::library()->partFromId(item->id()) : nullptr;
-//    m_part = LDraw::library()->partFromFile("C:/Users/sandman/git/lego-actros-tipper/actros.ldr"_l1);
     if (m_part) {
         m_part->addRef();
 
@@ -273,15 +285,6 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     m_blPriceGuide->setVisible(item && color);
     m_blLotsForSale->setVisible(item && color);
     redraw();
-}
-
-void PictureWidget::pictureWasUpdated(BrickLink::Picture *pic)
-{
-    if (pic == m_pic) {
-        if (pic->isValid())
-            m_image = pic->image();
-        redraw();
-    }
 }
 
 void PictureWidget::redraw()
@@ -343,25 +346,19 @@ void PictureWidget::redraw()
         w_image->setText({ });
     }
 
-    bool show3D = canShow3D() && prefer3D();
+    bool show3D = m_part && m_prefer3D;
 
     if (show3D) {
-#if !defined(QT_NO_OPENGL)
         w_image->hide();
 
         w_ldraw->show();
         w_ldrawWin->setPartAndColor(m_part, m_colorId);
         if (m_animationActive)
             w_ldrawWin->startAnimation();
-#endif
     } else {
-#if !defined(QT_NO_OPENGL)
-        if (w_ldraw) {
-            w_ldrawWin->setPartAndColor(nullptr, -1);
-            w_ldraw->hide();
-            w_ldrawWin->stopAnimation();
-        }
-#endif
+        w_ldrawWin->setPartAndColor(nullptr, -1);
+        w_ldraw->hide();
+        w_ldrawWin->stopAnimation();
         w_image->show();
     }
     m_reload->setVisible(!show3D);
@@ -409,34 +406,11 @@ void PictureWidget::contextMenuEvent(QContextMenuEvent *e)
 
 void PictureWidget::updateButtons()
 {
-    bool is3d = isShowing3D();
+    bool is3d = m_part && w_ldraw->isVisible();
 
     w_2d->setEnabled(is3d);
-    w_3d->setEnabled(!is3d && canShow3D());
+    w_3d->setEnabled(!is3d && m_part);
     w_playPause->setEnabled(is3d);
-}
-
-bool PictureWidget::canShow3D() const
-{
-#if !defined(QT_NO_OPENGL)
-    return m_part && w_ldraw;
-#else
-    return false;
-#endif
-}
-
-bool PictureWidget::prefer3D() const
-{
-    return m_prefer3D;
-}
-
-bool PictureWidget::isShowing3D() const
-{
-#if !defined(QT_NO_OPENGL)
-    return canShow3D() && w_ldraw->isVisible();
-#else
-    return false;
-#endif
 }
 
 #include "moc_picturewidget.cpp"

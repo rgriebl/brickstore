@@ -15,6 +15,7 @@
 
 #include <QFrame>
 #include <QImage>
+#include <QIcon>
 
 #include "bricklink/global.h"
 
@@ -39,7 +40,6 @@ public:
     void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
 
 protected slots:
-    void pictureWasUpdated(BrickLink::Picture *);
     void redraw();
     void languageChange();
     void paletteChange();
@@ -52,9 +52,6 @@ protected:
 
 private:
     void updateButtons();
-    bool canShow3D() const;
-    bool prefer3D() const;
-    bool isShowing3D() const;
 
     const BrickLink::Item * m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
@@ -62,7 +59,6 @@ private:
     QLabel *w_text;
     QLabel *w_image;
     QImage m_image;
-#if !defined(QT_NO_OPENGL)
     bool m_prefer3D = false;
     bool m_animationActive = true;
 #if defined(Q_OS_MACOS)
@@ -86,5 +82,4 @@ private:
     QAction *m_blCatalog;
     QAction *m_blPriceGuide;
     QAction *m_blLotsForSale;
-#endif
 };
