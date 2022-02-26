@@ -10,7 +10,7 @@ const highp float ambientStrength = 0.4;
 const highp float specularStrength = 0.3;
 
 void main() {
-    if (dot(n, n) == 0) {
+    if (dot(n, n) == 0.0) {
         gl_FragColor = c;
         return;
     }
