@@ -12,6 +12,8 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
+#include <limits>
+
 #include <QTextStream>
 #include <QDebug>
 
@@ -246,8 +248,11 @@ bool Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
 {
     if (!m_boundingCalculated) {
         QMatrix4x4 matrix;
-        m_boundingMin = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
-        m_boundingMax = QVector3D(FLT_MIN, FLT_MIN, FLT_MIN);
+        static constexpr auto fmin = std::numeric_limits<float>::min();
+        static constexpr auto fmax = std::numeric_limits<float>::max();
+
+        m_boundingMin = QVector3D(fmax, fmax, fmax);
+        m_boundingMax = QVector3D(fmin, fmin, fmin);
 
         calculateBoundingBox(this, matrix, m_boundingMin, m_boundingMax);
         m_boundingCalculated = true;
