@@ -10,13 +10,13 @@ QT *= opengl
 HEADERS += \
     $$PWD/glrenderer.h \
     $$PWD/ldraw.h \
-    $$PWD/part.h
+    $$PWD/part.h \
     $$PWD/renderwindow.h \
 
 SOURCES += \
     $$PWD/glrenderer.cpp \
     $$PWD/ldraw.cpp \
-    $$PWD/part.cpp
+    $$PWD/part.cpp \
     $$PWD/renderwindow.cpp \
 
 RESOURCES += \
