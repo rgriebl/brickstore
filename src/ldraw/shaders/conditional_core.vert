@@ -3,7 +3,6 @@
 uniform mat4 projMatrix;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
-uniform mat3 normalMatrix;
 
 in vec3 vertex0;
 in vec3 vertex1;
@@ -12,13 +11,11 @@ in vec3 vertex3;
 in vec4 color;
 
 out vec3 v;
-out vec3 n;
 out vec4 c;
 
 
 void main()
 {
-    n = vec3(0, 0, 0);
     v = vec3(modelMatrix * vec4(vertex0, 1));
 
     mat4 m = projMatrix * viewMatrix * modelMatrix;

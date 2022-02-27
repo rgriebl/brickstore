@@ -5,17 +5,15 @@ attribute highp vec3 vertex3;
 attribute highp vec4 color;
 
 varying highp vec3 v;
-varying highp vec3 n;
 varying highp vec4 c;
 
 uniform highp mat4 projMatrix;
 uniform highp mat4 modelMatrix;
 uniform highp mat4 viewMatrix;
-uniform highp mat3 normalMatrix;
+
 
 void main()
 {
-    n = vec3(0, 0, 0);
     v = vec3(modelMatrix * vec4(vertex0, 1));
 
     mat4 m = projMatrix * viewMatrix * modelMatrix;

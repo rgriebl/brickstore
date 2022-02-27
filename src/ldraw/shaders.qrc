@@ -1,10 +1,14 @@
 <RCC>
     <qresource prefix="/ldraw">
         <file>shaders/phong.frag</file>
-        <file>shaders/phong.vert</file>
         <file>shaders/phong_core.frag</file>
-        <file>shaders/phong_core.vert</file>
         <file>shaders/conditional_core.vert</file>
         <file>shaders/conditional.vert</file>
+        <file>shaders/line.frag</file>
+        <file>shaders/line.vert</file>
+        <file>shaders/line_core.frag</file>
+        <file>shaders/line_core.vert</file>
+        <file>shaders/surface.vert</file>
+        <file>shaders/surface_core.vert</file>
     </qresource>
 </RCC>

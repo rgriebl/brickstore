@@ -7,14 +7,11 @@ varying highp vec4 c;
 
 const highp vec3 lightColor = vec3(1.0, 1.0, 1.0);
 const highp float ambientStrength = 0.4;
-const highp float specularStrength = 0.3;
+const highp float specularStrength = 0.2;
 
-void main() {
-    if (dot(n, n) == 0.0) {
-        gl_FragColor = c;
-        return;
-    }
 
+void main()
+{
     // ambient
     highp vec3 ambient = ambientStrength * lightColor;
 

@@ -25,10 +25,10 @@ RESOURCES += \
 OTHER_FILES += \
     $$PWD/shaders/phong.frag \
     $$PWD/shaders/phong_core.frag \
-    $$PWD/shaders/phong.vert \
-    $$PWD/shaders/phong_core.vert \
     $$PWD/shaders/conditional.vert \
     $$PWD/shaders/conditional_core.vert \
+    $$PWD/shaders/surface.vert \
+    $$PWD/shaders/surface_core.vert
 
 }
 

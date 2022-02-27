@@ -10,12 +10,13 @@ in vec4 c;
 out vec4 color;
 
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+const float ambientStrength = 0.4;
+const float specularStrength = 0.2;
 
 
 void main()
 {
     // ambient
-    float ambientStrength = 0.4;
     vec3 ambient = ambientStrength * lightColor;
 
     // diffuse
@@ -25,7 +26,6 @@ void main()
     vec3 diffuse = diff * lightColor;
 
     // specular
-    float specularStrength = 0.3;
     vec3 viewDir = normalize(cameraPos - v);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);

@@ -136,8 +136,9 @@ private:
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer *m_vbos[VBO_Count];
 
-    QOpenGLShaderProgram *m_standardShader = nullptr;
+    QOpenGLShaderProgram *m_surfaceShader = nullptr;
     QOpenGLShaderProgram *m_conditionalShader = nullptr;
+    QOpenGLShaderProgram *m_lineShader = nullptr;
 
     bool m_arcBallActive = false;
     QPoint m_arcBallMousePos;

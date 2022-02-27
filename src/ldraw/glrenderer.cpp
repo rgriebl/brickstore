@@ -62,9 +62,11 @@ void GLRenderer::cleanup()
         m_vbos[i]->destroy();
         delete m_vbos[i];
     }
-    delete m_standardShader;
+    delete m_surfaceShader;
+    delete m_lineShader;
     delete m_conditionalShader;
-    m_standardShader = nullptr;
+    m_surfaceShader = nullptr;
+    m_lineShader = nullptr;
     m_conditionalShader = nullptr;
     emit doneCurrent();
 }
@@ -196,25 +198,36 @@ void GLRenderer::initializeGL(QOpenGLContext *context)
     initializeOpenGLFunctions();
     glClearColor(.5, .5, .5, 0);
 
-    m_standardShader = new QOpenGLShaderProgram;
-    m_standardShader->addShaderFromSourceFile(QOpenGLShader::Vertex, m_coreProfile
-                                       ? QLatin1String(":/ldraw/shaders/phong_core.vert")
-                                       : QLatin1String(":/ldraw/shaders/phong.vert"));
-    m_standardShader->addShaderFromSourceFile(QOpenGLShader::Fragment, m_coreProfile
-                                       ? QLatin1String(":/ldraw/shaders/phong_core.frag")
-                                       : QLatin1String(":/ldraw/shaders/phong.frag"));
-    m_standardShader->bindAttributeLocation("vertex", 0);
-    m_standardShader->bindAttributeLocation("normal", 1);
-    m_standardShader->bindAttributeLocation("color", 2);
-    m_standardShader->link();
+    m_surfaceShader = new QOpenGLShaderProgram;
+    m_surfaceShader->addShaderFromSourceFile(QOpenGLShader::Vertex, m_coreProfile
+                                             ? QLatin1String(":/ldraw/shaders/surface_core.vert")
+                                             : QLatin1String(":/ldraw/shaders/surface.vert"));
+    m_surfaceShader->addShaderFromSourceFile(QOpenGLShader::Fragment, m_coreProfile
+                                             ? QLatin1String(":/ldraw/shaders/phong_core.frag")
+                                             : QLatin1String(":/ldraw/shaders/phong.frag"));
+    m_surfaceShader->bindAttributeLocation("vertex", 0);
+    m_surfaceShader->bindAttributeLocation("normal", 1);
+    m_surfaceShader->bindAttributeLocation("color", 2);
+    m_surfaceShader->link();
+
+    m_lineShader = new QOpenGLShaderProgram;
+    m_lineShader->addShaderFromSourceFile(QOpenGLShader::Vertex, m_coreProfile
+                                          ? QLatin1String(":/ldraw/shaders/line_core.vert")
+                                          : QLatin1String(":/ldraw/shaders/line.vert"));
+    m_lineShader->addShaderFromSourceFile(QOpenGLShader::Fragment, m_coreProfile
+                                          ? QLatin1String(":/ldraw/shaders/line_core.frag")
+                                          : QLatin1String(":/ldraw/shaders/line.frag"));
+    m_lineShader->bindAttributeLocation("vertex", 0);
+    m_lineShader->bindAttributeLocation("color", 1);
+    m_lineShader->link();
 
     m_conditionalShader = new QOpenGLShaderProgram;
     m_conditionalShader->addShaderFromSourceFile(QOpenGLShader::Vertex, m_coreProfile
-                                       ? QLatin1String(":/ldraw/shaders/conditional_core.vert")
-                                       : QLatin1String(":/ldraw/shaders/conditional.vert"));
+                                                 ? QLatin1String(":/ldraw/shaders/conditional_core.vert")
+                                                 : QLatin1String(":/ldraw/shaders/conditional.vert"));
     m_conditionalShader->addShaderFromSourceFile(QOpenGLShader::Fragment, m_coreProfile
-                                       ? QLatin1String(":/ldraw/shaders/phong_core.frag")
-                                       : QLatin1String(":/ldraw/shaders/phong.frag"));
+                                                 ? QLatin1String(":/ldraw/shaders/line_core.frag")
+                                                 : QLatin1String(":/ldraw/shaders/line.frag"));
     m_conditionalShader->bindAttributeLocation("vertex0", 0);
     m_conditionalShader->bindAttributeLocation("vertex1", 1);
     m_conditionalShader->bindAttributeLocation("vertex2", 2);
@@ -237,17 +250,19 @@ void GLRenderer::initializeGL(QOpenGLContext *context)
     m_view.translate(cameraPos);
 
     // Fixed light position (very far away, because we can scale the model up quite a bit)
-    QVector3D lightPos = { -1, .2f, 1 };
+    QVector3D lightPos = { 0, 0, 1 };
 
-    m_standardShader->bind();
-    m_standardShader->setUniformValue("cameraPos", cameraPos);
-    m_standardShader->setUniformValue("lightPos", lightPos * 10000);
-    m_standardShader->setUniformValue("viewMatrix", m_view);
-    m_standardShader->release();
+    m_surfaceShader->bind();
+    m_surfaceShader->setUniformValue("cameraPos", cameraPos);
+    m_surfaceShader->setUniformValue("lightPos", lightPos * 10000);
+    m_surfaceShader->setUniformValue("viewMatrix", m_view);
+    m_surfaceShader->release();
+
+    m_lineShader->bind();
+    m_lineShader->setUniformValue("viewMatrix", m_view);
+    m_lineShader->release();
 
     m_conditionalShader->bind();
-    m_conditionalShader->setUniformValue("cameraPos", cameraPos);
-    m_conditionalShader->setUniformValue("lightPos", lightPos * 10000);
     m_conditionalShader->setUniformValue("viewMatrix", m_view);
     m_conditionalShader->release();
 }
@@ -294,21 +309,21 @@ void GLRenderer::paintGL(QOpenGLContext *context)
         return reinterpret_cast<void *>(offset * sizeof(GLfloat));
     };
 
-    auto renderStandardVBO = [this](int index, GLenum mode, int indexBufferIndex = -1) {
+    auto renderSurfacesVBO = [this](int index, GLenum mode, int indexBufferIndex = -1) {
         m_vbos[index]->bind();
 
         // Vertex: vec3
         // Normal: vec3
         // Color : rgba
 
-        const int stride = 10 * sizeof(GLfloat);
+        const int stride = 7 * sizeof(GLfloat);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(0));
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(3));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, vertexOffset(6));
+        glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, vertexOffset(6));
 
         if (indexBufferIndex == -1) {
             glDrawArrays(mode, 0, m_vbos[index]->size() / stride);
@@ -324,7 +339,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
         m_vbos[index]->release();
     };
 
-    auto renderConditionalVBO = [this](int index, GLenum mode) {
+    auto renderLinesVBO = [this](int index, GLenum mode, bool conditional) {
         m_vbos[index]->bind();
 
         // Vertex: vec3 (p1)
@@ -333,44 +348,66 @@ void GLRenderer::paintGL(QOpenGLContext *context)
         // Vertex: vec3 (p4)
         // Color : rgba
 
-        const int stride = 16 * sizeof(GLfloat);
+        // or
+
+        // Vertex: vec
+        // Color : rgba
+
+        const int stride = (conditional ? 13 : 4) * sizeof(GLfloat);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(0));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(3));
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(6));
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(9));
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, stride, vertexOffset(12));
+        if (conditional) {
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(3));
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(6));
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, vertexOffset(9));
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, vertexOffset(12));
+        } else {
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, vertexOffset(3));
+        }
 
         glDrawArrays(mode, 0, m_vbos[index]->size() / stride);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
-        glDisableVertexAttribArray(3);
-        glDisableVertexAttribArray(4);
+        if (conditional) {
+            glDisableVertexAttribArray(2);
+            glDisableVertexAttribArray(3);
+            glDisableVertexAttribArray(4);
+        }
         m_vbos[index]->release();
     };
+
+    // #### SURFACES ####
+
+    m_surfaceShader->bind();
+    m_surfaceShader->setUniformValue("projMatrix", m_proj);
+    m_surfaceShader->setUniformValue("modelMatrix", m_model);
+    m_surfaceShader->setUniformValue("normalMatrix", m_model.normalMatrix());
 
     // we need to offset the surfaces in the depth buffer, so that the lines are always
     // rendered on top, even though the technically have the same Z coordinate
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
 
-    m_standardShader->bind();
-    m_standardShader->setUniformValue("projMatrix", m_proj);
-    m_standardShader->setUniformValue("modelMatrix", m_model);
-    m_standardShader->setUniformValue("normalMatrix", m_model.normalMatrix());
-
     // backface culling on the solid surfaces
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    renderStandardVBO(VBO_Surfaces, GL_TRIANGLES);
+    renderSurfacesVBO(VBO_Surfaces, GL_TRIANGLES);
+
+    m_surfaceShader->release();
+
+    // #### LINES ####
+
+    m_lineShader->bind();
+    m_lineShader->setUniformValue("projMatrix", m_proj);
+    m_lineShader->setUniformValue("modelMatrix", m_model);
 
     // no culling on the transparent surfaces and the lines
     glDisable(GL_CULL_FACE);
@@ -383,18 +420,21 @@ void GLRenderer::paintGL(QOpenGLContext *context)
 
     glLineWidth(2.5);
 
-    renderStandardVBO(VBO_Lines, GL_LINES);
+    renderLinesVBO(VBO_Lines, GL_LINES, false /*not conditional*/);
 
-    m_standardShader->release();
+    m_lineShader->release();
+
+    // #### CONDITIONAL LINES ####
 
     m_conditionalShader->bind();
     m_conditionalShader->setUniformValue("projMatrix", m_proj);
     m_conditionalShader->setUniformValue("modelMatrix", m_model);
-    m_conditionalShader->setUniformValue("normalMatrix", m_model.normalMatrix());
 
-    renderConditionalVBO(VBO_ConditionalLines, GL_LINES);
+    renderLinesVBO(VBO_ConditionalLines, GL_LINES, true /*conditional*/);
 
     m_conditionalShader->release();
+
+    // #### TRANSPARENT SURFACES ####
 
     if (!m_transparentCenters.empty()) {
         // render transparent surfaces back to front
@@ -403,7 +443,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
             auto transformed = m_transparentCenters;
             auto m = m_proj * m_view * m_model;
             std::for_each(transformed.begin(), transformed.end(), [&m](QVector3D &v) {
-                v = m * v;
+                v = m.map(v);
             });
 
             struct triple_uint_t {
@@ -422,23 +462,25 @@ void GLRenderer::paintGL(QOpenGLContext *context)
             m_resortTransparentSurfaces = false;
         }
 
+        m_surfaceShader->bind();
         glEnable(GL_POLYGON_OFFSET_FILL);
-        m_standardShader->bind();
 
-        renderStandardVBO(VBO_TransparentSurfaces, GL_TRIANGLES, VBO_TransparentIndexes);
+        renderSurfacesVBO(VBO_TransparentSurfaces, GL_TRIANGLES, VBO_TransparentIndexes);
 
         glDisable(GL_POLYGON_OFFSET_FILL);
-        m_standardShader->release();
+        m_surfaceShader->release();
     }
     glDepthMask(GL_TRUE);
 }
 
 void GLRenderer::resetTransformation()
 {
+    // this is the approximate angle from which most of the BL 2D images have been rendered
+
     QMatrix4x4 rotation;
-    rotation.rotate(-180+30, 1, 0, 0);
-    rotation.rotate(-45, 0, 1, 0);
-    rotation.rotate(0, 0, 0, 1);
+    rotation.rotate(-145, 1, 0, 0);
+    rotation.rotate( -37, 0, 1, 0);
+    rotation.rotate(   0, 0, 0, 1);
 
     setTranslation({ 0, 0, 0 });
     setRotation(QQuaternion::fromRotationMatrix(rotation.toGenericMatrix<3, 3>()));
@@ -546,14 +588,17 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
 
     // 1 element == vec3 vector + vec3 normal + vec4 color
 
+    static auto convertColor = [](const QColor &color) -> float {
+        quint32 argb = color.rgba();
+        quint32 abgr = (argb & 0xff00ff00)
+                | ((argb & 0x00ff0000) >> 16)
+                | ((argb & 0x000000ff) << 16);
+        return *((float *) &abgr);
+    };
+
     auto addTriangle = [this, &buffers](const QVector3D &p0, const QVector3D &p1,
             const QVector3D &p2, const QVector3D &pc, const QColor &color, const QMatrix4x4 &matrix)
     {
-        float r = color.redF();
-        float g = color.greenF();
-        float b = color.blueF();
-        float a = color.alphaF();
-
         auto p0m = matrix.map(p0);
         auto p1m = matrix.map(p1);
         auto p2m = matrix.map(p2);
@@ -566,7 +611,7 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
 
         for (const auto &p : { p0m, p1m, p2m }) {
             buffers[index]->insert(buffers[index]->end(), {
-                                       p.x(), p.y(), p.z(), n.x(), n.y(), n.z(), r, g, b, a
+                                       p.x(), p.y(), p.z(), n.x(), n.y(), n.z(), convertColor(color)
                                    });
         }
         if (isTransparent)
@@ -576,15 +621,10 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
     auto addLine = [&buffers](const QVector3D &p0, const QVector3D &p1,
             const QColor &color, const QMatrix4x4 &matrix)
     {
-        float r = color.redF();
-        float g = color.greenF();
-        float b = color.blueF();
-        float a = color.alphaF();
-
         for (const auto &p : { p0, p1 }) {
             auto mp = matrix.map(p);
             buffers[VBO_Lines]->insert(buffers[VBO_Lines]->end(), {
-                                       mp.x(), mp.y(), mp.z(), 0, 0, 0, r, g, b, a
+                                       mp.x(), mp.y(), mp.z(), convertColor(color)
                                    });
         }
     };
@@ -592,11 +632,6 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
     auto addConditionalLine = [&buffers](const QVector3D &p0, const QVector3D &p1,
             const QVector3D &p2, const QVector3D &p3, const QColor &color, const QMatrix4x4 &matrix)
     {
-        float r = color.redF();
-        float g = color.greenF();
-        float b = color.blueF();
-        float a = color.alphaF();
-
         auto mp0 = matrix.map(p0);
         auto mp1 = matrix.map(p1);
         auto mp2 = matrix.map(p2);
@@ -606,14 +641,14 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
                                                   mp1.x(), mp1.y(), mp1.z(),
                                                   mp2.x(), mp2.y(), mp2.z(),
                                                   mp3.x(), mp3.y(), mp3.z(),
-                                                  r, g, b, a
+                                                  convertColor(color)
                                               });
         buffers[VBO_ConditionalLines]->insert(buffers[VBO_ConditionalLines]->end(), {
                                                   mp1.x(), mp1.y(), mp1.z(),
                                                   mp0.x(), mp0.y(), mp0.z(),
                                                   mp2.x(), mp2.y(), mp2.z(),
                                                   mp3.x(), mp3.y(), mp3.z(),
-                                                  r, g, b, a
+                                                  convertColor(color)
                                               });
     };
 
