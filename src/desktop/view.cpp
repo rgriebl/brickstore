@@ -476,9 +476,6 @@ View::View(Document *document, QWidget *parent)
     connect(m_model, &DocumentModel::modificationChanged,
             this, &View::updateCaption);
 
-    connect(m_document, &Document::blockingOperationActiveChanged,
-            m_table, &QWidget::setDisabled);
-
     updateMinimumSectionSize();
 
     m_ccw = new ColumnChangeWatcher(this, m_header);
@@ -494,6 +491,10 @@ View::View(Document *document, QWidget *parent)
         }
         repositionBlockOverlay();
         m_blockOverlay->setVisible(blocked);
+        if (blocked)
+            m_table->clearFocus();
+        else
+            m_table->setFocus();
         m_table->setEnabled(!blocked);
     });
     connect(m_document, &Document::blockingOperationTitleChanged,
