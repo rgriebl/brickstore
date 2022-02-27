@@ -39,7 +39,7 @@
 #include "bricklink/model.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "ldraw/ldraw.h"
+#include "ldraw/library.h"
 #include "utility/currency.h"
 #include "utility/utility.h"
 #include "betteritemdelegate.h"

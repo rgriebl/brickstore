@@ -31,7 +31,7 @@
 #include "bricklink/item.h"
 #include "bricklink/picture.h"
 #include "common/config.h"
-#include "ldraw/ldraw.h"
+#include "ldraw/library.h"
 #include "ldraw/part.h"
 #if defined(Q_OS_MACOS)
 #  include "ldraw/renderwindow.h"

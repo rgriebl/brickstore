@@ -14,7 +14,7 @@
 
 #include "common/application.h"
 #include "common/config.h"
-#include "ldraw/ldraw.h"
+#include "ldraw/library.h"
 #include "ldraw/renderwidget.h"
 #include "utility/utility.h"
 #include "aboutdialog.h"

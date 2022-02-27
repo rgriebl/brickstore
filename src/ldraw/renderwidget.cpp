@@ -18,7 +18,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include "ldraw.h"
+#include "library.h"
 #include "glrenderer.h"
 #include "renderwidget.h"
 

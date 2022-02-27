@@ -39,7 +39,7 @@
 #include "common/onlinestate.h"
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
-#include "ldraw/ldraw.h"
+#include "ldraw/library.h"
 #include "utility/currency.h"
 #include "utility/eventfilter.h"
 #include "utility/exception.h"

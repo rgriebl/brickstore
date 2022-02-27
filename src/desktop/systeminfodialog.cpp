@@ -20,7 +20,7 @@
 #include "utility/utility.h"
 #include "utility/eventfilter.h"
 #include "utility/exception.h"
-#include "ldraw/ldraw.h"
+#include "ldraw/library.h"
 #include "utility/systeminfo.h"
 #include "systeminfodialog.h"
 #include "ui_systeminfodialog.h"

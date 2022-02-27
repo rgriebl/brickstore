@@ -37,7 +37,7 @@
 #include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "minizip/minizip.h"
-#include "ldraw.h"
+#include "library.h"
 #include "part.h"
 
 
@@ -645,4 +645,4 @@ QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
 
 } // namespace LDraw
 
-#include "moc_ldraw.cpp"
+#include "moc_library.cpp"

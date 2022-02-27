@@ -21,7 +21,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include "ldraw.h"
+#include "library.h"
 #include "part.h"
 #include "glrenderer.h"
 

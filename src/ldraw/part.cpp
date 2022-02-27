@@ -17,7 +17,7 @@
 #include <QTextStream>
 #include <QDebug>
 
-#include "ldraw.h"
+#include "library.h"
 #include "part.h"
 
 
