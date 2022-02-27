@@ -441,6 +441,12 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
     bool inZip = false;
     bool found = false;
 
+    // add the logo on studs
+    if (filename == "stud.dat"_l1)
+        filename = "stud-logo.dat"_l1;
+    else if (filename == "stud2.dat"_l1)
+        filename = "stud2-logo.dat"_l1;
+
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
 
