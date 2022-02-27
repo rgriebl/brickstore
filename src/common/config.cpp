@@ -168,6 +168,11 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
     if (cfgver < mkver(2022, 2, 3)) {
         // transition to new ldrawDir settings
         setValue("General/LDrawTransition"_l1, true);
+
+        // reset the sentry consent flag on platforms that didn't have sentry builds before
+#if !defined(Q_OS_WINDOWS)
+        setSentryConsent(SentryConsent::Unknown);
+#endif
     }
 }
 

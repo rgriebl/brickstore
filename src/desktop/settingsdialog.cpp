@@ -1151,8 +1151,10 @@ void SettingsDialog::save()
                              tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
     }
 
+#if defined(SENTRY_ENABLED)
     Config::inst()->setSentryConsent(w_crash_reports->isChecked() ? Config::SentryConsent::Given
                                                                   : Config::SentryConsent::Revoked);
+#endif
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 
