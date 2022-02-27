@@ -265,16 +265,10 @@ QCoro::Task<> Application::setupLDraw()
         if (ldrawDir.isEmpty())
             ldrawDir = std::get<0>(LDraw::Library::potentialLDrawDirs().value(0));
 
-        auto msg1 = tr("The way BrickStore uses LDraw to render 3D models for parts has changed: "
-                       "by default it will now download and maintain its own LDraw installation.");
-        auto msg2 = tr("BrickStore was configured to use an existing LDraw installation on your "
-                       "computer in the past and you can switch back to this if you want.");
-        auto msg3 = tr("Please check the LDraw page in Settings.");
-
-        QString msg = msg1;
-        if (!ldrawDir.isEmpty())
-            msg = msg % u"<br><br>" % msg2;
-        msg = msg % u"<br><br>" % msg3;
+        auto msg = tr("The way BrickStore uses LDraw to render 3D models for parts has changed: "
+                      "by default it will now download and maintain its own LDraw installation."
+                      "<br><br>Please check the LDraw page in Settings if you still want to use "
+                      "a custom LDraw installation.");
 
         UIHelpers::information(msg);
 
@@ -282,7 +276,6 @@ QCoro::Task<> Application::setupLDraw()
         Config::inst()->remove("General/LDrawTransition"_l1);
         Config::inst()->setLDrawDir(ldrawDir);
     }
-
 
     auto loadLibrary = [](QString ldrawDir) -> QCoro::Task<> {
         bool isInternalZip = ldrawDir.isEmpty();
