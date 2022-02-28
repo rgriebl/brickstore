@@ -52,7 +52,7 @@ signals:
 
 private:
     Store(Core *core);
-    ~Store();
+    ~Store() override;
     void setUpdateStatus(UpdateStatus updateStatus);
 
     Core *m_core;

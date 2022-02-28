@@ -182,7 +182,7 @@ QuadElement *QuadElement::create(int color, const QVector3D *v)
 
 
 PartElement::PartElement(int color, const QMatrix4x4 &matrix, Part *p)
-    : Element(Type::Part), m_color(color), m_matrix(matrix), m_part(p)
+    : Element(Type::Part), m_matrix(matrix), m_part(p), m_color(color)
 {
     if (m_part)
         m_part->addRef();
@@ -231,7 +231,7 @@ Part *Part::parse(const QByteArray &data, const QString &dir)
             continue;
         if (Element *e = Element::fromString(line, dir)) {
             p->m_elements.append(e);
-            p->m_cost += e->size();
+            p->m_cost += int(e->size());
         } else {
             //qCWarning(LogLDraw) << "Could not parse line" << lineno << ":" << line;
         }
@@ -262,7 +262,7 @@ bool Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
     return true;
 }
 
-uint Part::cost() const
+int Part::cost() const
 {
     return m_cost;
 }

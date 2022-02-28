@@ -650,7 +650,7 @@ void SelectItem::itemTypeUpdated()
     setCurrentCategory(oldCat);
     setCurrentItem(oldItem);
 
-    d->w_itemthumbs->setColumnWidth(0, (itemtype ? itemtype->rawPictureSize().width() : 80) * d->m_zoom);
+    d->w_itemthumbs->setColumnWidth(0, int((itemtype ? itemtype->rawPictureSize().width() : 80) * d->m_zoom));
 
     if (!itemtype || !itemtype->hasColors())
         d->itemModel->setFilterColor(nullptr);

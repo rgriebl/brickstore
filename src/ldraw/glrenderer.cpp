@@ -283,8 +283,8 @@ void GLRenderer::paintGL(QOpenGLContext *context)
     Q_UNUSED(context)
 
     if (m_clearColor.isValid()) {
-        glClearColor(m_clearColor.redF(), m_clearColor.greenF(),
-                     m_clearColor.blueF(), m_clearColor.alphaF());
+        glClearColor(float(m_clearColor.redF()), float(m_clearColor.greenF()),
+                     float(m_clearColor.blueF()), float(m_clearColor.alphaF()));
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -306,7 +306,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
     }
 
     static auto vertexOffset = [](int offset) {
-        return reinterpret_cast<void *>(offset * sizeof(GLfloat));
+        return reinterpret_cast<void *>(offset * int(sizeof(GLfloat)));
     };
 
     auto renderSurfacesVBO = [this](int index, GLenum mode, int indexBufferIndex = -1) {
@@ -329,7 +329,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
             glDrawArrays(mode, 0, m_vbos[index]->size() / stride);
         } else {
             m_vbos[indexBufferIndex]->bind();
-            glDrawElements(mode, m_vbos[indexBufferIndex]->size() / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+            glDrawElements(mode, m_vbos[indexBufferIndex]->size() / int(sizeof(GLuint)), GL_UNSIGNED_INT, nullptr);
             m_vbos[indexBufferIndex]->release();
         }
 
@@ -448,7 +448,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
 
             struct triple_uint_t {
                 GLuint i1 = 0, i2 = 1, i3 = 2;
-                triple_uint_t &operator++() { i1+=3; i2+=3; i3+=3; return *this; };
+                triple_uint_t &operator++() { i1+=3; i2+=3; i3+=3; return *this; }
             };
 
             std::vector<triple_uint_t> indexes(transformed.size());
@@ -526,8 +526,8 @@ void GLRenderer::rotateArcBall()
     auto mapMouseToBall = [this](const QPoint &mouse) -> QVector3D {
         // normalize mouse pos to -1..+1 and reverse y
         QVector3D mouseView(
-                    2.f * mouse.x() / m_viewport.width() - 1.f,
-                    1.f - 2.f * mouse.y() / m_viewport.height(),
+                    2.f * float(mouse.x()) / float(m_viewport.width()) - 1.f,
+                    1.f - 2.f * float(mouse.y()) / float(m_viewport.height()),
                     0.f
         );
 
@@ -593,7 +593,7 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
         quint32 abgr = (argb & 0xff00ff00)
                 | ((argb & 0x00ff0000) >> 16)
                 | ((argb & 0x000000ff) << 16);
-        return *((float *) &abgr);
+        return *(reinterpret_cast<float *>(&abgr));
     };
 
     auto addTriangle = [this, &buffers](const QVector3D &p0, const QVector3D &p1,

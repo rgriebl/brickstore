@@ -840,7 +840,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     });
     connect(LDraw::library(), &LDraw::Library::updateFinished,
             this, [this](bool success, const QString &message) {
-        Q_UNUSED(success);
+        Q_UNUSED(success)
         w_ldraw_progress->setRange(0, 0);
         w_ldraw_progress->setVisible(false);
         w_ldraw_update_message->setText(message);

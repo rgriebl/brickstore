@@ -93,7 +93,7 @@ void MobileApplication::init()
         return;
     }
 
-    setUILoggingHandler([](QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
+    setUILoggingHandler([](QtMsgType type, const QMessageLogContext &, const QString &) {
         // just ignore for now, but we need to set one
     });
 }

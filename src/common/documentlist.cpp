@@ -70,7 +70,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount())
         return { };
 
-    static QIcon docIcon(":/assets/generated-app-icons/brickstore_doc"_l1);;
+    static QIcon docIcon(":/assets/generated-app-icons/brickstore_doc"_l1);
 
     Document *document = m_documents.at(index.row());
     switch (role) {

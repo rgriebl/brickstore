@@ -95,27 +95,29 @@ const QVector<BrickLink::Item::ConsistsOf> &BrickLink::Item::consistsOf() const
 
 const BrickLink::ItemType *BrickLink::Item::itemType() const
 {
-    return (m_itemTypeIndex != -1) ? &core()->itemTypes()[m_itemTypeIndex] : nullptr;
+    return (m_itemTypeIndex > -1) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;
 }
 
 const BrickLink::Category *BrickLink::Item::category() const
 {
-    return (m_categoryIndex != -1) ? &core()->categories()[m_categoryIndex] : nullptr;
+    return (m_categoryIndex > -1) ? &core()->categories()[uint(m_categoryIndex)] : nullptr;
 }
 
 const QVector<const BrickLink::Category *> BrickLink::Item::additionalCategories(bool includeMainCategory) const
 {
     QVector<const BrickLink::Category *> cats;
-    if (includeMainCategory && (m_categoryIndex != -1))
-        cats << &core()->categories()[m_categoryIndex];
-    for (const auto catIndex : m_additionalCategoryIndexes)
-        cats << &core()->categories()[catIndex];
+    if (includeMainCategory && (m_categoryIndex > -1))
+        cats << &core()->categories()[uint(m_categoryIndex)];
+    for (const auto catIndex : m_additionalCategoryIndexes) {
+        if (catIndex > -1)
+            cats << &core()->categories()[uint(catIndex)];
+    }
     return cats;
 }
 
 const BrickLink::Color *BrickLink::Item::defaultColor() const
 {
-    return (m_defaultColorIndex != -1) ? &core()->colors()[m_defaultColorIndex] : nullptr;
+    return (m_defaultColorIndex > -1) ? &core()->colors()[uint(m_defaultColorIndex)] : nullptr;
 }
 
 QDateTime BrickLink::Item::inventoryUpdated() const
@@ -146,7 +148,7 @@ const QVector<const BrickLink::Color *> BrickLink::Item::knownColors() const
 
 uint BrickLink::Item::index() const
 {
-    return (this - core()->items().data());
+    return uint(this - core()->items().data());
 }
 
 const BrickLink::Item *BrickLink::Item::ConsistsOf::item() const

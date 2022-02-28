@@ -1096,12 +1096,12 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
         return (!i && !toolTip) ? dash : loc.toString(i);
     }
     case DocumentModel::YearReleased: {
-        uint yearFrom = display.toUInt();
+        int yearFrom = display.toInt();
         if (!yearFrom && !toolTip) {
             return dash;
         } else {
             const auto *lot = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
-            uint yearTo = lot->itemYearLastProduced();
+            int yearTo = lot->itemYearLastProduced();
             if (yearTo && (yearTo != yearFrom))
                 return QString::number(yearFrom) % u" - " % QString::number(yearTo);
             else

@@ -263,8 +263,9 @@ retryState:
             break;
         }
         case StateCombination: {
-            auto combination = findInTokens(word, m_combination_tokens, Combination(-1));
-            if (combination < 0) {
+            auto notFound = Combination(-1);
+            auto combination = findInTokens(word, m_combination_tokens, notFound);
+            if (combination == notFound) {
                 state = StateInvalid;
             } else {
                 f.setCombination(combination);

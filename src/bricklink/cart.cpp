@@ -170,7 +170,7 @@ void Cart::setLastUpdated(const QDate &dt)
 
 void Cart::setTotal(double m)
 {
-    if (d->m_total != m) {
+    if (!qFuzzyCompare(d->m_total, m)) {
         d->m_total = m;
         emit totalChanged(m);
     }

@@ -269,7 +269,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
                                                               : QString(u' ' % tr("Batch") % u": " % marker)));
                     orderLot->setMarkerColor(col);
 
-                    if (crate) {
+                    if (!qFuzzyIsNull(crate)) {
                         orderLot->setCost(orderLot->cost() * crate);
                         orderLot->setPrice(orderLot->price() * crate);
                         for (int i = 0; i < 3; ++i)

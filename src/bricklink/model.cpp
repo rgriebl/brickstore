@@ -65,7 +65,7 @@ int BrickLink::ColorModel::pointerIndexOf(const void *pointer) const
 {
     const auto &colors = core()->colors();
     auto d = static_cast<const Color *>(pointer) - colors.data();
-    return (d >= 0 && d < int(colors.size())) ? d : -1;
+    return (d >= 0 && d < int(colors.size())) ? int(d) : -1;
 }
 
 const BrickLink::Color *BrickLink::ColorModel::color(const QModelIndex &index) const
@@ -91,7 +91,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         QFontMetricsF fm(QGuiApplication::font());
-        QImage img = core()->colorImage(c, fm.height() + 4, fm.height() + 4);
+        QImage img = core()->colorImage(c, int(fm.height()) + 4, int(fm.height()) + 4);
         if (!img.isNull()) {
             QPixmap pix = QPixmap::fromImage(img);
             QIcon ico;
@@ -257,7 +257,7 @@ int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
     } else {
         const auto &categories = core()->categories();
         auto d = static_cast<const Category *>(pointer) - categories.data();
-        return (d >= 0 && d < int(categories.size())) ? d + 1 : -1;
+        return (d >= 0 && d < int(categories.size())) ? int(d + 1) : -1;
     }
 }
 
@@ -374,7 +374,7 @@ int BrickLink::ItemTypeModel::pointerIndexOf(const void *pointer) const
 {
     const auto &itemTypes = core()->itemTypes();
     auto d = static_cast<const ItemType *>(pointer) - itemTypes.data();
-    return (d >= 0 && d < int(itemTypes.size())) ? d : -1;
+    return (d >= 0 && d < int(itemTypes.size())) ? int(d) : -1;
 }
 
 const BrickLink::ItemType *BrickLink::ItemTypeModel::itemType(const QModelIndex &index) const
@@ -484,7 +484,7 @@ int BrickLink::ItemModel::pointerIndexOf(const void *pointer) const
 {
     const auto &items = core()->items();
     auto d = static_cast<const Item *>(pointer) - items.data();
-    return (d >= 0 && d < int(items.size())) ? d : -1;
+    return (d >= 0 && d < int(items.size())) ? int(d) : -1;
 }
 
 const BrickLink::Item *BrickLink::ItemModel::item(const QModelIndex &index) const

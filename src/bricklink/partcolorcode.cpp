@@ -20,10 +20,10 @@
 
 const BrickLink::Item *BrickLink::PartColorCode::item() const
 {
-    return (m_itemIndex != -1) ? &core()->items()[m_itemIndex] : nullptr;
+    return (m_itemIndex > -1) ? &core()->items()[uint(m_itemIndex)] : nullptr;
 }
 
 const BrickLink::Color *BrickLink::PartColorCode::color() const
 {
-    return (m_colorIndex != -1) ? &core()->colors()[m_colorIndex] : nullptr;
+    return (m_colorIndex > -1) ? &core()->colors()[uint(m_colorIndex)] : nullptr;
 }

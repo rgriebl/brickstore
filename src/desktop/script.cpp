@@ -244,7 +244,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
         throw Exception(tr("Failed to start the print job."));
 
     if (maxPageCount)
-        *maxPageCount = job->pageCount();
+        *maxPageCount = uint(job->pageCount());
 }
 
 ///////////////////////////////////////////////////////////////////////

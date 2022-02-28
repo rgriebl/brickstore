@@ -874,7 +874,7 @@ void DocumentModel::changeCurrencyDirect(const QString &ccode, qreal crate, doub
     if (!qFuzzyCompare(crate, qreal(1)) || (ccode != m_currencycode)) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
-            prices = new double[5 * m_lots.count()];
+            prices = new double[uint(5 * m_lots.count())];
 
         for (int i = 0; i < m_lots.count(); ++i) {
             Lot *lot = m_lots[i];
@@ -1154,7 +1154,7 @@ void DocumentModel::applyTo(const LotList &lots, std::function<bool(const Lot &,
 
     int count = lots.size();
     std::vector<std::pair<Lot *, Lot>> changes;
-    changes.reserve(count);
+    changes.reserve(uint(count));
 
     for (Lot *from : lots) {
         Lot to = *from;

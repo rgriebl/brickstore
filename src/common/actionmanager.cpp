@@ -37,7 +37,7 @@ ActionManager::Action::Action(const char *name, const char *text, Needs needs, F
     , m_text(text)
     , m_shortcut(shortcut)
     , m_needs(needs)
-    , m_flags(flags)
+    , m_flags(int(flags))
 {
     if (text)
         m_transText = QString::fromLatin1(text);

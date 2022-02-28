@@ -126,7 +126,7 @@ void WantedList::setDescription(const QString &description)
 
 void WantedList::setFilled(double f)
 {
-    if (d->m_filled != f) {
+    if (!qFuzzyCompare(d->m_filled, f)) {
         d->m_filled = f;
         emit filledChanged(f);
     }

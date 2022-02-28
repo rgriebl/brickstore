@@ -84,22 +84,23 @@ bool MiniZip::openInternal(bool parseTOC)
         }
         return nullptr;
     };
-    static auto readCallback = [](void *, void *stream, void *buf, unsigned long size) -> unsigned long {
-        return stream ? reinterpret_cast<QFile *>(stream)->read(reinterpret_cast<char *>(buf), size) : -1;
+    static auto readCallback = [](void *, void *stream, void *buf, uLong size) -> uLong {
+        return uLong(stream ? reinterpret_cast<QFile *>(stream)->read(reinterpret_cast<char *>(buf), qint64(size)) : -1);
     };
 
     static auto tellCallback = [](void *, void *stream) -> quint64 {
-        return stream ? reinterpret_cast<QFile *>(stream)->pos() : -1;
+        return quint64(stream ? reinterpret_cast<QFile *>(stream)->pos() : -1);
     };
     static auto seekCallback = [](void *, void *stream, quint64 pos, int origin) -> long {
         if (auto *f = reinterpret_cast<QFile *>(stream)) {
+            qint64 ipos = qint64(pos);
             switch (origin) {
-            case ZLIB_FILEFUNC_SEEK_END: pos = f->size() - pos; break;
+            case ZLIB_FILEFUNC_SEEK_END: ipos = f->size() - ipos; break;
             case ZLIB_FILEFUNC_SEEK_SET: break;
-            case ZLIB_FILEFUNC_SEEK_CUR: pos = f->pos() + pos; break;
+            case ZLIB_FILEFUNC_SEEK_CUR: ipos = f->pos() + ipos; break;
             default: return -1;
             }
-            return f->seek(pos) ? 0 : -1;
+            return f->seek(ipos) ? 0 : -1;
         }
         return -1;
     };
@@ -192,7 +193,7 @@ QByteArray MiniZip::readFile(const QString &fileName)
         throw Exception(tr("Could not seek to the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
 
     unz_file_info64 fileInfo;
-    if (unzGetCurrentFileInfo64(m_zip, &fileInfo, 0, 0, 0, 0, 0, 0) != UNZ_OK)
+    if (unzGetCurrentFileInfo64(m_zip, &fileInfo, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK)
         throw Exception(tr("Could not get info for the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
 
     if (fileInfo.uncompressed_size >= 0x8000000ULL)
@@ -202,8 +203,8 @@ QByteArray MiniZip::readFile(const QString &fileName)
         throw Exception(tr("Could not open the file %1 within the ZIP file %2 for reading.")).arg(fileName).arg(m_zipFileName);
 
     QByteArray data;
-    data.resize(fileInfo.uncompressed_size);
-    if (unzReadCurrentFile(m_zip, data.data(), data.size()) != data.size()) {
+    data.resize(int(fileInfo.uncompressed_size));
+    if (unzReadCurrentFile(m_zip, data.data(), unsigned(data.size())) != data.size()) {
         data.clear();
         unzCloseCurrentFile(m_zip);
         throw Exception(tr("Could not read the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
@@ -225,7 +226,7 @@ void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
                 block.resize(1024*1024);
                 int bytesRead;
                 do {
-                    bytesRead = unzReadCurrentFile(zip.m_zip, block.data(), block.size());
+                    bytesRead = unzReadCurrentFile(zip.m_zip, block.data(), unsigned(block.size()));
                     if (bytesRead > 0)
                         destination->write(block.constData(), bytesRead);
                 } while (bytesRead > 0);

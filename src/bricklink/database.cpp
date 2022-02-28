@@ -214,7 +214,7 @@ void Database::read(const QString &fileName)
                     .arg(f.fileName()).arg(f.pos());
         };
 
-        auto sizeCheck = [&f](int s, int max) {
+        auto sizeCheck = [&f](uint s, uint max) {
             if (s > max)
                 throw Exception("failed to read from database (%1) at position %2: size value %L3 is larger than expected maximum %L4")
                     .arg(f.fileName()).arg(f.pos()).arg(s).arg(max);
@@ -522,7 +522,7 @@ void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, 
     qint8 dummy = 0; //TODO: legacy, remove in one of the next DB upgrades
     quint8 flags = 0;
     quint32 catSize = 0;
-    dataStream >> (qint8 &) itt.m_id >> dummy >> itt.m_name >> flags >> catSize;
+    dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> dummy >> itt.m_name >> flags >> catSize;
 
     itt.m_categoryIndexes.reserve(catSize);
     while (catSize-- > 0) {
@@ -543,7 +543,7 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     flags |= (itt.m_has_inventories   ? 0x01 : 0);
     flags |= (itt.m_has_colors        ? 0x02 : 0);
     flags |= (itt.m_has_weight        ? 0x04 : 0);
-    flags |= (true                    ? 0x08 : 0); // was: m_has_year
+    flags |=                            0x08     ; // was: m_has_year
     flags |= (itt.m_has_subconditions ? 0x10 : 0);
 
     dataStream << qint8(itt.m_id) << qint8(itt.m_id) << itt.m_name << flags
@@ -557,8 +557,8 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
 void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version)
 {
     dataStream >> item.m_id >> item.m_name >> item.m_itemTypeIndex >> item.m_categoryIndex
-            >> item.m_defaultColorIndex >> (qint8 &) item.m_itemTypeId >> item.m_year_from
-            >> item.m_lastInventoryUpdate >> item.m_weight >> item.m_year_to;
+            >> item.m_defaultColorIndex >> reinterpret_cast<qint8 &>(item.m_itemTypeId)
+            >> item.m_year_from >> item.m_lastInventoryUpdate >> item.m_weight >> item.m_year_to;
 
     quint32 appearsInSize = 0;
     dataStream >> appearsInSize;
@@ -579,7 +579,7 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     quint32 consistsOfSize = 0;
     dataStream >> consistsOfSize;
     item.m_consists_of.clear();
-    item.m_consists_of.reserve(consistsOfSize);
+    item.m_consists_of.reserve(int(consistsOfSize));
 
     union {
         quint64 ui64;

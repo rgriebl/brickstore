@@ -394,7 +394,7 @@ void Order::setOtherParty(const QString &str)
 
 void Order::setShipping(double m)
 {
-    if (d->m_shipping != m) {
+    if (!qFuzzyCompare(d->m_shipping, m)) {
         d->m_shipping = m;
         emit shippingChanged(m);
     }
@@ -402,7 +402,7 @@ void Order::setShipping(double m)
 
 void Order::setInsurance(double m)
 {
-    if (d->m_insurance != m) {
+    if (!qFuzzyCompare(d->m_insurance, m)) {
         d->m_insurance = m;
         emit insuranceChanged(m);
     }
@@ -410,7 +410,7 @@ void Order::setInsurance(double m)
 
 void Order::setAdditionalCharges1(double m)
 {
-    if (d->m_addCharges1 != m) {
+    if (!qFuzzyCompare(d->m_addCharges1, m)) {
         d->m_addCharges1 = m;
         emit additionalCharges1Changed(m);
     }
@@ -418,7 +418,7 @@ void Order::setAdditionalCharges1(double m)
 
 void Order::setAdditionalCharges2(double m)
 {
-    if (d->m_addCharges2 != m) {
+    if (!qFuzzyCompare(d->m_addCharges2, m)) {
         d->m_addCharges2 = m;
         emit additionalCharges2Changed(m);
     }
@@ -426,7 +426,7 @@ void Order::setAdditionalCharges2(double m)
 
 void Order::setCredit(double m)
 {
-    if (d->m_credit != m) {
+    if (!qFuzzyCompare(d->m_credit, m)) {
         d->m_credit = m;
         emit creditChanged(m);
     }
@@ -434,7 +434,7 @@ void Order::setCredit(double m)
 
 void Order::setCreditCoupon(double m)
 {
-    if (d->m_creditCoupon != m) {
+    if (!qFuzzyCompare(d->m_creditCoupon, m)) {
         d->m_creditCoupon = m;
         emit creditCouponChanged(m);
     }
@@ -442,7 +442,7 @@ void Order::setCreditCoupon(double m)
 
 void Order::setOrderTotal(double m)
 {
-    if (d->m_orderTotal != m) {
+    if (!qFuzzyCompare(d->m_orderTotal, m)) {
         d->m_orderTotal = m;
         emit orderTotalChanged(m);
     }
@@ -450,7 +450,7 @@ void Order::setOrderTotal(double m)
 
 void Order::setUsSalesTax(double m)
 {
-    if (d->m_usSalesTax != m) {
+    if (!qFuzzyCompare(d->m_usSalesTax, m)) {
         d->m_usSalesTax = m;
         emit usSalesTaxChanged(m);
     }
@@ -458,7 +458,7 @@ void Order::setUsSalesTax(double m)
 
 void Order::setGrandTotal(double m)
 {
-    if (d->m_grandTotal != m) {
+    if (!qFuzzyCompare(d->m_grandTotal, m)) {
         d->m_grandTotal = m;
         emit grandTotalChanged(m);
     }
@@ -466,7 +466,7 @@ void Order::setGrandTotal(double m)
 
 void Order::setVatChargeSeller(double m)
 {
-    if (d->m_vatChargeSeller != m) {
+    if (!qFuzzyCompare(d->m_vatChargeSeller, m)) {
         d->m_vatChargeSeller = m;
         emit vatChargeSellerChanged(m);
     }
@@ -474,7 +474,7 @@ void Order::setVatChargeSeller(double m)
 
 void Order::setVatChargeBrickLink(double m)
 {
-    if (d->m_vatChargeBrickLink != m) {
+    if (!qFuzzyCompare(d->m_vatChargeBrickLink, m)) {
         d->m_vatChargeBrickLink = m;
         emit vatChargeBrickLinkChanged(m);
     }
@@ -506,7 +506,7 @@ void Order::setItemCount(int i)
 
 void Order::setCost(double c)
 {
-    if (d->m_cost != c) {
+    if (!qFuzzyCompare(d->m_cost, c)) {
         d->m_cost = c;
         emit costChanged(c);
     }
@@ -881,7 +881,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     rootTagHash.insert(u"LOCATION",          [](auto *o, auto &v) { if (!v.isEmpty()) o->setCountryCode(BrickLink::core()->countryIdFromName(v.section(", "_l1, 0, 0))); } );
 
     try {
-        qint64 startOfOrder = -1;
+        int startOfOrder = -1;
 
         while (true) {
             switch (xml.readNext()) {
@@ -891,7 +891,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                 if (tagName == "ORDER"_l1) {
                     if (order || startOfOrder >= 0)
                         throw Exception("Found a nested ORDER tag");
-                    startOfOrder = xml.characterOffset();
+                    startOfOrder = int(xml.characterOffset());
                     order.reset(new Order());
 
                 } else if (tagName != "ORDERS"_l1) {
@@ -911,7 +911,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                 if (tagName == "ORDER"_l1) {
                     if (!order || (startOfOrder < 0))
                         throw Exception("Found a ORDER end tag without a start tag");
-                    qint64 endOfOrder = xml.characterOffset();
+                    int endOfOrder = int(xml.characterOffset());
                     QString header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_l1;
                     QString footer = "\n"_l1;
                     result.insert(order.take(), header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);

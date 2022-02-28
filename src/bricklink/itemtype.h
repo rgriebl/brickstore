@@ -26,7 +26,7 @@ namespace BrickLink {
 class ItemType
 {
 public:
-    static constexpr uint InvalidId = 0;
+    static constexpr char InvalidId = 0;
 
     char id() const                 { return m_id; }
     QString name() const            { return m_name; }

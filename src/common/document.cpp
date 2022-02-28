@@ -947,7 +947,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     m_model->beginMacro();
 
     m_setToPG.reset(new SetToPriceGuideData);
-    m_setToPG->changes.reserve(sel.size());
+    m_setToPG->changes.reserve(uint(sel.size()));
     m_setToPG->totalCount = sel.count();
     m_setToPG->doneCount = 0;
     m_setToPG->time = time;
@@ -1706,7 +1706,7 @@ void Document::copyFields(const LotList &srcLots, DocumentModel::MergeMode defau
 
     int copyCount = 0;
     std::vector<std::pair<Lot *, Lot>> changes;
-    changes.reserve(m_model->lots().size()); // just a guestimate
+    changes.reserve(uint(m_model->lots().size())); // just a guestimate
 
     model()->beginMacro();
 
@@ -1735,7 +1735,7 @@ void Document::subtractItems(const LotList &subLots)
     const LotList &lots = model()->lots();
 
     std::vector<std::pair<Lot *, Lot>> changes;
-    changes.reserve(subLots.size() * 2); // just a guestimate
+    changes.reserve(uint(subLots.size() * 2)); // just a guestimate
     LotList newLots;
 
     model()->beginMacro();

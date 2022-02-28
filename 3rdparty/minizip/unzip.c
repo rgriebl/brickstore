@@ -218,7 +218,7 @@ local int unz64local_getShort (const zlib_filefunc64_32_def* pzlib_filefunc_def,
                              voidpf filestream,
                              uLong *pX)
 {
-    unsigned short c;
+    unsigned short c = 0;
     int err = (int)ZREAD64(*pzlib_filefunc_def,filestream,&c,2);
     //TODO: swap on BE machines
     if (err==2)
@@ -244,7 +244,7 @@ local int unz64local_getLong (const zlib_filefunc64_32_def* pzlib_filefunc_def,
                             voidpf filestream,
                             uLong *pX)
 {
-    uLong c;
+    uLong c = 0;
     int err = (int)ZREAD64(*pzlib_filefunc_def,filestream,&c,4);
     //TODO: swap on BE machines
     if (err==4)
@@ -271,12 +271,12 @@ local int unz64local_getLong64 (const zlib_filefunc64_32_def* pzlib_filefunc_def
                             voidpf filestream,
                             ZPOS64_T *pX)
 {
-    ZPOS64_T c;
+    ZPOS64_T c = 0;
     int err = (int)ZREAD64(*pzlib_filefunc_def,filestream,&c,8);
     //TODO: swap on BE machines
     if (err==8)
     {
-        *pX = (int)c;
+        *pX = c;
         return UNZ_OK;
     }
     else

@@ -400,7 +400,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                     }
 
                     const BrickLink::Color *colp = isStudio ? BrickLink::core()->color(colid)
-                                                            : BrickLink::core()->colorFromLDrawId(colid);
+                                                            : BrickLink::core()->colorFromLDrawId(int(colid));
 
                     auto *lot = new Lot(colp, itemp);
                     lot->setQuantity(1);

@@ -37,7 +37,7 @@ public:
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
     bool boundingBox(QVector3D &vmin, QVector3D &vmax);
-    uint cost() const;
+    int cost() const;
 
 protected:
     Part();
@@ -52,7 +52,7 @@ protected:
     bool m_boundingCalculated;
     QVector3D m_boundingMin;
     QVector3D m_boundingMax;
-    uint m_cost = 0;
+    int m_cost = 0;
 };
 
 
@@ -88,7 +88,7 @@ class CommentElement : public Element
 {
 public:
     QString comment() const  { return m_comment; }
-    uint size() const override { return uint(sizeof(*this) + m_comment.size() * 2); }
+    uint size() const override { return int(sizeof(*this)) + uint(m_comment.size() * 2); }
 
     static CommentElement *create(const QString &text);
 
@@ -145,8 +145,8 @@ protected:
 
 private:
     Q_DISABLE_COPY(LineElement)
-    int       m_color;
     QVector3D m_points[2];
+    int       m_color;
 };
 
 
@@ -164,8 +164,8 @@ protected:
 
 private:
     Q_DISABLE_COPY(CondLineElement)
-    int       m_color;
     QVector3D m_points[4];
+    int       m_color;
 };
 
 
@@ -183,8 +183,8 @@ protected:
 
 private:
     Q_DISABLE_COPY(TriangleElement)
-    int       m_color;
     QVector3D m_points[3];
+    int       m_color;
 };
 
 
@@ -201,8 +201,8 @@ protected:
     QuadElement(int color, const QVector3D *points);
 
 private:
-    int       m_color;
     QVector3D m_points[4];
+    int       m_color;
     Q_DISABLE_COPY(QuadElement)
 };
 
@@ -225,9 +225,9 @@ protected:
 
 private:
     Q_DISABLE_COPY(PartElement)
-    int          m_color;
-    QMatrix4x4   m_matrix;
-    Part *m_part;
+    QMatrix4x4 m_matrix;
+    Part *     m_part;
+    int        m_color;
 };
 
 } // namespace LDraw
