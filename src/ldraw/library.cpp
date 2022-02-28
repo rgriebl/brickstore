@@ -567,11 +567,14 @@ std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
         QByteArray data;
         QBuffer buffer(&data);
         buffer.open(QIODevice::WriteOnly);
-        MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
-        auto [colors, date] = parseLDconfig(data); { }
-        if (!colors.isEmpty()) {
-            ok = true;
-            generated = date;
+        try {
+            MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
+            auto [colors, date] = parseLDconfig(data); { }
+            if (!colors.isEmpty()) {
+                ok = true;
+                generated = date;
+            }
+        } catch (const Exception &) {
         }
     }
     return { ok, generated };
