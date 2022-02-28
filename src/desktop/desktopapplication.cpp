@@ -131,6 +131,30 @@ void DesktopApplication::init()
 
     Application::init();
 
+#if defined(Q_OS_MACOS)
+    // the handling of emacs-style multi-key shortcuts is broken on macOS, because menu
+    // shortcuts are handled directly in the QPA plugin, instead of going through the global
+    // QShortcutMap. The workaround is override any shortcut while the map is in PartialMatch state.
+    new EventFilter(qApp, [](QObject *, QEvent *e) -> bool {
+        if (e->type() == QEvent::ShortcutOverride) {
+            auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
+            if (scm.state() == QKeySequence::PartialMatch) {
+                e->accept();
+                return true;
+            }
+        }
+        return false;
+    });
+#endif
+
+    new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {
+        if (e->type() == QEvent::ApplicationPaletteChange) {
+            // we need to delay this: otherwise macOS crashes on theme changes
+            QMetaObject::invokeMethod(this, &DesktopApplication::setDesktopIconTheme,
+                                      Qt::QueuedConnection);
+        }
+        return false;
+    });
     connect(Config::inst(), &Config::uiThemeChanged, this, &DesktopApplication::setUiTheme);
     setUiTheme();
     setDesktopIconTheme();
@@ -213,59 +237,6 @@ DeveloperConsole *DesktopApplication::developerConsole()
             m_loggingTimer.start();
     }
     return m_devConsole;
-}
-
-bool DesktopApplication::eventFilter(QObject *o, QEvent *e)
-{
-    switch (e->type()) {
-    case QEvent::ChildPolished:
-        if (auto *tb = qobject_cast<QToolButton *>(static_cast<QChildEvent *>(e)->child())) {
-            if (!qobject_cast<QToolBar *>(o)) {
-                QPointer<QToolButton> tbptr(tb);
-                QMetaObject::invokeMethod(this, [tbptr]() {
-                    if (tbptr && tbptr->autoRaise()) {
-#if defined(Q_OS_MACOS)
-                        // QToolButtons look really ugly on macOS, so we re-style them
-                        static QStyle *fusion = QStyleFactory::create("fusion"_l1);
-                        tbptr->setStyle(fusion);
-#endif
-                        if (qstrcmp(tbptr->style()->metaObject()->className(), "QFusionStyle") == 0) {
-                            QPalette pal = tbptr->palette();
-                            pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
-                                             qApp->palette("QAbstractItemView")
-                                             .color(QPalette::Highlight)));
-                            tbptr->setPalette(pal);
-                        }
-                    }
-                });
-            }
-        }
-        break;
-
-#if defined(Q_OS_MACOS)
-    // the handling of emacs-style multi-key shortcuts is broken on macOS, because menu
-    // shortcuts are handled directly in the QPA plugin, instad of going through the global
-    // QShortcutMap. The workaround is override any shortcut while the map is in PartialMatch state.
-    case QEvent::ShortcutOverride: {
-        auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
-        if (scm.state() == QKeySequence::PartialMatch) {
-            e->accept();
-            return true;
-        }
-        break;
-    }
-#endif
-    case QEvent::ApplicationPaletteChange:
-        // we need to delay this: otherwise macOS crashes on theme changes
-        QMetaObject::invokeMethod(this, &DesktopApplication::setDesktopIconTheme,
-                                  Qt::QueuedConnection);
-        break;
-
-    default:
-        break;
-    }
-
-    return Application::eventFilter(o, e);
 }
 
 void DesktopApplication::setupLogging()

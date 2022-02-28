@@ -13,11 +13,14 @@
 */
 #include <QComboBox>
 #include <QToolButton>
+#include <QToolBar>
 #include <QLineEdit>
 #include <QPainter>
 #include <QApplication>
 #include <QPalette>
 #include <QPixmapCache>
+#include <QStyleFactory>
+#include <QPointer>
 #include <QDynamicPropertyChangeEvent>
 
 #include "utility/utility.h"
@@ -42,6 +45,26 @@ void BrickStoreProxyStyle::polish(QWidget *w)
 {
     if (auto *le = qobject_cast<QLineEdit *>(w)) {
         le->installEventFilter(this);
+    } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
+        if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
+            QPointer<QToolButton> tbptr(tb);
+            QMetaObject::invokeMethod(this, [tbptr]() {
+                if (tbptr && tbptr->autoRaise()) {
+#if defined(Q_OS_MACOS)
+                    // QToolButtons look really ugly on macOS, so we re-style them
+                    static QStyle *fusion = QStyleFactory::create("fusion"_l1);
+                    tbptr->setStyle(fusion);
+#endif
+                    if (qstrcmp(tbptr->style()->metaObject()->className(), "QFusionStyle") == 0) {
+                        QPalette pal = tbptr->palette();
+                        pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
+                                         qApp->palette("QAbstractItemView")
+                                         .color(QPalette::Highlight)));
+                        tbptr->setPalette(pal);
+                    }
+                }
+            });
+        }
     }
 }
 

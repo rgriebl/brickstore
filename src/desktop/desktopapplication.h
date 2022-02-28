@@ -39,7 +39,6 @@ public:
     DeveloperConsole *developerConsole();
 
 protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
     void setupLogging() override;
 
     QCoro::Task<bool> closeAllViews() override;
