@@ -189,7 +189,7 @@ QByteArray MiniZip::readFile(const QString &fileName)
 
     unz64_file_pos fpos { it.value().first, it.value().second };
     if (unzGoToFilePos64(m_zip, &fpos) != UNZ_OK)
-        throw Exception(tr("Could not seek to thefile %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+        throw Exception(tr("Could not seek to the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
 
     unz_file_info64 fileInfo;
     if (unzGetCurrentFileInfo64(m_zip, &fileInfo, 0, 0, 0, 0, 0, 0) != UNZ_OK)

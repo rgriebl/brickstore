@@ -990,7 +990,7 @@ If you do not want to save your password, then just leave this field empty and y
          <item row="3" column="0" colspan="2">
           <widget class="QRadioButton" name="w_ldraw_external">
            <property name="text">
-            <string>Use a custom LDraw installation</string>
+            <string>Use an existing LDraw installation</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -1102,7 +1102,7 @@ If you do not want to save your password, then just leave this field empty and y
          <item row="1" column="0" colspan="2">
           <widget class="QLabel" name="w_ldraw_update_message">
            <property name="text">
-            <string>Updates are downloaded and applied automatically in the background. Only use this, if something got stuck.</string>
+            <string>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</string>
            </property>
            <property name="textFormat">
             <enum>Qt::RichText</enum>
