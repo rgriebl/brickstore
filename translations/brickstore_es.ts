@@ -1079,7 +1079,7 @@
     <message>
         <location filename="../src/common/application.cpp" line="268"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
-        <translation type="unfinished"></translation>
+        <translation>La manera en que BrickStore usa LDraw para renderizar los modelos 3D de piezas ha cambiado: por defecto descargará y mantendrá su própia instalación de LDraw.&lt;br&gt;&lt;br&gt; Por favor comprueba la página de LDraw en la Configuración si desea usar una instalación personalizada de LDraw.</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="339"/>
@@ -1255,7 +1255,7 @@
     <message>
         <location filename="../src/bricklink/database.cpp" line="152"/>
         <source>download and decompress failed</source>
-        <translation type="unfinished"></translation>
+        <translation>descarga y descompresión fallida</translation>
     </message>
     <message>
         <location filename="../src/bricklink/database.cpp" line="154"/>
@@ -1265,7 +1265,7 @@
     <message>
         <location filename="../src/bricklink/database.cpp" line="156"/>
         <source>saving failed</source>
-        <translation type="unfinished"></translation>
+        <translation>guardado fallido</translation>
     </message>
     <message>
         <location filename="../src/bricklink/database.cpp" line="166"/>
@@ -1733,27 +1733,27 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="177"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="201"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>¿Abilitar reportes anónimos de fallos?&lt;br&gt;&lt;br&gt;Por favor considere activar esta función cuando esté disponible.&lt;br&gt;Si tiene alguna duda sobre qué información se envía y cómo es udada, por favor &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;vea aquí&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Reporte de fallos se puede activar o desactivar en cualquier momento desde la ventana de Ajustes.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="453"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="424"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Su versión de macOS es demasiado antigua para admitir cambios de tema.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="470"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="441"/>
         <source>The theme change will take effect after a restart.</source>
         <translation>El cambio de tema tendrá efecto al reiniciar.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="473"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="444"/>
         <source>Restart now</source>
         <translation>Reiniciar ahora</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="472"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="443"/>
         <source>Later</source>
         <translation>Más tarde</translation>
     </message>
@@ -2625,92 +2625,92 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/utility/filter.cpp" line="324"/>
+        <location filename="../src/utility/filter.cpp" line="325"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ingrese la expresión para filtrar en (casi) lenguaje natural o con operadores lógicos.&lt;br /&gt;Una sola expresión se parece a &lt;b&gt;&lt;i&gt;NOMBREDELCAMPO COMPARACIÓN&lt;/i&gt; TEXTO&lt;/b&gt;. &lt;b&gt;&lt;i&gt;NOMBREDELCAMPO&lt;/i&gt;&lt;/b&gt; y &lt;b&gt;&lt;i&gt;COMPARACIÓN&lt;/i&gt;&lt;/b&gt; son opcionales y por defecto a &lt;b&gt;cualquier campo&lt;/b&gt; y &lt;b&gt;contenido&lt;/b&gt; respectivamente.&lt;/p&gt;&lt;p&gt;Se pueden combinar múltiples expresiones separandolas con un token de &lt;b&gt;COMBINACIÓN&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;P.ej. para buscar algo que se parece a un ladrillo azul, puedes usar: &lt;b&gt;brick y color es blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="331"/>
+        <location filename="../src/utility/filter.cpp" line="332"/>
         <source>Field names:</source>
         <translation>Nombres de campos:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="336"/>
+        <location filename="../src/utility/filter.cpp" line="337"/>
         <source>Comparisons:</source>
         <translation>Comparaciones:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="341"/>
+        <location filename="../src/utility/filter.cpp" line="342"/>
         <source>Combinations:</source>
         <translation>Combinaciones:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="396"/>
+        <location filename="../src/utility/filter.cpp" line="397"/>
         <source>and</source>
         <translation>y</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="397"/>
+        <location filename="../src/utility/filter.cpp" line="398"/>
         <source>or</source>
         <translation>o</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="423"/>
+        <location filename="../src/utility/filter.cpp" line="424"/>
         <source>is,equals</source>
         <translation>es, igual</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="424"/>
+        <location filename="../src/utility/filter.cpp" line="425"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation>no es, no es igual</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="425"/>
+        <location filename="../src/utility/filter.cpp" line="426"/>
         <source>less than</source>
         <translation>menor que</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="426"/>
+        <location filename="../src/utility/filter.cpp" line="427"/>
         <source>less equal than</source>
         <translation>menor igual que</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="427"/>
+        <location filename="../src/utility/filter.cpp" line="428"/>
         <source>greater than</source>
         <translation>mayor que</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="428"/>
+        <location filename="../src/utility/filter.cpp" line="429"/>
         <source>greater equal than</source>
         <translation>mayor igual que</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="429"/>
+        <location filename="../src/utility/filter.cpp" line="430"/>
         <source>contains,matches</source>
         <translation>contiene, coincide</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="430"/>
+        <location filename="../src/utility/filter.cpp" line="431"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation>no contiene, no coincide</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="431"/>
+        <location filename="../src/utility/filter.cpp" line="432"/>
         <source>starts with,begins with</source>
         <translation>empieza por, comienza por</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="432"/>
+        <location filename="../src/utility/filter.cpp" line="433"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation>no empiza por, no comienza por</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="433"/>
+        <location filename="../src/utility/filter.cpp" line="434"/>
         <source>ends with</source>
         <translation>acabe en</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="434"/>
+        <location filename="../src/utility/filter.cpp" line="435"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation>no acabe en</translation>
     </message>
@@ -3382,17 +3382,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/ldraw/library.cpp" line="247"/>
         <source>saving failed</source>
-        <translation type="unfinished"></translation>
+        <translation>guardado fallido</translation>
     </message>
     <message>
         <location filename="../src/ldraw/library.cpp" line="250"/>
         <source>reloading failed - please restart the application.</source>
-        <translation type="unfinished"></translation>
+        <translation>recarga fallida - por favor reinicie la aplicación.</translation>
     </message>
     <message>
         <location filename="../src/ldraw/library.cpp" line="257"/>
         <source>Could not load the new parts library</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo cargar la nueva librería de piezas</translation>
     </message>
 </context>
 <context>
@@ -3489,51 +3489,55 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation type="vanished">No se pudo localizar el model.ldr dentro del archivo ZIP de Studio.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="183"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="184"/>
         <source>ZIP file %1 has not been opened for reading</source>
-        <translation type="unfinished"></translation>
+        <translation>El archivo ZIP %1 no se ha abierto para lectura</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="188"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="241"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="189"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="242"/>
         <source>Could not locate the file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo localizar el archivo %1 dentro del archivo ZIP %2.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="192"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="193"/>
         <source>Could not seek to the file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo buscar el archivo %1 dentro del archivo ZIP %2.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="196"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="197"/>
         <source>Could not get info for the file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo obtener información del archivo %1 dentro del archivo ZIP %2.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="199"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="200"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
-        <translation type="unfinished"></translation>
+        <translation>El archivo %1 dentro del archivo ZIP %3 es demasiado grande (%2 bytes).</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="202"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="203"/>
         <source>Could not open the file %1 within the ZIP file %2 for reading.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo abrir el archivo %1 dentro del archivo ZIP %2 para lectura.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="209"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="233"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="210"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="234"/>
         <source>Could not read the file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo leer el archivo %1 dentro del archivo ZIP %2.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="237"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="238"/>
         <source>Could not decrypt the file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo desencriptar el archivo %1 dentro del archivo ZIP %2.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="246"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="247"/>
+        <source>Could not open the ZIP file %1</source>
+        <translation>No se pudo abrir el archivo ZIP %1</translation>
+    </message>
+    <message>
         <source>Could not open the Studio ZIP file</source>
-        <translation>No se pudo abrir el archivo ZIP de Studio</translation>
+        <translation type="vanished">No se pudo abrir el archivo ZIP de Studio</translation>
     </message>
 </context>
 <context>
@@ -4861,49 +4865,49 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Contraseña</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="920"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="923"/>
         <source>Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Librería</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="935"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="941"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
-        <translation type="unfinished"></translation>
+        <translation>Dejar que BrickStore manege su propia librería de piezas de LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="967"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="957"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta es la opción preferida, ya que BrickStore mantendrá una instalación actualizada.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="993"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="983"/>
         <source>Use an existing LDraw installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar una instalación existente de LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1105"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1107"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
-        <translation type="unfinished"></translation>
+        <translation>Las actualizaciones se descargan y aplican automáticamente de fondo. Por favor, solo empiece una actualización manual si la automática falla.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1039"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
         <source>Use this option, if you need custom or unofficial parts</source>
-        <translation type="unfinished"></translation>
+        <translation>Use esta opción si necesita piezas personalizadas o no oficiales</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1051"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1047"/>
         <source>Status</source>
-        <translation type="unfinished">Estado</translation>
+        <translation>Estado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1082"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1078"/>
         <source>Update</source>
-        <translation type="unfinished">Actualizar</translation>
+        <translation>Actualizar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1091"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1087"/>
         <source>Now</source>
-        <translation type="unfinished"></translation>
+        <translation>Ahora</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="691"/>
@@ -4966,39 +4970,39 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation type="vanished">Carpeta LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1137"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1126"/>
         <source>Toolbar</source>
         <translation>Barra de herramientas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1143"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1132"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Personalize la barra de herramientas principal usando arrastrar y solar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1150"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1264"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1139"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1253"/>
         <source>Filter</source>
         <translation>Filtrar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1243"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1319"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1232"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1308"/>
         <source>Reset all</source>
         <translation>Restablecer todo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1251"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1240"/>
         <source>Keyboard</source>
         <translation>Teclado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1257"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1246"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Personalize los atajos de teclado globales</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1329"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1318"/>
         <source>Reset</source>
         <translation>Restablecer</translation>
     </message>
@@ -5075,7 +5079,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
         <source>Valid LDraw installation from %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Instalación válida de LDraw de %1</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="815"/>

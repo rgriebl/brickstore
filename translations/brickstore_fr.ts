@@ -1743,27 +1743,27 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="177"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="201"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="453"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="424"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="470"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="441"/>
         <source>The theme change will take effect after a restart.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="473"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="444"/>
         <source>Restart now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="472"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="443"/>
         <source>Later</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2978,92 +2978,92 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/utility/filter.cpp" line="324"/>
+        <location filename="../src/utility/filter.cpp" line="325"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="331"/>
+        <location filename="../src/utility/filter.cpp" line="332"/>
         <source>Field names:</source>
         <translation>Nom des champs:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="336"/>
+        <location filename="../src/utility/filter.cpp" line="337"/>
         <source>Comparisons:</source>
         <translation>Comparaisons:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="341"/>
+        <location filename="../src/utility/filter.cpp" line="342"/>
         <source>Combinations:</source>
         <translation>Combinaisons:</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="396"/>
+        <location filename="../src/utility/filter.cpp" line="397"/>
         <source>and</source>
         <translation>et</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="397"/>
+        <location filename="../src/utility/filter.cpp" line="398"/>
         <source>or</source>
         <translation>ou</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="423"/>
+        <location filename="../src/utility/filter.cpp" line="424"/>
         <source>is,equals</source>
         <translation>est,égale</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="424"/>
+        <location filename="../src/utility/filter.cpp" line="425"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation>n&apos;est pas,n&apos;est pas égal,pas égal</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="425"/>
+        <location filename="../src/utility/filter.cpp" line="426"/>
         <source>less than</source>
         <translation>inférieur à</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="426"/>
+        <location filename="../src/utility/filter.cpp" line="427"/>
         <source>less equal than</source>
         <translation>inférieur ou égal à</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="427"/>
+        <location filename="../src/utility/filter.cpp" line="428"/>
         <source>greater than</source>
         <translation>supérieur à</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="428"/>
+        <location filename="../src/utility/filter.cpp" line="429"/>
         <source>greater equal than</source>
         <translation>supérieur ou égal à</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="429"/>
+        <location filename="../src/utility/filter.cpp" line="430"/>
         <source>contains,matches</source>
         <translation>contient,comporte</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="430"/>
+        <location filename="../src/utility/filter.cpp" line="431"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation>ne contient pas,contient pas,ne comporte pas,comporte pas</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="431"/>
+        <location filename="../src/utility/filter.cpp" line="432"/>
         <source>starts with,begins with</source>
         <translation>commence par,débute par</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="432"/>
+        <location filename="../src/utility/filter.cpp" line="433"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation>ne commence pas par,commence pas par,ne débute pas par,débute pas par</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="433"/>
+        <location filename="../src/utility/filter.cpp" line="434"/>
         <source>ends with</source>
         <translation>termine par</translation>
     </message>
     <message>
-        <location filename="../src/utility/filter.cpp" line="434"/>
+        <location filename="../src/utility/filter.cpp" line="435"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation>ne termine pas par,termine pas par</translation>
     </message>
@@ -4331,51 +4331,55 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">N&apos;est pas arrivé à localiser le fichier model.ldr dans le fichier ZIP Studio.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="183"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="184"/>
         <source>ZIP file %1 has not been opened for reading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="188"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="241"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="189"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="242"/>
         <source>Could not locate the file %1 within the ZIP file %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="192"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="193"/>
         <source>Could not seek to the file %1 within the ZIP file %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="196"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="197"/>
         <source>Could not get info for the file %1 within the ZIP file %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="199"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="200"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="202"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="203"/>
         <source>Could not open the file %1 within the ZIP file %2 for reading.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="209"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="233"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="210"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="234"/>
         <source>Could not read the file %1 within the ZIP file %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="237"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="238"/>
         <source>Could not decrypt the file %1 within the ZIP file %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="246"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="247"/>
+        <source>Could not open the ZIP file %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Could not open the Studio ZIP file</source>
-        <translation>N&apos;est pas arrivé à ouvrir le fichier ZIP Studio</translation>
+        <translation type="vanished">N&apos;est pas arrivé à ouvrir le fichier ZIP Studio</translation>
     </message>
     <message>
         <source>Could not read downloaded file: %1</source>
@@ -5709,84 +5713,84 @@ If you do not want to save your password, then just leave this field empty and y
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="920"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="923"/>
         <source>Library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="935"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="941"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="967"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="957"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1039"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1051"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1047"/>
         <source>Status</source>
         <translation type="unfinished">Statut</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1082"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1078"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1091"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1087"/>
         <source>Now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1137"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1126"/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1143"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1132"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1251"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1240"/>
         <source>Keyboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1257"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1246"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1150"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1264"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1139"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1253"/>
         <source>Filter</source>
         <translation>Filtre</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="993"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="983"/>
         <source>Use an existing LDraw installation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1105"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1107"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1243"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1319"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1232"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1308"/>
         <source>Reset all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1329"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1318"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
