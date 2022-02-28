@@ -14,6 +14,7 @@ This update is mostly about improvements to the handling of LDraw 3D part models
   rid of some crashes with those ever broken Intel graphics drivers.
 
 ## Fixed
+- Fixed a rendering issues with buttons on macOS, introduced in 2022.2.1
 - Removed workarounds for various bugs in BrickLink's order metadata, as they are now fixed on
   BrickLink's side (this also means that older BrickStore versions might now display wrong order totals).
 
