@@ -294,7 +294,9 @@ void GLRenderer::paintGL(QOpenGLContext *context)
 #if !defined(GL_MULTISAMPLE) && defined(GL_MULTISAMPLE_EXT) // ES vs Desktop
 #  define GL_MULTISAMPLE GL_MULTISAMPLE_EXT
 #endif
+#if defined(GL_MULTISAMPLE)
     glEnable(GL_MULTISAMPLE);
+#endif
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -663,7 +665,7 @@ void GLRenderer::fillVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matr
     };
 
     Element * const *ep = part->elements().constData();
-    int lastind = part->elements().count() - 1;
+    int lastind = int(part->elements().count()) - 1;
 
 //    bool gotFirstNonComment = false;
 

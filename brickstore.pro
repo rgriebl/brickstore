@@ -25,7 +25,7 @@ TEMPLATE = app
 TARGET = $$NAME
 unix:!macos:!android:!ios:TARGET = $$lower($$TARGET)
 
-CONFIG *= no_private_qt_headers_warning no_include_pwd c++2a
+CONFIG *= warn_on no_private_qt_headers_warning no_include_pwd c++2a
 CONFIG *= lrelease embed_translations
 
 bs_mobile:DEFINES *= BS_MOBILE

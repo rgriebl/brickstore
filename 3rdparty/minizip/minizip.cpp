@@ -244,7 +244,7 @@ void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
         }
         zip.close();
     } else {
-        errorMsg = tr("Could not open the Studio ZIP file");
+        errorMsg = tr("Could not open the ZIP file %1").arg(zipFileName);
     }
     if (!errorMsg.isEmpty())
         throw Exception(errorMsg);
