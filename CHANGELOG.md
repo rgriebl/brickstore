@@ -2,8 +2,20 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-### Added
-- Nicer and faster rendering of 3D parts and much more intuitive mouse controls for rotations.
+
+## [2022.3.1] - 2022-03-01
+This update is mostly about improvements to the handling of LDraw 3D part models:
+- BrickStore will now automatically download and update its own copy of the LDraw parts library.
+- Transparent parts are rendered correctly now.
+- If available, high resolution parts are loaded and studs are rendered with a LEGO logo on top.
+- Made the mouse controls for rotating parts much more intuitive (think of the part as being enclosed
+  in a transparent sphere, that you can grab and roll around).
+- On Windows, the rendering is now done via Direct3D instead of OpenGL. This should hopefully get
+  rid of some crashes with those ever broken Intel graphics drivers.
+
+## Fixed
+- Removed workarounds for various bugs in BrickLink's order metadata, as they are now fixed on
+  BrickLink's side (this also means that older BrickStore versions might now display wrong order totals).
 
 
 ## [2022.2.2] - 2022-02-09
@@ -457,7 +469,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.2.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.3.1...HEAD
+[2022.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.3.1
 [2022.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.2
 [2022.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.1
 [2022.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.1.3
