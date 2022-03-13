@@ -53,6 +53,59 @@ Library::Library(QObject *parent)
     , m_transfer(new Transfer(this))
 {
     m_cache.setMaxCost(50 * 1024 * 1024); // 50MB
+
+    connect(m_transfer, &Transfer::started,
+            this, [this](TransferJob *j) {
+        if (j != m_job)
+            return;
+        emit updateStarted();
+    });
+    connect(m_transfer, &Transfer::progress,
+            this, [this](TransferJob *j, int done, int total) {
+        if (j != m_job)
+            return;
+        emit updateProgress(done, total);
+    });
+    connect(m_transfer, &Transfer::finished,
+            this, [this](TransferJob *j) -> QCoro::Task<> {
+        if (j != m_job)
+            co_return;
+
+        Q_ASSERT(m_locked);
+        m_locked = false;
+
+        auto *file = qobject_cast<QSaveFile *>(j->file());
+        Q_ASSERT(file);
+
+        m_job = nullptr;
+
+        try {
+            if (!j->isFailed() && j->wasNotModifiedSince()) {
+                emit updateFinished(true, tr("Already up-to-date."));
+                setUpdateStatus(UpdateStatus::Ok);
+            } else if (j->isFailed()) {
+                throw Exception(tr("download failed") % u": " % j->errorString());
+            } else {
+                if (m_zip)
+                    m_zip->close();
+                if (!file->commit()) {
+                    setPath(m_path, true); // at least try to reload the old library
+                    throw Exception(tr("saving failed") % u": " % file->errorString());
+                }
+                if (!co_await setPath(file->fileName(), true))
+                    throw Exception(tr("reloading failed - please restart the application."));
+
+                emit updateFinished(true, { });
+                setUpdateStatus(UpdateStatus::Ok);
+            }
+
+        } catch (const Exception &e) {
+            emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
+            setUpdateStatus(UpdateStatus::UpdateFailed);
+        }
+        emit libraryReset();
+    });
+
 }
 
 Library *Library::inst()
@@ -184,7 +237,7 @@ bool Library::startUpdate(bool force)
     if (!m_isZip)
         return false;
 
-    if (updateStatus() == UpdateStatus::Updating)
+    if (m_job || (updateStatus() == UpdateStatus::Updating))
         return false;
 
     QScopedValueRollback locker(m_locked, true);
@@ -198,13 +251,12 @@ bool Library::startUpdate(bool force)
 
     auto file = new QSaveFile(localfile);
 
-    TransferJob *job = nullptr;
     if (file->open(QIODevice::WriteOnly)) {
-        job = TransferJob::getIfNewer(QUrl(remotefile), dt, file);
-        // job = TransferJob::get(QUrl(remotefile), file); // for testing only
-        m_transfer->retrieve(job);
+        m_job = TransferJob::getIfNewer(QUrl(remotefile), dt, file);
+        // m_job = TransferJob::get(QUrl(remotefile), file); // for testing only
+        m_transfer->retrieve(m_job);
     }
-    if (!job) {
+    if (!m_job) {
         delete file;
         return false;
     }
@@ -212,53 +264,6 @@ bool Library::startUpdate(bool force)
     setUpdateStatus(UpdateStatus::Updating);
 
     locker.commit();
-
-    connect(m_transfer, &Transfer::started,
-            this, [this, job](TransferJob *j) {
-        if (j != job)
-            return;
-        emit updateStarted();
-    });
-    connect(m_transfer, &Transfer::progress,
-            this, [this, job](TransferJob *j, int done, int total) {
-        if (j != job)
-            return;
-        emit updateProgress(done, total);
-    });
-    connect(m_transfer, &Transfer::finished,
-            this, [this, job, file](TransferJob *j) -> QCoro::Task<> {
-        if (j != job)
-            co_return;
-
-        Q_ASSERT(m_locked);
-        m_locked = false;
-
-        try {
-            if (!job->isFailed() && job->wasNotModifiedSince()) {
-                emit updateFinished(true, tr("Already up-to-date."));
-                setUpdateStatus(UpdateStatus::Ok);
-            } else if (job->isFailed()) {
-                throw Exception(tr("download failed") % u": " % job->errorString());
-            } else {
-                if (m_zip)
-                    m_zip->close();
-                if (!file->commit()) {
-                    setPath(m_path, true); // at least try to reload the old library
-                    throw Exception(tr("saving failed") % u": " % file->errorString());
-                }
-                if (!co_await setPath(file->fileName(), true))
-                    throw Exception(tr("reloading failed - please restart the application."));
-
-                emit updateFinished(true, { });
-                setUpdateStatus(UpdateStatus::Ok);
-            }
-
-        } catch (const Exception &e) {
-            emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
-            setUpdateStatus(UpdateStatus::UpdateFailed);
-        }
-        emit libraryReset();
-    });
 
     return true;
 }

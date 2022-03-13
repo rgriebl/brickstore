@@ -49,7 +49,59 @@ namespace BrickLink {
 Database::Database(QObject *parent)
     : QObject(parent)
     , m_transfer(new Transfer(this))
-{ }
+{
+    connect(m_transfer, &Transfer::started,
+            this, [this](TransferJob *j) {
+        if (j != m_job)
+            return;
+        emit updateStarted();
+    });
+    connect(m_transfer, &Transfer::progress,
+            this, [this](TransferJob *j, int done, int total) {
+        if (j != m_job)
+            return;
+        emit updateProgress(done, total);
+    });
+
+    connect(m_transfer, &Transfer::finished,
+            this, [this](TransferJob *j) {
+        if (j != m_job)
+            return;
+
+        auto *hhc = qobject_cast<HashHeaderCheckFilter *>(j->file());
+        Q_ASSERT(hhc);
+        auto *file = hhc->property("bsFile").value<QSaveFile *>();
+        Q_ASSERT(file);
+
+        hhc->close(); // does not close/commit the QSaveFile
+        hhc->deleteLater();
+
+        m_job = nullptr;
+
+        try {
+            if (!j->isFailed() && j->wasNotModifiedSince()) {
+                emit updateFinished(true, tr("Already up-to-date."));
+                setUpdateStatus(UpdateStatus::Ok);
+            } else if (j->isFailed()) {
+                throw Exception(tr("download and decompress failed") % u": " % j->errorString());
+            } else if (!hhc->hasValidChecksum()) {
+                throw Exception(tr("checksum mismatch after decompression"));
+            } else if (!file->commit()) {
+                throw Exception(tr("saving failed") % u": " % file->errorString());
+            } else {
+                read(file->fileName());
+
+                emit updateFinished(true, { });
+                setUpdateStatus(UpdateStatus::Ok);
+            }
+            emit databaseReset();
+
+        } catch (const Exception &e) {
+            emit updateFinished(false, tr("Could not load the new database") % u":\n\n" % e.error());
+            setUpdateStatus(UpdateStatus::UpdateFailed);
+        }
+    });
+}
 
 Database::~Database()
 {
@@ -93,7 +145,7 @@ bool Database::startUpdate()
 
 bool Database::startUpdate(bool force)
 {
-    if (updateStatus() == UpdateStatus::Updating)
+    if (m_job || (updateStatus() == UpdateStatus::Updating))
         return false;
 
     QString dbName = defaultDatabaseName();
@@ -109,13 +161,13 @@ bool Database::startUpdate(bool force)
     auto hhc = new HashHeaderCheckFilter(lzma);
     lzma->setParent(hhc);
     file->setParent(lzma);
+    hhc->setProperty("bsFile", QVariant::fromValue(file));
 
-    TransferJob *job = nullptr;
     if (hhc->open(QIODevice::WriteOnly)) {
-        job = TransferJob::getIfNewer(QUrl(remotefile), dt, hhc);
-        m_transfer->retrieve(job);
+        m_job = TransferJob::getIfNewer(QUrl(remotefile), dt, hhc);
+        m_transfer->retrieve(m_job);
     }
-    if (!job) {
+    if (!m_job) {
         delete hhc;
         return false;
     }
@@ -123,50 +175,6 @@ bool Database::startUpdate(bool force)
     setUpdateStatus(UpdateStatus::Updating);
 
     emit databaseAboutToBeReset();
-
-    connect(m_transfer, &Transfer::started,
-            this, [this, job](TransferJob *j) {
-        if (j != job)
-            return;
-        emit updateStarted();
-    });
-    connect(m_transfer, &Transfer::progress,
-            this, [this, job](TransferJob *j, int done, int total) {
-        if (j != job)
-            return;
-        emit updateProgress(done, total);
-    });
-    connect(m_transfer, &Transfer::finished,
-            this, [this, job, hhc, file](TransferJob *j) {
-        if (j != job)
-            return;
-
-        hhc->close(); // does not close/commit the QSaveFile
-        hhc->deleteLater();
-
-        try {
-            if (!job->isFailed() && job->wasNotModifiedSince()) {
-                emit updateFinished(true, tr("Already up-to-date."));
-                setUpdateStatus(UpdateStatus::Ok);
-            } else if (job->isFailed()) {
-                throw Exception(tr("download and decompress failed") % u": " % job->errorString());
-            } else if (!hhc->hasValidChecksum()) {
-                throw Exception(tr("checksum mismatch after decompression"));
-            } else if (!file->commit()) {
-                throw Exception(tr("saving failed") % u": " % file->errorString());
-            } else {
-                read(file->fileName());
-
-                emit updateFinished(true, { });
-                setUpdateStatus(UpdateStatus::Ok);
-            }
-            emit databaseReset();
-
-        } catch (const Exception &e) {
-            emit updateFinished(false, tr("Could not load the new database") % u":\n\n" % e.error());
-            setUpdateStatus(UpdateStatus::UpdateFailed);
-        }
-    });
     return true;
 }
 

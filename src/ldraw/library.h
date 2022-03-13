@@ -28,6 +28,7 @@
 Q_DECLARE_LOGGING_CATEGORY(LogLDraw)
 
 class Transfer;
+class TransferJob;
 class MiniZip;
 
 
@@ -112,6 +113,7 @@ private:
     int m_updateInterval = 0;
     QDate m_lastUpdated;
     Transfer *m_transfer;
+    TransferJob *m_job = nullptr;
 
     QString m_path;
     bool m_isZip = false;

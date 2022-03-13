@@ -26,6 +26,7 @@
 
 
 class Transfer;
+class TransferJob;
 
 namespace BrickLink {
 
@@ -92,6 +93,7 @@ private:
     int m_updateInterval = 0;
     QDateTime m_lastUpdated;
     Transfer *m_transfer;
+    TransferJob *m_job = nullptr;
 
     std::vector<Color>               m_colors;
     std::vector<Category>            m_categories;
