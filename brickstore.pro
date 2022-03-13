@@ -138,7 +138,7 @@ sentry {
   CONFIG(debug, debug|release):LIBS += "-L$$VCPKG_PATH/debug/lib"
   else:LIBS += "-L$$VCPKG_PATH/lib"
   LIBS *= -lsentry
-  macos:LIBS *= -lcurl -lcrashpad_client -lmini_chromium -lcrashpad_util -lbsm -framework Security
+  macos:LIBS = -lcurl -lbsm $$LIBS -lcrashpad_client -lmini_chromium -lcrashpad_util -framework Security
   CONFIG *= force_debug_info
   unix:CONFIG *= separate_debug_info
   linux:LIBS *= -lcurl -ldl
