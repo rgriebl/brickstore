@@ -24,6 +24,32 @@
 #include "bricklink/order.h"
 
 
+static QDateTime parseESTDateTimeString(const QString &v)
+{
+    if (v.isEmpty())
+        return { };
+
+    //TOO SLOW: QDateTime::fromString(v % u" EST", "M/d/yyyy h:mm:ss AP t"_l1));
+    //TOO SLOW: { QDate::fromString(v, "M/d/yyyy"_l1), QTime(0, 0), est };
+
+    QStringList sl = QString(v).replace('/'_l1, ' '_l1).replace(':'_l1, ' '_l1).split(' '_l1);
+    if (sl.size() == 7) {
+        static const QTimeZone est("EST");
+
+        int h = sl.at(3).toInt() % 12;
+        if (sl.at(6) == "PM"_l1)
+            h += 12;
+        return  QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
+                          { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
+    } else if (sl.size() == 3) {
+        return QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
+                         { 0, 0, 0 }, Qt::UTC);
+    } else {
+        return { };
+    }
+}
+
+
 QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
@@ -163,30 +189,12 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
         // So we run a hand-crafted parser and convert to UTC right away.
 
         itemTagHash.insert(u"DATEADDED", [](auto *lot, auto &v) {
-            if (!v.isEmpty()) {
-                //TOO SLOW lot->setDateAdded({ QDate::fromString(v, "M/d/yyyy"_l1), QTime(0, 0), est });
-                QStringList sl = v.split('/'_l1);
-                if (sl.size() == 3) {
-                    lot->setDateAdded(QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
-                                                { 0, 0, 0 }, Qt::UTC));
-                }
-            }
+            // For whatever reason this is missing the time when added via the HTML or XML
+            // interfaces, but has a time field, when added via the REST API
+            lot->setDateAdded(parseESTDateTimeString(v));
         });
         itemTagHash.insert(u"DATELASTSOLD", [](auto *lot, auto &v) {
-            if (!v.isEmpty()) {
-                //TOO SLOW lot->setDateLastSold(QDateTime::fromString(v % u" EST", "M/d/yyyy h:mm:ss AP t"_l1));
-                QStringList sl = QString(v).replace('/'_l1, ' '_l1).replace(':'_l1, ' '_l1).split(' '_l1);
-                if (sl.size() == 7) {
-                    static const QTimeZone est("EST");
-
-                    int h = sl.at(3).toInt() % 12;
-                    if (sl.at(6) == "PM"_l1)
-                        h += 12;
-                    auto dt = QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
-                                        { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
-                    lot->setDateLastSold(dt);
-                }
-            }
+            lot->setDateLastSold(parseESTDateTimeString(v));
         });
     }
 
