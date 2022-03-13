@@ -13,6 +13,11 @@
 */
 #include <QIODevice>
 
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+#  error "The read() optimizations in unzip.c are incompatible with big endian machines"
+#endif
+
+
 // vvv copied from minizip's miniunz.c
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
 #  ifndef __USE_FILE_OFFSET64
