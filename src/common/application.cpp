@@ -579,13 +579,20 @@ void Application::setupSentry()
     else
         qCInfo(LogSentry) << "Successfully initialized sentry.io";
 
-    connect(SystemInfo::inst(), &SystemInfo::initialized, []() {
-        auto sysInfo = SystemInfo::inst()->asMap();
-        for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-            if (!it.key().startsWith("os."_l1))
+    auto sysInfo = SystemInfo::inst()->asMap();
+    for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
+        if (!it.key().startsWith("os."_l1))
+            sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
+    }
+    sentry_set_tag("language", Config::inst()->language().toUtf8().constData());
+
+    connect(SystemInfo::inst(), &SystemInfo::initialized, [sysInfo]() {
+        auto newSysInfo = SystemInfo::inst()->asMap();
+
+        for (auto it = newSysInfo.cbegin(); it != newSysInfo.cend(); ++it) {
+            if (!it.key().startsWith("os."_l1) && !sysInfo.contains(it.key()))
                 sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
         }
-        sentry_set_tag("language", Config::inst()->language().toUtf8().constData());
     });
 #endif
 }
