@@ -544,6 +544,7 @@ void Application::setupSentry()
 {
 #if defined(SENTRY_ENABLED)
     auto *sentry = sentry_options_new();
+#  if defined(SENTRY_DEBUG)
     sentry_options_set_debug(sentry, 1);
     sentry_options_set_logger(sentry, [](sentry_level_t level, const char *message, va_list args, void *) {
         QDebug dbg(static_cast<QString *>(nullptr));
@@ -557,6 +558,7 @@ void Application::setupSentry()
         }
         dbg.noquote() << QString::vasprintf(QByteArray(message).replace("%S", "%ls").constData(), args);
     }, nullptr);
+#  endif
     sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
     sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
     sentry_options_set_require_user_consent(sentry, 1);
