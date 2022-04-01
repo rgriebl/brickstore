@@ -137,6 +137,7 @@ jobs:
         arch: ${{ matrix.config.qt_arch }}
         target: ${{ matrix.config.qt_target || 'desktop' }}
         tools: ${{ matrix.config.qt_tools }}
+        setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
 
     - name: Install Qt from qt.io (OS version for cross-compiling)
       if: (matrix.config.os == 'android') || (matrix.config.os == 'ios')
@@ -147,6 +148,7 @@ jobs:
         modules: 'qttools'
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
+        setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
 
     - name: Install Qt from Linux Distro (native/appimage)
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container
