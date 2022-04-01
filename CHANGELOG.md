@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.4.1] - 2022-04-02
+This update is **mandatory** for users of 2022.3.1:
+
+Ever since LDraw released their March update, the affected BrickStore version re-downloads the
+60 MB LDraw parts library every time it is started.
+This not only affects your internet connection, but also puts an unnecessary load on LDraw's
+servers.
+
+Please update as soon as possible!
+
+
 ## [2022.3.1] - 2022-03-01
 This update is mostly about improvements to the handling of LDraw 3D part models:
 - BrickStore will now automatically download and update its own copy of the LDraw parts library.
@@ -470,7 +481,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.3.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.4.1...HEAD
+[2022.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.4.1
 [2022.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.3.1
 [2022.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.2
 [2022.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.1
