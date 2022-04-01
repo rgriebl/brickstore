@@ -106,7 +106,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     j->m_url = url;
     if (j->m_url.scheme().isEmpty())
         j->m_url.setScheme("http"_l1);
-    j->m_only_if_newer = ifnewer;
+    j->m_only_if_newer = ifnewer.toUTC();
     j->m_data = file ? nullptr : new QByteArray();
     j->m_file = file ? file : nullptr;
     j->m_http_method = method;

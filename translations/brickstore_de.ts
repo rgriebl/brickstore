@@ -5537,8 +5537,8 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
-        <source>Valid LDraw installation from %1</source>
-        <translation>Gültige LDraw Installation vom %1</translation>
+        <source>Valid LDraw installation, LDConfig from %1</source>
+        <translation>Gültige LDraw Installation, LDConfig vom %1</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="815"/>

@@ -4632,7 +4632,7 @@ If you do not want to save your password, then just leave this field empty and y
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
-        <source>Valid LDraw installation from %1</source>
+        <source>Valid LDraw installation, LDConfig from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

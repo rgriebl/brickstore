@@ -246,8 +246,11 @@ bool Library::startUpdate(bool force)
     QString localfile = m_path;
 
     QDateTime dt;
-    if (!force && QFile::exists(localfile))
-        dt = m_lastUpdated.startOfDay().addDays(7);
+    if (!force && QFile::exists(localfile)) {
+        // m_lastUpdate, aka the date in LDConfig.ldr ist _just_ for the config itself,
+        // not for the whole library
+        dt = QFileInfo(localfile).lastModified();
+    }
 
     auto file = new QSaveFile(localfile);
 

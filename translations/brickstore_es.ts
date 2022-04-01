@@ -5078,8 +5078,8 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
-        <source>Valid LDraw installation from %1</source>
-        <translation>Instalación válida de LDraw de %1</translation>
+        <source>Valid LDraw installation, LDConfig from %1</source>
+        <translation>Instalación válida de LDraw, LDConfig de %1</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="815"/>

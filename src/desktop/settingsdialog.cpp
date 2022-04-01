@@ -1206,7 +1206,7 @@ void SettingsDialog::checkLDrawDir()
 
     QString status = !valid
             ? tr("Not a valid LDraw installation")
-            : tr("Valid LDraw installation from %1").arg(QLocale().toString(date, QLocale::ShortFormat));
+            : tr("Valid LDraw installation, LDConfig from %1").arg(QLocale().toString(date, QLocale::ShortFormat));
     w_ldraw_status_text->setText(status);
 
     auto icon = QIcon::fromTheme(valid ? "vcs-normal"_l1 : "vcs-removed"_l1);
