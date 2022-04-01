@@ -1,5 +1,5 @@
 #import <Cocoa/Cocoa.h>
-#include "config.h"
+#include "common/config.h"
 
 bool hasMacThemes()
 {
