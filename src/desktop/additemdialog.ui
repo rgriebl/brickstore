@@ -664,31 +664,31 @@
   <customwidget>
    <class>SelectItem</class>
    <extends>QWidget</extends>
-   <header>selectitem.h</header>
+   <header>desktop/selectitem.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PriceGuideWidget</class>
    <extends>QFrame</extends>
-   <header>priceguidewidget.h</header>
+   <header>desktop/priceguidewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PictureWidget</class>
    <extends>QFrame</extends>
-   <header>picturewidget.h</header>
+   <header>desktop/picturewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AppearsInWidget</class>
    <extends>QWidget</extends>
-   <header>appearsinwidget.h</header>
+   <header>desktop/appearsinwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SelectColor</class>
    <extends>QWidget</extends>
-   <header>selectcolor.h</header>
+   <header>desktop/selectcolor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

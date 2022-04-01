@@ -33,7 +33,7 @@
   <customwidget>
    <class>SelectItem</class>
    <extends>QWidget</extends>
-   <header>selectitem.h</header>
+   <header>desktop/selectitem.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
