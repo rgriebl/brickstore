@@ -62,8 +62,16 @@ list(GET VERSION_LIST 2 VERSION_PATCH)
 project(BrickStore
     VERSION ${VERSION}
     DESCRIPTION ${DESCRIPTION}
+    HOMEPAGE_URL "https://${BRICKSTORE_URL}"
     LANGUAGES CXX C
 )
+
+find_package(Qt6)
+include(QtPlatformSupport) # load all the platform names
+
+if (NOT ANDROID)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+endif()
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
@@ -104,18 +112,14 @@ if (MODELTEST)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::TestLib)
 endif()
 
-if (NOT ANDROID)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-endif()
-
 if (NOT APPLE AND NOT WIN32 AND NOT ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "brickstore")
 endif()
 
 if (CLANG)
-    target_compile_options(${PROJECT_NAME} PRIVATE -fcoroutines-ts -stdlib=libc++)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines-ts -stdlib=libc++>)
 elseif (GCC)
-    target_compile_options(${PROJECT_NAME} PRIVATE -fcoroutines)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>)
 endif()
 
 if (SANITIZE)
@@ -208,7 +212,13 @@ if (APPLE)
 endif()
 
 if (LINUX AND NOT ANDROID)
-    # TODO: detect tbb
+    find_package(TBB)
+    if (TBB_FOUND)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE BS_HAS_PARALLEL_STL)
+        target_link_libraries(${PROJECT_NAME} PRIVATE TBB::tbb)
+    else()
+        message(STATUS "No libtbb found: parallel STL algorithms will not be used.")
+    endif()
 endif()
 
 if (ANDROID)
@@ -293,7 +303,55 @@ elseif (WIN32)
     )
 
 elseif (LINUX)
-    # appimage + flatpak
+    install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+    install(FILES unix/brickstore.desktop DESTINATION share/applications)
+    install(FILES unix/brickstore-mime.xml DESTINATION share/mime/packages)
+    install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
+    install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes)
+
+    # Arch has Qt 6.2+ and is handled upstream via AUR
+    # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
+    # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
+
+    if (NOT BS_BACKEND)
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "qml6-module-qtquick (>= 6.2), qml6-module-qtquick-controls (>= 6.2)")
+    endif()
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set(CPACK_PACKAGE_CONTACT "Robert Griebl <robert@griebl.org>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION x11)
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+
+    add_custom_target(deb-package
+        COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>" -G DEB
+                "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
+        COMMENT "Running CPack. Please wait..."
+        DEPENDS ${PROJECT_NAME}
+    )
+
+    set(APPIMAGE_DIR "${CMAKE_BINARY_DIR}/AppDir")
+    set(LINUXDEPLOY_DIR "${CMAKE_BINARY_DIR}/.linuxdeploy")
+
+    add_custom_target(appimage
+        COMMAND mkdir -p "${APPIMAGE_DIR}"
+        COMMAND install -D "${CMAKE_SOURCE_DIR}/unix/brickstore-mime.xml"
+                           "${APPIMAGE_DIR}/share/mime/packages"
+        COMMAND install -D "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore_doc.png"
+                           "${APPIMAGE_DIR}/share/icons/hicolor/128x128/mimetypes"
+        COMMAND mkdir -p "${LINUXDEPLOY_DIR}"
+        COMMAND wget  -P "${LINUXDEPLOY_DIR}" -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+        COMMAND chmod +x "${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage"
+        COMMAND wget  -P "${LINUXDEPLOY_DIR}" -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+        COMMAND chmod +x "${LINUXDEPLOY_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
+        COMMAND "VERSION=${VERSION}"
+                "QML_SOURCES_PATHS=\"${CMAKE_SOURCE_DIR}/extensions\""
+                "EXTRA_QT_PLUGINS=\"svg\""
+                ${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage "--appdir=${APPIMAGE_DIR}"
+                    -e "${CMAKE_BINARY_DIR}/bin/brickstore"
+                    -i "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png"
+                    -d "${CMAKE_SOURCE_DIR}/unix/brickstore.desktop"
+                    --plugin qt --output appimage
+        DEPENDS ${PROJECT_NAME}
+    )
 endif()
 
 # we don't want the standard 'package' target
