@@ -3,10 +3,9 @@ configure_file(version.h.in generated/version.h @ONLY)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 target_sources(${PROJECT_NAME} PUBLIC
+    main.cpp
     version.h.in
 
-    bricklink/cart.cpp
-    bricklink/cart.h
     bricklink/category.cpp
     bricklink/category.h
     bricklink/changelogentry.cpp
@@ -15,47 +14,34 @@ target_sources(${PROJECT_NAME} PUBLIC
     bricklink/color.h
     bricklink/core.cpp
     bricklink/core.h
+    bricklink/database.cpp
+    bricklink/database.h
     bricklink/global.h
-    bricklink/io.cpp
-    bricklink/io.h
     bricklink/item.cpp
     bricklink/item.h
     bricklink/itemtype.cpp
     bricklink/itemtype.h
     bricklink/lot.cpp
     bricklink/lot.h
-    bricklink/order.cpp
-    bricklink/order.h
     bricklink/partcolorcode.cpp
     bricklink/partcolorcode.h
     bricklink/picture.cpp
     bricklink/picture.h
     bricklink/priceguide.cpp
     bricklink/priceguide.h
-    bricklink/store.cpp
-    bricklink/store.h
     bricklink/textimport.cpp
     bricklink/textimport.h
-    bricklink/updatedatabase.cpp
-    bricklink/updatedatabase.h
-
-    common/main.cpp
-    common/onlinestate.cpp
-    common/onlinestate.h
-
-    ldraw/ldraw.h
-    ldraw/ldraw.cpp
 
     utility/chunkreader.cpp
     utility/chunkreader.h
     utility/chunkwriter.h
+    utility/eventfilter.h
     utility/exception.cpp
     utility/exception.h
     utility/q3cache.h
     utility/q3cache6.h
     utility/q5hashfunctions.cpp
     utility/q5hashfunctions.h
-    utility/qparallelsort.h
     utility/ref.cpp
     utility/ref.h
     utility/stopwatch.h
@@ -88,8 +74,18 @@ endif()
 
 if (BS_DESKTOP OR BS_MOBILE)
     target_sources(${PROJECT_NAME} PUBLIC
+        bricklink/cart.cpp
+        bricklink/cart.h
+        bricklink/io.cpp
+        bricklink/io.h
         bricklink/model.cpp
         bricklink/model.h
+        bricklink/order.cpp
+        bricklink/order.h
+        bricklink/store.cpp
+        bricklink/store.h
+        bricklink/wantedlist.cpp
+        bricklink/wantedlist.h
 
         common/actionmanager.cpp
         common/actionmanager.h
@@ -101,9 +97,28 @@ if (BS_DESKTOP OR BS_MOBILE)
         common/config.h
         common/document.cpp
         common/document.h
-        common/document_p.h
         common/documentio.cpp
         common/documentio.h
+        common/documentlist.cpp
+        common/documentlist.h
+        common/documentmodel.cpp
+        common/documentmodel.h
+        common/documentmodel_p.h
+        common/onlinestate.cpp
+        common/onlinestate.h
+        common/recentfiles.cpp
+        common/recentfiles.h
+        common/uihelpers.cpp
+        common/uihelpers.h
+
+        ldraw/glrenderer.cpp
+        ldraw/glrenderer.h
+        ldraw/library.cpp
+        ldraw/library.h
+        ldraw/part.cpp
+        ldraw/part.h
+        ldraw/renderwindow.cpp
+        ldraw/renderwindow.h
 
         qmlapi/bricklink_wrapper.cpp
         qmlapi/bricklink_wrapper.h
@@ -118,10 +133,28 @@ if (BS_DESKTOP OR BS_MOBILE)
         utility/filter.h
         utility/humanreadabletimedelta.cpp
         utility/humanreadabletimedelta.h
+        utility/qparallelsort.h
         utility/staticpointermodel.cpp
         utility/staticpointermodel.h
         utility/undo.cpp
         utility/undo.h
+    )
+
+    set(SHADERS
+        ldraw/shaders/phong.frag
+        ldraw/shaders/phong_core.frag
+        ldraw/shaders/conditional_core.vert
+        ldraw/shaders/conditional.vert
+        ldraw/shaders/line.frag
+        ldraw/shaders/line.vert
+        ldraw/shaders/line_core.frag
+        ldraw/shaders/line_core.vert
+        ldraw/shaders/surface.vert
+        ldraw/shaders/surface_core.vert
+    )
+    qt_add_resources(${PROJECT_NAME} shaders_qrc
+        PREFIX "/"
+        FILES  "${SHADERS}"
     )
 endif()
 
@@ -140,6 +173,10 @@ if (BS_DESKTOP)
         desktop/announcementsdialog.cpp
         desktop/appearsinwidget.cpp
         desktop/appearsinwidget.h
+        desktop/betteritemdelegate.cpp
+        desktop/betteritemdelegate.h
+        desktop/brickstoreproxystyle.cpp
+        desktop/brickstoreproxystyle.h
         desktop/changecurrencydialog.cpp
         desktop/changecurrencydialog.h
         desktop/changecurrencydialog.ui
@@ -150,23 +187,45 @@ if (BS_DESKTOP)
         desktop/consolidateitemsdialog.ui
         desktop/desktopapplication.cpp
         desktop/desktopapplication.h
+        desktop/desktopuihelpers.cpp
+        desktop/desktopuihelpers.h
+        desktop/developerconsole.cpp
+        desktop/developerconsole.h
         desktop/documentdelegate.cpp
         desktop/documentdelegate.h
-        desktop/framework.cpp
-        desktop/framework.h
+        desktop/filtertermwidget.cpp
+        desktop/filtertermwidget.h
+        desktop/flowlayout.cpp
+        desktop/flowlayout.h
+        desktop/headerview.cpp
+        desktop/headerview.h
+        desktop/historylineedit.cpp
+        desktop/historylineedit.h
         desktop/importcartdialog.cpp
         desktop/importcartdialog.h
         desktop/importcartdialog.ui
         desktop/importinventorydialog.cpp
         desktop/importinventorydialog.h
-        desktop/importinventorydialog.ui
+        desktop/importinventorywidget.cpp
+        desktop/importinventorywidget.h
+        desktop/importinventorywidget.ui
         desktop/importorderdialog.cpp
         desktop/importorderdialog.h
         desktop/importorderdialog.ui
+        desktop/importwantedlistdialog.cpp
+        desktop/importwantedlistdialog.h
+        desktop/importwantedlistdialog.ui
         desktop/incdecpricesdialog.cpp
         desktop/incdecpricesdialog.h
+        desktop/mainwindow.cpp
+        desktop/mainwindow.h
         desktop/managecolumnlayoutsdialog.cpp
         desktop/managecolumnlayoutsdialog.h
+        desktop/menucombobox.cpp
+        desktop/menucombobox.h
+        desktop/orderinformationdialog.cpp
+        desktop/orderinformationdialog.h
+        desktop/orderinformationdialog.ui
         desktop/picturewidget.cpp
         desktop/picturewidget.h
         desktop/priceguidewidget.cpp
@@ -176,6 +235,10 @@ if (BS_DESKTOP)
         desktop/printdialog.ui
         desktop/printjob.cpp
         desktop/printjob.h
+        desktop/progresscircle.cpp
+        desktop/progresscircle.h
+        desktop/progressdialog.cpp
+        desktop/progressdialog.h
         desktop/script.cpp
         desktop/script.h
         desktop/scriptmanager.cpp
@@ -198,6 +261,8 @@ if (BS_DESKTOP)
         desktop/settopriceguidedialog.cpp
         desktop/settopriceguidedialog.h
         desktop/settopriceguidedialog.ui
+        desktop/smartvalidator.cpp
+        desktop/smartvalidator.h
         desktop/systeminfodialog.cpp
         desktop/systeminfodialog.h
         desktop/systeminfodialog.ui
@@ -206,32 +271,15 @@ if (BS_DESKTOP)
         desktop/view.cpp
         desktop/view.h
         desktop/view_p.h
+        desktop/viewpane.cpp
+        desktop/viewpane.h
         desktop/welcomewidget.cpp
         desktop/welcomewidget.h
-        desktop/workspace.cpp
-        desktop/workspace.h
 
         ldraw/renderwidget.h
         ldraw/renderwidget.cpp
-        ldraw/shaders.h
-
-        utility/betteritemdelegate.cpp
-        utility/betteritemdelegate.h
-        utility/flowlayout.cpp
-        utility/flowlayout.h
-        utility/headerview.cpp
-        utility/headerview.h
-        utility/historylineedit.cpp
-        utility/historylineedit.h
-        utility/messagebox.cpp
-        utility/messagebox.h
-        utility/progresscircle.cpp
-        utility/progresscircle.h
-        utility/progressdialog.cpp
-        utility/progressdialog.h
-        utility/smartvalidator.cpp
-        utility/smartvalidator.h
         )
+
     target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt6::Widgets
         Qt6::PrintSupport
@@ -240,45 +288,51 @@ if (BS_DESKTOP)
         Qt6::Concurrent
         Qt6::OpenGL
         Qt6::OpenGLWidgets
+    )
+
+    if (APPLE)
+        target_sources(${PROJECT_NAME} PUBLIC
+            desktop/desktopapplication_mac.mm
         )
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            "-framework SystemConfiguration"
+            "-framework AppKit"
+        )
+    endif()
 endif()
 
 
 if (BS_MOBILE)
     target_sources(${PROJECT_NAME} PUBLIC
         mobile/mobileapplication.cpp
-        mobile/mobileapplication.h c
-        )
+        mobile/mobileapplication.h
+        mobile/mobileuihelpers.cpp
+        mobile/mobileuihelpers.h
+    )
 
     set(QML_FILES
         mobile/qtquickcontrols2.conf
-        mobile/main.qml
-        mobile/View.qml
-        mobile/MessageBox.qml
-        mobile/SettingsDialog.qml
+        mobile/AboutDialog.qml
+        mobile/ActionDelegate.qml
+        mobile/AutoSizingMenu.qml
+        mobile/DocumentProxyModelJS.qml
         mobile/GridCell.qml
-        )
+        mobile/GridHeader.qml
+        mobile/ImportCartDialog.qml
+        mobile/ImportOrderDialog.qml
+        mobile/Main.qml
+        mobile/SettingsDialog.qml
+        mobile/View.qml
+        mobile/ViewEditMenu.qml
+        mobile/ViewHeaderMenu.qml
+        mobile/uihelpers/FileDialog.qml
+        mobile/uihelpers/InputDialog.qml
+        mobile/uihelpers/MessageBox.qml
+        mobile/uihelpers/ProgressDialog.qml
+    )
     qt_add_resources(${PROJECT_NAME} mobile_qrc
         PREFIX "mobile"
         BASE   "${CMAKE_CURRENT_SOURCE_DIR}"
         FILES  "${QML_FILES}"
-        )
-endif()
-
-if(WIN32)
-    add_compile_definitions(BS_HAS_PARALLEL_STL)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-#        Qt6::WinExtras
-        Qt6::Widgets
     )
-elseif(APPLE)
-    target_sources(${PROJECT_NAME} PUBLIC
-        application_mac.mm
-    )
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        "-framework SystemConfiguration"
-        "-framework AppKit"
-    )
-elseif(UNIX)
-    # TBB stuff
 endif()

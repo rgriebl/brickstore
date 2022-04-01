@@ -60,9 +60,6 @@ defineTest(substitute) {
   return(true)
 }
 
-BrickStore_VERSION_MAJOR = $$VERSION_MAJOR
-BrickStore_VERSION_MINOR = $$VERSION_MINOR
-BrickStore_VERSION_PATCH = $$VERSION_PATCH
 substitute($$PWD/src/version.h.in, $$OUT_PWD/src/version.h)
 
 INCLUDEPATH *= $$OUT_PWD/src  # for version.h

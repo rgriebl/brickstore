@@ -39,7 +39,7 @@ Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
 Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion skipifsourcedoesntexist
 Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 ; MSVC
