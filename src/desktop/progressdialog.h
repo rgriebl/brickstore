@@ -15,7 +15,7 @@
 
 #include <QDialog>
 
-#include "transfer.h"
+#include "utility/transfer.h"
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 QT_FORWARD_DECLARE_CLASS(QLabel)

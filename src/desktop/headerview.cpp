@@ -29,7 +29,7 @@
 #include <QPixmapCache>
 #include <QStyleFactory>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "headerview.h"
 
 

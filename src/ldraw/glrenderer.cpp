@@ -308,7 +308,7 @@ void GLRenderer::paintGL(QOpenGLContext *context)
     }
 
     static auto vertexOffset = [](int offset) {
-        return reinterpret_cast<void *>(offset * int(sizeof(GLfloat)));
+        return reinterpret_cast<void *>(offset * qintptr(sizeof(GLfloat)));
     };
 
     auto renderSurfacesVBO = [this](int index, GLenum mode, int indexBufferIndex = -1) {

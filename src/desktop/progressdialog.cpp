@@ -21,7 +21,7 @@
 #include <QLayout>
 #include <QApplication>
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "progressdialog.h"
 
 

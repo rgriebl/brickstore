@@ -58,8 +58,8 @@
 // ^^^ copied from minizip's miniunz.c
 
 #include "utility/exception.h"
+#include "utility/stopwatch.h"
 #include "minizip.h"
-#include "stopwatch.h"
 
 
 MiniZip::MiniZip(const QString &zipFilename)
