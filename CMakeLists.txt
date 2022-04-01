@@ -190,9 +190,9 @@ endif()
 if (APPLE)
     set(EXECUTABLE ${PROJECT_NAME})
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.macos.plist"
     )
-    set(MACOS_RESOURCESIDI_ICON1 ICON
+    set(MACOS_RESOURCES
         assets/generated-app-icons/brickstore.icns
         assets/generated-app-icons/brickstore_doc.icns
     )

@@ -96,7 +96,7 @@ bool DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::FocusIn) {
         QFocusEvent *fe = static_cast<QFocusEvent *>(e);
-        static const QVector validReasons = {
+        static const QVector<Qt::FocusReason> validReasons = {
             Qt::MouseFocusReason,
             Qt::TabFocusReason,
             Qt::BacktabFocusReason,
