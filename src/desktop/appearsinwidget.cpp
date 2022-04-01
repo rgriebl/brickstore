@@ -119,7 +119,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 }
 
 AppearsInWidget::~AppearsInWidget()
-{ /* needed to use QScopedPointer on d */ }
+{ /* needed to use std::unique_ptr on d */ }
 
 void AppearsInWidget::languageChange()
 {

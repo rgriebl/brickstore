@@ -14,7 +14,6 @@
 #pragma once
 
 #include <QTreeView>
-#include <QScopedPointer>
 
 #include "utility/currency.h"
 #include "bricklink/global.h"
@@ -84,5 +83,5 @@ private:
     void updateNonStaticCells() const;
 
 private:
-    QScopedPointer<PriceGuideWidgetPrivate> d;
+    std::unique_ptr<PriceGuideWidgetPrivate> d;
 };

@@ -16,7 +16,6 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 #include <QtCore/QDateTime>
-#include <QtCore/QScopedPointer>
 #include <QtGui/QColor>
 
 #include "bricklink/global.h"
@@ -147,7 +146,7 @@ public:
     QDateTime dateLastSold() const     { return m_dateLastSold; }
     void setDateLastSold(const QDateTime &dt) { m_dateLastSold = dt.toUTC(); }
 
-    Incomplete *isIncomplete() const    { return m_incomplete.data(); }
+    Incomplete *isIncomplete() const    { return m_incomplete.get(); }
     void setIncomplete(Incomplete *inc) { m_incomplete.reset(inc); }
 
     bool mergeFrom(const Lot &merge, bool useCostQtyAg = false);
@@ -159,7 +158,7 @@ private:
     const Item * m_item;
     const Color *m_color;
 
-    QScopedPointer<Incomplete> m_incomplete;
+    std::unique_ptr<Incomplete> m_incomplete;
 
     Status       m_status    : 3 = Status::Include;
     Condition    m_condition : 2 = Condition::New;

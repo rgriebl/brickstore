@@ -938,7 +938,7 @@ void Document::setPrice(double price)
 
 void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate)
 {
-    Q_ASSERT(m_setToPG.isNull());
+    Q_ASSERT(!m_setToPG);
     const auto sel = selectedLots();
 
     Q_ASSERT(!isBlockingOperationActive());

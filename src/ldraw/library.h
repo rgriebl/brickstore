@@ -118,7 +118,7 @@ private:
     QString m_path;
     bool m_isZip = false;
     bool m_locked = false; // during updates/loading
-    QScopedPointer<MiniZip> m_zip;
+    std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
     QHash<int, Color> m_colors;  // id -> color struct
     Q3Cache<QString, Part> m_cache;  // path -> part

@@ -341,7 +341,7 @@ private:
         double           currencyRate;
         bool             canceled = false;
     };
-    QScopedPointer<SetToPriceGuideData> m_setToPG;
+    std::unique_ptr<SetToPriceGuideData> m_setToPG;
 
     QVector<ColumnData>   m_columnData;
 

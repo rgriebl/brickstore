@@ -74,7 +74,7 @@ signals:
     void lotsChanged(const BrickLink::LotList &lots);
 
 private:
-    QScopedPointer<WantedListPrivate> d;
+    std::unique_ptr<WantedListPrivate> d;
 };
 
 

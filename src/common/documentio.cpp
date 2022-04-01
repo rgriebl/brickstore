@@ -180,7 +180,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
         co_return nullptr;
 
     try {
-        QScopedPointer<QFile> f;
+        std::unique_ptr<QFile> f;
         bool isStudio = fn.endsWith(".io"_l1);
 
         if (isStudio) {

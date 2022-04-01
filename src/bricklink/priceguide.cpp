@@ -12,7 +12,6 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <QtCore/QScopedPointer>
 #include <QtCore/QLocale>
 #include <QtCore/QFile>
 #include <QtCore/QSaveFile>
@@ -44,10 +43,10 @@ BrickLink::PriceGuide::~PriceGuide()
 
 void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
 {
-    QScopedPointer<QSaveFile> f(core()->dataSaveFile(u"priceguide.txt", m_item, m_color));
+    std::unique_ptr<QSaveFile> f(core()->dataSaveFile(u"priceguide.txt", m_item, m_color));
 
     if (f && f->isOpen()) {
-        QTextStream ts(f.data());
+        QTextStream ts(f.get());
 
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
         ts << "# last update: " << fetched.toString() << "\n#\n";
@@ -72,7 +71,7 @@ bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
     if (!m_item || !m_color)
         return false;
 
-    QScopedPointer<QFile> f(core()->dataReadFile(u"priceguide.txt", m_item, m_color));
+    std::unique_ptr<QFile> f(core()->dataReadFile(u"priceguide.txt", m_item, m_color));
 
     if (f && f->isOpen()) {
         if (parse(f->readAll(), data)) {

@@ -93,7 +93,7 @@ Q_SIGNALS:
 private:
     Q_DISABLE_COPY(QWinTaskbarProgress)
     Q_DECLARE_PRIVATE(QWinTaskbarProgress)
-    QScopedPointer<QWinTaskbarProgressPrivate> d_ptr;
+    std::unique_ptr<QWinTaskbarProgressPrivate> d_ptr;
 };
 
 QT_END_NAMESPACE

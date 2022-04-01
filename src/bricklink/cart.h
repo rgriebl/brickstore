@@ -86,7 +86,7 @@ signals:
     void lotsChanged(const BrickLink::LotList &lots);
 
 private:
-    QScopedPointer<CartPrivate> d;
+    std::unique_ptr<CartPrivate> d;
 };
 
 

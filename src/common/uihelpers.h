@@ -161,7 +161,7 @@ public:
     static QCoro::Task<bool> progressDialog(QString title, QString message,
                                             auto context, auto progress, auto finished, auto start, auto cancel) {
 
-        QScopedPointer<UIHelpers_ProgressDialogInterface> pd(inst()->createProgressDialog(title, message));
+        std::unique_ptr<UIHelpers_ProgressDialogInterface> pd(inst()->createProgressDialog(title, message));
 
         QObject::connect(context, progress, pd.get(), &UIHelpers_ProgressDialogInterface::progress);
         QObject::connect(context, finished, pd.get(), &UIHelpers_ProgressDialogInterface::finished);

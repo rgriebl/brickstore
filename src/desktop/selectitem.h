@@ -14,7 +14,6 @@
 #pragma once
 
 #include <QDialog>
-#include <QScopedPointer>
 
 #include "bricklink/global.h"
 
@@ -88,5 +87,5 @@ private:
     bool zoomFilter(QObject *o, QEvent *e);
 
 protected:
-    QScopedPointer<SelectItemPrivate> d;
+    std::unique_ptr<SelectItemPrivate> d;
 };

@@ -14,7 +14,6 @@
 #pragma once
 
 #include <QStringList>
-#include <QScopedPointer>
 #include <QPointer>
 
 #include "qcoro/task.h"
@@ -87,8 +86,8 @@ protected:
     QStringList m_queuedDocuments;
     bool m_canEmitOpenDocuments = false;
 
-    QScopedPointer<QTranslator> m_trans_qt;
-    QScopedPointer<QTranslator> m_trans_brickstore;
+    std::unique_ptr<QTranslator> m_trans_qt;
+    std::unique_ptr<QTranslator> m_trans_brickstore;
 
     QtMessageHandler m_defaultMessageHandler = nullptr;
     QtMessageHandler m_uiMessageHandler = nullptr;

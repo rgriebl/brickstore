@@ -12,7 +12,6 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <QScopedPointer>
 #include <QFile>
 
 #include "bricklink/picture.h"
@@ -70,7 +69,7 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
     if (!m_item)
         return false;
 
-    QScopedPointer<QFile> f(readFile());
+    std::unique_ptr<QFile> f(readFile());
 
     bool isValid = false;
 

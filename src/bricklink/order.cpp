@@ -18,7 +18,6 @@
 #include <QSaveFile>
 #include <QDirIterator>
 #include <QCoreApplication>
-#include <QScopedPointer>
 #include <QUrlQuery>
 #include <QRegularExpression>
 #include <QJsonDocument>
@@ -701,8 +700,8 @@ Orders::Orders(Core *core)
                     QJsonDocument json = QJsonDocument::fromVariant(vm);
                     QByteArray utf8 = json.toJson();
 
-                    QScopedPointer saveFile { orderSaveFile(QString(order->id() % u".brickstore.json"),
-                                                            order->type(), order->date()) };
+                    std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() % u".brickstore.json"),
+                                                                        order->type(), order->date()) };
 
                     if (!saveFile
                             || (saveFile->write(utf8) != utf8.size())
@@ -734,8 +733,8 @@ Orders::Orders(Core *core)
                         if (order->id().isEmpty() || !order->date().isValid())
                             throw Exception("Invalid order without ID and DATE");
 
-                        QScopedPointer saveFile { orderSaveFile(QString(order->id() % u".order.xml"),
-                                                                orderType, order->date()) };
+                        std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() % u".order.xml"),
+                                                                            orderType, order->date()) };
                         if (!saveFile
                                 || (saveFile->write(orderXml) != orderXml.size())
                                 || !saveFile->commit()) {
@@ -847,7 +846,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     QXmlStreamReader xml(data);
 
     QHash<Order *, QString> result;
-    QScopedPointer<Order> order;
+    std::unique_ptr<Order> order;
 
     QHash<QStringView, std::function<void(Order *, const QString &)>> rootTagHash;
 
@@ -914,7 +913,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                     int endOfOrder = int(xml.characterOffset());
                     QString header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_l1;
                     QString footer = "\n"_l1;
-                    result.insert(order.take(), header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
+                    result.insert(order.release(), header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
                     startOfOrder = -1;
                 }
                 break;

@@ -244,7 +244,7 @@ SelectItem::SelectItem(QWidget *parent)
 }
 
 SelectItem::~SelectItem()
-{ /* needed to use QScopedPointer on d */ }
+{ /* needed to use std::unique_ptr on d */ }
 
 void SelectItem::init()
 {

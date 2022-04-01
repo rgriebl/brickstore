@@ -170,7 +170,7 @@ signals:
     void phoneChanged(const QString &str);
 
 private:
-    QScopedPointer<OrderPrivate> d;
+    std::unique_ptr<OrderPrivate> d;
 };
 
 

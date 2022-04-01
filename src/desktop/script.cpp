@@ -213,7 +213,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
     if (maxPageCount)
         *maxPageCount = 0;
 
-    QScopedPointer<QmlPrintJob> job(new QmlPrintJob(pd));
+    std::unique_ptr<QmlPrintJob> job(new QmlPrintJob(pd));
 
     if (!m_printFunction.isCallable())
         throw Exception(tr("The printing script does not define a 'printFunction'."));
@@ -225,7 +225,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
         itemList << QVariant::fromValue(QmlLot(lot));
 
     QQmlEngine *engine = m_script->qmlEngine();
-    QJSValueList args = { engine->toScriptValue(job.data()),
+    QJSValueList args = { engine->toScriptValue(job.get()),
                           engine->toScriptValue(view->document()),
                           engine->toScriptValue(itemList) };
     QJSValue result = m_printFunction.call(args);

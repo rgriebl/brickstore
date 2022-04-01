@@ -68,7 +68,7 @@ public:
 private:
     Q_DISABLE_COPY(QWinTaskbarButton)
     Q_DECLARE_PRIVATE(QWinTaskbarButton)
-    QScopedPointer<QWinTaskbarButtonPrivate> d_ptr;
+    std::unique_ptr<QWinTaskbarButtonPrivate> d_ptr;
 
     Q_PRIVATE_SLOT(d_func(), void _q_updateProgress())
 };

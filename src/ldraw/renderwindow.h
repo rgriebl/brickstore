@@ -23,7 +23,6 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QVector3D>
-#include <QScopedPointer>
 
 #include <vector>
 

@@ -337,7 +337,7 @@ private:
 
 
     QVector<QPair<int, Qt::SortOrder>> m_sortColumns = { { -1, Qt::AscendingOrder } };
-    QScopedPointer<Filter::Parser> m_filterParser;
+    std::unique_ptr<Filter::Parser> m_filterParser;
     QVector<Filter> m_filter;
 
     bool m_isSorted = false;   // freshly sorted, no changes

@@ -23,7 +23,6 @@
 #include <QSurfaceFormat>
 #include <QMatrix4x4>
 #include <QQuaternion>
-#include <QScopedPointer>
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QColor>

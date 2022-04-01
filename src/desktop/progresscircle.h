@@ -15,7 +15,6 @@
 
 #include <QWidget>
 #include <QIcon>
-#include <QScopedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QGradient)
 
@@ -72,5 +71,5 @@ private:
     QString m_tt_normal;
     QIcon m_icon;
     QColor m_color;
-    QScopedPointer<QGradient> m_fill;
+    std::unique_ptr<QGradient> m_fill;
 };

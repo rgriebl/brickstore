@@ -14,7 +14,6 @@
 #pragma once
 
 #include <QTreeView>
-#include <QScopedPointer>
 
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
@@ -49,5 +48,5 @@ private:
     const BrickLink::AppearsInItem *appearsIn() const;
 
 private:
-    QScopedPointer<AppearsInWidgetPrivate> d;
+    std::unique_ptr<AppearsInWidgetPrivate> d;
 };
