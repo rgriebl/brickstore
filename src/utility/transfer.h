@@ -163,6 +163,8 @@ public:
     static void setDefaultUserAgent(const QString &ua);
     static QString defaultUserAgent();
 
+    static void setInitFunction(std::function<void()> func);
+
 signals:
     void overallProgress(int done, int total);
     void started(TransferJob *);
@@ -182,4 +184,5 @@ private:
     QString m_user_agent;
 
     static QString s_default_user_agent;
+    static std::function<void()> s_threadInitFunction;
 };

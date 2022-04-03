@@ -69,7 +69,7 @@ private:
 
     QFile *readFile() const;
     QSaveFile *saveFile() const;
-    bool loadFromDisk(QDateTime &fetched, QImage &image);
+    bool loadFromDisk(QDateTime &fetched, QImage &image) const;
 
     friend class Core;
     friend class PictureLoaderJob;

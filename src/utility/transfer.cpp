@@ -122,6 +122,8 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 // ===========================================================================
 
 QString Transfer::s_default_user_agent;
+std::function<void()> Transfer::s_threadInitFunction;
+
 
 Transfer::Transfer(QObject *parent)
     : QObject(parent)
@@ -131,8 +133,10 @@ Transfer::Transfer(QObject *parent)
     m_user_agent = s_default_user_agent;
 
     m_retriever = new TransferRetriever(this);
-#  if QT_CONFIG(cxx11_future)
+#if QT_CONFIG(cxx11_future)
     m_retrieverThread = QThread::create([this]() {
+        if (s_threadInitFunction)
+            s_threadInitFunction();
         QEventLoop eventLoop;
         int returnCode = eventLoop.exec();
         delete m_retriever;
@@ -216,6 +220,11 @@ void Transfer::setDefaultUserAgent(const QString &ua)
 QString Transfer::defaultUserAgent()
 {
     return s_default_user_agent;
+}
+
+void Transfer::setInitFunction(std::function<void ()> func)
+{
+    s_threadInitFunction = func;
 }
 
 

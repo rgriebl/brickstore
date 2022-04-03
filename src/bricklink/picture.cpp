@@ -64,7 +64,7 @@ QSaveFile *BrickLink::Picture::saveFile() const
                                 (!large && hasColors) ? m_color : nullptr);
 }
 
-bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
+bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image) const
 {
     if (!m_item)
         return false;
@@ -75,18 +75,25 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image)
 
     if (f && f->isOpen()) {
         if (f->size() > 0) {
-            QByteArray ba = f->readAll();
+            try {
+                QByteArray ba = f->readAll();
+                QImage img;
 
-            // optimize loading when a lot of QImageIO plugins are available
-            // (e.g. when building against Qt from a Linux distro)
-            if (ba.startsWith("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"))
-                isValid = image.loadFromData(ba, "PNG");
-            else if (ba.startsWith("GIF8"))
-                isValid = image.loadFromData(ba, "GIF");
-            else if (ba.startsWith("\xFF\xD8\xFF"))
-                isValid = image.loadFromData(ba, "JPG");
-            if (!isValid)
-                isValid = image.loadFromData(ba);
+                // optimize loading when a lot of QImageIO plugins are available
+                // (e.g. when building against Qt from a Linux distro)
+                if (ba.startsWith("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"))
+                    isValid = img.loadFromData(ba, "PNG");
+                else if (ba.startsWith("GIF8"))
+                    isValid = img.loadFromData(ba, "GIF");
+                else if (ba.startsWith("\xFF\xD8\xFF"))
+                    isValid = img.loadFromData(ba, "JPG");
+                if (!isValid)
+                    isValid = img.loadFromData(ba);
+                image = img;
+            } catch (const std::bad_alloc &) {
+                image = { };
+                isValid = false;
+            }
         }
         fetched = f->fileTime(QFileDevice::FileModificationTime);
     }

@@ -115,6 +115,11 @@ void Application::init()
     Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
                                   % u" (" + QSysInfo::prettyProductName() % u')');
 
+#if defined(Q_CC_MSVC)
+    // std::set_terminate is a per-thread setting on Windows
+    Transfer::setInitFunction([]() { Application::setupTerminateHandler(); });
+#endif
+
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     checkSentryConsent();
