@@ -33,11 +33,7 @@
 #include "common/config.h"
 #include "ldraw/library.h"
 #include "ldraw/part.h"
-#if defined(Q_OS_MACOS)
-#  include "ldraw/renderwindow.h"
-#else
-#  include "ldraw/renderwidget.h"
-#endif
+#include "ldraw/renderwidget.h"
 #include "utility/eventfilter.h"
 #include "utility/utility.h"
 #include "picturewidget.h"
@@ -86,12 +82,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     layout->addWidget(w_image, 10);
     layout->setContentsMargins(2, 6, 2, 2);
 
-#if defined(Q_OS_MACOS)
-    w_ldrawWin = new LDraw::RenderWindow();
-    w_ldraw = QWidget::createWindowContainer(w_ldrawWin, this);
-#else
     w_ldraw = new LDraw::RenderWidget(this);
-#endif
     w_ldraw->hide();
 
     w_2d = new QToolButton();
@@ -123,18 +114,19 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_playPause = new QToolButton();
     w_playPause->setAutoRaise(true);
     w_playPause->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    auto toggleAnimation = [this]() {
-        m_animationActive = !m_animationActive;
-        w_playPause->setIcon(m_animationActive ? m_pauseIcon : m_playIcon);
-        if (m_animationActive)
-            w_ldrawWin->startAnimation();
-        else
-            w_ldrawWin->resetCamera();
-    };
+    w_playPause->setIcon(m_playIcon);
     connect(w_playPause, &QToolButton::clicked,
-            w_ldraw, toggleAnimation);
-    m_animationActive = true;
-    toggleAnimation();
+            w_ldraw, [this]() {
+        bool b = !w_ldraw->isAnimationActive();
+        w_ldraw->setAnimationActive(b);
+        if (!b)
+            w_ldraw->resetCamera();
+    });
+    connect(w_ldraw, &LDraw::RenderWidget::animationActiveChanged,
+            this, [this]() {
+        w_playPause->setIcon(w_ldraw->isAnimationActive() ? m_pauseIcon : m_playIcon);
+    });
+
     updateButtons();
 
     if (w_ldraw)
@@ -232,8 +224,8 @@ void PictureWidget::languageChange()
 
 void PictureWidget::paletteChange()
 {
-    if (w_ldrawWin)
-        w_ldrawWin->setClearColor(palette().color(backgroundRole()));
+//    if (w_ldrawWin)
+//        w_ldrawWin->setClearColor(palette().color(backgroundRole()));
 }
 
 void PictureWidget::resizeEvent(QResizeEvent *e)
@@ -352,13 +344,11 @@ void PictureWidget::redraw()
         w_image->hide();
 
         w_ldraw->show();
-        w_ldrawWin->setPartAndColor(m_part, m_colorId);
-        if (m_animationActive)
-            w_ldrawWin->startAnimation();
+        w_ldraw->setPartAndColor(m_part, m_colorId);
     } else {
-        w_ldrawWin->setPartAndColor(nullptr, -1);
+        w_ldraw->setPartAndColor(nullptr, -1);
         w_ldraw->hide();
-        w_ldrawWin->stopAnimation();
+        w_ldraw->stopAnimation();
         w_image->show();
     }
     m_reload->setVisible(!show3D);

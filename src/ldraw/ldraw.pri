@@ -5,19 +5,17 @@ DEPENDPATH  += $$RELPWD
 
 bs_desktop|bs_mobile {
 
-QT *= opengl
+QT *= quick3d
 
 HEADERS += \
-    $$PWD/glrenderer.h \
     $$PWD/library.h \
     $$PWD/part.h \
-    $$PWD/renderwindow.h \
+    $$PWD/rendercontroller.h \
 
 SOURCES += \
-    $$PWD/glrenderer.cpp \
     $$PWD/library.cpp \
     $$PWD/part.cpp \
-    $$PWD/renderwindow.cpp \
+    $$PWD/rendercontroller.cpp \
 
 RESOURCES += \
     $$PWD/shaders.qrc \
@@ -28,13 +26,12 @@ OTHER_FILES += \
     $$PWD/shaders/conditional.vert \
     $$PWD/shaders/conditional_core.vert \
     $$PWD/shaders/surface.vert \
-    $$PWD/shaders/surface_core.vert
+    $$PWD/shaders/surface_core.vert \
+    $$PWD/PartRenderer.qml \
 
 }
 
 bs_desktop {
-
-versionAtLeast(QT_VERSION, 6.0.0):QT *= openglwidgets
 
 HEADERS += \
     $$PWD/renderwidget.h \

@@ -1,12 +1,10 @@
-name: QMake Build Matrix
+name: CMake Build Matrix
 
 on:
   push:
     workflow_dispatch:
     branches:
-      - main
-    tags:
-      - v*
+      - next
 
 jobs:
   build:
@@ -14,44 +12,34 @@ jobs:
     runs-on: ${{ matrix.config.runs-on }}
     env:
       BUILD_NUMBER: ${{ github.run_number }}
-      BRICKSTORE_QT_MODULES: libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev
+      TODO:!! BRICKSTORE_QT_MODULES: libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev
 
     strategy:
       fail-fast: false
       matrix:
         config:
-        - name: "Windows 32bit"
-          artifact: "Windows-x86"
-          runs-on: windows-2019
-          os: windows
-          qt_version: '5.15.2'
-          qt_arch: 'win32_msvc2019'
-          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
-          qmake_extra_config: 'CONFIG+=sentry'
-          vcpkg_triplet: 'x86-windows'
-
-        - name: "Windows 64bit"
+        - name: "Windows Intel 64bit"
           artifact: "Windows-x64"
           runs-on: windows-2019
           os: windows
-          qt_version: '5.15.2'
+          qt_version: '6.2.4'
           qt_arch: 'win64_msvc2019_64'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          qmake_extra_config: 'CONFIG+=sentry'
+          cmake_extra_config: '-DSENTRY=ON'
           vcpkg_triplet: 'x64-windows'
 
-        - name: "Ubuntu 21.04 64bit"
-          artifact: "Ubuntu-21.04"
+        - name: "Ubuntu 22.04 64bit"
+          artifact: "Ubuntu-22.04"
           runs-on: ubuntu-20.04
           os: linux
-          debian_container: "buildpack-deps:21.04"
+          debian_container: "buildpack-deps:22.04"
 
-        - name: "Debian 11 Backend 64bit"
-          artifact: "Debian-11-Backend"
+        - name: "Debian 12 Backend 64bit"
+          artifact: "Debian-12-Backend"
           runs-on: ubuntu-20.04
           os: linux
-          debian_container: "buildpack-deps:bullseye"
-          qmake_extra_config: "CONFIG+=backend-only"
+          debian_container: "buildpack-deps:bookworm"
+          cmake_extra_config: "-DBACKEND_ONLY=ON"
           generate_docs: true
 
         - name: "Linux AppImage 64bit"
@@ -59,35 +47,35 @@ jobs:
           runs-on: ubuntu-20.04
           os: linux
           appimage: true
-          qt_version: '5.15.2'
+          qt_version: '6.2.4'
           qt_arch: ''
 
-        - name: "macOS 64bit"
+        - name: "macOS Universal 64bit"
           artifact: "macOS"
           runs-on: macos-11
           os: macos
-          qt_version: '5.15.2'
+          qt_version: '6.2.4'
           qt_arch: ''
-          qmake_extra_config: 'CONFIG+=sentry'
+          cmake_extra_config: '-DSENTRY=ON -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
           vcpkg_triplet: 'x64-osx'
 
         - name: "Android ARM"
           artifact: "Android-ARM"
           runs-on: ubuntu-20.04
           os: android
-          qt_version: '6.2.3'
+          qt_version: '6.2.4'
           qt_arch: 'android_armv7'
           qt_target: 'android'
-          qmake_extra_config: ''
+          cmake_extra_config: ''
 
 #        - name: "iOS"
 #          artifact: "iOS"
 #          runs-on: macos-11
 #          os: ios
-#          qt_version: '6.2.2'
+#          qt_version: '6.2.4'
 #          qt_arch: ''
 #          qt_target: 'ios'
-#          qmake_extra_config: ''
+#          cmake_extra_config: ''
 
   # BUILD
   #################################################
@@ -153,7 +141,7 @@ jobs:
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install $BRICKSTORE_QT_MODULES debhelper lsb-release fakeroot build-essential
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install $BRICKSTORE_QT6_MODULES debhelper lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt from Linux Distro (container)
@@ -161,7 +149,7 @@ jobs:
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
-        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install $BRICKSTORE_QT_MODULES debhelper lsb-release fakeroot build-essential
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install $BRICKSTORE_QT6_MODULES debhelper lsb-release fakeroot build-essential
       shell: bash
 
     # Install dependencies using vcpkg
@@ -195,9 +183,8 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }} VCPKG_PATH=%VCPKG_PATH%
-        nmake
-        nmake installer
+        cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -DVCPKG_PATH=%VCPKG_PATH% .
+        cmake --build . --config RelWithDebInfo --parallel --target all,installer
       shell: cmd
 
     - name: Upload Windows Installer
@@ -220,24 +207,23 @@ jobs:
     - name: Build for Linux (native)
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
-        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
-        make package
+      cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
+      cmake --build . --config RelWithDebInfo --parallel --target all,package
       shell: bash
 
     - name: Build for Linux (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker exec -w /build "debian-build" qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
-        sudo docker exec -w /build "debian-build" make package
+        sudo docker exec -w /build "debian-build" cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
+        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo --parallel --target all,package
       shell: bash
 
     - name: Build for Linux (appimage)
       if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10
-        qmake CONFIG+=release QMAKE_CXX=g++-10 QMAKE_CC=gcc-10 ${{ matrix.config.qmake_extra_config }}
-        make
-        make appimage
+        cmake --config RelWithDebInfo -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++10 ${{ matrix.config.cmake_extra_config }} .
+        cmake --build . --config RelWithDebInfo --parallel --target all,appimage
       shell: bash
 
     - name: Upload Linux DEB
@@ -275,6 +261,7 @@ jobs:
       run: |
         echo "Using NDK: $ANDROID_NDK_ROOT"
         echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
+        TODO!!!
         qmake -spec android-clang CONFIG+=release CONFIG+=qtquickcompiler ${{ matrix.config.qmake_extra_config }}
         make
         make package
@@ -293,9 +280,8 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }} VCPKG_PATH=$VCPKG_PATH
-        make
-        make installer
+        cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -DVCPKG_PATH=$VCPKG_PATH .
+        cmake --build . --config RelWithDebInfo --parallel --target all,dmg
       shell: bash
 
     - name: Upload macOS DMG
@@ -328,6 +314,7 @@ jobs:
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
+      TODO!!!
         qmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make
         make package || true
@@ -346,7 +333,7 @@ jobs:
     - name: Generate Documentation
       if: (matrix.config.os == 'linux') && matrix.config.debian_container && matrix.config.generate_docs && (github.ref == 'refs/heads/main')
       run: |
-        sudo docker exec -w /build "debian-build" make extensions_doc
+        sudo docker exec -w /build "debian-build" cmake --build . --target extensions-doc
 
     - name: Publish Documentation
       if: matrix.config.generate_docs && (github.ref == 'refs/heads/main')

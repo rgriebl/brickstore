@@ -2,5 +2,7 @@
 .gitignore              export-ignore
 .gitattributes          export-ignore
 
+*.hdr   binary
+
 *.sh text eol=lf
 VERSION_NUMBER text eol=lf

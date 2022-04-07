@@ -593,15 +593,15 @@ Core::Core(const QString &datadir)
     m_diskloadPool.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
-    // * The max. pic cache size is at least 700MB. On 64bit systems, this gets expanded to a quarter
+    // * The max. pic cache size is at least 500MB. On 64bit systems, this gets expanded to a quarter
     //   of the physical memory, but it is capped at 4GB
     // * The max. pg cache size is at least 5'000. On 64bit systems with more than 3GB of RAM this
     //   gets doubled to 10'000.
-    quint64 picCacheMem = 700'000'000ULL; // more than that and Win32 runs oom
+    quint64 picCacheMem = 500'000'000ULL; // more than that and Win32 runs oom
     int pgCacheEntries = 5'000;
 
 #if Q_PROCESSOR_WORDSIZE >= 8
-    picCacheMem = qBound(picCacheMem, SystemInfo::inst()->physicalMemory() / 4, picCacheMem * 4);
+    picCacheMem = qBound(picCacheMem, SystemInfo::inst()->physicalMemory() / 4, picCacheMem * 8);
     if (SystemInfo::inst()->physicalMemory() >= 3'000'000'000ULL)
         pgCacheEntries *= 2;
 #endif

@@ -73,6 +73,11 @@ if (NOT ANDROID)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 endif()
 
+# Android is the last supported 32bit platform
+if (QT_32BIT AND NOT ANDROID)
+    message(FATAL_ERROR "32bit builds for this platform are not supported.")
+endif()
+
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
 add_compile_definitions(
@@ -93,7 +98,7 @@ find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools ToolsT
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     add_compile_definitions(BS_MOBILE)
-    find_package(Qt6 COMPONENTS Qml Quick OpenGL REQUIRED)
+    find_package(Qt6 COMPONENTS Qml Quick Quick3D REQUIRED)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -102,7 +107,7 @@ elseif (BACKEND_ONLY)
 else()
     set(BS_DESKTOP ON)
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick OpenGL OpenGLWidgets REQUIRED)
+    find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick Quick3D REQUIRED)
 
 endif()
 
@@ -282,7 +287,7 @@ add_custom_target(OtherFiles SOURCES
 if (APPLE)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
-    add_custom_target(bundle
+    add_custom_target(dmg
         COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE:${PROJECT_NAME}>/../../.. -qmldir=${CMAKE_CURRENT_SOURCE_DIR}/extensions
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
                 "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
@@ -324,7 +329,7 @@ elseif (LINUX)
     install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
     install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes)
 
-    # Arch has Qt 6.2+ and is handled upstream via AUR
+    # Arch has Qt 6.2+ and is handled upstream via AUR (TODO: update to Qt6)
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
     # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
 

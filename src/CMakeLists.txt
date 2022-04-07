@@ -111,14 +111,12 @@ if (BS_DESKTOP OR BS_MOBILE)
         common/uihelpers.cpp
         common/uihelpers.h
 
-        ldraw/glrenderer.cpp
-        ldraw/glrenderer.h
         ldraw/library.cpp
         ldraw/library.h
         ldraw/part.cpp
         ldraw/part.h
-        ldraw/renderwindow.cpp
-        ldraw/renderwindow.h
+        ldraw/rendercontroller.cpp
+        ldraw/rendercontroller.h
 
         qmlapi/bricklink_wrapper.cpp
         qmlapi/bricklink_wrapper.h
@@ -141,21 +139,26 @@ if (BS_DESKTOP OR BS_MOBILE)
     )
 
     set(SHADERS
-        ldraw/shaders/phong.frag
-        ldraw/shaders/phong_core.frag
-        ldraw/shaders/conditional_core.vert
-        ldraw/shaders/conditional.vert
-        ldraw/shaders/line.frag
-        ldraw/shaders/line.vert
-        ldraw/shaders/line_core.frag
-        ldraw/shaders/line_core.vert
-        ldraw/shaders/surface.vert
-        ldraw/shaders/surface_core.vert
+        ldraw/PartRenderer.qml
+        ldraw/lightbox.hdr
     )
     qt_add_resources(${PROJECT_NAME} shaders_qrc
         PREFIX "/"
         FILES  "${SHADERS}"
     )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        Qt6::Qml
+        Qt6::Quick
+        Qt6::Quick3D
+    )
+
+    # not useable due to QTBUG-XXXX
+    #qt_add_qml_module(${PROJECT_NAME}
+    #    URI BrickStore
+    #    VERSION 1.0
+    #)
+
 endif()
 
 if (BS_DESKTOP)
@@ -282,12 +285,8 @@ if (BS_DESKTOP)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt6::Widgets
+        Qt6::WidgetsPrivate
         Qt6::PrintSupport
-        Qt6::Qml
-        Qt6::Quick
-        Qt6::Concurrent
-        Qt6::OpenGL
-        Qt6::OpenGLWidgets
     )
 
     if (APPLE)

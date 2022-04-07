@@ -35,12 +35,10 @@ public:
     ~Part() override;
 
     inline const QVector<Element *> &elements() const  { return m_elements; }
-
-    bool boundingBox(QVector3D &vmin, QVector3D &vmax);
     int cost() const;
 
 protected:
-    Part();
+    Part() = default;
 
     static Part *parse(const QByteArray &data, const QString &dir);
     friend class PartElement;
@@ -49,9 +47,6 @@ protected:
     static void calculateBoundingBox(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
 
     QVector<Element *> m_elements;
-    bool m_boundingCalculated;
-    QVector3D m_boundingMin;
-    QVector3D m_boundingMax;
     int m_cost = 0;
 };
 

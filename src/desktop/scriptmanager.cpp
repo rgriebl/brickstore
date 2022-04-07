@@ -26,6 +26,7 @@
 #include "bricklink/core.h"
 #include "bricklink/database.h"
 #include "common/application.h"
+#include "ldraw/library.h"
 #include "qmlapi/common.h"
 #include "qmlapi/bricklink_wrapper.h"
 #include "qmlapi/brickstore_wrapper.h"
@@ -75,6 +76,7 @@ void ScriptManager::initialize()
     QmlBrickLink::registerTypes();
     QmlBrickStore::registerTypes();
     QmlPrintJob::registerTypes();
+    LDraw::registerQmlTypes();
 
     qmlRegisterType<Script>("BrickStore", 1, 0, "Script");
     qmlRegisterType<ExtensionScriptAction>("BrickStore", 1, 0, "ExtensionScriptAction");

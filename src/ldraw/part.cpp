@@ -204,11 +204,6 @@ PartElement *PartElement::create(int color, const QMatrix4x4 &matrix,
 }
 
 
-Part::Part()
-    : m_boundingCalculated(false)
-{
-}
-
 Part::~Part()
 {
     qDeleteAll(m_elements);
@@ -244,64 +239,9 @@ Part *Part::parse(const QByteArray &data, const QString &dir)
     return p;
 }
 
-bool Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
-{
-    if (!m_boundingCalculated) {
-        QMatrix4x4 matrix;
-        static constexpr auto fmin = std::numeric_limits<float>::min();
-        static constexpr auto fmax = std::numeric_limits<float>::max();
-
-        m_boundingMin = QVector3D(fmax, fmax, fmax);
-        m_boundingMax = QVector3D(fmin, fmin, fmin);
-
-        calculateBoundingBox(this, matrix, m_boundingMin, m_boundingMax);
-        m_boundingCalculated = true;
-    }
-    vmin = m_boundingMin;
-    vmax = m_boundingMax;
-    return true;
-}
-
 int Part::cost() const
 {
     return m_cost;
-}
-
-
-void Part::calculateBoundingBox(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
-{
-    auto extend = [&matrix, &vmin, &vmax](int cnt, const QVector3D *v) {
-        while (cnt--) {
-            QVector3D vm = matrix.map(*v++);
-            vmin = QVector3D(qMin(vmin.x(), vm.x()), qMin(vmin.y(), vm.y()), qMin(vmin.z(), vm.z()));
-            vmax = QVector3D(qMax(vmax.x(), vm.x()), qMax(vmax.y(), vm.y()), qMax(vmax.z(), vm.z()));
-        }
-    };
-
-    const auto elements = part->elements();
-    for (const Element *e : elements) {
-        switch (e->type()) {
-        case Element::Type::Line:
-            extend(2, static_cast<const LineElement *>(e)->points());
-            break;
-
-        case Element::Type::Triangle:
-            extend(3, static_cast<const TriangleElement *>(e)->points());
-            break;
-
-        case Element::Type::Quad:
-            extend(4, static_cast<const QuadElement *>(e)->points());
-            break;
-
-        case Element::Type::Part: {
-            const auto *pe = static_cast<const PartElement *>(e);
-            calculateBoundingBox(pe->part(), matrix * pe->matrix(), vmin, vmax);
-            break;
-        }
-        default:
-            break;
-        }
-    }
 }
 
 } // namespace LDraw

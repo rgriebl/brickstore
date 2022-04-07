@@ -58,12 +58,14 @@ Library::Library(QObject *parent)
             this, [this](TransferJob *j) {
         if (j != m_job)
             return;
+        qWarning() << "LDRAW UPDATE STARTED";
         emit updateStarted();
     });
     connect(m_transfer, &Transfer::progress,
             this, [this](TransferJob *j, int done, int total) {
         if (j != m_job)
             return;
+        qWarning() << "LDRAW UPDATE Progress" << done << total;
         emit updateProgress(done, total);
     });
     connect(m_transfer, &Transfer::finished,
@@ -305,7 +307,7 @@ void Library::setUpdateStatus(UpdateStatus updateStatus)
     }
 }
 
-std::tuple<QHash<int, Library::Color>, QDate> Library::parseLDconfig(const QByteArray &contents)
+std::tuple<QHash<int, Color>, QDate> Library::parseLDconfig(const QByteArray &contents)
 {
     QHash<int, Color> colors;
     QDate date;
@@ -326,38 +328,38 @@ std::tuple<QHash<int, Library::Color>, QDate> Library::parseLDconfig(const QByte
                 sl[3] == "CODE"_l1 &&
                 sl[5] == "VALUE"_l1 &&
                 sl[7] == "EDGE"_l1) {
-            // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]</params>
+            // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]
 
             Color c;
 
-            c.id = sl[4].toInt();
-            c.name = sl[2];
-            c.color = sl[6];
-            c.edgeColor = sl[8];
+            c.m_id = sl[4].toInt();
+            c.m_name = sl[2];
+            c.m_color = sl[6];
+            c.m_edgeColor = sl[8];
 
             for (int idx = 9; idx < sl.count(); ++idx) {
                 if (sl[idx] == "ALPHA"_l1) {
                     int alpha = sl[++idx].toInt();
-                    c.color.setAlpha(alpha);
+                    c.m_color.setAlpha(alpha);
                     //c.edgeColor.setAlpha(alpha);
                 } else if (sl[idx] == "LUMINANCE"_l1) {
-                    c.luminance = sl[++idx].toInt();
+                    c.m_luminance = float(sl[++idx].toInt()) / 255;
                 } else if (sl[idx] == "CHROME"_l1) {
-                    c.chrome = true;
+                    c.m_chrome = true;
                 } else if (sl[idx] == "PEARLESCENT"_l1) {
-                    c.pearlescent = true;
+                    c.m_pearlescent = true;
                 } else if (sl[idx] == "RUBBER"_l1) {
-                    c.rubber = true;
+                    c.m_rubber = true;
                 } else if (sl[idx] == "MATTE_METALLIC"_l1) {
-                    c.matteMetallic = true;
+                    c.m_matteMetallic = true;
                 } else if (sl[idx] == "METAL"_l1) {
-                    c.metal = true;
+                    c.m_metal = true;
                 }
             }
-            if (c.color.isValid() && c.edgeColor.isValid()) {
-                colors.insert(c.id, c);
+            if (c.m_color.isValid() && c.m_edgeColor.isValid()) {
+                colors.insert(c.m_id, c);
             } else {
-                qCWarning(LogLDraw) << "Got invalid color " << c.id << " : " << c.color << " // " << c.edgeColor;
+                qCWarning(LogLDraw) << "Got invalid color " << c.m_id << " : " << c.m_color << " // " << c.m_edgeColor;
             }
         } else if (sl.count() >= 5 &&
                    sl[0].toInt() == 0 &&
@@ -373,69 +375,59 @@ std::tuple<QHash<int, Library::Color>, QDate> Library::parseLDconfig(const QByte
 }
 
 
-QColor Library::edgeColor(int id) const
+Color Library::color(int id, int baseId) const
 {
     if (m_locked)
         return { };
 
-    if (m_colors.contains(id)) {
-        return m_colors.value(id).edgeColor;
-    } else if (id >= 0 && id <= 15) {
-        const int legacyMapping[] = {
-            8, 9, 10, 11, 12, 13, 0, 8,
-            0, 1, 2, 3, 4, 5, 8, 8
-        };
-        return color(legacyMapping[id]);
-    } else if (id > 256) {
-        // edge color of dithered colors is derived from color 1
-        return edgeColor((id - 256) & 0x0f);
-    } else {
-        // calculate a contrasting color
+    if ((id == 16) || (id == 24)) {
+        if (baseId < 0) {
+            qCWarning(LogLDraw) << "Called color() with meta color id" << id << "without specifying the base color";
+            return { };
+        }
+        return color(baseId, -1);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        qreal h, s, v, a;
-#else
-        float h, s, v, a;
-#endif
-        color(id).getHsvF(&h, &s, &v, &a);
-
-        v += 0.5f * ((v < 0.5f) ? 1 : -1);
-        v = qBound<decltype(v)>(0, v, 1);
-
-        return QColor::fromHsvF(h, s, v, a);
-    }
-}
-
-
-QColor Library::color(int id, int baseid) const
-{
-    if (m_locked)
-        return { };
-
-    if (baseid < 0 && (id == 16 || id == 24)) {
-        qCWarning(LogLDraw) << "Called color() with meta color id" << id << "without specifying the base color";
-        return {};
-    } else if (id == 16) {
-        return color(baseid);
-    } else if (id == 24) {
-        return edgeColor(baseid);
     } else if (m_colors.contains(id)) {
-        return m_colors.value(id).color;
+        return m_colors.value(id);
+
     } else if (id >= 256) {
+        Color c = m_colors.value(0); // black
+
         // dithered color (do a normal blend - DOS times are over by now)
 
-        QColor c1 = color((id - 256) & 0x0f);
-        QColor c2 = color(((id - 256) >> 4) & 0x0f);
+        QColor c1 = color((id - 256) & 0x0f).m_color;
+        QColor c2 = color(((id - 256) >> 4) & 0x0f).m_color;
 
         int r1, g1, b1, a1, r2, g2, b2, a2;
         c1.getRgb(&r1, &g1, &b1, &a1);
         c2.getRgb(&r2, &g2, &b2, &a2);
 
-        return QColor::fromRgb((r1+r2) >> 1, (g1+g2) >> 1, (b1+b2) >> 1, (a1+a2) >> 1);
+        c.m_name = "Dithered Color "_l1 + QString::number(id);
+        c.m_id = id;
+        c.m_color = QColor::fromRgb((r1+r2) >> 1, (g1+g2) >> 1, (b1+b2) >> 1, (a1+a2) >> 1);
+        // edge color of dithered colors is derived from color 1
+        c.m_edgeColor = color((id - 256) & 0x0f).m_edgeColor;
+        return c;
     } else {
         qCWarning(LogLDraw) << "Called color() with an invalid color id:" << id;
-        return Qt::yellow;
+        return { };
     }
+
+#if 0
+    // calculate a contrasting edge color
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    qreal h, s, v, a;
+#else
+    float h, s, v, a;
+#endif
+    color(id).getHsvF(&h, &s, &v, &a);
+
+    v += 0.5f * ((v < 0.5f) ? 1 : -1);
+    v = qBound<decltype(v)>(0, v, 1);
+
+    return QColor::fromHsvF(h, s, v, a);
+#endif
 }
 
 Part *Library::findPart(const QString &_filename, const QString &_parentdir)
@@ -451,9 +443,9 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 
     // add the logo on studs
     if (filename == "stud.dat"_l1)
-        filename = "stud-logo.dat"_l1;
+        filename = "stud-logo4.dat"_l1;
     else if (filename == "stud2.dat"_l1)
-        filename = "stud2-logo.dat"_l1;
+        filename = "stud2-logo4.dat"_l1;
 
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
@@ -658,6 +650,13 @@ QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
     }
 
     return result;
+}
+
+void registerQmlTypes()
+{
+    qRegisterMetaType<Color>("LDrawColor");
+    qmlRegisterUncreatableType<Color>("BrickStore", 1, 0, "LDrawColor",
+                                      "Cannot create objects of type %1"_l1.arg("LDrawColor"_l1));
 }
 
 } // namespace LDraw

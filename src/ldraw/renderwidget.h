@@ -13,75 +13,42 @@
 */
 #pragma once
 
-#include <qtguiglobal.h>
-
-#if !defined(QT_NO_OPENGL)
-
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
-#include <QMatrix4x4>
-#include <QVector3D>
-
-#include <vector>
-
-QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
-
-#ifdef MessageBox
-#undef MessageBox
-#endif
-
-QT_FORWARD_DECLARE_CLASS(QOpenGLFramebufferObject)
+#include <QWidget>
+#include <QQuickView>
 
 namespace LDraw {
 
-class GLRenderer;
 class Part;
+class RenderController;
 
-
-class RenderWidget : public QOpenGLWidget
+class RenderWidget : public QWidget
 {
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = nullptr);
 
-    void setClearColor(const QColor &color);
+    RenderController *controller();
 
-    Part *part() const;
-    int color() const;
-    void setPartAndColor(Part *part, const QColor &color);
     void setPartAndColor(Part *part, int basecolor);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
     bool isAnimationActive() const;
+    void setAnimationActive(bool active);
 
 public slots:
     void resetCamera();
     void startAnimation();
     void stopAnimation();
 
-protected slots:
-    void slotMakeCurrent();
-    void slotDoneCurrent();
-
-protected:
-    void mousePressEvent(QMouseEvent *e) override;
-    void mouseReleaseEvent(QMouseEvent *e) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void wheelEvent(QWheelEvent *e) override;
-
-    void initializeGL() override;
-    void resizeGL(int w, int h) override;
-    void paintGL() override;
+signals:
+    void animationActiveChanged();
 
 private:
-    GLRenderer *m_renderer;
+    RenderController *m_controller;
+    QQuickView *m_window;
+    QWidget *m_widget;
 };
 
 }
-
-#endif //!QT_NO_OPENGL
-

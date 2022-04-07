@@ -11,136 +11,93 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qtguiglobal.h>
+#include <QtCore/QCoreApplication>
+#include <QtWidgets/QVBoxLayout>
+#include <QtQuick3D/QQuick3D>
 
-#if !defined(QT_NO_OPENGL)
-
-#include <cfloat>
-#include <cmath>
-
-#include "library.h"
-#include "glrenderer.h"
+#include "utility/utility.h"
+#include "rendercontroller.h"
 #include "renderwidget.h"
 
+namespace LDraw {
 
-LDraw::RenderWidget::RenderWidget(QWidget *parent)
-    : QOpenGLWidget(parent)
+
+RenderWidget::RenderWidget(QWidget *parent)
+    : QWidget(parent)
+    , m_controller(new RenderController(this))
 {
-    setAttribute(Qt::WA_AlwaysStackOnTop);
+    connect(m_controller, &RenderController::animationActiveChanged,
+            this, &RenderWidget::animationActiveChanged);
+    connect(m_controller, &RenderController::requestContextMenu,
+            this, [this](const QPointF &pos) {
+        auto cme = new QContextMenuEvent(QContextMenuEvent::Mouse, pos.toPoint());
+        QCoreApplication::postEvent(this, cme);
+    });
 
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    QSurfaceFormat fmt = format();
-    GLRenderer::adjustSurfaceFormat(fmt);
-    setFormat(fmt);
+    m_window = new QQuickView();
 
-    m_renderer = new GLRenderer(this);
-    resetCamera();
-    connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderWidget::slotMakeCurrent);
-    connect(m_renderer, &GLRenderer::doneCurrent, this, &RenderWidget::slotDoneCurrent);
-    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<>::of(&RenderWidget::update));
+    QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
+    m_window->setFormat(fmt);
+    m_window->setResizeMode(QQuickView::SizeRootObjectToView);
 
-    setCursor(Qt::OpenHandCursor);
+    m_window->setInitialProperties({
+                                       { "renderController"_l1, QVariant::fromValue(m_controller) },
+                                   });
+    m_window->setSource(QUrl::fromLocalFile(":/ldraw/PartRenderer.qml"_l1));
+
+    m_widget = QWidget::createWindowContainer(m_window, this);
+
+    layout->addWidget(m_widget, 10);
 }
 
-void LDraw::RenderWidget::setClearColor(const QColor &color)
+RenderController *RenderWidget::controller()
 {
-    m_renderer->setClearColor(color);
+    return m_controller;
 }
 
-int LDraw::RenderWidget::color() const
+void RenderWidget::setPartAndColor(Part *part, int basecolor)
 {
-    return m_renderer->color();
+    m_controller->setPartAndColor(part, basecolor);
 }
 
-void LDraw::RenderWidget::setPartAndColor(Part *part, const QColor &color)
+QSize RenderWidget::minimumSizeHint() const
 {
-    m_renderer->setPartAndColor(part, color);
+    return QSize(100, 100);   //TODO
 }
 
-void LDraw::RenderWidget::setPartAndColor(Part *part, int basecolor)
+QSize RenderWidget::sizeHint() const
 {
-    m_renderer->setPartAndColor(part, basecolor);
+    return QSize(200, 200);   //TODO
 }
 
-LDraw::Part *LDraw::RenderWidget::part() const
+bool RenderWidget::isAnimationActive() const
 {
-    return m_renderer->part();
+    return m_controller->isAnimationActive();
 }
 
-QSize LDraw::RenderWidget::minimumSizeHint() const
+void RenderWidget::setAnimationActive(bool active)
 {
-    return { 50, 50 };
+    m_controller->setAnimationActive(active);
 }
 
-QSize LDraw::RenderWidget::sizeHint() const
+void RenderWidget::resetCamera()
 {
-    return { 100, 100 };
+    m_controller->resetCamera();
 }
 
-void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
+void RenderWidget::startAnimation()
 {
-    setCursor(Qt::ClosedHandCursor);
-    m_renderer->handleMouseEvent(e);
+    m_controller->setAnimationActive(true);
 }
 
-void LDraw::RenderWidget::mouseReleaseEvent(QMouseEvent *e)
+void RenderWidget::stopAnimation()
 {
-    m_renderer->handleMouseEvent(e);
-    setCursor(Qt::OpenHandCursor);
+    m_controller->setAnimationActive(false);
 }
 
-void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
-{
-    m_renderer->handleMouseEvent(e);
-}
-
-void LDraw::RenderWidget::wheelEvent(QWheelEvent *e)
-{
-    m_renderer->handleWheelEvent(e);
-}
-
-void LDraw::RenderWidget::slotMakeCurrent()
-{
-    makeCurrent();
-}
-
-void LDraw::RenderWidget::slotDoneCurrent()
-{
-    doneCurrent();
-}
-
-void LDraw::RenderWidget::initializeGL()
-{
-    m_renderer->initializeGL(context());
-}
-
-void LDraw::RenderWidget::resizeGL(int w, int h)
-{
-    m_renderer->resizeGL(context(), w, h);
-}
-
-void LDraw::RenderWidget::paintGL()
-{
-    m_renderer->paintGL(context());
-}
-
-void LDraw::RenderWidget::resetCamera()
-{
-    stopAnimation();
-    m_renderer->resetTransformation();
-}
-
-void LDraw::RenderWidget::startAnimation()
-{
-    m_renderer->startAnimation();
-}
-
-void LDraw::RenderWidget::stopAnimation()
-{
-    m_renderer->stopAnimation();
-}
-
-#endif // !QT_NO_OPENGL
+} // namespace LDraw
 
 #include "moc_renderwidget.cpp"
