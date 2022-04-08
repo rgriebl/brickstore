@@ -12,14 +12,22 @@ jobs:
     runs-on: ${{ matrix.config.runs-on }}
     env:
       BUILD_NUMBER: ${{ github.run_number }}
-      TODO:!! BRICKSTORE_QT_MODULES: libtbb-dev qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5-style-plugins libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev
+      BRICKSTORE_QT6_MODULES: >-
+          cmake ninja-build
+          libglvnd-dev libtbb-dev
+          qt6-tools-dev qt6-tools-dev-tools
+          qt6-l10n-tools qt6-documentation-tools
+          qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
+          qt6-declarative-dev qt6-declarative-private-dev
+          qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
+          qt6-gtk-platformtheme
 
     strategy:
       fail-fast: false
       matrix:
         config:
         - name: "Windows Intel 64bit"
-          artifact: "Windows-x64"
+          artifact: "Windows-Intel"
           runs-on: windows-2019
           os: windows
           qt_version: '6.2.4'
@@ -50,21 +58,41 @@ jobs:
           qt_version: '6.2.4'
           qt_arch: ''
 
-        - name: "macOS Universal 64bit"
-          artifact: "macOS"
+        - name: "macOS Intel 64bit"
+          artifact: "macOS-Intel"
           runs-on: macos-11
           os: macos
           qt_version: '6.2.4'
           qt_arch: ''
-          cmake_extra_config: '-DSENTRY=ON -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
+          cmake_extra_config: '-DSENTRY=ON'
           vcpkg_triplet: 'x64-osx'
 
-        - name: "Android ARM"
+        - name: "macOS ARM 64bit"
+          artifact: "macOS-ARM"
+          runs-on: macos-11
+          os: macos
+          qt_version: '6.2.4'
+          qt_arch: ''
+          cmake_extra_config: '-DSENTRY=ON -DCMAKE_OSX_ARCHITECTURES="arm64"'
+          vcpkg_triplet: 'arm64-osx'
+
+        - name: "Android ARM 32bit"
           artifact: "Android-ARM"
           runs-on: ubuntu-20.04
           os: android
+          android_abi: 'armeabi-v7a'
           qt_version: '6.2.4'
           qt_arch: 'android_armv7'
+          qt_target: 'android'
+          cmake_extra_config: ''
+
+        - name: "Android ARM 64bit"
+          artifact: "Android-ARM64"
+          runs-on: ubuntu-20.04
+          os: android
+          android_abi: 'arm64-v8a'
+          qt_version: '6.2.4'
+          qt_arch: 'android_arm64_v8a'
           qt_target: 'android'
           cmake_extra_config: ''
 
@@ -109,7 +137,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ../Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_target }}-${{ matrix.config.qt_arch }}-QtCache
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache
 
     # Get Qt
     #################################################
@@ -120,7 +148,7 @@ jobs:
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
-        modules: 'qtsvg qttools'
+        modules: 'qtsvg qtquick3d qtshadertools qttools'
         arch: ${{ matrix.config.qt_arch }}
         target: ${{ matrix.config.qt_target || 'desktop' }}
         tools: ${{ matrix.config.qt_tools }}
@@ -132,13 +160,13 @@ jobs:
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
-        modules: 'qttools'
+        modules: 'qtquick3d qtshadertools qttools'
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
         setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
 
-    - name: Install Qt from Linux Distro (native/appimage)
-      if: (matrix.config.os == 'linux') && !matrix.config.debian_container
+    - name: Install Qt from Linux Distro (native)
+      if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install $BRICKSTORE_QT6_MODULES debhelper lsb-release fakeroot build-essential
@@ -183,9 +211,10 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -DVCPKG_PATH=%VCPKG_PATH% .
-        cmake --build . --config RelWithDebInfo --parallel --target all,installer
+        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=%VCPKG_PATH%" .
+        cmake --build . --config RelWithDebInfo --parallel --target installer
       shell: cmd
+      ##--config RelWithDebInfo --parallel --target installer
 
     - name: Upload Windows Installer
       if: (matrix.config.os == 'windows')
@@ -207,23 +236,23 @@ jobs:
     - name: Build for Linux (native)
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
-      cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-      cmake --build . --config RelWithDebInfo --parallel --target all,package
+        /usr/lib/qt6/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
+        cmake --build . --config RelWithDebInfo --parallel --target deb-package
       shell: bash
 
     - name: Build for Linux (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker exec -w /build "debian-build" cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo --parallel --target all,package
+        sudo docker exec -w /build "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
+        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo --parallel --target deb-package
       shell: bash
 
     - name: Build for Linux (appimage)
       if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10
-        cmake --config RelWithDebInfo -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++10 ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target all,appimage
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev
+        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 ${{ matrix.config.cmake_extra_config }} .
+        cmake --build . --config RelWithDebInfo --parallel --target appimage
       shell: bash
 
     - name: Upload Linux DEB
@@ -243,12 +272,6 @@ jobs:
     # Build for Android
     #################################################
 
-    - name: Set Android env vars
-      if: (matrix.config.os == 'android')
-      run: |
-        echo "ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}" >> $GITHUB_ENV
-        echo "ANDROID_BUILD_TOOLS_REVISION=30.0.3" >> $GITHUB_ENV
-
     - name: Checkout Android openssl
       if: (matrix.config.os == 'android')
       run: |
@@ -259,17 +282,16 @@ jobs:
     - name: Build for Android
       if: (matrix.config.os == 'android')
       run: |
-        echo "Using NDK: $ANDROID_NDK_ROOT"
-        echo "Using Build Tools: $ANDROID_BUILD_TOOLS_REVISION"
-        TODO!!!
-        qmake -spec android-clang CONFIG+=release CONFIG+=qtquickcompiler ${{ matrix.config.qmake_extra_config }}
-        make
-        make package
+        echo "Using NDK: $ANDROID_NDK_LATEST_HOME"
+        echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
+        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANDROID_ABI=${{ matrix.config.android_abi }} -DANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME} -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) -DANDROID_NATIVE_API_LEVEL=23 ${{ matrix.config.qmake_extra_config }} .
+        cmake --build . --config RelWithDebInfo --parallel --target final-apk
       shell: bash
 
     - name: Upload Android APK
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.apk"
@@ -280,8 +302,8 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        cmake --config RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -DVCPKG_PATH=$VCPKG_PATH .
-        cmake --build . --config RelWithDebInfo --parallel --target all,dmg
+        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=$VCPKG_PATH" .
+        cmake --build . --config RelWithDebInfo --parallel --target dmg
       shell: bash
 
     - name: Upload macOS DMG
@@ -314,10 +336,10 @@ jobs:
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
-      TODO!!!
-        qmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.qmake_extra_config }}
-        make
-        make package || true
+        ## TODO!!!
+        ## qt-cmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.qmake_extra_config }}
+        ## qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.qmake_extra_config }} .
+        ## cmake --build . --config RelWithDebInfo --parallel --target all
       shell: bash
 
     - name: Upload iOS Bundle

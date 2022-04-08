@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.19.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -66,11 +66,11 @@ project(BrickStore
     LANGUAGES CXX C
 )
 
-find_package(Qt6)
+find_package(Qt6 COMPONENTS Core REQUIRED)
 include(QtPlatformSupport) # load all the platform names
 
 if (NOT ANDROID)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 endif()
 
 # Android is the last supported 32bit platform
@@ -78,7 +78,7 @@ if (QT_32BIT AND NOT ANDROID)
     message(FATAL_ERROR "32bit builds for this platform are not supported.")
 endif()
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
 add_compile_definitions(
     QT_STRICT_ITERATORS
@@ -87,18 +87,14 @@ add_compile_definitions(
     QT_MESSAGELOGCONTEXT
 )
 
-if (ANDROID)
-    # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
-    # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
-    target_link_libraries(${PROJECT_NAME} PRIVATE -lunwind)
-endif()
+find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools REQUIRED)
 
-find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools ToolsTools REQUIRED)
+message(STATUS ${Qt6LinguistTools_DIR})
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     add_compile_definitions(BS_MOBILE)
-    find_package(Qt6 COMPONENTS Qml Quick Quick3D REQUIRED)
+    find_package(Qt6 COMPONENTS Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 REQUIRED)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -107,7 +103,7 @@ elseif (BACKEND_ONLY)
 else()
     set(BS_DESKTOP ON)
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick Quick3D REQUIRED)
+    find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick Quick3D ToolsTools REQUIRED)
 
 endif()
 
@@ -125,6 +121,10 @@ if (CLANG)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines-ts -stdlib=libc++>)
 elseif (GCC)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>)
+endif()
+if (CLANG OR GCC)
+    # cmake's RelWithDebInfo is hardcoded to O2, while Release has O3
+    string(REGEX REPLACE "([\\/\\-]O)2" "\\13" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 endif()
 
 if (SANITIZE)
@@ -227,7 +227,40 @@ if (LINUX AND NOT ANDROID)
 endif()
 
 if (ANDROID)
+    if (BUILD_NUMBER STREQUAL "custom")
+        math(EXPR VERSION_CODE "((${VERSION_MAJOR} - 2000) * 10000) + (${VERSION_MINOR} * 100) + ${VERSION_PATCH}")
+    else()
+        set(VERSION_CODE "${BUILD_NUMBER}")
+    endif()
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
+        QT_ANDROID_VERSION_CODE ${VERSION_CODE}
+        QT_ANDROID_VERSION_NAME ${VERSION}
+    )
+
+    if (QT_ANDROID_SDK_BUILD_TOOLS_REVISION)
+        # Qt bug: this has to be set as a target property to stick
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            QT_ANDROID_SDK_BUILD_TOOLS_REVISION "${QT_ANDROID_SDK_BUILD_TOOLS_REVISION}"
+        )
+    endif()
+
+    # We expect KDAB's OpenSSL libs in $ANDROID_SDK_ROOT/android_openssl
+    # cd $ANDROID_SDK_ROOT && git clone https://github.com/KDAB/android_openssl.git
+    set(OPENSSL_CMAKE "${ANDROID_SDK_ROOT}/android_openssl/CMakeLists.txt")
+    if (NOT EXISTS ${OPENSSL_CMAKE})
+        message(FATAL_ERROR "${OPENSSL_CMAKE} is missing - please clone KDAB's android_openssl into ${ANDROID_SDK_ROOT}")
+    endif()
+    include(${OPENSSL_CMAKE})
+
+    # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
+    # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
+    if (ANDROID_NDK_MAJOR GREATER 22)
+        target_link_libraries(${PROJECT_NAME} PRIVATE -lunwind)
+    endif()
+
     # force QtSvg deployment
+    find_package(Qt6 COMPONENTS Svg REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Svg)
 endif()
 
@@ -240,10 +273,11 @@ if (TARGET Qt6::qdoc)
     )
 endif()
 
-add_custom_target(OtherFiles SOURCES
+add_custom_target("Other-Files" SOURCES
     .gitattributes
     .gitignore
-    .github/workflows/*.yml
+    .github/workflows/build_qmake.yml
+    .github/workflows/build_cmake.yml
     .qmake.conf
     .tag
     CHANGELOG.md
@@ -262,7 +296,6 @@ add_custom_target(OtherFiles SOURCES
     android/res/values/libs.xml
     assets/COPYING-ICONS
     assets/COPYING-FLAGS
-    debian/*
     doc/extensions.qdoc
     doc/extensions.qdocconf
     doc/extensions.css
@@ -272,9 +305,14 @@ add_custom_target(OtherFiles SOURCES
     docker/Dockerfile
     docker/entrypoint.sh
     extensions/README.md
-    extensions/*.bs.qml
-    macos/*
-    scripts/*.sh
+    extensions/classic-print-script.bs.qml
+    macos/Info.macos.plist
+    macos/Info.ios.plist
+    macos/locversion.plist.in
+    macos/dmg-ds_store
+    macos/dmg-background.png
+    scripts/generate-assets.sh
+    scripts/git-release.sh
     translations/translations.json
     unix/brickstore.desktop
     unix/brickstore-mime.xml
@@ -291,17 +329,19 @@ if (APPLE)
         COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE:${PROJECT_NAME}>/../../.. -qmldir=${CMAKE_CURRENT_SOURCE_DIR}/extensions
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
                 "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
-        COMMENT "Running CPack. Please wait..."
+        COMMENT "Creating macOS DMG. Please wait..."
         DEPENDS ${PROJECT_NAME}
     )
     set(CPACK_DMG_DS_STORE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-ds_store")
     set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-background.png")
     set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
 elseif (WIN32)
     # deploy sentry dependencies
+    set(COPY_SENTRY_COMMAND "")
     if (SENTRY)
-        set(COPY_SENTRY_COMMAND "${CMAKE_COMMAND}" -E copy
+        set(COPY_SENTRY_COMMAND COMMAND "${CMAKE_COMMAND}" -E copy
             "${VCPKG_PATH}/bin/sentry.dll"
             "${VCPKG_PATH}/bin/zlib1.dll"
             "${VCPKG_PATH}/tools/sentry-native/crashpad_handler.exe" "${CMAKE_CURRENT_BINARY_DIR}/bin")
@@ -315,11 +355,20 @@ elseif (WIN32)
                 "--no-virtualkeyboard"
                 "--no-translations"
                 "--verbose" "2"
-        COMMAND "${COPY_SENTRY_COMMAND}"
+        ${COPY_SENTRY_COMMAND}
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"
         COMMENT "Creating INNO Setup installer. Please wait..."
         DEPENDS ${PROJECT_NAME}
+    )
+
+elseif (ANDROID)
+    # we cannot set the apk name directly, so we have to rename it after creation
+    add_custom_target(final-apk
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+                                           "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.apk"
+        COMMENT "Moving apk to final name and location..."
+        DEPENDS apk
     )
 
 elseif (LINUX)

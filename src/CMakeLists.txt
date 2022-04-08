@@ -61,12 +61,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Xml
     Qt6::Network
     Qt6::CorePrivate
-    Qt6::GuiPrivate
     Qt6::Concurrent
 )
 
 if (BS_BACKEND)
     target_sources(${PROJECT_NAME} PUBLIC
+        backend/backendapplication.cpp
+        backend/backendapplication.h
         backend/rebuilddatabase.cpp
         backend/rebuilddatabase.h
     )
@@ -333,5 +334,12 @@ if (BS_MOBILE)
         PREFIX "mobile"
         BASE   "${CMAKE_CURRENT_SOURCE_DIR}"
         FILES  "${QML_FILES}"
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        Qt6::QuickPrivate
+        Qt6::QuickDialogs2Private
+        Qt6::QuickControls2ImplPrivate
+        Qt6::QuickTemplates2Private
     )
 endif()
