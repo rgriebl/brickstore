@@ -88,7 +88,7 @@ if (ANDROID)
     target_link_libraries(${PROJECT_NAME} PRIVATE -lunwind)
 endif()
 
-find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools ToolsTools REQUIRED)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
@@ -226,6 +226,15 @@ if (ANDROID)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Svg)
 endif()
 
+if (TARGET Qt6::qdoc)
+    add_custom_target(extensions-doc
+        WORKING_DIRECTORY
+        COMMAND Qt6::qdoc "${CMAKE_SOURCE_DIR}/doc/extensions.qdocconf"
+                --indexdir "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_DOCS}"
+                --outputdir "${CMAKE_BINARY_DIR}/doc/html/extensions"
+    )
+endif()
+
 add_custom_target(OtherFiles SOURCES
     .gitattributes
     .gitignore
@@ -249,6 +258,12 @@ add_custom_target(OtherFiles SOURCES
     assets/COPYING-ICONS
     assets/COPYING-FLAGS
     debian/*
+    doc/extensions.qdoc
+    doc/extensions.qdocconf
+    doc/extensions.css
+    doc/images/list_arrow.png
+    doc/images/list_expand.png
+    doc/images/favicon.ico
     docker/Dockerfile
     docker/entrypoint.sh
     extensions/README.md
