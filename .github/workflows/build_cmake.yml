@@ -49,6 +49,7 @@ jobs:
           debian_container: "buildpack-deps:bookworm"
           cmake_extra_config: "-DBACKEND_ONLY=ON"
           generate_docs: true
+          generate_docker: true
 
         - name: "Linux AppImage 64bit"
           artifact: "Linux"
@@ -364,6 +365,20 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./doc/html
 
+    # Generate the Backend Docker image
+    #################################################
+
+    - name: Create and push Docker image
+      if: (matrix.config.os == 'linux') && matrix.config.generate_docker
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        cp *.deb docker/brickstore-backend.deb
+        cd docker
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+        docker build . --tag "rgriebl/brickstore-backend:$BUILD_NUMBER"
+        docker push "$DOCKER_USER/brickstore-backend:$BUILD_NUMBER"
 
   # RELEASE
   #################################################
