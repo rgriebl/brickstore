@@ -48,9 +48,31 @@
  */
 #pragma once
 
-#include <QtConcurrentRun>
-#include <QtAlgorithms>
+#if defined(BS_HAS_PARALLEL_STL) && __has_include(<execution>)
+#  if defined(emit)
+#    undef emit // libtbb uses a function named emit()
+#  endif
+#  include <execution>
+#  if (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
+#    define BS_HAS_PARALLEL_STL_EXECUTION
+#  endif
+#  if !defined(QT_NO_EMIT)
+#    define emit
+#  endif
+#endif
 
+#ifdef BS_HAS_PARALLEL_STL_EXECUTION
+#include <algorithm>
+
+template <class IT, class LT>
+inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
+{
+    std::sort(std::execution::par_unseq, begin, end, lt);
+}
+
+#else
+#  include <QtConcurrentRun>
+#  include <QtAlgorithms>
 
 namespace QAlgorithmsPrivate {
 
@@ -181,7 +203,7 @@ inline void qParallelSort(Container &c)
 }
 
 
-#ifdef QPARALLELSORT_TESTING // benchmarking
+#  ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
 
 void test_par_sort()
@@ -215,4 +237,6 @@ void test_par_sort()
         delete [] src;
     }
 }
-#endif
+#  endif
+
+#endif // BS_HAS_PARALLEL_STL_EXECUTION

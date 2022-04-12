@@ -354,13 +354,14 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     // import
 
     m_import_frame = new QGroupBox();
-    auto import_layout = new QVBoxLayout(m_import_frame);
+    auto import_layout = new QVBoxLayout();
     for (const auto &name : { "document_import_bl_inv", "document_import_bl_xml", "document_import_bl_order",
          "document_import_bl_store_inv", "document_import_bl_cart", "document_import_bl_wanted",
          "document_import_ldraw_model" }) {
         auto b = new WelcomeButton(ActionManager::inst()->qAction(name));
         import_layout->addWidget(b);
     }
+    m_import_frame->setLayout(import_layout);
     layout->addWidget(m_import_frame, 2, 1);
 
     m_versions = new QLabel();

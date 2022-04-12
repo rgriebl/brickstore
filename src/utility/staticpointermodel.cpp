@@ -173,16 +173,12 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     QModelIndexList before = persistentIndexList();
 
     if (column >= 0 && column < columnCount()) {
-        qParallelSort(sorted.begin(), sorted.end(), [column, order, this](int r1, int r2) {
+        qParallelSort(sorted.begin(), sorted.end(),
+                      [column, order, this](int r1, int r2) {
             const void *pointer1 = pointerAt(order == Qt::AscendingOrder ? r1 : r2);
             const void *pointer2 = pointerAt(order == Qt::AscendingOrder ? r2 : r1);
             return lessThan(pointer1, pointer2, column);
         });
-
-        // c++17 alternatives, but not supported everywhere yet:
-        //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
-        //std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
-
     } else { // restore the source model order
         for (int i = 0; i < n; ++i)
             sorted[i] = i;

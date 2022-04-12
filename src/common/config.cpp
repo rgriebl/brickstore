@@ -112,8 +112,6 @@ QPair<QString, double> Config::legacyCurrencyCodeAndRate() const
 
 void Config::upgrade(int vmajor, int vminor, int vpatch)
 {
-    QStringList sl;
-
     int cfgver = value("General/ConfigVersion"_l1, 0).toInt();
     setValue("General/ConfigVersion"_l1, mkver(vmajor, vminor, vpatch));
 

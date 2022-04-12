@@ -13,12 +13,6 @@
 */
 #include <utility>
 #include <algorithm>
-#if defined(BS_HAS_PARALLEL_STL) && __has_include(<execution>)
-#  include <execution>
-#  if (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
-#    define AM_SORT_PARALLEL
-#  endif
-#endif
 
 #include <QCoreApplication>
 #include <QCursor>
@@ -1948,7 +1942,7 @@ void DocumentModel::setFilter(const QVector<Filter> &filter)
     if (m_undo) {
         m_undo->push(new FilterCmd(this, filter));
     } else {
-        bool dummy1;
+        bool dummy1 = false;
         LotList dummy2;
         filterDirect(filter, dummy1, dummy2);
     }
@@ -1981,13 +1975,8 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
             auto columnsPlusIndex = columns;
             columnsPlusIndex.append(qMakePair(0, columns.isEmpty() ? Qt::AscendingOrder
                                                                    : columns.constFirst().second));
-
-            std::sort(
-#ifdef AM_SORT_PARALLEL
-                        // c++17 parallel + vectorized, but not supported everywhere yet
-                        std::execution::par_unseq,
-#endif
-                        m_sortedLots.begin(), m_sortedLots.end(), [this, columnsPlusIndex](const auto *lot1, const auto *lot2) {
+            qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
+                          [this, columnsPlusIndex](const auto *lot1, const auto *lot2) {
                 int r = 0;
                 for (const auto &sc : columnsPlusIndex) {
                     auto cmp = m_columns.value(sc.first).compareFn;
@@ -2205,7 +2194,7 @@ QStringList DocumentModel::hasDifferenceUpdateWarnings(const BrickLink::LotList 
 // TODO: the Document c'tor needs this to set the initial sort order. find something better
 void DocumentModel::sortDirectForDocument(const QVector<QPair<int, Qt::SortOrder> > &columns)
 {
-    bool dummy1;
+    bool dummy1 = false;
     LotList dummy2;
     sortDirect(columns, dummy1, dummy2);
 }
