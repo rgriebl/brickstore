@@ -20,7 +20,7 @@ jobs:
           qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
           qt6-declarative-dev qt6-declarative-private-dev
           qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
-          qt6-gtk-platformtheme
+          qt6-gtk-platformtheme qt6-qpa-plugins
 
     strategy:
       fail-fast: false
@@ -59,23 +59,13 @@ jobs:
           qt_version: '6.2.4'
           qt_arch: ''
 
-        - name: "macOS Intel 64bit"
-          artifact: "macOS-Intel"
+        - name: "macOS Universal"
+          artifact: "macOS"
           runs-on: macos-11
           os: macos
           qt_version: '6.2.4'
           qt_arch: ''
-          cmake_extra_config: '-DSENTRY=ON'
-          vcpkg_triplet: 'x64-osx'
-
-        - name: "macOS ARM 64bit"
-          artifact: "macOS-ARM"
-          runs-on: macos-11
-          os: macos
-          qt_version: '6.2.4'
-          qt_arch: ''
-          cmake_extra_config: '-DSENTRY=ON -DCMAKE_OSX_ARCHITECTURES="arm64"'
-          vcpkg_triplet: 'arm64-osx'
+          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
 
         - name: "Android ARM 32bit"
           artifact: "Android-ARM"
@@ -191,12 +181,12 @@ jobs:
         echo VCPKG_PATH=%VCPKG_INSTALLATION_ROOT%\installed\${{ matrix.config.vcpkg_triplet }} >> %GITHUB_ENV%
       shell: cmd
 
-    - name: Install sentry.io for macOS (vcpkg)
-      if: (matrix.config.os == 'macos')
-      run: |
-        vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
-        echo "VCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" >> $GITHUB_ENV
-      shell: bash
+#    - name: Install sentry.io for macOS (vcpkg)
+#      if: (matrix.config.os == 'macos')
+#      run: |
+#        vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
+#        echo "VCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" >> $GITHUB_ENV
+#      shell: bash
 
     # Checkout
     #################################################
@@ -321,7 +311,7 @@ jobs:
         brew link getsentry/tools/sentry-cli
         # specifying just "." to make sentry-cli look for dSYM files on itself does not work on
         # the CI ... the sentry-cli process will just freeze forever
-        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dsym --org brickstore --project brickstore bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
+        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
 
     # Build for iOS
     #################################################

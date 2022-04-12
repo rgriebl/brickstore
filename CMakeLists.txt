@@ -69,16 +69,21 @@ project(BrickStore
 find_package(Qt6 COMPONENTS Core REQUIRED)
 include(QtPlatformSupport) # load all the platform names
 
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 if (NOT ANDROID)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-endif()
 
-# Android is the last supported 32bit platform
-if (QT_32BIT AND NOT ANDROID)
-    message(FATAL_ERROR "32bit builds for this platform are not supported.")
+    # Android is the last supported 32bit platform
+    if (QT_32BIT)
+        message(FATAL_ERROR "32bit builds for this platform are not supported.")
+    endif()
 endif()
 
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+
+include(SeparateDebugInfo)
+enable_separate_debug_info(${PROJECT_NAME})
 
 add_compile_definitions(
     QT_STRICT_ITERATORS
@@ -88,8 +93,6 @@ add_compile_definitions(
 )
 
 find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools REQUIRED)
-
-message(STATUS ${Qt6LinguistTools_DIR})
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
@@ -335,7 +338,7 @@ if (APPLE)
     set(CPACK_DMG_DS_STORE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-ds_store")
     set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-background.png")
     set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+    set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}-${VERSION}")
 
 elseif (WIN32)
     # deploy sentry dependencies
@@ -372,7 +375,7 @@ elseif (ANDROID)
     )
 
 elseif (LINUX)
-    install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
     install(FILES unix/brickstore.desktop DESTINATION share/applications)
     install(FILES unix/brickstore-mime.xml DESTINATION share/mime/packages)
     install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
@@ -382,9 +385,11 @@ elseif (LINUX)
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
     # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
 
+    set(DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins (>= 6.2)")
     if (NOT BS_BACKEND)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "qml6-module-qtquick (>= 6.2), qml6-module-qtquick-controls (>= 6.2)")
+        list(APPEND DEBIAN_PACKAGE_DEPENDS "qml6-module-qtquick (>= 6.2)" "qml6-module-qtquick-controls (>= 6.2)")
     endif()
+    string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS "${DEBIAN_PACKAGE_DEPENDS}")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     set(CPACK_PACKAGE_CONTACT "Robert Griebl <robert@griebl.org>")
     set(CPACK_DEBIAN_PACKAGE_SECTION x11)
