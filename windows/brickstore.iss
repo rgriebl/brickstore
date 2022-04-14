@@ -3,6 +3,9 @@
 #ifndef SOURCE_DIR
 #define SOURCE_DIR "."
 #endif
+#ifndef ARCH
+#define ARCH x64
+#endif
 
 #define ApplicationVersionFull GetVersionNumbersString(SOURCE_DIR + "\BrickStore.exe")
 #define ApplicationVersion RemoveFileExt(ApplicationVersionFull)
@@ -31,6 +34,9 @@ ChangesAssociations=yes
 WizardImageAlphaFormat=defined
 WizardSmallImageFile={#SourcePath}\..\assets\generated-installers\windows-installer.bmp
 
+ArchitecturesInstallIn64BitMode={#ARCH}
+ArchitecturesAllowed={#ARCH}
+
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"
@@ -43,16 +49,12 @@ Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion skipifsou
 Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 ; MSVC
-Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
-Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
+Source: "vc_redist.{#ARCH}.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Run]
-Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
-    Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist; \
-    Check: noMSVCInstalled('x86')
-Filename: "{tmp}\vc_redist.x64.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
-    Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist; \
-    Check: noMSVCInstalled('x64')
+Filename: "{tmp}\vc_redist.{#ARCH}.exe"; StatusMsg: "Microsoft C/C++ runtime"; \
+    Parameters: "/quiet /norestart"; Flags: waituntilterminated; \
+    Check: noMSVCInstalled('{#ARCH}')
 
 Filename: {app}\BrickStore.exe; Flags: postinstall nowait skipifsilent
 
@@ -78,8 +80,8 @@ var
     Version: Int64;
 begin
     Version := PackVersionComponents(14, 29, 30037, 0);
-    if Arch = 'x86' then
-        Result := not IsMsiProductInstalled('{65E5BD06-6392-3027-8C26-853107D3CF1A}', Version)
+    if Arch = 'arm64' then
+        Result := not IsMsiProductInstalled('{DC9BAE42-810B-423A-9E25-E4073F1C7B00}', Version)
     else if Arch = 'x64' then
         Result := not IsMsiProductInstalled('{36F68A90-239C-34DF-B58C-64B30153CE35}', Version)
     else

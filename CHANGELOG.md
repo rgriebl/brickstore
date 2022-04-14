@@ -3,6 +3,37 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+This is a big modernization of both the libraries BrickStore is built upon and its build-system to
+keep BrickStore maintainable and also compatible with modern operating systems.
+
+There are no major bug fixes, no new features (besides the much improved 3D renderer), but support
+for ARM based platforms was added.
+
+This comes with a lot of advantages, but also disadvantages for a few users.
+The disadvantages:
+- Windows 7, 8.1 and macOS 10.13 are no longer supported, as they have been discontinued by their
+  respective vendors. Support for these platforms will not come back!
+- 32bit Windows (x86) is no longer offered as pre-built package to download. Qt (the library
+  BrickStore is built upon) doesn't offer an installer for this platform anymore, because there are
+  too few users left using it. Getting BrickStore running on a 32bit Windows 10 is technically
+  possible, but you are on your own here, having to build Qt 6.2.4 plus BrickStore yourself.
+
+The advantages:
+- Better integration in current desktop systems, like Windows 11 and macOS 12.
+- The macOS package is now a Universal Binary which supports both Intel and ARM (M1) natively.
+- Windows on ARM is now a supported platform, but it needs a separate installer: there is no
+  concept like Apple's "Universal Binaries" on the Windows platform.
+- Ubuntu 22.04 LTS is shipping up-to-date Qt libraries again, so there's a native package for that.
+- 3D part rendering has once again taken a big step forward to more realistic rendering with better
+  lighting and support for different part materials (e.g. reflections on chrome parts).
+- In order to support the upcoming macOS 13 as well as Windows on ARM, the 3D renderer now always
+  uses the platform's native render interface (Direct3D on Windows, Metal on macOS/iOS, Vulkan
+  or OpenGL on Linux/Android) directly.
+
+If you are interested in the technicalities: Qt was updated from 5.15.2 to 6.2.4 and the build
+system was ported from qmake to cmake.
+
+
 ## [2022.4.1] - 2022-04-02
 This update is **mandatory** for users of 2022.3.1:
 

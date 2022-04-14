@@ -350,16 +350,30 @@ elseif (WIN32)
             "${VCPKG_PATH}/tools/sentry-native/crashpad_handler.exe" "${CMAKE_CURRENT_BINARY_DIR}/bin")
     endif()
 
+    set(INNO_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+    if (INNO_ARCH STREQUAL "AMD64")
+        set(INNO_ARCH "x64")
+    endif()
+
+    if (QT_HOST_PATH)
+        set(WINDEPLOYQT_PATH "${QT_HOST_PATH}/${QT6_HOST_INFO_BINDIR}")
+        set(WINDEPLOYQT_EXTRA_ARGS "--qmake=${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/qmake.bat")
+    else()
+        set(WINDEPLOYQT_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+    endif()
+
     # deploy Qt dependencies and create an INNO setup installer
     add_custom_target(installer
-        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/windeployqt" $<TARGET_FILE:${PROJECT_NAME}>
+        COMMAND "${WINDEPLOYQT_PATH}/windeployqt" $<TARGET_FILE:${PROJECT_NAME}>
+                ${WINDEPLOYQT_EXTRA_ARGS}
                 "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}/extensions"
                 "--no-opengl-sw"
                 "--no-virtualkeyboard"
                 "--no-translations"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
-        COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/O${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
+                "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"
         COMMENT "Creating INNO Setup installer. Please wait..."
         DEPENDS ${PROJECT_NAME}

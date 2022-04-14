@@ -27,7 +27,7 @@ jobs:
       matrix:
         config:
         - name: "Windows Intel 64bit"
-          artifact: "Windows-Intel"
+          artifact: "Windows-x64"
           runs-on: windows-2019
           os: windows
           qt_version: '6.2.4'
@@ -35,6 +35,16 @@ jobs:
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           cmake_extra_config: '-DSENTRY=ON'
           vcpkg_triplet: 'x64-windows'
+
+        - name: "Windows ARM 64bit"
+          artifact: "Windows-ARM64"
+          runs-on: windows-2019
+          os: windows
+          qt_version: '6.2.4'
+          qt_arch: 'win64_msvc2019_arm64'
+          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
+          cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
+          vcpkg_triplet: 'arm64-windows'
 
         - name: "Ubuntu 22.04 64bit"
           artifact: "Ubuntu-22.04"
@@ -146,7 +156,7 @@ jobs:
         setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
 
     - name: Install Qt from qt.io (OS version for cross-compiling)
-      if: (matrix.config.os == 'android') || (matrix.config.os == 'ios')
+      if: (matrix.config.os == 'android') || (matrix.config.os == 'ios') || (matrix.config.qt_arch == 'win64_msvc2019_arm64')
       uses: jurplel/install-qt-action@v2
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -155,6 +165,18 @@ jobs:
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
         setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
+        set-env: false
+
+    - name: Fix broken Windows / ARM64 setup
+      if: (matrix.config.qt_arch == 'win64_msvc2019_arm64')
+      # part 1: QTBUG-101059
+      # part 2: jurplel/install-qt-action always exports Qt6_DIR for the first Qt installation
+      #         found, but after a cache restore msvc2019_64 sorts BEFORE msvc2919_arm64
+      run: |
+        sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qtpaths.bat"
+        sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qmake.bat"
+        echo "Qt6_DIR=${Qt6_DIR}/../msvc2019_arm64" >> $GITHUB_ENV
+      shell: sh
 
     - name: Install Qt from Linux Distro (native)
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
@@ -174,19 +196,11 @@ jobs:
     # Install dependencies using vcpkg
     #################################################
 
-    - name: Install OpenSSL and sentry.io for Windows (vcpkg)
-      if: (matrix.config.os == 'windows')
+    - name: Install sentry.io (vcpkg)
+      if: contains(matrix.config.cmake_extra_config, '-DSENTRY=ON')
       run: |
-        c:\vcpkg\vcpkg install --recurse openssl sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
-        echo VCPKG_PATH=%VCPKG_INSTALLATION_ROOT%\installed\${{ matrix.config.vcpkg_triplet }} >> %GITHUB_ENV%
-      shell: cmd
-
-#    - name: Install sentry.io for macOS (vcpkg)
-#      if: (matrix.config.os == 'macos')
-#      run: |
-#        vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
-#        echo "VCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" >> $GITHUB_ENV
-#      shell: bash
+        $VCPKG_INSTALLATION_ROOT/vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
+      shell: sh
 
     # Checkout
     #################################################
@@ -202,10 +216,9 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=%VCPKG_PATH%" .
+        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=%VCPKG_INSTALLATION_ROOT%/installed/${{ matrix.config.vcpkg_triplet }}" .
         cmake --build . --config RelWithDebInfo --parallel --target installer
       shell: cmd
-      ##--config RelWithDebInfo --parallel --target installer
 
     - name: Upload Windows Installer
       if: (matrix.config.os == 'windows')
@@ -293,7 +306,7 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=$VCPKG_PATH" .
+        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" .
         cmake --build . --config RelWithDebInfo --parallel --target dmg
       shell: bash
 
