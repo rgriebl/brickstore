@@ -42,44 +42,6 @@ void registerQmlTypes();
 
 enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
 
-class Color
-{
-    Q_GADGET
-    QML_NAMED_ELEMENT(LDrawColor)
-    QML_UNCREATABLE("")
-    Q_PROPERTY(QString name MEMBER m_name)
-    Q_PROPERTY(QColor color MEMBER m_color)
-    Q_PROPERTY(QColor edgeColor MEMBER m_edgeColor)
-    Q_PROPERTY(int id MEMBER m_id)
-    Q_PROPERTY(float luminance MEMBER m_luminance)
-    Q_PROPERTY(bool transparent READ isTransparent)
-    Q_PROPERTY(bool chrome MEMBER m_chrome)
-    Q_PROPERTY(bool metal MEMBER m_metal)
-    Q_PROPERTY(bool matteMetallic MEMBER m_matteMetallic)
-    Q_PROPERTY(bool pearlescent MEMBER m_pearlescent)
-    Q_PROPERTY(bool rubber MEMBER m_rubber)
-
-public:
-    Color() = default;
-    Color(const Color &copy) = default;
-
-private:
-    bool isTransparent() { return m_color.alpha() < 255; }
-
-    QString m_name;
-    QColor m_color;
-    QColor m_edgeColor;
-    int m_id = -1;
-    float m_luminance = 0;
-    bool m_chrome        : 1 = false;
-    bool m_metal         : 1 = false;
-    bool m_matteMetallic : 1 = false;
-    bool m_rubber        : 1 = false;
-    bool m_pearlescent   : 1 = false;
-
-    friend class Library;
-};
-
 class Library : public QObject
 {
     Q_OBJECT
@@ -101,13 +63,11 @@ public:
     bool startUpdate(bool force);
     void cancelUpdate();
 
-    Color color(int id, int baseId = -1) const;
-
     Part *partFromId(const QByteArray &id);
     Part *partFromFile(const QString &filename);
 
-    static QVector<std::tuple<QString, QDate> > potentialLDrawDirs();
-    static std::tuple<bool, QDate> checkLDrawDir(const QString &dir);
+    static QStringList potentialLDrawDirs();
+    static bool checkLDrawDir(const QString &dir);
 
 signals:
     void updateStarted();
@@ -127,7 +87,6 @@ private:
     friend Library *library();
 
     Part *findPart(const QString &filename, const QString &parentdir = { });
-    static std::tuple<QHash<int, Color>, QDate> parseLDconfig(const QByteArray &contents);
     QByteArray readLDrawFile(const QString &filename);
     void setUpdateStatus(UpdateStatus updateStatus);
 
@@ -145,7 +104,6 @@ private:
     bool m_locked = false; // during updates/loading
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
-    QHash<int, Color> m_colors;  // id -> color struct
     Q3Cache<QString, Part> m_cache;  // path -> part
 
     friend class PartElement;
@@ -154,5 +112,3 @@ private:
 inline Library *library() { return Library::inst(); }
 
 } // namespace LDraw
-
-Q_DECLARE_METATYPE(LDraw::Color)

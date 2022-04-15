@@ -1110,7 +1110,7 @@ void SettingsDialog::load()
 
     const auto potentialLDrawDirs = LDraw::Library::potentialLDrawDirs();
     for (const auto &ldd : potentialLDrawDirs)
-        w_ldraw_dir->addItem(QDir::toNativeSeparators(std::get<0>(ldd)));
+        w_ldraw_dir->addItem(QDir::toNativeSeparators(ldd));
 
     auto ldrawDir = Config::inst()->ldrawDir();
     if (ldrawDir.isEmpty()) {
@@ -1202,11 +1202,11 @@ void SettingsDialog::checkLDrawDir()
             ? w_ldraw_dir->currentText()
             : Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
 
-    auto [valid, date] = LDraw::Library::checkLDrawDir(checkDir); { }
+    bool valid = LDraw::Library::checkLDrawDir(checkDir);
 
     QString status = !valid
             ? tr("Not a valid LDraw installation")
-            : tr("Valid LDraw installation, LDConfig from %1").arg(QLocale().toString(date, QLocale::ShortFormat));
+            : tr("Valid LDraw installation");
     w_ldraw_status_text->setText(status);
 
     auto icon = QIcon::fromTheme(valid ? "vcs-normal"_l1 : "vcs-removed"_l1);

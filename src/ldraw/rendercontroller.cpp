@@ -11,8 +11,16 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QtGui/QMatrix4x4>
+#include <QRandomGenerator>
+#include <QStringBuilder>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QStandardPaths>
+#include <QQuick3DTextureData>
+#include <QPainter>
 
+#include "bricklink/core.h"
 #include "library.h"
 #include "part.h"
 #include "rendercontroller.h"
@@ -20,16 +28,28 @@
 
 namespace LDraw {
 
-RenderGeometry::RenderGeometry(int colorId)
-    : QQuick3DGeometry()
-{
-    m_color = library()->color(colorId);
-}
+QHash<const BrickLink::Color *, QQuick3DTextureData *> RenderController::s_materialTextureDatas;
 
 
 RenderController::RenderController(QObject *parent)
-    : QObject{parent}
+    : QObject(parent)
+    , m_lineGeo(new QQuick3DGeometry())
+    , m_lines(new QmlRenderLineInstancing())
 {
+    static const float lineGeo[] = {
+        0, -0.5, 0,
+        0, -0.5, 1,
+        0, 0.5, 1,
+        0, -0.5, 0,
+        0, 0.5, 1,
+        0, 0.5, 0
+    };
+
+    m_lineGeo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
+    m_lineGeo->setStride(3 * sizeof(float));
+    m_lineGeo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
+    m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo), sizeof(lineGeo)));
+
     updateGeometries();
 }
 
@@ -37,22 +57,8 @@ RenderController::~RenderController()
 {
     for (auto *geo : m_geos)
         delete geo;
-}
-
-QQuaternion RenderController::standardRotation() const
-{
-    static QQuaternion q { 0, 0, 0, 0 };
-
-    if (q.isNull()) {
-        // this is the approximate angle from which most of the BL 2D images have been rendered
-        QMatrix4x4 rotation;
-        rotation.rotate(-150, 1, 0, 0);
-        rotation.rotate( -37, 0, 1, 0);
-        rotation.rotate(   0, 0, 0, 1);
-
-        q = QQuaternion::fromRotationMatrix(rotation.toGenericMatrix<3, 3>());
-    }
-    return q;
+    delete m_lines;
+    delete m_lineGeo;
 }
 
 QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
@@ -62,9 +68,9 @@ QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
     auto mapMouseToBall = [=](const QPointF &mouse) -> QVector3D {
         // normalize mouse pos to -1..+1 and reverse y
         QVector3D mouseView(
-                    2.f * mouse.x() / viewportSize.width() - 1.f,
-                    1.f - 2.f * mouse.y() / viewportSize.height(),
-                    0.f
+                    float(2 * mouse.x() / viewportSize.width() - 1),
+                    float(1 - 2 * mouse.y() / viewportSize.height()),
+                    0
         );
 
         QVector3D mapped = mouseView; // (mouseView - m_center)* (1.f / m_radius);
@@ -96,19 +102,38 @@ Part *RenderController::part() const
     return m_part;
 }
 
-int RenderController::color() const
+const BrickLink::Color *RenderController::color() const
 {
-    return m_colorId;
+    return m_color;
 }
 
-QVector<RenderGeometry *> RenderController::surfaces()
+QVector<QmlRenderGeometry *> RenderController::surfaces()
 {
     return m_geos;
 }
 
-void RenderController::setPartAndColor(Part *part, int colorId)
+QQuick3DGeometry *RenderController::lineGeometry()
 {
-    if ((m_part == part) && (m_colorId == colorId))
+    return m_lineGeo;
+}
+
+QQuick3DInstancing *RenderController::lines()
+{
+    return m_lines;
+}
+
+void RenderController::setPartAndColor(Part *part, int ldrawColorId)
+{
+    setPartAndColor(part, (ldrawColorId < 0) ? nullptr
+                                             : BrickLink::core()->colorFromLDrawId(ldrawColorId));
+}
+
+void RenderController::setPartAndColor(Part *part, const BrickLink::Color *color)
+{
+    if (!color)
+        color = BrickLink::core()->color(9); // light gray
+
+    if ((m_part == part) && (m_color == color))
         return;
 
     if (m_part)
@@ -116,46 +141,38 @@ void RenderController::setPartAndColor(Part *part, int colorId)
     m_part = part;
     if (m_part)
         m_part->addRef();
-    m_colorId = colorId;
+    m_color = color;
 
     updateGeometries();
     emit partOrColorChanged();
-}
-
-bool RenderController::isAnimationActive() const
-{
-    return m_animationActive;
-}
-
-void RenderController::setAnimationActive(bool active)
-{
-    if (m_animationActive != active) {
-        m_animationActive = active;
-        emit animationActiveChanged();
-    }
 }
 
 void RenderController::updateGeometries()
 {
     qDeleteAll(m_geos);
     m_geos.clear();
+    m_lines->clear();
+
 
     if (!m_part) {
         emit surfacesChanged();
         return;
     }
 
-    QHash<int, QByteArray> surfaceBuffers;
-    fillVertexBuffers(m_part, m_colorId, QMatrix4x4(), false, surfaceBuffers);
+    QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
+    QByteArray lineBuffer;
+    fillVertexBuffers(m_part, m_color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
 
     for (auto it = surfaceBuffers.cbegin(); it != surfaceBuffers.cend(); ++it) {
         const QByteArray &data = it.value();
         if (data.isEmpty())
             continue;
 
-        constexpr int stride = (3 + 3) * sizeof(float);
+        const BrickLink::Color *color = it.key();
 
-        auto geo = new RenderGeometry(it.key());
+        const int stride = (3 + 3 + (color->hasParticles() ? 2 : 0)) * sizeof(float);
+
+        auto geo = new QmlRenderGeometry(color);
 
         // calculate bounding box
         static constexpr auto fmin = std::numeric_limits<float>::min();
@@ -184,6 +201,19 @@ void RenderController::updateGeometries()
         geo->setStride(stride);
         geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
         geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+        if (color->hasParticles()) {
+            geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+
+            QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
+            if (!texData) {
+                texData = generateMaterialTextureData(color);
+                if (texData) {
+                    QQmlEngine::setObjectOwnership(texData, QQmlEngine::CppOwnership);
+                    s_materialTextureDatas.insert(color, texData);
+                }
+            }
+            geo->setTextureData(texData);
+        }
         geo->setBounds(vmin, vmax);
         geo->setCenter(center);
         geo->setRadius(radius);
@@ -192,6 +222,7 @@ void RenderController::updateGeometries()
         m_geos.append(geo);
     }
 
+    m_lines->setBuffer(lineBuffer);
     emit surfacesChanged();
 
     QVector3D center;
@@ -202,7 +233,7 @@ void RenderController::updateGeometries()
         const auto geoCenter = geo->center();
         const auto geoRadius = geo->radius();
 
-        if (!radius) { // first one
+        if (qFuzzyIsNull(radius)) { // first one
             center = geoCenter;
             radius = geoRadius;
         } else {
@@ -218,22 +249,22 @@ void RenderController::updateGeometries()
                 radius = nr;
             }
         }
-
-        geo->update();
     }
+    m_lines->update();
 
     if (m_center != center) {
         m_center = center;
         emit centerChanged();
     }
-    if (m_radius != radius) {
+    if (!qFuzzyCompare(m_radius, radius)) {
         m_radius = radius;
         emit radiusChanged();
     }
 }
 
-void RenderController::fillVertexBuffers(Part *part, int baseColorId, const QMatrix4x4 &matrix,
-                                         bool inverted, QHash<int, QByteArray> &surfaceBuffers)
+void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
+                                         bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
+                                         QByteArray &lineBuffer)
 {
     if (!part)
         return;
@@ -241,44 +272,44 @@ void RenderController::fillVertexBuffers(Part *part, int baseColorId, const QMat
     bool invertNext = false;
     bool ccw = true;
 
-    static auto addFloatsToByteArray = [](QByteArray &buffer, std::initializer_list<float> fs)
-    {
+    static auto addFloatsToByteArray = [](QByteArray &buffer, std::initializer_list<float> fs) {
         qsizetype oldSize = buffer.size();
-        buffer.resize(buffer.size() + fs.size() * sizeof(float));
+        size_t size = fs.size() * sizeof(float);
+        buffer.resize(oldSize + qsizetype(size));
         float *ptr = reinterpret_cast<float *>(buffer.data() + oldSize);
-        for (float f : fs)
-            *ptr++ = f;
+        memcpy(ptr, fs.begin(), size);
     };
 
-    static auto addTriangle = [](QByteArray &buffer, const QVector3D &p0,
-            const QVector3D &p1, const QVector3D &p2, const QMatrix4x4 &matrix)
-    {
-        auto p0m = matrix.map(p0);
-        auto p1m = matrix.map(p1);
-        auto p2m = matrix.map(p2);
-        auto n = QVector3D::normal(p0m, p1m, p2m);
-
-        for (const auto &p : { p0m, p1m, p2m })
-            addFloatsToByteArray(buffer, { p.x(), p.y(), p.z(), n.x(), n.y(), n.z() });
+    auto mapColor = [this, &baseColor](int colorId) -> const BrickLink::Color * {
+        auto c = (colorId == 16) ? (baseColor ? baseColor : m_color)
+                                 : BrickLink::core()->colorFromLDrawId(colorId);
+        if (!c && colorId >= 256) {
+            int newColorId = ((colorId - 256) & 0x0f);
+            qCWarning(LogLDraw) << "Dithered colors are not supported, using only one:"
+                                << colorId << "->" << newColorId;
+            c = BrickLink::core()->colorFromLDrawId(newColorId);
+        }
+        if (!c) {
+            qCWarning(LogLDraw) << "Could not map LDraw color" << colorId;
+            c = BrickLink::core()->color(9 /*light gray*/);
+        }
+        return c;
     };
 
-    auto mapColorId = [&](int colorId, int baseColorId) -> int
-    {
-        return (colorId == 16) ? ((baseColorId == -1) ? m_colorId : baseColorId)
-                               : colorId;
+    auto mapEdgeQColor = [this, &baseColor](int colorId) -> QColor {
+        if (colorId == 24) {
+            if (baseColor)
+                return baseColor->ldrawEdgeColor();
+            else if (m_color)
+                return m_color->ldrawEdgeColor();
+        } else if (auto *c = BrickLink::core()->colorFromLDrawId(colorId)) {
+            return c->ldrawColor();
+        }
+        return Qt::black;
     };
 
-    Element * const *ep = part->elements().constData();
-    int lastind = int(part->elements().count()) - 1;
-
-//    bool gotFirstNonComment = false;
-
-    for (int i = 0; i <= lastind; ++i, ++ep) {
-        const Element *e = *ep;
-
-//        if (e->type() != Element::Comment)
-//            gotFirstNonComment = true;
-
+    const auto &elements = part->elements();
+    for (const Element *e : elements) {
         bool isBFCCommand = false;
         bool isBFCInvertNext = false;
 
@@ -299,33 +330,114 @@ void RenderController::fillVertexBuffers(Part *part, int baseColorId, const QMat
             break;
         }
         case Element::Type::Triangle: {
-            const auto *te = static_cast<const TriangleElement *>(e);
-            int colorId = mapColorId(te->color(), baseColorId);
+            const auto te = static_cast<const TriangleElement *>(e);
+            const auto color = mapColor(te->color());
             const auto p = te->points();
-            addTriangle(surfaceBuffers[colorId], p[0], ccw ? p[2] : p[1], ccw ? p[1] : p[2], matrix);
+            const auto p0m = matrix.map(p[0]);
+            const auto p1m = matrix.map(ccw ? p[2] : p[1]);
+            const auto p2m = matrix.map(ccw ? p[1] : p[2]);
+            const auto n = QVector3D::normal(p0m, p1m, p2m);
+
+            if (color->hasParticles()) {
+                float u[3], v[3];
+                const float l1 = p0m.distanceToPoint(p1m) / 24;
+                const float l2 = p0m.distanceToPoint(p2m) / 24;
+                //const float h2 = p2m.distanceToLine(p0m, p1m - p0m) / 24; // sometimes way off
+                const float h2 = QVector3D::crossProduct(p2m - p0m, p2m - p1m).length() / (p1m - p0m).length() / 24;
+
+                QRandomGenerator *rd = QRandomGenerator::global();
+                float su = rd->generateDouble();
+                float sv = rd->generateDouble();
+
+                u[0] = su;
+                v[0] = sv;
+                u[1] = su + l1;
+                v[1] = sv;
+                u[2] = su + std::sqrt(l2 * l2 - h2 * h2);
+                v[2] = sv + h2;
+
+                addFloatsToByteArray(surfaceBuffers[color], {
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0],
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), u[1], v[1],
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2] });
+            } else {
+                addFloatsToByteArray(surfaceBuffers[color], {
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(),
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(),
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z() });
+            }
             break;
         }
         case Element::Type::Quad: {
-            const auto *qe = static_cast<const QuadElement *>(e);
-            int colorId = mapColorId(qe->color(), baseColorId);
+            const auto qe = static_cast<const QuadElement *>(e);
+            const auto color = mapColor(qe->color());
             const auto p = qe->points();
-            addTriangle(surfaceBuffers[colorId], p[0], ccw ? p[3] : p[1], p[2], matrix);
-            addTriangle(surfaceBuffers[colorId], p[2], ccw ? p[1] : p[3], p[0], matrix);
+            const auto p0m = matrix.map(p[0]);
+            const auto p1m = matrix.map(p[ccw ? 3 : 1]);
+            const auto p2m = matrix.map(p[2]);
+            const auto p3m = matrix.map(p[ccw ? 1 : 3]);
+            const auto n = QVector3D::normal(p0m, p1m, p2m);
+
+            if (color->hasParticles()) {
+                float u[4], v[4];
+                const float l1 = p0m.distanceToPoint(p1m) / 24;
+                const float l3 = p0m.distanceToPoint(p3m)/ 24;
+                QRandomGenerator *rd = QRandomGenerator::global();
+                const float su = rd->generateDouble();
+                const float sv = rd->generateDouble();
+
+                u[0] = su;
+                v[0] = sv;
+                u[1] = su + l1;
+                v[1] = sv;
+                u[2] = su + l1;
+                v[2] = sv + l3;
+                u[3] = su;
+                v[3] = sv + l3;
+                addFloatsToByteArray(surfaceBuffers[color], {
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0],
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), u[1], v[1],
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2],
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2],
+                    p3m.x(), p3m.y(), p3m.z(), n.x(), n.y(), n.z(), u[3], v[3],
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0] });
+            } else {
+                addFloatsToByteArray(surfaceBuffers[color], {
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(),
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(),
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(),
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(),
+                    p3m.x(), p3m.y(), p3m.z(), n.x(), n.y(), n.z(),
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z() });
+            }
             break;
         }
         case Element::Type::Line: {
+            const auto le = static_cast<const LineElement *>(e);
+            const auto c = mapEdgeQColor(le->color());
+            const auto p = le->points();
+            auto p0m = matrix.map(p[0]);
+            auto p1m = matrix.map(p[1]);
+            QmlRenderLineInstancing::addLineToBuffer(lineBuffer, c, p0m, p1m);
             break;
         }
         case Element::Type::CondLine: {
+            const auto cle = static_cast<const CondLineElement *>(e);
+            const auto c = mapEdgeQColor(cle->color());
+            const auto p = cle->points();
+            auto p0m = matrix.map(p[0]);
+            auto p1m = matrix.map(p[1]);
+            auto p2m = matrix.map(p[2]);
+            auto p3m = matrix.map(p[3]);
+            QmlRenderLineInstancing::addConditionalLineToBuffer(lineBuffer, c, p0m, p1m, p2m, p3m);
             break;
         }
         case Element::Type::Part: {
-            const auto *pe = static_cast<const PartElement *>(e);
+            const auto pe = static_cast<const PartElement *>(e);
             bool matrixReversed = (pe->matrix().determinant() < 0);
 
-            fillVertexBuffers(pe->part(), pe->color() == 16 ? baseColorId : pe->color(),
-                              matrix * pe->matrix(), inverted ^ invertNext ^ matrixReversed,
-                              surfaceBuffers);
+            fillVertexBuffers(pe->part(), mapColor(pe->color()), matrix * pe->matrix(),
+                              inverted ^ invertNext ^ matrixReversed, surfaceBuffers, lineBuffer);
             break;
         }
         default:
@@ -337,61 +449,120 @@ void RenderController::fillVertexBuffers(Part *part, int baseColorId, const QMat
     }
 }
 
+QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color) const
+{
+    if (color && color->hasParticles()) {
+        QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
+
+        if (!texData) {
+            const bool isSpeckle = color->isSpeckle();
+
+            QString cacheName = QLatin1String(isSpeckle ? "Speckle" : "Glitter")
+                    % u'_' % color->ldrawColor().name(QColor::HexArgb)
+                    % u'_' % color->particleColor().name(QColor::HexArgb)
+                    % u'_' % QString::number(color->particleMinSize())
+                    % u'_' % QString::number(color->particleMaxSize())
+                    % u'_' % QString::number(color->particleFraction());
+
+            static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+            QString cacheFile = cacheDir % u"/ldraw-textures/" % cacheName % u".png";
+            QImage texImg;
+
+            if (!texImg.load(cacheFile) || texImg.isNull()) {
+                const int particleSize = 50;
+
+                QPixmap particle(particleSize, particleSize);
+                if (isSpeckle) {
+                    particle.fill(Qt::transparent);
+                    QPainter pp(&particle);
+                    pp.setRenderHint(QPainter::Antialiasing);
+                    pp.setPen(Qt::NoPen);
+                    pp.setBrush(color->particleColor());
+                    pp.drawEllipse(particle.rect());
+                } else {
+                    particle.fill(color->particleColor());
+                }
+
+                float particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.f;
+                particleArea *= particleArea;
+                if (isSpeckle)
+                    particleArea *= (M_PI / 4.f);
+
+                const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
+                const float ldus = 24.f;
+
+                int particleCount = floor((ldus * ldus * color->particleFraction()) / particleArea);
+                int delta = color->particleMaxSize() * texSize / ldus;
+
+                QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
+                // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
+                img.fill(color->ldrawColor().rgba());
+
+                QVector<QPainter::PixmapFragment> fragments;
+                fragments.reserve(particleCount);
+                QRandomGenerator *rd = QRandomGenerator::global();
+                std::uniform_real_distribution<> dis(color->particleMinSize(), color->particleMaxSize());
+
+                float neededArea = floor(texSize * texSize * color->particleFraction());
+                float filledArea = 0;
+
+                //TODO: maybe partition the square into a grid and use random noise to offset drawing
+                //      into each cell to get a more uniform distribution
+
+                while (filledArea < neededArea) {
+                    qreal x = rd->bounded(texSize) + delta;
+                    qreal y = rd->bounded(texSize) + delta;
+                    qreal sx = qMax(1./(particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    qreal sy = isSpeckle ? sx : qMax(1./(particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    qreal rot = isSpeckle ? 0 : rd->bounded(90.);
+                    qreal opacity = isSpeckle ? 1 : qBound(0.0, (rd->bounded(0.3) + 0.7), 1.0);
+
+                    qreal area = particleSize * particleSize * sx * sy;
+                    if (isSpeckle)
+                        area *= (M_PI / 4.);
+                    filledArea += area;
+
+                    fragments << QPainter::PixmapFragment::create({ x, y }, particle.rect(), sx, sy, rot, opacity);
+
+                    // make it seamless
+                    if (x < 2 * delta)
+                        fragments << QPainter::PixmapFragment::create({ x + texSize, y }, particle.rect(), sx, sy, rot, opacity);
+                    else if (x > texSize)
+                        fragments << QPainter::PixmapFragment::create({ x - texSize, y }, particle.rect(), sx, sy, rot, opacity);
+                    if (y < 2 * delta)
+                        fragments << QPainter::PixmapFragment::create({ x, y + texSize }, particle.rect(), sx, sy, rot, opacity);
+                    else if (y > texSize)
+                        fragments << QPainter::PixmapFragment::create({ x, y - texSize }, particle.rect(), sx, sy, rot, opacity);
+                }
+
+                QPainter p(&img);
+                p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+                p.drawPixmapFragments(fragments.constData(), fragments.count(), particle);
+                p.end();
+
+                texImg = img.copy(delta, delta, texSize, texSize).rgbSwapped()
+                        .scaled(texSize / 2, texSize / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+                QDir(QFileInfo(cacheFile).absolutePath()).mkpath(QLatin1String("."));
+                texImg.save(cacheFile);
+            }
+            texData = new QQuick3DTextureData();
+            texData->setFormat(QQuick3DTextureData::RGBA8);
+            texData->setSize(texImg.size());
+            texData->setHasTransparency(color->ldrawColor().alpha() < 255);
+            texData->setTextureData(QByteArray { reinterpret_cast<const char *>(texImg.constBits()),
+                                                 texImg.sizeInBytes() });
+
+            s_materialTextureDatas.insert(color, texData);
+        }
+        return texData;
+    }
+    return nullptr;
+}
+
 void RenderController::resetCamera()
 {
     emit qmlResetCamera();
-}
-
-float RenderController::aoStrength() const
-{
-    return m_aoStrength;
-}
-
-void RenderController::setAoStrength(float newAoStrength)
-{
-    if (!qFuzzyCompare(m_aoStrength, newAoStrength)) {
-        m_aoStrength = newAoStrength;
-        emit aoStrengthChanged();
-    }
-}
-
-float RenderController::aoDistance() const
-{
-    return m_aoDistance;
-}
-
-void RenderController::setAoDistance(float newAoDistance)
-{
-    if (!qFuzzyCompare(m_aoDistance, newAoDistance)) {
-        m_aoDistance = newAoDistance;
-        emit aoDistanceChanged();
-    }
-}
-
-float RenderController::aoSoftness() const
-{
-    return m_aoSoftness;
-}
-
-void RenderController::setAoSoftness(float newAoSoftness)
-{
-    if (!qFuzzyCompare(m_aoSoftness, newAoSoftness)) {
-        m_aoSoftness = newAoSoftness;
-        emit aoSoftnessChanged();
-    }
-}
-
-bool RenderController::renderLines() const
-{
-    return m_renderLines;
-}
-
-void RenderController::setRenderLines(bool newRenderLines)
-{
-    if (m_renderLines != newRenderLines) {
-        m_renderLines = newRenderLines;
-        emit renderLinesChanged();
-    }
 }
 
 QVector3D RenderController::center() const
@@ -404,214 +575,18 @@ float RenderController::radius() const
     return m_radius;
 }
 
-float RenderController::lightProbeExposure() const
+bool RenderController::isTumblingAnimationActive() const
 {
-    return m_lightProbeExposure;
+    return m_tumblingAnimationActive;
 }
 
-void RenderController::setLightProbeExposure(float newLightProbeExposure)
+void RenderController::setTumblingAnimationActive(bool active)
 {
-    if (qFuzzyCompare(m_lightProbeExposure, newLightProbeExposure))
-        return;
-    m_lightProbeExposure = newLightProbeExposure;
-    emit lightProbeExposureChanged();
+    if (m_tumblingAnimationActive != active) {
+        m_tumblingAnimationActive = active;
+        emit tumblingAnimationActiveChanged();
+    }
 }
-
-float RenderController::plainMetalness() const
-{
-    return m_plainMetalness;
-}
-
-void RenderController::setPlainMetalness(float newPlainMetalness)
-{
-    if (qFuzzyCompare(m_plainMetalness, newPlainMetalness))
-        return;
-    m_plainMetalness = newPlainMetalness;
-    emit plainMetalnessChanged();
-}
-
-float RenderController::plainRoughness() const
-{
-    return m_plainRoughness;
-}
-
-void RenderController::setPlainRoughness(float newPlainRoughness)
-{
-    if (qFuzzyCompare(m_plainRoughness, newPlainRoughness))
-        return;
-    m_plainRoughness = newPlainRoughness;
-    emit plainRoughnessChanged();
-}
-
-float RenderController::chromeMetalness() const
-{
-    return m_chromeMetalness;
-}
-
-void RenderController::setChromeMetalness(float newChromeMetalness)
-{
-    if (qFuzzyCompare(m_chromeMetalness, newChromeMetalness))
-        return;
-    m_chromeMetalness = newChromeMetalness;
-    emit chromeMetalnessChanged();
-}
-
-float RenderController::chromeRoughness() const
-{
-    return m_chromeRoughness;
-}
-
-void RenderController::setChromeRoughness(float newChromeRoughness)
-{
-    if (qFuzzyCompare(m_chromeRoughness, newChromeRoughness))
-        return;
-    m_chromeRoughness = newChromeRoughness;
-    emit chromeRoughnessChanged();
-}
-
-float RenderController::metalMetalness() const
-{
-    return m_metalMetalness;
-}
-
-void RenderController::setMetalMetalness(float newMetalMetalness)
-{
-    if (qFuzzyCompare(m_metalMetalness, newMetalMetalness))
-        return;
-    m_metalMetalness = newMetalMetalness;
-    emit metalMetalnessChanged();
-}
-
-float RenderController::metalRoughness() const
-{
-    return m_metalRoughness;
-}
-
-void RenderController::setMetalRoughness(float newMetalRoughness)
-{
-    if (qFuzzyCompare(m_metalRoughness, newMetalRoughness))
-        return;
-    m_metalRoughness = newMetalRoughness;
-    emit metalRoughnessChanged();
-}
-
-float RenderController::pearlescentMetalness() const
-{
-    return m_pearlescentMetalness;
-}
-
-void RenderController::setPearlescentMetalness(float newPearlescentMetalness)
-{
-    if (qFuzzyCompare(m_pearlescentMetalness, newPearlescentMetalness))
-        return;
-    m_pearlescentMetalness = newPearlescentMetalness;
-    emit pearlescentMetalnessChanged();
-}
-
-float RenderController::pearlescentRoughness() const
-{
-    return m_pearlescentRoughness;
-}
-
-void RenderController::setPearlescentRoughness(float newPearlescentRoughness)
-{
-    if (qFuzzyCompare(m_pearlescentRoughness, newPearlescentRoughness))
-        return;
-    m_pearlescentRoughness = newPearlescentRoughness;
-    emit pearlescentRoughnessChanged();
-}
-
-float RenderController::matteMetallicMetalness() const
-{
-    return m_matteMetallicMetalness;
-}
-
-void RenderController::setMatteMetallicMetalness(float newMatteMetallicMetalness)
-{
-    if (qFuzzyCompare(m_matteMetallicMetalness, newMatteMetallicMetalness))
-        return;
-    m_matteMetallicMetalness = newMatteMetallicMetalness;
-    emit matteMetallicMetalnessChanged();
-}
-
-float RenderController::matteMetallicRoughness() const
-{
-    return m_matteMetallicRoughness;
-}
-
-void RenderController::setMatteMetallicRoughness(float newMatteMetallicRoughness)
-{
-    if (qFuzzyCompare(m_matteMetallicRoughness, newMatteMetallicRoughness))
-        return;
-    m_matteMetallicRoughness = newMatteMetallicRoughness;
-    emit matteMetallicRoughnessChanged();
-}
-
-float RenderController::rubberMetalness() const
-{
-    return m_rubberMetalness;
-}
-
-void RenderController::setRubberMetalness(float newRubberMetalness)
-{
-    if (qFuzzyCompare(m_rubberMetalness, newRubberMetalness))
-        return;
-    m_rubberMetalness = newRubberMetalness;
-    emit rubberMetalnessChanged();
-}
-
-float RenderController::rubberRoughness() const
-{
-    return m_rubberRoughness;
-}
-
-void RenderController::setRubberRoughness(float newRubberRoughness)
-{
-    if (qFuzzyCompare(m_rubberRoughness, newRubberRoughness))
-        return;
-    m_rubberRoughness = newRubberRoughness;
-    emit rubberRoughnessChanged();
-}
-
-float RenderController::tumblingAnimationAngle() const
-{
-    return m_tumblingAnimationAngle;
-}
-
-void RenderController::setTumblingAnimationAngle(float newTumblingAnimationAngle)
-{
-    if (qFuzzyCompare(m_tumblingAnimationAngle, newTumblingAnimationAngle))
-        return;
-    m_tumblingAnimationAngle = newTumblingAnimationAngle;
-    emit tumblingAnimationAngleChanged();
-}
-
-QVector3D RenderController::tumblingAnimationAxis() const
-{
-    return m_tumblingAnimationAxis;
-}
-
-void RenderController::setTumblingAnimationAxis(const QVector3D &newTumblingAnimationAxis)
-{
-    if (m_tumblingAnimationAxis == newTumblingAnimationAxis)
-        return;
-    m_tumblingAnimationAxis = newTumblingAnimationAxis;
-    emit tumblingAnimationAxisChanged();
-}
-
-bool RenderController::showBoundingSpheres() const
-{
-    return m_showBoundingSpheres;
-}
-
-void RenderController::setShowBoundingSpheres(bool newShowBoundingSpheres)
-{
-    if (m_showBoundingSpheres == newShowBoundingSpheres)
-        return;
-    m_showBoundingSpheres = newShowBoundingSpheres;
-    emit showBoundingSpheresChanged();
-}
-
 
 } // namespace LDraw
 

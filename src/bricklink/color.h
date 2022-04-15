@@ -29,8 +29,6 @@ public:
     QString name() const      { return m_name; }
     QColor color() const      { return m_color; }
 
-    int ldrawId() const       { return m_ldraw_id; }
-
     enum TypeFlag {
         Solid        = 0x0001,
         Transparent  = 0x0002,
@@ -60,6 +58,19 @@ public:
     bool isModulex() const     { return m_type & Modulex; }
     bool isSatin() const       { return m_type & Satin; }
 
+    float luminance() const    { return m_luminance; }
+
+    int ldrawId() const        { return m_ldraw_id; }
+    QColor ldrawColor() const  { return m_ldraw_color; }
+    QColor ldrawEdgeColor() const  { return m_ldraw_edge_color; }
+
+    bool hasParticles() const           { return m_particleMinSize && m_particleMaxSize; }
+    float particleMinSize() const       { return m_particleMinSize; }
+    float particleMaxSize() const       { return m_particleMaxSize; }
+    float particleFraction() const      { return m_particleFraction; }
+    float particleVFraction() const     { return m_particleVFraction; }
+    QColor particleColor() const        { return m_particleColor; }
+
     double popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
 
     static QString typeName(TypeFlag t);
@@ -69,14 +80,21 @@ public:
 
 private:
     QString m_name;
-    uint    m_id = 0;
-    int     m_ldraw_id = 0;
+    uint    m_id = InvalidId;
+    int     m_ldraw_id = -1;
     QColor  m_color;
+    QColor  m_ldraw_color;
+    QColor  m_ldraw_edge_color;
     Type    m_type = {};
     float   m_popularity = 0;
     quint16 m_year_from = 0;
     quint16 m_year_to = 0;
-    // 4 bytes padding here
+    float   m_luminance = 0;
+    float   m_particleMinSize = 0;
+    float   m_particleMaxSize = 0;
+    float   m_particleFraction = 0;
+    float   m_particleVFraction = 0;
+    QColor  m_particleColor;
 
 private:
     static bool lessThan(const Color &color, uint id) { return color.m_id < id; }

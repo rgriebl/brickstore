@@ -51,10 +51,11 @@ public:
         V4, // 2021.5.1
         V5, // 2022.1.1
         V6, // 2022.2.1
+        V7, // 2022.6.1
 
         OldestStillSupported = V4,
 
-        Latest = V6
+        Latest = V7
     };
 
     Q_INVOKABLE bool isUpdateNeeded() const;
@@ -96,6 +97,7 @@ private:
     TransferJob *m_job = nullptr;
 
     std::vector<Color>               m_colors;
+    std::vector<Color>               m_ldrawExtraColors;
     std::vector<Category>            m_categories;
     std::vector<ItemType>            m_itemTypes;
     std::vector<Item>                m_items;

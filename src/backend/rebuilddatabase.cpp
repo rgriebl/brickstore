@@ -98,6 +98,10 @@ int RebuildDatabase::exec()
         if (username.isEmpty() || password.isEmpty())
             printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");
 
+        m_rebrickableApiKey = QString::fromLocal8Bit(qgetenv("REBRICKABLE_APIKEY"));
+
+        if (m_rebrickableApiKey.isEmpty())
+            printf("  > Missing Rebrickable API key: please set $REBRICKABLE_APIKEY.\n");
         QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
         QUrlQuery q;
         q.addQueryItem("userid"_l1, Utility::urlQueryEscape(username));
@@ -205,39 +209,36 @@ int RebuildDatabase::exec()
     return 0;
 }
 
-static QList<QPair<QString, QString> > partCategoriesQuery(char item_type)
+static QUrlQuery partCategoriesQuery(char item_type)
 {
-    QList<QPair<QString, QString> > query;
-    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
-            << QPair<QString, QString>("viewType"_l1,     "0"_l1)
-            << QPair<QString, QString>("itemType"_l1,     QString(QLatin1Char(item_type)))
-            << QPair<QString, QString>("downloadType"_l1, "T"_l1);
-
-    return query;
+    return {
+        { "a"_l1,            "a"_l1 },
+        { "viewType"_l1,     "0"_l1 },
+        { "itemType"_l1,     QString(QLatin1Char(item_type)) },
+        { "downloadType"_l1, "T"_l1 },
+    };
 }
 
-static QList<QPair<QString, QString> > itemQuery(char item_type)
+static QUrlQuery itemQuery(char item_type)
 {
-    QList<QPair<QString, QString> > query;   //?a=a&viewType=0&itemType=X
-    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
-            << QPair<QString, QString>("viewType"_l1,     "0"_l1)
-            << QPair<QString, QString>("itemType"_l1,     QString(QLatin1Char(item_type)))
-            << QPair<QString, QString>("selItemColor"_l1, "Y"_l1)  // special BrickStore flag to get default color - thanks Dan
-            << QPair<QString, QString>("selWeight"_l1,    "Y"_l1)
-            << QPair<QString, QString>("selYear"_l1,      "Y"_l1)
-            << QPair<QString, QString>("downloadType"_l1, "X"_l1);
-
-    return query;
+    return { //?a=a&viewType=0&itemType=X
+        { "a"_l1,            "a"_l1 },
+        { "viewType"_l1,     "0"_l1 },
+        { "itemType"_l1,     QString(QLatin1Char(item_type)) },
+        { "selItemColor"_l1, "Y"_l1 },  // special BrickStore flag to get default color - thanks Dan
+        { "selWeight"_l1,    "Y"_l1 },
+        { "selYear"_l1,      "Y"_l1 },
+        { "downloadType"_l1, "X"_l1 },
+    };
 }
 
-static QList<QPair<QString, QString> > dbQuery(int which)
+static QUrlQuery dbQuery(int which)
 {
-    QList<QPair<QString, QString> > query; //?a=a&viewType=X
-    query   << QPair<QString, QString>("a"_l1,            "a"_l1)
-            << QPair<QString, QString>("viewType"_l1,     QString::number(which))
-            << QPair<QString, QString>("downloadType"_l1, "X"_l1);
-
-    return query;
+    return { //?a=a&viewType=X
+        { "a"_l1,            "a"_l1 },
+        { "viewType"_l1,     QString::number(which) },
+        { "downloadType"_l1, "X"_l1 },
+    };
 }
 
 bool RebuildDatabase::download()
@@ -316,11 +317,17 @@ bool RebuildDatabase::download()
 //          grant();
 
 
+    auto rebrickableQuery = [this]() -> QUrlQuery {
+        return {
+            { "page_size"_l1,    "1000"_l1 },
+            { "key"_l1,          m_rebrickableApiKey },
+        };
+    };
 
 
     struct {
         const char *m_url;
-        const QList<QPair<QString, QString> > m_query;
+        const QUrlQuery m_query;
         const char *m_file;
     } * tptr, table [] = {
         { "https://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.xml"   },
@@ -343,9 +350,11 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('C'), "items_C.csv" },
         { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('I'), "items_I.csv" },
         { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('O'), "items_O.csv" },
-        { "https://www.bricklink.com/btinvlist.asp",       { },            "btinvlist.csv"   },
-        { "https://www.bricklink.com/btchglog.asp",        { },            "btchglog.csv" },
-        { "https://www.ldraw.org/library/official/ldconfig.ldr", { },      "ldconfig.ldr" },
+        { "https://www.bricklink.com/btinvlist.asp",       { },                "btinvlist.csv"   },
+        { "https://www.bricklink.com/btchglog.asp",        { },                "btchglog.csv" },
+        { "https://www.ldraw.org/library/official/ldconfig.ldr", { },          "ldconfig.ldr" },
+        { "https://rebrickable.com/api/v3/lego/colors/",   rebrickableQuery(), "rebrickable_colors.json" },
+
         { nullptr, { }, nullptr }
     };
 
@@ -369,9 +378,7 @@ bool RebuildDatabase::download()
             break;
         }
         QUrl url(QLatin1String(tptr->m_url));
-        QUrlQuery query;
-        query.setQueryItems(tptr->m_query);
-        url.setQuery(query);
+        url.setQuery(tptr->m_query);
 
         TransferJob *job = TransferJob::get(url, f, 2);
         m_trans->retrieve(job);

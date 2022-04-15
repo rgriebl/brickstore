@@ -38,6 +38,9 @@ public:
 
     void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
 
+    bool prefer3D() const;
+    void setPrefer3D(bool b);
+
 protected slots:
     void redraw();
     void languageChange();
@@ -59,16 +62,16 @@ private:
     QLabel *w_image;
     QImage m_image;
     bool m_prefer3D = false;
+    bool m_is3D = false;
     LDraw::RenderWidget *w_ldraw = nullptr;
     LDraw::Part *m_part = nullptr;
-    int m_colorId = 0;
     QToolButton *w_2d = nullptr;
     QToolButton *w_3d = nullptr;
-    QToolButton *w_playPause = nullptr;
-    QIcon m_playIcon;
-    QIcon m_pauseIcon;
+    QToolButton *w_reloadRescale = nullptr;
+    QIcon m_rescaleIcon;
+    QIcon m_reloadIcon;
 
-    QAction *m_reload;
+    QAction *m_renderSettings;
     QAction *m_copyImage;
     QAction *m_saveImageAs;
     QAction *m_blCatalog;

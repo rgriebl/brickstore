@@ -118,6 +118,10 @@ if (BS_DESKTOP OR BS_MOBILE)
         ldraw/part.h
         ldraw/rendercontroller.cpp
         ldraw/rendercontroller.h
+        ldraw/rendergeometry.cpp
+        ldraw/rendergeometry.h
+        ldraw/rendersettings.cpp
+        ldraw/rendersettings.h
 
         qmlapi/bricklink_wrapper.cpp
         qmlapi/bricklink_wrapper.h
@@ -139,13 +143,13 @@ if (BS_DESKTOP OR BS_MOBILE)
         utility/undo.h
     )
 
-    set(SHADERS
-        ldraw/PartRenderer.qml
-        ldraw/lightbox.hdr
-    )
-    qt_add_resources(${PROJECT_NAME} shaders_qrc
+    qt_add_resources(${PROJECT_NAME} ldraw_qrc
         PREFIX "/"
-        FILES  "${SHADERS}"
+        FILES
+            ldraw/PartRenderer.qml
+            ldraw/lightbox.hdr
+            ldraw/shaders/custom-line.vert
+            ldraw/shaders/custom-line.frag
     )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -243,6 +247,9 @@ if (BS_DESKTOP)
         desktop/progresscircle.h
         desktop/progressdialog.cpp
         desktop/progressdialog.h
+        desktop/rendersettingsdialog.cpp
+        desktop/rendersettingsdialog.h
+        desktop/rendersettingsdialog.ui
         desktop/script.cpp
         desktop/script.h
         desktop/scriptmanager.cpp

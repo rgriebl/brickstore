@@ -159,6 +159,7 @@ CondLineElement *CondLineElement::create(int color, const QVector3D *v)
 TriangleElement::TriangleElement(int color, const QVector3D *v)
     : Element(Type::Triangle), m_color(color)
 {
+    Q_ASSERT(color >= 0);
     memcpy(m_points, v, sizeof(m_points));
 }
 
@@ -171,6 +172,7 @@ TriangleElement *TriangleElement::create(int color, const QVector3D *v)
 QuadElement::QuadElement(int color, const QVector3D *v)
     : Element(Type::Quad), m_color(color)
 {
+    Q_ASSERT(color >= 0);
     memcpy(m_points, v, sizeof(m_points));
 }
 

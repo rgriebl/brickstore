@@ -16,6 +16,11 @@
 #include <QWidget>
 #include <QQuickView>
 
+#include "bricklink/color.h"
+
+QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
+
+
 namespace LDraw {
 
 class Part;
@@ -29,13 +34,16 @@ public:
 
     RenderController *controller();
 
-    void setPartAndColor(Part *part, int basecolor);
+    void setPartAndColor(Part *part, int ldrawColorId);
+    void setPartAndColor(Part *part, const BrickLink::Color *color);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
     bool isAnimationActive() const;
     void setAnimationActive(bool active);
+
+    bool startGrab();
 
 public slots:
     void resetCamera();
@@ -44,11 +52,13 @@ public slots:
 
 signals:
     void animationActiveChanged();
+    void grabFinished(QImage grabbedImage);
 
 private:
     RenderController *m_controller;
     QQuickView *m_window;
     QWidget *m_widget;
+    QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };
 
 }

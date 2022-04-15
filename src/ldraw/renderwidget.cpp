@@ -14,6 +14,8 @@
 #include <QtCore/QCoreApplication>
 #include <QtWidgets/QVBoxLayout>
 #include <QtQuick3D/QQuick3D>
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickItemGrabResult>
 
 #include "utility/utility.h"
 #include "rendercontroller.h"
@@ -26,7 +28,7 @@ RenderWidget::RenderWidget(QWidget *parent)
     : QWidget(parent)
     , m_controller(new RenderController(this))
 {
-    connect(m_controller, &RenderController::animationActiveChanged,
+    connect(m_controller, &RenderController::tumblingAnimationActiveChanged,
             this, &RenderWidget::animationActiveChanged);
     connect(m_controller, &RenderController::requestContextMenu,
             this, [this](const QPointF &pos) {
@@ -58,9 +60,14 @@ RenderController *RenderWidget::controller()
     return m_controller;
 }
 
-void RenderWidget::setPartAndColor(Part *part, int basecolor)
+void RenderWidget::setPartAndColor(Part *part, int ldrawColorId)
 {
-    m_controller->setPartAndColor(part, basecolor);
+    m_controller->setPartAndColor(part, ldrawColorId);
+}
+
+void RenderWidget::setPartAndColor(Part *part, const BrickLink::Color *color)
+{
+    m_controller->setPartAndColor(part, color);
 }
 
 QSize RenderWidget::minimumSizeHint() const
@@ -75,12 +82,28 @@ QSize RenderWidget::sizeHint() const
 
 bool RenderWidget::isAnimationActive() const
 {
-    return m_controller->isAnimationActive();
+    return m_controller->isTumblingAnimationActive();
 }
 
 void RenderWidget::setAnimationActive(bool active)
 {
-    m_controller->setAnimationActive(active);
+    m_controller->setTumblingAnimationActive(active);
+}
+
+bool RenderWidget::startGrab()
+{
+    if (!m_grabResult) {
+        m_grabResult = m_window->rootObject()->grabToImage();
+        if (m_grabResult) {
+            connect(m_grabResult.get(), &QQuickItemGrabResult::ready,
+                    this, [this]() {
+                emit grabFinished(m_grabResult->image());
+                m_grabResult.clear();
+            });
+            return true;
+        }
+    }
+    return false;
 }
 
 void RenderWidget::resetCamera()
@@ -90,12 +113,12 @@ void RenderWidget::resetCamera()
 
 void RenderWidget::startAnimation()
 {
-    m_controller->setAnimationActive(true);
+    m_controller->setTumblingAnimationActive(true);
 }
 
 void RenderWidget::stopAnimation()
 {
-    m_controller->setAnimationActive(false);
+    m_controller->setTumblingAnimationActive(false);
 }
 
 } // namespace LDraw

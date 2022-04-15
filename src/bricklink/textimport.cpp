@@ -19,6 +19,10 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QtDebug>
 #include <QtCore/QTimeZone>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonValue>
 
 #include "utility/exception.h"
 #include "utility/xmlhelpers.h"
@@ -71,7 +75,7 @@ bool BrickLink::TextImport::import(const QString &path)
     try {
         // colors
         readColors(path % u"colors.xml");
-        readLDrawColors(path % u"ldconfig.ldr");
+        readLDrawColors(path % u"ldconfig.ldr", path % u"rebrickable_colors.json");
         calculateColorPopularity();
 
         // categories
@@ -442,46 +446,236 @@ bool BrickLink::TextImport::readInventory(const Item *item)
     }
 }
 
-void BrickLink::TextImport::readLDrawColors(const QString &path)
+void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
+    QFile fre(rebrickableColorsPath);
+    if (!fre.open(QFile::ReadOnly))
+        throw ParseException(&fre, "could not open file");
 
-    QTextStream in(&f);
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(fre.readAll(), &err);
+    if (doc.isNull())
+        throw ParseException(&fre, "Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
+
+    QHash<int, uint> ldrawToBrickLinkId;
+    const QJsonArray results = doc["results"_l1].toArray();
+    for (const auto &result : results) {
+        const auto blIds = result["external_ids"_l1]["BrickLink"_l1]["ext_ids"_l1].toArray();
+        const auto ldIds = result["external_ids"_l1]["LDraw"_l1]["ext_ids"_l1].toArray();
+
+        if (!blIds.isEmpty() && !ldIds.isEmpty()) {
+            for (const auto &ldId : ldIds)
+                ldrawToBrickLinkId.insert(ldId.toInt(), uint(blIds.first().toInt()));
+        }
+    }
+
+    QFile fld(ldconfigPath);
+    if (!fld.open(QFile::ReadOnly))
+        throw ParseException(&fld, "could not open file");
+
+    QTextStream in(&fld);
     QString line;
-    int matchCount = 0;
+    int lineno = 0;
 
-    while (!(line = in.readLine()).isNull()) {
-        if (!line.isEmpty() && line.at(0) == '0'_l1) {
-            const QStringList sl = line.simplified().split(' '_l1);
+    while (!in.atEnd()) {
+        line = in.readLine();
+        lineno++;
 
-            if ((sl.count() >= 9)
-                    && (sl[1] == "!COLOUR"_l1)
-                    && (sl[3] == "CODE"_l1)
-                    && (sl[5] == "VALUE"_l1)
-                    && (sl[7] == "EDGE"_l1)) {
-                QString name = sl[2];
-                int id = sl[4].toInt();
+        QStringList sl = line.simplified().split(' '_l1);
 
-                name = name.toLower();
-                if (name.startsWith("rubber"_l1))
-                    continue;
+        if (sl.count() >= 9 &&
+                sl[0].toInt() == 0 &&
+                sl[1] == "!COLOUR"_l1 &&
+                sl[3] == "CODE"_l1 &&
+                sl[5] == "VALUE"_l1 &&
+                sl[7] == "EDGE"_l1) {
+            // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]
 
-                for (auto &color : m_colors) {
-                    QString blname = color.name()
-                            .toLower()
-                            .replace(' '_l1, '_'_l1)
-                            .replace('-'_l1, '_'_l1)
-                            .replace("gray"_l1, "grey"_l1)
-                            .simplified();
-                    if (blname == name) {
-                        color.m_ldraw_id = id;
-                        matchCount++;
-                        break;
+            QString name = sl[2];
+            int id = sl[4].toInt();
+            QColor color = sl[6];
+            QColor edgeColor = sl[8];
+            float luminance = 0;
+            Color::Type type = Color::Solid;
+            float particleMinSize = 0;
+            float particleMaxSize = 0;
+            float particleFraction = 0;
+            float particleVFraction = 0;
+            QColor particleColor;
+
+            if (id == 16 || id == 24)
+                continue;
+
+            bool isRubber = name.startsWith("Rubber_"_l1);
+
+            int lastIdx = sl.count() - 1;
+
+            for (int idx = 9; idx < sl.count(); ++idx) {
+                if (sl[idx] == "ALPHA"_l1 && (idx < lastIdx)) {
+                    int alpha = sl[++idx].toInt();
+                    color.setAlpha(alpha);
+                    type.setFlag(Color::Solid, false);
+                    type.setFlag(Color::Transparent);
+                } else if (sl[idx] == "LUMINANCE"_l1 && (idx < lastIdx)) {
+                    luminance = float(sl[++idx].toInt()) / 255;
+                } else if (sl[idx] == "CHROME"_l1) {
+                    type.setFlag(Color::Chrome);
+                } else if (sl[idx] == "PEARLESCENT"_l1) {
+                    type.setFlag(Color::Pearl);
+                } else if (sl[idx] == "RUBBER"_l1) {
+                    ; // ignore
+                } else if (sl[idx] == "MATTE_METALLIC"_l1) {
+                    ; // ignore
+                } else if (sl[idx] == "METAL"_l1) {
+                    type.setFlag(Color::Metallic);
+                } else if (sl[idx] == "MATERIAL"_l1 && (idx < lastIdx)) {
+                    const auto mat = sl[idx + 1];
+
+                    if (mat == "GLITTER"_l1)
+                        type.setFlag(name.startsWith("Opal_"_l1) ? Color::Satin : Color::Glitter);
+                    else if (mat == "SPECKLE"_l1)
+                        type.setFlag(Color::Speckle);
+                    else
+                        qWarning() << "Found unsupported MATERIAL" << mat << "at line" << lineno << "of LDConfig.ldr";
+                } else if (sl[idx] == "SIZE"_l1 && (idx < lastIdx)) {
+                    particleMinSize = particleMaxSize = sl[++idx].toFloat();
+                } else if (sl[idx] == "MINSIZE"_l1 && (idx < lastIdx)) {
+                    particleMinSize = sl[++idx].toFloat();
+                } else if (sl[idx] == "MAXSIZE"_l1 && (idx < lastIdx)) {
+                    particleMaxSize = sl[++idx].toFloat();
+                } else if (sl[idx] == "VALUE"_l1 && (idx < lastIdx)) {
+                    particleColor = sl[++idx];
+                } else if (sl[idx] == "FRACTION"_l1 && (idx < lastIdx)) {
+                    particleFraction = sl[++idx].toFloat();
+                } else if (sl[idx] == "VFRACTION"_l1 && (idx < lastIdx)) {
+                    particleVFraction = sl[++idx].toFloat();
+                }
+            }
+
+            auto updateColor = [&](Color &c) {
+                if (c.m_ldraw_id != -1)
+                    return;
+
+                c.m_luminance = luminance;
+                c.m_ldraw_id = id;
+                c.m_ldraw_color = color;
+                c.m_ldraw_edge_color = edgeColor;
+                c.m_particleMinSize = particleMinSize;
+                c.m_particleMaxSize = particleMaxSize;
+                c.m_particleFraction = particleFraction;
+                c.m_particleVFraction = particleVFraction;
+                c.m_particleColor = particleColor;
+            };
+
+            bool found = false;
+
+            // Rebrickable's m:n mappings can be weird - try to first fuzzy-match on names
+            // 1. all lower-case
+            // 2. all spaces and dashes are underscores
+            // 3. LDraw's "grey_" is "gray_" on BrickLink
+            // 3. LDraw's "opal_" is "satin_" on BrickLink
+            for (auto &c : m_colors) {
+                QString ldName = name.toLower();
+                QString blName = c.name()
+                        .toLower()
+                        .replace(' '_l1, '_'_l1)
+                        .replace('-'_l1, '_'_l1)
+                        .replace("gray_"_l1, "grey_"_l1)
+                        .replace("satin_"_l1, "opal_"_l1)
+                        .simplified();
+                if (blName == ldName) {
+                    updateColor(c);
+                    found = true;
+                    break;
+                }
+            }
+
+            // Some mapping are missing or are ambigious via Rebrickable - hardcode these
+            if (!found) {
+                static const QMap<QString, QString> manualLDrawToBrickLink = {
+                    { "Trans_Bright_Light_Green"_l1, "Trans-Light Bright Green"_l1 },
+                };
+
+                QString blName = manualLDrawToBrickLink.value(name);
+                if (!blName.isEmpty()) {
+                    for (auto &c : m_colors) {
+                        if (blName == c.name()) {
+                            updateColor(c);
+                            found = true;
+                            break;
+                        }
                     }
                 }
             }
+
+            // Try the Rebrickable color table (but not for rubbery colors)
+            if (!found && !isRubber) {
+                uint blColorId = ldrawToBrickLinkId.value(id);
+                if (blColorId) {
+                    int colorIndex = findColorIndex(blColorId);
+                    if (colorIndex >= 0) {
+                        updateColor(m_colors[colorIndex]);
+                        found = true;
+                    }
+                }
+            }
+
+            // We can't map the color to a BrickLink one, but at least we keep a record of it to
+            // be able to render composite parts with fixed colors (e.g. electric motors)
+            if (!found) {
+                Color c;
+                c.m_name = "LDraw: "_l1 % name;
+                c.m_type = type;
+                c.m_color = color;
+                updateColor(c);
+
+                m_ldrawExtraColors.push_back(c);
+
+                if (!name.startsWith("Rubber_"_l1))
+                    qWarning() << "Could not match LDraw color" << id << name << "to any BrickLink color";
+            }
+        }
+    }
+
+    for (auto &c : m_colors) {
+        if (c.m_ldraw_id < 0 && c.id()) {
+            // We need at least some estimated values for the 3D renderer
+            c.m_ldraw_color = c.m_color;
+            c.m_ldraw_edge_color = (c.m_color.lightness() < 128) ? c.m_color.lighter() : c.m_color.darker();
+
+            int alpha = 255;
+
+            if (c.isTransparent())
+                alpha = 128;
+            else if (c.isMilky())
+                alpha = 240;
+
+            if (c.isSpeckle()) {
+                c.m_particleMinSize = 1;
+                c.m_particleMaxSize = 3;
+                c.m_particleFraction = 0.4f;
+                c.m_particleVFraction = 0;
+                c.m_particleColor = "pink";
+            } else if (c.isGlitter()) {
+                alpha = 128;
+                c.m_particleMinSize = 1;
+                c.m_particleMaxSize = 1;
+                c.m_particleFraction = 0.17f;
+                c.m_particleVFraction = 0.2f;
+                c.m_particleColor = "gray";
+            } else if (c.isSatin()) {
+                alpha = 200;
+                c.m_luminance = 5.f / 255;
+                c.m_particleMinSize = 0.02f;
+                c.m_particleMaxSize = 0.1f;
+                c.m_particleFraction = 0.8f;
+                c.m_particleVFraction = 0.6f;
+                c.m_particleColor = "white";
+            }
+            c.m_ldraw_color.setAlpha(alpha);
+
+            if (!c.isModulex())
+                qWarning() << "Could not match BrickLink color" << c.m_id << c.m_name << "to any LDraw color" << c.m_ldraw_color;
         }
     }
 }
@@ -599,6 +793,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
 void BrickLink::TextImport::exportTo(Database *db)
 {
     std::swap(db->m_colors, m_colors);
+    std::swap(db->m_ldrawExtraColors, m_ldrawExtraColors);
     std::swap(db->m_itemTypes, m_item_types);
     std::swap(db->m_categories, m_categories);
     std::swap(db->m_items, m_items);

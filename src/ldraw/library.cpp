@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include "qwidget.h"
 #include <cfloat>
 
 #include <QFile>
@@ -37,8 +38,9 @@
 #include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "minizip/minizip.h"
-#include "library.h"
-#include "part.h"
+#include "ldraw/library.h"
+#include "ldraw/part.h"
+#include "ldraw/rendersettings.h"
 
 
 Q_LOGGING_CATEGORY(LogLDraw, "ldraw")
@@ -182,9 +184,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
     }
     if (valid) {
         try {
-            auto ldConfig = readLDrawFile("LDConfig.ldr"_l1);
-            std::tie(m_colors, m_lastUpdated) = Library::parseLDconfig(ldConfig);
-            if (m_colors.isEmpty())
+            if (readLDrawFile("LDConfig.ldr"_l1).isEmpty())
                 valid = false;
         } catch (const Exception &) {
             valid = false;
@@ -307,129 +307,6 @@ void Library::setUpdateStatus(UpdateStatus updateStatus)
     }
 }
 
-std::tuple<QHash<int, Color>, QDate> Library::parseLDconfig(const QByteArray &contents)
-{
-    QHash<int, Color> colors;
-    QDate date;
-
-    QTextStream ts(contents);
-
-    QString line;
-    int lineno = 0;
-    while (!ts.atEnd()) {
-        line = ts.readLine();
-        lineno++;
-
-        QStringList sl = line.simplified().split(' '_l1);
-
-        if (sl.count() >= 9 &&
-                sl[0].toInt() == 0 &&
-                sl[1] == "!COLOUR"_l1 &&
-                sl[3] == "CODE"_l1 &&
-                sl[5] == "VALUE"_l1 &&
-                sl[7] == "EDGE"_l1) {
-            // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]
-
-            Color c;
-
-            c.m_id = sl[4].toInt();
-            c.m_name = sl[2];
-            c.m_color = sl[6];
-            c.m_edgeColor = sl[8];
-
-            for (int idx = 9; idx < sl.count(); ++idx) {
-                if (sl[idx] == "ALPHA"_l1) {
-                    int alpha = sl[++idx].toInt();
-                    c.m_color.setAlpha(alpha);
-                    //c.edgeColor.setAlpha(alpha);
-                } else if (sl[idx] == "LUMINANCE"_l1) {
-                    c.m_luminance = float(sl[++idx].toInt()) / 255;
-                } else if (sl[idx] == "CHROME"_l1) {
-                    c.m_chrome = true;
-                } else if (sl[idx] == "PEARLESCENT"_l1) {
-                    c.m_pearlescent = true;
-                } else if (sl[idx] == "RUBBER"_l1) {
-                    c.m_rubber = true;
-                } else if (sl[idx] == "MATTE_METALLIC"_l1) {
-                    c.m_matteMetallic = true;
-                } else if (sl[idx] == "METAL"_l1) {
-                    c.m_metal = true;
-                }
-            }
-            if (c.m_color.isValid() && c.m_edgeColor.isValid()) {
-                colors.insert(c.m_id, c);
-            } else {
-                qCWarning(LogLDraw) << "Got invalid color " << c.m_id << " : " << c.m_color << " // " << c.m_edgeColor;
-            }
-        } else if (sl.count() >= 5 &&
-                   sl[0].toInt() == 0 &&
-                   sl[1] == "!LDRAW_ORG"_l1 &&
-                   sl[2] == "Configuration"_l1 &&
-                   sl[3] == "UPDATE"_l1) {
-            // 0 !LDRAW_ORG Configuration UPDATE yyyy-MM-dd
-            date = QDate::fromString(sl[4], "yyyy-MM-dd"_l1);
-        }
-    }
-
-    return { colors, date };
-}
-
-
-Color Library::color(int id, int baseId) const
-{
-    if (m_locked)
-        return { };
-
-    if ((id == 16) || (id == 24)) {
-        if (baseId < 0) {
-            qCWarning(LogLDraw) << "Called color() with meta color id" << id << "without specifying the base color";
-            return { };
-        }
-        return color(baseId, -1);
-
-    } else if (m_colors.contains(id)) {
-        return m_colors.value(id);
-
-    } else if (id >= 256) {
-        Color c = m_colors.value(0); // black
-
-        // dithered color (do a normal blend - DOS times are over by now)
-
-        QColor c1 = color((id - 256) & 0x0f).m_color;
-        QColor c2 = color(((id - 256) >> 4) & 0x0f).m_color;
-
-        int r1, g1, b1, a1, r2, g2, b2, a2;
-        c1.getRgb(&r1, &g1, &b1, &a1);
-        c2.getRgb(&r2, &g2, &b2, &a2);
-
-        c.m_name = "Dithered Color "_l1 + QString::number(id);
-        c.m_id = id;
-        c.m_color = QColor::fromRgb((r1+r2) >> 1, (g1+g2) >> 1, (b1+b2) >> 1, (a1+a2) >> 1);
-        // edge color of dithered colors is derived from color 1
-        c.m_edgeColor = color((id - 256) & 0x0f).m_edgeColor;
-        return c;
-    } else {
-        qCWarning(LogLDraw) << "Called color() with an invalid color id:" << id;
-        return { };
-    }
-
-#if 0
-    // calculate a contrasting edge color
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    qreal h, s, v, a;
-#else
-    float h, s, v, a;
-#endif
-    color(id).getHsvF(&h, &s, &v, &a);
-
-    v += 0.5f * ((v < 0.5f) ? 1 : -1);
-    v = qBound<decltype(v)>(0, v, 1);
-
-    return QColor::fromHsvF(h, s, v, a);
-#endif
-}
-
 Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 {
     QString filename = _filename;
@@ -441,7 +318,7 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
     bool inZip = false;
     bool found = false;
 
-    // add the logo on studs
+    // add the logo on studs     //TODO: make this configurable
     if (filename == "stud.dat"_l1)
         filename = "stud-logo4.dat"_l1;
     else if (filename == "stud2.dat"_l1)
@@ -537,11 +414,9 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 }
 
 
-std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
+bool Library::checkLDrawDir(const QString &ldir)
 {
     bool ok = false;
-    QDate generated;
-
     QFileInfo fi(ldir);
 
     if (fi.exists() && fi.isDir() && fi.isReadable()) {
@@ -552,12 +427,8 @@ std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
                 if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
                     if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
                         QFile f(ldir % "/LDConfig.ldr"_l1);
-                        if (f.open(QIODevice::ReadOnly)) {
-                            auto [colors, date] = parseLDconfig(f.readAll()); { }
-                            if (!colors.isEmpty()) {
-                                ok = true;
-                                generated = date;
-                            }
+                        if (f.open(QIODevice::ReadOnly) && f.size()) {
+                            ok = true;
                         }
                     }
                 }
@@ -569,18 +440,16 @@ std::tuple<bool, QDate> Library::checkLDrawDir(const QString &ldir)
         buffer.open(QIODevice::WriteOnly);
         try {
             MiniZip::unzip(ldir, &buffer, "ldraw/LDConfig.ldr");
-            auto [colors, date] = parseLDconfig(data); { }
-            if (!colors.isEmpty()) {
+            if (!data.isEmpty()) {
                 ok = true;
-                generated = date;
             }
         } catch (const Exception &) {
         }
     }
-    return { ok, generated };
+    return ok;
 }
 
-QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
+QStringList Library::potentialLDrawDirs()
 {
     QStringList dirs;
     dirs << QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
@@ -638,14 +507,12 @@ QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
     }
 #endif
 
-    QVector<std::tuple<QString, QDate>> result;
+    QStringList result;
 
     for (auto dir = dirs.begin(); dir != dirs.end(); ++dir) {
         if (!dir->isEmpty()) {
-            auto [ok, date] = checkLDrawDir(*dir); { }
-            if (ok) {
-                result.append({ *dir, date });
-            }
+            if (checkLDrawDir(*dir))
+                result.append(*dir);
         }
     }
 
@@ -654,9 +521,13 @@ QVector<std::tuple<QString, QDate>> Library::potentialLDrawDirs()
 
 void registerQmlTypes()
 {
-    qRegisterMetaType<Color>("LDrawColor");
-    qmlRegisterUncreatableType<Color>("BrickStore", 1, 0, "LDrawColor",
-                                      "Cannot create objects of type %1"_l1.arg("LDrawColor"_l1));
+    qmlRegisterSingletonType<LDraw::RenderSettings>("BrickStore", 1, 0, "LDrawRenderSettings",
+                                                    [](QQmlEngine *, QJSEngine *) -> QObject * {
+        auto *rs = RenderSettings::inst();
+        QQmlEngine::setObjectOwnership(rs, QQmlEngine::CppOwnership);
+        return rs;
+    });
+
 }
 
 } // namespace LDraw

@@ -52,7 +52,7 @@ private:
     void readAdditionalItemCategories(const QString &path, BrickLink::ItemType *itt);
     void readPartColorCodes(const QString &path);
     bool readInventory(const Item *item);
-    void readLDrawColors(const QString &path);
+    void readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath);
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);
 
@@ -65,6 +65,7 @@ private:
 
 private:
     std::vector<Color>         m_colors;
+    std::vector<Color>         m_ldrawExtraColors;
     std::vector<ItemType>      m_item_types;
     std::vector<Category>      m_categories;
     std::vector<Item>          m_items;

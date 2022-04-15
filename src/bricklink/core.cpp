@@ -920,6 +920,15 @@ const Color *Core::colorFromLDrawId(int ldrawId) const
     });
     if (it != colors().cend())
         return &(*it);
+
+    const auto &extraColors = m_database->m_ldrawExtraColors;
+
+    it = std::find_if(extraColors.cbegin(), extraColors.cend(), [ldrawId](const auto &color) {
+        return (color.ldrawId() == ldrawId);
+    });
+    if (it != extraColors.cend())
+        return &(*it);
+
     return nullptr;
 }
 

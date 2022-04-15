@@ -34,9 +34,11 @@
 #include "ldraw/library.h"
 #include "ldraw/part.h"
 #include "ldraw/renderwidget.h"
+#include "qcoro/core/qcorosignal.h"
 #include "utility/eventfilter.h"
 #include "utility/utility.h"
 #include "picturewidget.h"
+#include "rendersettingsdialog.h"
 
 
 PictureWidget::PictureWidget(QWidget *parent)
@@ -51,9 +53,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_text->setWordWrap(true);
     w_text->setTextInteractionFlags(Qt::TextSelectableByMouse);
     w_text->setContextMenuPolicy(Qt::DefaultContextMenu);
-    QPalette pal = w_text->palette();
-    pal.setColor(QPalette::Base, Qt::red);
-    w_text->setPalette(pal);
 
     new EventFilter(w_text, [this](QObject *, QEvent *e) {
         if (e->type() == QEvent::ContextMenu) {
@@ -108,26 +107,27 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setFont(font);
     w_3d->setFont(font);
 
-    m_playIcon = QIcon::fromTheme("media-playback-start"_l1);
-    m_pauseIcon = QIcon::fromTheme("media-playback-stop"_l1);
+    m_rescaleIcon = QIcon::fromTheme("zoom-fit-best"_l1);
+    m_reloadIcon = QIcon::fromTheme("view-refresh"_l1);
 
-    w_playPause = new QToolButton();
-    w_playPause->setAutoRaise(true);
-    w_playPause->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    w_playPause->setIcon(m_playIcon);
-    connect(w_playPause, &QToolButton::clicked,
+    w_reloadRescale = new QToolButton();
+    w_reloadRescale->setAutoRaise(true);
+    w_reloadRescale->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+    w_reloadRescale->setIcon(m_rescaleIcon);
+    connect(w_reloadRescale, &QToolButton::clicked,
             w_ldraw, [this]() {
-        bool b = !w_ldraw->isAnimationActive();
-        w_ldraw->setAnimationActive(b);
-        if (!b)
+        if (m_is3D) {
             w_ldraw->resetCamera();
-    });
-    connect(w_ldraw, &LDraw::RenderWidget::animationActiveChanged,
-            this, [this]() {
-        w_playPause->setIcon(w_ldraw->isAnimationActive() ? m_pauseIcon : m_playIcon);
+        } else if (m_pic) {
+            m_pic->update(true);
+            redraw();
+        }
     });
 
-    updateButtons();
+    w_2d->setEnabled(false);
+    w_3d->setEnabled(false);
+    w_reloadRescale->setEnabled(false);
 
     if (w_ldraw)
         layout->addWidget(w_ldraw, 10);
@@ -136,7 +136,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     buttons->setContentsMargins(0, 0, 0, 0);
     buttons->addWidget(w_2d, 10);
     buttons->addWidget(w_3d, 10);
-    buttons->addWidget(w_playPause, 10);
+    buttons->addWidget(w_reloadRescale, 10);
     layout->addLayout(buttons);
 
     m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
@@ -153,41 +153,50 @@ PictureWidget::PictureWidget(QWidget *parent)
     connect(m_blLotsForSale, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, m_item, m_color);
     });
-    m_reload = new QAction(QIcon::fromTheme("view-refresh"_l1), { }, this);
-    connect(m_reload, &QAction::triggered, this, [this]() {
-        if (m_pic) {
-            m_pic->update(true);
-            redraw();
-        }
+    m_renderSettings = new QAction({ }, this);
+    connect(m_renderSettings, &QAction::triggered, this, []() {
+        RenderSettingsDialog::inst()->show();
     });
 
     m_copyImage = new QAction(QIcon::fromTheme("edit-copy"_l1), { }, this);
-    connect(m_copyImage, &QAction::triggered, this, [this]() {
-        if (!m_image.isNull()) {
-            auto clip = QGuiApplication::clipboard();
-            clip->setImage(m_image);
-        }
-    });
+    connect(m_copyImage, &QAction::triggered, this, [this]() -> QCoro::Task<> {
+                QImage img;
+                if (w_ldraw->isVisible()) {
+                    if (w_ldraw->startGrab()) {
+                        img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
+                    }
+                } else if (!m_image.isNull()) {
+                    img = m_image;
+                }
+                auto clip = QGuiApplication::clipboard();
+                clip->setImage(img);
+            });
 
     m_saveImageAs = new QAction(QIcon::fromTheme("document-save"_l1), { }, this);
-    connect(m_saveImageAs, &QAction::triggered, this, [this]() {
-        if (!m_image.isNull()) {
-            QStringList filters;
-            filters << tr("PNG Image") % " (*.png)"_l1;
+    connect(m_saveImageAs, &QAction::triggered, this, [this]() -> QCoro::Task<> {
+                QImage img;
+                if (w_ldraw->isVisible()) {
+                    if (w_ldraw->startGrab()) {
+                        img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
+                    }
+                } else if (!m_image.isNull()) {
+                    img = m_image;
+                }
+                QStringList filters;
+                filters << tr("PNG Image") % " (*.png)"_l1;
 
-            QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
-                                                      Config::inst()->lastDirectory(),
-                                                      filters.join(";;"_l1));
-            if (fn.isEmpty())
-                return;
-            Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
+                QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
+                Config::inst()->lastDirectory(),
+                filters.join(";;"_l1));
+                if (!fn.isEmpty()) {
+                    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
-            if (fn.right(4) != ".png"_l1)
-                fn += ".png"_l1;
-
-            m_image.save(fn, "PNG");
-        }
-    });
+                    if (fn.right(4) != ".png"_l1) {
+                        fn += ".png"_l1;
+                    }
+                    img.save(fn, "PNG");
+                }
+            });
 
     connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
             this, [this](BrickLink::Picture *pic) {
@@ -214,7 +223,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
 void PictureWidget::languageChange()
 {
-    m_reload->setText(tr("Update"));
+    m_renderSettings->setText(tr("3D render settings..."));
     m_copyImage->setText(tr("Copy image"));
     m_saveImageAs->setText(tr("Save image as..."));
     m_blCatalog->setText(tr("Show BrickLink Catalog Info..."));
@@ -263,20 +272,26 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     if (m_part)
         m_part->release();
     m_part = item ? LDraw::library()->partFromId(item->id()) : nullptr;
-    if (m_part) {
+    if (m_part)
         m_part->addRef();
-
-        m_colorId = -1;
-        if (color)
-            m_colorId = color->ldrawId();
-        if (m_colorId < 0)
-            m_colorId = 7; // light gray
-    }
 
     m_blCatalog->setVisible(item);
     m_blPriceGuide->setVisible(item && color);
     m_blLotsForSale->setVisible(item && color);
     redraw();
+}
+
+bool PictureWidget::prefer3D() const
+{
+    return m_prefer3D;
+}
+
+void PictureWidget::setPrefer3D(bool b)
+{
+    if (m_prefer3D != b) {
+        m_prefer3D = b;
+        redraw();
+    }
 }
 
 void PictureWidget::redraw()
@@ -338,24 +353,36 @@ void PictureWidget::redraw()
         w_image->setText({ });
     }
 
-    bool show3D = m_part && m_prefer3D;
+    m_is3D = m_part && m_prefer3D;
 
-    if (show3D) {
+    if (m_is3D) {
         w_image->hide();
-
         w_ldraw->show();
-        w_ldraw->setPartAndColor(m_part, m_colorId);
+        w_ldraw->setPartAndColor(m_part, m_color);
     } else {
         w_ldraw->setPartAndColor(nullptr, -1);
         w_ldraw->hide();
         w_ldraw->stopAnimation();
         w_image->show();
     }
-    m_reload->setVisible(!show3D);
-    m_copyImage->setVisible(!show3D);
-    m_saveImageAs->setVisible(!show3D);
+    w_reloadRescale->setIcon(m_is3D ? m_rescaleIcon : m_reloadIcon);
+    w_reloadRescale->setToolTip(m_is3D ? tr("Center view") : tr("Update"));
+    m_renderSettings->setVisible(m_is3D);
 
-    updateButtons();
+    auto markText = [](const char *text, bool marked) {
+        QString s = QString::fromLatin1(text);
+        if (marked) {
+            s.prepend(u'\x2308');
+            s.append(u'\x230b');
+        }
+        return s;
+    };
+
+    w_2d->setText(markText("2D", !m_is3D && m_item));
+    w_3d->setText(markText("3D", m_is3D));
+    w_2d->setEnabled(m_is3D);
+    w_3d->setEnabled(!m_is3D && m_part);
+    w_reloadRescale->setEnabled(m_item);
 }
 
 void PictureWidget::changeEvent(QEvent *e)
@@ -385,22 +412,13 @@ void PictureWidget::contextMenuEvent(QContextMenuEvent *e)
         m->addAction(m_blPriceGuide);
         m->addAction(m_blLotsForSale);
         m->addSeparator();
-        m->addAction(m_reload);
+        m->addAction(m_renderSettings);
         m->addSeparator();
         m->addAction(m_copyImage);
         m->addAction(m_saveImageAs);
         m->popup(e->globalPos());
     }
     e->accept();
-}
-
-void PictureWidget::updateButtons()
-{
-    bool is3d = m_part && w_ldraw->isVisible();
-
-    w_2d->setEnabled(is3d);
-    w_3d->setEnabled(!is3d && m_part);
-    w_playPause->setEnabled(is3d);
 }
 
 #include "moc_picturewidget.cpp"

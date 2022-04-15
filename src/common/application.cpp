@@ -268,7 +268,7 @@ QCoro::Task<> Application::setupLDraw()
 
     if (Config::inst()->value("General/LDrawTransition"_l1).toBool()) {
         if (ldrawDir.isEmpty())
-            ldrawDir = std::get<0>(LDraw::Library::potentialLDrawDirs().value(0));
+            ldrawDir = LDraw::Library::potentialLDrawDirs().value(0);
 
         auto msg = tr("The way BrickStore uses LDraw to render 3D models for parts has changed: "
                       "by default it will now download and maintain its own LDraw installation."
@@ -651,7 +651,7 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 
 void Application::setupLogging()
 {
-    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_l1);
+    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message}"_l1);
 //    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_l1);
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)

@@ -83,11 +83,11 @@ Database::Database(QObject *parent)
                 emit updateFinished(true, tr("Already up-to-date."));
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
-                throw Exception(tr("download and decompress failed") % u": " % j->errorString());
+                throw Exception(tr("download and decompress failed") % u":\n" % j->errorString());
             } else if (!hhc->hasValidChecksum()) {
                 throw Exception(tr("checksum mismatch after decompression"));
             } else if (!file->commit()) {
-                throw Exception(tr("saving failed") % u": " % file->errorString());
+                throw Exception(tr("saving failed") % u":\n" % file->errorString());
             } else {
                 read(file->fileName());
 
@@ -97,7 +97,7 @@ Database::Database(QObject *parent)
             emit databaseReset();
 
         } catch (const Exception &e) {
-            emit updateFinished(false, tr("Could not load the new database") % u":\n\n" % e.error());
+            emit updateFinished(false, tr("Could not load the new database") % u":\n" % e.error());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
     });
@@ -130,6 +130,7 @@ void Database::setUpdateStatus(UpdateStatus updateStatus)
 void Database::clear()
 {
     m_colors.clear();
+    m_ldrawExtraColors.clear();
     m_itemTypes.clear();
     m_categories.clear();
     m_items.clear();
@@ -230,6 +231,7 @@ void Database::read(const QString &fileName)
 
         QDateTime                        generationDate;
         std::vector<Color>               colors;
+        std::vector<Color>               ldrawExtraColors;
         std::vector<Category>            categories;
         std::vector<ItemType>            itemTypes;
         std::vector<Item>                items;
@@ -255,6 +257,19 @@ void Database::read(const QString &fileName)
                     check();
                 }
                 gotColors = true;
+                break;
+            }
+            case ChunkId('L', 'C','O','L') | 1ULL << 32: { // optional, can be missing or empty
+                quint32 colc = 0;
+                ds >> colc;
+                check();
+                sizeCheck(colc, 1'000);
+
+                ldrawExtraColors.resize(colc);
+                for (quint32 i = 0; i < colc; ++i) {
+                    readColorFromDatabase(ldrawExtraColors[i], ds, Version::Latest);
+                    check();
+                }
                 break;
             }
             case ChunkId('C','A','T',' ') | 1ULL << 32: {
@@ -369,6 +384,7 @@ void Database::read(const QString &fileName)
         qInfo().noquote() << "Loaded database from" << f.fileName()
                           << "\n  Generated at:" << generationDate.toString(Qt::RFC2822Date)
                           << "\n  Colors      :" << colors.size()
+                          << "\n  LDraw Colors:" << ldrawExtraColors.size()
                           << "\n  Item Types  :" << itemTypes.size()
                           << "\n  Categories  :" << categories.size()
                           << "\n  Items       :" << items.size()
@@ -377,6 +393,7 @@ void Database::read(const QString &fileName)
                           << "\n  ChangeLog C :" << colorChangelog.size();
 
         m_colors = colors;
+        m_ldrawExtraColors = ldrawExtraColors;
         m_categories = categories;
         m_itemTypes = itemTypes;
         m_items = items;
@@ -433,6 +450,14 @@ void Database::write(const QString &filename, Version version) const
     for (const Color &col : m_colors)
         writeColorToDatabase(col, ds, version);
     check(cw.endChunk());
+
+    if ((version >= Version::V7) && !m_ldrawExtraColors.empty()) {
+        check(cw.startChunk(ChunkId('L','C','O','L'), 1));
+        ds << quint32(m_ldrawExtraColors.size());
+        for (const Color &col : m_ldrawExtraColors)
+            writeColorToDatabase(col, ds, version);
+        check(cw.endChunk());
+    }
 
     check(cw.startChunk(ChunkId('C','A','T',' '), 1));
     ds << quint32(m_categories.size());
@@ -503,12 +528,22 @@ void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, Versio
     dataStream >> col.m_id >> col.m_name >> col.m_ldraw_id >> col.m_color >> flags
             >> col.m_popularity >> col.m_year_from >> col.m_year_to;
     col.m_type = static_cast<Color::Type>(flags);
+
+    dataStream >> col.m_ldraw_color >> col.m_ldraw_edge_color >> col.m_luminance
+            >> col.m_particleMinSize >> col.m_particleMaxSize >> col.m_particleColor
+            >> col.m_particleFraction >> col.m_particleVFraction;
 }
 
-void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, Version) const
+void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, Version v) const
 {
     dataStream << col.m_id << col.m_name << col.m_ldraw_id << col.m_color << quint32(col.m_type)
                << col.m_popularity << col.m_year_from << col.m_year_to;
+
+    if (v >= Version::V7) {
+        dataStream << col.m_ldraw_color << col.m_ldraw_edge_color << col.m_luminance
+                   << col.m_particleMinSize << col.m_particleMaxSize << col.m_particleColor
+                   << col.m_particleFraction << col.m_particleVFraction;
+    }
 }
 
 

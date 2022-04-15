@@ -31,6 +31,8 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStyle>
+#include <QtGui/QSurfaceFormat>
+#include <QtQuick3D/QQuick3D>
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
 #    undef _WIN32_WINNT
@@ -88,6 +90,7 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
             qputenv("QT_QPA_PLATFORMTHEME", "gtk2");
     }
 #endif
+    QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     (void) new QApplication(argc, argv);
 

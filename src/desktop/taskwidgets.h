@@ -67,6 +67,7 @@ class TaskInfoWidget : public QStackedWidget
 
 public:
     TaskInfoWidget(QWidget *parent = nullptr);
+    ~TaskInfoWidget() override;
 
 protected slots:
     void documentUpdate(Document *document);

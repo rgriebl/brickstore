@@ -3,20 +3,18 @@ import QtQuick3D
 import QtQuick3D.Helpers
 import BrickStore
 
-import QtQuick.Controls
-import QtQuick.Layouts
-
 Item {
     id: root
 
     required property var renderController
     property alias rc: root.renderController
+    property var rs: LDrawRenderSettings
 
     Connections {
         target: rc
         function onQmlResetCamera() {
             modelAnimation.enabled = true
-            rootNode.rotation = rc.standardRotation
+            rootNode.rotation = rs.defaultRotation
             scaleToFit()
             modelAnimation.enabled = false
         }
@@ -29,9 +27,20 @@ Item {
     onHeightChanged: scaleToFit()
 
     function scaleToFit() {
-        let d = rc.radius
-        let view = (width < height) ? width : height
-        let z = (d > 0) ? (view / d) : 1
+        let r = rc.radius
+        let z = 1
+        if (view.camera == pcamera) {
+            let r_max = pcamera.z * Math.sin(pcamera.fieldOfView * Math.PI / 180 / 2)
+            z = r_max / r
+            if (pcamera.fieldOfViewOrientation == PerspectiveCamera.Vertical && (width < height))
+                z = z * width / height
+            else if (pcamera.fieldOfViewOrientation == PerspectiveCamera.Horizontal && (height < width))
+                z = z * height / width
+        } else {
+            let size = (width < height) ? width : height
+            z = (r > 0) ? (size / r) : 1
+        }
+
         rootNode.scale = Qt.vector3d(z, z, z)
         rootNode.position = Qt.vector3d(0, 0, 0)
     }
@@ -49,21 +58,28 @@ Item {
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
             lightProbe: Texture { source: "qrc:/ldraw/lightbox.hdr" }
-            probeExposure: rc.lightProbeExposure
+            probeExposure: rs.lightProbeExposure
             tonemapMode: SceneEnvironment.TonemapModeLinear
-            aoStrength: rc.aoStrength * 100
-            aoDistance: rc.aoDistance * 100
-            aoSoftness: rc.aoSoftness * 100
+            aoStrength: rs.aoStrength * 100
+            aoDistance: rs.aoDistance * 100
+            aoSoftness: rs.aoSoftness * 100
         }
+        camera: rs.orthographicCamera ? ocamera : pcamera
 
         OrthographicCamera {
-            id: camera
-            z: 300
+            id: ocamera
+            z: 3000
+        }
+
+        PerspectiveCamera {
+            id: pcamera
+            z: 3000
+            fieldOfView: rs.fieldOfView
         }
 
         Node {
             id: rootNode
-            rotation: rc.standardRotation
+            rotation: rs.defaultRotation
             pivot: rc.center
 
             Behavior on rotation {
@@ -82,7 +98,7 @@ Item {
 
             Model {
                 source: "#Sphere"
-                visible: rc.showBoundingSpheres
+                visible: rs.showBoundingSpheres
                 position: rc.center
                 property real radius: rc.radius * 2 / 100
                 scale: Qt.vector3d(radius, radius, radius)
@@ -99,7 +115,7 @@ Item {
                     property var ldrawGeometry: rc.surfaces[index]
 
                     source: "#Sphere"
-                    visible: rc.showBoundingSpheres
+                    visible: rs.showBoundingSpheres
                     position: ldrawGeometry ? ldrawGeometry.center : Qt.vector3d(0, 0, 0)
                     property real radius: ldrawGeometry ? (ldrawGeometry.radius * 2 / 100) : 1
                     scale: Qt.vector3d(radius, radius, radius)
@@ -110,8 +126,14 @@ Item {
                 }
             }
 
+            // Workaround for QtQuick3D bug:
+            //  custom textures are unloaded from the GPU when no model is referencing them anymore,
+            //  but they are not re-uploaded when a new model references them again in the future.
+            property var textureKeepAlive: ({})
+
             Repeater3D {
                 model: rc.surfaces.length
+
                 Model {
                     id: model
                     property var ldrawGeometry: rc.surfaces[index]
@@ -119,50 +141,77 @@ Item {
                     geometry: ldrawGeometry
                     materials: PrincipledMaterial {
                         id: material
-                        property real colorId      : model.ldrawGeometry ? model.ldrawGeometry.color.id : -1
-                        property color color       : model.ldrawGeometry ? model.ldrawGeometry.color.color : "black"
-                        property real luminance    : model.ldrawGeometry ? model.ldrawGeometry.color.luminance : 0
-                        property bool chrome       : model.ldrawGeometry && model.ldrawGeometry.color.chrome
-                        property bool metal        : model.ldrawGeometry && model.ldrawGeometry.color.metal
-                        property bool matteMetallic: model.ldrawGeometry && model.ldrawGeometry.color.matteMetallic
-                        property bool pearlescent  : model.ldrawGeometry && model.ldrawGeometry.color.pearlescent
-                        property bool rubber       : model.ldrawGeometry && model.ldrawGeometry.color.rubber
-                        property bool transparent  : model.ldrawGeometry && model.ldrawGeometry.color.transparent
+                        property color color       : model.ldrawGeometry ? model.ldrawGeometry.color : "pink"
+                        property real luminance    : model.ldrawGeometry ? model.ldrawGeometry.luminance : 0
+                        property bool isChrome     : model.ldrawGeometry && model.ldrawGeometry.isChrome
+                        property bool isMetallic   : model.ldrawGeometry && model.ldrawGeometry.isMetallic
+                        property bool isPearl      : model.ldrawGeometry && model.ldrawGeometry.isPearl
+                        property bool isTransparent: (color.a < 1)
+                        property var textureData   : model.ldrawGeometry ? model.ldrawGeometry.textureData : null
 
-                        baseColor: (colorId == 0) ? Qt.lighter(color) : color
+                        onTextureDataChanged: {
+                            if (textureData) {
+                                if (rootNode.textureKeepAlive[textureData] === undefined) {
+                                    let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
+                                    obj.textureData = textureData
+                                    rootNode.textureKeepAlive[textureData] = true
+                                    console.log("Texture keep-alive for color " + color)
+                                }
+                            }
+                        }
 
-                        cullMode     : transparent ? Material.NoCulling          : Material.BackFaceCulling
-                        depthDrawMode: transparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
-                        alphaMode    : transparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
-                        blendMode    : transparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
+                        property var texture: Texture { textureData: material.textureData }
+
+                        lighting: rs.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
+
+                        baseColorMap: textureData ? texture : null
+                        baseColor   : textureData ? "white" : color
+
+                        cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
+                        depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
+                        alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
+                        blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
 
                         emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
 
-                        metalness: chrome ? rc.chromeMetalness
-                                          : metal ? rc.metalMetalness
-                                                  : matteMetallic ? rc.matteMetallicMetalness
-                                                                  : pearlescent ? rc.pearlescentMetalness
-                                                                                : rubber ? rc.rubberMetalness
-                                                                                         : rc.plainMetalness
-                        roughness: chrome ? rc.chromeRoughness
-                                          : metal ? rc.metalRoughness
-                                                  : matteMetallic ? rc.matteMetallicRoughness
-                                                                  : pearlescent ? rc.pearlescentRoughness
-                                                                                : rubber ? rc.rubberRoughness
-                                                                                         : rc.plainRoughness
+                        metalness: isChrome ? rs.chromeMetalness
+                                            : isMetallic ? rs.metallicMetalness
+                                                         : isPearl ? rs.pearlMetalness
+                                                                   : rs.plainMetalness
+                        roughness: isChrome ? rs.chromeRoughness
+                                            : isMetallic ? rs.metallicRoughness
+                                                         : isPearl ? rs.pearlRoughness
+                                                                   : rs.plainRoughness
                     }
+                }
+            }
+            Model {
+                id: lines
+                geometry: rc.lineGeometry
+                instancing: rc.lines
+                visible: rs.renderLines
+                depthBias: -10
+
+                materials: CustomMaterial {
+                    property real customLineWidth: rs.lineThickness * rootNode.scale.x / 50
+                    property size resolution: Qt.size(view.width, view.height)
+
+                    cullMode: Material.BackFaceCulling
+                    shadingMode: CustomMaterial.Unshaded
+                    vertexShader: "shaders/custom-line.vert"
+                    fragmentShader: "shaders/custom-line.frag"
                 }
             }
         }
 
         Timer {
             id: animation
-            running: rc.animationActive
+            running: rc.tumblingAnimationActive
             repeat: true
             interval: 16
             onTriggered: {
-                rootNode.rotate(rc.tumblingAnimationAngle,
-                                rc.tumblingAnimationAxis, Node.LocalSpace)
+                rootNode.rotate(rs.tumblingAnimationAngle,
+                                rs.tumblingAnimationAxis, Node.LocalSpace)
             }
         }
 
@@ -172,15 +221,12 @@ Item {
 
         TapHandler {
             acceptedButtons: Qt.RightButton
-            onSingleTapped: (eventPoint, button) => {
-                                rc.requestContextMenu(eventPoint.scenePosition)
-                            }
+            onSingleTapped: (eventPoint, button) => { rc.requestContextMenu(eventPoint.scenePosition) }
         }
 
         TapHandler {
-            onDoubleTapped: {
-                settings.visible = !settings.visible
-            }
+            acceptedButtons: Qt.LeftButton
+            onDoubleTapped: root.scaleToFit()
         }
 
         WheelHandler {
@@ -204,16 +250,17 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = rc.animationActive
-                    rc.animationActive = false
+                    animationWasActive = rc.tumblingAnimationActive
+                    rc.tumblingAnimationActive = false
                     pressPosition = rootNode.position
                 } else {
-                    rc.animationActive = animationWasActive
+                    rc.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
                 if (!active)
                     return
+                //TODO: this is not correct for a perspective camera
                 let offset = Qt.vector3d(2 * activeTranslation.x, -2 * activeTranslation.y, 0)
                 rootNode.position = pressPosition.plus(offset)
             }
@@ -230,12 +277,12 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = rc.animationActive
-                    rc.animationActive = false
+                    animationWasActive = rc.tumblingAnimationActive
+                    rc.tumblingAnimationActive = false
                     pressRotation = rootNode.rotation
                     pressPos = centroid.pressPosition
                 } else {
-                    rc.animationActive = animationWasActive
+                    rc.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
@@ -246,116 +293,6 @@ Item {
 
                 rootNode.rotation = rc.rotateArcBall(pressPos, mousePos, pressRotation,
                                                      Qt.size(view.width, view.height))
-            }
-        }
-    }
-    ApplicationWindow {
-        id: settings
-        visible: false
-        flags: Qt.Dialog
-        title: "3D Render Settings"
-
-        ScrollView {
-            anchors.fill: parent
-            contentWidth: availableWidth
-
-            GridLayout {
-                width: parent.width
-                anchors.fill: parent
-                anchors.margins: 11
-                columnSpacing: 9
-                rowSpacing: 6
-                columns: 3
-
-                component VSection: Label {
-                    Layout.columnSpan: 3
-                    font.bold: true
-                }
-
-                component VLabel: Label {
-                    Layout.leftMargin: 11
-                }
-
-                component VSlider: Slider {
-                    Layout.fillWidth: true
-                }
-
-                component VValue: Label {
-                    required property var value
-                    property string unit: " %"
-                    property real factor: 100
-                    text: Math.round(value * 100) / 100 * factor + unit
-                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                }
-
-                VSection { text: "Debug" }
-                VLabel { text: "Show bounding spheres" }
-                Switch { checked: rc.showBoundingSpheres; onToggled: rc.showBoundingSpheres = checked; Layout.columnSpan: 2 }
-
-                VSection { text: "Tumbling Animation" }
-                VLabel { text: "Angle" }
-                VSlider { value: rc.tumblingAnimationAngle; onValueChanged: rc.tumblingAnimationAngle = value }
-                VValue { value: rc.tumblingAnimationAngle; factor: 1; unit: "°" }
-
-                VSection { text: "Ambient Occlusion" }
-                VLabel { text: "Strength" }
-                VSlider { value: rc.aoStrength; onValueChanged: rc.aoStrength = value }
-                VValue { value: rc.aoStrength }
-                VLabel { text: "Softness" }
-                VSlider { value: rc.aoSoftness; onValueChanged: rc.aoSoftness = value }
-                VValue { value: rc.aoSoftness }
-                VLabel { text: "Distance" }
-                VSlider { value: rc.aoDistance; onValueChanged: rc.aoDistance = value }
-                VValue { value: rc.aoDistance }
-
-                VSection { text: "Plain Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.plainMetalness; onValueChanged: rc.plainMetalness = value }
-                VValue { value: rc.plainMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.plainRoughness; onValueChanged: rc.plainRoughness = value }
-                VValue { value: rc.plainRoughness }
-
-                VSection { text: "Chrome Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.chromeMetalness; onValueChanged: rc.chromeMetalness = value }
-                VValue { value: rc.chromeMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.chromeRoughness; onValueChanged: rc.chromeRoughness = value }
-                VValue { value: rc.chromeRoughness }
-
-                VSection { text: "Metal Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.metalMetalness; onValueChanged: rc.metalMetalness = value }
-                VValue { value: rc.metalMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.metalRoughness; onValueChanged: rc.metalRoughness = value }
-                VValue { value: rc.metalRoughness }
-
-                VSection { text: "Matte Metallic Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.matteMetallicMetalness; onValueChanged: rc.matteMetallicMetalness = value }
-                VValue { value: rc.matteMetallicMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.matteMetallicRoughness; onValueChanged: rc.matteMetallicRoughness = value }
-                VValue { value: rc.matteMetallicRoughness }
-
-                VSection { text: "Pearlescent Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.pearlescentMetalness; onValueChanged: rc.pearlescentMetalness = value }
-                VValue { value: rc.pearlescentMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.pearlescentRoughness; onValueChanged: rc.pearlescentRoughness = value }
-                VValue { value: rc.pearlescentRoughness }
-
-                VSection { text: "Rubber Material" }
-                VLabel { text: "Metalness" }
-                VSlider { value: rc.rubberMetalness; onValueChanged: rc.rubberMetalness = value }
-                VValue { value: rc.rubberMetalness }
-                VLabel { text: "Roughness" }
-                VSlider { value: rc.rubberRoughness; onValueChanged: rc.rubberRoughness = value }
-                VValue { value: rc.rubberRoughness }
-
             }
         }
     }

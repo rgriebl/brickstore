@@ -542,7 +542,7 @@ QByteArray AddItemDialog::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("AI") << qint32(2)
+    ds << QByteArray("AI") << qint32(3)
        << w_qty->value()
        << w_bulk->value()
        << Currency::fromString(w_price->text())
@@ -559,6 +559,8 @@ QByteArray AddItemDialog::saveState() const
        << w_comments->text()
        << w_remarks->text()
        << w_merge->isChecked();
+
+    ds << w_picture->prefer3D();
     return ba;
 }
 
@@ -568,7 +570,7 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "AI") || (version != 2))
+    if ((ds.status() != QDataStream::Ok) || (tag != "AI") || (version < 2) || (version > 3))
         return false;
 
     int qty;
@@ -583,11 +585,14 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     QString comments;
     QString remarks;
     bool consolidate;
+    bool prefer3D = true;
 
     ds >> qty >> bulk >> price >> cost >> tierCurrency;
     for (int i = 0; i < 3; ++i)
         ds >> tierQty[i] >> tierPrice[i];
     ds >> isNew >> subConditionIndex >> comments >> remarks >> consolidate;
+    if (version >= 3)
+        ds >> prefer3D;
 
     if (ds.status() != QDataStream::Ok)
         return false;
@@ -608,6 +613,9 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     w_remarks->setText(remarks);
     w_merge->setChecked(consolidate);
     checkAddPossible();
+
+    w_picture->setPrefer3D(prefer3D);
+
     return true;
 }
 

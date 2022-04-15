@@ -190,6 +190,13 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
             this, &TaskInfoWidget::documentUpdate);
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &TaskInfoWidget::refresh);
+
+    m_pic->setPrefer3D(Config::inst()->value("/MainWindow/TaskInfo/Prefer3D"_l1, true).toBool());
+}
+
+TaskInfoWidget::~TaskInfoWidget()
+{
+    Config::inst()->setValue("/MainWindow/TaskInfo/Prefer3D"_l1, m_pic->prefer3D());
 }
 
 void TaskInfoWidget::documentUpdate(Document *document)

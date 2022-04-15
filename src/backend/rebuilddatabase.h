@@ -45,4 +45,5 @@ private:
     int m_downloads_in_progress = 0;
     int m_downloads_failed = 0;
     QDateTime m_date;
+    QString m_rebrickableApiKey;
 };
