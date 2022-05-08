@@ -26,6 +26,7 @@
 
 Announcements::Announcements(const QString &baseUrl, QObject *parent)
     : QObject(parent)
+    , m_nam(new QNetworkAccessManager(this))
     , m_parent(parent)
 {
     m_rawAnnouncementsUrl = baseUrl;

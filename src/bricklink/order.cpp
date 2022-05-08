@@ -59,8 +59,8 @@ private:
     QString   m_paymentCurrencyCode;
     int       m_lotCount = 0;
     int       m_itemCount = 0;
-    double    m_cost;
-    OrderStatus m_status;
+    double    m_cost = 0;
+    OrderStatus m_status = OrderStatus::Unknown;
     QString   m_paymentType;
     QString   m_remarks;
     QString   m_trackingNumber;

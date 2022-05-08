@@ -135,9 +135,9 @@ if (SANITIZE)
         message(FATAL_ERROR "Sanitizer builds are only supported on Linux, using GCC or Clang.")
         return()
     endif()
-    ##CMAKE by default this takes ECM_ENABLE_SANITIZERS from the Qt build
-    include(ECMEnableSanitizers)
-    target_compile_definitions(${PROJECT_NAME} SANITIZER_ENABLED)
+    set(ECM_ENABLE_SANITIZERS address leak undefined)
+    include(${Qt6_DIR}/3rdparty/extra-cmake-modules/modules/ECMEnableSanitizers.cmake)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SANITIZER_ENABLED)
 endif()
 
 file(GLOB_RECURSE ICONS_QRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/icons/*)
