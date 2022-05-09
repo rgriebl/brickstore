@@ -11,12 +11,10 @@ mkdir -p "$LOG_PATH"
 mkdir -p "$CACHE_PATH"
 
 stdbuf -oL -eL /usr/bin/brickstore "$@" 2>&1 \
-  | tee >(gzip -c > $LOG_PATH/brickstore-rebuild-database-`date -Iseconds`.log.gz)
+  | tee >(gzip -c > $LOG_PATH/log-`date -Iseconds`.log.gz)
 
 echo
-echo " Compressing database"
-echo "======================"
-echo
+echo "Compressing databases..."
 
 for i in $(seq 4 20); do
   dbname=database-v$i

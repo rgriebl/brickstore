@@ -23,10 +23,11 @@ VOLUME /data
 
 ENV DB_PATH=/data/db
 ENV CACHE_PATH=/data/cache
-ENV LOG_PATH=/data/cache
+ENV LOG_PATH=/data/logs
 
 ## ENV BRICKLINK_USERNAME
 ## ENV BRICKLINK_PASSWORD
+## ENV REBRICKABLE_APIKEY
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
