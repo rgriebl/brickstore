@@ -21,7 +21,7 @@
 
 
 class DeveloperConsole;
-
+class ToastMessage;
 
 class DesktopApplication : public Application
 {
@@ -37,6 +37,8 @@ public:
 
     void checkRestart() override;
     DeveloperConsole *developerConsole();
+
+    void showToastMessage(const QString &message, int timeout = 10000) override;
 
 protected:
     void setupLogging() override;
@@ -56,5 +58,9 @@ private:
     QTimer m_loggingTimer;
     QMutex m_loggingMutex;
     QVector<std::tuple<QtMsgType, QMessageLogContext *, QString>> m_loggingMessages;
+
+    void processToastMessages();
+    QVector<ToastMessage *> m_toastMessages;
+    std::unique_ptr<ToastMessage> m_currentToastMessage;
 };
 

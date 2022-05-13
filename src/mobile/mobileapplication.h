@@ -32,6 +32,8 @@ public:
 
     void updateIconTheme();
 
+    void showToastMessage(const QString &message, int timeout = 10000) override;
+
 protected:
     QCoro::Task<bool> closeAllViews() override;
 

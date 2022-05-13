@@ -55,19 +55,16 @@ Library::Library(QObject *parent)
 {
     m_cache.setMaxCost(50 * 1024 * 1024); // 50MB
 
-    connect(m_transfer, &Transfer::started,
-            this, [this](TransferJob *j) {
-        if (j != m_job)
-            return;
-        qWarning() << "LDRAW UPDATE STARTED";
-        emit updateStarted();
-    });
     connect(m_transfer, &Transfer::progress,
             this, [this](TransferJob *j, int done, int total) {
         if (j != m_job)
             return;
-        qWarning() << "LDRAW UPDATE Progress" << done << total;
-        emit updateProgress(done, total);
+
+        // delay updating the state, in case we get 304 (not modified) back
+        if (done || total) {
+            emitUpdateStartedIfNecessary();
+            emit updateProgress(done, total);
+        }
     });
     connect(m_transfer, &Transfer::finished,
             this, [this](TransferJob *j) -> QCoro::Task<> {
@@ -84,7 +81,7 @@ Library::Library(QObject *parent)
 
         try {
             if (!j->isFailed() && j->wasNotModifiedSince()) {
-                emit updateFinished(true, tr("Already up-to-date."));
+                // no need to emit updateFinished() here, because we didn't emit updateStarted()
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
                 throw Exception(tr("download failed") % u": " % j->errorString());
@@ -98,11 +95,13 @@ Library::Library(QObject *parent)
                 if (!co_await setPath(file->fileName(), true))
                     throw Exception(tr("reloading failed - please restart the application."));
 
+                emitUpdateStartedIfNecessary();
                 emit updateFinished(true, { });
                 setUpdateStatus(UpdateStatus::Ok);
             }
 
         } catch (const Exception &e) {
+            emitUpdateStartedIfNecessary();
             emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
@@ -264,9 +263,6 @@ bool Library::startUpdate(bool force)
         delete file;
         return false;
     }
-
-    setUpdateStatus(UpdateStatus::Updating);
-
     locker.commit();
 
     return true;
@@ -303,6 +299,14 @@ void Library::setUpdateStatus(UpdateStatus updateStatus)
     if (updateStatus != m_updateStatus) {
         m_updateStatus = updateStatus;
         emit updateStatusChanged(updateStatus);
+    }
+}
+
+void Library::emitUpdateStartedIfNecessary()
+{
+    if (updateStatus() != UpdateStatus::Updating) {
+        setUpdateStatus(UpdateStatus::Updating);
+        emit updateStarted();
     }
 }
 

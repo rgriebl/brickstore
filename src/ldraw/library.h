@@ -89,6 +89,7 @@ private:
     Part *findPart(const QString &filename, const QString &parentdir = { });
     QByteArray readLDrawFile(const QString &filename);
     void setUpdateStatus(UpdateStatus updateStatus);
+    void emitUpdateStartedIfNecessary();
 
     void clear();
 

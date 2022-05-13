@@ -127,3 +127,8 @@ MobileApplication::~MobileApplication()
 {
     delete m_engine;
 }
+
+void MobileApplication::showToastMessage(const QString &message, int timeout)
+{
+    //TODO implement
+}
