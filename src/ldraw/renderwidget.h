@@ -54,7 +54,13 @@ signals:
     void animationActiveChanged();
     void grabFinished(QImage grabbedImage);
 
+protected:
+    void changeEvent(QEvent *e) override;
+
 private:
+    void paletteChange();
+    void languageChange();
+
     RenderController *m_controller;
     QQuickView *m_window;
     QWidget *m_widget;

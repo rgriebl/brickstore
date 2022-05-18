@@ -35,6 +35,7 @@ RenderController::RenderController(QObject *parent)
     : QObject(parent)
     , m_lineGeo(new QQuick3DGeometry())
     , m_lines(new QmlRenderLineInstancing())
+    , m_clearColor(Qt::transparent)
 {
     static const float lineGeo[] = {
         0, -0.5, 0,
@@ -585,6 +586,19 @@ void RenderController::setTumblingAnimationActive(bool active)
     if (m_tumblingAnimationActive != active) {
         m_tumblingAnimationActive = active;
         emit tumblingAnimationActiveChanged();
+    }
+}
+
+const QColor &RenderController::clearColor() const
+{
+    return m_clearColor;
+}
+
+void RenderController::setClearColor(const QColor &newClearColor)
+{
+    if (m_clearColor != newClearColor) {
+        m_clearColor = newClearColor;
+        emit clearColorChanged(m_clearColor);
     }
 }
 

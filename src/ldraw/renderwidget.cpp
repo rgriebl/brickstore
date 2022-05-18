@@ -13,6 +13,7 @@
 */
 #include <QtCore/QCoreApplication>
 #include <QtWidgets/QVBoxLayout>
+#include <QtGui/QHelpEvent>
 #include <QtQuick3D/QQuick3D>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
@@ -35,6 +36,11 @@ RenderWidget::RenderWidget(QWidget *parent)
         auto cme = new QContextMenuEvent(QContextMenuEvent::Mouse, pos.toPoint());
         QCoreApplication::postEvent(this, cme);
     });
+    connect(m_controller, &RenderController::requestToolTip,
+            this, [this](const QPointF &pos) {
+        auto he = new QHelpEvent(QHelpEvent::ToolTip, pos.toPoint(), QCursor::pos());
+        QCoreApplication::postEvent(this, he);
+    });
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -44,6 +50,7 @@ RenderWidget::RenderWidget(QWidget *parent)
     QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
     m_window->setFormat(fmt);
     m_window->setResizeMode(QQuickView::SizeRootObjectToView);
+    paletteChange();
 
     m_window->setInitialProperties({
                                        { "renderController"_l1, QVariant::fromValue(m_controller) },
@@ -53,6 +60,7 @@ RenderWidget::RenderWidget(QWidget *parent)
     m_widget = QWidget::createWindowContainer(m_window, this);
 
     layout->addWidget(m_widget, 10);
+    languageChange();
 }
 
 RenderController *RenderWidget::controller()
@@ -72,7 +80,7 @@ void RenderWidget::setPartAndColor(Part *part, const BrickLink::Color *color)
 
 QSize RenderWidget::minimumSizeHint() const
 {
-    return QSize(100, 100);   //TODO
+    return QSize(150, 150);   //TODO
 }
 
 QSize RenderWidget::sizeHint() const
@@ -119,6 +127,25 @@ void RenderWidget::startAnimation()
 void RenderWidget::stopAnimation()
 {
     m_controller->setTumblingAnimationActive(false);
+}
+
+void LDraw::RenderWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::PaletteChange)
+        paletteChange();
+    else if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QWidget::changeEvent(e);
+}
+
+void RenderWidget::paletteChange()
+{
+    m_controller->setClearColor(palette().color(QPalette::Active, backgroundRole()));
+}
+
+void RenderWidget::languageChange()
+{
+    setToolTip(tr("Hold left button: Rotate\nHold right button: Move\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
 }
 
 } // namespace LDraw

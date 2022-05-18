@@ -58,8 +58,8 @@ private:
     const BrickLink::Item * m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
     BrickLink::Picture *m_pic = nullptr;
-    QLabel *w_text;
-    QLabel *w_image;
+    QLabel *w_text = nullptr;
+    QLabel *w_image = nullptr;
     QImage m_image;
     bool m_prefer3D = false;
     bool m_is3D = false;

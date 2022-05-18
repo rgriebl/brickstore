@@ -31,6 +31,7 @@ class RenderController : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(LDrawRenderController)
+    Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged)
     Q_PROPERTY(QVector<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged)
     Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT)
     Q_PROPERTY(QQuick3DInstancing * lines READ lines CONSTANT)
@@ -60,6 +61,9 @@ public:
     bool isTumblingAnimationActive() const;
     void setTumblingAnimationActive(bool active);
 
+    const QColor &clearColor() const;
+    void setClearColor(const QColor &newClearColor);
+
 public slots:
     void resetCamera();
 
@@ -74,8 +78,11 @@ signals:
     void tumblingAnimationActiveChanged();
 
     void requestContextMenu(const QPointF &pos);
+    void requestToolTip(const QPointF &pos);
 
     void qmlResetCamera(); //TODO find something nicer
+
+    void clearColorChanged(const QColor &clearColor);
 
 private:
     void updateGeometries();
@@ -96,6 +103,7 @@ private:
     QVector3D m_center;
     float m_radius = 0;
     bool m_tumblingAnimationActive = false;
+    QColor m_clearColor;
 };
 
 } // namespace LDraw

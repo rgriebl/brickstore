@@ -75,14 +75,16 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     w_image->setMinimumSize(BrickLink::core()->standardPictureSize() * 2);
+    w_image->setAutoFillBackground(true);
+
+    w_ldraw = new LDraw::RenderWidget(this);
+    w_ldraw->hide();
 
     auto layout = new QVBoxLayout(this);
     layout->addWidget(w_text);
     layout->addWidget(w_image, 10);
+    layout->addWidget(w_ldraw, 10);
     layout->setContentsMargins(2, 6, 2, 2);
-
-    w_ldraw = new LDraw::RenderWidget(this);
-    w_ldraw->hide();
 
     w_2d = new QToolButton();
     w_2d->setText("2D"_l1);
@@ -128,9 +130,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setEnabled(false);
     w_3d->setEnabled(false);
     w_reloadRescale->setEnabled(false);
-
-    if (w_ldraw)
-        layout->addWidget(w_ldraw, 10);
 
     auto buttons = new QHBoxLayout();
     buttons->setContentsMargins(0, 0, 0, 0);
@@ -233,8 +232,16 @@ void PictureWidget::languageChange()
 
 void PictureWidget::paletteChange()
 {
-//    if (w_ldrawWin)
-//        w_ldrawWin->setClearColor(palette().color(backgroundRole()));
+    if (w_image) {
+        auto pal = w_image->palette();
+        pal.setColor(w_image->backgroundRole(), Qt::white);
+        w_image->setPalette(pal);
+    }
+    if (w_ldraw) {
+        auto pal = w_ldraw->palette();
+        pal.setColor(w_ldraw->backgroundRole(), Qt::white);
+        w_ldraw->setPalette(pal);
+    }
 }
 
 void PictureWidget::resizeEvent(QResizeEvent *e)

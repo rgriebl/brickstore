@@ -13,10 +13,7 @@ Item {
     Connections {
         target: rc
         function onQmlResetCamera() {
-            modelAnimation.enabled = true
-            rootNode.rotation = rs.defaultRotation
-            scaleToFit()
-            modelAnimation.enabled = false
+            root.animateScaleToFit()
         }
         function onPartOrColorChanged() {
             root.scaleToFit()
@@ -45,6 +42,13 @@ Item {
         rootNode.position = Qt.vector3d(0, 0, 0)
     }
 
+    function animateScaleToFit() {
+        modelAnimation.enabled = true
+        rootNode.rotation = rs.defaultRotation
+        scaleToFit()
+        modelAnimation.enabled = false
+    }
+
     View3D {
         id: view
         anchors.fill: parent
@@ -53,7 +57,7 @@ Item {
 
         environment: SceneEnvironment {
             id: env
-            clearColor: "white"
+            clearColor: rc.clearColor
             backgroundMode: SceneEnvironment.Color
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
@@ -216,7 +220,13 @@ Item {
         }
 
         HoverHandler {
-            cursorShape: Qt.OpenHandCursor
+            id: hovered
+            cursorShape: Qt.SizeAllCursor
+        }
+        Timer {
+            interval: 2000
+            running: hovered.hovered
+            onTriggered: rc.requestToolTip(hovered.point.scenePosition)
         }
 
         TapHandler {
@@ -226,12 +236,11 @@ Item {
 
         TapHandler {
             acceptedButtons: Qt.LeftButton
-            onDoubleTapped: root.scaleToFit()
+            onDoubleTapped: root.animateScaleToFit()
         }
 
         WheelHandler {
             target: null
-            cursorShape: Qt.SizeVerCursor
             onWheel: (event) => {
                          let d = 1.0 + (event.angleDelta.y / 1200.0)
                          rootNode.scale = rootNode.scale.times(d)
@@ -246,7 +255,6 @@ Item {
 
             target: null
             dragThreshold: 0
-            cursorShape: Qt.SizeAllCursor
 
             onActiveChanged: {
                 if (active) {
