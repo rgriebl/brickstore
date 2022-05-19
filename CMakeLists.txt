@@ -140,16 +140,6 @@ if (SANITIZE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SANITIZER_ENABLED)
 endif()
 
-
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
-
-include_directories(src)
-add_subdirectory(src)
-
 include_directories(3rdparty)
 add_subdirectory(3rdparty)
 file(GLOB_RECURSE ICONS_QRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/icons/*)
@@ -166,6 +156,7 @@ foreach (LANG ${LANGUAGES})
 endforeach()
 target_sources(${PROJECT_NAME} PUBLIC ${TS_FILES})
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/qm")
+
 qt_add_lrelease(${PROJECT_NAME}
     TS_FILES ${TS_FILES}
     QM_FILES_OUTPUT_VARIABLE QM_FILES
@@ -184,8 +175,16 @@ endif()
 add_dependencies(update_translations ${PROJECT_NAME}_lupdate)
 # end of custom qt_add_lupdate replacement
 
-qt_add_resources(${PROJECT_NAME} qt_translations_qrc PREFIX /translations BASE "${qt_qm_base}" FILES ${QT_QM_FILES})
-qt_add_resources(${PROJECT_NAME} bs_translations_qrc PREFIX /translations BASE "${CMAKE_CURRENT_BINARY_DIR}/qm" FILES ${QM_FILES})
+qt_add_resources(${PROJECT_NAME} qt_translations_qrc
+    PREFIX "/translations"
+    BASE "${qt_qm_base}"
+    FILES ${QT_QM_FILES}
+)
+qt_add_resources(${PROJECT_NAME} bs_translations_qrc
+    PREFIX /translations
+    BASE "${CMAKE_CURRENT_BINARY_DIR}/qm"
+    FILES ${QM_FILES}
+)
 qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
     translations/translations.json
     assets/generated-app-icons/brickstore.png
@@ -194,6 +193,15 @@ qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
     ${FLAGS_QRC}
     extensions/classic-print-script.bs.qml
 )
+
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
+
+include_directories(src)
+add_subdirectory(src)
 
 if (WIN32)
     # Windows resources: icons and file-version record
