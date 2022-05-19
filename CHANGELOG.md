@@ -25,7 +25,8 @@ The advantages:
   concept like Apple's "Universal Binaries" on the Windows platform.
 - Ubuntu 22.04 LTS is shipping up-to-date Qt libraries again, so there's a native package for that.
 - 3D part rendering has once again taken a big step forward to more realistic rendering with better
-  lighting and support for different part materials (e.g. reflections on chrome parts).
+  lighting and support for different part materials (e.g. reflections on chrome parts), as well
+  as texturing for glitter, satin and speckle parts.
 - In order to support the upcoming macOS 13 as well as Windows on ARM, the 3D renderer now always
   uses the platform's native render interface (Direct3D on Windows, Metal on macOS/iOS, Vulkan
   or OpenGL on Linux/Android) directly.
