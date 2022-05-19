@@ -149,7 +149,7 @@ jobs:
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
-        modules: 'qtsvg qtquick3d qtshadertools qttools'
+        modules: 'qtsvg qtquick3d qtshadertools qttools qtquicktimeline'
         arch: ${{ matrix.config.qt_arch }}
         target: ${{ matrix.config.qt_target || 'desktop' }}
         tools: ${{ matrix.config.qt_tools }}
