@@ -44,7 +44,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     : PriceGuideWidget(parent), m_document(nullptr), m_dock(nullptr)
 {
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);

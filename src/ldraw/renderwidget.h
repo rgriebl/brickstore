@@ -37,9 +37,6 @@ public:
     void setPartAndColor(Part *part, int ldrawColorId);
     void setPartAndColor(Part *part, const BrickLink::Color *color);
 
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
-
     bool isAnimationActive() const;
     void setAnimationActive(bool active);
 

@@ -74,7 +74,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_image = new QLabel();
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    w_image->setMinimumSize(BrickLink::core()->standardPictureSize() * 2);
+    w_image->setMinimumSize(BrickLink::core()->standardPictureSize());
     w_image->setAutoFillBackground(true);
 
     w_ldraw = new LDraw::RenderWidget(this);

@@ -58,6 +58,7 @@ RenderWidget::RenderWidget(QWidget *parent)
     m_window->setSource(QUrl::fromLocalFile(":/ldraw/PartRenderer.qml"_l1));
 
     m_widget = QWidget::createWindowContainer(m_window, this);
+    m_widget->setMinimumSize(100, 100);
 
     layout->addWidget(m_widget, 10);
     languageChange();
@@ -76,16 +77,6 @@ void RenderWidget::setPartAndColor(Part *part, int ldrawColorId)
 void RenderWidget::setPartAndColor(Part *part, const BrickLink::Color *color)
 {
     m_controller->setPartAndColor(part, color);
-}
-
-QSize RenderWidget::minimumSizeHint() const
-{
-    return QSize(150, 150);   //TODO
-}
-
-QSize RenderWidget::sizeHint() const
-{
-    return QSize(200, 200);   //TODO
 }
 
 bool RenderWidget::isAnimationActive() const
