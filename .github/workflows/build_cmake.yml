@@ -1,26 +1,35 @@
 name: CMake Build Matrix
 
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+  BRICKSTORE_QT6_MODULES: >-
+      cmake ninja-build
+      libglvnd-dev libtbb-dev
+      qt6-tools-dev qt6-tools-dev-tools
+      qt6-l10n-tools qt6-documentation-tools
+      qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
+      qt6-declarative-dev qt6-declarative-private-dev
+      qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
+      qt6-gtk-platformtheme qt6-qpa-plugins
+
 on:
+  workflow_dispatch:
   push:
-    workflow_dispatch:
     branches:
       - next
 
 jobs:
+  dummy:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: nope
+      run: |
+        /bin/false
+
   build:
+    needs: [ dummy ]
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.runs-on }}
-    env:
-      BUILD_NUMBER: ${{ github.run_number }}
-      BRICKSTORE_QT6_MODULES: >-
-          cmake ninja-build
-          libglvnd-dev libtbb-dev
-          qt6-tools-dev qt6-tools-dev-tools
-          qt6-l10n-tools qt6-documentation-tools
-          qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
-          qt6-declarative-dev qt6-declarative-private-dev
-          qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
-          qt6-gtk-platformtheme qt6-qpa-plugins
 
     strategy:
       fail-fast: false
@@ -426,4 +435,4 @@ jobs:
         SENTRY_ORG: brickstore
         SENTRY_PROJECT: brickstore
       with:
-        version: "brickstore@${{ github.run_number }}"
+        version: "brickstore@${{ env.BUILD_NUMBER }}"
