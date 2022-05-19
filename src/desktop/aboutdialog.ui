@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>587</width>
-    <height>695</height>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../../build-brickstore-Desktop_Qt_5_15_6_MSVC2019_64bit-Debug/debug/qmake_qmake_immediate.qrc">:/assets/generated-app-icons/brickstore.png</pixmap>
+        <pixmap>:/assets/generated-app-icons/brickstore.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -154,13 +154,6 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QDialogButtonBox" name="buttons">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -175,9 +168,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../build-brickstore-Desktop_Qt_5_15_6_MSVC2019_64bit-Debug/debug/qmake_qmake_immediate.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttons</sender>

@@ -14,8 +14,6 @@
 
 #include "common/application.h"
 #include "common/config.h"
-#include "ldraw/library.h"
-#include "ldraw/renderwidget.h"
 #include "utility/utility.h"
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
@@ -31,21 +29,11 @@ AboutDialog::AboutDialog(QWidget *parent)
     int iconSize = fontMetrics().height() * 7;
     ui->icon->setFixedSize(iconSize, iconSize);
 
-    if (LDraw::Part *part = LDraw::library()->partFromId("3833")) {
-        auto ldraw_icon = new LDraw::RenderWidget();
-        ldraw_icon->setPartAndColor(part, 321);
-        ldraw_icon->startAnimation();
-        auto layout = new QHBoxLayout(ui->icon);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(ldraw_icon);
-        ui->icon->setPixmap(QPixmap());
-    }
-
     const auto about = Application::inst()->about();
 
-    ui->header->setText(about["header"_l1].toString());
-    ui->license->setText(about["license"_l1].toString());
-    ui->translators->setText(about["translators"_l1].toString());
+    ui->header->setText(about[u"header"_qs].toString());
+    ui->license->setText(about[u"license"_qs].toString());
+    ui->translators->setText(about[u"translators"_qs].toString());
 
     setFixedSize(sizeHint());
 }
