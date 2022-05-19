@@ -366,7 +366,7 @@ elseif (WIN32)
     add_custom_target(installer
         COMMAND "${WINDEPLOYQT_PATH}/windeployqt" $<TARGET_FILE:${PROJECT_NAME}>
                 ${WINDEPLOYQT_EXTRA_ARGS}
-                "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}/extensions"
+                "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "--no-opengl-sw"
                 "--no-virtualkeyboard"
                 "--no-translations"

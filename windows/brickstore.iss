@@ -17,7 +17,7 @@ AppVersion={#ApplicationVersion}
 AppPublisher={#ApplicationPublisher}
 AppPublisherURL={#ApplicationPublisher}
 VersionInfoVersion={#ApplicationVersionFull}
-DefaultDirName={commonpf}\BrickStore
+DefaultDirName={autopf}\BrickStore
 DefaultGroupName=BrickStore
 UninstallDisplayIcon={app}\BrickStore.exe
 ; Since no icons will be created in "{group}", we do not need the wizard
@@ -36,6 +36,8 @@ WizardSmallImageFile={#SourcePath}\..\assets\generated-installers\windows-instal
 
 ArchitecturesInstallIn64BitMode={#ARCH}
 ArchitecturesAllowed={#ARCH}
+
+PrivilegesRequiredOverridesAllowed=dialog
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
@@ -86,4 +88,19 @@ begin
         Result := not IsMsiProductInstalled('{36F68A90-239C-34DF-B58C-64B30153CE35}', Version)
     else
         Result := True;
+end;
+
+{ BrickStore pre 2022.4.1 always got installed as a 32bit app (even in 64bit mode) }
+{ We need to detect this and remove the old 32bit installation when upgrading }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+    UninstallString: String;
+    ResultCode: Integer;
+begin
+    RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\BrickStore_is1', 'UninstallString', UninstallString);
+    if UninstallString <> '' then begin
+       UninstallString := RemoveQuotes(UninstallString);
+       if not Exec(UninstallString, '/SILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+         Result := 'Failed to remove the old 32bit BrickStore installer. Please manually uninstall the old version first.';
+    end
 end;
