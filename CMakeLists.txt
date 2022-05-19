@@ -246,7 +246,10 @@ endif()
 if (LINUX AND NOT ANDROID)
     find_package(TBB)
     if (TBB_FOUND)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE BS_HAS_PARALLEL_STL)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            BS_HAS_PARALLEL_STL
+            TBB_SUPPRESS_DEPRECATED_MESSAGES=1
+        )
         target_link_libraries(${PROJECT_NAME} PRIVATE TBB::tbb)
     else()
         message(STATUS "No libtbb found: parallel STL algorithms will not be used.")
@@ -303,9 +306,7 @@ endif()
 add_custom_target("Other-Files" SOURCES
     .gitattributes
     .gitignore
-    .github/workflows/build_qmake.yml
     .github/workflows/build_cmake.yml
-    .qmake.conf
     .tag
     CHANGELOG.md
     LICENSE.GPL

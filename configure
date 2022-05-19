@@ -37,13 +37,13 @@ while [ $# -gt 0 ]; do
         fi
         ;;
     --debug)
-        debug_release="CONFIG+=debug"
+        debug_release="-DCMAKE_BUILD_TYPE=Debug"
         ;;
     --release)
-        debug_release="CONFIG+=release"
+        debug_release="-DCMAKE_BUILD_TYPE=Release"
         ;;
     --backend-only)
-        backend_only="CONFIG+=backend_only"
+        backend_only="-DBACKEND_ONLY=TRUE"
         ;;
     *)
         echo "Usage: configure [options]"
@@ -68,26 +68,39 @@ for ((i=0; i<${#qmake_bin_test[@]}; i++)); do
    fi
 done
 
+if ! command -v cmake >/dev/null 2>&1; then
+    echo "FAIL: Could not find a cmake binary"
+    exit 2
+fi
+if ! command -v ninja >/dev/null 2>&1 ]; then
+    echo "FAIL: Could not find a ninja binary"
+    exit 2
+fi
+
 if [ ! -x "$qmake_bin" ]; then
     echo "FAIL: Could not find a suitable qmake binary"
     exit 2
 fi
 
-if ! "$qmake_bin" -query 2>/dev/null | grep -sq QT_VERSION; then
-    echo "FAIL: $qmake_bin is not a Qt 5 qmake"
+if [ $("$qmake_bin" -query QT_VERSION 2>/dev/null | cut -d. -f1) -ne 6 ]; then
+    echo "FAIL: $qmake_bin is not a Qt 6 qmake"
     exit 3
 fi
 
-echo
-echo "Running $qmake_bin with the following options:"
-echo "  PREFIX=$prefix $debug_release $backend_only"
-echo
+qtcmake_bin="$(dirname $qmake_bin)/qt-cmake"
 
-qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" $debug_release $backend_only 2>&1)
-qmake_res="$?"
-
-if [ "$qmake_res" != "0" ]; then
-    echo -e "$qmake_out"
+if [ ! -x "$qtcmake_bin" ]; then
+    echo "FAIL: Could not find a qt-cmake binary next to $qmake_bin"
+    exit 2
 fi
 
-exit $qmake_res
+prefix="-DCMAKE_INSTALL_PREFIX=$prefix"
+qmake="-DQT_QMAKE_EXECUTABLE=$qmake_bin"
+ninja="-DCMAKE_GENERATOR=Ninja"
+
+echo
+echo "Running $qtcmake_bin with the following options:"
+echo "  -S . -B . $prefix $ninja $debug_release $backend_only"
+echo
+
+"$qtcmake_bin" -S . -B . "$prefix" "$ninja" $debug_release $backend_only
