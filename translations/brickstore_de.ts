@@ -1049,27 +1049,27 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="141"/>
+        <location filename="../src/common/application.cpp" line="146"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Die Installation ist defekt: benötigte Bildformat Plugins sind nicht verfügbar!</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="145"/>
+        <location filename="../src/common/application.cpp" line="150"/>
         <source>Could not initialize the BrickLink kernel:</source>
         <translation>Konnte den BrickLink-Kernel nicht starten:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="149"/>
+        <location filename="../src/common/application.cpp" line="154"/>
         <source>Failed to authenticate with BrickLink as user %1</source>
         <translation>Authentifizierung bei BrickLink als Benutzer %1 ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="176"/>
+        <location filename="../src/common/application.cpp" line="181"/>
         <source>Import BrickLink Store</source>
         <translation>BrickLink Shop-Bestand importieren</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="177"/>
+        <location filename="../src/common/application.cpp" line="182"/>
         <source>Importing BrickLink Store</source>
         <translation>BrickLink Shop-Bestand wird importiert</translation>
     </message>
@@ -1078,12 +1078,12 @@
         <translation type="vanished">Shop-Bestand %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="223"/>
+        <location filename="../src/common/application.cpp" line="228"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>Die BrickLink Datenbankdateien konnten nicht geladen werden.&lt;br /&gt;&lt;br /&gt;Ohne diese Dateien ist das Programm nicht funktionsfähig.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/application.cpp" line="241"/>
+        <location filename="../src/common/application.cpp" line="246"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Anscheinend ist BrickStore abgestürzt, während ein Dokument ungesicherte Änderungen hatte.</numerusform>
@@ -1091,67 +1091,82 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="242"/>
+        <location filename="../src/common/application.cpp" line="247"/>
         <source>Should these documents be restored from their last available auto-save state?</source>
         <translation>Sollen diese Dokumente auf den automatisch gesicherten Stand wiederhergestellt werden?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="243"/>
+        <location filename="../src/common/application.cpp" line="248"/>
         <source>Restore Documents</source>
         <translation>Dokumente wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="268"/>
+        <location filename="../src/common/application.cpp" line="273"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
         <translation>Die Art, wie BrickStore LDraw für die Darstellung von 3D Modellen verwendet, hat sich geändert: standardmässig lädt es nun seine eigene LDraw Installation herunter und hält diese aktuell.&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem eine andere LDraw Installation verwenden wollen, so können Sie dies auf der LDraw Seite in den Einstellungen umstellen.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="339"/>
+        <location filename="../src/common/application.cpp" line="287"/>
+        <source>Started downloading an LDraw library update</source>
+        <translation>LDraw Bibliotheksupdate wurde gestartet</translation>
+    </message>
+    <message>
+        <location filename="../src/common/application.cpp" line="292"/>
+        <source>Finished downloading an LDraw library update</source>
+        <translation>LDraw Bibliotheksupdate wurde beendet</translation>
+    </message>
+    <message>
+        <location filename="../src/common/application.cpp" line="294"/>
+        <source>Failed to download a LDraw library update</source>
+        <translation>LDraw Bibliotheksupdate ist fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../src/common/application.cpp" line="356"/>
         <source>Please enter the password for the BrickLink account %1:</source>
         <translation>Bitte geben Sie das Passwort für das BrickLink Konto %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="346"/>
+        <location filename="../src/common/application.cpp" line="363"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Keine gültigen BrickLink Logineinstellungen vorhanden.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Einstellungen jetzt ändern?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="370"/>
+        <location filename="../src/common/application.cpp" line="387"/>
         <source>Update Database</source>
         <translation>Datenbank aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="371"/>
+        <location filename="../src/common/application.cpp" line="388"/>
         <source>Updating the BrickLink database</source>
         <translation>BrickLink Datenbank wird aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="513"/>
+        <location filename="../src/common/application.cpp" line="530"/>
         <source>Version %1 (build: %2)</source>
         <translation>Version %1 (Build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="515"/>
+        <location filename="../src/common/application.cpp" line="532"/>
         <source>Copyright &amp;copy; %1</source>
         <translation>Copyright &amp;copy; %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="516"/>
+        <location filename="../src/common/application.cpp" line="533"/>
         <source>Visit %1</source>
         <translation>Besuche %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="519"/>
+        <location filename="../src/common/application.cpp" line="536"/>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br/&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br/&gt;See &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.&lt;/p&gt;&lt;p&gt;Only made possible by &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezek&apos;s&lt;/a&gt; support.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br&gt;Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK&lt;br&gt;Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licens s/old-licenses/gpl-2.0.html&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Alle Daten von &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink. BrickLink und LEGO sind Warenzeichen der LEGO Gruppe, welche diese Software weder gesponsort noch autorisiert hat. Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;&lt;p&gt;Ermöglicht durch &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezeks&lt;/a&gt; Unterstützung.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="520"/>
+        <location filename="../src/common/application.cpp" line="537"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="532"/>
+        <location filename="../src/common/application.cpp" line="549"/>
         <source>Translators</source>
         <translation>Übersetzer</translation>
     </message>
@@ -1183,9 +1198,8 @@
 <context>
     <name>BrickLink</name>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="400"/>
         <source>Version %1 is too old</source>
-        <translation>Version %1 ist zu alt</translation>
+        <translation type="vanished">Version %1 ist zu alt</translation>
     </message>
 </context>
 <context>
@@ -1296,29 +1310,33 @@
 <context>
     <name>BrickLink::Database</name>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="149"/>
+        <location filename="../src/bricklink/database.cpp" line="83"/>
         <source>Already up-to-date.</source>
         <translation>Bereits auf dem aktuellen Stand.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="152"/>
+        <location filename="../src/bricklink/database.cpp" line="86"/>
         <source>download and decompress failed</source>
         <translation>Fehler beim Herunterladen und Entpacken</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="154"/>
+        <location filename="../src/bricklink/database.cpp" line="88"/>
         <source>checksum mismatch after decompression</source>
         <translation>Prüfsummenfehler nach Dekomprimierung</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="156"/>
+        <location filename="../src/bricklink/database.cpp" line="90"/>
         <source>saving failed</source>
         <translation>Fehler beim Speichern</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="166"/>
+        <location filename="../src/bricklink/database.cpp" line="100"/>
         <source>Could not load the new database</source>
         <translation>Konnte die neue Datenbank nicht laden</translation>
+    </message>
+    <message>
+        <source>Version %1 is too old</source>
+        <translation type="obsolete">Version %1 ist zu alt</translation>
     </message>
     <message>
         <source>Failed to download and decompress the database</source>
@@ -1414,12 +1432,12 @@
 <context>
     <name>BrickLink::Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="694"/>
+        <location filename="../src/bricklink/order.cpp" line="693"/>
         <source>Address not available</source>
         <translation>Adresse ist nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="710"/>
+        <location filename="../src/bricklink/order.cpp" line="709"/>
         <source>Cannot write order address to cache</source>
         <translation>Konnte Adresse zur Bestellung nicht in den Cache schreiben</translation>
     </message>
@@ -1428,67 +1446,67 @@
         <translation type="vanished">Konnte Bestellung nicht in eine Datei speichern</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="742"/>
+        <location filename="../src/bricklink/order.cpp" line="741"/>
         <source>Cannot write order XML to cache</source>
         <translation>Konnte die XML Daten der Bestellung nicht in den Cache schreiben</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="753"/>
+        <location filename="../src/bricklink/order.cpp" line="752"/>
         <source>Could not parse the received order XML data</source>
         <translation>Konnte XML Daten nicht verarbeiten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1178"/>
+        <location filename="../src/bricklink/order.cpp" line="1177"/>
         <source>Cannot open order XML</source>
         <translation>Konnte die XML Daten der Bestellung nicht laden</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1225"/>
+        <location filename="../src/bricklink/order.cpp" line="1224"/>
         <source>Received</source>
         <translation>Erhalten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1225"/>
+        <location filename="../src/bricklink/order.cpp" line="1224"/>
         <source>Placed</source>
         <translation>Getätigt</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1297"/>
+        <location filename="../src/bricklink/order.cpp" line="1296"/>
         <source>Date</source>
         <translation>Datum</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1298"/>
+        <location filename="../src/bricklink/order.cpp" line="1297"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1299"/>
+        <location filename="../src/bricklink/order.cpp" line="1298"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1300"/>
+        <location filename="../src/bricklink/order.cpp" line="1299"/>
         <source>Order ID</source>
         <translation>Bestellnr.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1301"/>
+        <location filename="../src/bricklink/order.cpp" line="1300"/>
         <source>Buyer/Seller</source>
         <translation>Käufer/Verkäufer</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1302"/>
+        <location filename="../src/bricklink/order.cpp" line="1301"/>
         <source>Items</source>
         <translation>Teile</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1303"/>
+        <location filename="../src/bricklink/order.cpp" line="1302"/>
         <source>Lots</source>
         <translation>Posten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1304"/>
+        <location filename="../src/bricklink/order.cpp" line="1303"/>
         <source>Total</source>
         <translation>Gesamt</translation>
     </message>
@@ -1560,7 +1578,7 @@
 <context>
     <name>ChangeCmd</name>
     <message numerus="yes">
-        <location filename="../src/common/documentmodel.cpp" line="273"/>
+        <location filename="../src/common/documentmodel.cpp" line="267"/>
         <source>Modified %1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text for table edits: %1 == column name (e.g. &quot;Price&quot;)</extracomment>
         <translation>
@@ -1569,7 +1587,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="277"/>
+        <location filename="../src/common/documentmodel.cpp" line="271"/>
         <source>multiple fields</source>
         <translation>Mehrere Felder</translation>
     </message>
@@ -1777,7 +1795,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>CurrencyCmd</name>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="322"/>
+        <location filename="../src/common/documentmodel.cpp" line="316"/>
         <source>Changed currency</source>
         <translation>Währung geändert</translation>
     </message>
@@ -1785,27 +1803,27 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="201"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="291"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>Anonyme Absturzberichte aktivieren?&lt;br&gt;&lt;br&gt;Erwägen Sie bitte, diese Funktionalität zu aktivieren.&lt;br&gt;Sollten Sie Bedenken haben, welche Informationen dabei übertragen werden und wie diese genutzt werden, lesen Sie bitte &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;diese Seite&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Absturzberichte können jederzeit in den Einstellungen aktiviert oder deaktiviert werden.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="424"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="542"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Die verwendete macOS Version is zu alt, um Themenänderungen zu unterstützen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="441"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="559"/>
         <source>The theme change will take effect after a restart.</source>
         <translation>Die Themenänderung wird erst nach einem Neustart sichtbar.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="444"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="562"/>
         <source>Restart now</source>
         <translation>Jetzt neu starten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="443"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="561"/>
         <source>Later</source>
         <translation>Später</translation>
     </message>
@@ -2602,7 +2620,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>DocumentModel</name>
     <message numerus="yes">
-        <location filename="../src/common/documentmodel.cpp" line="230"/>
+        <location filename="../src/common/documentmodel.cpp" line="224"/>
         <source>Added %n item(s)</source>
         <translation>
             <numerusform>Ein Teil hinzugefügt</numerusform>
@@ -2610,7 +2628,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/documentmodel.cpp" line="232"/>
+        <location filename="../src/common/documentmodel.cpp" line="226"/>
         <source>Removed %n item(s)</source>
         <translation>
             <numerusform>Ein Teil gelöscht</numerusform>
@@ -2618,7 +2636,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/documentmodel.cpp" line="1171"/>
+        <location filename="../src/common/documentmodel.cpp" line="1165"/>
         <source>%1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
@@ -2627,265 +2645,265 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1438"/>
+        <location filename="../src/common/documentmodel.cpp" line="1432"/>
         <source>Index</source>
         <translation>Index</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1455"/>
+        <location filename="../src/common/documentmodel.cpp" line="1449"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1456"/>
-        <location filename="../src/common/documentmodel.cpp" line="1461"/>
+        <location filename="../src/common/documentmodel.cpp" line="1450"/>
+        <location filename="../src/common/documentmodel.cpp" line="1455"/>
         <source>Include</source>
         <translation>Einschliessen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1456"/>
-        <location filename="../src/common/documentmodel.cpp" line="1464"/>
+        <location filename="../src/common/documentmodel.cpp" line="1450"/>
+        <location filename="../src/common/documentmodel.cpp" line="1458"/>
         <source>Exclude</source>
         <translation>Ausschliessen</translation>
     </message>
     <message>
+        <location filename="../src/common/documentmodel.cpp" line="1450"/>
         <location filename="../src/common/documentmodel.cpp" line="1456"/>
-        <location filename="../src/common/documentmodel.cpp" line="1462"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1486"/>
+        <location filename="../src/common/documentmodel.cpp" line="1480"/>
         <source>Image</source>
         <translation>Bild</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1499"/>
+        <location filename="../src/common/documentmodel.cpp" line="1493"/>
         <source>Item Id</source>
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1512"/>
+        <location filename="../src/common/documentmodel.cpp" line="1506"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1521"/>
+        <location filename="../src/common/documentmodel.cpp" line="1515"/>
         <source>Comments</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1529"/>
+        <location filename="../src/common/documentmodel.cpp" line="1523"/>
         <source>Remarks</source>
         <translation>Anmerkungen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1540"/>
+        <location filename="../src/common/documentmodel.cpp" line="1534"/>
         <source>Orig. Quantity</source>
         <translation>Orig. Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1554"/>
+        <location filename="../src/common/documentmodel.cpp" line="1548"/>
         <source>Diff. Quantity</source>
         <translation>Diff. Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1572"/>
+        <location filename="../src/common/documentmodel.cpp" line="1566"/>
         <source>Quantity</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1582"/>
+        <location filename="../src/common/documentmodel.cpp" line="1576"/>
         <source>Bulk</source>
         <translation>Gebinde</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1592"/>
+        <location filename="../src/common/documentmodel.cpp" line="1586"/>
         <source>Orig. Price</source>
         <translation>Orig. Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1605"/>
+        <location filename="../src/common/documentmodel.cpp" line="1599"/>
         <source>Diff. Price</source>
         <translation>Diff. Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1622"/>
+        <location filename="../src/common/documentmodel.cpp" line="1616"/>
         <source>Cost</source>
         <translation>Unkosten</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1631"/>
+        <location filename="../src/common/documentmodel.cpp" line="1625"/>
         <source>Price</source>
         <translation>Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1641"/>
+        <location filename="../src/common/documentmodel.cpp" line="1635"/>
         <source>Total</source>
         <translation>Gesamt</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1650"/>
+        <location filename="../src/common/documentmodel.cpp" line="1644"/>
         <source>Sale</source>
         <translation>Ausverkauf</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1660"/>
+        <location filename="../src/common/documentmodel.cpp" line="1654"/>
         <source>Condition</source>
         <translation>Zustand</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1661"/>
-        <location filename="../src/common/documentmodel.cpp" line="1665"/>
+        <location filename="../src/common/documentmodel.cpp" line="1655"/>
+        <location filename="../src/common/documentmodel.cpp" line="1659"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1661"/>
-        <location filename="../src/common/documentmodel.cpp" line="1665"/>
+        <location filename="../src/common/documentmodel.cpp" line="1655"/>
+        <location filename="../src/common/documentmodel.cpp" line="1659"/>
         <source>Used</source>
         <translation>Gebraucht</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1674"/>
+        <location filename="../src/common/documentmodel.cpp" line="1668"/>
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1694"/>
+        <location filename="../src/common/documentmodel.cpp" line="1688"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1710"/>
+        <location filename="../src/common/documentmodel.cpp" line="1704"/>
         <source>Item Type</source>
         <translation>Teiletyp</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1725"/>
+        <location filename="../src/common/documentmodel.cpp" line="1719"/>
         <source>Tier Q1</source>
         <translation>Anz. S1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1734"/>
+        <location filename="../src/common/documentmodel.cpp" line="1728"/>
         <source>Tier P1</source>
         <translation>Preis S1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1744"/>
+        <location filename="../src/common/documentmodel.cpp" line="1738"/>
         <source>Tier Q2</source>
         <translation>Anz. S2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1753"/>
+        <location filename="../src/common/documentmodel.cpp" line="1747"/>
         <source>Tier P2</source>
         <translation>Preis S2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1763"/>
+        <location filename="../src/common/documentmodel.cpp" line="1757"/>
         <source>Tier Q3</source>
         <translation>Anz. S3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1772"/>
+        <location filename="../src/common/documentmodel.cpp" line="1766"/>
         <source>Tier P3</source>
         <translation>Preis S3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1782"/>
+        <location filename="../src/common/documentmodel.cpp" line="1776"/>
         <source>Lot Id</source>
         <translation>Posten Id</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1791"/>
+        <location filename="../src/common/documentmodel.cpp" line="1785"/>
         <source>Retain</source>
         <translation>Halten</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1792"/>
+        <location filename="../src/common/documentmodel.cpp" line="1786"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1792"/>
+        <location filename="../src/common/documentmodel.cpp" line="1786"/>
         <source>No</source>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1796"/>
+        <location filename="../src/common/documentmodel.cpp" line="1790"/>
         <source>Yes</source>
         <comment>Filter&gt;Retain&gt;Yes</comment>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1796"/>
+        <location filename="../src/common/documentmodel.cpp" line="1790"/>
         <source>No</source>
         <comment>Filter&gt;Retain&gt;No</comment>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1804"/>
+        <location filename="../src/common/documentmodel.cpp" line="1798"/>
         <source>Stockroom</source>
         <translation>Auf Lager</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1805"/>
+        <location filename="../src/common/documentmodel.cpp" line="1799"/>
         <source>None</source>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1813"/>
+        <location filename="../src/common/documentmodel.cpp" line="1807"/>
         <source>None</source>
         <comment>Filter&gt;Stockroom&gt;None</comment>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1821"/>
+        <location filename="../src/common/documentmodel.cpp" line="1815"/>
         <source>Reserved</source>
         <translation>Reserviert</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1830"/>
+        <location filename="../src/common/documentmodel.cpp" line="1824"/>
         <source>Weight</source>
         <translation>Gewicht</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1841"/>
+        <location filename="../src/common/documentmodel.cpp" line="1835"/>
         <source>Year</source>
         <translation>Jahr</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1848"/>
+        <location filename="../src/common/documentmodel.cpp" line="1842"/>
         <source>Marker</source>
         <translation>Markierung</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1859"/>
+        <location filename="../src/common/documentmodel.cpp" line="1853"/>
         <source>Added</source>
         <translation>Hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1868"/>
+        <location filename="../src/common/documentmodel.cpp" line="1862"/>
         <source>Last Sold</source>
         <translation>Zuletzt verkauft</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2196"/>
+        <location filename="../src/common/documentmodel.cpp" line="2185"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Dieses Dokument hat keine Differenzen die exportiert werden könnenten.</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2198"/>
+        <location filename="../src/common/documentmodel.cpp" line="2187"/>
         <source>This list contains items without a BrickLink Lot Id.</source>
         <translation>Diese Liste enthält Teile mit doppelten BrickLink Posten Ids (Lot Id).</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2200"/>
+        <location filename="../src/common/documentmodel.cpp" line="2189"/>
         <source>This list contains items with duplicate BrickLink Lot Ids.</source>
         <translation>Diese Liste enthält Teile mit doppelten BrickLink Posten Ids (Lot Id).</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2282"/>
+        <location filename="../src/common/documentmodel.cpp" line="2271"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>
@@ -2999,7 +3017,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>FilterCmd</name>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="431"/>
+        <location filename="../src/common/documentmodel.cpp" line="425"/>
         <source>Filtered the view</source>
         <translation>Ansicht gefiltert</translation>
     </message>
@@ -3832,29 +3850,44 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="238"/>
         <source>Already up-to-date.</source>
-        <translation>Bereits auf dem aktuellen Stand.</translation>
+        <translation type="vanished">Bereits auf dem aktuellen Stand.</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="241"/>
+        <location filename="../src/ldraw/library.cpp" line="87"/>
         <source>download failed</source>
         <translation>Fehler beim Herunterladen</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="247"/>
+        <location filename="../src/ldraw/library.cpp" line="93"/>
         <source>saving failed</source>
         <translation>Fehler beim Speichern</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="250"/>
+        <location filename="../src/ldraw/library.cpp" line="96"/>
         <source>reloading failed - please restart the application.</source>
         <translation>Fehler beim Neuladen - bitte starten Sie die Anwendung neu.</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="257"/>
+        <location filename="../src/ldraw/library.cpp" line="105"/>
         <source>Could not load the new parts library</source>
         <translation>Konnte die neue Teile Bibliothek nicht laden</translation>
+    </message>
+</context>
+<context>
+    <name>LDraw::RenderWidget</name>
+    <message>
+        <location filename="../src/ldraw/renderwidget.cpp" line="148"/>
+        <source>Hold left button: Rotate
+Hold right button: Move
+Mouse wheel: Zoom
+Double click: Reset camera
+Right click: Menu</source>
+        <translation>Linke Taste halten: Drehen
+Rechte Taste halten: Verschieben
+Mausrad: Vergrößern
+Doppel-Click: Kamera zurücksetzen
+Rechts-Click: Menü</translation>
     </message>
 </context>
 <context>
@@ -3951,13 +3984,13 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Konnte model.ldr nicht in der Studio ZIP Datei finden.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="184"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="189"/>
         <source>ZIP file %1 has not been opened for reading</source>
         <translation>Konnte die ZIP Datei %1 nicht zum Lesen öffnen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="189"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="242"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="194"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="247"/>
         <source>Could not locate the file %1 within the ZIP file %2.</source>
         <translation>Konnte die Datei %1 nicht in der ZIP Datei %2 finden.</translation>
     </message>
@@ -3966,38 +3999,38 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Konnte die Datei %1 nicht in der ZIP Datei %2 erreichen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="193"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="198"/>
         <source>Could not seek to the file %1 within the ZIP file %2.</source>
         <translation>Konnte die Datei %1 nicht in der ZIP Datei %2 erreichen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="197"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="202"/>
         <source>Could not get info for the file %1 within the ZIP file %2.</source>
         <translation>Konnte keine Information über die Datei %1 nicht in der ZIP Datei %2 einholen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="200"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="205"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
         <translation>Die Datei %1 in der ZIP Datei %2 ist zu gross (%2 Bytes).</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="203"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="208"/>
         <source>Could not open the file %1 within the ZIP file %2 for reading.</source>
         <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht zum Lesen öffnen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="210"/>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="234"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="215"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="239"/>
         <source>Could not read the file %1 within the ZIP file %2.</source>
         <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht lesen.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="238"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="243"/>
         <source>Could not decrypt the file %1 within the ZIP file %2.</source>
         <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht entschlüsseln.</translation>
     </message>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="247"/>
+        <location filename="../3rdparty/minizip/minizip.cpp" line="252"/>
         <source>Could not open the ZIP file %1</source>
         <translation>Konnte die ZIP Datei %1 nicht öffnen</translation>
     </message>
@@ -4186,82 +4219,82 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="599"/>
+        <location filename="../src/bricklink/order.cpp" line="598"/>
         <source>Unknown</source>
         <translation>Unknown</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="600"/>
+        <location filename="../src/bricklink/order.cpp" line="599"/>
         <source>Pending</source>
         <translation>Pending</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="601"/>
+        <location filename="../src/bricklink/order.cpp" line="600"/>
         <source>Updated</source>
         <translation>Updated</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="602"/>
+        <location filename="../src/bricklink/order.cpp" line="601"/>
         <source>Processing</source>
         <translation>Processing</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="603"/>
+        <location filename="../src/bricklink/order.cpp" line="602"/>
         <source>Ready</source>
         <translation>Ready</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="604"/>
+        <location filename="../src/bricklink/order.cpp" line="603"/>
         <source>Paid</source>
         <translation>Paid</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="605"/>
+        <location filename="../src/bricklink/order.cpp" line="604"/>
         <source>Packed</source>
         <translation>Packed</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="606"/>
+        <location filename="../src/bricklink/order.cpp" line="605"/>
         <source>Shipped</source>
         <translation>Shipped</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="607"/>
+        <location filename="../src/bricklink/order.cpp" line="606"/>
         <source>Received</source>
         <translation>Erhalten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="608"/>
+        <location filename="../src/bricklink/order.cpp" line="607"/>
         <source>Completed</source>
         <translation>Completed</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="609"/>
+        <location filename="../src/bricklink/order.cpp" line="608"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="610"/>
+        <location filename="../src/bricklink/order.cpp" line="609"/>
         <source>NPB</source>
         <translation>NPB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="611"/>
+        <location filename="../src/bricklink/order.cpp" line="610"/>
         <source>NPX</source>
         <translation>NPX</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="612"/>
+        <location filename="../src/bricklink/order.cpp" line="611"/>
         <source>NRS</source>
         <translation>NRS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="613"/>
+        <location filename="../src/bricklink/order.cpp" line="612"/>
         <source>NSS</source>
         <translation>NSS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="614"/>
+        <location filename="../src/bricklink/order.cpp" line="613"/>
         <source>Cancelled</source>
         <translation>Cancelled</translation>
     </message>
@@ -4269,17 +4302,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="184"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="185"/>
         <source>PNG Image</source>
         <translation>PNG Bild</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="186"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="187"/>
         <source>Save image as</source>
         <translation>Bild speichern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="225"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="376"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
@@ -4287,6 +4320,11 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <location filename="../src/desktop/picturewidget.cpp" line="226"/>
         <source>Copy image</source>
         <translation>Bild kopieren</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/picturewidget.cpp" line="225"/>
+        <source>3D render settings...</source>
+        <translation>3D Anzeige Einstellungen...</translation>
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="227"/>
@@ -4309,9 +4347,14 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="320"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="334"/>
         <source>Please wait... updating</source>
         <translation>Bitte warten... Aktualisierung läuft</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/picturewidget.cpp" line="376"/>
+        <source>Center view</source>
+        <translation>Ansicht zentrieren</translation>
     </message>
 </context>
 <context>
@@ -4757,9 +4800,157 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
 </context>
 <context>
+    <name>RenderSettingsDialog</name>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="14"/>
+        <source>3D Render Settings</source>
+        <translation>3D Anzeige Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="27"/>
+        <source>General</source>
+        <translation>Allgemein</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="33"/>
+        <source>Camera</source>
+        <translation>Kamera</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="40"/>
+        <source>Orthographic</source>
+        <translation>Orthografisch</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="47"/>
+        <source>Perspective</source>
+        <translation>Perspektivisch</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="75"/>
+        <source>Field of view</source>
+        <translation>Sichtfeld</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="98"/>
+        <source> °</source>
+        <translation> °</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="119"/>
+        <source>Lines</source>
+        <translation>Linien</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="126"/>
+        <source>Show</source>
+        <translation>Anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="133"/>
+        <source>Line width</source>
+        <translation>Linienbreite</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="161"/>
+        <source> px</source>
+        <translation> px</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="176"/>
+        <source>Animation</source>
+        <translation>Animation</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="204"/>
+        <source> ° / tick</source>
+        <translation> ° / tick</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="219"/>
+        <source>Debug</source>
+        <translation>Debug</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="226"/>
+        <source>Show bounding spheres</source>
+        <translation>Zeige Hüllkugeln</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="250"/>
+        <source>Lighting</source>
+        <translation>Beleuchtung</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="256"/>
+        <source>Realistic Lighting</source>
+        <translation>Realistische Beleuchtung</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="263"/>
+        <source>Ambient Occlusion</source>
+        <translation>Umgebungsverdeckung (Ambient Occlusion)</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="269"/>
+        <source>Strength</source>
+        <translation>Stärke</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="292"/>
+        <source>Softness</source>
+        <translation>Sanftheit</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="315"/>
+        <source>Distance</source>
+        <translation>Abstand</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="385"/>
+        <source>Materials</source>
+        <translation>Materialien</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="391"/>
+        <source>Reflections</source>
+        <translation>Reflektionen</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="397"/>
+        <source>Metalness</source>
+        <translation>Metalligkeit</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="404"/>
+        <source>Roughness</source>
+        <translation>Unebenheit</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="411"/>
+        <source>Plain</source>
+        <translation>Einfach</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="450"/>
+        <source>Chrome</source>
+        <translation>Chrom</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="489"/>
+        <source>Metallic</source>
+        <translation>Metallisch</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="528"/>
+        <source>Pearl</source>
+        <translation>Perlglanz</translation>
+    </message>
+</context>
+<context>
     <name>ResetDifferenceModeCmd</name>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="364"/>
+        <location filename="../src/common/documentmodel.cpp" line="358"/>
         <source>Reset difference mode base values</source>
         <translation>Differenzen zurücksetzen</translation>
     </message>
@@ -5537,8 +5728,12 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <source>Valid LDraw installation</source>
+        <translation>Gültige LDraw Installation</translation>
+    </message>
+    <message>
         <source>Valid LDraw installation, LDConfig from %1</source>
-        <translation>Gültige LDraw Installation, LDConfig vom %1</translation>
+        <translation type="vanished">Gültige LDraw Installation, LDConfig vom %1</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="815"/>
@@ -5622,7 +5817,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>SortCmd</name>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="394"/>
+        <location filename="../src/common/documentmodel.cpp" line="388"/>
         <source>Sorted the view</source>
         <translation>Ansicht sortiert</translation>
     </message>
@@ -5705,47 +5900,47 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>TaskInfoWidget</name>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="273"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="280"/>
         <source>min.</source>
         <translation>min.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="292"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="299"/>
         <source>Multiple lots selected</source>
         <translation>Mehrere Posten ausgewählt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="292"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="299"/>
         <source>Document statistics</source>
         <translation>Dokumentstatistik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="293"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="300"/>
         <source>Lots:</source>
         <translation>Posten:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="294"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="301"/>
         <source>Items:</source>
         <translation>Teile:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="295"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="302"/>
         <source>Value:</source>
         <translation>Wert:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="296"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="303"/>
         <source>Value (min.):</source>
         <translation>Wert (mind.):</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="297"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="304"/>
         <source>Cost:</source>
         <translation>Unkosten:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="298"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="305"/>
         <source>Weight:</source>
         <translation>Gewicht:</translation>
     </message>
@@ -6206,30 +6401,30 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>WelcomeWidget</name>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="388"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="389"/>
         <source>version %1 (build: %2)</source>
         <translation>Version %1 (Build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="390"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="391"/>
         <source>Using a database that was generated %1</source>
         <translation>Die aktuelle Datenbank wurde %1 generiert</translation>
     </message>
     <message>
         <location filename="../src/mobile/Main.qml" line="158"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="396"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="397"/>
         <source>Open recent files</source>
         <translation>Zuletzt geöffnete Dateien</translation>
     </message>
     <message>
         <location filename="../src/mobile/Main.qml" line="112"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="397"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="398"/>
         <source>Document</source>
         <translation>Dokumente</translation>
     </message>
     <message>
         <location filename="../src/mobile/Main.qml" line="120"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="398"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="399"/>
         <source>Import items</source>
         <translation>Teile importieren</translation>
     </message>
@@ -6240,7 +6435,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/mobile/Main.qml" line="177"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="403"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="404"/>
         <source>No recent files</source>
         <translation>Keine zuletzt geöffneten Dateien</translation>
     </message>

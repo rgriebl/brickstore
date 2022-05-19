@@ -422,7 +422,7 @@ void Database::read(const QString &fileName)
 void Database::write(const QString &filename, Version version) const
 {
     if (version <= Version::Invalid)
-        throw Exception(tr("Version %1 is too old").arg(int(version)));
+        throw Exception("version %1 is too old").arg(int(version));
 
     QString fn(!filename.isEmpty() ? filename : core()->dataPath() + defaultDatabaseName(version));
 
