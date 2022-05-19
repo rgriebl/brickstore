@@ -138,7 +138,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ../Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-2
 
     # Get Qt
     #################################################
@@ -149,6 +149,7 @@ jobs:
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
+        # increase the trailing number in Qt's cache key (QtCache-X) above, if you change the module list below
         modules: 'qtsvg qtquick3d qtshadertools qttools qtquicktimeline'
         arch: ${{ matrix.config.qt_arch }}
         target: ${{ matrix.config.qt_target || 'desktop' }}
@@ -161,6 +162,7 @@ jobs:
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         version: ${{ matrix.config.qt_version }}
+        # increase the trailing number in Qt's cache key (QtCache-X) above, if you change the module list below
         modules: 'qtquick3d qtshadertools qttools'
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
