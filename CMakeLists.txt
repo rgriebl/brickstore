@@ -92,12 +92,15 @@ add_compile_definitions(
     QT_MESSAGELOGCONTEXT
 )
 
-find_package(Qt6 COMPONENTS Core Gui Xml Network Concurrent LinguistTools REQUIRED)
+find_package(Qt6
+    REQUIRED Core Gui Xml Network Concurrent LinguistTools
+    OPTIONAL_COMPONENTS ToolsTools
+)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     add_compile_definitions(BS_MOBILE)
-    find_package(Qt6 COMPONENTS Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 REQUIRED)
+    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -106,12 +109,12 @@ elseif (BACKEND_ONLY)
 else()
     set(BS_DESKTOP ON)
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 COMPONENTS Widgets PrintSupport Qml Quick Quick3D ToolsTools REQUIRED)
+    find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D)
 
 endif()
 
 if (MODELTEST)
-    find_package(Qt6 COMPONENTS TestLib REQUIRED)
+    find_package(Qt6 REQUIRED TestLib)
     target_compile_definitions(${PROJECT_NAME} MODELTEST)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::TestLib)
 endif()
@@ -290,7 +293,7 @@ if (ANDROID)
     endif()
 
     # force QtSvg deployment
-    find_package(Qt6 COMPONENTS Svg REQUIRED)
+    find_package(Qt6 REQUIRED Svg)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Svg)
 endif()
 
@@ -470,3 +473,18 @@ endif()
 # we don't want the standard 'package' target
 set(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/BundleConfig.cmake" )
 include(CPack)
+
+message(STATUS "")
+message(STATUS "Configure Summary:")
+message(STATUS "  Version ........ ${VERSION}")
+message(STATUS "  Git describe.... ${GIT_VERSION}")
+message(STATUS "  Build type ..... ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Qt version ..... ${Qt6_VERSION}")
+message(STATUS "  Qt location .... ${Qt6_DIR}")
+message(STATUS "  BACKEND_ONLY ... ${BACKEND_ONLY}")
+message(STATUS "  FORCE_MOBILE ... ${FORCE_MOBILE}")
+message(STATUS "  SANITIZE ....... ${SANITIZE}")
+message(STATUS "  MODELTEST ...... ${MODELTEST}")
+message(STATUS "  SENTRY ......... ${SENTRY}")
+message(STATUS "  VCPKG_PATH ..... ${VCPKG_PATH}")
+message(STATUS "")
