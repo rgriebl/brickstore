@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#methods">Methods</a></li>
@@ -29,7 +29,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Document QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$Document-brief -->
 <p>Each instance of this type represents an open document. <a href="#details">More...</a></p>
 <!-- @@@Document -->
@@ -37,27 +36,26 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-document-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#currencyCode-prop">currencyCode</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#fileName-prop">fileName</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#lotCount-prop">lotCount</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#order-prop">order</a></b></b> : Order</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#title-prop">title</a></b></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#currencyCode-prop">currencyCode</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#fileName-prop">fileName</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#lotCount-prop">lotCount</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#order-prop">order</a></b> : Order</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#title-prop">title</a></b> : string</li>
 </ul>
-<a name="methods"></a>
 <h2 id="methods">Methods</h2>
 <ul>
-<li class="fn">int <b><b><a href="qml-brickstore-document.html#lots.add-method">lots.add</a></b></b>(Item <i>item</i>, Color <i>color</i>)</li>
-<li class="fn">Lot <b><b><a href="qml-brickstore-document.html#lots.at-method">lots.at</a></b></b>(int <i>index</i>)</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#lots.remove-method">lots.remove</a></b></b>(Lot <i>lot</i>)</li>
-<li class="fn"><b><b><a href="qml-brickstore-document.html#lots.removeAt-method">lots.removeAt</a></b></b>(int <i>index</i>)</li>
+<li class="fn">int <b><a href="qml-brickstore-document.html#lots.add-method">lots.add</a></b>(Item <i>item</i>, Color <i>color</i>)</li>
+<li class="fn">Lot <b><a href="qml-brickstore-document.html#lots.at-method">lots.at</a></b>(int <i>index</i>)</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#lots.remove-method">lots.remove</a></b>(Lot <i>lot</i>)</li>
+<li class="fn"><b><a href="qml-brickstore-document.html#lots.removeAt-method">lots.removeAt</a></b>(int <i>index</i>)</li>
 </ul>
 <!-- $$$Document-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
+<div class="admonition note">
 <p><b>Note: </b>The <i>index</i> paramter of the lot API is the index into the internal data structure and not related to any sorting or filtering in the visible document window.</p>
+</div>
 <!-- @@@Document -->
 <h2>Property Documentation</h2>
 <!-- $$$currencyCode -->
@@ -65,7 +63,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="currencyCode-prop">
 <td class="tblQmlPropNode"><p>
-<a name="currencyCode-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">currencyCode</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">currencyCode</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The ISO currency code used in this document, e.g&#x2e; <code>EUR</code>.</p>
 </div></div><!-- @@@currencyCode -->
@@ -75,7 +73,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="fileName-prop">
 <td class="tblQmlPropNode"><p>
-<a name="fileName-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">fileName</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">fileName</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The file name of this document. New and imported documents that have not been saved yet will not have fileName set.</p>
 </div></div><!-- @@@fileName -->
@@ -85,7 +83,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lotCount-prop">
 <td class="tblQmlPropNode"><p>
-<a name="lotCount-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">lotCount</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">lotCount</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The number of lots in this document.</p>
 </div></div><!-- @@@lotCount -->
@@ -95,7 +93,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="order-prop">
 <td class="tblQmlPropNode"><p>
-<a name="order-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">order</span> : <span class="type"><a href="qml-brickstore-order.html">Order</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">order</span> : <span class="type"><a href="qml-brickstore-order.html">Order</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>An Order object or <code>null</code>, if this document is not a BrickLink order.</p>
 </div></div><!-- @@@order -->
@@ -105,7 +103,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="title-prop">
 <td class="tblQmlPropNode"><p>
-<a name="title-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">title</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">title</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The title of this document. Documents loaded from files do not have titles, but documents created from online imports do. A store import would have a title like <code>Store import &lt;date&gt;</code>.</p>
 </div></div><!-- @@@title -->
@@ -116,7 +114,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lots.add-method">
 <td class="tblQmlFuncNode"><p>
-<a name="lots.add-method"></a><span class="type">int</span> <span class="name">lots.add</span>(<span class="type"><a href="qml-brickstore-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-brickstore-color.html">Color</a></span> <i>color</i>)</p></td></tr>
+<span class="type">int</span> <span class="name">lots.add</span>(<span class="type"><a href="qml-brickstore-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-brickstore-color.html">Color</a></span> <i>color</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Adds a new lot for the given <i>item</i> and <i>color</i> combination to the document. Returns the index of the newly created lot.</p>
 </div></div><!-- @@@lots.add -->
@@ -126,7 +124,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lots.at-method">
 <td class="tblQmlFuncNode"><p>
-<a name="lots.at-method"></a><span class="type"><a href="qml-brickstore-lot.html">Lot</a></span> <span class="name">lots.at</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
+<span class="type"><a href="qml-brickstore-lot.html">Lot</a></span> <span class="name">lots.at</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the lot at the specified <i>index</i>.</p>
 </div></div><!-- @@@lots.at -->
@@ -136,7 +134,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lots.remove-method">
 <td class="tblQmlFuncNode"><p>
-<a name="lots.remove-method"></a><span class="name">lots.remove</span>(<span class="type"><a href="qml-brickstore-lot.html">Lot</a></span> <i>lot</i>)</p></td></tr>
+<span class="name">lots.remove</span>(<span class="type"><a href="qml-brickstore-lot.html">Lot</a></span> <i>lot</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Removes the specified <i>lot</i> from the document.</p>
 </div></div><!-- @@@lots.remove -->
@@ -146,7 +144,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lots.removeAt-method">
 <td class="tblQmlFuncNode"><p>
-<a name="lots.removeAt-method"></a><span class="name">lots.removeAt</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
+<span class="name">lots.removeAt</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Removes the lot at the specified <i>index</i> from the document.</p>
 </div></div><!-- @@@lots.removeAt -->

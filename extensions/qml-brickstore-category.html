@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#details">Detailed Description</a></li>
@@ -28,7 +28,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Category QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$Category-brief -->
 <p>This value type represents a BrickLink item category. <a href="#details">More...</a></p>
 <!-- @@@Category -->
@@ -36,18 +35,16 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-category-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-category.html#id-prop">id</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-category.html#isNull-prop">isNull</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-category.html#name-prop">name</a></b></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-category.html#id-prop">id</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-category.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-category.html#name-prop">name</a></b> : string</li>
 </ul>
 <!-- $$$Category-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <p>Each category in the BrickLink catalog is available as a Category object.</p>
-<p>You cannot create Category objects yourself, but you can retrieve a Category object given the id via <a href="qml-brickstore-bricklink.html#category-method">BrickLink::category()</a>. Each Item also has a read-only property <a href="qml-brickstore-item.html#category-prop">Item::category</a>.</p>
+<p>You cannot create Category objects yourself, but you can retrieve a Category object given the id via <a href="qml-brickstore-bricklink.html#category-method">BrickLink::category</a>(). Each Item also has a read-only property <a href="qml-brickstore-item.html#category-prop">Item::category</a>.</p>
 <p>See <a href="https://www.bricklink.com/catalogCategory.asp">https://www.bricklink.com/catalogCategory.asp</a></p>
 <!-- @@@Category -->
 <h2>Property Documentation</h2>
@@ -56,7 +53,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="id-prop">
 <td class="tblQmlPropNode"><p>
-<a name="id-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink id of this category.</p>
 </div></div><!-- @@@id -->
@@ -66,7 +63,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isNull-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this Category is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -76,7 +73,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="name-prop">
 <td class="tblQmlPropNode"><p>
-<a name="name-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink name of this category.</p>
 </div></div><!-- @@@name -->

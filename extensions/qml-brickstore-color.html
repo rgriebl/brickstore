@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#details">Detailed Description</a></li>
@@ -28,7 +28,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Color QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$Color-brief -->
 <p>This value type represents a BrickLink color. <a href="#details">More...</a></p>
 <!-- @@@Color -->
@@ -36,30 +35,28 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-color-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#chrome-prop">chrome</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#color-prop">color</a></b></b> : color</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#glitter-prop">glitter</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#id-prop">id</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#image-prop">image</a></b></b> : image</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#isNull-prop">isNull</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#ldrawId-prop">ldrawId</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#metallic-prop">metallic</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#milky-prop">milky</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#modulex-prop">modulex</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#name-prop">name</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#popularity-prop">popularity</a></b></b> : real</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#solid-prop">solid</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#speckle-prop">speckle</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-color.html#transparent-prop">transparent</a></b></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#chrome-prop">chrome</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#color-prop">color</a></b> : color</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#glitter-prop">glitter</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#id-prop">id</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#image-prop">image</a></b> : image</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#ldrawId-prop">ldrawId</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#metallic-prop">metallic</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#milky-prop">milky</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#modulex-prop">modulex</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#name-prop">name</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#popularity-prop">popularity</a></b> : real</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#solid-prop">solid</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#speckle-prop">speckle</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-color.html#transparent-prop">transparent</a></b> : bool</li>
 </ul>
 <!-- $$$Color-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <p>Each color in the BrickLink catalog is available as a Color object.</p>
-<p>You cannot create Color objects yourself, but you can retrieve a Color object given the id via the various <a href="qml-brickstore-bricklink.html#color-method">BrickLink::color()</a> overloads and <a href="qml-brickstore-bricklink.html#colorFromLDrawId-method">BrickLink::colorFromLDrawId()</a>.</p>
+<p>You cannot create Color objects yourself, but you can retrieve a Color object given the id via the various <a href="qml-brickstore-bricklink.html#color-method">BrickLink::color</a>() overloads and <a href="qml-brickstore-bricklink.html#colorFromLDrawId-method">BrickLink::colorFromLDrawId</a>().</p>
 <p>See <a href="https://www.bricklink.com/catalogColors.asp">https://www.bricklink.com/catalogColors.asp</a></p>
 <!-- @@@Color -->
 <h2>Property Documentation</h2>
@@ -68,7 +65,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="chrome-prop">
 <td class="tblQmlPropNode"><p>
-<a name="chrome-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">chrome</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">chrome</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is chrome-like, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@chrome -->
@@ -78,7 +75,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="color-prop">
 <td class="tblQmlPropNode"><p>
-<a name="color-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">color</span> : <span class="type">color</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type">color</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the RGB value of this BrickLink color as a basic QML color type.</p>
 </div></div><!-- @@@color -->
@@ -88,7 +85,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="glitter-prop">
 <td class="tblQmlPropNode"><p>
-<a name="glitter-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">glitter</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">glitter</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is glittery, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@glitter -->
@@ -98,7 +95,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="id-prop">
 <td class="tblQmlPropNode"><p>
-<a name="id-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink id of this color.</p>
 </div></div><!-- @@@id -->
@@ -108,7 +105,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="image-prop">
 <td class="tblQmlPropNode"><p>
-<a name="image-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns a 20x20 pixel image of this color.</p>
 </div></div><!-- @@@image -->
@@ -118,7 +115,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isNull-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this Color is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -128,7 +125,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="ldrawId-prop">
 <td class="tblQmlPropNode"><p>
-<a name="ldrawId-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">ldrawId</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">ldrawId</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The LDraw id of this color, or <code>-1</code> if there is no match or if a LDraw installation isn't available.</p>
 </div></div><!-- @@@ldrawId -->
@@ -138,7 +135,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="metallic-prop">
 <td class="tblQmlPropNode"><p>
-<a name="metallic-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">metallic</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">metallic</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is metallic, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@metallic -->
@@ -148,7 +145,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="milky-prop">
 <td class="tblQmlPropNode"><p>
-<a name="milky-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">milky</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">milky</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is milky, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@milky -->
@@ -158,7 +155,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="modulex-prop">
 <td class="tblQmlPropNode"><p>
-<a name="modulex-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">modulex</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">modulex</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is a Modulex color, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@modulex -->
@@ -168,7 +165,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="name-prop">
 <td class="tblQmlPropNode"><p>
-<a name="name-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink name of this color.</p>
 </div></div><!-- @@@name -->
@@ -178,7 +175,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="popularity-prop">
 <td class="tblQmlPropNode"><p>
-<a name="popularity-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">popularity</span> : <span class="type">real</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">popularity</span> : <span class="type">real</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the popularity of this color, normalized to the range <code>[0 .. 1]</code>. The raw popularity value is derived from summing up the counts of the <i>Parts</i>, <i>In Sets</i>, <i>Wanted</i> and <i>For Sale</i> columns in the <a href="https://www.bricklink.com/catalogColors.asp">BrickLink Color Guide table</a>.</p>
 </div></div><!-- @@@popularity -->
@@ -188,7 +185,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="solid-prop">
 <td class="tblQmlPropNode"><p>
-<a name="solid-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">solid</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">solid</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is a solid color, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@solid -->
@@ -198,7 +195,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="speckle-prop">
 <td class="tblQmlPropNode"><p>
-<a name="speckle-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">speckle</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">speckle</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is speckled, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@speckle -->
@@ -208,7 +205,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="transparent-prop">
 <td class="tblQmlPropNode"><p>
-<a name="transparent-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">transparent</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">transparent</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is transparent, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@transparent -->

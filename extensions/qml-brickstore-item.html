@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#methods">Methods</a></li>
@@ -29,7 +29,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Item QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$Item-brief -->
 <p>This value type represents a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@Item -->
@@ -37,31 +36,28 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-item-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#category-prop">category</a></b></b> : Category</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#defaultColor-prop">defaultColor</a></b></b> : Color</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#hasInventory-prop">hasInventory</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#id-prop">id</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#inventoryUpdated-prop">inventoryUpdated</a></b></b> : date</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#isNull-prop">isNull</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#itemType-prop">itemType</a></b></b> : ItemType</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#knownColors-prop">knownColors</a></b></b> : list&lt;Color&gt;</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#name-prop">name</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#weight-prop">weight</a></b></b> : real</li>
-<li class="fn"><b><b><a href="qml-brickstore-item.html#yearReleased-prop">yearReleased</a></b></b> : date</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#category-prop">category</a></b> : Category</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#defaultColor-prop">defaultColor</a></b> : Color</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#hasInventory-prop">hasInventory</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#id-prop">id</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#inventoryUpdated-prop">inventoryUpdated</a></b> : date</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#itemType-prop">itemType</a></b> : ItemType</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#knownColors-prop">knownColors</a></b> : list&lt;Color&gt;</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#name-prop">name</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#weight-prop">weight</a></b> : real</li>
+<li class="fn"><b><a href="qml-brickstore-item.html#yearReleased-prop">yearReleased</a></b> : date</li>
 </ul>
-<a name="methods"></a>
 <h2 id="methods">Methods</h2>
 <ul>
-<li class="fn">bool <b><b><a href="qml-brickstore-item.html#hasKnownColor-method">hasKnownColor</a></b></b>(Color <i>color</i>)</li>
+<li class="fn">bool <b><a href="qml-brickstore-item.html#hasKnownColor-method">hasKnownColor</a></b>(Color <i>color</i>)</li>
 </ul>
 <!-- $$$Item-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <p>Each item in the BrickLink catalog is available as an Item object.</p>
-<p>You cannot create Item objects yourself, but you can retrieve an Item object given the id via <a href="qml-brickstore-bricklink.html#item-method">BrickLink::item()</a>.</p>
+<p>You cannot create Item objects yourself, but you can retrieve an Item object given the id via <a href="qml-brickstore-bricklink.html#item-method">BrickLink::item</a>().</p>
 <p>See <a href="https://www.bricklink.com/catalog.asp">https://www.bricklink.com/catalog.asp</a></p>
 <!-- @@@Item -->
 <h2>Property Documentation</h2>
@@ -70,7 +66,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="category-prop">
 <td class="tblQmlPropNode"><p>
-<a name="category-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">category</span> : <span class="type"><a href="qml-brickstore-category.html">Category</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">category</span> : <span class="type"><a href="qml-brickstore-category.html">Category</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink category of this item.</p>
 </div></div><!-- @@@category -->
@@ -80,7 +76,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="defaultColor-prop">
 <td class="tblQmlPropNode"><p>
-<a name="defaultColor-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">defaultColor</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">defaultColor</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the default color used by BrickLink to display a large picture for this item.</p>
 </div></div><!-- @@@defaultColor -->
@@ -90,7 +86,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasInventory-prop">
 <td class="tblQmlPropNode"><p>
-<a name="hasInventory-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasInventory</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">hasInventory</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if a valid inventory exists for this item, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@hasInventory -->
@@ -100,7 +96,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="id-prop">
 <td class="tblQmlPropNode"><p>
-<a name="id-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink id of this item.</p>
 </div></div><!-- @@@id -->
@@ -110,7 +106,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="inventoryUpdated-prop">
 <td class="tblQmlPropNode"><p>
-<a name="inventoryUpdated-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">inventoryUpdated</span> : <span class="type">date</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">inventoryUpdated</span> : <span class="type">date</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Holds the time stamp of the last successful update of the item's inventory.</p>
 </div></div><!-- @@@inventoryUpdated -->
@@ -120,7 +116,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isNull-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this Item is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -130,7 +126,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemType-prop">
 <td class="tblQmlPropNode"><p>
-<a name="itemType-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">itemType</span> : <span class="type"><a href="qml-brickstore-itemtype.html">ItemType</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">itemType</span> : <span class="type"><a href="qml-brickstore-itemtype.html">ItemType</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink item type of this item.</p>
 </div></div><!-- @@@itemType -->
@@ -140,10 +136,12 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="knownColors-prop">
 <td class="tblQmlPropNode"><p>
-<a name="knownColors-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">knownColors</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-brickstore-color.html">Color</a></span>&gt;</p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">knownColors</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-brickstore-color.html">Color</a></span>&gt;</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns a list of <a href="qml-brickstore-color.html">Color</a> objects, containing all the colors the item is known to exist in.</p>
+<div class="admonition note">
 <p><b>Note: </b>An item might still exist in more colors than returned here: BrickStore is deriving this data by looking at all the known inventories and PCCs (part-color-codes).</p>
+</div>
 </div></div><!-- @@@knownColors -->
 <br/>
 <!-- $$$name -->
@@ -151,7 +149,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="name-prop">
 <td class="tblQmlPropNode"><p>
-<a name="name-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink name of this item.</p>
 </div></div><!-- @@@name -->
@@ -161,7 +159,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="weight-prop">
 <td class="tblQmlPropNode"><p>
-<a name="weight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">weight</span> : <span class="type">real</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">weight</span> : <span class="type">real</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the weight of this item in gram.</p>
 </div></div><!-- @@@weight -->
@@ -171,7 +169,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="yearReleased-prop">
 <td class="tblQmlPropNode"><p>
-<a name="yearReleased-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">yearReleased</span> : <span class="type">date</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">yearReleased</span> : <span class="type">date</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the year this item was first released.</p>
 </div></div><!-- @@@yearReleased -->
@@ -182,7 +180,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasKnownColor-method">
 <td class="tblQmlFuncNode"><p>
-<a name="hasKnownColor-method"></a><span class="type">bool</span> <span class="name">hasKnownColor</span>(<span class="type"><a href="qml-brickstore-color.html">Color</a></span> <i>color</i>)</p></td></tr>
+<span class="type">bool</span> <span class="name">hasKnownColor</span>(<span class="type"><a href="qml-brickstore-color.html">Color</a></span> <i>color</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this item is known to exist in the given <i>color</i>, or <code>false</code> otherwise.</p>
 <p><b>See also </b><a href="qml-brickstore-item.html#knownColors-prop">knownColors</a>.</p>

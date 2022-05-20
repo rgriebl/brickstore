@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#methods">Methods</a></li>
@@ -29,7 +29,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Picture QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$Picture-brief -->
 <p>This value type represents a picture of a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@Picture -->
@@ -37,28 +36,27 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-picture-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#color-prop">color</a></b></b> : Color</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#image-prop">image</a></b></b> : image</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#isNull-prop">isNull</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#isValid-prop">isValid</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#item-prop">item</a></b></b> : Item</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#lastUpdated-prop">lastUpdated</a></b></b> : date</li>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#updateStatus-prop">updateStatus</a></b></b> : UpdateStatus</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#color-prop">color</a></b> : Color</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#image-prop">image</a></b> : image</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#isValid-prop">isValid</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#item-prop">item</a></b> : Item</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#lastUpdated-prop">lastUpdated</a></b> : date</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#updateStatus-prop">updateStatus</a></b> : UpdateStatus</li>
 </ul>
-<a name="methods"></a>
 <h2 id="methods">Methods</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-picture.html#update-method">update</a></b></b>(bool <i>highPriority</i>)</li>
+<li class="fn"><b><a href="qml-brickstore-picture.html#update-method">update</a></b>(bool <i>highPriority</i>)</li>
 </ul>
 <!-- $$$Picture-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <p>Each picture of an item in the BrickLink catalog is available as a Picture object.</p>
-<p>You cannot create Picture objects yourself, but you can retrieve a Picture object given the item and color id via <a href="qml-brickstore-bricklink.html#picture-method">BrickLink::picture()</a> or <a href="qml-brickstore-bricklink.html#largePicture-method">BrickLink::largePicture()</a>.</p>
-<p><b>Note: </b>Pictures aren't readily available, but need to be asynchronously loaded (or even downloaded) at runtime. You need to connect to the signal <a href="qml-brickstore-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated()</a> to know when the data has been loaded.</p>
+<p>You cannot create Picture objects yourself, but you can retrieve a Picture object given the item and color id via <a href="qml-brickstore-bricklink.html#picture-method">BrickLink::picture</a>() or <a href="qml-brickstore-bricklink.html#largePicture-method">BrickLink::largePicture</a>().</p>
+<div class="admonition note">
+<p><b>Note: </b>Pictures aren't readily available, but need to be asynchronously loaded (or even downloaded) at runtime. You need to connect to the signal <a href="qml-brickstore-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
+</div>
 <!-- @@@Picture -->
 <h2>Property Documentation</h2>
 <!-- $$$color -->
@@ -66,7 +64,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="color-prop">
 <td class="tblQmlPropNode"><p>
-<a name="color-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink color reference this picture is requested for.</p>
 </div></div><!-- @@@color -->
@@ -76,7 +74,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="image-prop">
 <td class="tblQmlPropNode"><p>
-<a name="image-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the image if the Picture object <a href="qml-brickstore-picture.html#isValid-prop">isValid</a>, or a null image otherwise.</p>
 </div></div><!-- @@@image -->
@@ -86,7 +84,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isNull-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this Picture is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -96,7 +94,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isValid-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isValid-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isValid</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isValid</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether the image property currently holds a valid image.</p>
 </div></div><!-- @@@isValid -->
@@ -106,7 +104,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="item-prop">
 <td class="tblQmlPropNode"><p>
-<a name="item-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-brickstore-item.html">Item</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-brickstore-item.html">Item</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink item reference this picture is requested for.</p>
 </div></div><!-- @@@item -->
@@ -116,7 +114,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="lastUpdated-prop">
 <td class="tblQmlPropNode"><p>
-<a name="lastUpdated-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">lastUpdated</span> : <span class="type">date</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">lastUpdated</span> : <span class="type">date</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Holds the time stamp of the last successful update of this picture.</p>
 </div></div><!-- @@@lastUpdated -->
@@ -126,7 +124,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="updateStatus-prop">
 <td class="tblQmlPropNode"><p>
-<a name="updateStatus-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">updateStatus</span> : <span class="type">UpdateStatus</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">updateStatus</span> : <span class="type">UpdateStatus</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns the current update status. The available values are:</p>
 <div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
@@ -143,7 +141,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="update-method">
 <td class="tblQmlFuncNode"><p>
-<a name="update-method"></a><span class="name">update</span>(<span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+<span class="name">update</span>(<span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Tries to re-download the picture from the BrickLink server. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended.</p>
 </div></div><!-- @@@update -->

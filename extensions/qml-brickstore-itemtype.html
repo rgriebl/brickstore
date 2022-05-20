@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#details">Detailed Description</a></li>
@@ -28,7 +28,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">ItemType QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$ItemType-brief -->
 <p>This value type represents a BrickLink item type. <a href="#details">More...</a></p>
 <!-- @@@ItemType -->
@@ -36,24 +35,22 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-itemtype-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#categories-prop">categories</a></b></b> : list&lt;Category&gt;</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#hasColors-prop">hasColors</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#hasInventories-prop">hasInventories</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#hasSubConditions-prop">hasSubConditions</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#hasWeight-prop">hasWeight</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#id-prop">id</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#isNull-prop">isNull</a></b></b> : bool</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#name-prop">name</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-itemtype.html#pictureSize-prop">pictureSize</a></b></b> : size</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#categories-prop">categories</a></b> : list&lt;Category&gt;</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#hasColors-prop">hasColors</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#hasInventories-prop">hasInventories</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#hasSubConditions-prop">hasSubConditions</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#hasWeight-prop">hasWeight</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#id-prop">id</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#name-prop">name</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-itemtype.html#pictureSize-prop">pictureSize</a></b> : size</li>
 </ul>
 <!-- $$$ItemType-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <p>Each item type in the BrickLink catalog is available as an ItemType object.</p>
-<p>You cannot create ItemType objects yourself, but you can retrieve an ItemType object given the id via <a href="qml-brickstore-bricklink.html#itemType-method">BrickLink::itemType()</a>. Each Item also has a read-only property <a href="qml-brickstore-item.html#itemType-prop">Item::itemType</a>.</p>
+<p>You cannot create ItemType objects yourself, but you can retrieve an ItemType object given the id via <a href="qml-brickstore-bricklink.html#itemType-method">BrickLink::itemType</a>(). Each Item also has a read-only property <a href="qml-brickstore-item.html#itemType-prop">Item::itemType</a>.</p>
 <p>The currently available item types are</p>
 <div class="table"><table class="generic">
  <thead><tr class="qt-style"><th >Id</th><th >Name</th></tr></thead>
@@ -73,7 +70,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="categories-prop">
 <td class="tblQmlPropNode"><p>
-<a name="categories-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">categories</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-brickstore-category.html">Category</a></span>&gt;</p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">categories</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-brickstore-category.html">Category</a></span>&gt;</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>A list of <a href="qml-brickstore-category.html">Category</a> objects describing all the categories that are referencing at least one item of the given item type.</p>
 </div></div><!-- @@@categories -->
@@ -83,7 +80,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasColors-prop">
 <td class="tblQmlPropNode"><p>
-<a name="hasColors-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasColors</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">hasColors</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if items under this type can have colors, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@hasColors -->
@@ -93,7 +90,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasInventories-prop">
 <td class="tblQmlPropNode"><p>
-<a name="hasInventories-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasInventories</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">hasInventories</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if items under this type can have inventories, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@hasInventories -->
@@ -103,7 +100,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasSubConditions-prop">
 <td class="tblQmlPropNode"><p>
-<a name="hasSubConditions-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasSubConditions</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">hasSubConditions</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if items under this type can have sub-conditions, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@hasSubConditions -->
@@ -113,7 +110,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="hasWeight-prop">
 <td class="tblQmlPropNode"><p>
-<a name="hasWeight-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">hasWeight</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">hasWeight</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if items under this type can have weights, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@hasWeight -->
@@ -123,7 +120,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="id-prop">
 <td class="tblQmlPropNode"><p>
-<a name="id-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">id</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink id of this item type.</p>
 </div></div><!-- @@@id -->
@@ -133,7 +130,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<a name="isNull-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this <a href="qml-brickstore-itemtype.html">ItemType</a> is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -143,7 +140,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="name-prop">
 <td class="tblQmlPropNode"><p>
-<a name="name-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink name of this item type.</p>
 </div></div><!-- @@@name -->
@@ -153,7 +150,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="pictureSize-prop">
 <td class="tblQmlPropNode"><p>
-<a name="pictureSize-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">pictureSize</span> : <span class="type">size</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">pictureSize</span> : <span class="type">size</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The default size and aspect ratio for item pictures of this type.</p>
 </div></div><!-- @@@pictureSize -->

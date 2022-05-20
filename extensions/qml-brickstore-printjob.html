@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#methods">Methods</a></li>
@@ -29,7 +29,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">PrintJob QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$PrintJob-brief -->
 <p>An instance of this type represents an active print job. <a href="#details">More...</a></p>
 <!-- @@@PrintJob -->
@@ -37,21 +36,18 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-printjob-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-printjob.html#pageCount-prop">pageCount</a></b></b> : int</li>
-<li class="fn"><b><b><a href="qml-brickstore-printjob.html#paperSize-prop">paperSize</a></b></b> : size</li>
+<li class="fn"><b><a href="qml-brickstore-printjob.html#pageCount-prop">pageCount</a></b> : int</li>
+<li class="fn"><b><a href="qml-brickstore-printjob.html#paperSize-prop">paperSize</a></b> : size</li>
 </ul>
-<a name="methods"></a>
 <h2 id="methods">Methods</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-printjob.html#abort-method">abort</a></b></b>()</li>
-<li class="fn">PrintPage <b><b><a href="qml-brickstore-printjob.html#addPage-method">addPage</a></b></b>()</li>
-<li class="fn">PrintPage <b><b><a href="qml-brickstore-printjob.html#getPage-method">getPage</a></b></b>(int <i>index</i>)</li>
+<li class="fn"><b><a href="qml-brickstore-printjob.html#abort-method">abort</a></b>()</li>
+<li class="fn">PrintPage <b><a href="qml-brickstore-printjob.html#addPage-method">addPage</a></b>()</li>
+<li class="fn">PrintPage <b><a href="qml-brickstore-printjob.html#getPage-method">getPage</a></b>(int <i>index</i>)</li>
 </ul>
 <!-- $$$PrintJob-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <!-- @@@PrintJob -->
 <h2>Property Documentation</h2>
@@ -60,7 +56,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="pageCount-prop">
 <td class="tblQmlPropNode"><p>
-<a name="pageCount-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">pageCount</span> : <span class="type">int</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">pageCount</span> : <span class="type">int</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The number of pages added to this print job.</p>
 </div></div><!-- @@@pageCount -->
@@ -70,7 +66,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="paperSize-prop">
 <td class="tblQmlPropNode"><p>
-<a name="paperSize-prop"></a><span class="qmlreadonly">[read-only] </span><span class="name">paperSize</span> : <span class="type">size</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">paperSize</span> : <span class="type">size</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The paper size of a page in <code>mm</code>.</p>
 </div></div><!-- @@@paperSize -->
@@ -81,10 +77,12 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="abort-method">
 <td class="tblQmlFuncNode"><p>
-<a name="abort-method"></a><span class="name">abort</span>()</p></td></tr>
+<span class="name">abort</span>()</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Request this print job to be aborted.</p>
+<div class="admonition note">
 <p><b>Note: </b>Control will return back to the next JavaScript statement and you still have to return normally from your extension's PrintingScriptAction::printFunction() function.</p>
+</div>
 </div></div><!-- @@@abort -->
 <br/>
 <!-- $$$addPage[overload1]$$$addPage -->
@@ -92,7 +90,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="addPage-method">
 <td class="tblQmlFuncNode"><p>
-<a name="addPage-method"></a><span class="type"><a href="qml-brickstore-printpage.html">PrintPage</a></span> <span class="name">addPage</span>()</p></td></tr>
+<span class="type"><a href="qml-brickstore-printpage.html">PrintPage</a></span> <span class="name">addPage</span>()</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Calling this function adds a new <a href="qml-brickstore-printpage.html">PrintPage</a> to the print job and returns a reference to it for painting.</p>
 </div></div><!-- @@@addPage -->
@@ -102,7 +100,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="getPage-method">
 <td class="tblQmlFuncNode"><p>
-<a name="getPage-method"></a><span class="type"><a href="qml-brickstore-printpage.html">PrintPage</a></span> <span class="name">getPage</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
+<span class="type"><a href="qml-brickstore-printpage.html">PrintPage</a></span> <span class="name">getPage</span>(<span class="type">int</span> <i>index</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns a reference to an already added <a href="qml-brickstore-printpage.html">PrintPage</a> at <i>index</i> or <code>null</code> if the index is invalid.</p>
 </div></div><!-- @@@getPage -->

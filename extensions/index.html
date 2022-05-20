@@ -20,20 +20,16 @@
         <div class="content mainContent">
 <div class="context">
 <h1 class="title">BrickStore Extensions Documentation</h1>
-<span class="subtitle"></span>
 <!-- $$$index.html-description -->
-<div class="descr"> <a name="details"></a>
+<div class="descr" id="details">
 <p>BrickStore can be extended via JavaScript/QML based extensions.</p>
 <p>The QML <a href="qml-brickstore-brickstore.html">BrickStore</a> module provides the necessary types for scripting extension in the desktop version (as well as for creating complete mobile user interfaces).</p>
-<a name="installation"></a>
 <h2 id="installation">Installation</h2>
 <p>Installing an extension from a file, so that it can be used by BrickStore is covered here:</p>
 <p><a href="installation.html">BrickStore Extension Installation</a></p>
-<a name="porting-old-scripts"></a>
 <h2 id="porting-old-scripts">Porting old Scripts</h2>
 <p>Print scripts from old BrickStore (or BrickStock) versions are not compatible anymore and need to be ported manually. You can find a porting guide here:</p>
 <p><a href="porting.html">Porting old BrickStore and BrickStock Print Scripts</a></p>
-<a name="writing-extensions"></a>
 <h2 id="writing-extensions">Writing Extensions</h2>
 <p>Your best bet is to start by cloning an existing extension to get all the needed boiler plate code.</p>
 <p>Extensions are based on <a href="https://doc.qt.io/qt-5/qmlreference.html">QML</a> and JavaScript. These QML types can be imported into your application or extension using the following import statement in your <code>.qml</code> file:</p>
@@ -64,7 +60,6 @@
 <tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-printjob.html">PrintJob</a></p></td><td class="tblDescr"><p>An instance of this type represents an active print job</p></td></tr>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-printpage.html">PrintPage</a></p></td><td class="tblDescr"><p>An instance of this type represents the canvas of a printer page</p></td></tr>
 </table></div>
-<a name="debugging"></a>
 <h2 id="debugging">Debugging</h2>
 <p>The JavaScript environment is very similiar to a web browser, so any <code>console.log()</code> calls end up in BrickStore's error log, which is available via the <code>View</code> &gt; <code>View info docks</code> menu.</p>
 <p>If you throw an <code>Error</code> object, the script execution will terminate and the <code>message</code> property of the thrown object will be shown to the user in a message box.</p>

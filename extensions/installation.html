@@ -21,9 +21,8 @@
 <div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">BrickStore Extension Installation</h1>
-<span class="subtitle"></span>
 <!-- $$$installation.html-description -->
-<div class="descr"> <a name="details"></a>
+<div class="descr" id="details">
 <p>BrickStore can be extended via JavaScript/QML based extensions.</p>
 <p><a href="https://github.com/rgriebl/brickstore/blob/main/extensions/">Click for a full list of all available extension in the BrickStore repository.</a></p>
 <p>Although the BrickStore repository itself already contains a few user provided scripts, only these scripts are bundled in an official BrickStore release.</p>
@@ -41,7 +40,9 @@
 </table></div>
 <p>BrickStore will now pick up all the scripts it finds in these directories when starting up. You can also dynamically reload the scripts while it is running via <code>Extras</code> &gt; <code>Reload user scripts</code>.</p>
 <p>If your script doesn't show up in the <code>Extras</code> (or context) menu, then most likely it has JavaScript syntax errors. Enable the <code>Error log</code> via the <code>View</code> &gt; <code>View info docks</code> menu.</p>
+<div class="admonition note">
 <p><b>Note: </b>All script files have to have the file extensions <code>.bs.qml</code></p>
+</div>
 </div>
 <!-- @@@installation.html -->
 </div>

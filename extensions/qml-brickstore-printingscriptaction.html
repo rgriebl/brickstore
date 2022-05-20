@@ -19,7 +19,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
 <li class="level1"><a href="#details">Detailed Description</a></li>
@@ -28,7 +28,6 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">PrintingScriptAction QML Type</h1>
-<span class="subtitle"></span>
 <!-- $$$PrintingScriptAction-brief -->
 <p>Use this type to add a print action to your extension. <a href="#details">More...</a></p>
 <!-- @@@PrintingScriptAction -->
@@ -36,14 +35,12 @@
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-printingscriptaction-members.html">List of all members, including inherited members</a></li>
 </ul>
-<a name="properties"></a>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><b><a href="qml-brickstore-printingscriptaction.html#printFunction-prop">printFunction</a></b></b> : string</li>
-<li class="fn"><b><b><a href="qml-brickstore-printingscriptaction.html#text-prop">text</a></b></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-printingscriptaction.html#printFunction-prop">printFunction</a></b> : string</li>
+<li class="fn"><b><a href="qml-brickstore-printingscriptaction.html#text-prop">text</a></b> : string</li>
 </ul>
 <!-- $$$PrintingScriptAction-description -->
-<a name="details"></a>
 <h2 id="details">Detailed Description</h2>
 <!-- @@@PrintingScriptAction -->
 <h2>Property Documentation</h2>
@@ -52,7 +49,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="printFunction-prop">
 <td class="tblQmlPropNode"><p>
-<a name="printFunction-prop"></a><span class="name">printFunction</span> : <span class="type">string</span></p></td></tr>
+<span class="name">printFunction</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>This property holds a reference to the JavaScript function which should be called for printing. The function is called with three parameters: <code>(job, document, lots)</code>.</p>
 <div class="table"><table class="generic">
@@ -76,7 +73,7 @@ function printJob(job, doc, lots)
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="text-prop">
 <td class="tblQmlPropNode"><p>
-<a name="text-prop"></a><span class="name">text</span> : <span class="type">string</span></p></td></tr>
+<span class="name">text</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The user visible text of the menu entry in the <code>Extras</code> menu, that triggers the <a href="qml-brickstore-printingscriptaction.html#printFunction-prop">printFunction</a>.</p>
 </div></div><!-- @@@text -->

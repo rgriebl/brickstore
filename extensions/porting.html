@@ -20,7 +20,7 @@
         <div class="content mainContent">
 <div class="sidebar">
 <div class="toc">
-<h3><a name="toc">Contents</a></h3>
+<h3 id="toc">Contents</h3>
 <ul>
 <li class="level2"><a href="#the-simple-changes">The simple changes</a></li>
 <li class="level2"><a href="#intermediate-changes">Intermediate changes</a></li>
@@ -30,20 +30,17 @@
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
 <h1 class="title">Porting old BrickStore and BrickStock Print Scripts</h1>
-<span class="subtitle"></span>
 <!-- $$$porting.html-description -->
-<div class="descr"> <a name="details"></a>
+<div class="descr" id="details">
 <p>The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was abandoned by the industry (see <a href="https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))">Wikipedia</a>).</p>
 <p>The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers (see <a href="https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)">QML JavaScript environment</a>).</p>
 <p>Sadly JS4 did a few things differently than today's JS7, so you have to adapt your scripts: some of these required changes are just simple search-and-replace jobs, while others require you to rewrite your code a bit.</p>
-<a name="the-simple-changes"></a>
 <h3 id="the-simple-changes">The simple changes</h3>
 <ul>
 <li>Replace <code>var</code> with <code>let</code> for variable initialization</li>
 <li>Replace <code>CReportPage</code> with <code><a href="qml-brickstore-printpage.html">PrintPage</a></code></li>
 <li>Replace <code>Utility.localDateString(d)</code> with <code>Qt.formatDate(d)</code></li>
 </ul>
-<a name="intermediate-changes"></a>
 <h3 id="intermediate-changes">Intermediate changes</h3>
 <ul>
 <li>Replace the <code>load()</code> function with a new file header. Just copy the one from <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml">classic-print-script.bs.qm</a> (from the start of the file up to <code>function printJob</code>) and change the <code>name</code>, <code>author</code> and <code>version</code> fields in the <code><a href="qml-brickstore-script.html">Script</a></code> object. You can also set the text of the menu entry via the <code>text</code> property of <a href="qml-brickstore-printingscriptaction.html">PrintingScriptAction</a>.</li>
@@ -55,7 +52,6 @@
 <li>If you want to support printing just the selected lots, do not iterate over <code>doc.lots</code>, but use the <code>lots</code> parameter given to the <code>printJob</code> function.</li>
 <li>Replace <code>Money.toLocalString(m, showCurrencyCode)</code> with <code>BrickStore.toCurrencyString(m, currencyCode)</code>. The document's currencyCode is not set implicitly anymore, but needs to be retrieved via <code>doc.currencyCode</code> in the main <code>printJob()</code> function. Keep in mind to forward either <code>job</code> or the currency code to sub-routines if needed there.</li>
 </ul>
-<a name="complex-changes"></a>
 <h3 id="complex-changes">Complex changes</h3>
 <p>Font and Color objects changed a lot! The new JS engine is using the built-in Qt types for fonts and colors and these can be a bit weird, when compared to the old objects:</p>
 <ul>
