@@ -357,7 +357,9 @@ if (APPLE)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
     add_custom_target(dmg
-        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE:${PROJECT_NAME}>/../../.. -qmldir=${CMAKE_CURRENT_SOURCE_DIR}/extensions
+        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE:${PROJECT_NAME}>/../../..
+                "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
+                "-verbose=2"
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
                 "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
         COMMENT "Creating macOS DMG. Please wait..."
@@ -459,7 +461,7 @@ elseif (LINUX)
         COMMAND wget  -P "${LINUXDEPLOY_DIR}" -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
         COMMAND chmod +x "${LINUXDEPLOY_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
         COMMAND "VERSION=${VERSION}"
-                "QML_SOURCES_PATHS=\"${CMAKE_SOURCE_DIR}/extensions\""
+                "QML_SOURCES_PATHS=\"${CMAKE_SOURCE_DIR}\""
                 "EXTRA_QT_PLUGINS=\"svg\""
                 ${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage "--appdir=${APPIMAGE_DIR}"
                     -e "${CMAKE_BINARY_DIR}/bin/brickstore"
