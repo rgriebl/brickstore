@@ -27,9 +27,6 @@ class TransferJob;
 
 namespace BrickLink {
 
-class Item;
-class Color;
-
 class Picture : public QObject, protected Ref
 {
     Q_OBJECT

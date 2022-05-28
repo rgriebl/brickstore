@@ -23,9 +23,6 @@ class TransferJob;
 
 namespace BrickLink {
 
-class Item;
-class Color;
-
 class PriceGuide : public QObject, public Ref
 {
     Q_OBJECT

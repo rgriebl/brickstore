@@ -28,6 +28,7 @@
 
 #include "bricklink/global.h"
 #include "bricklink/database.h"
+#include "bricklink/lot.h"
 #include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
@@ -38,16 +39,8 @@ class TransferJob;
 
 namespace BrickLink {
 
-class Lot;
-class Incomplete;
-class Store;
-class Orders;
-class Carts;
-class Database;
-class PriceGuide;
-class Picture;
-class WantedLists;
 class QmlBrickLink;
+
 
 class Core : public QObject
 {
@@ -208,91 +201,4 @@ private:
 inline Core *core() { return Core::inst(); }
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 
-
-
-class QmlBrickLink : public QObject
-{
-    Q_OBJECT
-    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
-    Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
-
-    Q_PROPERTY(QmlItem noItem READ noItem CONSTANT)
-    Q_PROPERTY(QmlColor noColor READ noColor CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Store *store READ store CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Orders *orders READ orders CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Carts *carts READ carts CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Database *database READ database CONSTANT)
-
-public:
-    static void registerTypes();
-
-    QmlBrickLink(BrickLink::Core *core);
-
-    // copied from namespace BrickLink
-    enum class Time          { PastSix, Current };
-    enum class Price         { Lowest, Average, WAverage, Highest };
-    enum class Condition     { New, Used };
-    enum class SubCondition  { None, Complete, Incomplete, Sealed };
-    enum class Stockroom     { None, A, B, C };
-    enum class Status        { Include, Exclude, Extra };
-    enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
-
-    enum class OrderType     { Received, Placed, Any };
-    enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
-                               Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
-
-    Q_ENUM(Time)
-    Q_ENUM(Price)
-    Q_ENUM(Condition)
-    Q_ENUM(SubCondition)
-    Q_ENUM(Stockroom)
-    Q_ENUM(Status)
-    Q_ENUM(UpdateStatus)
-    Q_ENUM(OrderType)
-    Q_ENUM(OrderStatus)
-
-    QmlItem noItem() const;
-    QmlColor noColor() const;
-
-    Q_INVOKABLE QImage noImage(int width, int height) const;
-
-    Q_INVOKABLE QmlColor color(const QVariant &v) const;
-    Q_INVOKABLE QmlColor colorFromLDrawId(int ldrawId) const;
-    Q_INVOKABLE QmlCategory category(const QVariant &v) const;
-    Q_INVOKABLE QmlItemType itemType(const QVariant &v) const;
-    Q_INVOKABLE QmlItem item(const QVariant &v) const;
-    Q_INVOKABLE QmlItem item(const QString &itemTypeId, const QString &itemId) const;
-
-    Q_INVOKABLE BrickLink::PriceGuide *priceGuide(QmlItem item, QmlColor color, bool highPriority = false);
-
-    Q_INVOKABLE BrickLink::Picture *picture(QmlItem item, QmlColor color, bool highPriority = false);
-    Q_INVOKABLE BrickLink::Picture *largePicture(QmlItem item, bool highPriority = false);
-
-    Q_INVOKABLE QmlLot lot(const QVariant &v) const;
-
-    Q_INVOKABLE void cacheStat() const;
-
-    Q_INVOKABLE QString itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const;
-
-signals:
-    void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);
-    void pictureUpdated(BrickLink::Picture *picture);
-
-private:
-    static char firstCharInString(const QString &str);
-
-    static QmlBrickLink *s_inst;
-    BrickLink::Core *d;
-};
-
 } // namespace BrickLink
-
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Time)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Price)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Condition)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Stockroom)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Status)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::UpdateStatus)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::OrderType)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink *)

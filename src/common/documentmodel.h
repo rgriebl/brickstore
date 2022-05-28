@@ -37,11 +37,6 @@ class ChangeCmd;
 using BrickLink::Lot;
 using BrickLink::LotList;
 
-namespace BrickLink {
-class Picture;
-class PriceGuide;
-}
-
 class DocumentStatistics
 {
     Q_GADGET

@@ -30,9 +30,6 @@ class TransferJob;
 
 namespace BrickLink {
 
-class Core;
-
-
 class Database : public QObject
 {
     Q_OBJECT

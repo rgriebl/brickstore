@@ -20,6 +20,7 @@
 #include "ldraw/rendergeometry.h"
 #include "bricklink/color.h"
 #include "bricklink/item.h"
+#include "bricklink/qmlapi.h"
 
 QT_FORWARD_DECLARE_CLASS(QQuick3DTextureData)
 

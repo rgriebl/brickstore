@@ -6,7 +6,6 @@ target_sources(${PROJECT_NAME} PUBLIC
     main.cpp
     version.h.in
 
-    bricklink/category.cpp
     bricklink/category.h
     bricklink/changelogentry.cpp
     bricklink/changelogentry.h
@@ -83,7 +82,8 @@ if (BS_DESKTOP OR BS_MOBILE)
         bricklink/model.h
         bricklink/order.cpp
         bricklink/order.h
-        bricklink/qmlwrapperbase.h
+        bricklink/qmlapi.cpp
+        bricklink/qmlapi.h
         bricklink/store.cpp
         bricklink/store.h
         bricklink/wantedlist.cpp

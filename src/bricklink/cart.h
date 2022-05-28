@@ -162,7 +162,6 @@ private:
     friend class Core;
 };
 
-
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::Cart *)
