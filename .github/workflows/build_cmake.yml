@@ -3,7 +3,7 @@ name: CMake Build Matrix
 env:
   BUILD_NUMBER: ${{ github.run_number }}
   BRICKSTORE_QT6_MODULES: >-
-      cmake ninja-build
+      build-essential cmake ninja-build
       libglvnd-dev libtbb-dev
       qt6-tools-dev qt6-tools-dev-tools
       qt6-l10n-tools qt6-documentation-tools

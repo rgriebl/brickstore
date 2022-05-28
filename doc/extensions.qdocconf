@@ -12,6 +12,8 @@ headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
 examples.fileextensions = "*.cpp *.h *.qml *.yaml"
 examples.imageextensions = "*.png *.jpg *.svg"
 
+includepaths = -I . -I ../src
+
 headerdirs += \
     ../src/qmlapi/ \
     ../src/bricklink/ \
