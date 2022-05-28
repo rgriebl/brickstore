@@ -19,9 +19,12 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
-#include "global.h"
+#include "bricklink/qmlwrapperbase.h"
+
 
 namespace BrickLink {
+
+class Category;
 
 class ItemType
 {
@@ -63,6 +66,31 @@ private:
     friend class TextImport;
 };
 
+
+class QmlItemType : public QmlWrapperBase<const ItemType>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PROPERTY(QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+    Q_PROPERTY(QVariantList categories READ categories CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasInventories READ hasInventories CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasColors READ hasColors CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasWeight READ hasWeight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasSubConditions READ hasSubConditions CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QSize pictureSize READ pictureSize CONSTANT)
+
+public:
+    QmlItemType(const ItemType *itt = nullptr);
+
+    QString id() const;
+    QVariantList categories() const;
+
+    friend class QmlBrickLink;
+};
+
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
+Q_DECLARE_METATYPE(BrickLink::QmlItemType)

@@ -458,8 +458,8 @@ void FilterCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList &list,
-                                      bool ignoreExcluded, bool ignorePriceAndQuantityErrors)
+DocumentStatistics::DocumentStatistics(const DocumentModel *model, const LotList &list,
+                                       bool ignoreExcluded, bool ignorePriceAndQuantityErrors)
 {
     m_lots = 0;
     m_items = 0;
@@ -497,7 +497,7 @@ DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList 
         auto flags = model->lotFlags(lot);
         if (flags.first) {
             if (ignorePriceAndQuantityErrors)
-                flags.first &= ((1ULL << PartNo) | (1ULL <<Color));
+                flags.first &= ((1ULL << DocumentModel::PartNo) | (1ULL << DocumentModel::Color));
             m_errors += qPopulationCount(flags.first);
         }
         if (flags.second)
@@ -509,6 +509,59 @@ DocumentModel::Statistics::Statistics(const DocumentModel *model, const LotList 
     if (weight_missing)
         m_weight = qFuzzyIsNull(m_weight) ? -std::numeric_limits<double>::min() : -m_weight;
     m_ccode = model->currencyCode();
+}
+
+QString DocumentStatistics::asHtmlTable() const
+{
+    QLocale loc;
+    QString wgtstr;
+    QString minvalstr;
+    QString valstr = Currency::toDisplayString(value());
+    bool hasMinValue = !qFuzzyCompare(value(), minValue());
+
+    if (hasMinValue)
+        minvalstr = Currency::toDisplayString(minValue());
+
+    QString coststr = Currency::toDisplayString(cost());
+    QString profitstr;
+    if (!qFuzzyIsNull(cost())) {
+        int percent = int(std::round(value() / cost() * 100. - 100.));
+        profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
+    }
+
+
+    if (qFuzzyCompare(weight(), -std::numeric_limits<double>::min())) {
+        wgtstr = "-"_l1;
+    } else {
+        double weight = m_weight;
+
+        if (weight < 0) {
+            weight = -weight;
+            wgtstr = tr("min.") % u' ';
+        }
+
+        wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
+    }
+
+    static const char *fmt =
+            "<table cellspacing=6>"
+            "<tr><td>&nbsp;&nbsp;%2 </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
+            "<tr><td>&nbsp;&nbsp;%4 </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr>"
+            "<tr></tr>"
+            "<tr><td>&nbsp;&nbsp;%6 </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td></tr>"
+            "<tr><td>&nbsp;&nbsp;%9 </td><td>&nbsp;&nbsp;%10</td><td align=right>%11</td></tr>"
+            "<tr><td>&nbsp;&nbsp;%12 </td><td>&nbsp;&nbsp;%13</td><td align=right>%14</td><td>&nbsp;&nbsp;%15</td></tr>"
+            "<tr></tr>"
+            "<tr><td>&nbsp;&nbsp;%16 </td><td colspan=2 align=right>&nbsp;&nbsp;%17</td></tr>"
+            "</table>";
+
+    return QString::fromLatin1(fmt).arg(
+                tr("Lots:"), loc.toString(lots()),
+                tr("Items:"), loc.toString(items()),
+                tr("Value:"), m_ccode, valstr).arg(
+                hasMinValue ? tr("Value (min.):") : QString(), hasMinValue ? m_ccode : QString(), minvalstr,
+                tr("Cost:"), m_ccode, coststr, profitstr,
+                tr("Weight:"), wgtstr);
 }
 
 
@@ -653,10 +706,10 @@ const LotList &DocumentModel::filteredLots() const
     return m_filteredLots;
 }
 
-DocumentModel::Statistics DocumentModel::statistics(const LotList &list, bool ignoreExcluded,
-                                                    bool ignorePriceAndQuantityErrors) const
+DocumentStatistics DocumentModel::statistics(const LotList &list, bool ignoreExcluded,
+                                             bool ignorePriceAndQuantityErrors) const
 {
-    return Statistics(this, list, ignoreExcluded, ignorePriceAndQuantityErrors);
+    return DocumentStatistics(this, list, ignoreExcluded, ignorePriceAndQuantityErrors);
 }
 
 void DocumentModel::beginMacro(const QString &label)

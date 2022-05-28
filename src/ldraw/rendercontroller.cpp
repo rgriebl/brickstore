@@ -35,7 +35,7 @@ RenderController::RenderController(QObject *parent)
     : QObject(parent)
     , m_lineGeo(new QQuick3DGeometry())
     , m_lines(new QmlRenderLineInstancing())
-    , m_clearColor(Qt::transparent)
+    , m_clearColor(Qt::white)
 {
     static const float lineGeo[] = {
         0, -0.5, 0,
@@ -60,6 +60,8 @@ RenderController::~RenderController()
         delete geo;
     delete m_lines;
     delete m_lineGeo;
+    if (m_part)
+        m_part->release();
 }
 
 QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
@@ -121,6 +123,15 @@ QQuick3DGeometry *RenderController::lineGeometry()
 QQuick3DInstancing *RenderController::lines()
 {
     return m_lines;
+}
+
+void RenderController::setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
+{
+    const BrickLink::Item *i = item.wrappedObject();
+    const BrickLink::Color *c = color.wrappedObject();
+
+    Part *part = i ? LDraw::library()->partFromId(i->id()) : nullptr;
+    setPartAndColor(part, c);
 }
 
 void RenderController::setPartAndColor(Part *part, int ldrawColorId)

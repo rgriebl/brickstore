@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import BrickStore
+import "./uihelpers" as UIHelpers
 
 Page {
     id: root
@@ -44,9 +45,13 @@ Page {
             width: ListView.view.width
             text: model.date + " " + model.store
             onClicked: {
-                BrickStore.importBrickLinkCart(model.cart)
+                BrickLink.carts.startFetchLots(model.cart)
+                // initBrickLink in application.cpp reacts on fetchLotsFinished() and opens the documents
                 goBackFunction()
             }
         }
+    }
+    Component.onCompleted: {
+        Qt.callLater(function() { BrickLink.carts.startUpdate() })
     }
 }

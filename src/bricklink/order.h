@@ -18,8 +18,8 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QAbstractTableModel>
 
-#include "lot.h"
-#include "global.h"
+#include "bricklink/lot.h"
+#include "bricklink/global.h"
 
 QT_FORWARD_DECLARE_CLASS(QSaveFile)
 

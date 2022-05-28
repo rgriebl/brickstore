@@ -22,6 +22,8 @@ QT_FORWARD_DECLARE_CLASS(QTimer)
 class StaticPointerModel : public QAbstractItemModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool isFiltered READ isFiltered NOTIFY isFilteredChanged)
+
 public:
     StaticPointerModel(QObject *parent);
 
@@ -42,6 +44,9 @@ public:
 public slots:
     void invalidateFilter();
     void invalidateFilterNow();
+
+signals:
+    void isFilteredChanged();
 
 protected:
     virtual int pointerCount() const = 0;

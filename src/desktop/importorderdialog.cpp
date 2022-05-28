@@ -133,7 +133,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
         for (const auto &idx : selection) {
             auto order = idx.data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
             QByteArray orderId = order->id().toLatin1();
-            BrickLink::core()->openUrl(BrickLink::URL_OrderDetails, orderId.constData());
+            BrickLink::core()->openUrl(BrickLink::Url::OrderDetails, orderId.constData());
         }
     });
     m_contextMenu->addAction(m_showOnBrickLink);

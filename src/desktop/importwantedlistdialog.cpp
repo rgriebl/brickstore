@@ -226,7 +226,7 @@ void ImportWantedListDialog::showWantedListsOnBrickLink()
     for (auto idx : selection) {
         auto wantedList = idx.data(BrickLink::WantedLists::WantedListPointerRole).value<BrickLink::WantedList *>();
         int id = wantedList->id();
-        BrickLink::core()->openUrl(BrickLink::URL_WantedList, &id);
+        BrickLink::core()->openUrl(BrickLink::Url::WantedList, &id);
     }
 }
 

@@ -17,6 +17,7 @@
 #include <QtCore/QSysInfo>
 #include <QtCore/QStringBuilder>
 #include <QtCore/QTimer>
+#include <QtCore/QLoggingCategory>
 #include <QtNetwork/QNetworkProxyFactory>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QFont>
@@ -26,9 +27,11 @@
 #include <QtGui/QImageReader>
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
+#include <QtQml/QQmlApplicationEngine>
 
 #include "bricklink/core.h"
 #include "bricklink/store.h"
+#include "bricklink/cart.h"
 #include "common/actionmanager.h"
 #include "common/announcements.h"
 #include "common/application.h"
@@ -40,6 +43,7 @@
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
 #include "ldraw/library.h"
+#include "qmlapi/brickstore_wrapper.h"
 #include "utility/currency.h"
 #include "utility/eventfilter.h"
 #include "utility/exception.h"
@@ -67,6 +71,8 @@ Q_IMPORT_PLUGIN(qgif)
 #endif
 
 using namespace std::chrono_literals;
+
+Q_LOGGING_CATEGORY(LogQml, "qml")
 
 
 Application *Application::s_inst = nullptr;
@@ -161,6 +167,8 @@ void Application::init()
     connect(this, &Application::languageChanged,
             am, &ActionManager::retranslate);
     am->retranslate();
+
+    setupQml();
 }
 
 void Application::afterInit()
@@ -201,15 +209,15 @@ void Application::afterInit()
         { "help_extensions", [](auto) {
               QString url = "https://"_l1 % Application::inst()->gitHubPagesUrl() % "/extensions/"_l1;
               QDesktopServices::openUrl(url);
-        } },
+          } },
         { "help_reportbug", [](auto) {
               QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
               QDesktopServices::openUrl(url);
-        } },
+          } },
         { "help_releasenotes", [](auto) {
               QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/releases"_l1;
               QDesktopServices::openUrl(url);
-        } },
+          } },
         { "help_announcements", [](auto) {
               QString url = Application::inst()->announcements()->announcementsWikiUrl();
               QDesktopServices::openUrl(url);
@@ -714,8 +722,74 @@ bool Application::initBrickLink(QString *errString)
         } catch (const Exception &) {
             // this is not a critical error, but expected on the first run, so just ignore it
         }
+        connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
+                this, [](BrickLink::Cart *cart, bool success, const QString &message) {
+            Q_ASSERT(cart);
+
+            if (!success) {
+                UIHelpers::warning(message);
+            } else {
+                DocumentIO::importBrickLinkCart(cart);
+
+                if (!message.isEmpty())
+                    UIHelpers::information(message);
+            }
+        });
     }
     return bl;
+}
+
+void Application::setupQml()
+{
+    m_engine = new QQmlApplicationEngine(this);
+    redirectQmlEngineWarnings(LogQml());
+
+    connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
+            m_engine, &QQmlEngine::collectGarbage);
+
+    connect(this, &Application::languageChanged,
+            m_engine, &QQmlEngine::retranslate);
+
+    BrickLink::QmlBrickLink::registerTypes();
+
+    QString cannotCreate = "Cannot create this type"_l1;
+
+    qmlRegisterUncreatableType<QmlDocumentLots>("BrickStore", 1, 0, "Lots", cannotCreate);
+
+    QmlBrickStore::registerTypes();
+    LDraw::registerQmlTypes();
+
+    QQmlEngine::setObjectOwnership(ActionManager::inst(), QQmlEngine::CppOwnership);
+    qmlRegisterSingletonType<ActionManager>("BrickStore", 1, 0, "ActionManager",
+                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
+        return ActionManager::inst();
+    });
+}
+
+void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)
+{
+    m_engine->setOutputWarningsToStandardError(false);
+
+    QObject::connect(m_engine, &QQmlEngine::warnings,
+                     qApp, [&cat](const QList<QQmlError> &list) {
+        if (!cat.isWarningEnabled())
+            return;
+
+        for (auto &err : list) {
+            QByteArray func;
+            if (err.object())
+                func = err.object()->objectName().toLocal8Bit();
+            QByteArray file;
+            if (err.url().scheme() == QLatin1String("file"))
+                file = err.url().toLocalFile().toLocal8Bit();
+            else
+                file = err.url().toDisplayString().toLocal8Bit();
+
+            QMessageLogger ml(file, err.line(), func, cat.categoryName());
+            ml.warning().nospace().noquote() << err.description();
+        }
+    });
+
 }
 
 #include "moc_application.cpp"

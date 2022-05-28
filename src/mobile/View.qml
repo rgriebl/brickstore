@@ -222,7 +222,7 @@ Page {
                                 bottom: parent.bottom
                             }
                             width: parent.font.pixelSize * 2
-                            image: BrickLink.color(parent.display).image
+                            image: BrickLink.color(parent.display).image(width, height)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display

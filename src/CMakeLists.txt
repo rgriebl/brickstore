@@ -83,6 +83,7 @@ if (BS_DESKTOP OR BS_MOBILE)
         bricklink/model.h
         bricklink/order.cpp
         bricklink/order.h
+        bricklink/qmlwrapperbase.h
         bricklink/store.cpp
         bricklink/store.h
         bricklink/wantedlist.cpp
@@ -123,12 +124,8 @@ if (BS_DESKTOP OR BS_MOBILE)
         ldraw/rendersettings.cpp
         ldraw/rendersettings.h
 
-        qmlapi/bricklink_wrapper.cpp
-        qmlapi/bricklink_wrapper.h
         qmlapi/brickstore_wrapper.cpp
         qmlapi/brickstore_wrapper.h
-        qmlapi/common.cpp
-        qmlapi/common.h
 
         utility/currency.cpp
         utility/currency.h
@@ -315,6 +312,8 @@ if (BS_MOBILE)
         mobile/mobileapplication.h
         mobile/mobileuihelpers.cpp
         mobile/mobileuihelpers.h
+        mobile/qmlimageitem.cpp
+        mobile/qmlimageitem.h
     )
 
     set(QML_FILES

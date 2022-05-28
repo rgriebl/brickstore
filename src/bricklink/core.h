@@ -38,8 +38,16 @@ class TransferJob;
 
 namespace BrickLink {
 
+class Lot;
 class Incomplete;
-
+class Store;
+class Orders;
+class Carts;
+class Database;
+class PriceGuide;
+class Picture;
+class WantedLists;
+class QmlBrickLink;
 
 class Core : public QObject
 {
@@ -48,7 +56,7 @@ class Core : public QObject
 public:
     ~Core() override;
 
-    void openUrl(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
+    void openUrl(Url u, const void *opt = nullptr, const void *opt2 = nullptr);
 
     QString dataPath() const;
     QFile *dataReadFile(QStringView fileName, const Item *item,
@@ -77,8 +85,6 @@ public:
 
     const QImage noImage(const QSize &s) const;
 
-    const QImage colorImage(const Color *col, int w, int h) const;
-
     const Color *color(uint id) const;
     const Color *colorFromName(const QString &name) const;
     const Color *colorFromLDrawId(int ldrawId) const;
@@ -95,8 +101,8 @@ public:
     Picture *picture(const Item *item, const Color *color, bool highPriority = false);
     Picture *largePicture(const Item *item, bool highPriority = false);
 
-    qreal itemImageScaleFactor() const;
-    void setItemImageScaleFactor(qreal f);
+    double itemImageScaleFactor() const;
+    void setItemImageScaleFactor(double f);
 
     bool applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc);
 
@@ -104,7 +110,7 @@ public:
 
     QString countryIdFromName(const QString &name) const;
 
-    TransferJob *downloadDatabase(const QUrl &url = { }, const QString &filename = { });
+    static QString itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight);
 
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot);
@@ -118,7 +124,7 @@ public slots:
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *pic);
-    void itemImageScaleFactorChanged(qreal f);
+    void itemImageScaleFactorChanged(double f);
 
     void transferProgress(int progress, int total);
     void authenticatedTransferOverallProgress(int progress, int total);
@@ -146,15 +152,11 @@ private:
 
     void updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority = false);
     void updatePicture(BrickLink::Picture *pic, bool highPriority = false);
-//    friend void PriceGuide::update(bool);
-//    friend void Picture::update(bool);
     friend class PriceGuide;
     friend class Picture;
 
     void cancelPriceGuideUpdate(BrickLink::PriceGuide *pg);
     void cancelPictureUpdate(BrickLink::Picture *pic);
-//    friend void PriceGuide::cancelUpdate();
-//    friend void Picture::cancelUpdate();
 
     static bool updateNeeded(bool valid, const QDateTime &last, int iv);
 
@@ -165,20 +167,12 @@ private slots:
     void priceGuideLoaded(BrickLink::PriceGuide *pg);
     void pictureLoaded(BrickLink::Picture *pic);
 
-    friend class PriceGuideLoaderJob;
-    friend class PictureLoaderJob;
-
-public: // semi-public for the QML wrapper
-    QPair<int, int> pictureCacheStats() const;
-    QPair<int, int> priceGuideCacheStats() const;
-
 private:
     QString  m_datadir;
     bool     m_online = false;
 
     QIcon                           m_noImageIcon;
     mutable QHash<uint, QImage>     m_noImageCache;
-    mutable QHash<uint, QImage>     m_colorImageCache;
 
     Transfer *                 m_transfer = nullptr;
     Transfer *                 m_authenticatedTransfer = nullptr;
@@ -194,17 +188,111 @@ private:
     QThreadPool                  m_diskloadPool;
     Q3Cache<quint64, Picture>    m_pic_cache;
 
-    qreal m_item_image_scale_factor = 1.;
+    double m_item_image_scale_factor = 1.;
 
     Database *m_database = nullptr;
     Store *m_store = nullptr;
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
     WantedLists *m_wantedLists = nullptr;
+
+    QPair<int, int> pictureCacheStats() const;
+    QPair<int, int> priceGuideCacheStats() const;
+
+    friend class PriceGuideLoaderJob;
+    friend class PictureLoaderJob;
+
+    friend class QmlBrickLink;
 };
 
 inline Core *core() { return Core::inst(); }
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 
+
+
+class QmlBrickLink : public QObject
+{
+    Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+    Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
+    Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
+
+    Q_PROPERTY(QmlItem noItem READ noItem CONSTANT)
+    Q_PROPERTY(QmlColor noColor READ noColor CONSTANT)
+    Q_PRIVATE_PROPERTY(d, BrickLink::Store *store READ store CONSTANT)
+    Q_PRIVATE_PROPERTY(d, BrickLink::Orders *orders READ orders CONSTANT)
+    Q_PRIVATE_PROPERTY(d, BrickLink::Carts *carts READ carts CONSTANT)
+    Q_PRIVATE_PROPERTY(d, BrickLink::Database *database READ database CONSTANT)
+
+public:
+    static void registerTypes();
+
+    QmlBrickLink(BrickLink::Core *core);
+
+    // copied from namespace BrickLink
+    enum class Time          { PastSix, Current };
+    enum class Price         { Lowest, Average, WAverage, Highest };
+    enum class Condition     { New, Used };
+    enum class SubCondition  { None, Complete, Incomplete, Sealed };
+    enum class Stockroom     { None, A, B, C };
+    enum class Status        { Include, Exclude, Extra };
+    enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
+
+    enum class OrderType     { Received, Placed, Any };
+    enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
+                               Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
+
+    Q_ENUM(Time)
+    Q_ENUM(Price)
+    Q_ENUM(Condition)
+    Q_ENUM(SubCondition)
+    Q_ENUM(Stockroom)
+    Q_ENUM(Status)
+    Q_ENUM(UpdateStatus)
+    Q_ENUM(OrderType)
+    Q_ENUM(OrderStatus)
+
+    QmlItem noItem() const;
+    QmlColor noColor() const;
+
+    Q_INVOKABLE QImage noImage(int width, int height) const;
+
+    Q_INVOKABLE QmlColor color(const QVariant &v) const;
+    Q_INVOKABLE QmlColor colorFromLDrawId(int ldrawId) const;
+    Q_INVOKABLE QmlCategory category(const QVariant &v) const;
+    Q_INVOKABLE QmlItemType itemType(const QVariant &v) const;
+    Q_INVOKABLE QmlItem item(const QVariant &v) const;
+    Q_INVOKABLE QmlItem item(const QString &itemTypeId, const QString &itemId) const;
+
+    Q_INVOKABLE BrickLink::PriceGuide *priceGuide(QmlItem item, QmlColor color, bool highPriority = false);
+
+    Q_INVOKABLE BrickLink::Picture *picture(QmlItem item, QmlColor color, bool highPriority = false);
+    Q_INVOKABLE BrickLink::Picture *largePicture(QmlItem item, bool highPriority = false);
+
+    Q_INVOKABLE QmlLot lot(const QVariant &v) const;
+
+    Q_INVOKABLE void cacheStat() const;
+
+    Q_INVOKABLE QString itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const;
+
+signals:
+    void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);
+    void pictureUpdated(BrickLink::Picture *picture);
+
+private:
+    static char firstCharInString(const QString &str);
+
+    static QmlBrickLink *s_inst;
+    BrickLink::Core *d;
+};
+
 } // namespace BrickLink
 
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Time)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Price)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Condition)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Stockroom)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::Status)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::UpdateStatus)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink::OrderType)
+Q_DECLARE_METATYPE(BrickLink::QmlBrickLink *)

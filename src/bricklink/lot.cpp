@@ -13,22 +13,26 @@
 */
 #include <QRegularExpression>
 #include <QStringBuilder>
+#include <QQmlInfo>
 
 #include "bricklink/core.h"
 #include "bricklink/lot.h"
+#include "bricklink/picture.h"
 
 
-BrickLink::Lot::Lot(const Color *color, const Item *item)
+namespace BrickLink {
+
+Lot::Lot(const Color *color, const Item *item)
     : m_item(item)
     , m_color(color)
 { }
 
-BrickLink::Lot::Lot(const Lot &copy)
+Lot::Lot(const Lot &copy)
 {
     *this = copy;
 }
 
-BrickLink::Lot &BrickLink::Lot::operator=(const Lot &copy)
+Lot &Lot::operator=(const Lot &copy)
 {
     if (this == &copy)
         return *this;
@@ -71,12 +75,12 @@ BrickLink::Lot &BrickLink::Lot::operator=(const Lot &copy)
     return *this;
 }
 
-bool BrickLink::Lot::operator!=(const Lot &cmp) const
+bool Lot::operator!=(const Lot &cmp) const
 {
     return !operator==(cmp);
 }
 
-void BrickLink::Lot::setItem(const Item *i)
+void Lot::setItem(const Item *i)
 {
     m_item = i;
 
@@ -84,7 +88,7 @@ void BrickLink::Lot::setItem(const Item *i)
         m_incomplete.reset();
 }
 
-void BrickLink::Lot::setColor(const Color *c)
+void Lot::setColor(const Color *c)
 {
     m_color = c;
 
@@ -92,7 +96,7 @@ void BrickLink::Lot::setColor(const Color *c)
         m_incomplete.reset();
 }
 
-bool BrickLink::Lot::operator==(const Lot &cmp) const
+bool Lot::operator==(const Lot &cmp) const
 {
     return (!m_incomplete && !cmp.m_incomplete)
             && (m_item             == cmp.m_item)
@@ -124,10 +128,10 @@ bool BrickLink::Lot::operator==(const Lot &cmp) const
             && (m_dateLastSold     == cmp.m_dateLastSold);
 }
 
-BrickLink::Lot::~Lot()
+Lot::~Lot()
 { }
 
-bool BrickLink::Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
+bool Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
 {
     if ((&from == this) ||
         (from.isIncomplete() || isIncomplete()) ||
@@ -207,7 +211,7 @@ bool BrickLink::Lot::mergeFrom(const Lot &from, bool useCostQtyAg)
     return true;
 }
 
-void BrickLink::Lot::save(QDataStream &ds) const
+void Lot::save(QDataStream &ds) const
 {
     ds << QByteArray("II") << qint32(4)
        << QString::fromLatin1(itemId())
@@ -224,7 +228,7 @@ void BrickLink::Lot::save(QDataStream &ds) const
        << m_dateAdded << m_dateLastSold;
 }
 
-BrickLink::Lot *BrickLink::Lot::restore(QDataStream &ds)
+Lot *Lot::restore(QDataStream &ds)
 {
     std::unique_ptr<Lot> lot;
 
@@ -291,3 +295,275 @@ BrickLink::Lot *BrickLink::Lot::restore(QDataStream &ds)
 
     return lot.release();
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+/*! \qmltype Lot
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This value type represent a lot in a document.
+
+    A Lot corresponds to a row in a BrickStore document.
+*/
+/*! \qmlproperty bool Lot::isNull
+    \readonly
+    Returns whether this Lot is \c null. Since this type is a value wrapper around a C++ object, we
+    cannot use the normal JavaScript \c null notation.
+*/
+/*! \qmlproperty Item Lot::item
+    The \l Item represented by this lot. Can be a BrickLink::noItem, if there's no item set.
+*/
+/*! \qmlproperty Color Lot::color
+    The \l Color selected for this lot. Can be BrickLink::noColor, if there's no color set.
+*/
+/*! \qmlproperty Category Lot::category
+    \readonly
+    The \l Category of the lot's item or BrickLink::noCategory, if the lot's item is not valid.
+*/
+/*! \qmlproperty ItemType Lot::itemType
+    \readonly
+    The ItemType of the lot's item or BrickLink::noItemType, if the lot's item is not valid.
+*/
+/*! \qmlproperty string Lot::itemId
+    \readonly
+    The id of the lot's item. The same as \c{item.id}, but you don't have to check for isNull on
+    \c item.
+*/
+/*! \qmlproperty string Lot::id
+    \readonly
+    Obsolete. Please use itemId instead.
+*/
+/*! \qmlproperty string Lot::itemName
+    \readonly
+    The name of the lot's item. The same as \c{item.name}, but you don't have to
+    check for isNull on \c item.
+*/
+/*! \qmlproperty string Lot::name
+    \readonly
+    Obsolete. Please use itemName instead.
+*/
+/*! \qmlproperty string Lot::colorName
+    \readonly
+    The color name of the lot's item. The same as \c{color.name}, but you don't have to check for
+    isNull on \c color.
+*/
+/*! \qmlproperty string Lot::categoryName
+    \readonly
+    The category name of the lot's item. The same as \c{item.category.name}, but you don't have to
+    check for isNull on \c item.
+*/
+/*! \qmlproperty string Lot::itemTypeName
+    \readonly
+    The item-type name of the lot's item. The same as \c{item.itemType.name}, but you don't have to
+    check for isNull on \c item.
+*/
+/*! \qmlproperty int Lot::itemYearReleased
+    \readonly
+    The year the lot's item was first released.
+*/
+
+/*! \qmlproperty Status Lot::status
+    Represents the status of this lot. The Status enumeration has these values:
+    \value BrickLink.Include   The green checkmark in the UI.
+    \value BrickLink.Exclude   The red stop sign in the UI.
+    \value BrickLink.Extra     The blue plus sign in the UI.
+*/
+/*! \qmlproperty Condition Lot::condition
+    Describes the condition of this lot. The Condition enumeration has these values:
+    \value BrickLink.New    The items in this lot are new.
+    \value BrickLink.Used   The items in this lot are used.
+*/
+/*! \qmlproperty SubCondition Lot::subCondition
+    Describes the sub-condition of this lot, if it represents a set. The SubCondition enumeration
+    has these values:
+    \value BrickLink.None         No sub-condition is set.
+    \value BrickLink.Complete     The set is complete.
+    \value BrickLink.Incomplete   The set is not complete.
+    \value BrickLink.Sealed       The set is still sealed.
+*/
+
+/*! \qmlproperty string Lot::comments
+    The comment or description for this lot. This is the public text that a buyer can see.
+*/
+/*! \qmlproperty string Lot::remarks
+    The remark is the private text that only the seller can see.
+*/
+
+/*! \qmlproperty int Lot::quantity
+    The quantity of the item.
+*/
+/*! \qmlproperty int Lot::bulkQuantity
+    The bulk quantity. This lot can only be sold in multiple of this.
+*/
+/*! \qmlproperty int Lot::tier1Quantity
+    The tier-1 quantity: if a buyer buys this quantity or more, the price will be tier1Price
+    instead of price.
+*/
+/*! \qmlproperty int Lot::tier2Quantity
+    The tier-2 quantity: if a buyer buys this quantity or more, the price will be tier2Price
+    instead of tier1Price.
+    \note This value needs to be larger than tier1Quantity.
+*/
+/*! \qmlproperty int Lot::tier3Quantity
+    The tier-3 quantity: if a buyer buys this quantity or more, the price will be tier3Price
+    instead of tier2Price.
+    \note This value needs to be larger than tier2Quantity.
+*/
+
+/*! \qmlproperty real Lot::price
+    The unit price of the item.
+*/
+/*! \qmlproperty real Lot::tier1Price
+    The tier-3 price: this will be the price, if a buyer buys tier1Quantity or more parts.
+    \note This value needs to be smaller than price.
+*/
+/*! \qmlproperty real Lot::tier2Price
+    The tier-3 price: this will be the price, if a buyer buys tier2Quantity or more parts.
+    \note This value needs to be smaller than tier2Price.
+*/
+/*! \qmlproperty real Lot::tier3Price
+    The tier-3 price: this will be the price, if a buyer buys tier3Quantity or more parts.
+    \note This value needs to be smaller than tier2Price.
+*/
+
+/*! \qmlproperty int Lot::sale
+    The optional sale on this lots in percent. \c{[0 .. 100]}
+*/
+/*! \qmlproperty real Lot::total
+    \readonly
+    A convenience value, return price times quantity.
+*/
+
+/*! \qmlproperty uint Lot::lotId
+    The BrickLink lot-id, which uniquely identifies a lot for sale on BrickLink.
+*/
+/*! \qmlproperty bool Lot::retain
+    A boolean flag indicating whether the lot should be retained in the store's stockroom if the
+    last item has been sold.
+*/
+/*! \qmlproperty Stockroom Lot::stockroom
+    Describes if and in which stockroom this lot is located. The Stockroom enumeration has these
+    values:
+    \value BrickLink.None  Not in a stockroom.
+    \value BrickLink.A     In stockroom \c A.
+    \value BrickLink.B     In stockroom \c B.
+    \value BrickLink.C     In stockroom \c C.
+*/
+
+/*! \qmlproperty real Lot::totalWeight
+    The weight of the complete lot, i.e. quantity times the weight of a single item.
+*/
+/*! \qmlproperty string Lot::reserved
+    The name of the buyer this item is reserved for or an empty string.
+*/
+/*! \qmlproperty bool Lot::alternate
+    A boolean flag denoting this lot as an \e alternate in a set inventory.
+    \note This value does not get saved.
+*/
+/*! \qmlproperty uint Lot::alternateId
+    If this lot is an \e alternate in a set inventory, this property holds the \e{alternate id}.
+    \note This value does not get saved.
+*/
+/*! \qmlproperty bool Lot::counterPart
+    A boolean flag denoting this lot as a \e{counter part} in a set inventory.
+    \note This value does not get saved.
+*/
+
+/*! \qmlproperty bool Lot::incomplete
+    \readonly
+    Returns \c false if this lot has a valid item and color, or \c true otherwise.
+*/
+
+/*! \qmlproperty image Lot::image
+    \readonly
+    The item's image in the lot's color; can be \c null.
+    \note The image isn't readily available, but needs to be asynchronously loaded (or even
+          downloaded) at runtime. See the Picture type for more information.
+*/
+
+QmlLot::QmlLot(Lot *lot, ::QmlDocumentLots *documentLots)
+    : QmlWrapperBase(lot)
+    , m_documentLots(documentLots)
+{ }
+
+QmlLot::QmlLot(const QmlLot &copy)
+    : QmlLot(quintptr(copy.m_documentLots) == Owning
+             ? new Lot(*copy.wrappedObject())
+             : copy.wrappedObject(), copy.m_documentLots)
+{ }
+
+QmlLot::QmlLot(QmlLot &&move)
+    : QmlWrapperBase(move)
+{
+    std::swap(m_documentLots, move.m_documentLots);
+}
+
+QmlLot::~QmlLot()
+{
+    if ((quintptr(m_documentLots) == Owning) && !isNull())
+        delete wrappedObject();
+}
+
+QmlLot QmlLot::create(Lot *&&lot)
+{
+    return QmlLot(std::move(lot), reinterpret_cast<::QmlDocumentLots *>(Owning));
+}
+
+QmlLot &QmlLot::operator=(const QmlLot &assign)
+{
+    if (this != &assign) {
+        this->~QmlLot();
+        new (this) QmlLot(assign);
+    }
+    return *this;
+}
+
+QImage QmlLot::image() const
+{
+    static QImage dummy;
+    auto pic = core()->picture(get()->item(), get()->color(), true);
+    return pic ? pic->image() : dummy;
+}
+
+QmlLot::Setter::Setter(QmlLot *lot)
+    : m_lot((lot && !lot->isNull()) ? lot : nullptr)
+{
+    if (m_lot)
+        m_to = *m_lot->wrapped;
+}
+
+Lot *QmlLot::Setter::to()
+{
+    return &m_to;
+}
+
+QmlLot::Setter::~Setter()
+{
+    if (!m_lot->m_documentLots) {
+        qmlWarning(nullptr) << "Cannot modify a const Lot";
+        return;
+    }
+
+    if (m_lot && (*m_lot->wrapped != m_to)) {
+        if (m_lot->m_documentLots)
+            doChangeLot(m_lot->m_documentLots, m_lot->wrapped, m_to);
+        else
+            *m_lot->wrapped = m_to;
+    }
+}
+
+QmlLot::Setter QmlLot::set()
+{
+    return Setter(this);
+}
+
+Lot *QmlLot::get() const
+{
+    return wrapped;
+}
+
+} // namespace BrickLink

@@ -276,7 +276,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item) {
-                BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item, color);
+                BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, item, color);
             }
         });
     }
@@ -285,7 +285,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item && (color || !item->itemType()->hasColors())) {
-                BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item, color);
+                BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, item, color);
             }
         });
     }
@@ -294,7 +294,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
             if (item && (color || !item->itemType()->hasColors())) {
-                BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item, color);
+                BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, item, color);
             }
         });
     }

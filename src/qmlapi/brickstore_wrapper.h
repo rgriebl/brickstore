@@ -19,7 +19,6 @@
 
 #include "common/document.h"
 #include "common/documentlist.h"
-#include "bricklink_wrapper.h"
 
 class RecentFiles;
 class Config;
@@ -30,6 +29,9 @@ class QmlItem;
 class QmlLot;
 class QmlPriceGuide;
 class QmlPicture;
+namespace LDraw {
+class RenderController;
+}
 
 
 
@@ -140,9 +142,18 @@ public:
     Q_INVOKABLE Document *importBrickLinkOrder(BrickLink::Order *order);
     Q_INVOKABLE Document *importBrickLinkCart(BrickLink::Cart *cart);
 
+    Q_INVOKABLE Document *importPartInventory(BrickLink::QmlItem item,
+                                              BrickLink::QmlColor color, int multiply,
+                                              BrickLink::QmlBrickLink::Condition condition,
+                                              BrickLink::QmlBrickLink::Status extraParts,
+                                              bool includeInstructions, bool includeAlternates,
+                                              bool includeCounterParts);
+
     Q_INVOKABLE bool updateDatabase();
 
     Document *activeDocument() const;
+
+    Q_INVOKABLE LDraw::RenderController *createRenderController();
 
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);

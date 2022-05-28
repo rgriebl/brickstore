@@ -19,7 +19,9 @@
 #include "bricklink/core.h"
 
 
-BrickLink::Picture::Picture(const Item *item, const Color *color)
+namespace BrickLink {
+
+Picture::Picture(const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
 {
@@ -28,17 +30,17 @@ BrickLink::Picture::Picture(const Item *item, const Color *color)
     m_update_status = UpdateStatus::Ok;
 }
 
-BrickLink::Picture::~Picture()
+Picture::~Picture()
 {
     cancelUpdate();
 }
 
-const QImage BrickLink::Picture::image() const
+const QImage Picture::image() const
 {
     return m_image;
 }
 
-int BrickLink::Picture::cost() const
+int Picture::cost() const
 {
     if (m_image.isNull())
         return 640*480*4 / 1024;      // ~ 640*480 32bpp
@@ -46,7 +48,7 @@ int BrickLink::Picture::cost() const
         return int(m_image.sizeInBytes() / 1024);
 }
 
-QFile *BrickLink::Picture::readFile() const
+QFile *Picture::readFile() const
 {
     bool large = (!m_color);
     bool hasColors = m_item->itemType()->hasColors();
@@ -55,7 +57,7 @@ QFile *BrickLink::Picture::readFile() const
                                 (!large && hasColors) ? m_color : nullptr);
 }
 
-QSaveFile *BrickLink::Picture::saveFile() const
+QSaveFile *Picture::saveFile() const
 {
     bool large = (!m_color);
     bool hasColors = m_item->itemType()->hasColors();
@@ -64,7 +66,7 @@ QSaveFile *BrickLink::Picture::saveFile() const
                                 (!large && hasColors) ? m_color : nullptr);
 }
 
-bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image) const
+bool Picture::loadFromDisk(QDateTime &fetched, QImage &image) const
 {
     if (!m_item)
         return false;
@@ -100,20 +102,105 @@ bool BrickLink::Picture::loadFromDisk(QDateTime &fetched, QImage &image) const
     return isValid;
 }
 
-quint64 BrickLink::Picture::key(const Item *item, const Color *color)
+void Picture::setIsValid(bool valid)
+{
+    if (valid != m_valid) {
+        m_valid = valid;
+        emit isValidChanged(valid);
+    }
+}
+
+void Picture::setUpdateStatus(UpdateStatus status)
+{
+    if (status != m_update_status) {
+        m_update_status = status;
+        emit updateStatusChanged(status);
+    }
+}
+
+void Picture::setLastUpdated(const QDateTime &dt)
+{
+    if (dt != m_fetched) {
+        m_fetched = dt;
+        emit lastUpdatedChanged(dt);
+    }
+}
+
+quint64 Picture::key(const Item *item, const Color *color)
 {
     return (quint64(color ? color->id() : uint(-1)) << 32)
             | (quint64(item->itemTypeId()) << 24)
             | (quint64(item->index() + 1));
 }
 
-void BrickLink::Picture::update(bool highPriority)
+void Picture::update(bool highPriority)
 {
-    BrickLink::core()->updatePicture(this, highPriority);
+    core()->updatePicture(this, highPriority);
 }
 
-void BrickLink::Picture::cancelUpdate()
+void Picture::cancelUpdate()
 {
-    if (BrickLink::core())
-        BrickLink::core()->cancelPictureUpdate(this);
+    if (core())
+        core()->cancelPictureUpdate(this);
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+/*! \qmltype Picture
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This value type represents a picture of a BrickLink item.
+
+    Each picture of an item in the BrickLink catalog is available as a Picture object.
+
+    You cannot create Picture objects yourself, but you can retrieve a Picture object given the
+    item and color id via BrickLink::picture() or BrickLink::largePicture().
+
+    \note Pictures aren't readily available, but need to be asynchronously loaded (or even
+          downloaded) at runtime. You need to connect to the signal BrickLink::pictureUpdated()
+          to know when the data has been loaded.
+*/
+/*! \qmlproperty bool Picture::isNull
+    \readonly
+    Returns whether this Picture is \c null. Since this type is a value wrapper around a C++
+    object, we cannot use the normal JavaScript \c null notation.
+*/
+/*! \qmlproperty Item Picture::item
+    \readonly
+    The BrickLink item reference this picture is requested for.
+*/
+/*! \qmlproperty Color Picture::color
+    \readonly
+    The BrickLink color reference this picture is requested for.
+*/
+/*! \qmlproperty date Picture::lastUpdated
+    \readonly
+    Holds the time stamp of the last successful update of this picture.
+*/
+/*! \qmlproperty UpdateStatus Picture::updateStatus
+    \readonly
+    Returns the current update status. The available values are:
+    \value BrickLink::Ok            The last picture load (or download) was successful.
+    \value BrickLink::Loading       BrickStore is currently loading the picture from the local cache.
+    \value BrickLink::Updating      BrickStore is currently downloading the picture from BrickLink.
+    \value BrickLink::UpdateFailed  The last download from BrickLink failed. isValid might still be
+                                    \c true, if there was a valid picture available before the
+                                    failed update!
+*/
+/*! \qmlproperty bool Picture::isValid
+    \readonly
+    Returns whether the image property currently holds a valid image.
+*/
+/*! \qmlproperty image Picture::image
+    \readonly
+    Returns the image if the Picture object isValid, or a null image otherwise.
+*/
+/*! \qmlmethod Picture::update(bool highPriority = false)
+    Tries to re-download the picture from the BrickLink server. If you set \a highPriority to \c
+    true the load/download request will be pre-prended to the work queue instead of appended.
+*/
+
+} // namespace BrickLink

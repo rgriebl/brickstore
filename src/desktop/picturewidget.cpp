@@ -140,17 +140,17 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
     connect(m_blCatalog, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, m_item, m_color);
+        BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, m_item, m_color);
     });
 
     m_blPriceGuide = new QAction(QIcon::fromTheme("bricklink-priceguide"_l1), { }, this);
     connect(m_blPriceGuide, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, m_item, m_color);
+        BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, m_item, m_color);
     });
 
     m_blLotsForSale = new QAction(QIcon::fromTheme("bricklink-lotsforsale"_l1), { }, this);
     connect(m_blLotsForSale, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, m_item, m_color);
+        BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, m_item, m_color);
     });
     m_renderSettings = new QAction({ }, this);
     connect(m_renderSettings, &QAction::triggered, this, []() {
@@ -305,29 +305,9 @@ void PictureWidget::redraw()
 {
     w_image->setPixmap({ });
 
-    if (m_item) {
-        QString cs;
-        if (!QByteArray("MP").contains(m_item->itemTypeId())) {
-            QColor color = palette().color(QPalette::Highlight);
-            cs = cs % R"(<i><font color=")"_l1 % Utility::textColor(color).name() %
-                    R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
-                    m_item->itemType()->name() % R"(&nbsp;</font></i>&nbsp;&nbsp;)"_l1;
-        }
-        if (m_color && m_color->id()) {
-            QColor color = m_color->color();
-            cs = cs % R"(<b><font color=")"_l1 % Utility::textColor(color).name() %
-                    R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
-                    m_color->name() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
-        }
-
-        w_text->setText("<center><b>"_l1 %
-                        QLatin1String(m_item->id()) %
-                        "</b>&nbsp; "_l1 % cs %
-                        m_item->name() %
-                        "</center>"_l1);
-    } else {
-        w_text->setText({ });
-    }
+    QString s = BrickLink::Core::itemHtmlDescription(m_item, m_color,
+                                                     palette().color(QPalette::Highlight));
+    w_text->setText(s);
 
     if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
         w_image->setText("<center><i>"_l1 +

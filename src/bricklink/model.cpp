@@ -91,7 +91,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         QFontMetricsF fm(QGuiApplication::font());
-        QImage img = core()->colorImage(c, int(fm.height()) + 4, int(fm.height()) + 4);
+        QImage img = c->image(int(fm.height()) + 4, int(fm.height()) + 4);
         if (!img.isNull()) {
             QPixmap pix = QPixmap::fromImage(img);
             QIcon ico;
@@ -293,9 +293,23 @@ QVariant BrickLink::CategoryModel::headerData(int section, Qt::Orientation orien
     return QVariant();
 }
 
+QHash<int, QByteArray> BrickLink::CategoryModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "name" },
+        { CategoryPointerRole, "category" },
+    };
+    return roles;
+}
+
 bool BrickLink::CategoryModel::isFiltered() const
 {
     return m_itemtype_filter || m_all_filter;
+}
+
+const BrickLink::ItemType *BrickLink::CategoryModel::filterItemType() const
+{
+    return m_itemtype_filter;
 }
 
 void BrickLink::CategoryModel::setFilterItemType(const ItemType *it)
@@ -303,7 +317,13 @@ void BrickLink::CategoryModel::setFilterItemType(const ItemType *it)
     if (it == m_itemtype_filter)
         return;
     m_itemtype_filter = it;
+    emit isFilteredChanged();
     invalidateFilter();
+}
+
+bool BrickLink::CategoryModel::filterAllCategories() const
+{
+    return m_all_filter;
 }
 
 void BrickLink::CategoryModel::setFilterAllCategories(bool b)
@@ -312,6 +332,7 @@ void BrickLink::CategoryModel::setFilterAllCategories(bool b)
         return;
 
     m_all_filter = b;
+    emit isFilteredChanged();
     invalidateFilter();
 }
 
@@ -411,7 +432,22 @@ QVariant BrickLink::ItemTypeModel::headerData(int section, Qt::Orientation orien
     return QVariant();
 }
 
+QHash<int, QByteArray> BrickLink::ItemTypeModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "name" },
+        { ItemTypePointerRole, "itemType" },
+    };
+    return roles;
+
+}
+
 bool BrickLink::ItemTypeModel::isFiltered() const
+{
+    return filterWithoutInventory();
+}
+
+bool BrickLink::ItemTypeModel::filterWithoutInventory() const
 {
     return m_inv_filter;
 }
@@ -422,6 +458,7 @@ void BrickLink::ItemTypeModel::setFilterWithoutInventory(bool b)
         return;
 
     m_inv_filter = b;
+    emit isFilteredChanged();
     invalidateFilter();
 }
 
@@ -510,23 +547,20 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
         case 1: res = QLatin1String(i->id()); break;
         case 2: res = i->name(); break;
         }
-    }
-    else if (role == Qt::TextAlignmentRole) {
+    } else if (role == Qt::TextAlignmentRole) {
         if (index.column() == 0) {
             return Qt::AlignCenter;
         }
-    }
-    else if (role == Qt::ToolTipRole) {
+    } else if (role == Qt::ToolTipRole || role == NameRole) {
         if (index.column() == 0)
             res = i->name();
-    }
-    else if (role == ItemPointerRole) {
+    } else if (role == IdRole) {
+        res = QLatin1String(i->id());
+    } else if (role == ItemPointerRole) {
         res.setValue(i);
-    }
-    else if (role == ItemTypePointerRole) {
+    } else if (role == ItemTypePointerRole) {
         res.setValue(i->itemType());
-    }
-    else if (role == CategoryPointerRole) {
+    } else if (role == CategoryPointerRole) {
         res.setValue(i->category());
     }
     return res;
@@ -541,6 +575,18 @@ QVariant BrickLink::ItemModel::headerData(int section, Qt::Orientation orient, i
         }
     }
     return QVariant();
+}
+
+QHash<int, QByteArray> BrickLink::ItemModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { IdRole, "id" },
+        { NameRole, "name" },
+        { ItemPointerRole, "item" },
+        { ItemTypePointerRole, "itemType" },
+        { CategoryPointerRole, "category" },
+    };
+    return roles;
 }
 
 void BrickLink::ItemModel::pictureUpdated(Picture *pic)
@@ -559,13 +605,24 @@ bool BrickLink::ItemModel::isFiltered() const
             || m_inv_filter || !m_text_filter.isEmpty();
 }
 
+const BrickLink::ItemType *BrickLink::ItemModel::filterItemType() const
+{
+    return m_itemtype_filter;
+}
+
 void BrickLink::ItemModel::setFilterItemType(const ItemType *it)
 {
     if (it == m_itemtype_filter)
         return;
 
     m_itemtype_filter = it;
+    emit isFilteredChanged();
     invalidateFilter();
+}
+
+const BrickLink::Category *BrickLink::ItemModel::filterCategory() const
+{
+    return m_category_filter;
 }
 
 void BrickLink::ItemModel::setFilterCategory(const Category *cat)
@@ -573,7 +630,13 @@ void BrickLink::ItemModel::setFilterCategory(const Category *cat)
     if (cat == m_category_filter)
         return;
     m_category_filter = cat;
+    emit isFilteredChanged();
     invalidateFilter();
+}
+
+const BrickLink::Color *BrickLink::ItemModel::filterColor() const
+{
+    return m_color_filter;
 }
 
 void BrickLink::ItemModel::setFilterColor(const BrickLink::Color *col)
@@ -581,7 +644,13 @@ void BrickLink::ItemModel::setFilterColor(const BrickLink::Color *col)
     if (col == m_color_filter)
         return;
     m_color_filter = col;
+    emit isFilteredChanged();
     invalidateFilter();
+}
+
+QString BrickLink::ItemModel::filterText() const
+{
+    return m_text_filter;
 }
 
 void BrickLink::ItemModel::setFilterText(const QString &filter)
@@ -669,7 +738,13 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
         }
     }
 
+    emit isFilteredChanged();
     invalidateFilter();
+}
+
+bool BrickLink::ItemModel::filterWithoutInventory() const
+{
+    return m_inv_filter;
 }
 
 void BrickLink::ItemModel::setFilterWithoutInventory(bool b)
@@ -678,6 +753,7 @@ void BrickLink::ItemModel::setFilterWithoutInventory(bool b)
         return;
 
     m_inv_filter = b;
+    emit isFilteredChanged();
     invalidateFilter();
 }
 

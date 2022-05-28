@@ -29,6 +29,13 @@ class View;
 using BrickLink::Lot;
 using BrickLink::LotList;
 
+namespace BrickLink {
+class Store;
+class Order;
+class Cart;
+class WantedList;
+}
+
 
 class DocumentIO
 {

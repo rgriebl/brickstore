@@ -193,9 +193,6 @@ void ColumnLayoutCmd::undo()
 */
 
 
-std::function<QObject *(Document *)> Document::s_qmlLotsFactory { };
-
-
 Document::Document(QObject *parent)
     : Document(new DocumentModel(), parent)
 { }
@@ -450,26 +447,26 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "bricklink_catalog", [this]() {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, lot->item(), lot->color());
+              BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, lot->item(), lot->color());
           } },
         { "bricklink_priceguide", [this]() {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, lot->item(), lot->color());
+              BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, lot->item(), lot->color());
           } },
         { "bricklink_lotsforsale", [this]() {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, lot->item(), lot->color());
+              BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, lot->item(), lot->color());
           } },
         { "bricklink_myinventory", [this]() {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
               uint lotid = lot->lotId();
               if (lotid)
-              BrickLink::core()->openUrl(BrickLink::URL_StoreItemDetail, &lotid);
+              BrickLink::core()->openUrl(BrickLink::Url::StoreItemDetail, &lotid);
               else
-              BrickLink::core()->openUrl(BrickLink::URL_StoreItemSearch, lot->item(), lot->color());
+              BrickLink::core()->openUrl(BrickLink::Url::StoreItemSearch, lot->item(), lot->color());
           } },
     };
 
@@ -643,6 +640,12 @@ void Document::setThumbnail(const QString &iconName)
 QModelIndex Document::currentIndex() const
 {
     return m_selectionModel->currentIndex();
+}
+
+DocumentStatistics Document::selectionStatistics(bool ignoreExcluded) const
+{
+    return m_model->statistics(m_selectedLots.isEmpty() ? m_model->filteredLots() : m_selectedLots,
+                               ignoreExcluded);
 }
 
 void Document::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
@@ -1391,7 +1394,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::URL_InventoryUpload);
+            BrickLink::core()->openUrl(BrickLink::Url::InventoryUpload);
     }
 }
 
@@ -1415,7 +1418,7 @@ QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::URL_InventoryUpdate);
+            BrickLink::core()->openUrl(BrickLink::Url::InventoryUpdate);
     }
 }
 
@@ -1428,7 +1431,7 @@ QCoro::Task<> Document::exportBrickLinkInventoryRequestToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::URL_InventoryRequest);
+            BrickLink::core()->openUrl(BrickLink::Url::InventoryRequest);
     }
 }
 
@@ -1442,7 +1445,7 @@ QCoro::Task<> Document::exportBrickLinkWantedListToClipboard()
 
             QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
             if (Config::inst()->openBrowserOnExport())
-                BrickLink::core()->openUrl(BrickLink::URL_WantedListUpload);
+                BrickLink::core()->openUrl(BrickLink::Url::WantedListUpload);
         }
     }
 }
@@ -1547,15 +1550,10 @@ QCoro::Task<bool> Document::save(bool saveAs)
     co_return false;
 }
 
-void Document::setQmlLotsFactory(std::function<QObject *(Document *)> factory)
+QmlDocumentLots *Document::lots()
 {
-    s_qmlLotsFactory = factory;
-}
-
-QObject *Document::lots()
-{
-    if (!m_qmlLots && s_qmlLotsFactory) {
-        m_qmlLots = s_qmlLotsFactory(this);
+    if (!m_qmlLots) {
+        m_qmlLots = new QmlDocumentLots(model());
         m_qmlLots->setParent(this);
     }
     return m_qmlLots;
@@ -2407,5 +2405,52 @@ int Document::processAutosaves(AutosaveAction action)
     return restoredCount;
 }
 
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlDocumentLots::QmlDocumentLots(DocumentModel *model)
+    : QObject(model)
+    , m_model(model)
+{ }
+
+int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
+{
+    auto lot = new Lot();
+    lot->setItem(item.wrappedObject());
+    lot->setColor(color.wrappedObject());
+    m_model->appendLot(std::move(lot));
+    return m_model->lots().indexOf(lot);
+}
+
+void QmlDocumentLots::remove(BrickLink::QmlLot lot)
+{
+    if (!lot.isNull() && m_model && (lot.m_documentLots == this))
+        m_model->removeLot(lot.wrappedObject());
+}
+
+void QmlDocumentLots::removeAt(int index)
+{
+    if ((index >= 0) && (index < m_model->lotCount())) {
+        Lot *lot = m_model->lots().at(index);
+        m_model->removeLot(lot);
+    }
+}
+
+BrickLink::QmlLot QmlDocumentLots::at(int index)
+{
+    if (index < 0 || index >= m_model->lotCount())
+        return BrickLink::QmlLot { };
+    return BrickLink::QmlLot(m_model->lots().at(index), this);
+}
+
+void BrickLink::QmlLot::Setter::doChangeLot(QmlDocumentLots *lots, BrickLink::Lot *which,
+                                            const BrickLink::Lot &value)
+{
+    if (lots && lots->m_model)
+        lots->m_model->changeLot(which, value);
+}
 
 #include "moc_document.cpp"

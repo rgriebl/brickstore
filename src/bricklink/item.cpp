@@ -14,6 +14,7 @@
 
 #include "bricklink/item.h"
 #include "bricklink/core.h"
+#include "bricklink/lot.h"
 
 
 extern int _dwords_for_appears;
@@ -23,14 +24,16 @@ int _dwords_for_appears  = 0;
 int _qwords_for_consists = 0;
 
 
-bool BrickLink::Item::lessThan(const Item &item, const std::pair<char, QByteArray> &ids)
+namespace BrickLink {
+
+bool Item::lessThan(const Item &item, const std::pair<char, QByteArray> &ids)
 {
     int d = (item.m_itemTypeId - ids.first);
     return d == 0 ? (item.m_id.compare(ids.second) < 0) : (d < 0);
 }
 
 // color-idx -> { vector < qty, item-idx > }
-void BrickLink::Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash)
+void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash)
 {
     // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
 
@@ -49,7 +52,7 @@ void BrickLink::Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> 
     _dwords_for_appears += int(m_appears_in.size());
 }
 
-BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *onlyColor) const
+AppearsIn Item::appearsIn(const Color *onlyColor) const
 {
     AppearsIn appearsHash;
 
@@ -82,30 +85,30 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *onlyColor) const
     return appearsHash;
 }
 
-void BrickLink::Item::setConsistsOf(const QVector<BrickLink::Item::ConsistsOf> &items)
+void Item::setConsistsOf(const QVector<Item::ConsistsOf> &items)
 {
     m_consists_of = items;
     _qwords_for_consists += m_consists_of.size();
 }
 
-const QVector<BrickLink::Item::ConsistsOf> &BrickLink::Item::consistsOf() const
+const QVector<Item::ConsistsOf> &Item::consistsOf() const
 {
     return m_consists_of;
 }
 
-const BrickLink::ItemType *BrickLink::Item::itemType() const
+const ItemType *Item::itemType() const
 {
     return (m_itemTypeIndex > -1) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;
 }
 
-const BrickLink::Category *BrickLink::Item::category() const
+const Category *Item::category() const
 {
     return (m_categoryIndex > -1) ? &core()->categories()[uint(m_categoryIndex)] : nullptr;
 }
 
-const QVector<const BrickLink::Category *> BrickLink::Item::additionalCategories(bool includeMainCategory) const
+const QVector<const Category *> Item::additionalCategories(bool includeMainCategory) const
 {
-    QVector<const BrickLink::Category *> cats;
+    QVector<const Category *> cats;
     if (includeMainCategory && (m_categoryIndex > -1))
         cats << &core()->categories()[uint(m_categoryIndex)];
     for (const auto catIndex : m_additionalCategoryIndexes) {
@@ -115,12 +118,12 @@ const QVector<const BrickLink::Category *> BrickLink::Item::additionalCategories
     return cats;
 }
 
-const BrickLink::Color *BrickLink::Item::defaultColor() const
+const Color *Item::defaultColor() const
 {
     return (m_defaultColorIndex > -1) ? &core()->colors()[uint(m_defaultColorIndex)] : nullptr;
 }
 
-QDateTime BrickLink::Item::inventoryUpdated() const
+QDateTime Item::inventoryUpdated() const
 {
     QDateTime dt;
     if (m_lastInventoryUpdate >= 0)
@@ -128,7 +131,7 @@ QDateTime BrickLink::Item::inventoryUpdated() const
     return dt;
 }
 
-bool BrickLink::Item::hasKnownColor(const Color *col) const
+bool Item::hasKnownColor(const Color *col) const
 {
     if (!col)
         return true;
@@ -138,7 +141,7 @@ bool BrickLink::Item::hasKnownColor(const Color *col) const
                               quint16(col - core()->colors().data()));
 }
 
-const QVector<const BrickLink::Color *> BrickLink::Item::knownColors() const
+const QVector<const Color *> Item::knownColors() const
 {
     QVector<const Color *> result;
     for (const quint16 idx : m_knownColorIndexes)
@@ -146,22 +149,22 @@ const QVector<const BrickLink::Color *> BrickLink::Item::knownColors() const
     return result;
 }
 
-uint BrickLink::Item::index() const
+uint Item::index() const
 {
     return uint(this - core()->items().data());
 }
 
-const BrickLink::Item *BrickLink::Item::ConsistsOf::item() const
+const Item *Item::ConsistsOf::item() const
 {
     return &core()->items().at(m_itemIndex);
 }
 
-const BrickLink::Color *BrickLink::Item::ConsistsOf::color() const
+const Color *Item::ConsistsOf::color() const
 {
     return &core()->colors().at(m_colorIndex);
 }
 
-bool BrickLink::Item::ConsistsOf::isSimple(const QVector<ConsistsOf> &parts)
+bool Item::ConsistsOf::isSimple(const QVector<ConsistsOf> &parts)
 {
     for (const auto &co : parts) {
         if (co.isExtra() || co.isCounterPart() || co.isAlternate())
@@ -169,3 +172,113 @@ bool BrickLink::Item::ConsistsOf::isSimple(const QVector<ConsistsOf> &parts)
     }
     return true;
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+/*! \qmltype Item
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This value type represents a BrickLink item.
+
+    Each item in the BrickLink catalog is available as an Item object.
+
+    You cannot create Item objects yourself, but you can retrieve an Item object given the
+    id via BrickLink::item().
+
+    See \l https://www.bricklink.com/catalog.asp
+*/
+/*! \qmlproperty bool Item::isNull
+    \readonly
+    Returns whether this Item is \c null. Since this type is a value wrapper around a C++
+    object, we cannot use the normal JavaScript \c null notation.
+*/
+/*! \qmlproperty int Item::id
+    \readonly
+    The BrickLink id of this item.
+*/
+/*! \qmlproperty string Item::name
+    \readonly
+    The BrickLink name of this item.
+*/
+/*! \qmlproperty ItemType Item::itemType
+    \readonly
+    The BrickLink item type of this item.
+*/
+/*! \qmlproperty Category Item::category
+    \readonly
+    The BrickLink category of this item.
+*/
+/*! \qmlproperty bool Item::hasInventory
+    \readonly
+    Returns \c true if a valid inventory exists for this item, or \c false otherwise.
+*/
+/*! \qmlproperty date Item::inventoryUpdated
+    \readonly
+    Holds the time stamp of the last successful update of the item's inventory.
+*/
+/*! \qmlproperty Color Item::defaultColor
+    \readonly
+    Returns the default color used by BrickLink to display a large picture for this item.
+*/
+/*! \qmlproperty real Item::weight
+    \readonly
+    Returns the weight of this item in gram.
+*/
+/*! \qmlproperty date Item::yearReleased
+    \readonly
+    Returns the year this item was first released.
+*/
+/*! \qmlproperty list<Color> Item::knownColors
+    \readonly
+    Returns a list of \l Color objects, containing all the colors the item is known to exist in.
+    \note An item might still exist in more colors than returned here: BrickStore is deriving this
+          data by looking at all the known inventories and PCCs (part-color-codes).
+*/
+/*! \qmlmethod bool Item::hasKnownColor(Color color)
+    Returns \c true if this item is known to exist in the given \a color, or \c false otherwise.
+    \sa knownColors
+*/
+
+QmlItem::QmlItem(const Item *item)
+    : QmlWrapperBase(item)
+{ }
+
+QString QmlItem::id() const
+{
+    return QString::fromLatin1(wrapped->id());
+}
+
+bool QmlItem::hasKnownColor(QmlColor color) const
+{
+    return wrapped->hasKnownColor(color.wrappedObject());
+}
+
+QVariantList QmlItem::knownColors() const
+{
+    auto known = wrapped->knownColors();
+    QVariantList result;
+    for (auto c : known)
+        result.append(QVariant::fromValue(QmlColor { c }));
+    return result;
+}
+
+QVariantList QmlItem::consistsOf() const
+{
+    const auto consists = wrapped->consistsOf();
+    QVariantList result;
+    for (const auto &co : consists) {
+        auto *lot = new Lot { co.color(), co.item() };
+        lot->setAlternate(co.isAlternate());
+        lot->setAlternateId(co.alternateId());
+        lot->setCounterPart(co.isCounterPart());
+        if (co.isExtra())
+            lot->setStatus(Status::Extra);
+        result << QVariant::fromValue(QmlLot::create(std::move(lot)));
+    }
+    return result;
+}
+
+} // namespace BrickLink

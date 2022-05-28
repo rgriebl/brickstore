@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QObject>
+#include <QPointer>
 
 #include "bricklink/global.h"
 
@@ -38,7 +39,7 @@ public:
     ~ScriptManager() override;
     static ScriptManager *inst();
 
-    void initialize();
+    void initialize(QQmlEngine *engine);
 
     bool reload();
 
@@ -54,9 +55,9 @@ private:
     void clearScripts();
     void loadScript(const QString &fileName);
 
+    QPointer<QQmlEngine> m_engine;
     QVector<Script *> m_scripts;
 
-    std::unique_ptr<QQmlEngine> m_engine;
     QObject *m_rootObject = nullptr;
 
     Q_DISABLE_COPY(ScriptManager)

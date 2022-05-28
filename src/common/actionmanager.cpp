@@ -17,6 +17,7 @@
 #  include <QtQuickTemplates2/private/qquickaction_p.h>
 #  include <QJSValue>
 #  include <QJSValueIterator>
+#  include <QQmlEngine>
 #endif
 #if defined(BS_DESKTOP)
 #  include <QApplication>
@@ -719,10 +720,16 @@ QObject *ActionManager::connectQuickActionTable(const QJSValue &nameToCallable)
             });
         }
     }
+    QQmlEngine::setObjectOwnership(contextObject, QQmlEngine::CppOwnership);
 #else
     Q_UNUSED(nameToCallable)
 #endif
     return contextObject;
+}
+
+void ActionManager::disconnectQuickActionTable(QObject *connectionContext)
+{
+    delete connectionContext;
 }
 
 QString ActionManager::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)

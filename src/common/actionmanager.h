@@ -149,6 +149,7 @@ public:
     void disconnectActionTable(QObject *contextObject);
 
     Q_INVOKABLE QObject *connectQuickActionTable(const QJSValue &nameToCallable);
+    Q_INVOKABLE void disconnectQuickActionTable(QObject *connectionContext);
 
     static QString toolTipLabel(const QString &label, QKeySequence shortcut = { },
                                 const QString &extended = { });

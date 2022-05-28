@@ -113,23 +113,6 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
         checkSelected();
     });
-    connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
-            this, [this](BrickLink::Cart *cart, bool success, const QString &message) {
-        int idx = m_cartsToOpen.indexOf(cart ? cart->sellerId() : -1);
-        if (idx >= 0)
-            m_cartsToOpen.removeAt(idx);
-        else
-            return;
-
-        if (!success) {
-            QMessageBox::warning(this, windowTitle(), message);
-        } else {
-            DocumentIO::importBrickLinkCart(cart);
-
-            if (!message.isEmpty())
-                QMessageBox::information(this, windowTitle(), message);
-        }
-    });
 
     languageChange();
 
@@ -216,7 +199,8 @@ void ImportCartDialog::importCarts(const QModelIndexList &rows)
         auto cart = idx.data(BrickLink::Carts::CartPointerRole).value<BrickLink::Cart *>();
 
         BrickLink::core()->carts()->startFetchLots(cart);
-        m_cartsToOpen << cart->sellerId();
+
+        // initBrickLink in application.cpp reacts on fetchLotsFinished() and opens the documents
     }
 }
 
@@ -226,7 +210,7 @@ void ImportCartDialog::showCartsOnBrickLink()
     for (auto idx : selection) {
         auto cart = idx.data(BrickLink::Carts::CartPointerRole).value<BrickLink::Cart *>();
         int sellerId = cart->sellerId();
-        BrickLink::core()->openUrl(BrickLink::URL_ShoppingCart, &sellerId);
+        BrickLink::core()->openUrl(BrickLink::Url::ShoppingCart, &sellerId);
     }
 }
 

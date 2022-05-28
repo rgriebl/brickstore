@@ -27,8 +27,6 @@
 #include "bricklink/database.h"
 #include "common/application.h"
 #include "ldraw/library.h"
-#include "qmlapi/common.h"
-#include "qmlapi/bricklink_wrapper.h"
 #include "qmlapi/brickstore_wrapper.h"
 #include "utility/exception.h"
 #include "printjob.h"
@@ -71,13 +69,11 @@ ScriptManager *ScriptManager::inst()
     return s_inst;
 }
 
-void ScriptManager::initialize()
+void ScriptManager::initialize(QQmlEngine *engine)
 {
-    QmlBrickLink::registerTypes();
-    QmlBrickStore::registerTypes();
-    QmlPrintJob::registerTypes();
-    LDraw::registerQmlTypes();
+    m_engine = engine;
 
+    QmlPrintJob::registerTypes();
     qmlRegisterType<Script>("BrickStore", 1, 0, "Script");
     qmlRegisterType<ExtensionScriptAction>("BrickStore", 1, 0, "ExtensionScriptAction");
     qmlRegisterType<PrintingScriptAction>("BrickStore", 1, 0, "PrintingScriptAction");
@@ -127,11 +123,10 @@ bool ScriptManager::reload()
 
 void ScriptManager::loadScript(const QString &fileName)
 {
-    auto engine = std::make_unique<QQmlEngine>(this);
-    redirectQmlEngineWarnings(engine.get(), LogScript());
+    Q_ASSERT(m_engine);
 
-    auto comp = new QQmlComponent(engine.get(), fileName, engine.get());
-    auto ctx = new QQmlContext(engine.get(), engine.get());
+    auto comp = new QQmlComponent(m_engine, fileName, m_engine);
+    auto ctx = new QQmlContext(m_engine, m_engine);
     std::unique_ptr<QObject> root { comp->create(ctx) };
     if (!root)
         throw QmlException(comp->errors(), "Could not load QML file %1").arg(fileName);
@@ -139,13 +134,9 @@ void ScriptManager::loadScript(const QString &fileName)
         throw Exception("The root element of the script %1 is not 'Script'").arg(fileName);
 
     auto script = static_cast<Script *>(root.release());
-    script->m_engine.reset(engine.release());
     script->m_fileName = fileName;
     script->m_context = ctx;
     script->m_component = comp;
-
-    connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
-            script->m_engine.get(), &QQmlEngine::collectGarbage);
 
     m_scripts.append(script);
 }
@@ -157,28 +148,23 @@ QVector<Script *> ScriptManager::scripts() const
 
 bool ScriptManager::executeString(const QString &s)
 {
-    if (!m_engine) {
-        m_engine.reset(new QQmlEngine(this));
-        redirectQmlEngineWarnings(m_engine.get(), LogScript());
+    Q_ASSERT(m_engine);
 
-        connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
-                m_engine.get(), &QQmlEngine::collectGarbage);
+    const char script[] =
+            "import BrickStore 1.0\n"
+            "import QtQml 2.12\n"
+            "QtObject {\n"
+            "    property var bl: BrickLink\n"
+            "    property var bs: BrickStore\n"
+            "    property string help: \"Use 'bl'/'bs' to access the BrickLink/BrickStore singletons\"\n"
+            "}\n";
 
-        const char script[] =
-                "import BrickStore 1.0\n"
-                "import QtQml 2.12\n"
-                "QtObject {\n"
-                "    property var bl: BrickLink\n"
-                "    property var bs: BrickStore\n"
-                "    property string help: \"Use 'bl'/'bs' to access the BrickLink/BrickStore singletons\"\n"
-                "}\n";
+    QQmlComponent component(m_engine);
+    component.setData(script, QUrl());
+    if (component.status() == QQmlComponent::Error)
+        qCWarning(LogScript) << "JS compile error:" << component.errorString();
+    m_rootObject = component.create();
 
-        QQmlComponent component(m_engine.get());
-        component.setData(script, QUrl());
-        if (component.status() == QQmlComponent::Error)
-            qCWarning(LogScript) << "JS compile error:" << component.errorString();
-        m_rootObject = component.create();
-    }
     QQmlExpression e(m_engine->rootContext(), m_rootObject, s);
     qCDebug(LogScript).noquote() << "#" << s;
     auto result = e.evaluate();

@@ -16,6 +16,9 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtGui/QColor>
+#include <QtGui/QImage>
+
+#include "bricklink/qmlwrapperbase.h"
 
 
 namespace BrickLink {
@@ -78,6 +81,8 @@ public:
     Color() = default;
     Color(std::nullptr_t) : Color() { } // for scripting only!
 
+    const QImage image(int w, int h) const;
+
 private:
     QString m_name;
     uint    m_id = InvalidId;
@@ -99,13 +104,56 @@ private:
 private:
     static bool lessThan(const Color &color, uint id) { return color.m_id < id; }
 
+    static QHash<uint, QImage> s_colorImageCache; //TODO: clear cache on DB update
+
     friend class Core;
     friend class Database;
     friend class TextImport;
 };
 
+
+class QmlColor : public QmlWrapperBase<const Color>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QColor color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int ldrawId READ ldrawId CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QColor ldrawColor READ ldrawColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QColor ldrawEdgeColor READ ldrawEdgeColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool solid READ isSolid CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool transparent READ isTransparent CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool glitter READ isGlitter CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool speckle READ isSpeckle CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool metallic READ isMetallic CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool chrome READ isChrome CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool pearl READ isPearl CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool milky READ isMilky CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool modulex READ isModulex CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool satin READ isSatin CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double popularity READ popularity CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, float luminance READ luminance CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool particles READ hasParticles CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, float particleMinSize READ particleMinSize CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, float particleMaxSize READ particleMaxSize CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, float particleFraction READ particleFraction CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, float particleVFraction READ particleVFraction CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QColor particleColor READ particleColor CONSTANT)
+
+public:
+    QmlColor(const Color *col = nullptr);
+
+    Q_INVOKABLE QImage image(int width, int height) const;
+
+    friend class QmlBrickLink;
+    friend class QmlLot;
+};
+
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(const BrickLink::Color *)
+Q_DECLARE_METATYPE(BrickLink::QmlColor)
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::Color::Type)

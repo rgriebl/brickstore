@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QStringBuilder>
 #include <QtConcurrent>
+//#include <QElapsedTimer>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -64,6 +65,20 @@ Library::Library(QObject *parent)
         if (done || total) {
             emitUpdateStartedIfNecessary();
             emit updateProgress(done, total);
+
+//            // useful to debug the weird HTTP/2 slow downs
+//            static QElapsedTimer m_dlTimer;
+
+//            if (total) {
+//                if (!m_dlTimer.isValid())
+//                    m_dlTimer.restart();
+//                double sec = double(m_dlTimer.elapsed()) / 1000.;
+//                double mb = double(done) / (1024. * 1024.);
+//                qWarning().noquote() << QLocale().toString(mb/sec, 'f', 3) << "MB/s  -- " << QLocale().toString(100 * double(done) / total, 'f', 1) << "%  -- " << sec << "s";
+
+//                if (done == total)
+//                    m_dlTimer.invalidate();
+//            }
         }
     });
     connect(m_transfer, &Transfer::finished,

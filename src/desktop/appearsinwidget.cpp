@@ -71,7 +71,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
         const BrickLink::AppearsInItem *ai = appearsIn();
 
         if (ai && ai->second)
-            BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, ai->second);
+            BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, ai->second);
     });
 
     d->m_priceGuideAction = new QAction(this);
@@ -81,7 +81,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
         const BrickLink::AppearsInItem *ai = appearsIn();
 
         if (ai && ai->second)
-            BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, ai->second,
+            BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, ai->second,
                                        BrickLink::core()->color(0));
     });
 
@@ -92,7 +92,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
         const BrickLink::AppearsInItem *ai = appearsIn();
 
         if (ai && ai->second)
-            BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, ai->second,
+            BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, ai->second,
                                        BrickLink::core()->color(0));
     });
 

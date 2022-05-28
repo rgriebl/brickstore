@@ -22,6 +22,7 @@
 #include <QPointer>
 
 #include "bricklink/global.h"
+#include "bricklink/lot.h"
 #include "bricklink/order.h"
 #include "common/documentmodel.h"
 #include "qcoro/qcoro.h"
@@ -32,7 +33,7 @@ QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class DocumentModel;
 class Document;
 class ColumnChangeWatcher;
-class QmlLots;
+class QmlDocumentLots;
 
 
 enum {
@@ -146,6 +147,8 @@ public:
 
     const LotList &selectedLots() const  { return m_selectedLots; }
 
+    Q_INVOKABLE DocumentStatistics selectionStatistics(bool ignoreExcluded = false) const;
+
     bool isBlockingOperationActive() const;
     Q_INVOKABLE void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
     Q_INVOKABLE void endBlockingOperation();
@@ -246,8 +249,7 @@ public:
     void saveToFile(const QString &fileName);
     QCoro::Task<bool> save(bool saveAs);
 
-    static void setQmlLotsFactory(std::function<QObject *(Document *)> factory);
-    QObject *lots();
+    QmlDocumentLots *lots();
 
 public:
     static Document *fromPartInventory(const BrickLink::Item *preselect = nullptr,
@@ -360,10 +362,28 @@ private:
     mutable bool          m_autosaveClean = true;
     bool                  m_restoredFromAutosave = false;
 
-    static std::function<QObject *(Document *)> s_qmlLotsFactory;
-    QPointer<QObject>     m_qmlLots;
+    QPointer<QmlDocumentLots> m_qmlLots;
 
     friend class AutosaveJob;
     friend void ColumnCmd::redo();
     friend void ColumnLayoutCmd::redo();
+};
+
+
+class QmlDocumentLots : public QObject
+{
+    Q_OBJECT
+
+public:
+    QmlDocumentLots(DocumentModel *model);
+
+    Q_INVOKABLE int add(BrickLink::QmlItem item, BrickLink::QmlColor color);
+    Q_INVOKABLE void remove(BrickLink::QmlLot lot);
+    Q_INVOKABLE void removeAt(int index);
+    Q_INVOKABLE BrickLink::QmlLot at(int index);
+
+private:
+    DocumentModel *m_model;
+
+    friend class BrickLink::QmlLot::Setter;
 };

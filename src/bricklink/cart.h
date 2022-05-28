@@ -127,7 +127,7 @@ public:
 
     QVector<Cart *> carts() const;
 
-    void startFetchLots(Cart *cart);
+    Q_INVOKABLE void startFetchLots(BrickLink::Cart *cart);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

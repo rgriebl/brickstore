@@ -13,29 +13,24 @@
 */
 #include <QtCore/QLoggingCategory>
 #include <QtGui/QGuiApplication>
-#include <QtQml/QQmlApplicationEngine>
-#include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlProperty>
+#include <QtQml/QQmlApplicationEngine>
 #include <QtQuickTemplates2/private/qquickaction_p.h>
 #include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #ifdef Q_OS_ANDROID
 #  include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 #endif
+#include <QDirIterator>
 
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "qmlapi/bricklink_wrapper.h"
-#include "qmlapi/brickstore_wrapper.h"
-#include "qmlapi/common.h"
+#include "ldraw/library.h"
 #include "utility/undo.h"
 #include "utility/utility.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
-
-
-Q_LOGGING_CATEGORY(LogQml, "qml")
-
+#include "qmlimageitem.h"
 
 
 MobileApplication::MobileApplication(int &argc, char **argv)
@@ -48,21 +43,11 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 
 void MobileApplication::init()
 {
+    qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
+
     Application::init();
 
-    qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
-    m_engine = new QQmlApplicationEngine(this);
     m_engine->setBaseUrl(QUrl("qrc:/mobile/"_l1));
-    redirectQmlEngineWarnings(m_engine, LogQml());
-
-    connect(BrickLink::core()->database(), &BrickLink::Database::databaseAboutToBeReset,
-            m_engine, &QQmlEngine::collectGarbage);
-
-    connect(this, &Application::languageChanged,
-            m_engine, &QQmlEngine::retranslate);
-
-    QmlBrickLink::registerTypes();
-    QmlBrickStore::registerTypes();
 
     MobileUIHelpers::create(m_engine);
 
@@ -73,12 +58,6 @@ void MobileApplication::init()
             return Application::inst()->undoGroup()->createRedoAction(this);
         else
             return new QAction(this);
-    });
-
-    QQmlEngine::setObjectOwnership(ActionManager::inst(), QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<ActionManager>("BrickStore", 1, 0, "ActionManager",
-                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return ActionManager::inst();
     });
 
     setIconTheme(DarkTheme);
@@ -121,6 +100,13 @@ QCoro::Task<bool> MobileApplication::closeAllViews()
 {
     //TODO implement
     co_return true;
+}
+
+void MobileApplication::setupQml()
+{
+    Application::setupQml();
+
+    qmlRegisterType<QmlImageItem>("BrickStore", 1, 0, "QImageItem");
 }
 
 MobileApplication::~MobileApplication()

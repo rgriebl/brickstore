@@ -15,7 +15,6 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 
-#include "qmlapi/bricklink_wrapper.h"
 #include "qmlapi/brickstore_wrapper.h"
 #include "utility/exception.h"
 #include "utility/utility.h"
@@ -94,7 +93,7 @@ void ExtensionScriptAction::executeAction()
     if (!m_actionFunction.isCallable())
         throw Exception(tr("The extension script does not define an 'actionFunction'."));
 
-    m_script->qmlEngine()->rootContext()->setProperty("isExtensionContext", true);
+    qmlEngine(m_script)->rootContext()->setProperty("isExtensionContext", true);
 
     QJSValueList args = { };
     QJSValue result = m_actionFunction.call(args);
@@ -222,9 +221,9 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
                                                                : view->model()->lots());
     QVariantList itemList;
     for (auto lot : lots)
-        itemList << QVariant::fromValue(QmlLot(lot));
+        itemList << QVariant::fromValue(BrickLink::QmlLot(lot));
 
-    QQmlEngine *engine = m_script->qmlEngine();
+    QQmlEngine *engine = qmlEngine(m_script);
     QJSValueList args = { engine->toScriptValue(job.get()),
                           engine->toScriptValue(view->document()),
                           engine->toScriptValue(itemList) };
@@ -338,11 +337,6 @@ QVector<ExtensionScriptAction *> Script::extensionActions() const
 QVector<PrintingScriptAction *> Script::printingActions() const
 {
     return m_printingActions;
-}
-
-QQmlEngine *Script::qmlEngine() const
-{
-    return m_engine.get();
 }
 
 QQmlContext *Script::qmlContext() const

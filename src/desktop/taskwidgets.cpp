@@ -250,59 +250,12 @@ void TaskInfoWidget::delayedSelectionUpdate()
         setCurrentWidget(m_pic);
     } else {
         auto stat = m_document->model()->statistics(m_selection.isEmpty() ? m_document->model()->lots()
-                                                                        : m_selection,
-                                                  false /* ignoreExcluded */);
-        QLocale loc;
-        QString ccode = m_document->model()->currencyCode();
-        QString wgtstr;
-        QString minvalstr;
-        QString valstr = Currency::toDisplayString(stat.value());
-        bool hasMinValue = !qFuzzyCompare(stat.value(), stat.minValue());
+                                                                          : m_selection,
+                                                    false /* ignoreExcluded */);
 
-        if (hasMinValue)
-            minvalstr = Currency::toDisplayString(stat.minValue());
-
-        QString coststr = Currency::toDisplayString(stat.cost());
-        QString profitstr;
-        if (!qFuzzyIsNull(stat.cost())) {
-            int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
-            profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
-        }
-
-
-        if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
-            wgtstr = "-"_l1;
-        } else {
-            double weight = stat.weight();
-
-            if (weight < 0) {
-                weight = -weight;
-                wgtstr = tr("min.") % u' ';
-            }
-
-            wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
-        }
-
-        static const char *fmt =
-                "<h3>%1</h3><table cellspacing=6>"
-                "<tr><td>&nbsp;&nbsp;%2 </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
-                "<tr><td>&nbsp;&nbsp;%4 </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr>"
-                "<tr></tr>"
-                "<tr><td>&nbsp;&nbsp;%6 </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td></tr>"
-                "<tr><td>&nbsp;&nbsp;%9 </td><td>&nbsp;&nbsp;%10</td><td align=right>%11</td></tr>"
-                "<tr><td>&nbsp;&nbsp;%12 </td><td>&nbsp;&nbsp;%13</td><td align=right>%14</td><td>&nbsp;&nbsp;%15</td></tr>"
-                "<tr></tr>"
-                "<tr><td>&nbsp;&nbsp;%16 </td><td colspan=2 align=right>&nbsp;&nbsp;%17</td></tr>"
-                "</table>";
-
-        QString s = QString::fromLatin1(fmt).arg(
-                m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"),
-                tr("Lots:"), loc.toString(stat.lots()),
-                tr("Items:"), loc.toString(stat.items()),
-                tr("Value:"), ccode, valstr).arg(
-                hasMinValue ? tr("Value (min.):") : QString(), hasMinValue ? ccode : QString(), minvalstr,
-                tr("Cost:"), ccode, coststr, profitstr,
-                tr("Weight:"), wgtstr);
+        QString s = QString::fromLatin1("<h3>%1</h3>")
+                .arg(m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"))
+                % stat.asHtmlTable();
 
         m_pic->setItemAndColor(nullptr);
         m_text->setText(s);

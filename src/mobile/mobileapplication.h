@@ -17,8 +17,6 @@
 
 #include "common/application.h"
 
-QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
-
 
 class MobileApplication : public Application
 {
@@ -36,8 +34,8 @@ public:
 
 protected:
     QCoro::Task<bool> closeAllViews() override;
+    void setupQml() override;
 
 private:
-    QQmlApplicationEngine *m_engine = nullptr;
     QVariantMap m_actionMap;
 };

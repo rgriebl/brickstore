@@ -15,7 +15,7 @@
 
 #include <QtCore/QDateTime>
 
-#include "global.h"
+#include "bricklink/global.h"
 #include "utility/ref.h"
 
 class TransferJob;
@@ -23,8 +23,18 @@ class TransferJob;
 
 namespace BrickLink {
 
-class PriceGuide : public Ref
+class Item;
+class Color;
+
+class PriceGuide : public QObject, public Ref
 {
+    Q_OBJECT
+    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT)
+    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT)
+    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
+
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -42,6 +52,11 @@ public:
 
     PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr) { } // for scripting only!
     ~PriceGuide() override;
+
+signals:
+    void isValidChanged(bool newIsValid);
+    void lastUpdatedChanged(const QDateTime &newLastUpdated);
+    void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
 
 private:
     const Item *  m_item;
@@ -69,6 +84,9 @@ private:
 
     bool loadFromDisk(QDateTime &fetched, Data &data) const;
     void saveToDisk(const QDateTime &fetched, const Data &data);
+    void setIsValid(bool valid);
+    void setUpdateStatus(UpdateStatus status);
+    void setLastUpdated(const QDateTime &dt);
 
     bool parse(const QByteArray &ba, Data &result) const;
     bool parseHtml(const QByteArray &ba, Data &result);

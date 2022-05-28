@@ -21,9 +21,18 @@
 #include "bricklink/category.h"
 #include "bricklink/color.h"
 #include "bricklink/itemtype.h"
+#include "bricklink/qmlwrapperbase.h"
 
 
 namespace BrickLink {
+
+class Item;
+class Color;
+
+typedef QPair<int, const Item *>             AppearsInItem;
+typedef QVector<AppearsInItem>               AppearsInColor;
+typedef QHash<const Color *, AppearsInColor> AppearsIn;
+
 
 class Item
 {
@@ -149,6 +158,39 @@ public:
     bool operator==(const Incomplete &other) const = default;
 };
 
+
+class QmlItem : public QmlWrapperBase<const Item>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PROPERTY(QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlItemType itemType READ itemType CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlCategory category READ category CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, bool hasInventory READ hasInventory CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QmlColor defaultColor READ defaultColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, double weight READ weight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, int yearReleased READ yearReleased CONSTANT)
+    Q_PROPERTY(QVariantList knownColors READ knownColors CONSTANT)
+
+public:
+    QmlItem(const Item *item = nullptr);
+
+    QString id() const;
+    Q_INVOKABLE bool hasKnownColor(BrickLink::QmlColor color) const;
+    QVariantList knownColors() const;
+
+    Q_INVOKABLE QVariantList consistsOf() const;
+
+    // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
+
+    friend class QmlBrickLink;
+};
+
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(const BrickLink::Item *)
+Q_DECLARE_METATYPE(BrickLink::QmlItem)
+Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)

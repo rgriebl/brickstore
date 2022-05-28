@@ -16,7 +16,8 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 
-#include "global.h"
+#include "bricklink/global.h"
+#include "bricklink/qmlwrapperbase.h"
 
 
 namespace BrickLink {
@@ -52,6 +53,22 @@ private:
     friend class TextImport;
 };
 
+
+class QmlCategory : public QmlWrapperBase<const Category>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, QString name READ name CONSTANT)
+
+public:
+    QmlCategory(const Category *cat = nullptr);
+
+    friend class QmlBrickLink;
+};
+
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(const BrickLink::Category *)
+Q_DECLARE_METATYPE(BrickLink::QmlCategory)

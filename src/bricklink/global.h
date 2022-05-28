@@ -13,14 +13,53 @@
 */
 #pragma once
 
-#include <QPair>
-#include <QHash>
-#include <QVector>
 #include <QMetaType>
 
-QT_FORWARD_DECLARE_CLASS(QDataStream)
-
 namespace BrickLink {
+
+enum class Time          { PastSix, Current, Count };
+enum class Price         { Lowest, Average, WAverage, Highest, Count };
+enum class Condition     { New, Used, Count };
+enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
+enum class Stockroom     { None, A, B, C, Count };
+enum class Status        { Include, Exclude, Extra, Count };
+enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
+
+enum class OrderType     { Received, Placed, Any };
+enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
+                           Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
+
+enum class Url {
+    InventoryRequest,
+    WantedListUpload,
+    InventoryUpload,
+    InventoryUpdate,
+    CatalogInfo,
+    PriceGuideInfo,
+    ColorChangeLog,
+    ItemChangeLog,
+    LotsForSale,
+    AppearsInSets,
+    StoreItemDetail,
+    StoreItemSearch,
+    OrderDetails,
+    ShoppingCart,
+    WantedList,
+};
+
+enum ModelRoles {
+    RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
+
+    ColorPointerRole,
+    CategoryPointerRole,
+    ItemTypePointerRole,
+    ItemPointerRole,
+    AppearsInItemPointerRole,
+    IdRole,
+    NameRole,
+
+    RoleMax
+};
 
 class Color;
 class Category;
@@ -54,52 +93,6 @@ class AppearsInModel;
 class InternalAppearsInModel;
 class ItemDelegate;
 
-typedef QPair<int, const Item *>             AppearsInItem;
-typedef QVector<AppearsInItem>               AppearsInColor;
-typedef QHash<const Color *, AppearsInColor> AppearsIn;
-
-enum class Time          { PastSix, Current, Count };
-enum class Price         { Lowest, Average, WAverage, Highest, Count };
-enum class Condition     { New, Used, Count };
-enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
-enum class Stockroom     { None, A, B, C, Count };
-enum class Status        { Include, Exclude, Extra, Count };
-enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
-
-enum class OrderType     { Received, Placed, Any };
-enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
-                           Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
-
-enum UrlList {
-    URL_InventoryRequest,
-    URL_WantedListUpload,
-    URL_InventoryUpload,
-    URL_InventoryUpdate,
-    URL_CatalogInfo,
-    URL_PriceGuideInfo,
-    URL_ColorChangeLog,
-    URL_ItemChangeLog,
-    URL_LotsForSale,
-    URL_AppearsInSets,
-    URL_StoreItemDetail,
-    URL_StoreItemSearch,
-    URL_OrderDetails,
-    URL_ShoppingCart,
-    URL_WantedList,
-};
-
-enum ModelRoles {
-    RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
-
-    ColorPointerRole,
-    CategoryPointerRole,
-    ItemTypePointerRole,
-    ItemPointerRole,
-    AppearsInItemPointerRole,
-
-    RoleMax
-};
-
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::Time)
@@ -110,5 +103,4 @@ Q_DECLARE_METATYPE(BrickLink::Stockroom)
 Q_DECLARE_METATYPE(BrickLink::Status)
 Q_DECLARE_METATYPE(BrickLink::OrderType)
 Q_DECLARE_METATYPE(BrickLink::OrderStatus)
-Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
-
+Q_DECLARE_METATYPE(BrickLink::Url)

@@ -21,6 +21,9 @@
 #include "bricklink/lot.h"
 
 namespace BrickLink {
+
+class Order;
+
 namespace IO {
 
 class ParseResult

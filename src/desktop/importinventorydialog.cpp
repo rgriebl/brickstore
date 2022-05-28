@@ -91,21 +91,21 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
         if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 if (const auto item = m_select->currentItem())
-                    BrickLink::core()->openUrl(BrickLink::URL_CatalogInfo, item);
+                    BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, item);
             });
         }
         if (auto *a = ActionManager::inst()->action("bricklink_priceguide")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 const auto item = m_select->currentItem();
                 if (item && !item->itemType()->hasColors())
-                    BrickLink::core()->openUrl(BrickLink::URL_PriceGuideInfo, item);
+                    BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, item);
             });
         }
         if (auto *a = ActionManager::inst()->action("bricklink_lotsforsale")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 const auto item = m_select->currentItem();
                 if (item && !item->itemType()->hasColors())
-                    BrickLink::core()->openUrl(BrickLink::URL_LotsForSale, item);
+                    BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, item);
             });
         }
         checkItem(m_select->currentItem(), false);

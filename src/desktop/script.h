@@ -134,7 +134,6 @@ public:
     QVector<ExtensionScriptAction *> extensionActions() const;
     QVector<PrintingScriptAction *> printingActions() const;
 
-    QQmlEngine *qmlEngine() const;
     QQmlContext *qmlContext() const;
     QmlBrickStore *brickStoreWrapper() const;
 
@@ -149,7 +148,6 @@ private:
     QString m_version;
 
     QString m_fileName;
-    std::unique_ptr<QQmlEngine> m_engine;
     QQmlContext *m_context = nullptr;
     QQmlComponent *m_component = nullptr;
 

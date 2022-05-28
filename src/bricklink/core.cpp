@@ -27,13 +27,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRunnable>
+#include <QQmlEngine>
+#include <QQmlInfo>
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#  include <qhashfunctions.h>
-#  define q5Hash qHash
-#else
-#  include "utility/q5hashfunctions.h"
-#endif
+#include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
 #include "utility/systeminfo.h"
 #include "utility/stopwatch.h"
@@ -44,6 +41,7 @@
 #include "bricklink/changelogentry.h"
 #include "bricklink/color.h"
 #include "bricklink/core.h"
+#include "bricklink/global.h"
 #include "bricklink/item.h"
 #include "bricklink/itemtype.h"
 #include "bricklink/lot.h"
@@ -52,6 +50,7 @@
 #include "bricklink/priceguide.h"
 #if !defined(BS_BACKEND)
 #  include "bricklink/cart.h"
+#  include "bricklink/model.h"
 #  include "bricklink/order.h"
 #  include "bricklink/store.h"
 #  include "bricklink/wantedlist.h"
@@ -60,28 +59,28 @@
 
 namespace BrickLink {
 
-void Core::openUrl(UrlList u, const void *opt, const void *opt2)
+void Core::openUrl(Url u, const void *opt, const void *opt2)
 {
     QUrl url;
 
     switch (u) {
-    case URL_InventoryRequest:
+    case Url::InventoryRequest:
         url = "https://www.bricklink.com/catalogInvAdd.asp"_l1;
         break;
 
-    case URL_WantedListUpload:
+    case Url::WantedListUpload:
         url = "https://www.bricklink.com/wantedXML.asp"_l1;
         break;
 
-    case URL_InventoryUpload:
+    case Url::InventoryUpload:
         url = "https://www.bricklink.com/invXML.asp"_l1;
         break;
 
-    case URL_InventoryUpdate:
+    case Url::InventoryUpdate:
         url = "https://www.bricklink.com/invXML.asp#update"_l1;
         break;
 
-    case URL_CatalogInfo: {
+    case Url::CatalogInfo: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItem.asp"_l1;
@@ -93,7 +92,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_PriceGuideInfo: {
+    case Url::PriceGuideInfo: {
         auto *item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogPG.asp"_l1;
@@ -105,7 +104,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_LotsForSale: {
+    case Url::LotsForSale: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/search.asp"_l1;
@@ -130,7 +129,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_AppearsInSets: {
+    case Url::AppearsInSets: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItemIn.asp"_l1;
@@ -144,11 +143,11 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_ColorChangeLog:
+    case Url::ColorChangeLog:
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R"_l1;
         break;
 
-    case URL_ItemChangeLog: {
+    case Url::ItemChangeLog: {
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_l1;
         QUrlQuery query;
         if (opt)
@@ -156,7 +155,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         url.setQuery(query);
         break;
     }
-    case URL_StoreItemDetail: {
+    case Url::StoreItemDetail: {
         auto lotId = static_cast<const unsigned int *>(opt);
         if (lotId && *lotId) {
             url = "https://www.bricklink.com/inventory_detail.asp"_l1;
@@ -166,7 +165,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_StoreItemSearch: {
+    case Url::StoreItemSearch: {
         const Item *item = static_cast<const Item *>(opt);
         const Color *color = static_cast<const Color *>(opt2);
         if (item && item->itemType()) {
@@ -186,7 +185,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_OrderDetails: {
+    case Url::OrderDetails: {
         auto orderId = static_cast<const char *>(opt);
         if (orderId && *orderId) {
             url = "https://www.bricklink.com/orderDetail.asp"_l1;
@@ -196,7 +195,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_ShoppingCart: {
+    case Url::ShoppingCart: {
         auto shopId = static_cast<const int *>(opt);
         if (shopId && *shopId) {
             url = "https://www.bricklink.com/v2/globalcart.page"_l1;
@@ -206,7 +205,7 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    case URL_WantedList: {
+    case Url::WantedList: {
         auto wantedId = static_cast<const int *>(opt);
         if (wantedId && (*wantedId >= 0)) {
             url = "https://www.bricklink.com/v2/wanted/edit.page"_l1;
@@ -234,107 +233,6 @@ const QImage Core::noImage(const QSize &s) const
     return img;
 }
 
-
-const QImage Core::colorImage(const Color *col, int w, int h) const
-{
-    if (!col || w <= 0 || h <= 0)
-        return QImage();
-
-    //TODO for Qt6: use more than 10/11/11 bits ... qHash is 64bit wide now
-    uint key = uint(col->id() << 22) | uint(w << 11) | uint(h);
-    QImage img = m_colorImageCache.value(key);
-
-    if (img.isNull()) {
-        QColor c = col->color();
-
-        img = QImage(w, h, QImage::Format_ARGB32_Premultiplied);
-        QPainter p(&img);
-        p.setRenderHints(QPainter::Antialiasing);
-        QRect r = img.rect();
-
-        QBrush brush;
-
-        if (col->isGlitter()) {
-            brush = QBrush(Utility::contrastColor(c, 0.25), Qt::Dense6Pattern);
-        }
-        else if (col->isSpeckle()) {
-            // hack for speckled colors
-            QColor c2;
-
-            if (!c.isValid()) {
-                QString name = col->name();
-                int dash = name.indexOf('-'_l1);
-                if (dash > 0) {
-                    QString basename = name.mid(8, dash - 8);
-                    if (basename.startsWith("DB"_l1))
-                        basename.replace(0, 2, "Dark Bluish "_l1);
-                    QString speckname = name.mid(dash + 1);
-
-                    const Color *basec = colorFromName(basename);
-                    const Color *speckc = colorFromName(speckname);
-
-                    if (basec)
-                        c = basec->color();
-                    if (speckc)
-                        c2 = speckc->color();
-                }
-            }
-            if (c.isValid()) {
-                if (!c2.isValid()) // fake
-                    c2 = Utility::contrastColor(c, 0.2);
-                brush = QBrush(c2, Qt::Dense7Pattern);
-            }
-        }
-        else if (col->isMetallic()) {
-            QColor c2 = Utility::gradientColor(c, Qt::black);
-
-            QLinearGradient gradient(0, 0, 0, r.height());
-            gradient.setColorAt(0,   c2);
-            gradient.setColorAt(0.3, c);
-            gradient.setColorAt(0.7, c);
-            gradient.setColorAt(1,   c2);
-            brush = gradient;
-        }
-        else if (col->isChrome()) {
-            QColor c2 = Utility::gradientColor(c, Qt::black);
-
-            QLinearGradient gradient(0, 0, r.width(), 0);
-            gradient.setColorAt(0,   c2);
-            gradient.setColorAt(0.3, c);
-            gradient.setColorAt(0.7, c);
-            gradient.setColorAt(1,   c2);
-            brush = gradient;
-        }
-
-        if (c.isValid()) {
-            p.fillRect(r, c);
-            p.fillRect(r, brush);
-        }
-        else {
-            p.fillRect(0, 0, w, h, Qt::white);
-            p.setRenderHint(QPainter::Antialiasing);
-            p.setPen(Qt::darkGray);
-            p.setBrush(QColor(255, 255, 255, 128));
-            p.drawRect(r);
-            p.drawLine(0, 0, w, h);
-            p.drawLine(0, h, w, 0);
-        }
-
-        if (col->isTransparent()) {
-            QLinearGradient gradient(0, 0, r.width(), r.height());
-            gradient.setColorAt(0,   Qt::transparent);
-            gradient.setColorAt(0.4, Qt::transparent);
-            gradient.setColorAt(0.6, QColor(255, 255, 255, 100));
-            gradient.setColorAt(1,   QColor(255, 255, 255, 100));
-
-            p.fillRect(r, gradient);
-        }
-        p.end();
-
-        m_colorImageCache.insert(key, img);
-    }
-    return img;
-}
 
 
 QString Core::dataPath() const
@@ -883,6 +781,29 @@ QString Core::countryIdFromName(const QString &name) const
     return { };
 }
 
+QString Core::itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight)
+{
+    if (item) {
+        QString cs;
+        if (!QByteArray("MP").contains(item->itemTypeId())) {
+            cs = cs % R"(<i><font color=")"_l1 % Utility::textColor(highlight).name() %
+                    R"(" style="background-color: )"_l1 % highlight.name() % R"(;">&nbsp;)"_l1 %
+                    item->itemType()->name() % R"(&nbsp;</font></i>&nbsp;&nbsp;)"_l1;
+        }
+        if (color && color->id()) {
+            QColor c = color->color();
+            cs = cs % R"(<b><font color=")"_l1 % Utility::textColor(c).name() %
+                    R"(" style="background-color: )"_l1 % c.name() % R"(;">&nbsp;)"_l1 %
+                    color->name() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
+        }
+
+        return "<center><b>"_l1 % QLatin1String(item->id()) % "</b>&nbsp; "_l1 % cs %
+                item->name() % "</center>"_l1;
+    } else {
+        return { };
+    }
+}
+
 const Category *Core::category(uint id) const
 {
     auto it = std::lower_bound(categories().cbegin(), categories().cend(), id, &Category::lessThan);
@@ -1003,19 +924,15 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
     return (item && color);
 }
 
-qreal Core::itemImageScaleFactor() const
+double Core::itemImageScaleFactor() const
 {
     return m_item_image_scale_factor;
 }
 
-void Core::setItemImageScaleFactor(qreal f)
+void Core::setItemImageScaleFactor(double f)
 {
     if (!qFuzzyCompare(f, m_item_image_scale_factor)) {
         m_item_image_scale_factor = f;
-
-        m_noImageCache.clear();
-        m_colorImageCache.clear();
-
         emit itemImageScaleFactorChanged(f);
     }
 }
@@ -1087,7 +1004,6 @@ public:
         , m_pg(pg)
     {
         pg->addRef();
-        pg->m_update_status = UpdateStatus::Loading;
     }
     ~PriceGuideLoaderJob() override
     {
@@ -1117,12 +1033,12 @@ void PriceGuideLoaderJob::run()
 
         pg->addRef(); // the release will happen in Core::priceGuideLoaded
         QMetaObject::invokeMethod(core(), [=]() {
-            pg->m_valid = valid;
-            pg->m_update_status = UpdateStatus::Ok;
             if (valid) {
-                pg->m_fetched = fetched;
+                pg->setLastUpdated(fetched);
                 pg->m_data = data;
             }
+            pg->setIsValid(valid);
+            pg->setUpdateStatus(UpdateStatus::Ok);
             core()->priceGuideLoaded(pg);
         }, Qt::QueuedConnection);
     }
@@ -1159,6 +1075,7 @@ PriceGuide *Core::priceGuide(const Item *item, const Color *color, bool highPrio
             updatePriceGuide(pg, highPriority);
     }
     else if (needToLoad) {
+        pg->setUpdateStatus(UpdateStatus::Loading);
         m_diskloadPool.start(new PriceGuideLoaderJob(pg));
     }
 
@@ -1185,7 +1102,7 @@ void Core::updatePriceGuide(PriceGuide *pg, bool highPriority)
         return;
 
     if (!m_online || !m_transfer) {
-        pg->m_update_status = UpdateStatus::UpdateFailed;
+        pg->setUpdateStatus(UpdateStatus::UpdateFailed);
         emit priceGuideUpdated(pg);
         return;
     }
@@ -1195,7 +1112,7 @@ void Core::updatePriceGuide(PriceGuide *pg, bool highPriority)
         return;
     }
 
-    pg->m_update_status = UpdateStatus::Updating;
+    pg->setUpdateStatus(UpdateStatus::Updating);
     pg->addRef();
 
     QUrlQuery query;
@@ -1251,10 +1168,12 @@ void Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
         if (pg->m_valid) {
             pg->m_fetched = QDateTime::currentDateTime();
             pg->saveToDisk(pg->m_fetched, pg->m_data);
-            pg->m_update_status = UpdateStatus::Ok;
         }
-    } else if (!j->isAborted()) {
-        qWarning() << "PriceGuide download failed:" << j->errorString() << "(" << j->responseCode() << ")";
+        pg->setUpdateStatus(pg->m_valid ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+    } else {
+        if (!j->isAborted())
+            qWarning() << "PriceGuide download failed:" << j->errorString() << "(" << j->responseCode() << ")";
+        pg->setUpdateStatus(UpdateStatus::UpdateFailed);
     }
 
     emit priceGuideUpdated(pg);
@@ -1270,7 +1189,6 @@ public:
         , m_pic(pic)
     {
         pic->addRef();
-        pic->m_update_status = UpdateStatus::Loading;
     }
     ~PictureLoaderJob() override
     {
@@ -1300,12 +1218,12 @@ void PictureLoaderJob::run()
 
         pic->addRef(); // the release will happen in Core::pictureLoaded
         QMetaObject::invokeMethod(core(), [=]() {
-            pic->m_valid = valid;
-            pic->m_update_status = UpdateStatus::Ok;
             if (valid) {
-                pic->m_fetched = fetched;
+                pic->setLastUpdated(fetched);
                 pic->m_image = image;
             }
+            pic->setUpdateStatus(UpdateStatus::Ok);
+            pic->setIsValid(valid);
             core()->pictureLoaded(pic);
         }, Qt::QueuedConnection);
     }
@@ -1315,8 +1233,8 @@ void PictureLoaderJob::run()
 QSize Core::standardPictureSize() const
 {
     QSize s(80, 60);
-    qreal f = core()->itemImageScaleFactor();
-    if (!qFuzzyCompare(f, 1))
+    double f = core()->itemImageScaleFactor();
+    if (!qFuzzyCompare(f, 1.))
         s *= f;
     return s;
 }
@@ -1344,7 +1262,9 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
     if (highPriority) {
         if (!pic->isValid()) {
             pic->m_valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
+            emit pic->isValidChanged(pic->m_valid);
             pic->m_update_status = UpdateStatus::Ok;
+            emit pic->updateStatusChanged(pic->m_update_status);
 
             m_pic_cache.setObjectCost(key, pic->cost());
         }
@@ -1353,6 +1273,7 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
             updatePicture(pic, highPriority);
 
     } else if (needToLoad) {
+        pic->setUpdateStatus(UpdateStatus::Loading);
         m_diskloadPool.start(new PictureLoaderJob(pic));
     }
 
@@ -1398,7 +1319,7 @@ void Core::updatePicture(Picture *pic, bool highPriority)
         return;
 
     if (!m_online || !m_transfer) {
-        pic->m_update_status = UpdateStatus::UpdateFailed;
+        pic->setUpdateStatus(UpdateStatus::UpdateFailed);
         emit pictureUpdated(pic);
         return;
     }
@@ -1408,7 +1329,7 @@ void Core::updatePicture(Picture *pic, bool highPriority)
         return;
     }
 
-    pic->m_update_status = UpdateStatus::Updating;
+    pic->setUpdateStatus(UpdateStatus::Updating);
     pic->addRef();
 
     bool large = (!pic->color());
@@ -1447,7 +1368,7 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
     if (j->isCompleted() && j->file()) {
         static_cast<QSaveFile *>(j->file())->commit();
 
-        pic->m_update_status = UpdateStatus::Loading;
+        pic->setUpdateStatus(UpdateStatus::Loading);
         m_diskloadPool.start(new PictureLoaderJob(pic));
         pic->release();
         return;
@@ -1458,9 +1379,9 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
         // loading to do the right thing.
 
         if (!m_transfer) {
-            pic->m_update_status = UpdateStatus::UpdateFailed;
+            pic->setUpdateStatus(UpdateStatus::UpdateFailed);
         } else {
-            pic->m_update_status = UpdateStatus::Updating;
+            pic->setUpdateStatus(UpdateStatus::Updating);
 
             QUrl url = j->url();
             url.setPath(url.path().replace(".jpg"_l1, ".gif"_l1));
@@ -1475,13 +1396,293 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
             return;
         }
     } else {
-        pic->m_update_status = UpdateStatus::UpdateFailed;
+        pic->setUpdateStatus(UpdateStatus::UpdateFailed);
 
-        qWarning() << "Image download failed:" << j->errorString() << "(" << j->responseCode() << ")";
+//        qWarning() << "Image download failed:" << j->errorString() << "(" << j->responseCode() << ")";
     }
 
     emit pictureUpdated(pic);
     pic->release();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+/*! \qmltype BrickLink
+    \inherits QtObject
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief The core singleton managing the data transfer from and to BrickLink.
+
+    This singleton is responsible for handling all communications with the BrickLink servers, as
+    well as giving access to the BrickLink item catalog, which is available through these types:
+    \list
+    \li ItemType
+    \li \l Category
+    \li \l Color
+    \li \l Item
+    \li \l Picture
+    \li PriceGuide
+    \endlist
+*/
+
+QmlBrickLink *QmlBrickLink::s_inst = nullptr;
+
+void QmlBrickLink::registerTypes()
+{
+    qRegisterMetaType<QmlColor>("Color");
+    qRegisterMetaType<QmlItemType>("ItemType");
+    qRegisterMetaType<QmlCategory>("Category");
+    qRegisterMetaType<QmlItem>("Item");
+    qRegisterMetaType<QmlLot>("Lot");
+
+    qmlRegisterType<BrickLink::ColorModel>("BrickStore", 1, 0, "ColorModel");
+    qmlRegisterType<BrickLink::CategoryModel>("BrickStore", 1, 0, "CategoryModel");
+    qmlRegisterType<BrickLink::ItemTypeModel>("BrickStore", 1, 0, "ItemTypeModel");
+    qmlRegisterType<BrickLink::ItemModel>("BrickStore", 1, 0, "ItemModel");
+
+    s_inst = new QmlBrickLink(BrickLink::core());
+
+    QQmlEngine::setObjectOwnership(s_inst, QQmlEngine::CppOwnership);
+    qmlRegisterSingletonType<QmlBrickLink>("BrickStore", 1, 0, "BrickLink",
+                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
+        return s_inst;
+    });
+
+    QString cannotCreate = "Cannot create this type"_l1;
+    qmlRegisterUncreatableType<BrickLink::Picture>("BrickStore", 1, 0, "Picture", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::PriceGuide>("BrickStore", 1, 0, "PriceGuide", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::Order>("BrickStore", 1, 0, "Order", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::Cart>("BrickStore", 1, 0, "Cart", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::Store>("BrickStore", 1, 0, "Store", cannotCreate);
+}
+
+QmlBrickLink::QmlBrickLink(BrickLink::Core *core)
+    : d(core)
+{
+    setObjectName("BrickLink"_l1);
+
+    connect(core, &BrickLink::Core::priceGuideUpdated,
+            this, [this](::BrickLink::PriceGuide *pg) {
+        static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::priceGuideUpdated);
+        if (isSignalConnected(sig))
+            emit priceGuideUpdated(pg);
+    });
+    connect(core, &BrickLink::Core::pictureUpdated,
+            this, [this](::BrickLink::Picture *pic) {
+        static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::pictureUpdated);
+        if (isSignalConnected(sig))
+            emit pictureUpdated(pic);
+    });
+}
+
+/*! \qmlproperty Item BrickLink::noItem
+    \readonly
+    A special Item object denoting an invalid item. The object's Item::isNull returns \c true.
+    Used as a return value for functions that can fail.
+*/
+QmlItem QmlBrickLink::noItem() const
+{
+    return QmlItem { };
+}
+
+/*! \qmlproperty Color BrickLink::noColor
+    \readonly
+    A special \l Color object denoting an invalid color. The object's Color::isNull returns \c true.
+    Used as a return value for functions that can fail.
+*/
+QmlColor QmlBrickLink::noColor() const
+{
+    return QmlColor { };
+}
+
+/*! \qmlmethod Imager BrickLink::noImage(int width, int height)
+    Returns an icon, which can be used in place of a missing item image.
+*/
+QImage QmlBrickLink::noImage(int width, int height) const
+{
+    return BrickLink::core()->noImage({ width, height });
+}
+
+/*! \qmlmethod Color BrickLink::color(var color)
+    Create a JavaScript Color wrapper for a C++ \c{BrickLink::Color *} \a color obtained from a
+    data model.
+*/
+/*! \qmlmethod Color BrickLink::color(string colorName)
+    Returns a Color object corresponding to the given BrickLink \a colorName. If there is no match,
+    the returned object is noColor.
+*/
+/*! \qmlmethod Color BrickLink::color(uint colorId)
+    Returns a Color object corresponding to the given BrickLink \a colorId. If there is no match,
+    the returned object is noColor.
+*/
+QmlColor QmlBrickLink::color(const QVariant &v) const
+{
+    if (v.userType() == qMetaTypeId<const BrickLink::Color *>())
+        return v.value<const BrickLink::Color *>();
+    else if (v.userType() == QMetaType::QString)
+        return d->colorFromName(v.toString());
+    else
+        return d->color(v.value<uint>());
+}
+
+/*! \qmlmethod Color BrickLink::colorFromLDrawId(int colorId)
+    Returns a Color object corresponding to the given LDraw \a colorId. If there is no match (or
+    if a LDraw installation isn't available), the returned object is noColor.
+*/
+QmlColor QmlBrickLink::colorFromLDrawId(int ldrawId) const
+{
+    return d->colorFromLDrawId(ldrawId);
+}
+
+/*! \qmlmethod Category BrickLink::category(var category)
+    Create a JavaScript Category wrapper for a C++ \c{BrickLink::Category *} \a category obtained
+    from a data model.
+*/
+/*! \qmlmethod Category BrickLink::category(int categoryId)
+    Returns a Category object corresponding to the given BrickLink \a categoryId. If there is no
+    match, the returned object is noCategory.
+*/
+QmlCategory QmlBrickLink::category(const QVariant &v) const
+{
+    if (v.userType() == qMetaTypeId<const BrickLink::Category *>())
+        return v.value<const BrickLink::Category *>();
+    else
+        return d->category(v.value<uint>());
+}
+
+/*! \qmlmethod ItemType BrickLink::itemType(var itemType)
+    Create a JavaScript ItemType wrapper for a C++ \c{BrickLink::ItemType *} \a itemType obtained
+    from a data model.
+*/
+/*! \qmlmethod ItemType BrickLink::itemType(string itemTypeId)
+    Returns an ItemType object corresponding to the given BrickLink \a itemTypeId. If there is no
+    match, the returned object is noItemType.
+    \note The id is a single letter string and has to be one of \c{PCGIMOPS}.
+*/
+QmlItemType QmlBrickLink::itemType(const QVariant &v) const
+{
+    if (v.userType() == qMetaTypeId<const BrickLink::ItemType *>())
+        return v.value<const BrickLink::ItemType *>();
+    else
+        return d->itemType(firstCharInString(v.toString()));
+}
+
+/*! \qmlmethod Item BrickLink::itemType(var item)
+    Create a JavaScript Item wrapper for a C++ \c{BrickLink::Item *} \a item obtained from a data
+    model.
+*/
+QmlItem QmlBrickLink::item(const QVariant &v) const
+{
+    if (v.userType() == qMetaTypeId<const BrickLink::Item *>())
+        return v.value<const BrickLink::Item *>();
+    else
+        return noItem();
+}
+
+/*! \qmlmethod Item BrickLink::item(string itemTypeId, string itemId)
+    Returns an \l Item object corresponding to the given BrickLink \a itemTypeId and \a itemId. If
+    there is no match, the returned object is noItem.
+*/
+QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) const
+{
+    return d->item(firstCharInString(itemTypeId), itemId.toLatin1());
+}
+
+/*! \qmlsignal BrickLink::priceGuideUpdated(PriceGuide priceGuide)
+    This signal is emitted everytime the state of the \a priceGuide object changes. Receiving this
+    signal doesn't mean the preice guide data is available: you have to check the object's
+    properties to see what has changed.
+*/
+/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
+    Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
+    the given \a item and \a color combination. If you set \a highPriority to \c true the
+    load/download request will be pre-prended to the work queue instead of appended.
+    You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
+    been loaded.
+    \sa PriceGuide
+*/
+BrickLink::PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
+{
+    auto pg = d->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority);
+    QQmlEngine::setObjectOwnership(pg, QQmlEngine::CppOwnership);
+    return pg;
+}
+
+/*! \qmlsignal BrickLink::pictureUpdated(Picture picture)
+    This signal is emitted everytime the state of the \a picture object changes. Receiving this
+    signal doesn't mean the picture is available: you have to check the object's properties
+    to see what has changed.
+*/
+/*! \qmlmethod Picture BrickLink::picture(Item item, Color color, bool highPriority = false)
+    Creates a \l Picture object that asynchronously loads (or downloads) the picture for the given
+    \a item and \a color combination. If you set \a highPriority to \c true the load/download
+    request will be pre-prended to the work queue instead of appended.
+    You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
+    been loaded.
+    \sa Picture
+*/
+BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
+{
+    auto pic = d->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
+    QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
+    return pic;
+}
+
+/*! \qmlmethod Picture BrickLink::largePicture(Item item, bool highPriority = false)
+    Creates a Picture object that asynchronously loads (or downloads) the large picture for the
+    given \a item. If you set \a highPriority to \c true the load/download request will be
+    pre-prended to the work queue instead of appended.
+    You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
+    been loaded.
+    \sa Picture
+*/
+BrickLink::Picture *QmlBrickLink::largePicture(QmlItem item, bool highPriority)
+{
+    auto pic = d->largePicture(item.wrappedObject(), highPriority);
+    QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
+    return pic;
+}
+
+/*! \qmlmethod Lot BrickLink::lot(var lot)
+    Create a JavaScript Lot wrapper for a C++ \c{BrickLink::Lot *} \a lot obtained from a data model.
+*/
+QmlLot QmlBrickLink::lot(const QVariant &v) const
+{
+    if (v.userType() == qMetaTypeId<const BrickLink::Lot *>())
+        return QmlLot { const_cast<BrickLink::Lot *>(v.value<const BrickLink::Lot *>()), nullptr };
+    else
+        return v.value<BrickLink::Lot *>();
+}
+
+void QmlBrickLink::cacheStat() const
+{
+    auto pic = BrickLink::core()->pictureCacheStats();
+    auto pg = BrickLink::core()->priceGuideCacheStats();
+
+    QByteArray picBar(int(double(pic.first) / pic.second * 16), '=');
+    picBar.append(16 - picBar.length(), ' ');
+    QByteArray pgBar(int(double(pg.first) / pg.second * 16), '=');
+    pgBar.append(16 - pgBar.length(), ' ');
+
+    qmlDebug(this) << "Cache stats:\n"
+                   << "Pictures    : [" << picBar.constData() << "] " << (pic.first / 1000)
+                   << " / " << (pic.second / 1000) << " MB\n"
+                   << "Price guides: [" << pgBar.constData() << "] " << (pg.first)
+                   << " / " << pg.second << " entries";
+}
+
+QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const
+{
+    return BrickLink::Core::itemHtmlDescription(item.wrappedObject(), color.wrappedObject(), highlight);
+}
+
+char QmlBrickLink::firstCharInString(const QString &str)
+{
+    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
 }
 
 } // namespace BrickLink

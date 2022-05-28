@@ -384,8 +384,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case DocumentModel::Color: {
-        image = BrickLink::core()->colorImage(lot->color(), option.decorationSize.width(),
-                                              option.rect.height());
+        image = lot->color()->image(option.decorationSize.width(), option.rect.height());
         break;
     }
     case DocumentModel::Retain:

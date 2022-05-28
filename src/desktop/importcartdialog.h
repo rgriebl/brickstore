@@ -49,6 +49,5 @@ private:
     QPushButton *w_import;
     QPushButton *w_showOnBrickLink;
     QDateTime m_lastUpdated;
-    QVector<int> m_cartsToOpen;
     QString m_updateMessage;
 };

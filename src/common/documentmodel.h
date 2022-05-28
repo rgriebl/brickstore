@@ -37,6 +37,60 @@ class ChangeCmd;
 using BrickLink::Lot;
 using BrickLink::LotList;
 
+namespace BrickLink {
+class Picture;
+class PriceGuide;
+}
+
+class DocumentStatistics
+{
+    Q_GADGET
+    Q_DECLARE_TR_FUNCTIONS(DocumentStatistics)
+    Q_PROPERTY(int lots READ lots)
+    Q_PROPERTY(int items READ items)
+    Q_PROPERTY(double value READ value)
+    Q_PROPERTY(double minValue READ minValue)
+    Q_PROPERTY(double cost READ cost)
+    Q_PROPERTY(double weight READ weight)
+    Q_PROPERTY(int errors READ errors)
+    Q_PROPERTY(int differences READ differences)
+    Q_PROPERTY(int incomplete READ incomplete)
+    Q_PROPERTY(QString currencyCode READ currencyCode)
+
+public:
+    int lots() const             { return m_lots; }
+    int items() const            { return m_items; }
+    double value() const         { return m_val; }
+    double minValue() const      { return m_minval; }
+    double cost() const          { return m_cost; }
+    double weight() const        { return m_weight; }
+    int errors() const           { return m_errors; }
+    int differences() const      { return m_differences; }
+    int incomplete() const       { return m_incomplete; }
+    QString currencyCode() const { return m_ccode; }
+
+    DocumentStatistics() = default;
+
+    Q_INVOKABLE QString asHtmlTable() const;
+
+private:
+    DocumentStatistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded,
+                       bool ignorePriceAndQuantityErrors = false);
+
+    int m_lots;
+    int m_items;
+    double m_val;
+    double m_minval;
+    double m_cost;
+    double m_weight;
+    int m_errors;
+    int m_differences;
+    int m_incomplete;
+    QString m_ccode;
+
+    friend class DocumentModel;
+};
+
 
 class DocumentModel : public QAbstractTableModel
 {
@@ -117,38 +171,6 @@ public:
 
     static double maxLocalPrice(const QString &currencyCode);
 
-    class Statistics
-    {
-    public:
-        int lots() const             { return m_lots; }
-        int items() const            { return m_items; }
-        double value() const         { return m_val; }
-        double minValue() const      { return m_minval; }
-        double cost() const          { return m_cost; }
-        double weight() const        { return m_weight; }
-        int errors() const           { return m_errors; }
-        int differences() const      { return m_differences; }
-        int incomplete() const       { return m_incomplete; }
-        QString currencyCode() const { return m_ccode; }
-
-    private:
-        Statistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded,
-                   bool ignorePriceAndQuantityErrors = false);
-
-        int m_lots;
-        int m_items;
-        double m_val;
-        double m_minval;
-        double m_cost;
-        double m_weight;
-        int m_errors;
-        int m_differences;
-        int m_incomplete;
-        QString m_ccode;
-
-        friend class DocumentModel;
-    };
-
     // Itemviews API
     Lot *lot(const QModelIndex &idx) const;
     QModelIndex index(const Lot *i, int column = 0) const;
@@ -225,8 +247,8 @@ public:
     void changeLots(const std::vector<std::pair<Lot *, Lot>> &changes,
                      DocumentModel::Field hint = DocumentModel::FieldCount);
 
-    Statistics statistics(const LotList &list, bool ignoreExcluded,
-                          bool ignorePriceAndQuantityErrors = false) const;
+    DocumentStatistics statistics(const LotList &list, bool ignoreExcluded,
+                                  bool ignorePriceAndQuantityErrors = false) const;
 
     void setLotFlagsMask(QPair<quint64, quint64> flagsMask);
 
@@ -377,6 +399,7 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(DocumentModel::MergeModes)
 
+Q_DECLARE_METATYPE(DocumentStatistics)
 Q_DECLARE_METATYPE(DocumentModel *)
 Q_DECLARE_METATYPE(DocumentModel::Field)
 Q_DECLARE_METATYPE(const DocumentModel *)

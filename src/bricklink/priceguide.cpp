@@ -25,9 +25,11 @@
 #include "utility/utility.h"
 
 
-bool BrickLink::PriceGuide::s_scrapeHtml = true;
+namespace BrickLink {
 
-BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::Color *color)
+bool PriceGuide::s_scrapeHtml = true;
+
+PriceGuide::PriceGuide(const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
 {
@@ -36,12 +38,12 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     m_update_status = UpdateStatus::Ok;
 }
 
-BrickLink::PriceGuide::~PriceGuide()
+PriceGuide::~PriceGuide()
 {
     cancelUpdate();
 }
 
-void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
+void PriceGuide::saveToDisk(const QDateTime &fetched, const Data &data)
 {
     std::unique_ptr<QSaveFile> f(core()->dataSaveFile(u"priceguide.txt", m_item, m_color));
 
@@ -66,7 +68,32 @@ void BrickLink::PriceGuide::saveToDisk(const QDateTime &fetched, const Data &dat
     }
 }
 
-bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
+void PriceGuide::setIsValid(bool valid)
+{
+    if (valid != m_valid) {
+        m_valid = valid;
+        emit isValidChanged(valid);
+    }
+}
+
+void PriceGuide::setUpdateStatus(UpdateStatus status)
+{
+    if (status != m_update_status) {
+        m_update_status = status;
+        emit updateStatusChanged(status);
+    }
+}
+
+void PriceGuide::setLastUpdated(const QDateTime &dt)
+{
+    if (dt != m_fetched) {
+        m_fetched = dt;
+        emit lastUpdatedChanged(dt);
+    }
+}
+
+
+bool PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
 {
     if (!m_item || !m_color)
         return false;
@@ -82,7 +109,7 @@ bool BrickLink::PriceGuide::loadFromDisk(QDateTime &fetched, Data &data) const
     return false;
 }
 
-bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
+bool PriceGuide::parse(const QByteArray &ba, Data &result) const
 {
     result = { };
 
@@ -131,7 +158,7 @@ bool BrickLink::PriceGuide::parse(const QByteArray &ba, Data &result) const
     return true;
 }
 
-bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
+bool PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 {
     static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <)"_l1);
 
@@ -197,13 +224,105 @@ bool BrickLink::PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 }
 
 
-void BrickLink::PriceGuide::update(bool highPriority)
+void PriceGuide::update(bool highPriority)
 {
     core()->updatePriceGuide(this, highPriority);
 }
 
-void BrickLink::PriceGuide::cancelUpdate()
+void PriceGuide::cancelUpdate()
 {
     if (core())
         core()->cancelPriceGuideUpdate(this);
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+/*! \qmltype PriceGuide
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This value type represents the price guide for a BrickLink item.
+
+    Each price guide of an item in the BrickLink catalog is available as a PriceGuide object.
+
+    You cannot create PriceGuide objects yourself, but you can retrieve a PriceGuide object given the
+    item and color id via BrickLink::priceGuide().
+
+    \note PriceGuides aren't readily available, but need to be asynchronously loaded (or even
+          downloaded) at runtime. You need to connect to the signal BrickLink::priceGuideUpdated()
+          to know when the data has been loaded.
+
+    The following three enumerations are used to retrieve the price guide data from this object:
+
+    \b Time
+    \value BrickLink.PastSix   The sales in the last six months.
+    \value BrickLink.Current   The items currently for sale.
+
+    \b Condition
+    \value BrickLink.New       Only items in new condition.
+    \value BrickLink.Used      Only items in used condition.
+
+    \b Price
+    \value BrickLink.Lowest    The lowest price.
+    \value BrickLink.Average   The average price.
+    \value BrickLink.WAverage  The weighted average price.
+    \value BrickLink.Highest   The highest price.
+
+*/
+/*! \qmlproperty bool PriceGuide::isNull
+    \readonly
+    Returns whether this PriceGuide is \c null. Since this type is a value wrapper around a C++
+    object, we cannot use the normal JavaScript \c null notation.
+*/
+/*! \qmlproperty Item PriceGuide::item
+    \readonly
+    The BrickLink item reference this price guide is requested for.
+*/
+/*! \qmlproperty Color PriceGuide::color
+    \readonly
+    The BrickLink color reference this price guide is requested for.
+*/
+/*! \qmlproperty date PriceGuide::lastUpdated
+    \readonly
+    Holds the time stamp of the last successful update of this price guide.
+*/
+/*! \qmlproperty UpdateStatus PriceGuide::updateStatus
+    \readonly
+    Returns the current update status. The available values are:
+    \value BrickLink.Ok            The last picture load (or download) was successful.
+    \value BrickLink.Loading       BrickStore is currently loading the picture from the local cache.
+    \value BrickLink.Updating      BrickStore is currently downloading the picture from BrickLink.
+    \value BrickLink.UpdateFailed  The last download from BrickLink failed. isValid might still be
+                                   \c true, if there was a valid picture available before the failed
+                                   update!
+*/
+/*! \qmlproperty bool PriceGuide::isValid
+    \readonly
+    Returns whether this object currently holds valid price guide data.
+*/
+/*! \qmlmethod PriceGuide::update(bool highPriority = false)
+    Tries to re-download the price guide from the BrickLink server. If you set \a highPriority to \c
+    true the load/download request will be pre-prended to the work queue instead of appended.
+*/
+/*! \qmlmethod int PriceGuide::quantity(Time time, Condition condition)
+    Returns the number of items for sale (or item that have been sold) given the \a time frame and
+    \a condition. Returns \c 0 if no data is available.
+    See the PriceGuide type documentation for the possible values of the Time and
+    Condition enumerations.
+*/
+/*! \qmlmethod int PriceGuide::lots(Time time, Condition condition)
+    Returns the number of lots for sale (or lots that have been sold) given the \a time frame and
+    \a condition. Returns \c 0 if no data is available.
+    See the PriceGuide type documentation for the possible values of the Time and
+    Condition enumerations.
+*/
+/*! \qmlmethod real PriceGuide::price(Time time, Condition condition, Price price)
+    Returns the price of items for sale (or item that have been sold) given the \a time frame,
+    \a condition and \a price type. Returns \c 0 if no data is available.
+    See the PriceGuide type documentation for the possible values of the Time,
+    Condition and Price enumerations.
+*/
+
+} // namespace BrickLink

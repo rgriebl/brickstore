@@ -15,10 +15,11 @@
 
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
+#include "qqmlregistration.h"
 
 #include "bricklink/color.h"
-#include "bricklink/itemtype.h"
-#include "bricklink/color.h"
+#include "bricklink/global.h"
+#include "bricklink/item.h"
 #include "utility/staticpointermodel.h"
 
 
@@ -27,8 +28,10 @@ namespace BrickLink {
 class ColorModel : public StaticPointerModel
 {
     Q_OBJECT
+    QML_ELEMENT
+
 public:
-    ColorModel(QObject *parent);
+    ColorModel(QObject *parent = nullptr);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -67,8 +70,11 @@ private:
 class CategoryModel : public StaticPointerModel
 {
     Q_OBJECT
+    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
+    Q_PROPERTY(bool filterAllCategories READ filterAllCategories WRITE setFilterAllCategories NOTIFY isFilteredChanged)
+
 public:
-    CategoryModel(QObject *parent);
+    CategoryModel(QObject *parent = nullptr);
 
     static const Category *AllCategories;
 
@@ -76,13 +82,16 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Category *category) const;
     const Category *category(const QModelIndex &index) const;
 
     bool isFiltered() const override;
+    const ItemType *filterItemType() const;
     void setFilterItemType(const ItemType *it);
+    bool filterAllCategories() const;
     void setFilterAllCategories(bool);
 
 protected:
@@ -104,19 +113,23 @@ private:
 class ItemTypeModel : public StaticPointerModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
+
 public:
-    ItemTypeModel(QObject *parent);
+    ItemTypeModel(QObject *parent = nullptr);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const ItemType *itemtype) const;
     const ItemType *itemType(const QModelIndex &index) const;
 
     bool isFiltered() const override;
+    bool filterWithoutInventory() const;
     void setFilterWithoutInventory(bool on);
 
 protected:
@@ -137,24 +150,37 @@ private:
 class ItemModel : public StaticPointerModel
 {
     Q_OBJECT
+    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
+    Q_PROPERTY(const BrickLink::Category *filterCategory READ filterCategory WRITE setFilterCategory NOTIFY isFilteredChanged)
+    Q_PROPERTY(const BrickLink::Color *filterColor READ filterColor WRITE setFilterColor NOTIFY isFilteredChanged)
+    Q_PROPERTY(QString filterText READ filterText WRITE setFilterText NOTIFY isFilteredChanged)
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
+
 public:
-    ItemModel(QObject *parent);
+    ItemModel(QObject *parent = nullptr);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Item *item) const;
     const Item *item(const QModelIndex &index) const;
 
     bool isFiltered() const override;
+    const ItemType *filterItemType() const;
     void setFilterItemType(const ItemType *it);
+    const Category *filterCategory() const;
     void setFilterCategory(const Category *cat);
+    const BrickLink::Color *filterColor() const;
     void setFilterColor(const Color *col);
+    QString filterText() const;
     void setFilterText(const QString &filter);
+    bool filterWithoutInventory() const;
     void setFilterWithoutInventory(bool on);
+
     void setFilterYearRange(int minYear, int maxYear);
 
 protected slots:

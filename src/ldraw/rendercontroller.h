@@ -19,6 +19,7 @@
 
 #include "ldraw/rendergeometry.h"
 #include "bricklink/color.h"
+#include "bricklink/item.h"
 
 QT_FORWARD_DECLARE_CLASS(QQuick3DTextureData)
 
@@ -40,7 +41,7 @@ class RenderController : public QObject
     Q_PROPERTY(bool tumblingAnimationActive READ isTumblingAnimationActive WRITE setTumblingAnimationActive NOTIFY tumblingAnimationActiveChanged)
 
 public:
-    RenderController(QObject *parent);
+    RenderController(QObject *parent = nullptr);
     ~RenderController() override;
 
     QVector<QmlRenderGeometry *> surfaces();
@@ -55,6 +56,7 @@ public:
 
     Part *part() const;
     const BrickLink::Color *color() const;
+    Q_INVOKABLE void setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
     void setPartAndColor(Part *part, const BrickLink::Color *color);
     void setPartAndColor(Part *part, int ldrawColorId);
 

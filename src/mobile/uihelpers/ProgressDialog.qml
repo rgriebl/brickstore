@@ -8,6 +8,7 @@ Dialog {
     property alias text: progressLabel.text
     property alias done: progress.value
     property alias total: progress.to
+    property alias cancelable: buttons.enabled
 
     signal requestCancel()
 
@@ -27,6 +28,7 @@ Dialog {
         // we need to hide the box inside a layout to prevent the automatically
         // created connections to Dialog.accept and .reject
         DialogButtonBox {
+            id: buttons
             standardButtons: root.standardButtons
             Layout.fillWidth: true
 

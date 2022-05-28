@@ -18,7 +18,10 @@
 
 #include "qcoro/task.h"
 
+QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QTranslator)
+QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
+
 
 class Announcements;
 class UndoGroup;
@@ -65,6 +68,8 @@ protected:
     virtual void setupLogging();
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);
+    virtual void setupQml();
+    void redirectQmlEngineWarnings(const QLoggingCategory &cat);
 
     bool initBrickLink(QString *errString);
 
@@ -97,6 +102,8 @@ protected:
     QPointer<Announcements> m_announcements;
 
     UndoGroup *m_undoGroup;
+
+    QQmlApplicationEngine *m_engine = nullptr;
 
     static Application *s_inst;
 };

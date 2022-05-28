@@ -20,6 +20,9 @@
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QProcess>
 #include <QtCore/QMessageLogContext>
+#include <QtCore/QPropertyAnimation>
+#include <QtCore/QSequentialAnimationGroup>
+#include <QtCore/QPauseAnimation>
 #include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
 #include <QtWidgets/QProxyStyle>
@@ -29,15 +32,13 @@
 #include <QtWidgets/QToolTip>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
-#include <QtCore/QPropertyAnimation>
-#include <QtCore/QSequentialAnimationGroup>
-#include <QtCore/QPauseAnimation>
-#include <QtGui/QPainter>
 #include <QtWidgets/QStyleFactory>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStyle>
+#include <QtGui/QPainter>
 #include <QtGui/QSurfaceFormat>
+#include <QtQml/QQmlApplicationEngine>
 #include <QtQuick3D/QQuick3D>
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
@@ -274,7 +275,7 @@ void DesktopApplication::init()
     // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();
 
-    ScriptManager::inst()->initialize();
+    ScriptManager::inst()->initialize(m_engine);
 
     MainWindow::inst()->show();
 

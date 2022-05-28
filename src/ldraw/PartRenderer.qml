@@ -20,10 +20,16 @@ Item {
         }
     }
 
+    implicitWidth: 200
+    implicitHeight: 200
+
     onWidthChanged: scaleToFit()
     onHeightChanged: scaleToFit()
 
     function scaleToFit() {
+        if (!rc)
+            return
+
         let r = rc.radius
         let z = 1
         if (view.camera == pcamera) {

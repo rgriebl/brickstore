@@ -13,9 +13,35 @@
 */
 #pragma once
 
-#include <qglobal.h>
 
-QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
-QT_FORWARD_DECLARE_CLASS(QQmlEngine)
+namespace BrickLink {
 
-void redirectQmlEngineWarnings(QQmlEngine *engine, const QLoggingCategory &cat);
+template <typename T> class QmlWrapperBase
+{
+public:
+    inline T *wrappedObject() const
+    {
+        return (wrapped == wrappedNull()) ? nullptr : wrapped;
+    }
+    inline bool isNull() const
+    {
+        return !wrappedObject();
+    }
+
+protected:
+    QmlWrapperBase(T *_wrappedObject)
+        : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
+    { }
+    virtual ~QmlWrapperBase() = default;
+
+    static T *wrappedNull()
+    {
+        static T t_null(nullptr);
+        return &t_null;
+    }
+
+
+    T *wrapped;
+};
+
+} // namespace BrickLink

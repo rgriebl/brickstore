@@ -27,27 +27,46 @@ class TransferJob;
 
 namespace BrickLink {
 
-class Picture : public Ref
+class Item;
+class Color;
+
+class Picture : public QObject, protected Ref
 {
+    Q_OBJECT
+    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT)
+    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT)
+    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
+
 public:
     static quint64 key(const Item *item, const Color *color);
 
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 
-    void update(bool highPriority = false);
+    Q_INVOKABLE void update(bool highPriority = false);
     QDateTime lastUpdated() const      { return m_fetched; }
-    void cancelUpdate();
+    Q_INVOKABLE void cancelUpdate();
 
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
-    const QImage image() const;
+    Q_INVOKABLE const QImage image() const;
 
     int cost() const;
 
     Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
     ~Picture() override;
+
+    Q_INVOKABLE void addRef() { Ref::addRef(); }
+    Q_INVOKABLE void release() { Ref::release(); }
+    Q_INVOKABLE int refCount() const { return Ref::refCount(); }
+
+signals:
+    void isValidChanged(bool newIsValid);
+    void lastUpdatedChanged(const QDateTime &newLastUpdated);
+    void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
 
 private:
     const Item *  m_item;
@@ -70,6 +89,9 @@ private:
     QFile *readFile() const;
     QSaveFile *saveFile() const;
     bool loadFromDisk(QDateTime &fetched, QImage &image) const;
+    void setIsValid(bool valid);
+    void setUpdateStatus(UpdateStatus status);
+    void setLastUpdated(const QDateTime &dt);
 
     friend class Core;
     friend class PictureLoaderJob;

@@ -263,10 +263,6 @@ ApplicationWindow {
     property var connectionContext
 
     Component.onCompleted: {
-        Qt.callLater(function() {
-            if (!BrickStore.databaseValid)
-                updateDatabase()
-        })
         connectionContext = ActionManager.connectQuickActionTable
                 ({
                      "document_import_bl_order": () => {
@@ -277,12 +273,8 @@ ApplicationWindow {
                          setActiveDocument(null)
                          homeStack.push("ImportCartDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },
-                     "update_database": () => { updateDatabase() },
+                     "update_database": () => { BrickStore.updateDatabase() },
                      "help_about": () => { aboutDialog.active = true }
                  })
-    }
-
-    function updateDatabase() {
-        BrickStore.updateDatabase()
     }
 }

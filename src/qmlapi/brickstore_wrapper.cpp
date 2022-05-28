@@ -31,6 +31,7 @@
 #include "common/documentio.h"
 #include "common/onlinestate.h"
 #include "common/recentfiles.h"
+#include "ldraw/rendercontroller.h"
 #include "brickstore_wrapper.h"
 #include "version.h"
 
@@ -95,15 +96,12 @@ void QmlBrickStore::registerTypes()
 
     qmlRegisterType<QmlDocumentProxyModel>("BrickStore", 1, 0, "DocumentProxyModel");
 
-    QString cannotCreate = tr("Cannot create objects of type %1");
-    qmlRegisterUncreatableType<DocumentModel>("BrickStore", 1, 0, "DocumentModel",
-                                         cannotCreate.arg("DocumentModel"_l1));
-    qmlRegisterUncreatableType<Document>("BrickStore", 1, 0, "Document",
-                                         cannotCreate.arg("Document"_l1));
-    qmlRegisterUncreatableType<Config>("BrickStore", 1, 0, "Config",
-                                       cannotCreate.arg("Config"_l1));
-    qmlRegisterUncreatableType<Config>("BrickStore", 1, 0, "DocumentList",
-                                       cannotCreate.arg("DocumentList"_l1));
+    QString cannotCreate = "Cannot create this type"_l1;
+    qmlRegisterUncreatableType<DocumentModel>("BrickStore", 1, 0, "DocumentModel", cannotCreate);
+    qmlRegisterUncreatableType<Document>("BrickStore", 1, 0, "Document", cannotCreate);
+    qmlRegisterUncreatableType<Config>("BrickStore", 1, 0, "Config", cannotCreate);
+    qmlRegisterUncreatableType<DocumentList>("BrickStore", 1, 0, "DocumentList", cannotCreate);
+
 }
 
 
@@ -271,6 +269,18 @@ Document *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
     return DocumentIO::importBrickLinkCart(cart);
 }
 
+Document *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                             int multiply, BrickLink::QmlBrickLink::Condition condition,
+                                             BrickLink::QmlBrickLink::Status extraParts,
+                                             bool includeInstructions, bool includeAlternates,
+                                             bool includeCounterParts)
+{
+    return Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(), multiply,
+                                       static_cast<BrickLink::Condition>(condition),
+                                       static_cast<BrickLink::Status>(extraParts),
+                                       includeInstructions, includeAlternates, includeCounterParts);
+}
+
 /*! \qmlmethod bool BrickStore::updateDatabase()
 
     Starts an asychronous database update in the background. Returns \c true if the update was
@@ -284,6 +294,11 @@ bool QmlBrickStore::updateDatabase()
 Document *QmlBrickStore::activeDocument() const
 {
     return ActionManager::inst()->activeDocument();
+}
+
+LDraw::RenderController *QmlBrickStore::createRenderController()
+{
+    return new LDraw::RenderController();
 }
 
 
