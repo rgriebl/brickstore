@@ -21,18 +21,22 @@ Menu {
         ToolButton { action: ActionManager.quickAction("edit_cut")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
+            onClicked: root.dismiss()
         }
         ToolButton { action: ActionManager.quickAction("edit_copy")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
+            onClicked: root.dismiss()
         }
         ToolButton { action: ActionManager.quickAction("edit_paste")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
+            onClicked: root.dismiss()
         }
         ToolButton { action: ActionManager.quickAction("edit_delete")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
+            onClicked: root.dismiss()
         }
         ToolSeparator { }
         ToolButton { action: ActionManager.quickAction("edit_select_all")

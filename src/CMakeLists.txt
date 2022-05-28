@@ -321,13 +321,17 @@ if (BS_MOBILE)
         mobile/AboutDialog.qml
         mobile/ActionDelegate.qml
         mobile/AutoSizingMenu.qml
+        mobile/CornerTag.qml
         mobile/DocumentProxyModelJS.qml
         mobile/GridCell.qml
         mobile/GridHeader.qml
         mobile/ImportCartDialog.qml
+        mobile/ImportInventoryDialog.qml
         mobile/ImportOrderDialog.qml
         mobile/Main.qml
+        mobile/SelectionInfoDialog.qml
         mobile/SettingsDialog.qml
+        mobile/SetToPriceGuideDialog.qml
         mobile/View.qml
         mobile/ViewEditMenu.qml
         mobile/ViewHeaderMenu.qml
@@ -337,7 +341,7 @@ if (BS_MOBILE)
         mobile/uihelpers/ProgressDialog.qml
     )
     qt_add_resources(${PROJECT_NAME} mobile_qrc
-        PREFIX "mobile"
+        PREFIX "/"
         BASE   "${CMAKE_CURRENT_SOURCE_DIR}"
         FILES  "${QML_FILES}"
     )

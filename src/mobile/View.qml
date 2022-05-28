@@ -12,6 +12,24 @@ Page {
 
     property Document document
 
+    Loader {
+        id: infoDialog
+
+        active: false
+        onLoaded: {
+            item.open()
+        }
+        function open() {
+            if (status === Loader.Ready)
+                item.open()
+            else
+                active = true
+        }
+        Component.onCompleted: {
+            setSource("SelectionInfoDialog.qml", { "document": root.document })
+        }
+    }
+
     header: ToolBar {
         id: toolBar
 
@@ -33,6 +51,15 @@ Page {
                 display: Button.IconOnly
             }
             Item { Layout.fillWidth: true }
+            ToolButton {
+                icon.name: "help-about"
+                onClicked: {
+                    if (!root.document)
+                        return
+
+                    infoDialog.open()
+                }
+            }
             ToolButton {
                 icon.name: "overflow-menu"
                 onClicked: viewMenu.open()
@@ -191,8 +218,25 @@ Page {
                 DelegateChoice { roleValue: Document.Status
                     GridCell {
                         property var status: display
+                        required property var lot
+                        property var bllot: BrickLink.lot(lot)
+                        property string tagText: bllot.counterPart
+                                                 ? qsTr("CP")
+                                                 : bllot.alternateId
+                                                   ? bllot.alternateId
+                                                   : ''
+                        property bool tagBold: bllot.alternate
+                        property color tagColor: bllot.alternateId
+                                                 ? root.shadeColor(1 + bllot.alternateId, .5)
+                                                 : Qt.rgba(.5, .5, .5, .3)
 
                         Label { }
+                        CornerTag {
+                            visible: tagText !== ''
+                            text: tagText
+                            bold: tagBold
+                            color: tagColor
+                        }
                         ToolButton {
                             anchors.fill: parent
                             enabled: false
@@ -206,7 +250,10 @@ Page {
 
                 DelegateChoice { roleValue: Document.Picture
                     GridCell {
-                        background: QImageItem { image: display }
+                        background: QImageItem {
+                            fillColor: "white"
+                            image: display
+                        }
                     }
                 }
 
@@ -257,7 +304,7 @@ Page {
                             default: return ""
                             }
                         }
-                        property int checkState: Qt.Unchecked
+//                        property int checkState: Qt.Unchecked  remove?
                         CheckIndicator {
                             anchors.centerIn: parent
                             visible: stockroom === BrickLink.None
@@ -278,7 +325,7 @@ Page {
                 DelegateChoice { roleValue: Document.PriceOrig; delegate: currencyDelegate }
                 DelegateChoice { roleValue: Document.PriceDiff
                     GridCell {
-                        required property var baseLot
+//                        required property var baseLot  remove?
                         text: humanReadableCurrency(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
                                           : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
@@ -362,7 +409,7 @@ Page {
                 DelegateChoice { roleValue: Document.ItemType
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BrickLink.lot(lot).itemType.id, 0.1)
+                        tint: root.shadeColor(BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
                 }
@@ -391,6 +438,65 @@ Page {
                 shades.push(Qt.hsva(i * 30 / 360, 1, 1, 1));
         }
         let c = shades[n % shades.length]
-        return Qt.rgba(c.r, c.g, c.b, alpha)
+        c.a = alpha
+        return c
+    }
+
+    Loader {
+        id: blockDialog
+        active: root.document.blockingOperationActive
+        source: "uihelpers/ProgressDialog.qml"
+        Binding {
+            target: blockDialog.item
+            property: "text"
+            value: root.document.blockingOperationTitle
+        }
+        Binding {
+            target: blockDialog.item
+            property: "cancelable"
+            value: root.document.blockingOperationCancelable
+        }
+        Connections {
+            target: root.document
+            function onBlockingOperationProgress(done, total) {
+                blockDialog.item.total = total
+                blockDialog.item.done = done
+            }
+        }
+        Connections {
+            target: blockDialog.item
+            function onRequestCancel() { root.document.cancelBlockingOperation() }
+        }
+        onLoaded: { item.open() }
+    }
+
+    Loader {
+        id: setToPGDialog
+
+        active: false
+        source: "SetToPriceGuideDialog.qml"
+        onLoaded: {
+            item.onClosed.connect(() => { setToPGDialog.active = false })
+            item.onAccepted.connect(() => { root.document.setPriceToGuide(item.time, item.price, item.forceUpdate) })
+            item.open()
+        }
+        function open() { active = true }
+    }
+
+    property QtObject connectionContext: null
+    property bool active: document && (ActionManager.activeDocument === root.document)
+
+    onActiveChanged: {
+        if (active) {
+            connectionContext = ActionManager.connectQuickActionTable
+                    ({
+                         "edit_price_to_priceguide": () => {
+                             setToPGDialog.open()
+                         },
+                     })
+        } else {
+            ActionManager.disconnectQuickActionTable(connectionContext)
+            connectionContext = null
+        }
     }
 }

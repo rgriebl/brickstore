@@ -265,6 +265,10 @@ ApplicationWindow {
     Component.onCompleted: {
         connectionContext = ActionManager.connectQuickActionTable
                 ({
+                     "document_import_bl_inv": () => {
+                         setActiveDocument(null)
+                         homeStack.push("ImportInventoryDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     },
                      "document_import_bl_order": () => {
                          setActiveDocument(null)
                          homeStack.push("ImportOrderDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
