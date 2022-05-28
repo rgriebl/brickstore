@@ -306,9 +306,7 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
-#endif
+        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
@@ -349,6 +347,15 @@ void TransferRetriever::schedule()
             emit progress(j, int(recv), int(total));
         });
 
+        connect(j->m_reply, &QNetworkReply::metaDataChanged, this, [j]() {
+            qCInfo(LogTransfer) << "<< REPLY" << j->m_respcode << j->m_effective_url;
+            if (LogTransfer().isDebugEnabled()) {
+                const auto headers = j->m_reply->rawHeaderList();
+                for (const auto &header : headers)
+                    qCDebug(LogTransfer()) << header << ":" << j->m_reply->rawHeader(header);
+            }
+        });
+
         m_currentJobs.append(j);
         emit started(j);
     }
@@ -361,13 +368,6 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
 
     j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
     j->m_effective_url = j->m_reply->url();
-
-    qCInfo(LogTransfer) << "<< REPLY" << j->m_respcode << j->m_effective_url;
-    if (LogTransfer().isDebugEnabled()) {
-        const auto headers = j->m_reply->rawHeaderList();
-        for (const auto &header : headers)
-            qCDebug(LogTransfer()) << header << ":" << j->m_reply->rawHeader(header);
-    }
 
     if (error != QNetworkReply::NoError) {
         m_sslSession.clear();
