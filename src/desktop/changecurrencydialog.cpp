@@ -111,8 +111,8 @@ void ChangeCurrencyDialog::languageChange()
 
 void ChangeCurrencyDialog::currencyChanged(const QString &to)
 {
-    qreal rateFrom = Currency::inst()->rate(m_from);
-    qreal rateTo = Currency::inst()->rate(to);
+    double rateFrom = Currency::inst()->rate(m_from);
+    double rateTo = Currency::inst()->rate(to);
     m_rate = 1;
     if (!qFuzzyIsNull(rateFrom) && !qFuzzyIsNull(rateTo))
         m_rate = rateTo / rateFrom;

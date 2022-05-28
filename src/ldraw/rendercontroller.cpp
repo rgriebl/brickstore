@@ -522,16 +522,16 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 //      into each cell to get a more uniform distribution
 
                 while (filledArea < neededArea) {
-                    qreal x = rd->bounded(texSize) + delta;
-                    qreal y = rd->bounded(texSize) + delta;
-                    qreal sx = qMax(1./(particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    qreal sy = isSpeckle ? sx : qMax(1./(particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    qreal rot = isSpeckle ? 0 : rd->bounded(90.);
-                    qreal opacity = isSpeckle ? 1 : qBound(0.0, (rd->bounded(0.3) + 0.7), 1.0);
+                    float x = rd->bounded(texSize) + delta;
+                    float y = rd->bounded(texSize) + delta;
+                    float sx = qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    float sy = isSpeckle ? sx : qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    float rot = isSpeckle ? 0.f : rd->bounded(90.f);
+                    float opacity = isSpeckle ? 1.f : qBound(0.f, (rd->bounded(.3f) + .7f), 1.f);
 
-                    qreal area = particleSize * particleSize * sx * sy;
+                    float area = particleSize * particleSize * sx * sy;
                     if (isSpeckle)
-                        area *= (M_PI / 4.);
+                        area *= (M_PI / 4.f);
                     filledArea += area;
 
                     fragments << QPainter::PixmapFragment::create({ x, y }, particle.rect(), sx, sy, rot, opacity);

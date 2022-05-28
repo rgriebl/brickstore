@@ -215,9 +215,6 @@ Part *Part::parse(const QByteArray &data, const QString &dir)
 {
     Part *p = new Part();
     QTextStream ts(data);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    ts.setCodec("UTF-8");
-#endif
 
     QString line;
     int lineno = 0;

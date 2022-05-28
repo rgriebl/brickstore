@@ -156,10 +156,6 @@ private:
 DesktopApplication::DesktopApplication(int &argc, char **argv)
     : Application(argc, argv)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
-#endif
-
 #if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
@@ -203,17 +199,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
 #endif
-
-#if defined(Q_OS_MACOS)
-#  if QT_VERSION <= QT_VERSION_CHECK(5, 15, 2)
-    // the new default font San Francisco has rendering problems: QTBUG-88495
-    if (QVersionNumber::fromString(QSysInfo::productVersion()).majorVersion() >= 11) {
-        QFont f = QApplication::font();
-        f.setFamily("Helvetica Neue"_l1);
-        QApplication::setFont(f);
-    }
-#  endif
-#endif
 }
 
 void DesktopApplication::init()
@@ -255,7 +240,7 @@ void DesktopApplication::init()
 
     auto setFontSizePercentLambda = [this](int p) {
         QFont f = QApplication::font();
-        f.setPointSizeF(m_defaultFontSize * qreal(qBound(50, p, 200)) / 100.);
+        f.setPointSizeF(qreal(m_defaultFontSize * qBound(50, p, 200) / 100.));
         QApplication::setFont(f);
     };
     connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);

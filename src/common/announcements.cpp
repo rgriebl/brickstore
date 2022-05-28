@@ -79,13 +79,8 @@ QCoro::Task<> Announcements::check()
             a.m_text = md.mid(captureNextStart, captureEnd - captureNextStart).trimmed();
 
             quint64 id = (quint64(QDate(2021, 1, 1).daysTo(a.m_date)) << 32)
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                    | qChecksum(reinterpret_cast<const char *>(a.m_title.constData()),
-                                uint(a.m_title.size() * 2),
-#else
                     | qChecksum(QByteArrayView(reinterpret_cast<const char *>(a.m_title.constData()),
                                                a.m_title.size() * 2),
-#endif
                                 Qt::ChecksumIso3309);
             a.m_id = id;
 

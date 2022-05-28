@@ -57,9 +57,9 @@ namespace Utility {
 
 int naturalCompare(const QString &s1, const QString &s2);
 
-QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5);
+QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5);
 QColor textColor(const QColor &backgroundColor);
-QColor contrastColor(const QColor &c, qreal f);
+QColor contrastColor(const QColor &c, float f);
 QColor premultiplyAlpha(const QColor &c);
 
 QImage stripeImage(int h, const QColor &stripeColor, const QColor &baseColor = Qt::transparent);

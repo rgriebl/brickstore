@@ -23,12 +23,7 @@
 #include <QStringBuilder>
 #include <QScopeGuard>
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#  include <qhashfunctions.h>
-#  define q5Hash qHash
-#else
-#  include "utility/q5hashfunctions.h"
-#endif
+#include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
 #include "utility/stopwatch.h"
 #include "utility/chunkreader.h"

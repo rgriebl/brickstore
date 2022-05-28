@@ -1258,8 +1258,8 @@ QVariant Orders::data(const QModelIndex &index, int role) const
             c.setAlphaF(0.1f);
             return c;
         } else if (col == Status) {
-            QColor c = QColor::fromHslF(qreal(order->status()) / qreal(OrderStatus::Count),
-                                        .5, .5, .5);
+            QColor c = QColor::fromHslF(float(order->status()) / float(OrderStatus::Count),
+                                        .5f, .5f, .5f);
             return c;
         }
     } else if (role == Qt::ToolTipRole) {

@@ -726,10 +726,10 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     auto setFontSize = [this](int v) {
         w_font_size_percent->setText(QString::number(v * 10) % u" %");
         QFont f = font();
-        qreal defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
+        double defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
         if (defaultFontSize <= 0)
             defaultFontSize = 10;
-        f.setPointSizeF(defaultFontSize * qreal(v) / 10.);
+        f.setPointSizeF(defaultFontSize * double(v) / 10.);
         w_font_example->setFont(f);
     };
 
@@ -930,11 +930,8 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         auto newShortcut = w_sc_edit->keySequence();
         // disallow Alt only shortcuts, because this interferes with standard menu handling
         for (int i = 0; i < newShortcut.count(); ++i) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            auto mod = Qt::KeyboardModifiers(newShortcut[uint(i)]) & Qt::KeyboardModifierMask;
-#else
             auto mod = newShortcut[i].keyboardModifiers();
-#endif
+
             if ((mod & Qt::AltModifier) && !(mod & Qt::ControlModifier)) {
                 QMessageBox::warning(this, QCoreApplication::applicationName(),
                                      tr("Shortcuts with 'Alt' need to also include 'Control' in order to not interfere with the menu system."));
@@ -975,13 +972,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
 void SettingsDialog::currentCurrencyChanged(const QString &ccode)
 {
-    qreal rate = Currency::inst()->rate(ccode);
+    double rate = Currency::inst()->rate(ccode);
 
     QString s;
     if (qFuzzyIsNull(rate))
         s = tr("could not find a cross rate for %1").arg(ccode);
     else if (!qFuzzyCompare(rate, 1))
-        s = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'f', 3);
+        s = tr("1 %1 equals %2 USD").arg(ccode).arg(double(1) / rate, 0, 'f', 3);
 
     w_currency_status->setText(s);
     m_preferedCurrency = ccode;

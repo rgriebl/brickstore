@@ -164,7 +164,7 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     }
 
     p.setBrush(Qt::NoBrush);
-    outColor.setAlphaF(outColor.alphaF() * qreal(inactive ? 0.5 : 0.8));
+    outColor.setAlphaF(outColor.alphaF() * (inactive ? .5f : .8f));
     p.setPen(outColor);
 
     if (m_icon.isNull() || !inactive) {

@@ -256,7 +256,7 @@ public:
 
     bool legacyCurrencyCode() const;
     QString currencyCode() const;
-    void setCurrencyCode(const QString &code, qreal crate = qreal(1));
+    void setCurrencyCode(const QString &code, double crate = 1.);
 
     static bool canLotsBeMerged(const Lot &lot1, const Lot &lot2);
     static bool mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMerge,
@@ -307,7 +307,7 @@ private:
     void insertLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void removeLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
     void changeLotsDirect(std::vector<std::pair<Lot *, Lot> > &changes);
-    void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
+    void changeCurrencyDirect(const QString &ccode, double crate, double *&prices);
     void resetDifferenceModeDirect(QHash<const Lot *, Lot>
                                    &differenceBase);
     void filterDirect(const QVector<Filter> &filterList, bool &filtered,

@@ -30,12 +30,6 @@ QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QTableView)
 QT_FORWARD_DECLARE_CLASS(QTextLayout)
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-typedef uint qHashResult;
-#else
-typedef size_t qHashResult;
-#endif
-
 
 class DocumentDelegate : public QItemDelegate
 {
@@ -70,7 +64,7 @@ protected:
     void setModelDataInternal(const QVariant &value, QAbstractItemModel *model,
                               const QModelIndex &index) const;
 
-    static QColor shadeColor(int idx, qreal alpha = 0);
+    static QColor shadeColor(int idx, float alpha = 0);
 
 protected:
     QTableView *m_table;
@@ -92,6 +86,6 @@ protected:
             return (text == other.text) && (size == other.size) && (fontSize == other.fontSize);
         }
     };
-    friend qHashResult qHash(const DocumentDelegate::TextLayoutCacheKey &key, qHashResult seed);
+    friend size_t qHash(const DocumentDelegate::TextLayoutCacheKey &key, size_t seed);
     static QCache<TextLayoutCacheKey, QTextLayout> s_textLayoutCache;
 };

@@ -98,18 +98,14 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
     }
 }
 
-QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
+QColor Utility::gradientColor(const QColor &c1, const QColor &c2, float f)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    qreal r1, g1, b1, a1, r2, g2, b2, a2;
-#else
     float r1, g1, b1, a1, r2, g2, b2, a2;
-#endif
     c1.getRgbF(&r1, &g1, &b1, &a1);
     c2.getRgbF(&r2, &g2, &b2, &a2);
 
-    f = qBound(qreal(0), f, qreal(1));
-    qreal e = qreal(1) - f;
+    f = qBound(0.f, f, 1.f);
+    float e = 1.f - f;
 
     return QColor::fromRgbF(r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f);
 }
@@ -118,12 +114,12 @@ QColor Utility::textColor(const QColor &bg)
 {
     // see https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
 
-    auto adjust = [](qreal c) {
-        return (c <= 0.03928) ? c / 12.92 : std::pow(((c + 0.055) / 1.055), 2.4);
+    auto adjust = [](float c) {
+        return (c <= 0.03928f) ? c / 12.92f : std::pow(((c + 0.055f) / 1.055f), 2.4f);
     };
 
-    auto luminance = [](qreal r, qreal g, qreal b) {
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    auto luminance = [](float r, float g, float b) {
+        return 0.2126f * r + 0.7152f * g + 0.0722f * b;
     };
 
     auto r = adjust(bg.redF());
@@ -131,25 +127,21 @@ QColor Utility::textColor(const QColor &bg)
     auto b = adjust(bg.blueF());
     auto l = luminance(r, g, b);
 
-    auto cw = (1. + 0.05) / (l + 0.05); // contrast to white
-    auto cb = (l + 0.05) / (0. + 0.05); // contrast to black
+    auto cw = (1. + 0.05f) / (l + 0.05f); // contrast to white
+    auto cb = (l + 0.05f) / (0.f + 0.05f); // contrast to black
 
     return (cw > cb) ? Qt::white : Qt::black;
 }
 
-QColor Utility::contrastColor(const QColor &c, qreal f)
+QColor Utility::contrastColor(const QColor &c, float f)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    qreal h, s, l, a;
-#else
     float h, s, l, a;
-#endif
     c.getHslF(&h, &s, &l, &a);
 
-    f = qBound(qreal(0), f, qreal(1));
+    f = qBound(0.f, f, 1.f);
 
-    l += f * ((l <= qreal(0.55)) ? qreal(1) : qreal(-1));
-    l = qBound(qreal(0), l, qreal(1));
+    l += f * ((l <= 0.55f) ? 1.f : -1.f);
+    l = qBound(0.f, l, 1.f);
 
     return QColor::fromHslF(h, s, l, a);
 }

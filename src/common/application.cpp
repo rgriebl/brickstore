@@ -89,10 +89,6 @@ Application::Application(int &argc, char **argv)
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
 }
 
 void Application::init()
@@ -705,7 +701,7 @@ bool Application::initBrickLink(QString *errString)
     if (bl) {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,
-                this, [](qreal p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
+                this, [](double p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
 
         connect(Config::inst(), &Config::updateIntervalsChanged,
                 BrickLink::core(), &BrickLink::Core::setUpdateIntervals);

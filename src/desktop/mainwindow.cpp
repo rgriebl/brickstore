@@ -48,16 +48,10 @@
 #include <QStackedLayout>
 #include <QSplitter>
 #if defined(Q_OS_WINDOWS)
-#  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#    include <QWinTaskbarButton>
-#    include <QWinTaskbarProgress>
-#    include <QtPlatformHeaders/QWindowsWindowFunctions>
-#  else
-#    include <qwintaskbarbutton.h>
-#    include <qwintaskbarprogress.h>
-#    include <QtGui/qpa/qplatformwindow.h>
-#    include <QtGui/qpa/qplatformwindow_p.h>
-#  endif
+#  include <qwintaskbarbutton.h>
+#  include <qwintaskbarprogress.h>
+#  include <QtGui/qpa/qplatformwindow.h>
+#  include <QtGui/qpa/qplatformwindow_p.h>
 #endif
 
 #include "bricklink/store.h"
@@ -214,11 +208,7 @@ MainWindow::MainWindow(QWidget *parent)
         progress->setVisible(p != t);
     });
     // workaround for QOpenGLWidget messing with fullscreen mode
-#  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QWindowsWindowFunctions::setHasBorderInFullScreen(windowHandle(), true);
-#  else
     dynamic_cast<QNativeInterface::Private::QWindowsWindow *>(windowHandle()->handle())->setHasBorderInFullScreen(true);
-#  endif
 #endif
 
     QByteArray ba;

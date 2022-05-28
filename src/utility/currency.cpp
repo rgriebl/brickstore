@@ -32,17 +32,17 @@
 
 // all rates as downloaded are relative to the Euro, but
 // we need everything relative to the US Dollar
-static void baseConvert(QHash<QString, qreal> &rates)
+static void baseConvert(QHash<QString, double> &rates)
 {
-    QHash<QString, qreal>::iterator usd_it = rates.find("USD"_l1);
+    QHash<QString, double>::iterator usd_it = rates.find("USD"_l1);
 
     if (usd_it == rates.end()) {
         rates.clear();
         return;
     }
-    qreal usd_eur = qreal(1) / usd_it.value();
+    double usd_eur = double(1) / usd_it.value();
 
-    for (QHash<QString, qreal>::iterator it = rates.begin(); it != rates.end(); ++it)
+    for (QHash<QString, double>::iterator it = rates.begin(); it != rates.end(); ++it)
         it.value() = (it == usd_it) ? 1 : it.value() *= usd_eur;
 
     rates.insert("EUR"_l1, usd_eur);
@@ -97,7 +97,7 @@ void Currency::parseRates(const QStringList &ratesList, QHash<QString, double> &
         QStringList sl = s.split(QLatin1Char('|'));
         if (sl.count() == 2) {
             QString sym = sl[0];
-            qreal rate = sl[1].toDouble();
+            double rate = sl[1].toDouble();
 
             if (!sym.isEmpty() && rate > 0)
                 ratesMap.insert(sym, rate);
@@ -113,33 +113,33 @@ QStringList Currency::currencyCodes() const
     return sl;
 }
 
-QHash<QString, qreal> Currency::rates() const
+QHash<QString, double> Currency::rates() const
 {
     return m_rates;
 }
 
-QHash<QString, qreal> Currency::customRates() const
+QHash<QString, double> Currency::customRates() const
 {
     return m_customRates;
 }
 
-qreal Currency::rate(const QString &currencyCode) const
+double Currency::rate(const QString &currencyCode) const
 {
     return m_rates.value(currencyCode);
 }
 
-qreal Currency::crossRate(const QString &fromCode, const QString &toCode) const
+double Currency::crossRate(const QString &fromCode, const QString &toCode) const
 {
-    qreal f = m_rates.value(fromCode);
+    double f = m_rates.value(fromCode);
     return m_rates.value(toCode) / (qFuzzyIsNull(f) ? 1 : f);
 }
 
-qreal Currency::customRate(const QString &currencyCode) const
+double Currency::customRate(const QString &currencyCode) const
 {
     return m_customRates.value(currencyCode);
 }
 
-void Currency::setCustomRate(const QString &currencyCode, qreal rate)
+void Currency::setCustomRate(const QString &currencyCode, double rate)
 {
     m_customRates.insert(currencyCode, rate);
 }
@@ -169,7 +169,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
     } else {
         auto r = reply->readAll();
         QXmlStreamReader reader(r);
-        QHash<QString, qreal> newRates;
+        QHash<QString, double> newRates;
 
         while (!reader.atEnd()) {
             if (reader.readNext() == QXmlStreamReader::StartElement &&
@@ -177,7 +177,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
                 reader.attributes().hasAttribute("currency"_l1)) {
 
                 QString currency = reader.attributes().value("currency"_l1).toString();
-                qreal rate = reader.attributes().value("rate"_l1).toDouble();
+                double rate = reader.attributes().value("rate"_l1).toDouble();
 
                 if (currency.length() == 3 && rate > 0)
                     newRates.insert(currency, rate);

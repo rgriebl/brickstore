@@ -69,7 +69,7 @@ private:
 class CurrencyCmd : public QUndoCommand
 {
 public:
-    CurrencyCmd(DocumentModel *model, const QString &ccode, qreal crate);
+    CurrencyCmd(DocumentModel *model, const QString &ccode, double crate);
     ~CurrencyCmd() override;
 
     int id() const override;
@@ -80,7 +80,7 @@ public:
 private:
     DocumentModel * m_model;
     QString    m_ccode;
-    qreal      m_crate;
+    double     m_crate;
     double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
 };
 

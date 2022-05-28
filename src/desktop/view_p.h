@@ -70,11 +70,7 @@ public:
         edit(idx, AllEditTriggers, &kp);
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    using QTableView::viewOptions;
-#else
     using QTableView::initViewItemOption;
-#endif
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;

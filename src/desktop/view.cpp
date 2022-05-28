@@ -1195,12 +1195,9 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
                     const Lot *lot = lots.at(l);
                     QModelIndex idx = model()->index(lot, cw.first);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                    QStyleOptionViewItem options = m_table->viewOptions();
-#else
                     QStyleOptionViewItem options;
                     m_table->initViewItemOption(&options);
-#endif
+
                     options.rect = QRectF(dx, dy, w, rowHeight).toRect();
                     options.decorationSize *= (prtDpi / winDpi) * scaleFactor;
                     options.font = p.font();

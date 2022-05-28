@@ -453,18 +453,8 @@ QVariant QmlDocumentProxyModel::headerData(int section, Qt::Orientation o, int r
 
 QModelIndex QmlDocumentProxyModel::mapToSource(const QModelIndex &index) const
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
-    class WorkaroundModel : public QAbstractItemModel {
-    public:
-        using QAbstractItemModel::createIndex;
-    };
-    auto sindex = static_cast<WorkaroundModel *>(sourceModel())
-            ->createIndex(index.row(), index.column() < 0 ? -1 : v2l[index.column()],
-                          index.internalPointer());
-#else
     auto sindex = createSourceIndex(index.row(), index.column() < 0 ? -1 : v2l[index.column()],
                                     index.internalPointer());
-#endif
     return sindex;
 }
 

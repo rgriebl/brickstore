@@ -31,14 +31,14 @@ public:
     static Currency *inst();
     ~Currency() override;
 
-    QHash<QString, qreal> rates() const;
-    QHash<QString, qreal> customRates() const;
-    qreal rate(const QString &currencyCode) const;
-    qreal crossRate(const QString &fromCode, const QString &toCode) const;
-    qreal customRate(const QString &currencyCode) const;
+    QHash<QString, double> rates() const;
+    QHash<QString, double> customRates() const;
+    double rate(const QString &currencyCode) const;
+    double crossRate(const QString &fromCode, const QString &toCode) const;
+    double customRate(const QString &currencyCode) const;
     QStringList currencyCodes() const;
 
-    void setCustomRate(const QString &currencyCode, qreal rate);
+    void setCustomRate(const QString &currencyCode, double rate);
     void unsetCustomRate(const QString &currenyCode);
 
     QDateTime lastUpdate() const;
@@ -62,8 +62,8 @@ private:
     static void parseRates(const QStringList &ratesList, QHash<QString, double> &ratesMap);
 
     QNetworkAccessManager *m_nam;
-    QHash<QString, qreal> m_rates;
-    QHash<QString, qreal> m_customRates;
+    QHash<QString, double> m_rates;
+    QHash<QString, double> m_customRates;
     QDateTime m_lastUpdate;
     bool m_silent = false;
 };

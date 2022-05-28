@@ -79,7 +79,7 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
     });
 }
 
-QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
+QColor DocumentDelegate::shadeColor(int idx, float alpha)
 {
     if (s_shades.isEmpty()) {
         s_shades.resize(13);
@@ -131,7 +131,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
 }
 
-inline qHashResult qHash(const DocumentDelegate::TextLayoutCacheKey &key, qHashResult seed)
+inline size_t qHash(const DocumentDelegate::TextLayoutCacheKey &key, size_t seed)
 {
     auto sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
     return qHash(key.text) ^ sizeHash ^ key.fontSize ^ seed;
@@ -349,7 +349,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
                 tag.background = fg;
                 tag.background.setAlphaF(0.3f);
             } else {
-                tag.background = shadeColor(int(1 + altid), qreal(0.5));
+                tag.background = shadeColor(int(1 + altid), .5f);
             }
         }
         break;
@@ -925,13 +925,8 @@ void DocumentDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 
     QByteArray n = editor->metaObject()->userProperty().name();
     if (!n.isEmpty()) {
-        if (!v.isValid()) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            v = QVariant(editor->property(n).userType(), nullptr);
-#else
+        if (!v.isValid())
             v = QVariant(editor->property(n).metaType(), nullptr);
-#endif
-        }
         editor->setProperty(n, v);
     }
 }

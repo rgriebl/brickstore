@@ -312,7 +312,7 @@ void ChangeCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-CurrencyCmd::CurrencyCmd(DocumentModel *model, const QString &ccode, qreal crate)
+CurrencyCmd::CurrencyCmd(DocumentModel *model, const QString &ccode, double crate)
     : QUndoCommand(QCoreApplication::translate("CurrencyCmd", "Changed currency"))
     , m_model(model)
     , m_ccode(ccode)
@@ -914,11 +914,11 @@ void DocumentModel::changeLotsDirect(std::vector<std::pair<Lot *, Lot>> &changes
         emit isFilteredChanged(m_isFiltered = false);
 }
 
-void DocumentModel::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
+void DocumentModel::changeCurrencyDirect(const QString &ccode, double crate, double *&prices)
 {
     m_currencycode = ccode;
 
-    if (!qFuzzyCompare(crate, qreal(1)) || (ccode != m_currencycode)) {
+    if (!qFuzzyCompare(crate, 1.) || (ccode != m_currencycode)) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
             prices = new double[uint(5 * m_lots.count())];
@@ -1111,7 +1111,7 @@ QString DocumentModel::currencyCode() const
     return m_currencycode.isEmpty() ? QString::fromLatin1("USD") : m_currencycode;
 }
 
-void DocumentModel::setCurrencyCode(const QString &ccode, qreal crate)
+void DocumentModel::setCurrencyCode(const QString &ccode, double crate)
 {
     if (ccode != currencyCode())
         m_undo->push(new CurrencyCmd(this, ccode, crate));

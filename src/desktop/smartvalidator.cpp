@@ -49,30 +49,19 @@ bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
             bool fixed = false;
 
             for (int i = 0; i < text.length(); ++i) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                QCharRef ir = text[i];
-                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
-                    ir = QLocale::system().decimalPoint();
-#else
                 QChar &ir = text[i];
                 if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
                     ir = QLocale::system().decimalPoint().at(0);
-#endif
                     fixed = (text != ke->text());
                 }
             }
 
             if (fixed) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text,
-                                ke->isAutoRepeat(), ushort(ke->count()));
-#else
                 // send new event, eat this one.
                 auto nke = new QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text,
                                          ke->isAutoRepeat(), ushort(ke->count()));
                 QCoreApplication::postEvent(o, nke);
                 return true;
-#endif
             }
         }
     }

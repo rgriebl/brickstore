@@ -324,13 +324,9 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                 continue;
 
             if (line.at(0) == QLatin1Char('0')) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
-                auto strPosition = [](const QStringRef &sr) { return sr.position(); };
-#else
                 const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return line.constData() - sv.constData(); };
-#endif
+
                 if ((split.count() >= 2) && (split.at(1) == "FILE"_l1)) {
                     is_mpd = true;
                     current_mpd_model = line.mid(strPosition(split.at(2))).toLower();
@@ -349,13 +345,8 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
             } else if (line.at(0) == QLatin1Char('1')) {
                 if (is_mpd && !is_mpd_model_found)
                     continue;
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                const auto split = line.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
-                auto strPosition = [](const QStringRef &sr) { return sr.position(); };
-#else
                 const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return sv.constData() - line.constData(); };
-#endif
 
                 if (split.count() >= 15) {
                     uint colid = split.at(1).toUInt();

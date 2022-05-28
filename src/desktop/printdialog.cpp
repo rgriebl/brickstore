@@ -44,13 +44,6 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint);
 
     qRegisterMetaType<QPageSize>();
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    static bool once = false;
-    if (!once) {
-        QMetaType::registerEqualsComparator<QPageSize>();
-        once = true;
-    }
-#endif
     m_documentName = window->document()->filePathOrTitle();
     m_hasSelection = !window->selectedLots().isEmpty();
 
@@ -133,12 +126,8 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     connect(w_layout, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, [this](int idx) {
         if (w_print_preview)
-            w_print_preview->setOrientation(idx == 0 ?
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                                                QPrinter::Portrait: QPrinter::Landscape);
-#else
-                                                QPageLayout::Orientation::Portrait : QPageLayout::Orientation::Landscape);
-#endif
+            w_print_preview->setOrientation(idx == 0 ? QPageLayout::Orientation::Portrait
+                                                     : QPageLayout::Orientation::Landscape);
     });
     connect(w_color, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PrintDialog::updateColorMode);
