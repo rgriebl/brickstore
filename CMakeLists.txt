@@ -214,6 +214,7 @@ if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BS_HAS_PARALLEL_STL)
 
     # always link against widgets
+    find_package(Qt6 REQUIRED Widgets)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE user32 advapi32 wininet)
