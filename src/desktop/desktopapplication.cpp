@@ -174,11 +174,12 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
             qputenv("QT_QPA_PLATFORMTHEME", "gtk2");
     }
 #endif
-    QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     (void) new QApplication(argc, argv);
 
     qInfo() << "Device pixel ratio:" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
+
+    QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     m_clp.addHelpOption();
     m_clp.addVersionOption();
