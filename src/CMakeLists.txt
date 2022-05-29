@@ -352,4 +352,7 @@ if (BS_MOBILE)
         Qt6::QuickControls2ImplPrivate
         Qt6::QuickTemplates2Private
     )
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.3.0")
+        target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::QuickDialogs2UtilsPrivate)
+    endif()
 endif()

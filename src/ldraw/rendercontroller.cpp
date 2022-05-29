@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <numbers>
 #include <cmath>
 
 #include <QRandomGenerator>
@@ -501,7 +500,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 float particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.f;
                 particleArea *= particleArea;
                 if (isSpeckle)
-                    particleArea *= (std::numbers::pi_v<float> / 4.f);
+                    particleArea *= (float(M_PI) / 4.f);
 
                 const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
                 const float ldus = 24.f;

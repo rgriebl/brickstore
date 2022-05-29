@@ -101,6 +101,9 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     add_compile_definitions(BS_MOBILE)
     find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2)
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.3.0")
+        find_package(Qt6 REQUIRED QuickDialogs2Utils)
+    endif()
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -286,6 +289,9 @@ if (ANDROID)
         message(FATAL_ERROR "${OPENSSL_CMAKE} is missing - please clone KDAB's android_openssl into ${ANDROID_SDK_ROOT}")
     endif()
     include(${OPENSSL_CMAKE})
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_EXTRA_LIBS "${ANDROID_EXTRA_LIBS}"
+    )
 
     # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
     # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
