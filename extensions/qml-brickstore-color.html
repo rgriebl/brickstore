@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-<!-- bricklink_wrapper.cpp -->
+<!-- qmlapi.cpp -->
   <title>Color QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
@@ -22,6 +22,7 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
 <li class="level1"><a href="#details">Detailed Description</a></li>
 </ul>
 </div>
@@ -41,7 +42,6 @@
 <li class="fn"><b><a href="qml-brickstore-color.html#color-prop">color</a></b> : color</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#glitter-prop">glitter</a></b> : bool</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#id-prop">id</a></b> : int</li>
-<li class="fn"><b><a href="qml-brickstore-color.html#image-prop">image</a></b> : image</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#isNull-prop">isNull</a></b> : bool</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#ldrawId-prop">ldrawId</a></b> : int</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#metallic-prop">metallic</a></b> : bool</li>
@@ -52,6 +52,10 @@
 <li class="fn"><b><a href="qml-brickstore-color.html#solid-prop">solid</a></b> : bool</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#speckle-prop">speckle</a></b> : bool</li>
 <li class="fn"><b><a href="qml-brickstore-color.html#transparent-prop">transparent</a></b> : bool</li>
+</ul>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">image <b><a href="qml-brickstore-color.html#image-method">image</a></b>(int <i>width</i>, int <i>height</i>)</li>
 </ul>
 <!-- $$$Color-description -->
 <h2 id="details">Detailed Description</h2>
@@ -99,16 +103,6 @@
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink id of this color.</p>
 </div></div><!-- @@@id -->
-<br/>
-<!-- $$$image -->
-<div class="qmlitem"><div class="qmlproto">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="image-prop">
-<td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>Returns a 20x20 pixel image of this color.</p>
-</div></div><!-- @@@image -->
 <br/>
 <!-- $$$isNull -->
 <div class="qmlitem"><div class="qmlproto">
@@ -209,6 +203,17 @@
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>true</code> if this color is transparent, or <code>false</code> otherwise.</p>
 </div></div><!-- @@@transparent -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$image[overload1]$$$imageintint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="image-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-brickstore-color.html#image-method">image</a></span> <span class="name">image</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns an image of this color, sized <i>width</i> x <i>height</i>.</p>
+</div></div><!-- @@@image -->
 <br/>
 </div>
    <p class="copy-notice">
