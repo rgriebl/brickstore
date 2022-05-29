@@ -819,9 +819,9 @@ void Orders::reloadOrdersFromCache()
                 QDir d = dit.fileInfo().absoluteDir();
                 QString addressFileName = order->id() % u".brickstore.json";
                 if (d.exists(addressFileName)) {
-                    QFile f(d.absoluteFilePath(addressFileName));
-                    if (f.open(QIODevice::ReadOnly) && (f.size() < 5000)) {
-                        auto json = QJsonDocument::fromJson(f.readAll());
+                    QFile fa(d.absoluteFilePath(addressFileName));
+                    if (fa.open(QIODevice::ReadOnly) && (fa.size() < 5000)) {
+                        auto json = QJsonDocument::fromJson(fa.readAll());
                         if (json.isObject()) {
                             order->setAddress(json["address"_l1].toString());
                             order->setPhone(json["phone"_l1].toString());

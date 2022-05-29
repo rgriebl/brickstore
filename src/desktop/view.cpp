@@ -1166,11 +1166,11 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
                 p.drawText(footerRect, Qt::AlignLeft | Qt::AlignBottom, document()->filePathOrTitle());
             }
 
-            const auto &colWidths = colWidthsPerPageAcross.at(pa);
+            const auto &colWidthsAcross = colWidthsPerPageAcross.at(pa);
             double dx = pageRect.left();
             bool firstColumn = true;
 
-            for (const auto &cw : colWidths) {
+            for (const auto &cw : colWidthsAcross) {
                 QString title = model()->headerData(cw.first, Qt::Horizontal).toString();
                 Qt::Alignment align = Qt::Alignment(model()->headerData(cw.first, Qt::Horizontal,
                                                              Qt::TextAlignmentRole).toInt());

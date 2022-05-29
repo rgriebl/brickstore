@@ -163,7 +163,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     // force ANGLE to cut down on the number of crashes in the Intel OpenGL drivers
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 #else
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #endif
 
@@ -436,8 +435,7 @@ bool DesktopApplication::notifyOtherInstance()
 #endif
         if (res) {
             connect(server, &QLocalServer::newConnection,
-                    this, [this]() {
-                auto *server = qobject_cast<QLocalServer *>(sender());
+                    this, [this, server]() {
                 if (!server)
                     return;
                 QLocalSocket *client = server->nextPendingConnection();
@@ -597,7 +595,7 @@ void DesktopApplication::setDesktopIconTheme()
 {
     const auto pal = QGuiApplication::palette();
     auto winColor = pal.color(QPalette::Active, QPalette::Window);
-    bool dark = ((winColor.lightnessF() * winColor.alphaF()) < 0.5);
+    bool dark = ((winColor.lightnessF() * winColor.alphaF()) < 0.5f);
 
     setIconTheme(dark ? DarkTheme : LightTheme);
 }

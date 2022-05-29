@@ -52,8 +52,8 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
         bool ok = (m_document && (m_selection.count() == 1));
 
-        setPriceGuide(ok ? BrickLink::core()->priceGuide(m_selection.front()->item(),
-                                                         m_selection.front()->color(), true)
+        setPriceGuide(ok ? BrickLink::core()->priceGuide(m_selection.constFirst()->item(),
+                                                         m_selection.constFirst()->color(), true)
                          : nullptr);
     });
 
@@ -246,7 +246,7 @@ void TaskInfoWidget::delayedSelectionUpdate()
         m_pic->setItemAndColor(nullptr);
         setCurrentWidget(m_pic);
     } else if (m_selection.count() == 1) {
-        m_pic->setItemAndColor(m_selection.front()->item(), m_selection.front()->color());
+        m_pic->setItemAndColor(m_selection.constFirst()->item(), m_selection.constFirst()->color());
         setCurrentWidget(m_pic);
     } else {
         auto stat = m_document->model()->statistics(m_selection.isEmpty() ? m_document->model()->lots()
@@ -355,7 +355,7 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     m_closeDocument->setIcon(ActionManager::inst()->qAction("document_close")->icon());
 
     connect(m_closeDocument, &QAction::triggered, this, [this]() {
-        auto idx = m_contextMenu->property("contextIndex").value<QModelIndex>();
+        auto idx = m_contextMenu->property("contextIndex").toModelIndex();
         if (idx.isValid()) {
             if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
                 doc->requestClose();
@@ -399,7 +399,7 @@ void TaskOpenDocumentsWidget::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         languageChange();
-    return QTreeView::changeEvent(e);
+    QTreeView::changeEvent(e);
 }
 
 

@@ -381,7 +381,7 @@ void MainWindow::forEachViewPane(std::function<bool(ViewPane *)> callback)
     if (!callback)
         return;
 
-    QWidget *w = centralWidget();
+    QWidget *cw = centralWidget();
 
     std::function<bool(QWidget *)> recurse = [&callback, &recurse](QWidget *w) {
         if (auto *splitter = qobject_cast<QSplitter *>(w)) {
@@ -394,7 +394,7 @@ void MainWindow::forEachViewPane(std::function<bool(ViewPane *)> callback)
         }
         return false;
     };
-    recurse(w);
+    recurse(cw);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e)
@@ -437,10 +437,10 @@ void MainWindow::createCentralWidget()
     connect(qApp, &QApplication::focusChanged,
             this, [this](QWidget *, QWidget *now) {
         for ( ; now; now = now->parentWidget()) {
-            if (auto vp = qobject_cast<ViewPane *>(now)) {
+            if (auto vpl = qobject_cast<ViewPane *>(now)) {
                 if (m_goHome->isChecked())
                     goHome(false);
-                setActiveViewPane(vp);
+                setActiveViewPane(vpl);
                 break;
             }
         }
@@ -463,7 +463,7 @@ void MainWindow::setActiveViewPane(ViewPane *newActive)
 ViewPane *MainWindow::createViewPane(Document *activeDocument)
 {
     auto vp = new ViewPane([this](Document *doc) { return createViewPane(doc); },
-            [this](ViewPane *vp) { deleteViewPane(vp); },
+            [this](ViewPane *vpl) { deleteViewPane(vpl); },
             activeDocument);
 
     connect(vp, &ViewPane::viewActivated,
@@ -855,24 +855,24 @@ QMenu *MainWindow::setupMenu(const QByteArray &name, const QVector<QByteArray> &
     if (a_names.isEmpty())
         return nullptr;
 
-    QAction *a = ActionManager::inst()->qAction(name);
-    QMenu *m = a ? a->menu() : nullptr;
-    if (!a || !m)
+    QAction *menuAction = ActionManager::inst()->qAction(name);
+    QMenu *menu = menuAction ? menuAction->menu() : nullptr;
+    if (!menuAction || !menu)
         return nullptr;
 
     for (const QByteArray &an : a_names) {
         if (an.startsWith("-")) {
-            auto *a = m->addSeparator();
+            auto *a = menu->addSeparator();
             if (an.length() > 1)
                 a->setObjectName(QString::fromLatin1(an.mid(1)));
         } else if (QAction *a = ActionManager::inst()->qAction(an.constData())) {
-            m->addAction(a);
+            menu->addAction(a);
         } else  {
             qWarning("Couldn't find action '%s' when creating menu '%s'",
                      an.constData(), name.constData());
         }
     }
-    return m;
+    return menu;
 }
 
 void MainWindow::createActions()

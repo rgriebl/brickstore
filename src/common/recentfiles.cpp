@@ -37,10 +37,10 @@ RecentFiles *RecentFiles::inst()
 
 void RecentFiles::add(const QString &file)
 {
-    QFileInfo fi(file);
+    QFileInfo fileInfo(file);
     bool save = true;
 
-    int idx = m_fileInfos.indexOf(fi);
+    int idx = m_fileInfos.indexOf(fileInfo);
     if (idx > 0) {
         beginMoveRows({ }, idx, idx, { }, 0);
         m_fileInfos.move(idx, 0);
@@ -52,7 +52,7 @@ void RecentFiles::add(const QString &file)
             endRemoveRows();
         }
         beginInsertRows({ }, 0, 0);
-        m_fileInfos.prepend(fi);
+        m_fileInfos.prepend(fileInfo);
         endInsertRows();
     } else {
         save = false;
@@ -60,6 +60,7 @@ void RecentFiles::add(const QString &file)
 
     if (save) {
         QStringList recent;
+        recent.reserve(m_fileInfos.count());
         for (const auto &fi : qAsConst(m_fileInfos))
             recent << QDir::toNativeSeparators(fi.absoluteFilePath());
         Config::inst()->setRecentFiles(recent);

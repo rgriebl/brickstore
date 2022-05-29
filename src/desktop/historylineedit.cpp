@@ -88,7 +88,7 @@ void HistoryView::mousePressEvent(QMouseEvent *me)
 
         if (idx.isValid()) {
             int h = visualRect(idx).height();
-            if (me->x() >= (viewport()->width() - h)) {
+            if (me->position().x() >= (viewport()->width() - h)) {
                 if (auto proxy = qobject_cast<const QAbstractProxyModel *>(idx.model()))
                     idx = proxy->mapToSource(idx);
                 const_cast<QAbstractItemModel *>(idx.model())->removeRow(idx.row());
@@ -271,7 +271,7 @@ void HistoryLineEdit::changeEvent(QEvent *e)
             setFilterPixmap();
         }, Qt::QueuedConnection);
     }
-    return QLineEdit::changeEvent(e);
+    QLineEdit::changeEvent(e);
 }
 
 #include "moc_historylineedit.cpp"

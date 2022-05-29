@@ -119,7 +119,7 @@ void ProgressCircle::mousePressEvent(QMouseEvent *e)
     auto *a = m->addAction(tr("Cancel all active downloads"));
     a->setEnabled(m_online && ((m_value >= m_min) && (m_value < m_max)));
     connect(a, &QAction::triggered, this, &ProgressCircle::cancelAll);
-    m->popup(e->globalPos());
+    m->popup(e->globalPosition().toPoint());
 }
 
 void ProgressCircle::paintEvent(QPaintEvent *)

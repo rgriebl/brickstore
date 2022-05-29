@@ -77,7 +77,7 @@ private:
     static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
                                QIODevice *file, bool noRedirects, uint retries = 0);
 
-    void setStatus(Status st)  { m_status = st; };
+    void setStatus(Status st)  { m_status = st; }
     bool abortInternal();
 
     TransferJob() = default;

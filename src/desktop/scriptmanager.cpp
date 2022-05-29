@@ -172,9 +172,9 @@ bool ScriptManager::executeString(const QString &s)
         qCWarning(LogScript).noquote() << "> ERROR:" << e.error().toString();
         return false;
     } else {
-        auto s = result.toString();
-        if (!s.isEmpty())
-            qCDebug(LogScript).noquote() << ">" << s;
+        auto rs = result.toString();
+        if (!rs.isEmpty())
+            qCDebug(LogScript).noquote() << ">" << rs;
         return true;
     }
 }

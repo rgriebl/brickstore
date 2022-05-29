@@ -11,6 +11,9 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <numbers>
+#include <cmath>
+
 #include <QRandomGenerator>
 #include <QStringBuilder>
 #include <QFile>
@@ -77,12 +80,12 @@ QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
         );
 
         QVector3D mapped = mouseView; // (mouseView - m_center)* (1.f / m_radius);
-        auto l2 = mapped.lengthSquared();
+        float l2 = mapped.lengthSquared();
         if (l2 > 1.f) {
             mapped.normalize();
             mapped[2] = 0.f;
         } else {
-            mapped[2] = sqrt(1.f - l2);
+            mapped[2] = std::sqrt(1.f - l2);
         }
         return mapped;
     };
@@ -498,13 +501,13 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 float particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.f;
                 particleArea *= particleArea;
                 if (isSpeckle)
-                    particleArea *= (M_PI / 4.f);
+                    particleArea *= (std::numbers::pi_v<float> / 4.f);
 
                 const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
                 const float ldus = 24.f;
 
-                int particleCount = floor((ldus * ldus * color->particleFraction()) / particleArea);
-                int delta = color->particleMaxSize() * texSize / ldus;
+                int particleCount = std::floor((ldus * ldus * color->particleFraction()) / particleArea);
+                int delta = std::ceil(color->particleMaxSize() * texSize / ldus);
 
                 QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
                 // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
@@ -515,7 +518,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 QRandomGenerator *rd = QRandomGenerator::global();
                 std::uniform_real_distribution<> dis(color->particleMinSize(), color->particleMaxSize());
 
-                float neededArea = floor(texSize * texSize * color->particleFraction());
+                float neededArea = std::floor(texSize * texSize * color->particleFraction());
                 float filledArea = 0;
 
                 //TODO: maybe partition the square into a grid and use random noise to offset drawing

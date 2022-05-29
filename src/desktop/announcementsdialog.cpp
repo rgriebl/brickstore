@@ -116,7 +116,7 @@ void AnnouncementsDialog::paletteChange()
     QColor bg;
     QColor stripe;
     int hue = palette().color(QPalette::Highlight).hslHue();
-    if (fg.lightnessF() < 0.5) {
+    if (fg.lightnessF() < 0.5f) {
         bg = QColor::fromHsl(hue, 255, 220);
         stripe = Qt::white;
     } else {

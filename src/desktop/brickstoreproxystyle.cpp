@@ -91,9 +91,9 @@ void BrickStoreProxyStyle::drawItemText(QPainter *painter, const QRect &rect, in
 {
 #if defined(Q_OS_MACOS)
     // show _ shortcuts even on macOS
-    return QCommonStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
+    QCommonStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
 #else
-    return QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
+    QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
 #endif
 }
 
@@ -131,7 +131,7 @@ void BrickStoreProxyStyle::drawComplexControl(ComplexControl control,
             }
         }
     }
-    return QProxyStyle::drawComplexControl(control, option, painter, widget);
+    QProxyStyle::drawComplexControl(control, option, painter, widget);
 }
 
 
@@ -200,10 +200,10 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
                                 QPixmap pix2(pix.size());
                                 pix2.setDevicePixelRatio(pix.devicePixelRatio());
                                 pix2.fill(Qt::transparent);
-                                QPainter p(&pix2);
-                                p.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
-                                p.drawPixmap(pix2.rect(), pix);
-                                p.end();
+                                QPainter pPix2(&pix2);
+                                pPix2.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
+                                pPix2.drawPixmap(pix2.rect(), pix);
+                                pPix2.end();
                                 pix = pix2;
                             }
                             QPixmapCache::insert(key, pix);

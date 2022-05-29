@@ -61,7 +61,7 @@ RenderSettingsDialog::RenderSettingsDialog()
             break;
         default:
             break;
-        };
+        }
     });
 
     resize(minimumSizeHint());

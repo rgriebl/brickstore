@@ -65,14 +65,14 @@ public:
     QColor ldrawColor() const  { return m_ldraw_color; }
     QColor ldrawEdgeColor() const  { return m_ldraw_edge_color; }
 
-    bool hasParticles() const           { return m_particleMinSize && m_particleMaxSize; }
+    bool hasParticles() const           { return !qFuzzyIsNull(m_particleMinSize) && !qFuzzyIsNull(m_particleMaxSize); }
     float particleMinSize() const       { return m_particleMinSize; }
     float particleMaxSize() const       { return m_particleMaxSize; }
     float particleFraction() const      { return m_particleFraction; }
     float particleVFraction() const     { return m_particleVFraction; }
     QColor particleColor() const        { return m_particleColor; }
 
-    double popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
+    float popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
 
     static QString typeName(TypeFlag t);
 

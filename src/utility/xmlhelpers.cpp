@@ -83,8 +83,8 @@ XmlHelpers::ParseXML::~ParseXML()
     delete m_file;
 }
 
-void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback,
-                                 std::function<void (QDomElement)> rootCallback)
+void XmlHelpers::ParseXML::parse(std::function<void (const QDomElement &)> callback,
+                                 std::function<void (const QDomElement &)> rootCallback)
 {
     QDomDocument doc;
     QString emsg;
@@ -114,7 +114,7 @@ void XmlHelpers::ParseXML::parse(std::function<void (QDomElement)> callback,
     }
 }
 
-QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagName)
+QString XmlHelpers::ParseXML::elementText(const QDomElement &parent, const char *tagName)
 {
     auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
     if (dnl.size() != 1) {
@@ -125,7 +125,7 @@ QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagNam
     return decodeEntities(dnl.at(0).toElement().text().trimmed());
 }
 
-QString XmlHelpers::ParseXML::elementText(QDomElement parent, const char *tagName,
+QString XmlHelpers::ParseXML::elementText(const QDomElement &parent, const char *tagName,
                                           const char *defaultText)
 {
     try {

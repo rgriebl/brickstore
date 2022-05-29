@@ -326,12 +326,12 @@ void PictureWidget::redraw()
         } else {
             pSize = BrickLink::core()->standardPictureSize();
         }
-        QSize s = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2) * dpr;
+        QSize sz = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2) * dpr;
 
         if (hasImage)
-            p = p.scaled(s, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            p = p.scaled(sz, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         else
-            p = QPixmap::fromImage(BrickLink::core()->noImage(s));
+            p = QPixmap::fromImage(BrickLink::core()->noImage(sz));
 
         p.setDevicePixelRatio(dpr);
         w_image->setPixmap(p);
@@ -357,12 +357,12 @@ void PictureWidget::redraw()
     m_renderSettings->setVisible(m_is3D);
 
     auto markText = [](const char *text, bool marked) {
-        QString s = QString::fromLatin1(text);
+        QString str = QString::fromLatin1(text);
         if (marked) {
-            s.prepend(u'\x2308');
-            s.append(u'\x230b');
+            str.prepend(u'\x2308');
+            str.append(u'\x230b');
         }
-        return s;
+        return str;
     };
 
     w_2d->setText(markText("2D", !m_is3D && m_item));

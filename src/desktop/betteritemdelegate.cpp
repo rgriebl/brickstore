@@ -66,7 +66,7 @@ void BetterItemDelegate::extendedPaint(QPainter *painter, const QStyleOptionView
         painter->save();
         QColor c = option.palette.color(QPalette::Highlight);
         for (int i = 0; i < 6; ++i) {
-            c.setAlphaF((useFrameHover && !useFrameSelection ? 0.6 : 1.) - i * .1);
+            c.setAlphaF((useFrameHover && !useFrameSelection ? 0.6f : 1.f) - float(i) * .1f);
             painter->setPen(c);
             painter->drawRect(option.rect.adjusted(i, i, -i - 1, -i - 1));
         }

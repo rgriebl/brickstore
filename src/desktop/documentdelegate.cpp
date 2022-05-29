@@ -133,7 +133,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
 
 inline size_t qHash(const DocumentDelegate::TextLayoutCacheKey &key, size_t seed)
 {
-    auto sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
+    size_t sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
     return qHash(key.text) ^ sizeHash ^ key.fontSize ^ seed;
 }
 
@@ -600,7 +600,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int lines = qMax(4, option.rect.height() / 20);
         QColor c = bg;
         for (int i = 0; i < lines; ++i) {
-            c.setAlphaF(1. - i / double(lines + lines - 2));
+            c.setAlphaF(1.f - float(i) / float(lines + lines - 2));
             p->setPen(c);
             p->drawRect(option.rect.adjusted(i, i, -i - 1, -i -1));
         }
@@ -738,9 +738,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
                 connect(m_select_item, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
-                        auto idx = m_select_item->property("contextIndex").value<QModelIndex>();
-                        QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model());
-                        setModelDataInternal(QVariant::fromValue(m_select_item->item()), model, idx);
+                        auto ctxIdx = m_select_item->property("contextIndex").toModelIndex();
+                        QAbstractItemModel *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
+                        setModelDataInternal(QVariant::fromValue(m_select_item->item()), ctxModel, ctxIdx);
                     }
                 });
             }
@@ -767,9 +767,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
                 connect(m_select_color, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
-                        auto idx = m_select_color->property("contextIndex").value<QModelIndex>();
-                        QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model());
-                        setModelDataInternal(QVariant::fromValue(m_select_color->color()), model, idx);
+                        auto ctxIdx = m_select_color->property("contextIndex").toModelIndex();
+                        QAbstractItemModel *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
+                        setModelDataInternal(QVariant::fromValue(m_select_color->color()), ctxModel, ctxIdx);
                     }
                 });
             }

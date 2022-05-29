@@ -378,7 +378,7 @@ QByteArray Config::columnLayout(const QString &id) const
 {
     if (id.isEmpty())
         return { };
-    return value("ColumnLayouts/"_l1 % id % "/Layout"_l1).value<QByteArray>();
+    return value("ColumnLayouts/"_l1 % id % "/Layout"_l1).toByteArray();
 }
 
 QString Config::columnLayoutName(const QString &id) const

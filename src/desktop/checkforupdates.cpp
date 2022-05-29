@@ -94,7 +94,7 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
             qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
         auto assets = doc["assets"_l1].toArray();
         m_installerUrl.clear();
-        for (const QJsonValue &asset : assets) {
+        for (const QJsonValue &&asset : assets) {
             QString name = asset["name"_l1].toString();
 #if defined(Q_OS_MACOS)
             if (name.startsWith("macOS-"_l1)) {

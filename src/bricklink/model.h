@@ -46,7 +46,7 @@ public:
     void unsetFilter();
     void setFilterItemType(const ItemType *it);
     void setFilterType(Color::Type type);
-    void setFilterPopularity(double p);
+    void setFilterPopularity(float p);
     void setColorListFilter(const QVector<const Color *> &colorList);
 
 protected:
@@ -60,7 +60,7 @@ protected:
 private:
     const ItemType *m_itemtype_filter = nullptr;
     Color::Type m_type_filter {};
-    double m_popularity_filter = 0;
+    float m_popularity_filter = 0.f;
     QVector<const Color *> m_color_filter;
 
     friend class Core;

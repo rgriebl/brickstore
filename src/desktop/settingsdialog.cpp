@@ -555,8 +555,8 @@ public:
                 return true; // no change
 
             if (!newShortcuts.isEmpty()) {
-                for (const Entry &entry : qAsConst(m_entries)) {
-                    if (entry.keys == newShortcuts)
+                for (const Entry &e : qAsConst(m_entries)) {
+                    if (e.keys == newShortcuts)
                         return false; // duplicate
                 }
             }

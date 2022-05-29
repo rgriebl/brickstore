@@ -136,7 +136,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         int wantedCnt  = p.elementText(e, "COLORCNTWANTED").toInt();
         int forSaleCnt = p.elementText(e, "COLORCNTINV").toInt();
 
-        col.m_popularity = partCnt + setCnt + wantedCnt + forSaleCnt;
+        col.m_popularity = float(partCnt + setCnt + wantedCnt + forSaleCnt);
 
         // needs to be divided by the max. after all colors are parsed!
         // mark it as raw data meanwhile:
@@ -402,7 +402,7 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             addToKnownColors(itemIndex, colorIndex);
         });
 
-        uint itemIndex = item - items().data();;
+        uint itemIndex = item - items().data();
 
 
         // BL bug: if an extra item is part of an alternative match set, then none of the
@@ -459,12 +459,12 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
 
     QHash<int, uint> ldrawToBrickLinkId;
     const QJsonArray results = doc["results"_l1].toArray();
-    for (const auto &result : results) {
+    for (const auto &&result : results) {
         const auto blIds = result["external_ids"_l1]["BrickLink"_l1]["ext_ids"_l1].toArray();
         const auto ldIds = result["external_ids"_l1]["LDraw"_l1]["ext_ids"_l1].toArray();
 
         if (!blIds.isEmpty() && !ldIds.isEmpty()) {
-            for (const auto &ldId : ldIds)
+            for (const auto &&ldId : ldIds)
                 ldrawToBrickLinkId.insert(ldId.toInt(), uint(blIds.first().toInt()));
         }
     }
@@ -891,7 +891,7 @@ void BrickLink::TextImport::calculatePartsYearUsed()
             bool isPart = (item.itemTypeId() == 'P');
 
             if ((pass == 1 ? !isPart : isPart) && item.hasInventory() && item.yearReleased()) {
-                const auto itemParts = m_consists_of_hash[itemIndex];
+                const auto itemParts = m_consists_of_hash.value(itemIndex);
 
                 for (const BrickLink::Item::ConsistsOf &part : itemParts) {
                     Item &partItem = m_items[part.m_itemIndex];

@@ -270,7 +270,7 @@ bool FilterTermWidget::eventFilter(QObject *o, QEvent *e)
 void FilterTermWidget::paintEvent(QPaintEvent *)
 {
     QColor c = palette().color(QPalette::Window);
-    bool dark = ((c.lightnessF() * c.alphaF()) < 0.5);
+    bool dark = ((c.lightnessF() * c.alphaF()) < 0.5f);
 
     QPainter p(this);
     QLinearGradient g(0, 0, 0, 1);

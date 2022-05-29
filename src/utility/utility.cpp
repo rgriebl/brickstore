@@ -127,7 +127,7 @@ QColor Utility::textColor(const QColor &bg)
     auto b = adjust(bg.blueF());
     auto l = luminance(r, g, b);
 
-    auto cw = (1. + 0.05f) / (l + 0.05f); // contrast to white
+    auto cw = (1.f + 0.05f) / (l + 0.05f); // contrast to white
     auto cb = (l + 0.05f) / (0.f + 0.05f); // contrast to black
 
     return (cw > cb) ? Qt::white : Qt::black;

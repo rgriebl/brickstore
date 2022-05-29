@@ -747,7 +747,7 @@ QString ActionManager::toolTipLabel(const QString &label, const QList<QKeySequen
 
     QColor color = Utility::gradientColor(Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
                                           Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),
-                                          0.8);
+                                          0.8f);
     QString extendedTable;
     if (!extended.isEmpty())
         extendedTable = fmtExt.arg(extended);

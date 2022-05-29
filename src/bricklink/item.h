@@ -158,3 +158,4 @@ public:
 
 Q_DECLARE_METATYPE(const BrickLink::Item *)
 Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
+Q_DECLARE_TYPEINFO(BrickLink::Item::ConsistsOf, Q_PRIMITIVE_TYPE);

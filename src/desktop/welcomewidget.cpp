@@ -47,7 +47,7 @@ class WelcomeButton : public QPushButton
     Q_OBJECT
     Q_DISABLE_COPY(WelcomeButton)
 public:
-    explicit WelcomeButton(QAction *a, QWidget *parent = nullptr);
+    explicit WelcomeButton(QAction *action, QWidget *parent = nullptr);
 
     explicit WelcomeButton(QWidget *parent = nullptr)
         : WelcomeButton(QString(), QString(), parent)
@@ -99,10 +99,10 @@ private:
     int m_margin = 10;
 };
 
-WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
+WelcomeButton::WelcomeButton(QAction *action, QWidget *parent)
     : WelcomeButton(parent)
 {
-    if (!a)
+    if (!action)
         return;
 
     auto languageChange = [this](QAction *a) {
@@ -126,9 +126,9 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
         }
     };
 
-    connect(this, &WelcomeButton::clicked, a, &QAction::trigger);
-    connect(a, &QAction::changed, this, [languageChange, a]() { languageChange(a); });
-    languageChange(a);
+    connect(this, &WelcomeButton::clicked, action, &QAction::trigger);
+    connect(action, &QAction::changed, this, [languageChange, action]() { languageChange(action); });
+    languageChange(action);
 }
 
 WelcomeButton::WelcomeButton(const QString &text, const QString &description, QWidget *parent)

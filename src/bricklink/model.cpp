@@ -154,7 +154,7 @@ void BrickLink::ColorModel::unsetFilter()
     invalidateFilter();
 }
 
-void BrickLink::ColorModel::setFilterPopularity(double p)
+void BrickLink::ColorModel::setFilterPopularity(float p)
 {
     if (qFuzzyCompare(p, m_popularity_filter))
         return;

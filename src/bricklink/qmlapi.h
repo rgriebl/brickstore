@@ -136,6 +136,9 @@ protected:
     QmlWrapperBase(T *_wrappedObject)
         : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
     { }
+    QmlWrapperBase(const QmlWrapperBase &copy)
+        : wrapped(copy.wrapped)
+    { }
     virtual ~QmlWrapperBase() = default;
 
     static T *wrappedNull()
@@ -426,6 +429,7 @@ private:
     {
     public:
         Setter(QmlLot *lot);
+        Setter(const Setter &copy) = default;
         Lot *to();
         ~Setter();
 

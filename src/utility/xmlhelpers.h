@@ -37,10 +37,10 @@ public:
     ParseXML(QIODevice *file, const char *rootNodeName, const char *elementNodeName);
     ~ParseXML();
 
-    void parse(std::function<void(QDomElement)> callback,
-               std::function<void(QDomElement)> rootCallback = { });
-    static QString elementText(QDomElement parent, const char *tagName);
-    static QString elementText(QDomElement parent, const char *tagName, const char *defaultText);
+    void parse(std::function<void (const QDomElement &)> callback,
+               std::function<void (const QDomElement &)> rootCallback = { });
+    static QString elementText(const QDomElement &parent, const char *tagName);
+    static QString elementText(const QDomElement &parent, const char *tagName, const char *defaultText);
 
 private:
     static QIODevice *openFile(const QString &fileName);
@@ -49,6 +49,8 @@ private:
     QString m_elementNodeName;
     QIODevice *m_file;
     QDomElement m_root;
+
+    Q_DISABLE_COPY(ParseXML)
 };
 
 
@@ -69,6 +71,8 @@ private:
     QDomElement m_domRoot;
     QDomElement m_domItem;
     QString m_elementNodeName;
+
+    Q_DISABLE_COPY(CreateXML)
 };
 
 }

@@ -142,8 +142,8 @@ void Announcements::markAnnouncementRead(quint64 id)
             m_readIds.append(id);
 
             QVariantList vl;
-            for (const quint64 &id : qAsConst(m_readIds))
-                vl << id;
+            for (const quint64 &readId : qAsConst(m_readIds))
+                vl << readId;
             Config::inst()->setValue("Announcements/ReadIds"_l1, vl);
         }
     }

@@ -32,7 +32,7 @@ class UIHelpers_ProgressDialogInterface : public QObject
     Q_OBJECT
 
 public:
-    virtual ~UIHelpers_ProgressDialogInterface() { };
+    virtual ~UIHelpers_ProgressDialogInterface() override { }
 
     virtual QCoro::Task<bool> exec() = 0;
 
@@ -41,7 +41,7 @@ public:
 
 signals:
     void cancel();
-    bool start();
+    void start();
 };
 
 

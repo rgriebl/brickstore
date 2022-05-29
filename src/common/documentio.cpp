@@ -471,7 +471,6 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
         };
 
         auto parseInventory = [&]() {
-            Lot *lot = nullptr;
             QVariant legacyOrigPrice, legacyOrigQty;
             bool hasBaseValues = false;
             QXmlStreamAttributes baseValues;
@@ -542,7 +541,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                 if (xml.name() != "Item"_l1)
                     throw Exception("Expected Item element, but got: %1").arg(xml.name());
 
-                lot = new Lot();
+                auto lot = new Lot();
                 lot->setIncomplete(new BrickLink::Incomplete);
                 baseValues.clear();
 

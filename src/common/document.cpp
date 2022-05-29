@@ -971,12 +971,12 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
             pg->addRef();
 
         } else if (pg && pg->isValid()) {
-            double price = pg->price(m_setToPG->time, item->condition(), m_setToPG->price)
+            double p = pg->price(m_setToPG->time, item->condition(), m_setToPG->price)
                     * m_setToPG->currencyRate;
 
-            if (!qFuzzyCompare(price, item->price())) {
+            if (!qFuzzyCompare(p, item->price())) {
                 Lot newItem = *item;
-                newItem.setPrice(price);
+                newItem.setPrice(p);
                 m_setToPG->changes.emplace_back(item, newItem);
             }
             ++m_setToPG->doneCount;

@@ -38,7 +38,7 @@ class RenderController;
 class QmlDocumentProxyModel : public QAbstractProxyModel
 {
     Q_OBJECT
-    Q_PROPERTY(Document *document READ document WRITE setDocument NOTIFY documentChanged REQUIRED);
+    Q_PROPERTY(Document *document READ document WRITE setDocument NOTIFY documentChanged REQUIRED)
 public:
     QmlDocumentProxyModel(QObject *parent = nullptr);
 

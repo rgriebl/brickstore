@@ -773,7 +773,7 @@ void DocumentModel::insertLotsAfter(const Lot *afterLot, LotList &&lots)
 
 void DocumentModel::removeLot(Lot *lot)
 {
-    return removeLots({ lot });
+    removeLots({ lot });
 }
 
 void DocumentModel::removeLots(const LotList &lots)
@@ -924,7 +924,7 @@ void DocumentModel::changeCurrencyDirect(const QString &ccode, double crate, dou
             prices = new double[uint(5 * m_lots.count())];
 
         for (int i = 0; i < m_lots.count(); ++i) {
-            Lot *lot = m_lots[i];
+            Lot *lot = m_lots.value(i);
             if (createPrices) {
                 prices[i * 5] = lot->cost();
                 prices[i * 5 + 1] = lot->price();
@@ -1953,7 +1953,7 @@ QVariantList DocumentModel::qmlSortColumns() const
 
 void DocumentModel::sort(int column, Qt::SortOrder order)
 {
-    return sort({ { column, order } });
+    sort({ { column, order } });
 }
 
 void DocumentModel::sortAdditionally(int column, Qt::SortOrder order)

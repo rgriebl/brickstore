@@ -298,13 +298,13 @@ QCoro::Task<> Application::setupLDraw()
             showToastMessage(tr("Failed to download a LDraw library update") % u":<br>" % message);
     });
 
-    auto loadLibrary = [](QString ldrawDir) -> QCoro::Task<> {
-        bool isInternalZip = ldrawDir.isEmpty();
+    auto loadLibrary = [](QString ldrawDirLoad) -> QCoro::Task<> {
+        bool isInternalZip = ldrawDirLoad.isEmpty();
 
         if (isInternalZip)
-            ldrawDir = Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
+            ldrawDirLoad = Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
 
-        co_await LDraw::library()->setPath(ldrawDir);
+        co_await LDraw::library()->setPath(ldrawDirLoad);
 
         if (isInternalZip)
             LDraw::library()->startUpdate();
