@@ -254,13 +254,16 @@ Item {
         }
 
         DragHandler {
+            id: moveHandler
+
             property vector3d pressPosition
             property bool animationWasActive: false
 
             acceptedButtons: Qt.RightButton
+            enabled: !arcballHandler.active && !pinchHandler.active
 
             target: null
-            dragThreshold: 0
+            dragThreshold: 1
 
             onActiveChanged: {
                 if (active) {
@@ -279,11 +282,34 @@ Item {
                 rootNode.position = pressPosition.plus(offset)
             }
         }
+        PinchHandler {
+            id: pinchHandler
+
+            property vector3d scaleStart
+
+            target: null
+            enabled: !moveHandler.active && !arcballHandler.active
+
+            onActiveChanged: {
+                if (active)
+                    scaleStart = rootNode.scale
+            }
+
+            onActiveScaleChanged: {
+                if (active)
+                    rootNode.scale = scaleStart.times(activeScale)
+            }
+        }
 
         DragHandler {
+            id: arcballHandler
+
             property quaternion pressRotation
             property point pressPos
             property bool animationWasActive: false
+
+            acceptedButtons: Qt.LeftButton
+            enabled: !moveHandler.active && !pinchHandler.active
 
             target: null
             dragThreshold: 0
