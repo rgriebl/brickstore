@@ -37,7 +37,7 @@ int BrickLink::TextImport::findItemIndex(char tid, const QByteArray &id) const
     auto needle = std::make_pair(tid, id);
     auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lessThan);
     if ((it != m_items.cend()) && (it->itemTypeId() == tid) && (it->id() == id))
-        return std::distance(m_items.cbegin(), it);
+        return int(std::distance(m_items.cbegin(), it));
     return -1;
 }
 
@@ -45,7 +45,7 @@ int BrickLink::TextImport::findColorIndex(uint id) const
 {
     auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, Color::lessThan);
     if ((it != m_colors.cend()) && (it->id() == id))
-        return std::distance(m_colors.cbegin(), it);
+        return int(std::distance(m_colors.cbegin(), it));
     return -1;
 }
 
@@ -53,7 +53,7 @@ int BrickLink::TextImport::findCategoryIndex(uint id) const
 {
     auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, Category::lessThan);
     if ((it != m_categories.cend()) && (it->id() == id))
-        return std::distance(m_categories.cbegin(), it);
+        return int(std::distance(m_categories.cbegin(), it));
     return -1;
 }
 
@@ -402,7 +402,7 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             addToKnownColors(itemIndex, colorIndex);
         });
 
-        uint itemIndex = item - items().data();
+        uint itemIndex = uint(item - items().data());
 
 
         // BL bug: if an extra item is part of an alternative match set, then none of the
@@ -508,7 +508,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
 
             bool isRubber = name.startsWith("Rubber_"_l1);
 
-            int lastIdx = sl.count() - 1;
+            int lastIdx = int(sl.count()) - 1;
 
             for (int idx = 9; idx < sl.count(); ++idx) {
                 if (sl[idx] == "ALPHA"_l1 && (idx < lastIdx)) {

@@ -551,7 +551,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
 
                 QPainter p(&img);
                 p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-                p.drawPixmapFragments(fragments.constData(), fragments.count(), particle);
+                p.drawPixmapFragments(fragments.constData(), int(fragments.count()), particle);
                 p.end();
 
                 texImg = img.copy(delta, delta, texSize, texSize).rgbSwapped()

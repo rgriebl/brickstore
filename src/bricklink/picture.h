@@ -51,7 +51,7 @@ public:
 
     Q_INVOKABLE const QImage image() const;
 
-    int cost() const;
+    qsizetype cost() const;
 
     Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
     ~Picture() override;

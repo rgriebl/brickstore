@@ -166,7 +166,7 @@ enum {
 AddRemoveCmd::AddRemoveCmd(Type t, DocumentModel *model, const QVector<int> &positions,
                            const QVector<int> &sortedPositions,
                            const QVector<int> &filteredPositions, const LotList &lots)
-    : QUndoCommand(genDesc(t == Add, qMax(lots.count(), positions.count())))
+    : QUndoCommand(genDesc(t == Add, int(qMax(lots.count(), positions.count()))))
     , m_model(model)
     , m_positions(positions)
     , m_sortedPositions(sortedPositions)
@@ -751,13 +751,13 @@ void DocumentModel::insertLotsAfter(const Lot *afterLot, LotList &&lots)
     if (lots.empty())
         return;
 
-    int afterPos = m_lots.indexOf(const_cast<Lot *>(afterLot)) + 1;
-    int afterSortedPos = m_sortedLots.indexOf(const_cast<Lot *>(afterLot)) + 1;
-    int afterFilteredPos = m_filteredLots.indexOf(const_cast<Lot *>(afterLot)) + 1;
+    int afterPos = int(m_lots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+    int afterSortedPos = int(m_sortedLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+    int afterFilteredPos = int(m_filteredLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
 
     Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
     if (afterFilteredPos == 0)
-        afterFilteredPos = m_filteredLots.size();
+        afterFilteredPos = int(m_filteredLots.size());
 
     QVector<int> positions(int(lots.size()));
     std::iota(positions.begin(), positions.end(), afterPos);
@@ -841,7 +841,7 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
-    emit lotCountChanged(m_lots.count());
+    emit lotCountChanged(int(m_lots.count()));
     emitStatisticsChanged();
 
     if (isSorted())
@@ -860,11 +860,11 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
-    for (int i = lots.count() - 1; i >= 0; --i) {
+    for (int i = int(lots.count()) - 1; i >= 0; --i) {
         Lot *lot = lots.at(i);
-        int idx = m_lots.indexOf(lot);
-        int sortIdx = m_sortedLots.indexOf(lot);
-        int filterIdx = m_filteredLots.indexOf(lot);
+        int idx = int(m_lots.indexOf(lot));
+        int sortIdx = int(m_sortedLots.indexOf(lot));
+        int filterIdx = int(m_filteredLots.indexOf(lot));
         Q_ASSERT(idx >= 0 && sortIdx >= 0);
         positions[i] = idx;
         sortedPositions[i] = sortIdx;
@@ -881,7 +881,7 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 
-    emit lotCountChanged(m_lots.count());
+    emit lotCountChanged(int(m_lots.count()));
     emitStatisticsChanged();
 
     //TODO: we should remember and re-apply the isSorted/isFiltered state
@@ -1199,7 +1199,7 @@ void DocumentModel::applyTo(const LotList &lots, std::function<bool(const Lot &,
     if (!at.isEmpty())
         beginMacro();
 
-    int count = lots.size();
+    int count = int(lots.size());
     std::vector<std::pair<Lot *, Lot>> changes;
     changes.reserve(uint(count));
 
@@ -1315,7 +1315,7 @@ Lot *DocumentModel::lot(const QModelIndex &idx) const
 
 QModelIndex DocumentModel::index(const Lot *lot, int column) const
 {
-    int row = m_filteredLots.indexOf(const_cast<Lot *>(lot));
+    int row = int(m_filteredLots.indexOf(const_cast<Lot *>(lot)));
     if (row >= 0)
         return createIndex(row, column, const_cast<Lot *>(lot));
     return { };
@@ -1323,7 +1323,7 @@ QModelIndex DocumentModel::index(const Lot *lot, int column) const
 
 int DocumentModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_filteredLots.size();
+    return parent.isValid() ? 0 : int(m_filteredLots.size());
 }
 
 int DocumentModel::columnCount(const QModelIndex &parent) const
@@ -2129,7 +2129,7 @@ QByteArray DocumentModel::saveSortFilterState() const
     ds << qint32(m_sortedLots.size());
     for (int i = 0; i < m_sortedLots.size(); ++i) {
         auto *lot = m_sortedLots.at(i);
-        qint32 row = m_lots.indexOf(lot);
+        qint32 row = qint32(m_lots.indexOf(lot));
         bool visible = m_filteredLots.contains(lot);
 
         ds << (visible ? row : (-row - 1)); // can't have -0
@@ -2186,7 +2186,7 @@ bool DocumentModel::restoreSortFilterState(const QByteArray &ba)
 
     LotList sortedLots;
     LotList filteredLots;
-    int lotsSize = m_lots.size();
+    int lotsSize = int(m_lots.size());
     while (viewSize--) {
         qint32 pos;
         ds >> pos;

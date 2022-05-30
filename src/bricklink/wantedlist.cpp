@@ -229,7 +229,7 @@ WantedLists::WantedLists(Core *core)
                     m_wantedLists.clear();
                     const auto wantedLists = parseGlobalWantedList(*job->data());
                     for (auto &wantedList : wantedLists) {
-                        int row = m_wantedLists.count();
+                        int row = int(m_wantedLists.count());
                         m_wantedLists.append(wantedList);
                         wantedList->setParent(this); // needed to prevent QML from taking ownership
 
@@ -274,11 +274,11 @@ int WantedLists::parseWantedList(WantedList *wantedList, const QByteArray &data)
 QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteArray &data)
 {
     QVector<BrickLink::WantedList *> wantedLists;
-    int pos = data.indexOf("var wlJson");
+    auto pos = data.indexOf("var wlJson");
     if (pos < 0)
         throw Exception("Invalid HTML - cannot parse");
-    int startPos = data.indexOf('{', pos);
-    int endPos = data.indexOf("};\r\n", pos);
+    auto startPos = data.indexOf('{', pos);
+    auto endPos = data.indexOf("};\r\n", pos);
 
     if ((startPos <= pos) || (endPos < startPos))
         throw Exception("Invalid HTML - found wlJSON, but could not parse line");
@@ -379,7 +379,7 @@ QVector<WantedList *> WantedLists::wantedLists() const
 
 int WantedLists::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_wantedLists.count();
+    return parent.isValid() ? 0 : int(m_wantedLists.count());
 }
 
 int WantedLists::columnCount(const QModelIndex &parent) const

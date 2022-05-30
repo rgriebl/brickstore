@@ -696,7 +696,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 // contains either a minifig or a part, optionally with color-id
                 const BrickLink::Color *color = nullptr;
 
-                int atPos = str.lastIndexOf('@'_l1);
+                auto atPos = str.lastIndexOf('@'_l1);
                 if (atPos != -1) {
                     color = BrickLink::core()->color(str.mid(atPos + 1).toUInt());
                     str = str.left(atPos);
@@ -914,12 +914,12 @@ QModelIndex BrickLink::InternalAppearsInModel::index(const AppearsInItem *const_
 {
     auto *ai = const_cast<AppearsInItem *>(const_ai);
 
-    return ai ? createIndex(m_items.indexOf(ai), 0, ai) : QModelIndex();
+    return ai ? createIndex(int(m_items.indexOf(ai)), 0, ai) : QModelIndex();
 }
 
 int BrickLink::InternalAppearsInModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_items.size();
+    return parent.isValid() ? 0 : int(m_items.size());
 }
 
 int BrickLink::InternalAppearsInModel::columnCount(const QModelIndex &parent) const

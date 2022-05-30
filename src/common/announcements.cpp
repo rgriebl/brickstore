@@ -60,8 +60,8 @@ QCoro::Task<> Announcements::check()
     QVariantMap conditions = SystemInfo::inst()->asMap();
     conditions["language"_l1] = Config::inst()->language();
 
-    int captureNextStart = 0;
-    int nextHeader = 0;
+    qsizetype captureNextStart = 0;
+    qsizetype nextHeader = 0;
 
     QString nextTitle;
     QDate nextDate;
@@ -71,7 +71,7 @@ QCoro::Task<> Announcements::check()
         QRegularExpressionMatch match = header.match(md, nextHeader);
 
         if (captureNextStart) {
-            int captureEnd = match.hasMatch() ? match.capturedStart() : md.size();
+            auto captureEnd = match.hasMatch() ? match.capturedStart() : md.size();
 
             Announcement a;
             a.m_date = nextDate;

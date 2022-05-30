@@ -170,9 +170,9 @@ bool PriceGuide::parseHtml(const QByteArray &ba, Data &result)
     int matchCounter = 0;
     int startPos = 0;
 
-    int currentPos = s.indexOf("Current Items for Sale"_l1);
+    int currentPos = int(s.indexOf("Current Items for Sale"_l1));
     bool hasCurrent = (currentPos > 0);
-    int pastSixPos = s.indexOf("Past 6 Months Sales"_l1);
+    int pastSixPos = int(s.indexOf("Past 6 Months Sales"_l1));
     bool hasPastSix = (pastSixPos > 0);
 
 //    qWarning() << s;
@@ -183,8 +183,8 @@ bool PriceGuide::parseHtml(const QByteArray &ba, Data &result)
             int ti = -1;
             int ci = -1;
 
-            int matchPos = m.capturedStart(0);
-            int matchEnd = m.capturedEnd(0);
+            int matchPos = int(m.capturedStart(0));
+            int matchEnd = int(m.capturedEnd(0));
 
             // if both pastSix and current are available, pastSix comes first
             if (hasCurrent && (matchPos > currentPos))

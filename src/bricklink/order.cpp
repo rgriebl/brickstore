@@ -987,8 +987,8 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     Order *o = order.release();
     o->setParent(this); // needed to prevent QML from taking ownership
 
-    int row = m_orders.count();
-    beginInsertRows({ }, m_orders.count(), m_orders.count());
+    int row = int(m_orders.count());
+    beginInsertRows({ }, row, row);
 
     connect(o, &Order::idChanged, this, [this, row]() { emitDataChanged(row, OrderId); });
     connect(o, &Order::otherPartyChanged, this, [this, row]() { emitDataChanged(row, OtherParty); });
@@ -1201,7 +1201,7 @@ int Orders::indexOfOrder(const QString &orderId) const
 
 int Orders::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_orders.count();
+    return parent.isValid() ? 0 : int(m_orders.count());
 }
 
 int Orders::columnCount(const QModelIndex &parent) const
@@ -1225,7 +1225,7 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         case Status: return Order::statusToString(order->status(), true);
         case OrderId: return order->id();
         case OtherParty: {
-            int firstline = order->address().indexOf('\n'_l1);
+            auto firstline = order->address().indexOf('\n'_l1);
             if (firstline > 0) {
                 return QString::fromLatin1("%2 (%1)")
                         .arg(order->address().left(firstline), order->otherParty());

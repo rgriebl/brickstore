@@ -271,7 +271,7 @@ Carts::Carts(Core *core)
                     m_carts.clear();
                     const auto carts = parseGlobalCart(*job->data());
                     for (auto &cart : carts) {
-                        int row = m_carts.count();
+                        int row = int(m_carts.count());
                         m_carts.append(cart);
                         cart->setParent(this); // needed to prevent QML from taking ownership
 
@@ -366,11 +366,11 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
 QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
 {
     QVector<BrickLink::Cart *> carts;
-    int pos = data.indexOf("var GlobalCart");
+    auto pos = data.indexOf("var GlobalCart");
     if (pos < 0)
         throw Exception("Invalid HTML - cannot parse");
-    int startPos = data.indexOf('{', pos);
-    int endPos = data.indexOf("};\r\n", pos);
+    auto startPos = data.indexOf('{', pos);
+    auto endPos = data.indexOf("};\r\n", pos);
 
     if ((startPos <= pos) || (endPos < startPos))
         throw Exception("Invalid HTML - found GlobalCart, but could not parse line");
@@ -481,7 +481,7 @@ QVector<Cart *> Carts::carts() const
 
 int Carts::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_carts.count();
+    return parent.isValid() ? 0 : int(m_carts.count());
 }
 
 int Carts::columnCount(const QModelIndex &parent) const

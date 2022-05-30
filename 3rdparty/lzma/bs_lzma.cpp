@@ -199,7 +199,7 @@ qint64 HashHeaderCheckFilter::writeData(const char *data, qint64 maxSize)
     if (maxSize <= 0)
         return maxSize;
 
-    int dataSize = maxSize;
+    qint64 dataSize = maxSize;
 
     if (!m_gotHeader) {
         qint64 need = m_hashSize - m_header.size();

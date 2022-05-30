@@ -40,7 +40,7 @@ void RecentFiles::add(const QString &file)
     QFileInfo fileInfo(file);
     bool save = true;
 
-    int idx = m_fileInfos.indexOf(fileInfo);
+    int idx = int(m_fileInfos.indexOf(fileInfo));
     if (idx > 0) {
         beginMoveRows({ }, idx, idx, { }, 0);
         m_fileInfos.move(idx, 0);
@@ -78,7 +78,7 @@ void RecentFiles::clear()
 
 int RecentFiles::count() const
 {
-    return m_fileInfos.count();
+    return int(m_fileInfos.count());
 }
 
 int RecentFiles::rowCount(const QModelIndex &parent) const

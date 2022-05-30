@@ -54,7 +54,7 @@ int StaticPointerModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
     else if (isFiltered())
-        return filtered.count();
+        return int(filtered.count());
     else
         return pointerCount();
 }
@@ -68,12 +68,12 @@ QModelIndex StaticPointerModel::index(const void *pointer, int column) const
 {
     init();
 
-    int row = pointer ? pointerIndexOf(pointer) : -1;
+    auto row = pointer ? pointerIndexOf(pointer) : -1;
     if (row >= 0) {
         if (isFiltered())
-            row = filtered.indexOf(row);
+            row = int(filtered.indexOf(row));
         else
-            row = sorted.indexOf(row);
+            row = int(sorted.indexOf(row));
     }
     return row >= 0 ? createIndex(row, column, const_cast<void *>(pointer)) : QModelIndex();
 }

@@ -743,7 +743,7 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
         hideColumnDirect(li, newData.m_hidden);
     }
     // hide columns that got added after this was saved
-    for (int li = columnData.count(); li < DocumentModel::FieldCount; ++li) {
+    for (int li = int(columnData.count()); li < DocumentModel::FieldCount; ++li) {
         moveColumnDirect(li, li);
         resizeColumnDirect(li, current.value(li).m_size);
         hideColumnDirect(li, true);
@@ -951,7 +951,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
 
     m_setToPG.reset(new SetToPriceGuideData);
     m_setToPG->changes.reserve(uint(sel.size()));
-    m_setToPG->totalCount = sel.count();
+    m_setToPG->totalCount = int(sel.count());
     m_setToPG->doneCount = 0;
     m_setToPG->time = time;
     m_setToPG->price = price;
@@ -1958,7 +1958,7 @@ QVector<ColumnData> Document::defaultColumnLayout(bool simpleMode)
 
     int em = QFontMetrics(QGuiApplication::font()).averageCharWidth();
     for (int i = 0; i < model()->columnCount(); i++) {
-        int vi = columnOrder.indexOf(i);
+        int vi = int(columnOrder.indexOf(i));
 
         int mw = model()->headerData(i, Qt::Horizontal, DocumentModel::HeaderDefaultWidthRole).toInt();
         int width = (mw < 0 ? -mw : mw * em) + 8;
@@ -2321,7 +2321,7 @@ void Document::autosave() const
 int Document::restorableAutosaves()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    return temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) }).count();
+    return int(temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) }).count());
 }
 
 int Document::processAutosaves(AutosaveAction action)
@@ -2422,7 +2422,7 @@ int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
     lot->setItem(item.wrappedObject());
     lot->setColor(color.wrappedObject());
     m_model->appendLot(std::move(lot));
-    return m_model->lots().indexOf(lot);
+    return int(m_model->lots().indexOf(lot));
 }
 
 void QmlDocumentLots::remove(BrickLink::QmlLot lot)

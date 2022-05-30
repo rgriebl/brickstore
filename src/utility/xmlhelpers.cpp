@@ -29,12 +29,12 @@ QString XmlHelpers::decodeEntities(const QString &src)
 
     QString decoded(src);
 
-    int pos = decoded.indexOf("&#"_l1);
+    auto pos = decoded.indexOf("&#"_l1);
     if (pos < 0)
         return decoded;
 
     do {
-        int endpos = decoded.indexOf(QLatin1Char(';'), pos + 2);
+        auto endpos = decoded.indexOf(QLatin1Char(';'), pos + 2);
         if (endpos < 0) {
             pos += 2;
         } else {

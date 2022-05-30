@@ -489,7 +489,7 @@ void QmlDocumentProxyModel::update()
         return;
 
     const auto layout = m_doc->columnLayout();
-    int count = layout.count();
+    auto count = layout.count();
     v2l.resize(count);
     l2v.resize(count);
 
@@ -524,7 +524,7 @@ ColumnLayoutsModel::ColumnLayoutsModel(QObject *parent)
 
 int ColumnLayoutsModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_idAndName.size();
+    return parent.isValid() ? 0 : int(m_idAndName.size());
 }
 
 QVariant ColumnLayoutsModel::data(const QModelIndex &index, int role) const

@@ -78,16 +78,16 @@ namespace QAlgorithmsPrivate {
 
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
-static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int a_span, int b_span)
+static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, qsizetype a_span, qsizetype b_span)
 {
     RandomAccessIterator a = begin;
     RandomAccessIterator b = begin + a_span;
-    int span = a_span + b_span;
+    qsizetype span = a_span + b_span;
 
     Q_ASSERT(span == (end - begin));
     Q_ASSERT((b + b_span) == end);
 
-    for (int i = 0; i < span; ++i) {
+    for (qsizetype i = 0; i < span; ++i) {
         // 'a' if no b left or a < b
         // 'b' if no a left or a >= b
         if (!b_span || (a_span && b_span && lessThan(*a, *b))) {
@@ -107,7 +107,7 @@ static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIte
 template <typename RandomAccessIterator, typename T, typename LessThan>
 static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp)
 {
-    int span = end - begin;
+    qsizetype span = end - begin;
 
     if (span < 2) {
         return;
@@ -115,8 +115,8 @@ static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessI
         if (!lessThan(*begin, *(begin + 1)))
             std::swap(*begin, *(begin + 1));
     } else {
-        int a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
-        int b_span = span / 2;        // smaller half of array if array-size is uneven
+        qsizetype a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
+        qsizetype b_span = span / 2;        // smaller half of array if array-size is uneven
 
         if (a_span > 1) // no sorting necessary if size == 1
             qParallelSortSerial(begin, begin + a_span, lessThan, tmp);
@@ -131,7 +131,7 @@ static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessI
 template <typename RandomAccessIterator, typename T, typename LessThan>
 void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int threadCount)
 {
-    int span = end - begin;
+    qsizetype span = end - begin;
 
     // stop if there are no threads left OR if size of array is at most 100 (to avoid overhead)
     if (threadCount == 1 || span <= 100) {
@@ -140,8 +140,8 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
         return;
     } else {
         // divide & conquer
-        int a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
-        int b_span = span - a_span;  // smaller half of array if array-size is uneven
+        qsizetype a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
+        qsizetype b_span = span - a_span;  // smaller half of array if array-size is uneven
 
         if (b_span > 1) { // prepare thread only if sorting is necessary
             QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>, begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
@@ -158,7 +158,7 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
 template <typename RandomAccessIterator, typename T, typename LessThan>
 Q_OUTOFLINE_TEMPLATE void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &, LessThan lessThan)
 {
-    const int span = end - begin;
+    const qsizetype span = end - begin;
     if (span < 2)
        return;
 

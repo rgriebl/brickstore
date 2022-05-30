@@ -30,7 +30,7 @@ DocumentList *DocumentList::inst()
 
 int DocumentList::count() const
 {
-    return m_documents.count();
+    return int(m_documents.count());
 }
 
 QStringList DocumentList::allFiles() const
@@ -62,7 +62,7 @@ Document *DocumentList::documentForFile(const QString &fileName) const
 
 int DocumentList::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_documents.count();
+    return parent.isValid() ? 0 : int(m_documents.count());
 }
 
 QVariant DocumentList::data(const QModelIndex &index, int role) const
@@ -164,7 +164,7 @@ void DocumentList::add(Document *document)
         endInsertRows();
 
         auto updateDisplay = [this, document]() {
-            int row = m_documents.indexOf(document);
+            int row = int(m_documents.indexOf(document));
             emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
         };
         connect(document, &Document::filePathChanged,
@@ -181,7 +181,7 @@ void DocumentList::add(Document *document)
 
 void DocumentList::remove(Document *document)
 {
-    int row = m_documents.indexOf(document);
+    int row = int(m_documents.indexOf(document));
     if (row >= 0) {
         beginRemoveRows({ }, row, row);
         m_documents.removeAt(row);

@@ -2073,7 +2073,7 @@ extern int ZEXPORT unz__GetCurrentFilename(unzFile file, char **filename, int *f
     unz64_s *s = (unz64_s *) file;
     if (s && filename && filenameSize && s->cur_file_info.size_filename) {
         *filename = s->cur_file_name;
-        *filenameSize = s->cur_file_info.size_filename;
+        *filenameSize = (int)s->cur_file_info.size_filename;
         return UNZ_OK;
     } else {
         return UNZ_INTERNALERROR;

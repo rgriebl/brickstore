@@ -115,7 +115,7 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
             char itt = item->itemTypeId();
 
             if (itt == 'S' || itt == 'I' || itt == 'O') {
-                int pos = id.lastIndexOf('-'_l1);
+                auto pos = id.lastIndexOf('-'_l1);
                 if (pos >= 0)
                     id.truncate(pos);
             }

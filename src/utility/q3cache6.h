@@ -76,8 +76,8 @@ class Q3Cache
         }
         Value &operator=(Value &&other) noexcept
         {
-            qSwap(t, other.t);
-            qSwap(cost, other.cost);
+            std::swap(t, other.t);
+            std::swap(cost, other.cost);
             return *this;
         }
         ~Value() { delete t; }
@@ -121,23 +121,6 @@ class Q3Cache
         {
             value = Value(o, cost);
         }
-        static Node create(const Key &k, Value &&t) noexcept(std::is_nothrow_move_assignable_v<Key> && std::is_nothrow_move_assignable_v<T>)
-        {
-            return Node(k, std::move(t));
-        }
-        void replace(const Value &t) noexcept(std::is_nothrow_assignable_v<T, T>)
-        {
-            value = t;
-        }
-        void replace(Value &&t) noexcept(std::is_nothrow_move_assignable_v<T>)
-        {
-            value = std::move(t);
-        }
-        Value takeValue() noexcept(std::is_nothrow_move_constructible_v<T>)
-        {
-            return std::move(value);
-        }
-        bool valuesEqual(const Node *other) const { return value == other->value; }
 
         Node(Node &&other)
             : Chain(other),
@@ -167,11 +150,17 @@ class Q3Cache
         n->prev->next = n->next;
         n->next->prev = n->prev;
         total -= n->value.cost;
+#if QT_VERSION < QT_VERSION_CHECK(6, 4, 0)
         auto it = d.find(n->key);
+#else
+        auto it = d.findBucket(n->key);
+#endif
         d.erase(it);
     }
     T *relink(const Key &key) const noexcept
     {
+        if (isEmpty())
+            return nullptr;
         Node *n = d.findNode(key);
         if (!n)
             return nullptr;
@@ -191,22 +180,20 @@ class Q3Cache
 
     void trim(qsizetype m) noexcept(std::is_nothrow_destructible_v<Node>)
     {
-        Chain *n = chain.prev;
-        while (n != &chain && total > m) {
-            Node *u = static_cast<Node *>(n);
-            n = n->prev;
-            if (q3IsDetached(*u->value.t))
-                unlink(u);
+        while (chain.prev != &chain && total > m) {
+            Node *n = static_cast<Node *>(chain.prev);
+            if (q3IsDetached(*n->value.t))
+                unlink(n);
         }
     }
 
 public:
     void clearRecursive()
     {
-        int s = size();
+        auto s = size();
         while (s) {
             trim(0);
-            int new_s = size();
+            auto new_s = size();
             if (new_s == s)
                 break;
             s = new_s;
@@ -216,13 +203,13 @@ public:
         clear();
     }
 
-    void setObjectCost(const Key &key, int cost)
+    void setObjectCost(const Key &key, qsizetype cost)
     {
         // Reduce the cost if possible. Increasing is not possible, because the cache might
         // overflow, leaving us in a weird state.
         Node *n = d.findNode(key);
         if (n) {
-            int d = cost - n->value.cost;
+            qsizetype d = cost - n->value.cost;
             if ((d > 0) && ((total + d) > mx)) {
                 //qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
             } else if (d != 0) {
@@ -315,11 +302,13 @@ public:
     }
     inline bool contains(const Key &key) const noexcept
     {
-        return d.findNode(key) != nullptr;
+        return !isEmpty() && d.findNode(key) != nullptr;
     }
 
     bool remove(const Key &key) noexcept(std::is_nothrow_destructible_v<Node>)
     {
+        if (isEmpty())
+            return false;
         Node *n = d.findNode(key);
         if (!n) {
             return false;
@@ -331,6 +320,8 @@ public:
 
     T *take(const Key &key) noexcept(std::is_nothrow_destructible_v<Key>)
     {
+        if (isEmpty())
+            return nullptr;
         Node *n = d.findNode(key);
         if (!n)
             return nullptr;

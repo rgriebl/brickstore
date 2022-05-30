@@ -37,7 +37,7 @@ public:
     bool isValid() const          { return m_valid; }
     QDateTime lastUpdated() const { return m_lastUpdated; }
     BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
-    int lotCount() const          { return m_lots.count(); }
+    int lotCount() const          { return int(m_lots.count()); }
     const LotList &lots() const   { return m_lots; }
     QString currencyCode() const  { return m_currencyCode; }
 
