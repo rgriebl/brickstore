@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.Material.impl
 import QtQuick.Layouts
 import Qt.labs.qmlmodels
 import BrickStore 1.0
