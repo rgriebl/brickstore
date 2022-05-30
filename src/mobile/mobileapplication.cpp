@@ -39,12 +39,20 @@ MobileApplication::MobileApplication(int &argc, char **argv)
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     (void) new QGuiApplication(argc, argv);
+
+    const char *style =
+    #if defined(Q_OS_IOS) && (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
+            "iOS";
+    #elif defined(Q_OS_IOS)
+            "Basic";
+    #else
+            "Material";
+    #endif
+    qputenv("QT_QUICK_CONTROLS_STYLE", style);
 }
 
 void MobileApplication::init()
 {
-    qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
-
     Application::init();
 
     m_engine->setBaseUrl(QUrl("qrc:/mobile/"_l1));

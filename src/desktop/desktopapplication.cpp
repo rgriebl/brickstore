@@ -39,7 +39,6 @@
 #include <QtGui/QPainter>
 #include <QtGui/QSurfaceFormat>
 #include <QtQml/QQmlApplicationEngine>
-#include <QtQuick3D/QQuick3D>
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
 #    undef _WIN32_WINNT
@@ -177,8 +176,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     (void) new QApplication(argc, argv);
 
     qInfo() << "Device pixel ratio:" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
-
-    QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     m_clp.addHelpOption();
     m_clp.addVersionOption();

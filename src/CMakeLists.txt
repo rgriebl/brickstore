@@ -63,6 +63,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Concurrent
 )
 
+# really only useful for iOS: restrict the number of deployed plugins in static builds
+qt_import_plugins(${PROJECT_NAME}
+    EXCLUDE_BY_TYPE qmltooling
+    INCLUDE_BY_TYPE imageformats
+        Qt::QGifPlugin
+        Qt::QJpegPlugin
+        Qt::QSvgPlugin
+        Qt::QJpegPlugin
+        Qt::QJpegPlugin
+)
+
 if (BS_BACKEND)
     target_sources(${PROJECT_NAME} PUBLIC
         backend/backendapplication.cpp
@@ -154,6 +165,11 @@ if (BS_DESKTOP OR BS_MOBILE)
         Qt6::Quick
         Qt6::Quick3D
     )
+    if (MACOS)
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            "-framework SystemConfiguration"
+        )
+    endif()
 
     # not useable due to QTBUG-XXXX
     #qt_add_qml_module(${PROJECT_NAME}
@@ -299,7 +315,6 @@ if (BS_DESKTOP)
             desktop/desktopapplication_mac.mm
         )
         target_link_libraries(${PROJECT_NAME} PRIVATE
-            "-framework SystemConfiguration"
             "-framework AppKit"
         )
     endif()

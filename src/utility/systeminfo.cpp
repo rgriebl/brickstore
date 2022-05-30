@@ -27,7 +27,7 @@
 #  endif
 #  include <windows.h>
 #  include <qpa/qplatformnativeinterface.h>
-#elif defined(Q_OS_MACOS)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 #  include <sys/types.h>
 #  include <sys/sysctl.h>
 #elif defined(Q_OS_LINUX)
@@ -83,7 +83,7 @@ SystemInfo::SystemInfo()
 
     quint64 physmem = 0;
 
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
     uint64_t ram;
     int sctl[] = { CTL_HW, HW_MEMSIZE };
     size_t ramsize = sizeof(ram);

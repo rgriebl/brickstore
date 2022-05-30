@@ -28,6 +28,7 @@
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQuick3D/QQuick3D>
 
 #include "bricklink/core.h"
 #include "bricklink/store.h"
@@ -93,6 +94,8 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
+    QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
+
     new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {
         if (e->type() == QEvent::FileOpen) {
             const QString file = static_cast<QFileOpenEvent *>(e)->file();

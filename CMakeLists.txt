@@ -71,19 +71,21 @@ include(QtPlatformSupport) # load all the platform names
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-if (NOT ANDROID)
+if (NOT (ANDROID OR APPLE))
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+endif()
 
-    # Android is the last supported 32bit platform
-    if (QT_32BIT)
-        message(FATAL_ERROR "32bit builds for this platform are not supported.")
-    endif()
+# Android is the last supported 32bit platform
+if (NOT ANDROID AND QT_32BIT)
+    message(FATAL_ERROR "32bit builds for this platform are not supported.")
 endif()
 
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
-include(SeparateDebugInfo)
-enable_separate_debug_info(${PROJECT_NAME})
+if (NOT IOS) # somehow this tries to access the wrong build dir on iOS
+    include(SeparateDebugInfo)
+    enable_separate_debug_info(${PROJECT_NAME})
+endif()
 
 add_compile_definitions(
     QT_STRICT_ITERATORS
@@ -228,9 +230,23 @@ endif()
 
 if (APPLE)
     set(EXECUTABLE ${PROJECT_NAME})
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.macos.plist"
-    )
+    if (CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(MACOSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET})
+    endif()
+    if (IOS)
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.ios.plist"
+            MACOSX_BUNDLE_GUI_IDENTIFIER "de.brickforge.brickstore"
+            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "de.brickforge.brickstore"
+            XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+            XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+        )
+    else()
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.macos.plist"
+        )
+    endif()
     set(MACOS_RESOURCES
         assets/generated-app-icons/brickstore.icns
         assets/generated-app-icons/brickstore_doc.icns
@@ -317,6 +333,8 @@ add_custom_target("Other-Files" SOURCES
     .gitattributes
     .gitignore
     .github/workflows/build_cmake.yml
+    .github/scripts/ios-import-certificate.sh
+    .github/scripts/ios-import-profile.sh
     .tag
     CHANGELOG.md
     LICENSE.GPL
@@ -346,6 +364,7 @@ add_custom_target("Other-Files" SOURCES
     extensions/classic-print-script.bs.qml
     macos/Info.macos.plist
     macos/Info.ios.plist
+    macos/ExportOptions.ios.plist
     macos/locversion.plist.in
     macos/dmg-ds_store
     macos/dmg-background.png
@@ -360,11 +379,11 @@ add_custom_target("Other-Files" SOURCES
 
 ## Installers, Bundles, etc.
 
-if (APPLE)
+if (MACOS)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
     add_custom_target(dmg
-        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE:${PROJECT_NAME}>/../../..
+        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE_DIR:${PROJECT_NAME}>/../..
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
@@ -477,6 +496,45 @@ elseif (LINUX)
                     --plugin qt --output appimage
         DEPENDS ${PROJECT_NAME}
     )
+
+elseif (IOS)
+    # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake
+
+    if (${PLATFORM_INT} MATCHES ".*SIMULATOR.*")
+        message(STATUS "Skipping IPA generation for simulator builds")
+    else()
+        if (NOT CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER
+                OR NOT CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY
+                OR NOT CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
+            message(STATUS "Skipping IPA generation because not all necessary variables are set")
+        else()
+            get_target_property(IOS_BUNDLE_IDENTIFIER ${PROJECT_NAME} XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER)
+
+            set(EXPORT_OPTIONS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_ExportOptions.plist)
+            configure_file(${CMAKE_SOURCE_DIR}/macos/ExportOptions.ios.plist ${EXPORT_OPTIONS_FILE})
+
+            add_custom_target(archive
+              COMMAND xcodebuild
+                      -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
+                      -configuration Release
+                      -scheme ${PROJECT_NAME}
+                      -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
+                      -derivedDataPath ${CMAKE_BINARY_DIR}/derivedData
+                      archive
+            )
+
+            add_custom_target(ipa
+                  DEPENDS archive
+                  COMMAND xcodebuild
+                          -exportArchive
+                          -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
+                          -exportOptionsPlist ${EXPORT_OPTIONS_FILE}
+                          -exportPath ${CMAKE_BINARY_DIR}/ipa-export
+                  COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/ipa-export/${PROJECT_NAME}.ipa"
+                          "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.ipa"
+            )
+        endif()
+    endif()
 endif()
 
 # we don't want the standard 'package' target

@@ -99,14 +99,14 @@ jobs:
           qt_target: 'android'
           cmake_extra_config: ''
 
-#        - name: "iOS"
-#          artifact: "iOS"
-#          runs-on: macos-11
-#          os: ios
-#          qt_version: '6.2.4'
-#          qt_arch: ''
-#          qt_target: 'ios'
-#          cmake_extra_config: ''
+        - name: "iOS"
+          artifact: "iOS"
+          runs-on: macos-12
+          os: ios
+          qt_version: '6.2.4'
+          qt_arch: ''
+          qt_target: 'ios'
+          cmake_extra_config: ''
 
   # BUILD
   #################################################
@@ -140,7 +140,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ../Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-2
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-3
 
     # Get Qt
     #################################################
@@ -180,6 +180,13 @@ jobs:
         sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qtpaths.bat"
         sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qmake.bat"
         echo "Qt6_DIR=${Qt6_DIR}/../msvc2019_arm64" >> $GITHUB_ENV
+      shell: sh
+
+    - name: Fix broken iOS / ARM64 setup
+      if: (matrix.config.os == 'ios')
+      # see "part 2" above, only this time for macos vs ios
+      run: |
+        echo "Qt6_DIR=${Qt6_DIR}/../ios" >> $GITHUB_ENV
       shell: sh
 
     - name: Install Qt from Linux Distro (native)
@@ -293,7 +300,14 @@ jobs:
         echo "Using NDK: $ANDROID_NDK_LATEST_HOME"
         echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
-        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANDROID_ABI=${{ matrix.config.android_abi }} -DANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME} -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) -DANDROID_NATIVE_API_LEVEL=23 ${{ matrix.config.cmake_extra_config }} .
+        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) \
+            -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
+            -DANDROID_NATIVE_API_LEVEL=23 \
+            -DANDROID_ABI=${{ matrix.config.android_abi }} \
+            -DANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME} \
+            -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
+            ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target final-apk
       shell: bash
 
@@ -328,34 +342,55 @@ jobs:
         brew link getsentry/tools/sentry-cli
         # specifying just "." to make sentry-cli look for dSYM files on itself does not work on
         # the CI ... the sentry-cli process will just freeze forever
-        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
+        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
+            --org brickstore --project brickstore \
+            bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
 
     # Build for iOS
     #################################################
 
-    - name: Fix qmake script for iOS
+#    - name: Fix qmake script for iOS
+#      if: (matrix.config.os == 'ios')
+#      run: |
+#        # fix a bug in aqtinstall - the qmake script for iOS isn't patched correctly
+#        cd ../Qt/${{ matrix.config.qt_version }}
+#        ln -s macos clang_64
+#      shell: bash
+
+    - name: Import signing certificate
       if: (matrix.config.os == 'ios')
+      env:
+        SIGNING_CERTIFICATE_P12_DATA: ${{ secrets.IOS_SIGNING_CERTIFICATE_P12_DATA }}
+        SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.IOS_SIGNING_CERTIFICATE_PASSWORD }}
       run: |
-        # fix a bug in aqtinstall - the qmake script for iOS isn't patched correctly
-        cd ../Qt/${{ matrix.config.qt_version }}
-        ln -s macos clang_64
-      shell: bash
+        exec .github/scripts/ios-import-certificate.sh
+
+    - name: Import provisioning profile
+      if: (matrix.config.os == 'ios')
+      env:
+        PROVISIONING_PROFILE_DATA: ${{ secrets.IOS_PROVISIONING_PROFILE_DATA }}
+        PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROV_PROFILE }}
+      run: |
+        exec .github/scripts/ios-import-profile.sh
 
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
-        ## TODO!!!
-        ## qt-cmake -spec macx-ios-clang CONFIG+=iphoneos CONFIG+=device CONFIG+=qtquickcompiler QMAKE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} QMAKE_PROVISIONING_PROFILE=${{ secrets.IOS_PROV_PROFILE }} CONFIG+=release ${{ matrix.config.cmake_extra_config }}
-        ## qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        ## cmake --build . --config RelWithDebInfo --parallel --target all
+        qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos) \
+            -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} \
+            -DCMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }} \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=${{ secrets.IOS_CODE_SIGN_IDENTITY }} \
+            ${{ matrix.config.cmake_extra_config }} .
+        cmake --build . --config RelWithDebInfo --parallel --target ipa
       shell: bash
 
-    - name: Upload iOS Bundle
+    - name: Upload iOS IPA
       if: (matrix.config.os == 'ios')
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.config.artifact }}
-        path: "*.app"
+        path: "*.ipa"
 
     # Generate documentation
     #################################################
