@@ -25,7 +25,7 @@
 #include "utility.h"
 #include "transfer.h"
 
-Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
+Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtDebugMsg)
 
 
 TransferJob::~TransferJob()

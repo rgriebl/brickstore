@@ -158,9 +158,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 #if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
-
-    // force ANGLE to cut down on the number of crashes in the Intel OpenGL drivers
-    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 #else
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #endif
