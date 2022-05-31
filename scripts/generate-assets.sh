@@ -56,6 +56,14 @@ if which makeicns >/dev/null; then
   makeicns -256 $gai/brickstore_doc.png -32 $gai/brickstore_doc.png -out $gai/brickstore_doc.icns
 fi
 
+# iOS icons
+gai_ios=$gai/AppIcon.xcassets/AppIcon.appiconset
+mkdir -p $gai_ios
+convert $b/brickstore.png -background white -alpha remove -alpha off -resize 167 $gai_ios/icon-83.5@2x~ipad.png
+convert $b/brickstore.png -background white -alpha remove -alpha off -resize 152 $gai_ios/icon@2x~ipad.png
+convert $b/brickstore.png -background white -alpha remove -alpha off -resize 120 $gai_ios/icon@2x.png
+convert $b/brickstore.png -background white -alpha remove -alpha off -resize 180 $gai_ios/icon@3x.png
+
 echo "done"
 
 #######################################

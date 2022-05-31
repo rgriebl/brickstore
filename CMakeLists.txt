@@ -241,21 +241,27 @@ if (APPLE)
             XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
             XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
             XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+        )
+        set(APPICON_XCASSETS "${CMAKE_CURRENT_SOURCE_DIR}/assets/generated-app-icons/AppIcon.xcassets")
+        target_sources(${PROJECT_NAME} PRIVATE ${APPICON_XCASSETS})
+        set_source_files_properties(${APPICON_XCASSETS} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources"
         )
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.macos.plist"
         )
+        set(MACOS_RESOURCES
+            assets/generated-app-icons/brickstore.icns
+            assets/generated-app-icons/brickstore_doc.icns
+        )
+        target_sources(${PROJECT_NAME} PUBLIC ${MACOS_RESOURCES})
+        set_source_files_properties(${MACOS_RESOURCES} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources"
+        )
     endif()
-    set(MACOS_RESOURCES
-        assets/generated-app-icons/brickstore.icns
-        assets/generated-app-icons/brickstore_doc.icns
-    )
-    target_sources(${PROJECT_NAME} PUBLIC ${MACOS_RESOURCES})
 
-    set_source_files_properties(${MACOS_RESOURCES} PROPERTIES
-        MACOSX_PACKAGE_LOCATION "Resources"
-    )
     foreach (LANG ${LANGUAGES})
         set(locpath "locversions/${LANG}.lproj/locversion.plist")
         configure_file(macos/locversion.plist.in "${locpath}" @ONLY)
