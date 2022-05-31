@@ -277,11 +277,12 @@ Page {
 
                 DelegateChoice { roleValue: Document.Retain
                     GridCell {
+                        property bool retain: display
                         text: ""
-                        property int checkState: display ? Qt.Checked : Qt.Unchecked
-                        CheckIndicator {
+                        CheckBox {
                             anchors.centerIn: parent
-                            control: parent
+                            enabled: false
+                            checked: retain
                         }
                     }
                 }
@@ -303,11 +304,11 @@ Page {
                             default: return ""
                             }
                         }
-//                        property int checkState: Qt.Unchecked  remove?
-                        CheckIndicator {
+                        CheckBox {
                             anchors.centerIn: parent
+                            enabled: false
+                            checked: false
                             visible: stockroom === BrickLink.None
-                            control: parent
                         }
                     }
                 }
