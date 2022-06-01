@@ -99,7 +99,7 @@ Control {
     }
 
     TapHandler {
-        onLongPressed: parent.showMenu(parent.logicalIndex, parent.visualIndex)
+        onDoubleTapped: parent.showMenu(parent.logicalIndex, parent.visualIndex)
     }
 }
 

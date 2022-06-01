@@ -15,9 +15,8 @@ Page {
         id: infoDialog
 
         active: false
-        onLoaded: {
-            item.open()
-        }
+        asynchronous: true
+        onLoaded: { item.open() }
         function open() {
             if (status === Loader.Ready)
                 item.open()
@@ -49,7 +48,15 @@ Page {
                 action: ActionManager.quickAction("edit_redo")
                 display: Button.IconOnly
             }
-            Item { Layout.fillWidth: true }
+            Label {
+                Layout.fillWidth: true
+                scale: 1.3
+                minimumPointSize: font.pointSize / 2
+                fontSizeMode: Text.Fit
+                text: root.title
+                elide: Label.ElideLeft
+                horizontalAlignment: Qt.AlignHCenter
+            }
             ToolButton {
                 icon.name: "help-about"
                 onClicked: {
@@ -84,13 +91,6 @@ Page {
                     MenuItem { action: ActionManager.quickAction("document_close") }
                 }
             }
-        }
-        Label {
-            anchors.centerIn: parent
-            scale: 1.3
-            text: root.title
-            elide: Label.ElideLeft
-            horizontalAlignment: Qt.AlignHCenter
         }
     }
 
@@ -151,31 +151,16 @@ Page {
                 document: root.document
             }
 
-            TapHandler {
-                function mapPoint(point) {
-                    point = table.mapFromItem(target, point)
-                    let cell = table.cellAtPos(point)
-                    let lx = cell.x < 0 ? -1 : table.model.logicalColumn(cell.x)
-                    return {
-                        row: cell.y,
-                        logicalColumn: lx,
-                        visualColumn: cell.x
-                    }
+            function showMenu(row, col) {
+                if (col >= 0) {
+                    editMenu.field = model.logicalColumn(col)
+                    editMenu.popup()
                 }
-
-                onTapped: function(eventPoint) {
-                    let m = mapPoint(eventPoint.position)
-                    if (m.row >= 0) {
-                        table.selectionModel.select(table.model.index(m.row, m.logicalColumn),
-                                                    ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
-                    }
-                }
-                onLongPressed: function() {
-                    let m = mapPoint(point.position)
-                    if (m.logicalColumn >= 0) {
-                        editMenu.field = m.logicalColumn
-                        editMenu.popup()
-                    }
+            }
+            function toggleSelection(row, col) {
+                if (row >= 0 && col >= 0) {
+                    selectionModel.select(model.index(row, model.logicalColumn(col)),
+                                          ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
                 }
             }
 

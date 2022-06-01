@@ -35,6 +35,9 @@
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 
+        <key>ITSAppUsesNonExemptEncryption</key>
+        <false/>
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

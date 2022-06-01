@@ -94,6 +94,10 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
+    qInfo() << "Device pixel ratio :" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
+    const auto screenSize = qApp->primaryScreen()->physicalSize();
+    qInfo() << "Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
+
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {

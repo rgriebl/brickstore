@@ -40,15 +40,7 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 
     (void) new QGuiApplication(argc, argv);
 
-    const char *style =
-    #if defined(Q_OS_IOS) && (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
-            "iOS";
-    #elif defined(Q_OS_IOS)
-            "Basic";
-    #else
-            "Material";
-    #endif
-    qputenv("QT_QUICK_CONTROLS_STYLE", style);
+    qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
 }
 
 void MobileApplication::init()

@@ -98,6 +98,7 @@ Dialog {
             }
             Loader {
                 id: info3D
+                asynchronous: true
             }
         }
 

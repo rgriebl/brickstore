@@ -172,8 +172,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 
     (void) new QApplication(argc, argv);
 
-    qInfo() << "Device pixel ratio:" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
-
     m_clp.addHelpOption();
     m_clp.addVersionOption();
     m_clp.addOption({ "load-translation"_l1, "Load the specified translation (testing only)."_l1, "qm-file"_l1 });

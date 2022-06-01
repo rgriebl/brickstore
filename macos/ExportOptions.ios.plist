@@ -24,6 +24,6 @@
     <string>${CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM}</string>
 
     <key>uploadSymbols</key>
-    <false/>
+    <true/>
 </dict>
 </plist>

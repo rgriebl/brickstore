@@ -101,4 +101,10 @@ Control {
         anchors.bottom: parent.bottom
         anchors.right: parent.right
     }
+
+    // we cannot handle taps directly in the TableView thanks to QTBUG-101386
+    TapHandler {
+        onDoubleTapped: parent.TableView.view.showMenu(parent.row, parent.column)
+        onTapped: parent.TableView.view.toggleSelection(parent.row, parent.column)
+    }
 }

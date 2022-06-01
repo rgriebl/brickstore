@@ -6,7 +6,7 @@ import "./uihelpers" as UIHelpers
 
 Page {
     id: root
-    title: qsTr("Import BrickLink Inventory")
+    title: qsTr("Import")
 
     property var goBackFunction
 
@@ -28,7 +28,14 @@ Page {
                         pages.currentIndex = pages.currentIndex - 1
                 }
             }
-            Item { Layout.fillWidth: true }
+            Label {
+                Layout.fillWidth: true
+                scale: 1.3
+                text: root.title
+                minimumPointSize: font.pointSize / 2
+                fontSizeMode: Text.Fit
+                horizontalAlignment: Qt.AlignHCenter
+            }
             ToolButton {
                 property bool lastPage: pages.currentIndex == (pages.count - 1)
                 text: lastPage ? qsTr("Import") : qsTr("Next")
@@ -53,14 +60,7 @@ Page {
                 }
             }
         }
-        Label {
-            anchors.centerIn: parent
-            scale: 1.3
-            text: root.title
-            elide: Label.ElideLeft
-            horizontalAlignment: Qt.AlignHCenter
-        }
-    }
+     }
 
     SwipeView {
         id: pages
@@ -219,13 +219,15 @@ Page {
 
                         property real startScale
 
+                        grabPermissions: PointerHandler.CanTakeOverFromAnything
+
                         onActiveChanged: {
                             if (active)
                                 startScale = zoom.value / 100
                         }
-                        onScaleChanged: {
+                        onActiveScaleChanged: {
                             if (active)
-                                zoom.value = startScale * scale * 100
+                                zoom.value = startScale * activeScale * 100
                         }
                     }
                 }

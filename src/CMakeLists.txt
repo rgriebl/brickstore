@@ -63,16 +63,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Concurrent
 )
 
-# really only useful for iOS: restrict the number of deployed plugins in static builds
-qt_import_plugins(${PROJECT_NAME}
-    EXCLUDE_BY_TYPE qmltooling
-    INCLUDE_BY_TYPE imageformats
-        Qt::QGifPlugin
-        Qt::QJpegPlugin
-        Qt::QSvgPlugin
-        Qt::QJpegPlugin
-        Qt::QJpegPlugin
-)
+if (IOS)
+    # really only useful for iOS: restrict the number of deployed plugins in static builds
+    qt_import_plugins(${PROJECT_NAME}
+        EXCLUDE_BY_TYPE qmltooling
+        INCLUDE_BY_TYPE imageformats
+            Qt::QGifPlugin
+            Qt::QJpegPlugin
+            Qt::QSvgPlugin
+            Qt::QJpegPlugin
+            Qt::QJpegPlugin
+    )
+endif()
 
 if (BS_BACKEND)
     target_sources(${PROJECT_NAME} PUBLIC
@@ -333,6 +335,7 @@ if (BS_MOBILE)
 
     set(QML_FILES
         mobile/qtquickcontrols2.conf
+        mobile/+ios/qtquickcontrols2.conf
         mobile/AboutDialog.qml
         mobile/ActionDelegate.qml
         mobile/AutoSizingMenu.qml
