@@ -8,9 +8,12 @@ env:
       qt6-tools-dev qt6-tools-dev-tools
       qt6-l10n-tools qt6-documentation-tools
       qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
+      qt6-qpa-plugins
+  BRICKSTORE_GUI_QT6_MODULES: >-
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
-      qt6-gtk-platformtheme qt6-qpa-plugins
+      qt6-gtk-platformtheme
+      qml6-module-qt5compat-graphicaleffects
 
 on:
   workflow_dispatch:
@@ -193,7 +196,10 @@ jobs:
       if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install $BRICKSTORE_QT6_MODULES debhelper lsb-release fakeroot build-essential
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
+            $BRICKSTORE_QT6_MODULES \
+            $BRICKSTORE_GUI_QT6_MODULES \
+            debhelper lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt from Linux Distro (container)
@@ -201,7 +207,10 @@ jobs:
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
-        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install $BRICKSTORE_QT6_MODULES debhelper lsb-release fakeroot build-essential
+        sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install \
+            $BRICKSTORE_QT6_MODULES \
+            $BRICKSTORE_GUI_QT6_MODULES \
+            debhelper lsb-release fakeroot build-essential
       shell: bash
 
     # Install dependencies using vcpkg
@@ -258,15 +267,20 @@ jobs:
     - name: Build for Linux (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker exec -w /build "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo --parallel --target deb-package
+        sudo docker exec -w /build "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
+        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo \
+            --parallel --target deb-package
       shell: bash
 
     - name: Build for Linux (appimage)
       if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev
-        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 ${{ matrix.config.cmake_extra_config }} .
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
+            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev
+        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
+            ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target appimage
       shell: bash
 

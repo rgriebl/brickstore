@@ -461,9 +461,15 @@ elseif (LINUX)
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
     # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
 
-    set(DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins (>= 6.2)")
+    # remove this, once the TLS plugin is packaged alongside QtNetwork again
+    set(DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins")
+
     if (NOT BS_BACKEND)
-        list(APPEND DEBIAN_PACKAGE_DEPENDS "qml6-module-qtquick (>= 6.2)" "qml6-module-qtquick-controls (>= 6.2)")
+        list(APPEND DEBIAN_PACKAGE_DEPENDS
+            "qml6-module-qtquick"
+            "qml6-module-qtquick-controls"
+            "qml6-module-qt5compat-graphicaleffects"
+    )
     endif()
     string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS "${DEBIAN_PACKAGE_DEPENDS}")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
