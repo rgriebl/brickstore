@@ -20,24 +20,15 @@
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QProcess>
 #include <QtCore/QMessageLogContext>
-#include <QtCore/QPropertyAnimation>
-#include <QtCore/QSequentialAnimationGroup>
-#include <QtCore/QPauseAnimation>
 #include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
 #include <QtWidgets/QProxyStyle>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QToolBar>
-#include <QtWidgets/QToolButton>
 #include <QtWidgets/QToolTip>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
 #include <QtWidgets/QStyleFactory>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStyle>
-#include <QtGui/QPainter>
-#include <QtGui/QSurfaceFormat>
 #include <QtQml/QQmlApplicationEngine>
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
@@ -68,88 +59,6 @@
 #include "utility/utility.h"
 
 #include "desktopapplication.h"
-
-
-class ToastMessage : public QWidget
-{
-    Q_OBJECT
-public:
-    ToastMessage(const QString &message, int timeout)
-        : QWidget(nullptr, Qt::ToolTip | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
-        , m_message(message)
-        , m_timeout((timeout < 3000) ? 3000 : timeout)
-    {
-        setAttribute(Qt::WA_TranslucentBackground);
-        setAutoFillBackground(false);
-
-        QPalette pal = palette();
-        bool isDark = (pal.color(QPalette::Window).lightness() < 128);
-        pal.setBrush(QPalette::WindowText, isDark ? Qt::black : Qt::white);
-        pal.setBrush(QPalette::Window, QColor(isDark ? "#dddddd" : "#444444"));
-        setPalette(pal);
-        auto *layout = new QHBoxLayout(this);
-        layout->setContentsMargins(20, 10, 20, 10);
-        auto *label = new QLabel(u"<b>" % message % u"</b>");
-        label->setTextFormat(Qt::AutoText);
-        label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(label, 1);
-    }
-
-    void open(const QRect &area)
-    {
-        auto fadeIn = new QPropertyAnimation(this, "windowOpacity");
-        fadeIn->setStartValue(0.);
-        fadeIn->setEndValue(1.);
-        fadeIn->setDuration(m_fadeTime);
-        auto fadeOut = new QPropertyAnimation(this, "windowOpacity");
-        fadeOut->setEndValue(0.);
-        fadeOut->setDuration(m_fadeTime);
-        auto seq = new QSequentialAnimationGroup(this);
-        seq->addAnimation(fadeIn);
-        seq->addPause(m_timeout);
-        seq->addAnimation(fadeOut);
-        connect(seq, &QAnimationGroup::finished, this, &ToastMessage::closed);
-        m_animation = seq;
-
-        resize(sizeHint());
-        QPoint p = area.center() - rect().center();
-        p.ry() += area.height() / 4;
-        move(p);
-        show();
-        seq->start();
-    }
-
-signals:
-    void closed();
-
-protected:
-    void paintEvent(QPaintEvent *) override
-    {
-        QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
-        qreal r = qreal(height()) / 3.;
-        p.setBrush(palette().brush(QPalette::Window));
-        p.drawRoundedRect(QRectF(rect().adjusted(0, 0, -1, -1)), r, r);
-    }
-
-    void mousePressEvent(QMouseEvent *) override
-    {
-        if (m_animation && (m_animation->state() == QAbstractAnimation::Running)) {
-            int total = m_animation->totalDuration();
-            if (m_animation->currentTime() < (total - m_fadeTime)) {
-                m_animation->pause();
-                m_animation->setCurrentTime(total - m_fadeTime);
-                m_animation->resume();
-            }
-        }
-    }
-
-private:
-    QString m_message;
-    int m_timeout = -1;
-    QAbstractAnimation *m_animation = nullptr;
-    static constexpr int m_fadeTime = 1500;
-};
 
 
 DesktopApplication::DesktopApplication(int &argc, char **argv)
@@ -223,8 +132,8 @@ void DesktopApplication::init()
         }
         return false;
     });
-    connect(Config::inst(), &Config::uiThemeChanged, this, &DesktopApplication::setUiTheme);
-    setUiTheme();
+    connect(Config::inst(), &Config::uiThemeChanged, this, &DesktopApplication::setUITheme);
+    setUITheme();
     setDesktopIconTheme();
 
     m_defaultFontSize = QGuiApplication::font().pointSizeF();
@@ -305,34 +214,6 @@ DeveloperConsole *DesktopApplication::developerConsole()
             m_loggingTimer.start();
     }
     return m_devConsole;
-}
-
-void DesktopApplication::showToastMessage(const QString &message, int timeout)
-{
-    auto *tm = new ToastMessage(message, timeout);
-    m_toastMessages.push_back(tm);
-    processToastMessages();
-}
-
-void DesktopApplication::processToastMessages()
-{
-    if (m_currentToastMessage || m_toastMessages.isEmpty())
-        return;
-
-    auto *activeWindow = qApp->activeWindow();
-    if ((qApp->applicationState() != Qt::ApplicationActive) || !activeWindow) {
-        qDeleteAll(m_toastMessages);
-        m_toastMessages.clear();
-        return;
-    }
-
-    m_currentToastMessage.reset(m_toastMessages.takeFirst());
-    m_currentToastMessage->open(activeWindow->frameGeometry());
-    connect(m_currentToastMessage.get(), &ToastMessage::closed,
-            this, [this]() {
-        m_currentToastMessage.release();
-        processToastMessages();
-    }, Qt::QueuedConnection);
 }
 
 void DesktopApplication::setupLogging()
@@ -500,7 +381,7 @@ bool DesktopApplication::notifyOtherInstance()
     return false;
 }
 
-void DesktopApplication::setUiTheme()
+void DesktopApplication::setUITheme()
 {
     static bool once = false;
     bool startup = !once;
@@ -510,14 +391,14 @@ void DesktopApplication::setUiTheme()
 
 #if defined(Q_OS_MACOS)
     extern bool hasMacThemes();
-    extern void setCurrentMacTheme(Config::UiTheme);
+    extern void setCurrentMacTheme(Config::UITheme);
 
     // on macOS, we are using the native theme switch
     if (!hasMacThemes()) {
         if (!startup)
             QMessageBox::information(MainWindow::inst(), QCoreApplication::applicationName(),
                                      tr("Your macOS version is too old to support theme changes."));
-    } else if (!startup || (theme != Config::UiTheme::SystemDefault)) {
+    } else if (!startup || (theme != Config::UITheme::SystemDefault)) {
         if (startup)
             setCurrentMacTheme(theme);
         else
@@ -547,11 +428,11 @@ void DesktopApplication::setUiTheme()
         return;
     }
 
-    if (theme != Config::UiTheme::SystemDefault) {
+    if (theme != Config::UITheme::SystemDefault) {
         QApplication::setStyle(new BrickStoreProxyStyle(QStyleFactory::create("fusion"_l1)));
         auto palette = QApplication::style()->standardPalette();
 
-        if (theme == Config::UiTheme::Dark) {
+        if (theme == Config::UITheme::Dark) {
             // from https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
             palette.setColor(QPalette::Window, QColor(53, 53, 53));
             palette.setColor(QPalette::WindowText, Qt::white);
@@ -593,4 +474,3 @@ void DesktopApplication::setDesktopIconTheme()
 }
 
 #include "moc_desktopapplication.cpp"
-#include "desktopapplication.moc"

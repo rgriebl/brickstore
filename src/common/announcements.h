@@ -31,9 +31,12 @@ public:
     bool hasNewAnnouncements() const;
     QString announcementsWikiUrl() const;
 
+    // keys: id, title, date, text
+    Q_INVOKABLE QVariantList unreadAnnouncements() const;
+    Q_INVOKABLE void markAnnouncementRead(quint32 id);
+
 public slots:
     QCoro::Task<> check();
-    void markAnnouncementRead(quint64 id);
 
 signals:
     void newAnnouncements();
@@ -44,16 +47,16 @@ private:
     QString m_rawAnnouncementsUrl;
     QString m_wikiAnnouncementsUrl;
 
-    // id == (days since 2021.1.1) << 32 | crc16(title data as utf16)
+    // id == (days since 2021.1.1) << 16 | crc16(title data as utf16)
 
     struct Announcement {
-        quint64 m_id = 0;
+        quint32 m_id = 0;
         QString m_title;
         QDate m_date;
         QString m_text;
     };
     QVector<Announcement> m_announcements; // sorted by id (-> implicitly sorted by date)
-    QVector<quint64> m_readIds;
+    QVector<quint32> m_readIds;
 
     friend class AnnouncementsDialog;
 };

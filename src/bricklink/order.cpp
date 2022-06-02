@@ -622,10 +622,10 @@ OrderStatus Order::statusFromString(const QString &s)
     return OrderStatus::Unknown;
 }
 
-QString Order::statusToString(OrderStatus status, bool translated)
+QString Order::statusAsString(bool translated) const
 {
     for (const auto &os : orderStatus) {
-        if (status == os.first) {
+        if (d->m_status == os.first) {
             return translated ? QCoreApplication::translate("Orders", os.second)
                               : QString::fromLatin1(os.second);
         }
@@ -1222,7 +1222,7 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         case Date: return QLocale::system().toString(order->date(), QLocale::ShortFormat);
         case Type: return (order->type() == OrderType::Received)
                     ? tr("Received") : tr("Placed");
-        case Status: return Order::statusToString(order->status(), true);
+        case Status: return order->statusAsString(true);
         case OrderId: return order->id();
         case OtherParty: {
             auto firstline = order->address().indexOf('\n'_l1);
@@ -1234,7 +1234,7 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         }
         case ItemCount: return QLocale::system().toString(order->itemCount());
         case LotCount: return QLocale::system().toString(order->lotCount());
-        case Total: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
+        case Total: return Currency::toDisplayString(order->grandTotal(), order->currencyCode(), 2);
         }
     } else if (role == Qt::DecorationRole) {
         switch (col) {
@@ -1274,15 +1274,17 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         switch (col) {
         case Date:       return order->date();
         case Type:       return int(order->type());
-        case Status:     return Order::statusToString(order->status(), true);
+        case Status:     return order->statusAsString(true);
         case OrderId:    return order->id();
         case OtherParty: return order->otherParty();
         case ItemCount:  return order->itemCount();
         case LotCount:   return order->lotCount();
         case Total:      return order->grandTotal();
         }
-    } else if (role >= OrderFirstColumnRole && role < OrderLastColumnRole) {
-        return data(index.sibling(index.row(), role - OrderFirstColumnRole), Qt::DisplayRole);
+    } else if (role == DateRole) {
+        return order->date();
+    } else if (role == TypeRole) {
+        return QVariant::fromValue(order->type());
     }
 
     return { };
@@ -1317,14 +1319,8 @@ QHash<int, QByteArray> Orders::roleNames() const
         { Qt::DecorationRole, "decoration" },
         { Qt::BackgroundRole, "background" },
         { OrderPointerRole, "order" },
-        { int(OrderFirstColumnRole) + Date, "date" },
-        { int(OrderFirstColumnRole) + Type, "type" },
-        { int(OrderFirstColumnRole) + Status, "status" },
-        { int(OrderFirstColumnRole) + OrderId, "id" },
-        { int(OrderFirstColumnRole) + OtherParty, "otherParty" },
-        { int(OrderFirstColumnRole) + ItemCount, "itemCount" },
-        { int(OrderFirstColumnRole) + LotCount, "lotCount" },
-        { int(OrderFirstColumnRole) + Total, "grandTotal" },
+        { DateRole, "date" },
+        { TypeRole, "type" },
     };
     return roles;
 }

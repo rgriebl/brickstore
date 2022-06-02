@@ -504,7 +504,7 @@ QVariant Carts::data(const QModelIndex &index, int role) const
         case Store: return QString(cart->storeName() % u" (" % cart->sellerName() % u")");
         case ItemCount: return QLocale::system().toString(cart->itemCount());
         case LotCount: return QLocale::system().toString(cart->lotCount());
-        case Total: return Currency::toString(cart->total(), cart->currencyCode(), 2);
+        case Total: return Currency::toDisplayString(cart->total(), cart->currencyCode(), 2);
         }
     } else if (role == Qt::DecorationRole) {
         switch (col) {
@@ -539,8 +539,10 @@ QVariant Carts::data(const QModelIndex &index, int role) const
         case LotCount:  return cart->lotCount();
         case Total:     return cart->total();
         }
-    } else if (role >= CartFirstColumnRole && role < CartLastColumnRole) {
-        return data(index.sibling(index.row(), role - CartFirstColumnRole), Qt::DisplayRole);
+    } else if (role == LastUpdatedRole) {
+        return cart->lastUpdated();
+    } else if (role == DomesticRole) {
+        return cart->domestic();
     }
 
     return { };
@@ -573,12 +575,8 @@ QHash<int, QByteArray> Carts::roleNames() const
         { Qt::DecorationRole, "decoration" },
         { Qt::BackgroundRole, "background" },
         { CartPointerRole, "cart" },
-        { int(CartFirstColumnRole) + Date, "date" },
-        { int(CartFirstColumnRole) + Type, "type" },
-        { int(CartFirstColumnRole) + Store, "store" },
-        { int(CartFirstColumnRole) + ItemCount, "itemCount" },
-        { int(CartFirstColumnRole) + LotCount, "lotCount" },
-        { int(CartFirstColumnRole) + Total, "total" },
+        { LastUpdatedRole, "lastUpdated" },
+        { DomesticRole, "domestic" },
     };
     return roles;
 }

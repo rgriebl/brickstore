@@ -14,6 +14,7 @@
 #include <QtCore/QRegularExpression>
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
+#include <QtCore/QDateTime>
 #include <QtNetwork/QNetworkReply>
 #include <QtGui/QDesktopServices>
 
@@ -78,7 +79,7 @@ QCoro::Task<> Announcements::check()
             a.m_title = nextTitle;
             a.m_text = md.mid(captureNextStart, captureEnd - captureNextStart).trimmed();
 
-            quint64 id = (quint64(QDate(2021, 1, 1).daysTo(a.m_date)) << 32)
+            quint32 id = (quint32(QDate(2021, 1, 1).daysTo(a.m_date)) << 16)
                     | qChecksum(QByteArrayView(reinterpret_cast<const char *>(a.m_title.constData()),
                                                a.m_title.size() * 2),
                                 Qt::ChecksumIso3309);
@@ -132,7 +133,7 @@ QCoro::Task<> Announcements::check()
 }
 
 
-void Announcements::markAnnouncementRead(quint64 id)
+void Announcements::markAnnouncementRead(quint32 id)
 {
     auto it = std::find_if(m_announcements.begin(), m_announcements.end(), [id](const auto &a) {
         return a.m_id == id;
@@ -142,8 +143,9 @@ void Announcements::markAnnouncementRead(quint64 id)
             m_readIds.append(id);
 
             QVariantList vl;
-            for (const quint64 &readId : qAsConst(m_readIds))
+            for (const quint32 &readId : qAsConst(m_readIds))
                 vl << readId;
+
             Config::inst()->setValue("Announcements/ReadIds"_l1, vl);
         }
     }
@@ -161,6 +163,24 @@ bool Announcements::hasNewAnnouncements() const
 QString Announcements::announcementsWikiUrl() const
 {
     return m_wikiAnnouncementsUrl;
+}
+
+QVariantList Announcements::unreadAnnouncements() const
+{
+    QVariantList vl;
+
+    for (const auto &a : m_announcements) {
+        if (m_readIds.contains(a.m_id))
+            continue;
+        QVariantMap vm {
+            { "id"_l1, a.m_id },
+            { "date"_l1, a.m_date },
+            { "title"_l1, a.m_title },
+            { "text"_l1, a.m_text },
+        };
+        vl.append(vm);
+    }
+    return vl;
 }
 
 #include "moc_announcements.cpp"

@@ -22,6 +22,7 @@
 class Config : public QSettings
 {
     Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
     Q_PROPERTY(QVariantList availableLanguages READ availableLanguages CONSTANT)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
     Q_PROPERTY(QLocale::MeasurementSystem measurementSystem READ measurementSystem WRITE setMeasurementSystem NOTIFY measurementSystemChanged)
@@ -35,7 +36,8 @@ class Config : public QSettings
     Q_PROPERTY(QStringList recentFiles READ recentFiles WRITE setRecentFiles NOTIFY recentFilesChanged)
     Q_PROPERTY(QString brickLinkUsername READ brickLinkUsername WRITE setBrickLinkUsername NOTIFY brickLinkCredentialsChanged)
     Q_PROPERTY(QString brickLinkPassword READ brickLinkPassword WRITE setBrickLinkPassword NOTIFY brickLinkCredentialsChanged)
-    Q_PROPERTY(Config::UiTheme uiTheme READ uiTheme WRITE setUiTheme NOTIFY uiThemeChanged)
+    Q_PROPERTY(Config::UITheme uiTheme READ uiTheme WRITE setUITheme NOTIFY uiThemeChanged)
+    Q_PROPERTY(Config::UISize mobileUISize READ mobileUISize WRITE setMobileUISize NOTIFY mobileUISizeChanged)
 
 private:
     Config();
@@ -104,14 +106,15 @@ public:
 
     QVector<Translation> translations() const;
 
-    enum class IconSize {
+    enum class UISize {
         System,
         Small,
         Large,
     };
+    Q_ENUM(UISize)
 
-    IconSize iconSize() const;
-    void setIconSize(IconSize iconSize);
+    UISize iconSize() const;
+    void setIconSize(UISize iconSize);
 
     int fontSizePercent() const;
     int itemImageSizePercent() const;
@@ -138,15 +141,18 @@ public:
     SentryConsent sentryConsent() const;
     void setSentryConsent(SentryConsent consent);
 
-    enum class UiTheme {
+    enum class UITheme {
         SystemDefault,
         Light,
         Dark
     };
-    Q_ENUM(UiTheme)
+    Q_ENUM(UITheme)
 
-    UiTheme uiTheme() const;
-    void setUiTheme(UiTheme theme);
+    UITheme uiTheme() const;
+    void setUITheme(UITheme theme);
+
+    UISize mobileUISize() const;
+    void setMobileUISize(UISize size);
 
 public slots:
     void setLanguage(const QString &lang);
@@ -191,7 +197,7 @@ signals:
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void recentFilesChanged(const QStringList &recent);
-    void iconSizeChanged(Config::IconSize iconSize);
+    void iconSizeChanged(Config::UISize iconSize);
     void fontSizePercentChanged(int p);
     void itemImageSizePercentChanged(int p);
     void columnLayoutChanged(const QString &id, const QByteArray &layout);
@@ -201,7 +207,8 @@ signals:
     void shortcutsChanged(const QVariantMap &list);
     void sentryConsentChanged(Config::SentryConsent consent);
     void toolBarActionsChanged(const QStringList &actions);
-    void uiThemeChanged(Config::UiTheme theme);
+    void uiThemeChanged(Config::UITheme theme);
+    void mobileUISizeChanged(Config::UISize size);
     void brickLinkCredentialsChanged();
 
 protected:

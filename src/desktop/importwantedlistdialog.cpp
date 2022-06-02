@@ -113,23 +113,6 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
         checkSelected();
     });
-    connect(BrickLink::core()->wantedLists(), &BrickLink::WantedLists::fetchLotsFinished,
-            this, [this](BrickLink::WantedList *wantedList, bool success, const QString &message) {
-        int idx = m_wantedListsToOpen.indexOf(wantedList ? wantedList->id() : -1);
-        if (idx >= 0)
-            m_wantedListsToOpen.removeAt(idx);
-        else
-            return;
-
-        if (!success) {
-            QMessageBox::warning(this, windowTitle(), message);
-        } else {
-            DocumentIO::importBrickLinkWantedList(wantedList);
-
-            if (!message.isEmpty())
-                QMessageBox::information(this, windowTitle(), message);
-        }
-    });
 
     languageChange();
 
@@ -216,7 +199,6 @@ void ImportWantedListDialog::importWantedLists(const QModelIndexList &rows)
         auto wantedList = idx.data(BrickLink::WantedLists::WantedListPointerRole).value<BrickLink::WantedList *>();
 
         BrickLink::core()->wantedLists()->startFetchLots(wantedList);
-        m_wantedListsToOpen << wantedList->id();
     }
 }
 

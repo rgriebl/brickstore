@@ -1155,12 +1155,12 @@ void SettingsDialog::save()
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 
-    Config::inst()->setIconSize(static_cast<Config::IconSize>(w_icon_size->currentIndex()));
+    Config::inst()->setIconSize(static_cast<Config::UISize>(w_icon_size->currentIndex()));
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
 
     Config::inst()->setItemImageSizePercent(w_item_image_size->value() * 10);
 
-    Config::inst()->setUiTheme(Config::UiTheme(w_theme->currentIndex()));
+    Config::inst()->setUITheme(Config::UITheme(w_theme->currentIndex()));
 
     // --[ UPDATES ]-------------------------------------------------------------------
 

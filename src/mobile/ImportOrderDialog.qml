@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.Material
 import QtQuick.Layouts
-import Qt.labs.qmlmodels
+import Qt5Compat.GraphicalEffects
+import BrickStore as BS
 import "./uihelpers" as UIHelpers
-import BrickStore
+
 
 Page {
     id: root
@@ -21,10 +21,18 @@ Page {
                 icon.name: "go-previous"
                 onClicked: goBackFunction()
             }
-            Item { Layout.fillWidth: true }
+            Label {
+                Layout.fillWidth: true
+                font.pointSize: root.font.pointSize * 1.3
+                minimumPointSize: font.pointSize / 2
+                fontSizeMode: Text.Fit
+                text: root.title
+                elide: Label.ElideLeft
+                horizontalAlignment: Qt.AlignLeft
+            }
             ToolButton {
                 icon.name: "view-refresh"
-                enabled: BrickLink.orders.updateStatus !== BrickLink.Updating
+                enabled: BS.BrickLink.orders.updateStatus !== BS.BrickLink.Updating
                 onClicked: updateDaysDialog.open()
 
                 UIHelpers.InputDialog {
@@ -37,17 +45,10 @@ Page {
 
                     onAccepted: {
                         root.updateLastNDays = intValue
-                        BrickLink.orders.startUpdate(updateLastNDays)
+                        BS.BrickLink.orders.startUpdate(updateLastNDays)
                     }
                 }
             }
-        }
-        Label {
-            anchors.centerIn: parent
-            scale: 1.3
-            text: root.title
-            elide: Label.ElideLeft
-            horizontalAlignment: Qt.AlignHCenter
         }
     }
 
@@ -55,113 +56,124 @@ Page {
         anchors.fill: parent
         spacing: 0
 
-        HorizontalHeaderView {
-            id: header
-            syncView: table
-            clip: true
-            reuseItems: false
-            interactive: false
-
-//            property bool sorted: document.model.sorted
-//            property var sortColumns: document.model.sortColumns
-
-//            ViewHeaderMenu {
-//                id: headerMenu
-//                document: root.document
-//            }
-
-            delegate: Control {
-                FontMetrics { id: fm }
-
-                implicitWidth: 20
-                implicitHeight: fm.height * 1.5
-                Text {
-                    id: headerText
-                    anchors.fill: parent
-                    text: model.display
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: enabled ? root.Material.foreground : root.Material.hintTextColor
-                    fontSizeMode: Text.HorizontalFit
-                    minimumPointSize: font.pointSize / 4
-                    elide: Text.ElideMiddle
-                    clip: true
-                    padding: 2
-                }
-                Rectangle {
-                    z: 1
-                    antialiasing: true
-                    height: 1 / Screen.devicePixelRatio
-                    color: Material.hintTextColor
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                }
-                Rectangle {
-                    z: 1
-                    antialiasing: true
-                    width: 1 / Screen.devicePixelRatio
-                    color: Material.hintTextColor
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                }
-
-            }
-        }
-
-        TableView {
+        ListView {
             id: table
             Layout.fillHeight: true
             Layout.fillWidth: true
             clip: true
 
-            ScrollIndicator.vertical: ScrollIndicator { }
+            ScrollIndicator.vertical: ScrollIndicator { active: true }
 
-            model: BrickLink.orders
+            model: BS.SortFilterProxyModel {
+                id: sortFilterModel
+                sourceModel: BS.BrickLink.orders
+                sortOrder: Qt.DescendingOrder
+                sortColumn: 0
+                filterSyntax: BS.SortFilterProxyModel.FixedString
+                filterString: receivedOrPlaced.currentIndex ? "Placed" : "Received"
 
-            columnSpacing: 0
-            rowSpacing: 0
-            reuseItems: true
-
-            contentWidth: width
-
-            FontMetrics { id: fontMetrics; font: root.font }
-            property int cellHeight: fontMetrics.height * 2 + 8
-            property var cellWidths: [ 10, 0, 10, 10, 35, 10, 10, 15 ]
-
-            columnWidthProvider: (c) => {
-                                     return cellWidths[c] * table.contentWidth / 100
-                                 }
-            rowHeightProvider: (r) => {
-                                   return ((receivedOrPlaced.currentIndex === 0)
-                                           === (model.order(r).type === BrickLink.OrderType.Received)) ? cellHeight : 0
-                               }
-
-
-            delegate: DelegateChooser {
-                id: chooser
-                role: "column"
-
-                DelegateChoice {
-                    GridCell {
-                        text: display
-                    }
+                Component.onCompleted: {
+                    filterRoleName = "type"
+                    sortRoleName = "date"
                 }
             }
 
+            delegate: ItemDelegate {
+                id: delegate
+                property int xspacing: 16
+                width: ListView.view.width
+                height: layout.height + xspacing
+
+                required property BS.Order order
+                required property int index
+
+                GridLayout {
+                    id: layout
+                    x: xspacing
+                    y: xspacing / 2
+                    width: parent.width - 2 * xspacing
+                    columnSpacing: xspacing
+                    rowSpacing: xspacing / 2
+                    columns: 3
+
+                    Image {
+                        id: flag
+                        Layout.rowSpan: 3
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+
+                        asynchronous: true
+                        source: "qrc:/assets/flags/" + order.countryCode
+                        fillMode: Image.PreserveAspectFit
+                        sourceSize.height: fm.height * .75
+                        sourceSize.width: fm.height * 1.5
+                        FontMetrics {
+                            id: fm
+                            font: delegate.font
+                        }
+                        RectangularGlow {
+                            z: -1
+                            anchors.fill: parent
+                            color: label.color
+                            cornerRadius: 4
+                            glowRadius: 4
+                            spread: 0
+                        }
+                    }
+
+                    Label {
+                        id: label
+                        property string name: order.address.split("\n",1)[0]
+                        text: order.otherParty + (name === '' ? '' : ' (' + name + ')')
+                        font.bold: true
+                        elide: Text.ElideRight
+                        maximumLineCount: 1
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: order.date.toLocaleDateString(Locale.ShortFormat)
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    Label {
+                        text: "#" + order.id
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: order.statusAsString()
+                        font.bold: true
+                        color: Qt.hsla(order.status/ BS.BrickLink.OrderStatus.Count, .8, .5)
+                        Layout.alignment: Qt.AlignRight
+                    }
+                    Label {
+                        text: qsTr("%1 items (%2 lots)")
+                        .arg(Number(order.itemCount).toLocaleString())
+                        .arg(Number(order.lotCount).toLocaleString())
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: BS.Currency.format(order.grandTotal, order.currencyCode, 2)
+                        Layout.alignment: Qt.AlignRight
+                    }
+                }
+                Rectangle {
+                    z: 1
+                    antialiasing: true
+                    height: 1 / Screen.devicePixelRatio
+                    color: "grey"
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    anchors.rightMargin: parent.xspacing / 2
+                    anchors.leftMargin: anchors.rightMargin
+
+                }
+                onClicked: {
+                    BS.BrickStore.importBrickLinkOrder(order)
+                    root.goBackFunction()
+                }
+            }
         }
-
-
-//        delegate: ItemDelegate {
-//            width: ListView.view.width
-//            text: model.date + " " + model.otherParty
-//            visible: (receivedOrPlaced.currentIndex === 0) === (model.type === BrickLink.Received)
-//            onClicked: {
-//                BrickStore.importBrickLinkOrder(model.order)
-//                goBackFunction()
-//            }
-//        }
     }
 
     footer: TabBar {

@@ -148,11 +148,11 @@ MainWindow::MainWindow(QWidget *parent)
             repositionHomeWidget();
     });
 
-    auto setIconSizeLambda = [this](Config::IconSize iconSize) {
-        static const QMap<Config::IconSize, QStyle::PixelMetric> map = {
-            { Config::IconSize::System, QStyle::PM_ToolBarIconSize },
-            { Config::IconSize::Small, QStyle::PM_SmallIconSize },
-            { Config::IconSize::Large, QStyle::PM_LargeIconSize },
+    auto setIconSizeLambda = [this](Config::UISize iconSize) {
+        static const QMap<Config::UISize, QStyle::PixelMetric> map = {
+            { Config::UISize::System, QStyle::PM_ToolBarIconSize },
+            { Config::UISize::Small, QStyle::PM_SmallIconSize },
+            { Config::UISize::Large, QStyle::PM_LargeIconSize },
         };
         auto pm = map.value(iconSize, QStyle::PM_ToolBarIconSize);
         int s = style()->pixelMetric(pm, nullptr, this);
@@ -222,17 +222,6 @@ MainWindow::MainWindow(QWidget *parent)
     menuBar()->show();
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
-
-    connect(Currency::inst(), &Currency::updateRatesFailed,
-            this, [](const QString &errorString) {
-        UIHelpers::warning(errorString);
-    });
-
-    Currency::inst()->updateRates();
-    auto *currencyUpdateTimer = new QTimer(this);
-    currencyUpdateTimer->start(4h);
-    currencyUpdateTimer->callOnTimeout(Currency::inst(),
-                                       []() { Currency::inst()->updateRates(true /*silent*/); });
 
     m_checkForUpdates = new CheckForUpdates(Application::inst()->gitHubUrl(), this);
     connect(Application::inst()->announcements(), &Announcements::newAnnouncements,

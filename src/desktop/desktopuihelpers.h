@@ -22,6 +22,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
+class ToastMessage;
+
 
 class DesktopUIHelpers : public UIHelpers
 {
@@ -63,8 +65,12 @@ protected:
     UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                             const QString &message) override;
 
+    void processToastMessages() override;
+
 private:
     DesktopUIHelpers();
+
+    std::unique_ptr<ToastMessage> m_currentToastMessage;
 
     static QPointer<QWidget> s_defaultParent;
 

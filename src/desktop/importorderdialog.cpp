@@ -54,7 +54,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     proxyModel->setSourceModel(BrickLink::core()->orders());
     w_orders->setModel(proxyModel);
     w_orders->setContextMenuPolicy(Qt::CustomContextMenu);
-    w_orders->header()->setSectionResizeMode(4, QHeaderView::Stretch);
+    w_orders->header()->setSectionResizeMode(BrickLink::Orders::OtherParty, QHeaderView::Stretch);
     w_orders->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection
                                                      | BetterItemDelegate::MoreSpacing, w_orders));
 

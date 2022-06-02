@@ -2,8 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import QtQuick.Window
 import Qt.labs.qmlmodels
-import BrickStore 1.0
+import BrickStore as BS
 import QtQuick.Controls.Material
 import "./uihelpers" as UIHelpers
 
@@ -16,38 +17,27 @@ ApplicationWindow {
     height: 600
 
     Material.theme: {
-        switch (BrickStore.config.uiTheme) {
-        case Config.Light: return Material.Light
-        case Config.Dark: return Material.Dark
+        switch (BS.Config.uiTheme) {
+        case BS.Config.UITheme.Light: return Material.Light
+        case BS.Config.UITheme.Dark: return Material.Dark
         default:
-        case Config.SystemDefault: return Material.System
+        case BS.Config.UITheme.SystemDefault: return Material.System
         }
     }
 
-    Loader {
+    DialogLoader {
         id: aboutDialog
-
-        active: false
         source: "AboutDialog.qml"
-        onLoaded: {
-            item.onClosed.connect(() => { aboutDialog.active = false })
-            item.open()
-        }
     }
-    Loader {
+    DialogLoader {
         id: settingsDialog
+        source: "SettingsDialog.qml"
+        property string pageName
         function openPage(page) {
             pageName = page
-            active = true
+            open()
         }
-
-        active: false
-        source: "SettingsDialog.qml"
-        onLoaded: {
-            item.onClosed.connect(() => { settingsDialog.active = false })
-            item.openPage(pageName)
-        }
-        property string pageName
+        onLoaded: { item.openPage(pageName) }
     }
 
     SwipeView {
@@ -73,31 +63,36 @@ ApplicationWindow {
 
                             AutoSizingMenu {
                                 id: applicationMenu
-                                x: 0
+                                x: parent.width / 2
+                                y: parent.height / 2
                                 transformOrigin: Menu.TopLeft
                                 modal: true
                                 cascade: false
 
-                                MenuItem { action: ActionManager.quickAction("configure") }
-                                MenuItem { action: ActionManager.quickAction("update_database") }
-                                MenuItem { action: ActionManager.quickAction("help_about") }
+                                MenuItem { action: BS.ActionManager.quickAction("configure") }
+                                MenuItem { action: BS.ActionManager.quickAction("update_database") }
+                                MenuSeparator { }
+                                MenuItem { action: BS.ActionManager.quickAction("help_systeminfo") }
+                                MenuItem { action: BS.ActionManager.quickAction("help_about") }
                             }
                         }
+                        Label {
+                            Layout.fillWidth: true
+                            font.pointSize: root.font.pointSize * 1.3
+                            minimumPointSize: font.pointSize / 2
+                            fontSizeMode: Text.Fit
+                            text: root.title
+                            elide: Label.ElideLeft
+                            horizontalAlignment: Qt.AlignLeft
+                        }
                         Item { Layout.fillWidth: true }
-                    }
-                    Label {
-                        anchors.centerIn: parent
-                        scale: 1.3
-                        text: root.currentView && root.currentView.title ? root.currentView.title : root.title
-                        elide: Label.ElideLeft
-                        horizontalAlignment: Qt.AlignHCenter
                     }
                 }
 
                 Flickable {
                     anchors.fill: parent
 
-                    ScrollIndicator.vertical: ScrollIndicator { }
+                    ScrollIndicator.vertical: ScrollIndicator { active: true }
                     contentHeight: flickGrid.implicitHeight
                     GridLayout {
                         id: flickGrid
@@ -108,35 +103,37 @@ ApplicationWindow {
                         ColumnLayout {
                             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             Layout.fillWidth: true
+                            Layout.minimumWidth: implicitWidth
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Document")
                                 color: Material.hintTextColor
                                 leftPadding: 8
                             }
-                            ActionDelegate { action: ActionManager.quickAction("document_open") }
-                            ActionDelegate { action: ActionManager.quickAction("document_new") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_open") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_new") }
 
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Import items")
                                 color: Material.hintTextColor
                                 leftPadding: 8
                             }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_bl_inv") }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_bl_xml") }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_bl_order") }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_bl_store_inv") }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_bl_cart") }
-                            ActionDelegate { action: ActionManager.quickAction("document_import_ldraw_model") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_inv") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_xml") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_order") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_store_inv") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_cart") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_wanted") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_ldraw_model") }
 
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Currently Open Documents")
                                 color: Material.hintTextColor
-                                visible: BrickStore.documents.count !== 0
+                                visible: BS.BrickStore.documents.count !== 0
                                 leftPadding: 8
                             }
 
                             Repeater {
-                                model: BrickStore.documents
+                                model: BS.BrickStore.documents
 
                                 ActionDelegate {
                                     required property string fileNameOrTitle
@@ -154,6 +151,7 @@ ApplicationWindow {
                         ColumnLayout {
                             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             Layout.fillWidth: true
+                            Layout.preferredWidth: -1
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Open recent files")
                                 color: Material.hintTextColor
@@ -161,7 +159,7 @@ ApplicationWindow {
                             }
 
                             Repeater {
-                                model: BrickStore.recentFiles
+                                model: BS.BrickStore.recentFiles
 
                                 ActionDelegate {
                                     required property int index
@@ -170,12 +168,12 @@ ApplicationWindow {
                                     icon.source: "qrc:/assets/generated-app-icons/brickstore_doc"
                                     text: fileName
                                     infoText: filePath
-                                    onClicked: BrickStore.recentFiles.open(index)
+                                    onClicked: BS.BrickStore.recentFiles.open(index)
                                 }
                             }
                             ActionDelegate {
                                 text: qsTranslate("WelcomeWidget", "No recent files")
-                                visible: BrickStore.recentFiles.count === 0
+                                visible: BS.BrickStore.recentFiles.count === 0
                                 enabled: false
                             }
                         }
@@ -213,12 +211,12 @@ ApplicationWindow {
                 view.visible = true
             }
         }
-        ActionManager.activeDocument = view ? doc : null
+        BS.ActionManager.activeDocument = view ? doc : null
         homeAndView.setCurrentIndex(view ? 1: 0)
     }
 
     Connections {
-        target: BrickStore.documents
+        target: BS.BrickStore.documents
 
         function onDocumentAdded(doc) {
             doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
@@ -250,9 +248,23 @@ ApplicationWindow {
         }
     }
 
+    SystemInfoDialog {
+        id: systemInfoDialog
+    }
+
+    AnnouncementsDialog {
+        id: announcementsDialog
+    }
+
     Connections {
-        target: BrickStore
+        target: BS.BrickStore
         function onShowSettings(page) { settingsDialog.openPage(page) }
+    }
+    Connections {
+        target: BS.Announcements
+        function onNewAnnouncements() {
+            announcementsDialog.open()
+        }
     }
 
     Component.onDestruction:  {
@@ -263,7 +275,7 @@ ApplicationWindow {
     property var connectionContext
 
     Component.onCompleted: {
-        connectionContext = ActionManager.connectQuickActionTable
+        connectionContext = BS.ActionManager.connectQuickActionTable
                 ({
                      "document_import_bl_inv": () => {
                          setActiveDocument(null)
@@ -277,8 +289,21 @@ ApplicationWindow {
                          setActiveDocument(null)
                          homeStack.push("ImportCartDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },
-                     "update_database": () => { BrickStore.updateDatabase() },
-                     "help_about": () => { aboutDialog.active = true }
+                     "document_import_bl_wanted": () => {
+                         setActiveDocument(null)
+                         homeStack.push("ImportWantedListDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     },
+                     "update_database": () => { BS.BrickStore.updateDatabase() },
+                     "help_about": () => { aboutDialog.active = true },
+                     "help_systeminfo": () => { systemInfoDialog.open() },
+                     "help_announcements": () => { },
                  })
+
+//        console.log("W",Screen.width / Screen.pixelDensity)
+//        console.log("H",Screen.height / Screen.pixelDensity)
+//        console.log("DPR",Screen.devicePixelRatio)
+//        console.log("PD",Screen.pixelDensity)
+//        console.log("DW",Screen.desktopAvailableWidth)
+//        console.log("DH",Screen.desktopAvailableHeight)
     }
 }

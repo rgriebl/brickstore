@@ -95,5 +95,10 @@ QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, Q
     co_return { };
 }
 
+void UIHelpers::showToastMessageHelper(const QString &message, int timeout)
+{
+    m_toastMessages.push_back(qMakePair(message, timeout));
+    processToastMessages();
+}
 
 #include "moc_uihelpers.cpp"

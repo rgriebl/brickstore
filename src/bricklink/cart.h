@@ -113,9 +113,8 @@ public:
     enum Role {
         CartPointerRole = Qt::UserRole + 1,
         CartSortRole,
-
-        CartFirstColumnRole,
-        CartLastColumnRole = CartFirstColumnRole + ColumnCount,
+        LastUpdatedRole,
+        DomesticRole,
     };
 
     bool isValid() const          { return m_valid; }

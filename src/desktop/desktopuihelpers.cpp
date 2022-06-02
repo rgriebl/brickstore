@@ -22,8 +22,6 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDoubleSpinBox>
-#include <QProgressDialog>
-#include <QDialogButtonBox>
 #include <QScreen>
 #include <QWindow>
 #include <QAbstractSpinBox>
@@ -34,6 +32,7 @@
 #include "qcoro/core/qcorosignal.h"
 #include "utility/utility.h"
 #include "desktopuihelpers.h"
+#include "desktopuihelpers_p.h"
 
 
 QPointer<QWidget> DesktopUIHelpers::s_defaultParent;
@@ -55,11 +54,11 @@ int DesktopUIHelpers::shouldSwitchViews(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
         if ((e->modifiers() & ~Qt::ShiftModifier) ==
-        #if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS)
                 Qt::AltModifier
-        #else
+#else
                 Qt::ControlModifier
-        #endif
+#endif
                 ) {
             return (e->key() == Qt::Key_Backtab) || (e->modifiers() & Qt::ShiftModifier) ? -1 : 1;
         }
@@ -272,91 +271,32 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, Q
     co_return { };
 }
 
-
-class ForceableProgressDialog : public QProgressDialog
-{
-public:
-    ForceableProgressDialog(QWidget *parent)
-        : QProgressDialog(parent)
-    { }
-
-    // why is forceShow() protected?
-    using QProgressDialog::forceShow;
-};
-
-
-class DesktopPDI : public UIHelpers_ProgressDialogInterface
-{
-    Q_OBJECT
-
-public:
-    DesktopPDI(const QString &title, const QString &message)
-        : m_title(title)
-        , m_message(message)
-        , m_pd(new ForceableProgressDialog(DesktopUIHelpers::s_defaultParent))
-    {
-        m_pd->setModal(true);
-        m_pd->setWindowTitle(title);
-        m_pd->setLabelText(message);
-        m_pd->setAutoReset(false);
-        m_pd->setAutoClose(false);
-        m_pd->setMinimumWidth(m_pd->fontMetrics().averageCharWidth() * 60);
-
-        connect(m_pd, &QProgressDialog::canceled,
-                this, &DesktopPDI::cancel);
-    }
-
-    ~DesktopPDI() override
-    {
-        m_pd->deleteLater();
-    }
-
-    QCoro::Task<bool> exec() override
-    {
-        emit start();
-        m_pd->show();
-        int result = co_await qCoro(m_pd, &ForceableProgressDialog::finished);
-        co_return (result == 0);
-    }
-
-    void progress(int done, int total) override
-    {
-        if (total <= 0) {
-            m_pd->setMaximum(0);
-            m_pd->setValue(0);
-        } else {
-            m_pd->setMaximum(total);
-            m_pd->setValue(done);
-        }
-    }
-
-    void finished(bool success, const QString &message) override
-    {
-        bool showMessage = !message.isEmpty();
-        if (showMessage) {
-            m_pd->setLabelText(message);
-            m_pd->setCancelButtonText(QDialogButtonBox::tr("Ok"));
-            m_pd->forceShow();
-        }
-
-        if (!showMessage) {
-            m_pd->reset();
-            m_pd->done(success ? 0 : 1);
-        }
-    }
-
-private:
-    QString m_title;
-    QString m_message;
-    ForceableProgressDialog *m_pd;
-};
-
 UIHelpers_ProgressDialogInterface *DesktopUIHelpers::createProgressDialog(const QString &title, const QString &message)
 {
-    return new DesktopPDI(title, message);
+    return new DesktopPDI(title, message, DesktopUIHelpers::s_defaultParent);
 }
 
+void DesktopUIHelpers::processToastMessages()
+{
+    if (m_toastMessageVisible || m_toastMessages.isEmpty())
+        return;
+
+    auto *activeWindow = qApp->activeWindow();
+    if ((qApp->applicationState() != Qt::ApplicationActive) || !activeWindow) {
+        m_toastMessages.clear();
+        return;
+    }
+
+    auto [message, timeout] = m_toastMessages.takeFirst();
+    auto toast = new ToastMessage(message, timeout);
+    toast->open(activeWindow->frameGeometry());
+    connect(toast, &ToastMessage::closed,
+            this, [this, toast]() {
+        toast->deleteLater();
+        m_toastMessageVisible = false;
+        processToastMessages();
+    }, Qt::QueuedConnection);
+}
 
 #include "moc_desktopuihelpers.cpp"
-#include "desktopuihelpers.moc"
-
+#include "moc_desktopuihelpers_p.cpp"

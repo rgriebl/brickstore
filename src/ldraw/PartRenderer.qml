@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
-import BrickStore
+import BrickStore as BS
 
 Item {
     id: root
 
     required property var renderController
     property alias rc: root.renderController
-    property var rs: LDrawRenderSettings
+    property var rs: BS.LDrawRenderSettings
 
     Connections {
         target: rc

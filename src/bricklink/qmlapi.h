@@ -25,6 +25,7 @@
 #include "lot.h"
 #include "store.h"
 #include "order.h"
+#include "wantedlist.h"
 #include "cart.h"
 
 
@@ -50,6 +51,7 @@ class QmlBrickLink : public QObject
     Q_PRIVATE_PROPERTY(d, BrickLink::Store *store READ store CONSTANT)
     Q_PRIVATE_PROPERTY(d, BrickLink::Orders *orders READ orders CONSTANT)
     Q_PRIVATE_PROPERTY(d, BrickLink::Carts *carts READ carts CONSTANT)
+    Q_PRIVATE_PROPERTY(d, BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT)
     Q_PRIVATE_PROPERTY(d, BrickLink::Database *database READ database CONSTANT)
 
 public:
@@ -100,6 +102,9 @@ public:
     Q_INVOKABLE BrickLink::Picture *largePicture(BrickLink::QmlItem item, bool highPriority = false);
 
     Q_INVOKABLE BrickLink::QmlLot lot(const QVariant &v) const;
+
+    Q_INVOKABLE BrickLink::AppearsInModel *appearsInModel(const QVariantList &items,
+                                                          const QVariantList &colors);
 
     Q_INVOKABLE void cacheStat() const;
 

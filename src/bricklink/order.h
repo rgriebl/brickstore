@@ -134,7 +134,7 @@ public:
     void setPhone(const QString &str);
 
     static OrderStatus statusFromString(const QString &s);
-    static QString statusToString(OrderStatus status, bool translated = true);
+    Q_INVOKABLE QString statusAsString(bool translated = true) const;
 
 signals:
     void idChanged(const QString &id);
@@ -200,9 +200,8 @@ public:
     enum Role {
         OrderPointerRole = Qt::UserRole + 1,
         OrderSortRole,
-
-        OrderFirstColumnRole,
-        OrderLastColumnRole = OrderFirstColumnRole + ColumnCount,
+        DateRole,
+        TypeRole,
     };
 
     bool isValid() const          { return m_valid; }

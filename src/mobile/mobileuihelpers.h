@@ -54,10 +54,10 @@ protected:
     UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                             const QString &message) override;
 
+    void processToastMessages() override;
+
 private:
     MobileUIHelpers();
-    QObject *createItem(const QString &qmlFile, const QVariantMap &properties);
-    QQuickDialog *createDialog(const QString &qmlFile, const QVariantMap &properties);
 
     static QPointer<QQmlApplicationEngine> s_engine;
 };

@@ -17,6 +17,8 @@
 
 namespace BrickLink {
 
+Q_NAMESPACE
+
 enum class Time          { PastSix, Current, Count };
 enum class Price         { Lowest, Average, WAverage, Highest, Count };
 enum class Condition     { New, Used, Count };
@@ -47,6 +49,17 @@ enum class Url {
     WantedList,
 };
 
+Q_ENUM_NS(Time)
+Q_ENUM_NS(Price)
+Q_ENUM_NS(Condition)
+Q_ENUM_NS(SubCondition)
+Q_ENUM_NS(Stockroom)
+Q_ENUM_NS(Status)
+Q_ENUM_NS(UpdateStatus)
+Q_ENUM_NS(OrderType)
+Q_ENUM_NS(OrderStatus)
+Q_ENUM_NS(Url)
+
 enum ModelRoles {
     RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
 
@@ -57,6 +70,7 @@ enum ModelRoles {
     AppearsInItemPointerRole,
     IdRole,
     NameRole,
+    QuantityRole,
 
     RoleMax
 };

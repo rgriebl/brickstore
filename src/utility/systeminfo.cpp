@@ -19,7 +19,7 @@
 
 #if defined(Q_OS_WINDOWS)
 #  if !defined(BS_BACKEND)
-#    include <QGuiApplication>
+#    include <private/qguiapplication_p.h>
 #  endif
 #  if defined(Q_CC_MINGW)
 #    undef _WIN32_WINNT
@@ -153,8 +153,8 @@ QCoro::Task<> SystemInfo::init()
 
 #if defined(Q_OS_WIN)
         // On Windows, this will provide additional GPU info similar to the output of dxdiag.
-        if (const QPlatformNativeInterface *ni = QGuiApplication::platformNativeInterface()) {
-            const QVariantList gpuInfos = ni->property("gpuList").toList();
+        if (auto *ni = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>()) {
+            const QVariantList gpuInfos = ni->gpuList().toList();
             if (gpuInfos.size() > 0) {
 
                 const auto gpuMap = gpuInfos.constFirst().toMap();

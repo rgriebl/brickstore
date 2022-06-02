@@ -102,9 +102,7 @@ public:
     enum Role {
         WantedListPointerRole = Qt::UserRole + 1,
         WantedListSortRole,
-
-        WantedListFirstColumnRole,
-        WantedListLastColumnRole = WantedListFirstColumnRole + ColumnCount,
+        NameRole,
     };
 
     bool isValid() const          { return m_valid; }
@@ -116,7 +114,7 @@ public:
 
     QVector<WantedList *> wantedLists() const;
 
-    void startFetchLots(WantedList *wantedList);
+    Q_INVOKABLE void startFetchLots(WantedList *wantedList);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

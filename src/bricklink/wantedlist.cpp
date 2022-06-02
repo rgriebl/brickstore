@@ -407,6 +407,7 @@ QVariant WantedLists::data(const QModelIndex &index, int role) const
     } else if (role == Qt::TextAlignmentRole) {
         return int(Qt::AlignVCenter) | Qt::AlignLeft;
     } else if (role == WantedListPointerRole) {
+        qWarning() << QVariant::fromValue(wantedList);
         return QVariant::fromValue(wantedList);
     } else if (role == WantedListSortRole) {
         switch (col) {
@@ -417,8 +418,8 @@ QVariant WantedLists::data(const QModelIndex &index, int role) const
         case LotCount:      return wantedList->lotCount();
         case Filled:        return QString::number(int(wantedList->filled() * 100)) + u'%';
         }
-    } else if (role >= WantedListFirstColumnRole && role < WantedListLastColumnRole) {
-        return data(index.sibling(index.row(), role - WantedListFirstColumnRole), Qt::DisplayRole);
+    } else if (role == NameRole) {
+        return wantedList->name();
     }
 
     return { };
@@ -451,12 +452,7 @@ QHash<int, QByteArray> WantedLists::roleNames() const
         { Qt::DecorationRole, "decoration" },
         { Qt::BackgroundRole, "background" },
         { WantedListPointerRole, "wantedList" },
-        { int(WantedListFirstColumnRole) + Name, "name" },
-        { int(WantedListFirstColumnRole) + Description, "description" },
-        { int(WantedListFirstColumnRole) + ItemCount, "itemCount" },
-        { int(WantedListFirstColumnRole) + ItemLeftCount, "itemLeftCount" },
-        { int(WantedListFirstColumnRole) + LotCount, "lotCount" },
-        { int(WantedListFirstColumnRole) + Filled, "filled" },
+        { NameRole, "name" },
     };
     return roles;
 }

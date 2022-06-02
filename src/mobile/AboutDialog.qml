@@ -3,14 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore
 
-Dialog {
+BrickStoreDialog {
     id: root
     title: qsTr("About")
-    modal: true
-    parent: Overlay.overlay
-    anchors.centerIn: parent
-    width: Overlay.overlay.width * 3 / 4
-    height: Overlay.overlay.height * 3 / 4
 
     FontMetrics { id: fm }
 

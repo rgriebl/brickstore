@@ -26,6 +26,7 @@ QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
 class Currency : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate NOTIFY ratesChanged)
 
 public:
     static Currency *inst();
@@ -33,19 +34,21 @@ public:
 
     QHash<QString, double> rates() const;
     QHash<QString, double> customRates() const;
-    double rate(const QString &currencyCode) const;
-    double crossRate(const QString &fromCode, const QString &toCode) const;
-    double customRate(const QString &currencyCode) const;
-    QStringList currencyCodes() const;
+    Q_INVOKABLE double rate(const QString &currencyCode) const;
+    Q_INVOKABLE double crossRate(const QString &fromCode, const QString &toCode) const;
+    Q_INVOKABLE double customRate(const QString &currencyCode) const;
+    Q_INVOKABLE QStringList currencyCodes() const;
 
-    void setCustomRate(const QString &currencyCode, double rate);
-    void unsetCustomRate(const QString &currenyCode);
+    Q_INVOKABLE void setCustomRate(const QString &currencyCode, double rate);
+    Q_INVOKABLE void unsetCustomRate(const QString &currenyCode);
 
     QDateTime lastUpdate() const;
 
     static QString toDisplayString(double value, const QString &currencyCode = { }, int precision = 3);
     static QString toString(double value, const QString &currencyCode = { }, int precision = 3);
     static double fromString(const QString &str);
+
+    Q_INVOKABLE QString format(double value, const QString &currencyCode = { }, int precision = 3) const;
 
 public slots:
     QCoro::Task<> updateRates(bool silent = false);

@@ -99,11 +99,11 @@ ViewPane::ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate, std::fu
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &ViewPane::updateCurrencyRates);
 
-    auto setIconSizeLambda = [this](Config::IconSize iconSize) {
-        static const QMap<Config::IconSize, QStyle::PixelMetric> map = {
-            { Config::IconSize::System, QStyle::PM_SmallIconSize },
-            { Config::IconSize::Small, QStyle::PM_SmallIconSize },
-            { Config::IconSize::Large, QStyle::PM_ToolBarIconSize },
+    auto setIconSizeLambda = [this](Config::UISize iconSize) {
+        static const QMap<Config::UISize, QStyle::PixelMetric> map = {
+            { Config::UISize::System, QStyle::PM_SmallIconSize },
+            { Config::UISize::Small, QStyle::PM_SmallIconSize },
+            { Config::UISize::Large, QStyle::PM_ToolBarIconSize },
         };
         auto pm = map.value(iconSize, QStyle::PM_SmallIconSize);
         int s = style()->pixelMetric(pm, nullptr, this);

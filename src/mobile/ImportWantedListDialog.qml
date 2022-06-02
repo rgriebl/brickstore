@@ -1,13 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 
 
 Page {
     id: root
-    title: qsTr("Import Cart")
+    title: qsTr("Import Wanted List")
 
     property var goBackFunction
 
@@ -29,8 +28,8 @@ Page {
             }
             ToolButton {
                 icon.name: "view-refresh"
-                onClicked: BS.BrickLink.carts.startUpdate()
-                enabled: BS.BrickLink.carts.updateStatus !== BS.BrickLink.UpdateStatus.Updating
+                onClicked: BS.BrickLink.wantedLists.startUpdate()
+                enabled: BS.BrickLink.wantedLists.updateStatus !== BS.BrickLink.UpdateStatus.Updating
             }
         }
     }
@@ -49,15 +48,12 @@ Page {
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
-                sourceModel: BS.BrickLink.carts
-                sortOrder: Qt.DescendingOrder
+                sourceModel: BS.BrickLink.wantedLists
+                sortOrder: Qt.AscendingOrder
                 sortColumn: 0
-                filterSyntax: BS.SortFilterProxyModel.FixedString
-                filterString: domesticOrInternational.currentIndex ? "true" : "false"
 
                 Component.onCompleted: {
-                    filterRoleName = "domestic"
-                    sortRoleName = "lastUpdated"
+                    sortRoleName = "name"
                 }
             }
 
@@ -66,10 +62,8 @@ Page {
                 property int xspacing: 16
                 width: ListView.view.width
                 height: layout.height + xspacing
-                visible: cart
 
-                required property BS.Cart cart
-                required property int index
+                required property BS.WantedList wantedList
 
                 GridLayout {
                     id: layout
@@ -78,52 +72,30 @@ Page {
                     width: parent.width - 2 * xspacing
                     columnSpacing: xspacing
                     rowSpacing: xspacing / 2
-                    columns: 3
+                    columns: 2
 
-                    Image {
-                        id: flag
-                        Layout.rowSpan: 2
-                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-
-                        asynchronous: true
-                        source: "qrc:/assets/flags/" + cart.countryCode
-                        fillMode: Image.PreserveAspectFit
-                        sourceSize.height: fm.height * .75
-                        sourceSize.width: fm.height * 1.5
-                        FontMetrics {
-                            id: fm
-                            font: delegate.font
-                        }
-                        RectangularGlow {
-                            z: -1
-                            anchors.fill: parent
-                            color: label.color
-                            cornerRadius: 4
-                            glowRadius: 4
-                            spread: 0
-                        }
-                    }
                     Label {
                         id: label
-                        text: cart.storeName + ' (' + cart.sellerName + ')'
+                        text: wantedList.name
                         font.bold: true
                         elide: Text.ElideRight
-                        maximumLineCount: 1
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: cart.lastUpdated.toLocaleDateString(Locale.ShortFormat)
+                        text: wantedList.description
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(cart.itemCount).toLocaleString())
-                        .arg(Number(cart.lotCount).toLocaleString())
+                        .arg(Number(wantedList.itemCount).toLocaleString())
+                        .arg(Number(wantedList.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: BS.Currency.format(cart.total, cart.currencyCode, 2)
+                        text: qsTr("%1 items left, %2% filled")
+                        .arg(Number(wantedList.itemLeftCount).toLocaleString())
+                        .arg(wantedList.filled * 100)
                         Layout.alignment: Qt.AlignRight
                     }
                 }
@@ -140,22 +112,14 @@ Page {
                     anchors.leftMargin: anchors.rightMargin
                 }
                 onClicked: {
-                    BS.BrickLink.carts.startFetchLots(cart)
+                    BS.BrickLink.wantedLists.startFetchLots(wantedList)
                     root.goBackFunction()
                 }
             }
         }
     }
-    footer: TabBar {
-        id: domesticOrInternational
-
-        TabButton { text: qsTr("Domestic") }
-        TabButton { text: qsTr("International") }
-
-        onCurrentIndexChanged: table.forceLayout()
-    }
 
     Component.onCompleted: {
-        Qt.callLater(function() { BS.BrickLink.carts.startUpdate() })
+        Qt.callLater(function() { BS.BrickLink.wantedLists.startUpdate() })
     }
 }

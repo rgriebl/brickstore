@@ -56,8 +56,6 @@ public:
 
     void raise();
 
-    virtual void showToastMessage(const QString &message, int timeout = 10000) = 0;
-
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });

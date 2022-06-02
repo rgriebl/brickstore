@@ -211,6 +211,7 @@ if (BS_DESKTOP)
         desktop/desktopapplication.cpp
         desktop/desktopapplication.h
         desktop/desktopuihelpers.cpp
+        desktop/desktopuihelpers_p.h
         desktop/desktopuihelpers.h
         desktop/developerconsole.cpp
         desktop/developerconsole.h
@@ -334,22 +335,31 @@ if (BS_MOBILE)
     )
 
     set(QML_FILES
+        mobile/qmldir
         mobile/qtquickcontrols2.conf
         mobile/+ios/qtquickcontrols2.conf
         mobile/AboutDialog.qml
         mobile/ActionDelegate.qml
+        mobile/AnnouncementsDialog.qml
+        mobile/AppearsInWidget.qml
         mobile/AutoSizingMenu.qml
+        mobile/BrickStoreDialog.qml
         mobile/CornerTag.qml
+        mobile/DialogLoader.qml
         mobile/DocumentProxyModelJS.qml
         mobile/GridCell.qml
         mobile/GridHeader.qml
         mobile/ImportCartDialog.qml
         mobile/ImportInventoryDialog.qml
         mobile/ImportOrderDialog.qml
+        mobile/ImportWantedListDialog.qml
         mobile/Main.qml
+        mobile/PriceGuideWidget.qml
         mobile/SelectionInfoDialog.qml
         mobile/SettingsDialog.qml
         mobile/SetToPriceGuideDialog.qml
+        mobile/Style.qml
+        mobile/SystemInfoDialog.qml
         mobile/View.qml
         mobile/ViewEditMenu.qml
         mobile/ViewHeaderMenu.qml

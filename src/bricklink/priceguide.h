@@ -43,12 +43,16 @@ public:
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
-    int quantity(Time t, Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
-    int lots(Time t, Condition c) const               { return m_data.lots[int(t)][int(c)]; }
-    double price(Time t, Condition c, Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
+    Q_INVOKABLE int quantity(BrickLink::Time t, BrickLink::Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
+    Q_INVOKABLE int lots(BrickLink::Time t, BrickLink::Condition c) const               { return m_data.lots[int(t)][int(c)]; }
+    Q_INVOKABLE double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
 
     PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr) { } // for scripting only!
     ~PriceGuide() override;
+
+    Q_INVOKABLE void addRef() { Ref::addRef(); }
+    Q_INVOKABLE void release() { Ref::release(); }
+    Q_INVOKABLE int refCount() const { return Ref::refCount(); }
 
 signals:
     void isValidChanged(bool newIsValid);

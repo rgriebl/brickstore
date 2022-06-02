@@ -26,7 +26,7 @@ class SystemInfo : public QObject
 public:
     static SystemInfo *inst();
     ~SystemInfo() override;
-    QVariantMap asMap() const;
+    Q_INVOKABLE QVariantMap asMap() const;
     quint64 physicalMemory() const;
 
 signals:

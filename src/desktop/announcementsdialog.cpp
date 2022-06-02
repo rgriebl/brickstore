@@ -133,17 +133,19 @@ QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcem
         co_return;
 
     QString md;
-    QVector<quint64> shownIds;
+    QVector<quint32> shownIds;
+    const QVariantList vl = announcements->unreadAnnouncements();
 
-    for (const auto &a : qAsConst(announcements->m_announcements)) {
-        if (announcements->m_readIds.contains(a.m_id))
-            continue;
-        shownIds << a.m_id;
+    for (const QVariant &v : vl) {
+        const QVariantMap vm = v.toMap();
+
+        shownIds << vm.value("id"_l1).toUInt();
 
         if (!md.isEmpty())
             md = md % "\n\n___\n\n"_l1;
-        md = md % "**"_l1 % a.m_title % "** &mdash; *"_l1 %
-                QLocale().toString(a.m_date, QLocale::ShortFormat) % "*\n\n"_l1 % a.m_text;
+        md = md % "**"_l1 % vm.value("title"_l1).toString() % "** &mdash; *"_l1
+                % QLocale().toString(vm.value("date"_l1).toDate(), QLocale::ShortFormat)
+                % "*\n\n"_l1 % vm.value("text"_l1).toString();
     }
 
     if (shownIds.isEmpty())

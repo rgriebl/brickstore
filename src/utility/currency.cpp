@@ -237,4 +237,9 @@ double Currency::fromString(const QString &str)
     return QLocale().toDouble(s);
 }
 
+QString Currency::format(double value, const QString &currencyCode, int precision) const
+{
+    return toDisplayString(value, currencyCode, precision);
+}
+
 #include "moc_currency.cpp"

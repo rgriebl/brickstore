@@ -1,17 +1,15 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import BrickStore
+import BrickStore as BS
 
-Dialog {
+
+BrickStoreDialog {
     id: root
     title: qsTr("Settings")
-    modal: true
-    parent: Overlay.overlay
-    anchors.centerIn: parent
-    width: Overlay.overlay.width * 2 / 3
-    height: Overlay.overlay.height * 2 / 3
-    property string page
+    relativeWidth: 2 / 3
+    relativeHeight: 2 / 3
+    property string page    
 
     footer: TabBar {
         id: tabBar
@@ -34,6 +32,8 @@ Dialog {
         open()
     }
 
+    spacing: 16
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -45,9 +45,9 @@ Dialog {
             ColumnLayout {
                 width: parent.width
                 RowLayout {
-                    spacing: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                   spacing: root.spacing
+                   Layout.leftMargin: root.spacing
+                   Layout.rightMargin: root.spacing
                     Label {
                         text: qsTr("Language")
                         font.pixelSize: langCombo.font.pixelSize
@@ -55,14 +55,15 @@ Dialog {
                     ComboBox {
                         Layout.fillWidth: true
                         id: langCombo
-                        model: BrickStore.config.availableLanguages
+                        model: BS.Config.availableLanguages
                         textRole: "language"
                         valueRole: "language"
-                        enabled: BrickStore.config.availableLanguages.length > 0
+                        enabled: BS.Config.availableLanguages.length > 0
                         delegate: ItemDelegate {
+                            width: parent.width
                             text: langCombo.nameForLang(modelData)
                         }
-                        displayText: nameForLang(BrickStore.config.availableLanguages[currentIndex])
+                        displayText: nameForLang(BS.Config.availableLanguages[currentIndex])
 
                         function nameForLang(map) {
                             let name = map.name
@@ -71,59 +72,78 @@ Dialog {
                             return name
                         }
 
-                        onActivated: { BrickStore.config.language = currentValue }
-                        Component.onCompleted: { currentIndex = indexOfValue(BrickStore.config.language) }
+                        onActivated: { BS.Config.language = currentValue }
+                        Component.onCompleted: { currentIndex = indexOfValue(BS.Config.language) }
                     }
                 }
 
                 SwitchDelegate {
                     text: qsTr("Open Browser on Export")
-                    checked: BrickStore.config.openBrowserOnExport
+                    checked: BS.Config.openBrowserOnExport
                     Layout.fillWidth: true
-                    onToggled: BrickStore.config.openBrowserOnExport = checked
+                    onToggled: BS.Config.openBrowserOnExport = checked
                 }
                 SwitchDelegate {
                     text: qsTr("Show input errors")
-                    checked: BrickStore.config.showInputErrors
+                    checked: BS.Config.showInputErrors
                     Layout.fillWidth: true
-                    onToggled: BrickStore.config.showInputErrors = checked
+                    onToggled: BS.Config.showInputErrors = checked
                 }
             }
         }
         ScrollView {
             contentWidth: availableWidth
             ColumnLayout {
-                ButtonGroup {
-                    id: styleGroup
-                    onClicked: (button) => BrickStore.config.uiTheme = button.theme
-                }
+                width: parent.width
+                GridLayout {
+                    columns: 2
+                    rowSpacing: root.spacing / 2
+                    columnSpacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
+                    Label {
+                        text: qsTr("Theme")
+                        font.pixelSize: langCombo.font.pixelSize
+                    }
+                    ComboBox {
+                        Layout.fillWidth: true
+                        id: themeCombo
+                        model: [
+                            { value: 0, text: qsTr("System default") },
+                            { value: 1, text: qsTr("Light") },
+                            { value: 2, text: qsTr("Dark") },
+                        ]
+                        textRole: "text"
+                        valueRole: "value"
 
-                RadioDelegate {
-                    text: qsTr("Follow the system's theme")
-                    checked: BrickStore.config.uiTheme === theme
-                    ButtonGroup.group: styleGroup
-                    Layout.fillWidth: true
-                    property int theme: Config.SystemDefault
-                }
-                RadioDelegate {
-                    text: qsTr("Use a light theme")
-                    checked: BrickStore.config.uiTheme === theme
-                    ButtonGroup.group: styleGroup
-                    Layout.fillWidth: true
-                    property int theme: Config.Light
-                }
-                RadioDelegate {
-                    text: qsTr("Use a dark theme")
-                    checked: BrickStore.config.uiTheme === theme
-                    ButtonGroup.group: styleGroup
-                    Layout.fillWidth: true
-                    property int theme: Config.Dark
+                        onActivated: { BS.Config.uiTheme = currentValue }
+                        Component.onCompleted: { currentIndex = indexOfValue(BS.Config.uiTheme) }
+                    }
+                    Label {
+                        text: qsTr("UI Layout")
+                        font.pixelSize: langCombo.font.pixelSize
+                    }
+                    ComboBox {
+                        Layout.fillWidth: true
+                        id: uisizeCombo
+                        model: [
+                            { value: 0, text: qsTr("Automatic") },
+                            { value: 1, text: qsTr("Small") },
+                            { value: 2, text: qsTr("Large") },
+                        ]
+                        textRole: "text"
+                        valueRole: "value"
+
+                        onActivated: { BS.Config.mobileUISize = currentValue }
+                        Component.onCompleted: { currentIndex = indexOfValue(BS.Config.mobileUISize) }
+                    }
                 }
             }
         }
         ScrollView {
             contentWidth: availableWidth
             ColumnLayout {
+                width: parent.width
                 GridLayout {
                     columns: 2
                     ItemDelegate {
@@ -134,9 +154,9 @@ Dialog {
                     TextField {
                         id: blUsername
                         Layout.fillWidth: true
-                        text: BrickStore.config.brickLinkUsername
+                        text: BS.Config.brickLinkUsername
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-                        onEditingFinished: BrickStore.config.brickLinkUsername = text
+                        onEditingFinished: BS.Config.brickLinkUsername = text
                     }
                     ItemDelegate {
                         text: qsTr("Password")
@@ -146,9 +166,9 @@ Dialog {
                     TextField {
                         id: blPassword
                         Layout.fillWidth: true
-                        text: BrickStore.config.brickLinkPassword
+                        text: BS.Config.brickLinkPassword
                         echoMode: TextInput.PasswordEchoOnEdit
-                        onEditingFinished: BrickStore.config.brickLinkPassword = text
+                        onEditingFinished: BS.Config.brickLinkPassword = text
                     }
                 }
             }

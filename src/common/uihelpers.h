@@ -171,6 +171,10 @@ public:
         co_return co_await pd->exec();
     }
 
+    static void toast(const QString &message, int timeout = 3000) {
+        return inst()->showToastMessageHelper(message, timeout);
+    }
+
 protected:
     virtual UIHelpers_ProgressDialogInterface *createProgressDialog(const QString &title,
                                                                     const QString &message) = 0;
@@ -201,12 +205,18 @@ protected:
 
     virtual QCoro::Task<std::optional<QString>> getFileName(bool doSave, QString fileName,
                                                             QStringList filters,
-                                                            QString title = { }) = 0;
+                                                            QString title) = 0;
 
     QCoro::Task<std::optional<QString>> getFileNameHelper(bool doSave, QString fileName,
                                                           QString fileTitle,
                                                           QStringList filters,
-                                                          QString title = { });
+                                                          QString title);
+
+    void showToastMessageHelper(const QString &message, int timeout);
+
+    virtual void processToastMessages() = 0;
+    QVector<QPair<QString, int>> m_toastMessages;
+    bool m_toastMessageVisible = false;
 
     UIHelpers();
     static UIHelpers *inst();
@@ -216,6 +226,7 @@ protected:
 private:
     Q_SIGNAL void messageBoxClosed();
     QAtomicInt m_messageBoxCount;
+
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(UIHelpers::StandardButtons)

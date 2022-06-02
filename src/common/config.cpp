@@ -164,13 +164,26 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
         setValue("Interface/IconSizeEnum"_l1, oldSize);
     }
     if (cfgver < mkver(2022, 2, 3)) {
+#if defined(BS_DESKTOP)
         // transition to new ldrawDir settings
         setValue("General/LDrawTransition"_l1, true);
-
+#endif
         // reset the sentry consent flag on platforms that didn't have sentry builds before
 #if !defined(Q_OS_WINDOWS)
         setSentryConsent(SentryConsent::Unknown);
 #endif
+    }
+    if (cfgver < mkver(2022, 6, 3)) {
+        auto vl = Config::inst()->value("Announcements/ReadIds"_l1).toList();
+        for (QVariant &v : vl) {
+            if (v.typeId() == QMetaType::ULongLong) {
+                quint64 q = v.toULongLong();
+                // 32b days | 32b crc16 -> 16b days | 16b crc16
+                q = ((q >> 16) & ~0xffffULL) | (q & 0xffffULL);
+                v.setValue<quint32>(quint32(q));
+            }
+        }
+        Config::inst()->setValue("Announcements/ReadIds"_l1, vl);
     }
 }
 
@@ -539,19 +552,33 @@ void Config::setSentryConsent(SentryConsent consent)
     }
 }
 
-Config::UiTheme Config::uiTheme() const
+Config::UITheme Config::uiTheme() const
 {
     int v = value("Interface/Theme"_l1).toInt();
-    if ((v < int(UiTheme::SystemDefault)) || (v > int(UiTheme::Dark)))
-         v = int(UiTheme::SystemDefault);
-    return UiTheme(v);
+    if ((v < int(UITheme::SystemDefault)) || (v > int(UITheme::Dark)))
+         v = int(UITheme::SystemDefault);
+    return UITheme(v);
 }
 
-void Config::setUiTheme(UiTheme theme)
+void Config::setUITheme(UITheme theme)
 {
     if (uiTheme() != theme) {
         setValue("Interface/Theme"_l1, int(theme));
         emit uiThemeChanged(theme);
+    }
+}
+
+Config::UISize Config::mobileUISize() const
+{
+    int s = value("Interface/MobileUISize"_l1, 0).toInt();
+    return static_cast<UISize>(qBound(0, s, 2));
+}
+
+void Config::setMobileUISize(UISize size)
+{
+    if (mobileUISize() != size) {
+        setValue("Interface/MobileUISize"_l1, int(size));
+        emit mobileUISizeChanged(size);
     }
 }
 
@@ -671,13 +698,13 @@ int Config::itemImageSizePercent() const
     return value("Interface/ItemImageSizePercent"_l1, 100).toInt();
 }
 
-Config::IconSize Config::iconSize() const
+Config::UISize Config::iconSize() const
 {
     int s = value("Interface/IconSizeEnum"_l1, 0).toInt();
-    return static_cast<IconSize>(qBound(0, s, 2));
+    return static_cast<UISize>(qBound(0, s, 2));
 }
 
-void Config::setIconSize(IconSize iconSize)
+void Config::setIconSize(UISize iconSize)
 {
     if (this->iconSize() != iconSize) {
         setValue("Interface/IconSizeEnum"_l1, int(iconSize));

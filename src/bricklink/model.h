@@ -228,6 +228,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     const AppearsInItem *appearsIn(const QModelIndex &idx) const;
     QModelIndex index(const AppearsInItem *const_ai) const;

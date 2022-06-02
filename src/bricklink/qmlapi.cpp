@@ -660,16 +660,19 @@ QmlBrickLink *QmlBrickLink::s_inst = nullptr;
 void QmlBrickLink::registerTypes()
 {
 #if !defined(BS_BACKEND)
-    qRegisterMetaType<QmlColor>("Color");
-    qRegisterMetaType<QmlItemType>("ItemType");
-    qRegisterMetaType<QmlCategory>("Category");
-    qRegisterMetaType<QmlItem>("Item");
-    qRegisterMetaType<QmlLot>("Lot");
+    QString cannotCreate = "Cannot create this type"_l1;
+
+    qmlRegisterUncreatableType<BrickLink::QmlColor>("BrickStore", 1, 0, "Color", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::QmlItemType>("BrickStore", 1, 0, "ItemType", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::QmlCategory>("BrickStore", 1, 0, "Category", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::QmlItem>("BrickStore", 1, 0, "Item", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::QmlLot>("BrickStore", 1, 0, "Lot", cannotCreate);
 
     qmlRegisterType<BrickLink::ColorModel>("BrickStore", 1, 0, "ColorModel");
     qmlRegisterType<BrickLink::CategoryModel>("BrickStore", 1, 0, "CategoryModel");
     qmlRegisterType<BrickLink::ItemTypeModel>("BrickStore", 1, 0, "ItemTypeModel");
     qmlRegisterType<BrickLink::ItemModel>("BrickStore", 1, 0, "ItemModel");
+    qmlRegisterType<BrickLink::AppearsInModel>("BrickStore", 1, 0, "AppearsInModel");
 
     s_inst = new QmlBrickLink(BrickLink::core());
 
@@ -679,11 +682,11 @@ void QmlBrickLink::registerTypes()
         return s_inst;
     });
 
-    QString cannotCreate = "Cannot create this type"_l1;
     qmlRegisterUncreatableType<BrickLink::Picture>("BrickStore", 1, 0, "Picture", cannotCreate);
     qmlRegisterUncreatableType<BrickLink::PriceGuide>("BrickStore", 1, 0, "PriceGuide", cannotCreate);
     qmlRegisterUncreatableType<BrickLink::Order>("BrickStore", 1, 0, "Order", cannotCreate);
     qmlRegisterUncreatableType<BrickLink::Cart>("BrickStore", 1, 0, "Cart", cannotCreate);
+    qmlRegisterUncreatableType<BrickLink::WantedList>("BrickStore", 1, 0, "WantedList", cannotCreate);
     qmlRegisterUncreatableType<BrickLink::Store>("BrickStore", 1, 0, "Store", cannotCreate);
 #endif
 }
@@ -885,6 +888,34 @@ QmlLot QmlBrickLink::lot(const QVariant &v) const
         return QmlLot { const_cast<BrickLink::Lot *>(v.value<const BrickLink::Lot *>()), nullptr };
     else
         return v.value<BrickLink::Lot *>();
+}
+
+AppearsInModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QVariantList &colors)
+{
+    QVector<QPair<const Item *, const Color *>> list;
+    if (items.size() == colors.size()) {
+        for (int i = 0; i < int(items.size()); ++i) {
+            QVariant vitem = items.at(i);
+            QVariant vcolor = colors.at(i);
+            const BrickLink::Item *item = nullptr;
+            const BrickLink::Color *color = nullptr;
+
+            if (vitem.userType() == qMetaTypeId<const BrickLink::Item *>())
+                item = vitem.value<const BrickLink::Item *>();
+            else if (vitem.userType() == qMetaTypeId<BrickLink::QmlItem>())
+                item = vitem.value<BrickLink::QmlItem>().wrappedObject();
+
+            if (vcolor.userType() == qMetaTypeId<const BrickLink::Color *>())
+                color = vcolor.value<const BrickLink::Color *>();
+            else if (vcolor.userType() == qMetaTypeId<BrickLink::QmlColor>())
+                color = vcolor.value<BrickLink::QmlColor>().wrappedObject();
+
+            if (item && color)
+                list.append({ item, color });
+        }
+    }
+
+    return new AppearsInModel(list, nullptr);
 }
 
 void QmlBrickLink::cacheStat() const

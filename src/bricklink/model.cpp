@@ -936,21 +936,34 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
     if (!appears)
         return res;
 
-    if (role == Qt::DisplayRole) {
+    switch (role) {
+    case Qt::DisplayRole:
         switch (col) {
         case 0: res = appears->first < 0 ? "-"_l1 : QString::number(appears->first); break;
         case 1: res = appears->second->id(); break;
         case 2: res = appears->second->name(); break;
         }
-    }
-    else if (role == BrickLink::AppearsInItemPointerRole) {
+        break;
+    case BrickLink::AppearsInItemPointerRole:
         res.setValue(appears);
-    }
-    else if (role == BrickLink::ItemPointerRole) {
+        break;
+    case BrickLink::ItemPointerRole:
         res.setValue(appears->second);
-    }
-    else if (role == BrickLink::ColorPointerRole) {
+        break;
+    case BrickLink::ColorPointerRole:
         res.setValue(appears->second->defaultColor());
+        break;
+    case QuantityRole:
+        res = qMax(0, appears->first);
+        break;
+    case NameRole:
+        res = appears->second->name();
+        break;
+    case IdRole:
+        res = appears->second->id();
+        break;
+    default:
+        break;
     }
     return res;
 }
@@ -965,6 +978,16 @@ QVariant BrickLink::InternalAppearsInModel::headerData(int section, Qt::Orientat
         }
     }
     return QVariant();
+}
+
+QHash<int, QByteArray> BrickLink::InternalAppearsInModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { IdRole, "id" },
+        { NameRole, "name" },
+        { QuantityRole, "quantity" },
+    };
+    return roles;
 }
 
 BrickLink::AppearsInModel::AppearsInModel(const QVector<QPair<const Item *, const Color *>> &list,

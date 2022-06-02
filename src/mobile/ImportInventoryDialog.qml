@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import BrickStore
+import BrickStore as BS
 import "./uihelpers" as UIHelpers
 
 Page {
@@ -10,7 +10,7 @@ Page {
 
     property var goBackFunction
 
-    property var currentItem: BrickLink.noItem
+    property var currentItem: BS.BrickLink.noItem
     property bool hasInstructions: false
     property bool hasCounterParts: false
     property bool hasAlternates: false
@@ -42,12 +42,12 @@ Page {
                 icon.name: lastPage ? "brick-1x1" : ""
                 onClicked: {
                     if (lastPage && !root.currentItem.isNull) {
-                        let condition = conditionNew.checked ? BrickLink.Condition.New
-                                                             : BrickLink.Condition.Used
-                        let extra = extraInclude.checked ? BrickLink.Status.Include
-                                                         : extraExclude.checked ? BrickLink.Status.Exclude
-                                                                                : BrickLink.Status.Extra
-                        if (BrickStore.importPartInventory(root.currentItem, BrickLink.noColor,
+                        let condition = conditionNew.checked ? BS.BrickLink.Condition.New
+                                                             : BS.BrickLink.Condition.Used
+                        let extra = extraInclude.checked ? BS.BrickLink.Status.Include
+                                                         : extraExclude.checked ? BS.BrickLink.Status.Exclude
+                                                                                : BS.BrickLink.Status.Extra
+                        if (BrickStore.importPartInventory(root.currentItem, BS.BrickLink.noColor,
                                                            quantity.value, condition, extra,
                                                            root.hasInstructions && includeInstructions.checked,
                                                            root.hasAlternates && includeAlternates.checked,
@@ -77,7 +77,7 @@ Page {
                     }
                     Repeater {
                         id: ittRepeater
-                        model: ItemTypeModel {
+                        model: BS.ItemTypeModel {
                             filterWithoutInventory: true
                         }
                         Button {
@@ -104,7 +104,7 @@ Page {
                     clip: true
                     ScrollIndicator.vertical: ScrollIndicator { }
 
-                    model: CategoryModel { }
+                    model: BS.CategoryModel { }
                     ButtonGroup { id: catListGroup }
 
                     delegate: RadioDelegate {
@@ -147,9 +147,7 @@ Page {
                         to: 500
                         value: 100
                         stepSize: 25
-                        textFromValue: function(value, locale) {
-                            return value + "%"
-                        }
+                        textFromValue: function(value, locale) { return value + "%" }
                     }
                 }
                 GridView {
@@ -166,12 +164,12 @@ Page {
                     cacheBuffer: 8 * 2 * 2
                     ScrollIndicator.vertical: ScrollIndicator { }
 
-                    model: ItemModel {
+                    model: BS.ItemModel {
                         filterWithoutInventory: true
                         filterText: filter.text
                     }
 
-                    property var noImage: BrickLink.noImage(cellWidth, cellHeight)
+                    property var noImage: BS.BrickLink.noImage(cellWidth, cellHeight)
 
                     delegate: ItemDelegate {
                         width: GridView.view.cellWidth
@@ -179,14 +177,14 @@ Page {
                         required property string id
                         required property string name
                         required property var item
-                        property Picture pic: BrickLink.picture(BrickLink.item(item), BrickLink.color(item.defaultColor))
+                        property BS.Picture pic: BS.BrickLink.picture(BS.BrickLink.item(item), BS.BrickLink.color(item.defaultColor))
 
-                        QImageItem {
+                        BS.QImageItem {
                             anchors.fill: parent
                             image: parent.pic && parent.pic.isValid ? parent.pic.image() : itemList.noImage
                         }
                         onClicked: {
-                            let it = BrickLink.item(item)
+                            let it = BS.BrickLink.item(item)
 
                             root.currentItem = it
                             root.hasAlternates = false
@@ -196,19 +194,16 @@ Page {
 
                             if (!it.isNull) {
                                 if (it.itemType.id === "S")
-                                    root.hasInstructions = !BrickLink.item("I", it.id).isNull
+                                    root.hasInstructions = !BS.BrickLink.item("I", it.id).isNull
 
-                                it.consistsOf().forEach(lot => {
-                                                        if (lot.status === BrickLink.Status.Extra) {
-                                                            root.hasExtras = true
-                                                        }
-                                                        if (lot.counterPart) {
-                                                              root.hasCounterParts = true
-                                                        }
-                                                        if (lot.alternate) {
-                                                              root.hasAlternates = true
-                                                        }
-                                                    })
+                                it.consistsOf().forEach(function(lot) {
+                                    if (lot.status === BS.BrickLink.Status.Extra)
+                                        root.hasExtras = true
+                                    if (lot.counterPart)
+                                        root.hasCounterParts = true
+                                    if (lot.alternate)
+                                        root.hasAlternates = true
+                                })
                             }
                             pages.currentIndex = 2
                         }
@@ -236,7 +231,7 @@ Page {
 
         Pane {
             GridLayout {
-                enabled: root.currentItem !== BrickLink.noItem
+                enabled: root.currentItem !== BS.BrickLink.noItem
                 anchors.fill: parent
                 columns: 2
                 Label { text: qsTr("Quantity") }

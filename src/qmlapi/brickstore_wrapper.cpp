@@ -16,14 +16,17 @@
 #include <QQmlContext>
 #include <QFile>
 #include <QUrl>
+#include <QGuiApplication>
 #include "qqmlinfo.h"
 
 #include "utility/utility.h"
 #include "utility/currency.h"
+#include "utility/systeminfo.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/order.h"
 #include "common/actionmanager.h"
+#include "common/announcements.h"
 #include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
@@ -88,20 +91,24 @@ void QmlBrickStore::registerTypes()
 
     qRegisterMetaType<DocumentModel::Field>();
 
-    QQmlEngine::setObjectOwnership(s_inst, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlBrickStore>("BrickStore", 1, 0, "BrickStore",
-                                            [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return s_inst;
-    });
+    static QmlClipboard cb;
+
+    qmlRegisterSingletonInstance<QmlBrickStore>("BrickStore", 1, 0, "BrickStore", s_inst);
+    qmlRegisterSingletonInstance<Currency>("BrickStore", 1, 0, "Currency", Currency::inst());
+    qmlRegisterSingletonInstance<Config>("BrickStore", 1, 0, "Config", Config::inst());
+    qmlRegisterSingletonInstance<QmlClipboard>("BrickStore", 1, 0, "Clipboard", &cb);
+    qmlRegisterSingletonInstance<OnlineState>("BrickStore", 1, 0, "OnlineState", OnlineState::inst());
+    qmlRegisterSingletonInstance<SystemInfo>("BrickStore", 1, 0, "SystemInfo", SystemInfo::inst());
+    qmlRegisterSingletonInstance<Announcements>("BrickStore", 1, 0, "Announcements", Application::inst()->announcements());
+
 
     qmlRegisterType<QmlDocumentProxyModel>("BrickStore", 1, 0, "DocumentProxyModel");
+    qmlRegisterType<QmlSortFilterProxyModel>("BrickStore", 1, 0, "SortFilterProxyModel");
 
     QString cannotCreate = "Cannot create this type"_l1;
     qmlRegisterUncreatableType<DocumentModel>("BrickStore", 1, 0, "DocumentModel", cannotCreate);
     qmlRegisterUncreatableType<Document>("BrickStore", 1, 0, "Document", cannotCreate);
-    qmlRegisterUncreatableType<Config>("BrickStore", 1, 0, "Config", cannotCreate);
     qmlRegisterUncreatableType<DocumentList>("BrickStore", 1, 0, "DocumentList", cannotCreate);
-
 }
 
 
@@ -112,9 +119,6 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Application::inst(), &Application::showSettings,
             this, &QmlBrickStore::showSettings);
-
-    connect(OnlineState::inst(), &OnlineState::onlineStateChanged,
-            this, &QmlBrickStore::onlineStateChanged);
 
     connect(ActionManager::inst(), &ActionManager::activeDocumentChanged,
             this, &QmlBrickStore::activeDocumentChanged);
@@ -168,11 +172,6 @@ QString QmlBrickStore::defaultCurrencyCode() const
     return Config::inst()->defaultCurrencyCode();
 }
 
-bool QmlBrickStore::onlineState() const
-{
-    return OnlineState::inst()->isOnline();
-}
-
 /*! \qmlmethod string BrickStore::symbolForCurrencyCode(string currencyCode)
 
     Returns the currency symbol for the ISO \a currencyCode if available or the \a currencyCode
@@ -206,7 +205,7 @@ QString QmlBrickStore::symbolForCurrencyCode(const QString &currencyCode) const
 */
 QString QmlBrickStore::toCurrencyString(double value, const QString &symbol, int precision) const
 {
-    return Currency::toString(value, symbol, precision);
+    return Currency::toDisplayString(value, symbol, precision);
 }
 
 /*! \qmlmethod string BrickStore::toWeightString(real value, bool showUnit = false)
@@ -572,5 +571,143 @@ void ColumnLayoutsModel::update()
     }
     endResetModel();
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlSortFilterProxyModel::QmlSortFilterProxyModel(QObject *parent)
+    : QSortFilterProxyModel(parent)
+{
+    connect(this, &QSortFilterProxyModel::rowsInserted, this, [this]() {
+        emit countChanged(count());
+    });
+    connect(this, &QSortFilterProxyModel::rowsRemoved, this,  [this]() {
+        emit countChanged(count());
+    });
+    connect(this, &QSortFilterProxyModel::filterRoleChanged, this, [this](int role) {
+        emit filterRoleNameChanged(roleNames().value(role));
+    });
+    connect(this, &QSortFilterProxyModel::sortRoleChanged, this, [this](int role) {
+        emit sortRoleNameChanged(roleNames().value(role));
+    });
+}
+
+int QmlSortFilterProxyModel::count() const
+{
+    return rowCount();
+}
+
+QByteArray QmlSortFilterProxyModel::sortRoleName() const
+{
+    return roleNames().value(sortRole());
+}
+
+void QmlSortFilterProxyModel::setSortRoleName(const QByteArray &role)
+{
+    setSortRole(roleKey(role));
+    invalidate();
+}
+
+QByteArray QmlSortFilterProxyModel::filterRoleName() const
+{
+    return roleNames().value(filterRole());
+}
+
+void QmlSortFilterProxyModel::setFilterRoleName(const QByteArray &role)
+{
+    setFilterRole(roleKey(role));
+}
+
+void QmlSortFilterProxyModel::setSortColumn(int newSortColumn)
+{
+    if (sortColumn() != newSortColumn) {
+        sort(newSortColumn, sortOrder());
+        emit sortColumnChanged(newSortColumn);
+    }
+}
+
+void QmlSortFilterProxyModel::setSortOrder(Qt::SortOrder newSortOrder)
+{
+    if (sortOrder() != newSortOrder) {
+        sort(sortColumn(), newSortOrder);
+        emit sortOrderChanged(newSortOrder);
+    }
+}
+
+QString QmlSortFilterProxyModel::filterString() const
+{
+    return filterRegularExpression().pattern();
+}
+
+void QmlSortFilterProxyModel::setFilterString(const QString &filter)
+{
+    switch (m_filterSyntax) {
+    case RegularExpression:
+        setFilterRegularExpression(filter);
+        break;
+    case Wildcard:
+        setFilterRegularExpression(QRegularExpression::fromWildcard(filter));
+        break;
+    case FixedString:
+        setFilterFixedString(filter);
+        break;
+    }
+}
+
+QmlSortFilterProxyModel::FilterSyntax QmlSortFilterProxyModel::filterSyntax() const
+{
+    return m_filterSyntax;
+}
+
+void QmlSortFilterProxyModel::setFilterSyntax(FilterSyntax syntax)
+{
+    if (m_filterSyntax != syntax) {
+        m_filterSyntax = syntax;
+        emit filterSyntaxChanged(syntax);
+        //setFilterString({ });
+    }
+}
+
+QHash<int, QByteArray> QmlSortFilterProxyModel::roleNames() const
+{
+    if (auto source = sourceModel())
+        return source->roleNames();
+    return { };
+}
+
+int QmlSortFilterProxyModel::roleKey(const QByteArray &role) const
+{
+    const QHash<int, QByteArray> roles = roleNames();
+    for (auto it = roles.cbegin(); it != roles.cend(); ++it) {
+        if (it.value() == role)
+            return it.key();
+    }
+    return -1;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+void QmlClipboard::clear(QClipboard::Mode mode)
+{
+    QGuiApplication::clipboard()->clear(mode);
+}
+
+QString QmlClipboard::text(QClipboard::Mode mode) const
+{
+    return QGuiApplication::clipboard()->text(mode);
+}
+
+void QmlClipboard::setText(const QString &text, QClipboard::Mode mode)
+{
+    QGuiApplication::clipboard()->setText(text, mode);
+}
+
 
 #include "moc_brickstore_wrapper.cpp"

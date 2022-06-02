@@ -57,7 +57,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
                                                                         : tr("placed at"),
                         bon % order->otherParty() % boff,
                         loc.toString(order->date())));
-    w_status->setText(BrickLink::Order::statusToString(order->status()));
+    w_status->setText(order->statusAsString());
     w_lastUpdated->setText(loc.toString(order->lastUpdated()));
     setup(w_tracking, w_trackingCopy, order->trackingNumber());
 

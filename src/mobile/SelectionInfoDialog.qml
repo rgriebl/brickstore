@@ -1,50 +1,72 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import BrickStore
+import Qt5Compat.GraphicalEffects
+import BrickStore as BS
 
-Dialog {
+BrickStoreDialog {
     id: root
-    modal: true
-    parent: Overlay.overlay
-    anchors.centerIn: parent
-    width: single ? parent.width * 3 / 4 : implicitWidth
-    height: single ? parent.height * 3 / 4 : implicitHeight
+    relativeWidth: single ? (3 / 4) : (implicitWidth * 1.2 / Overlay.overlay.width)
+    relativeHeight: single ? (3 / 4) : (implicitHeight * 1.2 / Overlay.overlay.height)
 
-    property Document document
+    property BS.Document document
     property bool single: false
-    property bool isUpdating: false
-    property bool is3D: button3D.checked
-    property Picture picture
+    property bool none: false
+    property bool is3D: false
+    property BS.Picture picture
+    property bool isUpdating: (picture && (picture.updateStatus === BS.BrickLink.UpdateStatus.Updating))
     property var renderController
 
     function updateStats() {
         let selected = document.selectedLots.length
         single = (selected === 1)
+        none = (selected === 0)
 
         if (single) {
-            let lot = BrickLink.lot(document.selectedLots[0])
-            infoText.text = BrickLink.itemHtmlDescription(lot.item, lot.color, infoText.palette.highlight)
+            let lot = BS.BrickLink.lot(document.selectedLots[0])
+            infoText.text = BS.BrickLink.itemHtmlDescription(lot.item, lot.color, infoText.palette.highlight)
             root.title = ''
 
             if (picture)
                 picture.release()
-            picture = BrickLink.picture(lot.item, lot.color, true)
+            picture = BS.BrickLink.picture(lot.item, lot.color, true)
             if (picture)
                 picture.addRef()
             renderController.setPartAndColor(lot.item, lot.color)
 
-            isUpdating = (picture && (picture.updateStatus === BrickLink.UpdateStatus.Updating))
+            priceGuide.item = lot.item
+            priceGuide.color = lot.color
+
+            appearsIn.items = [ lot.item ]
+            appearsIn.colors = [ lot.color ]
         } else {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
             let stat = document.selectionStatistics()
             infoText.text = stat.asHtmlTable()
+
+            priceGuide.item = BS.BrickLink.noItem
+            priceGuide.color = BS.BrickLink.noColor
+
+            let items = []
+            let colors = []
+
+            document.selectedLots.forEach(function(s) {
+                let lot = BS.BrickLink.lot(s)
+
+                if (!lot.item.isNull && !lot.color.isNull) {
+                    items.push(lot.item)
+                    colors.push(lot.color)
+                }
+            })
+
+            appearsIn.items = items
+            appearsIn.colors = colors
         }
     }
 
     Component.onCompleted: {
-        renderController = BrickStore.createRenderController()
+        renderController = BS.BrickStore.createRenderController()
         renderController.parent = root
         info3D.setSource("qrc:/ldraw/PartRenderer.qml", { "renderController": renderController })
 
@@ -61,80 +83,110 @@ Dialog {
         isUpdating = false
     }
 
-    Connections {
-        target: root.picture
-        function onUpdateStatusChanged() {
-            isUpdating = (picture && (picture.updateStatus === BrickLink.UpdateStatus.Updating))
-        }
+    footer: TabBar {
+        id: tabBar
+
+        currentIndex: swipeView.currentIndex
+
+        TabButton { text: qsTr("Info"); }
+        TabButton { text: qsTr("Price Guide"); enabled: root.single }
+        TabButton { text: qsTr("Appears In"); enabled: !root.none }
     }
 
-    ColumnLayout {
+    SwipeView {
+        id: swipeView
+        interactive: false
         anchors.fill: parent
-        Label {
-            id: infoText
-            textFormat: Text.RichText
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
-        StackLayout {
-            visible: root.single
-            clip: true
+        currentIndex: tabBar.currentIndex
+        clip: true
 
-            currentIndex: root.is3D ? 2 : (root.isUpdating ? 0 : 1)
+        Control {
+            ColumnLayout {
+                anchors.fill: parent
+                Label {
+                    Layout.fillWidth: true
 
-            Label {
-                id: infoNoImage
-                color: "black"
-                background: Rectangle { color: "white" }
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: "<center><i>" + qsTr("Please wait... updating") + "</i></center>"
-            }
-            QImageItem {
-                id: infoImage
-                fillColor: "white"
-                image: root.picture && root.picture.isValid ? root.picture.image() : noImage
-                property var noImage: BrickLink.noImage(width, height)
-            }
-            Loader {
-                id: info3D
-                asynchronous: true
-            }
-        }
+                    id: infoText
+                    textFormat: Text.RichText
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                StackLayout {
+                    visible: root.single
+                    clip: true
 
-        RowLayout {
-            visible: root.single
+                    currentIndex: root.is3D ? 1 : 0
 
-            function markText(text : string, marked : bool) {
-                if (marked)
-                    text = "\u2308" + text + "\u230b"
-                return text
-            }
+                    BS.QImageItem {
+                        id: infoImage
+                        fillColor: "white"
+                        image: root.picture && root.picture.isValid ? root.picture.image() : noImage
+                        property var noImage: BS.BrickLink.noImage(width, height)
 
-            Button {
-                Layout.fillWidth: true
-                autoExclusive: true
-                checkable: true
-                checked: true
-                text: parent.markText("2D", checked)
-            }
-            Button {
-                id: button3D
-                Layout.fillWidth: true
-                autoExclusive: true
-                checkable: true
-                text: parent.markText("3D", checked)
-            }
-            Button {
-                Layout.fillWidth: true
-                icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
-                onClicked: {
-                    if (root.is3D)
-                        root.renderController.resetCamera();
-                    else if (root.picture)
-                        root.picture.update(true);
+                        Label {
+                            id: infoImageUpdating
+                            anchors.fill: parent
+                            visible: root.isUpdating
+                            color: "black"
+                            fontSizeMode: Text.Fit
+                            font.pointSize: root.font.pointSize * 3
+                            minimumPointSize: root.font.pointSize
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            text: "<center><i>" + qsTr("Please wait... updating") + "</i></center>"
+                        }
+
+                        Glow {
+                            anchors.fill: infoImageUpdating
+                            visible: root.isUpdating
+                            radius: 8
+                            spread: 0.9
+                            color: "white"
+                            source: infoImageUpdating
+                        }
+                    }
+                    Loader {
+                        id: info3D
+                        asynchronous: true
+                    }
                 }
             }
+            RowLayout {
+                anchors {
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                }
+                visible: root.single
+                Button {
+                    flat: true
+                    text: root.is3D ? "2D" : "3D"
+                    onClicked: root.is3D = !root.is3D
+                }
+                Item { Layout.fillWidth: true }
+                Button {
+                    icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
+                    flat: true
+                    onClicked: {
+                        if (root.is3D)
+                            root.renderController.resetCamera();
+                        else if (root.picture)
+                            root.picture.update(true);
+                    }
+                }
+            }
+
+        }
+
+        PriceGuideWidget {
+            id: priceGuide
+            document: root.document
+        }
+
+        AppearsInWidget {
+            id: appearsIn
+            document: root.document
         }
     }
 }

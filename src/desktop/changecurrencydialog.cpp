@@ -59,7 +59,7 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
         auto legacy = Config::inst()->legacyCurrencyCodeAndRate();
         if (!legacy.first.isEmpty() && !qFuzzyIsNull(legacy.second) && (m_to == legacy.first)) {
             w_labelLegacy->setText(w_labelLegacy->text().arg(legacy.first,
-                                                             Currency::toString(legacy.second)));
+                                                             Currency::toDisplayString(legacy.second)));
         } else {
             m_wasLegacy = false;
         }
@@ -73,7 +73,7 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     }
 
     w_editCustom->setValidator(new SmartDoubleValidator(0, 100000, 3, 1, w_editCustom));
-    w_editCustom->setText(Currency::toString(1));
+    w_editCustom->setText(Currency::toDisplayString(1));
 
     ratesUpdated();
 }
@@ -117,7 +117,7 @@ void ChangeCurrencyDialog::currencyChanged(const QString &to)
     if (!qFuzzyIsNull(rateFrom) && !qFuzzyIsNull(rateTo))
         m_rate = rateTo / rateFrom;
 
-    w_labelEcb->setText(m_labelEcbFormat.arg(to, Currency::toString(m_rate)));
+    w_labelEcb->setText(m_labelEcbFormat.arg(to, Currency::toDisplayString(m_rate)));
     w_labelCustom->setText(m_labelCustomFormat.arg(to));
 }
 

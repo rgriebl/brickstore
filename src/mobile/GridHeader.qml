@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
-import BrickStore
+import BrickStore as BS
 
 Control {
     id: root
@@ -10,7 +10,7 @@ Control {
 
     property int visualIndex: index
     property int logicalIndex: TableView.view.model.logicalColumn(index)
-    property Document document: TableView.view.model.document
+    property BS.Document document: TableView.view.model.document
     property int sortStatus: 0
     property int sortCount: 0
 

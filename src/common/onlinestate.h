@@ -21,6 +21,7 @@ class CheckThread;
 class OnlineState : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool online READ isOnline NOTIFY onlineStateChanged)
 
 public:
     static OnlineState *inst();

@@ -11,18 +11,8 @@ Page {
 
     property Document document
 
-    Loader {
+    DialogLoader {
         id: infoDialog
-
-        active: false
-        asynchronous: true
-        onLoaded: { item.open() }
-        function open() {
-            if (status === Loader.Ready)
-                item.open()
-            else
-                active = true
-        }
         Component.onCompleted: {
             setSource("SelectionInfoDialog.qml", { "document": root.document })
         }
@@ -50,12 +40,12 @@ Page {
             }
             Label {
                 Layout.fillWidth: true
-                scale: 1.3
+                font.pointSize: root.font.pointSize * 1.3
                 minimumPointSize: font.pointSize / 2
                 fontSizeMode: Text.Fit
                 text: root.title
                 elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignHCenter
+                horizontalAlignment: Qt.AlignLeft
             }
             ToolButton {
                 icon.name: "help-about"
@@ -72,7 +62,9 @@ Page {
 
                 AutoSizingMenu {
                     id: viewMenu
-                    x: parent.width - width
+                    x: parent.width / 2 - width
+                    y: parent.height / 2
+
                     transformOrigin: Menu.TopRight
                     modal: true
                     cascade: false
@@ -455,17 +447,10 @@ Page {
         onLoaded: { item.open() }
     }
 
-    Loader {
+    DialogLoader {
         id: setToPGDialog
-
-        active: false
         source: "SetToPriceGuideDialog.qml"
-        onLoaded: {
-            item.onClosed.connect(() => { setToPGDialog.active = false })
-            item.onAccepted.connect(() => { root.document.setPriceToGuide(item.time, item.price, item.forceUpdate) })
-            item.open()
-        }
-        function open() { active = true }
+        onAccepted: root.document.setPriceToGuide(item.time, item.price, item.forceUpdate)
     }
 
     property QtObject connectionContext: null

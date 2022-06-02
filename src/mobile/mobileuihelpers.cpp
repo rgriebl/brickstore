@@ -21,22 +21,11 @@
 #include "mobileuihelpers.h"
 
 
-QPointer<QQmlApplicationEngine> MobileUIHelpers::s_engine;
-
-void MobileUIHelpers::create(QQmlApplicationEngine *engine)
+static QObject *createItem(QQmlApplicationEngine *engine, const QString &qmlFile, const QVariantMap &properties)
 {
-    s_inst = new MobileUIHelpers();
-    s_engine = engine;
-}
+    auto root = qobject_cast<QQuickApplicationWindow *>(engine->rootObjects().constFirst());
 
-MobileUIHelpers::MobileUIHelpers()
-{ }
-
-QObject *MobileUIHelpers::createItem(const QString &qmlFile, const QVariantMap &properties)
-{
-    auto root = qobject_cast<QQuickApplicationWindow *>(s_engine->rootObjects().constFirst());
-
-    QQmlComponent component(s_engine, s_engine->baseUrl().resolved(QUrl(qmlFile)));
+    QQmlComponent component(engine, engine->baseUrl().resolved(QUrl(qmlFile)));
     if (!component.isReady()) {
         qWarning() << component.errorString();
         return nullptr;
@@ -48,22 +37,35 @@ QObject *MobileUIHelpers::createItem(const QString &qmlFile, const QVariantMap &
     return nullptr;
 }
 
-QQuickDialog *MobileUIHelpers::createDialog(const QString &qmlFile, const QVariantMap &properties)
+template <typename T> T *createPopup(QQmlApplicationEngine *engine, const QString &qmlFile, const QVariantMap &properties)
 {
-    if (auto item = createItem(qmlFile, properties)) {
-        if (auto dialog = qobject_cast<QQuickDialog *>(item)) {
-            auto root = qobject_cast<QQuickApplicationWindow *>(s_engine->rootObjects().constFirst());
+    if (auto item = createItem(engine, qmlFile, properties)) {
+        if (auto popup = qobject_cast<T *>(item)) {
+            auto root = qobject_cast<QQuickApplicationWindow *>(engine->rootObjects().constFirst());
 
-            dialog->setParentItem(root->contentItem());
-            dialog->open();
-            return dialog;
+            popup->setParentItem(root->contentItem());
+            popup->open();
+            return popup;
         } else {
             delete item;
-            qWarning() << "Component did not create a Dialog";
+            qWarning() << "Component did not create a Popup derived type";
         }
     }
     return nullptr;
 }
+
+
+QPointer<QQmlApplicationEngine> MobileUIHelpers::s_engine;
+
+void MobileUIHelpers::create(QQmlApplicationEngine *engine)
+{
+    s_inst = new MobileUIHelpers();
+    s_engine = engine;
+}
+
+MobileUIHelpers::MobileUIHelpers()
+{ }
+
 
 QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString msg,
                                                                        UIHelpers::Icon icon,
@@ -73,11 +75,11 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
 {
     Q_UNUSED(icon)
 
-    auto dialog = createDialog("uihelpers/MessageBox.qml"_l1, {
-                                   { "title"_l1, title },
-                                   { "text"_l1, msg },
-                                   { "standardButtons"_l1, int(buttons) },
-                               });
+    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/MessageBox.qml"_l1, {
+                                                { "title"_l1, title },
+                                                { "text"_l1, msg },
+                                                { "standardButtons"_l1, int(buttons) },
+                                            });
     if (!dialog)
         co_return defaultButton;
 
@@ -90,12 +92,12 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text
                                                                     QString initialValue,
                                                                     QString title)
 {
-    auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
-                                   { "title"_l1, title },
-                                   { "text"_l1, text },
-                                   { "mode"_l1, "string"_l1 },
-                                   { "textValue"_l1, initialValue },
-                               });
+    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
+                                                { "title"_l1, title },
+                                                { "text"_l1, text },
+                                                { "mode"_l1, "string"_l1 },
+                                                { "textValue"_l1, initialValue },
+                                            });
     if (!dialog)
         co_return { };
     co_await qCoro(dialog, &QQuickDialog::closed);
@@ -112,16 +114,16 @@ QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(QString text,
                                                                    double minValue, double maxValue,
                                                                    int decimals, QString title)
 {
-    auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
-                                   { "title"_l1, title },
-                                   { "text"_l1, text },
-                                   { "mode"_l1, "double"_l1 },
-                                   { "unit"_l1, unit },
-                                   { "doubleValue"_l1, initialValue },
-                                   { "doubleMinimum"_l1, minValue },
-                                   { "doubleMaximum"_l1, maxValue },
-                                   { "doubleDecimals"_l1, decimals },
-                               });
+    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
+                                                { "title"_l1, title },
+                                                { "text"_l1, text },
+                                                { "mode"_l1, "double"_l1 },
+                                                { "unit"_l1, unit },
+                                                { "doubleValue"_l1, initialValue },
+                                                { "doubleMinimum"_l1, minValue },
+                                                { "doubleMaximum"_l1, maxValue },
+                                                { "doubleDecimals"_l1, decimals },
+                                            });
     if (!dialog)
         co_return { };
     co_await qCoro(dialog, &QQuickDialog::closed);
@@ -137,15 +139,15 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
                                                                  int initialValue, int minValue,
                                                                  int maxValue, QString title)
 {
-    auto dialog = createDialog("uihelpers/InputDialog.qml"_l1, {
-                                   { "title"_l1, title },
-                                   { "text"_l1, text },
-                                   { "mode"_l1, "int"_l1 },
-                                   { "unit"_l1, unit },
-                                   { "intValue"_l1, initialValue },
-                                   { "intMinimum"_l1, minValue },
-                                   { "intMaximum"_l1, maxValue },
-                               });
+    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
+                                                { "title"_l1, title },
+                                                { "text"_l1, text },
+                                                { "mode"_l1, "int"_l1 },
+                                                { "unit"_l1, unit },
+                                                { "intValue"_l1, initialValue },
+                                                { "intMinimum"_l1, minValue },
+                                                { "intMaximum"_l1, maxValue },
+                                            });
     if (!dialog)
         co_return { };
     co_await qCoro(dialog, &QQuickDialog::closed);
@@ -158,9 +160,9 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
 
 
 QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(QColor initialColor,
-                                                                 QString title)
+                                                                  QString title)
 {
-    //TODO: port Qt5's DefaultColorDialog.qml to QQC2 and use it here
+    //TODO: QQC2 gets a ColorDialog with 6.4
     co_return { };
 }
 
@@ -168,7 +170,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
                                                                  QStringList filters,
                                                                  QString title)
 {    
-    auto item = createItem("uihelpers/FileDialog.qml"_l1, {
+    auto item = createItem(s_engine, "uihelpers/FileDialog.qml"_l1, {
                                { "fileMode"_l1, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
 #if defined(Q_OS_ANDROID)
                                // QTBUG-96655
@@ -179,8 +181,10 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
 #endif
                                { "nameFilters"_l1, filters },
                            });
-    if (!item)
+    if (!item) {
+        qWarning() << "Component did not create anything";
         co_return { };
+    }
 
     auto fileDialog = qobject_cast<QQuickFileDialog *>(item);
     if (!fileDialog) {
@@ -195,7 +199,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
 
     co_await qCoro(fileDialog, &QQuickFileDialog::resultChanged);
     fileDialog->deleteLater();
-    qWarning() << fileDialog->result() << fileDialog->selectedFile() << fileDialog->selectedFiles();
+    qWarning() << fileDialog->result() << fileDialog->selectedFile() << fileDialog->selectedFiles() << fileDialog->selectedFile().toDisplayString();
     if (fileDialog->result() == QQuickFileDialog::Accepted) {
 #if defined(Q_OS_ANDROID)
         co_return fileDialog->selectedFile().toString(); // content:// urls cannot be converted
@@ -272,7 +276,7 @@ public:
         if (showMessage) {
             m_dialog->setProperty("text", message);
             // adding new buttons to a QDialogButtonBox crashes Qt 6.2.1
-            // m_dialog->setStandardButtons(QPlatformColorDialogHelper::Ok);
+            // m_dialog->setStandardButtons(QPlatformDialogHelper::Ok);
             disconnect(m_dialog.get(), SIGNAL(requestCancel()), this, nullptr);
             connect(m_dialog.get(), SIGNAL(requestCancel()), m_dialog.get(), SLOT(reject()));
         } else {
@@ -290,6 +294,28 @@ private:
 UIHelpers_ProgressDialogInterface *MobileUIHelpers::createProgressDialog(const QString &title, const QString &message)
 {
     return new MobilePDI(title, message, s_engine);
+}
+
+void MobileUIHelpers::processToastMessages()
+{
+    if (m_toastMessageVisible || m_toastMessages.isEmpty())
+        return;
+
+    auto [message, timeout] = m_toastMessages.takeFirst();
+
+    auto toast = createPopup<QQuickPopup>(s_engine, "uihelpers/ToastMessage.qml"_l1, {
+                                             { "message"_l1, message },
+                                             { "timeout"_l1, timeout },
+                                         });
+    if (!toast)
+        return;
+
+    connect(toast, &QQuickPopup::closed,
+            this, [this, toast]() {
+        toast->deleteLater();
+        m_toastMessageVisible = false;
+        processToastMessages();
+    }, Qt::QueuedConnection);
 }
 
 

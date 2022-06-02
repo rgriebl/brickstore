@@ -33,6 +33,7 @@
 #include "bricklink/core.h"
 #include "bricklink/store.h"
 #include "bricklink/cart.h"
+#include "bricklink/wantedlist.h"
 #include "common/actionmanager.h"
 #include "common/announcements.h"
 #include "common/application.h"
@@ -246,6 +247,17 @@ void Application::afterInit()
         QMetaObject::invokeMethod(this, [this]() { restoreLastSession(); }, Qt::QueuedConnection);
     }
 
+    connect(Currency::inst(), &Currency::updateRatesFailed,
+            this, [](const QString &errorString) {
+        UIHelpers::warning(errorString);
+    });
+
+    Currency::inst()->updateRates();
+    auto *currencyUpdateTimer = new QTimer(this);
+    currencyUpdateTimer->start(4h);
+    currencyUpdateTimer->callOnTimeout(Currency::inst(),
+                                       []() { Currency::inst()->updateRates(true /*silent*/); });
+
     QMetaObject::invokeMethod(this, [this]() { setupLDraw(); }, Qt::QueuedConnection);
 }
 
@@ -294,15 +306,15 @@ QCoro::Task<> Application::setupLDraw()
     }
 
     connect(LDraw::library(), &LDraw::Library::updateStarted,
-            this, [this]() {
-        showToastMessage(tr("Started downloading an LDraw library update"));
+            this, []() {
+        UIHelpers::toast(tr("Started downloading an LDraw library update"));
     });
     connect(LDraw::library(), &LDraw::Library::updateFinished,
-            this, [this](bool success, const QString &message) {
+            this, [](bool success, const QString &message) {
         if (success)
-            showToastMessage(tr("Finished downloading an LDraw library update"));
+            UIHelpers::toast(tr("Finished downloading an LDraw library update"));
         else
-            showToastMessage(tr("Failed to download a LDraw library update") % u":<br>" % message);
+            UIHelpers::toast(tr("Failed to download a LDraw library update") % u":<br>" % message);
     });
 
     auto loadLibrary = [](QString ldrawDirLoad) -> QCoro::Task<> {
@@ -418,7 +430,6 @@ Announcements *Application::announcements()
         auto checkTimer = new QTimer(this);
         checkTimer->callOnTimeout(this, [this]() { m_announcements->check(); });
         checkTimer->start(12h);
-
     }
     return m_announcements;
 }
@@ -674,7 +685,8 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 
 void Application::setupLogging()
 {
-    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message}"_l1);
+//    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message}"_l1);
+    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n"_l1);
 //    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_l1);
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
@@ -733,6 +745,19 @@ bool Application::initBrickLink(QString *errString)
                 UIHelpers::warning(message);
             } else {
                 DocumentIO::importBrickLinkCart(cart);
+
+                if (!message.isEmpty())
+                    UIHelpers::information(message);
+            }
+        });
+        connect(BrickLink::core()->wantedLists(), &BrickLink::WantedLists::fetchLotsFinished,
+                this, [](BrickLink::WantedList *wanted, bool success, const QString &message) {
+            Q_ASSERT(wanted);
+
+            if (!success) {
+                UIHelpers::warning(message);
+            } else {
+                DocumentIO::importBrickLinkWantedList(wanted);
 
                 if (!message.isEmpty())
                     UIHelpers::information(message);
