@@ -1253,9 +1253,10 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
 
     if (!pic) {
         pic = new Picture(item, color);
-        if (!m_pic_cache.insert(key, pic, pic->cost())) {
-            qWarning("Can not add picture to cache (cache max/cur: %d/%d, item: %s)",
-                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), item->id().constData());
+        auto cost = pic->cost();
+        if (!m_pic_cache.insert(key, pic, cost)) {
+            qWarning("Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
+                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), int(cost), item->id().constData());
             return nullptr;
         }
         needToLoad = true;

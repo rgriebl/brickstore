@@ -180,10 +180,17 @@ class Q3Cache
 
     void trim(qsizetype m) noexcept(std::is_nothrow_destructible_v<Node>)
     {
-        while (chain.prev != &chain && total > m) {
-            Node *n = static_cast<Node *>(chain.prev);
-            if (q3IsDetached(*n->value.t))
-                unlink(n);
+        // we cannot use the current Qt 6.3 trim algorithm, because that only works by
+        // repeatedly unlinking the last entry. We cannot guarantee however, that the last entry
+        // CAN be unlinked and this will throw us into an endless loop sooner or later.
+        // --> Reverting to the old algorithm that iterates over whole chain (NB: make sure that
+        //     unlink() does not change this->chain in the future! Otherwise this will break)
+        Chain *n = chain.prev;
+        while (n != &chain && total > m) {
+            Node *u = static_cast<Node *>(n);
+            n = n->prev;
+            if (q3IsDetached(*u->value.t))
+                unlink(u);
         }
     }
 
@@ -210,9 +217,9 @@ public:
         Node *n = d.findNode(key);
         if (n) {
             qsizetype d = cost - n->value.cost;
-            if ((d > 0) && ((total + d) > mx)) {
-                //qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
-            } else if (d != 0) {
+/*            if ((d > 0) && ((total + d) > mx)) {
+                qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
+            } else*/ if (d != 0) {
                 n->value.cost = cost;
                 total += d;
                 //qWarning() << "Adjusted cache object cost by" << d;
