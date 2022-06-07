@@ -161,7 +161,7 @@ Page {
                     clip: true
                     cellWidth: width / 8 * scaleFactor
                     cellHeight: cellWidth * 3 / 4
-                    cacheBuffer: 8 * 2 * 2
+                    cacheBuffer: cellHeight
                     ScrollIndicator.vertical: ScrollIndicator { }
 
                     model: BS.ItemModel {

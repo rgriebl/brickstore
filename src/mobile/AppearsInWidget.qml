@@ -53,7 +53,7 @@ Control {
                     height: fm.height * 2
                     width: height * 4 / 3
 
-                    property BS.Picture pic: BS.BrickLink.picture(delegate.blitem, null)
+                    property BS.Picture pic: BS.BrickLink.largePicture(delegate.blitem)
                     property var noImage: BS.BrickLink.noImage(width, height)
 
                     image: pic && pic.isValid ? pic.image() : noImage

@@ -14,12 +14,6 @@ Control {
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BS.BrickLink.UpdateStatus.Updating))
     property real currencyRate: document ? BS.Currency.rate(document.currencyCode) : 0
 
-
-    Connections {
-        target: priceGuide
-        function onUpdateStatusChanged() { console.warn("IP", priceGuide.updateStatus) }
-    }
-
     onItemChanged: { updatePriceGuide() }
     onColorChanged: { updatePriceGuide() }
 
