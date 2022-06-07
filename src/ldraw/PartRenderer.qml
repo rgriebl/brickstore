@@ -263,7 +263,6 @@ Item {
             enabled: !arcballHandler.active && !pinchHandler.active
 
             target: null
-            dragThreshold: 1
 
             onActiveChanged: {
                 if (active) {
@@ -312,7 +311,6 @@ Item {
             enabled: !moveHandler.active && !pinchHandler.active
 
             target: null
-            dragThreshold: 0
             cursorShape: Qt.ClosedHandCursor
 
             onActiveChanged: {

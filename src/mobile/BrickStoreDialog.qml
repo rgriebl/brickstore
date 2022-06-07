@@ -16,6 +16,8 @@ Dialog {
     property real relativeWidth: .75
     property real relativeHeight: .75
 
+    focus: true
+
 //    // ~ in mm
 //    property size physicalScreenSize: Qt.size(Math.min(Screen.width, Screen.height) / Screen.pixelDensity,
 //                                              Math.max(Screen.width, Screen.height) / Screen.pixelDensity)
@@ -48,9 +50,19 @@ Dialog {
             }
         }
     }
+
+    //TODO: fix after Key_Back handling is fixed in 6.4 for Popup
+    onOpened: contentItem.forceActiveFocus()
     Component.onCompleted: {
         if (Style.smallSize)
             header = smallHeader
+        contentItem.focus = true
+        contentItem.Keys.released.connect(function(e) {
+            if (e.key === Qt.Key_Back) {
+                e.accept = true
+                close()
+            }
+        })
     }
 }
 

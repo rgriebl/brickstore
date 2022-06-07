@@ -36,9 +36,9 @@ public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 
-    void update(bool highPriority = false);
+    Q_INVOKABLE void update(bool highPriority = false);
     QDateTime lastUpdated() const     { return m_fetched; }
-    void cancelUpdate();
+    Q_INVOKABLE void cancelUpdate();
 
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }

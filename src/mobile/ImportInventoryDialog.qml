@@ -47,11 +47,11 @@ Page {
                         let extra = extraInclude.checked ? BS.BrickLink.Status.Include
                                                          : extraExclude.checked ? BS.BrickLink.Status.Exclude
                                                                                 : BS.BrickLink.Status.Extra
-                        if (BrickStore.importPartInventory(root.currentItem, BS.BrickLink.noColor,
-                                                           quantity.value, condition, extra,
-                                                           root.hasInstructions && includeInstructions.checked,
-                                                           root.hasAlternates && includeAlternates.checked,
-                                                           root.hasCounterParts && includeCounterParts.checked)) {
+                        if (BS.BrickStore.importPartInventory(root.currentItem, BS.BrickLink.noColor,
+                                                              quantity.value, condition, extra,
+                                                              root.hasInstructions && includeInstructions.checked,
+                                                              root.hasAlternates && includeAlternates.checked,
+                                                              root.hasCounterParts && includeCounterParts.checked)) {
                             goBackFunction()
                         }
                     } else if (visible) {

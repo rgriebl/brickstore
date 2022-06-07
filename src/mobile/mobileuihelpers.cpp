@@ -13,9 +13,12 @@
 */
 #include <QQmlApplicationEngine>
 #include <QEventLoop>
+#include <QStandardPaths>
 #include <QtQuickTemplates2/private/qquickapplicationwindow_p.h>
 #include <QtQuickTemplates2/private/qquickdialog_p.h>
 #include <QtQuickDialogs2/private/qquickfiledialog_p.h>
+#include <QtQuickDialogs2/private/qquickmessagedialog_p.h>
+//#include <QtQuickDialogs2/private/qquickcolordialog_p.h>
 
 #include "utility/utility.h"
 #include "mobileuihelpers.h"
@@ -54,6 +57,49 @@ template <typename T> T *createPopup(QQmlApplicationEngine *engine, const QStrin
     return nullptr;
 }
 
+template <typename T> T *createDialog(QQmlApplicationEngine *engine, const QVariantMap &properties)
+{
+    const QMetaObject *mo = &T::staticMetaObject;
+    QByteArray name = mo->classInfo(mo->indexOfClassInfo("QML.Element")).value();
+    if (name.isEmpty()) {
+        qWarning() << "Requested Dialog class does not have a QML name";
+        return { };
+    }
+
+    auto root = qobject_cast<QQuickApplicationWindow *>(engine->rootObjects().constFirst());
+    if (!root) {
+        qWarning() << "No root object to attach Dialog to";
+        return { };
+    }
+
+    static QQmlComponent *component = nullptr;
+    if (!component) {
+        component = new QQmlComponent(engine);
+        component->setData("import QtQuick.Dialogs as QD\nQD." + name + " { }\n", engine->baseUrl());
+    }
+    if (!component->isReady()) {
+        qWarning() << component->errorString();
+        return { };
+    }
+
+    auto item = component->createWithInitialProperties(properties, qmlContext(root));
+
+    if (!item) {
+        qWarning() << "Component create failed" << component->isError() << component->errors();
+        return { };
+    }
+
+    auto dialog = qobject_cast<T *>(item);
+    if (!dialog) {
+        delete item;
+        qWarning() << "Component did not create a" << name.constData();
+        return { };
+    }
+
+    dialog->setParentWindow(root);
+    dialog->open();
+    return dialog;
+}
 
 QPointer<QQmlApplicationEngine> MobileUIHelpers::s_engine;
 
@@ -75,17 +121,22 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
 {
     Q_UNUSED(icon)
 
-    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/MessageBox.qml"_l1, {
-                                                { "title"_l1, title },
-                                                { "text"_l1, msg },
-                                                { "standardButtons"_l1, int(buttons) },
-                                            });
-    if (!dialog)
+    auto messageDialog = createDialog<QQuickMessageDialog>(s_engine, {
+                                                               { "title"_l1, title },
+                                                               { "text"_l1, msg },
+                                                               { "buttons"_l1, int(buttons) }
+                                                           });
+
+    if (!messageDialog)
         co_return defaultButton;
 
-    co_await qCoro(dialog, &QQuickDialog::closed);
-    dialog->deleteLater();
-    co_return static_cast<StandardButton>(dialog->property("clickedButton").toInt());
+    auto [button, role] = co_await qCoro(messageDialog, &QQuickMessageDialog::buttonClicked);
+    Q_UNUSED(role)
+    messageDialog->deleteLater();
+    if (messageDialog->result() == QQuickMessageDialog::Accepted)
+        co_return static_cast<StandardButton>(button);
+    else
+        co_return defaultButton;
 }
 
 QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text,
@@ -162,40 +213,50 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
 QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(QColor initialColor,
                                                                   QString title)
 {
-    //TODO: QQC2 gets a ColorDialog with 6.4
-    co_return { };
+//    auto colorDialog = createDialog<QQuickColorDialog>(s_engine, {
+//                                                           { "title"_l1, title },
+//                                                           { "selectedColor"_l1, initialColor },
+//                                                       });
+
+//    if (!colorDialog)
+//        co_return { };
+
+//    co_await qCoro(colorDialog, &QQuickColorDialog::selectedColorChanged);
+//    colorDialog->deleteLater();
+//    if (colorDialog->result() == QQuickMessageDialog::Accepted)
+//        co_return colorDialog->selectedColor();
+//    else
+        co_return { };
 }
 
 QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QString fileName,
                                                                  QStringList filters,
                                                                  QString title)
-{    
-    auto item = createItem(s_engine, "uihelpers/FileDialog.qml"_l1, {
-                               { "fileMode"_l1, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
-#if defined(Q_OS_ANDROID)
-                               // QTBUG-96655
-                               { "title"_l1, fileName },
-#else
-                               { "title"_l1, title },
-                               { "currentFile"_l1, fileName },
+{
+#if defined(Q_OS_IOS)
+    if (doSave) {  // QTBUG-101301
+        fileName = QFileInfo(fileName).fileName();
+
+        if (auto fn = co_await getInputString(tr("Filename to save to"), fileName, title))
+           co_return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) % u'/' % *fn;
+        co_return { };
+    }
 #endif
-                               { "nameFilters"_l1, filters },
-                           });
-    if (!item) {
-        qWarning() << "Component did not create anything";
-        co_return { };
-    }
 
-    auto fileDialog = qobject_cast<QQuickFileDialog *>(item);
-    if (!fileDialog) {
-        delete item;
-        qWarning() << "Component did not create a FileDialog";
-        co_return { };
-    }
+    auto fileDialog = createDialog<QQuickFileDialog>(s_engine, {
+                                                         { "fileMode"_l1, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
+#if defined(Q_OS_ANDROID)
+                                                         // QTBUG-96655
+                                                         { "title"_l1, fileName },
+#else
+                                                         { "title"_l1, title },
+                                                         { "currentFile"_l1, fileName },
+#endif
+                                                         { "nameFilters"_l1, filters },
+                                                     });
 
-    auto root = qobject_cast<QQuickApplicationWindow *>(s_engine->rootObjects().constFirst());
-    fileDialog->setParentWindow(root);
-    fileDialog->open();
+    if (!fileDialog)
+        co_return { };
 
     co_await qCoro(fileDialog, &QQuickFileDialog::resultChanged);
     fileDialog->deleteLater();

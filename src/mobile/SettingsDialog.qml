@@ -38,12 +38,16 @@ BrickStoreDialog {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
+        interactive: false
         clip: true
 
-        ScrollView {
-            contentWidth: availableWidth
+        ScrollableLayout {
+            id: langScroller
+
+            SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+
             ColumnLayout {
-                width: parent.width
+                width: langScroller.width
                 RowLayout {
                    spacing: root.spacing
                    Layout.leftMargin: root.spacing
@@ -91,10 +95,13 @@ BrickStoreDialog {
                 }
             }
         }
-        ScrollView {
-            contentWidth: availableWidth
+        ScrollableLayout {
+            id: uiScroller
+
+            SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+
             ColumnLayout {
-                width: parent.width
+                width: uiScroller.width
                 GridLayout {
                     columns: 2
                     rowSpacing: root.spacing / 2
@@ -137,13 +144,29 @@ BrickStoreDialog {
                         onActivated: { BS.Config.mobileUISize = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.mobileUISize) }
                     }
+                    Label {
+                        text: qsTr("Item image Size")
+                        font.pixelSize: langCombo.font.pixelSize
+                    }
+                    SpinBox {
+                        Layout.fillWidth: true
+                        from: 50
+                        to: 200
+                        stepSize: 25
+
+                        onValueModified: { BS.Config.itemImageSizePercent = value }
+                        Component.onCompleted: { value = 25 * Math.round(BS.Config.itemImageSizePercent / 25) }
+                    }
                 }
             }
         }
-        ScrollView {
-            contentWidth: availableWidth
+        ScrollableLayout {
+            id: blScroller
+
+            SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+
             ColumnLayout {
-                width: parent.width
+                width: blScroller.width
                 GridLayout {
                     columns: 2
                     ItemDelegate {

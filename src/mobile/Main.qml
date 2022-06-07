@@ -209,6 +209,7 @@ ApplicationWindow {
                 view.parent = viewProxy
                 view.anchors.fill = viewProxy
                 view.visible = true
+                view.forceActiveFocus()
             }
         }
         BS.ActionManager.activeDocument = view ? doc : null
@@ -234,7 +235,11 @@ ApplicationWindow {
 
             let viewComponent = Qt.createComponent("View.qml")
             if (viewComponent.status === Component.Ready) {
-                let view = viewComponent.createObject(viewProxy, { visible: false, document: doc })
+                let view = viewComponent.createObject(viewProxy, {
+                                                          visible: false,
+                                                          document: doc,
+                                                          goHomeFunction: function() { setActiveDocument(null) },
+                                                          })
                 if (view) {
                     doc.ref()
                     views.push(view)
@@ -275,6 +280,19 @@ ApplicationWindow {
     property var connectionContext
 
     Component.onCompleted: {
+        // Handle Android's back button
+        contentItem.Keys.released.connect(function(e) {
+            if (e.key === Qt.Key_Back) {
+                e.accepted = true
+                if (currentView)
+                    setActiveDocument(null)
+                else if (homeStack.depth > 1)
+                    homeStack.pop()
+                else
+                    close()
+            }
+        })
+
         connectionContext = BS.ActionManager.connectQuickActionTable
                 ({
                      "document_import_bl_inv": () => {

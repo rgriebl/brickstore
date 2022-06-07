@@ -44,14 +44,14 @@ BrickStoreDialog {
         })
     }
 
+    onOpened: { sl.flashScrollIndicators() }
 
-    ScrollView {
-        id: sv
+    ScrollableLayout {
+        id: sl
         anchors.fill: parent
-        contentWidth: availableWidth
 
         ColumnLayout {
-            width: sv.contentWidth
+            width: sl.width
 
             Label {
                 text: root.announcementMarkdown

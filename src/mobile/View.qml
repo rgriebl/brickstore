@@ -2,14 +2,17 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.qmlmodels
-import BrickStore 1.0
+import BrickStore as BS
+
 
 Page {
     id: root
     padding: 0
     title: document.fileName ? document.fileName : (document.title ? document.title : qsTr("Untitled"))
 
-    property Document document
+    property BS.Document document
+
+    property var goHomeFunction
 
     DialogLoader {
         id: infoDialog
@@ -17,6 +20,8 @@ Page {
             setSource("SelectionInfoDialog.qml", { "document": root.document })
         }
     }
+
+    focus: true
 
     header: ToolBar {
         id: toolBar
@@ -28,14 +33,14 @@ Page {
             anchors.fill: parent
             ToolButton {
                 icon.name: "go-home"
-                onClicked: setActiveDocument(null)
+                onClicked: root.goHomeFunction()
             }
             ToolButton {
-                action: ActionManager.quickAction("edit_undo")
+                action: BS.ActionManager.quickAction("edit_undo")
                 display: Button.IconOnly
             }
             ToolButton {
-                action: ActionManager.quickAction("edit_redo")
+                action: BS.ActionManager.quickAction("edit_redo")
                 display: Button.IconOnly
             }
             Label {
@@ -69,18 +74,18 @@ Page {
                     modal: true
                     cascade: false
 
-                    MenuItem { action: ActionManager.quickAction("document_save") }
-                    MenuItem { action: ActionManager.quickAction("document_save_as") }
+                    MenuItem { action: BS.ActionManager.quickAction("document_save") }
+                    MenuItem { action: BS.ActionManager.quickAction("document_save_as") }
                     AutoSizingMenu {
-                        title: ActionManager.quickAction("document_export").text
+                        title: BS.ActionManager.quickAction("document_export").text
                         modal: true
                         cascade: false
-                        MenuItem { action: ActionManager.quickAction("document_export_bl_xml") }
-                        MenuItem { action: ActionManager.quickAction("document_export_bl_xml_clip") }
-                        MenuItem { action: ActionManager.quickAction("document_export_bl_update_clip") }
-                        MenuItem { action: ActionManager.quickAction("document_export_bl_wantedlist_clip") }
+                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_xml") }
+                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_xml_clip") }
+                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_update_clip") }
+                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_wantedlist_clip") }
                     }
-                    MenuItem { action: ActionManager.quickAction("document_close") }
+                    MenuItem { action: BS.ActionManager.quickAction("document_close") }
                 }
             }
         }
@@ -131,7 +136,8 @@ Page {
             reuseItems: true
 
             FontMetrics { id: fontMetrics; font: root.font }
-            property int cellHeight: fontMetrics.height * 2 + 8
+            property int cellHeight: fontMetrics.height * 2 * BS.Config.itemImageSizePercent / 100 + 8
+            onCellHeightChanged: Qt.callLater(function() { forceLayout() })
 
             columnWidthProvider: (c) => table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
             rowHeightProvider: () => cellHeight
@@ -156,7 +162,7 @@ Page {
                 }
             }
 
-            model: DocumentProxyModel {
+            model: BS.DocumentProxyModel {
                 document: root.document
                 onForceLayout: table.forceLayout()
             }
@@ -168,7 +174,7 @@ Page {
                         return Math.abs(d1 - d2) <= 1e-12 * Math.max(1.0, Math.abs(d1), Math.abs(d2));
                     }
 
-                    text: root.fuzzyCompare(display) ? "-" : BrickStore.toCurrencyString(display)
+                    text: root.fuzzyCompare(display) ? "-" : BS.Currency.format(display)
                 }
             }
             Component {
@@ -182,20 +188,20 @@ Page {
                 id: chooser
                 role: "documentField"
 
-                DelegateChoice { roleValue: Document.Condition
+                DelegateChoice { roleValue: BS.Document.Condition
                     GridCell {
-                        property bool isNew: display === BrickLink.New
+                        property bool isNew: display === BS.BrickLink.Condition.New
                         //horizontalAlignment: Text.AlignHCenter
                         text: isNew ? qsTr("N") : qsTr("U")
                         tint: isNew ? "transparent" : Qt.rgba(.5, .5, .5, .5)
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Status
+                DelegateChoice { roleValue: BS.Document.Status
                     GridCell {
                         property var status: display
                         required property var lot
-                        property var bllot: BrickLink.lot(lot)
+                        property var bllot: BS.BrickLink.lot(lot)
                         property string tagText: bllot.counterPart
                                                  ? qsTr("CP")
                                                  : bllot.alternateId
@@ -217,26 +223,26 @@ Page {
                             anchors.fill: parent
                             enabled: false
                             icon.color: "transparent"
-                            icon.name: status === BrickLink.Exclude ? "vcs-removed"
-                                                                    : (status === BrickLink.Include
-                                                                       ? "vcs-normal" : "vcs-added")
+                            icon.name: status === BS.BrickLink.Status.Exclude
+                                       ? "vcs-removed" : (status === BS.BrickLink.Status.Include
+                                                          ? "vcs-normal" : "vcs-added")
                         }
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Picture
+                DelegateChoice { roleValue: BS.Document.Picture
                     GridCell {
-                        background: QImageItem {
+                        background: BS.QImageItem {
                             fillColor: "white"
                             image: display
                         }
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Color
+                DelegateChoice { roleValue: BS.Document.Color
                     GridCell {
                         id: cell
-                        QImageItem {
+                        BS.QImageItem {
                             id: colorImage
                             anchors {
                                 left: parent.left
@@ -245,14 +251,14 @@ Page {
                                 bottom: parent.bottom
                             }
                             width: parent.font.pixelSize * 2
-                            image: BrickLink.color(parent.display).image(width, height)
+                            image: BS.BrickLink.color(parent.display).image(width, height)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Retain
+                DelegateChoice { roleValue: BS.Document.Retain
                     GridCell {
                         property bool retain: display
                         text: ""
@@ -264,20 +270,20 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Weight
+                DelegateChoice { roleValue: BS.Document.Weight
                     GridCell {
-                        text: BrickStore.toWeightString(display, true)
+                        text: BS.BrickStore.toWeightString(display, true)
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Stockroom
+                DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         property var stockroom: display
                         text: {
                             switch(stockroom) {
-                            case BrickLink.A: return "A"
-                            case BrickLink.B: return "B"
-                            case BrickLink.C: return "C"
+                            case BS.BrickLink.Stockroom.A: return "A"
+                            case BS.BrickLink.Stockroom.B: return "B"
+                            case BS.BrickLink.Stockroom.C: return "C"
                             default: return ""
                             }
                         }
@@ -290,17 +296,17 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Sale
+                DelegateChoice { roleValue: BS.Document.Sale
                     GridCell { text: humanReadableInteger(display, 0, "%") }
                 }
 
-                DelegateChoice { roleValue: Document.Bulk
+                DelegateChoice { roleValue: BS.Document.Bulk
                     GridCell { text: humanReadableInteger(display, 1) }
                 }
 
-                DelegateChoice { roleValue: Document.Price; delegate: currencyDelegate }
-                DelegateChoice { roleValue: Document.PriceOrig; delegate: currencyDelegate }
-                DelegateChoice { roleValue: Document.PriceDiff
+                DelegateChoice { roleValue: BS.Document.Price; delegate: currencyDelegate }
+                DelegateChoice { roleValue: BS.Document.PriceOrig; delegate: currencyDelegate }
+                DelegateChoice { roleValue: BS.Document.PriceDiff
                     GridCell {
 //                        required property var baseLot  remove?
                         text: humanReadableCurrency(display)
@@ -309,32 +315,32 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: Document.Total
+                DelegateChoice { roleValue: BS.Document.Total
                     GridCell {
                         text: humanReadableCurrency(display)
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
-                DelegateChoice { roleValue: Document.Cost; delegate: currencyDelegate }
-                DelegateChoice { roleValue: Document.TierP1
+                DelegateChoice { roleValue: BS.Document.Cost; delegate: currencyDelegate }
+                DelegateChoice { roleValue: BS.Document.TierP1
                     GridCell {
                         text: humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
-                DelegateChoice { roleValue: Document.TierP2
+                DelegateChoice { roleValue: BS.Document.TierP2
                     GridCell {
                         text: humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
-                DelegateChoice { roleValue: Document.TierP3
+                DelegateChoice { roleValue: BS.Document.TierP3
                     GridCell {
                         text: humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
-                DelegateChoice { roleValue: Document.Quantity
+                DelegateChoice { roleValue: BS.Document.Quantity
                     GridCell {
                         property bool isZero: display === 0
                         text: humanReadableInteger(display)
@@ -343,50 +349,50 @@ Page {
                                                           : "transparent"
                     }
                 }
-                DelegateChoice { roleValue: Document.QuantityOrig
+                DelegateChoice { roleValue: BS.Document.QuantityOrig
                     GridCell {
                         text: display === 0 ? "-" : display.toLocaleString()
                     }
                 }
-                DelegateChoice { roleValue: Document.QuantityDiff
+                DelegateChoice { roleValue: BS.Document.QuantityDiff
                     GridCell {
                         text: humanReadableInteger(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
                                           : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
                 }
-                DelegateChoice { roleValue: Document.TierQ1
+                DelegateChoice { roleValue: BS.Document.TierQ1
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
-                DelegateChoice { roleValue: Document.TierQ2
+                DelegateChoice { roleValue: BS.Document.TierQ2
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
-                DelegateChoice { roleValue: Document.TierQ3
+                DelegateChoice { roleValue: BS.Document.TierQ3
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
-                DelegateChoice { roleValue: Document.LotId; delegate: uintDelegate }
-                DelegateChoice { roleValue: Document.YearReleased; delegate: uintDelegate }
+                DelegateChoice { roleValue: BS.Document.LotId; delegate: uintDelegate }
+                DelegateChoice { roleValue: BS.Document.YearReleased; delegate: uintDelegate }
 
-                DelegateChoice { roleValue: Document.Category
+                DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BrickLink.lot(lot).category.id, 0.2)
+                        tint: root.shadeColor(BS.BrickLink.lot(lot).category.id, 0.2)
                         text: display
                     }
                 }
-                DelegateChoice { roleValue: Document.ItemType
+                DelegateChoice { roleValue: BS.Document.ItemType
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
+                        tint: root.shadeColor(BS.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
                 }
@@ -400,7 +406,7 @@ Page {
         return i === zero ? "-" : i.toLocaleString() + unit
     }
     function humanReadableCurrency(c) {
-        return fuzzyCompare(c, 0) ? "-" : BrickStore.toCurrencyString(c)
+        return fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
     }
 
     function fuzzyCompare(d1, d2) {
@@ -454,18 +460,18 @@ Page {
     }
 
     property QtObject connectionContext: null
-    property bool active: document && (ActionManager.activeDocument === root.document)
+    property bool active: document && (BS.ActionManager.activeDocument === root.document)
 
     onActiveChanged: {
         if (active) {
-            connectionContext = ActionManager.connectQuickActionTable
+            connectionContext = BS.ActionManager.connectQuickActionTable
                     ({
                          "edit_price_to_priceguide": () => {
                              setToPGDialog.open()
                          },
                      })
         } else {
-            ActionManager.disconnectQuickActionTable(connectionContext)
+            BS.ActionManager.disconnectQuickActionTable(connectionContext)
             connectionContext = null
         }
     }

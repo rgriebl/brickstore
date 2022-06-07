@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 
 Control {
@@ -13,19 +14,30 @@ Control {
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BS.BrickLink.UpdateStatus.Updating))
     property real currencyRate: document ? BS.Currency.rate(document.currencyCode) : 0
 
+
+    Connections {
+        target: priceGuide
+        function onUpdateStatusChanged() { console.warn("IP", priceGuide.updateStatus) }
+    }
+
     onItemChanged: { updatePriceGuide() }
     onColorChanged: { updatePriceGuide() }
 
     function updatePriceGuide() {
-        if (!document || root.item.isNull || root.color.isNull)
-            return
-
         if (priceGuide)
             priceGuide.release()
-        priceGuide = BS.BrickLink.priceGuide(root.item, root.color, true)
+
+        if (root.item.isNull || root.color.isNull)
+            priceGuide = null
+        else
+            priceGuide = BS.BrickLink.priceGuide(root.item, root.color, true)
+
         if (priceGuide)
             priceGuide.addRef()
     }
+
+    implicitHeight: layout.implicitHeight
+    implicitWidth: layout.implicitWidth
 
     Component.onDestruction: {
         if (priceGuide)
@@ -58,10 +70,10 @@ Control {
     }
 
     GridLayout {
+        id: layout
         anchors.fill: parent
 
         columns: 3
-        rows: 13
 
         HeaderLabel { text: document ? document.currencyCode : '' }
         HeaderLabel { text: qsTr("New") }
@@ -120,6 +132,41 @@ Control {
         Label { text: qsTr("Max.") }
         PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Highest }
         PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Highest }
+
+        ToolButton {
+            Layout.columnSpan: 3
+            Layout.alignment: Qt.AlignRight
+
+            icon.name: "view-refresh"
+            flat: true
+            onClicked: {
+                if (root.priceGuide)
+                    root.priceGuide.update(true);
+            }
+        }
+    }
+
+    Label {
+        id: pgUpdating
+        anchors.fill: parent
+        visible: root.isUpdating
+        color: "black"
+        fontSizeMode: Text.Fit
+        font.pointSize: root.font.pointSize * 3
+        font.italic: true
+        minimumPointSize: root.font.pointSize
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: qsTr("Please wait... updating")
+    }
+
+    Glow {
+        anchors.fill: pgUpdating
+        visible: root.isUpdating
+        radius: 8
+        spread: 0.9
+        color: "white"
+        source: pgUpdating
     }
 }
 

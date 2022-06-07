@@ -353,8 +353,10 @@ if (BS_MOBILE)
         mobile/ImportInventoryDialog.qml
         mobile/ImportOrderDialog.qml
         mobile/ImportWantedListDialog.qml
+        mobile/InfoWidget.qml
         mobile/Main.qml
         mobile/PriceGuideWidget.qml
+        mobile/ScrollableLayout.qml
         mobile/SelectionInfoDialog.qml
         mobile/SettingsDialog.qml
         mobile/SetToPriceGuideDialog.qml
@@ -363,10 +365,9 @@ if (BS_MOBILE)
         mobile/View.qml
         mobile/ViewEditMenu.qml
         mobile/ViewHeaderMenu.qml
-        mobile/uihelpers/FileDialog.qml
         mobile/uihelpers/InputDialog.qml
-        mobile/uihelpers/MessageBox.qml
         mobile/uihelpers/ProgressDialog.qml
+        mobile/utils.js
     )
     qt_add_resources(${PROJECT_NAME} mobile_qrc
         PREFIX "/"

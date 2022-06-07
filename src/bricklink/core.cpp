@@ -1065,8 +1065,9 @@ PriceGuide *Core::priceGuide(const Item *item, const Color *color, bool highPrio
 
     if (highPriority) {
         if (!pg->isValid()) {
-            pg->m_valid = pg->loadFromDisk(pg->m_fetched, pg->m_data);
-            pg->m_update_status = UpdateStatus::Ok;
+            bool valid = pg->loadFromDisk(pg->m_fetched, pg->m_data);
+            pg->setIsValid(valid);
+            pg->setUpdateStatus(UpdateStatus::Ok);
         }
 
         if (updateNeeded(pg->isValid(), pg->lastUpdated(), m_pg_update_iv))
@@ -1138,7 +1139,7 @@ void Core::updatePriceGuide(PriceGuide *pg, bool highPriority)
     }
     url.setQuery(query);
 
-    //qDebug ( "PG request started for %s", (const char *) url );
+    //qDebug() << "PG request started for" << url;
     pg->m_transferJob = TransferJob::get(url, nullptr, 2);
     pg->m_transferJob->setUserData("priceGuide", QVariant::fromValue(pg));
 
@@ -1155,19 +1156,22 @@ void Core::cancelPriceGuideUpdate(PriceGuide *pg)
 void Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
 {
     pg->m_transferJob = nullptr;
-    pg->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
+        PriceGuide::Data data;
+        bool valid;
         if (pg->m_scrapedHtml)
-            pg->m_valid = pg->parseHtml(*j->data(), pg->m_data);
+            valid = pg->parseHtml(*j->data(), data);
         else
-            pg->m_valid = pg->parse(*j->data(), pg->m_data);
+            valid = pg->parse(*j->data(), data);
 
-        if (pg->m_valid) {
-            pg->m_fetched = QDateTime::currentDateTime();
-            pg->saveToDisk(pg->m_fetched, pg->m_data);
+        if (valid) {
+            pg->setLastUpdated(QDateTime::currentDateTime());
+            pg->m_data = data;
+            pg->saveToDisk(pg->m_fetched, data);
         }
-        pg->setUpdateStatus(pg->m_valid ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+        pg->setIsValid(valid);
+        pg->setUpdateStatus(valid ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
     } else {
         if (!j->isAborted())
             qWarning() << "PriceGuide download failed:" << j->errorString() << "(" << j->responseCode() << ")";
@@ -1259,10 +1263,9 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
 
     if (highPriority) {
         if (!pic->isValid()) {
-            pic->m_valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
-            emit pic->isValidChanged(pic->m_valid);
-            pic->m_update_status = UpdateStatus::Ok;
-            emit pic->updateStatusChanged(pic->m_update_status);
+            bool valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
+            pic->setIsValid(valid);
+            pic->setUpdateStatus(UpdateStatus::Ok);
 
             m_pic_cache.setObjectCost(key, pic->cost());
         }

@@ -9,30 +9,30 @@ bool hasMacThemes()
         return false;
 }
 
-Config::UiTheme currentMacTheme()
+Config::UITheme currentMacTheme()
 {
-    Config::UiTheme theme = Config::UiTheme::SystemDefault;
+    Config::UITheme theme = Config::UITheme::SystemDefault;
 
     if (__builtin_available(macOS 10.14, *)) {
         auto appearance = [NSApp.effectiveAppearance
                 bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
         if ([appearance isEqualToString:NSAppearanceNameDarkAqua])
-            theme = Config::UiTheme::Dark;
+            theme = Config::UITheme::Dark;
         else if ([appearance isEqualToString:NSAppearanceNameAqua])
-            theme = Config::UiTheme::Light;
+            theme = Config::UITheme::Light;
     }
     return theme;
 }
 
-void setCurrentMacTheme(Config::UiTheme theme)
+void setCurrentMacTheme(Config::UITheme theme)
 {
     if (__builtin_available(macOS 10.14, *)) {
        NSAppearance *appearance = nil;
        switch (theme) {
-       case Config::UiTheme::Dark:
+       case Config::UITheme::Dark:
            appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
            break;
-       case Config::UiTheme::Light:
+       case Config::UITheme::Light:
            appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
            break;
        default:

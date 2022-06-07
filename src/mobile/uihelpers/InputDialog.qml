@@ -7,6 +7,8 @@ Dialog {
     modal: true
     anchors.centerIn: Overlay.overlay
     standardButtons: DialogButtonBox.Cancel | DialogButtonBox.Ok
+    width: Math.min(Math.max(fm.averageCharacterWidth * 50, implicitWidth), Overlay.overlay ? Overlay.overlay.width : 800)
+
 
     property string mode: "string"
     property alias text: label.text
@@ -25,11 +27,19 @@ Dialog {
 
     onDoubleValueChanged: dblSpin.value = doubleValue * dblSpin.factor
 
+    FontMetrics {
+        id: fm
+        font: root.font
+    }
+
     ColumnLayout {
+        anchors.fill: parent
+
         Label {
             id: label
             horizontalAlignment: Text.AlignLeft
             Layout.fillWidth: true
+            wrapMode: Text.Wrap
         }
         TextField {
             id: text

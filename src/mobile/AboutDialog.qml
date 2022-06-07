@@ -9,19 +9,20 @@ BrickStoreDialog {
 
     FontMetrics { id: fm }
 
-    ScrollView {
-        id: sv
+    onOpened: { sl.flashScrollIndicators() }
+
+    ScrollableLayout {
+        id: sl
         anchors.fill: parent
-        contentWidth: availableWidth
 
         ColumnLayout {
-            width: sv.contentWidth
+            width: sl.width
 
             RowLayout {
                 spacing: fm.averageCharacterWidth * 2
                 Image {
                     source: "qrc:/assets/generated-app-icons/brickstore"
-                    sourceSize.height: fm.height * 7
+                    sourceSize.height: fm.height * 5
                     //sourceSize.width: sourceSize.height
                     horizontalAlignment: Image.AlignRight
                 }

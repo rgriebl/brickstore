@@ -99,13 +99,13 @@ find_package(Qt6
     OPTIONAL_COMPONENTS ToolsTools
 )
 
+set(MIN_QT_VERSION 6.2.0)
+
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
+    set(MIN_QT_VERSION 6.3.0)
     add_compile_definitions(BS_MOBILE)
-    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2)
-    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.3.0")
-        find_package(Qt6 REQUIRED QuickDialogs2Utils)
-    endif()
+    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -117,6 +117,11 @@ else()
     find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D)
 
 endif()
+
+if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
+    message(FATAL_ERROR "Qt ${MIN_QT_VERSION} or newer is required for building this variant")
+endif()
+
 
 if (MODELTEST)
     find_package(Qt6 REQUIRED TestLib)

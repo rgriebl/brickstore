@@ -986,6 +986,8 @@ QHash<int, QByteArray> BrickLink::InternalAppearsInModel::roleNames() const
         { IdRole, "id" },
         { NameRole, "name" },
         { QuantityRole, "quantity" },
+        { ItemPointerRole, "item" },
+        { ColorPointerRole, "color" },
     };
     return roles;
 }

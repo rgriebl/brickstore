@@ -38,6 +38,8 @@ class Config : public QSettings
     Q_PROPERTY(QString brickLinkPassword READ brickLinkPassword WRITE setBrickLinkPassword NOTIFY brickLinkCredentialsChanged)
     Q_PROPERTY(Config::UITheme uiTheme READ uiTheme WRITE setUITheme NOTIFY uiThemeChanged)
     Q_PROPERTY(Config::UISize mobileUISize READ mobileUISize WRITE setMobileUISize NOTIFY mobileUISizeChanged)
+    Q_PROPERTY(int itemImageSizePercent READ itemImageSizePercent WRITE setItemImageSizePercent NOTIFY itemImageSizePercentChanged)
+    Q_PROPERTY(int fontSizePercent READ fontSizePercent WRITE setFontSizePercent NOTIFY fontSizePercentChanged)
 
 private:
     Config();

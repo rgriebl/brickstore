@@ -18,7 +18,10 @@ Dialog {
     anchors.centerIn: Overlay.overlay
 
     ColumnLayout {
-        Label { id: progressLabel }
+        Label {
+            id: progressLabel
+            wrapMode: Text.Wrap
+        }
         ProgressBar {
             id: progress
             indeterminate: !to && !value

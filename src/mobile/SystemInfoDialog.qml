@@ -39,13 +39,14 @@ BrickStoreDialog {
         BS.Clipboard.setText(root.sysinfoMarkdown);
     }
 
-    ScrollView {
-        id: sv
+    onOpened: { sl.flashScrollIndicators() }
+
+    ScrollableLayout {
+        id: sl
         anchors.fill: parent
-        contentWidth: availableWidth
 
         ColumnLayout {
-            width: sv.contentWidth
+            width: sl.width
 
             Label {
                 text: root.sysinfoMarkdown

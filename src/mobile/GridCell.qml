@@ -103,8 +103,17 @@ Control {
     }
 
     // we cannot handle taps directly in the TableView thanks to QTBUG-101386
-    TapHandler {
-        onDoubleTapped: parent.TableView.view.showMenu(parent.row, parent.column)
-        onTapped: parent.TableView.view.toggleSelection(parent.row, parent.column)
+    MouseArea {
+        anchors.fill: parent
+        onClicked: parent.TableView.view.toggleSelection(parent.row, parent.column)
+        onDoubleClicked: {
+            parent.TableView.view.toggleSelection(parent.row, parent.column)
+            parent.TableView.view.showMenu(parent.row, parent.column)
+        }
     }
+//  TapHandler {
+//        grabPermissions: PointerHandler.TakeOverForbidden
+//        onDoubleTapped: parent.TableView.view.showMenu(parent.row, parent.column)
+//        onTapped:
+//    }
 }

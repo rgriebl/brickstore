@@ -915,7 +915,9 @@ AppearsInModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QV
         }
     }
 
-    return new AppearsInModel(list, nullptr);
+    auto *aim = new AppearsInModel(list, nullptr);
+    aim->sort(0, Qt::DescendingOrder);
+    return aim;
 }
 
 void QmlBrickLink::cacheStat() const
