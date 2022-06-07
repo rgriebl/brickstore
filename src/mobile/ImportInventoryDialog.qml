@@ -130,6 +130,9 @@ Page {
         }
 
         Pane {
+            id: itemListPage
+            property bool isPageVisible: SwipeView.isCurrentItem
+
             ColumnLayout {
                 anchors.fill: parent
 
@@ -158,9 +161,13 @@ Page {
 
                     property real scaleFactor: zoom.value / 100
 
+                    FontMetrics { id: fm; font: itemListPage.font }
+
+                    property int labelHeight: fm.height + 8
+
                     clip: true
                     cellWidth: width / 8 * scaleFactor
-                    cellHeight: cellWidth * 3 / 4
+                    cellHeight: cellWidth * 3 / 4 + labelHeight
                     cacheBuffer: cellHeight
                     ScrollIndicator.vertical: ScrollIndicator { }
 
@@ -171,20 +178,35 @@ Page {
 
                     property var noImage: BS.BrickLink.noImage(cellWidth, cellHeight)
 
-                    delegate: ItemDelegate {
+                    delegate: MouseArea {
+                        id: delegate
                         width: GridView.view.cellWidth
                         height: GridView.view.cellHeight
                         required property string id
                         required property string name
                         required property var item
-                        property BS.Picture pic: BS.BrickLink.picture(BS.BrickLink.item(item), BS.BrickLink.color(item.defaultColor))
+                        property BS.Picture pic: itemListPage.isPageVisible
+                                                 ? BS.BrickLink.picture(BS.BrickLink.item(delegate.item), BS.BrickLink.color(delegate.item.defaultColor))
+                                                 : null
 
                         BS.QImageItem {
                             anchors.fill: parent
+                            anchors.bottomMargin: itemList.labelHeight
                             image: parent.pic && parent.pic.isValid ? parent.pic.image() : itemList.noImage
                         }
+                        Label {
+                            x: 8
+                            width: parent.width - 2 * x
+                            anchors.bottom: parent.bottom
+                            fontSizeMode: Text.Fit
+                            minimumPixelSize: 5
+                            clip: true
+                            text: delegate.id
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                         onClicked: {
-                            let it = BS.BrickLink.item(item)
+                            let it = BS.BrickLink.item(delegate.item)
 
                             root.currentItem = it
                             root.hasAlternates = false
