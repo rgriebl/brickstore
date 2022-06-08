@@ -23,8 +23,8 @@ BrickStoreDialog {
     }
 
     function openPage(page) {
-        for (let i = 0; i < tabBar.contentItem.children.length; ++i) {
-            if (tabBar.contentItem.children[i].pageName === page) {
+        for (let i = 0; i < tabBar.count; ++i) {
+            if (tabBar.contentChildren[i].pageName === page) {
                 tabBar.setCurrentIndex(i)
                 break
             }

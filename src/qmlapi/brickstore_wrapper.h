@@ -243,6 +243,8 @@ public:
 
     Q_INVOKABLE LDraw::RenderController *createRenderController();
 
+    Q_INVOKABLE bool checkBrickLinkLogin();
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);

@@ -316,6 +316,12 @@ void Core::retrieveAuthenticated(TransferJob *job)
 
     if (!m_authenticated) {
         if (!m_loginJob) {
+            if (m_credentials.first.isEmpty() || m_credentials.second.isEmpty()) {
+                QMetaObject::invokeMethod(this, [job]() { job->abort(); });
+                qWarning() << "Aborting transfer due to missing credentials";
+                return;
+            }
+
             QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
             QUrlQuery q;
             q.addQueryItem("userid"_l1,          Utility::urlQueryEscape(m_credentials.first));

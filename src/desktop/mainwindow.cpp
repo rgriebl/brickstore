@@ -926,6 +926,7 @@ void MainWindow::createActions()
         { "document_import_bl_order", [this](auto) -> QCoro::Task<> {
               if (!co_await Application::inst()->checkBrickLinkLogin())
                   co_return;
+
               if (!m_importorder_dialog)
                   m_importorder_dialog = new ImportOrderDialog(this);
               m_importorder_dialog->show();

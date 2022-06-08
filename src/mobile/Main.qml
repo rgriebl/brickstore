@@ -300,14 +300,21 @@ ApplicationWindow {
                          homeStack.push("ImportInventoryDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },
                      "document_import_bl_order": () => {
+                         if (!BS.BrickStore.checkBrickLinkLogin())
+                             return
                          setActiveDocument(null)
                          homeStack.push("ImportOrderDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },
                      "document_import_bl_cart": () => {
+                         if (!BS.BrickStore.checkBrickLinkLogin())
+                             return
                          setActiveDocument(null)
                          homeStack.push("ImportCartDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },
                      "document_import_bl_wanted": () => {
+                         if (!BS.BrickStore.checkBrickLinkLogin())
+                             return
+
                          setActiveDocument(null)
                          homeStack.push("ImportWantedListDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
                      },

@@ -71,30 +71,25 @@ Page {
             ColumnLayout {
                 anchors.fill: parent
 
-                RowLayout {
-                    ButtonGroup {
-                        id: ittGroup
-                    }
+                TabBar {
+                    Layout.fillWidth: true
+                    id: ittTabs
+                    position: TabBar.Header
+
                     Repeater {
-                        id: ittRepeater
                         model: BS.ItemTypeModel {
                             filterWithoutInventory: true
                         }
-                        Button {
-                            Layout.fillWidth: true
-                            ButtonGroup.group: ittGroup
-                            checkable: true
+                        delegate: TabButton {
+                            property var itemTypeProp: itemType
                             text: name
-                            onClicked: {
-                                checked = true
-                                catList.model.filterItemType = itemType
-                                itemList.model.filterItemType = itemType
-                            }
                         }
                     }
-                    Component.onCompleted: {
-                        ittRepeater.itemAt(0).checked = true
+                    onCurrentItemChanged: {
+                        catList.model.filterItemType = currentItem.itemTypeProp
+                        itemList.model.filterItemType = currentItem.itemTypeProp
                     }
+                    currentIndex: count - 1
                 }
 
                 ListView {
@@ -197,6 +192,7 @@ Page {
                         Label {
                             x: 8
                             width: parent.width - 2 * x
+                            height: itemList.labelHeight
                             anchors.bottom: parent.bottom
                             fontSizeMode: Text.Fit
                             minimumPixelSize: 5

@@ -407,7 +407,6 @@ QVariant WantedLists::data(const QModelIndex &index, int role) const
     } else if (role == Qt::TextAlignmentRole) {
         return int(Qt::AlignVCenter) | Qt::AlignLeft;
     } else if (role == WantedListPointerRole) {
-        qWarning() << QVariant::fromValue(wantedList);
         return QVariant::fromValue(wantedList);
     } else if (role == WantedListSortRole) {
         switch (col) {

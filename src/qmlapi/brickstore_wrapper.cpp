@@ -300,6 +300,11 @@ LDraw::RenderController *QmlBrickStore::createRenderController()
     return new LDraw::RenderController();
 }
 
+bool QmlBrickStore::checkBrickLinkLogin()
+{
+    return QCoro::waitFor(Application::inst()->checkBrickLinkLogin());
+}
+
 
 
 QmlDocumentProxyModel::QmlDocumentProxyModel(QObject *parent)

@@ -112,13 +112,19 @@ Control {
         visible: root.single
         Button {
             flat: true
+            font.bold: true
             text: root.is3D ? "2D" : "3D"
             onClicked: root.is3D = !root.is3D
+
+            Component.onCompleted: {
+                contentItem.color = "black"
+            }
         }
         Item { Layout.fillWidth: true }
         Button {
-            icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
             flat: true
+            icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
+            icon.color: "black"
             onClicked: {
                 if (root.is3D)
                     root.renderController.resetCamera();
