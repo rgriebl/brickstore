@@ -311,7 +311,7 @@ jobs:
     - name: Build for Android
       if: (matrix.config.os == 'android')
       run: |
-        echo "Using NDK: $ANDROID_NDK_LATEST_HOME"
+        echo "Using NDK: $ANDROID_NDK_HOME"
         echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
         qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -319,7 +319,7 @@ jobs:
             -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
             -DANDROID_NATIVE_API_LEVEL=23 \
             -DANDROID_ABI=${{ matrix.config.android_abi }} \
-            -DANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME} \
+            -DANDROID_NDK_ROOT=${ANDROID_NDK_HOME} \
             -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
             ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target final-apk
