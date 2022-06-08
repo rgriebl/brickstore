@@ -240,22 +240,23 @@ if (APPLE)
     endif()
     if (IOS)
         set_target_properties(${PROJECT_NAME} PROPERTIES
-            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.ios.plist"
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.ios.plist"
             MACOSX_BUNDLE_GUI_IDENTIFIER "de.brickforge.brickstore"
             XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "de.brickforge.brickstore"
             XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
             XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
             XCODE_ATTRIBUTE_SKIP_INSTALL "No"
             XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+            QT_IOS_LAUNCH_SCREEN "${CMAKE_SOURCE_DIR}/macos/LaunchScreen.storyboard"
         )
-        set(APPICON_XCASSETS "${CMAKE_CURRENT_SOURCE_DIR}/assets/generated-app-icons/AppIcon.xcassets")
+        set(APPICON_XCASSETS "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/AppIcon.xcassets")
         target_sources(${PROJECT_NAME} PRIVATE ${APPICON_XCASSETS})
         set_source_files_properties(${APPICON_XCASSETS} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
         )
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
-            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.macos.plist"
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"
         )
         set(MACOS_RESOURCES
             assets/generated-app-icons/brickstore.icns

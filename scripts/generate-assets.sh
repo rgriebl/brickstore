@@ -59,10 +59,21 @@ fi
 # iOS icons
 gai_ios=$gai/AppIcon.xcassets/AppIcon.appiconset
 mkdir -p $gai_ios
-convert $b/brickstore.png -background white -alpha remove -alpha off -resize 167 $gai_ios/icon-83.5@2x~ipad.png
-convert $b/brickstore.png -background white -alpha remove -alpha off -resize 152 $gai_ios/icon@2x~ipad.png
-convert $b/brickstore.png -background white -alpha remove -alpha off -resize 120 $gai_ios/icon@2x.png
-convert $b/brickstore.png -background white -alpha remove -alpha off -resize 180 $gai_ios/icon@3x.png
+
+function ios_icon() {
+  s=$1
+  id=$2
+
+  convert -size ${s}x${s} canvas:white \
+        \( $b/brickstore.png -scale $((s*9/10)) \) -geometry +$((s*1/20))+$((s*1/20)) -composite \
+        -alpha remove -alpha off $gai_ios/icon${id}.png
+}
+
+ios_icon 167 "-83.5@2x~ipad"
+ios_icon 152 "@2x~ipad"
+ios_icon 120 "@2x"
+ios_icon 180 "@3x"
+ios_icon 1024 "-1024"
 
 echo "done"
 
