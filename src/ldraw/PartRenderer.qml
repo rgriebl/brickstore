@@ -68,12 +68,16 @@ Item {
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
             lightProbe: Texture { source: "qrc:/ldraw/lightbox.hdr" }
-            probeExposure: rs.lightProbeExposure
-            tonemapMode: SceneEnvironment.TonemapModeLinear
+            probeExposure: 0.9
             aoStrength: rs.aoStrength * 100
             aoDistance: rs.aoDistance * 100
             aoSoftness: rs.aoSoftness * 100
         }
+
+        DirectionalLight {
+           brightness: rs.additionalLight
+        }
+
         camera: rs.orthographicCamera ? ocamera : pcamera
 
         OrthographicCamera {
@@ -180,7 +184,7 @@ Item {
                         cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
                         depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
                         alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
-                        blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
+                        //blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
 
                         emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
 

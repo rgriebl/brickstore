@@ -32,6 +32,7 @@ RenderSettingsDialog::RenderSettingsDialog()
     connectSliderAndSpinBox(ui->lineWidthSlider,      ui->lineWidth,      "lineThickness", 10);
     connectSliderAndSpinBox(ui->fieldOfViewSlider,    ui->fieldOfView,    "fieldOfView", 1);
 
+    connectSliderAndSpinBox(ui->brightnessSlider, ui->brightness, "additionalLight");
     connectSliderAndSpinBox(ui->aoStrengthSlider, ui->aoStrength, "aoStrength");
     connectSliderAndSpinBox(ui->aoSoftnessSlider, ui->aoSoftness, "aoSoftness");
     connectSliderAndSpinBox(ui->aoDistanceSlider, ui->aoDistance, "aoDistance");

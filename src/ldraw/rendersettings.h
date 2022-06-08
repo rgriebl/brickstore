@@ -37,7 +37,7 @@ class RenderSettings : public QObject
     Q_PROPERTY(float aoStrength MEMBER m_aoStrength NOTIFY aoStrengthChanged)
     Q_PROPERTY(float aoDistance MEMBER m_aoDistance NOTIFY aoDistanceChanged)
     Q_PROPERTY(float aoSoftness MEMBER m_aoSoftness NOTIFY aoSoftnessChanged)
-    Q_PROPERTY(float lightProbeExposure MEMBER m_lightProbeExposure NOTIFY lightProbeExposureChanged)
+    Q_PROPERTY(float additionalLight MEMBER m_additionalLight NOTIFY additionalLightChanged)
 
     Q_PROPERTY(float plainMetalness MEMBER m_plainMetalness NOTIFY plainMetalnessChanged)
     Q_PROPERTY(float plainRoughness MEMBER m_plainRoughness NOTIFY plainRoughnessChanged)
@@ -72,7 +72,7 @@ signals:
     void aoStrengthChanged(float newAoStrength);
     void aoDistanceChanged(float newAoDistance);
     void aoSoftnessChanged(float newAoSoftness);
-    void lightProbeExposureChanged(float newLightProbeExposure);
+    void additionalLightChanged(float newAdditionalLight);
 
     void plainMetalnessChanged(float newPlainMetalness);
     void plainRoughnessChanged(float newPlainRoughness);
@@ -102,7 +102,7 @@ private:
     float m_aoStrength;
     float m_aoSoftness;
     float m_aoDistance;
-    float m_lightProbeExposure;
+    float m_additionalLight;
 
     float m_plainMetalness;
     float m_plainRoughness;

@@ -82,7 +82,11 @@ QVariantMap RenderSettings::propertyDefaultValues() const
         { u"aoStrength"_qs, 0.6 },
         { u"aoSoftness"_qs, 0.7 },
         { u"aoDistance"_qs, 0.9 },
-        { u"lightProbeExposure"_qs, 0.9 },
+#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
+        { u"additionalLight"_qs, 0.4},
+#else
+        { u"additionalLight"_qs, 0.0 },
+#endif
 
         { u"plainMetalness"_qs, 0 },
         { u"plainRoughness"_qs, 0.5 },
