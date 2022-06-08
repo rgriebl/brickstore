@@ -295,9 +295,9 @@ Document *QmlBrickStore::activeDocument() const
     return ActionManager::inst()->activeDocument();
 }
 
-LDraw::RenderController *QmlBrickStore::createRenderController()
+LDraw::RenderController *QmlBrickStore::createRenderController(QObject *parent)
 {
-    return new LDraw::RenderController();
+    return new LDraw::RenderController(parent);
 }
 
 bool QmlBrickStore::checkBrickLinkLogin()

@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
-
+import "qrc:/ldraw" as LDraw
 
 Control {
     id: root
@@ -14,7 +14,6 @@ Control {
     property bool is3D: false
     property BS.Picture picture
     property bool isUpdating: (picture && (picture.updateStatus === BS.BrickLink.UpdateStatus.Updating))
-    property var renderController
 
     onLotChanged: { updateInfo() }
 
@@ -31,19 +30,17 @@ Control {
             picture = BS.BrickLink.picture(lot.item, lot.color, true)
             if (picture)
                 picture.addRef()
-            renderController.setPartAndColor(lot.item, lot.color)
+
+            Qt.callLater(function() {
+                let has3D = info3D.renderController.setPartAndColor(lot.item, lot.color)
+                root.is3D = has3D
+            })
         } else {
-            renderController.setPartAndColor(BS.BrickLink.noItem, BS.BrickLink.noColor)
+            info3D.renderController.setPartAndColor(BS.BrickLink.noItem, BS.BrickLink.noColor)
 
             let stat = document.selectionStatistics()
             infoText.text = stat.asHtmlTable()
         }
-    }
-
-    Component.onCompleted: {
-        renderController = BS.BrickStore.createRenderController()
-        renderController.parent = root
-        info3D.setSource("qrc:/ldraw/PartRenderer.qml", { "renderController": renderController })
     }
 
     Component.onDestruction: {
@@ -63,7 +60,6 @@ Control {
             verticalAlignment: Text.AlignVCenter
         }
         StackLayout {
-            visible: root.single
             clip: true
 
             currentIndex: root.is3D ? 1 : 0
@@ -97,9 +93,10 @@ Control {
                     source: infoImageUpdating
                 }
             }
-            Loader {
+
+            LDraw.PartRenderer {
                 id: info3D
-                asynchronous: true
+                renderController: BS.BrickStore.createRenderController(this)
             }
         }
     }
@@ -113,8 +110,13 @@ Control {
         Button {
             flat: true
             font.bold: true
+            leftPadding: 8
+            bottomPadding: 8
+            topPadding: 16
+            rightPadding: 16
             text: root.is3D ? "2D" : "3D"
             onClicked: root.is3D = !root.is3D
+            background: null
 
             Component.onCompleted: {
                 contentItem.color = "black"
@@ -125,9 +127,14 @@ Control {
             flat: true
             icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
             icon.color: "black"
+            background: null
+            rightPadding: 8
+            bottomPadding: 8
+            topPadding: 16
+            leftPadding: 16
             onClicked: {
                 if (root.is3D)
-                    root.renderController.resetCamera();
+                    info3D.renderController.resetCamera();
                 else if (root.picture)
                     root.picture.update(true);
             }

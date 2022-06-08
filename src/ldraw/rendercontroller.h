@@ -18,6 +18,7 @@
 #include <QtGui/QQuaternion>
 
 #include "ldraw/rendergeometry.h"
+#include "qcoro/qcoro.h"
 #include "bricklink/color.h"
 #include "bricklink/item.h"
 #include "bricklink/qmlapi.h"
@@ -57,7 +58,7 @@ public:
 
     Part *part() const;
     const BrickLink::Color *color() const;
-    Q_INVOKABLE void setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
+    Q_INVOKABLE bool setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
     void setPartAndColor(Part *part, const BrickLink::Color *color);
     void setPartAndColor(Part *part, int ldrawColorId);
 
@@ -88,11 +89,12 @@ signals:
     void clearColorChanged(const QColor &clearColor);
 
 private:
-    void updateGeometries();
-    void fillVertexBuffers(Part *part, const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
-                           bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
-                           QByteArray &lineBuffer);
-    QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color) const;
+    QCoro::Task<void> updateGeometries();
+    static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
+                                  const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
+                                  bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
+                                  QByteArray &lineBuffer);
+    static QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color);
 
     QVector<QmlRenderGeometry *> m_geos;
     QQuick3DGeometry *m_lineGeo = nullptr;

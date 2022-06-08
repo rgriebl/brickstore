@@ -241,7 +241,7 @@ public:
 
     Document *activeDocument() const;
 
-    Q_INVOKABLE LDraw::RenderController *createRenderController();
+    Q_INVOKABLE LDraw::RenderController *createRenderController(QObject *parent);
 
     Q_INVOKABLE bool checkBrickLinkLogin();
 

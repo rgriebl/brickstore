@@ -235,7 +235,7 @@ Item {
         }
         Timer {
             interval: 2000
-            running: hovered.hovered
+            running: hovered.hovered && !moveHandler.active && !pinchHandler.active && !arcballHandler.active
             onTriggered: rc.requestToolTip(hovered.point.scenePosition)
         }
 

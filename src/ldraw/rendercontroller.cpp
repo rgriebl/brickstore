@@ -13,6 +13,7 @@
 */
 #include <cmath>
 
+#include <QtConcurrent>
 #include <QRandomGenerator>
 #include <QStringBuilder>
 #include <QFile>
@@ -22,6 +23,7 @@
 #include <QQuick3DTextureData>
 #include <QPainter>
 
+#include "qcoro/core/qcorofuture.h"
 #include "bricklink/core.h"
 #include "library.h"
 #include "part.h"
@@ -127,13 +129,15 @@ QQuick3DInstancing *RenderController::lines()
     return m_lines;
 }
 
-void RenderController::setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
+bool RenderController::setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
 {
     const BrickLink::Item *i = item.wrappedObject();
     const BrickLink::Color *c = color.wrappedObject();
 
+    //TODO: this is expensive and should also be moved to a background thread
     Part *part = i ? LDraw::library()->partFromId(i->id()) : nullptr;
     setPartAndColor(part, c);
+    return (part);
 }
 
 void RenderController::setPartAndColor(Part *part, int ldrawColorId)
@@ -158,113 +162,127 @@ void RenderController::setPartAndColor(Part *part, const BrickLink::Color *color
     m_color = color;
 
     updateGeometries();
-    emit partOrColorChanged();
 }
 
-void RenderController::updateGeometries()
+QCoro::Task<void> RenderController::updateGeometries()
 {
+    if (!m_part) {
+        qDeleteAll(m_geos);
+        m_geos.clear();
+        m_lines->clear();
+
+        emit surfacesChanged();
+        emit partOrColorChanged();
+        co_return;
+    }
+
+    // in
+    Part *part = m_part;
+    const BrickLink::Color *color = m_color;
+
+    // out
+    float radius = 0;
+    QVector3D center;
+    QVector<QmlRenderGeometry *> geos;
+    QByteArray lineBuffer;
+
+    co_await QtConcurrent::run([part, color, &lineBuffer, &geos, &radius, &center]() {
+        QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
+        RenderController::fillVertexBuffers(part, color, color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
+
+        for (auto it = surfaceBuffers.cbegin(); it != surfaceBuffers.cend(); ++it) {
+            const QByteArray &data = it.value();
+            if (data.isEmpty())
+                continue;
+
+            const BrickLink::Color *color = it.key();
+
+            const int stride = (3 + 3 + (color->hasParticles() ? 2 : 0)) * sizeof(float);
+
+            auto geo = new QmlRenderGeometry(color);
+
+            // calculate bounding box
+            static constexpr auto fmin = std::numeric_limits<float>::min();
+            static constexpr auto fmax = std::numeric_limits<float>::max();
+
+            QVector3D vmin = QVector3D(fmax, fmax, fmax);
+            QVector3D vmax = QVector3D(fmin, fmin, fmin);
+
+            for (int i = 0; i < data.size(); i += stride) {
+                auto v = reinterpret_cast<const float *>(it->constData() + i);
+                vmin = QVector3D(std::min(vmin.x(), v[0]), std::min(vmin.y(), v[1]), std::min(vmin.z(), v[2]));
+                vmax = QVector3D(std::max(vmax.x(), v[0]), std::max(vmax.y(), v[1]), std::max(vmax.z(), v[2]));
+            }
+
+            // calculate bounding sphere
+            QVector3D center = (vmin + vmax) / 2;
+            float radius = 0;
+
+            for (int i = 0; i < data.size(); i += stride) {
+                auto v = reinterpret_cast<const float *>(it->constData() + i);
+                radius = std::max(radius, (center - QVector3D { v[0], v[1], v[2] }).lengthSquared());
+            }
+            radius = std::sqrt(radius);
+
+            geo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
+            geo->setStride(stride);
+            geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
+            geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+            if (color->hasParticles()) {
+                geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+
+                QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
+                if (!texData) {
+                    texData = generateMaterialTextureData(color);
+                    if (texData) {
+                        QQmlEngine::setObjectOwnership(texData, QQmlEngine::CppOwnership);
+                        s_materialTextureDatas.insert(color, texData);
+                    }
+                }
+                geo->setTextureData(texData);
+            }
+            geo->setBounds(vmin, vmax);
+            geo->setCenter(center);
+            geo->setRadius(radius);
+            geo->setVertexData(data);
+
+            geos.append(geo);
+        }
+
+        for (auto *geo : qAsConst(geos)) {
+            // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
+            const auto geoCenter = geo->center();
+            const auto geoRadius = geo->radius();
+
+            if (qFuzzyIsNull(radius)) { // first one
+                center = geoCenter;
+                radius = geoRadius;
+            } else {
+                QVector3D d = geoCenter - center;
+                float l = d.length();
+
+                if ((l + radius) < geoRadius) { // the old one is inside the new one
+                    center = geoCenter;
+                    radius = geoRadius;
+                } else if ((l + geoRadius) > radius) { // the new one is NOT inside the old one -> we need to merge
+                    float nr = (radius + l + geoRadius) / 2;
+                    center = center + (geoCenter - center).normalized() * (nr - radius);
+                    radius = nr;
+                }
+            }
+        }
+    });
+
     qDeleteAll(m_geos);
     m_geos.clear();
     m_lines->clear();
 
-
-    if (!m_part) {
-        emit surfacesChanged();
-        return;
-    }
-
-    QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
-    QByteArray lineBuffer;
-    fillVertexBuffers(m_part, m_color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
-
-    for (auto it = surfaceBuffers.cbegin(); it != surfaceBuffers.cend(); ++it) {
-        const QByteArray &data = it.value();
-        if (data.isEmpty())
-            continue;
-
-        const BrickLink::Color *color = it.key();
-
-        const int stride = (3 + 3 + (color->hasParticles() ? 2 : 0)) * sizeof(float);
-
-        auto geo = new QmlRenderGeometry(color);
-
-        // calculate bounding box
-        static constexpr auto fmin = std::numeric_limits<float>::min();
-        static constexpr auto fmax = std::numeric_limits<float>::max();
-
-        QVector3D vmin = QVector3D(fmax, fmax, fmax);
-        QVector3D vmax = QVector3D(fmin, fmin, fmin);
-
-        for (int i = 0; i < data.size(); i += stride) {
-            auto v = reinterpret_cast<const float *>(it->constData() + i);
-            vmin = QVector3D(std::min(vmin.x(), v[0]), std::min(vmin.y(), v[1]), std::min(vmin.z(), v[2]));
-            vmax = QVector3D(std::max(vmax.x(), v[0]), std::max(vmax.y(), v[1]), std::max(vmax.z(), v[2]));
-        }
-
-        // calculate bounding sphere
-        QVector3D center = (vmin + vmax) / 2;
-        float radius = 0;
-
-        for (int i = 0; i < data.size(); i += stride) {
-            auto v = reinterpret_cast<const float *>(it->constData() + i);
-            radius = std::max(radius, (center - QVector3D { v[0], v[1], v[2] }).lengthSquared());
-        }
-        radius = std::sqrt(radius);
-
-        geo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
-        geo->setStride(stride);
-        geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
-        geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-        if (color->hasParticles()) {
-            geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-
-            QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
-            if (!texData) {
-                texData = generateMaterialTextureData(color);
-                if (texData) {
-                    QQmlEngine::setObjectOwnership(texData, QQmlEngine::CppOwnership);
-                    s_materialTextureDatas.insert(color, texData);
-                }
-            }
-            geo->setTextureData(texData);
-        }
-        geo->setBounds(vmin, vmax);
-        geo->setCenter(center);
-        geo->setRadius(radius);
-        geo->setVertexData(data);
-
-        m_geos.append(geo);
-    }
-
-    m_lines->setBuffer(lineBuffer);
+    m_geos = geos;
     emit surfacesChanged();
 
-    QVector3D center;
-    float radius = 0;
-
-    for (auto *geo : qAsConst(m_geos)) {
-        // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
-        const auto geoCenter = geo->center();
-        const auto geoRadius = geo->radius();
-
-        if (qFuzzyIsNull(radius)) { // first one
-            center = geoCenter;
-            radius = geoRadius;
-        } else {
-            QVector3D d = geoCenter - center;
-            float l = d.length();
-
-            if ((l + radius) < geoRadius) { // the old one is inside the new one
-                center = geoCenter;
-                radius = geoRadius;
-            } else if ((l + geoRadius) > radius) { // the new one is NOT inside the old one -> we need to merge
-                float nr = (radius + l + geoRadius) / 2;
-                center = center + (geoCenter - center).normalized() * (nr - radius);
-                radius = nr;
-            }
-        }
-    }
+    m_lines->setBuffer(lineBuffer);
     m_lines->update();
+
 
     if (m_center != center) {
         m_center = center;
@@ -274,9 +292,11 @@ void RenderController::updateGeometries()
         m_radius = radius;
         emit radiusChanged();
     }
+    emit partOrColorChanged();
 }
 
-void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
+void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
+                                         const BrickLink::Color *baseColor,const QMatrix4x4 &matrix,
                                          bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
                                          QByteArray &lineBuffer)
 {
@@ -294,8 +314,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *bas
         memcpy(ptr, fs.begin(), size);
     };
 
-    auto mapColor = [this, &baseColor](int colorId) -> const BrickLink::Color * {
-        auto c = (colorId == 16) ? (baseColor ? baseColor : m_color)
+    auto mapColor = [&baseColor, &modelColor](int colorId) -> const BrickLink::Color * {
+        auto c = (colorId == 16) ? (baseColor ? baseColor : modelColor)
                                  : BrickLink::core()->colorFromLDrawId(colorId);
         if (!c && colorId >= 256) {
             int newColorId = ((colorId - 256) & 0x0f);
@@ -310,12 +330,12 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *bas
         return c;
     };
 
-    auto mapEdgeQColor = [this, &baseColor](int colorId) -> QColor {
+    auto mapEdgeQColor = [&baseColor, &modelColor](int colorId) -> QColor {
         if (colorId == 24) {
             if (baseColor)
                 return baseColor->ldrawEdgeColor();
-            else if (m_color)
-                return m_color->ldrawEdgeColor();
+            else if (modelColor)
+                return modelColor->ldrawEdgeColor();
         } else if (auto *c = BrickLink::core()->colorFromLDrawId(colorId)) {
             return c->ldrawColor();
         }
@@ -450,7 +470,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *bas
             const auto pe = static_cast<const PartElement *>(e);
             bool matrixReversed = (pe->matrix().determinant() < 0);
 
-            fillVertexBuffers(pe->part(), mapColor(pe->color()), matrix * pe->matrix(),
+            fillVertexBuffers(pe->part(), modelColor, mapColor(pe->color()), matrix * pe->matrix(),
                               inverted ^ invertNext ^ matrixReversed, surfaceBuffers, lineBuffer);
             break;
         }
@@ -463,7 +483,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *bas
     }
 }
 
-QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color) const
+QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color)
 {
     if (color && color->hasParticles()) {
         QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
