@@ -81,15 +81,17 @@ signals:
     void databaseReset();
 
 private:
-    Database(QObject *parent = nullptr);
+    Database(const QString &updateUrl, QObject *parent = nullptr);
     void setUpdateStatus(UpdateStatus updateStatus);
 
     void clear();
 
+    QString m_updateUrl;
     bool m_valid = false;
     BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
     int m_updateInterval = 0;
     QDateTime m_lastUpdated;
+    QString m_etag;
     Transfer *m_transfer;
     TransferJob *m_job = nullptr;
 

@@ -42,6 +42,8 @@ public:
     QString applicationUrl() const;
     QString gitHubUrl() const;
     QString gitHubPagesUrl() const;
+    QString databaseUrl() const;
+    QString ldrawUrl() const;
 
     void setUILoggingHandler(QtMessageHandler callback);
 

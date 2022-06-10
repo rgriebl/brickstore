@@ -40,17 +40,22 @@ TransferJob *TransferJob::get(const QUrl &url, QIODevice *file, uint retries)
 {
     Q_ASSERT(retries < 31);
 
-    return create(HttpGet, url, QDateTime(), file, false, retries);
+    return create(HttpGet, url, { }, { }, file, false, retries);
 }
 
 TransferJob *TransferJob::getIfNewer(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
-    return create(HttpGet, url, ifnewer, file, false);
+    return create(HttpGet, url, ifnewer, { }, file, false);
+}
+
+TransferJob *TransferJob::getIfDifferent(const QUrl &url, const QString &etag, QIODevice *file)
+{
+    return create(HttpGet, url, { }, etag, file, false);
 }
 
 TransferJob *TransferJob::post(const QUrl &url, QIODevice *file, bool noRedirects)
 {
-    return create(HttpPost, url, QDateTime(), file, noRedirects);
+    return create(HttpPost, url, { }, { }, file, noRedirects);
 }
 
 QString TransferJob::errorString() const
@@ -96,7 +101,7 @@ bool TransferJob::abortInternal()
 }
 
 TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
-                                 QIODevice *file, bool noRedirects, uint retries)
+                                 const QString &etag, QIODevice *file, bool noRedirects, uint retries)
 {
     if (url.isEmpty())
         return nullptr;
@@ -107,6 +112,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     if (j->m_url.scheme().isEmpty())
         j->m_url.setScheme("http"_l1);
     j->m_only_if_newer = ifnewer.toUTC();
+    j->m_only_if_different = etag;
     j->m_data = file ? nullptr : new QByteArray();
     j->m_file = file ? file : nullptr;
     j->m_http_method = method;
@@ -306,7 +312,7 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
+//        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
@@ -324,6 +330,8 @@ void TransferRetriever::schedule()
         if (isget) {
             if (j->m_only_if_newer.isValid())
                 req.setHeader(QNetworkRequest::IfModifiedSinceHeader, j->m_only_if_newer);
+            if (!j->m_only_if_different.isEmpty())
+                req.setHeader(QNetworkRequest::IfNoneMatchHeader, j->m_only_if_different);
             j->m_reply = m_nam->get(req);
         }
         else {
@@ -399,11 +407,10 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
 
         switch (j->m_respcode) {
         case 304:
-            if (j->m_only_if_newer.isValid()) {
+            if (j->m_only_if_newer.isValid() || !j->m_only_if_different.isEmpty()) {
                 j->m_was_not_modified = true;
                 j->setStatus(TransferJob::Completed);
-            }
-            else {
+            } else {
                 j->setStatus(TransferJob::Failed);
             }
             break;
@@ -416,6 +423,9 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             break;
 
         case 200: {
+            auto lastetag = j->m_reply->header(QNetworkRequest::ETagHeader);
+            if (lastetag.isValid())
+                j->m_last_etag = lastetag.toString();
             auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
             if (lastmod.isValid())
                 j->m_last_modified = lastmod.toDateTime();

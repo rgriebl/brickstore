@@ -847,7 +847,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         checkLDrawDir();
     });
     connect(w_ldraw_update, &QPushButton::clicked,
-            this, []() { LDraw::library()->startUpdate(); });
+            this, []() { LDraw::library()->startUpdate(true /*force*/); });
     QSizePolicy p = w_ldraw_progress->sizePolicy();
     p.setRetainSizeWhenHidden(true);
     w_ldraw_progress->setSizePolicy(p);

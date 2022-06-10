@@ -15,7 +15,7 @@
 
 #include <QObject>
 #include <QHash>
-#include <QDate>
+#include <QDateTime>
 #include <QString>
 #include <QByteArray>
 #include <QLoggingCategory>
@@ -47,7 +47,7 @@ class Library : public QObject
     Q_OBJECT
     Q_PROPERTY(bool valid READ isValid NOTIFY validChanged)
     Q_PROPERTY(LDraw::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
-    Q_PROPERTY(QDate lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
 
 public:
     ~Library() override;
@@ -56,7 +56,7 @@ public:
     QCoro::Task<bool> setPath(const QString &path, bool forceReload = false);
 
     bool isValid() const               { return m_valid; }
-    QDate lastUpdated() const          { return m_lastUpdated; }
+    QDateTime lastUpdated() const      { return m_lastUpdated; }
     UpdateStatus updateStatus() const  { return m_updateStatus; }
 
     bool startUpdate();
@@ -74,17 +74,19 @@ signals:
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
     void updateStatusChanged(LDraw::UpdateStatus updateStatus);
-    void lastUpdatedChanged(const QDate &lastUpdated);
+    void lastUpdatedChanged(const QDateTime &lastUpdated);
     void validChanged(bool valid);
     void libraryAboutToBeReset();
     void libraryReset();
 
 private:
-    Library(QObject *parent = nullptr);
+    Library(const QString &updateUrl, QObject *parent = nullptr);
 
-    static Library *inst();
+    static inline Library *inst() { return s_inst; }
+    static Library *create(const QString &updateUrl);
     static Library *s_inst;
     friend Library *library();
+    friend Library *create(const QString &);
 
     Part *findPart(const QString &filename, const QString &parentdir = { });
     QByteArray readLDrawFile(const QString &filename);
@@ -93,10 +95,12 @@ private:
 
     void clear();
 
+    QString m_updateUrl;
     bool m_valid = false;
     UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     int m_updateInterval = 0;
-    QDate m_lastUpdated;
+    QDateTime m_lastUpdated;
+    QString m_etag;
     Transfer *m_transfer;
     TransferJob *m_job = nullptr;
 
@@ -111,5 +115,6 @@ private:
 };
 
 inline Library *library() { return Library::inst(); }
+inline Library *create(const QString &updateUrl) { return Library::create(updateUrl); }
 
 } // namespace LDraw

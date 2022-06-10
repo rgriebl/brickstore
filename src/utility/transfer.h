@@ -32,6 +32,7 @@ public:
 
     static TransferJob *get(const QUrl &url, QIODevice *file = nullptr, uint retries = 0);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
+    static TransferJob *getIfDifferent(const QUrl &url, const QString &etag, QIODevice *file = nullptr);
     static TransferJob *post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
 
     QUrl url() const                 { return m_url; }
@@ -42,7 +43,8 @@ public:
     QIODevice *file() const          { return m_file; }
     QByteArray *data() const         { return m_data; }
     QDateTime lastModified() const   { return m_last_modified; }
-    bool wasNotModifiedSince() const { return m_was_not_modified; }
+    QString lastETag() const         { return m_last_etag; }
+    bool wasNotModified() const      { return m_was_not_modified; }
 
     bool isActive() const            { return m_status == Active; }
 
@@ -74,7 +76,7 @@ private:
         HttpPost = 1
     };
 
-    static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
+    static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, const QString &etag,
                                QIODevice *file, bool noRedirects, uint retries = 0);
 
     void setStatus(Status st)  { m_status = st; }
@@ -90,6 +92,8 @@ private:
     QByteArray * m_data = nullptr;
     QIODevice *  m_file = nullptr;
     QString      m_error_string;
+    QString      m_only_if_different;
+    QString      m_last_etag;
     QDateTime    m_only_if_newer;
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;

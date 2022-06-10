@@ -159,6 +159,8 @@ void Application::init()
     if (!initBrickLink(&errString))
         m_startupErrors << tr("Could not initialize the BrickLink kernel:") % u' ' % errString;
 
+    LDraw::create(ldrawUrl());
+
     connect(BrickLink::core(), &BrickLink::Core::authenticationFailed,
             this, [](const QString &userName, const QString &error) {
         UIHelpers::warning(tr("Failed to authenticate with BrickLink as user %1")
@@ -365,6 +367,16 @@ QString Application::gitHubPagesUrl() const
     const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split('/'_l1);
     Q_ASSERT(sections.count() == 3);
     return sections[1] % ".github.io/"_l1 % sections[2];
+}
+
+QString Application::databaseUrl() const
+{
+    return QLatin1String(BRICKSTORE_DATABASE_URL);
+}
+
+QString Application::ldrawUrl() const
+{
+    return QLatin1String(BRICKSTORE_DATABASE_URL);
 }
 
 void Application::checkRestart()
@@ -716,7 +728,7 @@ void Application::setIconTheme(Theme theme)
 
 bool Application::initBrickLink(QString *errString)
 {
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), errString);
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), databaseUrl(), errString);
     if (bl) {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,

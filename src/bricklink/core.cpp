@@ -341,10 +341,10 @@ void Core::retrieveAuthenticated(TransferJob *job)
 
 Core *Core::s_inst = nullptr;
 
-Core *Core::create(const QString &datadir, QString *errstring)
+Core *Core::create(const QString &dataDir, const QString &updateUrl, QString *errorString)
 {
     if (!s_inst) {
-        QString test = datadir;
+        QString test = dataDir;
 
         if (!test.isEmpty()) {
             QFileInfo fi(test);
@@ -358,22 +358,22 @@ Core *Core::create(const QString &datadir, QString *errstring)
         }
 
         if (test.isEmpty()) {
-            if (errstring)
-                *errstring = tr("Data directory \'%1\' is not both read- and writable.").arg(datadir);
+            if (errorString)
+                *errorString = tr("Data directory \'%1\' is not both read- and writable.").arg(dataDir);
         } else {
-            s_inst = new Core(datadir);
+            s_inst = new Core(dataDir, updateUrl);
         }
     }
     return s_inst;
 }
 
-Core::Core(const QString &datadir)
+Core::Core(const QString &datadir, const QString &updateUrl)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme("image-missing-large"_l1))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(this))
 {
-    m_database = new Database(this);
+    m_database = new Database(updateUrl, this);
 #if !defined(BS_BACKEND)
     m_store = new Store(this);
     m_orders = new Orders(this);

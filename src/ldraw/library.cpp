@@ -20,11 +20,9 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QStringBuilder>
-#include <QDateTime>
 #include <QDebug>
 #include <QStringBuilder>
 #include <QtConcurrent>
-//#include <QElapsedTimer>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -50,8 +48,9 @@ namespace LDraw {
 
 Library *Library::s_inst = nullptr;
 
-Library::Library(QObject *parent)
+Library::Library(const QString &updateUrl, QObject *parent)
     : QObject(parent)
+    , m_updateUrl(updateUrl)
     , m_transfer(new Transfer(this))
 {
     m_cache.setMaxCost(50 * 1024 * 1024); // 50MB
@@ -65,20 +64,6 @@ Library::Library(QObject *parent)
         if (done || total) {
             emitUpdateStartedIfNecessary();
             emit updateProgress(done, total);
-
-//            // useful to debug the weird HTTP/2 slow downs
-//            static QElapsedTimer m_dlTimer;
-
-//            if (total) {
-//                if (!m_dlTimer.isValid())
-//                    m_dlTimer.restart();
-//                double sec = double(m_dlTimer.elapsed()) / 1000.;
-//                double mb = double(done) / (1024. * 1024.);
-//                qWarning().noquote() << QLocale().toString(mb/sec, 'f', 3) << "MB/s  -- " << QLocale().toString(100 * double(done) / total, 'f', 1) << "%  -- " << sec << "s";
-
-//                if (done == total)
-//                    m_dlTimer.invalidate();
-//            }
         }
     });
     connect(m_transfer, &Transfer::finished,
@@ -95,12 +80,15 @@ Library::Library(QObject *parent)
         m_job = nullptr;
 
         try {
-            if (!j->isFailed() && j->wasNotModifiedSince()) {
+            if (!j->isFailed() && j->wasNotModified()) {
                 // no need to emit updateFinished() here, because we didn't emit updateStarted()
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
                 throw Exception(tr("download failed") % u": " % j->errorString());
             } else {
+                QString etag = j->lastETag();
+                QFile etagf(file->fileName() % u".etag");
+
                 if (m_zip)
                     m_zip->close();
                 if (!file->commit()) {
@@ -109,6 +97,12 @@ Library::Library(QObject *parent)
                 }
                 if (!co_await setPath(file->fileName(), true))
                     throw Exception(tr("reloading failed - please restart the application."));
+
+                m_etag = etag;
+                if (etagf.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                    etagf.write(m_etag.toUtf8());
+                    etagf.close();
+                }
 
                 emitUpdateStartedIfNecessary();
                 emit updateFinished(true, { });
@@ -125,10 +119,10 @@ Library::Library(QObject *parent)
 
 }
 
-Library *Library::inst()
+Library *Library::create(const QString &updateUrl)
 {
     if (!s_inst)
-        s_inst = new Library();
+        s_inst = new Library(updateUrl);
     return s_inst;
 }
 
@@ -220,6 +214,15 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
                     m_searchpath << sdir.canonicalPath();
             }
         }
+
+        m_etag.clear();
+        if (m_zip) {
+            QFile f(m_path % u".etag");
+            if (f.open(QIODevice::ReadOnly))
+                m_etag = QString::fromUtf8(f.readAll());
+        }
+
+        m_lastUpdated = m_zip ? QFileInfo(path).lastModified() : QDateTime { };
     }
 
     if (valid) {
@@ -257,20 +260,16 @@ bool Library::startUpdate(bool force)
 
     QScopedValueRollback locker(m_locked, true);
 
-    QString remotefile = "https://www.ldraw.org/library/updates/complete.zip"_l1;
+    QString remotefile = m_updateUrl % "complete.zip"_l1;
     QString localfile = m_path;
 
-    QDateTime dt;
-    if (!force && QFile::exists(localfile)) {
-        // m_lastUpdate, aka the date in LDConfig.ldr ist _just_ for the config itself,
-        // not for the whole library
-        dt = QFileInfo(localfile).lastModified();
-    }
+    if (!QFile::exists(localfile))
+        force = true;
 
     auto file = new QSaveFile(localfile);
 
     if (file->open(QIODevice::WriteOnly)) {
-        m_job = TransferJob::getIfNewer(QUrl(remotefile), dt, file);
+        m_job = TransferJob::getIfDifferent(QUrl(remotefile), force ? QString { } : m_etag, file);
         // m_job = TransferJob::get(QUrl(remotefile), file); // for testing only
         m_transfer->retrieve(m_job);
     }

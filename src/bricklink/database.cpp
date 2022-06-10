@@ -41,8 +41,9 @@
 namespace BrickLink {
 
 
-Database::Database(QObject *parent)
+Database::Database(const QString &updateUrl, QObject *parent)
     : QObject(parent)
+    , m_updateUrl(updateUrl)
     , m_transfer(new Transfer(this))
 {
     connect(m_transfer, &Transfer::started,
@@ -74,7 +75,7 @@ Database::Database(QObject *parent)
         m_job = nullptr;
 
         try {
-            if (!j->isFailed() && j->wasNotModifiedSince()) {
+            if (!j->isFailed() && j->wasNotModified()) {
                 emit updateFinished(true, tr("Already up-to-date."));
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
@@ -85,6 +86,13 @@ Database::Database(QObject *parent)
                 throw Exception(tr("saving failed") % u":\n" % file->errorString());
             } else {
                 read(file->fileName());
+
+                m_etag = j->lastETag();
+                QFile etagf(file->fileName() % u".etag");
+                if (etagf.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                    etagf.write(m_etag.toUtf8());
+                    etagf.close();
+                }
 
                 emit updateFinished(true, { });
                 setUpdateStatus(UpdateStatus::Ok);
@@ -136,7 +144,7 @@ void Database::clear()
 
 bool Database::startUpdate()
 {
-    return startUpdate(true);
+    return startUpdate(false);
 }
 
 bool Database::startUpdate(bool force)
@@ -145,12 +153,18 @@ bool Database::startUpdate(bool force)
         return false;
 
     QString dbName = defaultDatabaseName();
-    QString remotefile = BRICKSTORE_DATABASE_URL ""_l1 % dbName % u".lzma";
+    QString remotefile = m_updateUrl % dbName % u".lzma";
     QString localfile = core()->dataPath() % dbName;
 
-    QDateTime dt;
-    if (!force && QFile::exists(localfile))
-        dt = m_lastUpdated.addSecs(60 * 5);
+    if (!QFile::exists(localfile))
+        force = true;
+
+    if (m_etag.isEmpty()) {
+        QString dbfile = core()->dataPath() + Database::defaultDatabaseName();
+        QFile etagf(dbfile % u".etag");
+        if (etagf.open(QIODevice::ReadOnly))
+            m_etag = QString::fromUtf8(etagf.readAll());
+    }
 
     auto file = new QSaveFile(localfile);
     auto lzma = new LZMA::DecompressFilter(file);
@@ -160,7 +174,7 @@ bool Database::startUpdate(bool force)
     hhc->setProperty("bsFile", QVariant::fromValue(file));
 
     if (hhc->open(QIODevice::WriteOnly)) {
-        m_job = TransferJob::getIfNewer(QUrl(remotefile), dt, hhc);
+        m_job = TransferJob::getIfDifferent(QUrl(remotefile), force ? QString { } : m_etag, hhc);
         m_transfer->retrieve(m_job);
     }
     if (!m_job) {
@@ -404,10 +418,10 @@ void Database::read(const QString &fileName)
             m_valid = true;
             emit validChanged(m_valid);
         }
-
     } catch (const Exception &) {
         if (m_valid) {
             m_valid = false;
+            m_etag.clear(); // better redownload the db in this case
             emit validChanged(m_valid);
         }
         throw;
