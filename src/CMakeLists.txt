@@ -367,6 +367,7 @@ if (BS_MOBILE)
         mobile/ViewHeaderMenu.qml
         mobile/uihelpers/InputDialog.qml
         mobile/uihelpers/ProgressDialog.qml
+        mobile/uihelpers/ToastMessage.qml
         mobile/utils.js
     )
     qt_add_resources(${PROJECT_NAME} mobile_qrc

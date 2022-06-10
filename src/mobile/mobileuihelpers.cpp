@@ -370,6 +370,7 @@ void MobileUIHelpers::processToastMessages()
                                          });
     if (!toast)
         return;
+    m_toastMessageVisible = true;
 
     connect(toast, &QQuickPopup::closed,
             this, [this, toast]() {
