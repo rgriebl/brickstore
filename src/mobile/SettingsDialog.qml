@@ -7,8 +7,8 @@ import BrickStore as BS
 BrickStoreDialog {
     id: root
     title: qsTr("Settings")
-    relativeWidth: 2 / 3
-    relativeHeight: 2 / 3
+    relativeWidth: 3 / 4
+    relativeHeight: 3 / 4
     property string page    
 
     footer: TabBar {
@@ -48,10 +48,11 @@ BrickStoreDialog {
 
             ColumnLayout {
                 width: langScroller.width
-                RowLayout {
-                   spacing: root.spacing
-                   Layout.leftMargin: root.spacing
-                   Layout.rightMargin: root.spacing
+                GridLayout {
+                    columns: 2
+                    columnSpacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
                     Label {
                         text: qsTr("Language")
                         font.pixelSize: langCombo.font.pixelSize
@@ -78,6 +79,37 @@ BrickStoreDialog {
 
                         onActivated: { BS.Config.language = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.language) }
+                    }
+
+                    Label {
+                        text: qsTr("Weights")
+                        font.pixelSize: weightsCombo.font.pixelSize
+                    }
+                    ComboBox {
+                        Layout.fillWidth: true
+                        id: weightsCombo
+                        textRole: "text"
+                        valueRole: "value"
+                        model: [
+                            { value: Locale.MetricSystem,   text: qsTr("Metric (g)") },
+                            { value: Locale.ImperialSystem, text: qsTr("Imperial (oz)") },
+                        ]
+
+                        onActivated: { BS.Config.measurementSystem = currentValue }
+                        Component.onCompleted: { currentIndex = indexOfValue(BS.Config.measurementSystem) }
+                    }
+
+                    Label {
+                        text: qsTr("Default currency")
+                        font.pixelSize: currencyCombo.font.pixelSize
+                    }
+                    ComboBox {
+                        Layout.fillWidth: true
+                        id: currencyCombo
+                        model: BS.Currency.currencyCodes
+
+                        onActivated: { BS.Config.defaultCurrencyCode = currentValue }
+                        Component.onCompleted: { currentIndex = indexOfValue(BS.Config.defaultCurrencyCode) }
                     }
                 }
 
@@ -145,7 +177,7 @@ BrickStoreDialog {
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.mobileUISize) }
                     }
                     Label {
-                        text: qsTr("Item image Size")
+                        text: qsTr("Item image size")
                         font.pixelSize: langCombo.font.pixelSize
                     }
                     SpinBox {
@@ -181,6 +213,12 @@ BrickStoreDialog {
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
                         onEditingFinished: BS.Config.brickLinkUsername = text
                     }
+                    Label {
+                        Layout.columnSpan: 2
+                        text: qsTr("Your username is required here - not your email address.")
+                        color: Qt.rgba(1, .4, .4)
+                        visible: blUsername.text.indexOf('@') >= 0
+                    }
                     ItemDelegate {
                         text: qsTr("Password")
                         font.pixelSize: blPassword.font.pixelSize
@@ -192,6 +230,12 @@ BrickStoreDialog {
                         text: BS.Config.brickLinkPassword
                         echoMode: TextInput.PasswordEchoOnEdit
                         onEditingFinished: BS.Config.brickLinkPassword = text
+                    }
+                    Label {
+                        Layout.columnSpan: 2
+                        text: qsTr("BrickLink's maximum password length is 15.")
+                        color: Qt.rgba(1, .4, .4)
+                        visible: blPassword.text.length > 15
                     }
                 }
             }

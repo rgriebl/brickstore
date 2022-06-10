@@ -27,6 +27,7 @@ class Currency : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QDateTime lastUpdate READ lastUpdate NOTIFY ratesChanged)
+    Q_PROPERTY(QStringList currencyCodes READ currencyCodes NOTIFY ratesChanged)
 
 public:
     static Currency *inst();
@@ -37,7 +38,7 @@ public:
     Q_INVOKABLE double rate(const QString &currencyCode) const;
     Q_INVOKABLE double crossRate(const QString &fromCode, const QString &toCode) const;
     Q_INVOKABLE double customRate(const QString &currencyCode) const;
-    Q_INVOKABLE QStringList currencyCodes() const;
+    QStringList currencyCodes() const;
 
     Q_INVOKABLE void setCustomRate(const QString &currencyCode, double rate);
     Q_INVOKABLE void unsetCustomRate(const QString &currenyCode);
