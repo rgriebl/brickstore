@@ -20,13 +20,13 @@
 #if defined(Q_OS_WINDOWS)
 #  if !defined(BS_BACKEND)
 #    include <private/qguiapplication_p.h>
+#    include <qpa/qplatformnativeinterface.h>
 #  endif
 #  if defined(Q_CC_MINGW)
 #    undef _WIN32_WINNT
 #    define _WIN32_WINNT 0x0500
 #  endif
 #  include <windows.h>
-#  include <qpa/qplatformnativeinterface.h>
 #elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 #  include <sys/types.h>
 #  include <sys/sysctl.h>
@@ -151,7 +151,8 @@ QCoro::Task<> SystemInfo::init()
         QPair<QString, QString> result;
         uint vendor = 0;
 
-#if defined(Q_OS_WIN)
+#if !defined(BS_BACKEND)
+#  if defined(Q_OS_WIN)
         // On Windows, this will provide additional GPU info similar to the output of dxdiag.
         if (auto *ni = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>()) {
             const QVariantList gpuInfos = ni->gpuList().toList();
@@ -162,7 +163,7 @@ QCoro::Task<> SystemInfo::init()
                 vendor = gpuMap.value("vendorId"_l1).toUInt();
             }
         }
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#  elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
         p.start("lspci"_l1, { "-d"_l1, "::0300"_l1, "-vmm"_l1, "-nn"_l1 }, QIODevice::ReadOnly);
         p.waitForFinished(1000);
@@ -177,7 +178,7 @@ QCoro::Task<> SystemInfo::init()
                 vendor = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
         }
 
-#elif defined(Q_OS_MACOS)
+#  elif defined(Q_OS_MACOS)
        QProcess p;
        p.start("system_profiler"_l1, { "-json"_l1, "SPDisplaysDataType"_l1 }, QIODevice::ReadOnly);
        p.waitForFinished(3000);
@@ -186,6 +187,7 @@ QCoro::Task<> SystemInfo::init()
        result.first = o.value("sppci_model"_l1).toString();
        result.second = o.value("spdisplays_vendor"_l1).toString().toLower();
 
+#  endif
 #endif
         if (vendor) {
             switch (vendor) {

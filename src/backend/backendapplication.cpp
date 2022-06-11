@@ -47,7 +47,7 @@ void BackendApplication::init()
 
     QString errstring;
     BrickLink::Core *bl = BrickLink::create(QStandardPaths::writableLocation(QStandardPaths::CacheLocation),
-                                            &errstring);
+                                            { }, &errstring);
 
     if (!bl) {
         fprintf(stderr, "Could not initialize the BrickLink kernel:\n%s\n", qPrintable(errstring));
