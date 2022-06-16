@@ -31,6 +31,7 @@ BrickStoreDialog {
                     horizontalAlignment: Text.AlignLeft
                     Layout.fillWidth: true
                     textFormat: Text.RichText
+                    wrapMode: Text.Wrap
                     onLinkActivated: (link) => Qt.openUrlExternally(link)
                 }
             }
@@ -38,14 +39,14 @@ BrickStoreDialog {
                 text: BrickStore.about.license
                 Layout.fillWidth: true
                 textFormat: Text.RichText
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 onLinkActivated: (link) => Qt.openUrlExternally(link)
             }
             Label {
                 text: BrickStore.about.translators
                 Layout.fillWidth: true
                 textFormat: Text.RichText
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 onLinkActivated: (link) => Qt.openUrlExternally(link)
             }
         }
