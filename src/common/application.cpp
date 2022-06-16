@@ -337,6 +337,22 @@ QCoro::Task<> Application::setupLDraw()
     return loadLibrary(ldrawDir);
 }
 
+QCoro::Task<bool> Application::closeAllViews()
+{
+    const auto docs = DocumentList::inst()->documents();
+
+    for (const auto doc : docs) {
+        if (doc->model()->isModified()) {
+            // bring a View of the doc to the front, preferably in the active ViewPane
+
+            emit doc->requestActivation();
+        }
+        if (!co_await doc->requestClose())
+            co_return false;
+    }
+    co_return true;
+}
+
 Application::~Application()
 {
     delete BrickLink::core();

@@ -65,7 +65,7 @@ public:
     ~MainWindow() override;
     static MainWindow *inst();
 
-    QCoro::Task<bool> closeAllViews();
+    void closeAllDialogs();
     View *activeView() const;
     void setActiveView(View *view);
 

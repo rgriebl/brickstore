@@ -569,7 +569,7 @@ QCoro::Task<bool> Document::requestClose()
         }
     }
     if (doClose)
-        emit closeAllViews();
+        emit closeAllViewsForDocument();
     co_return doClose;
 }
 

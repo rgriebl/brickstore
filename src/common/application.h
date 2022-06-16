@@ -58,6 +58,8 @@ public:
 
     void raise();
 
+    virtual QCoro::Task<bool> closeAllViews();
+
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });
@@ -84,8 +86,6 @@ protected:
     QCoro::Task<> restoreLastSession();
 
     QCoro::Task<> setupLDraw();
-
-    virtual QCoro::Task<bool> closeAllViews() = 0;
 
 protected:
     QStringList m_startupErrors;

@@ -287,7 +287,7 @@ View::View(Document *document, QWidget *parent)
     m_model = document->model();
     m_document->ref();
 
-    connect(m_document, &Document::closeAllViews,
+    connect(m_document, &Document::closeAllViewsForDocument,
             this, [this]() { delete this; });
 
     m_latest_row = -1;

@@ -221,7 +221,7 @@ ApplicationWindow {
 
         function onDocumentAdded(doc) {
             doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
-            doc.closeAllViews.connect(
+            doc.closeAllViewsForDocument.connect(
                         () => {
                             let index = indexOfDocument(doc)
                             if (index >= 0) {

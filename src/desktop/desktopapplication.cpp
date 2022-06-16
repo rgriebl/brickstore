@@ -279,7 +279,10 @@ void DesktopApplication::setupLogging()
 
 QCoro::Task<bool> DesktopApplication::closeAllViews()
 {
-    return MainWindow::inst()->closeAllViews();
+    auto result = co_await Application::closeAllViews();
+
+    MainWindow::inst()->closeAllDialogs();
+    co_return result;
 }
 
 bool DesktopApplication::notifyOtherInstance()

@@ -265,7 +265,7 @@ public:
     static int processAutosaves(AutosaveAction action);
 
 signals:
-    void closeAllViews();
+    void closeAllViewsForDocument();
 
     void filePathChanged(const QString &filePath);
     void fileNameChanged(const QString &fileName);

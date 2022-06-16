@@ -98,8 +98,7 @@ void MobileApplication::updateIconTheme()
 
 QCoro::Task<bool> MobileApplication::closeAllViews()
 {
-    //TODO implement
-    co_return true;
+    return Application::closeAllViews();
 }
 
 void MobileApplication::setupQml()

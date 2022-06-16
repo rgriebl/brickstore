@@ -1213,7 +1213,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     QStringList files = DocumentList::inst()->allFiles();
     Config::inst()->setValue("/MainWindow/LastSessionDocuments"_l1, files);
 
-    if (!QCoro::waitFor(closeAllViews())) {
+    if (!QCoro::waitFor(Application::inst()->closeAllViews())) {
         e->ignore();
         return;
     }
@@ -1227,40 +1227,13 @@ void MainWindow::resizeEvent(QResizeEvent *e)
     repositionHomeWidget();
 }
 
-
-QCoro::Task<bool> MainWindow::closeAllViews()
+void MainWindow::closeAllDialogs()
 {
-    auto oldView = m_activeView;
-    auto oldViewPane = m_activeViewPane;
-    const auto docs = DocumentList::inst()->documents();
-
-    for (const auto doc : docs) {
-        if (doc->model()->isModified()) {
-            // bring a View of the doc to the front, preferably in the active ViewPane
-
-            QHash<ViewPane *, View *> allViews;
-            forEachViewPane([doc, &allViews](ViewPane *vp) {
-                if (auto *view = vp->viewForDocument(doc))
-                    allViews.insert(vp, view);
-                return false;
-            });
-            Q_ASSERT(!allViews.isEmpty());
-
-            if (!allViews.contains(m_activeViewPane))
-                setActiveViewPane(*allViews.keyBegin());
-            m_activeViewPane->activateDocument(doc);
-        }
-        if (!co_await doc->requestClose())
-            co_return false;
-    }
-
     delete m_add_dialog;
     delete m_importinventory_dialog;
     delete m_importorder_dialog;
     delete m_importcart_dialog;
     delete m_importwanted_dialog;
-
-    co_return true;
 }
 
 
