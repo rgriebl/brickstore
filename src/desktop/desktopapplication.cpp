@@ -42,6 +42,7 @@
 #  if defined(Q_CC_MSVC) // needed for themed common controls (e.g. file open dialogs)
 #    pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #  endif
+#  include <QtGui/private/qguiapplication_p.h>
 #elif defined(Q_OS_MACOS)
 #  include <QtCore/QVersionNumber>
 #  include <QtGui/private/qguiapplication_p.h>
@@ -427,6 +428,23 @@ void DesktopApplication::setUITheme()
         }
         return;
     }
+
+#if defined(Q_OS_WINDOWS)
+    auto qwa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>();
+
+    if (qwa && qwa->isDarkMode()) {
+        // let Qt handle the window frames, but we handle the style ourselves
+        qwa->setDarkModeHandling(QNativeInterface::Private::QWindowsApplication::DarkModeWindowFrames);
+    }
+
+    if ((theme == Config::UITheme::SystemDefault) && qwa && qwa->isDarkMode()) {
+        // Qt's Windows Vista style only supports light mode, so we have to fake dark mode
+        theme = Config::UITheme::Dark;
+    } else if (theme == Config::UITheme::Light) {
+        // no need to use Fusion tricks here, just use the default Vista style
+        theme = Config::UITheme::SystemDefault;
+    }
+#endif
 
     if (theme != Config::UITheme::SystemDefault) {
         QApplication::setStyle(new BrickStoreProxyStyle(QStyleFactory::create("fusion"_l1)));
