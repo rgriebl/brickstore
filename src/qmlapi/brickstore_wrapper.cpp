@@ -280,14 +280,13 @@ Document *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink:
                                        includeInstructions, includeAlternates, includeCounterParts);
 }
 
-/*! \qmlmethod bool BrickStore::updateDatabase()
+/*! \qmlmethod void BrickStore::updateDatabase()
 
-    Starts an asychronous database update in the background. Returns \c true if the update was
-    started and \c false if it failed (e.g. there were documents with unsaved changes).
+    Starts an asychronous database update in the background.
 */
-bool QmlBrickStore::updateDatabase()
+void QmlBrickStore::updateDatabase()
 {
-    return QCoro::waitFor(Application::inst()->updateDatabase());
+    Application::inst()->updateDatabase();
 }
 
 Document *QmlBrickStore::activeDocument() const

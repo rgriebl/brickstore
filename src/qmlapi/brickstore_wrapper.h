@@ -237,7 +237,7 @@ public:
                                               bool includeInstructions, bool includeAlternates,
                                               bool includeCounterParts);
 
-    Q_INVOKABLE bool updateDatabase();
+    Q_INVOKABLE void updateDatabase();
 
     Document *activeDocument() const;
 
