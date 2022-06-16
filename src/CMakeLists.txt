@@ -57,6 +57,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Gui
+    Qt6::GuiPrivate
     Qt6::Xml
     Qt6::Network
     Qt6::CorePrivate
@@ -71,8 +72,6 @@ if (IOS)
             Qt::QGifPlugin
             Qt::QJpegPlugin
             Qt::QSvgPlugin
-            Qt::QJpegPlugin
-            Qt::QJpegPlugin
     )
 endif()
 
