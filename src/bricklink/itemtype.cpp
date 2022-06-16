@@ -30,15 +30,6 @@ const QVector<const Category *> ItemType::categories() const
 
 QSize ItemType::pictureSize() const
 {
-    QSize s = rawPictureSize();
-    double f = core()->itemImageScaleFactor();
-    if (!qFuzzyCompare(f, 1.))
-        s *= f;
-    return s;
-}
-
-QSize ItemType::rawPictureSize() const
-{
     QSize s(80, 60);
     if (m_id == 'M')
         s.transpose();

@@ -133,7 +133,7 @@ QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
 {
     if (index.column() == 0) {
         const auto *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
-        return (item ? item->itemType()->rawPictureSize() : QSize(80, 60)) * m_zoom;
+        return (item ? item->itemType()->pictureSize() : QSize(80, 60)) * m_zoom;
     } else {
         return BrickLink::ItemDelegate::sizeHint(option, index);
     }
@@ -650,7 +650,7 @@ void SelectItem::itemTypeUpdated()
     setCurrentCategory(oldCat);
     setCurrentItem(oldItem);
 
-    d->w_itemthumbs->setColumnWidth(0, int((itemtype ? itemtype->rawPictureSize().width() : 80) * d->m_zoom));
+    d->w_itemthumbs->setColumnWidth(0, int((itemtype ? itemtype->pictureSize().width() : 80) * d->m_zoom));
 
     if (!itemtype || !itemtype->hasColors())
         d->itemModel->setFilterColor(nullptr);

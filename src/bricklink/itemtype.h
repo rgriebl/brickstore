@@ -39,7 +39,6 @@ public:
     bool hasWeight() const          { return m_has_weight; }
     bool hasSubConditions() const   { return m_has_subconditions; }
     QSize pictureSize() const;
-    QSize rawPictureSize() const;
 
     ItemType() = default;
     ItemType(std::nullptr_t) : ItemType() { } // for scripting only!

@@ -169,16 +169,16 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    m_pic = new PictureWidget(this);
     m_text = new QLabel(this);
     m_text->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     m_text->setIndent(8);
-
     m_text->setBackgroundRole(QPalette::Base);
     m_text->setAutoFillBackground(true);
 
-    addWidget(m_pic);
+    m_pic = new PictureWidget(this);
+
     addWidget(m_text);
+    addWidget(m_pic);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
@@ -192,6 +192,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
             this, &TaskInfoWidget::refresh);
 
     m_pic->setPrefer3D(Config::inst()->value("/MainWindow/TaskInfo/Prefer3D"_l1, true).toBool());
+    setCurrentWidget(m_text);
 }
 
 TaskInfoWidget::~TaskInfoWidget()
@@ -244,7 +245,8 @@ void TaskInfoWidget::delayedSelectionUpdate()
 {
     if (!m_document) {
         m_pic->setItemAndColor(nullptr);
-        setCurrentWidget(m_pic);
+        m_text->clear();
+        setCurrentWidget(m_text);
     } else if (m_selection.count() == 1) {
         m_pic->setItemAndColor(m_selection.constFirst()->item(), m_selection.constFirst()->color());
         setCurrentWidget(m_pic);
