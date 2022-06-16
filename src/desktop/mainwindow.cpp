@@ -48,10 +48,9 @@
 #include <QStackedLayout>
 #include <QSplitter>
 #if defined(Q_OS_WINDOWS)
-#  include <qwintaskbarbutton.h>
-#  include <qwintaskbarprogress.h>
-#  include <QtGui/qpa/qplatformwindow.h>
-#  include <QtGui/qpa/qplatformwindow_p.h>
+#  include <qtwinextras/qwintaskbarbutton.h>
+#  include <qtwinextras/qwintaskbarprogress.h>
+#  include <QtGui/private/qguiapplication_p.h>
 #endif
 
 #include "bricklink/store.h"
@@ -65,6 +64,7 @@
 #include "common/onlinestate.h"
 #include "qcoro/core/qcorosignal.h"
 #include "utility/currency.h"
+#include "utility/eventfilter.h"
 #include "utility/exception.h"
 #include "common/uihelpers.h"
 #include "utility/stopwatch.h"
@@ -187,39 +187,64 @@ MainWindow::MainWindow(QWidget *parent)
 
     connectView(nullptr);
 
-    // we need to show now, since most X11 window managers and macOS with
-    // unified-toolbar look won't get the position right otherwise
-    // plus, on Windows, we need the window handle for the progress indicator
-    show();
+    bool doNotRestoreGeometry = false;
 
 #if defined(Q_OS_WINDOWS)
-    auto winTaskbarButton = new QWinTaskbarButton(this);
-    winTaskbarButton->setWindow(windowHandle());
+    new EventFilter(this, [this](QObject *, QEvent *e) {
+        if (e->type() == QEvent::Show) {
+            deleteLater();
 
-    connect(BrickLink::core(), &BrickLink::Core::transferProgress, this, [winTaskbarButton](int p, int t) {
-        QWinTaskbarProgress *progress = winTaskbarButton->progress();
-        if (p == t) {
-            progress->reset();
-        } else {
-            if (progress->maximum() != t)
-                progress->setMaximum(t);
-            progress->setValue(p);
+            auto winTaskbarButton = new QWinTaskbarButton(this);
+            winTaskbarButton->setWindow(windowHandle());
+
+            connect(BrickLink::core(), &BrickLink::Core::transferProgress, this, [winTaskbarButton](int p, int t) {
+                QWinTaskbarProgress *progress = winTaskbarButton->progress();
+                if (p == t) {
+                    progress->reset();
+                } else {
+                    if (progress->maximum() != t)
+                        progress->setMaximum(t);
+                    progress->setValue(p);
+                }
+                progress->setVisible(p != t);
+            });
         }
-        progress->setVisible(p != t);
-    });
-    // workaround for QOpenGLWidget messing with fullscreen mode
-    dynamic_cast<QNativeInterface::Private::QWindowsWindow *>(windowHandle()->handle())->setHasBorderInFullScreen(true);
+        return false;
+    }, this);
+
+    // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
+    if (auto wa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>())
+        doNotRestoreGeometry = wa->isTabletMode();
 #endif
 
-    QByteArray ba;
+    auto geo = Config::inst()->value("/MainWindow/Layout/Geometry"_l1).toByteArray();
+    if (!doNotRestoreGeometry)
+        restoreGeometry(geo);
 
-    ba = Config::inst()->value("/MainWindow/Layout/Geometry"_l1).toByteArray();
-    restoreGeometry(ba);
+    // We need to restore twice: the first time to at least hide all the hidden dock widgets,
+    // otherwise the dock overflows on small screens and the geometry restore is completely off.
 
-    ba = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
-    if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
+    auto state = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
+    if (state.isEmpty() || !restoreState(state, DockStateVersion)) {
         m_toolbar->show();
+        state.clear();
+    }
     menuBar()->show();
+
+    // On Windows in tablet mode, the window is resized after showing, so we need to restore again,
+    // once this resize has happened.
+
+    if (!state.isEmpty()) {
+        new EventFilter(this, [this, state](QObject *, QEvent *e) {
+            if (e->type() == QEvent::Resize) {
+                deleteLater();
+
+                restoreState(state, DockStateVersion);
+                menuBar()->show();
+            }
+            return false;
+        }, this);
+    }
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
