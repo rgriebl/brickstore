@@ -28,7 +28,7 @@ public:
 
     void init() override;
 
-    void updateIconTheme();
+    void setMobileIconTheme();
 
 protected:
     QCoro::Task<bool> closeAllViews() override;

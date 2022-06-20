@@ -16,8 +16,6 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
-#include <QtQuickTemplates2/private/qquickaction_p.h>
-#include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #ifdef Q_OS_ANDROID
 #  include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 #endif
@@ -64,36 +62,34 @@ void MobileApplication::init()
 
     m_engine->load(m_engine->baseUrl().resolved(QUrl("Main.qml"_l1)));
 
-    connect(Config::inst(), &Config::uiThemeChanged, this, &MobileApplication::updateIconTheme);
-    updateIconTheme();
-
     if (m_engine->rootObjects().isEmpty()) {
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
+
+    int tid = qmlTypeId("Mobile", 1, 0, "Style");
+    auto s = m_engine->singletonInstance<QObject *>(tid);
+    qWarning() << tid << s;
+
+    connect(Config::inst(), &Config::uiThemeChanged, this, &MobileApplication::setMobileIconTheme);
+    setMobileIconTheme();
 
     setUILoggingHandler([](QtMsgType, const QMessageLogContext &, const QString &) {
         // just ignore for now, but we need to set one
     });
 }
 
-void MobileApplication::updateIconTheme()
+void MobileApplication::setMobileIconTheme()
 {
     auto roots = m_engine->rootObjects();
     if (roots.isEmpty())
         return;
     QObject *root = roots.constFirst();
-    QQmlProperty theme(root, "Material.theme"_l1, qmlContext(root));
+    QQmlProperty theme(root, u"Style.darkTheme"_qs, qmlContext(root));
 
-    setIconTheme(theme.read().toInt() == 1 ? DarkTheme : LightTheme);
+    qWarning() << "TR?" << theme.read();
 
-    const auto icons = root->findChildren<QQuickIconImage *>();
-    for (const auto &icon : icons) {
-        QString name = icon->name();
-        icon->setName("foo"_l1);
-        icon->setName(name);
-    }
-
+    setIconTheme(theme.read().toBool() ? DarkTheme : LightTheme);
 }
 
 QCoro::Task<bool> MobileApplication::closeAllViews()

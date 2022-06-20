@@ -166,6 +166,8 @@ if (BS_DESKTOP OR BS_MOBILE)
         Qt6::Qml
         Qt6::Quick
         Qt6::Quick3D
+        Qt6::QuickPrivate
+        Qt6::QuickControls2ImplPrivate
     )
     if (MACOS)
         target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -377,9 +379,7 @@ if (BS_MOBILE)
     )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt6::QuickPrivate
         Qt6::QuickDialogs2Private
-        Qt6::QuickControls2ImplPrivate
         Qt6::QuickTemplates2Private
     )
     if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.3.0")

@@ -28,6 +28,7 @@
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #include <QtQuick3D/QQuick3D>
 
 #include "bricklink/core.h"
@@ -738,6 +739,19 @@ void Application::setIconTheme(Theme theme)
 {
     QPixmapCache::clear();
     QIcon::setThemeName(theme == DarkTheme ? "brickstore-breeze-dark"_l1 : "brickstore-breeze"_l1);
+
+    auto roots = m_engine->rootObjects();
+    if (!roots.isEmpty()) {
+        QObject *root = roots.constFirst();
+
+        // force all icons to update by re-setting the name
+        const auto icons = root->findChildren<QQuickIconImage *>();
+        for (const auto &icon : icons) {
+            QString name = icon->name();
+            icon->setName("foo"_l1);
+            icon->setName(name);
+        }
+    }
 }
 
 
