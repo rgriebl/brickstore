@@ -101,18 +101,17 @@ void Application::init()
 
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
-    new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {
-        if (e->type() == QEvent::FileOpen) {
-            const QString file = static_cast<QFileOpenEvent *>(e)->file();
-            if (m_canEmitOpenDocuments)
-                emit openDocument(file);
-            else
-                m_queuedDocuments.append(file);
-            return true;
-        } else if (e->type() == QEvent::LanguageChange) {
-            emit languageChanged();
-        }
-        return false;
+    new EventFilter(qApp, { QEvent::FileOpen }, [this](QObject *, QEvent *e) {
+        const QString file = static_cast<QFileOpenEvent *>(e)->file();
+        if (m_canEmitOpenDocuments)
+            emit openDocument(file);
+        else
+            m_queuedDocuments.append(file);
+        return EventFilter::StopEventProcessing;
+    });
+    new EventFilter(qApp, { QEvent::LanguageChange }, [this](QObject *, QEvent *) {
+        emit languageChanged();
+        return EventFilter::ContinueEventProcessing;
     });
 
     setupTerminateHandler();

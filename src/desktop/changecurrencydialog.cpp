@@ -41,16 +41,14 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     grp->addButton(w_radioCustom);
 
     auto checkRadioOnLabelClick = [](QRadioButton *r, QObject *, QEvent *e) {
-        if ((e->type() == QEvent::MouseButtonPress)
-                && (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)) {
+        if (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)
             r->setChecked(true);
-        }
-        return false;
+        return EventFilter::ContinueEventProcessing;
     };
 
-    new EventFilter(w_labelEcb,    std::bind(checkRadioOnLabelClick, w_radioEcb, _1, _2));
-    new EventFilter(w_labelCustom, std::bind(checkRadioOnLabelClick, w_radioCustom, _1, _2));
-    new EventFilter(w_labelLegacy, std::bind(checkRadioOnLabelClick, w_radioLegacy, _1, _2));
+    new EventFilter(w_labelEcb,    { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioEcb, _1, _2));
+    new EventFilter(w_labelCustom, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioCustom, _1, _2));
+    new EventFilter(w_labelLegacy, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioLegacy, _1, _2));
 
     if (m_from != "USD"_l1)
         m_wasLegacy = false;

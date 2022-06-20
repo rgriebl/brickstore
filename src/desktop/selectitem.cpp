@@ -167,10 +167,9 @@ public:
         m_overlay->setSelectionMode(QAbstractItemView::SingleSelection);
         m_overlay->setItemDelegate(new CategoryDelegate(this));
 
-        new EventFilter(m_overlay->viewport(), [this](QObject *, QEvent *e) {
-            if (e->type() == QEvent::Wheel)
-                return QCoreApplication::sendEvent(viewport(), e);
-            return false;
+        new EventFilter(m_overlay->viewport(), { QEvent::Wheel }, [this](QObject *, QEvent *e) {
+            return QCoreApplication::sendEvent(viewport(), e) ? EventFilter::StopEventProcessing
+                                                              : EventFilter::ContinueEventProcessing;
         });
     }
 
@@ -267,7 +266,7 @@ void SelectItem::init()
             d->w_filter, &HistoryLineEdit::setToFavoritesMode);
     d->w_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
 
-    new EventFilter(d->w_filter, DesktopUIHelpers::selectAllFilter);
+    new EventFilter(d->w_filter, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);
@@ -367,7 +366,8 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    new EventFilter(d->w_itemthumbs->viewport(), std::bind(&SelectItem::zoomFilter, this, _1, _2));
+    new EventFilter(d->w_itemthumbs->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
+                    std::bind(&SelectItem::zoomFilter, this, _1, _2));
     d->w_itemthumbs->header()->setSectionsMovable(false);
 
     d->w_thumbs = new QListView();
@@ -382,7 +382,8 @@ void SelectItem::init()
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    new EventFilter(d->w_thumbs->viewport(), std::bind(&SelectItem::zoomFilter, this, _1, _2));
+    new EventFilter(d->w_thumbs->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
+                    std::bind(&SelectItem::zoomFilter, this, _1, _2));
 
     d->itemTypeModel = new BrickLink::ItemTypeModel(this);
     d->categoryModel = new BrickLink::CategoryModel(this);
@@ -539,10 +540,10 @@ void SelectItem::languageChange()
     setToolTipOnButton(d->w_zoomOut, tr("Zoom out"));
 }
 
-bool SelectItem::zoomFilter(QObject *o, QEvent *e)
+EventFilter::Result SelectItem::zoomFilter(QObject *o, QEvent *e)
 {
     if (!d->w_itemthumbs || !d->w_thumbs)
-        return false;
+        return EventFilter::ContinueEventProcessing;
 
     if ((e->type() == QEvent::Wheel)
             && (o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())) {
@@ -551,7 +552,7 @@ bool SelectItem::zoomFilter(QObject *o, QEvent *e)
             double z = std::pow(1.001, we->angleDelta().y());
             setZoomFactor(d->m_zoom * z);
             e->accept();
-            return true;
+            return EventFilter::StopEventProcessing;
         }
     } else if ((e->type() == QEvent::NativeGesture)
                && (o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())) {
@@ -560,10 +561,10 @@ bool SelectItem::zoomFilter(QObject *o, QEvent *e)
             double z = 1 + nge->value();
             setZoomFactor(d->m_zoom * z);
             e->accept();
-            return true;
+            return EventFilter::StopEventProcessing;
         }
     }
-    return false;
+    return EventFilter::ContinueEventProcessing;
 }
 
 void SelectItem::changeEvent(QEvent *e)

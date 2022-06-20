@@ -34,6 +34,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/chunkreader.cpp
     utility/chunkreader.h
     utility/chunkwriter.h
+    utility/eventfilter.cpp
     utility/eventfilter.h
     utility/exception.cpp
     utility/exception.h

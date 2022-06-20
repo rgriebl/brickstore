@@ -55,14 +55,14 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     w_print_preview = new QPrintPreviewWidget(m_printer);
     if (auto *asa = w_print_preview->findChild<QAbstractScrollArea *>()) {
         // workaround for QTBUG-20677
-        new EventFilter(asa, [this](QObject *, QEvent *e) {
+        new EventFilter(asa, { }, [this](QObject *, QEvent *e) {
             if (e->type() == QEvent::MetaCall) {
                 if (++m_freezeLoopWorkaround > 11)
-                    return true;
+                    return EventFilter::StopEventProcessing;
             } else {
                 m_freezeLoopWorkaround = 0;
             }
-            return false;
+            return EventFilter::ContinueEventProcessing;
         });
     }
     connect(w_print_preview, &QPrintPreviewWidget::paintRequested,

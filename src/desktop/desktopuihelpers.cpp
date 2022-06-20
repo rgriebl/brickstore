@@ -91,7 +91,7 @@ void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
     w->resize(sh);
 }
 
-bool DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
+EventFilter::Result DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::FocusIn) {
         QFocusEvent *fe = static_cast<QFocusEvent *>(e);
@@ -111,7 +111,7 @@ bool DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
                 QMetaObject::invokeMethod(sb, &QAbstractSpinBox::selectAll, Qt::QueuedConnection);
         }
     }
-    return false;
+    return EventFilter::ContinueEventProcessing;
 }
 
 

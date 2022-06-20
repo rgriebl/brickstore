@@ -16,31 +16,47 @@
 #include <algorithm>
 
 #include <QObject>
+#include <QEvent>
+#include <QVector>
 
 
 class EventFilter : public QObject
 {
+    Q_OBJECT
 public:
-    typedef std::function<bool(QObject *, QEvent *e)> Type;
+    enum ResultFlag {
+        ContinueEventProcessing = 0,
+        StopEventProcessing     = 1,
+        RemoveEventFilter       = 0x1000,
+        DeleteEventFilter       = 0x3000,
+    };
+    Q_ENUM(ResultFlag)
+    Q_DECLARE_FLAGS(Result, ResultFlag)
+    Q_FLAG(Result)
 
-    inline explicit EventFilter(QObject *o, Type filter)
-        : EventFilter(o, filter, o)
+    typedef std::function<Result(QObject *, QEvent *e)> Type;
+
+    inline explicit EventFilter(QObject *o, std::initializer_list<QEvent::Type> types, Type filter)
+        : EventFilter(o, o, types, filter)
     { }
-    inline explicit EventFilter(QObject *o, Type filter, QObject *parent)
+
+    inline explicit EventFilter(QObject *parent, QObject *o, std::initializer_list<QEvent::Type> types, Type filter)
         : QObject(parent)
         , m_filter(filter)
+        , m_types(types)
     {
         Q_ASSERT(o);
         Q_ASSERT(filter);
         if (o)
             o->installEventFilter(this);
     }
+
 protected:
-    bool eventFilter(QObject *o, QEvent *e) override
-    {
-        return m_filter ? m_filter(o, e) : false;
-    }
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     Type m_filter;
+    QVector<QEvent::Type> m_types;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(EventFilter::Result)

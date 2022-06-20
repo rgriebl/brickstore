@@ -67,10 +67,9 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
     // we can't use eventFilter() in anything derived from QAbstractItemDelegate:
     // the eventFilter() function there will filter ANY event, because it thinks
     // everything is an editor widget.
-    new EventFilter(table, [this](QObject *, QEvent *e) {
-        if (e->type() == QEvent::LanguageChange)
-            languageChange();
-        return false;
+    new EventFilter(table, { QEvent::LanguageChange }, [this](QObject *, QEvent *) {
+        languageChange();
+        return EventFilter::ContinueEventProcessing;
     });
 
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,

@@ -37,7 +37,7 @@ public:
 
     static void setPopupPos(QWidget *w, const QRect &pos);
 
-    static bool selectAllFilter(QObject *o, QEvent *e);
+    static EventFilter::Result selectAllFilter(QObject *o, QEvent *e);
 
 protected:
     QCoro::Task<StandardButton> showMessageBox(QString msg, UIHelpers::Icon icon,

@@ -103,18 +103,18 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_qty->setRange(1, DocumentModel::maxQuantity);
     w_qty->setValue(1);
-    new EventFilter(w_qty, DesktopUIHelpers::selectAllFilter);
+    new EventFilter(w_qty, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
     w_bulk->setRange(1, DocumentModel::maxQuantity);
     w_bulk->setValue(1);
-    new EventFilter(w_bulk, DesktopUIHelpers::selectAllFilter);
+    new EventFilter(w_bulk, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
     double maxPrice = DocumentModel::maxLocalPrice(m_currency_code);
 
     w_price->setRange(0, maxPrice);
-    new EventFilter(w_price, DesktopUIHelpers::selectAllFilter);
+    new EventFilter(w_price, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
     w_cost->setRange(0, maxPrice);
-    new EventFilter(w_cost, DesktopUIHelpers::selectAllFilter);
+    new EventFilter(w_cost, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
     w_tier_qty[0] = w_tier_qty_0;
     w_tier_qty[1] = w_tier_qty_1;
@@ -128,8 +128,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_tier_price[i]->setRange(0, maxPrice);
         w_tier_qty[i]->setValue(0);
         w_tier_price[i]->setValue(0);
-        new EventFilter(w_tier_qty[i], DesktopUIHelpers::selectAllFilter);
-        new EventFilter(w_tier_price[i], DesktopUIHelpers::selectAllFilter);
+        new EventFilter(w_tier_qty[i], { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
+        new EventFilter(w_tier_price[i], { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
         connect(w_tier_qty[i], QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
@@ -248,22 +248,19 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             .toByteArray();
     restoreState(ba);
 
-    new EventFilter(w_last_added, [this](QObject *, QEvent *e) { // dynamic tooltip
-        if (e->type() == QEvent::ToolTip) {
-            const auto *he = static_cast<QHelpEvent *>(e);
-            if (m_addHistory.size() > 1) {
-                static const QString pre = "<p style='white-space:pre'>"_l1;
-                static const QString post = "</p>"_l1;
-                QString tips;
+    new EventFilter(w_last_added, { QEvent::ToolTip }, [this](QObject *, QEvent *e) { // dynamic tooltip
+        const auto *he = static_cast<QHelpEvent *>(e);
+        if (m_addHistory.size() > 1) {
+            static const QString pre = "<p style='white-space:pre'>"_l1;
+            static const QString post = "</p>"_l1;
+            QString tips;
 
-                for (const auto &entry : m_addHistory)
-                    tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
+            for (const auto &entry : m_addHistory)
+                tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
 
-                QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
-            }
-            return true;
+            QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
         }
-        return false;
+        return EventFilter::StopEventProcessing;
     });
 
     m_historyTimer = new QTimer(this);

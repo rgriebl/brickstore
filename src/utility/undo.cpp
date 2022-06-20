@@ -266,10 +266,10 @@ QWidget *UndoAction::createWidget(QWidget *parent)
                                      + 2 * label->style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing));
         });
 
-        new EventFilter(button, [this](QObject *, QEvent *e) {
-            if ((e->type() == QEvent::LanguageChange) && m_undoStack)
+        new EventFilter(button, { QEvent::LanguageChange }, [this](QObject *, QEvent *) {
+            if (m_undoStack)
                 setDescription(m_type == Undo ? m_undoStack->undoText() : m_undoStack->redoText());
-            return false;
+            return EventFilter::ContinueEventProcessing;
         });
         return button;
     }

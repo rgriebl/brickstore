@@ -28,35 +28,33 @@ DeveloperConsole::DeveloperConsole(QWidget *parent)
     m_log = new QPlainTextEdit(this);
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
-    new EventFilter(m_log, [this](QObject *, QEvent *e) {
-        if ((e->type() == QEvent::KeyPress)
-                && (static_cast<QKeyEvent *>(e)->text() == m_consoleKey)) {
+    new EventFilter(m_log, { QEvent::KeyPress }, [this](QObject *, QEvent *e) {
+        if (static_cast<QKeyEvent *>(e)->text() == m_consoleKey) {
             activateConsole(!m_consoleActive);
-            return true;
+            return EventFilter::StopEventProcessing;
         }
-        return false;
+        return EventFilter::ContinueEventProcessing;
     });
     m_cmd = new QLineEdit(this);
     m_cmd->hide();
-    new EventFilter(m_cmd, [this](QObject *, QEvent *e) {
-        if (e->type() == QEvent::KeyPress) {
-            auto *ke = static_cast<QKeyEvent *>(e);
 
-            int hd = (ke->key() == Qt::Key_Up) ? -1 : ((ke->key() == Qt::Key_Down) ? 1 : 0);
-            if (hd) {
-                if (((m_historyIndex + hd) >= 0) && ((m_historyIndex + hd) < m_history.size())) {
-                    m_historyIndex += hd;
-                    m_cmd->setText(m_history.at(m_historyIndex));
-                }
-            } else if (ke->key() == Qt::Key_Escape) {
-                m_cmd->clear();
-            } else if ((ke->text() == m_consoleKey) && m_cmd->text().isEmpty()) {
-                m_cmd->clear();
-                activateConsole(!m_consoleActive);
-                return true;
+    new EventFilter(m_cmd, { QEvent::KeyPress }, [this](QObject *, QEvent *e) {
+        auto *ke = static_cast<QKeyEvent *>(e);
+
+        int hd = (ke->key() == Qt::Key_Up) ? -1 : ((ke->key() == Qt::Key_Down) ? 1 : 0);
+        if (hd) {
+            if (((m_historyIndex + hd) >= 0) && ((m_historyIndex + hd) < m_history.size())) {
+                m_historyIndex += hd;
+                m_cmd->setText(m_history.at(m_historyIndex));
             }
+        } else if (ke->key() == Qt::Key_Escape) {
+            m_cmd->clear();
+        } else if ((ke->text() == m_consoleKey) && m_cmd->text().isEmpty()) {
+            m_cmd->clear();
+            activateConsole(!m_consoleActive);
+            return EventFilter::StopEventProcessing;
         }
-        return false;
+        return EventFilter::ContinueEventProcessing;
     });
 
     connect(m_cmd, &QLineEdit::returnPressed,

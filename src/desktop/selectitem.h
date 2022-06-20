@@ -16,6 +16,7 @@
 #include <QDialog>
 
 #include "bricklink/global.h"
+#include "utility/eventfilter.h"
 
 QT_FORWARD_DECLARE_CLASS(QListViewItem)
 QT_FORWARD_DECLARE_CLASS(QIconViewItem)
@@ -84,7 +85,7 @@ private:
     void init();
     void ensureSelectionVisible();
     void sortItems(int section, Qt::SortOrder order);
-    bool zoomFilter(QObject *o, QEvent *e);
+    EventFilter::Result zoomFilter(QObject *o, QEvent *e);
 
 protected:
     std::unique_ptr<SelectItemPrivate> d;

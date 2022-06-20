@@ -35,15 +35,14 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     ui->buttons->button(QDialogButtonBox::Ok)->setText(tr("Copy to clipboard"));
 
     // sentry crash handler test
-    new EventFilter(ui->buttons->button(QDialogButtonBox::Ok), [](QObject *, QEvent *e) -> bool {
-        if (e->type() == QEvent::MouseButtonPress) {
-            auto *me = static_cast<QMouseEvent *>(e);
-            if (me->button() == Qt::RightButton)
-                static_cast<int *>(nullptr)[0] = 1;
-            else if (me->button() == Qt::MiddleButton)
-                throw Exception("Test exception");
-        }
-        return false;
+    new EventFilter(ui->buttons->button(QDialogButtonBox::Ok), { QEvent::MouseButtonPress },
+                    [](QObject *, QEvent *e) {
+        auto *me = static_cast<QMouseEvent *>(e);
+        if (me->button() == Qt::RightButton)
+            static_cast<int *>(nullptr)[0] = 1;
+        else if (me->button() == Qt::MiddleButton)
+            throw Exception("Test exception");
+        return EventFilter::ContinueEventProcessing;
     });
 
     connect(ui->buttons, &QDialogButtonBox::accepted,

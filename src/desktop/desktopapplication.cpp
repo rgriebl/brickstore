@@ -118,20 +118,18 @@ void DesktopApplication::init()
             auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
             if (scm.state() == QKeySequence::PartialMatch) {
                 e->accept();
-                return true;
+                return EventFilter::StopEventProcessing;
             }
         }
-        return false;
+        return EventFilter::ContinueEventProcessing;
     });
 #endif
 
-    new EventFilter(qApp, [this](QObject *, QEvent *e) -> bool {
-        if (e->type() == QEvent::ApplicationPaletteChange) {
-            // we need to delay this: otherwise macOS crashes on theme changes
-            QMetaObject::invokeMethod(this, &DesktopApplication::setDesktopIconTheme,
-                                      Qt::QueuedConnection);
-        }
-        return false;
+    new EventFilter(qApp, { QEvent::ApplicationPaletteChange }, [this](QObject *, QEvent *) {
+        // we need to delay this: otherwise macOS crashes on theme changes
+        QMetaObject::invokeMethod(this, &DesktopApplication::setDesktopIconTheme,
+                                  Qt::QueuedConnection);
+        return EventFilter::ContinueEventProcessing;
     });
     connect(Config::inst(), &Config::uiThemeChanged, this, &DesktopApplication::setUITheme);
     setUITheme();

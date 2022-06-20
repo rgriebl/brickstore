@@ -190,27 +190,23 @@ MainWindow::MainWindow(QWidget *parent)
     bool doNotRestoreGeometry = false;
 
 #if defined(Q_OS_WINDOWS)
-    new EventFilter(this, [this](QObject *, QEvent *e) {
-        if (e->type() == QEvent::Show) {
-            deleteLater();
+    new EventFilter(this, { QEvent::Show }, [this](QObject *, QEvent *) -> EventFilter::Result {
+        auto winTaskbarButton = new QWinTaskbarButton(this);
+        winTaskbarButton->setWindow(windowHandle());
 
-            auto winTaskbarButton = new QWinTaskbarButton(this);
-            winTaskbarButton->setWindow(windowHandle());
-
-            connect(BrickLink::core(), &BrickLink::Core::transferProgress, this, [winTaskbarButton](int p, int t) {
-                QWinTaskbarProgress *progress = winTaskbarButton->progress();
-                if (p == t) {
-                    progress->reset();
-                } else {
-                    if (progress->maximum() != t)
-                        progress->setMaximum(t);
-                    progress->setValue(p);
-                }
-                progress->setVisible(p != t);
-            });
-        }
-        return false;
-    }, this);
+        connect(BrickLink::core(), &BrickLink::Core::transferProgress, this, [winTaskbarButton](int p, int t) {
+            QWinTaskbarProgress *progress = winTaskbarButton->progress();
+            if (p == t) {
+                progress->reset();
+            } else {
+                if (progress->maximum() != t)
+                    progress->setMaximum(t);
+                progress->setValue(p);
+            }
+            progress->setVisible(p != t);
+        });
+        return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
+    });
 
     // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
     if (auto wa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>())
@@ -221,7 +217,7 @@ MainWindow::MainWindow(QWidget *parent)
     if (!doNotRestoreGeometry)
         restoreGeometry(geo);
 
-    // We need to restore twice: the first time to at least hide all the hidden dock widgets,
+    // We need to restore twice. The first time to at least hide all the hidden dock widgets:
     // otherwise the dock overflows on small screens and the geometry restore is completely off.
 
     auto state = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
@@ -231,19 +227,18 @@ MainWindow::MainWindow(QWidget *parent)
     }
     menuBar()->show();
 
-    // On Windows in tablet mode, the window is resized after showing, so we need to restore again,
-    // once this resize has happened.
+    // The second restore is needed, because sometimes the system's window-manager resizes us after
+    // showing, so we need to restore again, once this resize has happened. For some reason, it
+    // needs to be delayed as well to work on Windows...
 
     if (!state.isEmpty()) {
-        new EventFilter(this, [this, state](QObject *, QEvent *e) {
-            if (e->type() == QEvent::Resize) {
-                deleteLater();
-
+        new EventFilter(this, { QEvent::Resize }, [this, state](QObject *, QEvent *) -> EventFilter::Result {
+            QTimer::singleShot(200, this, [this, state]() {
                 restoreState(state, DockStateVersion);
                 menuBar()->show();
-            }
-            return false;
-        }, this);
+            });
+            return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
+        });
     }
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
