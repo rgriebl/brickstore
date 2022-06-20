@@ -92,11 +92,13 @@ void QmlBrickStore::registerTypes()
     qRegisterMetaType<DocumentModel::Field>();
 
     static QmlClipboard cb;
+    static QmlUtility ut;
 
     qmlRegisterSingletonInstance<QmlBrickStore>("BrickStore", 1, 0, "BrickStore", s_inst);
     qmlRegisterSingletonInstance<Currency>("BrickStore", 1, 0, "Currency", Currency::inst());
     qmlRegisterSingletonInstance<Config>("BrickStore", 1, 0, "Config", Config::inst());
     qmlRegisterSingletonInstance<QmlClipboard>("BrickStore", 1, 0, "Clipboard", &cb);
+    qmlRegisterSingletonInstance<QmlUtility>("BrickStore", 1, 0, "Utililty", &ut);
     qmlRegisterSingletonInstance<OnlineState>("BrickStore", 1, 0, "OnlineState", OnlineState::inst());
     qmlRegisterSingletonInstance<SystemInfo>("BrickStore", 1, 0, "SystemInfo", SystemInfo::inst());
     qmlRegisterSingletonInstance<Announcements>("BrickStore", 1, 0, "Announcements", Application::inst()->announcements());

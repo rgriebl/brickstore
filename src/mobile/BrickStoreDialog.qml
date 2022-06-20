@@ -8,8 +8,8 @@ Dialog {
     modal: true
     parent: Overlay.overlay
     anchors.centerIn: parent
-    width: Overlay.overlay.width * (Style.smallSize ? 1 : relativeWidth)
-    height: Overlay.overlay.height * (Style.smallSize ? 1 : relativeHeight)
+    width: Overlay.overlay ? Overlay.overlay.width * (Style.smallSize ? 1 : relativeWidth) : 0
+    height: Overlay.overlay ? Overlay.overlay.height * (Style.smallSize ? 1 : relativeHeight) : 0
 
 //    property bool forceSmall: false
 

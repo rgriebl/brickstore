@@ -348,7 +348,6 @@ if (BS_MOBILE)
         mobile/BrickStoreDialog.qml
         mobile/CornerTag.qml
         mobile/DialogLoader.qml
-        mobile/DocumentProxyModelJS.qml
         mobile/GridCell.qml
         mobile/GridHeader.qml
         mobile/ImportCartDialog.qml
@@ -363,6 +362,8 @@ if (BS_MOBILE)
         mobile/SettingsDialog.qml
         mobile/SetToPriceGuideDialog.qml
         mobile/Style.qml
+        mobile/StyleHelper.qml
+        mobile/+Material/StyleHelper.qml
         mobile/SystemInfoDialog.qml
         mobile/View.qml
         mobile/ViewEditMenu.qml

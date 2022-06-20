@@ -1,12 +1,8 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtQuick.Window
-import Qt.labs.qmlmodels
 import BrickStore as BS
-import QtQuick.Controls.Material
-import "./uihelpers" as UIHelpers
 
 
 ApplicationWindow {
@@ -16,13 +12,10 @@ ApplicationWindow {
     width: 800
     height: 600
 
-    Material.theme: {
-        switch (BS.Config.uiTheme) {
-        case BS.Config.UITheme.Light: return Material.Light
-        case BS.Config.UITheme.Dark: return Material.Dark
-        default:
-        case BS.Config.UITheme.SystemDefault: return Material.System
-        }
+    Binding { // used to apply the dark/light theme for the complete app (Style is a singleton)
+        target: Style
+        property: "themeRootItem"
+        value: root
     }
 
     DialogLoader {
@@ -106,7 +99,7 @@ ApplicationWindow {
                             Layout.minimumWidth: implicitWidth
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Document")
-                                color: Material.hintTextColor
+                                color: Style.hintTextColor
                                 leftPadding: 8
                             }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_open") }
@@ -114,7 +107,7 @@ ApplicationWindow {
 
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Import items")
-                                color: Material.hintTextColor
+                                color: Style.hintTextColor
                                 leftPadding: 8
                             }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_inv") }
@@ -127,7 +120,7 @@ ApplicationWindow {
 
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Currently Open Documents")
-                                color: Material.hintTextColor
+                                color: Style.hintTextColor
                                 visible: BS.BrickStore.documents.count !== 0
                                 leftPadding: 8
                             }
@@ -154,7 +147,7 @@ ApplicationWindow {
                             Layout.preferredWidth: -1
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Open recent files")
-                                color: Material.hintTextColor
+                                color: Style.hintTextColor
                                 leftPadding: 8
                             }
 

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.Material
 import BrickStore as BS
 
 Control {
@@ -41,7 +40,7 @@ Control {
 
     // based on Qt's Material header
     implicitWidth: 20
-    implicitHeight: fm.height * 1.5
+    implicitHeight: fm.height * 2
 
     Loader {
         id: loaderText
@@ -53,20 +52,21 @@ Control {
                 text: model.display // root.textRole ? model[root.textRole] : modelData
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                color: enabled ? root.Material.foreground : root.Material.hintTextColor
+                color: enabled ? Style.textColor : Style.hintTextColor
                 fontSizeMode: Text.HorizontalFit
-                minimumPointSize: font.pointSize / 4
+                minimumPixelSize: font.pixelSize / 4
                 elide: Text.ElideMiddle
                 clip: true
                 padding: root.cellPadding
+                font.pixelSize: height / 2
                 font.bold: root.sortStatus === 1 || root.sortStatus === -1
 
                 Rectangle {
                     id: rect
                     z: -1
                     anchors.fill: parent
-                    color: root.Material.backgroundColor
-                    property color gradientColor: root.Material.accentColor
+                    color: Style.backgroundColor
+                    property color gradientColor: Style.accentColor
                     property real d: sortCount && sortStatus ? (sortStatus < 0 ? -1 : 1) / sortCount : 0
                     property real e: (sortCount - Math.abs(sortStatus) + 1) * d
                     gradient: Gradient {
@@ -83,7 +83,7 @@ Control {
         z: 1
         antialiasing: true
         height: 1 / Screen.devicePixelRatio
-        color: Material.hintTextColor
+        color: Style.hintTextColor
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -92,14 +92,15 @@ Control {
         z: 1
         antialiasing: true
         width: 1 / Screen.devicePixelRatio
-        color: Material.hintTextColor
+        color: Style.hintTextColor
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
     }
 
-    TapHandler {
-        onDoubleTapped: parent.showMenu(parent.logicalIndex, parent.visualIndex)
+    MouseArea {
+        anchors.fill: parent
+        onDoubleClicked: parent.showMenu(parent.logicalIndex, parent.visualIndex)
     }
 }
 

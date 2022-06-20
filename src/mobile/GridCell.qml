@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.Material
+import BrickStore as BS
 
 Control {
     id: root
@@ -66,7 +66,7 @@ Control {
                 elide: Text.ElideRight
                 wrapMode: Text.Wrap
 
-                color: selected ? Material.primaryHighlightedTextColor : Material.foreground
+                color: selected ? Style.accentTextColor : Style.textColor
             }
         }
     }
@@ -75,10 +75,10 @@ Control {
         anchors.fill: parent
         z: -1
         color: {
-            let c = selected ? Material.accentColor : Material.background
+            let c = selected ? Style.accentColor : Style.backgroundColor
             if (alternate)
-                c = (Material.theme === Material.Dark) ? Qt.lighter(c, 1.2) : Qt.darker(c, 1.1)
-            return Qt.tint(c, tint)
+                c = BS.Utililty.contrastColor(c, 0.1)
+            return c
         }
     }
 
@@ -87,7 +87,7 @@ Control {
         z: 1
         antialiasing: true
         height: 1 / Screen.devicePixelRatio
-        color: Material.hintTextColor
+        color: Style.hintTextColor
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.right: parent.right
@@ -96,7 +96,7 @@ Control {
         z: 1
         antialiasing: true
         width: 1 / Screen.devicePixelRatio
-        color: Material.hintTextColor
+        color: Style.hintTextColor
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right

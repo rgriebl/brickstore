@@ -13,7 +13,7 @@ BrickStoreDialog {
     footer: DialogButtonBox {
         Button {
             text: qsTr("Mark read")
-            flat: true //TODO: Material
+            flat: true
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
         }
     }

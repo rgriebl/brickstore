@@ -15,8 +15,14 @@ QtObject {
 
     property int uiSize: BS.Config.mobileUISize
 
-    property color accentColor: Qt.color("blue") //TODO: from Material or Basic or iOS
+    property bool darkTheme: helper.darkTheme
+    property color accentColor: helper.accentColor
+    property color backgroundColor: helper.backgroundColor
+    property color textColor: helper.textColor
+    property color hintTextColor: helper.hintTextColor
+    property color accentTextColor: helper.accentTextColor
 
-    function dimColor(baseColor) {
-    }
+    property alias themeRootItem: helper.themeRootItem
+
+    property var _helper: StyleHelper { id: helper }
 }

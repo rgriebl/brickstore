@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
-import "./uihelpers" as UIHelpers
 
 Page {
     id: root
@@ -68,6 +67,8 @@ Page {
         anchors.fill: parent
 
         Pane {
+            padding: 0
+
             ColumnLayout {
                 anchors.fill: parent
 
@@ -126,19 +127,20 @@ Page {
 
         Pane {
             id: itemListPage
+            padding: 0
             property bool isPageVisible: SwipeView.isCurrentItem
 
             ColumnLayout {
                 anchors.fill: parent
 
                 RowLayout {
-                    Label { text: qsTr("Filter") }
+                    //spacing: 16
+                    Item { width: 8 }
                     TextField {
                         id: filter
                         Layout.fillWidth: true
-                        placeholderText: qsTr("No filter")
+                        placeholderText: qsTr("Filter")
                     }
-                    Label { text: qsTr("Zoom") }
                     SpinBox {
                         id: zoom
                         from: 50
@@ -164,7 +166,7 @@ Page {
                     cellWidth: width / 8 * scaleFactor
                     cellHeight: cellWidth * 3 / 4 + labelHeight
                     cacheBuffer: cellHeight
-                    ScrollIndicator.vertical: ScrollIndicator { }
+                    ScrollIndicator.vertical: ScrollIndicator { minimumSize: 0.05 }
 
                     model: BS.ItemModel {
                         filterWithoutInventory: true
@@ -187,7 +189,7 @@ Page {
                         BS.QImageItem {
                             anchors.fill: parent
                             anchors.bottomMargin: itemList.labelHeight
-                            image: parent.pic && parent.pic.isValid ? parent.pic.image() : itemList.noImage
+                            image: parent.pic && parent.pic.isValid ? parent.pic.image : itemList.noImage
                         }
                         Label {
                             x: 8
@@ -248,34 +250,63 @@ Page {
         }
 
         Pane {
-            GridLayout {
-                enabled: root.currentItem !== BS.BrickLink.noItem
+            ColumnLayout {
+                enabled: !root.currentItem.isNull
                 anchors.fill: parent
-                columns: 2
-                Label { text: qsTr("Quantity") }
-                SpinBox { id: quantity; from: 1; to: 1000; value: 1 }
-
-                Label { text: qsTr("Condition") }
                 RowLayout {
-                    RadioButton { text: qsTr("New"); checked: true; id: conditionNew }
-                    RadioButton { text: qsTr("Used") }
-                }
-                Label { text: qsTr("Extra parts") }
-                RowLayout {
-                    enabled: root.hasExtras
-                    RadioButton { text: qsTr("Include"); checked: true; id: extraInclude }
-                    RadioButton { text: qsTr("Exclude"); id: extraExclude }
-                    RadioButton { text: qsTr("Extra"); id: extraExtra }
-                }
+                    BS.QImageItem {
+                        height: lfm.height * 5
+                        width: height * 4 / 3
 
-                Label { text: qsTr("Include") }
-                ColumnLayout {
+                        property BS.Picture pic: BS.BrickLink.picture(root.currentItem, BS.BrickLink.noColor, true)
+                        image: pic ? pic.image : BS.BrickLink.noImage(width, height)
+                    }
+                    Label {
+                        text: "<b>" + root.currentItem.id + "</b> " + root.currentItem.name
+                              + " <i>(" + root.currentItem.itemType.name + ")</i>"
+                        wrapMode: Text.Wrap
+
+                        FontMetrics { id: lfm }
+                    }
+                }
+                GridLayout {
+                    columns: 2
+                    columnSpacing: 16
+                    Label { text: qsTr("Quantity") }
+                    SpinBox { id: quantity; from: 1; to: 1000; value: 1 }
+
+                    component CheckButton : Button {
+                        flat: true
+                        checkable: true
+                        autoExclusive: true
+                        icon.color: "transparent"
+                        leftPadding: 16
+                        rightPadding: 16
+                    }
+
+                    Label { text: qsTr("Condition") }
+                    RowLayout {
+                        CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
+                        CheckButton { text: qsTr("Used") }
+                    }
+                    Label { text: qsTr("Extra parts") }
+                    RowLayout {
+                        enabled: root.hasExtras
+                        CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
+                        CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
+                        CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }
+                    }
+
+                    Label { text: qsTr("Include") }
                     Switch { text: qsTr("Instructions"); enabled: root.hasInstructions; id: includeInstructions }
+                    Label { }
                     Switch { text: qsTr("Alternates"); enabled: root.hasAlternates; id: includeAlternates }
+                    Label { }
                     Switch { text: qsTr("Counterparts"); enabled: root.hasCounterParts; id: includeCounterParts }
+
+                    Item { Layout.fillHeight: true }
                 }
             }
         }
-
     }
 }
