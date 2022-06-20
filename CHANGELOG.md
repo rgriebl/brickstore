@@ -6,9 +6,6 @@ All notable changes to this project will be documented in this file.
 This is a big modernization of both the libraries BrickStore is built upon and its build-system to
 keep BrickStore maintainable and also compatible with modern operating systems.
 
-There are no major bug fixes, no new features (besides the much improved 3D renderer), but support
-for ARM based platforms was added.
-
 This comes with a lot of advantages, but also disadvantages for a few users.
 The disadvantages:
 - Windows 7, 8.1 and macOS 10.13 are no longer supported, as they have been discontinued by their
@@ -21,6 +18,7 @@ The disadvantages:
 The advantages:
 - Better integration in current desktop systems, like Windows 11 and macOS 12.
 - The macOS package is now a Universal Binary which supports both Intel and ARM (M1) natively.
+- Added support for Windows' "Tablet" mode as well as automatic detection of dark themes.
 - Windows on ARM is now a supported platform, but it needs a separate installer: there is no
   concept like Apple's "Universal Binaries" on the Windows platform.
 - Ubuntu 22.04 LTS is shipping up-to-date Qt libraries again, so there's a native package for that.
@@ -31,9 +29,14 @@ The advantages:
   uses the platform's native render interface (Direct3D on Windows, Metal on macOS/iOS, Vulkan
   or OpenGL on Linux/Android) directly.
 
-If you are interested in the technicalities: Qt was updated from 5.15.2 to 6.2.4 and the build
-system was ported from qmake to cmake.
-
+Other notable changes:
+- The mobile UIs for Android and iOS have taken a huge step forward, but they still are not feature
+  complete.
+- The IPA download for iOS is only installable on jailbroken devices - a version for the official
+  App Store is currently being tested, but needs a bit more work before Apple will accept it.
+- The LDraw parts library is now mirrored to brickforge.de, which should really speed up these
+  downloads.
+ 
 
 ## [2022.4.1] - 2022-04-02
 This update is **mandatory** for users of 2022.3.1:
