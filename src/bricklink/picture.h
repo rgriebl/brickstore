@@ -35,6 +35,7 @@ class Picture : public QObject, protected Ref
     Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
+    Q_PROPERTY(QImage image READ image NOTIFY imageChanged)
 
 public:
     static quint64 key(const Item *item, const Color *color);
@@ -49,7 +50,7 @@ public:
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
-    Q_INVOKABLE const QImage image() const;
+    const QImage image() const;
 
     qsizetype cost() const;
 
@@ -64,6 +65,7 @@ signals:
     void isValidChanged(bool newIsValid);
     void lastUpdatedChanged(const QDateTime &newLastUpdated);
     void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
+    void imageChanged(const QImage &newImage);
 
 private:
     const Item *  m_item;
@@ -89,6 +91,7 @@ private:
     void setIsValid(bool valid);
     void setUpdateStatus(UpdateStatus status);
     void setLastUpdated(const QDateTime &dt);
+    void setImage(const QImage &newImage);
 
     friend class Core;
     friend class PictureLoaderJob;

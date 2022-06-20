@@ -126,6 +126,14 @@ void Picture::setLastUpdated(const QDateTime &dt)
     }
 }
 
+void Picture::setImage(const QImage &newImage)
+{
+    if (newImage != m_image) {
+        m_image = newImage;
+        emit imageChanged(m_image);
+    }
+}
+
 quint64 Picture::key(const Item *item, const Color *color)
 {
     return (quint64(color ? color->id() : uint(-1)) << 32)

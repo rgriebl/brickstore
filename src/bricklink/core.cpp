@@ -1228,7 +1228,7 @@ void PictureLoaderJob::run()
         QMetaObject::invokeMethod(core(), [=]() {
             if (valid) {
                 pic->setLastUpdated(fetched);
-                pic->m_image = image;
+                pic->setImage(image);
             }
             pic->setUpdateStatus(UpdateStatus::Ok);
             pic->setIsValid(valid);
@@ -1270,8 +1270,14 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
 
     if (highPriority) {
         if (!pic->isValid()) {
-            bool valid = pic->loadFromDisk(pic->m_fetched, pic->m_image);
+            QDateTime dt;
+            QImage img;
+            bool valid = pic->loadFromDisk(dt, img);
             pic->setIsValid(valid);
+            if (valid) {
+                pic->setLastUpdated(dt);
+                pic->setImage(img);
+            }
             pic->setUpdateStatus(UpdateStatus::Ok);
 
             m_pic_cache.setObjectCost(key, pic->cost());
