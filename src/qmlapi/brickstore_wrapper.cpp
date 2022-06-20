@@ -311,6 +311,7 @@ bool QmlBrickStore::checkBrickLinkLogin()
 QmlDocumentProxyModel::QmlDocumentProxyModel(QObject *parent)
     : QAbstractProxyModel(parent)
     , m_forceLayoutDelay(new QTimer(this))
+    , m_columnModel(new QmlDocumentColumnModel(this))
 {
     m_forceLayoutDelay->setInterval(100);
     m_forceLayoutDelay->setSingleShot(true);
@@ -333,9 +334,11 @@ void QmlDocumentProxyModel::setDocument(Document *doc)
 
         connect(m_doc, &Document::columnPositionChanged,
                 m_connectionContext, [this](int /*li*/, int /*vi*/) {
+            m_columnModel->beginResetModel();
             beginResetModel();
             update();
             endResetModel();
+            m_columnModel->endResetModel();
             emitForceLayout(); //TODO: check if needed
         });
         connect(m_doc, &Document::columnSizeChanged,
@@ -405,6 +408,14 @@ void QmlDocumentProxyModel::setDocument(Document *doc)
                 m_connectionContext, [this](const QModelIndex &, int, int, const QModelIndex &, int) {
             endMoveRows();
         });
+        connect(this, &QmlDocumentProxyModel::headerDataChanged,
+                this, [this](Qt::Orientation orientation, int, int) {
+            if (orientation != Qt::Horizontal)
+                return;
+            auto tl = m_columnModel->index(0);
+            auto br = m_columnModel->index(m_columnModel->rowCount() - 1);
+            emit m_columnModel->dataChanged(tl, br);
+        });
     }
     update();
     endResetModel();
@@ -448,12 +459,21 @@ QVariant QmlDocumentProxyModel::data(const QModelIndex &index, int role) const
 
 QVariant QmlDocumentProxyModel::headerData(int section, Qt::Orientation o, int role) const
 {
-    if ((o == Qt::Horizontal) && (section >= 0) && (section < m_doc->model()->columnCount())
-            && (role == Qt::SizeHintRole)) {
+    if ((o != Qt::Horizontal) || (section < 0) || (section >= m_doc->model()->columnCount()))
+        return { };
+
+    switch (role) {
+    case Qt::SizeHintRole: {
         const auto &cd = m_doc->columnLayout().value(v2l[section]);
-        return cd.m_hidden ? 0 : cd.m_size;
+        return cd.m_size;
     }
-    return sourceModel()->headerData(v2l[section], o, role);
+    case Qt::CheckStateRole: {
+        const auto &cd = m_doc->columnLayout().value(v2l[section]);
+        return cd.m_hidden;
+    }
+    default:
+        return sourceModel()->headerData(v2l[section], o, role);
+    }
 }
 
 QModelIndex QmlDocumentProxyModel::mapToSource(const QModelIndex &index) const
@@ -487,6 +507,10 @@ QHash<int, QByteArray> QmlDocumentProxyModel::roleNames() const
     return hash;
 }
 
+QAbstractListModel *QmlDocumentProxyModel::columnModel()
+{
+    return m_columnModel;
+}
 
 void QmlDocumentProxyModel::update()
 {
@@ -507,6 +531,63 @@ void QmlDocumentProxyModel::update()
 void QmlDocumentProxyModel::emitForceLayout()
 {
     m_forceLayoutDelay->start();
+}
+
+void QmlDocumentProxyModel::internalMoveColumn(int viFrom, int viTo)
+{
+    int li = v2l[viFrom];
+    m_doc->moveColumn(li, viFrom, viTo);
+}
+
+void QmlDocumentProxyModel::internalHideColumn(int vi, bool hidden)
+{
+    int li = v2l[vi];
+    const auto &cd = m_doc->columnLayout().value(li);
+
+    if (cd.m_hidden != hidden)
+        m_doc->hideColumn(li, cd.m_hidden, hidden);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlDocumentColumnModel::QmlDocumentColumnModel(QmlDocumentProxyModel *proxyModel)
+    : QAbstractListModel(proxyModel)
+    , m_proxyModel(proxyModel)
+{ }
+
+int QmlDocumentColumnModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_proxyModel->columnCount();
+}
+
+QVariant QmlDocumentColumnModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return { };
+    return m_proxyModel->headerData(index.row(), Qt::Horizontal, role);
+}
+
+QHash<int, QByteArray> QmlDocumentColumnModel::roleNames() const
+{
+    static QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "name" },
+        { Qt::CheckStateRole, "hidden" },
+    };
+    return roles;
+}
+
+void QmlDocumentColumnModel::moveColumn(int viFrom, int viTo)
+{
+    m_proxyModel->internalMoveColumn(viFrom, viTo);
+}
+
+void QmlDocumentColumnModel::hideColumn(int vi, bool hidden)
+{
+    m_proxyModel->internalHideColumn(vi, hidden);
 }
 
 

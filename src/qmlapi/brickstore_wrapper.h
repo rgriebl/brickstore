@@ -38,13 +38,15 @@ class QmlPicture;
 namespace LDraw {
 class RenderController;
 }
-
+class QmlDocumentColumnModel;
 
 
 class QmlDocumentProxyModel : public QAbstractProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(Document *document READ document WRITE setDocument NOTIFY documentChanged REQUIRED)
+    Q_PROPERTY(QAbstractListModel *columnModel READ columnModel CONSTANT)
+
 public:
     QmlDocumentProxyModel(QObject *parent = nullptr);
 
@@ -69,6 +71,8 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
+    QAbstractListModel *columnModel();
+
 signals:
     void forceLayout();
     void documentChanged(Document *doc);
@@ -77,12 +81,38 @@ private:
     void update();
     void emitForceLayout();
 
+    void internalHideColumn(int vi, bool visible);
+    void internalMoveColumn(int viFrom, int viTo);
+
     QVector<int> l2v;
     QVector<int> v2l;
 
     QPointer<Document> m_doc;
     QObject *m_connectionContext = nullptr;
     QTimer *m_forceLayoutDelay = nullptr;
+    QmlDocumentColumnModel *m_columnModel = nullptr;
+
+    friend class QmlDocumentColumnModel;
+};
+
+class QmlDocumentColumnModel : public QAbstractListModel
+{
+    Q_OBJECT
+    Q_PROPERTY(int count READ rowCount CONSTANT)
+
+public:
+    QmlDocumentColumnModel(QmlDocumentProxyModel *proxyModel);
+
+    int rowCount(const QModelIndex &parent = { }) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Q_INVOKABLE void moveColumn(int viFrom, int viTo);
+    Q_INVOKABLE void hideColumn(int vi, bool hidden);
+
+private:
+    QmlDocumentProxyModel *m_proxyModel;
+    friend class QmlDocumentProxyModel;
 };
 
 

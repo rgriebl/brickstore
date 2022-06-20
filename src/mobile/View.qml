@@ -109,6 +109,7 @@ Page {
             ViewHeaderMenu {
                 id: headerMenu
                 document: root.document
+                model: table.model
             }
 
             delegate: GridHeader {
@@ -140,7 +141,8 @@ Page {
             property int cellHeight: fontMetrics.height * 2 * BS.Config.itemImageSizePercent / 100 + 8
             onCellHeightChanged: Qt.callLater(function() { forceLayout() })
 
-            columnWidthProvider: (c) => table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
+            columnWidthProvider: (c) => table.model.headerData(c, Qt.Horizontal, Qt.CheckStateRole)
+                                 ? 0 : table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
             rowHeightProvider: () => cellHeight
 
             selectionModel: document.selectionModel
@@ -292,7 +294,7 @@ Page {
                             anchors.centerIn: parent
                             enabled: false
                             checked: false
-                            visible: stockroom === BrickLink.None
+                            visible: stockroom === BS.BrickLink.None
                         }
                     }
                 }
