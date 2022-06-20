@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_toolbar, &QToolBar::visibilityChanged,
             this, [this]() {
-        if (m_welcomeWidget->isVisible())
+        if (m_welcomeWidget->isVisibleTo(this))
             repositionHomeWidget();
     });
 
@@ -280,6 +280,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(Config::inst(), &Config::toolBarActionsChanged,
             this, &MainWindow::setupToolBar);
+
+    goHome(true);
 }
 
 void MainWindow::setupScripts()
@@ -434,7 +436,7 @@ void MainWindow::createCentralWidget()
 {
     m_welcomeWidget = new WelcomeWidget(this);
     m_welcomeWidget->setAutoFillBackground(true);
-    repositionHomeWidget();
+    m_welcomeWidget->hide();
 
     auto *rootSplitter = new QSplitter();
     rootSplitter->setObjectName("RootSplitter"_l1);
@@ -454,7 +456,6 @@ void MainWindow::createCentralWidget()
             }
         }
     });
-    repositionHomeWidget();
 }
 
 void MainWindow::setActiveViewPane(ViewPane *newActive)
@@ -540,9 +541,9 @@ void MainWindow::goHome(bool home)
 void MainWindow::repositionHomeWidget()
 {
     QRect r = rect();
-    if (menuBar() && menuBar()->isVisible())
+    if (menuBar() && menuBar()->isVisibleTo(this))
         r.setTop(r.top() + menuBar()->height());
-    if (m_toolbar->isVisible())
+    if (m_toolbar->isVisibleTo(this))
         r.setTop(r.top() + m_toolbar->height());
 
     m_welcomeWidget->setGeometry(r);
@@ -1243,8 +1244,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::resizeEvent(QResizeEvent *e)
 {
-    QMainWindow::resizeEvent(e);
     repositionHomeWidget();
+    QMainWindow::resizeEvent(e);
 }
 
 void MainWindow::closeAllDialogs()
