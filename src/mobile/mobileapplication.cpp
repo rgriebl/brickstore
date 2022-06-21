@@ -46,6 +46,8 @@ void MobileApplication::init()
     Application::init();
 
     m_engine->setBaseUrl(QUrl("qrc:/mobile/"_l1));
+    if (qEnvironmentVariableIntValue("SHOW_TRACER") == 1)
+        m_engine->rootContext()->setContextProperty(u"showTracer"_qs, true);
 
     MobileUIHelpers::create(m_engine);
 

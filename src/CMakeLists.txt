@@ -365,6 +365,7 @@ if (BS_MOBILE)
         mobile/StyleHelper.qml
         mobile/+Material/StyleHelper.qml
         mobile/SystemInfoDialog.qml
+        mobile/Tracer.qml
         mobile/View.qml
         mobile/ViewEditMenu.qml
         mobile/ViewHeaderMenu.qml
