@@ -58,7 +58,7 @@ void MobileApplication::init()
             return new QAction(this);
     });
 
-    setIconTheme(DarkTheme);
+    setIconTheme(LightTheme);
 
     m_engine->load(m_engine->baseUrl().resolved(QUrl("Main.qml"_l1)));
 
@@ -67,29 +67,9 @@ void MobileApplication::init()
         return;
     }
 
-    int tid = qmlTypeId("Mobile", 1, 0, "Style");
-    auto s = m_engine->singletonInstance<QObject *>(tid);
-    qWarning() << tid << s;
-
-    connect(Config::inst(), &Config::uiThemeChanged, this, &MobileApplication::setMobileIconTheme);
-    setMobileIconTheme();
-
     setUILoggingHandler([](QtMsgType, const QMessageLogContext &, const QString &) {
         // just ignore for now, but we need to set one
     });
-}
-
-void MobileApplication::setMobileIconTheme()
-{
-    auto roots = m_engine->rootObjects();
-    if (roots.isEmpty())
-        return;
-    QObject *root = roots.constFirst();
-    QQmlProperty theme(root, u"Style.darkTheme"_qs, qmlContext(root));
-
-    qWarning() << "TR?" << theme.read();
-
-    setIconTheme(theme.read().toBool() ? DarkTheme : LightTheme);
 }
 
 QCoro::Task<bool> MobileApplication::closeAllViews()

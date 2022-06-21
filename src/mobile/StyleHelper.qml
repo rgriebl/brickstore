@@ -7,6 +7,8 @@ QtObject {
     property color textColor: "black"
     property color hintTextColor: "gray"
     property color accentTextColor: "white"
+    property color primaryColor: "red"
+    property color primaryTextColor: "white"
+    property color primaryHighlightedTextColor: "white"
 
-    property var themeRootItem // ignored here
 }

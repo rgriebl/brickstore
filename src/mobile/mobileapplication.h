@@ -28,8 +28,6 @@ public:
 
     void init() override;
 
-    void setMobileIconTheme();
-
 protected:
     QCoro::Task<bool> closeAllViews() override;
     void setupQml() override;

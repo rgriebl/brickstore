@@ -306,6 +306,11 @@ bool QmlBrickStore::checkBrickLinkLogin()
     return QCoro::waitFor(Application::inst()->checkBrickLinkLogin());
 }
 
+void QmlBrickStore::updateIconTheme(bool darkTheme)
+{
+    Application::inst()->setIconTheme(darkTheme ? Application::DarkTheme : Application::LightTheme);
+}
+
 
 
 QmlDocumentProxyModel::QmlDocumentProxyModel(QObject *parent)

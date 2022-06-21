@@ -60,6 +60,9 @@ public:
 
     virtual QCoro::Task<bool> closeAllViews();
 
+    enum Theme { LightTheme, DarkTheme };
+    void setIconTheme(Theme theme);
+
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });
@@ -68,8 +71,6 @@ signals:
 protected:
     static void setupTerminateHandler();
     virtual void setupLogging();
-    enum Theme { LightTheme, DarkTheme };
-    void setIconTheme(Theme theme);
     virtual void setupQml();
     void redirectQmlEngineWarnings(const QLoggingCategory &cat);
 

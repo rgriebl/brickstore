@@ -275,6 +275,8 @@ public:
 
     Q_INVOKABLE bool checkBrickLinkLogin();
 
+    Q_INVOKABLE void updateIconTheme(bool darkTheme);
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);

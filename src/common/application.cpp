@@ -740,18 +740,21 @@ void Application::setIconTheme(Theme theme)
     QPixmapCache::clear();
     QIcon::setThemeName(theme == DarkTheme ? "brickstore-breeze-dark"_l1 : "brickstore-breeze"_l1);
 
-    auto roots = m_engine->rootObjects();
-    if (!roots.isEmpty()) {
-        QObject *root = roots.constFirst();
+    // we need to delay this, because we are called during the construction of the QML root item
+    QMetaObject::invokeMethod(this, [this]() {
+        auto roots = m_engine->rootObjects();
+        if (!roots.isEmpty()) {
+            QObject *root = roots.constFirst();
 
-        // force all icons to update by re-setting the name
-        const auto icons = root->findChildren<QQuickIconImage *>();
-        for (const auto &icon : icons) {
-            QString name = icon->name();
-            icon->setName("foo"_l1);
-            icon->setName(name);
+            // force all icons to update by re-setting the name
+            const auto icons = root->findChildren<QQuickIconImage *>();
+            for (const auto &icon : icons) {
+                QString name = icon->name();
+                icon->setName("foo"_l1);
+                icon->setName(name);
+            }
         }
-    }
+    }, Qt::QueuedConnection);
 }
 
 
