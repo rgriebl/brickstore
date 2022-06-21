@@ -21,6 +21,7 @@
 QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QTranslator)
 QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
+QT_FORWARD_DECLARE_CLASS(QGuiApplication)
 
 
 class Announcements;
@@ -105,6 +106,6 @@ protected:
     UndoGroup *m_undoGroup;
 
     QQmlApplicationEngine *m_engine = nullptr;
-
+    QGuiApplication *m_app = nullptr;
     static Application *s_inst;
 };

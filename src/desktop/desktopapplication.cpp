@@ -68,19 +68,9 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 #if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
-#else
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #endif
 
-#if defined(Q_OS_LINUX)
-    const QByteArray xdgDesktop = qgetenv("XDG_CURRENT_DESKTOP");
-    for (const auto *gtkBased : { "GNOME", "MATE", "Cinnamon" }) {
-        if (xdgDesktop.contains(gtkBased))
-            qputenv("QT_QPA_PLATFORMTHEME", "gtk2");
-    }
-#endif
-
-    (void) new QApplication(argc, argv);
+    m_app = new QApplication(argc, argv);
 
     m_clp.addHelpOption();
     m_clp.addVersionOption();
@@ -113,13 +103,11 @@ void DesktopApplication::init()
     // the handling of emacs-style multi-key shortcuts is broken on macOS, because menu
     // shortcuts are handled directly in the QPA plugin, instead of going through the global
     // QShortcutMap. The workaround is override any shortcut while the map is in PartialMatch state.
-    new EventFilter(qApp, [](QObject *, QEvent *e) -> bool {
-        if (e->type() == QEvent::ShortcutOverride) {
-            auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
-            if (scm.state() == QKeySequence::PartialMatch) {
-                e->accept();
-                return EventFilter::StopEventProcessing;
-            }
+    new EventFilter(qApp, { QEvent::ShortcutOverride }, [](QObject *, QEvent *e) {
+        auto &scm = QGuiApplicationPrivate::instance()->shortcutMap;
+        if (scm.state() == QKeySequence::PartialMatch) {
+            e->accept();
+            return EventFilter::StopEventProcessing;
         }
         return EventFilter::ContinueEventProcessing;
     });

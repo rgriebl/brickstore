@@ -96,8 +96,9 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
-    qInfo() << "Device pixel ratio :" << qApp->devicePixelRatio() << qApp->highDpiScaleFactorRoundingPolicy();
-    const auto screenSize = qApp->primaryScreen()->physicalSize();
+    qInfo() << "Device pixel ratio :" << qApp->devicePixelRatio()
+            << QGuiApplication::highDpiScaleFactorRoundingPolicy();
+    const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();
     qInfo() << "Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
 
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
@@ -363,7 +364,7 @@ Application::~Application()
     delete Config::inst();
 
     s_inst = nullptr;
-    delete qApp;
+    delete m_app;
 
     shutdownSentry();
 }

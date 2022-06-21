@@ -34,9 +34,7 @@
 MobileApplication::MobileApplication(int &argc, char **argv)
     : Application(argc, argv)
 {
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-
-    (void) new QGuiApplication(argc, argv);
+    m_app = new QGuiApplication(argc, argv);
 
     qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
 }

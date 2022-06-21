@@ -191,8 +191,8 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
                                 name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
                                                ? "-ascending"_l1 : "-descending"_l1);
                             }
-                            pix = QIcon::fromTheme(name).pixmap(widget->window()->windowHandle(),
-                                                                QSize(iconSize, iconSize),
+                            pix = QIcon::fromTheme(name).pixmap(QSize(iconSize, iconSize),
+                                                                widget->devicePixelRatio(),
                                                                 (opt->state & State_Enabled) ?
                                                                     QIcon::Normal : QIcon::Disabled);
 
@@ -202,7 +202,7 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
                                 pix2.fill(Qt::transparent);
                                 QPainter pPix2(&pix2);
                                 pPix2.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
-                                pPix2.drawPixmap(pix2.rect(), pix);
+                                pPix2.drawPixmap(QRect({ }, pix2.deviceIndependentSize().toSize()), pix);
                                 pPix2.end();
                                 pix = pix2;
                             }

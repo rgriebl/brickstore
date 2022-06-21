@@ -318,12 +318,5 @@ ApplicationWindow {
                      "help_systeminfo": () => { systemInfoDialog.open() },
                      "help_announcements": () => { },
                  })
-
-//        console.log("W",Screen.width / Screen.pixelDensity)
-//        console.log("H",Screen.height / Screen.pixelDensity)
-//        console.log("DPR",Screen.devicePixelRatio)
-//        console.log("PD",Screen.pixelDensity)
-//        console.log("DW",Screen.desktopAvailableWidth)
-//        console.log("DH",Screen.desktopAvailableHeight)
     }
 }
