@@ -66,7 +66,7 @@ Control {
                 elide: Text.ElideRight
                 wrapMode: Text.Wrap
 
-                color: selected ? Style.accentTextColor : Style.textColor
+                color: selected ? Style.primaryHighlightedTextColor : Style.textColor
             }
         }
     }
@@ -75,9 +75,9 @@ Control {
         anchors.fill: parent
         z: -1
         color: {
-            let c = selected ? Style.accentColor : Style.backgroundColor
+            let c = selected ? Style.primaryColor : Style.backgroundColor
             if (alternate)
-                c = BS.Utililty.contrastColor(c, 0.1)
+                c = Qt.darker(c, 1.1)
             return c
         }
     }

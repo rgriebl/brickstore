@@ -77,7 +77,7 @@ Control {
             Layout.fillWidth: true
             Layout.columnSpan: 3
             text: qsTr("Last 6 Months Sale")
-            background: Rectangle { anchors.fill: parent; color: root.palette.alternateBase}
+            background: Rectangle { anchors.fill: parent; color: Qt.darker(Style.backgroundColor, 1.1) }
         }
 
         Label { text: qsTr("Qty.") }
@@ -104,7 +104,7 @@ Control {
             Layout.fillWidth: true
             Layout.columnSpan: 3
             text: qsTr("Current Inventory")
-            background: Rectangle { anchors.fill: parent; color: root.palette.alternateBase}
+            background: Rectangle { anchors.fill: parent; color: Qt.darker(Style.backgroundColor, 1.1) }
         }
 
         Label { text: qsTr("Qty.") }

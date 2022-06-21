@@ -23,7 +23,6 @@ BrickStoreDialog {
         none = (selected === 0)
 
         if (single) {
-            root.title = ''
 
             let lot = BS.BrickLink.lot(document.selectedLots[0])
             info.lot = lot
@@ -33,6 +32,8 @@ BrickStoreDialog {
 
             appearsIn.items = [ lot.item ]
             appearsIn.colors = [ lot.color ]
+
+            root.title = BS.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
         } else {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
@@ -57,6 +58,8 @@ BrickStoreDialog {
             appearsIn.items = items
             appearsIn.colors = colors
         }
+        if (!tabBar.currentItem.enabled)
+            tabBar.currentIndex = 0
     }
 
     function clearInfos() {

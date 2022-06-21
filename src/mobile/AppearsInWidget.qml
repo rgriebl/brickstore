@@ -56,7 +56,7 @@ Control {
                     property BS.Picture pic: BS.BrickLink.largePicture(delegate.blitem)
                     property var noImage: BS.BrickLink.noImage(width, height)
 
-                    image: pic && pic.isValid ? pic.image() : noImage
+                    image: pic && pic.isValid ? pic.image : noImage
                 }
                 Label {
                     Layout.fillWidth: true

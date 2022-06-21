@@ -714,7 +714,7 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 void Application::setupLogging()
 {
 //    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message}"_l1);
-    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n"_l1);
+    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_l1);
 //    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_l1);
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)

@@ -25,6 +25,9 @@ Dialog {
 //    // small is defined as "smaller than 8cm x 12cm"
 //    property bool small: (physicalScreenSize.width < 80) || (physicalScreenSize.height < 120) || forceSmall
 
+    property int defaultTopPadding: 0
+    property Item defaultHeader: null
+
     property Item smallHeader: ToolBar {
         id: toolBar
         width: root.width
@@ -45,6 +48,7 @@ Dialog {
                 minimumPointSize: font.pointSize / 2
                 fontSizeMode: Text.Fit
                 text: root.title
+                textFormat: Text.RichText
                 elide: Label.ElideLeft
                 horizontalAlignment: Qt.AlignLeft
             }
@@ -53,9 +57,16 @@ Dialog {
 
     //TODO: fix after Key_Back handling is fixed in 6.4 for Popup
     onOpened: contentItem.forceActiveFocus()
+
+    Connections {
+        target: Style
+        function onSmallSizeChanged() {
+            switchSmallStyle()
+        }
+    }
     Component.onCompleted: {
-        if (Style.smallSize)
-            header = smallHeader
+        header.textFormat = Text.RichText
+        switchSmallStyle()
         contentItem.focus = true
         contentItem.Keys.released.connect(function(e) {
             if (e.key === Qt.Key_Back) {
@@ -63,6 +74,21 @@ Dialog {
                 close()
             }
         })
+    }
+    function switchSmallStyle() {
+        if (Style.smallSize) {
+            if (!defaultHeader) {
+                defaultHeader = header
+                defaultTopPadding = topPadding
+            }
+            header = smallHeader
+            topPadding = 0
+        } else {
+            if (defaultHeader) {
+                header = defaultHeader
+                topPadding = defaultTopPadding
+            }
+        }
     }
 }
 

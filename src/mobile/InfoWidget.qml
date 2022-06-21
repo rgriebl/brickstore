@@ -25,8 +25,7 @@ Control {
         picture = null
 
         if (single) {
-            infoText.text = BS.BrickLink.itemHtmlDescription(lot.item, lot.color, infoText.palette.highlight)
-
+            infoText.text = ''
             picture = BS.BrickLink.picture(lot.item, lot.color, true)
             if (picture)
                 picture.addRef()
@@ -48,56 +47,51 @@ Control {
             picture.release()
     }
 
-    ColumnLayout {
+    StackLayout {
         anchors.fill: parent
-        Label {
-            Layout.fillWidth: true
+        clip: true
+        currentIndex: root.single ? (root.is3D ? 2 : 1) : 0
 
+        Label {
             id: infoText
             textFormat: Text.RichText
             wrapMode: Text.Wrap
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            leftPadding: 8
         }
-        StackLayout {
-            clip: true
 
-            currentIndex: root.is3D ? 1 : 0
+        BS.QImageItem {
+            id: infoImage
+            fillColor: "white"
+            image: root.picture && root.picture.isValid ? root.picture.image : noImage
+            property var noImage: BS.BrickLink.noImage(width, height)
 
-            BS.QImageItem {
-                id: infoImage
-                fillColor: "white"
-                image: root.picture && root.picture.isValid ? root.picture.image() : noImage
-                property var noImage: BS.BrickLink.noImage(width, height)
-
-                Label {
-                    id: infoImageUpdating
-                    anchors.fill: parent
-                    visible: root.isUpdating
-                    color: "black"
-                    fontSizeMode: Text.Fit
-                    font.pointSize: root.font.pointSize * 3
-                    font.italic: true
-                    minimumPointSize: root.font.pointSize
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    text: qsTr("Please wait... updating")
-                }
-
-                Glow {
-                    anchors.fill: infoImageUpdating
-                    visible: root.isUpdating
-                    radius: 8
-                    spread: 0.5
-                    color: "white"
-                    source: infoImageUpdating
-                }
+            Label {
+                id: infoImageUpdating
+                anchors.fill: parent
+                visible: root.isUpdating
+                color: "black"
+                fontSizeMode: Text.Fit
+                font.pointSize: root.font.pointSize * 3
+                font.italic: true
+                minimumPointSize: root.font.pointSize
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: qsTr("Please wait... updating")
             }
 
-            LDraw.PartRenderer {
-                id: info3D
-                renderController: BS.BrickStore.createRenderController(this)
+            Glow {
+                anchors.fill: infoImageUpdating
+                visible: root.isUpdating
+                radius: 8
+                spread: 0.5
+                color: "white"
+                source: infoImageUpdating
             }
+        }
+
+        LDraw.PartRenderer {
+            id: info3D
+            renderController: BS.BrickStore.createRenderController(this)
         }
     }
     RowLayout {
