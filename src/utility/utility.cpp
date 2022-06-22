@@ -33,14 +33,16 @@ static int naturalCompareNumbers(const QChar *&n1, const QChar *&n2)
         const auto d1 = (n1++)->digitValue();
         const auto d2 = (n2++)->digitValue();
 
-        if (d1 == -1 && d2 == -1)
+        if (d1 == -1 && d2 == -1) {
+            --n1; --n2;
             return result;
-        else if (d1 == -1)
+        } else if (d1 == -1) {
             return -1;
-        else if (d2 == -1)
+        } else if (d2 == -1) {
             return 1;
-        else if (d1 != d2 && !result)
+        } else if (d1 != d2 && !result) {
             result = d1 - d2;
+        }
     }
 }
 
