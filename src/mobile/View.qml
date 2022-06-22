@@ -170,26 +170,28 @@ Page {
                 onForceLayout: table.forceLayout()
             }
 
-            Component {
-                id: currencyDelegate
-                GridCell {
+            delegate: DelegateChooser {
+                id: chooser
+                role: "documentField"
+
+                component CurrencyGridCell: GridCell {
                     function fuzzyCompare(d1, d2) {
                         return Math.abs(d1 - d2) <= 1e-12 * Math.max(1.0, Math.abs(d1), Math.abs(d2));
                     }
 
                     text: root.fuzzyCompare(display) ? "-" : BS.Currency.format(display)
                 }
-            }
-            Component {
-                id: uintDelegate
-                GridCell {
+                component UIntGridCell : GridCell {
                     text: display === 0 ? "-" : display
                 }
-            }
+                component DateGridCell : GridCell {
+                    property date dt: display
 
-            delegate: DelegateChooser {
-                id: chooser
-                role: "documentField"
+                    text: (isFinite(dt) && (dt.getUTCHours() === 0) && (dt.getUTCMinutes() === 0))
+                          ? dt.toLocaleDateString(Locale.ShortFormat)
+                          : isFinite(dt) ? dt.toLocaleString(Locale.ShortFormat)
+                                         : '-'
+                }
 
                 DelegateChoice { roleValue: BS.Document.Condition
                     GridCell {
@@ -282,19 +284,15 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         property var stockroom: display
-                        text: {
-                            switch(stockroom) {
-                            case BS.BrickLink.Stockroom.A: return "A"
-                            case BS.BrickLink.Stockroom.B: return "B"
-                            case BS.BrickLink.Stockroom.C: return "C"
-                            default: return ""
-                            }
-                        }
+                        text: stockroom === BS.BrickLink.Stockroom.A
+                              ? 'A' : (stockroom === BS.BrickLink.Stockroom.B
+                                ? 'B' : (stockroom === BS.BrickLink.Stockroom.C
+                                  ? 'C' : ''))
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
                             checked: false
-                            visible: stockroom === BS.BrickLink.None
+                            visible: stockroom === BS.BrickLink.Stockroom.None
                         }
                     }
                 }
@@ -307,8 +305,12 @@ Page {
                     GridCell { text: humanReadableInteger(display, 1) }
                 }
 
-                DelegateChoice { roleValue: BS.Document.Price; delegate: currencyDelegate }
-                DelegateChoice { roleValue: BS.Document.PriceOrig; delegate: currencyDelegate }
+                DelegateChoice { roleValue: BS.Document.Price
+                    CurrencyGridCell { }
+                }
+                DelegateChoice { roleValue: BS.Document.PriceOrig
+                    CurrencyGridCell { }
+                }
                 DelegateChoice { roleValue: BS.Document.PriceDiff
                     GridCell {
 //                        required property var baseLot  remove?
@@ -324,7 +326,9 @@ Page {
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
-                DelegateChoice { roleValue: BS.Document.Cost; delegate: currencyDelegate }
+                DelegateChoice { roleValue: BS.Document.Cost
+                    CurrencyGridCell { }
+                }
                 DelegateChoice { roleValue: BS.Document.TierP1
                     GridCell {
                         text: humanReadableCurrency(display)
@@ -382,9 +386,12 @@ Page {
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
-                DelegateChoice { roleValue: BS.Document.LotId; delegate: uintDelegate }
-                DelegateChoice { roleValue: BS.Document.YearReleased; delegate: uintDelegate }
-
+                DelegateChoice { roleValue: BS.Document.LotId
+                    UIntGridCell { }
+                }
+                DelegateChoice { roleValue: BS.Document.YearReleased
+                    UIntGridCell { }
+                }
                 DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
                         required property var lot
@@ -398,6 +405,12 @@ Page {
                         tint: root.shadeColor(BS.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
+                }
+                DelegateChoice { roleValue: BS.Document.DateAdded
+                    DateGridCell { }
+                }
+                DelegateChoice { roleValue: BS.Document.DateLastSold
+                    DateGridCell { }
                 }
 
                 DelegateChoice { GridCell { text: display } }

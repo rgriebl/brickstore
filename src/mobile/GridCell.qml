@@ -78,7 +78,7 @@ Control {
             let c = selected ? Style.primaryColor : Style.backgroundColor
             if (alternate)
                 c = Qt.darker(c, 1.1)
-            return c
+            return Qt.tint(c, tint)
         }
     }
 
