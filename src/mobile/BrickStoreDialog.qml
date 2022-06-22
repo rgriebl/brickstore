@@ -26,6 +26,9 @@ Dialog {
 //    property bool small: (physicalScreenSize.width < 80) || (physicalScreenSize.height < 120) || forceSmall
 
     property int defaultTopPadding: 0
+    property int defaultLeftPadding: 0
+    property int defaultRightPadding: 0
+    property int defaultBottomPadding: 0
     property Item defaultHeader: null
 
     property Item smallHeader: ToolBar {
@@ -83,10 +86,16 @@ Dialog {
             }
             header = smallHeader
             topPadding = 0
+            leftPadding = 0
+            rightPadding = 0
+            bottomPadding = 0
         } else {
             if (defaultHeader) {
                 header = defaultHeader
                 topPadding = defaultTopPadding
+                leftPadding = defaultLeftPadding
+                rightPadding = defaultRightPadding
+                bottomPadding = defaultBottomPadding
             }
         }
     }

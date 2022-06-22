@@ -7,12 +7,13 @@ import QtQuick.Controls
 Menu {
     width: {
         let result = 0
-        let padding = 0
         for (let i = 0; i < count; ++i) {
             let item = itemAt(i)
-            result = Math.max(item.implicitWidth, result)
-            padding = Math.max(item.padding, padding)
+            let w = item.implicitWidth
+            let lpad = item.leftPadding || 0
+            let rpad = item.rightPadding || 0
+            result = Math.max(w + lpad + rpad, result)
         }
-        return result + padding * 2
+        return result
     }
 }

@@ -31,7 +31,7 @@ public:
     QModelIndex parent(const QModelIndex &) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    void sort(int column, Qt::SortOrder order) override;
+    Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
 
     int sortColumn() const;
     Qt::SortOrder sortOrder() const;

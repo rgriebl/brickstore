@@ -48,9 +48,8 @@ BrickStoreDialog {
 
             ColumnLayout {
                 width: langScroller.width
-                GridLayout {
-                    columns: 2
-                    columnSpacing: root.spacing
+                RowLayout {
+                    spacing: root.spacing
                     Layout.leftMargin: root.spacing
                     Layout.rightMargin: root.spacing
                     Label {
@@ -80,6 +79,11 @@ BrickStoreDialog {
                         onActivated: { BS.Config.language = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.language) }
                     }
+                }
+                RowLayout {
+                    spacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
 
                     Label {
                         text: qsTr("Weights")
@@ -98,6 +102,11 @@ BrickStoreDialog {
                         onActivated: { BS.Config.measurementSystem = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.measurementSystem) }
                     }
+                }
+                RowLayout {
+                    spacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
 
                     Label {
                         text: qsTr("Default currency")
@@ -201,6 +210,7 @@ BrickStoreDialog {
                 width: blScroller.width
                 GridLayout {
                     columns: 2
+                    Layout.rightMargin: 16
                     ItemDelegate {
                         text: qsTr("Username")
                         font.pixelSize: blUsername.font.pixelSize
@@ -215,7 +225,12 @@ BrickStoreDialog {
                     }
                     Label {
                         Layout.columnSpan: 2
+                        Layout.fillWidth: true
                         text: qsTr("Your username is required here - not your email address.")
+                        wrapMode: Text.Wrap
+                        leftPadding: 16
+                        rightPadding: 16
+                        font.bold: true
                         color: Qt.rgba(1, .4, .4)
                         visible: blUsername.text.indexOf('@') >= 0
                     }
@@ -233,7 +248,12 @@ BrickStoreDialog {
                     }
                     Label {
                         Layout.columnSpan: 2
+                        Layout.fillWidth: true
                         text: qsTr("BrickLink's maximum password length is 15.")
+                        wrapMode: Text.Wrap
+                        leftPadding: 16
+                        rightPadding: 16
+                        font.bold: true
                         color: Qt.rgba(1, .4, .4)
                         visible: blPassword.text.length > 15
                     }

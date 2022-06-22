@@ -1,8 +1,10 @@
 //.pragma library
 
 function flashScrollIndicator(flickable) {
-    if (flickable.ScrollIndicator && flickable.ScrollIndicator.vertical)
+    if (flickable.ScrollIndicator.vertical)
         flickable.ScrollIndicator.vertical.active = true
+    else if (flickable.ScrollBar.vertical)
+        flickable.ScrollBar.vertical.active = true
     else
         return
 
@@ -11,8 +13,12 @@ function flashScrollIndicator(flickable) {
     timer.repeat = false
     timer.triggered.connect(function() {
         timer.destroy()
-        if (!flickable.moving)
-            flickable.ScrollIndicator.vertical.active = false
+        if (!flickable.moving) {
+            if (flickable.ScrollIndicator.vertical)
+                flickable.ScrollIndicator.vertical.active = false
+            else if (flickable.ScrollBar.vertical)
+                flickable.ScrollBar.vertical.active = false
+        }
     })
     timer.start()
 }

@@ -100,7 +100,7 @@ Control {
 
     MouseArea {
         anchors.fill: parent
-        onDoubleClicked: parent.showMenu(parent.logicalIndex, parent.visualIndex)
+        onClicked: parent.showMenu(parent.logicalIndex, parent.visualIndex)
     }
 }
 

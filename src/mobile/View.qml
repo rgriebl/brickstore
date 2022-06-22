@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.qmlmodels
+import "./utils.js" as Utils
 import BrickStore as BS
 
 
@@ -22,6 +23,10 @@ Page {
         }
     }
 
+    Component.onCompleted: {
+        Utils.flashScrollIndicator(table)
+    }
+
     focus: true
 
     header: ToolBar {
@@ -37,11 +42,15 @@ Page {
                 onClicked: root.goHomeFunction()
             }
             ToolButton {
+                id: editUndo
                 action: BS.ActionManager.quickAction("edit_undo")
+                visible: enabled || editRedo.enabled
                 display: Button.IconOnly
             }
             ToolButton {
+                id: editRedo
                 action: BS.ActionManager.quickAction("edit_redo")
+                visible: enabled || editUndo.enabled
                 display: Button.IconOnly
             }
             Label {
@@ -124,8 +133,8 @@ Page {
             id: table
 //            ScrollIndicator.horizontal: ScrollIndicator { id: hbar; active: vbar.active }
 //            ScrollIndicator.vertical: ScrollIndicator { id: vbar; active: hbar.active }
-            ScrollBar.horizontal: ScrollBar { id: hbar; active: vbar.active }
-            ScrollBar.vertical: ScrollBar { id: vbar; active: hbar.active }
+            ScrollBar.horizontal: ScrollBar { id: hbar; minimumSize: 0.07; active: vbar.active }
+            ScrollBar.vertical: ScrollBar { id: vbar; minimumSize: 0.07; active: hbar.active }
 
             boundsBehavior: Flickable.StopAtBounds
 
@@ -476,7 +485,7 @@ Page {
     }
 
     property QtObject connectionContext: null
-    property bool active: document && (BS.ActionManager.activeDocument === root.document)
+    property bool active: document && (BS.ActionManager.activeDocument == root.document)
 
     onActiveChanged: {
         if (active) {

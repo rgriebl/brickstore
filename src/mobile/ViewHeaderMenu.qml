@@ -5,7 +5,7 @@ import Qt.labs.qmlmodels
 import BrickStore
 
 
-Menu {
+AutoSizingMenu {
     id: root
     property int field
     required property Document document
@@ -17,7 +17,6 @@ Menu {
     cascade: false
     parent: Overlay.overlay
     anchors.centerIn: parent
-    width: Overlay.overlay.width * 2 / 3
 
     ActionDelegate { action: Action { text: qsTr("Sort ascending by %1").arg(root.fieldName)
             onTriggered: document.model.sort(root.field, Qt.AscendingOrder)
@@ -100,7 +99,7 @@ Menu {
     }
     ActionDelegate { actionName: "view_column_layout_load"
         onTriggered: loadLayoutMenu.popup()
-        Menu {
+        AutoSizingMenu {
             id: loadLayoutMenu
             modal: true
             cascade: false

@@ -5,7 +5,7 @@ import BrickStore as BS
 
 Page {
     id: root
-    title: qsTr("Import")
+    title: qsTr("Part out")
 
     property var goBackFunction
 
@@ -36,9 +36,10 @@ Page {
                 horizontalAlignment: Qt.AlignHCenter
             }
             ToolButton {
-                property bool lastPage: pages.currentIndex == (pages.count - 1)
+                property bool lastPage: pages.currentIndex === (pages.count - 1)
                 text: lastPage ? qsTr("Import") : qsTr("Next")
                 icon.name: lastPage ? "brick-1x1" : ""
+                enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
                 onClicked: {
                     if (lastPage && !root.currentItem.isNull) {
                         let condition = conditionNew.checked ? BS.BrickLink.Condition.New
@@ -80,6 +81,9 @@ Page {
                     Repeater {
                         model: BS.ItemTypeModel {
                             filterWithoutInventory: true
+
+                            // get "Set" to the left side
+                            Component.onCompleted: { sort(0, Qt.DescendingOrder) }
                         }
                         delegate: TabButton {
                             property var itemTypeProp: itemType
@@ -90,7 +94,7 @@ Page {
                         catList.model.filterItemType = currentItem.itemTypeProp
                         itemList.model.filterItemType = currentItem.itemTypeProp
                     }
-                    currentIndex: count - 1
+                    currentIndex: 0
                 }
 
                 ListView {
@@ -171,6 +175,8 @@ Page {
                     model: BS.ItemModel {
                         filterWithoutInventory: true
                         filterText: filter.text
+
+                        Component.onCompleted: { sort(1, Qt.AscendingOrder) }
                     }
 
                     property var noImage: BS.BrickLink.noImage(cellWidth, cellHeight)
@@ -250,10 +256,15 @@ Page {
         }
 
         Pane {
+            padding: 0
             ColumnLayout {
                 enabled: !root.currentItem.isNull
                 anchors.fill: parent
                 RowLayout {
+                    Layout.topMargin: 8
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 0
                     BS.QImageItem {
                         height: lfm.height * 5
                         width: height * 4 / 3
@@ -262,9 +273,13 @@ Page {
                         image: pic ? pic.image : BS.BrickLink.noImage(width, height)
                     }
                     Label {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
                         text: "<b>" + root.currentItem.id + "</b> " + root.currentItem.name
                               + " <i>(" + root.currentItem.itemType.name + ")</i>"
+                        textFormat: Text.StyledText
                         wrapMode: Text.Wrap
+                        verticalAlignment: Text.AlignVCenter
 
                         FontMetrics { id: lfm }
                     }
@@ -272,8 +287,9 @@ Page {
                 GridLayout {
                     columns: 2
                     columnSpacing: 16
-                    Label { text: qsTr("Quantity") }
-                    SpinBox { id: quantity; from: 1; to: 1000; value: 1 }
+                    Layout.rightMargin: 16
+                    ItemDelegate { text: qsTr("Quantity") }
+                    SpinBox { id: quantity; editable: true; from: 1; to: 1000; value: 1 }
 
                     component CheckButton : Button {
                         flat: true
@@ -284,24 +300,28 @@ Page {
                         rightPadding: 16
                     }
 
-                    Label { text: qsTr("Condition") }
-                    RowLayout {
+                    ItemDelegate { text: qsTr("Condition") }
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: parent.columnSpacing
                         CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
                         CheckButton { text: qsTr("Used") }
                     }
-                    Label { text: qsTr("Extra parts") }
-                    RowLayout {
+                    ItemDelegate { text: qsTr("Extra parts") }
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: parent.columnSpacing
                         enabled: root.hasExtras
                         CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
                         CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
                         CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }
                     }
 
-                    Label { text: qsTr("Include") }
+                    ItemDelegate { text: qsTr("Include") }
                     Switch { text: qsTr("Instructions"); enabled: root.hasInstructions; id: includeInstructions }
-                    Label { }
+                    ItemDelegate { }
                     Switch { text: qsTr("Alternates"); enabled: root.hasAlternates; id: includeAlternates }
-                    Label { }
+                    ItemDelegate { }
                     Switch { text: qsTr("Counterparts"); enabled: root.hasCounterParts; id: includeCounterParts }
 
                     Item { Layout.fillHeight: true }

@@ -106,8 +106,8 @@ Control {
     MouseArea {
         anchors.fill: parent
         onClicked: parent.TableView.view.toggleSelection(parent.row, parent.column)
-        onDoubleClicked: {
-            parent.TableView.view.toggleSelection(parent.row, parent.column)
+        onPressAndHold: {
+            //parent.TableView.view.toggleSelection(parent.row, parent.column)
             parent.TableView.view.showMenu(parent.row, parent.column)
         }
     }

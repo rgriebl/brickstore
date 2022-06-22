@@ -4,14 +4,13 @@ import QtQuick.Layouts
 import BrickStore
 
 
-Menu {
+AutoSizingMenu {
     id: root
     property int field
     property Document document
     modal: true
     parent: Overlay.overlay
     anchors.centerIn: parent
-    width: Overlay.overlay.width * 2 / 3
 
     function is(ids) {
         return Array.isArray(ids) ? ids.indexOf(field) >= 0 : ids === field
