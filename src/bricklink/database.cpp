@@ -558,7 +558,8 @@ void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, V
 
 void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, Version)
 {
-    dataStream >> cat.m_id >> cat.m_name >> cat.m_year_from >> cat.m_year_to >> cat.m_year_recency;
+    dataStream >> cat.m_id >> cat.m_name >> cat.m_year_from >> cat.m_year_to >> cat.m_year_recency
+            >> cat.m_has_inventories;
 }
 
 void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version v) const
@@ -566,15 +567,16 @@ void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStr
     dataStream << cat.m_id << cat.m_name;
     if (v >= Version::V6)
         dataStream << cat.m_year_from << cat.m_year_to << cat.m_year_recency;
+    if (v >= Version::V8)
+        dataStream << cat.m_has_inventories;
 }
 
 
 void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, Version)
 {
-    qint8 dummy = 0; //TODO: legacy, remove in one of the next DB upgrades
     quint8 flags = 0;
     quint32 catSize = 0;
-    dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> dummy >> itt.m_name >> flags >> catSize;
+    dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> itt.m_name >> flags >> catSize;
 
     itt.m_categoryIndexes.reserve(catSize);
     while (catSize-- > 0) {
@@ -589,7 +591,7 @@ void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, 
     itt.m_has_subconditions = flags & 0x10;
 }
 
-void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStream, Version) const
+void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStream, Version v) const
 {
     quint8 flags = 0;
     flags |= (itt.m_has_inventories   ? 0x01 : 0);
@@ -598,8 +600,10 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     flags |=                            0x08     ; // was: m_has_year
     flags |= (itt.m_has_subconditions ? 0x10 : 0);
 
-    dataStream << qint8(itt.m_id) << qint8(itt.m_id) << itt.m_name << flags
-               << quint32(itt.m_categoryIndexes.size());
+    dataStream << qint8(itt.m_id);
+    if (v < Version::V8)
+        dataStream << qint8(itt.m_id);
+    dataStream << itt.m_name << flags << quint32(itt.m_categoryIndexes.size());
 
     for (const quint16 catIdx : itt.m_categoryIndexes)
         dataStream << catIdx;

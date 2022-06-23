@@ -48,11 +48,12 @@ public:
         V4, // 2021.5.1
         V5, // 2022.1.1
         V6, // 2022.2.1
-        V7, // 2022.6.1
+        V7, // 2022.6.1 (not released)
+        V8, // 2022.6.2
 
         OldestStillSupported = V4,
 
-        Latest = V7
+        Latest = V8
     };
 
     Q_INVOKABLE bool isUpdateNeeded() const;

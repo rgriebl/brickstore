@@ -19,6 +19,8 @@
 
 namespace BrickLink {
 
+class ItemType;
+
 class Category
 {
 public:
@@ -27,11 +29,14 @@ public:
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
 
+    bool hasInventories() const  { return (m_has_inventories); }
+    bool hasInventories(const ItemType *itemType) const;
     int yearReleased() const     { return m_year_from ? m_year_from + 1900 : 0; }
     int yearLastProduced() const { return m_year_to ? m_year_to + 1900 : 0; }
     int yearRecency() const      { return m_year_recency ? m_year_recency + 1900 : 0; }
 
     Category() = default;
+
     Category(std::nullptr_t) : Category() { } // for scripting only!
 
 private:
@@ -39,7 +44,7 @@ private:
     quint8   m_year_from = 0;
     quint8   m_year_to = 0;
     quint8   m_year_recency = 0;
-    // 1 byte padding
+    quint8   m_has_inventories = 0;
     QString  m_name;
 
 private:

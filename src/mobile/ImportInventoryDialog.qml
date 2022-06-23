@@ -104,7 +104,10 @@ Page {
                     clip: true
                     ScrollIndicator.vertical: ScrollIndicator { }
 
-                    model: BS.CategoryModel { }
+                    model: BS.CategoryModel {
+                        filterWithoutInventory: true
+                        Component.onCompleted: { sort(0, Qt.AscendingOrder) }
+                    }
                     ButtonGroup { id: catListGroup }
 
                     delegate: RadioDelegate {
@@ -189,7 +192,7 @@ Page {
                         required property string name
                         required property var item
                         property BS.Picture pic: itemListPage.isPageVisible
-                                                 ? BS.BrickLink.picture(BS.BrickLink.item(delegate.item), BS.BrickLink.color(delegate.item.defaultColor))
+                                                 ? BS.BrickLink.picture(BS.BrickLink.item(delegate.item), BS.BrickLink.item(delegate.item).defaultColor)
                                                  : null
 
                         BS.QImageItem {
@@ -307,11 +310,14 @@ Page {
                         CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
                         CheckButton { text: qsTr("Used") }
                     }
-                    ItemDelegate { text: qsTr("Extra parts") }
+                    ItemDelegate {
+                        text: qsTr("Extra parts")
+                        visible: root.hasExtras
+                    }
                     Flow {
                         Layout.fillWidth: true
                         spacing: parent.columnSpacing
-                        enabled: root.hasExtras
+                        visible: root.hasExtras
                         CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
                         CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
                         CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }

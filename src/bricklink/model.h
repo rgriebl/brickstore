@@ -71,7 +71,7 @@ class CategoryModel : public StaticPointerModel
 {
     Q_OBJECT
     Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
-    Q_PROPERTY(bool filterAllCategories READ filterAllCategories WRITE setFilterAllCategories NOTIFY isFilteredChanged)
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
 
 public:
     CategoryModel(QObject *parent = nullptr);
@@ -91,8 +91,8 @@ public:
     bool isFiltered() const override;
     const ItemType *filterItemType() const;
     void setFilterItemType(const ItemType *it);
-    bool filterAllCategories() const;
-    void setFilterAllCategories(bool);
+    bool filterWithoutInventory() const;
+    void setFilterWithoutInventory(bool on);
 
 protected:
     int pointerCount() const override;
@@ -103,8 +103,8 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    const ItemType *m_itemtype_filter;
-    bool m_all_filter;
+    const ItemType *m_itemtype_filter = nullptr;
+    bool m_inv_filter = false;
 
     friend class Core;
 };
@@ -141,7 +141,7 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    bool m_inv_filter;
+    bool m_inv_filter = false;
 
     friend class Core;
 };

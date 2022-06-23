@@ -726,8 +726,14 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
             }
             Item &item = m_items[itemIndex];
             item.m_lastInventoryUpdate = t;
-            ItemType &itemType = m_item_types[item.m_itemTypeIndex];
-            itemType.m_has_inventories = true;
+
+            m_item_types[item.m_itemTypeIndex].m_has_inventories = true;
+
+            auto catIndexes = item.m_additionalCategoryIndexes;
+            catIndexes.push_back(item.m_categoryIndex);
+            Q_ASSERT(item.m_itemTypeIndex < 8);
+            for (const auto &catIndex : catIndexes)
+                m_categories[catIndex].m_has_inventories |= (quint8(1) << item.m_itemTypeIndex);
         } else {
             qWarning() << "WARNING: parsing btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
         }

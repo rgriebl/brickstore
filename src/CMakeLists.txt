@@ -7,6 +7,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     version.h.in
 
     bricklink/category.h
+    bricklink/category.cpp
     bricklink/changelogentry.cpp
     bricklink/changelogentry.h
     bricklink/color.cpp

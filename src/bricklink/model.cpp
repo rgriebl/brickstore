@@ -230,7 +230,7 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
 const BrickLink::Category *BrickLink::CategoryModel::AllCategories = reinterpret_cast <const BrickLink::Category *>(-1);
 
 BrickLink::CategoryModel::CategoryModel(QObject *parent)
-    : StaticPointerModel(parent), m_itemtype_filter(nullptr), m_all_filter(false)
+    : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
 }
@@ -304,7 +304,7 @@ QHash<int, QByteArray> BrickLink::CategoryModel::roleNames() const
 
 bool BrickLink::CategoryModel::isFiltered() const
 {
-    return m_itemtype_filter || m_all_filter;
+    return filterItemType() || filterWithoutInventory();
 }
 
 const BrickLink::ItemType *BrickLink::CategoryModel::filterItemType() const
@@ -321,17 +321,17 @@ void BrickLink::CategoryModel::setFilterItemType(const ItemType *it)
     invalidateFilter();
 }
 
-bool BrickLink::CategoryModel::filterAllCategories() const
+bool BrickLink::CategoryModel::filterWithoutInventory() const
 {
-    return m_all_filter;
+    return m_inv_filter;
 }
 
-void BrickLink::CategoryModel::setFilterAllCategories(bool b)
+void BrickLink::CategoryModel::setFilterWithoutInventory(bool b)
 {
-    if (b == m_all_filter)
+    if (b == m_inv_filter)
         return;
 
-    m_all_filter = b;
+    m_inv_filter = b;
     emit isFilteredChanged();
     invalidateFilter();
 }
@@ -354,15 +354,18 @@ bool BrickLink::CategoryModel::filterAccepts(const void *pointer) const
 {
     const auto *c = static_cast<const Category *>(pointer);
 
-    if (m_itemtype_filter || m_all_filter) {
-        if (!c)
-            return false;
-        else if (c == AllCategories)
-            return !m_all_filter;
-        else if (m_itemtype_filter)
-            return m_itemtype_filter->categories().contains(c);
-    }
-    return true;
+    if (!c)
+        return false;
+    else if (c == AllCategories)
+        return true;
+    else if (m_inv_filter && !c->hasInventories())
+        return false;
+    else if (m_itemtype_filter && !m_itemtype_filter->categories().contains(c))
+        return false;
+    else if (m_inv_filter && m_itemtype_filter && !c->hasInventories(m_itemtype_filter))
+        return false;
+    else
+        return true;
 }
 
 
@@ -371,7 +374,7 @@ bool BrickLink::CategoryModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 
 BrickLink::ItemTypeModel::ItemTypeModel(QObject *parent)
-    : StaticPointerModel(parent), m_inv_filter(false)
+    : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
 }

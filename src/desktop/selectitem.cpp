@@ -600,6 +600,7 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
         d->w_categories->clearSelection();
         d->w_items->clearSelection();
 
+        d->categoryModel->setFilterWithoutInventory(b);
         d->itemTypeModel->setFilterWithoutInventory(b);
         d->itemModel->setFilterWithoutInventory(b);
 
