@@ -155,6 +155,7 @@ QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(QString 
 
 QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(QString text,
                                                                      QString initialValue,
+                                                                     bool isPassword,
                                                                      QString title)
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
@@ -163,6 +164,8 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(QString tex
     dlg.setInputMode(QInputDialog::TextInput);
     dlg.setLabelText(text);
     dlg.setTextValue(initialValue);
+    if (isPassword)
+        dlg.setTextEchoMode(QLineEdit::Password);
 
     dlg.open();
 

@@ -125,7 +125,11 @@ public:
     static QCoro::Task<std::optional<QString>> getString(QString text,
                                                          QString initialValue = { },
                                                          QString title = { }) {
-        return inst()->getInputString(text, initialValue, title);
+        return inst()->getInputString(text, initialValue, false, title);
+    }
+    static QCoro::Task<std::optional<QString>> getPassword(QString text,
+                                                           QString title = { }) {
+        return inst()->getInputString(text, { }, true, title);
     }
     static QCoro::Task<std::optional<double>> getDouble(QString text, QString unit,
                                                         double initialValue,
@@ -191,6 +195,7 @@ protected:
 
     virtual QCoro::Task<std::optional<QString>> getInputString(QString text,
                                                                QString initialValue,
+                                                               bool isPassword,
                                                                QString title) = 0;
     virtual QCoro::Task<std::optional<double>> getInputDouble(QString text, QString unit,
                                                               double initialValue,  double minValue,

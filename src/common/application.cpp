@@ -405,8 +405,8 @@ QCoro::Task<bool> Application::checkBrickLinkLogin()
         if (!Config::inst()->brickLinkPassword().isEmpty()) {
             co_return true;
         } else {
-            if (auto pw = co_await UIHelpers::getString(tr("Please enter the password for the BrickLink account %1:")
-                                                        .arg(u"<b>" % Config::inst()->brickLinkUsername() % u"</b>"))) {
+            if (auto pw = co_await UIHelpers::getPassword(tr("Please enter the password for the BrickLink account %1:")
+                                                          .arg(u"<b>" % Config::inst()->brickLinkUsername() % u"</b>"))) {
                 Config::inst()->setBrickLinkPassword(*pw, true /*do not save*/);
                 co_return true;
             }

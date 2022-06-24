@@ -13,6 +13,7 @@ Dialog {
     property string mode: "string"
     property alias text: label.text
     property string unit
+    property bool isPassword: false
 
     property alias textValue: text.text
 
@@ -44,6 +45,7 @@ Dialog {
         TextField {
             id: text
             visible: mode === "string"
+            echoMode: isPassword ? TextInput.Password : TextInput.Normal
             Layout.fillWidth: true
         }
         RowLayout {

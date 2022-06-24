@@ -142,6 +142,7 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
 
 QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text,
                                                                     QString initialValue,
+                                                                    bool isPassword,
                                                                     QString title)
 {
     auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
@@ -149,6 +150,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text
                                                 { "text"_l1, text },
                                                 { "mode"_l1, "string"_l1 },
                                                 { "textValue"_l1, initialValue },
+                                                { "isPassword"_l1, isPassword },
                                             });
     if (!dialog)
         co_return { };

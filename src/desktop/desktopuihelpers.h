@@ -45,7 +45,7 @@ protected:
                                                QString title) override;
 
     QCoro::Task<std::optional<QString>> getInputString(QString text,
-                                                       QString initialValue,
+                                                       QString initialValue, bool isPassword,
                                                        QString title) override;
     QCoro::Task<std::optional<double>> getInputDouble(QString text, QString unit,
                                                       double initialValue,  double minValue,
