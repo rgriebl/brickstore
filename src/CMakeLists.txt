@@ -370,6 +370,7 @@ if (BS_MOBILE)
         mobile/View.qml
         mobile/ViewEditMenu.qml
         mobile/ViewHeaderMenu.qml
+        mobile/uihelpers/ImportsHelper.qml
         mobile/uihelpers/InputDialog.qml
         mobile/uihelpers/ProgressDialog.qml
         mobile/uihelpers/ToastMessage.qml
