@@ -10,6 +10,8 @@
 #include <atomic>
 #include <variant>
 #include <memory>
+#include <type_traits>
+#include <optional>
 
 #include <QDebug>
 #include <QEventLoop>
@@ -209,7 +211,7 @@ public:
 
     //! \copydoc template<Awaitable T> QCoro::TaskPromiseBase::await_transform(T &&)
     template<Awaitable T>
-    auto await_transform(T &awaitable) {
+    auto &await_transform(T &awaitable) {
         return awaitable;
     }
 
@@ -278,7 +280,7 @@ public:
      *            promise, later can be retrieved by the calling coroutine.
      */
     void return_value(T &&value) noexcept {
-        mValue = std::forward<T>(value);
+        mValue.template emplace<T>(std::forward<T>(value));
     }
 
     //! \copydoc template<typename T> TaskPromise::return_value(T &&value) noexcept
@@ -303,6 +305,7 @@ public:
      */
     T &result() & {
         if (std::holds_alternative<std::exception_ptr>(mValue)) {
+            Q_ASSERT(std::get<std::exception_ptr>(mValue) != nullptr);
             std::rethrow_exception(std::get<std::exception_ptr>(mValue));
         }
 
@@ -312,6 +315,7 @@ public:
     //! \copydoc T &QCoro::TaskPromise<T>::result() &
     T &&result() && {
         if (std::holds_alternative<std::exception_ptr>(mValue)) {
+            Q_ASSERT(std::get<std::exception_ptr>(mValue) != nullptr);
             std::rethrow_exception(std::get<std::exception_ptr>(mValue));
         }
 
@@ -533,6 +537,155 @@ public:
         return TaskAwaiter{mCoroutine};
     }
 
+    //! A callback to be invoked when the asynchronous task finishes.
+    /*!
+     * In some scenarios it is not possible to co_await a coroutine (for example from
+     * a third-party code that cannot be changed to be a coroutine). In that case,
+     * chaining a then() callback is a possible solution how to handle a result
+     * of a coroutine without co_awaiting it.
+     *
+     * @param callback A function or a function object that can be invoked without arguments
+     * (discarding the result of the coroutine) or with a single argument of type T that is
+     * type matching the return type of the coroutine or is implicitly constructible from
+     * the return type returned by the coroutine.
+     *
+     * @return Returns Task<R> where R is the return type of the callback, so that the
+     * result of the then() action can be co_awaited, if desired. If the callback
+     * returns an awaitable (Task<R>) then the result of then is the awaitable.
+     */
+    template<typename ThenCallback>
+    requires (std::invocable<ThenCallback> || (!std::is_void_v<T> && std::invocable<ThenCallback, T>))
+    auto then(ThenCallback &&callback) {
+        return thenImpl(std::forward<ThenCallback>(callback));
+    }
+
+    template<typename ThenCallback, typename ErrorCallback>
+    requires ((std::invocable<ThenCallback> || (!std::is_void_v<T> && std::invocable<ThenCallback, T>)) &&
+               std::invocable<ErrorCallback, const std::exception &>)
+    auto then(ThenCallback &&callback, ErrorCallback &&errorCallback) {
+        return thenImpl(std::forward<ThenCallback>(callback), std::forward<ErrorCallback>(errorCallback));
+    }
+
+private:
+    template<typename ThenCallback, typename ... Args>
+    requires (std::invocable<ThenCallback>)
+    auto invoke(ThenCallback &&callback, Args && ...) {
+        return callback();
+    }
+
+    template<typename ThenCallback, typename Arg>
+    requires (std::invocable<ThenCallback, Arg>)
+    auto invoke(ThenCallback &&callback, Arg && arg) {
+        return callback(std::forward<Arg>(arg));
+    }
+
+    template<typename ThenCallback, typename Arg>
+    struct invoke_result: std::conditional_t<
+        std::is_invocable_v<ThenCallback>,
+            std::invoke_result<ThenCallback>,
+            std::invoke_result<ThenCallback, Arg>
+        > {};
+
+    template<typename ThenCallback>
+    struct invoke_result<ThenCallback, void>: std::invoke_result<ThenCallback> {};
+
+    template<typename ThenCallback, typename Arg>
+
+    using invoke_result_t = typename invoke_result<ThenCallback, Arg>::type;
+
+    // Implementation of then() for callbacks that return Task<R>
+    template<typename ThenCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires QCoro::Awaitable<R>
+    auto thenImpl(ThenCallback &&callback) -> R {
+        const auto cb = std::move(callback);
+        if constexpr (std::is_void_v<value_type>) {
+            co_await *this;
+            co_return co_await invoke(cb);
+        } else {
+            co_return co_await invoke(cb, co_await *this);
+        }
+    }
+
+    template<typename ThenCallback, typename ErrorCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires QCoro::Awaitable<R>
+    auto thenImpl(ThenCallback &&thenCallback, ErrorCallback &&errorCallback) -> R {
+        const auto thenCb = std::move(thenCallback);
+        const auto errCb = std::move(errorCallback);
+        if constexpr (std::is_void_v<value_type>) {
+            try {
+                co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<typename R::value_type>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return co_await invoke(thenCb);
+        } else {
+            std::optional<T> v;
+            try {
+                v = co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<typename R::value_type>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return co_await invoke(thenCb, std::move(*v));
+        }
+    }
+
+
+    // Implementation of then() for callbacks that return R, which is not Task<S>
+    template<typename ThenCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires (!QCoro::Awaitable<R>)
+    auto thenImpl(ThenCallback &&callback) -> Task<R> {
+        const auto cb = std::move(callback);
+        if constexpr (std::is_void_v<value_type>) {
+            co_await *this;
+            co_return invoke(cb);
+        } else {
+            co_return invoke(cb, co_await *this);
+        }
+    }
+
+    template<typename ThenCallback, typename ErrorCallback, typename R = invoke_result_t<ThenCallback, T>>
+    requires (!QCoro::Awaitable<R>)
+    auto thenImpl(ThenCallback &&thenCallback, ErrorCallback &&errorCallback) -> Task<R> {
+        const auto thenCb = std::move(thenCallback);
+        const auto errCb = std::move(errorCallback);
+        if constexpr (std::is_void_v<value_type>) {
+            try {
+                co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<R>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return invoke(thenCb);
+        } else {
+            std::optional<T> v;
+            try {
+                v = co_await *this;
+            } catch (const std::exception &e) {
+                errCb(e);
+                if constexpr (!std::is_void_v<R>) {
+                    co_return {};
+                } else {
+                    co_return;
+                }
+            }
+            co_return invoke(thenCb, std::move(*v));
+        }
+    }
+
 private:
     //! The coroutine represented by this task
     /*!
@@ -587,13 +740,15 @@ T waitFor(Coroutine &&coro) {
     bool startLoop = true; // for early returns: calling quit() before exec() still starts the loop
     if constexpr (std::is_void_v<T>) {
         runCoroutine(loop, startLoop, std::forward<Coroutine>(coro));
-        if (startLoop)
+        if (startLoop) {
             loop.exec();
+        }
     } else {
         T result;
         runCoroutine(loop, startLoop, result, std::forward<Coroutine>(coro));
-        if (startLoop)
+        if (startLoop) {
             loop.exec();
+        }
         return result;
     }
 }

@@ -38,7 +38,11 @@ target_sources(${PROJECT_NAME} PUBLIC
     qcoro/core/qcorofuture.h
     qcoro/core/qcoroiodevice.cpp
     qcoro/core/qcoroiodevice.h
+    qcoro/core/qcoroiodevice_p.cpp
+    qcoro/core/qcoroiodevice_p.h
     qcoro/core/qcorosignal.h
+    qcoro/core/qcorothread.cpp
+    qcoro/core/qcorothread.h
     qcoro/core/qcorotimer.cpp
     qcoro/core/qcorotimer.h
     qcoro/coroutine.h
