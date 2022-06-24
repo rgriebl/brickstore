@@ -11,7 +11,9 @@ HEADERS += \
   $$PWD/qcoro/core/qcorocore.h \
   $$PWD/qcoro/core/qcorofuture.h \
   $$PWD/qcoro/core/qcoroiodevice.h \
+  $$PWD/qcoro/core/qcoroiodevice_p.h \
   $$PWD/qcoro/core/qcorosignal.h \
+  $$PWD/qcoro/core/qcorothread.h \
   $$PWD/qcoro/core/qcorotimer.h \
   $$PWD/qcoro/coroutine.h \
   $$PWD/qcoro/macros_p.h \
@@ -26,6 +28,8 @@ HEADERS += \
 
 SOURCES += \
   $$PWD/qcoro/core/qcoroiodevice.cpp \
+  $$PWD/qcoro/core/qcoroiodevice_p.cpp \
+  $$PWD/qcoro/core/qcorothread.cpp \
   $$PWD/qcoro/core/qcorotimer.cpp \
   $$PWD/qcoro/network/qcoroabstractsocket.cpp \
   $$PWD/qcoro/network/qcorolocalsocket.cpp \
