@@ -132,12 +132,10 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
         co_return defaultButton;
 
     auto [button, role] = co_await qCoro(messageDialog, &QQuickMessageDialog::buttonClicked);
+
     Q_UNUSED(role)
     messageDialog->deleteLater();
-    if (messageDialog->result() == QQuickMessageDialog::Accepted)
-        co_return static_cast<StandardButton>(button);
-    else
-        co_return defaultButton;
+    co_return static_cast<StandardButton>(button);
 }
 
 QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text,
