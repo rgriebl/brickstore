@@ -13,7 +13,8 @@
 */
 #pragma once
 
-#include <QQmlParserStatus>
+#include <QtQml/QQmlParserStatus>
+#include <QtQml/QJSValue>
 #include <QPointer>
 #include <QIdentityProxyModel>
 #include <QSortFilterProxyModel>
@@ -220,6 +221,26 @@ public:
     Q_INVOKABLE double roundTo(double f, int decimals) { return Utility::roundTo(f, decimals); }
 };
 
+class QmlThenable : public QObject
+{
+    Q_OBJECT
+
+public:
+    QmlThenable(QJSEngine *engine, QObject *parent = nullptr);
+    ~QmlThenable() override;
+
+    Q_INVOKABLE void then(const QJSValue &function);
+
+    void callThen(const QVariantList &arguments);
+
+private:
+    void callThenInternal(const QVariantList &arguments);
+
+    bool m_thenable = false;
+    QJSValue m_function;
+    QPointer<QJSEngine> m_engine;
+};
+
 class QmlBrickStore : public QObject
 {
     Q_OBJECT
@@ -273,7 +294,7 @@ public:
 
     Q_INVOKABLE LDraw::RenderController *createRenderController(QObject *parent);
 
-    Q_INVOKABLE bool checkBrickLinkLogin();
+    Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
 
     Q_INVOKABLE void updateIconTheme(bool darkTheme);
 
