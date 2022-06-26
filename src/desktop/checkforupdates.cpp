@@ -96,7 +96,7 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
         for (const QJsonValue &&asset : assets) {
             QString name = asset[u"name"].toString();
 #if defined(Q_OS_MACOS)
-            if (name.startsWith(u"macOS-") {
+            if (name.startsWith(u"macOS-")) {
 #elif defined(Q_OS_WIN64)
             if (name.startsWith(u"Windows-x64-")) {
 #elif defined(Q_OS_WIN)

@@ -17,9 +17,7 @@
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
-#ifdef Q_OS_ANDROID
-#  include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
-#endif
+#include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 
 #include "common/actionmanager.h"
 #include "common/config.h"

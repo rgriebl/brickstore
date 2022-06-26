@@ -227,7 +227,7 @@ struct suspend_always {
 } // namespace std
 
 #else // defined(__clang__)
-#pragma error "Current compiler does not support coroutines, or is not supported by QCoro."
+#error "Current compiler does not support coroutines, or is not supported by QCoro."
 #endif // defined(__cpp_lib_coroutine)
 
 // The QCORO_STD macro is no longer needed (with the code above), but keep it for backwards

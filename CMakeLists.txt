@@ -83,6 +83,14 @@ if (NOT ANDROID AND QT_32BIT)
     message(FATAL_ERROR "32bit builds for this platform are not supported.")
 endif()
 
+# this needs to happen before
+if (CLANG)
+    set(coroargs -fcoroutines-ts -stdlib=libc++)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:>${coroargs}")
+elseif (GCC)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>")
+endif()
+
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
 if (NOT IOS) # somehow this tries to access the wrong build dir on iOS
@@ -108,7 +116,7 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     set(MIN_QT_VERSION 6.3.0)
     add_compile_definitions(BS_MOBILE)
-    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils)
+    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -140,11 +148,6 @@ if (NOT APPLE AND NOT WIN32 AND NOT ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "brickstore")
 endif()
 
-if (CLANG)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines-ts -stdlib=libc++>)
-elseif (GCC)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>)
-endif()
 if (CLANG OR GCC)
     # cmake's RelWithDebInfo is hardcoded to O2, while Release has O3
     string(REGEX REPLACE "([\\/\\-]O)2" "\\13" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
@@ -338,10 +341,6 @@ if (ANDROID)
     if (ANDROID_NDK_MAJOR GREATER 22)
         target_link_libraries(${PROJECT_NAME} PRIVATE -lunwind)
     endif()
-
-    # force QtSvg deployment
-    find_package(Qt6 REQUIRED Svg)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Svg)
 endif()
 
 if (TARGET Qt6::qdoc)

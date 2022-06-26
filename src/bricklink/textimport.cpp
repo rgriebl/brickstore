@@ -190,7 +190,7 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
-        QStringList strs = line.split('\t'_l1);
+        QStringList strs = line.split(u'\t');
 
         if (strs.count() < 3)
             throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
@@ -481,7 +481,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
         line = in.readLine();
         lineno++;
 
-        QStringList sl = line.simplified().split(' '_l1);
+        QStringList sl = line.simplified().split(u' ');
 
         if (sl.count() >= 9 &&
                 sl[0].toInt() == 0 &&
@@ -693,7 +693,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
-        QStringList strs = line.split('\t'_l1);
+        QStringList strs = line.split(u'\t');
 
         if (strs.count() < 2)
             throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
@@ -753,7 +753,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
-        QStringList strs = line.split('\t'_l1);
+        QStringList strs = line.split(u'\t');
 
         if (strs.count() < 7)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);

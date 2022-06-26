@@ -21,7 +21,9 @@
 #elif defined(BS_DESKTOP)
 #  include <QApplication>
 #  include <QPalette>
-typedef QObject QQuickAction;
+QT_BEGIN_NAMESPACE
+class QQuickAction : public QObject { }; // clazy:exclude=missing-qobject-macro
+QT_END_NAMESPACE
 #endif
 #include <QDebug>
 

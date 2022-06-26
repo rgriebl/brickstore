@@ -31,6 +31,7 @@
 #endif
 
 #include "utility/exception.h"
+#include "utility/utility.h"
 #include "bricklink/core.h"
 #include "bricklink/textimport.h"
 #include "rebuilddatabase.h"
