@@ -16,12 +16,11 @@
 #include <QGuiApplication>
 #include <QMouseEvent>
 
-#include "version.h"
-#include "utility/utility.h"
-#include "utility/eventfilter.h"
+#include "common/application.h"
+#include "common/eventfilter.h"
 #include "utility/exception.h"
 #include "ldraw/library.h"
-#include "utility/systeminfo.h"
+#include "common/systeminfo.h"
 #include "systeminfodialog.h"
 #include "ui_systeminfodialog.h"
 
@@ -51,17 +50,18 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
         QGuiApplication::clipboard()->setText(text);
     });
 
-    QString text = "### BrickStore " BRICKSTORE_VERSION " (build: " BRICKSTORE_BUILD_NUMBER ")\n\n"_l1;
+    QString text = u"### BrickStore " % QCoreApplication::applicationVersion()
+            % u" (build: " % Application::inst()->buildNumber() % u")\n\n";
     auto sysInfo = SystemInfo::inst()->asMap();
-    sysInfo.remove("os.type"_l1);
-    sysInfo.remove("os.version"_l1);
-    sysInfo.remove("hw.gpu.arch"_l1);
-    sysInfo.remove("hw.memory"_l1);
-    sysInfo.remove("brickstore.version"_l1);
-    sysInfo["brickstore.ldraw"_l1] = LDraw::library()->lastUpdated().toString(Qt::RFC2822Date);
+    sysInfo.remove(u"os.type"_qs);
+    sysInfo.remove(u"os.version"_qs);
+    sysInfo.remove(u"hw.gpu.arch"_qs);
+    sysInfo.remove(u"hw.memory"_qs);
+    sysInfo.remove(u"brickstore.version"_qs);
+    sysInfo[u"brickstore.ldraw"_qs] = LDraw::library()->lastUpdated().toString(Qt::RFC2822Date);
 
     for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-        text = text % " * **"_l1 % it.key() % "**: "_l1 % it.value().toString() % "\n"_l1;
+        text = text % u" * **" % it.key() % u"**: " % it.value().toString() % u"\n";
     }
 
     ui->text->setMarkdown(text);

@@ -27,7 +27,7 @@
 #include "bricklink/database.h"
 #include "common/application.h"
 #include "ldraw/library.h"
-#include "qmlapi/brickstore_wrapper.h"
+#include "common/brickstore_wrapper.h"
 #include "utility/exception.h"
 #include "printjob.h"
 #include "script.h"
@@ -44,7 +44,7 @@ public:
         : Exception(msg)
     {
         for (auto &error : errors) {
-            m_message.append("\n"_l1);
+            m_message.append(u"\n"_qs);
             m_message.append(error.toString());
         }
     }
@@ -87,23 +87,23 @@ bool ScriptManager::reload()
 
     clearScripts();
 
-    QStringList spath = { ":/extensions"_l1 };
+    QStringList spath = { u":/extensions"_qs };
     QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!dataloc.isEmpty())
-        spath.prepend(dataloc + "/extensions"_l1);
+        spath.prepend(dataloc + u"/extensions"_qs);
 
     for (const QString &path : qAsConst(spath)) {
         QDir dir(path);
-        if (!path.startsWith(':'_l1)) {
+        if (!path.startsWith(u':')) {
             qCInfo(LogScript) << "Loading scripts from directory:" << path;
             if (!dir.exists())
-                dir.mkpath('.'_l1);
+                dir.mkpath(u"."_qs);
         }
 
-        const QFileInfoList fis = dir.entryInfoList(QStringList("*.bs.qml"_l1), QDir::Files | QDir::Readable);
+        const QFileInfoList fis = dir.entryInfoList(QStringList(u"*.bs.qml"_qs), QDir::Files | QDir::Readable);
         for (const QFileInfo &fi : fis) {
             QString filePath = fi.absoluteFilePath();
-            if (filePath.startsWith(u":"))
+            if (filePath.startsWith(u':'))
                 filePath = u"qrc://" % filePath.mid(1);
 
             try {

@@ -39,9 +39,9 @@
 #include "bricklink/picture.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "utility/currency.h"
-#include "utility/eventfilter.h"
-#include "utility/humanreadabletimedelta.h"
+#include "common/currency.h"
+#include "common/eventfilter.h"
+#include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -218,12 +218,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (differenceFlags & (1ULL << idx.column())) {
         bool warn = (differenceFlags & differenceWarningMask & (1ULL << idx.column()));
         int s = option.fontMetrics.height() / 10 * 8;
-        QString key = "dd_ti_"_l1 % (warn ? "!"_l1 : ""_l1) % QString::number(s);
+        QString key = u"dd_ti_"_qs % (warn ? u"!" : u"") % QString::number(s);
         QPixmap pix;
 
         if (!QPixmapCache::find(key, &pix)) {
-            QIcon icon = warn ? QIcon::fromTheme("vcs-locally-modified-unstaged-small"_l1)
-                              : QIcon::fromTheme("vcs-locally-modified-small"_l1);
+            QIcon icon = warn ? QIcon::fromTheme(u"vcs-locally-modified-unstaged-small"_qs)
+                              : QIcon::fromTheme(u"vcs-locally-modified-small"_qs);
             pix = QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
             QPixmapCache::insert(key, pix);
         }
@@ -321,17 +321,17 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
     case DocumentModel::Status: {
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
-        QString key = "dd_st_"_l1 % QString::number(quint32(lot->status())) % "-"_l1 %
+        QString key = u"dd_st_" % QString::number(quint32(lot->status())) % u"-" %
                 QString::number(iconSize);
         QPixmap pix;
 
         if (!QPixmapCache::find(key, &pix)) {
             QIcon icon;
             switch (lot->status()) {
-            case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"_l1); break;
-            case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"_l1); break;
+            case BrickLink::Status::Exclude: icon = QIcon::fromTheme(u"vcs-removed"_qs); break;
+            case BrickLink::Status::Extra  : icon = QIcon::fromTheme(u"vcs-added"_qs); break;
             default                        :
-            case BrickLink::Status::Include: icon = QIcon::fromTheme("vcs-normal"_l1); break;
+            case BrickLink::Status::Include: icon = QIcon::fromTheme(u"vcs-normal"_qs); break;
             }
             pix = QPixmap(icon.pixmap(iconSize));
             QPixmapCache::insert(key, pix);
@@ -341,7 +341,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         uint altid = lot->alternateId();
         bool cp = lot->counterPart();
         if (altid || cp) {
-            tag.text = cp ? "CP"_l1 : QString::number(altid);
+            tag.text = cp ? u"CP"_qs : QString::number(altid);
             tag.bold = (cp || !lot->alternate());
             tag.foreground = fg;
             if (cp || selected) {
@@ -411,7 +411,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     if (nocolor || noitem) {
         int d = option.rect.height();
-        QString key = "dd_stripe_"_l1 % QString::number(d);
+        QString key = u"dd_stripe_" % QString::number(d);
         QPixmap pix;
         if (!QPixmapCache::find(key, &pix)) {
             pix = QPixmap::fromImage(Utility::stripeImage(d, Qt::red));
@@ -429,7 +429,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int itw = qMax(int(1.5 * fontmetrics.height()),
                        2 * fontmetrics.horizontalAdvance(tag.text));
 
-        QString key = "dd_tag_"_l1 % QString::number(itw) % "-"_l1 % tag.background.name();
+        QString key = u"dd_tag_" % QString::number(itw) % u"-" % tag.background.name();
         QPixmap pix;
         if (!QPixmapCache::find(key, &pix)) {
             pix = QPixmap(itw, itw);
@@ -536,7 +536,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             return;
         }
 
-        static const QString elide = "..."_l1;
+        static const QString elide = u"..."_qs;
         auto key = TextLayoutCacheKey { str, QSize(rw, h), uint(fm.height()) };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
@@ -808,7 +808,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     QValidator *valid = nullptr;
     switch (idx.column()) {
-    case DocumentModel::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(R"([a-zA-Z0-9._-]+)"_l1), nullptr); break;
+    case DocumentModel::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(uR"([a-zA-Z0-9._-]+)"_qs), nullptr); break;
     case DocumentModel::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case DocumentModel::Quantity    :
     case DocumentModel::QuantityDiff: valid = new SmartIntValidator(-DocumentModel::maxQuantity,
@@ -943,11 +943,11 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
         case DocumentModel::TierP1:
         case DocumentModel::TierP2:
         case DocumentModel::TierP3:
-            if (!v.toString().startsWith('='_l1))
+            if (!v.toString().startsWith(u'='))
                 v = Currency::fromString(v.toString());
             break;
         case DocumentModel::Weight:
-            if (!v.toString().startsWith('='_l1))
+            if (!v.toString().startsWith(u'='))
                 v = Utility::stringToWeight(v.toString(), Config::inst()->measurementSystem());
             break;
         default:
@@ -968,7 +968,7 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
     char op = 0;
 
     QString str = value.toString();
-    if ((str.length() >= 3) && str.startsWith('='_l1)) {
+    if ((str.length() >= 3) && str.startsWith(u'=')) {
         auto type = model->data(index, Qt::EditRole).userType();
         intCalc = (type == QMetaType::Int);
         doubleCalc = (type == QMetaType::Double);

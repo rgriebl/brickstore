@@ -13,8 +13,6 @@
 */
 
 #include <QBuffer>
-#include <QDomDocument>
-#include <QDomElement>
 #include <QSaveFile>
 #include <QDirIterator>
 #include <QCoreApplication>
@@ -27,7 +25,7 @@
 #include "bricklink/io.h"
 #include "bricklink/order.h"
 
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/stopwatch.h"
 #include "utility/transfer.h"
@@ -640,11 +638,11 @@ Orders::Orders(Core *core)
 {
     //TODO: Remove in 2022.6.x
     QDir legacyPath(core->dataPath() % u"orders/");
-    if (legacyPath.cd("received"_l1)) {
+    if (legacyPath.cd(u"received"_qs)) {
         legacyPath.removeRecursively();
         legacyPath.cdUp();
     }
-    if (legacyPath.cd("placed"_l1)) {
+    if (legacyPath.cd(u"placed"_qs)) {
         legacyPath.removeRecursively();
         legacyPath.cdUp();
     }
@@ -693,9 +691,9 @@ Orders::Orders(Core *core)
                         address = tr("Address not available");
 
                     QVariantMap vm = {
-                        { "id"_l1, order->id() },
-                        { "address"_l1, address },
-                        { "phone"_l1, phone },
+                        { u"id"_qs, order->id() },
+                        { u"address"_qs, address },
+                        { u"phone"_qs, phone },
                     };
                     QJsonDocument json = QJsonDocument::fromVariant(vm);
                     QByteArray utf8 = json.toJson();
@@ -802,7 +800,7 @@ void Orders::reloadOrdersFromCache()
     QThreadPool::globalInstance()->start([this, path]() {
         stopwatch sw("Loading orders from cache");
 
-        QDirIterator dit(path, { "*.order.xml"_l1 },
+        QDirIterator dit(path, { u"*.order.xml"_qs },
                          QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
         while (dit.hasNext()) {
             try {
@@ -823,8 +821,8 @@ void Orders::reloadOrdersFromCache()
                     if (fa.open(QIODevice::ReadOnly) && (fa.size() < 5000)) {
                         auto json = QJsonDocument::fromJson(fa.readAll());
                         if (json.isObject()) {
-                            order->setAddress(json["address"_l1].toString());
-                            order->setPhone(json["phone"_l1].toString());
+                            order->setAddress(json[u"address"].toString());
+                            order->setPhone(json[u"phone"].toString());
                         }
                     }
                 }
@@ -853,8 +851,8 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     rootTagHash.insert(u"ORDERID",           [](auto *o, auto &v) { o->setId(v); } );
     rootTagHash.insert(u"BUYER",             [](auto *o, auto &v) { o->setOtherParty(v); o->setType(OrderType::Received); } );
     rootTagHash.insert(u"SELLER",            [](auto *o, auto &v) { o->setOtherParty(v); o->setType(OrderType::Placed); } );
-    rootTagHash.insert(u"ORDERDATE",         [](auto *o, auto &v) { o->setDate(QDate::fromString(v, "M/d/yyyy"_l1)); } );
-    rootTagHash.insert(u"ORDERSTATUSCHANGED",[](auto *o, auto &v) { o->setLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
+    rootTagHash.insert(u"ORDERDATE",         [](auto *o, auto &v) { o->setDate(QDate::fromString(v, u"M/d/yyyy")); } );
+    rootTagHash.insert(u"ORDERSTATUSCHANGED",[](auto *o, auto &v) { o->setLastUpdated(QDate::fromString(v, u"M/d/yyyy")); } );
     rootTagHash.insert(u"ORDERSHIPPING",     [](auto *o, auto &v) { o->setShipping(v.toDouble()); } );
     rootTagHash.insert(u"ORDERINSURANCE",    [](auto *o, auto &v) { o->setInsurance(v.toDouble()); } );
     rootTagHash.insert(u"ORDERADDCHRG1",     [](auto *o, auto &v) { o->setAdditionalCharges1(v.toDouble()); } );
@@ -875,9 +873,9 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     rootTagHash.insert(u"ORDERREMARKS",      [](auto *o, auto &v) { o->setRemarks(v); } );
     rootTagHash.insert(u"ORDERTRACKNO",      [](auto *o, auto &v) { o->setTrackingNumber(v); } );
     rootTagHash.insert(u"PAYMENTSTATUS",     [](auto *o, auto &v) { o->setPaymentStatus(v); } );
-    rootTagHash.insert(u"PAYMENTSTATUSCHANGED", [](auto *o, auto &v) { o->setPaymentLastUpdated(QDate::fromString(v, "M/d/yyyy"_l1)); } );
+    rootTagHash.insert(u"PAYMENTSTATUSCHANGED", [](auto *o, auto &v) { o->setPaymentLastUpdated(QDate::fromString(v, u"M/d/yyyy")); } );
     rootTagHash.insert(u"VATCHARGES",        [](auto *o, auto &v) { o->setVatChargeSeller(v.toDouble()); } ); // VAT charge by seller
-    rootTagHash.insert(u"LOCATION",          [](auto *o, auto &v) { if (!v.isEmpty()) o->setCountryCode(BrickLink::core()->countryIdFromName(v.section(", "_l1, 0, 0))); } );
+    rootTagHash.insert(u"LOCATION",          [](auto *o, auto &v) { if (!v.isEmpty()) o->setCountryCode(BrickLink::core()->countryIdFromName(v.section(u", "_qs, 0, 0))); } );
 
     try {
         int startOfOrder = -1;
@@ -887,13 +885,13 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
             case QXmlStreamReader::StartElement: {
                 auto tagName = xml.name();
 
-                if (tagName == "ORDER"_l1) {
+                if (tagName == u"ORDER") {
                     if (order || startOfOrder >= 0)
                         throw Exception("Found a nested ORDER tag");
                     startOfOrder = int(xml.characterOffset());
                     order.reset(new Order());
 
-                } else if (tagName != "ORDERS"_l1) {
+                } else if (tagName != u"ORDERS") {
                     auto it = rootTagHash.find(xml.name());
                     if (it != rootTagHash.end())
                         (*it)(order.get(), xml.readElementText());
@@ -907,12 +905,12 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
             case QXmlStreamReader::EndElement: {
                 auto tagName = xml.name();
 
-                if (tagName == "ORDER"_l1) {
+                if (tagName == u"ORDER") {
                     if (!order || (startOfOrder < 0))
                         throw Exception("Found a ORDER end tag without a start tag");
                     int endOfOrder = int(xml.characterOffset());
-                    QString header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_l1;
-                    QString footer = "\n"_l1;
+                    QString header = u"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ORDER>\n"_qs;
+                    QString footer = u"\n"_qs;
                     result.insert(order.release(), header + data.mid(startOfOrder, endOfOrder - startOfOrder + 1) + footer);
                     startOfOrder = -1;
                 }
@@ -1030,9 +1028,9 @@ void Orders::startUpdateAddress(Order *order)
             return;
     }
 
-    QUrl url("https://www.bricklink.com/orderDetail.asp"_l1);
+    QUrl url(u"https://www.bricklink.com/orderDetail.asp"_qs);
     QUrlQuery query;
-    query.addQueryItem("ID"_l1, Utility::urlQueryEscape(order->id()));
+    query.addQueryItem(u"ID"_qs, Utility::urlQueryEscape(order->id()));
     url.setQuery(query);
 
     auto job = TransferJob::get(url);
@@ -1049,7 +1047,7 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
         QString s = QString::fromUtf8(data);
         QString a;
 
-        static const QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
+        static const QRegularExpression regExp(uR"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_qs);
         auto matches = regExp.globalMatch(s);
         if (type == OrderType::Placed) {
             // skip our own address
@@ -1061,11 +1059,11 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
 
             QRegularExpressionMatch match = matches.next();
             a = match.captured(1);
-            static const QRegularExpression breakRegExp(R"(<[bB][rR] ?/?>)"_l1);
-            a.replace(breakRegExp, "\n"_l1);
+            static const QRegularExpression breakRegExp(uR"(<[bB][rR] ?/?>)"_qs);
+            a.replace(breakRegExp, u"\n"_qs);
             result.first = a;
 
-            static const QRegularExpression phoneRegExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Phone:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_l1);
+            static const QRegularExpression phoneRegExp(uR"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Phone:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)"_qs);
 
             auto phoneMatch = phoneRegExp.match(s, match.capturedEnd());
             if (phoneMatch.hasMatch())
@@ -1081,7 +1079,7 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
     // Avoid huge directories with 1000s of entries.
     QString p = orderFilePath(fileName, type, date);
 
-    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
+    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath(u"."_qs))
         return nullptr;
 
     auto f = new QSaveFile(p);
@@ -1094,10 +1092,10 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
 
 QString Orders::orderFilePath(QStringView fileName, OrderType type, const QDate &date) const
 {
-    return m_core->dataPath() % "orders/"_l1 % m_core->userId()
-            % ((type == OrderType::Received) ? "/received/"_l1: "/placed/"_l1 )
+    return m_core->dataPath() % u"orders/" % m_core->userId()
+            % ((type == OrderType::Received) ? u"/received/": u"/placed/")
             % QString::number(date.year()) % u'/'
-            % QString("%1"_l1).arg(date.month(), 2, 10, '0'_l1) % u'/'
+            % u"%1"_qs.arg(date.month(), 2, 10, QChar(u'0')) % u'/'
             % fileName;
 }
 
@@ -1132,26 +1130,26 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 
     static const char *types[] = { "received", "placed" };
     for (auto &type : types) {
-        QUrl url("https://www.bricklink.com/orderExcelFinal.asp"_l1);
+        QUrl url(u"https://www.bricklink.com/orderExcelFinal.asp"_qs);
         QUrlQuery query;
-        query.addQueryItem("action"_l1,        "save"_l1);
-        query.addQueryItem("orderType"_l1,     QLatin1String(type));
-        query.addQueryItem("viewType"_l1,      "X"_l1);
+        query.addQueryItem(u"action"_qs,        u"save"_qs);
+        query.addQueryItem(u"orderType"_qs,     QLatin1String(type));
+        query.addQueryItem(u"viewType"_qs,      u"X"_qs);
         if (fromDate.isValid() && toDate.isValid()) {
-            query.addQueryItem("getOrders"_l1,     "date"_l1);
-            query.addQueryItem("fMM"_l1,           QString::number(fromDate.month()));
-            query.addQueryItem("fDD"_l1,           QString::number(fromDate.day()));
-            query.addQueryItem("fYY"_l1,           QString::number(fromDate.year()));
-            query.addQueryItem("tMM"_l1,           QString::number(toDate.month()));
-            query.addQueryItem("tDD"_l1,           QString::number(toDate.day()));
-            query.addQueryItem("tYY"_l1,           QString::number(toDate.year()));
+            query.addQueryItem(u"getOrders"_qs,     u"date"_qs);
+            query.addQueryItem(u"fMM"_qs,           QString::number(fromDate.month()));
+            query.addQueryItem(u"fDD"_qs,           QString::number(fromDate.day()));
+            query.addQueryItem(u"fYY"_qs,           QString::number(fromDate.year()));
+            query.addQueryItem(u"tMM"_qs,           QString::number(toDate.month()));
+            query.addQueryItem(u"tDD"_qs,           QString::number(toDate.day()));
+            query.addQueryItem(u"tYY"_qs,           QString::number(toDate.year()));
         } else if (!orderId.isEmpty()) {
-            query.addQueryItem("orderID"_l1,       orderId);
+            query.addQueryItem(u"orderID"_qs,       orderId);
         }
-        query.addQueryItem("getStatusSel"_l1,  "I"_l1);
-        query.addQueryItem("getFiled"_l1,      "Y"_l1);
-        query.addQueryItem("getDetail"_l1,     "y"_l1);
-        query.addQueryItem("getDateFormat"_l1, "0"_l1);    // MM/DD/YYYY
+        query.addQueryItem(u"getStatusSel"_qs,  u"I"_qs);
+        query.addQueryItem(u"getFiled"_qs,      u"Y"_qs);
+        query.addQueryItem(u"getDetail"_qs,     u"y"_qs);
+        query.addQueryItem(u"getDateFormat"_qs, u"0"_qs);    // MM/DD/YYYY
         url.setQuery(query);
 
         auto job = TransferJob::post(url);
@@ -1171,7 +1169,7 @@ void Orders::cancelUpdate()
 
 LotList Orders::loadOrderLots(const Order *order) const
 {
-    QString fileName = order->id() % ".order.xml"_l1;
+    QString fileName = order->id() % u".order.xml";
     QFile f(Orders::orderFilePath(fileName, order->type(), order->date()));
     if (!f.open(QIODevice::ReadOnly))
         throw Exception(&f, tr("Cannot open order XML"));
@@ -1225,10 +1223,9 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         case Status: return order->statusAsString(true);
         case OrderId: return order->id();
         case OtherParty: {
-            auto firstline = order->address().indexOf('\n'_l1);
+            auto firstline = order->address().indexOf(u'\n');
             if (firstline > 0) {
-                return QString::fromLatin1("%2 (%1)")
-                        .arg(order->address().left(firstline), order->otherParty());
+                return u"%2 (%1)"_qs.arg(order->address().left(firstline), order->otherParty());
             }
             return order->otherParty();
         }
@@ -1266,7 +1263,7 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         QString tt = data(index, Qt::DisplayRole).toString();
 
         if (!order->address().isEmpty())
-            tt = tt + "\n\n"_l1 + order->address();
+            tt = tt % u"\n\n" % order->address();
         return tt;
     } else if (role == OrderPointerRole) {
         return QVariant::fromValue(order);

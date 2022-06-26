@@ -16,6 +16,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtCore/QObject>
+#include <QtQml/QQmlEngine>
 
 #include "core.h"
 #include "color.h"
@@ -23,6 +24,7 @@
 #include "category.h"
 #include "item.h"
 #include "lot.h"
+#include "model.h"
 #include "store.h"
 #include "order.h"
 #include "wantedlist.h"
@@ -39,25 +41,32 @@ class QmlCategory;
 class QmlItem;
 class QmlLot;
 
+//namespace QmlTime {
+//Q_NAMESPACE
+//QML_NAMED_ELEMENT(Time)
+//enum class Time          { PastSix, Current };
+//Q_ENUM_NS(Time)
+//}
+
 class QmlBrickLink : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(BrickLink)
+    QML_SINGLETON
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
-    Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), QString cachePath READ dataPath CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), QSize standardPictureSize READ standardPictureSize CONSTANT)
 
-    Q_PROPERTY(QmlItem noItem READ noItem CONSTANT)
-    Q_PROPERTY(QmlColor noColor READ noColor CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Store *store READ store CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Orders *orders READ orders CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Carts *carts READ carts CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT)
-    Q_PRIVATE_PROPERTY(d, BrickLink::Database *database READ database CONSTANT)
+    Q_PROPERTY(BrickLink::QmlItem noItem READ noItem CONSTANT)
+    Q_PROPERTY(BrickLink::QmlColor noColor READ noColor CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Store *store READ store CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Orders *orders READ orders CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Database *database READ database CONSTANT)
 
 public:
-    static void registerTypes();
-
-    QmlBrickLink(Core *core);
+    QmlBrickLink();
 
     // copied from namespace BrickLink
     enum class Time          { PastSix, Current };
@@ -117,9 +126,8 @@ signals:
 
 private:
     static char firstCharInString(const QString &str);
-
-    static QmlBrickLink *s_inst;
-    Core *d;
+    inline Core *core() { return BrickLink::core(); }
+    inline const Core *core() const { return BrickLink::core(); }
 };
 
 
@@ -168,6 +176,8 @@ protected:
 class QmlColor : public QmlWrapperBase<const Color>
 {
     Q_GADGET
+    QML_NAMED_ELEMENT(Color)
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
@@ -213,6 +223,8 @@ public:
 class QmlItemType : public QmlWrapperBase<const ItemType>
 {
     Q_GADGET
+    QML_NAMED_ELEMENT(ItemType)
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QString id READ id CONSTANT)
@@ -242,6 +254,8 @@ public:
 class QmlCategory : public QmlWrapperBase<const Category>
 {
     Q_GADGET
+    QML_NAMED_ELEMENT(Category)
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PRIVATE_PROPERTY(wrapped, int id READ id CONSTANT)
@@ -262,6 +276,8 @@ public:
 class QmlItem : public QmlWrapperBase<const Item>
 {
     Q_GADGET
+    QML_NAMED_ELEMENT(Item)
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QString id READ id CONSTANT)
@@ -300,6 +316,8 @@ class QmlBrickLink;
 class QmlLot : public QmlWrapperBase<Lot>
 {
     Q_GADGET
+    QML_NAMED_ELEMENT(Lot)
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QmlItem item READ item WRITE setItem)

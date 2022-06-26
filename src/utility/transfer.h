@@ -16,12 +16,13 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QThread>
-#include <QNetworkAccessManager>
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(LogTransfer)
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
+QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
+QT_FORWARD_DECLARE_CLASS(QNetworkReply)
 class Transfer;
 class TransferRetriever;
 

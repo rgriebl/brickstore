@@ -30,8 +30,7 @@
 #  include <shlobj.h>
 #endif
 
-#include "qcoro/core/qcorofuture.h"
-#include "utility/utility.h"
+#include "qcoro/qcorofuture.h"
 #include "utility/exception.h"
 #include "utility/stopwatch.h"
 #include "utility/transfer.h"
@@ -173,13 +172,13 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 #endif
     bool valid = !path.isEmpty();
     m_path = path;
-    m_isZip = (QFileInfo(path).suffix() == "zip"_l1);
+    m_isZip = (QFileInfo(path).suffix() == u"zip");
 
     m_zip.reset();
     m_searchpath.clear();
 
     if (valid && m_isZip) {
-        QFileInfo(path).dir().mkpath("."_l1);
+        QFileInfo(path).dir().mkpath(u"."_qs);
 
         caseSensitive = false;
         auto zip = std::make_unique<MiniZip>(path);
@@ -191,7 +190,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
     }
     if (valid) {
         try {
-            if (readLDrawFile("LDConfig.ldr"_l1).isEmpty())
+            if (readLDrawFile(u"LDConfig.ldr"_qs).isEmpty())
                 valid = false;
         } catch (const Exception &) {
             valid = false;
@@ -260,7 +259,7 @@ bool Library::startUpdate(bool force)
 
     QScopedValueRollback locker(m_locked, true);
 
-    QString remotefile = m_updateUrl % "complete.zip"_l1;
+    QString remotefile = m_updateUrl % u"complete.zip";
     QString localfile = m_path;
 
     if (!QFile::exists(localfile))
@@ -292,7 +291,7 @@ QByteArray Library::readLDrawFile(const QString &filename)
 {
     QByteArray data;
     if (m_zip) {
-        QString zipFilename = "ldraw/"_l1 % filename;
+        QString zipFilename = u"ldraw/" % filename;
         if (m_zip->contains(zipFilename))
             data = m_zip->readFile(zipFilename);
     } else {
@@ -329,17 +328,17 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
     QString filename = _filename;
     filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
     QString parentdir = _parentdir;
-    if (!parentdir.isEmpty() && !parentdir.startsWith("!ZIP!"_l1))
+    if (!parentdir.isEmpty() && !parentdir.startsWith(u"!ZIP!"))
         parentdir = QDir(parentdir).canonicalPath();
 
     bool inZip = false;
     bool found = false;
 
     // add the logo on studs     //TODO: make this configurable
-    if (filename == "stud.dat"_l1)
-        filename = "stud-logo4.dat"_l1;
-    else if (filename == "stud2.dat"_l1)
-        filename = "stud2-logo4.dat"_l1;
+    if (filename == u"stud.dat")
+        filename = u"stud-logo4.dat"_qs;
+    else if (filename == u"stud2.dat")
+        filename = u"stud2-logo4.dat"_qs;
 
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
@@ -350,13 +349,13 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 
         for (const QString &sp : qAsConst(searchpath)) {
 
-            if (sp.startsWith("!ZIP!"_l1)) {
+            if (sp.startsWith(u"!ZIP!")) {
                 filename = filename.toLower();
                 QString testname = sp.mid(5) % u'/' % filename;
                 if (m_zip->contains(testname)) {
                     QFileInfo fi(filename);
                     parentdir = sp;
-                    if (fi.path() != "."_l1)
+                    if (fi.path() != u".")
                         parentdir = parentdir % u'/' % fi.path();
                     filename = testname;
                     inZip = true;
@@ -439,11 +438,11 @@ bool Library::checkLDrawDir(const QString &ldir)
     if (fi.exists() && fi.isDir() && fi.isReadable()) {
         QDir dir(ldir);
 
-        if (dir.cd("p"_l1) || dir.cd("P"_l1)) {
-            if (dir.exists("stud.dat"_l1) || dir.exists("STUD.DAT"_l1)) {
-                if (dir.cd("../parts"_l1) || dir.cd("../PARTS"_l1)) {
-                    if (dir.exists("3001.dat"_l1) || dir.exists("3001.DAT"_l1)) {
-                        QFile f(ldir % "/LDConfig.ldr"_l1);
+        if (dir.cd(u"p"_qs) || dir.cd(u"P"_qs)) {
+            if (dir.exists(u"stud.dat"_qs) || dir.exists(u"STUD.DAT"_qs)) {
+                if (dir.cd(u"../parts"_qs) || dir.cd(u"../PARTS"_qs)) {
+                    if (dir.exists(u"3001.dat"_qs) || dir.exists(u"3001.DAT"_qs)) {
+                        QFile f(ldir % u"/LDConfig.ldr");
                         if (f.open(QIODevice::ReadOnly) && f.size()) {
                             ok = true;
                         }
@@ -451,7 +450,7 @@ bool Library::checkLDrawDir(const QString &ldir)
                 }
             }
         }
-    } else if (fi.exists() && fi.isFile() && fi.suffix() == "zip"_l1) {
+    } else if (fi.exists() && fi.isFile() && fi.suffix() == u"zip") {
         QByteArray data;
         QBuffer buffer(&data);
         buffer.open(QIODevice::WriteOnly);
@@ -502,23 +501,23 @@ QStringList Library::potentialLDrawDirs()
 #elif defined(Q_OS_UNIX)
     {
         QStringList unixdirs;
-        unixdirs << "~/ldraw"_l1;
+        unixdirs << u"~/ldraw"_qs;
 
 #  if defined(Q_OS_MACOS)
-        unixdirs << "~/Library/ldraw"_l1
-                 << "~/Library/LDRAW"_l1
-                 << "/Library/LDRAW"_l1
-                 << "/Library/ldraw"_l1;
+        unixdirs << u"~/Library/ldraw"_qs
+                 << u"~/Library/LDRAW"_qs
+                 << u"/Library/LDRAW"_qs
+                 << u"/Library/ldraw"_qs;
 #  else
-        unixdirs << "/usr/share/ldraw"_l1;
-        unixdirs << "/var/lib/ldraw"_l1;
-        unixdirs << "/var/ldraw"_l1;
+        unixdirs << u"/usr/share/ldraw"_qs;
+        unixdirs << u"/var/lib/ldraw"_qs;
+        unixdirs << u"/var/ldraw"_qs;
 #  endif
 
         QString homepath = QDir::homePath();
 
         foreach (QString d, unixdirs) {
-            d.replace("~"_l1, homepath);
+            d.replace(u"~"_qs, homepath);
             dirs << d;
         }
     }
@@ -536,16 +535,6 @@ QStringList Library::potentialLDrawDirs()
     return result;
 }
 
-void registerQmlTypes()
-{
-    qmlRegisterSingletonType<LDraw::RenderSettings>("BrickStore", 1, 0, "LDrawRenderSettings",
-                                                    [](QQmlEngine *, QJSEngine *) -> QObject * {
-        auto *rs = RenderSettings::inst();
-        QQmlEngine::setObjectOwnership(rs, QQmlEngine::CppOwnership);
-        return rs;
-    });
-
-}
 
 } // namespace LDraw
 

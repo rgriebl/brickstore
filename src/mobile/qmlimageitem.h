@@ -13,8 +13,8 @@
 */
 #pragma once
 
-#include <QQmlParserStatus>
-#include <QQuickPaintedItem>
+#include <QtQml/QQmlParserStatus>
+#include <QtQuick/QQuickPaintedItem>
 
 #include "bricklink/core.h"
 #include "bricklink/lot.h"
@@ -35,6 +35,7 @@ class QmlPicture;
 class QmlImageItem : public QQuickPaintedItem
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(QImageItem)
     Q_PROPERTY(QImage image READ image WRITE setImage NOTIFY imageChanged)
 
 public:
@@ -53,6 +54,10 @@ private:
     QImage m_image;
 };
 
-
-
-
+class QmlImage // make QImage known to qmllint
+{
+    Q_GADGET
+    QML_FOREIGN(QImage)
+    QML_NAMED_ELEMENT(QImage)
+    QML_UNCREATABLE("")
+};

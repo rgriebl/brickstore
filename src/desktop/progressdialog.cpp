@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QPushButton>
 #include <QLabel>
 #include <QProgressBar>
@@ -21,7 +22,6 @@
 #include <QLayout>
 #include <QApplication>
 
-#include "utility/utility.h"
 #include "progressdialog.h"
 
 
@@ -36,7 +36,7 @@ ProgressDialog::ProgressDialog(const QString &title, TransferJob *job, QWidget *
 
     setWindowTitle(title);
 
-    int minwidth = fontMetrics().horizontalAdvance('m'_l1) * 40;
+    int minwidth = fontMetrics().horizontalAdvance(u'm') * 40;
 
     auto *lay = new QVBoxLayout(this);
 
@@ -102,7 +102,7 @@ void ProgressDialog::setHeaderText(const QString &str)
 void ProgressDialog::setMessageText(const QString &str)
 {
     m_message_text = str;
-    m_message_progress = str.contains("%p"_l1);
+    m_message_progress = str.contains(u"%p");
 
     if (m_message_progress)
         setProgress(0, 0);
@@ -148,15 +148,15 @@ void ProgressDialog::setProgress(int s, int t)
     if (m_message_progress) {
         QString str = m_message_text;
         
-        if (str.contains("%p"_l1)) {
+        if (str.contains(u"%p")) {
             QString prog;
 
             if (t)
-                prog = QString::fromLatin1("%1/%2 KB").arg(s).arg(t);
+                prog = u"%1/%2 KB"_qs.arg(s).arg(t);
             else
-                prog = QString::fromLatin1("%1 KB").arg(s);
+                prog = u"%1 KB"_qs.arg(s);
 
-            str.replace("%p"_l1, prog);
+            str.replace(u"%p"_qs, prog);
         }
         m_message->setText(str);
     }

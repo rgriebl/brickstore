@@ -16,19 +16,24 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QQmlExtensionPlugin>
 #ifdef Q_OS_ANDROID
 #  include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 #endif
-#include <QDirIterator>
 
 #include "common/actionmanager.h"
 #include "common/config.h"
+#include "common/undo.h"
 #include "ldraw/library.h"
-#include "utility/undo.h"
-#include "utility/utility.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
-#include "qmlimageitem.h"
+
+
+// add all QML plugins here for the iOS port (static linking only)
+Q_IMPORT_QML_PLUGIN(MobilePlugin)
+Q_IMPORT_QML_PLUGIN(LDrawPlugin)
+Q_IMPORT_QML_PLUGIN(BrickLinkPlugin)
+Q_IMPORT_QML_PLUGIN(BrickStorePlugin)
 
 
 MobileApplication::MobileApplication(int &argc, char **argv)
@@ -36,14 +41,13 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 {
     m_app = new QGuiApplication(argc, argv);
 
-    qputenv("QT_QUICK_CONTROLS_CONF", ":/mobile/qtquickcontrols2.conf");
+    qputenv("QT_QUICK_CONTROLS_CONF", ":/Mobile/qtquickcontrols2.conf");
 }
 
 void MobileApplication::init()
 {
     Application::init();
 
-    m_engine->setBaseUrl(QUrl("qrc:/mobile/"_l1));
     if (qEnvironmentVariableIntValue("SHOW_TRACER") == 1)
         m_engine->rootContext()->setContextProperty(u"showTracer"_qs, true);
 
@@ -60,7 +64,7 @@ void MobileApplication::init()
 
     setIconTheme(LightTheme);
 
-    m_engine->load(m_engine->baseUrl().resolved(QUrl("Main.qml"_l1)));
+    m_engine->load(QUrl(u"Mobile/Main.qml"_qs));
 
     if (m_engine->rootObjects().isEmpty()) {
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
@@ -80,8 +84,6 @@ QCoro::Task<bool> MobileApplication::closeAllViews()
 void MobileApplication::setupQml()
 {
     Application::setupQml();
-
-    qmlRegisterType<QmlImageItem>("BrickStore", 1, 0, "QImageItem");
 }
 
 MobileApplication::~MobileApplication()

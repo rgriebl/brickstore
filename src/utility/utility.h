@@ -16,12 +16,11 @@
 #include <algorithm>
 #include <cmath>
 
-#include <QString>
-#include <QColor>
-#include <QLocale>
-#include <QPair>
-#include <QImage>
-#include <QStringBuilder>
+#include <QtCore/QString>
+#include <QtCore/QLocale>
+#include <QtCore/QPair>
+#include <QtGui/QColor>
+#include <QtGui/QImage>
 
 #if defined(Q_OS_WINDOWS) && defined(max)
 #  undef max
@@ -32,15 +31,6 @@ QT_FORWARD_DECLARE_CLASS(QRect)
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
 
-constexpr inline QLatin1String operator ""_l1(const char *c, std::size_t s)
-{
-    return QLatin1String(c, int(s));
-}
-
-constexpr inline QChar operator ""_l1(const char c)
-{
-    return QLatin1Char(c);
-}
 
 inline static double fixFinite(double d)
 {

@@ -20,21 +20,16 @@
 #include "qqmlinfo.h"
 
 #include "utility/utility.h"
-#include "utility/currency.h"
-#include "utility/systeminfo.h"
+#include "common/currency.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/order.h"
 #include "common/actionmanager.h"
-#include "common/announcements.h"
 #include "common/application.h"
-#include "common/config.h"
 #include "common/document.h"
 #include "common/documentmodel.h"
 #include "common/documentio.h"
-#include "common/onlinestate.h"
 #include "common/recentfiles.h"
-#include "ldraw/rendercontroller.h"
 #include "brickstore_wrapper.h"
 #include "version.h"
 
@@ -83,43 +78,11 @@
     no documents are open, but also if the quickstart page is active.
 */
 
-QmlBrickStore *QmlBrickStore::s_inst = nullptr;
-
-void QmlBrickStore::registerTypes()
-{
-    s_inst = new QmlBrickStore();
-
-    qRegisterMetaType<DocumentModel::Field>();
-
-    static QmlClipboard cb;
-    static QmlUtility ut;
-
-    qmlRegisterSingletonInstance<QmlBrickStore>("BrickStore", 1, 0, "BrickStore", s_inst);
-    qmlRegisterSingletonInstance<Currency>("BrickStore", 1, 0, "Currency", Currency::inst());
-    qmlRegisterSingletonInstance<Config>("BrickStore", 1, 0, "Config", Config::inst());
-    qmlRegisterSingletonInstance<QmlClipboard>("BrickStore", 1, 0, "Clipboard", &cb);
-    qmlRegisterSingletonInstance<QmlUtility>("BrickStore", 1, 0, "Utililty", &ut);
-    qmlRegisterSingletonInstance<OnlineState>("BrickStore", 1, 0, "OnlineState", OnlineState::inst());
-    qmlRegisterSingletonInstance<SystemInfo>("BrickStore", 1, 0, "SystemInfo", SystemInfo::inst());
-    qmlRegisterSingletonInstance<Announcements>("BrickStore", 1, 0, "Announcements", Application::inst()->announcements());
-
-
-    qmlRegisterType<QmlDocumentProxyModel>("BrickStore", 1, 0, "DocumentProxyModel");
-    qmlRegisterType<QmlSortFilterProxyModel>("BrickStore", 1, 0, "SortFilterProxyModel");
-
-    QString cannotCreate = "Cannot create this type"_l1;
-    qmlRegisterUncreatableType<DocumentModel>("BrickStore", 1, 0, "DocumentModel", cannotCreate);
-    qmlRegisterUncreatableType<Document>("BrickStore", 1, 0, "Document", cannotCreate);
-    qmlRegisterUncreatableType<DocumentList>("BrickStore", 1, 0, "DocumentList", cannotCreate);
-
-    qmlRegisterUncreatableType<QmlThenable>("BrickStore", 1, 0, "Thenable", cannotCreate);
-}
-
 
 QmlBrickStore::QmlBrickStore()
     : m_columnLayouts(new ColumnLayoutsModel(this))
 {
-    setObjectName("BrickStore"_l1);
+    setObjectName(u"BrickStore"_qs);
 
     connect(Application::inst(), &Application::showSettings,
             this, &QmlBrickStore::showSettings);
@@ -129,11 +92,6 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
             this, &QmlBrickStore::defaultCurrencyCodeChanged);
-}
-
-QmlBrickStore *QmlBrickStore::inst()
-{
-    return s_inst;
 }
 
 DocumentList *QmlBrickStore::documents() const
@@ -296,11 +254,6 @@ void QmlBrickStore::updateDatabase()
 Document *QmlBrickStore::activeDocument() const
 {
     return ActionManager::inst()->activeDocument();
-}
-
-LDraw::RenderController *QmlBrickStore::createRenderController(QObject *parent)
-{
-    return new LDraw::RenderController(parent);
 }
 
 QmlThenable *QmlBrickStore::checkBrickLinkLogin()
@@ -658,7 +611,7 @@ void ColumnLayoutsModel::update()
     }
     const auto userLayoutIds = Config::inst()->columnLayoutIds();
     if (!userLayoutIds.isEmpty())
-        m_idAndName.append({ ""_l1, "-"_l1 });
+        m_idAndName.append({ u""_qs, u"-"_qs });
 
     QMap<int, QString> orderedUserLayoutIds;
     for (const auto &layoutId : userLayoutIds)

@@ -117,10 +117,10 @@ bool PriceGuide::parse(const QByteArray &ba, Data &result) const
     QString line;
 
     while (!(line = ts.readLine()).isNull()) {
-        if (line.isEmpty() || (line[0] == '#'_l1) || (line[0] == '\r'_l1))         // skip comments fast
+        if (line.isEmpty() || (line[0] == u'#') || (line[0] == u'\r'))         // skip comments fast
             continue;
 
-        QStringList sl = line.split('\t'_l1, Qt::KeepEmptyParts);
+        QStringList sl = line.split(u"\t"_qs, Qt::KeepEmptyParts);
 
         if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
             continue;
@@ -160,19 +160,19 @@ bool PriceGuide::parse(const QByteArray &ba, Data &result) const
 
 bool PriceGuide::parseHtml(const QByteArray &ba, Data &result)
 {
-    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <)"_l1);
+    static const QRegularExpression re(uR"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <.*?> US \$([0-9.,]+) <)"_qs);
 
-    QString s = QString::fromUtf8(ba).replace("&nbsp;"_l1, " "_l1);
-    QLocale en_US("en_US"_l1);
+    QString s = QString::fromUtf8(ba).replace(u"&nbsp;"_qs, u" "_qs);
+    QLocale en_US(u"en_US"_qs);
 
     result = { };
 
     int matchCounter = 0;
     int startPos = 0;
 
-    int currentPos = int(s.indexOf("Current Items for Sale"_l1));
+    int currentPos = int(s.indexOf(u"Current Items for Sale"));
     bool hasCurrent = (currentPos > 0);
-    int pastSixPos = int(s.indexOf("Past 6 Months Sales"_l1));
+    int pastSixPos = int(s.indexOf(u"Past 6 Months Sales"));
     bool hasPastSix = (pastSixPos > 0);
 
 //    qWarning() << s;
@@ -193,9 +193,9 @@ bool PriceGuide::parseHtml(const QByteArray &ba, Data &result)
                 ti = int(Time::PastSix);
 
             const QString condStr = m.captured(1);
-            if (condStr == "Used"_l1) {
+            if (condStr == u"Used") {
                 ci = int(Condition::Used);
-            } else if (condStr == "New"_l1) {
+            } else if (condStr == u"New") {
                 ci = int(Condition::New);
             } else if (condStr.isEmpty()) {
                 ci = int(Condition::New);

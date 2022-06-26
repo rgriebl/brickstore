@@ -13,10 +13,11 @@
 */
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QStringBuilder>
 #include <QLabel>
 #include <QToolButton>
 #include "utility/utility.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "orderinformationdialog.h"
 
 
@@ -48,8 +49,8 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
 
     QLocale loc;
 
-    const QString bon("<b>"_l1);
-    const QString boff("</b>"_l1);
+    const QString bon(u"<b>"_qs);
+    const QString boff(u"</b>"_qs);
 
     w_info->setText(tr("Order %1, %2 %3 on %4").arg(
                         bon % order->id() % boff,
@@ -67,7 +68,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
                                               QClipboard::Clipboard);
     });
 
-    const QStringList adr = order->address().split("\n"_l1);
+    const QStringList adr = order->address().split(u"\n"_qs);
     int adrSize = adr.size();
 
     setup(w_address1, w_address1Copy, adr.value(0), adrSize >= 1);

@@ -32,7 +32,6 @@
 #include <QMessageBox>
 
 #include "qcoro/qcoro.h"
-#include "utility/utility.h"
 #include "checkforupdates.h"
 #include "progressdialog.h"
 
@@ -43,20 +42,20 @@ CheckForUpdates::CheckForUpdates(const QString &baseUrl, QWidget *parent)
     , m_parent(parent)
 {
     m_checkUrl = baseUrl;
-    m_checkUrl.replace("github.com"_l1, "https://api.github.com/repos"_l1);
-    m_checkUrl.append("/releases/latest"_l1);
+    m_checkUrl.replace(u"github.com"_qs, u"https://api.github.com/repos"_qs);
+    m_checkUrl.append(u"/releases/latest"_qs);
 
     m_changelogUrl = baseUrl;
-    m_changelogUrl.replace("github.com"_l1, "https://raw.githubusercontent.com"_l1);
-    m_changelogUrl.append("/main/CHANGELOG.md"_l1);
+    m_changelogUrl.replace(u"github.com"_qs, u"https://raw.githubusercontent.com"_qs);
+    m_changelogUrl.append(u"/main/CHANGELOG.md"_qs);
 
     m_downloadUrl = baseUrl;
-    m_downloadUrl.prepend("https://"_l1);
-    m_downloadUrl.append("/releases/tag/v%1"_l1);
+    m_downloadUrl.prepend(u"https://"_qs);
+    m_downloadUrl.append(u"/releases/tag/v%1"_qs);
 
     m_updatesPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % u"/updates/";
     QDir d(m_updatesPath);
-    d.mkpath('.'_l1);
+    d.mkpath(u"."_qs);
     const auto leftOvers = d.entryList(QDir::Files);
     for (const auto &leftOver: leftOvers)
         QFile::remove(d.absoluteFilePath(leftOver));
@@ -86,27 +85,27 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
         qWarning() << data.constData();
         qWarning() << "\nCould not parse GitHub JSON reply:" << jsonError.errorString();
     } else {
-        QString tag = doc["tag_name"_l1].toString();
-        if (tag.startsWith('v'_l1))
+        QString tag = doc[u"tag_name"].toString();
+        if (tag.startsWith(u'v'))
             tag.remove(0, 1);
         latestVersion = QVersionNumber::fromString(tag);
         if (latestVersion.isNull())
             qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
-        auto assets = doc["assets"_l1].toArray();
+        auto assets = doc[u"assets"].toArray();
         m_installerUrl.clear();
         for (const QJsonValue &&asset : assets) {
-            QString name = asset["name"_l1].toString();
+            QString name = asset[u"name"].toString();
 #if defined(Q_OS_MACOS)
-            if (name.startsWith("macOS-"_l1)) {
+            if (name.startsWith(u"macOS-") {
 #elif defined(Q_OS_WIN64)
-            if (name.startsWith("Windows-x64-"_l1)) {
+            if (name.startsWith(u"Windows-x64-")) {
 #elif defined(Q_OS_WIN)
-            if (name.startsWith("Windows-x86-"_l1)) {
+            if (name.startsWith(u"Windows-x86-")) {
 #else
             if (false) {
 #endif
                 m_installerName = name;
-                m_installerUrl = asset["browser_download_url"_l1].toString();
+                m_installerUrl = asset[u"browser_download_url"].toString();
                 break;
             }
         }
@@ -149,7 +148,7 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
     reply->deleteLater();
 
     QString md = QString::fromUtf8(reply->readAll());
-    static const QRegularExpression header(R"(^## \[([0-9.]+)\] - \d{4}-\d{2}-\d{2}$)"_l1,
+    static const QRegularExpression header(uR"(^## \[([0-9.]+)\] - \d{4}-\d{2}-\d{2}$)"_qs,
                                            QRegularExpression::MultilineOption);
 
     int fromHeader = 0;

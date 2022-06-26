@@ -62,13 +62,13 @@
 #include "common/documentmodel.h"
 #include "common/documentio.h"
 #include "common/onlinestate.h"
-#include "qcoro/core/qcorosignal.h"
-#include "utility/currency.h"
-#include "utility/eventfilter.h"
+#include "qcoro/qcorosignal.h"
+#include "common/currency.h"
+#include "common/eventfilter.h"
 #include "utility/exception.h"
 #include "common/uihelpers.h"
 #include "utility/stopwatch.h"
-#include "utility/undo.h"
+#include "common/undo.h"
 #include "utility/utility.h"
 #include "checkforupdates.h"
 #include "desktopapplication.h"
@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent)
     // vvv increase DockStateVersion if you change the dock/toolbar setup
 
     m_toolbar = new QToolBar(this);
-    m_toolbar->setObjectName("toolbar"_l1);
+    m_toolbar->setObjectName(u"toolbar"_qs);
     m_toolbar->setMovable(false);
 
     connect(m_toolbar, &QToolBar::visibilityChanged,
@@ -213,14 +213,14 @@ MainWindow::MainWindow(QWidget *parent)
         doNotRestoreGeometry = wa->isTabletMode();
 #endif
 
-    auto geo = Config::inst()->value("/MainWindow/Layout/Geometry"_l1).toByteArray();
+    auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
     if (!doNotRestoreGeometry)
         restoreGeometry(geo);
 
     // We need to restore twice. The first time to at least hide all the hidden dock widgets:
     // otherwise the dock overflows on small screens and the geometry restore is completely off.
 
-    auto state = Config::inst()->value("/MainWindow/Layout/State"_l1).toByteArray();
+    auto state = Config::inst()->value(u"/MainWindow/Layout/State"_qs).toByteArray();
     if (state.isEmpty() || !restoreState(state, DockStateVersion)) {
         m_toolbar->show();
         state.clear();
@@ -330,9 +330,9 @@ void MainWindow::setupScripts()
         auto actions = m_extrasMenu->actions();
         bool deleteRest = false;
         for (QAction *a : qAsConst(actions)) {
-            if (a->objectName() == "scripts-start"_l1)
+            if (a->objectName() == u"scripts-start")
                 deleteRest = true;
-            else if (a->objectName() == "scripts-end"_l1)
+            else if (a->objectName() == u"scripts-end")
                 break;
             else if (deleteRest)
                 m_extrasMenu->removeAction(a);
@@ -353,17 +353,17 @@ void MainWindow::languageChange()
     foreach (QDockWidget *dock, m_dock_widgets) {
         QString name = dock->objectName();
 
-        if (name == "dock_info"_l1)
+        if (name == u"dock_info")
             dock->setWindowTitle(tr("Info"));
-        if (name == "dock_priceguide"_l1)
+        if (name == u"dock_priceguide")
             dock->setWindowTitle(tr("Price Guide"));
-        if (name == "dock_appearsin"_l1)
+        if (name == u"dock_appearsin")
             dock->setWindowTitle(tr("Appears In Sets"));
-        if (name == "dock_opendocuments"_l1)
+        if (name == u"dock_opendocuments")
             dock->setWindowTitle(tr("Open Documents"));
-        if (name == "dock_recentdocuments"_l1)
+        if (name == u"dock_recentdocuments")
             dock->setWindowTitle(tr("Recent Documents"));
-        if (name == "dock_errorlog"_l1)
+        if (name == u"dock_errorlog")
             dock->setWindowTitle(tr("Error Log"));
     }
     if (m_progress) {
@@ -375,8 +375,8 @@ void MainWindow::languageChange()
 
 MainWindow::~MainWindow()
 {
-    Config::inst()->setValue("/MainWindow/Layout/State"_l1, saveState(DockStateVersion));
-    Config::inst()->setValue("/MainWindow/Layout/Geometry"_l1, saveGeometry());
+    Config::inst()->setValue(u"/MainWindow/Layout/State"_qs, saveState(DockStateVersion));
+    Config::inst()->setValue(u"/MainWindow/Layout/Geometry"_qs, saveGeometry());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
@@ -439,7 +439,7 @@ void MainWindow::createCentralWidget()
     m_welcomeWidget->hide();
 
     auto *rootSplitter = new QSplitter();
-    rootSplitter->setObjectName("RootSplitter"_l1);
+    rootSplitter->setObjectName(u"RootSplitter"_qs);
     auto *vp = createViewPane(nullptr);
     rootSplitter->addWidget(vp);
     setCentralWidget(rootSplitter);
@@ -533,7 +533,7 @@ void MainWindow::goHome(bool home)
             connectView(v);
         }
     }
-    m_goHome->setIcon(QIcon::fromTheme(home ? "go-previous"_l1 : "go-home"_l1));
+    m_goHome->setIcon(QIcon::fromTheme(home ? u"go-previous"_qs : u"go-home"_qs));
     m_goHome->setChecked(home);
     m_goHome->setEnabled(DocumentList::inst()->count() > 0);
 }
@@ -791,28 +791,28 @@ bool MainWindow::setupToolBar()
     if (actionNames.isEmpty())
         actionNames = defaultToolBarActionNames();
 
-    actionNames = QStringList { "go_home"_l1, "-"_l1 } + actionNames
-            + QStringList { "<>"_l1, "widget_progress"_l1, "|"_l1 };
+    actionNames = QStringList { u"go_home"_qs, u"-"_qs } + actionNames
+            + QStringList { u"<>"_qs, u"widget_progress"_qs, u"|"_qs };
 
     for (const QString &an : qAsConst(actionNames)) {
-        if (an == "-"_l1) {
+        if (an == u"-") {
             m_toolbar->addSeparator()->setObjectName(an);
-        } else if (an == "|"_l1) {
+        } else if (an == u"|") {
             QWidget *spacer = new QWidget();
             spacer->setObjectName(an);
             int sp = 2 * style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setFixedSize(sp, sp);
             m_toolbar->addWidget(spacer);
-        } else if (an == "<>"_l1) {
+        } else if (an == u"<>") {
             QWidget *spacer = new QWidget();
             spacer->setObjectName(an);
             int sp = 2 * style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
             m_toolbar->addWidget(spacer);
-        } else if (an == "edit_filter_focus"_l1) {
+        } else if (an == u"edit_filter_focus") {
             // the old filter control - ignore
-        } else if (an == "widget_progress"_l1) {
+        } else if (an == u"widget_progress") {
             m_toolbar->addAction(m_progressAction);
         } else if (QAction *a = ActionManager::inst()->qAction(an.toLatin1().constData())) {
             m_toolbar->addAction(a);
@@ -972,7 +972,7 @@ void MainWindow::createActions()
         { "edit_additems", [this](auto) {
               if (!m_add_dialog) {
                   m_add_dialog = new AddItemDialog();
-                  m_add_dialog->setObjectName("additems"_l1);
+                  m_add_dialog->setObjectName(u"additems"_qs);
                   m_add_dialog->attach(m_activeView);
 
                   connect(m_add_dialog, &AddItemDialog::closed,
@@ -1024,7 +1024,7 @@ void MainWindow::createActions()
     am->qAction("edit_additems")->setShortcutContext(Qt::ApplicationShortcut);
 
     m_progress = new ProgressCircle();
-    m_progress->setIcon(QIcon(":/assets/generated-app-icons/brickstore.png"_l1));
+    m_progress->setIcon(QIcon(u":/assets/generated-app-icons/brickstore.png"_qs));
     m_progress->setColor("#4ba2d8");
 
     connect(m_progress, &ProgressCircle::cancelAll,
@@ -1081,31 +1081,31 @@ QStringList MainWindow::toolBarActionNames() const
 QStringList MainWindow::defaultToolBarActionNames() const
 {
     static const QStringList actionNames = {
-        "document_new"_l1,
-        "document_open"_l1,
-        "document_save"_l1,
-        "document_print"_l1,
-        "-"_l1,
-        "document_import"_l1,
-        "document_export"_l1,
-        "-"_l1,
-        "edit_undo"_l1,
-        "edit_redo"_l1,
-        "-"_l1,
-        "edit_cut"_l1,
-        "edit_copy"_l1,
-        "edit_paste"_l1,
-        "edit_delete"_l1,
-        "-"_l1,
-        "edit_additems"_l1,
-        "edit_subtractitems"_l1,
-        "edit_mergeitems"_l1,
-        "edit_partoutitems"_l1,
-        "-"_l1,
-        "edit_price_to_priceguide"_l1,
-        "edit_price_inc_dec"_l1,
-        "-"_l1,
-        "view_column_layout_load"_l1,
+        u"document_new"_qs,
+        u"document_open"_qs,
+        u"document_save"_qs,
+        u"document_print"_qs,
+        u"-"_qs,
+        u"document_import"_qs,
+        u"document_export"_qs,
+        u"-"_qs,
+        u"edit_undo"_qs,
+        u"edit_redo"_qs,
+        u"-"_qs,
+        u"edit_cut"_qs,
+        u"edit_copy"_qs,
+        u"edit_paste"_qs,
+        u"edit_delete"_qs,
+        u"-"_qs,
+        u"edit_additems"_qs,
+        u"edit_subtractitems"_qs,
+        u"edit_mergeitems"_qs,
+        u"edit_partoutitems"_qs,
+        u"-"_qs,
+        u"edit_price_to_priceguide"_qs,
+        u"edit_price_inc_dec"_qs,
+        u"-"_qs,
+        u"view_column_layout_load"_qs,
     };
     return actionNames;
 }
@@ -1180,7 +1180,7 @@ QMenu *MainWindow::createPopupMenu()
     auto menu = QMainWindow::createPopupMenu();
     if (menu) {
         menu->addAction(tr("Customize Toolbar..."), this, [this]() {
-            showSettings("toolbar"_l1);
+            showSettings(u"toolbar"_qs);
         });
     }
     return menu;
@@ -1232,7 +1232,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
 {
     //TODO move to Application and get rid of QCoro::waitFor
     QStringList files = DocumentList::inst()->allFiles();
-    Config::inst()->setValue("/MainWindow/LastSessionDocuments"_l1, files);
+    Config::inst()->setValue(u"/MainWindow/LastSessionDocuments"_qs, files);
 
     if (!QCoro::waitFor(Application::inst()->closeAllViews())) {
         e->ignore();

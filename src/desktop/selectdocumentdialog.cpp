@@ -430,7 +430,7 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QS
     connect(m_sd, &SelectDocument::documentSelected,
             dpage, &WizardPage::setComplete);
 
-    QByteArray ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/Geometry"_l1).toByteArray();
+    QByteArray ba = Config::inst()->value(u"/MainWindow/SelectCopyMergeDialog/Geometry"_qs).toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
 
@@ -440,15 +440,15 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QS
     dpage->setFixedSize(s);
     mpage->setFixedSize(s);
 
-    ba = Config::inst()->value("/MainWindow/SelectCopyMergeDialog/MergeMode"_l1)
+    ba = Config::inst()->value(u"/MainWindow/SelectCopyMergeDialog/MergeMode"_qs)
             .toByteArray();
     m_mm->restoreState(ba);
 }
 
 SelectCopyMergeDialog::~SelectCopyMergeDialog()
 {
-    Config::inst()->setValue("/MainWindow/SelectCopyMergeDialog/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/SelectCopyMergeDialog/MergeMode"_l1, m_mm->saveState());
+    Config::inst()->setValue(u"/MainWindow/SelectCopyMergeDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"/MainWindow/SelectCopyMergeDialog/MergeMode"_qs, m_mm->saveState());
 }
 
 

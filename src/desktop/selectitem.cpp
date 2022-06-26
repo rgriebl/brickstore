@@ -48,7 +48,7 @@
 #include "bricklink/picture.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "utility/eventfilter.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "historylineedit.h"
@@ -275,7 +275,7 @@ void SelectItem::init()
             this, &SelectItem::setViewMode);
 
     d->w_pcc = new QToolButton();
-    d->w_pcc->setIcon(QIcon::fromTheme("edit-find"_l1));
+    d->w_pcc->setIcon(QIcon::fromTheme(u"edit-find"_qs));
     d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
     d->w_pcc->setAutoRaise(true);
     connect(d->w_pcc, &QToolButton::clicked, this, [this]() {
@@ -292,17 +292,17 @@ void SelectItem::init()
 
     d->w_dateFilter = new QToolButton();
     d->w_dateFilter->setVisible(false);
-    d->w_dateFilter->setIcon(QIcon::fromTheme("appointment-new"_l1));
+    d->w_dateFilter->setIcon(QIcon::fromTheme(u"appointment-new"_qs));
     d->w_dateFilter->setAutoRaise(true);
     connect(d->w_dateFilter, &QToolButton::clicked, this, [this]() {
-        int minYear = QInputDialog::getInt(this, "Min Year"_l1, "Min Year"_l1, 1950);
-        int maxYear = QInputDialog::getInt(this, "Max Year"_l1, "Max Year"_l1, 2050);
+        int minYear = QInputDialog::getInt(this, u"Min Year"_qs, u"Min Year"_qs, 1950);
+        int maxYear = QInputDialog::getInt(this, u"Max Year"_qs, u"Max Year"_qs, 2050);
         d->itemModel->setFilterYearRange(minYear, maxYear);
     });
 
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"_l1));
+    d->w_zoomOut->setIcon(QIcon::fromTheme(u"zoom-out"_qs));
     d->w_zoomOut->setAutoRaise(true);
     d->w_zoomOut->setAutoRepeat(true);
     connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
@@ -315,7 +315,7 @@ void SelectItem::init()
             this, [this]() { setZoomFactor(2); });
     d->w_zoomIn = new QToolButton();
     d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"_l1));
+    d->w_zoomIn->setIcon(QIcon::fromTheme(u"zoom-in"_qs));
     d->w_zoomIn->setAutoRaise(true);
     d->w_zoomIn->setAutoRepeat(true);
     connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
@@ -325,14 +325,14 @@ void SelectItem::init()
     QToolButton *tb;
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+1"));
-    tb->setIcon(QIcon::fromTheme("view-list-text"_l1));
+    tb->setIcon(QIcon::fromTheme(u"view-list-text"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+2"));
-    tb->setIcon(QIcon::fromTheme("view-list-details"_l1));
+    tb->setIcon(QIcon::fromTheme(u"view-list-details"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     tb->setChecked(true);
@@ -340,7 +340,7 @@ void SelectItem::init()
 
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+3"));
-    tb->setIcon(QIcon::fromTheme("view-list-icons"_l1));
+    tb->setIcon(QIcon::fromTheme(u"view-list-icons"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
@@ -925,13 +925,13 @@ void SelectItem::applyFilter()
 QSize SelectItem::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return { 120 * fm.horizontalAdvance('x'_l1), 20 * fm.height() };
+    return { 120 * fm.horizontalAdvance(u'x'), 20 * fm.height() };
 }
 
 QSize SelectItem::minimumSizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return { 80 * fm.horizontalAdvance('x'_l1), 12 * fm.height() };
+    return { 80 * fm.horizontalAdvance(u'x'), 12 * fm.height() };
 }
 
 void SelectItem::showContextMenu(const QPoint &p)

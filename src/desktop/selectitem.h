@@ -16,7 +16,7 @@
 #include <QDialog>
 
 #include "bricklink/global.h"
-#include "utility/eventfilter.h"
+#include "common/eventfilter.h"
 
 QT_FORWARD_DECLARE_CLASS(QListViewItem)
 QT_FORWARD_DECLARE_CLASS(QIconViewItem)

@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QPushButton>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
@@ -22,8 +23,8 @@
 #include <QMessageBox>
 #include <QMenu>
 
-#include "utility/currency.h"
-#include "utility/humanreadabletimedelta.h"
+#include "common/currency.h"
+#include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "bricklink/core.h"
 #include "bricklink/order.h"
@@ -127,7 +128,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     m_contextMenu->addAction(m_orderInformation);
 
     m_showOnBrickLink = new QAction(this);
-    m_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
+    m_showOnBrickLink->setIcon(QIcon::fromTheme(u"bricklink"_qs));
     connect(m_showOnBrickLink, &QAction::triggered, this, [this]() {
         const auto selection = w_orders->selectionModel()->selectedRows();
         for (const auto &idx : selection) {
@@ -154,14 +155,14 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     if (!BrickLink::core()->orders()->rowCount())
         QMetaObject::invokeMethod(this, &ImportOrderDialog::updateOrders, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value("/MainWindow/ImportOrderDialog/Geometry"_l1)
+    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    int daysBack = Config::inst()->value("/MainWindow/ImportOrderDialog/DaysBack"_l1, -1).toInt();
+    int daysBack = Config::inst()->value(u"/MainWindow/ImportOrderDialog/DaysBack"_qs, -1).toInt();
     if (daysBack > 0)
         w_daysBack->setValue(daysBack);
-    ba = Config::inst()->value("/MainWindow/ImportOrderDialog/Filter"_l1).toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
 
@@ -170,9 +171,9 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
 ImportOrderDialog::~ImportOrderDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack"_l1, w_daysBack->value());
-    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Filter"_l1, w_filter->saveState());
+    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/DaysBack"_qs, w_daysBack->value());
+    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Filter"_qs, w_filter->saveState());
 }
 
 void ImportOrderDialog::keyPressEvent(QKeyEvent *e)
@@ -236,7 +237,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     if (combined && m_selectedCurrencyCodes.size() > 1) {
         if (QMessageBox::question(this, tr("Import Order"),
                                   tr("You have selected multiple orders with differing currencies, which cannot be combined as-is.")
-                                  % "<br><br>"_l1
+                                  % u"<br><br>"
                                   % tr("Do you want to continue and convert all prices to your default currency (%1)?")
                                   .arg(Config::inst()->defaultCurrencyCode())) == QMessageBox::No) {
             return;
@@ -288,7 +289,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     if (combined) {
         auto doc = new Document(new DocumentModel(std::move(combinedPr))); // Document owns the items now
         doc->setTitle(tr("Multiple Orders"));
-        doc->setThumbnail("view-financial-list"_l1);
+        doc->setThumbnail(u"view-financial-list"_qs);
     }
 }
 

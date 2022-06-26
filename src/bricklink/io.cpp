@@ -29,15 +29,15 @@ static QDateTime parseESTDateTimeString(const QString &v)
     if (v.isEmpty())
         return { };
 
-    //TOO SLOW: QDateTime::fromString(v % u" EST", "M/d/yyyy h:mm:ss AP t"_l1));
-    //TOO SLOW: { QDate::fromString(v, "M/d/yyyy"_l1), QTime(0, 0), est };
+    //TOO SLOW: QDateTime::fromString(v % u" EST", u"M/d/yyyy h:mm:ss AP t"));
+    //TOO SLOW: { QDate::fromString(v, u"M/d/yyyy"), QTime(0, 0), est };
 
-    QStringList sl = QString(v).replace('/'_l1, ' '_l1).replace(':'_l1, ' '_l1).split(' '_l1);
+    QStringList sl = QString(v).replace(u'/', u' ').replace(u':', u' ').split(u' ');
     if (sl.size() == 7) {
         static const QTimeZone est("EST");
 
         int h = sl.at(3).toInt() % 12;
-        if (sl.at(6) == "PM"_l1)
+        if (sl.at(6) == u"PM")
             h += 12;
         return  QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
                           { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
@@ -120,9 +120,9 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
 
     ParseResult pr;
     QXmlStreamReader xml(data);
-    QString rootName = "INVENTORY"_l1;
+    QString rootName = u"INVENTORY"_qs;
     if (hint == Hint::Order)
-        rootName = "ORDER"_l1;
+        rootName = u"ORDER"_qs;
 
     QHash<QStringView, std::function<void(ParseResult &pr, const QString &value)>> rootTagHash;
 
@@ -134,7 +134,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     { u"ITEMID",       [](auto *lot, auto &v) { lot->isIncomplete()->m_item_id = v.toLatin1(); } },
     { u"COLOR",        [](auto *lot, auto &v) { lot->isIncomplete()->m_color_id = v.toUInt(); } },
     { u"CATEGORY",     [](auto *lot, auto &v) { lot->isIncomplete()->m_category_id = v.toUInt(); } },
-    { u"ITEMTYPE",     [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = XmlHelpers::firstCharInString(v); } },
+    { u"ITEMTYPE",     [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = ItemType::idFromFirstCharInString(v); } },
     { u"MAXPRICE",     [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setPrice(fixFinite(v.toDouble())); } },
     { u"PRICE",        [](auto *lot, auto &v) { lot->setPrice(fixFinite(v.toDouble())); } },
     { u"BULK",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
@@ -150,28 +150,28 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, fixFinite(v.toDouble())); } },
     { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, fixFinite(v.toDouble())); } },
     { u"LOTID",        [](auto *lot, auto &v) { lot->setLotId(v.toUInt()); } },
-    { u"RETAIN",       [](auto *lot, auto &v) { lot->setRetain(v == "Y"_l1); } },
+    { u"RETAIN",       [](auto *lot, auto &v) { lot->setRetain(v == u"Y"); } },
     { u"BUYERUSERNAME",[](auto *lot, auto &v) { lot->setReserved(v); } },
     { u"MYWEIGHT",     [](auto *lot, auto &v) { lot->setWeight(fixFinite(v.toDouble())); } },
     { u"MYCOST",       [](auto *lot, auto &v) { lot->setCost(fixFinite(v.toDouble())); } },
     { u"CONDITION",    [](auto *lot, auto &v) {
-        lot->setCondition(v == "N"_l1 ? Condition::New
-                                      : Condition::Used); } },
+        lot->setCondition(v == u"N" ? Condition::New
+                                    : Condition::Used); } },
     { u"SUBCONDITION", [](auto *lot, auto &v) {
         // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-        lot->setSubCondition(v == "C"_l1 ? SubCondition::Complete :
-                             v == "I"_l1 ? SubCondition::Incomplete :
-                             v == "M"_l1 ? SubCondition::Sealed : // legacy
-                             v == "S"_l1 ? SubCondition::Sealed
-                                         : SubCondition::None); } },
+        lot->setSubCondition(v == u"C" ? SubCondition::Complete :
+                             v == u"I" ? SubCondition::Incomplete :
+                             v == u"M" ? SubCondition::Sealed : // legacy
+                             v == u"S" ? SubCondition::Sealed
+                                       : SubCondition::None); } },
     { u"STOCKROOM",    [](auto *lot, auto &v) {
-        if ((v == "Y"_l1) && (lot->stockroom() == Stockroom::None))
+        if ((v == u"Y") && (lot->stockroom() == Stockroom::None))
             lot->setStockroom(Stockroom::A); } },
     { u"STOCKROOMID",  [](auto *lot, auto &v) {
-        lot->setStockroom(v == "A"_l1 || v.isEmpty() ? Stockroom::A :
-                          v == "B"_l1 ? Stockroom::B :
-                          v == "C"_l1 ? Stockroom::C
-                                      : Stockroom::None); } },
+        lot->setStockroom(v == u"A" || v.isEmpty() ? Stockroom::A :
+                          v == u"B" ? Stockroom::B :
+                          v == u"C" ? Stockroom::C
+                                    : Stockroom::None); } },
     { u"BASECURRENCYCODE", [&pr](auto *, auto &v) {
         if (!v.isEmpty()) {
             if (pr.currencyCode().isEmpty())
@@ -209,7 +209,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                     if (tagName.toString() != rootName)
                         throw Exception("Expected %1 as root element, but got: %2").arg(rootName).arg(tagName);
                     foundRoot = true;
-                } else if (tagName == "ITEM"_l1) {
+                } else if (tagName == u"ITEM") {
                     auto *lot = new Lot();
                     auto inc = new BrickLink::Incomplete;
                     inc->m_color_id = 0;
@@ -248,7 +248,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                     throw Exception("Not a valid BrickLink XML file");
 
                 if (pr.currencyCode().isEmpty())
-                    pr.setCurrencyCode("USD"_l1);
+                    pr.setCurrencyCode(u"USD"_qs);
 
                 return pr;
 

@@ -40,6 +40,7 @@ public:
     virtual void init();
     void afterInit();
 
+    QString buildNumber() const;
     QString applicationUrl() const;
     QString gitHubUrl() const;
     QString gitHubPagesUrl() const;
@@ -75,7 +76,7 @@ protected:
     virtual void setupQml();
     void redirectQmlEngineWarnings(const QLoggingCategory &cat);
 
-    bool initBrickLink(QString *errString);
+    bool initBrickLink();
 
     void openQueuedDocuments();
     void updateTranslations();

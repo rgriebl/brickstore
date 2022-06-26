@@ -31,7 +31,7 @@ ProgressCircle::ProgressCircle(QWidget *parent)
     , m_max(100)
     , m_value(-1)
     , m_online(false)
-    , m_tt_normal("%p%"_l1)
+    , m_tt_normal(u"%p%"_qs)
 {
     QSizePolicy sp(QSizePolicy::Preferred, QSizePolicy::Preferred);
     sp.setHeightForWidth(true);
@@ -221,19 +221,19 @@ QString ProgressCircle::toolTip() const
     qint64 totalSteps = qint64(m_max) - m_min;
 
     QString result = m_tt_normal;
-    result.replace("%m"_l1, QString::number(totalSteps));
-    result.replace("%v"_l1, QString::number(m_value));
+    result.replace(u"%m"_qs, QString::number(totalSteps));
+    result.replace(u"%v"_qs, QString::number(m_value));
 
     // If max and min are equal and we get this far, it means that the
     // progress bar has one step and that we are on that step. Return
     // 100% here in order to avoid division by zero further down.
     if (totalSteps == 0) {
-        result.replace("%p"_l1, QString::number(100));
+        result.replace(u"%p"_qs, QString::number(100));
         return result;
     }
 
     int progress = (m_value - m_min) * 100 / totalSteps;
-    result.replace("%p"_l1, QString::number(progress));
+    result.replace(u"%p"_qs, QString::number(progress));
     return result;
 }
 

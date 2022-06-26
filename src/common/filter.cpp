@@ -13,19 +13,19 @@
 */
 
 #include <QStringList>
+#include <QStringBuilder>
 #include <QCoreApplication>
 #include <QVariant>
 #include <QRegularExpression>
 #include <QDebug>
 #include <QLocale>
 
-#include "utility.h"
 #include "filter.h"
 
 
 static QString quote(const QString &str)
 {
-    if (str.isEmpty() || str.contains(' '_l1))
+    if (str.isEmpty() || str.contains(u' '))
         return u'"' % str % u'"';
     else
         return str;
@@ -49,7 +49,7 @@ void Filter::setExpression(const QString &expr)
     m_asDouble = loc.toDouble(expr, &isDouble);
     m_isDouble = isDouble;
 
-    if (expr.contains('?'_l1) || expr.contains('*'_l1) || expr.contains('['_l1)) {
+    if (expr.contains(u'?') || expr.contains(u'*') || expr.contains(u'[')) {
         m_isRegExp = true;
         m_asRegExp.setPattern(QRegularExpression::wildcardToRegularExpression(expr));
         m_asRegExp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
@@ -198,7 +198,7 @@ QString Filter::Parser::toString(const QVector<Filter> &filter, bool preferSymbo
             }
         }
     }
-    if (result == R"("")"_l1)
+    if (result == uR"("")"_qs)
         result.clear();
     return result;
 }
@@ -226,8 +226,8 @@ static T findInTokens(const QString &word, const QVector<QPair<T, QString>> &tok
 QVector<Filter> Filter::Parser::parse(const QString &str)
 {
     // match words, which are either quoted with ["], quoted with ['] or unquoted
-    static const QRegularExpression re(R"-("([^"]*)"|'([^']*)'|([^ ]+))-"_l1);
-    auto matches = re.globalMatch(str % " &&"_l1);
+    static const QRegularExpression re(uR"-("([^"]*)"|'([^']*)'|([^ ]+))-"_qs);
+    auto matches = re.globalMatch(str % u" &&"_qs);
 
     QVector<Filter> filters;
     Filter f;
@@ -328,22 +328,22 @@ QString Filter::Parser::toolTip() const
        "<p>Multiple expressions can be combined by separating them with a <b>COMBINATION</b> token.</p>"
        "<p>E.g. to search for anything resembling an brick in blue, you could use: <b>brick and color is blue</b></p>");
 
-    QString block = "<b><u>%1</u></b>%2"_l1;
+    QString block = u"<b><u>%1</u></b>%2"_qs;
     tt += block.arg(Filter::tr("Field names:"),
                     toHtml(m_field_tokens,
-                           "<ul><li>"_l1, "</li></ul>"_l1,
-                           QString(),  QString(), ", "_l1,
-                           "<b>"_l1, "</b>"_l1, " / "_l1));
+                           u"<ul><li>"_qs, u"</li></ul>"_qs,
+                           { }, { }, u", "_qs,
+                           u"<b>"_qs, u"</b>"_qs, u" / "_qs));
     tt += block.arg(Filter::tr("Comparisons:"),
                     toHtml(m_comparison_tokens,
-                           "<ul>"_l1, "</ul>"_l1,
-                           "<li>"_l1, "</li>"_l1, QString(),
-                           "<b>"_l1, "</b>"_l1, " / "_l1));
+                           u"<ul>"_qs, u"</ul>"_qs,
+                           u"<li>"_qs, u"</li>"_qs, { },
+                           u"<b>"_qs, u"</b>"_qs, u" / "_qs));
     tt += block.arg(Filter::tr("Combinations:"),
                     toHtml(m_combination_tokens,
-                           "<ul>"_l1, "</ul>"_l1,
-                           "<li>"_l1, "</li>"_l1, QString(),
-                           "<b>"_l1, "</b>"_l1, " / "_l1));
+                           u"<ul>"_qs, u"</ul>"_qs,
+                           u"<li>"_qs, u"</li>"_qs, { },
+                           u"<b>"_qs, u"</b>"_qs, u" / "_qs));
     return tt;
 }
 

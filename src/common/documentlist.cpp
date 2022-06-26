@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QFileInfo>
 #include <QIcon>
 #include <QPainter>
@@ -70,14 +71,14 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount())
         return { };
 
-    static QIcon docIcon(":/assets/generated-app-icons/brickstore_doc"_l1);
+    static QIcon docIcon(u":/assets/generated-app-icons/brickstore_doc"_qs);
 
     Document *document = m_documents.at(index.row());
     switch (role) {
     case Qt::ToolTipRole: {
         QString s = document->filePathOrTitle();
         if (document->model()->isModified())
-            s.append("*"_l1);
+            s.append(u"*"_qs);
         return s;
     }
     case Qt::DisplayRole: {
@@ -116,7 +117,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
             }
         }
         if (document->model()->isModified())
-            s.append("*"_l1);
+            s.append(u"*"_qs);
         return s;
     }
     case Qt::DecorationRole:

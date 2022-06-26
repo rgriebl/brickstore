@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QPushButton>
 #include <QHeaderView>
 #include <QAbstractTableModel>
@@ -35,10 +36,9 @@
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentio.h"
-#include "utility/currency.h"
-#include "utility/humanreadabletimedelta.h"
+#include "common/currency.h"
+#include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
-#include "utility/xmlhelpers.h"
 #include "betteritemdelegate.h"
 #include "historylineedit.h"
 #include "importcartdialog.h"
@@ -75,7 +75,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     connect(w_import, &QAbstractButton::clicked,
             this, [this]() { importCarts(w_carts->selectionModel()->selectedRows()); });
     w_showOnBrickLink = new QPushButton();
-    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
+    w_showOnBrickLink->setIcon(QIcon::fromTheme(u"bricklink"_qs));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
     connect(w_showOnBrickLink, &QAbstractButton::clicked,
             this, &ImportCartDialog::showCartsOnBrickLink);
@@ -124,11 +124,11 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportCartDialog::updateCarts, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value("/MainWindow/ImportCartDialog/Geometry"_l1)
+    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    ba = Config::inst()->value("/MainWindow/ImportCartDialog/Filter"_l1).toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
 
@@ -137,8 +137,8 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
 ImportCartDialog::~ImportCartDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportCartDialog/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportCartDialog/Filter"_l1, w_filter->saveState());
+    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Filter"_qs, w_filter->saveState());
 }
 
 void ImportCartDialog::keyPressEvent(QKeyEvent *e)

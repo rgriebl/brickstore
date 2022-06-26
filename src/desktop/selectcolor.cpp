@@ -64,7 +64,7 @@ SelectColor::SelectColor(QWidget *parent)
     w_filter->setMaxVisibleItems(w_filter->count());
 
     w_lock = new QToolButton();
-    w_lock->setIcon(QIcon::fromTheme("folder-locked"_l1));
+    w_lock->setIcon(QIcon::fromTheme(u"folder-locked"_qs));
     w_lock->setAutoRaise(true);
     w_lock->setCheckable(true);
     w_lock->setChecked(false);

@@ -30,7 +30,6 @@
 
 #include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
-#include "utility/systeminfo.h"
 #include "utility/stopwatch.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
@@ -63,29 +62,29 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
 
     switch (u) {
     case Url::InventoryRequest:
-        url = "https://www.bricklink.com/catalogInvAdd.asp"_l1;
+        url = u"https://www.bricklink.com/catalogInvAdd.asp"_qs;
         break;
 
     case Url::WantedListUpload:
-        url = "https://www.bricklink.com/wantedXML.asp"_l1;
+        url = u"https://www.bricklink.com/wantedXML.asp"_qs;
         break;
 
     case Url::InventoryUpload:
-        url = "https://www.bricklink.com/invXML.asp"_l1;
+        url = u"https://www.bricklink.com/invXML.asp"_qs;
         break;
 
     case Url::InventoryUpdate:
-        url = "https://www.bricklink.com/invXML.asp#update"_l1;
+        url = u"https://www.bricklink.com/invXML.asp#update"_qs;
         break;
 
     case Url::CatalogInfo: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogItem.asp"_l1;
+            url = u"https://www.bricklink.com/catalogItem.asp"_qs;
             QUrlQuery query;
             query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), QLatin1String(item->id()));
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("C"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem(u"C"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -93,11 +92,11 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::PriceGuideInfo: {
         auto *item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogPG.asp"_l1;
+            url = u"https://www.bricklink.com/catalogPG.asp"_qs;
             QUrlQuery query;
             query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -105,24 +104,24 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::LotsForSale: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/search.asp"_l1;
+            url = u"https://www.bricklink.com/search.asp"_qs;
             QUrlQuery query;
-            query.addQueryItem("viewFrom"_l1, "sa"_l1);
-            query.addQueryItem("itemType"_l1, QString(QLatin1Char(item->itemTypeId())));
+            query.addQueryItem(u"viewFrom"_qs, u"sa"_qs);
+            query.addQueryItem(u"itemType"_qs, QString(QLatin1Char(item->itemTypeId())));
 
             // workaround for BL not accepting the -X suffix for sets, instructions and boxes
             QString id = QLatin1String(item->id());
             char itt = item->itemTypeId();
 
             if (itt == 'S' || itt == 'I' || itt == 'O') {
-                auto pos = id.lastIndexOf('-'_l1);
+                auto pos = id.lastIndexOf(u'-');
                 if (pos >= 0)
                     id.truncate(pos);
             }
-            query.addQueryItem("q"_l1, Utility::urlQueryEscape(id));
+            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(id));
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
@@ -130,35 +129,35 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::AppearsInSets: {
         auto item = static_cast<const Item *>(opt);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/catalogItemIn.asp"_l1;
+            url = u"https://www.bricklink.com/catalogItemIn.asp"_qs;
             QUrlQuery query;
             query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
-            query.addQueryItem("in"_l1, "S"_l1);
+            query.addQueryItem(u"in"_qs, u"S"_qs);
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID"_l1, QString::number(static_cast<const Color *>(opt2)->id()));
+                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
     }
     case Url::ColorChangeLog:
-        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R"_l1;
+        url = u"https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R"_qs;
         break;
 
     case Url::ItemChangeLog: {
-        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_l1;
+        url = u"https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_qs;
         QUrlQuery query;
         if (opt)
-            query.addQueryItem("q"_l1, Utility::urlQueryEscape(static_cast<const char *>(opt)));
+            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(static_cast<const char *>(opt)));
         url.setQuery(query);
         break;
     }
     case Url::StoreItemDetail: {
         auto lotId = static_cast<const unsigned int *>(opt);
         if (lotId && *lotId) {
-            url = "https://www.bricklink.com/inventory_detail.asp"_l1;
+            url = u"https://www.bricklink.com/inventory_detail.asp"_qs;
             QUrlQuery query;
-            query.addQueryItem("invID"_l1, Utility::urlQueryEscape(QString::number(*lotId)));
+            query.addQueryItem(u"invID"_qs, Utility::urlQueryEscape(QString::number(*lotId)));
             url.setQuery(query);
         }
         break;
@@ -167,18 +166,18 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
         const Item *item = static_cast<const Item *>(opt);
         const Color *color = static_cast<const Color *>(opt2);
         if (item && item->itemType()) {
-            url = "https://www.bricklink.com/inventory_detail.asp?"_l1;
+            url = u"https://www.bricklink.com/inventory_detail.asp?"_qs;
             QUrlQuery query;
-            query.addQueryItem("catType"_l1, QString(QLatin1Char(item->itemTypeId())));
+            query.addQueryItem(u"catType"_qs, QString(QLatin1Char(item->itemTypeId())));
             QString queryTerm = QLatin1String(item->id());
-            if (queryTerm.contains('-'_l1)) {
+            if (queryTerm.contains(u'-')) {
                 queryTerm = item->name();
-                queryTerm.remove('('_l1);
-                queryTerm.remove(')'_l1);
+                queryTerm.remove(u'(');
+                queryTerm.remove(u')');
             }
-            query.addQueryItem("q"_l1, Utility::urlQueryEscape(queryTerm));
+            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
             if (item->itemType()->hasColors() && color)
-                query.addQueryItem("ColorID"_l1, QString::number(color->id()));
+                query.addQueryItem(u"ColorID"_qs, QString::number(color->id()));
             url.setQuery(query);
         }
         break;
@@ -186,9 +185,9 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::OrderDetails: {
         auto orderId = static_cast<const char *>(opt);
         if (orderId && *orderId) {
-            url = "https://www.bricklink.com/orderDetail.asp"_l1;
+            url = u"https://www.bricklink.com/orderDetail.asp"_qs;
             QUrlQuery query;
-            query.addQueryItem("ID"_l1, Utility::urlQueryEscape(orderId));
+            query.addQueryItem(u"ID"_qs, Utility::urlQueryEscape(orderId));
             url.setQuery(query);
         }
         break;
@@ -196,9 +195,9 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::ShoppingCart: {
         auto shopId = static_cast<const int *>(opt);
         if (shopId && *shopId) {
-            url = "https://www.bricklink.com/v2/globalcart.page"_l1;
+            url = u"https://www.bricklink.com/v2/globalcart.page"_qs;
             QUrlQuery query;
-            query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(*shopId)));
+            query.addQueryItem(u"sid"_qs, Utility::urlQueryEscape(QString::number(*shopId)));
             url.setQuery(query);
         }
         break;
@@ -206,9 +205,9 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
     case Url::WantedList: {
         auto wantedId = static_cast<const int *>(opt);
         if (wantedId && (*wantedId >= 0)) {
-            url = "https://www.bricklink.com/v2/wanted/edit.page"_l1;
+            url = u"https://www.bricklink.com/v2/wanted/edit.page"_qs;
             QUrlQuery query;
-            query.addQueryItem("wantedMoreID"_l1, Utility::urlQueryEscape(QString::number(*wantedId)));
+            query.addQueryItem(u"wantedMoreID"_qs, Utility::urlQueryEscape(QString::number(*wantedId)));
             url.setQuery(query);
         }
         break;
@@ -264,7 +263,7 @@ QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Colo
 {
     auto p = dataFileName(fileName, item, color);
 
-    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."_l1))
+    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath(u"."_qs))
         return nullptr;
 
     auto f = new QSaveFile(p);
@@ -287,9 +286,9 @@ void Core::setCredentials(const QPair<QString, QString> &credentials)
         if (wasAuthenticated) {
             emit authenticationChanged(false);
 
-            QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
+            QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
             QUrlQuery q;
-            q.addQueryItem("do_logout"_l1, "true"_l1);
+            q.addQueryItem(u"do_logout"_qs, u"true"_qs);
             url.setQuery(q);
 
             auto logoutJob = TransferJob::get(url);
@@ -322,11 +321,11 @@ void Core::retrieveAuthenticated(TransferJob *job)
                 return;
             }
 
-            QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax"_l1);
+            QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
             QUrlQuery q;
-            q.addQueryItem("userid"_l1,          Utility::urlQueryEscape(m_credentials.first));
-            q.addQueryItem("password"_l1,        Utility::urlQueryEscape(m_credentials.second));
-            q.addQueryItem("keepme_loggedin"_l1, "1"_l1);
+            q.addQueryItem(u"userid"_qs,          Utility::urlQueryEscape(m_credentials.first));
+            q.addQueryItem(u"password"_qs,        Utility::urlQueryEscape(m_credentials.second));
+            q.addQueryItem(u"keepme_loggedin"_qs, u"1"_qs);
             url.setQuery(q);
 
             m_loginJob = TransferJob::post(url, nullptr, true /* no redirects */);
@@ -341,7 +340,7 @@ void Core::retrieveAuthenticated(TransferJob *job)
 
 Core *Core::s_inst = nullptr;
 
-Core *Core::create(const QString &dataDir, const QString &updateUrl, QString *errorString)
+Core *Core::create(const QString &dataDir, const QString &updateUrl, quint64 physicalMem)
 {
     if (!s_inst) {
         QString test = dataDir;
@@ -350,26 +349,24 @@ Core *Core::create(const QString &dataDir, const QString &updateUrl, QString *er
             QFileInfo fi(test);
 
             if (!fi.exists()) {
-                QDir(test).mkpath("."_l1);
+                QDir(test).mkpath(u"."_qs);
                 fi.refresh();
             }
             if (!fi.exists() || !fi.isDir() || !fi.isReadable() || !fi.isWritable())
                 test.clear();
         }
 
-        if (test.isEmpty()) {
-            if (errorString)
-                *errorString = tr("Data directory \'%1\' is not both read- and writable.").arg(dataDir);
-        } else {
-            s_inst = new Core(dataDir, updateUrl);
-        }
+        if (test.isEmpty())
+            throw Exception(tr("Data directory \'%1\' is not both read- and writable.")).arg(dataDir);
+
+        s_inst = new Core(dataDir, updateUrl, physicalMem);
     }
     return s_inst;
 }
 
-Core::Core(const QString &datadir, const QString &updateUrl)
+Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
-    , m_noImageIcon(QIcon::fromTheme("image-missing-large"_l1))
+    , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(this))
 {
@@ -450,9 +447,9 @@ Core::Core(const QString &datadir, const QString &updateUrl)
                 auto json = QJsonDocument::fromJson(*job->data());
                 if (!json.isNull()) {
                     bool wasAuthenticated = m_authenticated;
-                    m_authenticated = (json.object().value("returnCode"_l1).toInt() == 0);
+                    m_authenticated = (json[u"returnCode"].toInt() == 0);
                     if (!m_authenticated)
-                        error = json.object().value("returnMessage"_l1).toString();
+                        error = json[u"returnMessage"].toString();
 
                     if (wasAuthenticated != m_authenticated)
                         emit authenticationChanged(m_authenticated);
@@ -471,8 +468,8 @@ Core::Core(const QString &datadir, const QString &updateUrl)
                 m_authenticatedTransfer->abortAllJobs();
         } else {
             if (job->responseCode() == 302 &&
-                    (job->redirectUrl().toString().contains("v2/login.page"_l1)
-                     || job->redirectUrl().toString().contains("login.asp?"_l1))) {
+                    (job->redirectUrl().toString().contains(u"v2/login.page")
+                     || job->redirectUrl().toString().contains(u"login.asp?"))) {
                 m_authenticated = false;
                 emit authenticationChanged(m_authenticated);
 
@@ -503,9 +500,11 @@ Core::Core(const QString &datadir, const QString &updateUrl)
     int pgCacheEntries = 5'000;
 
 #if Q_PROCESSOR_WORDSIZE >= 8
-    picCacheMem = qBound(picCacheMem, SystemInfo::inst()->physicalMemory() / 4, picCacheMem * 8);
-    if (SystemInfo::inst()->physicalMemory() >= 3'000'000'000ULL)
-        pgCacheEntries *= 2;
+    if (physicalMem) {
+        picCacheMem = qBound(picCacheMem, physicalMem / 4, picCacheMem * 8);
+        if (physicalMem >= 3'000'000'000ULL)
+            pgCacheEntries *= 2;
+    }
 #endif
 
     qInfo().noquote() << "Caches:"
@@ -790,19 +789,19 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
     if (item) {
         QString cs;
         if (!QByteArray("MP").contains(item->itemTypeId())) {
-            cs = cs % R"(<i><font color=")"_l1 % Utility::textColor(highlight).name() %
-                    R"(" style="background-color: )"_l1 % highlight.name() % R"(;">&nbsp;)"_l1 %
-                    item->itemType()->name() % R"(&nbsp;</font></i>&nbsp;&nbsp;)"_l1;
+            cs = cs % uR"(<i><font color=")" % Utility::textColor(highlight).name() %
+                    uR"(" style="background-color: )" % highlight.name() % uR"(;">&nbsp;)" %
+                    item->itemType()->name() % uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
         }
         if (color && color->id()) {
             QColor c = color->color();
-            cs = cs % R"(<b><font color=")"_l1 % Utility::textColor(c).name() %
-                    R"(" style="background-color: )"_l1 % c.name() % R"(;">&nbsp;)"_l1 %
-                    color->name() % R"(&nbsp;</font></b>&nbsp;&nbsp;)"_l1;
+            cs = cs % uR"(<b><font color=")" % Utility::textColor(c).name() %
+                    uR"(" style="background-color: )" % c.name() % uR"(;">&nbsp;)" %
+                    color->name() % uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
         }
 
-        return "<center><b>"_l1 % QLatin1String(item->id()) % "</b>&nbsp; "_l1 % cs %
-                item->name() % "</center>"_l1;
+        return u"<center><b>" % QLatin1String(item->id()) % u"</b>&nbsp; " % cs %
+                item->name() % u"</center>";
     } else {
         return { };
     }
@@ -1124,24 +1123,24 @@ void Core::updatePriceGuide(PriceGuide *pg, bool highPriority)
     QUrl url;
 
     if (pg->m_scrapedHtml) {
-        url = QUrl("https://www.bricklink.com/priceGuideSummary.asp"_l1);
-        query.addQueryItem("a"_l1,       QString(QLatin1Char(pg->item()->itemTypeId())));
-        query.addQueryItem("vcID"_l1,    "1"_l1); // USD
-        query.addQueryItem("vatInc"_l1,  "Y"_l1);
-        query.addQueryItem("viewExclude"_l1, "Y"_l1);
-        query.addQueryItem("ajView"_l1,  "Y"_l1); // only the AJAX snippet
-        query.addQueryItem("colorID"_l1, QString::number(pg->color()->id()));
-        query.addQueryItem("itemID"_l1,  Utility::urlQueryEscape(pg->item()->id()));
-        query.addQueryItem("uncache"_l1, QString::number(QDateTime::currentMSecsSinceEpoch()));
+        url = QUrl(u"https://www.bricklink.com/priceGuideSummary.asp"_qs);
+        query.addQueryItem(u"a"_qs,       QString(QLatin1Char(pg->item()->itemTypeId())));
+        query.addQueryItem(u"vcID"_qs,    u"1"_qs); // USD
+        query.addQueryItem(u"vatInc"_qs,  u"Y"_qs);
+        query.addQueryItem(u"viewExclude"_qs, u"Y"_qs);
+        query.addQueryItem(u"ajView"_qs,  u"Y"_qs); // only the AJAX snippet
+        query.addQueryItem(u"colorID"_qs, QString::number(pg->color()->id()));
+        query.addQueryItem(u"itemID"_qs,  Utility::urlQueryEscape(pg->item()->id()));
+        query.addQueryItem(u"uncache"_qs, QString::number(QDateTime::currentMSecsSinceEpoch()));
     } else {
         //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
-        url = QUrl("https://www.bricklink.com/BTpriceSummary.asp"_l1);
+        url = QUrl(u"https://www.bricklink.com/BTpriceSummary.asp"_qs);
 
         query.addQueryItem(QString(QLatin1Char(pg->item()->itemTypeId())).toUpper(),
                            QLatin1String(pg->item()->id()));
-        query.addQueryItem("colorID"_l1,  QString::number(pg->color()->id()));
-        query.addQueryItem("cCode"_l1,    "USD"_l1);
-        query.addQueryItem("cExc"_l1,     "Y"_l1); //  Y == exclude incomplete sets
+        query.addQueryItem(u"colorID"_qs,  QString::number(pg->color()->id()));
+        query.addQueryItem(u"cCode"_qs,    u"USD"_qs);
+        query.addQueryItem(u"cExc"_qs,     u"Y"_qs); //  Y == exclude incomplete sets
     }
     url.setQuery(query);
 
@@ -1387,7 +1386,7 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
         pic->release();
         return;
 
-    } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"_l1))) {
+    } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(u".jpg"))) {
         // There's no large JPG image, so try a GIF image instead (mostly very old sets)
         // We save the GIF with an JPG extension if we succeed, but Qt uses the file header on
         // loading to do the right thing.
@@ -1398,7 +1397,7 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
             pic->setUpdateStatus(UpdateStatus::Updating);
 
             QUrl url = j->url();
-            url.setPath(url.path().replace(".jpg"_l1, ".gif"_l1));
+            url.setPath(url.path().replace(u".jpg"_qs, u".gif"_qs));
 
             QSaveFile *f = pic->saveFile();
             TransferJob *job = TransferJob::get(url, f);

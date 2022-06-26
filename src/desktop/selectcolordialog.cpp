@@ -33,7 +33,7 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 
     setupUi(this);
 
-    auto ba = Config::inst()->value("/MainWindow/ModifyColorDialog/SelectColor"_l1)
+    auto ba = Config::inst()->value(u"/MainWindow/ModifyColorDialog/SelectColor"_qs)
             .toByteArray();
     if (!w_sc->restoreState(ba))
         w_sc->restoreState(SelectColor::defaultState());
@@ -44,7 +44,7 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 
     m_resetGeometryAction = new QAction(this);
-    m_resetGeometryAction->setIcon(QIcon::fromTheme("zoom-fit-best"_l1));
+    m_resetGeometryAction->setIcon(QIcon::fromTheme(u"zoom-fit-best"_qs));
     m_resetGeometryAction->setToolTip(tr("Reset the position to automatic mode"));
     m_resetGeometryAction->setVisible(false);
 
@@ -64,8 +64,8 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 
     setFocusProxy(w_sc);
 
-    m_geometryConfigKey = popupMode ? "/MainWindow/ModifyColorPopup/Geometry"_l1
-                                    : "/MainWindow/ModifyColorDialog/Geometry"_l1;
+    m_geometryConfigKey = popupMode ? u"/MainWindow/ModifyColorPopup/Geometry"_qs
+                                    : u"/MainWindow/ModifyColorDialog/Geometry"_qs;
 
     if (!popupMode)
         restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
@@ -75,7 +75,7 @@ SelectColorDialog::~SelectColorDialog()
 {
     if (!m_popupMode)
         Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ModifyColorDialog/SelectColor"_l1, w_sc->saveState());
+    Config::inst()->setValue(u"/MainWindow/ModifyColorDialog/SelectColor"_qs, w_sc->saveState());
 }
 
 

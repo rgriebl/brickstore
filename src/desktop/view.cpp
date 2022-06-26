@@ -59,10 +59,9 @@
 #include "common/documentmodel.h"
 #include "common/documentio.h"
 #include "common/uihelpers.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
-#include "utility/undo.h"
-#include "utility/utility.h"
+#include "common/undo.h"
 #include "changecurrencydialog.h"
 #include "desktopuihelpers.h"
 #include "documentdelegate.h"
@@ -457,7 +456,7 @@ View::View(Document *document, QWidget *parent)
     m_blockProgress = new QProgressBar();
     blockLayout->addWidget(m_blockProgress, 1, 0);
     m_blockCancel = new QToolButton();
-    m_blockCancel->setIcon(QIcon::fromTheme("process-stop"_l1));
+    m_blockCancel->setIcon(QIcon::fromTheme(u"process-stop"_qs));
     m_blockCancel->setAutoRaise(true);
     blockLayout->addWidget(m_blockCancel, 1, 1);
 
@@ -550,7 +549,7 @@ void View::updateCaption()
     if (cap.isEmpty())
         cap = tr("Untitled");
 
-    cap += "[*]"_l1;
+    cap += u"[*]";
 
     setWindowTitle(cap);
     setWindowModified(m_model->isModified());
@@ -1051,7 +1050,7 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
                 if (msg.isEmpty())
                     msg = tr("Printing failed.");
                 else
-                    msg.replace('\n'_l1, "<br>"_l1);
+                    msg.replace(u"\n"_qs, u"<br>"_qs);
 
                 QMetaObject::invokeMethod(this, [=]() {
                     UIHelpers::warning(msg);

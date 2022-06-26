@@ -17,6 +17,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QDateTime>
 #include <QtCore/QAbstractTableModel>
+#include <QtQml/qqmlregistration.h>
 
 #include "bricklink/lot.h"
 #include "bricklink/global.h"
@@ -33,6 +34,8 @@ class OrderPrivate;
 class Order : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(QString id READ id NOTIFY idChanged)
     Q_PROPERTY(BrickLink::OrderType type READ type NOTIFY typeChanged)
     Q_PROPERTY(QString otherParty READ otherParty NOTIFY otherPartyChanged)
@@ -178,6 +181,8 @@ private:
 class Orders : public QAbstractTableModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)

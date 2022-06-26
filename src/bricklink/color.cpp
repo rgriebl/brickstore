@@ -15,9 +15,9 @@
 #include <QtCore/QMap>
 #include <QtGui/QPainter>
 
+#include "utility/utility.h"
 #include "bricklink/color.h"
 #include "bricklink/core.h"
-#include "utility/utility.h"
 
 
 namespace BrickLink {
@@ -28,16 +28,16 @@ QHash<uint, QImage> Color::s_colorImageCache;
 QString Color::typeName(TypeFlag t)
 {
     static const QMap<TypeFlag, QString> colortypes = {
-        { Solid,       "Solid"_l1 },
-        { Transparent, "Transparent"_l1 },
-        { Glitter,     "Glitter"_l1 },
-        { Speckle,     "Speckle"_l1 },
-        { Metallic,    "Metallic"_l1 },
-        { Chrome,      "Chrome"_l1 },
-        { Pearl,       "Pearl"_l1 },
-        { Milky,       "Milky"_l1 },
-        { Modulex,     "Modulex"_l1 },
-        { Satin,       "Satin"_l1 },
+        { Solid,       u"Solid"_qs },
+        { Transparent, u"Transparent"_qs },
+        { Glitter,     u"Glitter"_qs },
+        { Speckle,     u"Speckle"_qs },
+        { Metallic,    u"Metallic"_qs },
+        { Chrome,      u"Chrome"_qs },
+        { Pearl,       u"Pearl"_qs },
+        { Milky,       u"Milky"_qs },
+        { Modulex,     u"Modulex"_qs },
+        { Satin,       u"Satin"_qs },
     };
     return colortypes.value(t);
 }

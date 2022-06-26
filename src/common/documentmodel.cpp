@@ -33,9 +33,9 @@
 
 #include "utility/utility.h"
 #include "utility/stopwatch.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
-#include "utility/undo.h"
+#include "common/undo.h"
 #include "utility/qparallelsort.h"
 #include "bricklink/core.h"
 #include "bricklink/model.h"
@@ -531,7 +531,7 @@ QString DocumentStatistics::asHtmlTable() const
 
 
     if (qFuzzyCompare(weight(), -std::numeric_limits<double>::min())) {
-        wgtstr = "-"_l1;
+        wgtstr = u"-"_qs;
     } else {
         double weight = m_weight;
 
@@ -653,7 +653,7 @@ DocumentModel::DocumentModel(BrickLink::IO::ParseResult &&pr, bool forceModified
     setLotsDirect(pr.takeLots());
 
     if (!pr.currencyCode().isEmpty()) {
-        if (pr.currencyCode() == "$$$"_l1) // legacy USD
+        if (pr.currencyCode() == u"$$$"_qs) // legacy USD
             m_currencycode.clear();
         else
             m_currencycode = pr.currencyCode();
@@ -1194,7 +1194,7 @@ void DocumentModel::applyTo(const LotList &lots, std::function<bool(const Lot &,
     if (lots.isEmpty())
         return;
     QString at = actionText;
-    if (actionText.endsWith("..."_l1))
+    if (actionText.endsWith(u"..."))
         at.chop(3);
     if (!at.isEmpty())
         beginMacro();
@@ -1849,14 +1849,14 @@ void DocumentModel::initializeColumns()
     C(Stockroom, Column {
           .alignment = Qt::AlignHCenter,
           .title = QT_TR_NOOP("Stockroom"),
-          .valueModelFn = [&]() { return new QStringListModel({ "A"_l1, "B"_l1, "C"_l1, tr("None") }); },
+          .valueModelFn = [&]() { return new QStringListModel({ u"A"_qs, u"B"_qs, u"C"_qs, tr("None") }); },
           .dataFn = [&](const Lot *lot) { return QVariant::fromValue(lot->stockroom()); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setStockroom(v.value<BrickLink::Stockroom>()); },
           .filterFn = [&](const Lot *lot) {
               switch (lot->stockroom()) {
-              case BrickLink::Stockroom::A: return QString("A"_l1);
-              case BrickLink::Stockroom::B: return QString("B"_l1);
-              case BrickLink::Stockroom::C: return QString("C"_l1);
+              case BrickLink::Stockroom::A: return u"A"_qs;
+              case BrickLink::Stockroom::B: return u"B"_qs;
+              case BrickLink::Stockroom::C: return u"C"_qs;
               default                     : return tr("None", "Filter>Stockroom>None");
               }
           },
@@ -1947,7 +1947,7 @@ QVariantList DocumentModel::qmlSortColumns() const
 {
     QVariantList result;
     for (auto &sc : m_sortColumns)
-        result.append(QVariantMap { { "column"_l1, sc.first }, { "order"_l1, sc.second } });
+        result.append(QVariantMap { { u"column"_qs, sc.first }, { u"order"_qs, sc.second } });
     return result;
 }
 
@@ -2347,7 +2347,7 @@ LotList DocumentModel::sortLotList(const LotList &list) const
 ///////////////////////////////////////////////////////////////////////
 
 
-const QString DocumentLotsMimeData::s_mimetype = "application/x-bricklink-invlots"_l1;
+const QString DocumentLotsMimeData::s_mimetype = u"application/x-bricklink-invlots"_qs;
 
 DocumentLotsMimeData::DocumentLotsMimeData(const LotList &lots)
     : QMimeData()
@@ -2366,7 +2366,7 @@ void DocumentLotsMimeData::setLots(const LotList &lots)
     for (const Lot *lot : lots) {
         lot->save(ds);
         if (!text.isEmpty())
-            text.append("\n"_l1);
+            text.append(u"\n"_qs);
         text.append(QLatin1String(lot->itemId()));
     }
     setText(text);
@@ -2400,14 +2400,14 @@ QStringList DocumentLotsMimeData::formats() const
     static QStringList sl;
 
     if (sl.isEmpty())
-        sl << s_mimetype << "text/plain"_l1;
+        sl << s_mimetype << u"text/plain"_qs;
 
     return sl;
 }
 
 bool DocumentLotsMimeData::hasFormat(const QString &mimeType) const
 {
-    return mimeType.compare(s_mimetype) || mimeType.compare("text/plain"_l1);
+    return mimeType.compare(s_mimetype) || mimeType.compare(u"text/plain"_qs);
 }
 
 

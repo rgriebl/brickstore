@@ -25,11 +25,6 @@ QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 namespace XmlHelpers {
 
-QString decodeEntities(const QString &src);
-
-char firstCharInString(const QString &str);
-
-
 class ParseXML
 {
 public:

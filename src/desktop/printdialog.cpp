@@ -28,7 +28,7 @@
 
 #include "common/config.h"
 #include "common/document.h"
-#include "utility/eventfilter.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "view.h"
 
@@ -36,7 +36,7 @@
 PrintDialog::PrintDialog(bool asPdf, View *window)
     : QDialog(window)
     , m_printer(new QPrinter(QPrinter::HighResolution))
-    , m_pdfWriter(new QPdfWriter(""_l1))
+    , m_pdfWriter(new QPdfWriter(QString { }))
 {
     if (asPdf)
         m_printer->setPrinterName(QString { });
@@ -84,7 +84,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     w_pageSelectWarning->hide();
     w_scalePercent->hide();
 
-    w_sysprint->setText(R"(<a href="sysprint">)"_l1 % tr("Print using the system dialog...") % "</a>"_l1);
+    w_sysprint->setText(uR"(<a href="sysprint">)" % tr("Print using the system dialog...") % u"</a>");
 
     connect(w_page_first, &QToolButton::clicked,
             this, [this]() { gotoPage(1); });
@@ -175,7 +175,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     int defaultIdx = -1;
     QSignalBlocker blocker(w_printers); // delay initialization
     for (const QPrinterInfo &printer : printers) {
-        w_printers->addItem(QIcon::fromTheme("document-print"_l1), printer.description(),
+        w_printers->addItem(QIcon::fromTheme(u"document-print"_qs), printer.description(),
                             printer.printerName());
         if (printer.isDefault())
             defaultIdx = idx;
@@ -183,7 +183,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     }
     if (w_printers->count())
         w_printers->insertSeparator(w_printers->count());
-    w_printers->addItem(QIcon::fromTheme("document-save-as"_l1), tr("Save as PDF"),
+    w_printers->addItem(QIcon::fromTheme(u"document-save-as"_qs), tr("Save as PDF"),
                         QString::fromLatin1("__PDF__"));
 
     if ((defaultIdx == -1) || (m_printer->outputFormat() == QPrinter::PdfFormat))
@@ -211,7 +211,7 @@ void PrintDialog::updatePrinter(int idx)
     QList<QPrinter::ColorMode> colorModes;
     QPrinter::ColorMode defaultColorMode;
 
-    if (printerKey == "__PDF__"_l1) {
+    if (printerKey == u"__PDF__") {
         static const QList<QPageSize> pdfPageSizes = {
             QPageSize(QPageSize::Letter),
             QPageSize(QPageSize::Legal),
@@ -279,7 +279,7 @@ void PrintDialog::updatePageRange()
     bool selectionOnly = m_hasSelection && (w_pageMode->currentIndex() == 1);
     bool customPages = (w_pageMode->currentIndex() == (w_pageMode->count() - 1));
 
-    QString s = w_pageSelect->text().simplified().remove(' '_l1);
+    QString s = w_pageSelect->text().simplified().remove(u' ');
     if (customPages && s.isEmpty())
         allPages = true;
 
@@ -290,9 +290,9 @@ void PrintDialog::updatePageRange()
     bool ok = true;
 
     if (customPages && !allPages) {
-        const auto ranges = s.split(','_l1);
+        const auto ranges = s.split(u","_qs);
         for (const QString &range : ranges) {
-            const QStringList fromTo = range.split('-'_l1);
+            const QStringList fromTo = range.split(u"-"_qs);
             uint from = 0, to = 0;
             if (fromTo.size() == 1) {
                 from = to = fromTo.at(0).toUInt(&ok);
@@ -417,7 +417,7 @@ void PrintDialog::gotoPage(int page)
 void PrintDialog::print()
 {
     if (m_saveAsPdf) {
-        QString suffix = ".pdf"_l1;
+        QString suffix = u".pdf"_qs;
         QString pdfname = m_documentName + suffix;
 
         QDir d(Config::inst()->documentDir());

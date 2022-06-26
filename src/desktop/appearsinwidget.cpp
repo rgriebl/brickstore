@@ -59,14 +59,14 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::None, this));
 
     d->m_partOutAction = new QAction(this);
-    d->m_partOutAction->setObjectName("appearsin_partoutitems"_l1);
-    d->m_partOutAction->setIcon(QIcon::fromTheme("edit-partoutitems"_l1));
+    d->m_partOutAction->setObjectName(u"appearsin_partoutitems"_qs);
+    d->m_partOutAction->setIcon(QIcon::fromTheme(u"edit-partoutitems"_qs));
     connect(d->m_partOutAction, &QAction::triggered,
             this, &AppearsInWidget::partOut);
 
     d->m_catalogAction = new QAction(this);
-    d->m_catalogAction->setObjectName("appearsin_bl_catalog"_l1);
-    d->m_catalogAction->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
+    d->m_catalogAction->setObjectName(u"appearsin_bl_catalog"_qs);
+    d->m_catalogAction->setIcon(QIcon::fromTheme(u"bricklink-catalog"_qs));
     connect(d->m_catalogAction, &QAction::triggered, this, [this]() {
         const BrickLink::AppearsInItem *ai = appearsIn();
 
@@ -75,8 +75,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     });
 
     d->m_priceGuideAction = new QAction(this);
-    d->m_priceGuideAction->setObjectName("appearsin_bl_priceguide"_l1);
-    d->m_priceGuideAction->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
+    d->m_priceGuideAction->setObjectName(u"appearsin_bl_priceguide"_qs);
+    d->m_priceGuideAction->setIcon(QIcon::fromTheme(u"bricklink-priceguide"_qs));
     connect(d->m_priceGuideAction, &QAction::triggered, this, [this]() {
         const BrickLink::AppearsInItem *ai = appearsIn();
 
@@ -86,8 +86,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     });
 
     d->m_lotsForSaleAction = new QAction(this);
-    d->m_lotsForSaleAction->setObjectName("appearsin_bl_lotsforsale"_l1);
-    d->m_lotsForSaleAction->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
+    d->m_lotsForSaleAction->setObjectName(u"appearsin_bl_lotsforsale"_qs);
+    d->m_lotsForSaleAction->setIcon(QIcon::fromTheme(u"bricklink-lotsforsale"_qs));
     connect(d->m_lotsForSaleAction, &QAction::triggered, this, [this]() {
         const BrickLink::AppearsInItem *ai = appearsIn();
 

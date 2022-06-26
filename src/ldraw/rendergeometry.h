@@ -31,7 +31,8 @@ class Part;
 class QmlRenderGeometry : public QQuick3DGeometry
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(LDrawRenderGeometry)
+    QML_NAMED_ELEMENT(RenderGeometry)
+    QML_UNCREATABLE("")
     Q_PROPERTY(QColor color READ color CONSTANT)
     Q_PROPERTY(float luminance READ luminance CONSTANT)
     Q_PROPERTY(bool isChrome READ isChrome CONSTANT)

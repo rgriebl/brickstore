@@ -18,10 +18,10 @@
 #  include <QJSValue>
 #  include <QJSValueIterator>
 #  include <QQmlEngine>
-#endif
-#if defined(BS_DESKTOP)
+#elif defined(BS_DESKTOP)
 #  include <QApplication>
 #  include <QPalette>
+typedef QObject QQuickAction;
 #endif
 #include <QDebug>
 
@@ -102,6 +102,13 @@ ActionManager *ActionManager::inst()
         s_inst->initialize();
     }
     return s_inst;
+}
+
+ActionManager *ActionManager::create(QQmlEngine *, QJSEngine *)
+{
+    auto am = inst();
+    QQmlEngine::setObjectOwnership(am, QQmlEngine::CppOwnership);
+    return am;
 }
 
 Document *ActionManager::activeDocument() const
@@ -628,7 +635,7 @@ void ActionManager::setupQAction(Action &aa)
     }
 }
 
-QObject *ActionManager::quickAction(const QString &name)
+QQuickAction *ActionManager::quickAction(const QString &name)
 {
 #if defined(BS_MOBILE)
     if (auto aa = const_cast<Action *>(action(name.toLatin1().constData()))) {
@@ -657,7 +664,7 @@ QObject *ActionManager::quickAction(const QString &name)
 
             aa->m_qquickaction = qa;
         }
-        return aa->m_qquickaction;
+        return qobject_cast<QQuickAction *>(aa->m_qquickaction);
     }
 #else
     Q_UNUSED(name)

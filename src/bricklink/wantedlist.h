@@ -17,6 +17,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QDateTime>
 #include <QtCore/QAbstractTableModel>
+#include <QtQml/qqmlregistration.h>
 
 #include "lot.h"
 #include "global.h"
@@ -33,6 +34,8 @@ class WantedListPrivate;
 class WantedList : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(int id READ id NOTIFY idChanged)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
@@ -44,6 +47,7 @@ class WantedList : public QObject
 
 public:
     WantedList();
+    ~WantedList() override;
 
     int id() const;
     QString name() const;
@@ -81,6 +85,8 @@ private:
 class WantedLists : public QAbstractTableModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)

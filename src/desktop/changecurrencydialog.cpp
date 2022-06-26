@@ -6,8 +6,8 @@
 #include <QMouseEvent>
 
 #include "common/config.h"
-#include "utility/currency.h"
-#include "utility/eventfilter.h"
+#include "common/currency.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "changecurrencydialog.h"
 #include "smartvalidator.h"
@@ -50,7 +50,7 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     new EventFilter(w_labelCustom, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioCustom, _1, _2));
     new EventFilter(w_labelLegacy, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioLegacy, _1, _2));
 
-    if (m_from != "USD"_l1)
+    if (m_from != u"USD")
         m_wasLegacy = false;
 
     if (m_wasLegacy) {
@@ -89,11 +89,11 @@ void ChangeCurrencyDialog::ratesUpdated()
     QStringList currencies = Currency::inst()->currencyCodes();
     currencies.sort();
     currencies.removeOne(m_from);
-    bool wasUSD = (m_from == "USD"_l1);
+    bool wasUSD = (m_from == u"USD");
 
     if (!wasUSD) {
-        currencies.removeOne("USD"_l1);
-        currencies.prepend("USD"_l1);
+        currencies.removeOne(u"USD"_qs);
+        currencies.prepend(u"USD"_qs);
     }
     w_newCurrency->clear();
     w_newCurrency->insertItems(0, currencies);

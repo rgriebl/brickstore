@@ -24,6 +24,8 @@ namespace LDraw {
 class RenderSettings : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(RenderSettings)
+    QML_SINGLETON
     Q_PROPERTY(QQuaternion defaultRotation MEMBER m_defaultRotation NOTIFY defaultRotationChanged)
     Q_PROPERTY(bool orthographicCamera MEMBER m_orthographicCamera NOTIFY orthographicCameraChanged)
     Q_PROPERTY(bool lighting MEMBER m_lighting NOTIFY lightingChanged)
@@ -50,6 +52,7 @@ class RenderSettings : public QObject
 
 public:
     static RenderSettings *inst();
+    static RenderSettings *create(QQmlEngine *qe, QJSEngine *je); // QML_SINGLETON
 
 public:
     void save();

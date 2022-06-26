@@ -159,7 +159,7 @@ QmlPrintPage::QmlPrintPage(const QmlPrintJob *job)
 {
     setObjectName(u"Page" % QString::number(job->pageCount() + 1));
 
-    m_attr.m_font = QFont("Arial"_l1, 10);
+    m_attr.m_font = QFont(u"Arial"_qs, 10);
     m_attr.m_color = QColor(Qt::black);
     m_attr.m_bgcolor = QColor(Qt::white);
     m_attr.m_linewidth = 0.1;
@@ -471,22 +471,22 @@ void QmlPrintJob::registerTypes()
     QString cannotCreate = tr("Cannot create objects of type %1");
 
     qmlRegisterUncreatableType<QmlPrintJob>("BrickStore", 1, 0, "PrintJob",
-                                            cannotCreate.arg("PrintJob"_l1));
+                                            cannotCreate.arg(u"PrintJob"_qs));
     qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "PrintPage",
-                                             cannotCreate.arg("PrintPage"_l1));
+                                             cannotCreate.arg(u"PrintPage"_qs));
     qRegisterMetaType<QmlPrintPage::Alignment>("PrintPage::Alignment");
     qRegisterMetaType<QmlPrintPage::LineStyle>("PrintPage::LineStyle");
 
     // deprecated as of 2022.1.1 ... use PrintPage instead
     qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "Page",
-                                             cannotCreate.arg("Page"_l1));
+                                             cannotCreate.arg(u"Page"_qs));
 }
 
 QmlPrintJob::QmlPrintJob(QPaintDevice *pd)
     : QObject(nullptr)
     , m_pd(pd)
 {
-    setObjectName("Job"_l1);
+    setObjectName(u"Job"_qs);
 }
 
 QmlPrintJob::~QmlPrintJob()
@@ -504,7 +504,7 @@ QmlPrintPage *QmlPrintJob::addPage()
     auto *page = new QmlPrintPage(this);
     m_pages.append(page);
     int pageNo = m_pages.size();
-    page->setObjectName("Print page #"_l1 + QString::number(pageNo));
+    page->setObjectName(u"Print page #"_qs + QString::number(pageNo));
     emit pageCountChanged(pageNo);
     return page;
 }

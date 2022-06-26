@@ -34,7 +34,7 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
     setupUi(this);
     w_si->setExcludeWithoutInventoryFilter(false);
 
-    auto ba = Config::inst()->value("/MainWindow/ModifyItemDialog/SelectItem"_l1)
+    auto ba = Config::inst()->value(u"/MainWindow/ModifyItemDialog/SelectItem"_qs)
             .toByteArray();
     if (!w_si->restoreState(ba)) {
         w_si->restoreState(SelectItem::defaultState());
@@ -47,7 +47,7 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 
     m_resetGeometryAction = new QAction(this);
-    m_resetGeometryAction->setIcon(QIcon::fromTheme("zoom-fit-best"_l1));
+    m_resetGeometryAction->setIcon(QIcon::fromTheme(u"zoom-fit-best"_qs));
     m_resetGeometryAction->setToolTip(tr("Reset the position to automatic mode"));
     m_resetGeometryAction->setVisible(false);
 
@@ -67,8 +67,8 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
 
     setFocusProxy(w_si);
 
-    m_geometryConfigKey = popupMode ? "/MainWindow/ModifyItemPopup/Geometry"_l1
-                                    : "/MainWindow/ModifyItemDialog/Geometry"_l1;
+    m_geometryConfigKey = popupMode ? u"/MainWindow/ModifyItemPopup/Geometry"_qs
+                                    : u"/MainWindow/ModifyItemDialog/Geometry"_qs;
 
     if (!popupMode)
         restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
@@ -78,7 +78,7 @@ SelectItemDialog::~SelectItemDialog()
 {
     if (!m_popupMode)
         Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ModifyItemDialog/SelectItem"_l1, w_si->saveState());
+    Config::inst()->setValue(u"/MainWindow/ModifyItemDialog/SelectItem"_qs, w_si->saveState());
 }
 
 void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)

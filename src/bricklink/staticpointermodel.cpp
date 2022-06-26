@@ -16,7 +16,7 @@
 #include <QtAlgorithms>
 #include <QTimer>
 
-#include "qparallelsort.h"
+#include "utility/qparallelsort.h"
 #include "staticpointermodel.h"
 
 

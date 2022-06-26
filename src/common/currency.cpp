@@ -25,16 +25,16 @@
 
 #include "common/config.h"
 #include "common/onlinestate.h"
-#include "qcoro/network/qcoronetworkreply.h"
+#include "qcoro/qcoronetworkreply.h"
 #include "currency.h"
-#include "utility.h"
+#include "utility/utility.h"
 
 
 // all rates as downloaded are relative to the Euro, but
 // we need everything relative to the US Dollar
 static void baseConvert(QHash<QString, double> &rates)
 {
-    QHash<QString, double>::iterator usd_it = rates.find("USD"_l1);
+    QHash<QString, double>::iterator usd_it = rates.find(u"USD"_qs);
 
     if (usd_it == rates.end()) {
         rates.clear();
@@ -45,7 +45,7 @@ static void baseConvert(QHash<QString, double> &rates)
     for (QHash<QString, double>::iterator it = rates.begin(); it != rates.end(); ++it)
         it.value() = (it == usd_it) ? 1 : it.value() *= usd_eur;
 
-    rates.insert("EUR"_l1, usd_eur);
+    rates.insert(u"EUR"_qs, usd_eur);
 }
 
 
@@ -54,10 +54,10 @@ Currency *Currency::s_inst = nullptr;
 Currency::Currency()
     : m_nam(nullptr)
 {
-    qint64 tt = Config::inst()->value("/Rates/LastUpdate"_l1, 0).toLongLong();
+    qint64 tt = Config::inst()->value(u"/Rates/LastUpdate"_qs, 0).toLongLong();
     m_lastUpdate = QDateTime::fromSecsSinceEpoch(tt);
-    QStringList rates = Config::inst()->value("/Rates/Normal"_l1).toString().split(','_l1);
-    QStringList customRates = Config::inst()->value("/Rates/Custom"_l1).toString().split(','_l1);
+    QStringList rates = Config::inst()->value(u"/Rates/Normal"_qs).toString().split(u',');
+    QStringList customRates = Config::inst()->value(u"/Rates/Custom"_qs).toString().split(u',');
 
     parseRates(rates, m_rates);
     parseRates(customRates, m_customRates);
@@ -65,21 +65,21 @@ Currency::Currency()
 
 Currency::~Currency()
 {
-    Config::inst()->setValue("/Rates/LastUpdate"_l1, m_lastUpdate.toSecsSinceEpoch());
+    Config::inst()->setValue(u"/Rates/LastUpdate"_qs, m_lastUpdate.toSecsSinceEpoch());
 
     QStringList sl;
     for (auto it = m_rates.constBegin(); it != m_rates.constEnd(); ++it) {
-        QString s = "%1|%2"_l1;
+        QString s = u"%1|%2"_qs;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue("/Rates/Normal"_l1, sl.join(","_l1));
+    Config::inst()->setValue(u"/Rates/Normal"_qs, sl.join(u","));
 
     sl.clear();
     for (auto it = m_customRates.constBegin(); it != m_customRates.constEnd(); ++it) {
-        QString s = "%1|%2"_l1;
+        QString s = u"%1|%2"_qs;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue("/Rates/Custom"_l1, sl.join(","_l1));
+    Config::inst()->setValue(u"/Rates/Custom"_qs, sl.join(u","));
 
     s_inst = nullptr;
 }
@@ -160,7 +160,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
     }
 
     m_silent = silent;
-    auto reply = co_await m_nam->get(QNetworkRequest(QUrl("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_l1)));
+    auto reply = co_await m_nam->get(QNetworkRequest(QUrl(u"https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"_qs)));
 
     if (reply->error() != QNetworkReply::NoError) {
         if (OnlineState::inst()->isOnline() && !m_silent)
@@ -172,12 +172,12 @@ QCoro::Task<> Currency::updateRates(bool silent)
         QHash<QString, double> newRates;
 
         while (!reader.atEnd()) {
-            if (reader.readNext() == QXmlStreamReader::StartElement &&
-                reader.name() == "Cube"_l1 &&
-                reader.attributes().hasAttribute("currency"_l1)) {
+            if ((reader.readNext() == QXmlStreamReader::StartElement) &&
+                (reader.name() == u"Cube") &&
+                reader.attributes().hasAttribute(u"currency"_qs)) {
 
-                QString currency = reader.attributes().value("currency"_l1).toString();
-                double rate = reader.attributes().value("rate"_l1).toDouble();
+                QString currency = reader.attributes().value(u"currency"_qs).toString();
+                double rate = reader.attributes().value(u"rate"_qs).toDouble();
 
                 if (currency.length() == 3 && rate > 0)
                     newRates.insert(currency, rate);

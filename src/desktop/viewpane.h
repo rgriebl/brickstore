@@ -16,7 +16,7 @@
 #include <QFrame>
 
 #include <qcoro/task.h>
-#include <utility/filter.h>
+#include <common/filter.h>
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QLabel)

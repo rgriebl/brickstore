@@ -28,7 +28,7 @@
 #include "bricklink/core.h"
 #include "bricklink/priceguide.h"
 #include "common/config.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/utility.h"
 #include "priceguidewidget.h"
 
@@ -120,8 +120,8 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("priceguide_reload"_l1);
-    a->setIcon(QIcon::fromTheme("view-refresh"_l1));
+    a->setObjectName(u"priceguide_reload"_qs);
+    a->setIcon(QIcon::fromTheme(u"view-refresh"_qs));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::doUpdate);
     addAction(a);
@@ -131,20 +131,20 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("priceguide_bl_catalog"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-catalog"_l1));
+    a->setObjectName(u"priceguide_bl_catalog"_qs);
+    a->setIcon(QIcon::fromTheme(u"bricklink-catalog"_qs));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("priceguide_bl_priceguide"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-priceguide"_l1));
+    a->setObjectName(u"priceguide_bl_priceguide"_qs);
+    a->setIcon(QIcon::fromTheme(u"bricklink-priceguide"_qs));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("priceguide_bl_lotsforsale"_l1);
-    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"_l1));
+    a->setObjectName(u"priceguide_bl_lotsforsale"_qs);
+    a->setIcon(QIcon::fromTheme(u"bricklink-lotsforsale"_qs));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLLotsForSale);
     addAction(a);
@@ -155,10 +155,10 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
 
 void PriceGuideWidget::languageChange()
 {
-    findChild<QAction *>("priceguide_reload"_l1)->setText(tr("Update"));
-    findChild<QAction *>("priceguide_bl_catalog"_l1)->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *>("priceguide_bl_priceguide"_l1)->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *>("priceguide_bl_lotsforsale"_l1)->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *>(u"priceguide_reload"_qs)->setText(tr("Update"));
+    findChild<QAction *>(u"priceguide_bl_catalog"_qs)->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *>(u"priceguide_bl_priceguide"_qs)->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *>(u"priceguide_bl_lotsforsale"_qs)->setText(tr("Show Lots for Sale on BrickLink..."));
 
     d->m_str_qty                                     = tr("Qty.");
     d->m_str_cond[int(BrickLink::Condition::New)]    = tr("New");
@@ -295,7 +295,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("9.000.000 (90.000)"_l1));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
@@ -313,7 +313,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     setMinimumSize(2 * frameWidth() + cw[1] + cw[2] + d->s_price_count * cw[3],
                    2 * frameWidth() + (1 + (1 + d->s_cond_count) * d->s_time_count) * ch);
 
-    d->m_cells.emplace_back(cell::Header, 0, 0, cw[1], ch, Qt::AlignCenter, "$$$"_l1, true);
+    d->m_cells.emplace_back(cell::Header, 0, 0, cw[1], ch, Qt::AlignCenter, u"$$$"_qs, true);
     d->m_cells.emplace_back(cell::Header, cw[1], 0, cw[2], ch, Qt::AlignCenter, d->m_str_qty);
 
     dx = cw[1] + cw[2];
@@ -388,7 +388,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("9.000.000 (90.000)"_l1));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
@@ -404,7 +404,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     dx = cw[0] + cw[1];
     dy = 0;
 
-    d->m_cells.emplace_back(cell::Header, 0,  dy, dx,    ch, Qt::AlignCenter, "$$$"_l1, true);
+    d->m_cells.emplace_back(cell::Header, 0,  dy, dx,    ch, Qt::AlignCenter, u"$$$"_qs, true);
     d->m_cells.emplace_back(cell::Header, dx, dy, cw[2], ch, Qt::AlignCenter, d->m_str_qty);
 
     dx += cw[2];
@@ -475,7 +475,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     cw[0] += 2 * hborder;
 
     cw[1] = qMax(fm.horizontalAdvance(Currency::toDisplayString(9000)),
-                  fm.horizontalAdvance("9.000.000 (90.000)"_l1));
+                  fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
     cw[1] += 2 * hborder;
@@ -504,7 +504,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     dx = 0;
     dy = 0;
 
-    d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], ch, Qt::AlignCenter, "$$$"_l1, true);
+    d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], ch, Qt::AlignCenter, u"$$$"_qs, true);
     dx += cw[0];
 
     for (const auto &cond : d->m_str_cond) {
@@ -641,7 +641,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
             bool left = (c.left() == 0);
             bool right = (c.right() == (viewport()->width() - 1));
 
-            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$"_l1 ? d->m_ccode
+            paintHeader(&p, c, c.m_text_flags, (c.m_text == u"$$$") ? d->m_ccode
                                                                     : c.m_text, c.m_flag, left, right);
             break;
         }

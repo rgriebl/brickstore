@@ -17,7 +17,6 @@
 #include "utility/utility.h"
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
-#include "version.h"
 
 
 AboutDialog::AboutDialog(QWidget *parent)

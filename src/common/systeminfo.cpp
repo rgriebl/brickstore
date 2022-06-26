@@ -34,8 +34,7 @@
 #  include <sys/sysinfo.h>
 #endif
 
-#include "qcoro/core/qcorofuture.h"
-#include "utility.h"
+#include "qcoro/qcorofuture.h"
 #include "version.h"
 #include "systeminfo.h"
 
@@ -57,27 +56,27 @@ SystemInfo::~SystemInfo()
 SystemInfo::SystemInfo()
     : QObject(QCoreApplication::instance())
 {
-    m_map["os.type"_l1] = QSysInfo::productType();
-    m_map["os.version"_l1] = QSysInfo::productVersion();
-    m_map["os.name"_l1] = QSysInfo::prettyProductName();
-    m_map["os.arch"_l1] = QSysInfo::currentCpuArchitecture();
-    m_map["qt.version"_l1] = QString::fromLatin1(qVersion());
-    m_map["qt.debug"_l1] = QLibraryInfo::isDebugBuild();
-    m_map["build.compiler"_l1] = QLatin1String(BRICKSTORE_COMPILER_VERSION);
-    m_map["build.arch"_l1] = QSysInfo::buildCpuArchitecture();
-    m_map["build.host"_l1] = QLatin1String(BRICKSTORE_BUILD_HOST);
-    m_map["build.qt.version"_l1] = QString::fromLatin1(QT_VERSION_STR);
-    m_map["build.date"_l1] = QLocale::c().toDateTime(QString::fromLatin1(__DATE__ " " __TIME__)
-                                                     .simplified(), "MMM d yyyy HH:mm:ss"_l1);
-    m_map["build.number"_l1] = QLatin1String(BRICKSTORE_BUILD_NUMBER);
-    m_map["brickstore.locale"_l1] = QLocale().name().left(2);
-    m_map["brickstore.version"_l1] = QCoreApplication::applicationVersion();
+    m_map[u"os.type"_qs] = QSysInfo::productType();
+    m_map[u"os.version"_qs] = QSysInfo::productVersion();
+    m_map[u"os.name"_qs] = QSysInfo::prettyProductName();
+    m_map[u"os.arch"_qs] = QSysInfo::currentCpuArchitecture();
+    m_map[u"qt.version"_qs] = QString::fromLatin1(qVersion());
+    m_map[u"qt.debug"_qs] = QLibraryInfo::isDebugBuild();
+    m_map[u"build.compiler"_qs] = QLatin1String(BRICKSTORE_COMPILER_VERSION);
+    m_map[u"build.arch"_qs] = QSysInfo::buildCpuArchitecture();
+    m_map[u"build.host"_qs] = QLatin1String(BRICKSTORE_BUILD_HOST);
+    m_map[u"build.qt.version"_qs] = QString::fromLatin1(QT_VERSION_STR);
+    m_map[u"build.date"_qs] = QLocale::c().toDateTime(QString::fromLatin1(__DATE__ " " __TIME__)
+                                                      .simplified(), u"MMM d yyyy HH:mm:ss"_qs);
+    m_map[u"build.number"_qs] = QLatin1String(BRICKSTORE_BUILD_NUMBER);
+    m_map[u"brickstore.locale"_qs] = QLocale().name().left(2);
+    m_map[u"brickstore.version"_qs] = QCoreApplication::applicationVersion();
 
-    m_map["hw.cpu.arch"_l1] = QSysInfo::currentCpuArchitecture();
+    m_map[u"hw.cpu.arch"_qs] = QSysInfo::currentCpuArchitecture();
     // set below - may be delayed due to external processes involved
-    // m_map["hw.cpu"_l1] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
-    // m_map["hw.gpu"_l1] = "e.g. NVIDIA GeForce GTX 1650";
-    // m_map["hw.gpu.arch"_l1] = "intel|amd|nvidia";
+    // m_map[u"hw.cpu"_qs] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
+    // m_map[u"hw.gpu"_qs] = "e.g. NVIDIA GeForce GTX 1650";
+    // m_map[u"hw.gpu.arch"_qs] = "intel|amd|nvidia";
 
     // -- Memory ---------------------------------------------
 
@@ -105,8 +104,8 @@ SystemInfo::SystemInfo()
 #  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
 #endif
 
-    m_map["hw.memory"_l1] = physmem;
-    m_map["hw.memory.gb"_l1] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
+    m_map[u"hw.memory"_qs] = physmem;
+    m_map[u"hw.memory.gb"_qs] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 
 
     // we cannot use co-routines in a constructor
@@ -120,14 +119,14 @@ QCoro::Task<> SystemInfo::init()
     auto checkCpu = []() -> QString {
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
-        p.start("sh"_l1, { "-c"_l1, R"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_l1 },
+        p.start(u"sh"_qs, { u"-c"_qs, uR"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_qs },
                 QIODevice::ReadOnly);
         p.waitForFinished(1000);
         return QString::fromUtf8(p.readAllStandardOutput()).simplified();
 
 #elif defined(Q_OS_WIN) && !defined(BS_BACKEND)
         QProcess p;
-        p.start("wmic"_l1, { "/locale:ms_409"_l1, "cpu"_l1, "get"_l1, "name"_l1, "/value"_l1 },
+        p.start(u"wmic"_qs, { u"/locale:ms_409"_qs, u"cpu"_qs, u"get"_qs, u"name"_qs, u"/value"_qs },
                 QIODevice::ReadOnly);
         p.waitForFinished(1000);
         return QString::fromUtf8(p.readAllStandardOutput()).simplified().mid(5);
@@ -139,9 +138,9 @@ QCoro::Task<> SystemInfo::init()
         if (sysctlbyname("machdep.cpu.brand_string", brand, &brandSize, nullptr, 0) == 0)
             return QString::fromLocal8Bit(brand, int(brandSize) - 1);
         else
-            return "?"_l1;
+            return u"?"_qs;
 #else
-        return "?"_l1;
+        return u"?"_qs;
 #endif
     };
 
@@ -159,51 +158,51 @@ QCoro::Task<> SystemInfo::init()
             if (gpuInfos.size() > 0) {
 
                 const auto gpuMap = gpuInfos.constFirst().toMap();
-                result.first = gpuMap.value("description"_l1).toString();
-                vendor = gpuMap.value("vendorId"_l1).toUInt();
+                result.first = gpuMap.value(u"description"_qs).toString();
+                vendor = gpuMap.value(u"vendorId"_qs).toUInt();
             }
         }
 #  elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
         QProcess p;
-        p.start("lspci"_l1, { "-d"_l1, "::0300"_l1, "-vmm"_l1, "-nn"_l1 }, QIODevice::ReadOnly);
+        p.start(u"lspci"_qs, { u"-d"_qs, u"::0300"_qs, u"-vmm"_qs, u"-nn"_qs }, QIODevice::ReadOnly);
         p.waitForFinished(1000);
 
-        QStringList lspci = QString::fromUtf8(p.readAllStandardOutput()).split('\n'_l1);
+        QStringList lspci = QString::fromUtf8(p.readAllStandardOutput()).split(u'\n');
         for (const auto &line : lspci) {
-            if (line.startsWith("SDevice:"_l1))
+            if (line.startsWith(u"SDevice:"))
                 result.first = line.mid(8).simplified().chopped(7);
-            else if (line.startsWith("Device:"_l1) && result.first.isEmpty())
+            else if (line.startsWith(u"Device:") && result.first.isEmpty())
                 result.first = line.mid(7).simplified().chopped(7);
-            else if (line.startsWith("Vendor:"_l1))
+            else if (line.startsWith(u"Vendor:"))
                 vendor = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
         }
 
 #  elif defined(Q_OS_MACOS)
        QProcess p;
-       p.start("system_profiler"_l1, { "-json"_l1, "SPDisplaysDataType"_l1 }, QIODevice::ReadOnly);
+       p.start(u"system_profiler"_qs, { u"-json"_qs, u"SPDisplaysDataType"_qs }, QIODevice::ReadOnly);
        p.waitForFinished(3000);
        auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
-       auto o = json.object().value("SPDisplaysDataType"_l1).toArray().first().toObject();
-       result.first = o.value("sppci_model"_l1).toString();
-       result.second = o.value("spdisplays_vendor"_l1).toString().toLower();
+       auto o = json.object().value(u"SPDisplaysDataType"_qs).toArray().first().toObject();
+       result.first = o.value(u"sppci_model"_qs).toString();
+       result.second = o.value(u"spdisplays_vendor"_qs).toString().toLower();
 
 #  endif
 #endif
         if (vendor) {
             switch (vendor) {
-            case 0x10de: result.second = "nvidia"_l1; break;
-            case 0x8086: result.second = "intel"_l1; break;
-            case 0x1002: result.second = "amd"_l1; break;
-            case 0x15ad: result.second = "vmware"_l1; break;
+            case 0x10de: result.second = u"nvidia"_qs; break;
+            case 0x8086: result.second = u"intel"_qs; break;
+            case 0x1002: result.second = u"amd"_qs; break;
+            case 0x15ad: result.second = u"vmware"_qs; break;
             }
         }
         return result;
     };
 
-    m_map["hw.cpu"_l1] = co_await QtConcurrent::run(checkCpu);
+    m_map[u"hw.cpu"_qs] = co_await QtConcurrent::run(checkCpu);
     auto gpuResultPair = co_await QtConcurrent::run(checkGpu);
-    m_map["hw.gpu"_l1] = gpuResultPair.first;
-    m_map["hw.gpu.arch"_l1] = gpuResultPair.second;
+    m_map[u"hw.gpu"_qs] = gpuResultPair.first;
+    m_map[u"hw.gpu.arch"_qs] = gpuResultPair.second;
 
     emit initialized();
 }
@@ -215,7 +214,7 @@ QVariantMap SystemInfo::asMap() const
 
 quint64 SystemInfo::physicalMemory() const
 {
-    return m_map["hw.memory"_l1].toULongLong();
+    return m_map[u"hw.memory"_qs].toULongLong();
 }
 
 #include "moc_systeminfo.cpp"

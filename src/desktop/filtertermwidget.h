@@ -16,7 +16,7 @@
 #include <QWidget>
 #include <QPointer>
 
-#include "utility/filter.h"
+#include "common/filter.h"
 
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QComboBox)

@@ -57,7 +57,7 @@ public:
                 QString s = fn % u" (" % dn % u")";
 #if !defined(Q_OS_MACOS)
                 if (i < 9)
-                    s.prepend(QString("&%1   "_l1).arg(i + 1));
+                    s.prepend(QString(u"&%1   "_qs).arg(i + 1));
 #endif
                 addAction(s)->setData(i);
             }
@@ -213,7 +213,7 @@ public:
         m_text->setIndent(style()->pixelMetric(QStyle::PM_LayoutLeftMargin));
         layout->addWidget(m_text, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_button = new QToolButton();
-        m_button->setIcon(QIcon::fromTheme("overflow-menu"_l1));
+        m_button->setIcon(QIcon::fromTheme(u"overflow-menu"_qs));
         m_button->setAutoRaise(true);
         m_button->setPopupMode(QToolButton::InstantPopup);
         m_button->setProperty("noMenuArrow", true);

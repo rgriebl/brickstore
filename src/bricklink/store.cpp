@@ -82,21 +82,21 @@ bool BrickLink::Store::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url("https://www.bricklink.com/invExcelFinal.asp"_l1);
+    QUrl url(u"https://www.bricklink.com/invExcelFinal.asp"_qs);
     QUrlQuery query;
-    query.addQueryItem("itemType"_l1,      ""_l1);
-    query.addQueryItem("catID"_l1,         ""_l1);
-    query.addQueryItem("colorID"_l1,       ""_l1);
-    query.addQueryItem("invNew"_l1,        ""_l1);
-    query.addQueryItem("itemYear"_l1,      ""_l1);
-    query.addQueryItem("viewType"_l1,      "x"_l1);    // XML
-    query.addQueryItem("invStock"_l1,      "Y"_l1);
-    query.addQueryItem("invStockOnly"_l1,  ""_l1);
-    query.addQueryItem("invQty"_l1,        ""_l1);
-    query.addQueryItem("invQtyMin"_l1,     "0"_l1);
-    query.addQueryItem("invQtyMax"_l1,     "0"_l1);
-    query.addQueryItem("invBrikTrak"_l1,   ""_l1);
-    query.addQueryItem("invDesc"_l1,       ""_l1);
+    query.addQueryItem(u"itemType"_qs,      { });
+    query.addQueryItem(u"catID"_qs,         { });
+    query.addQueryItem(u"colorID"_qs,       { });
+    query.addQueryItem(u"invNew"_qs,        { });
+    query.addQueryItem(u"itemYear"_qs,      { });
+    query.addQueryItem(u"viewType"_qs,      u"x"_qs);    // XML
+    query.addQueryItem(u"invStock"_qs,      u"Y"_qs);
+    query.addQueryItem(u"invStockOnly"_qs,  { });
+    query.addQueryItem(u"invQty"_qs,        { });
+    query.addQueryItem(u"invQtyMin"_qs,     u"0"_qs);
+    query.addQueryItem(u"invQtyMax"_qs,     u"0"_qs);
+    query.addQueryItem(u"invBrikTrak"_qs,   { });
+    query.addQueryItem(u"invDesc"_qs,       { });
     url.setQuery(query);
 
     m_job = TransferJob::post(url);

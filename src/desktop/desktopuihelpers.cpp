@@ -29,7 +29,7 @@
 #include <QDebug>
 
 #include "common/config.h"
-#include "qcoro/core/qcorosignal.h"
+#include "qcoro/qcorosignal.h"
 #include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "desktopuihelpers_p.h"
@@ -124,7 +124,7 @@ QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(QString 
     if (qobject_cast<QApplication *>(qApp)) {
         QMessageBox mb(QMessageBox::Icon(icon), !title.isEmpty() ? title : defaultTitle(), msg,
                        QMessageBox::NoButton, s_defaultParent);
-        mb.setObjectName("messagebox"_l1);
+        mb.setObjectName(u"messagebox"_qs);
         mb.setStandardButtons(QMessageBox::StandardButton(int(buttons)));
         mb.setDefaultButton(QMessageBox::StandardButton(defaultButton));
         mb.setTextFormat(Qt::RichText);
@@ -262,7 +262,7 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, Q
                                                                   QString title)
 {
     QFileDialog fd(s_defaultParent, !title.isEmpty() ? title : defaultTitle(), fileName,
-                   filters.join(";;"_l1));
+                   filters.join(u";;"));
     fd.setFileMode(doSave ? QFileDialog::AnyFile : QFileDialog::ExistingFile);
     fd.setAcceptMode(doSave ? QFileDialog::AcceptSave : QFileDialog::AcceptOpen);
     fd.open();

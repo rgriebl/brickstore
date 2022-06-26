@@ -31,7 +31,7 @@
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/store.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/utility.h"
 #include "actionmanager.h"
@@ -523,13 +523,13 @@ void Document::setActive(bool active)
                     messages << tr("%n oudated item or color reference(s) in this file have been updated according to the BrickLink catalog.",
                                    nullptr, m_model->fixedLotCount());
                 }
-                if (m_model->legacyCurrencyCode() && (Config::inst()->defaultCurrencyCode() != "USD"_l1)) {
+                if (m_model->legacyCurrencyCode() && (Config::inst()->defaultCurrencyCode() != u"USD")) {
                     messages << tr("You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner.");
                 }
 
                 if (!messages.isEmpty()) {
                     const QString msg = u"<b>" % filePathOrTitle() % u"</b><br><ul><li>"
-                            % messages.join("</li><li>"_l1) % u"</li></ul>";
+                            % messages.join(u"</li><li>") % u"</li></ul>";
 
                     static auto notifyUser = [](QString s) -> QCoro::Task<> {
                         co_await UIHelpers::information(s);
@@ -552,7 +552,7 @@ QCoro::Task<bool> Document::requestClose()
 
     if (m_model->isModified()) {
         switch (co_await UIHelpers::question(tr("The document %1 has been modified.").arg(CMB_BOLD(fileName()))
-                                             % "<br><br>"_l1 % tr("Do you want to save your changes?"),
+                                             % u"<br><br>" % tr("Do you want to save your changes?"),
                                              UIHelpers::Save | UIHelpers::Discard | UIHelpers::Cancel,
                                              UIHelpers::Save)) {
         case UIHelpers::Save:
@@ -1366,8 +1366,8 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
         co_return;
 
 #if !defined(Q_OS_ANDROID)
-    if (fn.right(4) != ".xml"_l1)
-        fn = fn % ".xml"_l1;
+    if (fn.right(4) != u".xml")
+        fn = fn % u".xml";
 #endif
 
     const QByteArray xml = BrickLink::IO::toBrickLinkXML(lots).toUtf8();
@@ -1407,7 +1407,7 @@ QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
     if (!lots.isEmpty()) {
         auto warnings = model()->hasDifferenceUpdateWarnings(lots);
         if (!warnings.isEmpty()) {
-            QString s = u"<ul><li>" % warnings.join("</li><li>"_l1) % u"</li></ul>";
+            QString s = u"<ul><li>" % warnings.join(u"</li><li>") % u"</li></ul>";
             s = tr("There are problems: %1Do you really want to export this list?").arg(s);
 
             if (co_await UIHelpers::question(s) != UIHelpers::Yes)
@@ -1521,7 +1521,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
 
     if (saveAs || filePath().isEmpty()) {
         fn = filePath();
-        if (fn.right(4) == ".xml"_l1)
+        if (fn.right(4) == u".xml")
             fn.truncate(fn.length() - 4);
 
         if (auto f = co_await UIHelpers::getSaveFileName(fn, filters, tr("Save File as"), title()))
@@ -2323,7 +2323,7 @@ void Document::autosave() const
 int Document::restorableAutosaves()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    return int(temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) }).count());
+    return int(temp.entryList({ QString::fromLatin1(autosaveTemplate).arg(u"*") }).count());
 }
 
 int Document::processAutosaves(AutosaveAction action)
@@ -2331,7 +2331,7 @@ int Document::processAutosaves(AutosaveAction action)
     int restoredCount = 0;
 
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    const auto ondisk = temp.entryList({ QString::fromLatin1(autosaveTemplate).arg("*"_l1) });
+    const auto ondisk = temp.entryList({ QString::fromLatin1(autosaveTemplate).arg(u"*") });
 
     for (const QString &filename : ondisk) {
         QFile f(temp.filePath(filename));

@@ -23,7 +23,7 @@
 #include <QQuick3DTextureData>
 #include <QPainter>
 
-#include "qcoro/core/qcorofuture.h"
+#include "qcoro/qcorofuture.h"
 #include "bricklink/core.h"
 #include "library.h"
 #include "part.h"

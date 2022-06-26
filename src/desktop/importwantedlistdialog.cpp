@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QPushButton>
 #include <QHeaderView>
 #include <QAbstractTableModel>
@@ -35,10 +36,9 @@
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentio.h"
-#include "utility/currency.h"
-#include "utility/humanreadabletimedelta.h"
+#include "common/currency.h"
+#include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
-#include "utility/xmlhelpers.h"
 #include "betteritemdelegate.h"
 #include "historylineedit.h"
 #include "importwantedlistdialog.h"
@@ -75,7 +75,7 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
     connect(w_import, &QAbstractButton::clicked,
             this, [this]() { importWantedLists(w_wantedLists->selectionModel()->selectedRows()); });
     w_showOnBrickLink = new QPushButton();
-    w_showOnBrickLink->setIcon(QIcon::fromTheme("bricklink"_l1));
+    w_showOnBrickLink->setIcon(QIcon::fromTheme(u"bricklink"_qs));
     w_buttons->addButton(w_showOnBrickLink, QDialogButtonBox::ActionRole);
     connect(w_showOnBrickLink, &QAbstractButton::clicked,
             this, &ImportWantedListDialog::showWantedListsOnBrickLink);
@@ -124,11 +124,11 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportWantedListDialog::updateWantedLists, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value("/MainWindow/ImportWantedListDialog/Geometry"_l1)
+    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportWantedListDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    ba = Config::inst()->value("/MainWindow/ImportWantedListDialog/Filter"_l1).toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/ImportWantedListDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
 
@@ -137,8 +137,8 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
 ImportWantedListDialog::~ImportWantedListDialog()
 {
-    Config::inst()->setValue("/MainWindow/ImportWantedListDialog/Geometry"_l1, saveGeometry());
-    Config::inst()->setValue("/MainWindow/ImportWantedListDialog/Filter"_l1, w_filter->saveState());
+    Config::inst()->setValue(u"/MainWindow/ImportWantedListDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"/MainWindow/ImportWantedListDialog/Filter"_qs, w_filter->saveState());
 }
 
 void ImportWantedListDialog::keyPressEvent(QKeyEvent *e)

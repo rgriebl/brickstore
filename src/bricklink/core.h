@@ -131,14 +131,14 @@ signals:
     void userIdChanged(const QString &userId);
 
 private:
-    Core(const QString &dataDir, const QString &updateUrl);
+    Core(const QString &dataDir, const QString &updateUrl, quint64 physicalMem);
 
-    static Core *create(const QString &dataDir, const QString &updateUrl, QString *errorString);
+    static Core *create(const QString &dataDir, const QString &updateUrl, quint64 physicalMem);
     static inline Core *inst() { return s_inst; }
     static Core *s_inst;
 
     friend Core *core();
-    friend Core *create(const QString &, const QString &, QString *);
+    friend Core *create(const QString &, const QString &, quint64);
 
 private:
     QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
@@ -199,7 +199,7 @@ private:
 };
 
 inline Core *core() { return Core::inst(); }
-inline Core *create(const QString &dataDir, const QString &updateUrl, QString *errorString)
-{ return Core::create(dataDir, updateUrl, errorString); }
+inline Core *create(const QString &dataDir, const QString &updateUrl = { }, quint64 physicalMem = 0ULL)
+{ return Core::create(dataDir, updateUrl, physicalMem); }
 
 } // namespace BrickLink

@@ -18,7 +18,6 @@
 #include <QRegularExpressionValidator>
 #include <QDebug>
 
-#include "utility/utility.h"
 #include "smartvalidator.h"
 
 
@@ -78,14 +77,14 @@ SmartDoubleValidator::SmartDoubleValidator(double bottom, double top, int decima
                                            QObject *parent)
     : QDoubleValidator(bottom, top, decimals, parent)
     , m_empty(empty)
-    , m_regexp(new QRegularExpressionValidator(QRegularExpression(R"(=[*\/\+-]-?[.,\d]+)"_l1), this))
+    , m_regexp(new QRegularExpressionValidator(QRegularExpression(uR"(=[*\/\+-]-?[.,\d]+)"_qs), this))
 {
     DotCommaFilter::install();
 }
 
 QValidator::State SmartDoubleValidator::validate(QString &input, int &pos) const
 {
-    if (input.startsWith('='_l1)) {
+    if (input.startsWith(u'=')) {
         auto v = m_regexp->validate(input, pos);
         if (v == QValidator::Acceptable) {
             bool ok = false;
@@ -122,12 +121,12 @@ SmartIntValidator::SmartIntValidator(QObject *parent)
 SmartIntValidator::SmartIntValidator(int bottom, int top, int empty, QObject *parent)
     : QIntValidator(bottom, top, parent)
     , m_empty(empty)
-    , m_regexp(new QRegularExpressionValidator(QRegularExpression(R"(=[*\/\+-]-?\d+)"_l1), this))
+    , m_regexp(new QRegularExpressionValidator(QRegularExpression(uR"(=[*\/\+-]-?\d+)"_qs), this))
 { }
 
 QValidator::State SmartIntValidator::validate(QString &input, int &pos) const
 {
-    if (input.startsWith('='_l1))
+    if (input.startsWith(u'='))
         return m_regexp->validate(input, pos);
     else
         return QIntValidator::validate(input, pos);

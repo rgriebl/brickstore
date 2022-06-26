@@ -20,8 +20,6 @@
 #include <QByteArray>
 #include <QFile>
 
-#include "utility.h"
-
 
 class Exception : public QException
 {
@@ -72,7 +70,7 @@ class ParseException : public Exception
 {
 public:
     ParseException(const char *message)
-        : Exception("Parse error: "_l1 + QLatin1String(message))
+        : Exception(u"Parse error: "_qs + QLatin1String(message))
     { }
 
     ParseException(QIODevice *dev, const char *message)

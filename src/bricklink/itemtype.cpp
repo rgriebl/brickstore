@@ -36,4 +36,9 @@ QSize ItemType::pictureSize() const
     return s;
 }
 
+char ItemType::idFromFirstCharInString(const QString &str)
+{
+    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
+}
+
 } // namespace BrickLink

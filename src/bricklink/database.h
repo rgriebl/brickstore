@@ -15,6 +15,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QtQml/qqmlregistration.h>
 
 #include "bricklink/global.h"
 #include "bricklink/color.h"
@@ -33,6 +34,8 @@ namespace BrickLink {
 class Database : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool valid READ isValid NOTIFY validChanged)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)

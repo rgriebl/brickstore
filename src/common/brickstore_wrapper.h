@@ -20,6 +20,13 @@
 #include <QSortFilterProxyModel>
 #include <QClipboard>
 
+#include "common/application.h"
+#include "common/currency.h"
+#include "common/onlinestate.h"
+#include "common/config.h"
+#include "common/announcements.h"
+#include "common/systeminfo.h"
+
 #include "common/document.h"
 #include "common/documentlist.h"
 #include "utility/utility.h"
@@ -45,6 +52,7 @@ class QmlDocumentColumnModel;
 class QmlDocumentProxyModel : public QAbstractProxyModel
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(DocumentProxyModel)
     Q_PROPERTY(Document *document READ document WRITE setDocument NOTIFY documentChanged REQUIRED)
     Q_PROPERTY(QAbstractListModel *columnModel READ columnModel CONSTANT)
 
@@ -99,6 +107,8 @@ private:
 class QmlDocumentColumnModel : public QAbstractListModel
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(DocumentColumnModel)
+    QML_UNCREATABLE("")
     Q_PROPERTY(int count READ rowCount CONSTANT)
 
 public:
@@ -120,6 +130,8 @@ private:
 class ColumnLayoutsModel : public QAbstractListModel
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(ColumnLayoutModel)
+    QML_UNCREATABLE("")
 
 public:
     ColumnLayoutsModel(QObject *parent = nullptr);
@@ -139,6 +151,7 @@ private:
 class QmlSortFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(SortFilterProxyModel)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(int sortColumn READ sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
@@ -196,8 +209,13 @@ private:
 class QmlClipboard : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(Clipboard)
+    QML_SINGLETON
+
 public:
     Q_ENUMS(QClipboard::Mode)
+
+    QmlClipboard() = default;
 
     Q_INVOKABLE void clear(QClipboard::Mode mode = QClipboard::Clipboard);
     Q_INVOKABLE QString text(QClipboard::Mode mode = QClipboard::Clipboard) const;
@@ -207,8 +225,12 @@ public:
 class QmlUtility : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(Utility)
+    QML_SINGLETON
 
 public:
+    QmlUtility() = default;
+
     Q_INVOKABLE int naturalCompare(const QString &s1, const QString &s2) const { return Utility::naturalCompare(s1, s2); }
 
     Q_INVOKABLE QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5) { return Utility::gradientColor(c1, c2, f); }
@@ -224,6 +246,8 @@ public:
 class QmlThenable : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(Thenable)
+    QML_UNCREATABLE("")
 
 public:
     QmlThenable(QJSEngine *engine, QObject *parent = nullptr);
@@ -244,6 +268,8 @@ private:
 class QmlBrickStore : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(BrickStore)
+    QML_SINGLETON
     Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
     Q_PROPERTY(QString versionNumber READ versionNumber CONSTANT)
     Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT)
@@ -254,11 +280,7 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(QVariantMap about READ about CONSTANT)
 
 public:
-    static void registerTypes();
-
     QmlBrickStore();
-
-    static QmlBrickStore *inst();
 
     DocumentList *documents() const;
     Config *config() const;
@@ -292,8 +314,6 @@ public:
 
     Document *activeDocument() const;
 
-    Q_INVOKABLE LDraw::RenderController *createRenderController(QObject *parent);
-
     Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
 
     Q_INVOKABLE void updateIconTheme(bool darkTheme);
@@ -304,8 +324,122 @@ signals:
     void activeDocumentChanged(Document *doc);
 
 private:
-    static QmlBrickStore *s_inst;
     ColumnLayoutsModel *m_columnLayouts;
 };
+
+class QmlAnnouncements
+{
+    Q_GADGET
+    QML_FOREIGN(Announcements)
+    QML_NAMED_ELEMENT(Announcements)
+    QML_SINGLETON
+
+public:
+     static Announcements *create(QQmlEngine *, QJSEngine *)
+     {
+         auto a = Application::inst()->announcements();
+         QQmlEngine::setObjectOwnership(a, QQmlEngine::CppOwnership);
+         return a;
+     }
+};
+
+class QmlCurrency
+{
+    Q_GADGET
+    QML_FOREIGN(Currency)
+    QML_NAMED_ELEMENT(Currency)
+    QML_SINGLETON
+
+public:
+     static Currency *create(QQmlEngine *, QJSEngine *)
+     {
+         auto c = Currency::inst();
+         QQmlEngine::setObjectOwnership(c, QQmlEngine::CppOwnership);
+         return c;
+     }
+};
+
+
+class QmlSystemInfo
+{
+    Q_GADGET
+    QML_FOREIGN(SystemInfo)
+    QML_NAMED_ELEMENT(SystemInfo)
+    QML_SINGLETON
+
+public:
+     static SystemInfo *create(QQmlEngine *, QJSEngine *)
+     {
+         auto si = SystemInfo::inst();
+         QQmlEngine::setObjectOwnership(si, QQmlEngine::CppOwnership);
+         return si;
+     }
+};
+
+class QmlConfig
+{
+    Q_GADGET
+    QML_FOREIGN(Config)
+    QML_NAMED_ELEMENT(Config)
+    QML_SINGLETON
+
+public:
+     static Config *create(QQmlEngine *, QJSEngine *)
+     {
+         auto c = Config::inst();
+         QQmlEngine::setObjectOwnership(c, QQmlEngine::CppOwnership);
+         return c;
+     }
+};
+
+
+class QmlOnlineState
+{
+    Q_GADGET
+    QML_FOREIGN(OnlineState)
+    QML_NAMED_ELEMENT(OnlineState)
+    QML_SINGLETON
+
+public:
+     static OnlineState *create(QQmlEngine *, QJSEngine *)
+     {
+         auto os = OnlineState::inst();
+         QQmlEngine::setObjectOwnership(os, QQmlEngine::CppOwnership);
+         return os;
+     }
+};
+
+class QmlDocument
+{
+    Q_GADGET
+    QML_FOREIGN(Document)
+    QML_NAMED_ELEMENT(Document)
+    QML_UNCREATABLE("")
+};
+
+class QmlDocumentList
+{
+    Q_GADGET
+    QML_FOREIGN(DocumentList)
+    QML_NAMED_ELEMENT(DocumentList)
+    QML_UNCREATABLE("")
+};
+
+class QmlDocumentModel
+{
+    Q_GADGET
+    QML_FOREIGN(DocumentModel)
+    QML_NAMED_ELEMENT(DocumentModel)
+    QML_UNCREATABLE("")
+};
+
+class QmlLots
+{
+    Q_GADGET
+    QML_FOREIGN(QmlDocumentLots)
+    QML_NAMED_ELEMENT(Lots)
+    QML_UNCREATABLE("")
+};
+
 
 Q_DECLARE_METATYPE(QmlBrickStore *)

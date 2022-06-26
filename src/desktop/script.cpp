@@ -15,7 +15,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 
-#include "qmlapi/brickstore_wrapper.h"
+#include "common/brickstore_wrapper.h"
 #include "utility/exception.h"
 #include "utility/utility.h"
 #include "printjob.h"
@@ -29,11 +29,11 @@ static QString formatJSError(const QJSValue &error)
         return { };
 
     QString msg = QString::fromLatin1("<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5")
-            .arg(error.property("name"_l1).toString(),
-                 error.property("message"_l1).toString(),
-                 error.property("fileName"_l1).toString(),
-                 error.property("lineNumber"_l1).toString(),
-                 error.property("stack"_l1).toString());
+            .arg(error.property(u"name"_qs).toString(),
+                 error.property(u"message"_qs).toString(),
+                 error.property(u"fileName"_qs).toString(),
+                 error.property(u"lineNumber"_qs).toString(),
+                 error.property(u"stack"_qs).toString());
     return msg;
 }
 
@@ -100,7 +100,7 @@ void ExtensionScriptAction::executeAction()
 
     if (result.isError()) {
         throw Exception(tr("Extension script aborted with error:")
-                        + "<br/><br/>"_l1 + formatJSError(result));
+                        + u"<br/><br/>"_qs + formatJSError(result));
 
     }
 }
@@ -231,7 +231,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
 
     if (result.isError()) {
         throw Exception(tr("Print script aborted with error:")
-                        + "<br/><br/>"_l1 + formatJSError(result));
+                        + u"<br/><br/>"_qs + formatJSError(result));
     }
 
     if (job->isAborted())
@@ -342,11 +342,6 @@ QVector<PrintingScriptAction *> Script::printingActions() const
 QQmlContext *Script::qmlContext() const
 {
     return m_context;
-}
-
-QmlBrickStore *Script::brickStoreWrapper() const
-{
-    return QmlBrickStore::inst();
 }
 
 #include "moc_script.cpp"

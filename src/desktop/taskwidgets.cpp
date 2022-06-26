@@ -32,7 +32,6 @@
 #include "common/config.h"
 #include "common/documentlist.h"
 #include "common/recentfiles.h"
-#include "utility/utility.h"
 #include "mainwindow.h"
 
 #include "taskwidgets.h"
@@ -191,13 +190,13 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &TaskInfoWidget::refresh);
 
-    m_pic->setPrefer3D(Config::inst()->value("/MainWindow/TaskInfo/Prefer3D"_l1, true).toBool());
+    m_pic->setPrefer3D(Config::inst()->value(u"/MainWindow/TaskInfo/Prefer3D"_qs, true).toBool());
     setCurrentWidget(m_text);
 }
 
 TaskInfoWidget::~TaskInfoWidget()
 {
-    Config::inst()->setValue("/MainWindow/TaskInfo/Prefer3D"_l1, m_pic->prefer3D());
+    Config::inst()->setValue(u"/MainWindow/TaskInfo/Prefer3D"_qs, m_pic->prefer3D());
 }
 
 void TaskInfoWidget::documentUpdate(Document *document)

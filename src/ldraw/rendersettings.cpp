@@ -30,6 +30,14 @@ RenderSettings *RenderSettings::inst()
     return s_inst;
 }
 
+RenderSettings *RenderSettings::create(QQmlEngine *qe, QJSEngine *)
+{
+    Q_ASSERT(!s_inst || !qmlEngine(s_inst) || (qmlEngine(s_inst) == qe));
+    auto rs = inst();
+    QQmlEngine::setObjectOwnership(rs, QQmlEngine::CppOwnership);
+    return rs;
+}
+
 void RenderSettings::forEachProperty(std::function<void(QMetaProperty &)> callback)
 {
     const QMetaObject *mo = metaObject();

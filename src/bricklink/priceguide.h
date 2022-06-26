@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QtCore/QDateTime>
+#include <QtQml/qqmlregistration.h>
 
 #include "bricklink/global.h"
 #include "utility/ref.h"
@@ -26,6 +27,8 @@ namespace BrickLink {
 class PriceGuide : public QObject, public Ref
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT)
     Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT)
     Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)

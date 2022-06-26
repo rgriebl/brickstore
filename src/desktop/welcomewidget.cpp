@@ -31,13 +31,12 @@
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
-#include "utility/humanreadabletimedelta.h"
-#include "utility/utility.h"
+#include "common/humanreadabletimedelta.h"
 #include "flowlayout.h"
 #include "welcomewidget.h"
-#include "version.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction
@@ -138,7 +137,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     setAttribute(Qt::WA_Hover);
 
     // only Fusion seems to be able to draw QCommandLink buttons correctly
-    if (auto s = QStyleFactory::create("fusion"_l1)) {
+    if (auto s = QStyleFactory::create(u"fusion"_qs)) {
         s->setParent(this);
         setStyle(s);
     }
@@ -148,7 +147,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     setSizePolicy(policy);
 
     setIconSize({ 32, 32 });
-    setIcon(QIcon::fromTheme("go-next"_l1));
+    setIcon(QIcon::fromTheme(u"go-next"_qs));
 
     resetTitleFont();
 }
@@ -289,7 +288,7 @@ void WelcomeButton::paintEvent(QPaintEvent *)
 
 WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
-    , m_docIcon(":/assets/generated-app-icons/brickstore_doc"_l1)
+    , m_docIcon(u":/assets/generated-app-icons/brickstore_doc"_qs)
 {
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 
@@ -383,10 +382,10 @@ void WelcomeWidget::updateVersionsText()
                                                   BrickLink::core()->database()->lastUpdated());
 
     QString dbd = u"<b>" % delta % u"</b>";
-    QString ver = u"<b>" % QLatin1String(BRICKSTORE_VERSION) % u"</b>";
+    QString ver = u"<b>" % QCoreApplication::applicationVersion() % u"</b>";
 
     QString s = QCoreApplication::applicationName() % u" " %
-            tr("version %1 (build: %2)").arg(ver).arg(QLatin1String(BRICKSTORE_BUILD_NUMBER)) %
+            tr("version %1 (build: %2)").arg(ver).arg(Application::inst()->buildNumber()) %
             u"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" %
             tr("Using a database that was generated %1").arg(dbd);
     m_versions->setText(s);

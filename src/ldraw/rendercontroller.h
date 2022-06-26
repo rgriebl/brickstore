@@ -33,7 +33,7 @@ class Part;
 class RenderController : public QObject
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(LDrawRenderController)
+    QML_NAMED_ELEMENT(RenderController)
     Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged)
     Q_PROPERTY(QVector<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged)
     Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT)

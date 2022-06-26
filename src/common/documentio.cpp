@@ -45,29 +45,29 @@
 QStringList DocumentIO::nameFiltersForBrickLinkXML(bool includeAll)
 {
     QStringList filters;
-    filters << tr("BrickLink XML File") % " (*.xml)"_l1;
+    filters << tr("BrickLink XML File") % u" (*.xml)";
     if (includeAll)
-        filters << tr("All Files") % "(*)"_l1;
+        filters << tr("All Files") % u"(*)";
     return filters;
 }
 
 QStringList DocumentIO::nameFiltersForBrickStoreXML(bool includeAll)
 {
     QStringList filters;
-    filters << tr("BrickStore XML Data") % " (*.bsx)"_l1;
+    filters << tr("BrickStore XML Data") % u" (*.bsx)";
     if (includeAll)
-        filters << tr("All Files") % "(*)"_l1;
+        filters << tr("All Files") % u"(*)";
     return filters;
 }
 
 QStringList DocumentIO::nameFiltersForLDraw(bool includeAll)
 {
     QStringList filters;
-    filters << tr("All Models") % " (*.dat *.ldr *.mpd *.io)"_l1;
-    filters << tr("LDraw Models") % " (*.dat *.ldr *.mpd)"_l1;
-    filters << tr("BrickLink Studio Models") % " (*.io)"_l1;
+    filters << tr("All Models") % u" (*.dat *.ldr *.mpd *.io)";
+    filters << tr("LDraw Models") % u" (*.dat *.ldr *.mpd)";
+    filters << tr("BrickLink Studio Models") % u" (*.io)";
     if (includeAll)
-        filters << tr("All Files") % " (*)"_l1;
+        filters << tr("All Files") % u" (*)";
     return filters;
 }
 
@@ -83,7 +83,7 @@ Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
 
     auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
-    document->setThumbnail("bricklink-store"_l1);
+    document->setThumbnail(u"bricklink-store"_qs);
     return document;
 }
 
@@ -100,7 +100,7 @@ Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order)
     auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setOrder(order);
     document->setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
-    document->setThumbnail("view-financial-list"_l1);
+    document->setThumbnail(u"view-financial-list"_qs);
     return document;
 }
 
@@ -116,7 +116,7 @@ Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
 
     auto *document = new Document(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
-    document->setThumbnail("bricklink-cart"_l1);
+    document->setThumbnail(u"bricklink-cart"_qs);
     return document;
 }
 
@@ -133,7 +133,7 @@ Document *DocumentIO::importBrickLinkWantedList(BrickLink::WantedList *wantedLis
     QString name = wantedList->name().isEmpty() ? QString::number(wantedList->id())
                                                 : wantedList->name();
     document->setTitle(tr("Wanted List %1").arg(name));
-    document->setThumbnail("love-amarok"_l1);
+    document->setThumbnail(u"love-amarok"_qs);
     return document;
 }
 
@@ -181,7 +181,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 
     try {
         std::unique_ptr<QFile> f;
-        bool isStudio = fn.endsWith(".io"_l1);
+        bool isStudio = fn.endsWith(u".io");
 
         if (isStudio) {
             stopwatch unpack("unpack/decrypt studio zip");
@@ -327,7 +327,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                 const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return line.constData() - sv.constData(); };
 
-                if ((split.count() >= 2) && (split.at(1) == "FILE"_l1)) {
+                if ((split.count() >= 2) && (split.at(1) == u"FILE")) {
                     is_mpd = true;
                     current_mpd_model = line.mid(strPosition(split.at(2))).toLower();
                     current_mpd_index++;
@@ -357,7 +357,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
 
                     const BrickLink::Item *itemp = BrickLink::core()->item('P', partid.toLatin1());
 
-                    if (!itemp && !partname.endsWith(".dat"_l1)) {
+                    if (!itemp && !partname.endsWith(u".dat")) {
                         bool got_subfile = false;
                         QVector<Lot *> subLots;
 
@@ -405,13 +405,13 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                         if (!itemp) {
                             inc->m_item_id = partid.toLatin1();
                             inc->m_itemtype_id = 'P';
-                            inc->m_itemtype_name = "Part"_l1;
+                            inc->m_itemtype_name = u"Part"_qs;
                         }
                         if (!colp) {
                             if (isStudio)
                                 inc->m_color_id = colid;
                             else
-                                inc->m_color_name = "LDraw #"_l1 + QString::number(colid);
+                                inc->m_color_name = u"LDraw #"_qs + QString::number(colid);
                         }
                         lot->setIncomplete(inc);
                     }
@@ -443,7 +443,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
     BsxContents bsx;
 
     try {
-        bsx.setCurrencyCode("$$$"_l1);  // flag as legacy currency
+        bsx.setCurrencyCode(u"$$$"_qs);  // flag as legacy currency
 
         bool foundRoot = false;
         bool foundInventory = false;
@@ -451,11 +451,11 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
         auto parseGuiState = [&]() {
             while (xml.readNextStartElement()) {
                 const auto tag = xml.name();
-                bool isColumnLayout = (tag == "ColumnLayout"_l1);
-                bool isSortFilter = (tag == "SortFilterState"_l1);
+                bool isColumnLayout = (tag == u"ColumnLayout");
+                bool isSortFilter = (tag == u"SortFilterState");
 
                 if (isColumnLayout || isSortFilter) {
-                    bool compressed = (xml.attributes().value("Compressed"_l1).toInt() == 1);
+                    bool compressed = (xml.attributes().value(u"Compressed"_qs).toInt() == 1);
                     auto ba = QByteArray::fromBase64(xml.readElementText().toLatin1());
                     if (compressed)
                         ba = qUncompress(ba);
@@ -479,7 +479,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
             { u"ItemID",       [](auto *lot, auto &v) { lot->isIncomplete()->m_item_id = v.toLatin1(); } },
             { u"ColorID",      [](auto *lot, auto &v) { lot->isIncomplete()->m_color_id = v.toUInt(); } },
             { u"CategoryID",   [](auto *lot, auto &v) { lot->isIncomplete()->m_category_id = v.toUInt(); } },
-            { u"ItemTypeID",   [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = XmlHelpers::firstCharInString(v); } },
+            { u"ItemTypeID",   [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = BrickLink::ItemType::idFromFirstCharInString(v); } },
             { u"ItemName",     [](auto *lot, auto &v) { lot->isIncomplete()->m_item_name = v; } },
             { u"ColorName",    [](auto *lot, auto &v) { lot->isIncomplete()->m_color_name = v; } },
             { u"CategoryName", [](auto *lot, auto &v) { lot->isIncomplete()->m_category_name = v; } },
@@ -497,29 +497,29 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
             { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, fixFinite(v.toDouble())); } },
             { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, fixFinite(v.toDouble())); } },
             { u"LotID",        [](auto *lot, auto &v) { lot->setLotId(v.toUInt()); } },
-            { u"Retain",       [](auto *lot, auto &v) { lot->setRetain(v.isEmpty() || (v == "Y"_l1)); } },
+            { u"Retain",       [](auto *lot, auto &v) { lot->setRetain(v.isEmpty() || (v == u"Y")); } },
             { u"Reserved",     [](auto *lot, auto &v) { lot->setReserved(v); } },
             { u"TotalWeight",  [](auto *lot, auto &v) { lot->setTotalWeight(fixFinite(v.toDouble())); } },
             { u"Cost",         [](auto *lot, auto &v) { lot->setCost(fixFinite(v.toDouble())); } },
             { u"Condition",    [](auto *lot, auto &v) {
-                lot->setCondition(v == "N"_l1 ? BrickLink::Condition::New
-                                              : BrickLink::Condition::Used); } },
+                lot->setCondition(v == u"N" ? BrickLink::Condition::New
+                                            : BrickLink::Condition::Used); } },
             { u"SubCondition", [](auto *lot, auto &v) {
                 // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-                lot->setSubCondition(v == "C"_l1 ? BrickLink::SubCondition::Complete :
-                                     v == "I"_l1 ? BrickLink::SubCondition::Incomplete :
-                                     v == "M"_l1 ? BrickLink::SubCondition::Sealed
-                                                 : BrickLink::SubCondition::None); } },
+                lot->setSubCondition(v == u"C" ? BrickLink::SubCondition::Complete :
+                                     v == u"I" ? BrickLink::SubCondition::Incomplete :
+                                     v == u"M" ? BrickLink::SubCondition::Sealed
+                                               : BrickLink::SubCondition::None); } },
             { u"Status",       [](auto *lot, auto &v) {
-                lot->setStatus(v == "X"_l1 ? BrickLink::Status::Exclude :
-                                                 v == "I"_l1 ? BrickLink::Status::Include :
-                                                                  v == "E"_l1 ? BrickLink::Status::Extra
-                                                                                 : BrickLink::Status::Include); } },
+                lot->setStatus(v == u"X" ? BrickLink::Status::Exclude :
+                               v == u"I" ? BrickLink::Status::Include :
+                               v == u"E" ? BrickLink::Status::Extra
+                                         : BrickLink::Status::Include); } },
             { u"Stockroom",    [](auto *lot, auto &v) {
-                lot->setStockroom(v == "A"_l1 || v.isEmpty() ? BrickLink::Stockroom::A :
-                                  v == "B"_l1 ? BrickLink::Stockroom::B :
-                                  v == "C"_l1 ? BrickLink::Stockroom::C
-                                              : BrickLink::Stockroom::None); } },
+                lot->setStockroom(v == u"A" || v.isEmpty() ? BrickLink::Stockroom::A :
+                                  v == u"B" ? BrickLink::Stockroom::B :
+                                  v == u"C" ? BrickLink::Stockroom::C
+                                            : BrickLink::Stockroom::None); } },
             { u"MarkerText",   [](auto *lot, auto &v) { lot->setMarkerText(v); } },
             { u"MarkerColor",  [](auto *lot, auto &v) { lot->setMarkerColor(QColor(v)); } },
             { u"DateAdded",    [](auto *lot, auto &v) {
@@ -538,7 +538,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
             } }, };
 
             while (xml.readNextStartElement()) {
-                if (xml.name() != "Item"_l1)
+                if (xml.name() != u"Item")
                     throw Exception("Expected Item element, but got: %1").arg(xml.name());
 
                 auto lot = new Lot();
@@ -548,7 +548,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                 while (xml.readNextStartElement()) {
                     auto tag = xml.name();
 
-                    if (tag != "DifferenceBaseValues"_l1) {
+                    if (tag != u"DifferenceBaseValues") {
                         auto it = tagHash.find(tag);
                         if (it != tagHash.end())
                             (*it)(lot, xml.readElementText());
@@ -570,9 +570,9 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                 // convert the legacy OrigQty / OrigPrice fields
                 if (!hasBaseValues && (legacyOrigPrice.isValid() || legacyOrigQty.isValid())) {
                     if (legacyOrigQty.isValid())
-                        baseValues.append("Qty"_l1, QString::number(legacyOrigQty.toInt()));
+                        baseValues.append(u"Qty"_qs, QString::number(legacyOrigQty.toInt()));
                     if (!legacyOrigPrice.isNull())
-                        baseValues.append("Price"_l1, QString::number(legacyOrigPrice.toDouble(), 'f', 3));
+                        baseValues.append(u"Price"_qs, QString::number(legacyOrigPrice.toDouble(), 'f', 3));
                 }
 
                 Lot base = *lot;
@@ -606,15 +606,15 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
         // In an ideal world, BrickStock wouldn't have changed the root tag.
         // DTDs are not required anymore, but if there is a DTD, it has to be correct
 
-        static const QVector<QString> knownTypes { "BrickStoreXML"_l1, "BrickStockXML"_l1 };
+        static const QVector<QString> knownTypes { u"BrickStoreXML"_qs, u"BrickStockXML"_qs };
 
         while (true) {
             switch (xml.readNext()) {
             case QXmlStreamReader::DTD: {
                 auto dtd = xml.text().toString().trimmed();
 
-                if (!dtd.startsWith("<!DOCTYPE "_l1)
-                        || !dtd.endsWith(">"_l1)
+                if (!dtd.startsWith(u"<!DOCTYPE ")
+                        || !dtd.endsWith(u">")
                         || !knownTypes.contains(dtd.mid(10).chopped(1))) {
                     throw Exception("Expected BrickStoreXML as DOCTYPE, but got: %1").arg(dtd);
                 }
@@ -626,13 +626,13 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                         throw Exception("Expected BrickStoreXML as root element, but got: %1").arg(xml.name());
                     foundRoot = true;
                 } else {
-                    if (xml.name() == "Inventory"_l1) {
+                    if (xml.name() == u"Inventory") {
                         foundInventory = true;
-                        bsx.setCurrencyCode(xml.attributes().value("Currency"_l1).toString());
+                        bsx.setCurrencyCode(xml.attributes().value(u"Currency"_qs).toString());
                         parseInventory();
-                    } else if ((xml.name() == "GuiState"_l1)
-                                && (xml.attributes().value("Application"_l1) == "BrickStore"_l1)
-                                && (xml.attributes().value("Version"_l1).toInt() == 2)) {
+                    } else if ((xml.name() == u"GuiState")
+                                && (xml.attributes().value(u"Application"_qs) == u"BrickStore")
+                                && (xml.attributes().value(u"Version"_qs).toInt() == 2)) {
                         parseGuiState();
                     } else {
                         xml.skipCurrentElement();
@@ -676,9 +676,9 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
     // We don't write a DOCTYPE anymore, because RelaxNG wants the schema independent from
     // the actual XML file. As a side effect, BSX files can now be opened directly in Excel.
 
-    xml.writeStartElement("BrickStoreXML"_l1);
-    xml.writeStartElement("Inventory"_l1);
-    xml.writeAttribute("Currency"_l1, doc->model()->currencyCode());
+    xml.writeStartElement(u"BrickStoreXML"_qs);
+    xml.writeStartElement(u"Inventory"_qs);
+    xml.writeAttribute(u"Currency"_qs, doc->model()->currencyCode());
 
     const Lot *lot;
     const Lot *base;
@@ -720,7 +720,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         base = &baseRef;
         baseValues.clear();
 
-        xml.writeStartElement("Item"_l1);
+        xml.writeStartElement(u"Item"_qs);
 
         // vvv Required Fields (part 1)
         create(u"ItemID",       &Lot::itemId,       [](auto l1s) {
@@ -746,16 +746,16 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         create(u"Status", &Lot::status, [](auto st) {
             switch (st) {
             default                        :
-            case BrickLink::Status::Exclude: return "X"_l1;
-            case BrickLink::Status::Include: return "I"_l1;
-            case BrickLink::Status::Extra  : return "E"_l1;
+            case BrickLink::Status::Exclude: return u"X"_qs;
+            case BrickLink::Status::Include: return u"I"_qs;
+            case BrickLink::Status::Extra  : return u"E"_qs;
             }
         });
 
         create(u"Qty",       &Lot::quantity,     asInt);
         create(u"Price",     &Lot::price,        asCurrency);
         create(u"Condition", &Lot::condition, [](auto c) {
-            return (c == BrickLink::Condition::New) ? "N"_l1 : "U"_l1; });
+            return (c == BrickLink::Condition::New) ? u"N"_qs : u"U"_qs; });
 
         // vvv Optional Fields (part 2)
 
@@ -763,10 +763,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
                 [](auto sc) {
             // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
             switch (sc) {
-            case BrickLink::SubCondition::Incomplete: return "I"_l1;
-            case BrickLink::SubCondition::Complete  : return "C"_l1;
-            case BrickLink::SubCondition::Sealed    : return "M"_l1;
-            default                                 : return "N"_l1;
+            case BrickLink::SubCondition::Incomplete: return u"I"_qs;
+            case BrickLink::SubCondition::Complete  : return u"C"_qs;
+            case BrickLink::SubCondition::Sealed    : return u"M"_qs;
+            default                                 : return u"N"_qs;
             }
         }, Optional, QVariant::fromValue(BrickLink::SubCondition::None));
 
@@ -785,14 +785,14 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         create(u"TP3",       &Lot::tierPrice2,    asCurrency, Optional, 0);
 
         create(u"Retain", &Lot::retain, [](bool b) {
-            return b ? "Y"_l1 : "N"_l1; }, Optional | WriteEmpty, false);
+            return b ? u"Y"_qs : u"N"_qs; }, Optional | WriteEmpty, false);
 
         create(u"Stockroom", &Lot::stockroom, [](auto st) {
             switch (st) {
-            case BrickLink::Stockroom::A: return "A"_l1;
-            case BrickLink::Stockroom::B: return "B"_l1;
-            case BrickLink::Stockroom::C: return "C"_l1;
-            default                     : return "N"_l1;
+            case BrickLink::Stockroom::A: return u"A"_qs;
+            case BrickLink::Stockroom::B: return u"B"_qs;
+            case BrickLink::Stockroom::C: return u"C"_qs;
+            default                     : return u"N"_qs;
             }
         }, Optional, QVariant::fromValue(BrickLink::Stockroom::None));
 
@@ -811,7 +811,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
             create(u"DateLastSold", &Lot::dateLastSold, asDateTime, Constant);
 
         if (base && !baseValues.isEmpty()) {
-            xml.writeStartElement("DifferenceBaseValues"_l1);
+            xml.writeStartElement(u"DifferenceBaseValues"_qs);
             xml.writeAttributes(baseValues);
             xml.writeEndElement(); // DifferenceBaseValues
         }
@@ -820,20 +820,20 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
 
     xml.writeEndElement(); // Inventory
 
-    xml.writeStartElement("GuiState"_l1);
-    xml.writeAttribute("Application"_l1, "BrickStore"_l1);
-    xml.writeAttribute("Version"_l1, QString::number(2));
+    xml.writeStartElement(u"GuiState"_qs);
+    xml.writeAttribute(u"Application"_qs, u"BrickStore"_qs);
+    xml.writeAttribute(u"Version"_qs, QString::number(2));
     QByteArray columnLayout = doc->saveColumnsState();
     if (!columnLayout.isEmpty()) {
-        xml.writeStartElement("ColumnLayout"_l1);
-        xml.writeAttribute("Compressed"_l1, "1"_l1);
+        xml.writeStartElement(u"ColumnLayout"_qs);
+        xml.writeAttribute(u"Compressed"_qs, u"1"_qs);
         xml.writeCDATA(QLatin1String(qCompress(columnLayout).toBase64()));
         xml.writeEndElement(); // ColumnLayout
     }
     QByteArray sortFilterState = doc->model()->saveSortFilterState();
     if (!sortFilterState.isEmpty()) {
-        xml.writeStartElement("SortFilterState"_l1);
-        xml.writeAttribute("Compressed"_l1, "1"_l1);
+        xml.writeStartElement(u"SortFilterState"_qs);
+        xml.writeAttribute(u"Compressed"_qs, u"1"_qs);
         xml.writeCDATA(QLatin1String(qCompress(sortFilterState).toBase64()));
         xml.writeEndElement(); // SortFilterState
     }

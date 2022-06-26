@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QtCore/QStringBuilder>
 #include <QtGui/QPainter>
 #include <QtGui/QPaintEvent>
 #include <QtGui/QIcon>
@@ -43,7 +44,7 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
 
     auto icon = new QLabel();
     int s = fontMetrics().height();
-    icon->setPixmap(QIcon::fromTheme("dialog-warning"_l1).pixmap(s * 3));
+    icon->setPixmap(QIcon::fromTheme(u"dialog-warning"_qs).pixmap(s * 3));
     icon->setFixedSize(s * 3, s * 3);
     lay->addWidget(icon, 0, Qt::AlignVCenter | Qt::AlignLeft);
 
@@ -60,7 +61,7 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
     m_browser = new QTextBrowser();
     m_browser->setReadOnly(true);
     m_browser->setFrameStyle(QFrame::NoFrame);
-    m_browser->setMarkdown(markdown % "\n\n___\n"_l1);
+    m_browser->setMarkdown(markdown % u"\n\n___\n");
     m_browser->setOpenLinks(true);
     m_browser->setOpenExternalLinks(true);
     m_browser->viewport()->setAutoFillBackground(false);
@@ -139,13 +140,13 @@ QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcem
     for (const QVariant &v : vl) {
         const QVariantMap vm = v.toMap();
 
-        shownIds << vm.value("id"_l1).toUInt();
+        shownIds << vm.value(u"id"_qs).toUInt();
 
         if (!md.isEmpty())
-            md = md % "\n\n___\n\n"_l1;
-        md = md % "**"_l1 % vm.value("title"_l1).toString() % "** &mdash; *"_l1
-                % QLocale().toString(vm.value("date"_l1).toDate(), QLocale::ShortFormat)
-                % "*\n\n"_l1 % vm.value("text"_l1).toString();
+            md = md % u"\n\n___\n\n";
+        md = md % u"**" % vm.value(u"title"_qs).toString() % u"** &mdash; *"
+                % QLocale().toString(vm.value(u"date"_qs).toDate(), QLocale::ShortFormat)
+                % u"*\n\n" % vm.value(u"text"_qs).toString();
     }
 
     if (shownIds.isEmpty())

@@ -74,20 +74,20 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 
     m_clp.addHelpOption();
     m_clp.addVersionOption();
-    m_clp.addOption({ "load-translation"_l1, "Load the specified translation (testing only)."_l1, "qm-file"_l1 });
-    m_clp.addOption({ "new-instance"_l1, "Start a new instance."_l1 });
-    m_clp.addPositionalArgument("files"_l1, "The BSX documents to open, optionally."_l1, "[files...]"_l1);
+    m_clp.addOption({ u"load-translation"_qs, u"Load the specified translation (testing only)."_qs, u"qm-file"_qs });
+    m_clp.addOption({ u"new-instance"_qs, u"Start a new instance."_qs });
+    m_clp.addPositionalArgument(u"files"_qs, u"The BSX documents to open, optionally."_qs, u"[files...]"_qs);
     m_clp.process(QCoreApplication::arguments());
 
-    m_translationOverride = m_clp.value("load-translation"_l1);
+    m_translationOverride = m_clp.value(u"load-translation"_qs);
     m_queuedDocuments << m_clp.positionalArguments();
 
     // check for an already running instance
-    if (!m_clp.isSet("new-instance"_l1) && notifyOtherInstance())
+    if (!m_clp.isSet(u"new-instance"_qs) && notifyOtherInstance())
         exit(0);
 
 #if defined(Q_OS_LINUX)
-    QPixmap pix(":/assets/generated-app-icons/brickstore.png"_l1);
+    QPixmap pix(u":/assets/generated-app-icons/brickstore.png"_qs);
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
 #endif
@@ -137,7 +137,7 @@ void DesktopApplication::init()
         setFontSizePercentLambda(fsp);
 
     if (!m_startupErrors.isEmpty()) {
-        QCoro::waitFor(UIHelpers::critical(m_startupErrors.join("\n\n"_l1)));
+        QCoro::waitFor(UIHelpers::critical(m_startupErrors.join(u"\n\n")));
 
         // we cannot call quit directly, since there is no event loop to quit from...
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
@@ -278,7 +278,7 @@ bool DesktopApplication::notifyOtherInstance()
     // With a short timeout, the clients may not get back the confirmation ('X') in time.
     const int timeout = 10000;
     enum { Undecided, Server, Client } state = Undecided;
-    QString socketName = "BrickStore"_l1;
+    QString socketName = u"BrickStore"_qs;
     QLocalServer *server = nullptr;
 
 #if defined(Q_OS_WINDOWS)
@@ -433,10 +433,14 @@ void DesktopApplication::setUITheme()
         // no need to use Fusion tricks here, just use the default Vista style
         theme = Config::UITheme::SystemDefault;
     }
+    if (theme == Config::UITheme::Dark) {
+        // prevent Win11 palette updates when the system theme or screen settings change
+        QGuiApplication::setDesktopSettingsAware(false);
+    }
 #endif
 
     if (theme != Config::UITheme::SystemDefault) {
-        QApplication::setStyle(new BrickStoreProxyStyle(QStyleFactory::create("fusion"_l1)));
+        QApplication::setStyle(new BrickStoreProxyStyle(QStyleFactory::create(u"fusion"_qs)));
         auto palette = QApplication::style()->standardPalette();
 
         if (theme == Config::UITheme::Dark) {

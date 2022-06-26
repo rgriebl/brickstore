@@ -23,7 +23,7 @@
 #include "bricklink/lot.h"
 #include "common/config.h"
 #include "common/documentmodel.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QProgressBar)

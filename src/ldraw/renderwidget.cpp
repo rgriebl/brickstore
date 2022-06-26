@@ -18,7 +18,6 @@
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
 
-#include "utility/utility.h"
 #include "rendercontroller.h"
 #include "renderwidget.h"
 
@@ -53,9 +52,9 @@ RenderWidget::RenderWidget(QWidget *parent)
     paletteChange();
 
     m_window->setInitialProperties({
-                                       { "renderController"_l1, QVariant::fromValue(m_controller) },
+                                       { u"renderController"_qs, QVariant::fromValue(m_controller) },
                                    });
-    m_window->setSource(QUrl::fromLocalFile(":/ldraw/PartRenderer.qml"_l1));
+    m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
 
     m_widget = QWidget::createWindowContainer(m_window, this);
     m_widget->setMinimumSize(100, 100);

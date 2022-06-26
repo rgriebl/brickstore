@@ -43,6 +43,8 @@ public:
     ItemType() = default;
     ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
 
+    static char idFromFirstCharInString(const QString &str);
+
 private:
     char  m_id = InvalidId;
 

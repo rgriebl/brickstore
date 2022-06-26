@@ -38,8 +38,6 @@ namespace LDraw {
 class Part;
 class PartElement;
 
-void registerQmlTypes();
-
 enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
 
 class Library : public QObject

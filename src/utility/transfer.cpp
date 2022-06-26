@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-
+#include <QStringBuilder>
 #include <QThread>
 #include <QFile>
 #include <QLocale>
@@ -22,7 +22,6 @@
 #include <QUrlQuery>
 
 #include "common/config.h"
-#include "utility.h"
 #include "transfer.h"
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
@@ -110,7 +109,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 
     j->m_url = url;
     if (j->m_url.scheme().isEmpty())
-        j->m_url.setScheme("http"_l1);
+        j->m_url.setScheme(u"http"_qs);
     j->m_only_if_newer = ifnewer.toUTC();
     j->m_only_if_different = etag;
     j->m_data = file ? nullptr : new QByteArray();
@@ -152,7 +151,7 @@ Transfer::Transfer(QObject *parent)
     m_retrieverThread = new QThread(); // we're leaking m_retriever here
 #endif
     m_retriever->moveToThread(m_retrieverThread);
-    m_retrieverThread->setObjectName("TransferRetriever"_l1);
+    m_retrieverThread->setObjectName(u"TransferRetriever"_qs);
     m_retrieverThread->setParent(this);
     m_retrieverThread->start(QThread::LowPriority);
 
@@ -335,7 +334,7 @@ void TransferRetriever::schedule()
             j->m_reply = m_nam->get(req);
         }
         else {
-            req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded"_l1);
+            req.setHeader(QNetworkRequest::ContentTypeHeader, u"application/x-www-form-urlencoded"_qs);
             QByteArray postdata = url.query(QUrl::FullyEncoded).toLatin1();
             url.setQuery(QUrlQuery());
             req.setUrl(url);

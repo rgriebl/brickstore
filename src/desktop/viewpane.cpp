@@ -12,6 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QLocale>
+#include <QStringBuilder>
 #include <QStyle>
 #include <QBoxLayout>
 #include <QApplication>
@@ -151,7 +152,7 @@ void ViewPane::newWindow()
     }
     nw->setAttribute(Qt::WA_DeleteOnClose);
     auto *rootSplitter = new QSplitter();
-    rootSplitter->setObjectName("WindowSplitter"_l1);
+    rootSplitter->setObjectName(u"WindowSplitter"_qs);
     auto *vp = m_viewPaneCreate(nullptr);
     rootSplitter->addWidget(vp);
     nw->setCentralWidget(rootSplitter);
@@ -372,7 +373,7 @@ void ViewPane::updateCurrencyRates()
 
 void ViewPane::documentCurrencyChanged(const QString &ccode)
 {
-    m_currency->setText(ccode + "  "_l1);
+    m_currency->setText(ccode % u"  ");
     // the menu might still be open right now, so we need to delay deleting the actions
     QMetaObject::invokeMethod(this, &ViewPane::updateCurrencyRates, Qt::QueuedConnection);
 }
@@ -693,7 +694,7 @@ void ViewPane::createToolBar()
     addSeparator();
 
     m_split = new QToolButton();
-    m_split->setIcon(QIcon::fromTheme("view-split-left-right"_l1));
+    m_split->setIcon(QIcon::fromTheme(u"view-split-left-right"_qs));
     m_split->setAutoRaise(true);
     m_split->setPopupMode(QToolButton::InstantPopup);
     m_split->setProperty("noMenuArrow", true);
@@ -701,13 +702,13 @@ void ViewPane::createToolBar()
     pageLayout->addWidget(m_split);
 
     m_splitH = new QAction(this);
-    m_splitH->setIcon(QIcon::fromTheme("view-split-left-right"_l1));
+    m_splitH->setIcon(QIcon::fromTheme(u"view-split-left-right"_qs));
     m_splitV = new QAction(this);
-    m_splitV->setIcon(QIcon::fromTheme("view-split-top-bottom"_l1));
+    m_splitV->setIcon(QIcon::fromTheme(u"view-split-top-bottom"_qs));
     m_splitClose = new QAction(this);
-    m_splitClose->setIcon(QIcon::fromTheme("view-close"_l1));
+    m_splitClose->setIcon(QIcon::fromTheme(u"view-close"_qs));
     m_splitWindow = new QAction(this);
-    m_splitWindow->setIcon(QIcon::fromTheme("document-new"_l1));
+    m_splitWindow->setIcon(QIcon::fromTheme(u"document-new"_qs));
 
     QMenu *splitMenu = new QMenu(m_split);
     splitMenu->addAction(m_splitClose);

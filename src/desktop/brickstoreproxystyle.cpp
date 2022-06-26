@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QComboBox>
 #include <QToolButton>
 #include <QToolBar>
@@ -52,7 +53,7 @@ void BrickStoreProxyStyle::polish(QWidget *w)
                 if (tbptr && tbptr->autoRaise()) {
 #if defined(Q_OS_MACOS)
                     // QToolButtons look really ugly on macOS, so we re-style them
-                    static QStyle *fusion = QStyleFactory::create("fusion"_l1);
+                    static QStyle *fusion = QStyleFactory::create(u"fusion"_qs);
                     tbptr->setStyle(fusion);
 #endif
                     if (qstrcmp(tbptr->style()->metaObject()->className(), "QFusionStyle") == 0) {
@@ -180,16 +181,16 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
 
                 for (int i = 0; i < sortColumns.size(); ++i) {
                     if (sortColumns.at(i).first == headerOpt->section) {
-                        QString key = "hv_"_l1 % QString::number(iconSize) % "-"_l1 %
-                                QString::number(i) % "-"_l1 % QString::number(
+                        QString key = u"hv_" % QString::number(iconSize) % u"-" %
+                                QString::number(i) % u"-" % QString::number(
                                     headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
 
                         QPixmap pix;
                         if (!QPixmapCache::find(key, &pix)) {
-                            QString name = "view-sort"_l1;
+                            QString name = u"view-sort"_qs;
                             if (headerView->isSorted()) {
                                 name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
-                                               ? "-ascending"_l1 : "-descending"_l1);
+                                               ? u"-ascending" : u"-descending");
                             }
                             pix = QIcon::fromTheme(name).pixmap(QSize(iconSize, iconSize),
                                                                 widget->devicePixelRatio(),

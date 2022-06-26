@@ -20,7 +20,7 @@
 #include "bricklink/color.h"
 #include "bricklink/global.h"
 #include "bricklink/item.h"
-#include "utility/staticpointermodel.h"
+#include "bricklink/staticpointermodel.h"
 
 
 namespace BrickLink {
@@ -70,6 +70,7 @@ private:
 class CategoryModel : public StaticPointerModel
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
     Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
 
@@ -113,6 +114,7 @@ private:
 class ItemTypeModel : public StaticPointerModel
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
 
 public:
@@ -150,6 +152,7 @@ private:
 class ItemModel : public StaticPointerModel
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
     Q_PROPERTY(const BrickLink::Category *filterCategory READ filterCategory WRITE setFilterCategory NOTIFY isFilteredChanged)
     Q_PROPERTY(const BrickLink::Color *filterColor READ filterColor WRITE setFilterColor NOTIFY isFilteredChanged)
@@ -219,6 +222,7 @@ class AppearsInModel;
 class InternalAppearsInModel : public QAbstractTableModel
 {
     Q_OBJECT
+
 public:
     ~InternalAppearsInModel() override;
 
@@ -246,6 +250,9 @@ protected:
 class AppearsInModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
+
 public:
     AppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
     AppearsInModel(const Item *item, const Color *color, QObject *parent);

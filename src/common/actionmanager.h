@@ -23,6 +23,8 @@
 #include <common/document.h>
 
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
+QT_FORWARD_DECLARE_CLASS(QQmlEngine)
+QT_FORWARD_DECLARE_CLASS(QJSEngine)
 QT_FORWARD_DECLARE_CLASS(QQuickAction)
 QT_FORWARD_DECLARE_CLASS(QJSValue)
 
@@ -30,6 +32,8 @@ QT_FORWARD_DECLARE_CLASS(QJSValue)
 class ActionManager : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
     Q_PROPERTY(Document *activeDocument READ activeDocument WRITE setActiveDocument NOTIFY activeDocumentChanged)
 
 public:
@@ -141,7 +145,7 @@ public:
 
     QAction *qAction(const char *name);
 
-    Q_INVOKABLE QObject *quickAction(const QString &name);
+    Q_INVOKABLE QQuickAction *quickAction(const QString &name);
 
     bool createAll(std::function<QAction *(const ActionManager::Action *)> creator);
 
@@ -162,6 +166,7 @@ public:
     void setActiveDocument(Document *document);
 
     static ActionManager *inst();
+    static ActionManager *create(QQmlEngine *, QJSEngine *); // for QML
 
 signals:
     void activeDocumentChanged(Document *doc);

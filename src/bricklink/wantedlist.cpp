@@ -27,10 +27,9 @@
 #include "bricklink/core.h"
 #include "bricklink/io.h"
 
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "utility/utility.h"
 #include "utility/xmlhelpers.h"
 
 namespace BrickLink {
@@ -58,6 +57,9 @@ private:
 WantedList::WantedList()
     : QObject()
     , d(new WantedListPrivate)
+{ }
+
+WantedList::~WantedList()
 { }
 
 const LotList &WantedList::lots() const
@@ -288,16 +290,16 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
     if (json.isNull())
         throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-    const QJsonArray jsonWantedLists = json["wantedLists"_l1].toArray();
+    const QJsonArray jsonWantedLists = json[u"wantedLists"].toArray();
 
     for (auto &&jsonWantedList : jsonWantedLists) {
-        int id = jsonWantedList["id"_l1].toInt(-1);
-        QString name = jsonWantedList["name"_l1].toString();
-        QString desc = jsonWantedList["desc"_l1].toString();
-        double filled = jsonWantedList["filledPct"_l1].toDouble();
-        int lots = jsonWantedList["num"_l1].toInt();
-        int items = jsonWantedList["totalNum"_l1].toInt();
-        int itemsLeft = jsonWantedList["totalLeft"_l1].toInt();
+        int id = jsonWantedList[u"id"].toInt(-1);
+        QString name = jsonWantedList[u"name"].toString();
+        QString desc = jsonWantedList[u"desc"].toString();
+        double filled = jsonWantedList[u"filledPct"].toDouble();
+        int lots = jsonWantedList[u"num"].toInt();
+        int items = jsonWantedList[u"totalNum"].toInt();
+        int itemsLeft = jsonWantedList[u"totalLeft"].toInt();
 
         if (id >= 0 && !name.isEmpty() && lots && items) {
             auto wantedList = new BrickLink::WantedList;
@@ -339,7 +341,7 @@ void WantedLists::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url("https://www.bricklink.com/v2/wanted/list.page"_l1);
+    QUrl url(u"https://www.bricklink.com/v2/wanted/list.page"_qs);
 
     auto job = TransferJob::post(url);
     job->setUserData("globalWantedList", true);
@@ -359,9 +361,9 @@ void WantedLists::startFetchLots(WantedList *wantedList)
     if (!wantedList)
         return;
 
-    QUrl url("https://www.bricklink.com/files/clone/wanted/downloadXML.file"_l1);
+    QUrl url(u"https://www.bricklink.com/files/clone/wanted/downloadXML.file"_qs);
     QUrlQuery query;
-    query.addQueryItem("wantedMoreID"_l1, Utility::urlQueryEscape(QString::number(wantedList->id())));
+    query.addQueryItem(u"wantedMoreID"_qs, QString::number(wantedList->id()));
     url.setQuery(query);
 
     auto job = TransferJob::post(url);

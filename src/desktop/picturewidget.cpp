@@ -34,8 +34,8 @@
 #include "ldraw/library.h"
 #include "ldraw/part.h"
 #include "ldraw/renderwidget.h"
-#include "qcoro/core/qcorosignal.h"
-#include "utility/eventfilter.h"
+#include "qcoro/qcorosignal.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "picturewidget.h"
 #include "rendersettingsdialog.h"
@@ -88,7 +88,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     layout->setContentsMargins(2, 6, 2, 2);
 
     w_2d = new QToolButton();
-    w_2d->setText("2D"_l1);
+    w_2d->setText(u"2D"_qs);
     w_2d->setAutoRaise(true);
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
@@ -97,7 +97,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     w_3d = new QToolButton();
-    w_3d->setText("3D"_l1);
+    w_3d->setText(u"3D"_qs);
     w_3d->setAutoRaise(true);
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
@@ -110,8 +110,8 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setFont(font);
     w_3d->setFont(font);
 
-    m_rescaleIcon = QIcon::fromTheme("zoom-fit-best"_l1);
-    m_reloadIcon = QIcon::fromTheme("view-refresh"_l1);
+    m_rescaleIcon = QIcon::fromTheme(u"zoom-fit-best"_qs);
+    m_reloadIcon = QIcon::fromTheme(u"view-refresh"_qs);
 
     w_reloadRescale = new QToolButton();
     w_reloadRescale->setAutoRaise(true);
@@ -139,17 +139,17 @@ PictureWidget::PictureWidget(QWidget *parent)
     buttons->addWidget(w_reloadRescale, 10);
     layout->addLayout(buttons);
 
-    m_blCatalog = new QAction(QIcon::fromTheme("bricklink-catalog"_l1), { }, this);
+    m_blCatalog = new QAction(QIcon::fromTheme(u"bricklink-catalog"_qs), { }, this);
     connect(m_blCatalog, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, m_item, m_color);
     });
 
-    m_blPriceGuide = new QAction(QIcon::fromTheme("bricklink-priceguide"_l1), { }, this);
+    m_blPriceGuide = new QAction(QIcon::fromTheme(u"bricklink-priceguide"_qs), { }, this);
     connect(m_blPriceGuide, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, m_item, m_color);
     });
 
-    m_blLotsForSale = new QAction(QIcon::fromTheme("bricklink-lotsforsale"_l1), { }, this);
+    m_blLotsForSale = new QAction(QIcon::fromTheme(u"bricklink-lotsforsale"_qs), { }, this);
     connect(m_blLotsForSale, &QAction::triggered, this, [this]() {
         BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, m_item, m_color);
     });
@@ -158,7 +158,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         RenderSettingsDialog::inst()->show();
     });
 
-    m_copyImage = new QAction(QIcon::fromTheme("edit-copy"_l1), { }, this);
+    m_copyImage = new QAction(QIcon::fromTheme(u"edit-copy"_qs), { }, this);
     connect(m_copyImage, &QAction::triggered, this, [this]() -> QCoro::Task<> {
                 QImage img;
                 if (w_ldraw->isVisible()) {
@@ -172,7 +172,7 @@ PictureWidget::PictureWidget(QWidget *parent)
                 clip->setImage(img);
             });
 
-    m_saveImageAs = new QAction(QIcon::fromTheme("document-save"_l1), { }, this);
+    m_saveImageAs = new QAction(QIcon::fromTheme(u"document-save"_qs), { }, this);
     connect(m_saveImageAs, &QAction::triggered, this, [this]() -> QCoro::Task<> {
                 QImage img;
                 if (w_ldraw->isVisible()) {
@@ -183,16 +183,16 @@ PictureWidget::PictureWidget(QWidget *parent)
                     img = m_image;
                 }
                 QStringList filters;
-                filters << tr("PNG Image") % " (*.png)"_l1;
+                filters << tr("PNG Image") % u" (*.png)";
 
                 QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
                 Config::inst()->lastDirectory(),
-                filters.join(";;"_l1));
+                filters.join(u";;"));
                 if (!fn.isEmpty()) {
                     Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
-                    if (fn.right(4) != ".png"_l1) {
-                        fn += ".png"_l1;
+                    if (fn.right(4) != u".png") {
+                        fn += u".png"_qs;
                     }
                     img.save(fn, "PNG");
                 }
@@ -311,9 +311,7 @@ void PictureWidget::redraw()
     w_text->setText(s);
 
     if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-        w_image->setText("<center><i>"_l1 +
-                         tr("Please wait... updating") +
-                         "</i></center>"_l1);
+        w_image->setText(u"<center><i>" % tr("Please wait... updating") % u"</i></center>");
     } else if (m_pic) {
         bool hasImage = !m_image.isNull();
         auto dpr = devicePixelRatioF();

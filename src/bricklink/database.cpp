@@ -30,7 +30,6 @@
 #include "utility/chunkwriter.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "version.h"
 
 #include "bricklink/core.h"
 #include "bricklink/database.h"

@@ -27,10 +27,9 @@
 #include "bricklink/core.h"
 #include "bricklink/io.h"
 
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "utility/utility.h"
 #include "utility/xmlhelpers.h"
 
 namespace BrickLink {
@@ -61,6 +60,9 @@ private:
 Cart::Cart()
     : QObject()
     , d(new CartPrivate)
+{ }
+
+Cart::~Cart()
 { }
 
 const LotList &Cart::lots() const
@@ -309,7 +311,7 @@ Carts::Carts(Core *core)
 
 int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
 {
-    QLocale en_US("en_US"_l1);
+    QLocale en_US(u"en_US"_qs);
     LotList lots;
 
     int invalidCount = 0;
@@ -318,18 +320,18 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
     if (json.isNull())
         throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-    const QJsonArray cartItems = json["cart"_l1].toObject()["items"_l1].toArray();
+    const QJsonArray cartItems = json[u"cart"].toObject()[u"items"].toArray();
     for (auto &&v : cartItems) {
         const QJsonObject cartItem = v.toObject();
 
-        QByteArray itemId = cartItem["itemNo"_l1].toString().toLatin1();
-        int itemSeq = cartItem["itemSeq"_l1].toInt();
-        char itemTypeId = XmlHelpers::firstCharInString(cartItem["itemType"_l1].toString());
-        uint colorId = cartItem["colorID"_l1].toVariant().toUInt();
-        auto cond = (cartItem["invNew"_l1].toString() == "New"_l1)
+        QByteArray itemId = cartItem[u"itemNo"].toString().toLatin1();
+        int itemSeq = cartItem[u"itemSeq"].toInt();
+        char itemTypeId = ItemType::idFromFirstCharInString(cartItem[u"itemType"].toString());
+        uint colorId = cartItem[u"colorID"].toVariant().toUInt();
+        auto cond = (cartItem[u"invNew"].toString() == u"New")
                 ? BrickLink::Condition::New : BrickLink::Condition::Used;
-        int qty = cartItem["cartQty"_l1].toInt();
-        QString priceStr = cartItem["nativePrice"_l1].toString();
+        int qty = cartItem[u"cartQty"].toInt();
+        QString priceStr = cartItem[u"nativePrice"].toString();
         double price = en_US.toDouble(priceStr.mid(4));
 
         if (itemSeq)
@@ -344,12 +346,12 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
             lot->setCondition(cond);
 
             if (lot->itemType()->hasSubConditions()) {
-                QString scond = cartItem["invComplete"_l1].toString();
-                if (scond == "Complete"_l1)
+                QString scond = cartItem[u"invComplete"].toString();
+                if (scond == u"Complete")
                     lot->setSubCondition(BrickLink::SubCondition::Complete);
-                if (scond == "Incomplete"_l1)
+                if (scond == u"Incomplete")
                     lot->setSubCondition(BrickLink::SubCondition::Incomplete);
-                if (scond == "Sealed"_l1)
+                if (scond == u"Sealed")
                     lot->setSubCondition(BrickLink::SubCondition::Sealed);
             }
 
@@ -380,8 +382,8 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
     if (json.isNull())
         throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-    const QJsonArray domesticCarts = json["domestic"_l1].toObject()["stores"_l1].toArray();
-    const QJsonArray internationalCarts = json["international"_l1].toObject()["stores"_l1].toArray();
+    const QJsonArray domesticCarts = json[u"domestic"].toObject()[u"stores"].toArray();
+    const QJsonArray internationalCarts = json[u"international"].toObject()[u"stores"].toArray();
     QVector<QJsonObject> jsonCarts;
     for (auto &&v : domesticCarts)
         jsonCarts << v.toObject();
@@ -389,27 +391,27 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
         jsonCarts << v.toObject();
 
     for (auto &&jsonCart : jsonCarts) {
-        int sellerId = jsonCart["sellerID"_l1].toInt();
-        int lots = jsonCart["totalLots"_l1].toInt();
-        int items = jsonCart["totalItems"_l1].toInt();
-        QString totalPrice = jsonCart["totalPriceNative"_l1].toString();
+        int sellerId = jsonCart[u"sellerID"].toInt();
+        int lots = jsonCart[u"totalLots"].toInt();
+        int items = jsonCart[u"totalItems"].toInt();
+        QString totalPrice = jsonCart[u"totalPriceNative"].toString();
 
         if (sellerId && !totalPrice.isEmpty() && lots && items) {
             auto cart = new BrickLink::Cart;
             cart->setSellerId(sellerId);
             cart->setLotCount(lots);
             cart->setItemCount(items);
-            if (totalPrice.mid(2, 2) == " $"_l1) // why does if have to be different?
-                cart->setCurrencyCode(totalPrice.left(2) + 'D'_l1);
+            if (totalPrice.mid(2, 2) == u" $") // why does if have to be different?
+                cart->setCurrencyCode(totalPrice.left(2) % u'D');
             else
                 cart->setCurrencyCode(totalPrice.left(3));
             cart->setTotal(totalPrice.mid(4).toDouble());
-            cart->setDomestic(jsonCart["type"_l1].toString() == "domestic"_l1);
-            cart->setLastUpdated(QDate::fromString(jsonCart["lastUpdated"_l1].toString(),
-                                 "yyyy-MM-dd"_l1));
-            cart->setSellerName(jsonCart["sellerName"_l1].toString());
-            cart->setStoreName(jsonCart["storeName"_l1].toString());
-            cart->setCountryCode(jsonCart["countryID"_l1].toString());
+            cart->setDomestic(jsonCart[u"type"].toString() == u"domestic");
+            cart->setLastUpdated(QDate::fromString(jsonCart[u"lastUpdated"].toString(),
+                                 u"yyyy-MM-dd"));
+            cart->setSellerName(jsonCart[u"sellerName"].toString());
+            cart->setStoreName(jsonCart[u"storeName"].toString());
+            cart->setCountryCode(jsonCart[u"countryID"].toString());
 
             carts << cart;
         }
@@ -441,7 +443,7 @@ void Carts::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url("https://www.bricklink.com/v2/globalcart.page"_l1);
+    QUrl url(u"https://www.bricklink.com/v2/globalcart.page"_qs);
 
     auto job = TransferJob::post(url);
     job->setUserData("globalCart", true);
@@ -461,9 +463,9 @@ void Carts::startFetchLots(Cart *cart)
     if (!cart)
         return;
 
-    QUrl url("https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_l1);
+    QUrl url(u"https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_qs);
     QUrlQuery query;
-    query.addQueryItem("sid"_l1, Utility::urlQueryEscape(QString::number(cart->sellerId())));
+    query.addQueryItem(u"sid"_qs, QString::number(cart->sellerId()));
     url.setQuery(query);
 
     auto job = TransferJob::post(url);

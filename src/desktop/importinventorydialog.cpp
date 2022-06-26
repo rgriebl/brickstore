@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QStringBuilder>
 #include <QSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -73,18 +74,18 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
     layout->addWidget(m_buttons);
 
     if (m_select) {
-        QByteArray ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Geometry"_l1).toByteArray();
+        QByteArray ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Geometry"_qs).toByteArray();
         if (!ba.isEmpty())
             restoreGeometry(ba);
 
-        ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/SelectItem"_l1)
+        ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/SelectItem"_qs)
                 .toByteArray();
         if (!m_select->restoreState(ba)) {
             m_select->restoreState(SelectItem::defaultState());
             m_select->setCurrentItemType(BrickLink::core()->itemType('S'));
         }
 
-        ba = Config::inst()->value("/MainWindow/ImportInventoryDialog/Details"_l1)
+        ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Details"_qs)
                 .toByteArray();
         m_import->restoreState(ba);
 
@@ -124,9 +125,9 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
 ImportInventoryDialog::~ImportInventoryDialog()
 {
     if (!m_verifyItem) {
-        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry"_l1, saveGeometry());
-        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/SelectItem"_l1, m_select->saveState());
-        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Details"_l1, m_import->saveState());
+        Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Geometry"_qs, saveGeometry());
+        Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/SelectItem"_qs, m_select->saveState());
+        Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Details"_qs, m_import->saveState());
     }
 }
 
@@ -215,7 +216,7 @@ QSize ImportInventoryDialog::sizeHint() const
         return QDialog::sizeHint();
     } else {
         QFontMetrics fm(font());
-        return QSize(fm.horizontalAdvance("m"_l1) * 120, fm.height() * 30);
+        return QSize(fm.horizontalAdvance(u"m"_qs) * 120, fm.height() * 30);
     }
 }
 

@@ -129,9 +129,9 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
         yearStr = yearStr % u'-' % QString::number(item->yearLastProduced());
 
     QColor color = qApp->palette().color(QPalette::Highlight);
-    id = id % R"(&nbsp;&nbsp;<i><font color=")"_l1 % Utility::textColor(color).name() %
-            R"(" style="background-color: )"_l1 % color.name() % R"(;">&nbsp;)"_l1 %
-            item->itemType()->name() % R"(&nbsp;</font></i>)"_l1;
+    id = id % uR"(&nbsp;&nbsp;<i><font color=")" % Utility::textColor(color).name() %
+            uR"(" style="background-color: )" % color.name() % uR"(;">&nbsp;)" %
+            item->itemType()->name() % uR"(&nbsp;</font></i>)";
 
     if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
         return str.arg(note_left, id, item->name(), yearStr);
@@ -154,7 +154,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
 
     m_tooltip_pic = nullptr;
 
-    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<table class="tooltip_picture")"_l1)) {
+    if (QToolTip::isVisible() && QToolTip::text().startsWith(uR"(<table class="tooltip_picture")")) {
         const auto tlwidgets = QApplication::topLevelWidgets();
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {

@@ -119,15 +119,15 @@ void BrickLink::TextImport::readColors(const QString &path)
         col.m_type     = Color::Type();
 
         auto type = p.elementText(e, "COLORTYPE");
-        if (type.contains("Transparent"_l1)) col.m_type |= Color::Transparent;
-        if (type.contains("Glitter"_l1))     col.m_type |= Color::Glitter;
-        if (type.contains("Speckle"_l1))     col.m_type |= Color::Speckle;
-        if (type.contains("Metallic"_l1))    col.m_type |= Color::Metallic;
-        if (type.contains("Chrome"_l1))      col.m_type |= Color::Chrome;
-        if (type.contains("Pearl"_l1))       col.m_type |= Color::Pearl;
-        if (type.contains("Milky"_l1))       col.m_type |= Color::Milky;
-        if (type.contains("Modulex"_l1))     col.m_type |= Color::Modulex;
-        if (type.contains("Satin"_l1))       col.m_type |= Color::Satin;
+        if (type.contains(u"Transparent")) col.m_type |= Color::Transparent;
+        if (type.contains(u"Glitter"))     col.m_type |= Color::Glitter;
+        if (type.contains(u"Speckle"))     col.m_type |= Color::Speckle;
+        if (type.contains(u"Metallic"))    col.m_type |= Color::Metallic;
+        if (type.contains(u"Chrome"))      col.m_type |= Color::Chrome;
+        if (type.contains(u"Pearl"))       col.m_type |= Color::Pearl;
+        if (type.contains(u"Milky"))       col.m_type |= Color::Milky;
+        if (type.contains(u"Modulex"))     col.m_type |= Color::Modulex;
+        if (type.contains(u"Satin"))       col.m_type |= Color::Satin;
         if (!col.m_type)
             col.m_type = Color::Solid;
 
@@ -212,18 +212,18 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
 
         catStr = catStr.mid(mainCat.name().length() + 3);
 
-        const QStringList cats = catStr.split(" / "_l1);
+        const QStringList cats = catStr.split(u" / "_qs);
         for (int i = 0; i < cats.count(); ++i) {
             for (qint16 catIndex = 0; catIndex < qint16(m_categories.size()); ++catIndex) {
                 const QString catName = m_categories.at(catIndex).name();
-                bool disambiguate = catName.contains(" / "_l1);
+                bool disambiguate = catName.contains(u" / ");
                 qint16 addCatIndex = -1;
 
                 // The " / " sequence is used to separate the fields, but it also appears in
                 // category names like "String Reel / Winch"
 
                 if (disambiguate) {
-                    const auto catNameList = catName.split(" / "_l1);
+                    const auto catNameList = catName.split(u" / "_qs);
                     if (catNameList == cats.mid(i, catNameList.size())) {
                         addCatIndex = catIndex;
                         i += (catNameList.size() - 1);
@@ -244,7 +244,7 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p](QDomElement e) {
         ItemType itt;
-        char c = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
+        char c = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
 
         if (c == 'U')
             return;
@@ -307,7 +307,7 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
 {
     XmlHelpers::ParseXML p(path, "CODES", "ITEM");
     p.parse([this, &p](QDomElement e) {
-        char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
+        char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
         const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
         const QString colorName = p.elementText(e, "COLOR").simplified();
         bool numeric = false;
@@ -373,13 +373,13 @@ bool BrickLink::TextImport::readInventory(const Item *item)
     try {
         XmlHelpers::ParseXML p(f.release(), "INVENTORY", "ITEM");
         p.parse([this, &p, &inventory](QDomElement e) {
-            char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
+            char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
             const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
             uint colorId = p.elementText(e, "COLOR").toUInt();
             int qty = p.elementText(e, "QTY").toInt();
-            bool extra = (p.elementText(e, "EXTRA") == "Y"_l1);
-            bool counterPart = (p.elementText(e, "COUNTERPART") == "Y"_l1);
-            bool alternate = (p.elementText(e, "ALTERNATE") == "Y"_l1);
+            bool extra = (p.elementText(e, "EXTRA") == u"Y");
+            bool counterPart = (p.elementText(e, "COUNTERPART") == u"Y");
+            bool alternate = (p.elementText(e, "ALTERNATE") == u"Y");
             uint matchId = p.elementText(e, "MATCHID").toUInt();
 
             int itemIndex = findItemIndex(itemTypeId, itemId);
@@ -458,10 +458,10 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
         throw ParseException(&fre, "Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
     QHash<int, uint> ldrawToBrickLinkId;
-    const QJsonArray results = doc["results"_l1].toArray();
+    const QJsonArray results = doc[u"results"].toArray();
     for (const auto &&result : results) {
-        const auto blIds = result["external_ids"_l1]["BrickLink"_l1]["ext_ids"_l1].toArray();
-        const auto ldIds = result["external_ids"_l1]["LDraw"_l1]["ext_ids"_l1].toArray();
+        const auto blIds = result[u"external_ids"][u"BrickLink"][u"ext_ids"].toArray();
+        const auto ldIds = result[u"external_ids"][u"LDraw"][u"ext_ids"].toArray();
 
         if (!blIds.isEmpty() && !ldIds.isEmpty()) {
             for (const auto &&ldId : ldIds)
@@ -485,10 +485,10 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
 
         if (sl.count() >= 9 &&
                 sl[0].toInt() == 0 &&
-                sl[1] == "!COLOUR"_l1 &&
-                sl[3] == "CODE"_l1 &&
-                sl[5] == "VALUE"_l1 &&
-                sl[7] == "EDGE"_l1) {
+                sl[1] == u"!COLOUR" &&
+                sl[3] == u"CODE" &&
+                sl[5] == u"VALUE" &&
+                sl[7] == u"EDGE") {
             // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]
 
             QString name = sl[2];
@@ -506,48 +506,48 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             if (id == 16 || id == 24)
                 continue;
 
-            bool isRubber = name.startsWith("Rubber_"_l1);
+            bool isRubber = name.startsWith(u"Rubber_");
 
             int lastIdx = int(sl.count()) - 1;
 
             for (int idx = 9; idx < sl.count(); ++idx) {
-                if (sl[idx] == "ALPHA"_l1 && (idx < lastIdx)) {
+                if ((sl[idx] == u"ALPHA") && (idx < lastIdx)) {
                     int alpha = sl[++idx].toInt();
                     color.setAlpha(alpha);
                     type.setFlag(Color::Solid, false);
                     type.setFlag(Color::Transparent);
-                } else if (sl[idx] == "LUMINANCE"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"LUMINANCE") && (idx < lastIdx)) {
                     luminance = float(sl[++idx].toInt()) / 255;
-                } else if (sl[idx] == "CHROME"_l1) {
+                } else if (sl[idx] == u"CHROME") {
                     type.setFlag(Color::Chrome);
-                } else if (sl[idx] == "PEARLESCENT"_l1) {
+                } else if (sl[idx] == u"PEARLESCENT") {
                     type.setFlag(Color::Pearl);
-                } else if (sl[idx] == "RUBBER"_l1) {
+                } else if (sl[idx] == u"RUBBER") {
                     ; // ignore
-                } else if (sl[idx] == "MATTE_METALLIC"_l1) {
+                } else if (sl[idx] == u"MATTE_METALLIC") {
                     ; // ignore
-                } else if (sl[idx] == "METAL"_l1) {
+                } else if (sl[idx] == u"METAL") {
                     type.setFlag(Color::Metallic);
-                } else if (sl[idx] == "MATERIAL"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"MATERIAL") && (idx < lastIdx)) {
                     const auto mat = sl[idx + 1];
 
-                    if (mat == "GLITTER"_l1)
-                        type.setFlag(name.startsWith("Opal_"_l1) ? Color::Satin : Color::Glitter);
-                    else if (mat == "SPECKLE"_l1)
+                    if (mat == u"GLITTER")
+                        type.setFlag(name.startsWith(u"Opal_") ? Color::Satin : Color::Glitter);
+                    else if (mat == u"SPECKLE")
                         type.setFlag(Color::Speckle);
                     else
                         qWarning() << "Found unsupported MATERIAL" << mat << "at line" << lineno << "of LDConfig.ldr";
-                } else if (sl[idx] == "SIZE"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"SIZE") && (idx < lastIdx)) {
                     particleMinSize = particleMaxSize = sl[++idx].toFloat();
-                } else if (sl[idx] == "MINSIZE"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"MINSIZE") && (idx < lastIdx)) {
                     particleMinSize = sl[++idx].toFloat();
-                } else if (sl[idx] == "MAXSIZE"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"MAXSIZE") && (idx < lastIdx)) {
                     particleMaxSize = sl[++idx].toFloat();
-                } else if (sl[idx] == "VALUE"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"VALUE") && (idx < lastIdx)) {
                     particleColor = sl[++idx];
-                } else if (sl[idx] == "FRACTION"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"FRACTION") && (idx < lastIdx)) {
                     particleFraction = sl[++idx].toFloat();
-                } else if (sl[idx] == "VFRACTION"_l1 && (idx < lastIdx)) {
+                } else if ((sl[idx] == u"VFRACTION") && (idx < lastIdx)) {
                     particleVFraction = sl[++idx].toFloat();
                 }
             }
@@ -578,10 +578,10 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
                 QString ldName = name.toLower();
                 QString blName = c.name()
                         .toLower()
-                        .replace(' '_l1, '_'_l1)
-                        .replace('-'_l1, '_'_l1)
-                        .replace("gray_"_l1, "grey_"_l1)
-                        .replace("satin_"_l1, "opal_"_l1)
+                        .replace(u" "_qs, u"_"_qs)
+                        .replace(u"-"_qs, u"_"_qs)
+                        .replace(u"gray_"_qs, u"grey_"_qs)
+                        .replace(u"satin_"_qs, u"opal_"_qs)
                         .simplified();
                 if (blName == ldName) {
                     updateColor(c);
@@ -593,7 +593,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             // Some mapping are missing or are ambigious via Rebrickable - hardcode these
             if (!found) {
                 static const QMap<QString, QString> manualLDrawToBrickLink = {
-                    { "Trans_Bright_Light_Green"_l1, "Trans-Light Bright Green"_l1 },
+                    { u"Trans_Bright_Light_Green"_qs, u"Trans-Light Bright Green"_qs },
                 };
 
                 QString blName = manualLDrawToBrickLink.value(name);
@@ -624,14 +624,14 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             // be able to render composite parts with fixed colors (e.g. electric motors)
             if (!found) {
                 Color c;
-                c.m_name = "LDraw: "_l1 % name;
+                c.m_name = u"LDraw: " % name;
                 c.m_type = type;
                 c.m_color = color;
                 updateColor(c);
 
                 m_ldrawExtraColors.push_back(c);
 
-                if (!name.startsWith("Rubber_"_l1))
+                if (!name.startsWith(u"Rubber_"))
                     qWarning() << "Could not match LDraw color" << id << name << "to any BrickLink color";
             }
         }
@@ -698,7 +698,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         if (strs.count() < 2)
             throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
 
-        char itemTypeId = XmlHelpers::firstCharInString(strs.at(0));
+        char itemTypeId = ItemType::idFromFirstCharInString(strs.at(0));
         const QByteArray itemId = strs.at(1).toLatin1();
 
         if (!itemTypeId || itemId.isEmpty())
@@ -758,7 +758,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         if (strs.count() < 7)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);
 
-        char c = XmlHelpers::firstCharInString(strs.at(2));
+        char c = ItemType::idFromFirstCharInString(strs.at(2));
 
         switch (c) {
         case 'I':   // ItemId

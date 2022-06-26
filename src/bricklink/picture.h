@@ -15,6 +15,7 @@
 
 #include <QtCore/QDateTime>
 #include <QtGui/QImage>
+#include <QtQml/qqmlregistration.h>
 
 #include "global.h"
 #include "utility/ref.h"
@@ -30,6 +31,8 @@ namespace BrickLink {
 class Picture : public QObject, protected Ref
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT)
     Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT)
     Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)

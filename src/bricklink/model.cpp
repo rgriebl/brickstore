@@ -668,7 +668,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
     m_filter_ids.second.clear();
     m_filter_ids.first = false;
 
-    const QStringList sl = filter.simplified().split(' '_l1);
+    const QStringList sl = filter.simplified().split(u' ');
 
     QString quoted;
     bool quotedNegate = false;
@@ -679,7 +679,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
         if (!quoted.isEmpty()) {
             quoted = quoted % u' ' % s;
-            if (quoted.endsWith('"'_l1)) {
+            if (quoted.endsWith(u'"')) {
                 quoted.chop(1);
                 m_filter_text << qMakePair(quotedNegate, quoted);
                 quoted.clear();
@@ -690,7 +690,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
         } else {
             const QChar first = s.at(0);
-            const bool negate = (first == '-'_l1);
+            const bool negate = (first == u'-');
             auto str = negate ? s.mid(1) : s;
 
             if (str.startsWith(s_consistsOfPrefix)) {
@@ -699,7 +699,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 // contains either a minifig or a part, optionally with color-id
                 const BrickLink::Color *color = nullptr;
 
-                auto atPos = str.lastIndexOf('@'_l1);
+                auto atPos = str.lastIndexOf(u'@');
                 if (atPos != -1) {
                     color = BrickLink::core()->color(str.mid(atPos + 1).toUInt());
                     str = str.left(atPos);
@@ -717,7 +717,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
             } else if (str.startsWith(s_idPrefix)) {
                 str = str.mid(s_idPrefix.length());
-                const auto ids = str.split(","_l1);
+                const auto ids = str.split(u","_qs);
 
                 for (const auto &id : ids) {
                     if (auto item = BrickLink::core()->item("MPSG", id.toLatin1()))
@@ -726,8 +726,8 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
                 m_filter_ids.first = negate;
 
             } else {
-                const bool firstIsQuote = str.startsWith("\""_l1);
-                const bool lastIsQuote = str.endsWith("\""_l1);
+                const bool firstIsQuote = str.startsWith(u"\"");
+                const bool lastIsQuote = str.endsWith(u"\"");
 
                 if (firstIsQuote && !lastIsQuote) {
                     quoted = str.mid(1);
@@ -942,7 +942,7 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
     switch (role) {
     case Qt::DisplayRole:
         switch (col) {
-        case 0: res = appears->first < 0 ? "-"_l1 : QString::number(appears->first); break;
+        case 0: res = appears->first < 0 ? u"-"_qs : QString::number(appears->first); break;
         case 1: res = appears->second->id(); break;
         case 2: res = appears->second->name(); break;
         }

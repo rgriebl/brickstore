@@ -17,6 +17,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QDateTime>
 #include <QtCore/QAbstractTableModel>
+#include <QtQml/qqmlregistration.h>
 
 #include "lot.h"
 #include "global.h"
@@ -33,6 +34,8 @@ class CartPrivate;
 class Cart : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool domestic READ domestic NOTIFY domesticChanged)
     Q_PROPERTY(int sellerId READ sellerId NOTIFY sellerIdChanged)
     Q_PROPERTY(QString sellerName READ sellerName NOTIFY sellerNameChanged)
@@ -47,6 +50,7 @@ class Cart : public QObject
 
 public:
     Cart();
+    ~Cart() override;
 
     bool domestic() const;
     int sellerId() const;
@@ -93,6 +97,8 @@ private:
 class Carts : public QAbstractTableModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)

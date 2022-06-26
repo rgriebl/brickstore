@@ -40,7 +40,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "ldraw/library.h"
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "utility/utility.h"
 #include "betteritemdelegate.h"
 #include "mainwindow.h"
@@ -78,9 +78,9 @@ public:
         }
 
         static const std::vector<std::pair<QString, const char *>> separators = {
-            { "-"_l1,  QT_TR_NOOP("Bar Separator") },
-            { "|"_l1,  QT_TR_NOOP("Space Separator") },
-            { "<>"_l1, QT_TR_NOOP("Flexible Space Separator") },
+            { u"-"_qs,  QT_TR_NOOP("Bar Separator") },
+            { u"|"_qs,  QT_TR_NOOP("Space Separator") },
+            { u"<>"_qs, QT_TR_NOOP("Flexible Space Separator") },
         };
         for (const auto &sep : separators) {
             QAction *a = new QAction(this);
@@ -176,7 +176,7 @@ public:
 
     QStringList mimeTypes() const override
     {
-        return { "application/x-brickstore-toolbar-dnd"_l1 };
+        return { u"application/x-brickstore-toolbar-dnd"_qs };
     }
 
     QMimeData *mimeData(const QModelIndexList &indexes) const override
@@ -207,7 +207,7 @@ public:
         }
 
         static auto removeMnemonic = [](const QString &s) {
-            static const QRegularExpression re(R"(\&(?!\&))"_l1);
+            static const QRegularExpression re(uR"(\&(?!\&))"_qs);
             QString s2(s);
             s2.remove(re);
             return s2;
@@ -253,7 +253,7 @@ public:
             QString s = m_textCache.value(action);
             if (s.isEmpty()) {
                 auto sl = buildPath(action);
-                s = (sl.size() == 1) ? sl.constFirst() : sl.mid(1).join(" / "_l1);
+                s = (sl.size() == 1) ? sl.constFirst() : sl.mid(1).join(u" / "_qs);
                 m_textCache.insert(action, s);
             }
             return s;
@@ -632,7 +632,7 @@ private:
 
 ToolBarDelegate::ToolBarDelegate(Options options, QObject *parent)
     : BetterItemDelegate(options, parent)
-    , m_deleteIcon(QIcon::fromTheme("window-close"_l1))
+    , m_deleteIcon(QIcon::fromTheme(u"window-close"_qs))
 { }
 
 void ToolBarDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -744,7 +744,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         w_item_image_size_percent->setText(QString::number(v * 10) % u" %");
         int s = int(BrickLink::core()->standardPictureSize().height() * v
                     / 10 / BrickLink::core()->itemImageScaleFactor());
-        QImage img(":/assets/generated-app-icons/brickstore.png"_l1);
+        QImage img(u":/assets/generated-app-icons/brickstore.png"_qs);
         img = img.scaled(s, s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         w_item_image_example->setPixmap(QPixmap::fromImage(img));
     };
@@ -813,7 +813,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, [this]() {
         auto olddir = w_ldraw_dir->currentText();
         auto newdir = QFileDialog::getOpenFileName(this, tr("LDraw directory location"), olddir,
-                                                   "LDConfig (LDConfig.ldr)"_l1);
+                                                   u"LDConfig (LDConfig.ldr)"_qs);
         if (!newdir.isEmpty()) {
             w_ldraw_dir->setEditText(QDir::toNativeSeparators(QFileInfo(newdir).path()));
             checkLDrawDir();
@@ -866,7 +866,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_tb_actions->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
     w_tb_actions->expandAll();
     w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
-    w_tb_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
+    w_tb_filter->addAction(QIcon::fromTheme(u"view-filter"_qs), QLineEdit::LeadingPosition);
 
     auto tbActionNames = MainWindow::inst()->toolBarActionNames();
 
@@ -896,7 +896,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
     w_sc_list->expandAll();
     w_sc_list->sortByColumn(0, Qt::AscendingOrder);
-    w_sc_filter->addAction(QIcon::fromTheme("view-filter"_l1), QLineEdit::LeadingPosition);
+    w_sc_filter->addAction(QIcon::fromTheme(u"view-filter"_qs), QLineEdit::LeadingPosition);
 
     connect(w_sc_list->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, [this]() {
@@ -1025,8 +1025,8 @@ void SettingsDialog::currenciesUpdated()
     QString oldprefered = m_preferedCurrency;
     QStringList currencies = Currency::inst()->currencyCodes();
     currencies.sort();
-    currencies.removeOne("USD"_l1);
-    currencies.prepend("USD"_l1);
+    currencies.removeOne(u"USD"_qs);
+    currencies.prepend(u"USD"_qs);
     w_currency->clear();
     w_currency->insertItems(0, currencies);
     if (currencies.count() > 1)
@@ -1197,7 +1197,7 @@ void SettingsDialog::checkLDrawDir()
 
     QString checkDir = isExternal
             ? w_ldraw_dir->currentText()
-            : Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
+            : Config::inst()->cacheDir() % u"/ldraw/complete.zip";
 
     bool valid = LDraw::Library::checkLDrawDir(checkDir);
 
@@ -1206,7 +1206,7 @@ void SettingsDialog::checkLDrawDir()
             : tr("Valid LDraw installation");
     w_ldraw_status_text->setText(status);
 
-    auto icon = QIcon::fromTheme(valid ? "vcs-normal"_l1 : "vcs-removed"_l1);
+    auto icon = QIcon::fromTheme(valid ? u"vcs-normal"_qs : u"vcs-removed"_qs);
     w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
 
     w_ldraw_dir->lineEdit()->setProperty("showInputError", isExternal && !valid);

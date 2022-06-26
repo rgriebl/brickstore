@@ -64,10 +64,10 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_valueDelay->setSingleShot(true);
 
     m_fields = new MenuComboBox();
-    m_fields->setObjectName("filter-fields"_l1);
+    m_fields->setObjectName(u"filter-fields"_qs);
     m_fields->view()->setFont(m_fields->font());
     m_comparisons = new MenuComboBox();
-    m_comparisons->setObjectName("filter-comparisons"_l1);
+    m_comparisons->setObjectName(u"filter-comparisons"_qs);
     m_value = new QComboBox();
     m_value->setEditable(true);
     m_value->setMinimumContentsLength(16);
@@ -77,19 +77,19 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_value->lineEdit()->setClearButtonEnabled(true);
     m_value->setItemDelegate(new QStyledItemDelegate(m_value));
     m_value->setProperty("transparentCombo", true);
-    m_value->setObjectName("filter-value"_l1);
+    m_value->setObjectName(u"filter-value"_qs);
     auto bdel = new QToolButton();
     bdel->setAutoRaise(true);
     bdel->setText(QString(QChar(0x00d7)));
-    bdel->setObjectName("filter-delete"_l1);
+    bdel->setObjectName(u"filter-delete"_qs);
     auto band = new QToolButton();
     band->setAutoRaise(true);
     band->setCheckable(true);
-    band->setObjectName("filter-and"_l1);
+    band->setObjectName(u"filter-and"_qs);
     auto bor = new QToolButton();
     bor->setAutoRaise(true);
     bor->setCheckable(true);
-    bor->setObjectName("filter-or"_l1);
+    bor->setObjectName(u"filter-or"_qs);
 
     setFocusProxy(m_value);
 
@@ -336,7 +336,7 @@ FilterWidget::FilterWidget(QWidget *parent)
     : QWidget(parent)
 {
     m_onOff = new QAction(this);
-    m_onOff->setIcon(QIcon::fromTheme("view-filter"_l1));
+    m_onOff->setIcon(QIcon::fromTheme(u"view-filter"_qs));
     m_onOff->setCheckable(true);
 
     m_editDelay = new QTimer(this);
@@ -348,7 +348,7 @@ FilterWidget::FilterWidget(QWidget *parent)
     layout->setSpacing(4);
 
     m_refilter = new QToolButton();
-    m_refilter->setIcon(QIcon::fromTheme("view-refresh"_l1));
+    m_refilter->setIcon(QIcon::fromTheme(u"view-refresh"_qs));
     m_refilter->setAutoRaise(true);
     QSizePolicy sp = m_refilter->sizePolicy();
     sp.setRetainSizeWhenHidden(true);
@@ -368,14 +368,14 @@ FilterWidget::FilterWidget(QWidget *parent)
     layout->addWidget(m_edit, 1);
 
     m_menu = new QToolButton();
-    m_menu->setIcon(QIcon::fromTheme("overflow-menu"_l1));
+    m_menu->setIcon(QIcon::fromTheme(u"overflow-menu"_qs));
     m_menu->setProperty("noMenuArrow", true);
     m_menu->setAutoRaise(true);
     layout->addWidget(m_menu);
 
     auto *filterMenu = new QMenu(this);
-    m_copy = filterMenu->addAction(QIcon::fromTheme("edit-copy"_l1), { });
-    m_paste = filterMenu->addAction(QIcon::fromTheme("edit-paste"_l1), { });
+    m_copy = filterMenu->addAction(QIcon::fromTheme(u"edit-copy"_qs), { });
+    m_paste = filterMenu->addAction(QIcon::fromTheme(u"edit-paste"_qs), { });
     filterMenu->addSeparator();
     m_mode = filterMenu->addAction(QString());
     m_mode->setCheckable(true);

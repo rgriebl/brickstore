@@ -13,28 +13,24 @@
 */
 
 #include <QFile>
-#include <QDomDocument>
-#include <QDomElement>
 #include <QDebug>
 
-#include "utility.h"
 #include "exception.h"
 #include "xmlhelpers.h"
 
 
-
-QString XmlHelpers::decodeEntities(const QString &src)
+static QString decodeEntities(const QString &src)
 {
     // Regular Expressions would be easier, but too slow here
 
     QString decoded(src);
 
-    auto pos = decoded.indexOf("&#"_l1);
+    auto pos = decoded.indexOf(u"&#");
     if (pos < 0)
         return decoded;
 
     do {
-        auto endpos = decoded.indexOf(QLatin1Char(';'), pos + 2);
+        auto endpos = decoded.indexOf(u';', pos + 2);
         if (endpos < 0) {
             pos += 2;
         } else {
@@ -46,17 +42,11 @@ QString XmlHelpers::decodeEntities(const QString &src)
                 pos = endpos + 1;
             }
         }
-        pos = decoded.indexOf("&#"_l1, pos);
+        pos = decoded.indexOf(u"&#", pos);
     } while (pos >= 0);
 
     return decoded;
 }
-
-char XmlHelpers::firstCharInString(const QString &str)
-{
-    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
-}
-
 
 
 XmlHelpers::ParseXML::ParseXML(const QString &path, const char *rootNodeName, const char *elementNodeName)

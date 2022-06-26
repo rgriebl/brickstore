@@ -20,7 +20,6 @@
 #include <QtQuickDialogs2/private/qquickmessagedialog_p.h>
 //#include <QtQuickDialogs2/private/qquickcolordialog_p.h>
 
-#include "utility/utility.h"
 #include "mobileuihelpers.h"
 #include "mobileuihelpers_p.h"
 
@@ -123,9 +122,9 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
     Q_UNUSED(icon)
 
     auto messageDialog = createDialog<QQuickMessageDialog>(s_engine, {
-                                                               { "title"_l1, title },
-                                                               { "text"_l1, msg },
-                                                               { "buttons"_l1, int(buttons) }
+                                                               { u"title"_qs, title },
+                                                               { u"text"_qs, msg },
+                                                               { u"buttons"_qs, int(buttons) }
                                                            });
 
     if (!messageDialog)
@@ -143,12 +142,12 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text
                                                                     bool isPassword,
                                                                     QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
-                                                { "title"_l1, title },
-                                                { "text"_l1, text },
-                                                { "mode"_l1, "string"_l1 },
-                                                { "textValue"_l1, initialValue },
-                                                { "isPassword"_l1, isPassword },
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+                                                { u"title"_qs, title },
+                                                { u"text"_qs, text },
+                                                { u"mode"_qs, u"string"_qs },
+                                                { u"textValue"_qs, initialValue },
+                                                { u"isPassword"_qs, isPassword },
                                             });
     if (!dialog)
         co_return { };
@@ -166,15 +165,15 @@ QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(QString text,
                                                                    double minValue, double maxValue,
                                                                    int decimals, QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
-                                                { "title"_l1, title },
-                                                { "text"_l1, text },
-                                                { "mode"_l1, "double"_l1 },
-                                                { "unit"_l1, unit },
-                                                { "doubleValue"_l1, initialValue },
-                                                { "doubleMinimum"_l1, minValue },
-                                                { "doubleMaximum"_l1, maxValue },
-                                                { "doubleDecimals"_l1, decimals },
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+                                                { u"title"_qs, title },
+                                                { u"text"_qs, text },
+                                                { u"mode"_qs, u"double"_qs },
+                                                { u"unit"_qs, unit },
+                                                { u"doubleValue"_qs, initialValue },
+                                                { u"doubleMinimum"_qs, minValue },
+                                                { u"doubleMaximum"_qs, maxValue },
+                                                { u"doubleDecimals"_qs, decimals },
                                             });
     if (!dialog)
         co_return { };
@@ -191,14 +190,14 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
                                                                  int initialValue, int minValue,
                                                                  int maxValue, QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, "uihelpers/InputDialog.qml"_l1, {
-                                                { "title"_l1, title },
-                                                { "text"_l1, text },
-                                                { "mode"_l1, "int"_l1 },
-                                                { "unit"_l1, unit },
-                                                { "intValue"_l1, initialValue },
-                                                { "intMinimum"_l1, minValue },
-                                                { "intMaximum"_l1, maxValue },
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+                                                { u"title"_qs, title },
+                                                { u"text"_qs, text },
+                                                { u"mode"_qs, u"int"_qs },
+                                                { u"unit"_qs, unit },
+                                                { u"intValue"_qs, initialValue },
+                                                { u"intMinimum"_qs, minValue },
+                                                { u"intMaximum"_qs, maxValue },
                                             });
     if (!dialog)
         co_return { };
@@ -215,8 +214,8 @@ QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(QColor initial
                                                                   QString title)
 {
 //    auto colorDialog = createDialog<QQuickColorDialog>(s_engine, {
-//                                                           { "title"_l1, title },
-//                                                           { "selectedColor"_l1, initialColor },
+//                                                           { u"title"_qs, title },
+//                                                           { u"selectedColor"_qs, initialColor },
 //                                                       });
 
 //    if (!colorDialog)
@@ -245,15 +244,15 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
 #endif
 
     auto fileDialog = createDialog<QQuickFileDialog>(s_engine, {
-                                                         { "fileMode"_l1, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
+                                                         { u"fileMode"_qs, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
 #if defined(Q_OS_ANDROID)
                                                          // QTBUG-96655
-                                                         { "title"_l1, fileName },
+                                                         { u"title"_qs, fileName },
 #else
-                                                         { "title"_l1, title },
-                                                         { "currentFile"_l1, fileName },
+                                                         { u"title"_qs, title },
+                                                         { u"currentFile"_qs, fileName },
 #endif
-                                                         { "nameFilters"_l1, filters },
+                                                         { u"nameFilters"_qs, filters },
                                                      });
 
     if (!fileDialog)
@@ -285,9 +284,9 @@ void MobileUIHelpers::processToastMessages()
 
     auto [message, timeout] = m_toastMessages.takeFirst();
 
-    auto toast = createPopup<QQuickPopup>(s_engine, "uihelpers/ToastMessage.qml"_l1, {
-                                             { "message"_l1, message },
-                                             { "timeout"_l1, timeout },
+    auto toast = createPopup<QQuickPopup>(s_engine, u"Mobile/uihelpers/ToastMessage.qml"_qs, {
+                                             { u"message"_qs, message },
+                                             { u"timeout"_qs, timeout },
                                          });
     if (!toast)
         return;

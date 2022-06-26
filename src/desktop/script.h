@@ -135,7 +135,6 @@ public:
     QVector<PrintingScriptAction *> printingActions() const;
 
     QQmlContext *qmlContext() const;
-    QmlBrickStore *brickStoreWrapper() const;
 
 signals:
     void nameChanged(QString name);

@@ -26,7 +26,7 @@
 #include "bricklink/lot.h"
 #include "bricklink/io.h"
 #include "documentio.h"
-#include "utility/filter.h"
+#include "common/filter.h"
 
 QT_FORWARD_DECLARE_CLASS(QUndoStack)
 class UndoStack;

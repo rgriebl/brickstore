@@ -17,6 +17,7 @@
 #include <QtCore/QSysInfo>
 #include <QtCore/QStringBuilder>
 #include <QtCore/QTimer>
+#include <QtCore/QDirIterator>
 #include <QtCore/QLoggingCategory>
 #include <QtNetwork/QNetworkProxyFactory>
 #include <QtGui/QGuiApplication>
@@ -46,13 +47,13 @@
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
 #include "ldraw/library.h"
-#include "qmlapi/brickstore_wrapper.h"
-#include "utility/currency.h"
-#include "utility/eventfilter.h"
+#include "common/brickstore_wrapper.h"
+#include "common/currency.h"
+#include "common/eventfilter.h"
 #include "utility/exception.h"
-#include "utility/systeminfo.h"
+#include "common/systeminfo.h"
 #include "utility/transfer.h"
-#include "utility/undo.h"
+#include "common/undo.h"
 #include "utility/utility.h"
 #include "version.h"
 
@@ -92,6 +93,10 @@ Application::Application(int &argc, char **argv)
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
+
+//    QDirIterator dit(u":/"_qs, QDirIterator::Subdirectories);
+//    while (dit.hasNext())
+//        qWarning() << dit.next();
 }
 
 void Application::init()
@@ -123,7 +128,7 @@ void Application::init()
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent("Br1ckstore"_l1 % u'/' % QCoreApplication::applicationVersion()
+    Transfer::setDefaultUserAgent(u"Br1ckstore/" % QCoreApplication::applicationVersion()
                                   % u" (" + QSysInfo::prettyProductName() % u')');
 
 #if defined(Q_CC_MSVC)
@@ -135,7 +140,7 @@ void Application::init()
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     checkSentryConsent();
 
-    QIcon::setThemeSearchPaths({ ":/assets/icons"_l1 });
+    QIcon::setThemeSearchPaths({ u":/assets/icons"_qs });
 
     (void) OnlineState::inst();
     (void) Currency::inst();
@@ -156,9 +161,11 @@ void Application::init()
     if (!imgFormats.contains("png") || !imgFormats.contains("jpg") || !imgFormats.contains("gif"))
         m_startupErrors << tr("Your installation is broken: image format plugins are missing!");
 
-    QString errString;
-    if (!initBrickLink(&errString))
-        m_startupErrors << tr("Could not initialize the BrickLink kernel:") % u' ' % errString;
+    try {
+        initBrickLink();
+    } catch (const Exception &e) {
+        m_startupErrors << tr("Could not initialize the BrickLink kernel:") % u' ' % e.error();
+    }
 
     LDraw::create(ldrawUrl());
 
@@ -214,15 +221,15 @@ void Application::afterInit()
           } },
         { "configure", [this](auto) { emit showSettings(); } },
         { "help_extensions", [](auto) {
-              QString url = "https://"_l1 % Application::inst()->gitHubPagesUrl() % "/extensions/"_l1;
+              QString url = u"https://" % Application::inst()->gitHubPagesUrl() % u"/extensions/";
               QDesktopServices::openUrl(url);
           } },
         { "help_reportbug", [](auto) {
-              QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/issues/new"_l1;
+              QString url = u"https://" % Application::inst()->gitHubUrl() % u"/issues/new";
               QDesktopServices::openUrl(url);
           } },
         { "help_releasenotes", [](auto) {
-              QString url = "https://"_l1 % Application::inst()->gitHubUrl() % "/releases"_l1;
+              QString url = u"https://" % Application::inst()->gitHubUrl() % u"/releases";
               QDesktopServices::openUrl(url);
           } },
         { "help_announcements", [](auto) {
@@ -281,7 +288,7 @@ QCoro::Task<> Application::restoreLastSession()
 
     if (!autosavesRestored) {
         if (Config::inst()->restoreLastSession()) {
-            const auto files = Config::inst()->value("/MainWindow/LastSessionDocuments"_l1).toStringList();
+            const auto files = Config::inst()->value(u"/MainWindow/LastSessionDocuments"_qs).toStringList();
             for (const auto &file : files)
                 Document::load(file);
         }
@@ -292,7 +299,7 @@ QCoro::Task<> Application::setupLDraw()
 {
     auto ldrawDir = Config::inst()->ldrawDir();
 
-    if (Config::inst()->value("General/LDrawTransition"_l1).toBool()) {
+    if (Config::inst()->value(u"General/LDrawTransition"_qs).toBool()) {
         if (ldrawDir.isEmpty())
             ldrawDir = LDraw::Library::potentialLDrawDirs().value(0);
 
@@ -304,7 +311,7 @@ QCoro::Task<> Application::setupLDraw()
         UIHelpers::information(msg);
 
         ldrawDir.clear();
-        Config::inst()->remove("General/LDrawTransition"_l1);
+        Config::inst()->remove(u"General/LDrawTransition"_qs);
         Config::inst()->setLDrawDir(ldrawDir);
     }
 
@@ -324,7 +331,7 @@ QCoro::Task<> Application::setupLDraw()
         bool isInternalZip = ldrawDirLoad.isEmpty();
 
         if (isInternalZip)
-            ldrawDirLoad = Config::inst()->cacheDir() % "/ldraw/complete.zip"_l1;
+            ldrawDirLoad = Config::inst()->cacheDir() % u"/ldraw/complete.zip";
 
         co_await LDraw::library()->setPath(ldrawDirLoad);
 
@@ -369,6 +376,11 @@ Application::~Application()
     shutdownSentry();
 }
 
+QString Application::buildNumber() const
+{
+    return QLatin1String(BRICKSTORE_BUILD_NUMBER);
+}
+
 QString Application::applicationUrl() const
 {
     return QLatin1String(BRICKSTORE_URL);
@@ -381,9 +393,9 @@ QString Application::gitHubUrl() const
 
 QString Application::gitHubPagesUrl() const
 {
-    const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split('/'_l1);
+    const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split(u"/"_qs);
     Q_ASSERT(sections.count() == 3);
-    return sections[1] % ".github.io/"_l1 % sections[2];
+    return sections[1] % u".github.io/" % sections[2];
 }
 
 QString Application::databaseUrl() const
@@ -414,7 +426,7 @@ QCoro::Task<bool> Application::checkBrickLinkLogin()
     } else {
         if (co_await UIHelpers::question(tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
                                          ) == UIHelpers::Yes) {
-            emit showSettings("bricklink"_l1);
+            emit showSettings(u"bricklink"_qs);
         }
     }
     co_return false;
@@ -538,16 +550,16 @@ void Application::updateTranslations()
     if (language.isEmpty())
         return;
 
-    QString i18n = ":/translations"_l1;
+    QString i18n = u":/translations"_qs;
 
     static bool once = false; // always load english
     if (!once) {
         auto transQt = new QTranslator(this);
-        if (transQt->load("qtbase_en"_l1, i18n))
+        if (transQt->load(u"qtbase_en"_qs, i18n))
             QCoreApplication::installTranslator(transQt);
 
         auto transBrickStore = new QTranslator(this);
-        if (transBrickStore->load("brickstore_en"_l1, i18n))
+        if (transBrickStore->load(u"brickstore_en"_qs, i18n))
             QCoreApplication::installTranslator(transBrickStore);
         once = true;
     }
@@ -555,12 +567,12 @@ void Application::updateTranslations()
     m_trans_qt.reset(new QTranslator);
     m_trans_brickstore.reset(new QTranslator);
 
-    if (language != "en"_l1) {
-        if (m_trans_qt->load("qtbase_"_l1 + language, i18n))
+    if (language != u"en") {
+        if (m_trans_qt->load(u"qtbase_"_qs + language, i18n))
             QCoreApplication::installTranslator(m_trans_qt.get());
     }
-    if ((language != "en"_l1) || (!m_translationOverride.isEmpty())) {
-        QString translationFile = "brickstore_"_l1 % language;
+    if ((language != u"en") || (!m_translationOverride.isEmpty())) {
+        QString translationFile = u"brickstore_"_qs % language;
         QString translationDir = i18n;
 
         QFileInfo qm(m_translationOverride);
@@ -576,34 +588,34 @@ void Application::updateTranslations()
 
 QVariantMap Application::about() const
 {
-    QString header = R"(<p style="line-height: 150%;">)"_l1
-            % R"(<span style="font-size: large"><b>)" BRICKSTORE_NAME "</b></span><br>"_l1
-            % "<b>"_l1 % tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION ""_l1, BRICKSTORE_BUILD_NUMBER ""_l1)
-            % "</b><br>"_l1
-            % tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT ""_l1) % "<br>"_l1
-            % tr("Visit %1").arg(R"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)"_l1)
-            % "</p>"_l1;
+    QString header = uR"(<p style="line-height: 150%;">)"_qs
+            % uR"(<span style="font-size: large"><b>)" BRICKSTORE_NAME "</b></span><br>"
+            % u"<b>" % tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION u"", BRICKSTORE_BUILD_NUMBER u"")
+            % u"</b><br>"
+            % tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT u"") % u"<br>"
+            % tr("Visit %1").arg(uR"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)")
+            % u"</p>";
 
     QString license = tr(R"(<p>This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.<br/>This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.<br/>See <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for GPL licensing information.</p><p>All data from <a href="https://www.bricklink.com">www.bricklink.com</a> is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.</p><p>Only made possible by <a href="https://www.danjezek.com/">Dan Jezek's</a> support.</p>)");
-    license = "<br><b>"_l1 % tr("License") % R"(</b><div style="margin-left: 10px">)"_l1
-            % license % "</div>"_l1;
+    license = u"<br><b>" % tr("License") % uR"(</b><div style="margin-left: 10px">)"
+            % license % u"</div>";
 
     QString translators;
-    const QString transRow = R"(<tr><td>%1</td><td width="2em">&nbsp;</td><td>%2 <a href="mailto:%3">%4</a></td></tr>)"_l1;
+    const QString transRow = uR"(<tr><td>%1</td><td width="2em">&nbsp;</td><td>%2 <a href="mailto:%3">%4</a></td></tr>)"_qs;
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
-        if (trans.language != "en"_l1 && !trans.author.isEmpty()) {
-            QString langname = trans.localName % " ("_l1 % trans.name % ")"_l1;
+        if ((trans.language != u"en") && !trans.author.isEmpty()) {
+            QString langname = trans.localName % u" (" % trans.name % u")";
             translators = translators % transRow.arg(langname, trans.author, trans.authorEmail, trans.authorEmail);
         }
     }
-    translators = "<br><b>"_l1 % tr("Translators") % R"(</b><div style="margin-left: 10px">)"_l1
-            % R"(<p><table border="0">)"_l1 % translators % R"(</p></table>)"_l1 % "</div>"_l1;
+    translators = u"<br><b>" % tr("Translators") % uR"(</b><div style="margin-left: 10px">)"
+            % uR"(<p><table border="0">)" % translators % uR"(</p></table>)" % u"</div>";
 
     return QVariantMap {
-        { "header"_l1, header },
-        { "license"_l1, license },
-        { "translators"_l1, translators },
+        { u"header"_qs, header },
+        { u"license"_qs, license },
+        { u"translators"_qs, translators },
     };
 }
 
@@ -631,11 +643,11 @@ void Application::setupSentry()
     sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
     sentry_options_set_require_user_consent(sentry, 1);
 
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % "/.sentry"_l1;
-    QString crashHandler = QCoreApplication::applicationDirPath() % "/crashpad_handler"_l1;
+    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % u"/.sentry";
+    QString crashHandler = QCoreApplication::applicationDirPath() % u"/crashpad_handler";
 
 #  if defined(Q_OS_WINDOWS)
-    crashHandler.append(".exe"_l1);
+    crashHandler.append(u".exe"_qs);
     sentry_options_set_handler_pathw(sentry, reinterpret_cast<const wchar_t *>(crashHandler.utf16()));
     sentry_options_set_database_pathw(sentry, reinterpret_cast<const wchar_t *>(dbPath.utf16()));
 #  else
@@ -649,7 +661,7 @@ void Application::setupSentry()
 
     auto sysInfo = SystemInfo::inst()->asMap();
     for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-        if (!it.key().startsWith("os."_l1))
+        if (!it.key().startsWith(u"os."))
             sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
     }
     sentry_set_tag("language", Config::inst()->language().toUtf8().constData());
@@ -658,7 +670,7 @@ void Application::setupSentry()
         auto newSysInfo = SystemInfo::inst()->asMap();
 
         for (auto it = newSysInfo.cbegin(); it != newSysInfo.cend(); ++it) {
-            if (!it.key().startsWith("os."_l1) && !sysInfo.contains(it.key()))
+            if (!it.key().startsWith(u"os.") && !sysInfo.contains(it.key()))
                 sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
         }
     });
@@ -714,9 +726,9 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 
 void Application::setupLogging()
 {
-//    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message}"_l1);
-    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_l1);
-//    qSetMessagePattern("%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_l1);
+//    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message}"_qs);
+    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_qs);
+//    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_qs);
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
     {
@@ -739,7 +751,7 @@ void Application::setUILoggingHandler(QtMessageHandler callback)
 void Application::setIconTheme(Theme theme)
 {
     QPixmapCache::clear();
-    QIcon::setThemeName(theme == DarkTheme ? "brickstore-breeze-dark"_l1 : "brickstore-breeze"_l1);
+    QIcon::setThemeName(theme == DarkTheme ? u"brickstore-breeze-dark"_qs : u"brickstore-breeze"_qs);
 
     // we need to delay this, because we are called during the construction of the QML root item
     QMetaObject::invokeMethod(this, [this]() {
@@ -751,7 +763,7 @@ void Application::setIconTheme(Theme theme)
             const auto icons = root->findChildren<QQuickIconImage *>();
             for (const auto &icon : icons) {
                 QString name = icon->name();
-                icon->setName("foo"_l1);
+                icon->setName(u"foo"_qs);
                 icon->setName(name);
             }
         }
@@ -759,56 +771,57 @@ void Application::setIconTheme(Theme theme)
 }
 
 
-bool Application::initBrickLink(QString *errString)
+bool Application::initBrickLink()
 {
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), databaseUrl(), errString);
-    if (bl) {
-        bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
-        connect(Config::inst(), &Config::itemImageSizePercentChanged,
-                this, [](double p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), databaseUrl(),
+                                            SystemInfo::inst()->physicalMemory());
 
-        connect(Config::inst(), &Config::updateIntervalsChanged,
-                BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
-        BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
+    bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
+    connect(Config::inst(), &Config::itemImageSizePercentChanged,
+            this, [](double p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
+
+    connect(Config::inst(), &Config::updateIntervalsChanged,
+            BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
+    BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
+    BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
+                                        Config::inst()->brickLinkPassword() });
+    connect(Config::inst(), &Config::brickLinkCredentialsChanged,
+            this, []() {
         BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
                                             Config::inst()->brickLinkPassword() });
-        connect(Config::inst(), &Config::brickLinkCredentialsChanged,
-                this, []() {
-            BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
-                                                Config::inst()->brickLinkPassword() });
-        });
-        try {
-            BrickLink::core()->database()->read();
-        } catch (const Exception &) {
-            // this is not a critical error, but expected on the first run, so just ignore it
-        }
-        connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
-                this, [](BrickLink::Cart *cart, bool success, const QString &message) {
-            Q_ASSERT(cart);
-
-            if (!success) {
-                UIHelpers::warning(message);
-            } else {
-                DocumentIO::importBrickLinkCart(cart);
-
-                if (!message.isEmpty())
-                    UIHelpers::information(message);
-            }
-        });
-        connect(BrickLink::core()->wantedLists(), &BrickLink::WantedLists::fetchLotsFinished,
-                this, [](BrickLink::WantedList *wanted, bool success, const QString &message) {
-            Q_ASSERT(wanted);
-
-            if (!success) {
-                UIHelpers::warning(message);
-            } else {
-                DocumentIO::importBrickLinkWantedList(wanted);
-
-                if (!message.isEmpty())
-                    UIHelpers::information(message);
-            }
-        });
+    });
+    try {
+        BrickLink::core()->database()->read();
+    } catch (const Exception &) {
+        // this is not a critical error, but expected on the first run, so just ignore it
     }
+    connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
+            this, [](BrickLink::Cart *cart, bool success, const QString &message) {
+        Q_ASSERT(cart);
+
+        if (!success) {
+            UIHelpers::warning(message);
+        } else {
+            DocumentIO::importBrickLinkCart(cart);
+
+            if (!message.isEmpty())
+                UIHelpers::information(message);
+        }
+    });
+    connect(BrickLink::core()->wantedLists(), &BrickLink::WantedLists::fetchLotsFinished,
+            this, [](BrickLink::WantedList *wanted, bool success, const QString &message) {
+        Q_ASSERT(wanted);
+
+        if (!success) {
+            UIHelpers::warning(message);
+        } else {
+            DocumentIO::importBrickLinkWantedList(wanted);
+
+            if (!message.isEmpty())
+                UIHelpers::information(message);
+        }
+    });
+
     return bl;
 }
 
@@ -823,20 +836,8 @@ void Application::setupQml()
     connect(this, &Application::languageChanged,
             m_engine, &QQmlEngine::retranslate);
 
-    BrickLink::QmlBrickLink::registerTypes();
-
-    QString cannotCreate = "Cannot create this type"_l1;
-
-    qmlRegisterUncreatableType<QmlDocumentLots>("BrickStore", 1, 0, "Lots", cannotCreate);
-
-    QmlBrickStore::registerTypes();
-    LDraw::registerQmlTypes();
-
-    QQmlEngine::setObjectOwnership(ActionManager::inst(), QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<ActionManager>("BrickStore", 1, 0, "ActionManager",
-                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return ActionManager::inst();
-    });
+    m_engine->setBaseUrl(QUrl(u"qrc:/"_qs));
+    m_engine->addImportPath(u"qrc:/"_qs);
 }
 
 void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)

@@ -15,7 +15,7 @@
 
 #include <QTreeView>
 
-#include "utility/currency.h"
+#include "common/currency.h"
 #include "bricklink/global.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)

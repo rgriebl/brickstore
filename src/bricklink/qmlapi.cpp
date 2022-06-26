@@ -655,54 +655,18 @@ Lot *QmlLot::get() const
     \endlist
 */
 
-QmlBrickLink *QmlBrickLink::s_inst = nullptr;
 
-void QmlBrickLink::registerTypes()
+QmlBrickLink::QmlBrickLink()
 {
-#if !defined(BS_BACKEND)
-    QString cannotCreate = "Cannot create this type"_l1;
+    setObjectName(u"BrickLink"_qs);
 
-    qmlRegisterUncreatableType<BrickLink::QmlColor>("BrickStore", 1, 0, "Color", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::QmlItemType>("BrickStore", 1, 0, "ItemType", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::QmlCategory>("BrickStore", 1, 0, "Category", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::QmlItem>("BrickStore", 1, 0, "Item", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::QmlLot>("BrickStore", 1, 0, "Lot", cannotCreate);
-
-    qmlRegisterType<BrickLink::ColorModel>("BrickStore", 1, 0, "ColorModel");
-    qmlRegisterType<BrickLink::CategoryModel>("BrickStore", 1, 0, "CategoryModel");
-    qmlRegisterType<BrickLink::ItemTypeModel>("BrickStore", 1, 0, "ItemTypeModel");
-    qmlRegisterType<BrickLink::ItemModel>("BrickStore", 1, 0, "ItemModel");
-    qmlRegisterType<BrickLink::AppearsInModel>("BrickStore", 1, 0, "AppearsInModel");
-
-    s_inst = new QmlBrickLink(BrickLink::core());
-
-    QQmlEngine::setObjectOwnership(s_inst, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlBrickLink>("BrickStore", 1, 0, "BrickLink",
-                                           [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return s_inst;
-    });
-
-    qmlRegisterUncreatableType<BrickLink::Picture>("BrickStore", 1, 0, "Picture", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::PriceGuide>("BrickStore", 1, 0, "PriceGuide", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::Order>("BrickStore", 1, 0, "Order", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::Cart>("BrickStore", 1, 0, "Cart", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::WantedList>("BrickStore", 1, 0, "WantedList", cannotCreate);
-    qmlRegisterUncreatableType<BrickLink::Store>("BrickStore", 1, 0, "Store", cannotCreate);
-#endif
-}
-
-QmlBrickLink::QmlBrickLink(Core *core)
-    : d(core)
-{
-    setObjectName("BrickLink"_l1);
-
-    connect(core, &BrickLink::Core::priceGuideUpdated,
+    connect(core(), &BrickLink::Core::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::priceGuideUpdated);
         if (isSignalConnected(sig))
             emit priceGuideUpdated(pg);
     });
-    connect(core, &BrickLink::Core::pictureUpdated,
+    connect(core(), &BrickLink::Core::pictureUpdated,
             this, [this](::BrickLink::Picture *pic) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::pictureUpdated);
         if (isSignalConnected(sig))
@@ -714,6 +678,7 @@ QmlBrickLink::QmlBrickLink(Core *core)
     \readonly
     A special Item object denoting an invalid item. The object's Item::isNull returns \c true.
     Used as a return value for functions that can fail.
+
 */
 QmlItem QmlBrickLink::noItem() const
 {
@@ -756,9 +721,9 @@ QmlColor QmlBrickLink::color(const QVariant &v) const
     if (v.userType() == qMetaTypeId<const BrickLink::Color *>())
         return v.value<const BrickLink::Color *>();
     else if (v.userType() == QMetaType::QString)
-        return d->colorFromName(v.toString());
+        return core()->colorFromName(v.toString());
     else
-        return d->color(v.value<uint>());
+        return core()->color(v.value<uint>());
 }
 
 /*! \qmlmethod Color BrickLink::colorFromLDrawId(int colorId)
@@ -767,7 +732,7 @@ QmlColor QmlBrickLink::color(const QVariant &v) const
 */
 QmlColor QmlBrickLink::colorFromLDrawId(int ldrawId) const
 {
-    return d->colorFromLDrawId(ldrawId);
+    return core()->colorFromLDrawId(ldrawId);
 }
 
 /*! \qmlmethod Category BrickLink::category(var category)
@@ -783,7 +748,7 @@ QmlCategory QmlBrickLink::category(const QVariant &v) const
     if (v.userType() == qMetaTypeId<const BrickLink::Category *>())
         return v.value<const BrickLink::Category *>();
     else
-        return d->category(v.value<uint>());
+        return core()->category(v.value<uint>());
 }
 
 /*! \qmlmethod ItemType BrickLink::itemType(var itemType)
@@ -800,7 +765,7 @@ QmlItemType QmlBrickLink::itemType(const QVariant &v) const
     if (v.userType() == qMetaTypeId<const BrickLink::ItemType *>())
         return v.value<const BrickLink::ItemType *>();
     else
-        return d->itemType(firstCharInString(v.toString()));
+        return core()->itemType(firstCharInString(v.toString()));
 }
 
 /*! \qmlmethod Item BrickLink::itemType(var item)
@@ -821,7 +786,7 @@ QmlItem QmlBrickLink::item(const QVariant &v) const
 */
 QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) const
 {
-    return d->item(firstCharInString(itemTypeId), itemId.toLatin1());
+    return core()->item(firstCharInString(itemTypeId), itemId.toLatin1());
 }
 
 /*! \qmlsignal BrickLink::priceGuideUpdated(PriceGuide priceGuide)
@@ -839,7 +804,7 @@ QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) con
 */
 BrickLink::PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
 {
-    auto pg = d->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority);
+    auto pg = core()->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority);
     QQmlEngine::setObjectOwnership(pg, QQmlEngine::CppOwnership);
     return pg;
 }
@@ -859,7 +824,7 @@ BrickLink::PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bo
 */
 BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
 {
-    auto pic = d->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
+    auto pic = core()->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
     QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
     return pic;
 }
@@ -874,7 +839,7 @@ BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool hig
 */
 BrickLink::Picture *QmlBrickLink::largePicture(QmlItem item, bool highPriority)
 {
-    auto pic = d->largePicture(item.wrappedObject(), highPriority);
+    auto pic = core()->largePicture(item.wrappedObject(), highPriority);
     QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
     return pic;
 }

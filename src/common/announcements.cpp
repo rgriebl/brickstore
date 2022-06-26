@@ -18,9 +18,9 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtGui/QDesktopServices>
 
-#include "qcoro/network/qcoronetworkreply.h"
+#include "qcoro/qcoronetworkreply.h"
 #include "utility/utility.h"
-#include "utility/systeminfo.h"
+#include "common/systeminfo.h"
 #include "announcements.h"
 #include "config.h"
 
@@ -31,14 +31,14 @@ Announcements::Announcements(const QString &baseUrl, QObject *parent)
     , m_parent(parent)
 {
     m_rawAnnouncementsUrl = baseUrl;
-    m_rawAnnouncementsUrl.replace("github.com"_l1, "https://raw.githubusercontent.com/wiki"_l1);
-    m_rawAnnouncementsUrl.append("/Announcements.md"_l1);
+    m_rawAnnouncementsUrl.replace(u"github.com"_qs, u"https://raw.githubusercontent.com/wiki"_qs);
+    m_rawAnnouncementsUrl.append(u"/Announcements.md"_qs);
 
     m_wikiAnnouncementsUrl = baseUrl;
-    m_wikiAnnouncementsUrl.prepend("https://"_l1);
-    m_wikiAnnouncementsUrl.append("/wiki/Announcements"_l1);
+    m_wikiAnnouncementsUrl.prepend(u"https://"_qs);
+    m_wikiAnnouncementsUrl.append(u"/wiki/Announcements"_qs);
 
-    const auto vl = Config::inst()->value("Announcements/ReadIds"_l1).toList();
+    const auto vl = Config::inst()->value(u"Announcements/ReadIds"_qs).toList();
     for (const QVariant &v : vl)
         m_readIds << v.toULongLong();
 }
@@ -53,13 +53,13 @@ QCoro::Task<> Announcements::check()
         co_return;
 
     QString md = QString::fromUtf8(reply->readAll());
-    static const QRegularExpression header(R"(^## (.+?) - (\d{4})-(\d{2})-(\d{2}) \[\]\(([^)]*)\)$)"_l1,
+    static const QRegularExpression header(uR"(^## (.+?) - (\d{4})-(\d{2})-(\d{2}) \[\]\(([^)]*)\)$)"_qs,
                                            QRegularExpression::MultilineOption);
     // ## TITLE - YYYY-MM-DD [](<CONDITIONS>)
     // TEXT
 
     QVariantMap conditions = SystemInfo::inst()->asMap();
-    conditions["language"_l1] = Config::inst()->language();
+    conditions[u"language"_qs] = Config::inst()->language();
 
     qsizetype captureNextStart = 0;
     qsizetype nextHeader = 0;
@@ -100,10 +100,10 @@ QCoro::Task<> Announcements::check()
         bool conditionMatch = true;
 
         if (!allConds.isEmpty()) {
-            QStringList condList = allConds.split(","_l1);
+            QStringList condList = allConds.split(u","_qs);
             for (const QString &cond : condList) {
-                QString key = cond.section(":"_l1, 0, 0).trimmed();
-                QString val = cond.section(":"_l1, 1, -1).trimmed();
+                QString key = cond.section(u":"_qs, 0, 0).trimmed();
+                QString val = cond.section(u":"_qs, 1, -1).trimmed();
 
                 QRegularExpression valRE(QRegularExpression::wildcardToRegularExpression(val));
                 valRE.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
@@ -146,7 +146,7 @@ void Announcements::markAnnouncementRead(quint32 id)
             for (const quint32 &readId : qAsConst(m_readIds))
                 vl << readId;
 
-            Config::inst()->setValue("Announcements/ReadIds"_l1, vl);
+            Config::inst()->setValue(u"Announcements/ReadIds"_qs, vl);
         }
     }
 }
@@ -173,10 +173,10 @@ QVariantList Announcements::unreadAnnouncements() const
         if (m_readIds.contains(a.m_id))
             continue;
         QVariantMap vm {
-            { "id"_l1, a.m_id },
-            { "date"_l1, a.m_date },
-            { "title"_l1, a.m_title },
-            { "text"_l1, a.m_text },
+            { u"id"_qs, a.m_id },
+            { u"date"_qs, a.m_date },
+            { u"title"_qs, a.m_title },
+            { u"text"_qs, a.m_text },
         };
         vl.append(vm);
     }

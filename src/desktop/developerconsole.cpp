@@ -12,12 +12,13 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QPlainTextEdit>
+#include <QStringBuilder>
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QTimer>
 
-#include "utility/eventfilter.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "developerconsole.h"
 
@@ -140,35 +141,35 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
         filename = QString::fromLocal8Bit(ctx.file);
         int pos = -1;
 #if defined(Q_OS_WINDOWS)
-        pos = filename.lastIndexOf('\\'_l1);
+        pos = filename.lastIndexOf(u'\\');
 #endif
         if (pos < 0)
-            pos = int(filename.lastIndexOf('/'_l1));
+            pos = int(filename.lastIndexOf(u'/'));
         filename = filename.mid(pos + 1);
     }
 
-    QString str = "<pre>"_l1;
-    const auto lines = msg.split('\n'_l1);
+    QString str = u"<pre>"_qs;
+    const auto lines = msg.split(u"\n"_qs);
     for (int i = 0; i < lines.count(); ++i) {
-        str = str % R"(<span style="color:#)"_l1 % QLatin1String(msgTypeColor[type])
-                % R"(;background-color:#)"_l1 % QLatin1String(msgTypeBgColor[type]) % R"(;">)"_l1
-                % QLatin1String(msgTypeNames[type]) % R"(</span>)"_l1
-                % R"(&nbsp;<span style="color:#)"_l1
+        str = str % uR"(<span style="color:#)" % QLatin1String(msgTypeColor[type])
+                % uR"(;background-color:#)" % QLatin1String(msgTypeBgColor[type]) % uR"(;">)"
+                % QLatin1String(msgTypeNames[type]) % uR"(</span>)"
+                % uR"(&nbsp;<span style="color:#)"
                 % QLatin1String(categoryColor[qHashBits(ctx.category, qstrlen(ctx.category), 1) % 6])
-                % R"(;font-weight:bold;">)"_l1
-                % QLatin1String(ctx.category) % R"(</span>)"_l1 % ":&nbsp;"_l1
+                % uR"(;font-weight:bold;">)"
+                % QLatin1String(ctx.category) % uR"(</span>)" % u":&nbsp;"
                 % lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if ((type != QtInfoMsg) && !filename.isEmpty()) {
-                str = str % R"( at <span style="color:#)"_l1 % QLatin1String(fileColor)
-                        % R"(;font-weight:bold;">)"_l1 % filename
-                        % R"(</span>, line <span style="color:#)"_l1 % QLatin1String(lineColor)
-                        % R"(;font-weight:bold;">)"_l1 % QString::number(ctx.line) % R"(</span></pre>)"_l1;
+                str = str % uR"( at <span style="color:#)" % QLatin1String(fileColor)
+                        % uR"(;font-weight:bold;">)" % filename
+                        % uR"(</span>, line <span style="color:#)" % QLatin1String(lineColor)
+                        % uR"(;font-weight:bold;">)" % QString::number(ctx.line) % uR"(</span></pre>)";
             } else {
-                str = str % "</pre>"_l1;
+                str = str % u"</pre>";
             }
         } else {
-            str = str % "<br>"_l1;
+            str = str % u"<br>";
         }
     }
 
