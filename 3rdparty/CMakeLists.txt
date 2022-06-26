@@ -34,28 +34,28 @@ endif()
 
 target_sources(${PROJECT_NAME} PUBLIC
     qcoro/concepts_p.h
-    qcoro/core/qcorocore.h
-    qcoro/core/qcorofuture.h
-    qcoro/core/qcoroiodevice.cpp
-    qcoro/core/qcoroiodevice.h
-    qcoro/core/qcoroiodevice_p.cpp
-    qcoro/core/qcoroiodevice_p.h
-    qcoro/core/qcorosignal.h
-    qcoro/core/qcorothread.cpp
-    qcoro/core/qcorothread.h
-    qcoro/core/qcorotimer.cpp
-    qcoro/core/qcorotimer.h
+    qcoro/qcorocore.h
+    qcoro/qcorofuture.h
+    qcoro/qcoroiodevice.cpp
+    qcoro/qcoroiodevice.h
+    qcoro/qcoroiodevice_p.cpp
+    qcoro/qcoroiodevice_p.h
+    qcoro/qcorosignal.h
+    qcoro/qcorothread.cpp
+    qcoro/qcorothread.h
+    qcoro/qcorotimer.cpp
+    qcoro/qcorotimer.h
     qcoro/coroutine.h
     qcoro/macros_p.h
-    qcoro/network/qcoroabstractsocket.cpp
-    qcoro/network/qcoroabstractsocket.h
-    qcoro/network/qcorolocalsocket.cpp
-    qcoro/network/qcorolocalsocket.h
-    qcoro/network/qcoronetwork.h
-    qcoro/network/qcoronetworkreply.cpp
-    qcoro/network/qcoronetworkreply.h
-    qcoro/network/qcorotcpserver.cpp
-    qcoro/network/qcorotcpserver.h
+    qcoro/qcoroabstractsocket.cpp
+    qcoro/qcoroabstractsocket.h
+    qcoro/qcorolocalsocket.cpp
+    qcoro/qcorolocalsocket.h
+    qcoro/qcoronetwork.h
+    qcoro/qcoronetworkreply.cpp
+    qcoro/qcoronetworkreply.h
+    qcoro/qcorotcpserver.cpp
+    qcoro/qcorotcpserver.h
     qcoro/qcoro.h
     qcoro/task.h
     qcoro/waitoperationbase_p.h
@@ -63,15 +63,13 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 if (NOT IOS)
     target_sources(${PROJECT_NAME} PUBLIC
-        qcoro/core/qcoroprocess.cpp
-        qcoro/core/qcoroprocess.h
+        qcoro/qcoroprocess.cpp
+        qcoro/qcoroprocess.h
     )
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/qcoro
-    ${CMAKE_CURRENT_SOURCE_DIR}/qcoro/core
-    ${CMAKE_CURRENT_SOURCE_DIR}/qcoro/network
 )
 
 if (WIN32)

@@ -8,6 +8,8 @@
 
 class QThread;
 
+#include <chrono>
+
 namespace QCoro {
 template<typename T>
 class Task;
