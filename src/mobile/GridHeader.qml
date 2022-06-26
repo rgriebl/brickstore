@@ -7,6 +7,8 @@ Control {
 
     // we expect to be inside a HeaderView.delegate for a Document
 
+    required property int index
+    required property string display
     property int visualIndex: index
     property int logicalIndex: TableView.view.model.logicalColumn(index)
     property BS.Document document: TableView.view.model.document
@@ -18,8 +20,8 @@ Control {
     signal showMenu(logicalColumn: int, visualColumn: int)
 
     Connections {
-        target: document.model
-        function onSortColumnsChanged() { checkSortStatus() }
+        target: root.document.model
+        function onSortColumnsChanged() { root.checkSortStatus() }
     }
     Component.onCompleted: checkSortStatus()
 
@@ -49,7 +51,7 @@ Control {
         sourceComponent: Component {
             Text {
                 id: headerText
-                text: model.display // root.textRole ? model[root.textRole] : modelData
+                text: root.display
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 color: enabled ? Style.textColor : Style.hintTextColor
@@ -67,12 +69,12 @@ Control {
                     anchors.fill: parent
                     color: Style.backgroundColor
                     property color gradientColor: Style.accentColor
-                    property real d: sortCount && sortStatus ? (sortStatus < 0 ? -1 : 1) / sortCount : 0
-                    property real e: (sortCount - Math.abs(sortStatus) + 1) * d
+                    property real d: root.sortCount && root.sortStatus ? (root.sortStatus < 0 ? -1 : 1) / root.sortCount : 0
+                    property real e: (root.sortCount - Math.abs(root.sortStatus) + 1) * d
                     gradient: Gradient {
-                        GradientStop { position: 0; color: sortStatus <= 0 ? rect.color : rect.gradientColor }
+                        GradientStop { position: 0; color: root.sortStatus <= 0 ? rect.color : rect.gradientColor }
                         GradientStop { position: 0.5 + 0.4 * rect.e; color: rect.color }
-                        GradientStop { position: 1; color: sortStatus >= 0 ? rect.color : rect.gradientColor }
+                        GradientStop { position: 1; color: root.sortStatus >= 0 ? rect.color : rect.gradientColor }
                     }
                 }
             }

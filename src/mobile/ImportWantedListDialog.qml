@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import BrickLink as BL
 import BrickStore as BS
 
 
@@ -15,7 +16,7 @@ Page {
             anchors.fill: parent
             ToolButton {
                 icon.name: "go-previous"
-                onClicked: goBackFunction()
+                onClicked: root.goBackFunction()
             }
             Label {
                 Layout.fillWidth: true
@@ -28,8 +29,8 @@ Page {
             }
             ToolButton {
                 icon.name: "view-refresh"
-                onClicked: BS.BrickLink.wantedLists.startUpdate()
-                enabled: BS.BrickLink.wantedLists.updateStatus !== BS.BrickLink.UpdateStatus.Updating
+                onClicked: BL.BrickLink.wantedLists.startUpdate()
+                enabled: BL.BrickLink.wantedLists.updateStatus !== BL.BrickLink.UpdateStatus.Updating
             }
         }
     }
@@ -48,7 +49,7 @@ Page {
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
-                sourceModel: BS.BrickLink.wantedLists
+                sourceModel: BL.BrickLink.wantedLists
                 sortOrder: Qt.AscendingOrder
                 sortColumn: 0
 
@@ -63,39 +64,39 @@ Page {
                 width: ListView.view.width
                 height: layout.height + xspacing
 
-                required property BS.WantedList wantedList
+                required property BL.WantedList wantedList
 
                 GridLayout {
                     id: layout
-                    x: xspacing
-                    y: xspacing / 2
-                    width: parent.width - 2 * xspacing
-                    columnSpacing: xspacing
-                    rowSpacing: xspacing / 2
+                    x: parent.xspacing
+                    y: parent.xspacing / 2
+                    width: parent.width - 2 * parent.xspacing
+                    columnSpacing: parent.xspacing
+                    rowSpacing: parent.xspacing / 2
                     columns: 2
 
                     Label {
                         id: label
-                        text: wantedList.name
+                        text: delegate.wantedList.name
                         font.bold: true
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: wantedList.description
+                        text: delegate.wantedList.description
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(wantedList.itemCount).toLocaleString())
-                        .arg(Number(wantedList.lotCount).toLocaleString())
+                        .arg(Number(delegate.wantedList.itemCount).toLocaleString())
+                        .arg(Number(delegate.wantedList.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
                         text: qsTr("%1 items left, %2% filled")
-                        .arg(Number(wantedList.itemLeftCount).toLocaleString())
-                        .arg(wantedList.filled * 100)
+                        .arg(Number(delegate.wantedList.itemLeftCount).toLocaleString())
+                        .arg(delegate.wantedList.filled * 100)
                         Layout.alignment: Qt.AlignRight
                     }
                 }
@@ -112,7 +113,7 @@ Page {
                     anchors.leftMargin: anchors.rightMargin
                 }
                 onClicked: {
-                    BS.BrickLink.wantedLists.startFetchLots(wantedList)
+                    BL.BrickLink.wantedLists.startFetchLots(wantedList)
                     root.goBackFunction()
                 }
             }
@@ -120,6 +121,6 @@ Page {
     }
 
     Component.onCompleted: {
-        Qt.callLater(function() { BS.BrickLink.wantedLists.startUpdate() })
+        Qt.callLater(function() { BL.BrickLink.wantedLists.startUpdate() })
     }
 }

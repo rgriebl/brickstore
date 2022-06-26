@@ -3,7 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
 
-BrickStoreDialog {
+
+AutoSizingDialog {
     id: root
     title: qsTr("Announcements")
     relativeWidth: 7 / 8

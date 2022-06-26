@@ -21,24 +21,24 @@ Popup {
     rightPadding: fm.height + 4
 
     contentItem: Label {
-        id: label
         text: root.message
         wrapMode: Text.Wrap
         font.bold: true
+        color: Style.accentTextColor
 
         FontMetrics {
             id: fm
-            font: label.font
+            font: parent.font
         }
     }
 
     background: Rectangle {
         radius: height / 2
-        color: "gray"
+        color: Style.accentColor
         MouseArea {
             z: 1000
             anchors.fill: parent
-            onClicked: { console.log("WTF?", root.close()) }
+            onClicked: { root.close() }
         }
     }
 

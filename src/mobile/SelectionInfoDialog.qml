@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import BrickLink as BL
 import BrickStore as BS
 
 
-BrickStoreDialog {
+AutoSizingDialog {
     id: root
     relativeWidth: .8
     relativeHeight: .8
@@ -24,7 +25,7 @@ BrickStoreDialog {
 
         if (single) {
 
-            let lot = BS.BrickLink.lot(document.selectedLots[0])
+            let lot = BL.BrickLink.lot(document.selectedLots[0])
             info.lot = lot
 
             priceGuide.item = lot.item
@@ -33,21 +34,21 @@ BrickStoreDialog {
             appearsIn.items = [ lot.item ]
             appearsIn.colors = [ lot.color ]
 
-            root.title = BS.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
+            root.title = BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
         } else {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
 
             info.lot = undefined
 
-            priceGuide.item = BS.BrickLink.noItem
-            priceGuide.color = BS.BrickLink.noColor
+            priceGuide.item = BL.BrickLink.noItem
+            priceGuide.color = BL.BrickLink.noColor
 
             let items = []
             let colors = []
 
             document.selectedLots.forEach(function(s) {
-                let lot = BS.BrickLink.lot(s)
+                let lot = BL.BrickLink.lot(s)
 
                 if (!lot.item.isNull && !lot.color.isNull) {
                     items.push(lot.item)
@@ -65,8 +66,8 @@ BrickStoreDialog {
     function clearInfos() {
         info.lot = undefined
 
-        priceGuide.item = BS.BrickLink.noItem
-        priceGuide.color = BS.BrickLink.noColor
+        priceGuide.item = BL.BrickLink.noItem
+        priceGuide.color = BL.BrickLink.noColor
 
         appearsIn.items = []
         appearsIn.colors = []

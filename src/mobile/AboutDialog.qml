@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import BrickStore
+import BrickStore as BS
 
-BrickStoreDialog {
+AutoSizingDialog {
     id: root
     title: qsTr("About")
+    keepPaddingInSmallMode: true
 
     FontMetrics { id: fm }
 
@@ -27,7 +28,7 @@ BrickStoreDialog {
                     horizontalAlignment: Image.AlignRight
                 }
                 Label {
-                    text: BrickStore.about.header
+                    text: BS.BrickStore.about.header
                     horizontalAlignment: Text.AlignLeft
                     Layout.fillWidth: true
                     textFormat: Text.RichText
@@ -36,14 +37,14 @@ BrickStoreDialog {
                 }
             }
             Label {
-                text: BrickStore.about.license
+                text: BS.BrickStore.about.license
                 Layout.fillWidth: true
                 textFormat: Text.RichText
                 wrapMode: Text.Wrap
                 onLinkActivated: (link) => Qt.openUrlExternally(link)
             }
             Label {
-                text: BrickStore.about.translators
+                text: BS.BrickStore.about.translators
                 Layout.fillWidth: true
                 textFormat: Text.RichText
                 wrapMode: Text.Wrap

@@ -9,7 +9,7 @@ Control {
     required property int row       // from TableView
     required property int column    // from TableView
     required property bool selected // from TableView
-    required property var textAlignment
+    required property int textAlignment
     required property var display
 
     property string text
@@ -53,7 +53,7 @@ Control {
                 id: label
                 text: root.text
 
-                horizontalAlignment: textAlignment & 7
+                horizontalAlignment: root.textAlignment & 7
 
                 clip: true
                 leftPadding: root.cellPadding + root.textLeftPadding
@@ -66,7 +66,7 @@ Control {
                 elide: Text.ElideRight
                 wrapMode: Text.Wrap
 
-                color: selected ? Style.primaryHighlightedTextColor : Style.textColor
+                color: root.selected ? Style.primaryHighlightedTextColor : Style.textColor
             }
         }
     }
@@ -75,8 +75,8 @@ Control {
         anchors.fill: parent
         z: -1
         color: {
-            let c = selected ? Style.primaryColor : Style.backgroundColor
-            if (alternate)
+            let c = root.selected ? Style.primaryColor : Style.backgroundColor
+            if (root.alternate)
                 c = Qt.darker(c, 1.1)
             return Qt.tint(c, tint)
         }

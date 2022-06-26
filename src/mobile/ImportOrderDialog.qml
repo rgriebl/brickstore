@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
+import BrickLink as BL
 import "./uihelpers" as UIHelpers
 
 
@@ -19,7 +20,7 @@ Page {
             anchors.fill: parent
             ToolButton {
                 icon.name: "go-previous"
-                onClicked: goBackFunction()
+                onClicked: root.goBackFunction()
             }
             Label {
                 Layout.fillWidth: true
@@ -32,7 +33,7 @@ Page {
             }
             ToolButton {
                 icon.name: "view-refresh"
-                enabled: BS.BrickLink.orders.updateStatus !== BS.BrickLink.Updating
+                enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating
                 onClicked: updateDaysDialog.open()
 
                 UIHelpers.InputDialog {
@@ -45,7 +46,7 @@ Page {
 
                     onAccepted: {
                         root.updateLastNDays = intValue
-                        BS.BrickLink.orders.startUpdate(updateLastNDays)
+                        BL.BrickLink.orders.startUpdate(updateLastNDays)
                     }
                 }
             }
@@ -66,7 +67,7 @@ Page {
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
-                sourceModel: BS.BrickLink.orders
+                sourceModel: BL.BrickLink.orders
                 sortOrder: Qt.DescendingOrder
                 sortColumn: 0
                 filterSyntax: BS.SortFilterProxyModel.FixedString
@@ -84,16 +85,16 @@ Page {
                 width: ListView.view.width
                 height: layout.height + xspacing
 
-                required property BS.Order order
+                required property BL.Order order
                 required property int index
 
                 GridLayout {
                     id: layout
-                    x: xspacing
-                    y: xspacing / 2
-                    width: parent.width - 2 * xspacing
-                    columnSpacing: xspacing
-                    rowSpacing: xspacing / 2
+                    x: parent.xspacing
+                    y: parent.xspacing / 2
+                    width: parent.width - 2 * parent.xspacing
+                    columnSpacing: parent.xspacing
+                    rowSpacing: parent.xspacing / 2
                     columns: 3
 
                     Image {
@@ -102,7 +103,7 @@ Page {
                         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                         asynchronous: true
-                        source: "qrc:/assets/flags/" + order.countryCode
+                        source: "qrc:/assets/flags/" + delegate.order.countryCode
                         fillMode: Image.PreserveAspectFit
                         sourceSize.height: fm.height * .75
                         sourceSize.width: fm.height * 1.5
@@ -122,37 +123,37 @@ Page {
 
                     Label {
                         id: label
-                        property string name: order.address.split("\n",1)[0]
-                        text: order.otherParty + (name === '' ? '' : ' (' + name + ')')
+                        property string name: delegate.order.address.split("\n",1)[0]
+                        text: delegate.order.otherParty + (name === '' ? '' : ' (' + name + ')')
                         font.bold: true
                         elide: Text.ElideRight
                         maximumLineCount: 1
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: order.date.toLocaleDateString(Locale.ShortFormat)
+                        text: delegate.order.date.toLocaleDateString(Locale.ShortFormat)
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
-                        text: "#" + order.id
+                        text: "#" + delegate.order.id
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: order.statusAsString()
+                        text: delegate.order.statusAsString()
                         font.bold: true
-                        color: Qt.hsla(order.status/ BS.BrickLink.OrderStatus.Count, .8, .5)
+                        color: Qt.hsla(delegate.order.status/ BL.BrickLink.OrderStatus.Count, .8, .5)
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(order.itemCount).toLocaleString())
-                        .arg(Number(order.lotCount).toLocaleString())
+                        .arg(Number(delegate.order.itemCount).toLocaleString())
+                        .arg(Number(delegate.order.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: BS.Currency.format(order.grandTotal, order.currencyCode, 2)
+                        text: BS.Currency.format(delegate.order.grandTotal, delegate.order.currencyCode, 2)
                         Layout.alignment: Qt.AlignRight
                     }
                 }

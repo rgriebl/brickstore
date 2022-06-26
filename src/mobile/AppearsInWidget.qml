@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
+import BrickLink as BL
+import Mobile
 
 Control {
     id: root
@@ -9,11 +11,17 @@ Control {
     property var items: []
     property var colors: []
 
-    onItemsChanged: { updateAppearsIn() }
-    onColorsChanged: { updateAppearsIn() }
+    onItemsChanged: { delayedUpdateTimer.start() }
+    onColorsChanged: { delayedUpdateTimer.start() }
+
+    Timer {
+        id: delayedUpdateTimer
+        interval: 100
+        onTriggered: { root.updateAppearsIn() }
+    }
 
     function updateAppearsIn() {
-        listView.model = BS.BrickLink.appearsInModel(root.items, root.colors)
+        listView.model = BL.BrickLink.appearsInModel(root.items, root.colors)
     }
 
     ListView {
@@ -35,16 +43,16 @@ Control {
             width: ListView.view.width
             height: layout.height + xspacing
 
-            property var blitem: BS.BrickLink.item(item)
+            property var blitem: BL.BrickLink.item(item)
 
             GridLayout {
                 id: layout
-                x: xspacing
-                width: parent.width - 2 * xspacing
-                columnSpacing: xspacing
+                x: parent.xspacing
+                width: parent.width - 2 * parent.xspacing
+                columnSpacing: parent.xspacing
                 columns: 3
 
-                BS.QImageItem {
+                QImageItem {
                     Layout.rowSpan: 2
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
@@ -53,8 +61,8 @@ Control {
                     height: fm.height * 2
                     width: height * 4 / 3
 
-                    property BS.Picture pic: BS.BrickLink.largePicture(delegate.blitem)
-                    property var noImage: BS.BrickLink.noImage(width, height)
+                    property BL.Picture pic: BL.BrickLink.largePicture(delegate.blitem)
+                    property var noImage: BL.BrickLink.noImage(width, height)
 
                     image: pic && pic.isValid ? pic.image : noImage
                 }
@@ -65,7 +73,7 @@ Control {
                 Label {
                     font.bold: true
                     text: delegate.quantity
-                    visible: quantity > 0
+                    visible: delegate.quantity > 0
                     horizontalAlignment: Text.AlignRight
                 }
                 Label {

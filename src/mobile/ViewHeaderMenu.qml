@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import Qt.labs.qmlmodels
 import BrickStore
 
@@ -19,21 +18,21 @@ AutoSizingMenu {
     anchors.centerIn: parent
 
     ActionDelegate { action: Action { text: qsTr("Sort ascending by %1").arg(root.fieldName)
-            onTriggered: document.model.sort(root.field, Qt.AscendingOrder)
+            onTriggered: root.document.model.sort(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Sort descending by %1").arg(root.fieldName)
-            onTriggered: document.model.sort(root.field, Qt.DescendingOrder)
+            onTriggered: root.document.model.sort(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Additionally sort ascending by %1").arg(root.fieldName)
-            onTriggered: document.model.sortAdditionally(root.field, Qt.AscendingOrder)
+            onTriggered: root.document.model.sortAdditionally(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Additionally sort descending by %1").arg(root.fieldName)
-            onTriggered: document.model.sortAdditionally(root.field, Qt.DescendingOrder)
+            onTriggered: root.document.model.sortAdditionally(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Resize column %1").arg(root.fieldName) }
-        BrickStoreDialog {
+        AutoSizingDialog {
             id: columnDialog
             title: qsTr("Configure Columns")
 
@@ -53,7 +52,7 @@ AutoSizingMenu {
                     text: name
                     ToolButton {
                         id: moveDown
-                        enabled: index < (root.model.columnModel.count - 1)
+                        enabled: delegate.index < (root.model.columnModel.count - 1)
                         height: parent.height
                         width: height
                         anchors.right: parent.right
@@ -65,7 +64,7 @@ AutoSizingMenu {
                     }
                     ToolButton {
                         id: moveUp
-                        enabled: index > 0
+                        enabled: delegate.index > 0
                         height: parent.height
                         width: height
                         anchors.right: moveDown.left
@@ -81,7 +80,7 @@ AutoSizingMenu {
                         width: height
                         anchors.right: moveUp.left
                         flat: true
-                        icon.name: hidden ? "view-hidden" : "view-visible"
+                        icon.name: delegate.hidden ? "view-hidden" : "view-visible"
                         onClicked: {
                             root.model.columnModel.hideColumn(index, !hidden)
                         }
@@ -118,8 +117,9 @@ AutoSizingMenu {
                     }
                     DelegateChoice {
                         MenuItem {
-                            text: model.name
-                            property string id: model.id
+                            required property string id
+                            required property string name
+                            text: name
                             onTriggered: Qt.callLater(root.document.setColumnLayoutFromId, id)
                         }
                     }

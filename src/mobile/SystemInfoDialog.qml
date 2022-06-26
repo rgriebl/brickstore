@@ -4,9 +4,10 @@ import QtQuick.Layouts
 import BrickStore as BS
 
 
-BrickStoreDialog {
+AutoSizingDialog {
     id: root
     title: qsTr("System Information")
+    keepPaddingInSmallMode: true
 
     footer: DialogButtonBox {
         Button {
@@ -63,7 +64,7 @@ BrickStoreDialog {
                 property string t
                 text: t
                 leftPadding: height * 1.5
-                Rectangle { width: parent.height; height: parent.height; color: c }
+                Rectangle { width: parent.height; height: parent.height; color: parent.c }
             }
 
             ColorLabel { t: "foreground color                 "; c: Material.foreground }

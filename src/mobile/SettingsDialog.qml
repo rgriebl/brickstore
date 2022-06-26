@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import BrickStore as BS
 
 
-BrickStoreDialog {
+AutoSizingDialog {
     id: root
     title: qsTr("Settings")
     relativeWidth: 3 / 4

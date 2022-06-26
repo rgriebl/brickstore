@@ -3,7 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
-import "qrc:/ldraw" as LDraw
+import BrickLink as BL
+import Mobile
+import LDraw
 
 Control {
     id: root
@@ -12,8 +14,8 @@ Control {
 
     property bool single: false
     property bool is3D: false
-    property BS.Picture picture
-    property bool isUpdating: (picture && (picture.updateStatus === BS.BrickLink.UpdateStatus.Updating))
+    property BL.Picture picture
+    property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
 
     onLotChanged: { updateInfo() }
 
@@ -26,16 +28,19 @@ Control {
 
         if (single) {
             infoText.text = ''
-            picture = BS.BrickLink.picture(lot.item, lot.color, true)
+            picture = BL.BrickLink.picture(lot.item, lot.color, true)
             if (picture)
                 picture.addRef()
 
             Qt.callLater(function() {
                 let has3D = info3D.renderController.setPartAndColor(lot.item, lot.color)
-                root.is3D = has3D
+                if (root.is3D && !has3D)
+                    root.is3D = false
+                else if (!root.is3D && has3D && (!root.picture || !root.picture.isValid))
+                    root.is3D = true;
             })
         } else {
-            info3D.renderController.setPartAndColor(BS.BrickLink.noItem, BS.BrickLink.noColor)
+            info3D.renderController.setPartAndColor(BL.BrickLink.noItem, BL.BrickLink.noColor)
 
             let stat = document.selectionStatistics()
             infoText.text = stat.asHtmlTable()
@@ -50,8 +55,10 @@ Control {
     StackLayout {
         anchors.fill: parent
         clip: true
-        currentIndex: root.single ? (root.is3D ? 2 : 1) : 0
-
+        currentIndex: !root.single ? 0
+                                   : (!root.is3D ? (!root.picture || !root.picture.isValid ? 1
+                                                                                           : 2)
+                                                 : 3)
         Label {
             id: infoText
             textFormat: Text.RichText
@@ -59,11 +66,23 @@ Control {
             leftPadding: 8
         }
 
-        BS.QImageItem {
+        Label {
+            id: infoNoImage
+            color: "#DA4453"
+            fontSizeMode: Text.Fit
+            font.pointSize: root.font.pointSize * 3
+            font.italic: true
+            minimumPointSize: root.font.pointSize
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: qsTr("No image available")
+        }
+
+        QImageItem {
             id: infoImage
             fillColor: "white"
             image: root.picture && root.picture.isValid ? root.picture.image : noImage
-            property var noImage: BS.BrickLink.noImage(width, height)
+            property var noImage: BL.BrickLink.noImage(0, 0)
 
             Label {
                 id: infoImageUpdating
@@ -89,9 +108,11 @@ Control {
             }
         }
 
-        LDraw.PartRenderer {
+        //Rectangle {
+        PartRenderer {
             id: info3D
-            renderController: BS.BrickStore.createRenderController(this)
+            //property var renderController: RenderController { }
+            renderController: RenderController { }
         }
     }
     RowLayout {
@@ -109,7 +130,7 @@ Control {
             topPadding: 16
             rightPadding: 16
             text: root.is3D ? "2D" : "3D"
-            onClicked: root.is3D = !root.is3D
+            onClicked: { root.is3D = !root.is3D }
             background: null
 
             Component.onCompleted: {

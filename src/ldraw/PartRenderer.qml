@@ -1,17 +1,15 @@
 import QtQuick
 import QtQuick3D
-import QtQuick3D.Helpers
-import BrickStore as BS
+import LDraw
 
 Item {
     id: root
 
     required property var renderController
     property alias rc: root.renderController
-    property var rs: BS.LDrawRenderSettings
 
     Connections {
-        target: rc
+        target: root.rc
         function onQmlResetCamera() {
             root.animateScaleToFit()
         }
@@ -30,7 +28,7 @@ Item {
         if (!rc)
             return
 
-        let r = rc.radius
+        let r = root.rc.radius
         let z = 1
         if (view.camera == pcamera) {
             let r_max = pcamera.z * Math.sin(pcamera.fieldOfView * Math.PI / 180 / 2)
@@ -50,7 +48,7 @@ Item {
 
     function animateScaleToFit() {
         modelAnimation.enabled = true
-        rootNode.rotation = rs.defaultRotation
+        rootNode.rotation = RenderSettings.defaultRotation
         scaleToFit()
         modelAnimation.enabled = false
     }
@@ -63,22 +61,22 @@ Item {
 
         environment: SceneEnvironment {
             id: env
-            clearColor: rc.clearColor
+            clearColor: root.rc.clearColor
             backgroundMode: SceneEnvironment.Color
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
-            lightProbe: Texture { source: "qrc:/ldraw/lightbox.hdr" }
+            lightProbe: Texture { source: "./lightbox.hdr" }
             probeExposure: 0.9
-            aoStrength: rs.aoStrength * 100
-            aoDistance: rs.aoDistance * 100
-            aoSoftness: rs.aoSoftness * 100
+            aoStrength: RenderSettings.aoStrength * 100
+            aoDistance: RenderSettings.aoDistance * 100
+            aoSoftness: RenderSettings.aoSoftness * 100
         }
 
         DirectionalLight {
-           brightness: rs.additionalLight
+           brightness: RenderSettings.additionalLight
         }
 
-        camera: rs.orthographicCamera ? ocamera : pcamera
+        camera: RenderSettings.orthographicCamera ? ocamera : pcamera
 
         OrthographicCamera {
             id: ocamera
@@ -88,13 +86,13 @@ Item {
         PerspectiveCamera {
             id: pcamera
             z: 3000
-            fieldOfView: rs.fieldOfView
+            fieldOfView: RenderSettings.fieldOfView
         }
 
         Node {
             id: rootNode
-            rotation: rs.defaultRotation
-            pivot: rc.center
+            rotation: RenderSettings.defaultRotation
+            pivot: root.rc.center
 
             Behavior on rotation {
                 id: modelAnimation
@@ -112,9 +110,9 @@ Item {
 
             Model {
                 source: "#Sphere"
-                visible: rs.showBoundingSpheres
-                position: rc.center
-                property real radius: rc.radius * 2 / 100
+                visible: RenderSettings.showBoundingSpheres
+                position: root.rc.center
+                property real radius: root.rc.radius * 2 / 100
                 scale: Qt.vector3d(radius, radius, radius)
                 materials: PrincipledMaterial {
                     baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
@@ -123,15 +121,15 @@ Item {
             }
 
             Repeater3D {
-                model: rc.surfaces.length
+                model: root.rc.surfaces
 
                 Model {
-                    property var ldrawGeometry: rc.surfaces[index]
+                    required property RenderGeometry modelData
 
                     source: "#Sphere"
-                    visible: rs.showBoundingSpheres
-                    position: ldrawGeometry ? ldrawGeometry.center : Qt.vector3d(0, 0, 0)
-                    property real radius: ldrawGeometry ? (ldrawGeometry.radius * 2 / 100) : 1
+                    visible: RenderSettings.showBoundingSpheres
+                    position: modelData ? modelData.center : Qt.vector3d(0, 0, 0)
+                    property real radius: modelData ? (modelData.radius * 2 / 100) : 1
                     scale: Qt.vector3d(radius, radius, radius)
                     materials: PrincipledMaterial {
                         baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
@@ -146,25 +144,29 @@ Item {
             property var textureKeepAlive: ({})
 
             Repeater3D {
-                model: rc.surfaces.length
+                model: root.rc.surfaces
 
                 Model {
                     id: model
-                    property var ldrawGeometry: rc.surfaces[index]
+                    required property RenderGeometry modelData
 
-                    geometry: ldrawGeometry
+                    geometry: modelData
                     materials: PrincipledMaterial {
                         id: material
-                        property color color       : model.ldrawGeometry ? model.ldrawGeometry.color : "pink"
-                        property real luminance    : model.ldrawGeometry ? model.ldrawGeometry.luminance : 0
-                        property bool isChrome     : model.ldrawGeometry && model.ldrawGeometry.isChrome
-                        property bool isMetallic   : model.ldrawGeometry && model.ldrawGeometry.isMetallic
-                        property bool isPearl      : model.ldrawGeometry && model.ldrawGeometry.isPearl
+                        property color color       : model.modelData ? model.modelData.color : "pink"
+                        property real luminance    : model.modelData ? model.modelData.luminance : 0
+                        property bool isChrome     : model.modelData && model.modelData.isChrome
+                        property bool isMetallic   : model.modelData && model.modelData.isMetallic
+                        property bool isPearl      : model.modelData && model.modelData.isPearl
                         property bool isTransparent: (color.a < 1)
-                        property var textureData   : model.ldrawGeometry ? model.ldrawGeometry.textureData : null
+                        property var textureData   : model.modelData ? model.modelData.textureData : null
 
                         onTextureDataChanged: {
                             if (textureData) {
+                                // qml.lint workaround: accessing rootNode by id is an unqualified access
+                                // when done from a Repeater delegate
+                                let rootNode = parent.parent.parent
+
                                 if (rootNode.textureKeepAlive[textureData] === undefined) {
                                     let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
                                     obj.textureData = textureData
@@ -176,7 +178,7 @@ Item {
 
                         property var texture: Texture { textureData: material.textureData }
 
-                        lighting: rs.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
+                        lighting: RenderSettings.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
 
                         baseColorMap: textureData ? texture : null
                         baseColor   : textureData ? "white" : color
@@ -188,44 +190,44 @@ Item {
 
                         emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
 
-                        metalness: isChrome ? rs.chromeMetalness
-                                            : isMetallic ? rs.metallicMetalness
-                                                         : isPearl ? rs.pearlMetalness
-                                                                   : rs.plainMetalness
-                        roughness: isChrome ? rs.chromeRoughness
-                                            : isMetallic ? rs.metallicRoughness
-                                                         : isPearl ? rs.pearlRoughness
-                                                                   : rs.plainRoughness
+                        metalness: isChrome ? RenderSettings.chromeMetalness
+                                            : isMetallic ? RenderSettings.metallicMetalness
+                                                         : isPearl ? RenderSettings.pearlMetalness
+                                                                   : RenderSettings.plainMetalness
+                        roughness: isChrome ? RenderSettings.chromeRoughness
+                                            : isMetallic ? RenderSettings.metallicRoughness
+                                                         : isPearl ? RenderSettings.pearlRoughness
+                                                                   : RenderSettings.plainRoughness
                     }
                 }
             }
             Model {
                 id: lines
-                geometry: rc.lineGeometry
-                instancing: rc.lines
-                visible: rs.renderLines
+                geometry: root.rc.lineGeometry
+                instancing: root.rc.lines
+                visible: RenderSettings.renderLines
                 depthBias: -10
 
                 materials: CustomMaterial {
-                    property real customLineWidth: rs.lineThickness * rootNode.scale.x / 50
+                    property real customLineWidth: RenderSettings.lineThickness * rootNode.scale.x / 50
                     property size resolution: Qt.size(view.width, view.height)
 
                     cullMode: Material.BackFaceCulling
                     shadingMode: CustomMaterial.Unshaded
-                    vertexShader: "shaders/custom-line.vert"
-                    fragmentShader: "shaders/custom-line.frag"
+                    vertexShader: "./shaders/custom-line.vert"
+                    fragmentShader: "./shaders/custom-line.frag"
                 }
             }
         }
 
         Timer {
             id: animation
-            running: rc.tumblingAnimationActive
+            running: root.rc.tumblingAnimationActive
             repeat: true
             interval: 16
             onTriggered: {
-                rootNode.rotate(rs.tumblingAnimationAngle,
-                                rs.tumblingAnimationAxis, Node.LocalSpace)
+                rootNode.rotate(RenderSettings.tumblingAnimationAngle,
+                                RenderSettings.tumblingAnimationAxis, Node.LocalSpace)
             }
         }
 
@@ -236,12 +238,12 @@ Item {
         Timer {
             interval: 2000
             running: hovered.hovered && !moveHandler.active && !pinchHandler.active && !arcballHandler.active
-            onTriggered: rc.requestToolTip(hovered.point.scenePosition)
+            onTriggered: root.rc.requestToolTip(hovered.point.scenePosition)
         }
 
         TapHandler {
             acceptedButtons: Qt.RightButton
-            onSingleTapped: (eventPoint, button) => { rc.requestContextMenu(eventPoint.scenePosition) }
+            onSingleTapped: (eventPoint, button) => { root.rc.requestContextMenu(eventPoint.scenePosition) }
         }
 
         TapHandler {
@@ -270,11 +272,11 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = rc.tumblingAnimationActive
-                    rc.tumblingAnimationActive = false
+                    animationWasActive = root.rc.tumblingAnimationActive
+                    root.rc.tumblingAnimationActive = false
                     pressPosition = rootNode.position
                 } else {
-                    rc.tumblingAnimationActive = animationWasActive
+                    root.rc.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
@@ -319,12 +321,12 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = rc.tumblingAnimationActive
-                    rc.tumblingAnimationActive = false
+                    animationWasActive = root.rc.tumblingAnimationActive
+                    root.rc.tumblingAnimationActive = false
                     pressRotation = rootNode.rotation
                     pressPos = centroid.pressPosition
                 } else {
-                    rc.tumblingAnimationActive = animationWasActive
+                    root.rc.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
@@ -333,7 +335,7 @@ Item {
                 let mousePos = Qt.point(pressPos.x + activeTranslation.x,
                                         pressPos.y + activeTranslation.y)
 
-                rootNode.rotation = rc.rotateArcBall(pressPos, mousePos, pressRotation,
+                rootNode.rotation = root.rc.rotateArcBall(pressPos, mousePos, pressRotation,
                                                      Qt.size(view.width, view.height))
             }
         }

@@ -16,6 +16,8 @@ Dialog {
     property real relativeWidth: .75
     property real relativeHeight: .75
 
+    property bool keepPaddingInSmallMode: false
+
     focus: true
 
 //    // ~ in mm
@@ -64,7 +66,7 @@ Dialog {
     Connections {
         target: Style
         function onSmallSizeChanged() {
-            switchSmallStyle()
+            root.switchSmallStyle()
         }
     }
     Component.onCompleted: {
@@ -83,12 +85,22 @@ Dialog {
             if (!defaultHeader) {
                 defaultHeader = header
                 defaultTopPadding = topPadding
+                defaultLeftPadding = leftPadding
+                defaultRightPadding = rightPadding
+                defaultBottomPadding = bottomPadding
             }
             header = smallHeader
-            topPadding = 0
-            leftPadding = 0
-            rightPadding = 0
-            bottomPadding = 0
+            if (keepPaddingInSmallMode) {
+                topPadding = defaultTopPadding / 2
+                leftPadding = defaultLeftPadding / 2
+                rightPadding = defaultRightPadding / 2
+                bottomPadding = defaultBottomPadding / 2
+            } else {
+                topPadding = 0
+                leftPadding = 0
+                rightPadding = 0
+                bottomPadding = 0
+            }
         } else {
             if (defaultHeader) {
                 header = defaultHeader

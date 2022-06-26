@@ -138,7 +138,7 @@ ApplicationWindow {
 
                                     icon.source: "qrc:/assets/generated-app-icons/brickstore_doc"
                                     text: fileNameOrTitle
-                                    onClicked: setActiveDocument(document)
+                                    onClicked: root.setActiveDocument(document)
                                 }
                             }
                         }

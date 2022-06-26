@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Controls
+
 import QtQuick.Layouts
 import Qt.labs.qmlmodels
 import "./utils.js" as Utils
 import BrickStore as BS
-
+import BrickLink as BL
+import Mobile
 
 Page {
     id: root
@@ -204,7 +206,7 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Condition
                     GridCell {
-                        property bool isNew: display === BS.BrickLink.Condition.New
+                        property bool isNew: display === BL.BrickLink.Condition.New
                         //horizontalAlignment: Text.AlignHCenter
                         text: isNew ? qsTr("N") : qsTr("U")
                         tint: isNew ? "transparent" : Qt.rgba(.5, .5, .5, .5)
@@ -215,7 +217,7 @@ Page {
                     GridCell {
                         property var status: display
                         required property var lot
-                        property var bllot: BS.BrickLink.lot(lot)
+                        property var bllot: BL.BrickLink.lot(lot)
                         property string tagText: bllot.counterPart
                                                  ? qsTr("CP")
                                                  : bllot.alternateId
@@ -228,17 +230,17 @@ Page {
 
                         Label { }
                         CornerTag {
-                            visible: tagText !== ''
-                            text: tagText
-                            bold: tagBold
-                            color: tagColor
+                            visible: parent.tagText !== ''
+                            text: parent.tagText
+                            bold: parent.tagBold
+                            color: parent.tagColor
                         }
                         ToolButton {
                             anchors.fill: parent
                             enabled: false
                             icon.color: "transparent"
-                            icon.name: status === BS.BrickLink.Status.Exclude
-                                       ? "vcs-removed" : (status === BS.BrickLink.Status.Include
+                            icon.name: parent.status === BL.BrickLink.Status.Exclude
+                                       ? "vcs-removed" : (parent.status === BL.BrickLink.Status.Include
                                                           ? "vcs-normal" : "vcs-added")
                         }
                     }
@@ -246,9 +248,9 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Picture
                     GridCell {
-                        background: BS.QImageItem {
+                        background: QImageItem {
                             fillColor: "white"
-                            image: display
+                            image: parent.display
                         }
                     }
                 }
@@ -256,7 +258,7 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Color
                     GridCell {
                         id: cell
-                        BS.QImageItem {
+                        QImageItem {
                             id: colorImage
                             anchors {
                                 left: parent.left
@@ -265,7 +267,7 @@ Page {
                                 bottom: parent.bottom
                             }
                             width: parent.font.pixelSize * 2
-                            image: BS.BrickLink.color(parent.display).image(width, height)
+                            image: BL.BrickLink.color(parent.display).image(width, height)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display
@@ -279,7 +281,7 @@ Page {
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
-                            checked: retain
+                            checked: parent.retain
                         }
                     }
                 }
@@ -293,25 +295,25 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         property var stockroom: display
-                        text: stockroom === BS.BrickLink.Stockroom.A
-                              ? 'A' : (stockroom === BS.BrickLink.Stockroom.B
-                                ? 'B' : (stockroom === BS.BrickLink.Stockroom.C
+                        text: stockroom === BL.BrickLink.Stockroom.A
+                              ? 'A' : (stockroom === BL.BrickLink.Stockroom.B
+                                ? 'B' : (stockroom === BL.BrickLink.Stockroom.C
                                   ? 'C' : ''))
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
                             checked: false
-                            visible: stockroom === BS.BrickLink.Stockroom.None
+                            visible: parent.stockroom === BL.BrickLink.Stockroom.None
                         }
                     }
                 }
 
                 DelegateChoice { roleValue: BS.Document.Sale
-                    GridCell { text: humanReadableInteger(display, 0, "%") }
+                    GridCell { text: root.humanReadableInteger(display, 0, "%") }
                 }
 
                 DelegateChoice { roleValue: BS.Document.Bulk
-                    GridCell { text: humanReadableInteger(display, 1) }
+                    GridCell { text: root.humanReadableInteger(display, 1) }
                 }
 
                 DelegateChoice { roleValue: BS.Document.Price
@@ -323,7 +325,7 @@ Page {
                 DelegateChoice { roleValue: BS.Document.PriceDiff
                     GridCell {
 //                        required property var baseLot  remove?
-                        text: humanReadableCurrency(display)
+                        text: root.humanReadableCurrency(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
                                           : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
@@ -331,7 +333,7 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Total
                     GridCell {
-                        text: humanReadableCurrency(display)
+                        text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
@@ -340,26 +342,26 @@ Page {
                 }
                 DelegateChoice { roleValue: BS.Document.TierP1
                     GridCell {
-                        text: humanReadableCurrency(display)
+                        text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierP2
                     GridCell {
-                        text: humanReadableCurrency(display)
+                        text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierP3
                     GridCell {
-                        text: humanReadableCurrency(display)
+                        text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.Quantity
                     GridCell {
                         property bool isZero: display === 0
-                        text: humanReadableInteger(display)
+                        text: root.humanReadableInteger(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, .4)
                                           : display === 0 ? Qt.rgba(1, 1, 0, .4)
                                                           : "transparent"
@@ -372,7 +374,7 @@ Page {
                 }
                 DelegateChoice { roleValue: BS.Document.QuantityDiff
                     GridCell {
-                        text: humanReadableInteger(display)
+                        text: root.humanReadableInteger(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
                                           : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
@@ -404,14 +406,14 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BS.BrickLink.lot(lot).category.id, 0.2)
+                        tint: root.shadeColor(BL.BrickLink.lot(lot).category.id, 0.2)
                         text: display
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.ItemType
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BS.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
+                        tint: root.shadeColor(BL.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
                 }
@@ -485,7 +487,7 @@ Page {
     }
 
     property QtObject connectionContext: null
-    property bool active: document && (BS.ActionManager.activeDocument == root.document)
+    property bool active: document && (BS.ActionManager.activeDocument === root.document)
 
     onActiveChanged: {
         if (active) {

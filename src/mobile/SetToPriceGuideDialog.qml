@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import BrickStore
+import BrickLink as BL
+
 
 Dialog {
     id: root
@@ -13,8 +14,8 @@ Dialog {
 //    width: Overlay.overlay.width * 3 / 4
 //    height: Overlay.overlay.height * 3 / 4
 
-    property int time: BrickLink.Time.PastSix
-    property int price: BrickLink.Price.WAverage
+    property int time: BL.BrickLink.Time.PastSix
+    property int price: BL.BrickLink.Price.WAverage
     property bool forceUpdate: false
 
     ButtonGroup {
@@ -35,6 +36,11 @@ Dialog {
         }
     }
 
+    component CheckButton : Button {
+        checkable: true
+        property int value
+    }
+
     Component.onCompleted: {
         force.checked = root.forceUpdate
         checkButton(timeButtons.children, root.time)
@@ -46,44 +52,38 @@ Dialog {
         Label { text: qsTr("The prices of all selected items will be set to Price Guide values.<br /><br />Select which part of the price guide should be used:") }
         RowLayout {
             id: timeButtons
-            Button {
+            CheckButton {
                 ButtonGroup.group: timeGroup
-                checkable: true
                 text: qsTr("Last 6 Months Sales")
-                property int value: BrickLink.Time.PastSix
+                value: BL.BrickLink.Time.PastSix
             }
-            Button {
+            CheckButton {
                 ButtonGroup.group: timeGroup
-                checkable: true
                 text: qsTr("Current Inventory")
-                property int value: BrickLink.Time.Current
+                value: BL.BrickLink.Time.Current
             }
         }
         RowLayout {
             id: priceButtons
-            Button {
+            CheckButton {
                 ButtonGroup.group: priceGroup
-                checkable: true
                 text: qsTr("Minimum")
-                property int value: BrickLink.Price.Lowest
+                value: BL.BrickLink.Price.Lowest
             }
-            Button {
+            CheckButton {
                 ButtonGroup.group: priceGroup
-                checkable: true
                 text: qsTr("Average")
-                property int value: BrickLink.Price.Average
+                value: BL.BrickLink.Price.Average
             }
-            Button {
+            CheckButton {
                 ButtonGroup.group: priceGroup
-                checkable: true
                 text: qsTr("Quantity Average")
-                property int value: BrickLink.Price.WAverage
+                value: BL.BrickLink.Price.WAverage
             }
-            Button {
+            CheckButton {
                 ButtonGroup.group: priceGroup
-                checkable: true
                 text: qsTr("Maximum")
-                property int value: BrickLink.Price.Highest
+                value: BL.BrickLink.Price.Highest
             }
         }
         Label {

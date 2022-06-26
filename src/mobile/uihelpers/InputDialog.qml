@@ -9,7 +9,6 @@ Dialog {
     standardButtons: DialogButtonBox.Cancel | DialogButtonBox.Ok
     width: Math.min(Math.max(fm.averageCharacterWidth * 50, implicitWidth), Overlay.overlay ? Overlay.overlay.width : 800)
 
-
     property string mode: "string"
     property alias text: label.text
     property string unit
@@ -44,14 +43,14 @@ Dialog {
         }
         TextField {
             id: text
-            visible: mode === "string"
-            echoMode: isPassword ? TextInput.Password : TextInput.Normal
+            visible: root.mode === "string"
+            echoMode: root.isPassword ? TextInput.Password : TextInput.Normal
             Layout.fillWidth: true
         }
         RowLayout {
             SpinBox {
                 id: intSpin
-                visible: mode === "int"
+                visible: root.mode === "int"
                 editable: true
                 from: intValidator.bottom
                 to: intValidator.top
@@ -66,7 +65,7 @@ Dialog {
         RowLayout {
             SpinBox {
                 id: dblSpin
-                visible: mode === "double"
+                visible: root.mode === "double"
                 editable: true
 
                 property int factor: Math.pow(10, root.doubleDecimals)

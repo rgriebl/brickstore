@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import BrickLink as BL
 import BrickStore as BS
 
 
@@ -16,7 +17,7 @@ Page {
             anchors.fill: parent
             ToolButton {
                 icon.name: "go-previous"
-                onClicked: goBackFunction()
+                onClicked: root.goBackFunction()
             }
             Label {
                 Layout.fillWidth: true
@@ -29,8 +30,8 @@ Page {
             }
             ToolButton {
                 icon.name: "view-refresh"
-                onClicked: BS.BrickLink.carts.startUpdate()
-                enabled: BS.BrickLink.carts.updateStatus !== BS.BrickLink.UpdateStatus.Updating
+                onClicked: BL.BrickLink.carts.startUpdate()
+                enabled: BL.BrickLink.carts.updateStatus !== BL.BrickLink.UpdateStatus.Updating
             }
         }
     }
@@ -49,7 +50,7 @@ Page {
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
-                sourceModel: BS.BrickLink.carts
+                sourceModel: BL.BrickLink.carts
                 sortOrder: Qt.DescendingOrder
                 sortColumn: 0
                 filterSyntax: BS.SortFilterProxyModel.FixedString
@@ -68,16 +69,16 @@ Page {
                 height: layout.height + xspacing
                 visible: cart
 
-                required property BS.Cart cart
+                required property BL.Cart cart
                 required property int index
 
                 GridLayout {
                     id: layout
-                    x: xspacing
-                    y: xspacing / 2
-                    width: parent.width - 2 * xspacing
-                    columnSpacing: xspacing
-                    rowSpacing: xspacing / 2
+                    x: parent.xspacing
+                    y: parent.xspacing / 2
+                    width: parent.width - 2 * parent.xspacing
+                    columnSpacing: parent.xspacing
+                    rowSpacing: parent.xspacing / 2
                     columns: 3
 
                     Image {
@@ -86,7 +87,7 @@ Page {
                         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                         asynchronous: true
-                        source: "qrc:/assets/flags/" + cart.countryCode
+                        source: "qrc:/assets/flags/" + delegate.cart.countryCode
                         fillMode: Image.PreserveAspectFit
                         sourceSize.height: fm.height * .75
                         sourceSize.width: fm.height * 1.5
@@ -105,25 +106,25 @@ Page {
                     }
                     Label {
                         id: label
-                        text: cart.storeName + ' (' + cart.sellerName + ')'
+                        text: delegate.cart.storeName + ' (' + delegate.cart.sellerName + ')'
                         font.bold: true
                         elide: Text.ElideRight
                         maximumLineCount: 1
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: cart.lastUpdated.toLocaleDateString(Locale.ShortFormat)
+                        text: delegate.cart.lastUpdated.toLocaleDateString(Locale.ShortFormat)
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(cart.itemCount).toLocaleString())
-                        .arg(Number(cart.lotCount).toLocaleString())
+                        .arg(Number(delegate.cart.itemCount).toLocaleString())
+                        .arg(Number(delegate.cart.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: BS.Currency.format(cart.total, cart.currencyCode, 2)
+                        text: BS.Currency.format(delegate.cart.total, delegate.cart.currencyCode, 2)
                         Layout.alignment: Qt.AlignRight
                     }
                 }
@@ -140,7 +141,7 @@ Page {
                     anchors.leftMargin: anchors.rightMargin
                 }
                 onClicked: {
-                    BS.BrickLink.carts.startFetchLots(cart)
+                    BL.BrickLink.carts.startFetchLots(delegate.cart)
                     root.goBackFunction()
                 }
             }
@@ -156,6 +157,6 @@ Page {
     }
 
     Component.onCompleted: {
-        Qt.callLater(function() { BS.BrickLink.carts.startUpdate() })
+        Qt.callLater(function() { BL.BrickLink.carts.startUpdate() })
     }
 }

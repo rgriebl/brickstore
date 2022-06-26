@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
+import BrickLink as BL
+import Mobile
 
 Page {
     id: root
@@ -9,7 +11,7 @@ Page {
 
     property var goBackFunction
 
-    property var currentItem: BS.BrickLink.noItem
+    property var currentItem: BL.BrickLink.noItem
     property bool hasInstructions: false
     property bool hasCounterParts: false
     property bool hasAlternates: false
@@ -22,7 +24,7 @@ Page {
                 icon.name: "go-previous"
                 onClicked: {
                     if (pages.currentIndex === 0)
-                        goBackFunction()
+                        root.goBackFunction()
                     else if (pages.currentIndex > 0)
                         pages.currentIndex = pages.currentIndex - 1
                 }
@@ -42,12 +44,12 @@ Page {
                 enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
                 onClicked: {
                     if (lastPage && !root.currentItem.isNull) {
-                        let condition = conditionNew.checked ? BS.BrickLink.Condition.New
-                                                             : BS.BrickLink.Condition.Used
-                        let extra = extraInclude.checked ? BS.BrickLink.Status.Include
-                                                         : extraExclude.checked ? BS.BrickLink.Status.Exclude
-                                                                                : BS.BrickLink.Status.Extra
-                        if (BS.BrickStore.importPartInventory(root.currentItem, BS.BrickLink.noColor,
+                        let condition = conditionNew.checked ? BL.BrickLink.Condition.New
+                                                             : BL.BrickLink.Condition.Used
+                        let extra = extraInclude.checked ? BL.BrickLink.Status.Include
+                                                         : extraExclude.checked ? BL.BrickLink.Status.Exclude
+                                                                                : BL.BrickLink.Status.Extra
+                        if (BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
                                                               quantity.value, condition, extra,
                                                               root.hasInstructions && includeInstructions.checked,
                                                               root.hasAlternates && includeAlternates.checked,
@@ -79,20 +81,21 @@ Page {
                     position: TabBar.Header
 
                     Repeater {
-                        model: BS.ItemTypeModel {
+                        model: BL.ItemTypeModel {
                             filterWithoutInventory: true
 
                             // get "Set" to the left side
                             Component.onCompleted: { sort(0, Qt.DescendingOrder) }
                         }
                         delegate: TabButton {
-                            property var itemTypeProp: itemType
+                            required property var itemType
+                            required property string name
                             text: name
                         }
                     }
                     onCurrentItemChanged: {
-                        catList.model.filterItemType = currentItem.itemTypeProp
-                        itemList.model.filterItemType = currentItem.itemTypeProp
+                        catList.model.filterItemType = currentItem.itemType
+                        itemList.model.filterItemType = currentItem.itemType
                     }
                     currentIndex: 0
                 }
@@ -104,7 +107,7 @@ Page {
                     clip: true
                     ScrollIndicator.vertical: ScrollIndicator { }
 
-                    model: BS.CategoryModel {
+                    model: BL.CategoryModel {
                         filterWithoutInventory: true
                         Component.onCompleted: { sort(0, Qt.AscendingOrder) }
                     }
@@ -175,14 +178,14 @@ Page {
                     cacheBuffer: cellHeight
                     ScrollIndicator.vertical: ScrollIndicator { minimumSize: 0.05 }
 
-                    model: BS.ItemModel {
+                    model: BL.ItemModel {
                         filterWithoutInventory: true
                         filterText: filter.text
 
                         Component.onCompleted: { sort(1, Qt.AscendingOrder) }
                     }
 
-                    property var noImage: BS.BrickLink.noImage(cellWidth, cellHeight)
+                    property var noImage: BL.BrickLink.noImage(cellWidth, cellHeight)
 
                     delegate: MouseArea {
                         id: delegate
@@ -191,14 +194,14 @@ Page {
                         required property string id
                         required property string name
                         required property var item
-                        property BS.Picture pic: itemListPage.isPageVisible
-                                                 ? BS.BrickLink.picture(BS.BrickLink.item(delegate.item), BS.BrickLink.item(delegate.item).defaultColor)
+                        property BL.Picture pic: itemListPage.isPageVisible
+                                                 ? BL.BrickLink.picture(BL.BrickLink.item(delegate.item), BL.BrickLink.item(delegate.item).defaultColor)
                                                  : null
 
-                        BS.QImageItem {
+                        QImageItem {
                             anchors.fill: parent
                             anchors.bottomMargin: itemList.labelHeight
-                            image: parent.pic && parent.pic.isValid ? parent.pic.image : itemList.noImage
+                            image: delegate.pic && delegate.pic.isValid ? delegate.pic.image : itemList.noImage
                         }
                         Label {
                             x: 8
@@ -213,7 +216,7 @@ Page {
                             verticalAlignment: Text.AlignVCenter
                         }
                         onClicked: {
-                            let it = BS.BrickLink.item(delegate.item)
+                            let it = BL.BrickLink.item(delegate.item)
 
                             root.currentItem = it
                             root.hasAlternates = false
@@ -223,10 +226,10 @@ Page {
 
                             if (!it.isNull) {
                                 if (it.itemType.id === "S")
-                                    root.hasInstructions = !BS.BrickLink.item("I", it.id).isNull
+                                    root.hasInstructions = !BL.BrickLink.item("I", it.id).isNull
 
                                 it.consistsOf().forEach(function(lot) {
-                                    if (lot.status === BS.BrickLink.Status.Extra)
+                                    if (lot.status === BL.BrickLink.Status.Extra)
                                         root.hasExtras = true
                                     if (lot.counterPart)
                                         root.hasCounterParts = true
@@ -268,12 +271,12 @@ Page {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 0
-                    BS.QImageItem {
+                    QImageItem {
                         height: lfm.height * 5
                         width: height * 4 / 3
 
-                        property BS.Picture pic: BS.BrickLink.picture(root.currentItem, BS.BrickLink.noColor, true)
-                        image: pic ? pic.image : BS.BrickLink.noImage(width, height)
+                        property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
+                        image: pic ? pic.image : BL.BrickLink.noImage(width, height)
                     }
                     Label {
                         Layout.fillWidth: true

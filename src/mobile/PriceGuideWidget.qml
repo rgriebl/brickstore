@@ -2,20 +2,28 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import BrickLink as BL
 import BrickStore as BS
 
 Control {
     id: root
     property BS.Document document: null
-    property var item: BS.BrickLink.noItem
-    property var color: BS.BrickLink.noColor
+    property var item: BL.BrickLink.noItem
+    property var color: BL.BrickLink.noColor
 
-    property BS.PriceGuide priceGuide: null
-    property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BS.BrickLink.UpdateStatus.Updating))
+    property BL.PriceGuide priceGuide: null
+    property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BL.BrickLink.UpdateStatus.Updating))
     property real currencyRate: document ? BS.Currency.rate(document.currencyCode) : 0
 
-    onItemChanged: { updatePriceGuide() }
-    onColorChanged: { updatePriceGuide() }
+
+    onItemChanged: { delayedUpdateTimer.start() }
+    onColorChanged: { delayedUpdateTimer.start() }
+
+    Timer {
+        id: delayedUpdateTimer
+        interval: 100
+        onTriggered: { root.updatePriceGuide() }
+    }
 
     function updatePriceGuide() {
         if (priceGuide)
@@ -24,7 +32,7 @@ Control {
         if (root.item.isNull || root.color.isNull)
             priceGuide = null
         else
-            priceGuide = BS.BrickLink.priceGuide(root.item, root.color, true)
+            priceGuide = BL.BrickLink.priceGuide(root.item, root.color, true)
 
         if (priceGuide)
             priceGuide.addRef()
@@ -69,7 +77,7 @@ Control {
 
         columns: 3
 
-        HeaderLabel { text: document ? document.currencyCode : '' }
+        HeaderLabel { text: root.document ? root.document.currencyCode : '' }
         HeaderLabel { text: qsTr("New") }
         HeaderLabel { text: qsTr("Used") }
 
@@ -81,24 +89,24 @@ Control {
         }
 
         Label { text: qsTr("Qty.") }
-        QuantityLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.New }
-        QuantityLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.Used }
+        QuantityLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.New }
+        QuantityLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.Used }
 
         Label { text: qsTr("Min.") }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Lowest }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Lowest }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Lowest }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Lowest }
 
         Label { text: qsTr("Avg.") }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Average }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Average }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Average }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Average }
 
         Label { text: qsTr("Q.Avg.") }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.WAverage }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.WAverage }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.WAverage }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.WAverage }
 
         Label { text: qsTr("Max.") }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Highest }
-        PriceLabel { time: BS.BrickLink.Time.PastSix; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Highest }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Highest }
+        PriceLabel { time: BL.BrickLink.Time.PastSix; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Highest }
 
         HeaderLabel {
             Layout.fillWidth: true
@@ -108,24 +116,24 @@ Control {
         }
 
         Label { text: qsTr("Qty.") }
-        QuantityLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New }
-        QuantityLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used }
+        QuantityLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.New }
+        QuantityLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.Used }
 
         Label { text: qsTr("Min.") }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Lowest }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Lowest }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Lowest }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Lowest }
 
         Label { text: qsTr("Avg.") }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Average }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Average }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Average }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Average }
 
         Label { text: qsTr("Q.Avg.") }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.WAverage }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.WAverage }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.WAverage }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.WAverage }
 
         Label { text: qsTr("Max.") }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.New;  price: BS.BrickLink.Price.Highest }
-        PriceLabel { time: BS.BrickLink.Time.Current; condition: BS.BrickLink.Condition.Used; price: BS.BrickLink.Price.Highest }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.New;  price: BL.BrickLink.Price.Highest }
+        PriceLabel { time: BL.BrickLink.Time.Current; condition: BL.BrickLink.Condition.Used; price: BL.BrickLink.Price.Highest }
 
         ToolButton {
             Layout.columnSpan: 3

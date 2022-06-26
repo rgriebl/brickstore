@@ -1,4 +1,3 @@
-import QtQuick
 import QtQuick.Controls
 
 // Menu doesn't resize itself to the maximum of its items' implictWidth
