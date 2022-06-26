@@ -1,5 +1,6 @@
 
 configure_file(version.h.in generated/version.h @ONLY)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 target_sources(${PROJECT_NAME} PUBLIC

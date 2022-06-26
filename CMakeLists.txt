@@ -10,6 +10,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# for QtCreator
+set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
+
 # Supported languages
 set(LANGUAGES en de fr es)
 
@@ -122,10 +125,14 @@ if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
     message(FATAL_ERROR "Qt ${MIN_QT_VERSION} or newer is required for building this variant")
 endif()
 
+if (WIN32)
+    add_compile_definitions(BS_HAS_PARALLEL_STL)
+    add_compile_definitions(NOMINMAX)
+endif()
 
 if (MODELTEST)
     find_package(Qt6 REQUIRED TestLib)
-    target_compile_definitions(${PROJECT_NAME} MODELTEST)
+    add_compile_definitions(MODELTEST)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::TestLib)
 endif()
 
@@ -150,11 +157,9 @@ if (SANITIZE)
     endif()
     set(ECM_ENABLE_SANITIZERS address leak undefined)
     include(${Qt6_DIR}/3rdparty/extra-cmake-modules/modules/ECMEnableSanitizers.cmake)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE SANITIZER_ENABLED)
+    add_compile_definitions(SANITIZER_ENABLED)
 endif()
 
-include_directories(3rdparty)
-add_subdirectory(3rdparty)
 file(GLOB_RECURSE ICONS_QRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/icons/*)
 file(GLOB_RECURSE FLAGS_QRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} assets/flags/*)
 
@@ -213,6 +218,9 @@ qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
+include_directories(3rdparty)
+add_subdirectory(3rdparty)
+
 include_directories(src)
 add_subdirectory(src)
 
@@ -221,16 +229,11 @@ if (WIN32)
     configure_file(windows/brickstore.rc.in generated/brickstore.rc @ONLY)
     target_sources(${PROJECT_NAME} PUBLIC generated/brickstore.rc)
 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE BS_HAS_PARALLEL_STL)
-
     # always link against widgets
     find_package(Qt6 REQUIRED Widgets)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE user32 advapi32 wininet)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations)
 endif()
 
 if (APPLE)
@@ -253,6 +256,15 @@ if (APPLE)
         target_sources(${PROJECT_NAME} PRIVATE ${APPICON_XCASSETS})
         set_source_files_properties(${APPICON_XCASSETS} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
+        )
+
+        # restrict the number of deployed plugins in static builds
+        qt_import_plugins(${PROJECT_NAME}
+            EXCLUDE_BY_TYPE qmltooling
+            INCLUDE_BY_TYPE imageformats
+                Qt::QGifPlugin
+                Qt::QJpegPlugin
+                Qt::QSvgPlugin
         )
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -281,7 +293,7 @@ endif()
 if (LINUX AND NOT ANDROID)
     find_package(TBB)
     if (TBB_FOUND)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE
+        add_compile_definitions(
             BS_HAS_PARALLEL_STL
             TBB_SUPPRESS_DEPRECATED_MESSAGES=1
         )
