@@ -23,6 +23,7 @@
 #include "common/application.h"
 #include "common/currency.h"
 #include "common/onlinestate.h"
+#include "common/recentfiles.h"
 #include "common/config.h"
 #include "common/announcements.h"
 #include "common/systeminfo.h"
@@ -463,6 +464,14 @@ public:
          QQmlEngine::setObjectOwnership(os, QQmlEngine::CppOwnership);
          return os;
      }
+};
+
+class QmlRecentFiles
+{
+    Q_GADGET
+    QML_FOREIGN(RecentFiles)
+    QML_NAMED_ELEMENT(RecentFiles)
+    QML_UNCREATABLE("")
 };
 
 class QmlDocument
