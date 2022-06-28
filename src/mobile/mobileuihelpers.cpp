@@ -142,7 +142,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text
                                                                     bool isPassword,
                                                                     QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/InputDialog.qml"_qs, {
                                                 { u"title"_qs, title },
                                                 { u"text"_qs, text },
                                                 { u"mode"_qs, u"string"_qs },
@@ -165,7 +165,7 @@ QCoro::Task<std::optional<double>> MobileUIHelpers::getInputDouble(QString text,
                                                                    double minValue, double maxValue,
                                                                    int decimals, QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/InputDialog.qml"_qs, {
                                                 { u"title"_qs, title },
                                                 { u"text"_qs, text },
                                                 { u"mode"_qs, u"double"_qs },
@@ -190,7 +190,7 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
                                                                  int initialValue, int minValue,
                                                                  int maxValue, QString title)
 {
-    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/uihelpers/InputDialog.qml"_qs, {
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/InputDialog.qml"_qs, {
                                                 { u"title"_qs, title },
                                                 { u"text"_qs, text },
                                                 { u"mode"_qs, u"int"_qs },
@@ -284,7 +284,7 @@ void MobileUIHelpers::processToastMessages()
 
     auto [message, timeout] = m_toastMessages.takeFirst();
 
-    auto toast = createPopup<QQuickPopup>(s_engine, u"Mobile/uihelpers/ToastMessage.qml"_qs, {
+    auto toast = createPopup<QQuickPopup>(s_engine, u"Mobile/ToastMessage.qml"_qs, {
                                              { u"message"_qs, message },
                                              { u"timeout"_qs, timeout },
                                          });

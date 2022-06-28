@@ -1,4 +1,5 @@
-import QtQuick.Controls
+import Mobile
+
 
 // Menu doesn't resize itself to the maximum of its items' implictWidth
 // from https://martin.rpdev.net/2018/03/13/qt-quick-controls-2-automatically-set-the-width-of-menus.html

@@ -1,7 +1,9 @@
 pragma Singleton
-import QtQuick
+
+import Mobile
 import QtQuick.Window
 import BrickStore as BS
+
 
 QtObject {
     // ~ in mm

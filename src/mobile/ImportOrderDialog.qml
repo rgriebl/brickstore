@@ -1,10 +1,7 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 import BrickLink as BL
-import "./uihelpers" as UIHelpers
 
 
 Page {
@@ -36,7 +33,7 @@ Page {
                 enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating
                 onClicked: updateDaysDialog.open()
 
-                UIHelpers.InputDialog {
+                InputDialog {
                     id: updateDaysDialog
                     mode: "int"
                     text: qsTr("Synchronize the orders of the last") + " n " + qsTr("days")

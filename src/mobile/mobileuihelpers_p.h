@@ -40,7 +40,7 @@ public:
     {
         auto root = qobject_cast<QQuickApplicationWindow *>(m_engine->rootObjects().constFirst());
 
-        QQmlComponent component(m_engine, m_engine->baseUrl().resolved(QUrl(u"Mobile/uihelpers/ProgressDialog.qml"_qs)));
+        QQmlComponent component(m_engine, m_engine->baseUrl().resolved(QUrl(u"Mobile/ProgressDialog.qml"_qs)));
         if (!component.isReady()) {
             qWarning() << component.errorString();
             co_return false;

@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+//pragma ComponentBehavior: Bound
+
+import Mobile
 import Qt.labs.qmlmodels
 import "utils.js" as Utils
 import BrickStore as BS
@@ -446,7 +446,7 @@ Page {
     Loader {
         id: blockDialog
         active: root.document.blockingOperationActive
-        source: "uihelpers/ProgressDialog.qml"
+        source: "ProgressDialog.qml"
         Binding {
             target: blockDialog.item
             property: "text"

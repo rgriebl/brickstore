@@ -1,10 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
-import "utils.js" as Utils
+import Mobile
 import BrickStore as BS
+import "utils.js" as Utils
 
 
 AutoSizingDialog {

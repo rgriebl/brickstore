@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+pragma ComponentBehavior: Bound
+
+import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickLink as BL
 import BrickStore as BS

@@ -1,5 +1,6 @@
-import QtQuick
-import QtQuick.Controls
+pragma ComponentBehavior: Bound
+
+import Mobile
 import Qt.labs.qmlmodels
 import BrickStore
 

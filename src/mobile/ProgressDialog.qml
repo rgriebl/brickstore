@@ -1,6 +1,5 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import Mobile
+
 
 Dialog {
     id: root

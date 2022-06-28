@@ -32,13 +32,15 @@ qt_add_qml_module(mobile_module
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN
     #ENABLE_TYPE_COMPILER
-    IMPORTS
-        QtQuick
-        QtQuick.Controls
-        QtQuick.Layouts
+    DEPENDENCIES
+        QtQuick.Dialogs
         BrickStore
         BrickLink
         LDraw
+    IMPORTS
+        QtQuick
+        QtQuick.Layouts
+        ${QUICK_CONTROLS}
 
     QML_FILES
         AboutDialog.qml
@@ -65,21 +67,18 @@ qt_add_qml_module(mobile_module
         SetToPriceGuideDialog.qml
         Style.qml
         StyleHelper.qml
-        +Material/StyleHelper.qml
         SystemInfoDialog.qml
         Tracer.qml
         View.qml
         ViewEditMenu.qml
         ViewHeaderMenu.qml
-        uihelpers/ImportsHelper.qml
-        uihelpers/InputDialog.qml
-        uihelpers/ProgressDialog.qml
-        uihelpers/ToastMessage.qml
+        InputDialog.qml
+        ProgressDialog.qml
+        ToastMessage.qml
         utils.js
 
     RESOURCES
         qtquickcontrols2.conf
-        +ios/qtquickcontrols2.conf
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE mobile_module)

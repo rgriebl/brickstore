@@ -1,6 +1,6 @@
-import QtQuick.Controls
-import QtQuick.Layouts
+import Mobile
 import BrickStore
+
 
 MenuItem {
     id: control

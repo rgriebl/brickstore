@@ -1,6 +1,4 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import Mobile
 import BrickStore as BS
 import BrickLink as BL
 

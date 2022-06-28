@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
+import Mobile
 import Qt5Compat.GraphicalEffects
+
 
 Control {
     id: root

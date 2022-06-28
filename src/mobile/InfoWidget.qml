@@ -1,10 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 import BrickLink as BL
 import LDraw
+
 
 Control {
     id: root
