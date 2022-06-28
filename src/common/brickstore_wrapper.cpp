@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QUrl>
 #include <QGuiApplication>
+#include <QFontDatabase>
 #include "qqmlinfo.h"
 
 #include "utility/utility.h"
@@ -765,6 +766,17 @@ QString QmlClipboard::text(QClipboard::Mode mode) const
 void QmlClipboard::setText(const QString &text, QClipboard::Mode mode)
 {
     QGuiApplication::clipboard()->setText(text, mode);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QFont QmlUtility::monospaceFont() const
+{
+    return QFontDatabase::systemFont(QFontDatabase::FixedFont);
 }
 
 

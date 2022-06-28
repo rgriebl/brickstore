@@ -27,7 +27,7 @@ QtObject {
     property color primaryHighlightedTextColor: styleHelper.primaryHighlightedTextColor
     property color hintTextColor: styleHelper.hintTextColor
 
-    property font monospaceFont: styleHelper.monospaceFont
+    property font monospaceFont: BS.Utility.monospaceFont
 
     property var styleHelper
 

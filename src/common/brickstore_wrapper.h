@@ -19,6 +19,7 @@
 #include <QIdentityProxyModel>
 #include <QSortFilterProxyModel>
 #include <QClipboard>
+#include <QFont>
 
 #include "common/application.h"
 #include "common/currency.h"
@@ -228,9 +229,12 @@ class QmlUtility : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(Utility)
     QML_SINGLETON
+    Q_PROPERTY(QFont monospaceFont READ monospaceFont CONSTANT)
 
 public:
     QmlUtility() = default;
+
+    QFont monospaceFont() const;
 
     Q_INVOKABLE bool fuzzyCompare(double d1, double d2) { return Utility::fuzzyCompare(d1, d2); }
 
