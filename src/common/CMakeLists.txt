@@ -69,9 +69,10 @@ qt_add_qml_module(common_module
     VERSION 1.0
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickStore
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
+    NO_PLUGIN
     DEPENDENCIES
         QtQuick
         BrickLink
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE common_moduleplugin)
+target_link_libraries(${PROJECT_NAME} PRIVATE common_module)

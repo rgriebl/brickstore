@@ -68,12 +68,6 @@ Q_LOGGING_CATEGORY(LogSentry, "sentry")
 #  include <cxxabi.h>
 #endif
 
-#if defined(STATIC_QT_BUILD) // this should be needed for linking against a static Qt, but it works without
-#  include <QtCore/QtPlugin>
-Q_IMPORT_PLUGIN(qjpeg)
-Q_IMPORT_PLUGIN(qgif)
-#endif
-
 using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(LogQml, "qml")
@@ -87,6 +81,11 @@ Application::Application(int &argc, char **argv)
 {
     Q_UNUSED(argc)
     Q_UNUSED(argv)
+
+    // add all relevant QML modules here
+    extern void qml_register_types_LDraw(); qml_register_types_LDraw();
+    extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
+    extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
 
     s_inst = this;
 

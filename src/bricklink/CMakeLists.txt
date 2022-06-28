@@ -31,6 +31,7 @@ if (NOT BS_BACKEND)
         VERSION 1.0
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickLink
         IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
+        NO_PLUGIN
         DEPENDENCIES
             QtQml
     )
@@ -85,8 +86,5 @@ if (BS_DESKTOP)
     )
 endif()
 
-if (BS_BACKEND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_module)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_moduleplugin)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_module)
+

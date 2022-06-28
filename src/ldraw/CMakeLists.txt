@@ -35,6 +35,7 @@ qt_add_qml_module(ldraw_module
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/LDraw
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     #ENABLE_TYPE_COMPILER
+    NO_PLUGIN
     DEPENDENCIES
         QtQuick
         QtQuick3D
@@ -48,4 +49,4 @@ qt_add_qml_module(ldraw_module
         shaders/custom-line.frag
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ldraw_moduleplugin)
+target_link_libraries(${PROJECT_NAME} PRIVATE ldraw_module)

@@ -30,12 +30,12 @@ qt_add_qml_module(mobile_module
     VERSION 1.0
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/Mobile
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
+    NO_PLUGIN
     #ENABLE_TYPE_COMPILER
-    DEPENDENCIES
+    IMPORTS
         QtQuick
         QtQuick.Controls
         QtQuick.Layouts
-        QtQuick.
         BrickStore
         BrickLink
         LDraw
@@ -81,4 +81,4 @@ qt_add_qml_module(mobile_module
         +ios/qtquickcontrols2.conf
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE mobile_moduleplugin)
+target_link_libraries(${PROJECT_NAME} PRIVATE mobile_module)

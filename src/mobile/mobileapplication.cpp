@@ -25,19 +25,17 @@
 #include "ldraw/library.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
-
-
-// add all QML plugins here for the iOS port (static linking only)
-Q_IMPORT_QML_PLUGIN(MobilePlugin)
-Q_IMPORT_QML_PLUGIN(LDrawPlugin)
-Q_IMPORT_QML_PLUGIN(BrickLinkPlugin)
-Q_IMPORT_QML_PLUGIN(BrickStorePlugin)
+#include "common/brickstore_wrapper.h"
 
 
 MobileApplication::MobileApplication(int &argc, char **argv)
     : Application(argc, argv)
 {
     m_app = new QGuiApplication(argc, argv);
+
+    // add all relevant QML modules here
+    extern void qml_register_types_Mobile();
+    qml_register_types_Mobile();
 
     qputenv("QT_QUICK_CONTROLS_CONF", ":/Mobile/qtquickcontrols2.conf");
 }
