@@ -108,10 +108,8 @@ Control {
             }
         }
 
-        //Rectangle {
         PartRenderer {
             id: info3D
-            //property var renderController: RenderController { }
             renderController: RenderController { }
         }
     }

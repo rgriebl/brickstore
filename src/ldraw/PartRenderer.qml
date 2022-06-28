@@ -5,11 +5,10 @@ import LDraw
 Item {
     id: root
 
-    required property var renderController
-    property alias rc: root.renderController
+    required property RenderController renderController
 
     Connections {
-        target: root.rc
+        target: root.renderController
         function onQmlResetCamera() {
             root.animateScaleToFit()
         }
@@ -25,10 +24,10 @@ Item {
     onHeightChanged: scaleToFit()
 
     function scaleToFit() {
-        if (!rc)
+        if (!renderController)
             return
 
-        let r = root.rc.radius
+        let r = root.renderController.radius
         let z = 1
         if (view.camera == pcamera) {
             let r_max = pcamera.z * Math.sin(pcamera.fieldOfView * Math.PI / 180 / 2)
@@ -61,7 +60,7 @@ Item {
 
         environment: SceneEnvironment {
             id: env
-            clearColor: root.rc.clearColor
+            clearColor: root.renderController.clearColor
             backgroundMode: SceneEnvironment.Color
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
@@ -92,7 +91,7 @@ Item {
         Node {
             id: rootNode
             rotation: RenderSettings.defaultRotation
-            pivot: root.rc.center
+            pivot: root.renderController.center
 
             Behavior on rotation {
                 id: modelAnimation
@@ -111,8 +110,8 @@ Item {
             Model {
                 source: "#Sphere"
                 visible: RenderSettings.showBoundingSpheres
-                position: root.rc.center
-                property real radius: root.rc.radius * 2 / 100
+                position: root.renderController.center
+                property real radius: root.renderController.radius * 2 / 100
                 scale: Qt.vector3d(radius, radius, radius)
                 materials: PrincipledMaterial {
                     baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
@@ -121,7 +120,7 @@ Item {
             }
 
             Repeater3D {
-                model: root.rc.surfaces
+                model: root.renderController.surfaces
 
                 Model {
                     required property RenderGeometry modelData
@@ -144,7 +143,7 @@ Item {
             property var textureKeepAlive: ({})
 
             Repeater3D {
-                model: root.rc.surfaces
+                model: root.renderController.surfaces
 
                 Model {
                     id: model
@@ -163,10 +162,6 @@ Item {
 
                         onTextureDataChanged: {
                             if (textureData) {
-                                // qml.lint workaround: accessing rootNode by id is an unqualified access
-                                // when done from a Repeater delegate
-                                let rootNode = parent.parent.parent
-
                                 if (rootNode.textureKeepAlive[textureData] === undefined) {
                                     let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
                                     obj.textureData = textureData
@@ -203,8 +198,8 @@ Item {
             }
             Model {
                 id: lines
-                geometry: root.rc.lineGeometry
-                instancing: root.rc.lines
+                geometry: root.renderController.lineGeometry
+                instancing: root.renderController.lines
                 visible: RenderSettings.renderLines
                 depthBias: -10
 
@@ -222,7 +217,7 @@ Item {
 
         Timer {
             id: animation
-            running: root.rc.tumblingAnimationActive
+            running: root.renderController.tumblingAnimationActive
             repeat: true
             interval: 16
             onTriggered: {
@@ -238,12 +233,14 @@ Item {
         Timer {
             interval: 2000
             running: hovered.hovered && !moveHandler.active && !pinchHandler.active && !arcballHandler.active
-            onTriggered: root.rc.requestToolTip(hovered.point.scenePosition)
+            onTriggered: root.renderController.requestToolTip(hovered.point.scenePosition)
         }
 
         TapHandler {
             acceptedButtons: Qt.RightButton
-            onSingleTapped: (eventPoint, button) => { root.rc.requestContextMenu(eventPoint.scenePosition) }
+            onSingleTapped: (eventPoint, button) => {
+                                root.renderController.requestContextMenu(eventPoint.scenePosition)
+                            }
         }
 
         TapHandler {
@@ -272,11 +269,11 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = root.rc.tumblingAnimationActive
-                    root.rc.tumblingAnimationActive = false
+                    animationWasActive = root.renderController.tumblingAnimationActive
+                    root.renderController.tumblingAnimationActive = false
                     pressPosition = rootNode.position
                 } else {
-                    root.rc.tumblingAnimationActive = animationWasActive
+                    root.renderController.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
@@ -321,12 +318,12 @@ Item {
 
             onActiveChanged: {
                 if (active) {
-                    animationWasActive = root.rc.tumblingAnimationActive
-                    root.rc.tumblingAnimationActive = false
+                    animationWasActive = root.renderController.tumblingAnimationActive
+                    root.renderController.tumblingAnimationActive = false
                     pressRotation = rootNode.rotation
                     pressPos = centroid.pressPosition
                 } else {
-                    root.rc.tumblingAnimationActive = animationWasActive
+                    root.renderController.tumblingAnimationActive = animationWasActive
                 }
             }
             onActiveTranslationChanged: {
@@ -335,8 +332,9 @@ Item {
                 let mousePos = Qt.point(pressPos.x + activeTranslation.x,
                                         pressPos.y + activeTranslation.y)
 
-                rootNode.rotation = root.rc.rotateArcBall(pressPos, mousePos, pressRotation,
-                                                     Qt.size(view.width, view.height))
+                rootNode.rotation = root.renderController.rotateArcBall(pressPos, mousePos,
+                                                                        pressRotation,
+                                                                        Qt.size(view.width, view.height))
             }
         }
     }
