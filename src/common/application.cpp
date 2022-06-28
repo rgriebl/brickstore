@@ -19,6 +19,7 @@
 #include <QtCore/QTimer>
 #include <QtCore/QDirIterator>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QMutexLocker>
 #include <QtNetwork/QNetworkProxyFactory>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QFont>
@@ -29,6 +30,7 @@
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #include <QtQuick3D/QQuick3D>
 
@@ -736,13 +738,56 @@ void Application::setupLogging()
 
         addSentryBreadcrumb(type, ctx, msg);
 
-        if (s_inst && s_inst->m_uiMessageHandler)
-            (*s_inst->m_uiMessageHandler)(type, ctx, msg);
+        if (!s_inst)
+            return;
+
+        try {
+            // we may not be in the main thread here, but even if we are, we could be recursing
+
+            QMutexLocker locker(&s_inst->m_loggingMutex);
+            s_inst->m_loggingMessages.emplace_back(type, QString::fromLatin1(ctx.category),
+                                                   QString::fromLatin1(ctx.file), ctx.line, msg);
+            locker.unlock();
+
+            if (s_inst->m_uiMessageHandler) {
+                // can't start a timer from another thread
+                QMetaObject::invokeMethod(s_inst, []() {
+                    if (!s_inst->m_loggingTimer.isActive())
+                        s_inst->m_loggingTimer.start();
+                }, Qt::QueuedConnection);
+            }
+        } catch (const std::bad_alloc &) {
+            // swallow bad-allocs and hope for sentry to log something useful
+        }
     };
+
+    s_inst->m_loggingTimer.setInterval(100);
+    s_inst->m_loggingTimer.setSingleShot(true);
+
+    connect(&s_inst->m_loggingTimer, &QTimer::timeout, s_inst, []() {
+        if (!s_inst->m_uiMessageHandler)
+            return;
+
+        QMutexLocker locker(&s_inst->m_loggingMutex);
+        if (s_inst->m_loggingMessages.isEmpty())
+            return;
+        auto messages = s_inst->m_loggingMessages.mid(0, 100); // don't overload the UI
+        s_inst->m_loggingMessages.remove(0, messages.size());
+        bool restartTimer = !s_inst->m_loggingMessages.isEmpty();
+        locker.unlock();
+
+        for (const auto &lm : messages)
+            s_inst->m_uiMessageHandler(lm);
+
+        if (restartTimer)
+            s_inst->m_loggingTimer.start();
+
+    });
+
     m_defaultMessageHandler = qInstallMessageHandler(messageHandler);
 }
 
-void Application::setUILoggingHandler(QtMessageHandler callback)
+void Application::setUILoggingHandler(UIMessageHandler callback)
 {
     m_uiMessageHandler = callback;
 }

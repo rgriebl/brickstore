@@ -29,7 +29,8 @@ class DeveloperConsole : public QWidget
 public:
     DeveloperConsole(QWidget *parent = nullptr);
 
-    void messageHandler(QtMsgType type, const QMessageLogContext &ctx, const QString &msg);
+    void append(QtMsgType type, const QString &category, const QString &file,
+                int line, const QString &msg);
 
 signals:
     void execute(const QString &command, bool *successful);

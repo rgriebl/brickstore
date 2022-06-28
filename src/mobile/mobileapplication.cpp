@@ -44,8 +44,6 @@ void MobileApplication::init()
 {
     Application::init();
 
-    if (qEnvironmentVariableIntValue("SHOW_TRACER") == 1)
-        m_engine->rootContext()->setContextProperty(u"showTracer"_qs, true);
 
     MobileUIHelpers::create(m_engine);
 
@@ -66,9 +64,15 @@ void MobileApplication::init()
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
+}
 
-    setUILoggingHandler([](QtMsgType, const QMessageLogContext &, const QString &) {
-        // just ignore for now, but we need to set one
+void MobileApplication::setupLogging()
+{
+    Application::setupLogging();
+
+    setUILoggingHandler([](const UILogMessage &lm) {
+        QmlDebugLogModel::inst()->append(std::get<0>(lm), std::get<1>(lm), std::get<2>(lm),
+                                         std::get<3>(lm), std::get<4>(lm));
     });
 }
 

@@ -1,11 +1,13 @@
 import QtQuick
+import BrickStore as BS
+
 
 MouseArea {
     id: root
     property bool fill: false
 
     anchors.fill: parent
-    visible: typeof(showTracer) != "undefined" ? showTracer : false
+    visible: BS.BrickStore.debug.showTracers
     acceptedButtons: Qt.RightButton
     propagateComposedEvents: true
 
@@ -26,7 +28,7 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         anchors.margins: .5
-        color: fill ? Qt.rgba(root.color.r, root.color.g, root.color.b, 0.3) : 'transparent'
+        color: root.fill ? Qt.rgba(root.color.r, root.color.g, root.color.b, 0.3) : 'transparent'
         border.color: root.color
         border.width: 1
         opacity: 0.8

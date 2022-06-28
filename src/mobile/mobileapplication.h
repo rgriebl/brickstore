@@ -31,6 +31,7 @@ public:
 protected:
     QCoro::Task<bool> closeAllViews() override;
     void setupQml() override;
+    void setupLogging() override;
 
 private:
     QVariantMap m_actionMap;

@@ -15,6 +15,8 @@
 
 #include <QStringList>
 #include <QPointer>
+#include <QTimer>
+#include <QMutex>
 
 #include "qcoro/task.h"
 
@@ -47,7 +49,10 @@ public:
     QString databaseUrl() const;
     QString ldrawUrl() const;
 
-    void setUILoggingHandler(QtMessageHandler callback);
+    typedef std::tuple<QtMsgType, QString, QString, int, QString> UILogMessage;
+    typedef void (*UIMessageHandler)(const UILogMessage &msg);
+
+    void setUILoggingHandler(UIMessageHandler callback);
 
     virtual void checkRestart();
     QCoro::Task<bool> checkBrickLinkLogin();
@@ -100,7 +105,10 @@ protected:
     std::unique_ptr<QTranslator> m_trans_brickstore;
 
     QtMessageHandler m_defaultMessageHandler = nullptr;
-    QtMessageHandler m_uiMessageHandler = nullptr;
+    UIMessageHandler m_uiMessageHandler = nullptr;
+    QTimer m_loggingTimer;
+    QMutex m_loggingMutex;
+    QVector<UILogMessage> m_loggingMessages;
 
     QPointer<Announcements> m_announcements;
 

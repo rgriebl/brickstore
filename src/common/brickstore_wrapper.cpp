@@ -129,6 +129,13 @@ QVariantMap QmlBrickStore::about() const
     return Application::inst()->about();
 }
 
+QmlDebug *QmlBrickStore::debug() const
+{
+    if (!m_debug)
+        m_debug = new QmlDebug(const_cast<QmlBrickStore *>(this));
+    return m_debug;
+}
+
 QString QmlBrickStore::defaultCurrencyCode() const
 {
     return Config::inst()->defaultCurrencyCode();
@@ -811,5 +818,108 @@ void QmlThenable::callThenInternal(const QVariantList &arguments)
     }
     QQmlEngine::setObjectOwnership(this, QQmlEngine::JavaScriptOwnership);
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+namespace {
+enum {
+    TypeRole = Qt::UserRole + 1,
+    CategoryRole,
+    MessageRole,
+    LineRole,
+    FileRole,
+};
+}
+
+QmlDebugLogModel *QmlDebugLogModel::s_inst = nullptr;
+
+QmlDebugLogModel::QmlDebugLogModel(QObject *parent)
+    : QAbstractListModel(parent)
+{ }
+
+QmlDebugLogModel *QmlDebugLogModel::inst()
+{
+    if (!s_inst)
+        s_inst = new QmlDebugLogModel(qApp);
+    return s_inst;
+}
+
+int QmlDebugLogModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_logs.size();
+}
+
+QVariant QmlDebugLogModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return { };
+
+    const Log &log = m_logs.at(index.row());
+
+    switch (role) {
+    case TypeRole    : return int(log.type);
+    case LineRole    : return log.line;
+    case FileRole    : return log.file;
+    case CategoryRole: return log.category;
+    case MessageRole : return log.message;
+    }
+    return { };
+
+}
+
+QHash<int, QByteArray> QmlDebugLogModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { TypeRole, "type" },
+        { CategoryRole, "category" },
+        { MessageRole, "message" },
+        { LineRole, "line" },
+        { FileRole, "file" },
+    };
+    return roles;
+}
+
+void QmlDebugLogModel::append(QtMsgType type, const QString &category, const QString &file,
+                              int line, const QString &message)
+{
+    beginInsertRows({ }, m_logs.size(), m_logs.size());
+    m_logs.emplace_back(type, line, category, file, message);
+    endInsertRows();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlDebug::QmlDebug(QObject *parent)
+    : QObject(parent)
+{
+    m_showTracers = (qEnvironmentVariableIntValue("BS_SHOW_TRACERS") == 1);
+}
+
+bool QmlDebug::showTracers() const
+{
+    return m_showTracers;
+}
+
+void QmlDebug::setShowTracers(bool newShowTracers)
+{
+    if (m_showTracers != newShowTracers) {
+        m_showTracers = newShowTracers;
+        emit showTracersChanged(newShowTracers);
+    }
+}
+
+QAbstractListModel *QmlDebug::log() const
+{
+    return QmlDebugLogModel::inst();
+}
+
 
 #include "moc_brickstore_wrapper.cpp"

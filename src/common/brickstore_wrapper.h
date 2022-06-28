@@ -267,6 +267,57 @@ private:
     QPointer<QJSEngine> m_engine;
 };
 
+class QmlDebugLogModel : public QAbstractListModel
+{
+    Q_OBJECT
+    QML_ANONYMOUS
+
+public:
+    static QmlDebugLogModel *inst();
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    void append(QtMsgType type, const QString &category, const QString &file, int line,
+                const QString &message);
+
+private:
+    QmlDebugLogModel(QObject *parent = nullptr);
+    static QmlDebugLogModel *s_inst;
+
+    struct Log {
+        QtMsgType type;
+        int line;
+        QString category;
+        QString file;
+        QString message;
+    };
+    std::vector<Log> m_logs;
+};
+
+class QmlDebug : public QObject
+{
+    Q_OBJECT
+    QML_NAMED_ELEMENT(Debug)
+    QML_UNCREATABLE("")
+    Q_PROPERTY(bool showTracers READ showTracers WRITE setShowTracers NOTIFY showTracersChanged)
+    Q_PROPERTY(QAbstractListModel *log READ log CONSTANT)
+
+public:
+    QmlDebug(QObject *parent = nullptr);
+
+    bool showTracers() const;
+    void setShowTracers(bool newShowTracers);
+    QAbstractListModel *log() const;
+
+signals:
+    void showTracersChanged(bool newShowTracers);
+
+private:
+    bool m_showTracers;
+};
+
 class QmlBrickStore : public QObject
 {
     Q_OBJECT
@@ -280,6 +331,7 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(Document *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
     Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
     Q_PROPERTY(QVariantMap about READ about CONSTANT)
+    Q_PROPERTY(QmlDebug *debug READ debug CONSTANT)
 
 public:
     QmlBrickStore();
@@ -291,6 +343,7 @@ public:
     RecentFiles *recentFiles() const;
     ColumnLayoutsModel *columnLayouts() const;
     QVariantMap about() const;
+    QmlDebug *debug() const;
     QString defaultCurrencyCode() const;
 
     Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
@@ -327,6 +380,7 @@ signals:
 
 private:
     ColumnLayoutsModel *m_columnLayouts;
+    mutable QmlDebug *m_debug = nullptr;
 };
 
 class QmlAnnouncements

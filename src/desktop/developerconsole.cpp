@@ -126,7 +126,8 @@ void DeveloperConsole::fontChange()
 }
 
 
-void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
+void DeveloperConsole::append(QtMsgType type, const QString &category, const QString &file,
+                              int line, const QString &msg)
 {
     static const char *msgTypeNames[] =   { "DBG ",   "WARN",   "CRIT",   "FATL",   "INFO" };
     static const char *msgTypeColor[] =   { "000000", "000000", "ff0000", "ffffff", "ffffff" };
@@ -137,8 +138,8 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
 
     type = qBound(QtDebugMsg, type, QtInfoMsg);
     QString filename;
-    if (ctx.file && ctx.file[0] && ctx.line > 1) {
-        filename = QString::fromLocal8Bit(ctx.file);
+    if (!file.isEmpty() && line > 1) {
+        filename = file;
         int pos = -1;
 #if defined(Q_OS_WINDOWS)
         pos = filename.lastIndexOf(u'\\');
@@ -155,16 +156,15 @@ void DeveloperConsole::messageHandler(QtMsgType type, const QMessageLogContext &
                 % uR"(;background-color:#)" % QLatin1String(msgTypeBgColor[type]) % uR"(;">)"
                 % QLatin1String(msgTypeNames[type]) % uR"(</span>)"
                 % uR"(&nbsp;<span style="color:#)"
-                % QLatin1String(categoryColor[qHashBits(ctx.category, qstrlen(ctx.category), 1) % 6])
-                % uR"(;font-weight:bold;">)"
-                % QLatin1String(ctx.category) % uR"(</span>)" % u":&nbsp;"
+                % QLatin1String(categoryColor[qHashBits(category.constData(), category.size() * 2, 1) % 6])
+                % uR"(;font-weight:bold;">)" % category % uR"(</span>)" % u":&nbsp;"
                 % lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if ((type != QtInfoMsg) && !filename.isEmpty()) {
                 str = str % uR"( at <span style="color:#)" % QLatin1String(fileColor)
                         % uR"(;font-weight:bold;">)" % filename
                         % uR"(</span>, line <span style="color:#)" % QLatin1String(lineColor)
-                        % uR"(;font-weight:bold;">)" % QString::number(ctx.line) % uR"(</span></pre>)";
+                        % uR"(;font-weight:bold;">)" % QString::number(line) % uR"(</span></pre>)";
             } else {
                 str = str % u"</pre>";
             }

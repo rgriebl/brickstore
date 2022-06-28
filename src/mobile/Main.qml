@@ -34,6 +34,10 @@ ApplicationWindow {
         }
         onLoaded: { item.openPage(pageName) }
     }
+    DialogLoader {
+        id: devConsole
+        source: "DeveloperConsole.qml"
+    }
 
     SwipeView {
         id: homeAndView
@@ -69,6 +73,29 @@ ApplicationWindow {
                                 MenuSeparator { }
                                 MenuItem { action: BS.ActionManager.quickAction("help_systeminfo") }
                                 MenuItem { action: BS.ActionManager.quickAction("help_about") }
+                            }
+
+                            onPressAndHold: debugMenu.open()
+
+                            AutoSizingMenu {
+                                id: debugMenu
+                                x: parent.width / 2
+                                y: parent.height / 2
+                                transformOrigin: Menu.TopLeft
+                                modal: true
+                                cascade: false
+
+                                MenuItem {
+                                    text: "Show Tracers"
+                                    checkable: true
+                                    checked: BS.BrickStore.debug.showTracers
+                                    onCheckedChanged: BS.BrickStore.debug.showTracers = checked
+                                }
+                                MenuSeparator { }
+                                MenuItem {
+                                    text: "Error Log..."
+                                    onClicked: { devConsole.open() }
+                                }
                             }
                         }
                         Label {

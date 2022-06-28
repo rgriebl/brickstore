@@ -14,8 +14,6 @@
 #pragma once
 
 #include <QCommandLineParser>
-#include <QTimer>
-#include <QMutex>
 
 #include "common/application.h"
 
@@ -53,8 +51,5 @@ private:
     bool m_restart = false;
     QCommandLineParser m_clp;
     QPointer<DeveloperConsole> m_devConsole;
-    QTimer m_loggingTimer;
-    QMutex m_loggingMutex;
-    QVector<std::tuple<QtMsgType, QMessageLogContext *, QString>> m_loggingMessages;
 };
 

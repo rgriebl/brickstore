@@ -49,6 +49,7 @@ qt_add_qml_module(mobile_module
         AutoSizingDialog.qml
         CornerTag.qml
         DialogLoader.qml
+        DeveloperConsole.qml
         GridCell.qml
         GridHeader.qml
         ImportCartDialog.qml

@@ -15,6 +15,9 @@ Control {
     property color primaryHighlightedTextColor: Material.primaryHighlightedTextColor
     property color hintTextColor: Material.hintTextColor
 
+    //property font monospaceFont: Qt.font({ family: "Droid Sans Mono", pointSize: font.pointSize })
+    property font monospaceFont: Qt.font({ family: "Consolas", pointSize: font.pointSize })
+
     visible: false
 
     function updateTheme() {
