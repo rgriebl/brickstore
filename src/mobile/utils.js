@@ -1,6 +1,6 @@
 //.pragma library
 
-function flashScrollIndicator(flickable) {
+function flashScrollIndicators(flickable) {
     if (flickable.ScrollIndicator.vertical)
         flickable.ScrollIndicator.vertical.active = true
     else if (flickable.ScrollBar.vertical)

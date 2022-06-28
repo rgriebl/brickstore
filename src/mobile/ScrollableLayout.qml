@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import "./utils.js" as Utils
+import "utils.js" as Utils
 
 
 Flickable {
@@ -11,7 +11,7 @@ Flickable {
 
     interactive: contentHeight > height
 
-    function flashScrollIndicators() { Utils.flashScrollIndicator(root) }
+    function flashScrollIndicators() { Utils.flashScrollIndicators(root) }
 
     ScrollIndicator.vertical: ScrollIndicator { }
 }

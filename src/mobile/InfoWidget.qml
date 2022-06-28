@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 import BrickLink as BL
-import Mobile
 import LDraw
 
 Control {

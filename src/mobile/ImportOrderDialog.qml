@@ -46,7 +46,7 @@ Page {
 
                     onAccepted: {
                         root.updateLastNDays = intValue
-                        BL.BrickLink.orders.startUpdate(updateLastNDays)
+                        BL.BrickLink.orders.startUpdate(root.updateLastNDays)
                     }
                 }
             }
@@ -170,7 +170,7 @@ Page {
 
                 }
                 onClicked: {
-                    BS.BrickStore.importBrickLinkOrder(order)
+                    BS.BrickStore.importBrickLinkOrder(root.order)
                     root.goBackFunction()
                 }
             }

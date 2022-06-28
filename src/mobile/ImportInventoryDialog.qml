@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
 import BrickLink as BL
-import Mobile
+
 
 Page {
     id: root
@@ -144,10 +144,9 @@ Page {
                 anchors.fill: parent
 
                 RowLayout {
-                    //spacing: 16
-                    Item { width: 8 }
                     TextField {
                         id: filter
+                        Layout.leftMargin: 8
                         Layout.fillWidth: true
                         placeholderText: qsTr("Filter")
                     }
@@ -273,8 +272,8 @@ Page {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 0
                     QImageItem {
-                        height: lfm.height * 5
-                        width: height * 4 / 3
+                        implicitHeight: lfm.height * 5
+                        implicitWidth: height * 4 / 3
 
                         property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
                         image: pic ? pic.image : BL.BrickLink.noImage(width, height)

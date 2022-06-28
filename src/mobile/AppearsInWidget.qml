@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import BrickStore as BS
 import BrickLink as BL
-import Mobile
+
 
 Control {
     id: root
@@ -58,8 +58,8 @@ Control {
 
                     FontMetrics { id: fm; font: delegate.font }
 
-                    height: fm.height * 2
-                    width: height * 4 / 3
+                    implicitHeight: fm.height * 2
+                    implicitWidth: height * 4 / 3
 
                     property BL.Picture pic: BL.BrickLink.largePicture(delegate.blitem)
                     property var noImage: BL.BrickLink.noImage(width, height)

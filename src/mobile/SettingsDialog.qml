@@ -64,6 +64,7 @@ AutoSizingDialog {
                         valueRole: "language"
                         enabled: BS.Config.availableLanguages.length > 0
                         delegate: ItemDelegate {
+                            required property var modelData
                             width: parent.width
                             text: langCombo.nameForLang(modelData)
                         }
