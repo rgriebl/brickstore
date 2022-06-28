@@ -194,8 +194,9 @@ Page {
                         required property string id
                         required property string name
                         required property var item
+                        property BL.Item blitem: BL.BrickLink.item(delegate.item)
                         property BL.Picture pic: itemListPage.isPageVisible
-                                                 ? BL.BrickLink.picture(BL.BrickLink.item(delegate.item), BL.BrickLink.item(delegate.item).defaultColor)
+                                                 ? BL.BrickLink.picture(blitem, blitem.defaultColor)
                                                  : null
 
                         QImageItem {

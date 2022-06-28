@@ -307,8 +307,8 @@ public:
 
     Q_INVOKABLE Document *importPartInventory(BrickLink::QmlItem item,
                                               BrickLink::QmlColor color, int multiply,
-                                              BrickLink::QmlBrickLink::Condition condition,
-                                              BrickLink::QmlBrickLink::Status extraParts,
+                                              BrickLink::Condition condition,
+                                              BrickLink::Status extraParts,
                                               bool includeInstructions, bool includeAlternates,
                                               bool includeCounterParts);
 

@@ -231,14 +231,13 @@ Document *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
 }
 
 Document *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                             int multiply, BrickLink::QmlBrickLink::Condition condition,
-                                             BrickLink::QmlBrickLink::Status extraParts,
+                                             int multiply, BrickLink::Condition condition,
+                                             BrickLink::Status extraParts,
                                              bool includeInstructions, bool includeAlternates,
                                              bool includeCounterParts)
 {
     return Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(), multiply,
-                                       static_cast<BrickLink::Condition>(condition),
-                                       static_cast<BrickLink::Status>(extraParts),
+                                       condition, extraParts,
                                        includeInstructions, includeAlternates, includeCounterParts);
 }
 
