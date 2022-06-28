@@ -1468,7 +1468,7 @@ void DocumentModel::initializeColumns()
         return (u1 == u2) ? 0 : ((u1 < u2) ? -1 : 1);
     };
     static auto doubleCompare = [](double d1, double d2) -> int {
-        return fuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
+        return Utility::fuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
     };
     static auto dateTimeCompare = [](const QDateTime &dt1, const QDateTime &dt2) -> int {
         qint64 se1 = dt1.toSecsSinceEpoch();

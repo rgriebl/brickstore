@@ -64,7 +64,7 @@ QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
         xml.createText("COLOR", QString::number(lot->colorId()));
         xml.createText("CATEGORY", QString::number(lot->categoryId()));
         xml.createText("QTY", QString::number(lot->quantity()));
-        xml.createText("PRICE", QString::number(fixFinite(lot->price()), 'f', 3));
+        xml.createText("PRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
 
         if (lot->bulkQuantity() != 1)   xml.createText("BULK", QString::number(lot->bulkQuantity()));
@@ -73,16 +73,16 @@ QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
         if (!lot->remarks().isEmpty())  xml.createText("REMARKS", lot->remarks());
         if (lot->retain())              xml.createText("RETAIN", u"Y");
         if (!lot->reserved().isEmpty()) xml.createText("BUYERUSERNAME", lot->reserved());
-        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", QString::number(fixFinite(lot->cost()), 'f', 3));
-        if (lot->hasCustomWeight())     xml.createText("MYWEIGHT", QString::number(fixFinite(lot->weight()), 'f', 4));
+        if (!qFuzzyIsNull(lot->cost())) xml.createText("MYCOST", QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
+        if (lot->hasCustomWeight())     xml.createText("MYWEIGHT", QString::number(Utility::fixFinite(lot->weight()), 'f', 4));
 
         if (lot->tierQuantity(0)) {
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
-            xml.createText("TP1", QString::number(fixFinite(lot->tierPrice(0)), 'f', 3));
+            xml.createText("TP1", QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
-            xml.createText("TP2", QString::number(fixFinite(lot->tierPrice(1)), 'f', 3));
+            xml.createText("TP2", QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
-            xml.createText("TP3", QString::number(fixFinite(lot->tierPrice(2)), 'f', 3));
+            xml.createText("TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
         }
 
         if (lot->subCondition() != BrickLink::SubCondition::None) {
@@ -135,8 +135,8 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     { u"COLOR",        [](auto *lot, auto &v) { lot->isIncomplete()->m_color_id = v.toUInt(); } },
     { u"CATEGORY",     [](auto *lot, auto &v) { lot->isIncomplete()->m_category_id = v.toUInt(); } },
     { u"ITEMTYPE",     [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_id = ItemType::idFromFirstCharInString(v); } },
-    { u"MAXPRICE",     [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setPrice(fixFinite(v.toDouble())); } },
-    { u"PRICE",        [](auto *lot, auto &v) { lot->setPrice(fixFinite(v.toDouble())); } },
+    { u"MAXPRICE",     [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setPrice(Utility::fixFinite(v.toDouble())); } },
+    { u"PRICE",        [](auto *lot, auto &v) { lot->setPrice(Utility::fixFinite(v.toDouble())); } },
     { u"BULK",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
     { u"MINQTY",       [=](auto *lot, auto &v) { if (int(hint) & int(Hint::Wanted)) lot->setQuantity(QString(v).remove(u',').toInt()); } },
     { u"QTY",          [](auto *lot, auto &v) { lot->setQuantity(QString(v).remove(u',').toInt()); } },
@@ -146,14 +146,14 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     { u"TQ1",          [](auto *lot, auto &v) { lot->setTierQuantity(0, v.toInt()); } },
     { u"TQ2",          [](auto *lot, auto &v) { lot->setTierQuantity(1, v.toInt()); } },
     { u"TQ3",          [](auto *lot, auto &v) { lot->setTierQuantity(2, v.toInt()); } },
-    { u"TP1",          [](auto *lot, auto &v) { lot->setTierPrice(0, fixFinite(v.toDouble())); } },
-    { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, fixFinite(v.toDouble())); } },
-    { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, fixFinite(v.toDouble())); } },
+    { u"TP1",          [](auto *lot, auto &v) { lot->setTierPrice(0, Utility::fixFinite(v.toDouble())); } },
+    { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, Utility::fixFinite(v.toDouble())); } },
+    { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, Utility::fixFinite(v.toDouble())); } },
     { u"LOTID",        [](auto *lot, auto &v) { lot->setLotId(v.toUInt()); } },
     { u"RETAIN",       [](auto *lot, auto &v) { lot->setRetain(v == u"Y"); } },
     { u"BUYERUSERNAME",[](auto *lot, auto &v) { lot->setReserved(v); } },
-    { u"MYWEIGHT",     [](auto *lot, auto &v) { lot->setWeight(fixFinite(v.toDouble())); } },
-    { u"MYCOST",       [](auto *lot, auto &v) { lot->setCost(fixFinite(v.toDouble())); } },
+    { u"MYWEIGHT",     [](auto *lot, auto &v) { lot->setWeight(Utility::fixFinite(v.toDouble())); } },
+    { u"MYCOST",       [](auto *lot, auto &v) { lot->setCost(Utility::fixFinite(v.toDouble())); } },
     { u"CONDITION",    [](auto *lot, auto &v) {
         lot->setCondition(v == u"N" ? Condition::New
                                     : Condition::Used); } },
@@ -278,7 +278,7 @@ QString BrickLink::IO::toWantedListXML(const LotList &lots, const QString &wante
         if (lot->quantity())
             xml.createText("MINQTY", QString::number(lot->quantity()));
         if (!qFuzzyIsNull(lot->price()))
-            xml.createText("MAXPRICE", QString::number(fixFinite(lot->price()), 'f', 3));
+            xml.createText("MAXPRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         if (!lot->remarks().isEmpty())
             xml.createText("REMARKS", lot->remarks());
         if (lot->condition() == BrickLink::Condition::New)
@@ -338,9 +338,9 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
             xml.createEmpty("DELETE");
 
         if (!qFuzzyCompare(base->price(), lot->price()))
-            xml.createText("PRICE", QString::number(fixFinite(lot->price()), 'f', 3));
+            xml.createText("PRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         if (!qFuzzyCompare(base->cost(), lot->cost()))
-            xml.createText("MYCOST", QString::number(fixFinite(lot->cost()), 'f', 3));
+            xml.createText("MYCOST", QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
         if (base->condition() != lot->condition())
             xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
         if (base->bulkQuantity() != lot->bulkQuantity())
@@ -357,15 +357,15 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
         if (base->tierQuantity(0) != lot->tierQuantity(0))
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
         if (!qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0)))
-            xml.createText("TP1", QString::number(fixFinite(lot->tierPrice(0)), 'f', 3));
+            xml.createText("TP1", QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
         if (base->tierQuantity(1) != lot->tierQuantity(1))
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
         if (!qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1)))
-            xml.createText("TP2", QString::number(fixFinite(lot->tierPrice(1)), 'f', 3));
+            xml.createText("TP2", QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
         if (base->tierQuantity(2) != lot->tierQuantity(2))
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
         if (!qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2)))
-            xml.createText("TP3", QString::number(fixFinite(lot->tierPrice(2)), 'f', 3));
+            xml.createText("TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
 
         if (base->subCondition() != lot->subCondition()) {
             const char16_t *st = nullptr;

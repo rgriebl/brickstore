@@ -484,7 +484,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
             { u"ColorName",    [](auto *lot, auto &v) { lot->isIncomplete()->m_color_name = v; } },
             { u"CategoryName", [](auto *lot, auto &v) { lot->isIncomplete()->m_category_name = v; } },
             { u"ItemTypeName", [](auto *lot, auto &v) { lot->isIncomplete()->m_itemtype_name = v; } },
-            { u"Price",        [](auto *lot, auto &v) { lot->setPrice(fixFinite(v.toDouble())); } },
+            { u"Price",        [](auto *lot, auto &v) { lot->setPrice(Utility::fixFinite(v.toDouble())); } },
             { u"Bulk",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
             { u"Qty",          [](auto *lot, auto &v) { lot->setQuantity(v.toInt()); } },
             { u"Sale",         [](auto *lot, auto &v) { lot->setSale(v.toInt()); } },
@@ -493,14 +493,14 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
             { u"TQ1",          [](auto *lot, auto &v) { lot->setTierQuantity(0, v.toInt()); } },
             { u"TQ2",          [](auto *lot, auto &v) { lot->setTierQuantity(1, v.toInt()); } },
             { u"TQ3",          [](auto *lot, auto &v) { lot->setTierQuantity(2, v.toInt()); } },
-            { u"TP1",          [](auto *lot, auto &v) { lot->setTierPrice(0, fixFinite(v.toDouble())); } },
-            { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, fixFinite(v.toDouble())); } },
-            { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, fixFinite(v.toDouble())); } },
+            { u"TP1",          [](auto *lot, auto &v) { lot->setTierPrice(0, Utility::fixFinite(v.toDouble())); } },
+            { u"TP2",          [](auto *lot, auto &v) { lot->setTierPrice(1, Utility::fixFinite(v.toDouble())); } },
+            { u"TP3",          [](auto *lot, auto &v) { lot->setTierPrice(2, Utility::fixFinite(v.toDouble())); } },
             { u"LotID",        [](auto *lot, auto &v) { lot->setLotId(v.toUInt()); } },
             { u"Retain",       [](auto *lot, auto &v) { lot->setRetain(v.isEmpty() || (v == u"Y")); } },
             { u"Reserved",     [](auto *lot, auto &v) { lot->setReserved(v); } },
-            { u"TotalWeight",  [](auto *lot, auto &v) { lot->setTotalWeight(fixFinite(v.toDouble())); } },
-            { u"Cost",         [](auto *lot, auto &v) { lot->setCost(fixFinite(v.toDouble())); } },
+            { u"TotalWeight",  [](auto *lot, auto &v) { lot->setTotalWeight(Utility::fixFinite(v.toDouble())); } },
+            { u"Cost",         [](auto *lot, auto &v) { lot->setCost(Utility::fixFinite(v.toDouble())); } },
             { u"Condition",    [](auto *lot, auto &v) {
                 lot->setCondition(v == u"N" ? BrickLink::Condition::New
                                             : BrickLink::Condition::Used); } },
@@ -530,7 +530,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                     lot->setDateLastSold(QDateTime::fromString(v, Qt::ISODate)); } },
             { u"OrigPrice",    [&legacyOrigPrice](auto *lot, auto &v) {
                 Q_UNUSED(lot)
-                legacyOrigPrice.setValue(fixFinite(v.toDouble()));
+                legacyOrigPrice.setValue(Utility::fixFinite(v.toDouble()));
             } },
             { u"OrigQty",      [&legacyOrigQty](auto *lot, auto &v) {
                 Q_UNUSED(lot)
@@ -708,7 +708,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         }
     };
     static auto asString   = [](const QString &s)      { return s; };
-    static auto asCurrency = [](double d)              { return QString::number(fixFinite(d), 'f', 3); };
+    static auto asCurrency = [](double d)              { return QString::number(Utility::fixFinite(d), 'f', 3); };
     static auto asInt      = [](auto i)                { return QString::number(i); };
     static auto asDateTime = [](const QDateTime &dt)   { return dt.toString(Qt::ISODate); };
 
@@ -798,7 +798,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
 
         if (lot->hasCustomWeight()) {
             create(u"TotalWeight", &Lot::totalWeight, [](double d) {
-                return QString::number(fixFinite(d), 'f', 4); }, Required);
+                return QString::number(Utility::fixFinite(d), 'f', 4); }, Required);
         }
         if (!lot->markerText().isEmpty())
             create(u"MarkerText", &Lot::markerText, asString, Constant);

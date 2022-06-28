@@ -186,11 +186,7 @@ Page {
                 role: "documentField"
 
                 component CurrencyGridCell: GridCell {
-                    function fuzzyCompare(d1, d2) {
-                        return Math.abs(d1 - d2) <= 1e-12 * Math.max(1.0, Math.abs(d1), Math.abs(d2));
-                    }
-
-                    text: root.fuzzyCompare(display) ? "-" : BS.Currency.format(display)
+                    text: BS.Utility.fuzzyCompare(display, 0) ? "-" : BS.Currency.format(display)
                 }
                 component UIntGridCell : GridCell {
                     text: display === 0 ? "-" : display
@@ -433,11 +429,7 @@ Page {
         return i === zero ? "-" : i.toLocaleString() + unit
     }
     function humanReadableCurrency(c) {
-        return fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
-    }
-
-    function fuzzyCompare(d1, d2) {
-        return Math.abs(d1 - d2) <= 1e-12 * Math.max(1.0, Math.abs(d1), Math.abs(d2));
+        return BS.Utility.fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
     }
 
     property var shades: []
