@@ -84,11 +84,6 @@ Application::Application(int &argc, char **argv)
     Q_UNUSED(argc)
     Q_UNUSED(argv)
 
-    // add all relevant QML modules here
-    extern void qml_register_types_LDraw(); qml_register_types_LDraw();
-    extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
-    extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
-
     s_inst = this;
 
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
@@ -102,6 +97,12 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
+    // add all relevant QML modules here
+    extern void qml_register_types_LDraw(); qml_register_types_LDraw();
+    extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
+    extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
+
+
     qInfo() << "Device pixel ratio :" << qApp->devicePixelRatio()
             << QGuiApplication::highDpiScaleFactorRoundingPolicy();
     const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();

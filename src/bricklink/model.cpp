@@ -442,7 +442,6 @@ QHash<int, QByteArray> BrickLink::ItemTypeModel::roleNames() const
         { ItemTypePointerRole, "itemType" },
     };
     return roles;
-
 }
 
 bool BrickLink::ItemTypeModel::isFiltered() const

@@ -33,16 +33,15 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 {
     m_app = new QGuiApplication(argc, argv);
 
-    // add all relevant QML modules here
-    extern void qml_register_types_Mobile();
-    qml_register_types_Mobile();
-
     qputenv("QT_QUICK_CONTROLS_CONF", ":/Mobile/qtquickcontrols2.conf");
 }
 
 void MobileApplication::init()
 {
     Application::init();
+
+    // add all relevant QML modules here
+    extern void qml_register_types_Mobile(); qml_register_types_Mobile();
 
 
     MobileUIHelpers::create(m_engine);

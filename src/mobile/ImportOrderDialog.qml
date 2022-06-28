@@ -167,7 +167,7 @@ Page {
 
                 }
                 onClicked: {
-                    BS.BrickStore.importBrickLinkOrder(root.order)
+                    BS.BrickStore.importBrickLinkOrder(delegate.order)
                     root.goBackFunction()
                 }
             }

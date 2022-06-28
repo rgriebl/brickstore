@@ -12,7 +12,7 @@ Page {
     padding: 0
     title: document.fileName ? document.fileName : (document.title ? document.title : qsTr("Untitled"))
 
-    property BS.Document document
+    required property BS.Document document
 
     property var goHomeFunction
 
@@ -478,7 +478,7 @@ Page {
     }
 
     property QtObject connectionContext: null
-    property bool active: document && (BS.ActionManager.activeDocument === root.document)
+    property bool active: document && (document === BS.ActionManager.activeDocument)
 
     onActiveChanged: {
         if (active) {

@@ -58,7 +58,7 @@ Dialog {
             }
             Label {
                 text: root.unit
-                visible: intSpin.visible && text !== ''
+                visible: intSpin.visible && root.unit !== ''
             }
         }
         RowLayout {
@@ -91,7 +91,7 @@ Dialog {
             }
             Label {
                 text: root.unit
-                visible: dblSpin.visible && text !== ''
+                visible: dblSpin.visible && root.unit !== ''
             }
         }
     }
