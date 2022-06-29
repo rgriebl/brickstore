@@ -1,3 +1,4 @@
+import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
 import Mobile
 
 

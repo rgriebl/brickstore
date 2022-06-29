@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import Mobile
+import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
 import Qt.labs.qmlmodels
 import BrickStore as BS
 

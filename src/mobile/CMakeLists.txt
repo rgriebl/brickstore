@@ -38,6 +38,7 @@ qt_add_qml_module(mobile_module
         BrickLink
         LDraw
     IMPORTS
+        QtQml
         QtQuick
         QtQuick.Layouts
         ${QUICK_CONTROLS}
