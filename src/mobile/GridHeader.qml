@@ -13,7 +13,7 @@ Control {
     required property string display
     property int visualIndex: index
     property int logicalIndex: TableView.view.model.logicalColumn(index)
-    property BS.Document document: TableView.view.model.document
+    property BS.Document document: TableView.view.model
     property int sortStatus: 0
     property int sortCount: 0
 
@@ -22,14 +22,14 @@ Control {
     signal showMenu(logicalColumn: int, visualColumn: int)
 
     Connections {
-        target: root.document.model
+        target: root.document
         function onSortColumnsChanged() { root.checkSortStatus() }
     }
-    Component.onCompleted: checkSortStatus()
+    Component.onCompleted: { checkSortStatus() }
 
     function checkSortStatus() {
         let sorted = 0
-        let sc = document.model.sortColumns
+        let sc = document.sortColumns
         for (let i = 0; i < sc.length; ++i) {
             if (sc[i].column === logicalIndex) {
                 sorted = (i + 1) * (sc[i].order === Qt.AscendingOrder ? -1 : 1);

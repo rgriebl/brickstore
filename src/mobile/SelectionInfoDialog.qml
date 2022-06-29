@@ -10,7 +10,7 @@ AutoSizingDialog {
 
     padding: 0
 
-    property BS.Document document
+    required property BS.Document document
 
     property bool single: false
     property bool none: false
@@ -23,7 +23,7 @@ AutoSizingDialog {
 
         if (single) {
 
-            let lot = BL.BrickLink.lot(document.selectedLots[0])
+            let lot = document.selectedLots[0]
             info.lot = lot
 
             priceGuide.item = lot.item
@@ -45,9 +45,7 @@ AutoSizingDialog {
             let items = []
             let colors = []
 
-            document.selectedLots.forEach(function(s) {
-                let lot = BL.BrickLink.lot(s)
-
+            document.selectedLots.forEach(function(lot) {
                 if (!lot.item.isNull && !lot.color.isNull) {
                     items.push(lot.item)
                     colors.push(lot.color)

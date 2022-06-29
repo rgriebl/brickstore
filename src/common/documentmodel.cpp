@@ -1943,26 +1943,6 @@ QVector<QPair<int, Qt::SortOrder>> DocumentModel::sortColumns() const
     return m_sortColumns;
 }
 
-QVariantList DocumentModel::qmlSortColumns() const
-{
-    QVariantList result;
-    for (auto &sc : m_sortColumns)
-        result.append(QVariantMap { { u"column"_qs, sc.first }, { u"order"_qs, sc.second } });
-    return result;
-}
-
-void DocumentModel::sort(int column, Qt::SortOrder order)
-{
-    sort({ { column, order } });
-}
-
-void DocumentModel::sortAdditionally(int column, Qt::SortOrder order)
-{
-    auto sc = m_sortColumns;
-    sc.append({ column, order });
-    sort(sc);
-}
-
 void DocumentModel::sort(const QVector<QPair<int, Qt::SortOrder>> &columns)
 {
     if (((columns.size() == 1) && (columns.at(0).first == -1)) || (columns == m_sortColumns))

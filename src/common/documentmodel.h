@@ -90,9 +90,6 @@ private:
 class DocumentModel : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool sorted READ isSorted NOTIFY isSortedChanged)
-    Q_PROPERTY(bool filtered READ isFiltered NOTIFY isFilteredChanged)
-    Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY sortColumnsChanged)
 
 public:
     enum Field {
@@ -185,9 +182,6 @@ public:
 
     bool isSorted() const;
     QVector<QPair<int, Qt::SortOrder>> sortColumns() const;
-    QVariantList qmlSortColumns() const;
-    Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
-    Q_INVOKABLE void sortAdditionally(int column, Qt::SortOrder order);
     void sort(const QVector<QPair<int, Qt::SortOrder>> &columns);
 
     bool isFiltered() const;

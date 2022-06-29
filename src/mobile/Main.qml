@@ -234,7 +234,7 @@ ApplicationWindow {
                 view.forceActiveFocus()
             }
         }
-        BS.ActionManager.activeDocument = view ? doc : null
+        BS.ActionManager.activeDocument = view ? doc.document : null
         homeAndView.setCurrentIndex(view ? 1: 0)
     }
 

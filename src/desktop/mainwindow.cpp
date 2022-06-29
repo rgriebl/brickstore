@@ -1134,7 +1134,7 @@ void MainWindow::connectView(View *view)
 
         disconnect(m_activeView.data(), &View::windowTitleChanged,
                    this, &MainWindow::titleUpdate);
-        disconnect(document, &Document::modificationChanged,
+        disconnect(document->model(), &DocumentModel::modificationChanged,
                    this, &QWidget::setWindowModified);
         disconnect(document, &Document::blockingOperationActiveChanged,
                    this, &MainWindow::blockUpdate);
@@ -1151,7 +1151,7 @@ void MainWindow::connectView(View *view)
 
         connect(view, &View::windowTitleChanged,
                 this, &MainWindow::titleUpdate);
-        connect(document, &Document::modificationChanged,
+        connect(document->model(), &DocumentModel::modificationChanged,
                 this, &QWidget::setWindowModified);
         connect(document, &Document::blockingOperationActiveChanged,
                 this, &MainWindow::blockUpdate);

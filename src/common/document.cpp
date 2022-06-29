@@ -221,14 +221,6 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
     for (int li = 0; li < m_columnData.size(); ++li)
         m_columnData[li] = ColumnData { 20, li, false };
 
-    // relay signals for the QML API
-    connect(model, &DocumentModel::currencyCodeChanged,
-            this, &Document::currencyCodeChanged);
-    connect(model, &DocumentModel::lotCountChanged,
-            this, &Document::lotCountChanged);
-    connect(model, &DocumentModel::modificationChanged,
-            this, &Document::modificationChanged);
-
     connect(m_selectionModel, &QItemSelectionModel::selectionChanged,
             this, &Document::updateSelection);
     connect(this, &Document::selectedLotsChanged,
@@ -640,12 +632,6 @@ void Document::setThumbnail(const QString &iconName)
 QModelIndex Document::currentIndex() const
 {
     return m_selectionModel->currentIndex();
-}
-
-DocumentStatistics Document::selectionStatistics(bool ignoreExcluded) const
-{
-    return m_model->statistics(m_selectedLots.isEmpty() ? m_model->filteredLots() : m_selectedLots,
-                               ignoreExcluded);
 }
 
 void Document::documentDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
@@ -1552,15 +1538,6 @@ QCoro::Task<bool> Document::save(bool saveAs)
     co_return false;
 }
 
-QmlDocumentLots *Document::lots()
-{
-    if (!m_qmlLots) {
-        m_qmlLots = new QmlDocumentLots(model());
-        m_qmlLots->setParent(this);
-    }
-    return m_qmlLots;
-}
-
 void Document::saveToFile(const QString &fileName)
 {
     QSaveFile f(fileName);
@@ -2043,7 +2020,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
     case ColumnLayoutCommand::BrickStoreDefault:
     case ColumnLayoutCommand::BrickStoreSimpleDefault:
         resizeColumnsToDefault(clc == ColumnLayoutCommand::BrickStoreSimpleDefault);
-        model()->sort(0, Qt::AscendingOrder);
+        model()->sort({ { 0, Qt::AscendingOrder } });
         break;
     case ColumnLayoutCommand::AutoResize:
         emit resizeColumnsToContents();
@@ -2052,7 +2029,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
         userLayout = Config::inst()->columnLayout(layoutId);
         if (userLayout.isEmpty()) { // use brickstore default
             resizeColumnsToDefault(false);
-            model()->sort(0, Qt::AscendingOrder);
+            model()->sort({ { 0, Qt::AscendingOrder } });
             break;
         }
         Q_FALLTHROUGH();
@@ -2405,54 +2382,6 @@ int Document::processAutosaves(AutosaveAction action)
         f.remove();
     }
     return restoredCount;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-QmlDocumentLots::QmlDocumentLots(DocumentModel *model)
-    : QObject(model)
-    , m_model(model)
-{ }
-
-int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
-{
-    auto lot = new Lot();
-    lot->setItem(item.wrappedObject());
-    lot->setColor(color.wrappedObject());
-    m_model->appendLot(std::move(lot));
-    return int(m_model->lots().indexOf(lot));
-}
-
-void QmlDocumentLots::remove(BrickLink::QmlLot lot)
-{
-    if (!lot.isNull() && m_model && (lot.m_documentLots == this))
-        m_model->removeLot(lot.wrappedObject());
-}
-
-void QmlDocumentLots::removeAt(int index)
-{
-    if ((index >= 0) && (index < m_model->lotCount())) {
-        Lot *lot = m_model->lots().at(index);
-        m_model->removeLot(lot);
-    }
-}
-
-BrickLink::QmlLot QmlDocumentLots::at(int index)
-{
-    if (index < 0 || index >= m_model->lotCount())
-        return BrickLink::QmlLot { };
-    return BrickLink::QmlLot(m_model->lots().at(index), this);
-}
-
-void BrickLink::QmlLot::Setter::doChangeLot(QmlDocumentLots *lots, BrickLink::Lot *which,
-                                            const BrickLink::Lot &value)
-{
-    if (lots && lots->m_model)
-        lots->m_model->changeLot(which, value);
 }
 
 #include "moc_document.cpp"

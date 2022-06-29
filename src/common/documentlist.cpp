@@ -144,13 +144,6 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     return { };
 }
 
-QHash<int, QByteArray> DocumentList::roleNames() const
-{
-    return {
-        { Qt::DisplayRole, "fileNameOrTitle" },
-        { Qt::UserRole, "document" },
-    };
-}
 
 void DocumentList::add(Document *document)
 {

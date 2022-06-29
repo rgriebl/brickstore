@@ -9,10 +9,9 @@ import BrickStore as BS
 AutoSizingMenu {
     id: root
     property int field
-    required property Document document
-    required property var model
+    required property BS.Document document
 
-    property string fieldName: document.model.headerData(field, Qt.Horizontal)
+    property string fieldName: document.headerData(field, Qt.Horizontal)
 
     modal: true
     cascade: false
@@ -20,17 +19,17 @@ AutoSizingMenu {
     anchors.centerIn: parent
 
     ActionDelegate { action: Action { text: qsTr("Sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.model.sort(root.field, Qt.AscendingOrder)
+            onTriggered: root.document.sort(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.model.sort(root.field, Qt.DescendingOrder)
+            onTriggered: root.document.sort(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Additionally sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.model.sortAdditionally(root.field, Qt.AscendingOrder)
+            onTriggered: root.document.sortAdditionally(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Additionally sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.model.sortAdditionally(root.field, Qt.DescendingOrder)
+            onTriggered: root.document.sortAdditionally(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Resize column %1").arg(root.fieldName) }
@@ -40,7 +39,7 @@ AutoSizingMenu {
 
             ListView {
                 anchors.fill: parent
-                model: root.model.columnModel
+                model: root.document.columnModel
 
                 ScrollIndicator.vertical: ScrollIndicator { }
 
@@ -54,14 +53,14 @@ AutoSizingMenu {
                     text: name
                     ToolButton {
                         id: moveDown
-                        enabled: delegate.index < (root.model.columnModel.count - 1)
+                        enabled: delegate.index < (root.document.columnModel.count - 1)
                         height: parent.height
                         width: height
                         anchors.right: parent.right
                         flat: true
                         icon.name: "go-down"
                         onClicked: {
-                            root.model.columnModel.moveColumn(index, index + 1)
+                            root.document.columnModel.moveColumn(delegate.index, delegate.index + 1)
                         }
                     }
                     ToolButton {
@@ -73,7 +72,7 @@ AutoSizingMenu {
                         flat: true
                         icon.name: "go-up"
                         onClicked: {
-                            root.model.columnModel.moveColumn(index, index - 1)
+                            root.document.columnModel.moveColumn(delegate.index, delegate.index - 1)
                         }
                     }
                     ToolButton {
@@ -84,7 +83,7 @@ AutoSizingMenu {
                         flat: true
                         icon.name: delegate.hidden ? "view-hidden" : "view-visible"
                         onClicked: {
-                            root.model.columnModel.hideColumn(index, !hidden)
+                            root.document.columnModel.hideColumn(delegate.index, !delegate.hidden)
                         }
                     }
                 }

@@ -18,6 +18,7 @@
 #include <QPointer>
 #include <QIdentityProxyModel>
 #include <QSortFilterProxyModel>
+#include <QItemSelectionModel>
 #include <QClipboard>
 #include <QFont>
 
@@ -33,11 +34,6 @@
 #include "common/documentlist.h"
 #include "utility/utility.h"
 
-class Currency;
-class Announcements;
-class SystemInfo;
-class RecentFiles;
-class Config;
 class QmlColor;
 class QmlCategory;
 class QmlItemType;
@@ -45,24 +41,39 @@ class QmlItem;
 class QmlLot;
 class QmlPriceGuide;
 class QmlPicture;
-namespace LDraw {
-class RenderController;
-}
 class QmlDocumentColumnModel;
 
 
-class QmlDocumentProxyModel : public QAbstractProxyModel
+class QmlDocument : public QAbstractProxyModel
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(DocumentProxyModel)
-    Q_PROPERTY(Document *document READ document WRITE setDocument NOTIFY documentChanged REQUIRED)
-    Q_PROPERTY(QAbstractListModel *columnModel READ columnModel CONSTANT)
+    QML_NAMED_ELEMENT(Document)
+    QML_UNCREATABLE("")
+    QML_EXTENDED_NAMESPACE(DocumentModel)
+    Q_PRIVATE_PROPERTY(model(), bool sorted READ isSorted NOTIFY isSortedChanged)
+    Q_PRIVATE_PROPERTY(model(), bool filtered READ isFiltered NOTIFY isFilteredChanged)
+    Q_PRIVATE_PROPERTY(model(), QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
+    Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged)
+    Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged)
+    Q_PRIVATE_PROPERTY(doc(), QString title READ title WRITE setTitle NOTIFY titleChanged)
+    Q_PRIVATE_PROPERTY(doc(), QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PRIVATE_PROPERTY(doc(), QString fileName READ fileName NOTIFY fileNameChanged)
+    Q_PRIVATE_PROPERTY(doc(), QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged)
+    Q_PRIVATE_PROPERTY(doc(), BrickLink::Order *order READ order NOTIFY orderChanged)
+    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
+    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged)
+    Q_PRIVATE_PROPERTY(doc(), QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged)
+    Q_PRIVATE_PROPERTY(doc(), bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT)
+    Q_PRIVATE_PROPERTY(doc(), QItemSelectionModel *selectionModel READ selectionModel CONSTANT)
+
+    Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY qmlSortColumnsChanged)
+    Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT)
+    Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged)
+    Q_PROPERTY(QmlDocumentColumnModel *columnModel READ columnModel CONSTANT)
+    Q_PROPERTY(Document *document READ document CONSTANT)
 
 public:
-    QmlDocumentProxyModel(QObject *parent = nullptr);
-
-    Document *document() const;
-    void setDocument(Document *doc);
+    QmlDocument(Document *doc);
 
     int rowCount(const QModelIndex &parent = { }) const override;
     int columnCount(const QModelIndex &parent = { }) const override;
@@ -75,20 +86,60 @@ public:
     QModelIndex mapToSource(const QModelIndex &idx) const override;
     QModelIndex mapFromSource(const QModelIndex &sindex) const override;
 
-    //dropMimeData?
-
     Q_INVOKABLE int logicalColumn(int visual) const;
     Q_INVOKABLE int visualColumn(int logical) const;
 
     QHash<int, QByteArray> roleNames() const override;
 
-    QAbstractListModel *columnModel();
+    QmlDocumentColumnModel *columnModel();
+
+
+    QVariantList qmlSortColumns() const;
+    QmlDocumentLots *qmlLots();
+    QList<BrickLink::QmlLot> qmlSelectedLots();
+
+    Q_INVOKABLE void ref() { m_doc->ref(); }
+    Q_INVOKABLE void deref() { m_doc->deref(); }
+
+    Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
+    Q_INVOKABLE void sortAdditionally(int column, Qt::SortOrder order);
+
+    Q_INVOKABLE DocumentStatistics selectionStatistics(bool ignoreExcluded = false) const;
+
+    Q_INVOKABLE void saveCurrentColumnLayout();
+    Q_INVOKABLE void setColumnLayoutFromId(const QString &layoutId);
 
 signals:
     void forceLayout();
-    void documentChanged(Document *doc);
+
+    void closeAllViewsForDocument();
+    void requestActivation();
+
+    void isSortedChanged(bool b);
+    void isFilteredChanged(bool b);
+    void currencyCodeChanged(const QString &ccode);
+    void lotCountChanged(int lotCount);
+    void modificationChanged(bool modified);
+    void filePathChanged(const QString &filePath);
+    void fileNameChanged(const QString &fileName);
+    void titleChanged(const QString &title);
+    void thumbnailChanged(const QImage &image);
+    void orderChanged(BrickLink::Order *order);
+    void blockingOperationActiveChanged(bool blocked);
+    void blockingOperationCancelableChanged(bool cancelable);
+    void blockingOperationTitleChanged(const QString &title);
+    void blockingOperationProgress(int done, int total);
+
+    void qmlSortColumnsChanged();
+    void qmlSelectedLotsChanged();
 
 private:
+    DocumentModel *model() { return m_doc->model(); }
+    Document *doc() { return m_doc; }
+
+    void setDocument(Document *doc);
+    Document *document() const;
+
     void update();
     void emitForceLayout();
 
@@ -103,18 +154,23 @@ private:
     QTimer *m_forceLayoutDelay = nullptr;
     QmlDocumentColumnModel *m_columnModel = nullptr;
 
+    QPointer<QmlDocumentLots> m_qmlLots;
+
     friend class QmlDocumentColumnModel;
 };
+
+
+
 
 class QmlDocumentColumnModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(DocumentColumnModel)
-    QML_UNCREATABLE("")
+    QML_ANONYMOUS
     Q_PROPERTY(int count READ rowCount CONSTANT)
 
 public:
-    QmlDocumentColumnModel(QmlDocumentProxyModel *proxyModel);
+    QmlDocumentColumnModel(QmlDocument *proxyModel);
 
     int rowCount(const QModelIndex &parent = { }) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -124,8 +180,8 @@ public:
     Q_INVOKABLE void hideColumn(int vi, bool hidden);
 
 private:
-    QmlDocumentProxyModel *m_proxyModel;
-    friend class QmlDocumentProxyModel;
+    QmlDocument *m_proxyModel;
+    friend class QmlDocument;
 };
 
 
@@ -324,71 +380,6 @@ private:
     bool m_showTracers;
 };
 
-class QmlBrickStore : public QObject
-{
-    Q_OBJECT
-    QML_NAMED_ELEMENT(BrickStore)
-    QML_SINGLETON
-    Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
-    Q_PROPERTY(QString versionNumber READ versionNumber CONSTANT)
-    Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT)
-    Q_PROPERTY(RecentFiles *recentFiles READ recentFiles CONSTANT)
-    Q_PROPERTY(DocumentList *documents READ documents CONSTANT)
-    Q_PROPERTY(Document *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
-    Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
-    Q_PROPERTY(QVariantMap about READ about CONSTANT)
-    Q_PROPERTY(QmlDebug *debug READ debug CONSTANT)
-
-public:
-    QmlBrickStore();
-
-    DocumentList *documents() const;
-    Config *config() const;
-    QString versionNumber() const;
-    QString buildNumber() const;
-    RecentFiles *recentFiles() const;
-    ColumnLayoutsModel *columnLayouts() const;
-    QVariantMap about() const;
-    QmlDebug *debug() const;
-    QString defaultCurrencyCode() const;
-
-    Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
-    Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
-    Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
-
-    Q_INVOKABLE QStringList nameFiltersForBrickLinkXML(bool includeAll = false) const;
-    Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
-    Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
-
-    Q_INVOKABLE Document *importBrickLinkStore(BrickLink::Store *store);
-    Q_INVOKABLE Document *importBrickLinkOrder(BrickLink::Order *order);
-    Q_INVOKABLE Document *importBrickLinkCart(BrickLink::Cart *cart);
-
-    Q_INVOKABLE Document *importPartInventory(BrickLink::QmlItem item,
-                                              BrickLink::QmlColor color, int multiply,
-                                              BrickLink::Condition condition,
-                                              BrickLink::Status extraParts,
-                                              bool includeInstructions, bool includeAlternates,
-                                              bool includeCounterParts);
-
-    Q_INVOKABLE void updateDatabase();
-
-    Document *activeDocument() const;
-
-    Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
-
-    Q_INVOKABLE void updateIconTheme(bool darkTheme);
-
-signals:
-    void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
-    void showSettings(const QString &page);
-    void activeDocumentChanged(Document *doc);
-
-private:
-    ColumnLayoutsModel *m_columnLayouts;
-    mutable QmlDebug *m_debug = nullptr;
-};
-
 class QmlAnnouncements
 {
     Q_GADGET
@@ -479,37 +470,129 @@ class QmlRecentFiles
     QML_UNCREATABLE("")
 };
 
-class QmlDocument
+
+class QmlDocumentLots : public QObject
 {
-    Q_GADGET
-    QML_FOREIGN(Document)
-    QML_NAMED_ELEMENT(Document)
+    Q_OBJECT
+    QML_ANONYMOUS
     QML_UNCREATABLE("")
+
+public:
+    QmlDocumentLots(DocumentModel *model);
+
+    Q_INVOKABLE int add(BrickLink::QmlItem item, BrickLink::QmlColor color);
+    Q_INVOKABLE void remove(BrickLink::QmlLot lot);
+    Q_INVOKABLE void removeAt(int index);
+    Q_INVOKABLE BrickLink::QmlLot at(int index);
+
+private:
+    DocumentModel *m_model;
+
+    friend class BrickLink::QmlLot::Setter;
 };
 
-class QmlDocumentList
+class QmlLotList
 {
     Q_GADGET
-    QML_FOREIGN(DocumentList)
+    QML_FOREIGN(QList<BrickLink::QmlLot>)
+    QML_ANONYMOUS
+    QML_SEQUENTIAL_CONTAINER(BrickLink::QmlLot)
+};
+
+
+
+class QmlDocumentList : public QAbstractListModel
+{
+    Q_OBJECT
     QML_NAMED_ELEMENT(DocumentList)
     QML_UNCREATABLE("")
+    Q_PRIVATE_PROPERTY(docList(), int count READ count NOTIFY countChanged)
+
+public:
+    QmlDocumentList(QObject *parent = nullptr);
+
+    QmlDocument *map(Document *doc) const;
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+signals:
+    void lastDocumentClosed();
+    void countChanged(int count);
+    void documentAdded(QmlDocument *document);
+    void documentRemoved(QmlDocument *document);
+
+private:
+    DocumentList *docList();
+    QHash<Document *, QmlDocument *> m_docMapping;
 };
 
-class QmlDocumentModel
+
+
+class QmlBrickStore : public QObject
 {
-    Q_GADGET
-    QML_FOREIGN(DocumentModel)
-    QML_NAMED_ELEMENT(DocumentModel)
-    QML_UNCREATABLE("")
+    Q_OBJECT
+    QML_NAMED_ELEMENT(BrickStore)
+    QML_SINGLETON
+    Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
+    Q_PROPERTY(QString versionNumber READ versionNumber CONSTANT)
+    Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT)
+    Q_PROPERTY(RecentFiles *recentFiles READ recentFiles CONSTANT)
+    Q_PROPERTY(QmlDocumentList *documents READ documents CONSTANT)
+    Q_PROPERTY(QmlDocument *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
+    Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
+    Q_PROPERTY(QVariantMap about READ about CONSTANT)
+    Q_PROPERTY(QmlDebug *debug READ debug CONSTANT)
+
+public:
+    QmlBrickStore();
+
+    QmlDocumentList *documents() const;
+    Config *config() const;
+    QString versionNumber() const;
+    QString buildNumber() const;
+    RecentFiles *recentFiles() const;
+    ColumnLayoutsModel *columnLayouts() const;
+    QVariantMap about() const;
+    QmlDebug *debug() const;
+    QString defaultCurrencyCode() const;
+
+    Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
+    Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
+    Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
+
+    Q_INVOKABLE QStringList nameFiltersForBrickLinkXML(bool includeAll = false) const;
+    Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
+    Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
+
+    Q_INVOKABLE QmlDocument *importBrickLinkStore(BrickLink::Store *store);
+    Q_INVOKABLE QmlDocument *importBrickLinkOrder(BrickLink::Order *order);
+    Q_INVOKABLE QmlDocument *importBrickLinkCart(BrickLink::Cart *cart);
+
+    Q_INVOKABLE QmlDocument *importPartInventory(BrickLink::QmlItem item,
+                                                 BrickLink::QmlColor color, int multiply,
+                                                 BrickLink::Condition condition,
+                                                 BrickLink::Status extraParts,
+                                                 bool includeInstructions, bool includeAlternates,
+                                                 bool includeCounterParts);
+
+    Q_INVOKABLE void updateDatabase();
+
+    QmlDocument *activeDocument() const;
+
+    Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
+
+    Q_INVOKABLE void updateIconTheme(bool darkTheme);
+
+signals:
+    void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
+    void showSettings(const QString &page);
+    void activeDocumentChanged(QmlDocument *doc);
+
+private:
+    QmlDocumentList *m_docList;
+    ColumnLayoutsModel *m_columnLayouts;
+    mutable QmlDebug *m_debug = nullptr;
 };
 
-class QmlLots
-{
-    Q_GADGET
-    QML_FOREIGN(QmlDocumentLots)
-    QML_NAMED_ELEMENT(Lots)
-    QML_UNCREATABLE("")
-};
-
-
-Q_DECLARE_METATYPE(QmlBrickStore *)

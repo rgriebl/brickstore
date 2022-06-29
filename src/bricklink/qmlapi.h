@@ -13,6 +13,8 @@
 */
 #pragma once
 
+#include <functional>
+
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtCore/QObject>
@@ -349,6 +351,7 @@ class QmlLot : public QmlWrapperBase<Lot>
 
 public:
     QmlLot(Lot *lot = nullptr, ::QmlDocumentLots *documentLots = nullptr);
+    QmlLot(const Lot *lot);
     QmlLot(const QmlLot &copy);
     QmlLot(QmlLot &&move);
     ~QmlLot() override;
@@ -431,6 +434,11 @@ public:
 
     QImage image() const;
 
+    typedef std::function<void(::QmlDocumentLots * /*lots*/, Lot * /*which*/,
+                               const Lot & /*value*/)> QmlSetterCallback;
+
+    static void setQmlSetterCallback(QmlSetterCallback callback);
+
 private:
     class Setter
     {
@@ -441,14 +449,13 @@ private:
         ~Setter();
 
     private:
-        // the definition is in document.cpp
-        void doChangeLot(::QmlDocumentLots *lots, Lot *which, const Lot &value);
         QmlLot *m_lot;
         Lot m_to;
     };
     Setter set();
     Lot *get() const;
 
+    static QmlSetterCallback s_changeLot;
     QmlDocumentLots *m_documentLots = nullptr;
     constexpr static quintptr Owning = 1u;
 

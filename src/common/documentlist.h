@@ -21,7 +21,6 @@
 class DocumentList : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
     static DocumentList *inst();
@@ -34,7 +33,6 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
 
 signals:
     void lastDocumentClosed();

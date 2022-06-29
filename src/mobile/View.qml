@@ -113,13 +113,12 @@ Page {
             reuseItems: false
             interactive: false
 
-            property bool sorted: root.document.model.sorted
-            property var sortColumns: root.document.model.sortColumns
+            property bool sorted: root.document.sorted
+            property var sortColumns: root.document.sortColumns
 
             ViewHeaderMenu {
                 id: headerMenu
                 document: root.document
-                model: table.model
             }
 
             delegate: GridHeader {
@@ -175,9 +174,11 @@ Page {
                 }
             }
 
-            model: BS.DocumentProxyModel {
-                document: root.document
-                onForceLayout: table.forceLayout()
+            model: root.document
+
+            Connections {
+                target: root.document
+                function onForceLayout() { table.forceLayout() }
             }
 
             delegate: DelegateChooser {
@@ -199,7 +200,7 @@ Page {
                                          : '-'
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Condition
+                DelegateChoice { roleValue: BS.Document.Condition
                     GridCell {
                         property bool isNew: display === BL.BrickLink.Condition.New
                         //horizontalAlignment: Text.AlignHCenter
@@ -208,7 +209,7 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Status
+                DelegateChoice { roleValue: BS.Document.Status
                     GridCell {
                         property var status: display
                         required property var lot
@@ -241,7 +242,7 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Picture
+                DelegateChoice { roleValue: BS.Document.Picture
                     GridCell {
                         id: picCell
                         background: QImageItem {
@@ -251,7 +252,7 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Color
+                DelegateChoice { roleValue: BS.Document.Color
                     GridCell {
                         QImageItem {
                             id: colorImage
@@ -269,7 +270,7 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Retain
+                DelegateChoice { roleValue: BS.Document.Retain
                     GridCell {
                         property bool retain: display
                         text: ""
@@ -281,13 +282,13 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Weight
+                DelegateChoice { roleValue: BS.Document.Weight
                     GridCell {
                         text: BS.BrickStore.toWeightString(display, true)
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Stockroom
+                DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         property var stockroom: display
                         text: stockroom === BL.BrickLink.Stockroom.A
@@ -303,21 +304,21 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Sale
+                DelegateChoice { roleValue: BS.Document.Sale
                     GridCell { text: root.humanReadableInteger(display, 0, "%") }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Bulk
+                DelegateChoice { roleValue: BS.Document.Bulk
                     GridCell { text: root.humanReadableInteger(display, 1) }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Price
+                DelegateChoice { roleValue: BS.Document.Price
                     CurrencyGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.PriceOrig
+                DelegateChoice { roleValue: BS.Document.PriceOrig
                     CurrencyGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.PriceDiff
+                DelegateChoice { roleValue: BS.Document.PriceDiff
                     GridCell {
 //                        required property var baseLot  remove?
                         text: root.humanReadableCurrency(display)
@@ -326,34 +327,34 @@ Page {
                     }
                 }
 
-                DelegateChoice { roleValue: BS.DocumentModel.Total
+                DelegateChoice { roleValue: BS.Document.Total
                     GridCell {
                         text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.Cost
+                DelegateChoice { roleValue: BS.Document.Cost
                     CurrencyGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierP1
+                DelegateChoice { roleValue: BS.Document.TierP1
                     GridCell {
                         text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierP2
+                DelegateChoice { roleValue: BS.Document.TierP2
                     GridCell {
                         text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierP3
+                DelegateChoice { roleValue: BS.Document.TierP3
                     GridCell {
                         text: root.humanReadableCurrency(display)
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.Quantity
+                DelegateChoice { roleValue: BS.Document.Quantity
                     GridCell {
                         property bool isZero: display === 0
                         text: root.humanReadableInteger(display)
@@ -362,60 +363,60 @@ Page {
                                                           : "transparent"
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.QuantityOrig
+                DelegateChoice { roleValue: BS.Document.QuantityOrig
                     GridCell {
                         text: display === 0 ? "-" : display.toLocaleString()
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.QuantityDiff
+                DelegateChoice { roleValue: BS.Document.QuantityDiff
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
                                           : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierQ1
+                DelegateChoice { roleValue: BS.Document.TierQ1
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierQ2
+                DelegateChoice { roleValue: BS.Document.TierQ2
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.TierQ3
+                DelegateChoice { roleValue: BS.Document.TierQ3
                     GridCell {
                         text: root.humanReadableInteger(display)
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.LotId
+                DelegateChoice { roleValue: BS.Document.LotId
                     UIntGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.YearReleased
+                DelegateChoice { roleValue: BS.Document.YearReleased
                     UIntGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.Category
+                DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
                         required property var lot
                         tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).category.id, 0.2)
                         text: display
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.ItemType
+                DelegateChoice { roleValue: BS.Document.ItemType
                     GridCell {
                         required property var lot
                         tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.DateAdded
+                DelegateChoice { roleValue: BS.Document.DateAdded
                     DateGridCell { }
                 }
-                DelegateChoice { roleValue: BS.DocumentModel.DateLastSold
+                DelegateChoice { roleValue: BS.Document.DateLastSold
                     DateGridCell { }
                 }
 
@@ -466,7 +467,7 @@ Page {
     }
 
     property QtObject connectionContext: null
-    property bool active: document && (document === BS.ActionManager.activeDocument)
+    property bool active: document && (document.document === BS.ActionManager.activeDocument)
 
     onActiveChanged: {
         if (active) {

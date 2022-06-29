@@ -550,6 +550,12 @@ QVariantList QmlItem::consistsOf() const
           downloaded) at runtime. See the Picture type for more information.
 */
 
+QmlLot::QmlSetterCallback QmlLot::s_changeLot;
+
+QmlLot::QmlLot(const Lot *lot)
+    : QmlLot(const_cast<Lot *>(lot), nullptr)
+{ }
+
 QmlLot::QmlLot(Lot *lot, ::QmlDocumentLots *documentLots)
     : QmlWrapperBase(lot)
     , m_documentLots(documentLots)
@@ -594,6 +600,12 @@ QImage QmlLot::image() const
     return pic ? pic->image() : dummy;
 }
 
+void QmlLot::setQmlSetterCallback(QmlSetterCallback callback)
+{
+    s_changeLot = callback;
+}
+
+
 QmlLot::Setter::Setter(QmlLot *lot)
     : m_lot((lot && !lot->isNull()) ? lot : nullptr)
 {
@@ -614,8 +626,8 @@ QmlLot::Setter::~Setter()
     }
 
     if (m_lot && (*m_lot->wrapped != m_to)) {
-        if (m_lot->m_documentLots)
-            doChangeLot(m_lot->m_documentLots, m_lot->wrapped, m_to);
+        if (m_lot->m_documentLots && QmlLot::s_changeLot)
+            QmlLot::s_changeLot(m_lot->m_documentLots, m_lot->wrapped, m_to);
         else
             *m_lot->wrapped = m_to;
     }

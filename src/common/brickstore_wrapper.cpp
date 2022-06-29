@@ -81,7 +81,9 @@
 
 
 QmlBrickStore::QmlBrickStore()
-    : m_columnLayouts(new ColumnLayoutsModel(this))
+    : QObject()
+    , m_docList(new QmlDocumentList(this))
+    , m_columnLayouts(new ColumnLayoutsModel(this))
 {
     setObjectName(u"BrickStore"_qs);
 
@@ -89,15 +91,17 @@ QmlBrickStore::QmlBrickStore()
             this, &QmlBrickStore::showSettings);
 
     connect(ActionManager::inst(), &ActionManager::activeDocumentChanged,
-            this, &QmlBrickStore::activeDocumentChanged);
+            this, [this](Document *doc) {
+        emit activeDocumentChanged(m_docList->map(doc));
+    });
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
             this, &QmlBrickStore::defaultCurrencyCodeChanged);
 }
 
-DocumentList *QmlBrickStore::documents() const
+QmlDocumentList *QmlBrickStore::documents() const
 {
-    return DocumentList::inst();
+    return m_docList;
 }
 
 Config *QmlBrickStore::config() const
@@ -223,30 +227,31 @@ QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
     return DocumentIO::nameFiltersForLDraw(includeAll);
 }
 
-Document *QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
+QmlDocument *QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
 {
-    return DocumentIO::importBrickLinkStore(store);
+    return new QmlDocument(DocumentIO::importBrickLinkStore(store));
 }
 
-Document *QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
+QmlDocument *QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
 {
-    return DocumentIO::importBrickLinkOrder(order);
+    return new QmlDocument(DocumentIO::importBrickLinkOrder(order));
 }
 
-Document *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
+QmlDocument *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
 {
-    return DocumentIO::importBrickLinkCart(cart);
+    return new QmlDocument(DocumentIO::importBrickLinkCart(cart));
 }
 
-Document *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
+QmlDocument *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                              int multiply, BrickLink::Condition condition,
                                              BrickLink::Status extraParts,
                                              bool includeInstructions, bool includeAlternates,
                                              bool includeCounterParts)
 {
-    return Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(), multiply,
-                                       condition, extraParts,
-                                       includeInstructions, includeAlternates, includeCounterParts);
+    return new QmlDocument(Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(),
+                                                       multiply, condition, extraParts,
+                                                       includeInstructions, includeAlternates,
+                                                       includeCounterParts));
 }
 
 /*! \qmlmethod void BrickStore::updateDatabase()
@@ -258,9 +263,9 @@ void QmlBrickStore::updateDatabase()
     Application::inst()->updateDatabase();
 }
 
-Document *QmlBrickStore::activeDocument() const
+QmlDocument *QmlBrickStore::activeDocument() const
 {
-    return ActionManager::inst()->activeDocument();
+    return m_docList->map(ActionManager::inst()->activeDocument());
 }
 
 QmlThenable *QmlBrickStore::checkBrickLinkLogin()
@@ -279,19 +284,133 @@ void QmlBrickStore::updateIconTheme(bool darkTheme)
 }
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
-QmlDocumentProxyModel::QmlDocumentProxyModel(QObject *parent)
-    : QAbstractProxyModel(parent)
+QmlDocument::QmlDocument(Document *doc)
+    : QAbstractProxyModel(doc)
+    , m_doc(doc)
     , m_forceLayoutDelay(new QTimer(this))
     , m_columnModel(new QmlDocumentColumnModel(this))
 {
     m_forceLayoutDelay->setInterval(100);
     m_forceLayoutDelay->setSingleShot(true);
     connect(m_forceLayoutDelay, &QTimer::timeout,
-            this, &QmlDocumentProxyModel::forceLayout);
+            this, &QmlDocument::forceLayout);
+
+    setDocument(doc); //TODO: inline
+
+    // relay signals for the QML API
+
+    connect(doc, &Document::closeAllViewsForDocument,
+            this, &QmlDocument::closeAllViewsForDocument);
+    connect(doc, &Document::requestActivation,
+            this, &QmlDocument::requestActivation);
+
+
+    connect(model(), &DocumentModel::isSortedChanged,
+            this, &QmlDocument::isSortedChanged);
+    connect(model(), &DocumentModel::isFilteredChanged,
+            this, &QmlDocument::isFilteredChanged);
+
+    connect(model(), &DocumentModel::currencyCodeChanged,
+            this, &QmlDocument::currencyCodeChanged);
+    connect(model(), &DocumentModel::lotCountChanged,
+            this, &QmlDocument::lotCountChanged);
+    connect(model(), &DocumentModel::modificationChanged,
+            this, &QmlDocument::modificationChanged);
+
+    connect(doc, &Document::filePathChanged,
+            this, &QmlDocument::filePathChanged);
+    connect(doc, &Document::fileNameChanged,
+            this, &QmlDocument::fileNameChanged);
+    connect(doc, &Document::titleChanged,
+            this, &QmlDocument::titleChanged);
+    connect(doc, &Document::thumbnailChanged,
+            this, &QmlDocument::thumbnailChanged);
+    connect(doc, &Document::orderChanged,
+            this, &QmlDocument::orderChanged);
+    connect(doc, &Document::blockingOperationActiveChanged,
+            this, &QmlDocument::blockingOperationActiveChanged);
+    connect(doc, &Document::blockingOperationCancelableChanged,
+            this, &QmlDocument::blockingOperationCancelableChanged);
+    connect(doc, &Document::blockingOperationTitleChanged,
+            this, &QmlDocument::blockingOperationTitleChanged);
+    connect(doc, &Document::blockingOperationProgress,
+            this, &QmlDocument::blockingOperationProgress);
+
+    connect(model(), &DocumentModel::sortColumnsChanged,
+            this, [this]() {
+        emit qmlSortColumnsChanged();
+    });
+    connect(doc, &Document::selectedLotsChanged,
+            this, &QmlDocument::qmlSelectedLotsChanged);
 }
 
-void QmlDocumentProxyModel::setDocument(Document *doc)
+QVariantList QmlDocument::qmlSortColumns() const
+{
+    QVariantList result;
+    const auto sortColumns = m_doc->model()->sortColumns();
+    for (auto &sc : sortColumns)
+        result.append(QVariantMap { { u"column"_qs, sc.first }, { u"order"_qs, sc.second } });
+    return result;
+}
+
+QmlDocumentLots *QmlDocument::qmlLots()
+{
+    if (!m_qmlLots) {
+        m_qmlLots = new QmlDocumentLots(m_doc->model());
+        m_qmlLots->setParent(this);
+    }
+    return m_qmlLots;
+}
+
+QList<BrickLink::QmlLot> QmlDocument::qmlSelectedLots()
+{
+    const auto lots = m_doc->selectedLots();
+    QList<BrickLink::QmlLot> qmlLots;
+    qmlLots.reserve(lots.size());
+
+    for (const auto *lot : lots)
+        qmlLots << BrickLink::QmlLot(lot);
+
+    return qmlLots;
+}
+
+void QmlDocument::sort(int column, Qt::SortOrder order)
+{
+    model()->sort({ { column, order } });
+}
+
+void QmlDocument::sortAdditionally(int column, Qt::SortOrder order)
+{
+    auto sc = model()->sortColumns();
+    sc.append({ column, order });
+    model()->sort(sc);
+}
+
+DocumentStatistics QmlDocument::selectionStatistics(bool ignoreExcluded) const
+{
+    const auto &selected = m_doc->selectedLots();
+
+    return m_doc->model()->statistics(selected.isEmpty() ? m_doc->model()->filteredLots() : selected,
+                                      ignoreExcluded);
+}
+
+void QmlDocument::saveCurrentColumnLayout()
+{
+    // decouple the co-routine
+    QMetaObject::invokeMethod(this, [this]() { m_doc->saveCurrentColumnLayout(); });
+}
+
+void QmlDocument::setColumnLayoutFromId(const QString &layoutId)
+{
+    m_doc->setColumnLayoutFromId(layoutId);
+}
+
+
+void QmlDocument::setDocument(Document *doc)
 {
     beginResetModel();
 
@@ -380,7 +499,7 @@ void QmlDocumentProxyModel::setDocument(Document *doc)
                 m_connectionContext, [this](const QModelIndex &, int, int, const QModelIndex &, int) {
             endMoveRows();
         });
-        connect(this, &QmlDocumentProxyModel::headerDataChanged,
+        connect(this, &QmlDocument::headerDataChanged,
                 this, [this](Qt::Orientation orientation, int, int) {
             if (orientation != Qt::Horizontal)
                 return;
@@ -393,34 +512,34 @@ void QmlDocumentProxyModel::setDocument(Document *doc)
     endResetModel();
 }
 
-Document *QmlDocumentProxyModel::document() const
+Document *QmlDocument::document() const
 {
     return m_doc;
 }
 
 
-int QmlDocumentProxyModel::rowCount(const QModelIndex &parent) const
+int QmlDocument::rowCount(const QModelIndex &parent) const
 {
     return sourceModel()->rowCount(mapToSource(parent));
 }
 
-int QmlDocumentProxyModel::columnCount(const QModelIndex &parent) const
+int QmlDocument::columnCount(const QModelIndex &parent) const
 {
     return sourceModel()->columnCount(mapToSource(parent));
 }
 
-QModelIndex QmlDocumentProxyModel::index(int row, int column, const QModelIndex &) const
+QModelIndex QmlDocument::index(int row, int column, const QModelIndex &) const
 {
     auto sindex = sourceModel()->index(row, column < 0 ? -1 : v2l[column], { });
     return mapFromSource(sindex);
 }
 
-QModelIndex QmlDocumentProxyModel::parent(const QModelIndex &) const
+QModelIndex QmlDocument::parent(const QModelIndex &) const
 {
     return QModelIndex();
 }
 
-QVariant QmlDocumentProxyModel::data(const QModelIndex &index, int role) const
+QVariant QmlDocument::data(const QModelIndex &index, int role) const
 {
     if (index.isValid() && (role == Qt::UserRole + 3456)) {
         return logicalColumn(index.column());
@@ -429,7 +548,7 @@ QVariant QmlDocumentProxyModel::data(const QModelIndex &index, int role) const
     return sourceModel()->data(sindex, role);
 }
 
-QVariant QmlDocumentProxyModel::headerData(int section, Qt::Orientation o, int role) const
+QVariant QmlDocument::headerData(int section, Qt::Orientation o, int role) const
 {
     if ((o != Qt::Horizontal) || (section < 0) || (section >= m_doc->model()->columnCount()))
         return { };
@@ -448,43 +567,43 @@ QVariant QmlDocumentProxyModel::headerData(int section, Qt::Orientation o, int r
     }
 }
 
-QModelIndex QmlDocumentProxyModel::mapToSource(const QModelIndex &index) const
+QModelIndex QmlDocument::mapToSource(const QModelIndex &index) const
 {
     auto sindex = createSourceIndex(index.row(), index.column() < 0 ? -1 : v2l[index.column()],
                                     index.internalPointer());
     return sindex;
 }
 
-QModelIndex QmlDocumentProxyModel::mapFromSource(const QModelIndex &sindex) const
+QModelIndex QmlDocument::mapFromSource(const QModelIndex &sindex) const
 {
     auto index = createIndex(sindex.row(), sindex.column() < 0 ? -1 : l2v[sindex.column()],
                              sindex.internalPointer());
     return index;
 }
 
-int QmlDocumentProxyModel::logicalColumn(int visual) const
+int QmlDocument::logicalColumn(int visual) const
 {
     return ((visual >= 0) && (visual < v2l.size())) ? v2l[visual] : -1;
 }
 
-int QmlDocumentProxyModel::visualColumn(int logical) const
+int QmlDocument::visualColumn(int logical) const
 {
     return ((logical >= 0) && (logical < l2v.size())) ? l2v[logical] : -1;
 }
 
-QHash<int, QByteArray> QmlDocumentProxyModel::roleNames() const
+QHash<int, QByteArray> QmlDocument::roleNames() const
 {
     auto hash = sourceModel()->roleNames();
     hash.insert(Qt::UserRole + 3456, "documentField");
     return hash;
 }
 
-QAbstractListModel *QmlDocumentProxyModel::columnModel()
+QmlDocumentColumnModel *QmlDocument::columnModel()
 {
     return m_columnModel;
 }
 
-void QmlDocumentProxyModel::update()
+void QmlDocument::update()
 {
     if (!m_doc)
         return;
@@ -500,18 +619,18 @@ void QmlDocumentProxyModel::update()
     }
 }
 
-void QmlDocumentProxyModel::emitForceLayout()
+void QmlDocument::emitForceLayout()
 {
     m_forceLayoutDelay->start();
 }
 
-void QmlDocumentProxyModel::internalMoveColumn(int viFrom, int viTo)
+void QmlDocument::internalMoveColumn(int viFrom, int viTo)
 {
     int li = v2l[viFrom];
     m_doc->moveColumn(li, viFrom, viTo);
 }
 
-void QmlDocumentProxyModel::internalHideColumn(int vi, bool hidden)
+void QmlDocument::internalHideColumn(int vi, bool hidden)
 {
     int li = v2l[vi];
     const auto &cd = m_doc->columnLayout().value(li);
@@ -526,7 +645,7 @@ void QmlDocumentProxyModel::internalHideColumn(int vi, bool hidden)
 ///////////////////////////////////////////////////////////////////////
 
 
-QmlDocumentColumnModel::QmlDocumentColumnModel(QmlDocumentProxyModel *proxyModel)
+QmlDocumentColumnModel::QmlDocumentColumnModel(QmlDocument *proxyModel)
     : QAbstractListModel(proxyModel)
     , m_proxyModel(proxyModel)
 { }
@@ -933,5 +1052,117 @@ QAbstractListModel *QmlDebug::log() const
     return QmlDebugLogModel::inst();
 }
 
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlDocumentLots::QmlDocumentLots(DocumentModel *model)
+    : QObject(model)
+    , m_model(model)
+{
+    static bool once = false;
+    if (!once) {
+        BrickLink::QmlLot::setQmlSetterCallback([](QmlDocumentLots *lots, BrickLink::Lot *which,
+                                                const BrickLink::Lot &value) {
+            if (lots && lots->m_model)
+                lots->m_model->changeLot(which, value);
+        });
+        once = true;
+    }
+}
+
+int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
+{
+    auto lot = new Lot();
+    lot->setItem(item.wrappedObject());
+    lot->setColor(color.wrappedObject());
+    m_model->appendLot(std::move(lot));
+    return int(m_model->lots().indexOf(lot));
+}
+
+void QmlDocumentLots::remove(BrickLink::QmlLot lot)
+{
+    if (!lot.isNull() && m_model && (lot.m_documentLots == this))
+        m_model->removeLot(lot.wrappedObject());
+}
+
+void QmlDocumentLots::removeAt(int index)
+{
+    if ((index >= 0) && (index < m_model->lotCount())) {
+        Lot *lot = m_model->lots().at(index);
+        m_model->removeLot(lot);
+    }
+}
+
+BrickLink::QmlLot QmlDocumentLots::at(int index)
+{
+    if (index < 0 || index >= m_model->lotCount())
+        return BrickLink::QmlLot { };
+    return BrickLink::QmlLot(m_model->lots().at(index), this);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlDocumentList::QmlDocumentList(QObject *parent)
+    : QAbstractListModel(parent)
+{
+    auto dl = DocumentList::inst();
+
+    connect(dl, &DocumentList::lastDocumentClosed,
+            this, &QmlDocumentList::lastDocumentClosed);
+    connect(dl, &DocumentList::countChanged,
+            this, &QmlDocumentList::countChanged);
+    connect(dl, &DocumentList::documentAdded,
+            this, [this](Document *doc) {
+        auto qmlDoc = new QmlDocument(doc);
+        m_docMapping.insert(doc, qmlDoc);
+        emit documentAdded(qmlDoc);
+    });
+    connect(dl, &DocumentList::documentRemoved,
+            this, [this](Document *doc) {
+        auto qmlDoc = m_docMapping.value(doc);
+        if (qmlDoc)
+            emit documentRemoved(qmlDoc);
+    });
+}
+
+QmlDocument *QmlDocumentList::map(Document *doc) const
+{
+    return m_docMapping.value(doc);
+}
+
+int QmlDocumentList::rowCount(const QModelIndex &parent) const
+{
+    return DocumentList::inst()->rowCount(parent);
+}
+
+QVariant QmlDocumentList::data(const QModelIndex &index, int role) const
+{
+    auto dl = DocumentList::inst();
+    return dl->data(dl->index(index.row(), index.column()), role);
+}
+
+QHash<int, QByteArray> QmlDocumentList::roleNames() const
+{
+    return {
+        { Qt::DisplayRole, "fileNameOrTitle" },
+        { Qt::UserRole, "document" },
+    };
+}
+
+DocumentList *QmlDocumentList::docList()
+{
+    return DocumentList::inst();
+}
 
 #include "moc_brickstore_wrapper.cpp"
