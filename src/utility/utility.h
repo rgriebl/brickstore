@@ -34,14 +34,14 @@ QT_FORWARD_DECLARE_CLASS(QWidget)
 
 namespace Utility {
 
-inline static double fixFinite(double d)
+constexpr double fixFinite(double d)
 {
     return std::isfinite(d) ? d : 0;
 }
 
-inline static bool fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, but also usable around 0
+constexpr bool fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, but also usable around 0
 {
-    return std::abs(d1 - d2) <= 1e-12 * std::max({ 1.0, std::abs(d1), std::abs(d2) });
+    return qAbs(d1 - d2) <= 1e-12 * std::max({ 1.0, qAbs(d1), qAbs(d2) });
 }
 
 int naturalCompare(const QString &s1, const QString &s2);
