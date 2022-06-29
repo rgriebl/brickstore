@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import Mobile
 import Qt.labs.qmlmodels
-import BrickStore
+import BrickStore as BS
 
 
 AutoSizingMenu {
@@ -105,10 +105,10 @@ AutoSizingMenu {
             cascade: false
             parent: Overlay.overlay
             anchors.centerIn: parent
-            width: Overlay.overlay ? Overlay.overlay.width * 2 / 3 : 0
+            //width: Overlay.overlay ? Overlay.overlay.width * 2 / 3 : 0
 
             Repeater {
-                model: BrickStore.columnLayouts
+                model: BS.BrickStore.columnLayouts
                 DelegateChooser {
                     role: "id"
 

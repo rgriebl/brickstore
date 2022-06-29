@@ -14,21 +14,16 @@ Popup {
     bottomMargin: Overlay.overlay ? Overlay.overlay.height / 5 : 0
     topMargin: Overlay.overlay ? Overlay.overlay.height * 4 / 5 : 0
 
-    leftPadding: fm.height + 4
+    leftPadding: font.pixelSize
     topPadding: 4
     bottomPadding: 4
-    rightPadding: fm.height + 4
+    rightPadding: leftPadding
 
     contentItem: Label {
         text: root.message
         wrapMode: Text.Wrap
         font.bold: true
         color: Style.accentTextColor
-
-        FontMetrics {
-            id: fm
-            font: parent.font
-        }
     }
 
     background: Rectangle {

@@ -2,15 +2,10 @@ import Mobile
 import BrickLink as BL
 
 
-Dialog {
+AutoSizingDialog {
     id: root
     title: qsTr("Set To Price Guide")
-    modal: true
-    parent: Overlay.overlay
-    anchors.centerIn: parent
     standardButtons: DialogButtonBox.Cancel | DialogButtonBox.Ok
-//    width: Overlay.overlay.width * 3 / 4
-//    height: Overlay.overlay.height * 3 / 4
 
     property int time: BL.BrickLink.Time.PastSix
     property int price: BL.BrickLink.Price.WAverage
@@ -18,11 +13,11 @@ Dialog {
 
     ButtonGroup {
         id: timeGroup
-        onCheckedButtonChanged: time = checkedButton.value
+        onCheckedButtonChanged: root.time = (checkedButton as CheckButton).value
     }
     ButtonGroup {
         id: priceGroup
-        onCheckedButtonChanged: price = checkedButton.value
+        onCheckedButtonChanged: root.price = (checkedButton as CheckButton).value
     }
 
     function checkButton(buttons, value) {

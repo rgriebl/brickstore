@@ -4,6 +4,8 @@ import BrickStore as BS
 
 
 Control {
+    id: root
+
     property bool darkTheme: Material.theme === Material.Dark
     property color accentColor: Material.accentColor
     property color accentTextColor: Material.primaryHighlightedTextColor

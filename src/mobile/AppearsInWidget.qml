@@ -27,6 +27,14 @@ Control {
         anchors.fill: parent
         clip: true
 
+        Label {
+            anchors.fill: parent
+            text: qsTr("No matches found")
+            color: Style.hintTextColor
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
         ScrollIndicator.vertical: ScrollIndicator { }
 
         delegate: ItemDelegate {
