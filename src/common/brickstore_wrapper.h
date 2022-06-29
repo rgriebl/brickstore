@@ -243,6 +243,7 @@ public:
     Q_INVOKABLE QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5) { return Utility::gradientColor(c1, c2, f); }
     Q_INVOKABLE QColor textColor(const QColor &backgroundColor) { return Utility::textColor(backgroundColor); }
     Q_INVOKABLE QColor contrastColor(const QColor &c, float f) { return Utility::contrastColor(c, f); }
+    Q_INVOKABLE QColor shadeColor(int n, float alpha) { return Utility::shadeColor(n, alpha); }
 
     Q_INVOKABLE QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimize = false, bool show_unit = false) { return Utility::weightToString(gramm, ms, optimize, show_unit); }
     Q_INVOKABLE double stringToWeight(const QString &s, QLocale::MeasurementSystem ms) { return Utility::stringToWeight(s, ms); }

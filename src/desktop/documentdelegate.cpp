@@ -49,7 +49,6 @@
 #include "smartvalidator.h"
 
 
-QVector<QColor>                 DocumentDelegate::s_shades;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
 
 static const quint64 differenceWarningMask = 0ULL
@@ -76,19 +75,6 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
             this, [this]() {
         m_table->resizeRowsToContents();
     });
-}
-
-QColor DocumentDelegate::shadeColor(int idx, float alpha)
-{
-    if (s_shades.isEmpty()) {
-        s_shades.resize(13);
-        for (int i = 0; i < 13; i++)
-            s_shades[i] = QColor::fromHsv(i == 0 ? -1 : (i - 1) * 30, 255, 255);
-    }
-    QColor c = s_shades.at(idx % s_shades.size());
-    if (!qFuzzyIsNull(alpha))
-        c.setAlphaF(alpha);
-    return c;
 }
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
@@ -241,12 +227,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         switch (idx.column()) {
         case DocumentModel::ItemType:
             if (lot->itemType())
-                bg = shadeColor(lot->itemTypeId(), 0.1f);
+                bg = Utility::shadeColor(lot->itemTypeId(), 0.1f);
             break;
 
         case DocumentModel::Category:
             if (lot->category())
-                bg = shadeColor(int(lot->categoryId()), 0.2f);
+                bg = Utility::shadeColor(int(lot->categoryId()), 0.2f);
             break;
 
         case DocumentModel::Quantity:
@@ -348,7 +334,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
                 tag.background = fg;
                 tag.background.setAlphaF(0.3f);
             } else {
-                tag.background = shadeColor(int(1 + altid), .5f);
+                tag.background = Utility::shadeColor(int(1 + altid), .5f);
             }
         }
         break;

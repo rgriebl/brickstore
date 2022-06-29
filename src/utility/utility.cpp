@@ -148,6 +148,22 @@ QColor Utility::contrastColor(const QColor &c, float f)
     return QColor::fromHslF(h, s, l, a);
 }
 
+QColor Utility::shadeColor(int n, float alpha)
+{
+    static QColor shades[12];
+    static bool once = false;
+    if (!once) [[unlikely]] {
+        for (int i = 0; i < 12; i++)
+            shades[i] = QColor::fromHsv(i * 30, 255, 255).toRgb();
+        once = true;
+    }
+
+    QColor c = shades[n % 12];
+    if (alpha)
+        c.setAlphaF(alpha);
+    return c;
+}
+
 QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
 {
     QLocale loc;
@@ -267,4 +283,3 @@ QString Utility::urlQueryEscape(const QString &str)
 {
     return QString::fromUtf8(QUrl::toPercentEncoding(str));
 }
-

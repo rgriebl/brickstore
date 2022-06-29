@@ -74,8 +74,6 @@ protected:
     bool m_read_only = false;
     mutable QSet<quint64> m_elided;
 
-    static QVector<QColor> s_shades;
-
     struct TextLayoutCacheKey {
         QString text;
         QSize size;

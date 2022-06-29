@@ -220,7 +220,7 @@ Page {
                                                    : ''
                         property bool tagBold: bllot.alternate
                         property color tagColor: bllot.alternateId
-                                                 ? root.shadeColor(1 + bllot.alternateId, .5)
+                                                 ? BS.Utility.shadeColor(1 + bllot.alternateId, .5)
                                                  : Qt.rgba(.5, .5, .5, .3)
 
                         Label { }
@@ -401,14 +401,14 @@ Page {
                 DelegateChoice { roleValue: BS.DocumentModel.Category
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BL.BrickLink.lot(lot).category.id, 0.2)
+                        tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).category.id, 0.2)
                         text: display
                     }
                 }
                 DelegateChoice { roleValue: BS.DocumentModel.ItemType
                     GridCell {
                         required property var lot
-                        tint: root.shadeColor(BL.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
+                        tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
                         text: display
                     }
                 }
@@ -429,18 +429,6 @@ Page {
     }
     function humanReadableCurrency(c) {
         return BS.Utility.fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
-    }
-
-    property var shades: []
-
-    function shadeColor(n, alpha) {
-        if (shades.length === 0) {
-            for (let i = 0; i < 13; i++)
-                shades.push(Qt.hsva(i * 30 / 360, 1, 1, 1));
-        }
-        let c = shades[n % shades.length]
-        c.a = alpha
-        return c
     }
 
     Loader {
