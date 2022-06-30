@@ -42,9 +42,6 @@ class UndoGroup : public QUndoGroup
 public:
     UndoGroup(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = nullptr);
-    QAction *createUndoAction(QObject *parent = nullptr);
-
 public slots:
     void redoMultiple(int count);
     void undoMultiple(int count);

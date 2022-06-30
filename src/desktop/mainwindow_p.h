@@ -13,6 +13,7 @@
 */
 #pragma once
 
+#include <QStringBuilder>
 #include <QProgressDialog>
 #include <QMenu>
 #include <QLabel>
@@ -26,6 +27,9 @@
 #include <QShortcut>
 #include <QComboBox>
 #include <QStackedLayout>
+#include <QWidgetAction>
+#include <QUndoGroup>
+#include <QUndoStack>
 #include <QDebug>
 
 #include "common/config.h"
@@ -283,4 +287,93 @@ private:
     QLabel *m_text;
     QToolButton *m_button;
     std::unique_ptr<QMenu> m_menu;
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+class UndoAction : public QWidgetAction
+{
+    Q_OBJECT
+public:
+    enum Type { Undo, Redo };
+
+    template<typename T>
+    static QAction *create(Type type, T *stackOrGroup, QObject *parent)
+    {
+        bool un = (type == Undo);
+
+        auto *a = new UndoAction(type, stackOrGroup, parent);
+        a->setEnabled(un ? stackOrGroup->canUndo() : stackOrGroup->canRedo());
+
+        connect(stackOrGroup, un ? &T::undoTextChanged : &T::redoTextChanged,
+                a, &UndoAction::setDescription);
+        connect(stackOrGroup, un ? &T::canUndoChanged  : &T::canRedoChanged,
+                a, &QAction::setEnabled);
+
+        connect(a, qOverload<int>(&UndoAction::triggered),
+                stackOrGroup, un ? &T::undoMultiple : &T::redoMultiple);
+        connect(a, &QAction::triggered,
+                stackOrGroup, un ? &T::undo : &T::redo);
+        return a;
+    }
+
+
+public slots:
+    void setDescription(const QString &desc)
+    {
+        QString str = (m_type == Undo) ? tr("Undo") : tr("Redo");
+        if (!desc.isEmpty())
+            str = str % u" (" % desc % u')';
+        setText(str);
+    }
+
+signals:
+    void triggered(int);
+
+protected:
+    QWidget *createWidget(QWidget *parent) override;
+
+private:
+    UndoAction(Type t, QUndoStack *stack, QObject *parent)
+        : QWidgetAction(parent)
+        , m_type(t)
+        , m_undoStack(stack)
+    {
+        setDescription({ });
+    }
+
+    UndoAction(Type t, QUndoGroup *group, QObject *parent)
+        : UndoAction(t, group->activeStack(), parent)
+    {
+        connect(group, &QUndoGroup::activeStackChanged,
+                this, [this](QUndoStack *stack) { m_undoStack = stack; });
+    }
+
+    QStringList descriptionList(QUndoStack *stack) const
+    {
+        QStringList sl;
+
+        if (m_type == Undo) {
+            for (int i = stack->index() - 1; i >= 0; --i)
+                sl.append(stack->text(i));
+        } else {
+            for (int i = stack->index(); i < stack->count(); ++i)
+                sl.append(stack->text(i));
+        }
+        return sl;
+    }
+
+    QString listLabel(int count) const
+    {
+        return (m_type == Undo) ? tr("Undo %n action(s)", nullptr, count)
+                                : tr("Redo %n action(s)", nullptr, count);
+    }
+
+private:
+    Type         m_type;
+    QUndoStack * m_undoStack;
 };
