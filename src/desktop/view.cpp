@@ -306,7 +306,7 @@ View::View(Document *document, QWidget *parent)
         { "edit_copy_fields", [this]() -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
-                                        tr("Choose how fields are getting copied or merged."));
+                                        tr("Choose how fields are getting copied or merged."), this);
               dlg.open();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
@@ -317,7 +317,7 @@ View::View(Document *document, QWidget *parent)
               }
           } },
         { "edit_subtractitems", [this]() -> QCoro::Task<> {
-              SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"));
+              SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"), this);
               dlg.open();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {

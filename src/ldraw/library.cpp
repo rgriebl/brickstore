@@ -89,7 +89,7 @@ Library::Library(QObject *parent)
                 if (m_zip)
                     m_zip->close();
                 if (!file->commit()) {
-                    setPath(m_path, true); // at least try to reload the old library
+                    co_await setPath(m_path, true); // at least try to reload the old library
                     throw Exception(tr("saving failed") % u": " % file->errorString());
                 }
                 if (!co_await setPath(file->fileName(), true))
