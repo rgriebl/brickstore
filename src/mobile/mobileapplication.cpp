@@ -43,7 +43,6 @@ void MobileApplication::init()
     // add all relevant QML modules here
     extern void qml_register_types_Mobile(); qml_register_types_Mobile();
 
-
     MobileUIHelpers::create(m_engine);
 
     ActionManager::inst()->createAll([this](const ActionManager::Action *aa) {

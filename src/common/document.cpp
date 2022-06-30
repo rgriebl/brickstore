@@ -960,8 +960,6 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
             double p = pg->price(m_setToPG->time, item->condition(), m_setToPG->price)
                     * m_setToPG->currencyRate;
 
-            qWarning() << "PRICE:" << p << "for" << m_setToPG->time << item->condition() << m_setToPG->price << m_setToPG->currencyRate;
-
             if (!qFuzzyCompare(p, item->price())) {
                 Lot newItem = *item;
                 newItem.setPrice(p);

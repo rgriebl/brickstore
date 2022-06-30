@@ -63,6 +63,13 @@ RenderWidget::RenderWidget(QWidget *parent)
     languageChange();
 }
 
+RenderWidget::~RenderWidget()
+{
+    // we need to make sure the widget/window dies before the RenderController
+    delete m_widget;
+    m_widget = nullptr;
+}
+
 RenderController *RenderWidget::controller()
 {
     return m_controller;

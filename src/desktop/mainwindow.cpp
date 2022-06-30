@@ -1026,7 +1026,7 @@ void MainWindow::createActions()
 
     m_progress = new ProgressCircle();
     m_progress->setIcon(QIcon(u":/assets/generated-app-icons/brickstore.png"_qs));
-    m_progress->setColor("#4ba2d8");
+    m_progress->setColor({ 0x4b, 0xa2, 0xd8 });
 
     connect(m_progress, &ProgressCircle::cancelAll,
             BrickLink::core(), &BrickLink::Core::cancelTransfers);
