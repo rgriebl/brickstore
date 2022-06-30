@@ -1078,9 +1078,12 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
 {
     // Avoid huge directories with 1000s of entries.
     QString p = orderFilePath(fileName, type, date);
+    QString dir = fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()));
 
-    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath(u"."_qs))
+    if (!QFileInfo(dir).isDir() && !QDir(dir).mkpath(u"."_qs)) {
+        qWarning() << "Orders::orderSaveFile failed to mkpath" << dir;
         return nullptr;
+    }
 
     auto f = new QSaveFile(p);
     if (!f->open(QIODevice::WriteOnly)) {
