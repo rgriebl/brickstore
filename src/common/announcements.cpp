@@ -40,7 +40,7 @@ Announcements::Announcements(const QString &baseUrl, QObject *parent)
 
     const auto vl = Config::inst()->value(u"Announcements/ReadIds"_qs).toList();
     for (const QVariant &v : vl)
-        m_readIds << v.toULongLong();
+        m_readIds << v.toUInt();
 }
 
 QCoro::Task<> Announcements::check()

@@ -24,7 +24,7 @@ bool Category::hasInventories(const ItemType *itemType) const
 {
     if (!itemType)
         return false;
-    int index = (itemType - core()->itemTypes().data());
+    auto index = (itemType - core()->itemTypes().data());
     Q_ASSERT(index >= 0 && index < 8);
     return m_has_inventories & quint8(1) << index;
 }

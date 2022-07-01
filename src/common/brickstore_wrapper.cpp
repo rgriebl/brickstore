@@ -981,7 +981,7 @@ QmlDebugLogModel *QmlDebugLogModel::inst()
 
 int QmlDebugLogModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_logs.size();
+    return parent.isValid() ? 0 : int(m_logs.size());
 }
 
 QVariant QmlDebugLogModel::data(const QModelIndex &index, int role) const
@@ -989,7 +989,7 @@ QVariant QmlDebugLogModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return { };
 
-    const Log &log = m_logs.at(index.row());
+    const Log &log = m_logs.at(size_t(index.row()));
 
     switch (role) {
     case TypeRole    : return int(log.type);
@@ -1017,8 +1017,8 @@ QHash<int, QByteArray> QmlDebugLogModel::roleNames() const
 void QmlDebugLogModel::append(QtMsgType type, const QString &category, const QString &file,
                               int line, const QString &message)
 {
-    beginInsertRows({ }, m_logs.size(), m_logs.size());
-    m_logs.emplace_back(type, line, category, file, message);
+    beginInsertRows({ }, int(m_logs.size()), int(m_logs.size()));
+    m_logs.push_back({ type, line, category, file, message });
     endInsertRows();
 }
 
