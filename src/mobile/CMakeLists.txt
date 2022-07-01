@@ -15,6 +15,8 @@ target_link_libraries(mobile_module PRIVATE
     Qt6::QuickControls2ImplPrivate
     Qt6::QuickTemplates2Private
     Qt6::Svg # force deployment
+    bricklink_module
+    common_module
 )
 
 if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.3.0")

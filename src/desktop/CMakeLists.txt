@@ -126,6 +126,9 @@ target_link_libraries(desktop_module PRIVATE
     Qt6::PrintSupport
     Qt6::Qml
     Qt6::Quick
+    common_module
+    bricklink_module
+    ldraw_module
 )
 
 if (MACOS)

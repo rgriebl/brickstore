@@ -50,6 +50,7 @@ target_link_libraries(common_module PRIVATE
     Qt6::QuickPrivate
     Qt6::QuickControls2ImplPrivate
     Qt6::QuickTemplates2Private
+    bricklink_module
 )
 
 if (BS_DESKTOP)

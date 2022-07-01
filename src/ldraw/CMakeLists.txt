@@ -17,6 +17,7 @@ target_link_libraries(ldraw_module PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::Quick3D
+    bricklink_module
 )
 
 if (BS_DESKTOP)
