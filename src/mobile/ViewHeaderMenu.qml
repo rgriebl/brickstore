@@ -1,4 +1,4 @@
-pragma ComponentBehavior: Bound
+//pragma ComponentBehavior: Bound
 
 import Mobile
 import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
