@@ -531,8 +531,18 @@ elseif (IOS)
     # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake
 
     if (${PLATFORM_INT} MATCHES ".*SIMULATOR.*")
-        message(STATUS "Skipping IPA generation for simulator builds")
+        message(STATUS "Skipping Archive and IPA generation for simulator builds")
     else()
+        add_custom_target(archive
+            COMMAND xcodebuild
+                    -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
+                    -configuration Release
+                    -scheme ${PROJECT_NAME}
+                    -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
+                    -derivedDataPath ${CMAKE_BINARY_DIR}/derivedData
+                    archive
+        )
+
         if (NOT CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER
                 OR NOT CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY
                 OR NOT CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
@@ -542,16 +552,6 @@ elseif (IOS)
 
             set(EXPORT_OPTIONS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_ExportOptions.plist)
             configure_file(${CMAKE_SOURCE_DIR}/macos/ExportOptions.ios.plist ${EXPORT_OPTIONS_FILE})
-
-            add_custom_target(archive
-              COMMAND xcodebuild
-                      -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
-                      -configuration Release
-                      -scheme ${PROJECT_NAME}
-                      -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
-                      -derivedDataPath ${CMAKE_BINARY_DIR}/derivedData
-                      archive
-            )
 
             add_custom_target(ipa
                   DEPENDS archive
