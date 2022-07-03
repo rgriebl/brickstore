@@ -530,40 +530,50 @@ elseif (LINUX)
 elseif (IOS)
     # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake
 
-    if (${PLATFORM_INT} MATCHES ".*SIMULATOR.*")
-        message(STATUS "Skipping Archive and IPA generation for simulator builds")
-    else()
-        add_custom_target(archive
-            COMMAND xcodebuild
-                    -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
-                    -configuration Release
-                    -scheme ${PROJECT_NAME}
-                    -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
-                    -derivedDataPath ${CMAKE_BINARY_DIR}/derivedData
-                    archive
+    # Workaround for https://stackoverflow.com/questions/30318941/cmake-generated-xcode-project-release-build-works-but-archive-fails-on-linker
+    if (FIX_IOS_ARCHIVE_BUILD)
+        # for the object libs, we have to link all .o to the correct folder
+        add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
+            VERBATIM
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/fix-ios-archive-build.sh
         )
+        # for the static libs, we can force a common folder
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/out/library)
+    endif()
 
-        if (NOT CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER
-                OR NOT CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY
-                OR NOT CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
-            message(STATUS "Skipping IPA generation because not all necessary variables are set")
-        else()
-            get_target_property(IOS_BUNDLE_IDENTIFIER ${PROJECT_NAME} XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER)
+    add_custom_target(archive
+        COMMAND xcodebuild
+                -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
+                -configuration Release
+                -scheme ${PROJECT_NAME}
+                -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
+                -derivedDataPath ${CMAKE_BINARY_DIR}/derivedData
+                archive
+    )
 
-            set(EXPORT_OPTIONS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_ExportOptions.plist)
-            configure_file(${CMAKE_SOURCE_DIR}/macos/ExportOptions.ios.plist ${EXPORT_OPTIONS_FILE})
+    if (${CMAKE_OSX_SYSROOT} MATCHES ".*SIMULATOR.*")
+        message(STATUS "Skipping IPA target generation for simulator builds")
+    elseif (NOT CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER
+            OR NOT CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY
+            OR NOT CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
+        message(STATUS "Skipping IPA generation because not all necessary variables are set")
+    else()
+        get_target_property(IOS_BUNDLE_IDENTIFIER ${PROJECT_NAME} XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER)
 
-            add_custom_target(ipa
-                  DEPENDS archive
-                  COMMAND xcodebuild
-                          -exportArchive
-                          -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
-                          -exportOptionsPlist ${EXPORT_OPTIONS_FILE}
-                          -exportPath ${CMAKE_BINARY_DIR}/ipa-export
-                  COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/ipa-export/${PROJECT_NAME}.ipa"
-                          "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.ipa"
-            )
-        endif()
+        set(EXPORT_OPTIONS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_ExportOptions.plist)
+        configure_file(${CMAKE_SOURCE_DIR}/macos/ExportOptions.ios.plist ${EXPORT_OPTIONS_FILE})
+
+        add_custom_target(ipa
+            DEPENDS archive
+            COMMAND xcodebuild
+                    -exportArchive
+                    -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
+                    -exportOptionsPlist ${EXPORT_OPTIONS_FILE}
+                    -exportPath ${CMAKE_BINARY_DIR}/ipa-export
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/ipa-export/${PROJECT_NAME}.ipa"
+                    "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.ipa"
+        )
     endif()
 endif()
 
