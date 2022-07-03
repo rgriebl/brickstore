@@ -18,6 +18,7 @@ AutoSizingDialog {
     ListView {
         id: log
         anchors.fill: parent
+        clip: true
 
         ScrollIndicator.vertical: ScrollIndicator { }
 

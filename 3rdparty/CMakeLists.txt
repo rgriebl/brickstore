@@ -5,7 +5,14 @@ target_sources(${PROJECT_NAME} PUBLIC
     lzma/lzmadec.h
     lzma/lzmadec.c
 )
-    
+
+
+target_sources(${PROJECT_NAME} PUBLIC
+    qtdiag/qtdiag.h
+    qtdiag/qtdiag.cpp
+)
+
+
 if (NOT BS_BACKEND)
     target_sources(${PROJECT_NAME} PUBLIC
         minizip/crypt.h
@@ -31,6 +38,7 @@ if (NOT BS_BACKEND)
         )
     endif()
 endif()
+
 
 target_sources(${PROJECT_NAME} PUBLIC
     qcoro/concepts_p.h

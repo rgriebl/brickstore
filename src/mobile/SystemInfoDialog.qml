@@ -7,15 +7,15 @@ AutoSizingDialog {
     title: qsTr("System Information")
     keepPaddingInSmallMode: true
 
-    footer: DialogButtonBox {
-        Button {
-            text: qsTr("Copy to clipboard")
-            flat: true //TODO: Material
-            DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-        }
+    footer: TabBar {
+        id: tabBar
+        TabButton { text: root.title }
+        TabButton { text: qsTr("Colors") }
+        TabButton { text: qsTr("Diagnostics") }
     }
 
     property string sysinfoMarkdown
+    property string diagMarkdown
 
     onAboutToShow: {
         let sysinfo = BS.SystemInfo.asMap()
@@ -32,47 +32,72 @@ AutoSizingDialog {
         })
 
         root.sysinfoMarkdown = md
-    }
 
-    onAccepted: {
-        BS.Clipboard.setText(root.sysinfoMarkdown);
+        diagMarkdown = "```" + BS.SystemInfo.qtDiag() + "\n```\n"
     }
 
     onOpened: { sl.flashScrollIndicators() }
 
-    ScrollableLayout {
-        id: sl
+    SwipeView {
         anchors.fill: parent
+        interactive: false
+        clip: true
 
-        ColumnLayout {
-            width: sl.width
+        currentIndex: tabBar.currentIndex
 
-            Label {
-                text: root.sysinfoMarkdown
-                Layout.fillWidth: true
-                textFormat: Text.MarkdownText
-                wrapMode: Text.WordWrap
-                onLinkActivated: (link) => Qt.openUrlExternally(link)
+        ScrollableLayout {
+            id: sl
+
+            ColumnLayout {
+                width: sl.width
+
+                Label {
+                    text: root.sysinfoMarkdown
+                    Layout.fillWidth: true
+                    textFormat: Text.MarkdownText
+                    wrapMode: Text.WordWrap
+                    onLinkActivated: (link) => Qt.openUrlExternally(link)
+                }
             }
+        }
+        ScrollableLayout {
+            id: colors
 
-            Item { Layout.preferredHeight: 32 }
+            ColumnLayout {
+                width: colors.width
 
-            component ColorLabel : Label {
-                property color c
-                property string t
-                text: t
-                leftPadding: height * 1.5
-                Rectangle { width: parent.height; height: parent.height; color: parent.c }
+                component ColorLabel : Label {
+                    property color c
+                    property string t
+                    text: t
+                    leftPadding: height * 1.5
+                    Rectangle { width: parent.height; height: parent.height; color: parent.c }
+                }
+
+                ColorLabel { t: "textColor                  "; c: Style.textColor }
+                ColorLabel { t: "backgroundColor            "; c: Style.backgroundColor }
+                ColorLabel { t: "accentColor                "; c: Style.accentColor }
+                ColorLabel { t: "accentTextColor            "; c: Style.accentTextColor }
+                ColorLabel { t: "primaryColor               "; c: Style.primaryColor }
+                ColorLabel { t: "primaryTextColor           "; c: Style.primaryTextColor }
+                ColorLabel { t: "primaryHighlightedTextColor"; c: Style.primaryHighlightedTextColor }
+                ColorLabel { t: "hintTextColor              "; c: Style.hintTextColor }
             }
+        }
+        ScrollableLayout {
+            id: diag
 
-            ColorLabel { t: "textColor                  "; c: Style.textColor }
-            ColorLabel { t: "backgroundColor            "; c: Style.backgroundColor }
-            ColorLabel { t: "accentColor                "; c: Style.accentColor }
-            ColorLabel { t: "accentTextColor            "; c: Style.accentTextColor }
-            ColorLabel { t: "primaryColor               "; c: Style.primaryColor }
-            ColorLabel { t: "primaryTextColor           "; c: Style.primaryTextColor }
-            ColorLabel { t: "primaryHighlightedTextColor"; c: Style.primaryHighlightedTextColor }
-            ColorLabel { t: "hintTextColor              "; c: Style.hintTextColor }
+            ColumnLayout {
+                width: diag.width
+
+                Label {
+                    text: root.diagMarkdown
+                    Layout.fillWidth: true
+                    textFormat: Text.MarkdownText
+                    wrapMode: Text.WordWrap
+                    onLinkActivated: (link) => Qt.openUrlExternally(link)
+                }
+            }
         }
     }
 }

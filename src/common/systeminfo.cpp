@@ -34,6 +34,7 @@
 #  include <sys/sysinfo.h>
 #endif
 
+#include "qtdiag/qtdiag.h"
 #include "qcoro/qcorofuture.h"
 #include "version.h"
 #include "systeminfo.h"
@@ -215,6 +216,11 @@ QVariantMap SystemInfo::asMap() const
 quint64 SystemInfo::physicalMemory() const
 {
     return m_map[u"hw.memory"_qs].toULongLong();
+}
+
+QString SystemInfo::qtDiag() const
+{
+    return QT_PREPEND_NAMESPACE(qtDiag)(-1);
 }
 
 #include "moc_systeminfo.cpp"

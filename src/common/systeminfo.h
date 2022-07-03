@@ -28,6 +28,7 @@ public:
     ~SystemInfo() override;
     Q_INVOKABLE QVariantMap asMap() const;
     quint64 physicalMemory() const;
+    Q_INVOKABLE QString qtDiag() const;
 
 signals:
     void initialized();
