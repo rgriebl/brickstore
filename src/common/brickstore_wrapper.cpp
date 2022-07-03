@@ -1114,7 +1114,7 @@ BrickLink::QmlLot QmlDocumentLots::at(int index)
 
 
 QmlDocumentList::QmlDocumentList(QObject *parent)
-    : QAbstractListModel(parent)
+    : QIdentityProxyModel(parent)
 {
     auto dl = DocumentList::inst();
 
@@ -1122,18 +1122,22 @@ QmlDocumentList::QmlDocumentList(QObject *parent)
             this, &QmlDocumentList::lastDocumentClosed);
     connect(dl, &DocumentList::countChanged,
             this, &QmlDocumentList::countChanged);
-    connect(dl, &DocumentList::documentAdded,
+    connect(dl, &DocumentList::documentCreated,
             this, [this](Document *doc) {
         auto qmlDoc = new QmlDocument(doc);
         m_docMapping.insert(doc, qmlDoc);
-        emit documentAdded(qmlDoc);
+    });
+    connect(dl, &DocumentList::documentAdded,
+            this, [this](Document *doc) {
+        if (auto qmlDoc = m_docMapping.value(doc))
+            emit documentAdded(qmlDoc);
     });
     connect(dl, &DocumentList::documentRemoved,
             this, [this](Document *doc) {
-        auto qmlDoc = m_docMapping.value(doc);
-        if (qmlDoc)
+        if (auto qmlDoc = m_docMapping.value(doc))
             emit documentRemoved(qmlDoc);
     });
+    setSourceModel(dl);
 }
 
 QmlDocument *QmlDocumentList::map(Document *doc) const
@@ -1141,15 +1145,12 @@ QmlDocument *QmlDocumentList::map(Document *doc) const
     return m_docMapping.value(doc);
 }
 
-int QmlDocumentList::rowCount(const QModelIndex &parent) const
-{
-    return DocumentList::inst()->rowCount(parent);
-}
-
 QVariant QmlDocumentList::data(const QModelIndex &index, int role) const
 {
-    auto dl = DocumentList::inst();
-    return dl->data(dl->index(index.row(), index.column()), role);
+    QVariant v = QIdentityProxyModel::data(index, role);
+    if (index.isValid() && (role == Qt::UserRole))
+        return QVariant::fromValue(map(v.value<Document *>()));
+    return v;
 }
 
 QHash<int, QByteArray> QmlDocumentList::roleNames() const

@@ -501,7 +501,7 @@ class QmlLotList
 
 
 
-class QmlDocumentList : public QAbstractListModel
+class QmlDocumentList : public QIdentityProxyModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(DocumentList)
@@ -513,7 +513,6 @@ public:
 
     QmlDocument *map(Document *doc) const;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
