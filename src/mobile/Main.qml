@@ -206,7 +206,7 @@ ApplicationWindow {
         Item { id: viewProxy }
     }
 
-    function indexOfDocument(doc) {
+    function indexOfDocument(doc : BS.Document) : int {
         for (let i = 0; i < views.length; ++i) {
             if (views[i].document === doc)
                 return i
@@ -217,7 +217,7 @@ ApplicationWindow {
     property var views: []
     property View currentView: null
 
-    function setActiveDocument(doc) {
+    function setActiveDocument(doc : BS.Document) {
         let index = indexOfDocument(doc)
         let view = index >= 0 ? views[index] : null
 
@@ -241,7 +241,7 @@ ApplicationWindow {
     Connections {
         target: BS.BrickStore.documents
 
-        function onDocumentAdded(doc) {
+        function onDocumentAdded(doc : BS.Document) {
             doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
             doc.closeAllViewsForDocument.connect(
                         () => {
@@ -285,7 +285,7 @@ ApplicationWindow {
 
     Connections {
         target: BS.BrickStore
-        function onShowSettings(page) { settingsDialog.openPage(page) }
+        function onShowSettings(page : string) { settingsDialog.openPage(page) }
     }
     Connections {
         target: BS.Announcements

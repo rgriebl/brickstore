@@ -10,7 +10,7 @@ import BrickLink as BL
 Page {
     id: root
     padding: 0
-    title: document.fileName ? document.fileName : (document.title ? document.title : qsTr("Untitled"))
+    title: document.fileName.length ? document.fileName : (document.title.length ? document.title : qsTr("Untitled"))
 
     required property BS.Document document
 
@@ -122,10 +122,11 @@ Page {
             }
 
             delegate: GridHeader {
-                onShowMenu: (logicalColumn, _) => {
-                    headerMenu.field = logicalColumn
-                    headerMenu.popup()
-                }
+                onShowMenu: (logicalColumn, visualColumn) => {
+                                headerMenu.logicalColumn = logicalColumn
+                                headerMenu.visualColumn = visualColumn
+                                headerMenu.popup()
+                            }
             }
         }
 
@@ -425,10 +426,10 @@ Page {
         }
     }
 
-    function humanReadableInteger(i, zero = 0, unit = '') {
+    function humanReadableInteger(i : int, zero : int, unit : string) : string {
         return i === zero ? "-" : i.toLocaleString() + unit
     }
-    function humanReadableCurrency(c) {
+    function humanReadableCurrency(c : real) : string {
         return BS.Utility.fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
     }
 
