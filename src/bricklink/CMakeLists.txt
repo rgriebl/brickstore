@@ -3,7 +3,6 @@ qt_add_library(bricklink_module STATIC
     category.h
     category.cpp
     changelogentry.h
-    changelogentry.cpp
     color.h
     color.cpp
     core.h

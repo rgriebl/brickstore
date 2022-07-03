@@ -24,7 +24,7 @@ static QString sanitizeFileName(const QString &name)
     static QVector<char> illegal { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };
     QString result;
 
-    for (int i = 0; i < name.count(); ++i) {
+    for (int i = 0; i < name.size(); ++i) {
         auto c = name.at(i);
         auto u = c.unicode();
 
