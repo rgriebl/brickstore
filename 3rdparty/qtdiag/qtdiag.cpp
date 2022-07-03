@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qtdiag.h"
-
 #include <QtGui/QGuiApplication>
 #include <QtGui/QStyleHints>
 #include <QtGui/QScreen>
@@ -16,7 +15,7 @@
 #  include <QtOpenGL/QOpenGLVersionFunctions>
 #  include <QtOpenGL/QOpenGLVersionFunctionsFactory>
 #endif // QT_NO_OPENGL
-#if QT_CONFIG(vulkan) && defined(Q_OS_LINUX)
+#if QT_CONFIG(vulkan) && defined(HAS_VULKAN)
 #  include <QtGui/QVulkanInstance>
 #  include <QtGui/QVulkanWindow>
 #endif // vulkan
@@ -56,7 +55,7 @@
 #if QT_CONFIG(opengl) && defined(Q_OS_LINUX)
 # include <QtGui/private/qrhigles2_p.h>
 #endif
-#if QT_CONFIG(vulkan) && defined(Q_OS_LINUX)
+#if QT_CONFIG(vulkan) && defined(HAS_VULKAN)
 # include <QtGui/private/qrhivulkan_p.h>
 #endif
 #ifdef Q_OS_WIN
@@ -225,7 +224,7 @@ void dumpGlInfo(QTextStream &str, bool listExtensions)
 
 #endif // !QT_NO_OPENGL
 
-#if QT_CONFIG(vulkan) && defined(Q_OS_LINUX)
+#if QT_CONFIG(vulkan) && defined(HAS_VULKAN)
 QVersionNumber vulkanVersion(uint32_t v)
 {
     return QVersionNumber(VK_VERSION_MAJOR(v), VK_VERSION_MINOR(v), VK_VERSION_PATCH(v));
@@ -399,7 +398,7 @@ void dumpRhiInfo(QTextStream &str)
     }
 #endif
 
-#if QT_CONFIG(vulkan) && defined(Q_OS_LINUX)
+#if QT_CONFIG(vulkan) && defined(HAS_VULKAN)
     {
         QVulkanInstance vulkanInstance;
         vulkanInstance.create();
@@ -864,7 +863,7 @@ QString qtDiag(unsigned flags)
     Q_UNUSED(flags);
 #endif // !QT_NO_OPENGL
 
-#if QT_CONFIG(vulkan) && defined(Q_OS_LINUX)
+#if QT_CONFIG(vulkan) && defined(HAS_VULKAN)
     if (flags & QtDiagVk) {
         dumpVkInfo(str);
         str << "\n\n";

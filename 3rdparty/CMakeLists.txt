@@ -7,12 +7,6 @@ target_sources(${PROJECT_NAME} PUBLIC
 )
 
 
-target_sources(${PROJECT_NAME} PUBLIC
-    qtdiag/qtdiag.h
-    qtdiag/qtdiag.cpp
-)
-
-
 if (NOT BS_BACKEND)
     target_sources(${PROJECT_NAME} PUBLIC
         minizip/crypt.h
@@ -36,6 +30,17 @@ if (NOT BS_BACKEND)
         target_link_libraries(${PROJECT_NAME} PRIVATE
             ${ZLIB_LIBRARIES}
         )
+    endif()
+
+
+    target_sources(${PROJECT_NAME} PUBLIC
+        qtdiag/qtdiag.h
+        qtdiag/qtdiag.cpp
+    )
+    if (VULKAN_FOUND)
+        set_source_files_properties(qtdiag/qtdiag.cpp
+            TARGET_DIRECTORY ${PROJECT_NAME}
+            PROPERTIES COMPILE_DEFINITIONS HAS_VULKAN)
     endif()
 endif()
 

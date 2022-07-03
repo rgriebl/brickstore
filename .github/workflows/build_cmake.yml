@@ -87,7 +87,7 @@ jobs:
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'armeabi-v7a'
-          qt_version: '6.3.1'
+          qt_version: '6.4.0'
           qt_arch: 'android_armv7'
           qt_target: 'android'
           cmake_extra_config: ''
@@ -97,7 +97,7 @@ jobs:
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'arm64-v8a'
-          qt_version: '6.3.1'
+          qt_version: '6.4.0'
           qt_arch: 'android_arm64_v8a'
           qt_target: 'android'
           cmake_extra_config: ''
@@ -106,7 +106,7 @@ jobs:
           artifact: "iOS"
           runs-on: macos-12
           os: ios
-          qt_version: '6.3.1'
+          qt_version: '6.4.0'
           qt_arch: ''
           qt_target: 'ios'
           cmake_extra_config: ''
