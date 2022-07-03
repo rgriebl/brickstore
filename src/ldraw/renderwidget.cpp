@@ -24,7 +24,7 @@
 namespace LDraw {
 
 
-RenderWidget::RenderWidget(QWidget *parent)
+RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
     , m_controller(new RenderController(this))
 {
@@ -44,7 +44,7 @@ RenderWidget::RenderWidget(QWidget *parent)
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    m_window = new QQuickView();
+    m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
 
     QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
     m_window->setFormat(fmt);

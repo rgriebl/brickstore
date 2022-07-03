@@ -63,6 +63,8 @@ public:
 
     UndoGroup *undoGroup();
 
+    QQmlApplicationEngine *qmlEngine();
+
     void raise();
 
     virtual QCoro::Task<bool> closeAllViews();

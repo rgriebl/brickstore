@@ -482,6 +482,11 @@ UndoGroup *Application::undoGroup()
     return m_undoGroup;
 }
 
+QQmlApplicationEngine *Application::qmlEngine()
+{
+    return m_engine;
+}
+
 void Application::raise()
 {
     const auto tlWindows = qApp->topLevelWindows();

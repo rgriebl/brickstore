@@ -30,7 +30,7 @@ class RenderWidget : public QWidget
 {
     Q_OBJECT
 public:
-    RenderWidget(QWidget *parent = nullptr);
+    RenderWidget(QQmlEngine *engine, QWidget *parent = nullptr);
     ~RenderWidget() override;
 
     RenderController *controller();

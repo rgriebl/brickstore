@@ -24,12 +24,14 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStringBuilder>
+#include <QQmlApplicationEngine>
 
 #include "bricklink/color.h"
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
 #include "bricklink/item.h"
 #include "bricklink/picture.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "ldraw/library.h"
 #include "ldraw/part.h"
@@ -78,7 +80,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_image->setMinimumSize(BrickLink::core()->standardPictureSize());
     w_image->setAutoFillBackground(true);
 
-    w_ldraw = new LDraw::RenderWidget(this);
+    w_ldraw = new LDraw::RenderWidget(Application::inst()->qmlEngine(), this);
     w_ldraw->hide();
 
     auto layout = new QVBoxLayout(this);
