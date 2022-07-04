@@ -16,6 +16,7 @@
 #include <QtCore/QObject>
 #include <QtGui/QColor>
 #include <QtGui/QQuaternion>
+#include <QtQml/qqmlregistration.h>
 
 #include "ldraw/rendergeometry.h"
 #include "qcoro/qcoro.h"
@@ -35,7 +36,7 @@ class RenderController : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(RenderController)
     Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged FINAL)
-    Q_PROPERTY(QVector<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged FINAL)
+    Q_PROPERTY(QList<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged FINAL)
     Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT FINAL)
     Q_PROPERTY(QQuick3DInstancing * lines READ lines CONSTANT FINAL)
     Q_PROPERTY(QVector3D center READ center NOTIFY centerChanged FINAL)
@@ -46,7 +47,7 @@ public:
     RenderController(QObject *parent = nullptr);
     ~RenderController() override;
 
-    QVector<QmlRenderGeometry *> surfaces();
+    QList<QmlRenderGeometry *> surfaces();
     QQuick3DGeometry *lineGeometry();
     QQuick3DInstancing *lines();
     QQuick3DInstancing *conditionalLines();
@@ -96,7 +97,7 @@ private:
                                   QByteArray &lineBuffer);
     static QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color);
 
-    QVector<QmlRenderGeometry *> m_geos;
+    QList<QmlRenderGeometry *> m_geos;
     QQuick3DGeometry *m_lineGeo = nullptr;
     QmlRenderLineInstancing *m_lines = nullptr;
 
@@ -110,5 +111,13 @@ private:
     bool m_tumblingAnimationActive = false;
     QColor m_clearColor;
 };
+
+//class QmlVectorRenderGeometry
+//{
+//    Q_GADGET
+//    QML_FOREIGN(QList<QmlRenderGeometry*>)
+//    QML_ANONYMOUS
+//    QML_SEQUENTIAL_CONTAINER(QmlRenderGeometry*)
+//};
 
 } // namespace LDraw

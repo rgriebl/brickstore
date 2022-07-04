@@ -114,7 +114,7 @@ const BrickLink::Color *RenderController::color() const
     return m_color;
 }
 
-QVector<QmlRenderGeometry *> RenderController::surfaces()
+QList<QmlRenderGeometry *> RenderController::surfaces()
 {
     return m_geos;
 }
@@ -183,7 +183,7 @@ QCoro::Task<void> RenderController::updateGeometries()
     // out
     float radius = 0;
     QVector3D center;
-    QVector<QmlRenderGeometry *> geos;
+    QList<QmlRenderGeometry *> geos;
     QByteArray lineBuffer;
 
     co_await QtConcurrent::run([part, color, &lineBuffer, &geos, &radius, &center]() {
@@ -532,7 +532,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
                 img.fill(color->ldrawColor().rgba());
 
-                QVector<QPainter::PixmapFragment> fragments;
+                QList<QPainter::PixmapFragment> fragments;
                 fragments.reserve(particleCount);
                 QRandomGenerator *rd = QRandomGenerator::global();
                 std::uniform_real_distribution<> dis(color->particleMinSize(), color->particleMaxSize());
