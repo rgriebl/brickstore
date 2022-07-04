@@ -58,16 +58,16 @@ class QmlBrickLink : public QObject
     QML_EXTENDED_NAMESPACE(BrickLink)
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
-    Q_PRIVATE_PROPERTY(core(), QString cachePath READ dataPath CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), QSize standardPictureSize READ standardPictureSize CONSTANT)
+    Q_PRIVATE_PROPERTY(core(), QString cachePath READ dataPath CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), QSize standardPictureSize READ standardPictureSize CONSTANT FINAL)
 
-    Q_PROPERTY(BrickLink::QmlItem noItem READ noItem CONSTANT)
-    Q_PROPERTY(BrickLink::QmlColor noColor READ noColor CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), BrickLink::Store *store READ store CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), BrickLink::Orders *orders READ orders CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT)
-    Q_PRIVATE_PROPERTY(core(), BrickLink::Database *database READ database CONSTANT)
+    Q_PROPERTY(BrickLink::QmlItem noItem READ noItem CONSTANT FINAL)
+    Q_PROPERTY(BrickLink::QmlColor noColor READ noColor CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Store *store READ store CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Orders *orders READ orders CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(core(), BrickLink::Database *database READ database CONSTANT FINAL)
 
 public:
     QmlBrickLink();

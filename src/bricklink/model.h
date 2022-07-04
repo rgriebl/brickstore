@@ -71,8 +71,8 @@ class CategoryModel : public StaticPointerModel
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
-    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
+    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged FINAL)
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged FINAL)
 
 public:
     CategoryModel(QObject *parent = nullptr);
@@ -115,7 +115,7 @@ class ItemTypeModel : public StaticPointerModel
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged FINAL)
 
 public:
     ItemTypeModel(QObject *parent = nullptr);
@@ -153,11 +153,11 @@ class ItemModel : public StaticPointerModel
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged)
-    Q_PROPERTY(const BrickLink::Category *filterCategory READ filterCategory WRITE setFilterCategory NOTIFY isFilteredChanged)
-    Q_PROPERTY(const BrickLink::Color *filterColor READ filterColor WRITE setFilterColor NOTIFY isFilteredChanged)
-    Q_PROPERTY(QString filterText READ filterText WRITE setFilterText NOTIFY isFilteredChanged)
-    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged)
+    Q_PROPERTY(const BrickLink::ItemType *filterItemType READ filterItemType WRITE setFilterItemType NOTIFY isFilteredChanged FINAL)
+    Q_PROPERTY(const BrickLink::Category *filterCategory READ filterCategory WRITE setFilterCategory NOTIFY isFilteredChanged FINAL)
+    Q_PROPERTY(const BrickLink::Color *filterColor READ filterColor WRITE setFilterColor NOTIFY isFilteredChanged FINAL)
+    Q_PROPERTY(QString filterText READ filterText WRITE setFilterText NOTIFY isFilteredChanged FINAL)
+    Q_PROPERTY(bool filterWithoutInventory READ filterWithoutInventory WRITE setFilterWithoutInventory NOTIFY isFilteredChanged FINAL)
 
 public:
     ItemModel(QObject *parent = nullptr);

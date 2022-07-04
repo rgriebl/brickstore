@@ -34,13 +34,13 @@ class RenderController : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(RenderController)
-    Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged)
-    Q_PROPERTY(QVector<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged)
-    Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT)
-    Q_PROPERTY(QQuick3DInstancing * lines READ lines CONSTANT)
-    Q_PROPERTY(QVector3D center READ center NOTIFY centerChanged)
-    Q_PROPERTY(float radius READ radius NOTIFY radiusChanged)
-    Q_PROPERTY(bool tumblingAnimationActive READ isTumblingAnimationActive WRITE setTumblingAnimationActive NOTIFY tumblingAnimationActiveChanged)
+    Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged FINAL)
+    Q_PROPERTY(QVector<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged FINAL)
+    Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT FINAL)
+    Q_PROPERTY(QQuick3DInstancing * lines READ lines CONSTANT FINAL)
+    Q_PROPERTY(QVector3D center READ center NOTIFY centerChanged FINAL)
+    Q_PROPERTY(float radius READ radius NOTIFY radiusChanged FINAL)
+    Q_PROPERTY(bool tumblingAnimationActive READ isTumblingAnimationActive WRITE setTumblingAnimationActive NOTIFY tumblingAnimationActiveChanged FINAL)
 
 public:
     RenderController(QObject *parent = nullptr);

@@ -29,11 +29,11 @@ class PriceGuide : public QObject, public Ref
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT)
-    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT)
-    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
+    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT FINAL)
+    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT FINAL)
+    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
 
 public:
     const Item *item() const          { return m_item; }

@@ -36,14 +36,14 @@ class WantedList : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(int id READ id NOTIFY idChanged)
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
-    Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
-    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
-    Q_PROPERTY(int itemLeftCount READ itemLeftCount NOTIFY itemLeftCountChanged)
-    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged)
-    Q_PROPERTY(double filled READ filled NOTIFY filledChanged)
-    Q_PROPERTY(LotList lots READ lots NOTIFY lotsChanged)
+    Q_PROPERTY(int id READ id NOTIFY idChanged FINAL)
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged FINAL)
+    Q_PROPERTY(QString description READ description NOTIFY descriptionChanged FINAL)
+    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged FINAL)
+    Q_PROPERTY(int itemLeftCount READ itemLeftCount NOTIFY itemLeftCountChanged FINAL)
+    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
+    Q_PROPERTY(double filled READ filled NOTIFY filledChanged FINAL)
+    Q_PROPERTY(LotList lots READ lots NOTIFY lotsChanged FINAL)
 
 public:
     WantedList();
@@ -87,10 +87,10 @@ class WantedLists : public QAbstractTableModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)
-    Q_PROPERTY(QVector<WantedList *> wantedLists READ wantedLists NOTIFY updateFinished)
+    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
+    Q_PROPERTY(QVector<WantedList *> wantedLists READ wantedLists NOTIFY updateFinished FINAL)
 
 public:
     enum Column {

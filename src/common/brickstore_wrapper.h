@@ -50,27 +50,27 @@ class QmlDocument : public QAbstractProxyModel
     QML_NAMED_ELEMENT(Document)
     QML_UNCREATABLE("")
     QML_EXTENDED_NAMESPACE(DocumentModel)
-    Q_PRIVATE_PROPERTY(model(), bool sorted READ isSorted NOTIFY isSortedChanged)
-    Q_PRIVATE_PROPERTY(model(), bool filtered READ isFiltered NOTIFY isFilteredChanged)
-    Q_PRIVATE_PROPERTY(model(), QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
-    Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged)
-    Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged)
-    Q_PRIVATE_PROPERTY(doc(), QString title READ title WRITE setTitle NOTIFY titleChanged)
-    Q_PRIVATE_PROPERTY(doc(), QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
-    Q_PRIVATE_PROPERTY(doc(), QString fileName READ fileName NOTIFY fileNameChanged)
-    Q_PRIVATE_PROPERTY(doc(), QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged)
-    Q_PRIVATE_PROPERTY(doc(), BrickLink::Order *order READ order NOTIFY orderChanged)
-    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged)
-    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged)
-    Q_PRIVATE_PROPERTY(doc(), QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged)
-    Q_PRIVATE_PROPERTY(doc(), bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT)
-    Q_PRIVATE_PROPERTY(doc(), QItemSelectionModel *selectionModel READ selectionModel CONSTANT)
+    Q_PRIVATE_PROPERTY(model(), bool sorted READ isSorted NOTIFY isSortedChanged FINAL)
+    Q_PRIVATE_PROPERTY(model(), bool filtered READ isFiltered NOTIFY isFilteredChanged FINAL)
+    Q_PRIVATE_PROPERTY(model(), QString currencyCode READ currencyCode NOTIFY currencyCodeChanged FINAL)
+    Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
+    Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QString fileName READ fileName NOTIFY fileNameChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QImage thumbnail READ thumbnail WRITE setThumbnail NOTIFY thumbnailChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), BrickLink::Order *order READ order NOTIFY orderChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationActive READ isBlockingOperationActive NOTIFY blockingOperationActiveChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged FINAL)
+    Q_PRIVATE_PROPERTY(doc(), bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT FINAL)
+    Q_PRIVATE_PROPERTY(doc(), QItemSelectionModel *selectionModel READ selectionModel CONSTANT FINAL)
 
-    Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY qmlSortColumnsChanged)
-    Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT)
-    Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged)
-    Q_PROPERTY(QmlDocumentColumnModel *columnModel READ columnModel CONSTANT)
-    Q_PROPERTY(Document *document READ document CONSTANT)
+    Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY qmlSortColumnsChanged FINAL)
+    Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT FINAL)
+    Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged FINAL)
+    Q_PROPERTY(QmlDocumentColumnModel *columnModel READ columnModel CONSTANT FINAL)
+    Q_PROPERTY(Document *document READ document CONSTANT FINAL)
 
 public:
     QmlDocument(Document *doc);
@@ -167,7 +167,7 @@ class QmlDocumentColumnModel : public QAbstractListModel
     Q_OBJECT
     QML_NAMED_ELEMENT(DocumentColumnModel)
     QML_ANONYMOUS
-    Q_PROPERTY(int count READ rowCount CONSTANT)
+    Q_PROPERTY(int count READ rowCount CONSTANT FINAL)
 
 public:
     QmlDocumentColumnModel(QmlDocument *proxyModel);
@@ -210,14 +210,14 @@ class QmlSortFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(SortFilterProxyModel)
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
-    Q_PROPERTY(int sortColumn READ sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
-    Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
+    Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
+    Q_PROPERTY(int sortColumn READ sortColumn WRITE setSortColumn NOTIFY sortColumnChanged FINAL)
+    Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder WRITE setSortOrder NOTIFY sortOrderChanged FINAL)
 
-    Q_PROPERTY(QByteArray sortRoleName READ sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged)
-    Q_PROPERTY(QByteArray filterRoleName READ filterRoleName WRITE setFilterRoleName NOTIFY filterRoleNameChanged)
-    Q_PROPERTY(QString filterString READ filterString WRITE setFilterString)
-    Q_PROPERTY(FilterSyntax filterSyntax READ filterSyntax WRITE setFilterSyntax NOTIFY filterSyntaxChanged)
+    Q_PROPERTY(QByteArray sortRoleName READ sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged FINAL)
+    Q_PROPERTY(QByteArray filterRoleName READ filterRoleName WRITE setFilterRoleName NOTIFY filterRoleNameChanged FINAL)
+    Q_PROPERTY(QString filterString READ filterString WRITE setFilterString FINAL)
+    Q_PROPERTY(FilterSyntax filterSyntax READ filterSyntax WRITE setFilterSyntax NOTIFY filterSyntaxChanged FINAL)
 
 public:
     enum FilterSyntax {
@@ -285,7 +285,7 @@ class QmlUtility : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(Utility)
     QML_SINGLETON
-    Q_PROPERTY(QFont monospaceFont READ monospaceFont CONSTANT)
+    Q_PROPERTY(QFont monospaceFont READ monospaceFont CONSTANT FINAL)
 
 public:
     QmlUtility() = default;
@@ -363,8 +363,8 @@ class QmlDebug : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(Debug)
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool showTracers READ showTracers WRITE setShowTracers NOTIFY showTracersChanged)
-    Q_PROPERTY(QAbstractListModel *log READ log CONSTANT)
+    Q_PROPERTY(bool showTracers READ showTracers WRITE setShowTracers NOTIFY showTracersChanged FINAL)
+    Q_PROPERTY(QAbstractListModel *log READ log CONSTANT FINAL)
 
 public:
     QmlDebug(QObject *parent = nullptr);
@@ -506,7 +506,7 @@ class QmlDocumentList : public QIdentityProxyModel
     Q_OBJECT
     QML_NAMED_ELEMENT(DocumentList)
     QML_UNCREATABLE("")
-    Q_PRIVATE_PROPERTY(docList(), int count READ count NOTIFY countChanged)
+    Q_PRIVATE_PROPERTY(docList(), int count READ count NOTIFY countChanged FINAL)
 
 public:
     QmlDocumentList(QObject *parent = nullptr);
@@ -534,15 +534,15 @@ class QmlBrickStore : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(BrickStore)
     QML_SINGLETON
-    Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged)
-    Q_PROPERTY(QString versionNumber READ versionNumber CONSTANT)
-    Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT)
-    Q_PROPERTY(RecentFiles *recentFiles READ recentFiles CONSTANT)
-    Q_PROPERTY(QmlDocumentList *documents READ documents CONSTANT)
-    Q_PROPERTY(QmlDocument *activeDocument READ activeDocument NOTIFY activeDocumentChanged)
-    Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT)
-    Q_PROPERTY(QVariantMap about READ about CONSTANT)
-    Q_PROPERTY(QmlDebug *debug READ debug CONSTANT)
+    Q_PROPERTY(QString defaultCurrencyCode READ defaultCurrencyCode NOTIFY defaultCurrencyCodeChanged FINAL)
+    Q_PROPERTY(QString versionNumber READ versionNumber CONSTANT FINAL)
+    Q_PROPERTY(QString buildNumber READ buildNumber CONSTANT FINAL)
+    Q_PROPERTY(RecentFiles *recentFiles READ recentFiles CONSTANT FINAL)
+    Q_PROPERTY(QmlDocumentList *documents READ documents CONSTANT FINAL)
+    Q_PROPERTY(QmlDocument *activeDocument READ activeDocument NOTIFY activeDocumentChanged FINAL)
+    Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT FINAL)
+    Q_PROPERTY(QVariantMap about READ about CONSTANT FINAL)
+    Q_PROPERTY(QmlDebug *debug READ debug CONSTANT FINAL)
 
 public:
     QmlBrickStore();

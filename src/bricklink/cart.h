@@ -36,17 +36,17 @@ class Cart : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool domestic READ domestic NOTIFY domesticChanged)
-    Q_PROPERTY(int sellerId READ sellerId NOTIFY sellerIdChanged)
-    Q_PROPERTY(QString sellerName READ sellerName NOTIFY sellerNameChanged)
-    Q_PROPERTY(QString storeName READ storeName NOTIFY storeNameChanged)
-    Q_PROPERTY(QDate lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged)
-    Q_PROPERTY(double total READ total NOTIFY totalChanged)
-    Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
-    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged)
-    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged)
-    Q_PROPERTY(QString countryCode READ countryCode NOTIFY countryCodeChanged)
-    Q_PROPERTY(LotList lots READ lots NOTIFY lotsChanged)
+    Q_PROPERTY(bool domestic READ domestic NOTIFY domesticChanged FINAL)
+    Q_PROPERTY(int sellerId READ sellerId NOTIFY sellerIdChanged FINAL)
+    Q_PROPERTY(QString sellerName READ sellerName NOTIFY sellerNameChanged FINAL)
+    Q_PROPERTY(QString storeName READ storeName NOTIFY storeNameChanged FINAL)
+    Q_PROPERTY(QDate lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(double total READ total NOTIFY totalChanged FINAL)
+    Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY currencyCodeChanged FINAL)
+    Q_PROPERTY(int itemCount READ itemCount NOTIFY itemCountChanged FINAL)
+    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
+    Q_PROPERTY(QString countryCode READ countryCode NOTIFY countryCodeChanged FINAL)
+    Q_PROPERTY(LotList lots READ lots NOTIFY lotsChanged FINAL)
 
 public:
     Cart();
@@ -99,10 +99,10 @@ class Carts : public QAbstractTableModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished)
-    Q_PROPERTY(QVector<Cart *> carts READ carts NOTIFY updateFinished)
+    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
+    Q_PROPERTY(QVector<Cart *> carts READ carts NOTIFY updateFinished FINAL)
 
 public:
     enum Column {

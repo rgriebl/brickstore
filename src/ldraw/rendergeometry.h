@@ -33,14 +33,14 @@ class QmlRenderGeometry : public QQuick3DGeometry
     Q_OBJECT
     QML_NAMED_ELEMENT(RenderGeometry)
     QML_UNCREATABLE("")
-    Q_PROPERTY(QColor color READ color CONSTANT)
-    Q_PROPERTY(float luminance READ luminance CONSTANT)
-    Q_PROPERTY(bool isChrome READ isChrome CONSTANT)
-    Q_PROPERTY(bool isMetallic READ isMetallic CONSTANT)
-    Q_PROPERTY(bool isPearl READ isPearl CONSTANT)
-    Q_PROPERTY(QQuick3DTextureData *textureData READ textureData CONSTANT)
-    Q_PROPERTY(QVector3D center READ center CONSTANT)
-    Q_PROPERTY(float radius READ radius CONSTANT)
+    Q_PROPERTY(QColor color READ color CONSTANT FINAL)
+    Q_PROPERTY(float luminance READ luminance CONSTANT FINAL)
+    Q_PROPERTY(bool isChrome READ isChrome CONSTANT FINAL)
+    Q_PROPERTY(bool isMetallic READ isMetallic CONSTANT FINAL)
+    Q_PROPERTY(bool isPearl READ isPearl CONSTANT FINAL)
+    Q_PROPERTY(QQuick3DTextureData *textureData READ textureData CONSTANT FINAL)
+    Q_PROPERTY(QVector3D center READ center CONSTANT FINAL)
+    Q_PROPERTY(float radius READ radius CONSTANT FINAL)
 
 public:
     QmlRenderGeometry(const BrickLink::Color *color);

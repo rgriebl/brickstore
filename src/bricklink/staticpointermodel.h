@@ -22,7 +22,7 @@ QT_FORWARD_DECLARE_CLASS(QTimer)
 class StaticPointerModel : public QAbstractItemModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool isFiltered READ isFiltered NOTIFY isFilteredChanged)
+    Q_PROPERTY(bool isFiltered READ isFiltered NOTIFY isFilteredChanged FINAL)
 
 public:
     StaticPointerModel(QObject *parent);
