@@ -12,7 +12,7 @@ MouseArea {
     propagateComposedEvents: true
 
     readonly property color color: randomColor()
-    function randomColor() {
+    function randomColor() : color {
         return Qt.rgba(Math.random(), Math.random(), Math.random(), 1.0)
     }
 

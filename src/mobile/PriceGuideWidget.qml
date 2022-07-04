@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import Mobile
 import Qt5Compat.GraphicalEffects
@@ -9,8 +9,8 @@ import BrickStore as BS
 Control {
     id: root
     property BS.Document document: null
-    property var item: BL.BrickLink.noItem
-    property var color: BL.BrickLink.noColor
+    property BL.Item item: BL.BrickLink.noItem
+    property BL.Color color: BL.BrickLink.noColor
 
     property BL.PriceGuide priceGuide: null
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BL.BrickLink.UpdateStatus.Updating))

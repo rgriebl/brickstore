@@ -22,7 +22,7 @@ AutoSizingDialog {
         TabButton { text: qsTr("BrickLink"); property string pageName: "bricklink" }
     }
 
-    function openPage(page) {
+    function openPage(page : string) {
         for (let i = 0; i < tabBar.count; ++i) {
             if (tabBar.contentChildren[i].pageName === page) {
                 tabBar.setCurrentIndex(i)
@@ -70,7 +70,7 @@ AutoSizingDialog {
                         }
                         displayText: nameForLang(BS.Config.availableLanguages[currentIndex])
 
-                        function nameForLang(map) {
+                        function nameForLang(map) : string {
                             let name = map.name
                             if (map.localName)
                                 name = map.localName + " (" + name + ")"

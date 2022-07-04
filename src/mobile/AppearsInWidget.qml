@@ -49,13 +49,13 @@ Control {
             width: ListView.view.width
             height: layout.height + xspacing
 
-            property var blitem: BL.BrickLink.item(item)
+            property BL.Item blitem: BL.BrickLink.item(item)
 
             GridLayout {
                 id: layout
-                x: parent.xspacing
-                width: parent.width - 2 * parent.xspacing
-                columnSpacing: parent.xspacing
+                x: delegate.xspacing
+                width: parent.width - 2 * delegate.xspacing
+                columnSpacing: delegate.xspacing
                 columns: 3
 
                 QImageItem {

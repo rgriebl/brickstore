@@ -107,10 +107,10 @@ Control {
     // we cannot handle taps directly in the TableView thanks to QTBUG-101386
     MouseArea {
         anchors.fill: parent
-        onClicked: parent.TableView.view.toggleSelection(parent.row, parent.column)
+        onClicked: parent.TableView.view.toggleSelection(root.row, root.column)
         onPressAndHold: {
             //parent.TableView.view.toggleSelection(parent.row, parent.column)
-            parent.TableView.view.showMenu(parent.row, parent.column)
+            parent.TableView.view.showMenu(root.row, root.column)
         }
     }
 //  TapHandler {
