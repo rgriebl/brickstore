@@ -20,6 +20,21 @@
 #include "common/application.h"
 #include "qmlstyle.h"
 
+#if defined(Q_OS_ANDROID)
+#  include <jni.h>
+
+static bool darkThemeOS = false;
+
+extern "C" JNIEXPORT void JNICALL
+Java_de_brickforge_brickstore_ExtendedQtActivity_changeUiTheme(JNIEnv *, jobject, jboolean jisDark)
+{
+    darkThemeOS = jisDark;
+}
+
+#else
+static const bool darkThemeOS = false;
+#endif
+
 
 QmlStyle::QmlStyle(QObject *parent)
     : QObject(parent)
@@ -139,7 +154,7 @@ void QmlStyle::updateTheme()
     case Config::UITheme::Light:         materialTheme = 0; break;
     case Config::UITheme::Dark:          materialTheme = 1; break;
     default:
-    case Config::UITheme::SystemDefault: materialTheme = 2; break;
+    case Config::UITheme::SystemDefault: materialTheme = (darkThemeOS ? 1 : 0); break;
     }
 
     if (m_theme.read().toInt() != materialTheme)
