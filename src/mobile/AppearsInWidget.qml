@@ -33,6 +33,7 @@ Control {
             color: Style.hintTextColor
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
+            visible: listView.model ? !listView.model.count : true
         }
 
         ScrollIndicator.vertical: ScrollIndicator { }

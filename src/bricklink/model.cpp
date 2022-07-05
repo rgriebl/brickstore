@@ -853,12 +853,6 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 
 
-BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, const Color *color,
-                                                          QObject *parent)
-    : InternalAppearsInModel({ { item, color } }, parent)
-{
-}
-
 BrickLink::InternalAppearsInModel::InternalAppearsInModel(const QVector<QPair<const Item *,
                                                           const Color *>> &list, QObject *parent)
     : QAbstractTableModel(parent)
@@ -1002,9 +996,12 @@ BrickLink::AppearsInModel::AppearsInModel(const QVector<QPair<const Item *, cons
 }
 
 BrickLink::AppearsInModel::AppearsInModel(const Item *item, const Color *color, QObject *parent)
-    : QSortFilterProxyModel(parent)
+    : AppearsInModel({ { item, color } }, parent)
+{ }
+
+int BrickLink::AppearsInModel::count() const
 {
-    setSourceModel(new InternalAppearsInModel(item, color, this));
+    return rowCount();
 }
 
 const BrickLink::AppearsInItem *BrickLink::AppearsInModel::appearsIn(const QModelIndex &index) const

@@ -239,7 +239,6 @@ public:
 
 protected:
     InternalAppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
-    InternalAppearsInModel(const Item *item, const Color *color, QObject *parent);
 
     AppearsIn m_appearsin;
     QVector<AppearsInItem *> m_items;
@@ -252,10 +251,13 @@ class AppearsInModel : public QSortFilterProxyModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
+    Q_PROPERTY(int count READ count CONSTANT FINAL)
 
 public:
     AppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
     AppearsInModel(const Item *item, const Color *color, QObject *parent);
+
+    int count() const;
 
     using QSortFilterProxyModel::index;
     const AppearsInItem *appearsIn(const QModelIndex &idx) const;
