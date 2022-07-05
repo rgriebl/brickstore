@@ -163,18 +163,30 @@ Page {
                 document: root.document
             }
 
-            function showMenu(row : int, col : int) {
-                if (col >= 0) {
-                    editMenu.field = root.document.logicalColumn(col)
-                    editMenu.open()
+            TapHandler {
+                function mapPoint(point) {
+                    point = table.mapFromItem(target, point)
+                    let cell = table.cellAtPos(point)
+                    let lx = cell.x < 0 ? -1 : root.document.logicalColumn(cell.x)
+                    return { row: cell.y, column: lx }
+                }
+
+                onTapped: function(eventPoint) {
+                    let m = mapPoint(eventPoint.position)
+                    if (m.row >= 0 && m.column >= 0) {
+                        table.selectionModel.select(table.model.index(m.row, m.column),
+                                                    ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
+                    }
+                }
+                onLongPressed: function() {
+                    let m = mapPoint(point.position)
+                    if (m.column >= 0) {
+                        editMenu.field = m.column
+                        editMenu.open()
+                    }
                 }
             }
-            function toggleSelection(row : int, col : int) {
-                if (row >= 0 && col >= 0) {
-                    selectionModel.select(model.index(row, root.document.logicalColumn(col)),
-                                          ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
-                }
-            }
+
 
             model: root.document
 
