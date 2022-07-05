@@ -24,7 +24,6 @@
 QmlStyle::QmlStyle(QObject *parent)
     : QObject(parent)
 {
-
     auto calculateSmallSize = [this](Config::UISize uiSize) {
         const auto scrSize = physicalScreenSize();
         return ((scrSize.width() < 80) || (scrSize.height() < 120) || (uiSize == Config::UISize::Small))

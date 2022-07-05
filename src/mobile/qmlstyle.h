@@ -75,7 +75,6 @@ private:
 
     QPointer<QObject> m_root;
     bool m_smallSize = false;
-    bool m_darkTheme = false;
 
     QQmlProperty m_hintTextColor;
     QQmlProperty m_primaryHighlightedTextColor;

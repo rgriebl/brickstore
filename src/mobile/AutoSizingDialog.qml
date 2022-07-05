@@ -11,21 +11,12 @@ Dialog {
     width: Overlay.overlay ? Overlay.overlay.width * (Style.smallSize ? 1 : relativeWidth) : 0
     height: Overlay.overlay ? Overlay.overlay.height * (Style.smallSize ? 1 : relativeHeight) : 0
 
-//    property bool forceSmall: false
-
     property real relativeWidth: .75
     property real relativeHeight: .75
 
     property bool keepPaddingInSmallMode: false
 
     focus: true
-
-//    // ~ in mm
-//    property size physicalScreenSize: Qt.size(Math.min(Screen.width, Screen.height) / Screen.pixelDensity,
-//                                              Math.max(Screen.width, Screen.height) / Screen.pixelDensity)
-
-//    // small is defined as "smaller than 8cm x 12cm"
-//    property bool small: (physicalScreenSize.width < 80) || (physicalScreenSize.height < 120) || forceSmall
 
     property int defaultTopPadding: 0
     property int defaultLeftPadding: 0
