@@ -11,14 +11,14 @@ Control {
     property BL.Lot lot
 
     property bool single: false
-    property bool is3D: false
+    property bool is3D: true
     property BL.Picture picture
     property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
 
     onLotChanged: { updateInfo() }
 
     function updateInfo() {
-        single = (lot !== undefined)
+        single = !lot.isNull
 
         if (picture)
             picture.release()

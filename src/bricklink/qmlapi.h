@@ -63,6 +63,7 @@ class QmlBrickLink : public QObject
 
     Q_PROPERTY(BrickLink::QmlItem noItem READ noItem CONSTANT FINAL)
     Q_PROPERTY(BrickLink::QmlColor noColor READ noColor CONSTANT FINAL)
+    Q_PROPERTY(BrickLink::QmlLot noLot READ noLot CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Store *store READ store CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Orders *orders READ orders CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT FINAL)
@@ -74,6 +75,7 @@ public:
 
     QmlItem noItem() const;
     QmlColor noColor() const;
+    QmlLot noLot() const;
 
     Q_INVOKABLE QImage noImage(int width, int height) const;
 

@@ -707,6 +707,16 @@ QmlColor QmlBrickLink::noColor() const
     return QmlColor { };
 }
 
+/*! \qmlproperty Lot BrickLink::noLot
+    \readonly
+    A special \l Lot object denoting an invalid lot. The object's Lot::isNull returns \c true.
+    Used as a return value for functions that can fail.
+*/
+QmlLot QmlBrickLink::noLot() const
+{
+    return QmlLot { };
+}
+
 /*! \qmlmethod Image BrickLink::noImage(int width, int height)
     Returns an image (sized \a width x \a height), which can be used in place of a missing item
     image.

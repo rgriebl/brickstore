@@ -22,7 +22,6 @@ AutoSizingDialog {
         none = (selected === 0)
 
         if (single) {
-
             let lot = document.selectedLots[0]
             info.lot = lot
 
@@ -37,7 +36,7 @@ AutoSizingDialog {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
 
-            info.lot = undefined
+            info.lot = BL.BrickLink.noLot
 
             priceGuide.item = BL.BrickLink.noItem
             priceGuide.color = BL.BrickLink.noColor
@@ -60,7 +59,7 @@ AutoSizingDialog {
     }
 
     function clearInfos() {
-        info.lot = undefined
+        info.lot = BL.BrickLink.noLot
 
         priceGuide.item = BL.BrickLink.noItem
         priceGuide.color = BL.BrickLink.noColor
