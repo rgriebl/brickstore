@@ -80,7 +80,6 @@ public:
     QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
     QModelIndex parent(const QModelIndex &child) const override;
 
-    QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation o, int role) const override;
 
     QModelIndex mapToSource(const QModelIndex &idx) const override;
@@ -89,10 +88,7 @@ public:
     Q_INVOKABLE int logicalColumn(int visual) const;
     Q_INVOKABLE int visualColumn(int logical) const;
 
-    QHash<int, QByteArray> roleNames() const override;
-
     QmlDocumentColumnModel *columnModel();
-
 
     QVariantList qmlSortColumns() const;
     QmlDocumentLots *qmlLots();
@@ -108,6 +104,8 @@ public:
 
     Q_INVOKABLE void saveCurrentColumnLayout();
     Q_INVOKABLE void setColumnLayoutFromId(const QString &layoutId);
+
+    Q_INVOKABLE void cancelBlockingOperation();
 
 signals:
     void forceLayout();
@@ -214,8 +212,8 @@ class QmlSortFilterProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(int sortColumn READ sortColumn WRITE setSortColumn NOTIFY sortColumnChanged FINAL)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder WRITE setSortOrder NOTIFY sortOrderChanged FINAL)
 
-    Q_PROPERTY(QByteArray sortRoleName READ sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged FINAL)
-    Q_PROPERTY(QByteArray filterRoleName READ filterRoleName WRITE setFilterRoleName NOTIFY filterRoleNameChanged FINAL)
+    Q_PROPERTY(QString sortRoleName READ sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged FINAL)
+    Q_PROPERTY(QString filterRoleName READ filterRoleName WRITE setFilterRoleName NOTIFY filterRoleNameChanged FINAL)
     Q_PROPERTY(QString filterString READ filterString WRITE setFilterString FINAL)
     Q_PROPERTY(FilterSyntax filterSyntax READ filterSyntax WRITE setFilterSyntax NOTIFY filterSyntaxChanged FINAL)
 
@@ -231,11 +229,11 @@ public:
 
     int count() const;
 
-    QByteArray sortRoleName() const;
-    void setSortRoleName(const QByteArray &role);
+    QString sortRoleName() const;
+    void setSortRoleName(const QString &role);
 
-    QByteArray filterRoleName() const;
-    void setFilterRoleName(const QByteArray &role);
+    QString filterRoleName() const;
+    void setFilterRoleName(const QString &role);
 
     void setSortColumn(int newSortColumn);
     void setSortOrder(Qt::SortOrder newSortOrder);
@@ -253,8 +251,8 @@ signals:
     void sortOrderChanged(int newSortOrder);
     void sortColumnChanged(int newSortColumn);
 
-    void sortRoleNameChanged(QByteArray newSortRoleName);
-    void filterRoleNameChanged(QByteArray newFilterRoleName);
+    void sortRoleNameChanged(QString newSortRoleName);
+    void filterRoleNameChanged(QString newFilterRoleName);
 
     void filterSyntaxChanged(QmlSortFilterProxyModel::FilterSyntax newFilterSyntax);
 

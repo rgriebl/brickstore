@@ -73,6 +73,7 @@ qt_add_qml_module(common_module
     NO_PLUGIN
     DEPENDENCIES
         QtQuick
+        QtQuick.Controls
         BrickLink
 )
 

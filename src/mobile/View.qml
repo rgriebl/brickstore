@@ -122,6 +122,7 @@ Page {
             }
 
             delegate: GridHeader {
+                document: root.document
                 onShowMenu: (logicalColumn, visualColumn) => {
                                 headerMenu.logicalColumn = logicalColumn
                                 headerMenu.visualColumn = visualColumn
@@ -162,15 +163,15 @@ Page {
                 document: root.document
             }
 
-            function showMenu(row, col) {
+            function showMenu(row : int, col : int) {
                 if (col >= 0) {
-                    editMenu.field = model.logicalColumn(col)
-                    editMenu.popup()
+                    editMenu.field = root.document.logicalColumn(col)
+                    editMenu.open()
                 }
             }
-            function toggleSelection(row, col) {
+            function toggleSelection(row : int, col : int) {
                 if (row >= 0 && col >= 0) {
-                    selectionModel.select(model.index(row, model.logicalColumn(col)),
+                    selectionModel.select(model.index(row, root.document.logicalColumn(col)),
                                           ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
                 }
             }
@@ -190,7 +191,8 @@ Page {
                     text: BS.Utility.fuzzyCompare(display, 0) ? "-" : BS.Currency.format(display)
                 }
                 component UIntGridCell : GridCell {
-                    text: display === 0 ? "-" : display
+                    property int ui: display
+                    text: ui === 0 ? "-" : ui
                 }
                 component DateGridCell : GridCell {
                     property date dt: display
@@ -212,9 +214,10 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Status
                     GridCell {
+                        id: statusCell
                         property var status: display
                         required property var lot
-                        property var bllot: BL.BrickLink.lot(lot)
+                        property BL.Lot bllot: BL.BrickLink.lot(lot)
                         property string tagText: bllot.counterPart
                                                  ? qsTr("CP")
                                                  : bllot.alternateId
@@ -227,17 +230,17 @@ Page {
 
                         Label { }
                         CornerTag {
-                            visible: parent.tagText !== ''
-                            text: parent.tagText
-                            bold: parent.tagBold
-                            color: parent.tagColor
+                            visible: statusCell.tagText !== ''
+                            text: statusCell.tagText
+                            bold: statusCell.tagBold
+                            color: statusCell.tagColor
                         }
                         ToolButton {
                             anchors.fill: parent
                             enabled: false
                             icon.color: "transparent"
-                            icon.name: parent.status === BL.BrickLink.Status.Exclude
-                                       ? "vcs-removed" : (parent.status === BL.BrickLink.Status.Include
+                            icon.name: statusCell.status === BL.BrickLink.Status.Exclude
+                                       ? "vcs-removed" : (statusCell.status === BL.BrickLink.Status.Include
                                                           ? "vcs-normal" : "vcs-added")
                         }
                     }
@@ -255,16 +258,17 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Color
                     GridCell {
+                        id: colorCell
                         QImageItem {
                             id: colorImage
                             anchors {
-                                left: parent.left
-                                leftMargin: parent.leftPadding
-                                top: parent.top
-                                bottom: parent.bottom
+                                left: colorCell.left
+                                leftMargin: colorCell.leftPadding
+                                top: colorCell.top
+                                bottom: colorCell.bottom
                             }
-                            width: parent.font.pixelSize * 2
-                            image: BL.BrickLink.color(parent.display).image(width, height)
+                            width: colorCell.font.pixelSize * 2
+                            image: BL.BrickLink.color(colorCell.display).image(width, height)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display
@@ -273,12 +277,13 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Retain
                     GridCell {
+                        id: retainCell
                         property bool retain: display
                         text: ""
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
-                            checked: parent.retain
+                            checked: retainCell.retain
                         }
                     }
                 }
@@ -291,6 +296,7 @@ Page {
 
                 DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
+                        id: stockroomCell
                         property var stockroom: display
                         text: stockroom === BL.BrickLink.Stockroom.A
                               ? 'A' : (stockroom === BL.BrickLink.Stockroom.B
@@ -300,7 +306,7 @@ Page {
                             anchors.centerIn: parent
                             enabled: false
                             checked: false
-                            visible: parent.stockroom === BL.BrickLink.Stockroom.None
+                            visible: stockroomCell.stockroom === BL.BrickLink.Stockroom.None
                         }
                     }
                 }
@@ -357,16 +363,17 @@ Page {
                 }
                 DelegateChoice { roleValue: BS.Document.Quantity
                     GridCell {
-                        property bool isZero: display === 0
+                        property int qty: display
                         text: root.humanReadableInteger(display)
-                        tint: display < 0 ? Qt.rgba(1, 0, 0, .4)
-                                          : display === 0 ? Qt.rgba(1, 1, 0, .4)
-                                                          : "transparent"
+                        tint: qty < 0 ? Qt.rgba(1, 0, 0, .4)
+                                      : qty === 0 ? Qt.rgba(1, 1, 0, .4)
+                                                  : "transparent"
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.QuantityOrig
                     GridCell {
-                        text: display === 0 ? "-" : display.toLocaleString()
+                        property int qty: display
+                        text: qty === 0 ? "-" : qty.toLocaleString()
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.QuantityDiff
@@ -427,6 +434,10 @@ Page {
     }
 
     function humanReadableInteger(i : int, zero : int, unit : string) : string {
+        if (typeof zero === 'undefined')
+            zero = 0
+        if (typeof unit === 'undefined')
+            unit = ''
         return i === zero ? "-" : i.toLocaleString() + unit
     }
     function humanReadableCurrency(c : real) : string {
@@ -449,7 +460,7 @@ Page {
         }
         Connections {
             target: root.document
-            function onBlockingOperationProgress(done, total) {
+            function onBlockingOperationProgress(done : int, total : int) {
                 blockDialog.item.total = total
                 blockDialog.item.done = done
             }

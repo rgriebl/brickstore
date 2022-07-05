@@ -8,7 +8,7 @@ import LDraw
 Control {
     id: root
     property BS.Document document
-    property var lot
+    property BL.Lot lot
 
     property bool single: false
     property bool is3D: false

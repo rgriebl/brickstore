@@ -74,11 +74,11 @@ Page {
 
                 GridLayout {
                     id: layout
-                    x: parent.xspacing
-                    y: parent.xspacing / 2
-                    width: parent.width - 2 * parent.xspacing
-                    columnSpacing: parent.xspacing
-                    rowSpacing: parent.xspacing / 2
+                    x: delegate.xspacing
+                    y: delegate.xspacing / 2
+                    width: parent.width - 2 * delegate.xspacing
+                    columnSpacing: delegate.xspacing
+                    rowSpacing: delegate.xspacing / 2
                     columns: 3
 
                     Image {
@@ -137,7 +137,7 @@ Page {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
-                    anchors.rightMargin: parent.xspacing / 2
+                    anchors.rightMargin: delegate.xspacing / 2
                     anchors.leftMargin: anchors.rightMargin
                 }
                 onClicked: {

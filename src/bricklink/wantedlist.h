@@ -120,7 +120,7 @@ public:
 
     QVector<WantedList *> wantedLists() const;
 
-    Q_INVOKABLE void startFetchLots(WantedList *wantedList);
+    Q_INVOKABLE void startFetchLots(BrickLink::WantedList *wantedList);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

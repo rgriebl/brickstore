@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import Mobile
 import QtQuick.Window
@@ -26,7 +26,7 @@ ApplicationWindow {
         id: settingsDialog
         source: "SettingsDialog.qml"
         property string pageName
-        function openPage(page) {
+        function openPage(page : string) {
             pageName = page
             open()
         }

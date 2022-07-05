@@ -1384,6 +1384,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         case BaseLotPointerRole   : return QVariant::fromValue(differenceBaseLot(lot));
         case ErrorFlagsRole       : return lotFlags(lot).first;
         case DifferenceFlagsRole  : return lotFlags(lot).second;
+        case DocumentFieldRole    : return f;
         }
     }
     return { };
@@ -1399,6 +1400,7 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
     switch (role) {
     case Qt::TextAlignmentRole : return int(Qt::AlignLeft) | Qt::AlignVCenter;
     case Qt::DisplayRole       : return tr(c.title);
+    case DocumentFieldRole     : return section;
     case HeaderDefaultWidthRole: return c.defaultWidth;
     case HeaderValueModelRole  : return QVariant::fromValue(c.valueModelFn ? c.valueModelFn() : nullptr);
     case HeaderFilterableRole  : return c.filterable;
@@ -1449,6 +1451,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const
         { BaseLotPointerRole,     "baseLot" },
         { ErrorFlagsRole,         "errorFlags" },
         { DifferenceFlagsRole,    "differenceFlags" },
+        { DocumentFieldRole,      "documentField" },
         { HeaderDefaultWidthRole, "headerDefaultWidth" },
         { HeaderValueModelRole,   "headerValueModel" },
         { HeaderFilterableRole,   "headerFilterable" },

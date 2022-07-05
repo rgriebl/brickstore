@@ -36,7 +36,7 @@ class RenderController : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(RenderController)
     Q_PROPERTY(QColor clearColor READ clearColor WRITE setClearColor NOTIFY clearColorChanged FINAL)
-    Q_PROPERTY(QList<QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged FINAL)
+    Q_PROPERTY(QList<LDraw::QmlRenderGeometry *> surfaces READ surfaces NOTIFY surfacesChanged FINAL)
     Q_PROPERTY(QQuick3DGeometry * lineGeometry READ lineGeometry CONSTANT FINAL)
     Q_PROPERTY(QQuick3DInstancing * lines READ lines CONSTANT FINAL)
     Q_PROPERTY(QVector3D center READ center NOTIFY centerChanged FINAL)

@@ -11,9 +11,9 @@ Control {
 
     required property int index
     required property string display
+    required property BS.Document document
     property int visualIndex: index
-    property int logicalIndex: TableView.view.model.logicalColumn(index)
-    property BS.Document document: TableView.view.model
+    property int logicalIndex: document.logicalColumn(index)
     property int sortStatus: 0
     property int sortCount: 0
 

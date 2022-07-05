@@ -142,6 +142,7 @@ public:
         BaseLotPointerRole,
         ErrorFlagsRole,
         DifferenceFlagsRole,
+        DocumentFieldRole,
 
         HeaderDefaultWidthRole,
         HeaderValueModelRole,

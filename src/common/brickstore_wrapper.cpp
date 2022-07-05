@@ -403,6 +403,11 @@ void QmlDocument::setColumnLayoutFromId(const QString &layoutId)
     m_doc->setColumnLayoutFromId(layoutId);
 }
 
+void QmlDocument::cancelBlockingOperation()
+{
+    m_doc->cancelBlockingOperation();
+}
+
 
 void QmlDocument::setDocument(Document *doc)
 {
@@ -533,15 +538,6 @@ QModelIndex QmlDocument::parent(const QModelIndex &) const
     return QModelIndex();
 }
 
-QVariant QmlDocument::data(const QModelIndex &index, int role) const
-{
-    if (index.isValid() && (role == Qt::UserRole + 3456)) {
-        return logicalColumn(index.column());
-    }
-    QModelIndex sindex = mapToSource(index);
-    return sourceModel()->data(sindex, role);
-}
-
 QVariant QmlDocument::headerData(int section, Qt::Orientation o, int role) const
 {
     if ((o != Qt::Horizontal) || (section < 0) || (section >= m_doc->model()->columnCount()))
@@ -583,13 +579,6 @@ int QmlDocument::logicalColumn(int visual) const
 int QmlDocument::visualColumn(int logical) const
 {
     return ((logical >= 0) && (logical < l2v.size())) ? l2v[logical] : -1;
-}
-
-QHash<int, QByteArray> QmlDocument::roleNames() const
-{
-    auto hash = sourceModel()->roleNames();
-    hash.insert(Qt::UserRole + 3456, "documentField");
-    return hash;
 }
 
 QmlDocumentColumnModel *QmlDocument::columnModel()
@@ -760,10 +749,10 @@ QmlSortFilterProxyModel::QmlSortFilterProxyModel(QObject *parent)
         emit countChanged(count());
     });
     connect(this, &QSortFilterProxyModel::filterRoleChanged, this, [this](int role) {
-        emit filterRoleNameChanged(roleNames().value(role));
+        emit filterRoleNameChanged(QString::fromLatin1(roleNames().value(role)));
     });
     connect(this, &QSortFilterProxyModel::sortRoleChanged, this, [this](int role) {
-        emit sortRoleNameChanged(roleNames().value(role));
+        emit sortRoleNameChanged(QString::fromLatin1(roleNames().value(role)));
     });
 }
 
@@ -772,25 +761,25 @@ int QmlSortFilterProxyModel::count() const
     return rowCount();
 }
 
-QByteArray QmlSortFilterProxyModel::sortRoleName() const
+QString QmlSortFilterProxyModel::sortRoleName() const
 {
-    return roleNames().value(sortRole());
+    return QString::fromLatin1(roleNames().value(sortRole()));
 }
 
-void QmlSortFilterProxyModel::setSortRoleName(const QByteArray &role)
+void QmlSortFilterProxyModel::setSortRoleName(const QString &role)
 {
-    setSortRole(roleKey(role));
+    setSortRole(roleKey(role.toLatin1()));
     invalidate();
 }
 
-QByteArray QmlSortFilterProxyModel::filterRoleName() const
+QString QmlSortFilterProxyModel::filterRoleName() const
 {
-    return roleNames().value(filterRole());
+    return QString::fromLatin1(roleNames().value(filterRole()));
 }
 
-void QmlSortFilterProxyModel::setFilterRoleName(const QByteArray &role)
+void QmlSortFilterProxyModel::setFilterRoleName(const QString &role)
 {
-    setFilterRole(roleKey(role));
+    setFilterRole(roleKey(role.toLatin1()));
 }
 
 void QmlSortFilterProxyModel::setSortColumn(int newSortColumn)

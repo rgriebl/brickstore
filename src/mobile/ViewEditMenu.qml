@@ -11,7 +11,7 @@ AutoSizingMenu {
     parent: Overlay.overlay
     anchors.centerIn: parent
 
-    function is(ids) {
+    function is(ids) : bool {
         return Array.isArray(ids) ? ids.indexOf(field) >= 0 : ids === field
     }
 

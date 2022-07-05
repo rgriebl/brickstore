@@ -67,11 +67,12 @@ AutoSizingDialog {
                 width: colors.width
 
                 component ColorLabel : Label {
+                    id: label
                     property color c
                     property string t
                     text: t
                     leftPadding: height * 1.5
-                    Rectangle { width: parent.height; height: parent.height; color: parent.c }
+                    Rectangle { width: parent.height; height: parent.height; color: label.c }
                 }
 
                 ColorLabel { t: "textColor                  "; c: Style.textColor }

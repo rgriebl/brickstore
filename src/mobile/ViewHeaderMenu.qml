@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import Mobile
 import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
@@ -99,7 +99,7 @@ AutoSizingMenu {
         onTriggered: root.document.saveCurrentColumnLayout()
     }
     ActionDelegate { actionName: "view_column_layout_load"
-        onTriggered: loadLayoutMenu.popup()
+        onTriggered: loadLayoutMenu.open()
         AutoSizingMenu {
             id: loadLayoutMenu
             modal: true

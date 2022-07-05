@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import Mobile
 import BrickStore as BS
@@ -11,7 +11,7 @@ Page {
 
     property var goBackFunction
 
-    property var currentItem: BL.BrickLink.noItem
+    property BL.Item currentItem: BL.BrickLink.noItem
     property bool hasInstructions: false
     property bool hasCounterParts: false
     property bool hasAlternates: false
@@ -95,7 +95,7 @@ Page {
                     }
                     onCurrentItemChanged: {
                         catList.model.filterItemType = currentItem.itemType
-                        itemList.model.filterItemType = currentItem.itemType
+                        itemListModel.filterItemType = currentItem.itemType
                     }
                     currentIndex: 0
                 }
@@ -125,7 +125,7 @@ Page {
 
                         onCheckedChanged: {
                             if (checked)
-                                itemList.model.filterCategory = category
+                                itemListModel.filterCategory = category
                         }
                         onClicked: {
                             pages.currentIndex = 1
@@ -178,6 +178,7 @@ Page {
                     ScrollIndicator.vertical: ScrollIndicator { minimumSize: 0.05 }
 
                     model: BL.ItemModel {
+                        id: itemListModel
                         filterWithoutInventory: true
                         filterText: filter.text
 
@@ -291,6 +292,7 @@ Page {
                     }
                 }
                 GridLayout {
+                    id: importDetailsGrid
                     columns: 2
                     columnSpacing: 16
                     Layout.rightMargin: 16
@@ -309,7 +311,7 @@ Page {
                     ItemDelegate { text: qsTr("Condition") }
                     Flow {
                         Layout.fillWidth: true
-                        spacing: parent.columnSpacing
+                        spacing: importDetailsGrid.columnSpacing
                         CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
                         CheckButton { text: qsTr("Used") }
                     }
@@ -319,7 +321,7 @@ Page {
                     }
                     Flow {
                         Layout.fillWidth: true
-                        spacing: parent.columnSpacing
+                        spacing: importDetailsGrid.columnSpacing
                         visible: root.hasExtras
                         CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
                         CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
