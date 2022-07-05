@@ -12,12 +12,10 @@ ApplicationWindow {
     width: 800
     height: 600
 
-    StyleHelper { id: styleHelper }
-
     Binding { // used to apply the dark/light theme for the complete app (Style is a singleton)
         target: Style
-        property: "styleHelper"
-        value: styleHelper
+        property: "rootWindow"
+        value: root
     }
 
     DialogLoader {

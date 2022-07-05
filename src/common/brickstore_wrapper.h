@@ -285,12 +285,9 @@ class QmlUtility : public QObject
     Q_OBJECT
     QML_NAMED_ELEMENT(Utility)
     QML_SINGLETON
-    Q_PROPERTY(QFont monospaceFont READ monospaceFont CONSTANT FINAL)
 
 public:
     QmlUtility() = default;
-
-    QFont monospaceFont() const;
 
     Q_INVOKABLE bool fuzzyCompare(double d1, double d2) { return Utility::fuzzyCompare(d1, d2); }
 
@@ -581,8 +578,6 @@ public:
     QmlDocument *activeDocument() const;
 
     Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
-
-    Q_INVOKABLE void updateIconTheme(bool darkTheme);
 
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);

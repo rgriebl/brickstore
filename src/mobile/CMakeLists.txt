@@ -7,6 +7,8 @@ qt_add_library(mobile_module STATIC
     mobileuihelpers.cpp
     qmlimageitem.h
     qmlimageitem.cpp
+    qmlstyle.h
+    qmlstyle.cpp
 )
 
 target_link_libraries(mobile_module PRIVATE
@@ -68,8 +70,6 @@ qt_add_qml_module(mobile_module
         SelectionInfoDialog.qml
         SettingsDialog.qml
         SetToPriceGuideDialog.qml
-        Style.qml
-        StyleHelper.qml
         SystemInfoDialog.qml
         Tracer.qml
         View.qml
