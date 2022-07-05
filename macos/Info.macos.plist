@@ -18,7 +18,7 @@
     <string>Copyright © @COPYRIGHT@</string>
 
     <key>CFBundleIdentifier</key>
-    <string>de.softforge.@EXECUTABLE@</string>
+    <string>@MACOSX_BUNDLE_GUI_IDENTIFIER@</string>
 
     <key>CFBundleSignature</key>
     <string>ttxt</string>

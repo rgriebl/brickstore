@@ -114,7 +114,7 @@ set(MIN_QT_VERSION 6.2.0)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
-    set(MIN_QT_VERSION 6.3.0)
+    set(MIN_QT_VERSION 6.4.0)
     add_compile_definitions(BS_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
     find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
@@ -293,6 +293,7 @@ if (APPLE)
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"
+            MACOSX_BUNDLE_GUI_IDENTIFIER "de.brickforge.brickstore"
         )
         set(MACOS_RESOURCES
             assets/generated-app-icons/brickstore.icns
