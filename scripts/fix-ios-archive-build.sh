@@ -2,11 +2,13 @@
 
 buildType="$1"
 targetType="$2"
+arch="$3"
 
 echo "Fixing iOS archive build"
-echo "  current dir: $PWD"
-echo "  build tyoe : $buildType"
-echo "  target type: $targetType"
+echo "  current dir : $PWD"
+echo "  build type  : $buildType"
+echo "  target type : $targetType"
+echo "  architecture: $arch"
 
 derivedData="derivedData/ArchiveIntermediates/BrickStore/IntermediateBuildFilesPath"
 
@@ -25,19 +27,24 @@ echo "  created links:"
 #  ln -sf $PWD/$i $dst
 #done
 
-modules=('bricklink', 'common', 'ldraw', 'modules')
-files=('_module_resources_1.build/Objects-normal/x86_64/mocs_compilation.o', \
-       '_module_resources_1.build/Objects-normal/x86_64/qrc_qmake_Mobile.o', \
-       '_module_qmlcache.build/Objects-normal/x86_64/mocs_compilation.o', \
-       '_module_qmlcache.build/Objects-normal/x86_64/mobile_module_qmlcache_loader.o', \
-       '_module_resources_2.build/Objects-normal/x86_64/mocs_compilation.o', \
-       '_module_resources_2.build/Objects-normal/x86_64/qrc_mobile_module_raw_qml_0.o')
+buildModules=('BrickLink/bricklink' 'BrickStore/common' 'LDraw/ldraw' 'Mobile/mobile')
+files=('@bm@_module_resources_1.build/Objects-normal/@arch@/mocs_compilation.o' \
+       '@bm@_module_resources_1.build/Objects-normal/@arch@/qrc_qmake_@BM@.o' \
+       '@bm@_module_qmlcache.build/Objects-normal/@arch@/mocs_compilation.o' \
+       '@bm@_module_qmlcache.build/Objects-normal/@arch@/@bm@_module_qmlcache_loader.o' \
+       '@bm@_module_resources_2.build/Objects-normal/@arch@/mocs_compilation.o' \
+       '@bm@_module_resources_2.build/Objects-normal/@arch@/qrc_@bm@_module_raw_qml_0.o')
 
-for module in ${modules}; do
+for buildModule in ${buildModules}; do
+  BM=$(echo $buildModule | cut -d / -f 1)
+  bm=$(echo $buildModule | cut -d / -f 2)
+
   for file in ${files}; do
-     common="BrickStore.build/${buildType}-${targetType}/${module}_${file}"
+     f=$(echo $file | sed -e "s,@BM@,${BM},g" -e "s,@bm@,${bm},g" -e "s,@arch@,${arch},g")
+
+     common="BrickStore.build/${buildType}-${targetType}/${f}"
      src="${derivedData}/${common}"
-     dst="src/${module}/${common}"
+     dst="src/${bm}/${common}"
 
      echo "    $src --> $dst"
 
