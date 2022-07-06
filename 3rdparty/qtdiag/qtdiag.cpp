@@ -434,7 +434,7 @@ static void dumpStandardLocation(QTextStream &str, QStandardPaths::StandardLocat
     str << '"' << QStandardPaths::displayName(location) << '"';
     const QStringList directories = QStandardPaths::standardLocations(location);
     const QString writableDirectory = QStandardPaths::writableLocation(location);
-    const int writableIndex = writableDirectory.isEmpty() ? -1 : directories.indexOf(writableDirectory);
+    const int writableIndex = writableDirectory.isEmpty() ? -1 : int(directories.indexOf(writableDirectory));
     for (int i = 0; i < directories.size(); ++i) {
         str << ' ';
         if (i == writableIndex)
@@ -750,23 +750,23 @@ QString qtDiag(unsigned flags)
     if (flags & QtDiagFonts) {
         const QStringList families = QFontDatabase::families();
         str << "\n  Families (" << families.size() << "):\n";
-        for (int i = 0, count = families.size(); i < count; ++i)
+        for (int i = 0, count = int(families.size()); i < count; ++i)
             str << "    " << families.at(i) << '\n';
 
         const QList<int> standardSizes = QFontDatabase::standardSizes();
         str << "\n  Standard Sizes:";
-        for (int i = 0, count = standardSizes.size(); i < count; ++i)
+        for (int i = 0, count = int(standardSizes.size()); i < count; ++i)
             str << ' ' << standardSizes.at(i);
         QList<QFontDatabase::WritingSystem> writingSystems = QFontDatabase::writingSystems();
         str << "\n\n  Writing systems:\n";
-        for (int i = 0, count = writingSystems.size(); i < count; ++i)
+        for (int i = 0, count = int(writingSystems.size()); i < count; ++i)
             str << "    " << formatValueQDebug(writingSystems.at(i)) << '\n';
     }
 
     str << "\nPalette:\n" << QGuiApplication::palette();
 
     const QList<QScreen*> screens = QGuiApplication::screens();
-    const int screenCount = screens.size();
+    const int screenCount = int(screens.size());
     str << "\nScreens: " << screenCount << ", High DPI scaling: "
         << (QHighDpiScaling::isActive() ? "active" : "inactive") << '\n';
     for (int s = 0; s < screenCount; ++s) {
