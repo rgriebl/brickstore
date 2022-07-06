@@ -22,6 +22,7 @@
             <function name="priceGuideUpdated" fullname="BrickStore.BrickLink.priceGuideUpdated" href="qml-brickstore-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal"/>
             <qmlproperty name="noColor" fullname="BrickStore.BrickLink.noColor" href="qml-brickstore-bricklink.html#noColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
             <qmlproperty name="noItem" fullname="BrickStore.BrickLink.noItem" href="qml-brickstore-bricklink.html#noItem-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="noLot" fullname="BrickStore.BrickLink.noLot" href="qml-brickstore-bricklink.html#noLot-prop" status="active" access="public" documented="true" type="Lot" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="BrickStore" qml-module-name="BrickStore" fullname="BrickStore.BrickStore" href="qml-brickstore-brickstore.html" status="active" access="public" documented="true" groups="qml-api" title="BrickStore" fulltitle="BrickStore" subtitle="" brief="This singleton represents global settings and state">
             <function name="nameFiltersForBrickLinkXML" fullname="BrickStore.BrickStore.nameFiltersForBrickLinkXML" href="qml-brickstore-brickstore.html#nameFiltersForBrickLinkXML-method" status="active" access="public" documented="true" meta="qmlmethod"/>
