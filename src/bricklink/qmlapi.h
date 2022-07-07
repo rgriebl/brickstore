@@ -347,6 +347,13 @@ class QmlLot : public QmlWrapperBase<Lot>
     Q_PROPERTY(uint alternateId READ alternateId WRITE setAlternateId)
     Q_PROPERTY(bool counterPart READ counterPart WRITE setCounterPart)
 
+    Q_PROPERTY(QDateTime dateAdded READ dateAdded WRITE setDateAdded)
+    Q_PROPERTY(QDateTime dateLastSold READ dateLastSold WRITE setDateLastSold)
+
+    Q_PROPERTY(bool isMarked READ isMarked)
+    Q_PROPERTY(QString markerText READ markerText WRITE setMarkerText)
+    Q_PROPERTY(QColor markerColor READ markerColor WRITE setMarkerColor)
+
     Q_PROPERTY(bool incomplete READ incomplete)
 
     Q_PROPERTY(QImage image READ image)
@@ -431,6 +438,17 @@ public:
 
     bool counterPart() const           { return get()->counterPart(); }
     void setCounterPart(bool b)        { set().to()->setCounterPart(b); }
+
+    QDateTime dateAdded() const        { return get()->dateAdded(); }
+    void setDateAdded(const QDateTime &dt)    { set().to()->setDateAdded(dt); }
+    QDateTime dateLastSold() const     { return get()->dateLastSold(); }
+    void setDateLastSold(const QDateTime &dt) { set().to()->setDateLastSold(dt); }
+
+    bool isMarked() const              { return !markerText().isEmpty() || markerColor().isValid(); }
+    QString markerText() const         { return get()->markerText(); }
+    QColor markerColor() const         { return get()->markerColor(); }
+    void setMarkerText(const QString &text)  { set().to()->setMarkerText(text); }
+    void setMarkerColor(const QColor &color) { set().to()->setMarkerColor(color); }
 
     bool incomplete() const            { return get()->isIncomplete(); }
 
