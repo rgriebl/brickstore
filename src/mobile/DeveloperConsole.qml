@@ -61,6 +61,7 @@ AutoSizingDialog {
                     text: '  '+ delegate.category + '  '
                     background: Rectangle {
                         anchors.fill: parent
+                        color: "transparent"
                         border.width: 1
                         border.color: log.categoryColors[(delegate.category.length
                                                           * delegate.category.codePointAt(0))
@@ -75,7 +76,6 @@ AutoSizingDialog {
                     text: (delegate.file === '' || delegate.type === 4)
                           ? '' : delegate.file + ", line " + delegate.line
                     elide: Text.ElideMiddle
-                    Tracer { }
                 }
             }
             Label {

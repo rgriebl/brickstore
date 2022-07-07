@@ -181,10 +181,8 @@ Page {
                 }
                 onLongPressed: function() {
                     let m = mapPoint(point.position)
-                    if (m.column >= 0) {
-                        editMenu.field = m.column
-                        editMenu.open()
-                    }
+                    editMenu.field = m.column
+                    editMenu.open()
                 }
             }
 
