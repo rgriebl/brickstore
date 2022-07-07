@@ -96,6 +96,8 @@
 #include "managecolumnlayoutsdialog.h"
 #include "settingsdialog.h"
 #include "systeminfodialog.h"
+#include "consolidateitemsdialog.h"
+
 
 using namespace std::chrono_literals;
 
@@ -281,6 +283,28 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(Config::inst(), &Config::toolBarActionsChanged,
             this, &MainWindow::setupToolBar);
+
+    Document::setLotConsolidationFunction([](Document::LotConsolidation &lc) -> QCoro::Task<> {
+        if (!lc.document || !MainWindow::inst())
+            co_return;
+        emit lc.document->requestActivation();
+
+        auto *view = MainWindow::inst()->activeView();
+
+        Q_ASSERT(view->document() == lc.document);
+
+        ConsolidateItemsDialog dlg(view, lc.lots, lc.preselectedIndex,
+                                   lc.mode, lc.current, lc.total, view);
+        dlg.open();
+
+        lc.accepted = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
+        lc.repeatForRemaining = dlg.repeatForAll();
+        lc.costQuantityAverage = dlg.costQuantityAverage();
+        lc.consolidateToIndex = dlg.consolidateToIndex();
+        lc.consolidateRemaining = dlg.consolidateRemaining();
+
+        co_return;
+    });
 
     goHome(true);
 }

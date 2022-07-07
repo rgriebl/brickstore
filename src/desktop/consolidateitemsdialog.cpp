@@ -29,9 +29,8 @@
 #include "view.h"
 
 
-ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view,
-                                               const LotList &lots,
-                                               int preselectedIndex, View::Consolidate mode,
+ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view, const LotList &lots,
+                                               int preselectedIndex, Document::LotConsolidation::Mode mode,
                                                int current, int total, QWidget *parent)
     : QDialog(parent)
 {
@@ -45,12 +44,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view,
     bool newLots = (lots.count() == 2) && view->model()->lots().contains(lots.at(0))
             && !view->model()->lots().contains(lots.at(lots.count() - 1));
 
-    Q_ASSERT(newLots == (int(mode) >= int(View::Consolidate::IntoExisting)));
+    Q_ASSERT(newLots == (int(mode) >= int(Document::LotConsolidation::Mode::IntoExisting)));
 
-    for (int i = int(View::Consolidate::IntoNew); i > int(View::Consolidate::Not); --i) {
-        w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<View::Consolidate>(i)));
+    for (int i = int(Document::LotConsolidation::Mode::IntoNew); i > int(Document::LotConsolidation::Mode::Not); --i) {
+        w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<Document::LotConsolidation::Mode>(i)));
 
-        bool forNewOnly = (i >= int(View::Consolidate::IntoExisting));
+        bool forNewOnly = (i >= int(Document::LotConsolidation::Mode::IntoExisting));
         if (newLots != forNewOnly)
             w_prefer_remaining->removeItem(i);
     }
@@ -128,12 +127,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view,
     }, Qt::QueuedConnection);
 }
 
-View::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
+Document::LotConsolidation::Mode ConsolidateItemsDialog::consolidateRemaining() const
 {
     if (m_forAll)
-        return w_prefer_remaining->currentData().value<View::Consolidate>();
+        return w_prefer_remaining->currentData().value<Document::LotConsolidation::Mode>();
     else
-        return View::Consolidate::Not;
+        return Document::LotConsolidation::Mode::Not;
 }
 
 int ConsolidateItemsDialog::consolidateToIndex() const

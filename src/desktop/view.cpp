@@ -80,13 +80,9 @@
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
 #include "importinventorydialog.h"
-#include "consolidateitemsdialog.h"
-
 
 
 using namespace std::chrono_literals;
-
-
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -275,6 +271,14 @@ const QHeaderView *View::headerView() const
     return m_header;
 }
 
+void View::setLatestRow(int row)
+{
+    if (row >= 0) {
+        m_latest_row = row;
+        m_latest_timer->start();
+    }
+}
+
 
 View::View(Document *document, QWidget *parent)
     : QWidget(parent)
@@ -295,12 +299,6 @@ View::View(Document *document, QWidget *parent)
     m_latest_timer->setInterval(100ms);
 
     m_actionTable = {
-        { "edit_mergeitems", [this]() {
-              if (!selectedLots().isEmpty())
-                  consolidateLots(selectedLots());
-              else
-                  consolidateLots(m_model->sortedLots());
-          } },
         { "edit_partoutitems", [this]() { partOutItems(); } },
         { "edit_copy_fields", [this]() -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
@@ -325,25 +323,6 @@ View::View(Document *document, QWidget *parent)
                       m_document->subtractItems(lots);
                   qDeleteAll(lots);
               }
-          } },
-        { "edit_paste", [this]() -> QCoro::Task<> {
-              LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
-
-              if (!lots.empty()) {
-                  if (!selectedLots().isEmpty()) {
-                       if (co_await UIHelpers::question(tr("Overwrite the currently selected items?"),
-                                                        UIHelpers::Yes | UIHelpers::No, UIHelpers::Yes
-                                               ) == UIHelpers::Yes) {
-                          m_model->removeLots(selectedLots());
-                      }
-                  }
-                  addLots(std::move(lots), AddLotMode::ConsolidateInteractive);
-              }
-          } },
-        { "edit_paste_silent", [this]() {
-              LotList lots = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
-              if (!lots.empty())
-                  addLots(std::move(lots), AddLotMode::AddAsNew);
           } },
         { "edit_price_to_priceguide", [this]() -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
@@ -569,249 +548,6 @@ void View::ensureLatestVisible()
         m_table->scrollTo(m_model->index(m_latest_row, m_header->logicalIndexAt(-xOffset)));
         m_latest_row = -1;
     }
-}
-
-QCoro::Task<> View::addLots(LotList &&lotsRef, AddLotMode addLotMode)
-{
-    if (lotsRef.empty())
-        co_return;
-
-    // we own the items now, but we have to move them into a local variable, because
-    // the lotsRef reference might go out of scope when we co_await later
-    LotList lots(lotsRef);
-
-    bool startedMacro = false;
-
-    bool wasEmpty = (model()->lotCount() == 0);
-    Lot *lastAdded = nullptr;
-    int addCount = 0;
-    int consolidateCount = 0;
-    Consolidate conMode = Consolidate::IntoExisting;
-    bool repeatForRemaining = false;
-    bool costQtyAvg = true;
-
-    for (int i = 0; i < lots.size(); ++i) {
-        Lot *lot = lots.at(i);
-        bool justAdd = true;
-
-        if (addLotMode != AddLotMode::AddAsNew) {
-            Lot *mergeLot = nullptr;
-
-            const auto documentLots = model()->sortedLots();
-            for (int j = documentLots.count() - 1; j >= 0; --j) {
-                Lot *otherLot = documentLots.at(j);
-                if ((!lot->isIncomplete() && !otherLot->isIncomplete())
-                        && (lot->item() == otherLot->item())
-                        && (lot->color() == otherLot->color())
-                        && (lot->condition() == otherLot->condition())
-                        && ((lot->status() == BrickLink::Status::Exclude) ==
-                            (otherLot->status() == BrickLink::Status::Exclude))) {
-                    mergeLot = otherLot;
-                    break;
-                }
-            }
-
-            if (mergeLot) {
-                int mergeIndex = -1;
-
-                if ((addLotMode == AddLotMode::ConsolidateInteractive) && !repeatForRemaining) {
-                    LotList list { mergeLot, lot };
-
-                    ConsolidateItemsDialog dlg(this, list,
-                                               conMode == Consolidate::IntoExisting ? 0 : 1,
-                                               conMode, i + 1, lots.size(), this);
-                    dlg.open();
-
-                    bool yesClicked = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
-                    repeatForRemaining = dlg.repeatForAll();
-                    costQtyAvg = dlg.costQuantityAverage();
-
-
-                    if (yesClicked) {
-                        mergeIndex = dlg.consolidateToIndex();
-
-                        if (repeatForRemaining) {
-                            conMode = dlg.consolidateRemaining();
-                            mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
-                        }
-                    } else {
-                        if (repeatForRemaining)
-                            addLotMode = AddLotMode::AddAsNew;
-                    }
-                } else {
-                    mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
-                }
-
-                if (mergeIndex >= 0) {
-                    justAdd = false;
-
-                    if (!startedMacro) {
-                        m_model->beginMacro();
-                        startedMacro = true;
-                    }
-
-                    if (mergeIndex == 0) {
-                        // merge new into existing
-                        Lot changedLot = *mergeLot;
-                        changedLot.mergeFrom(*lot, costQtyAvg);
-                        m_model->changeLot(mergeLot, changedLot);
-                        delete lot; // we own it, but we don't need it anymore
-                    } else {
-                        // merge existing into new, add new, remove existing
-                        lot->mergeFrom(*mergeLot, costQtyAvg);
-                        lot->setDateAdded(QDateTime::currentDateTimeUtc());
-                        m_model->appendLot(std::move(lot)); // pass on ownership
-                        m_model->removeLot(mergeLot);
-                    }
-
-                    ++consolidateCount;
-                }
-            }
-        }
-
-        if (justAdd) {
-            if (!startedMacro) {
-                m_model->beginMacro();
-                startedMacro = true;
-            }
-
-            lot->setDateAdded(QDateTime::currentDateTimeUtc());
-            lastAdded = lot;
-            m_model->appendLot(std::move(lot));  // pass on ownership to the doc
-            ++addCount;
-        }
-    }
-
-    if (startedMacro)
-        m_model->endMacro(tr("Added %1, consolidated %2 items").arg(addCount).arg(consolidateCount));
-
-    if (wasEmpty)
-        m_table->selectRow(0);
-
-    if (lastAdded) {
-        m_latest_row = m_model->index(lastAdded).row();
-        m_latest_timer->start();
-    }
-
-    lots.clear();
-}
-
-
-QCoro::Task<> View::consolidateLots(BrickLink::LotList lots)
-{
-    if (lots.count() < 2)
-        co_return;
-
-    QVector<LotList> mergeList;
-    LotList sourceLots = lots;
-
-    for (int i = 0; i < sourceLots.count(); ++i) {
-        Lot *lot = sourceLots.at(i);
-        LotList mergeLots;
-
-        for (int j = i + 1; j < sourceLots.count(); ++j) {
-            Lot *otherLot = sourceLots.at(j);
-            if ((!lot->isIncomplete() && !otherLot->isIncomplete())
-                    && (lot->item() == otherLot->item())
-                    && (lot->color() == otherLot->color())
-                    && (lot->condition() == otherLot->condition())
-                    && ((lot->status() == BrickLink::Status::Exclude) ==
-                        (otherLot->status() == BrickLink::Status::Exclude))) {
-                mergeLots << sourceLots.takeAt(j--);
-            }
-        }
-        if (mergeLots.isEmpty())
-            continue;
-
-        mergeLots.prepend(sourceLots.at(i));
-        mergeList << mergeLots;
-    }
-
-    if (mergeList.isEmpty())
-        co_return;
-
-    bool startedMacro = false;
-
-    auto conMode = Consolidate::IntoLowestIndex;
-    bool repeatForRemaining = false;
-    bool costQtyAvg = true;
-    int consolidateCount = 0;
-
-    for (int mi = 0; mi < mergeList.count(); ++mi) {
-        const LotList &mergeLots = mergeList.at(mi);
-        int mergeIndex = -1;
-
-        if (!repeatForRemaining) {
-            ConsolidateItemsDialog dlg(this, mergeLots, consolidateLotsHelper(mergeLots, conMode),
-                                       conMode, mi + 1, mergeList.count(), this);
-            dlg.open();
-
-            bool yesClicked = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
-            repeatForRemaining = dlg.repeatForAll();
-            costQtyAvg = dlg.costQuantityAverage();
-
-            if (yesClicked) {
-                mergeIndex = dlg.consolidateToIndex();
-
-                if (repeatForRemaining) {
-                    conMode = dlg.consolidateRemaining();
-                    mergeIndex = consolidateLotsHelper(mergeLots, conMode);
-                }
-            } else {
-                if (repeatForRemaining)
-                    break;
-                else
-                    continue;
-            }
-        } else {
-            mergeIndex = consolidateLotsHelper(mergeLots, conMode);
-        }
-
-        if (!startedMacro) {
-            m_model->beginMacro();
-            startedMacro = true;
-        }
-
-        Lot newitem = *mergeLots.at(mergeIndex);
-        for (int i = 0; i < mergeLots.count(); ++i) {
-            if (i != mergeIndex) {
-                newitem.mergeFrom(*mergeLots.at(i), costQtyAvg);
-                m_model->removeLot(mergeLots.at(i));
-            }
-        }
-        m_model->changeLot(mergeLots.at(mergeIndex), newitem);
-
-        ++consolidateCount;
-    }
-    if (startedMacro)
-        m_model->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
-}
-
-int View::consolidateLotsHelper(const LotList &lots, Consolidate conMode) const
-{
-    switch (conMode) {
-    case Consolidate::IntoTopSorted:
-        return 0;
-    case Consolidate::IntoBottomSorted:
-        return lots.count() - 1;
-    case Consolidate::IntoLowestIndex: {
-        const auto di = model()->lots();
-        auto it = std::min_element(lots.cbegin(), lots.cend(), [di](const auto &a, const auto &b) {
-            return di.indexOf(a) < di.indexOf(b);
-        });
-        return int(std::distance(lots.cbegin(), it));
-    }
-    case Consolidate::IntoHighestIndex: {
-        const auto di = model()->lots();
-        auto it = std::max_element(lots.cbegin(), lots.cend(), [di](const auto &a, const auto &b) {
-            return di.indexOf(a) < di.indexOf(b);
-        });
-        return int(std::distance(lots.cbegin(), it));
-    }
-    default:
-        break;
-    }
-    return -1;
 }
 
 QCoro::Task<> View::partOutItems()

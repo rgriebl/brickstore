@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 
 #include <QObject>
 #include <QUndoCommand>
@@ -131,6 +132,46 @@ public:
     QModelIndex currentIndex() const;
 
     const LotList &selectedLots() const  { return m_selectedLots; }
+
+    enum class AddLotMode {
+        AddAsNew,
+        ConsolidateWithExisting,
+        ConsolidateInteractive,
+    };
+    QCoro::Task<int> addLots(LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
+    QCoro::Task<> consolidateLots(BrickLink::LotList lots);
+
+    struct LotConsolidation
+    {
+        // input
+        Document *document;
+        const LotList lots;
+
+        int preselectedIndex;
+
+        enum class Mode {
+            Not = -1,
+            IntoTopSorted = 0,
+            IntoBottomSorted = 1,
+            IntoLowestIndex = 2,
+            IntoHighestIndex = 3,
+            IntoExisting = 4,
+            IntoNew = 5
+        };
+        Mode mode;
+
+        int current;
+        int total;
+
+
+        // output
+        bool accepted = false;
+        bool repeatForRemaining = false;
+        bool costQuantityAverage = false;
+        int consolidateToIndex = -1;
+        Mode consolidateRemaining = Mode::Not;
+    };
+    static void setLotConsolidationFunction(std::function<QCoro::Task<>(Document::LotConsolidation &)> f);
 
     bool isBlockingOperationActive() const;
     void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
@@ -272,6 +313,7 @@ signals:
 private:
     QString actionText() const;
     void applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback);
+    int consolidateLotsHelper(const LotList &lots, LotConsolidation::Mode conMode) const;
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void cancelPriceGuideUpdates();
     enum ExportCheckMode {
@@ -305,6 +347,8 @@ private:
     QObject *            m_actionConnectionContext = nullptr;
 
     std::vector<std::pair<const char *, std::function<void()>>> m_actionTable;
+
+    static std::function<QCoro::Task<>(Document::LotConsolidation &)> s_consolidationFunction;
 
     struct SetToPriceGuideData
     {

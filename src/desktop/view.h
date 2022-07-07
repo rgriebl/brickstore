@@ -55,33 +55,15 @@ public:
     Document *document() const { return m_document; }
     DocumentModel *model() const { return m_model; }
 
-    enum class Consolidate {
-        Not = -1,
-        IntoTopSorted = 0,
-        IntoBottomSorted = 1,
-        IntoLowestIndex = 2,
-        IntoHighestIndex = 3,
-        IntoExisting = 4,
-        IntoNew = 5
-    };
-
-    enum class AddLotMode {
-        AddAsNew,
-        ConsolidateWithExisting,
-        ConsolidateInteractive,
-    };
-
     const LotList &selectedLots() const;
-
-    QCoro::Task<> addLots(LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
-
-    QCoro::Task<> consolidateLots(BrickLink::LotList lots);
 
     void printScriptAction(PrintingScriptAction *printingAction);
 
     void setActive(bool active);
 
     const QHeaderView *headerView() const;
+
+    void setLatestRow(int row);
 
 signals:
     void currentColumnOrderChanged(const QVector<int> &newOrder);
@@ -103,7 +85,6 @@ private:
     void languageChange();
     void repositionBlockOverlay();
     QCoro::Task<> partOutItems();
-    int consolidateLotsHelper(const LotList &lots, Consolidate conMode) const;
 
     friend class ColumnCmd;
 
@@ -131,5 +112,3 @@ private:
 
     std::vector<std::pair<const char *, std::function<void()>>> m_actionTable;
 };
-
-Q_DECLARE_METATYPE(View::Consolidate)

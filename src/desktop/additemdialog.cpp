@@ -689,8 +689,13 @@ void AddItemDialog::addClicked()
         m_addHistory.pop_front();
     updateHistoryText();
 
-    m_view->addLots({ lot }, w_merge->isChecked() ? View::AddLotMode::ConsolidateWithExisting
-                                                  : View::AddLotMode::AddAsNew);
+    m_view->document()->addLots({ lot }, w_merge->isChecked() ? Document::AddLotMode::ConsolidateWithExisting
+                                                              : Document::AddLotMode::AddAsNew)
+            .then([view = m_view](int lastAddedRow) {
+        if (lastAddedRow >= 0) {
+            view->setLatestRow(lastAddedRow);
+        }
+    });
 }
 
 #include "moc_additemdialog.cpp"

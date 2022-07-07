@@ -21,6 +21,7 @@
 
 #include "common/actionmanager.h"
 #include "common/config.h"
+#include "common/document.h"
 #include "common/undo.h"
 #include "ldraw/library.h"
 #include "mobileapplication.h"
@@ -54,6 +55,21 @@ void MobileApplication::init()
             return Application::inst()->undoGroup()->createRedoAction(this);
         else
             return new QAction(this);
+    });
+
+    Document::setLotConsolidationFunction([](Document::LotConsolidation &lc) -> QCoro::Task<> {
+        if (!lc.document || !MobileApplication::inst())
+            co_return;
+        emit lc.document->requestActivation();
+
+        QString s = tr("Would you like to consolidate %n lot(s)?", nullptr, lc.total);
+
+        lc.accepted = (co_await UIHelpers::question(s) == UIHelpers::Yes);
+        lc.consolidateToIndex = lc.preselectedIndex;
+        lc.repeatForRemaining = true;
+        lc.consolidateRemaining = lc.mode;
+
+        co_return;
     });
 
     m_engine->load(QUrl(u"Mobile/Main.qml"_qs));

@@ -14,23 +14,25 @@
 #pragma once
 
 #include "bricklink/global.h"
-#include "view.h"
+#include "common/document.h"
 #include "ui_consolidateitemsdialog.h"
 
+
+class View;
 
 class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialog
 {
     Q_OBJECT
 
 public:
-    ConsolidateItemsDialog(const View *win, const LotList &lots,
-                           int preselectedIndex, View::Consolidate mode, int current, int total,
-                           QWidget *parent = nullptr);
+    ConsolidateItemsDialog(const View *view, const LotList &lots,
+                           int preselectedIndex, Document::LotConsolidation::Mode mode,
+                           int current, int total, QWidget *parent = nullptr);
 
     int consolidateToIndex() const;
     bool repeatForAll() const;
     bool costQuantityAverage() const;
-    View::Consolidate consolidateRemaining() const;
+    Document::LotConsolidation::Mode consolidateRemaining() const;
 
 protected:
     QSize sizeHint() const override;
