@@ -420,15 +420,15 @@ Page {
                 }
                 DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
-                        required property var lot
-                        tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).category.id, 0.2)
+                        required property int decoration // the cateogry id
+                        tint: BS.Utility.shadeColor(decoration, 0.2)
                         text: display
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.ItemType
                     GridCell {
-                        required property var lot
-                        tint: BS.Utility.shadeColor(BL.BrickLink.lot(lot).itemType.id.codePointAt(0), 0.1)
+                        required property int decoration // the itemtype id
+                        tint: BS.Utility.shadeColor(decoration, 0.1)
                         text: display
                     }
                 }
@@ -437,6 +437,13 @@ Page {
                 }
                 DelegateChoice { roleValue: BS.Document.DateLastSold
                     DateGridCell { }
+                }
+                DelegateChoice { roleValue: BS.Document.Marker
+                    GridCell {
+                        required property color decoration // the marker color
+                        text: display
+                        tint: decoration.valid ? decoration : "transparent"
+                    }
                 }
 
                 DelegateChoice { GridCell { text: display } }

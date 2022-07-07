@@ -18,7 +18,7 @@
 #include <QtQuickTemplates2/private/qquickdialog_p.h>
 #include <QtQuickDialogs2/private/qquickfiledialog_p.h>
 #include <QtQuickDialogs2/private/qquickmessagedialog_p.h>
-//#include <QtQuickDialogs2/private/qquickcolordialog_p.h>
+#include <QtQuickDialogs2/private/qquickcolordialog_p.h>
 
 #include "mobileuihelpers.h"
 #include "mobileuihelpers_p.h"
@@ -213,19 +213,19 @@ QCoro::Task<std::optional<int>> MobileUIHelpers::getInputInteger(QString text,
 QCoro::Task<std::optional<QColor>> MobileUIHelpers::getInputColor(QColor initialColor,
                                                                   QString title)
 {
-//    auto colorDialog = createDialog<QQuickColorDialog>(s_engine, {
-//                                                           { u"title"_qs, title },
-//                                                           { u"selectedColor"_qs, initialColor },
-//                                                       });
+    auto colorDialog = createDialog<QQuickColorDialog>(s_engine, {
+                                                           { u"title"_qs, title },
+                                                           { u"selectedColor"_qs, initialColor },
+                                                       });
+    if (!colorDialog)
+        co_return { };
 
-//    if (!colorDialog)
-//        co_return { };
-
-//    co_await qCoro(colorDialog, &QQuickColorDialog::selectedColorChanged);
-//    colorDialog->deleteLater();
-//    if (colorDialog->result() == QQuickMessageDialog::Accepted)
-//        co_return colorDialog->selectedColor();
-//    else
+    co_await qCoro(colorDialog, &QQuickColorDialog::resultChanged);
+    colorDialog->deleteLater();
+    qWarning() << colorDialog->result() << QQuickMessageDialog::Accepted << colorDialog->selectedColor();
+    if (colorDialog->result() == QQuickMessageDialog::Accepted)
+        co_return colorDialog->selectedColor();
+    else
         co_return { };
 }
 
@@ -250,7 +250,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
                                                          { u"title"_qs, fileName },
 #else
                                                          { u"title"_qs, title },
-                                                         { u"currentFile"_qs, fileName },
+                                                         { u"selectedFile"_qs, fileName },
 #endif
                                                          { u"nameFilters"_qs, filters },
                                                      });

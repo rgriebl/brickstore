@@ -178,6 +178,7 @@ public:
     bool setData(const QModelIndex&, const QVariant&, int) override;
     QVariant dataForEditRole(const Lot *lot, Field f) const;
     QVariant dataForDisplayRole(const Lot *lot, Field f) const;
+    QVariant dataForDecorationRole(const Lot *lot, Field f) const;
     QVariant dataForFilterRole(const Lot *lot, Field f) const;
     QHash<int, QByteArray> roleNames() const override;
 
@@ -332,6 +333,7 @@ private:
         const char *title;
         std::function<QAbstractItemModel *()> valueModelFn = { };
         std::function<QVariant(const Lot *)> dataFn = { };
+        std::function<QVariant(const Lot *)> auxDataFn = { };
         std::function<void(Lot *, const QVariant &v)> setDataFn = { };
         std::function<QVariant(const Lot *)> displayFn = { };
         std::function<QVariant(const Lot *)> filterFn = { };

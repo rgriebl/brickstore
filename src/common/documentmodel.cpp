@@ -1376,6 +1376,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DisplayRole      : return dataForDisplayRole(lot, f);
         case BaseDisplayRole      : return dataForDisplayRole(differenceBaseLot(lot), f);
+        case Qt::DecorationRole   : return dataForDecorationRole(lot, f);
         case Qt::TextAlignmentRole: return c.alignment | Qt::AlignVCenter;
         case Qt::EditRole         : return dataForEditRole(lot, f);
         case BaseEditRole         : return dataForEditRole(differenceBaseLot(lot), f);
@@ -1421,6 +1422,12 @@ QVariant DocumentModel::dataForDisplayRole(const Lot *lot, Field f) const
     return c.displayFn ? c.displayFn(lot) : (c.dataFn ? c.dataFn(lot) : QVariant { });
 }
 
+QVariant DocumentModel::dataForDecorationRole(const Lot *lot, Field f) const
+{
+    const auto &c = m_columns.value(f);
+    return c.auxDataFn ? c.auxDataFn(lot) : QVariant { };
+}
+
 QVariant DocumentModel::dataForFilterRole(const Lot *lot, Field f) const
 {
     const auto &c = m_columns.value(f);
@@ -1442,6 +1449,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const
 {
     static QHash<int, QByteArray> roles = {
         { Qt::DisplayRole,        "display" },
+        { Qt::DecorationRole,     "decoration" },
         { Qt::TextAlignmentRole,  "textAlignment" },
         { Qt::EditRole,           "edit" },
         { BaseDisplayRole,        "baseDisplay" },
@@ -1710,6 +1718,7 @@ void DocumentModel::initializeColumns()
           .title = QT_TR_NOOP("Condition"),
           .valueModelFn = [&]() { return new QStringListModel({ tr("New"), tr("Used") }); },
           .dataFn = [&](const Lot *lot) { return QVariant::fromValue(lot->condition()); },
+          .auxDataFn = [&](const Lot *lot) { return QVariant::fromValue(lot->subCondition()); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setCondition(v.value<BrickLink::Condition>()); },
           .filterFn = [&](const Lot *lot) {
               return (lot->condition() == BrickLink::Condition::New) ? tr("New") : tr("Used");
@@ -1749,6 +1758,7 @@ void DocumentModel::initializeColumns()
               sl.sort(Qt::CaseInsensitive);
               return new QStringListModel(sl);
           },
+          .auxDataFn = [&](const Lot *lot) { return lot->categoryId(); },
           .displayFn = [&](const Lot *lot) { return lot->categoryName(); },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
               return l1->categoryName().localeAwareCompare(l2->categoryName());
@@ -1764,6 +1774,7 @@ void DocumentModel::initializeColumns()
               std::for_each(itts.cbegin(), itts.cend(), [&](const auto &itt) { sl << itt.name(); });
               return new QStringListModel(sl);
           },
+          .auxDataFn = [&](const Lot *lot) { return int(lot->itemTypeId()); },
           .displayFn = [&](const Lot *lot) { return lot->itemTypeName(); },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
               return l1->itemTypeName().localeAwareCompare(l2->itemTypeName());
@@ -1897,6 +1908,7 @@ void DocumentModel::initializeColumns()
     C(Marker, Column {
           .title = QT_TR_NOOP("Marker"),
           .dataFn = [&](const Lot *lot) { return lot->markerText(); },
+          .auxDataFn = [&](const Lot *lot) { return lot->markerColor(); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setMarkerText(v.toString()); },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
               int d = Utility::naturalCompare(l1->markerText(), l2->markerText());
