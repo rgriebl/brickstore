@@ -23,16 +23,30 @@
 #if defined(Q_OS_ANDROID)
 #  include <jni.h>
 
-static bool darkThemeOS = false;
+static bool darkThemeOS_value;
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_changeUiTheme(JNIEnv *, jobject, jboolean jisDark)
 {
-    darkThemeOS = jisDark;
+    *darkThemeOS_value = jisDark;
+}
+
+static bool darkThemeOS()
+{
+    return darkThemeOS_value;
 }
 
 #else
-static const bool darkThemeOS = false;
+#  include <QtGui/private/qguiapplication_p.h>
+#  include <QtGui/qpa/qplatformtheme.h>
+
+static bool darkThemeOS()
+{
+    if (const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme())
+        return (theme->appearance() == QPlatformTheme::Appearance::Dark);
+    return false;
+}
+
 #endif
 
 
@@ -55,6 +69,13 @@ QmlStyle::QmlStyle(QObject *parent)
             emit smallSizeChanged(newSmallSize);
         }
     });
+
+    connect(QGuiApplication::primaryScreen(), &QScreen::geometryChanged,
+            this, &QmlStyle::screenMarginsChanged);
+    connect(QGuiApplication::primaryScreen(), &QScreen::availableGeometryChanged,
+            this, &QmlStyle::screenMarginsChanged);
+    connect(QGuiApplication::primaryScreen(), &QScreen::orientationChanged,
+            this, &QmlStyle::screenMarginsChanged);
 }
 
 QSizeF QmlStyle::physicalScreenSize() const
@@ -121,6 +142,70 @@ QColor QmlStyle::hintTextColor() const
     return colorProperty(m_hintTextColor, "gray");
 }
 
+bool QmlStyle::isIOS() const
+{
+#if defined(Q_OS_IOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool QmlStyle::isAndroid() const
+{
+#if defined(Q_OS_ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
+int QmlStyle::topScreenMargin() const
+{
+    if (isIOS()) {
+        const auto scr = QGuiApplication::primaryScreen();
+        return scr->availableGeometry().y();
+    } else {
+        return 0;
+    }
+}
+
+int QmlStyle::bottomScreenMargin() const
+{
+    if (isIOS()) {
+        const auto scr = QGuiApplication::primaryScreen();
+        return scr->geometry().bottom() - scr->availableGeometry().bottom();
+    } else {
+        return 0;
+    }
+}
+
+int QmlStyle::leftScreenMargin() const
+{
+    int lsm = 0;
+
+    if (isIOS()) {
+        const auto scr = QGuiApplication::primaryScreen();
+        lsm = (scr->orientation() == Qt::InvertedLandscapeOrientation)
+                ? 0 : scr->availableGeometry().x();
+    }
+    //qWarning() << "Left screen margin:" << lsm;
+    return lsm;
+}
+
+int QmlStyle::rightScreenMargin() const
+{
+    int rsm = 0;
+
+    if (isIOS()) {
+        const auto scr = QGuiApplication::primaryScreen();
+        rsm = (scr->orientation() == Qt::LandscapeOrientation)
+                ? 0 : (scr->geometry().right() - scr->availableGeometry().right());
+    }
+    //qWarning() << "Right screen margin:" << rsm;
+    return rsm;
+}
+
 void QmlStyle::setRootWindow(QObject *root)
 {
     Q_ASSERT(!m_root);
@@ -154,7 +239,7 @@ void QmlStyle::updateTheme()
     case Config::UITheme::Light:         materialTheme = 0; break;
     case Config::UITheme::Dark:          materialTheme = 1; break;
     default:
-    case Config::UITheme::SystemDefault: materialTheme = (darkThemeOS ? 1 : 0); break;
+    case Config::UITheme::SystemDefault: materialTheme = (darkThemeOS() ? 1 : 0); break;
     }
 
     if (m_theme.read().toInt() != materialTheme)

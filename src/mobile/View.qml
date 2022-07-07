@@ -32,6 +32,7 @@ Page {
 
     header: ToolBar {
         id: toolBar
+        topPadding: Style.topScreenMargin
 
         // The text color might be off after switching themes:
         // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756

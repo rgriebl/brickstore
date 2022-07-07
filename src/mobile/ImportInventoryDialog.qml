@@ -18,6 +18,7 @@ Page {
     property bool hasExtras: false
 
     header: ToolBar {
+        topPadding: Style.topScreenMargin
         RowLayout {
             anchors.fill: parent
             ToolButton {

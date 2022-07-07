@@ -22,12 +22,15 @@ Dialog {
     property int defaultLeftPadding: 0
     property int defaultRightPadding: 0
     property int defaultBottomPadding: 0
+    property int defaultFooterLeftPadding: 0
+    property int defaultFooterRightPadding: 0
     property Item defaultHeader: null
 
     property Item smallHeader: ToolBar {
         id: toolBar
         width: root.width
         visible: root.header === this
+        topPadding: Style.topScreenMargin
 
         // The text color might be off after switching themes:
         // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
@@ -35,6 +38,7 @@ Dialog {
         RowLayout {
             anchors.fill: parent
             ToolButton {
+                Layout.leftMargin: Style.leftScreenMargin + Style.rightScreenMargin
                 icon.name: "go-previous"
                 onClicked: root.close()
             }
@@ -60,6 +64,13 @@ Dialog {
             root.switchSmallStyle()
         }
     }
+
+    Connections {
+        target: Style
+        function onScreenMarginsChanged() {
+            root.switchSmallStyle()
+        }
+    }
     Component.onCompleted: {
         if (header && ('textFormat' in header))
             header.textFormat = Text.RichText
@@ -79,19 +90,37 @@ Dialog {
                 defaultTopPadding = topPadding
                 defaultLeftPadding = leftPadding
                 defaultRightPadding = rightPadding
-                defaultBottomPadding = bottomPadding
+                if (footer) {
+                    defaultFooterLeftPadding = footer.leftPadding
+                    defaultFooterRightPadding = footer.rightPadding
+                    defaultBottomPadding = footer.bottomPadding
+                } else {
+                    defaultBottomPadding = bottomPadding
+                }
             }
             header = smallHeader
             if (keepPaddingInSmallMode) {
                 topPadding = defaultTopPadding / 2
-                leftPadding = defaultLeftPadding / 2
-                rightPadding = defaultRightPadding / 2
-                bottomPadding = defaultBottomPadding / 2
+                leftPadding = defaultLeftPadding / 2 + Style.leftScreenMargin
+                rightPadding = defaultRightPadding / 2 + Style.rightScreenMargin
+                if (footer) {
+                    footer.leftPadding = Style.leftScreenMargin
+                    footer.rightPadding = Style.rightScreenMargin
+                    footer.bottomPadding = Style.bottomScreenMargin
+                } else {
+                    bottomPadding = defaultBottomPadding / 2
+                }
             } else {
                 topPadding = 0
-                leftPadding = 0
-                rightPadding = 0
-                bottomPadding = 0
+                leftPadding = Style.leftScreenMargin
+                rightPadding = Style.rightScreenMargin
+                if (footer) {
+                    footer.leftPadding = Style.leftScreenMargin
+                    footer.rightPadding = Style.rightScreenMargin
+                    footer.bottomPadding = Style.bottomScreenMargin
+                } else {
+                    bottomPadding = Style.bottomScreenMargin
+                }
             }
         } else {
             if (defaultHeader) {
@@ -99,7 +128,14 @@ Dialog {
                 topPadding = defaultTopPadding
                 leftPadding = defaultLeftPadding
                 rightPadding = defaultRightPadding
-                bottomPadding = defaultBottomPadding
+
+                if (footer) {
+                    footer.leftPadding = defaultFooterLeftPadding
+                    footer.rightPadding = defaultFooterRightPadding
+                    footer.bottomPadding = defaultBottomPadding
+                } else {
+                    bottomPadding = defaultBottomPadding
+                }
             }
         }
     }

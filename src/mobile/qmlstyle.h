@@ -42,6 +42,14 @@ class QmlStyle : public QObject
     Q_PROPERTY(QColor accentTextColor             READ accentTextColor             NOTIFY styleColorChanged FINAL)
     Q_PROPERTY(QColor accentColor                 READ accentColor                 NOTIFY styleColorChanged FINAL)
 
+    Q_PROPERTY(bool isIOS READ isIOS CONSTANT)
+    Q_PROPERTY(bool isAndroid READ isAndroid CONSTANT)
+
+    Q_PROPERTY(int topScreenMargin READ topScreenMargin NOTIFY screenMarginsChanged FINAL)
+    Q_PROPERTY(int bottomScreenMargin READ bottomScreenMargin NOTIFY screenMarginsChanged FINAL)
+    Q_PROPERTY(int leftScreenMargin READ leftScreenMargin NOTIFY screenMarginsChanged FINAL)
+    Q_PROPERTY(int rightScreenMargin READ rightScreenMargin NOTIFY screenMarginsChanged FINAL)
+
     Q_PROPERTY(QObject *rootWindow WRITE setRootWindow)
 
 public:
@@ -60,12 +68,20 @@ public:
     QColor primaryHighlightedTextColor() const;
     QColor hintTextColor() const;
 
+    bool isIOS() const;
+    bool isAndroid() const;
+    int topScreenMargin() const;
+    int bottomScreenMargin() const;
+    int leftScreenMargin() const;
+    int rightScreenMargin() const;
+
     void setRootWindow(QObject *root);
 
 signals:
     void smallSizeChanged(bool newSmallSize);
     void darkThemeChanged(bool newDarkTheme);
     void styleColorChanged();
+    void screenMarginsChanged();
 
 private slots:
     void updateTheme();

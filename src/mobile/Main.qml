@@ -12,6 +12,9 @@ ApplicationWindow {
     width: 800
     height: 600
 
+    // ios: colored statusbar background
+    flags: Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint
+
     Binding { // used to apply the dark/light theme for the complete app (Style is a singleton)
         target: Style
         property: "rootWindow"
@@ -37,10 +40,27 @@ ApplicationWindow {
         source: "DeveloperConsole.qml"
     }
 
+    Popup {
+        // iOS: black bar over the notch in portrait mode
+        modal: false
+        enabled: false
+        closePolicy: Popup.NoAutoClose
+        z: 1000
+        background: Rectangle { color: "black" }
+        visible: Style.leftScreenMargin || Style.rightScreenMargin
+        width: Style.leftScreenMargin ? Style.leftScreenMargin : Style.rightScreenMargin
+        y: 0
+        x: Style.leftScreenMargin ? 0 : parent.width - width
+        height: parent.height
+    }
+
     SwipeView {
         id: homeAndView
         interactive: false
         anchors.fill: parent
+        anchors.bottomMargin: Style.bottomScreenMargin
+        anchors.leftMargin: Style.leftScreenMargin
+        anchors.rightMargin: Style.rightScreenMargin
 
         StackView {
             id: homeStack
@@ -49,12 +69,15 @@ ApplicationWindow {
                 header: ToolBar {
                     id: toolBar
 
+                    topPadding: Style.topScreenMargin
+
                     // The text color might be off after switching themes:
                     // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
 
                     RowLayout {
                         anchors.fill: parent
                         ToolButton {
+                            Layout.leftMargin: (Style.leftScreenMargin + Style.rightScreenMargin) / 2
                             icon.name: "application-menu"
                             onClicked: applicationMenu.open()
 
