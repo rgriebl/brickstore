@@ -408,6 +408,11 @@ void QmlDocument::cancelBlockingOperation()
     m_doc->cancelBlockingOperation();
 }
 
+void QmlDocument::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate)
+{
+    m_doc->setPriceToGuide(time, price, forceUpdate);
+}
+
 
 void QmlDocument::setDocument(Document *doc)
 {

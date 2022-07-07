@@ -264,78 +264,76 @@ Page {
 
         Pane {
             padding: 0
-            ColumnLayout {
-                enabled: !root.currentItem.isNull
+
+            ScrollableLayout {
+                id: finalImportLayout
                 anchors.fill: parent
-                RowLayout {
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: 0
-                    QImageItem {
-                        implicitHeight: lfm.height * 5
-                        implicitWidth: height * 4 / 3
 
-                        property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
-                        image: pic ? pic.image : BL.BrickLink.noImage(width, height)
-                    }
-                    Label {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        text: "<b>" + root.currentItem.id + "</b> " + root.currentItem.name
-                              + " <i>(" + root.currentItem.itemType.name + ")</i>"
-                        textFormat: Text.StyledText
-                        wrapMode: Text.Wrap
-                        verticalAlignment: Text.AlignVCenter
+                ColumnLayout {
+                    enabled: !root.currentItem.isNull
+                    width: finalImportLayout.width
 
-                        FontMetrics { id: lfm }
-                    }
-                }
-                GridLayout {
-                    id: importDetailsGrid
-                    columns: 2
-                    columnSpacing: 16
-                    Layout.rightMargin: 16
-                    ItemDelegate { text: qsTr("Quantity") }
-                    SpinBox { id: quantity; editable: true; from: 1; to: 1000; value: 1 }
+                    RowLayout {
+                        Layout.topMargin: 8
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 0
+                        QImageItem {
+                            implicitHeight: lfm.height * 5
+                            implicitWidth: height * 4 / 3
 
-                    component CheckButton : Button {
-                        flat: true
-                        checkable: true
-                        autoExclusive: true
-                        icon.color: "transparent"
-                        leftPadding: 16
-                        rightPadding: 16
-                    }
+                            property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
+                            image: pic ? pic.image : BL.BrickLink.noImage(width, height)
+                        }
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            text: "<b>" + root.currentItem.id + "</b> " + root.currentItem.name
+                                  + " <i>(" + root.currentItem.itemType.name + ")</i>"
+                            textFormat: Text.StyledText
+                            wrapMode: Text.Wrap
+                            verticalAlignment: Text.AlignVCenter
 
-                    ItemDelegate { text: qsTr("Condition") }
-                    Flow {
-                        Layout.fillWidth: true
-                        spacing: importDetailsGrid.columnSpacing
-                        CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
-                        CheckButton { text: qsTr("Used") }
+                            FontMetrics { id: lfm }
+                        }
                     }
-                    ItemDelegate {
-                        text: qsTr("Extra parts")
-                        visible: root.hasExtras
-                    }
-                    Flow {
-                        Layout.fillWidth: true
-                        spacing: importDetailsGrid.columnSpacing
-                        visible: root.hasExtras
-                        CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
-                        CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
-                        CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }
-                    }
+                    GridLayout {
+                        id: importDetailsGrid
+                        columns: 2
+                        columnSpacing: 16
+                        Layout.rightMargin: 16
+                        ItemDelegate { text: qsTr("Quantity") }
+                        SpinBox { id: quantity; editable: true; from: 1; to: 1000; value: 1 }
 
-                    ItemDelegate { text: qsTr("Include") }
-                    Switch { text: qsTr("Instructions"); enabled: root.hasInstructions; id: includeInstructions }
-                    ItemDelegate { }
-                    Switch { text: qsTr("Alternates"); enabled: root.hasAlternates; id: includeAlternates }
-                    ItemDelegate { }
-                    Switch { text: qsTr("Counterparts"); enabled: root.hasCounterParts; id: includeCounterParts }
+                        ItemDelegate { text: qsTr("Condition") }
+                        Flow {
+                            Layout.fillWidth: true
+                            spacing: importDetailsGrid.columnSpacing
+                            CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
+                            CheckButton { text: qsTr("Used") }
+                        }
+                        ItemDelegate {
+                            text: qsTr("Extra parts")
+                            visible: root.hasExtras
+                        }
+                        Flow {
+                            Layout.fillWidth: true
+                            spacing: importDetailsGrid.columnSpacing
+                            visible: root.hasExtras
+                            CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
+                            CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
+                            CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }
+                        }
 
-                    Item { Layout.fillHeight: true }
+                        ItemDelegate { text: qsTr("Include") }
+                        Switch { text: qsTr("Instructions"); enabled: root.hasInstructions; id: includeInstructions }
+                        ItemDelegate { }
+                        Switch { text: qsTr("Alternates"); enabled: root.hasAlternates; id: includeAlternates }
+                        ItemDelegate { }
+                        Switch { text: qsTr("Counterparts"); enabled: root.hasCounterParts; id: includeCounterParts }
+
+                        Item { Layout.fillHeight: true }
+                    }
                 }
             }
         }

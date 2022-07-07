@@ -107,6 +107,8 @@ public:
 
     Q_INVOKABLE void cancelBlockingOperation();
 
+    Q_INVOKABLE void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate);
+
 signals:
     void forceLayout();
 

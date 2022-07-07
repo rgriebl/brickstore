@@ -102,11 +102,11 @@ void Application::init()
     extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
     extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
 
-
-    qInfo() << "Device pixel ratio :" << qApp->devicePixelRatio()
+    qInfo() << "UI:";
+    qInfo() << "  Device pixel ratio :" << qApp->devicePixelRatio()
             << QGuiApplication::highDpiScaleFactorRoundingPolicy();
     const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();
-    qInfo() << "Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
+    qInfo() << "  Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
 
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 

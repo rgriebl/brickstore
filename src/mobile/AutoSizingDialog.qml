@@ -61,7 +61,8 @@ Dialog {
         }
     }
     Component.onCompleted: {
-        header.textFormat = Text.RichText
+        if (header && ('textFormat' in header))
+            header.textFormat = Text.RichText
         switchSmallStyle()
         contentItem.focus = true
         contentItem.Keys.released.connect(function(e) {

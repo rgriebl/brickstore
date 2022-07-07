@@ -32,6 +32,7 @@ AutoSizingDialog {
         open()
     }
 
+    padding: 0
     spacing: 16
 
     SwipeView {

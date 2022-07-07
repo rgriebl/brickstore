@@ -111,6 +111,7 @@ ApplicationWindow {
 
                 Flickable {
                     anchors.fill: parent
+                    clip: true
 
                     ScrollIndicator.vertical: ScrollIndicator { active: true }
                     contentHeight: flickGrid.implicitHeight
