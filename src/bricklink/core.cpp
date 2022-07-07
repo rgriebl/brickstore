@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QSaveFile>
 #include <QFileInfo>
@@ -213,8 +214,10 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
         break;
     }
     }
-    if (url.isValid())
-        QDesktopServices::openUrl(url);
+    if (url.isValid()) {
+        // decouple from the UI, necessary on iOS
+        QMetaObject::invokeMethod(qApp, [=]() { QDesktopServices::openUrl(url); }, Qt::QueuedConnection);
+    }
 }
 
 
