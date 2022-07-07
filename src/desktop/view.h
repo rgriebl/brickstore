@@ -129,7 +129,7 @@ private:
 
     QObject *            m_actionConnectionContext = nullptr;
 
-    std::vector<std::pair<const char *, std::function<void() > > > m_actionTable;
+    std::vector<std::pair<const char *, std::function<void()>>> m_actionTable;
 };
 
 Q_DECLARE_METATYPE(View::Consolidate)

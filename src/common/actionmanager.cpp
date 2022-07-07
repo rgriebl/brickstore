@@ -595,9 +595,8 @@ void ActionManager::setupQAction(Action &aa)
     a->setObjectName(QLatin1String(aa.name()));
     a->setProperty("bsAction", true);
 
-    QIcon icon = QIcon::fromTheme(aa.iconName());
-    if (!icon.isNull())
-        a->setIcon(icon);
+    if (QIcon::hasThemeIcon(aa.iconName()))
+        a->setIcon(QIcon::fromTheme(aa.iconName()));
     if (aa.needs())
         a->setProperty("bsFlags", int(aa.needs()));
     const auto text = aa.text();
@@ -640,33 +639,31 @@ void ActionManager::setupQAction(Action &aa)
 QQuickAction *ActionManager::quickAction(const QString &name)
 {
 #if defined(BS_MOBILE)
-    if (auto aa = const_cast<Action *>(action(name.toLatin1().constData()))) {
-        if (aa->m_qaction) {
-            QAction *a = aa->qAction();
-            auto qa = new QQuickAction(a);
-            qa->setObjectName(a->objectName());
-            qa->setText(a->text());
-            qa->setCheckable(a->isCheckable());
-            qa->setEnabled(a->isEnabled());
-            if (!aa->iconName().isEmpty()) {
-                QQuickIcon qi = qa->icon();
-                qi.setName(aa->iconName());
-                qi.setColor(Qt::transparent);
-                qa->setIcon(qi);
-            }
+    if (auto a = const_cast<Action *>(action(name.toLatin1().constData()))) {
+        if (QAction *qAction = a->qAction()) {
+            auto quickAction = new QQuickAction(qAction);
+            quickAction->setObjectName(qAction->objectName());
+            quickAction->setText(qAction->text());
+            quickAction->setCheckable(qAction->isCheckable());
+            quickAction->setEnabled(qAction->isEnabled());
 
-            connect(qa, &QQuickAction::triggered, a, &QAction::trigger);
-            connect(qa, &QQuickAction::enabledChanged, a, &QAction::setEnabled);
-            connect(a, &QAction::enabledChanged, qa, &QQuickAction::setEnabled);
-            connect(qa, &QQuickAction::checkableChanged, a, &QAction::setCheckable);
-            connect(a, &QAction::checkableChanged, qa, &QQuickAction::setCheckable);
-            connect(qa, &QQuickAction::checkedChanged, a, &QAction::setChecked);
-            connect(a, &QAction::toggled, qa, &QQuickAction::setChecked);
-            connect(a, &QAction::changed, qa, [a, qa]() { qa->setText(a->text()); });
+            QQuickIcon qi = quickAction->icon();
+            qi.setName(qAction->icon().isNull() ? u"dummy"_qs : a->iconName());
+            qi.setColor(Qt::transparent);
+            quickAction->setIcon(qi);
 
-            aa->m_qquickaction = qa;
+            connect(quickAction, &QQuickAction::triggered, qAction, &QAction::trigger);
+            connect(quickAction, &QQuickAction::enabledChanged, qAction, &QAction::setEnabled);
+            connect(qAction, &QAction::enabledChanged, quickAction, &QQuickAction::setEnabled);
+            connect(quickAction, &QQuickAction::checkableChanged, qAction, &QAction::setCheckable);
+            connect(qAction, &QAction::checkableChanged, quickAction, &QQuickAction::setCheckable);
+            connect(quickAction, &QQuickAction::checkedChanged, qAction, &QAction::setChecked);
+            connect(qAction, &QAction::toggled, quickAction, &QQuickAction::setChecked);
+            connect(qAction, &QAction::changed, quickAction, [qAction, quickAction]() { quickAction->setText(qAction->text()); });
+
+            a->m_qquickaction = quickAction;
         }
-        return qobject_cast<QQuickAction *>(aa->m_qquickaction);
+        return qobject_cast<QQuickAction *>(a->m_qquickaction);
     }
 #else
     Q_UNUSED(name)

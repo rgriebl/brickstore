@@ -45,6 +45,8 @@ void MobileApplication::init()
 
     MobileUIHelpers::create(m_engine);
 
+    setIconTheme(LightTheme);
+
     ActionManager::inst()->createAll([this](const ActionManager::Action *aa) {
         if (aa->isUndo())
             return Application::inst()->undoGroup()->createUndoAction(this);
@@ -53,8 +55,6 @@ void MobileApplication::init()
         else
             return new QAction(this);
     });
-
-    setIconTheme(LightTheme);
 
     m_engine->load(QUrl(u"Mobile/Main.qml"_qs));
 
