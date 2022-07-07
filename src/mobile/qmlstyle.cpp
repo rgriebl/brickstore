@@ -22,18 +22,43 @@
 
 #if defined(Q_OS_ANDROID)
 #  include <jni.h>
+#  include <QJniObject>
+
+// WindowManager.LayoutParams
+#  define FLAG_TRANSLUCENT_STATUS 0x04000000
+#  define FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS 0x80000000
+// View
+#  define SYSTEM_UI_FLAG_LIGHT_STATUS_BAR 0x00002000
 
 static bool darkThemeOS_value;
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_changeUiTheme(JNIEnv *, jobject, jboolean jisDark)
 {
-    *darkThemeOS_value = jisDark;
+    darkThemeOS_value = jisDark;
 }
 
 static bool darkThemeOS()
 {
     return darkThemeOS_value;
+}
+
+static void setStatusBarColor(const QColor &color)
+{
+    if (QNativeInterface::QAndroidApplication::sdkVersion() < 23)
+        return;
+    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        window.callMethod<void>("addFlags", "(I)V", FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.callMethod<void>("clearFlags", "(I)V", FLAG_TRANSLUCENT_STATUS);
+        QJniObject view = window.callObjectMethod("getDecorView", "()Landroid/view/View;");
+        int visibility = view.callMethod<int>("getSystemUiVisibility", "()I");
+        visibility &= ~SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        view.callMethod<void>("setSystemUiVisibility", "(I)V", visibility);
+
+        window.callMethod<void>("setStatusBarColor", "(I)V", color.rgba());
+    });
 }
 
 #else
@@ -45,6 +70,11 @@ static bool darkThemeOS()
     if (const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme())
         return (theme->appearance() == QPlatformTheme::Appearance::Dark);
     return false;
+}
+
+static void setStatusBarColor(const QColor &color)
+{
+    Q_UNUSED(color);
 }
 
 #endif
@@ -241,6 +271,8 @@ void QmlStyle::updateTheme()
     default:
     case Config::UITheme::SystemDefault: materialTheme = (darkThemeOS() ? 1 : 0); break;
     }
+
+    setStatusBarColor(m_primaryColor.read().value<QColor>());
 
     if (m_theme.read().toInt() != materialTheme)
         m_theme.write(materialTheme);
