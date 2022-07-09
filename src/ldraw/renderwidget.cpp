@@ -32,12 +32,12 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
             this, &RenderWidget::animationActiveChanged);
     connect(m_controller, &RenderController::requestContextMenu,
             this, [this](const QPointF &pos) {
-        auto cme = new QContextMenuEvent(QContextMenuEvent::Mouse, pos.toPoint());
+        auto cme = new QContextMenuEvent(QContextMenuEvent::Mouse, pos.toPoint(), mapToGlobal(pos.toPoint()));
         QCoreApplication::postEvent(this, cme);
     });
     connect(m_controller, &RenderController::requestToolTip,
             this, [this](const QPointF &pos) {
-        auto he = new QHelpEvent(QHelpEvent::ToolTip, pos.toPoint(), QCursor::pos());
+        auto he = new QHelpEvent(QHelpEvent::ToolTip, pos.toPoint(), mapToGlobal(pos.toPoint()));
         QCoreApplication::postEvent(this, he);
     });
 

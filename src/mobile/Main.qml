@@ -297,12 +297,14 @@ ApplicationWindow {
         }
     }
 
-    SystemInfoDialog {
+    DialogLoader {
         id: systemInfoDialog
+        source: "SystemInfoDialog.qml"
     }
 
-    AnnouncementsDialog {
+    DialogLoader {
         id: announcementsDialog
+        source: "AnnouncementsDialog.qml"
     }
 
     Connections {

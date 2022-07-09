@@ -29,7 +29,7 @@ static QString sanitizeFileName(const QString &name)
         auto u = c.unicode();
 
         if ((u <= 31) || ((u < 128) && illegal.contains(char(u))))
-            c = QLatin1Char('_');
+            c = u'_';
 
         result.append(c);
     }
