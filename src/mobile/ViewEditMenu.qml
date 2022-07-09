@@ -50,7 +50,7 @@ AutoSizingMenu {
     ActionDelegate { actionName: "edit_status_exclude"; visible: enabled && root.is(BS.Document.Status) }
     ActionDelegate { actionName: "edit_status_extra"; visible: enabled && root.is(BS.Document.Status) }
     ActionDelegate { actionName: "edit_status_toggle"; visible: enabled && root.is(BS.Document.Status) }
-    ActionDelegate { actionName: "edit_item"; visible: enabled && root.is([ BS.Document.Picture, BS.Document.PartNo, BS.Document.Description ]) }
+//    ActionDelegate { actionName: "edit_item"; visible: enabled && root.is([ BS.Document.Picture, BS.Document.PartNo, BS.Document.Description ]) }
     ActionDelegate { actionName: "edit_cond_new"; visible: enabled && root.is(BS.Document.Condition) }
     ActionDelegate { actionName: "edit_cond_used"; visible: enabled && root.is(BS.Document.Condition) }
     MenuSeparator {
@@ -61,18 +61,18 @@ AutoSizingMenu {
     ActionDelegate { actionName: "edit_subcond_sealed"; visible: enabled && root.is(BS.Document.Condition) }
     ActionDelegate { actionName: "edit_subcond_complete"; visible: enabled && root.is(BS.Document.Condition) }
     ActionDelegate { actionName: "edit_subcond_incomplete"; visible: enabled && root.is(BS.Document.Condition) }
-    ActionDelegate { actionName: "edit_color"
-        visible: enabled && root.is(BS.Document.Color)
-    }
+//    ActionDelegate { actionName: "edit_color"
+//        visible: enabled && root.is(BS.Document.Color)
+//    }
     ActionDelegate { actionName: "edit_qty_set"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionDelegate { actionName: "edit_qty_multiply"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionDelegate { actionName: "edit_qty_divide"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionDelegate { actionName: "edit_price_set"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
-    ActionDelegate { actionName: "edit_price_inc_dec"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
+//    ActionDelegate { actionName: "edit_price_inc_dec"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionDelegate { actionName: "edit_price_round"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionDelegate { actionName: "edit_price_to_priceguide"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionDelegate { actionName: "edit_cost_set"; visible: enabled && root.is(BS.Document.Cost) }
-    ActionDelegate { actionName: "edit_cost_inc_dec"; visible: enabled && root.is(BS.Document.Cost) }
+//    ActionDelegate { actionName: "edit_cost_inc_dec"; visible: enabled && root.is(BS.Document.Cost) }
     ActionDelegate { actionName: "edit_cost_round"; visible: enabled && root.is(BS.Document.Cost) }
     ActionDelegate { actionName: "edit_cost_spread_price"; visible: enabled && root.is(BS.Document.Cost) }
     ActionDelegate { actionName: "edit_cost_spread_weight"; visible: enabled && root.is(BS.Document.Cost) }
@@ -96,23 +96,21 @@ AutoSizingMenu {
     ActionDelegate { actionName: "edit_reserved"; visible: enabled && root.is(BS.Document.Reserved) }
     ActionDelegate { actionName: "edit_marker_text"; visible: enabled && root.is(BS.Document.Marker) }
     ActionDelegate { actionName: "edit_marker_color"; visible: enabled && root.is(BS.Document.Marker) }
-    MenuSeparator { }
-    ActionDelegate { actionName: "edit_additems"
-        visible: enabled
-    }
-    ActionDelegate { actionName: "edit_subtractitems"
-        visible: enabled
-    }
-    ActionDelegate { actionName: "edit_mergeitems"
-        visible: enabled
-    }
-    ActionDelegate { actionName: "edit_partoutitems"
-        visible: enabled
-    }
-    MenuSeparator { }
-    ActionDelegate { actionName: "bricklink_catalog"; visible: enabled }
-    ActionDelegate { actionName: "bricklink_priceguide"; visible: enabled }
-    ActionDelegate { actionName: "bricklink_lotsforsale"; visible: enabled }
-    ActionDelegate { actionName: "bricklink_myinventory"; visible: enabled }
+    MenuSeparator { visible: (ed3.visible) }
+//    ActionDelegate { actionName: "edit_additems"
+//        visible: enabled
+//    }
+//    ActionDelegate { actionName: "edit_subtractitems"
+//        visible: enabled
+//    }
+    ActionDelegate { id: ed3; actionName: "edit_mergeitems"; visible: enabled }
+//    ActionDelegate { actionName: "edit_partoutitems"
+//        visible: enabled
+//    }
+    MenuSeparator { visible: (bl1.visible || bl2.visible || bl3.visible || bl4.visible) }
+    ActionDelegate { id: bl1; actionName: "bricklink_catalog"; visible: enabled }
+    ActionDelegate { id: bl2; actionName: "bricklink_priceguide"; visible: enabled }
+    ActionDelegate { id: bl3; actionName: "bricklink_lotsforsale"; visible: enabled }
+    ActionDelegate { id: bl4; actionName: "bricklink_myinventory"; visible: enabled }
 
 }
