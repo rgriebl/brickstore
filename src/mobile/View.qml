@@ -112,23 +112,42 @@ Page {
             syncView: table
             clip: true
             reuseItems: false
-            interactive: false
+            //interactive: false
 
             property bool sorted: root.document.sorted
             property var sortColumns: root.document.sortColumns
 
-            ViewHeaderMenu {
+            Loader {
                 id: headerMenu
-                document: root.document
+                function open(field : int) {
+                    if (!_menu)
+                        asynchronous = false
+                    if (_menu) {
+                        _menu.field = field
+                        _menu.open()
+                    }
+                }
+                Component.onCompleted: { setSource("ViewHeaderMenu.qml", { "document": root.document }) }
+                asynchronous: true
+                onLoaded: { _menu = item }
+                property ViewHeaderMenu _menu: null
             }
 
-            delegate: GridHeader {
-                document: root.document
-                onShowMenu: (logicalColumn, visualColumn) => {
-                                headerMenu.logicalColumn = logicalColumn
-                                headerMenu.visualColumn = visualColumn
-                                headerMenu.popup()
-                            }
+            delegate: GridHeader { document: root.document }
+
+            TapHandler {
+                function mapPoint(point) {
+                    point = header.mapFromItem(target, point)
+                    let cell = header.cellAtPos(point)
+                    let lx = cell.x < 0 ? -1 : root.document.logicalColumn(cell.x)
+                    return { row: cell.y, column: lx }
+                }
+
+                onTapped: function(eventPoint) {
+                    let m = mapPoint(eventPoint.position)
+                    if (m.column >= 0)
+                        headerMenu.open(m.column)
+                }
             }
         }
 
@@ -159,9 +178,21 @@ Page {
 
             selectionModel: root.document.selectionModel
 
-            ViewEditMenu {
+            Loader {
                 id: editMenu
-                document: root.document
+                function open(field : int) {
+                    if (!_menu)
+                        asynchronous = false
+                    if (_menu) {
+                        _menu.field = field
+                        _menu.open()
+                    }
+                }
+
+                property ViewEditMenu _menu: null
+                asynchronous: true
+                onLoaded: { _menu = item }
+                Component.onCompleted: { setSource("ViewEditMenu.qml", { "document": root.document }) }
             }
 
             TapHandler {
@@ -181,8 +212,7 @@ Page {
                 }
                 onLongPressed: function() {
                     let m = mapPoint(point.position)
-                    editMenu.field = m.column
-                    editMenu.open()
+                    editMenu.open(m.column)
                 }
             }
 

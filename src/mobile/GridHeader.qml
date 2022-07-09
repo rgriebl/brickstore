@@ -46,39 +46,34 @@ Control {
     implicitWidth: 20
     implicitHeight: fm.height * 2
 
-    Loader {
-        id: loaderText
+    Text {
         anchors.fill: parent
-        asynchronous: true
-        sourceComponent: Component {
-            Text {
-                id: headerText
-                text: root.display
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                color: enabled ? Style.textColor : Style.hintTextColor
-                fontSizeMode: Text.HorizontalFit
-                minimumPixelSize: font.pixelSize / 4
-                elide: Text.ElideMiddle
-                clip: true
-                padding: root.cellPadding
-                font.pixelSize: height / 2
-                font.bold: root.sortStatus === 1 || root.sortStatus === -1
 
-                Rectangle {
-                    id: rect
-                    z: -1
-                    anchors.fill: parent
-                    color: Style.backgroundColor
-                    property color gradientColor: Style.accentColor
-                    property real d: root.sortCount && root.sortStatus ? (root.sortStatus < 0 ? -1 : 1) / root.sortCount : 0
-                    property real e: (root.sortCount - Math.abs(root.sortStatus) + 1) * d
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: root.sortStatus <= 0 ? rect.color : rect.gradientColor }
-                        GradientStop { position: 0.5 + 0.4 * rect.e; color: rect.color }
-                        GradientStop { position: 1; color: root.sortStatus >= 0 ? rect.color : rect.gradientColor }
-                    }
-                }
+        id: headerText
+        text: root.display
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: enabled ? Style.textColor : Style.hintTextColor
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: font.pixelSize / 4
+        elide: Text.ElideMiddle
+        clip: true
+        padding: root.cellPadding
+        font.pixelSize: height / 2
+        font.bold: root.sortStatus === 1 || root.sortStatus === -1
+
+        Rectangle {
+            id: rect
+            z: -1
+            anchors.fill: parent
+            color: Style.backgroundColor
+            property color gradientColor: Style.accentColor
+            property real d: root.sortCount && root.sortStatus ? (root.sortStatus < 0 ? -1 : 1) / root.sortCount : 0
+            property real e: (root.sortCount - Math.abs(root.sortStatus) + 1) * d
+            gradient: Gradient {
+                GradientStop { position: 0; color: root.sortStatus <= 0 ? rect.color : rect.gradientColor }
+                GradientStop { position: 0.5 + 0.4 * rect.e; color: rect.color }
+                GradientStop { position: 1; color: root.sortStatus >= 0 ? rect.color : rect.gradientColor }
             }
         }
     }
@@ -100,11 +95,6 @@ Control {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: parent.showMenu(parent.logicalIndex, parent.visualIndex)
     }
 }
 

@@ -8,11 +8,10 @@ import BrickStore as BS
 
 AutoSizingMenu {
     id: root
-    property int logicalColumn
-    property int visualColumn
+    property int field
     required property BS.Document document
 
-    property string fieldName: document.headerData(visualColumn, Qt.Horizontal)
+    property string fieldName: document.headerData(document.visualColumn(field), Qt.Horizontal)
 
     modal: true
     cascade: false
@@ -20,17 +19,17 @@ AutoSizingMenu {
     anchors.centerIn: parent
 
     ActionDelegate { action: Action { text: qsTr("Sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.sort(root.logicalColumn, Qt.AscendingOrder)
+            onTriggered: root.document.sort(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.sort(root.logicalColumn, Qt.DescendingOrder)
+            onTriggered: root.document.sort(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Additionally sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.sortAdditionally(root.logicalColumn, Qt.AscendingOrder)
+            onTriggered: root.document.sortAdditionally(root.field, Qt.AscendingOrder)
         } }
     ActionDelegate { action: Action { text: qsTr("Additionally sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.sortAdditionally(root.logicalColumn, Qt.DescendingOrder)
+            onTriggered: root.document.sortAdditionally(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
     ActionDelegate { action: Action { text: qsTr("Configure Columns...") }
