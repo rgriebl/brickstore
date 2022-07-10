@@ -10,6 +10,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(ANDROID_PLATFORM 21) # supress warning by setting it early
+endif()
+
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
 
@@ -307,7 +311,7 @@ if (APPLE)
     endforeach()
 endif()
 
-if (LINUX AND NOT ANDROID)
+if (LINUX)
     find_package(TBB)
     if (TBB_FOUND)
         add_compile_definitions(
@@ -480,6 +484,15 @@ elseif (ANDROID)
                                            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.apk"
         COMMENT "Moving apk to final name and location..."
         DEPENDS apk
+    )
+
+    string(TOLOWER "${CMAKE_BUILD_TYPE}" lower_build_type)
+
+    add_custom_target(final-aab
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/android-build/build/outputs/bundle/${lower_build_type}/android-build-release.aab"
+                                           "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.aab"
+        COMMENT "Moving aab to final name and location..."
+        DEPENDS aab
     )
 
 elseif (LINUX)

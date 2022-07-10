@@ -38,6 +38,8 @@ android {
 
     buildToolsVersion androidBuildToolsVersion
 
+    ndkVersion androidNdkVersion
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
