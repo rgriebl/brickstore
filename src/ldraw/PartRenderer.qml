@@ -107,32 +107,39 @@ Item {
                 enabled: modelAnimation.enabled
             }
 
-            Model {
-                source: "#Sphere"
-                visible: RenderSettings.showBoundingSpheres
-                position: root.renderController.center
-                property real radius: root.renderController.radius * 2 / 100
-                scale: Qt.vector3d(radius, radius, radius)
-                materials: PrincipledMaterial {
-                    baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
-                    opacity: 0.3
-                }
-            }
-
-            Repeater3D {
-                model: root.renderController.surfaces
-
-                Model {
-                    required property RenderGeometry modelData
-
+            Loader3D {
+                asynchronous: true
+                active: RenderSettings.showBoundingSpheres
+                sourceComponent: Model {
                     source: "#Sphere"
-                    visible: RenderSettings.showBoundingSpheres
-                    position: modelData ? modelData.center : Qt.vector3d(0, 0, 0)
-                    property real radius: modelData ? (modelData.radius * 2 / 100) : 1
+                    position: root.renderController.center
+                    property real radius: root.renderController.radius * 2 / 100
                     scale: Qt.vector3d(radius, radius, radius)
                     materials: PrincipledMaterial {
                         baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
                         opacity: 0.3
+                    }
+                }
+            }
+
+            Loader3D {
+                asynchronous: true
+                active: RenderSettings.showBoundingSpheres
+                sourceComponent: Repeater3D {
+                    model: root.renderController.surfaces
+
+                    Model {
+                        required property RenderGeometry modelData
+
+                        source: "#Sphere"
+                        visible: RenderSettings.showBoundingSpheres
+                        position: modelData ? modelData.center : Qt.vector3d(0, 0, 0)
+                        property real radius: modelData ? (modelData.radius * 2 / 100) : 1
+                        scale: Qt.vector3d(radius, radius, radius)
+                        materials: PrincipledMaterial {
+                            baseColor: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
+                            opacity: 0.3
+                        }
                     }
                 }
             }
@@ -142,75 +149,83 @@ Item {
             //  but they are not re-uploaded when a new model references them again in the future.
             property var textureKeepAlive: ({})
 
-            Repeater3D {
-                model: root.renderController.surfaces
+            Loader3D {
+                asynchronous: true
+                Repeater3D {
+                    model: root.renderController.surfaces
 
-                Model {
-                    id: model
-                    required property RenderGeometry modelData
+                    Model {
+                        id: model
+                        required property RenderGeometry modelData
 
-                    geometry: modelData
-                    materials: PrincipledMaterial {
-                        id: material
-                        property color color       : model.modelData ? model.modelData.color : "pink"
-                        property real luminance    : model.modelData ? model.modelData.luminance : 0
-                        property bool isChrome     : model.modelData && model.modelData.isChrome
-                        property bool isMetallic   : model.modelData && model.modelData.isMetallic
-                        property bool isPearl      : model.modelData && model.modelData.isPearl
-                        property bool isTransparent: (color.a < 1)
-                        property var textureData   : model.modelData ? model.modelData.textureData : null
+                        geometry: modelData
+                        materials: PrincipledMaterial {
+                            id: material
+                            property color color       : model.modelData ? model.modelData.color : "pink"
+                            property real luminance    : model.modelData ? model.modelData.luminance : 0
+                            property bool isChrome     : model.modelData && model.modelData.isChrome
+                            property bool isMetallic   : model.modelData && model.modelData.isMetallic
+                            property bool isPearl      : model.modelData && model.modelData.isPearl
+                            property bool isTransparent: (color.a < 1)
+                            property var textureData   : model.modelData ? model.modelData.textureData : null
 
-                        onTextureDataChanged: {
-                            if (textureData) {
-                                if (rootNode.textureKeepAlive[textureData] === undefined) {
-                                    let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
-                                    obj.textureData = textureData
-                                    rootNode.textureKeepAlive[textureData] = true
-                                    console.log("Texture keep-alive for color " + color)
+                            onTextureDataChanged: {
+                                if (textureData) {
+                                    if (rootNode.textureKeepAlive[textureData] === undefined) {
+                                        let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
+                                        obj.textureData = textureData
+                                        rootNode.textureKeepAlive[textureData] = true
+                                        console.log("Texture keep-alive for color " + color)
+                                    }
                                 }
                             }
+
+                            property var texture: Texture { textureData: material.textureData }
+
+                            lighting: RenderSettings.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
+
+                            baseColorMap: textureData ? texture : null
+                            baseColor   : textureData ? "white" : color
+
+                            cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
+                            depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
+                            alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
+                            //blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
+
+                            emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
+
+                            metalness: isChrome ? RenderSettings.chromeMetalness
+                                                : isMetallic ? RenderSettings.metallicMetalness
+                                                             : isPearl ? RenderSettings.pearlMetalness
+                                                                       : RenderSettings.plainMetalness
+                            roughness: isChrome ? RenderSettings.chromeRoughness
+                                                : isMetallic ? RenderSettings.metallicRoughness
+                                                             : isPearl ? RenderSettings.pearlRoughness
+                                                                       : RenderSettings.plainRoughness
                         }
-
-                        property var texture: Texture { textureData: material.textureData }
-
-                        lighting: RenderSettings.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
-
-                        baseColorMap: textureData ? texture : null
-                        baseColor   : textureData ? "white" : color
-
-                        cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
-                        depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
-                        alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
-                        //blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
-
-                        emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
-
-                        metalness: isChrome ? RenderSettings.chromeMetalness
-                                            : isMetallic ? RenderSettings.metallicMetalness
-                                                         : isPearl ? RenderSettings.pearlMetalness
-                                                                   : RenderSettings.plainMetalness
-                        roughness: isChrome ? RenderSettings.chromeRoughness
-                                            : isMetallic ? RenderSettings.metallicRoughness
-                                                         : isPearl ? RenderSettings.pearlRoughness
-                                                                   : RenderSettings.plainRoughness
                     }
                 }
             }
-            Model {
-                id: lines
-                geometry: root.renderController.lineGeometry
-                instancing: root.renderController.lines
-                visible: RenderSettings.renderLines
-                depthBias: -10
 
-                materials: CustomMaterial {
-                    property real customLineWidth: RenderSettings.lineThickness * rootNode.scale.x / 50
-                    property size resolution: Qt.size(view.width, view.height)
+            Loader3D {
+                asynchronous: true
+                active: RenderSettings.renderLines
+                sourceComponent: Model {
+                    id: lines
+                    geometry: root.renderController.lineGeometry
+                    instancing: root.renderController.lines
+                    visible: RenderSettings.renderLines
+                    depthBias: -10
 
-                    cullMode: Material.BackFaceCulling
-                    shadingMode: CustomMaterial.Unshaded
-                    vertexShader: "./shaders/custom-line.vert"
-                    fragmentShader: "./shaders/custom-line.frag"
+                    materials: CustomMaterial {
+                        property real customLineWidth: RenderSettings.lineThickness * rootNode.scale.x / 50
+                        property size resolution: Qt.size(view.width, view.height)
+
+                        cullMode: Material.BackFaceCulling
+                        shadingMode: CustomMaterial.Unshaded
+                        vertexShader: "./shaders/custom-line.vert"
+                        fragmentShader: "./shaders/custom-line.frag"
+                    }
                 }
             }
         }
