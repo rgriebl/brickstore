@@ -19,7 +19,7 @@ AutoSizingMenu {
         ToolButton { action: BS.ActionManager.quickAction("edit_cut")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
-            onClicked: root.dismiss()
+            onClicked: { root.dismiss(); document.selectionModel.clear() }
         }
         ToolButton { action: BS.ActionManager.quickAction("edit_copy")
             display: AbstractButton.IconOnly
@@ -34,7 +34,7 @@ AutoSizingMenu {
         ToolButton { action: BS.ActionManager.quickAction("edit_delete")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
-            onClicked: root.dismiss()
+            onClicked: { root.dismiss(); document.selectionModel.clear() }
         }
         ToolSeparator { }
         ToolButton { action: BS.ActionManager.quickAction("edit_select_all")

@@ -413,12 +413,6 @@ View::View(Document *document, QWidget *parent)
     connect(m_document, &Document::resizeColumnsToContents,
             m_table, &QTableView::resizeColumnsToContents);
 
-    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
-    // items. The docs are a bit undecided if you should really do that, but it really helps
-    // performance wise. Just the selection is not updated, when the items in it are deleted.
-    connect(m_model, &DocumentModel::layoutChanged,
-            m_document, &Document::updateSelection);
-
     auto *dd = new DocumentDelegate(m_table);
     m_table->setItemDelegate(dd);
     m_table->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(m_table));

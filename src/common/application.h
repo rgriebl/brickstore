@@ -24,6 +24,7 @@ QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QTranslator)
 QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
 QT_FORWARD_DECLARE_CLASS(QGuiApplication)
+QT_FORWARD_DECLARE_CLASS(QMimeData)
 
 
 class Announcements;
@@ -72,6 +73,10 @@ public:
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);
 
+    void mimeClipboardClear();
+    const QMimeData *mimeClipboardGet() const;
+    void mimeClipboardSet(QMimeData *data);
+
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });
@@ -115,6 +120,8 @@ protected:
     QPointer<Announcements> m_announcements;
 
     UndoGroup *m_undoGroup;
+
+    std::unique_ptr<QMimeData> m_clipboardMimeData;
 
     QQmlApplicationEngine *m_engine = nullptr;
     QGuiApplication *m_app = nullptr;

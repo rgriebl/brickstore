@@ -271,13 +271,11 @@ class QmlClipboard : public QObject
     QML_SINGLETON
 
 public:
-    Q_ENUMS(QClipboard::Mode)
-
     QmlClipboard() = default;
 
-    Q_INVOKABLE void clear(QClipboard::Mode mode = QClipboard::Clipboard);
-    Q_INVOKABLE QString text(QClipboard::Mode mode = QClipboard::Clipboard) const;
-    Q_INVOKABLE void setText(const QString &text, QClipboard::Mode mode = QClipboard::Clipboard);
+    Q_INVOKABLE void clear();
+    Q_INVOKABLE QString text() const;
+    Q_INVOKABLE void setText(const QString &text);
 };
 
 class QmlUtility : public QObject

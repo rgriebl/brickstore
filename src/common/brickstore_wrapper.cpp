@@ -860,19 +860,19 @@ int QmlSortFilterProxyModel::roleKey(const QByteArray &role) const
 ///////////////////////////////////////////////////////////////////////
 
 
-void QmlClipboard::clear(QClipboard::Mode mode)
+void QmlClipboard::clear()
 {
-    QGuiApplication::clipboard()->clear(mode);
+    QGuiApplication::clipboard()->clear(QClipboard::Clipboard);
 }
 
-QString QmlClipboard::text(QClipboard::Mode mode) const
+QString QmlClipboard::text() const
 {
-    return QGuiApplication::clipboard()->text(mode);
+    return QGuiApplication::clipboard()->text(QClipboard::Clipboard);
 }
 
-void QmlClipboard::setText(const QString &text, QClipboard::Mode mode)
+void QmlClipboard::setText(const QString &text)
 {
-    QGuiApplication::clipboard()->setText(text, mode);
+    QGuiApplication::clipboard()->setText(text, QClipboard::Clipboard);
 }
 
 

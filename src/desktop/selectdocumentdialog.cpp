@@ -28,6 +28,7 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 
+#include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentlist.h"
@@ -51,7 +52,7 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
     layout->addWidget(m_document, 1, 0, 1, 2);
     layout->addWidget(m_documentList, 2, 1, 1, 1);
 
-    m_lotsFromClipboard = DocumentLotsMimeData::lots(QApplication::clipboard()->mimeData());
+    m_lotsFromClipboard = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
 
     const auto docs = DocumentList::inst()->documents();
     for (const Document *doc : docs) {

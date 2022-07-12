@@ -31,6 +31,7 @@
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "bricklink/store.h"
+#include "common/application.h"
 #include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/utility.h"
@@ -247,6 +248,11 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
             this, &Document::autosave);
     m_autosaveTimer.start(1min);
 
+    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
+    // items. The docs are a bit undecided if you should really do that, but it really helps
+    // performance wise. Just the selection is not updated, when the items in it are deleted.
+    connect(m_model, &DocumentModel::layoutChanged,
+            this, &Document::updateSelection);
 
     try {
         auto [columnData, sortColumns] = parseColumnsState(columnsState);
@@ -273,7 +279,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "edit_copy", [this]() { copy(); } },
         { "edit_duplicate", [this]() { duplicate(); } },
         { "edit_paste", [this]() -> QCoro::Task<> {
-              LotList lots = DocumentLotsMimeData::lots(QGuiApplication::clipboard()->mimeData());
+              LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
 
               if (!lots.empty()) {
                   if (!selectedLots().isEmpty()) {
@@ -287,7 +293,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_paste_silent", [this]() {
-              LotList lots = DocumentLotsMimeData::lots(QGuiApplication::clipboard()->mimeData());
+              LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
               if (!lots.empty())
                   addLots(std::move(lots), AddLotMode::AddAsNew);
           } },
@@ -799,7 +805,7 @@ void Document::resetDifferenceMode()
 void Document::cut()
 {
     if (!m_selectedLots.isEmpty()) {
-        QGuiApplication::clipboard()->setMimeData(new DocumentLotsMimeData(m_selectedLots));
+        Application::inst()->mimeClipboardSet(new DocumentLotsMimeData(m_selectedLots));
         m_model->removeLots(m_selectedLots);
     }
 }
@@ -807,7 +813,7 @@ void Document::cut()
 void Document::copy()
 {
     if (!m_selectedLots.isEmpty())
-        QGuiApplication::clipboard()->setMimeData(new DocumentLotsMimeData(m_selectedLots));
+        Application::inst()->mimeClipboardSet(new DocumentLotsMimeData(m_selectedLots));
 }
 
 void Document::duplicate()

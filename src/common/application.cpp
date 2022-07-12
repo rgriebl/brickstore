@@ -347,6 +347,37 @@ QCoro::Task<> Application::setupLDraw()
     return loadLibrary(ldrawDir);
 }
 
+void Application::mimeClipboardClear()
+{
+    QGuiApplication::clipboard()->clear();
+#if defined(BS_MOBILE)
+    m_clipboardMimeData.reset();
+#endif
+}
+
+const QMimeData *Application::mimeClipboardGet() const
+{
+#if defined(BS_MOBILE)
+    return m_clipboardMimeData.get();
+#else
+    return QGuiApplication::clipboard()->mimeData();
+#endif
+}
+
+void Application::mimeClipboardSet(QMimeData *data)
+{
+#if defined(BS_MOBILE)
+    mimeClipboardClear();
+    if (!data)
+        return;
+    if (data->hasText())
+        QGuiApplication::clipboard()->setText(data->text());
+    m_clipboardMimeData.reset(data);
+#else
+    QGuiApplication::clipboard()->setMimeData(data);
+#endif
+}
+
 QCoro::Task<bool> Application::closeAllViews()
 {
     const auto docs = DocumentList::inst()->documents();
