@@ -30,6 +30,16 @@ if (BS_DESKTOP)
     )
 endif()
 
+# This doesn't work on CI runs, because the converter (balsam) needs a working QPA
+# We need to convert and include the ktx-es manually (see RESOURCES below)
+#qt6_add_lightprobe_images(ldraw_module "lightprobe"
+#    PREFIX
+#        "/LDraw"
+#    FILES
+#        "textures/lightbox.hdr"
+#)
+
+
 qt_add_qml_module(ldraw_module
     URI LDraw
     VERSION 1.0
@@ -45,7 +55,7 @@ qt_add_qml_module(ldraw_module
 	PartRenderer.qml
 
     RESOURCES
-        lightbox.hdr
+        textures/lightbox.ktx
         shaders/custom-line.vert
         shaders/custom-line.frag
 )

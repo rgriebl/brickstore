@@ -64,7 +64,7 @@ Item {
             backgroundMode: SceneEnvironment.Color
             antialiasingMode: SceneEnvironment.SSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
-            lightProbe: Texture { source: "./lightbox.hdr" }
+            lightProbe: Texture { source: "./textures/lightbox.ktx" }
             probeExposure: 0.9
             aoStrength: RenderSettings.aoStrength * 100
             aoDistance: RenderSettings.aoDistance * 100
