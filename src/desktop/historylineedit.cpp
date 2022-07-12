@@ -77,7 +77,7 @@ void HistoryView::paintEvent(QPaintEvent *e)
     if (model()->rowCount() == 0) {
         QPainter p(viewport());
         p.drawText(viewport()->contentsRect(), Qt::AlignCenter,
-                   tr("No favorite filters. Read the tooltip."));
+                   HistoryLineEdit::tr("No favorite filters. Read the tooltip."));
     }
 }
 

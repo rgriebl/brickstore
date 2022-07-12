@@ -32,7 +32,7 @@ AutoSizingMenu {
             onTriggered: root.document.sortAdditionally(root.field, Qt.DescendingOrder)
         } }
     MenuSeparator { }
-    ActionDelegate { action: Action { text: qsTr("Configure Columns...") }
+    ActionDelegate { action: Action { text: qsTr("Configure columns...") }
         AutoSizingDialog {
             id: columnDialog
             title: qsTr("Configure Columns")

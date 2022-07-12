@@ -62,7 +62,7 @@ void MobileApplication::init()
             co_return;
         emit lc.document->requestActivation();
 
-        QString s = tr("Would you like to consolidate %n lot(s)?", nullptr, lc.total);
+        QString s = tr("Would you like to consolidate %L1 lots?").arg(lc.total);
 
         lc.accepted = (co_await UIHelpers::question(s) == UIHelpers::Yes);
         lc.consolidateToIndex = lc.preselectedIndex;
