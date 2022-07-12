@@ -253,6 +253,7 @@ Item {
 
         TapHandler {
             acceptedButtons: Qt.RightButton
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onSingleTapped: (eventPoint, button) => {
                                 root.renderController.requestContextMenu(eventPoint.scenePosition)
                             }
@@ -260,6 +261,7 @@ Item {
 
         TapHandler {
             acceptedButtons: Qt.LeftButton
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onDoubleTapped: root.animateScaleToFit()
         }
 

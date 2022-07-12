@@ -136,6 +136,7 @@ Page {
             delegate: GridHeader { document: root.document }
 
             TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
                 function mapPoint(point) {
                     point = header.mapFromItem(target, point)
                     let cell = header.cellAtPos(point)
@@ -196,6 +197,7 @@ Page {
             }
 
             TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
                 function mapPoint(point) {
                     point = table.mapFromItem(target, point)
                     let cell = table.cellAtPos(point)
