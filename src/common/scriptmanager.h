@@ -23,23 +23,16 @@ QT_FORWARD_DECLARE_CLASS(QQmlContext)
 QT_FORWARD_DECLARE_CLASS(QQmlComponent)
 
 class Script;
-class QmlBrickLink;
-class QmlBrickStore;
 
 
 class ScriptManager : public QObject
 {
     Q_OBJECT
 
-private:
-    ScriptManager();
-    static ScriptManager *s_inst;
-
 public:
     ~ScriptManager() override;
+    static ScriptManager *create(QQmlEngine *engine);
     static ScriptManager *inst();
-
-    void initialize(QQmlEngine *engine);
 
     bool reload();
 
@@ -52,6 +45,9 @@ signals:
     void reloaded();
 
 private:
+    ScriptManager(QQmlEngine *engine);
+    static ScriptManager *s_inst;
+
     void clearScripts();
     void loadScript(const QString &fileName);
 

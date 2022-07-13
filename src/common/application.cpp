@@ -919,6 +919,9 @@ void Application::setupQml()
 
     m_engine->setBaseUrl(QUrl(u"qrc:/"_qs));
     m_engine->addImportPath(u"qrc:/"_qs);
+
+    // we need to call this early for the QmlDocumentList to be in sync
+    QmlBrickStore::create(m_engine, m_engine);
 }
 
 void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)

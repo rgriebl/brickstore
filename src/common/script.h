@@ -15,22 +15,21 @@
 
 #include <QtQml/QQmlParserStatus>
 #include <QtQml/QQmlInfo>
+#include <QtQml/qqmlregistration.h>
 #include <QtQuick/QQuickItem>
 #include <QAction> // moved from QtWidgets to QtGui in Qt 6
 
 QT_FORWARD_DECLARE_CLASS(QQmlContext)
 QT_FORWARD_DECLARE_CLASS(QQmlComponent)
 
-class QmlPrintJob;
-class QmlBrickStore;
-
-class View;
+class Document;
 class Script;
 
 
 class ExtensionScriptAction : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(Location location READ location WRITE setLocation NOTIFY locationChanged)
@@ -74,6 +73,7 @@ private:
 class PrintingScriptAction : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(QJSValue printFunction READ printFunction WRITE setPrintFunction NOTIFY printFunctionChanged)
@@ -85,7 +85,7 @@ public:
     QJSValue printFunction() const;
     void setPrintFunction(const QJSValue &function);
 
-    void executePrint(QPaintDevice *pd, View *win, bool selectionOnly, const QList<uint> &pages, uint *maxPageCount = nullptr);
+    void executePrint(QPaintDevice *pd, Document *doc, bool selectionOnly, const QList<uint> &pages, uint *maxPageCount = nullptr);
 
 signals:
     void textChanged(const QString &text);
@@ -104,6 +104,7 @@ private:
 class Script : public QQuickItem
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
@@ -155,7 +156,3 @@ private:
 
     friend class ScriptManager;
 };
-
-Q_DECLARE_METATYPE(ExtensionScriptAction *)
-Q_DECLARE_METATYPE(PrintingScriptAction *)
-Q_DECLARE_METATYPE(Script *)

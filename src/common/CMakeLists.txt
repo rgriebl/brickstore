@@ -29,6 +29,12 @@ qt_add_library(common_module STATIC
 
     brickstore_wrapper.cpp
     brickstore_wrapper.h
+    printjob.cpp
+    printjob.h
+    script.cpp
+    script.h
+    scriptmanager.cpp
+    scriptmanager.h
 
     currency.cpp
     currency.h
@@ -56,6 +62,7 @@ target_link_libraries(common_module PRIVATE
 if (BS_DESKTOP)
     target_link_libraries(common_module PRIVATE
         Qt6::Widgets
+        Qt6::PrintSupport
     )
 endif()
 
@@ -71,6 +78,8 @@ qt_add_qml_module(common_module
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickStore
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN
+    IMPORTS
+        BrickLink
     DEPENDENCIES
         QtQuick
         QtQuick.Controls

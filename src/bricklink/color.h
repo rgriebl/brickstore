@@ -79,7 +79,7 @@ public:
     Color() = default;
     Color(std::nullptr_t) : Color() { } // for scripting only!
 
-    const QImage image(int w, int h) const;
+    const QImage sampleImage(int w, int h) const;
 
 private:
     QString m_name;

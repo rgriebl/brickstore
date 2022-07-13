@@ -42,7 +42,7 @@ QString Color::typeName(TypeFlag t)
     return colortypes.value(t);
 }
 
-const QImage Color::image(int w, int h) const
+const QImage Color::sampleImage(int w, int h) const
 {
     if (w <= 0 || h <= 0)
         return QImage();

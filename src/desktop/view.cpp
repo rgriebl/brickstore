@@ -60,6 +60,8 @@
 #include "common/documentio.h"
 #include "common/uihelpers.h"
 #include "common/currency.h"
+#include "common/script.h"
+#include "common/scriptmanager.h"
 #include "utility/exception.h"
 #include "common/undo.h"
 #include "changecurrencydialog.h"
@@ -68,8 +70,6 @@
 #include "flowlayout.h"
 #include "mainwindow.h"
 #include "headerview.h"
-#include "script.h"
-#include "scriptmanager.h"
 #include "view.h"
 #include "view_p.h"
 
@@ -769,7 +769,7 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
             Q_UNUSED(scaleFactor)
             Q_UNUSED(maxWidth)
             previewPrt->setFullPage(true);
-            printingAction->executePrint(previewPrt, this,
+            printingAction->executePrint(previewPrt, document(),
                                          previewPrt->printRange() == QPrinter::Selection,
                                          pages, maxPageCount);
         } catch (const Exception &e) {

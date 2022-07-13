@@ -540,7 +540,8 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(QmlDebug *debug READ debug CONSTANT FINAL)
 
 public:
-    QmlBrickStore();
+    static QmlBrickStore *inst();
+    static QmlBrickStore *create(QQmlEngine *, QJSEngine *);
 
     QmlDocumentList *documents() const;
     Config *config() const;
@@ -560,16 +561,15 @@ public:
     Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
     Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
 
-    Q_INVOKABLE QmlDocument *importBrickLinkStore(BrickLink::Store *store);
-    Q_INVOKABLE QmlDocument *importBrickLinkOrder(BrickLink::Order *order);
-    Q_INVOKABLE QmlDocument *importBrickLinkCart(BrickLink::Cart *cart);
+    Q_INVOKABLE void importBrickLinkStore(BrickLink::Store *store);
+    Q_INVOKABLE void importBrickLinkOrder(BrickLink::Order *order);
+    Q_INVOKABLE void importBrickLinkCart(BrickLink::Cart *cart);
 
-    Q_INVOKABLE QmlDocument *importPartInventory(BrickLink::QmlItem item,
-                                                 BrickLink::QmlColor color, int multiply,
-                                                 BrickLink::Condition condition,
-                                                 BrickLink::Status extraParts,
-                                                 bool includeInstructions, bool includeAlternates,
-                                                 bool includeCounterParts);
+    Q_INVOKABLE void importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                         int multiply, BrickLink::Condition condition,
+                                         BrickLink::Status extraParts,
+                                         bool includeInstructions, bool includeAlternates,
+                                         bool includeCounterParts);
 
     Q_INVOKABLE void updateDatabase();
 
@@ -583,6 +583,8 @@ signals:
     void activeDocumentChanged(QmlDocument *doc);
 
 private:
+    QmlBrickStore();
+    static QmlBrickStore *s_inst;
     QmlDocumentList *m_docList;
     ColumnLayoutsModel *m_columnLayouts;
     mutable QmlDebug *m_debug = nullptr;

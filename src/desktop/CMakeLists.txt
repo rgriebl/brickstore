@@ -71,8 +71,6 @@ qt_add_library(desktop_module STATIC
     printdialog.cpp
     printdialog.h
     printdialog.ui
-    printjob.cpp
-    printjob.h
     progresscircle.cpp
     progresscircle.h
     progressdialog.cpp
@@ -80,10 +78,6 @@ qt_add_library(desktop_module STATIC
     rendersettingsdialog.cpp
     rendersettingsdialog.h
     rendersettingsdialog.ui
-    script.cpp
-    script.h
-    scriptmanager.cpp
-    scriptmanager.h
     selectcolor.cpp
     selectcolor.h
     selectcolordialog.cpp

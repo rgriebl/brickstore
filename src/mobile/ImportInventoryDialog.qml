@@ -50,13 +50,12 @@ Page {
                         let extra = extraInclude.checked ? BL.BrickLink.Status.Include
                                                          : extraExclude.checked ? BL.BrickLink.Status.Exclude
                                                                                 : BL.BrickLink.Status.Extra
-                        if (BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
-                                                              quantity.value, condition, extra,
-                                                              root.hasInstructions && includeInstructions.checked,
-                                                              root.hasAlternates && includeAlternates.checked,
-                                                              root.hasCounterParts && includeCounterParts.checked)) {
-                            goBackFunction()
-                        }
+                        BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
+                                                          quantity.value, condition, extra,
+                                                          root.hasInstructions && includeInstructions.checked,
+                                                          root.hasAlternates && includeAlternates.checked,
+                                                          root.hasCounterParts && includeCounterParts.checked)
+                        goBackFunction()
                     } else if (visible) {
                         pages.currentIndex = pages.currentIndex + 1
                     }

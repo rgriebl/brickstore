@@ -15,12 +15,12 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 
-#include "common/brickstore_wrapper.h"
 #include "utility/exception.h"
 #include "utility/utility.h"
+#include "brickstore_wrapper.h"
 #include "printjob.h"
 #include "script.h"
-#include "view.h"
+#include "document.h"
 
 
 static QString formatJSError(const QJSValue &error)
@@ -206,7 +206,7 @@ void PrintingScriptAction::componentComplete()
     }
 }
 
-void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selectionOnly,
+void PrintingScriptAction::executePrint(QPaintDevice *pd, Document *doc, bool selectionOnly,
                                         const QList<uint> &pages, uint *maxPageCount)
 {
     if (maxPageCount)
@@ -217,15 +217,15 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, View *view, bool selec
     if (!m_printFunction.isCallable())
         throw Exception(tr("The printing script does not define a 'printFunction'."));
 
-    const auto lots = view->model()->sortLotList(selectionOnly ? view->selectedLots()
-                                                               : view->model()->lots());
+    const auto lots = doc->model()->sortLotList(selectionOnly ? doc->selectedLots()
+                                                              : doc->model()->lots());
     QVariantList itemList;
     for (auto lot : lots)
         itemList << QVariant::fromValue(BrickLink::QmlLot(lot));
 
     QQmlEngine *engine = qmlEngine(m_script);
     QJSValueList args = { engine->toScriptValue(job.get()),
-                          engine->toScriptValue(view->document()),
+                          engine->toScriptValue(QmlBrickStore::inst()->documents()->map(doc)),
                           engine->toScriptValue(itemList) };
     QJSValue result = m_printFunction.call(args);
 

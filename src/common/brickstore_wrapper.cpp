@@ -78,6 +78,7 @@
     no documents are open, but also if the quickstart page is active.
 */
 
+QmlBrickStore *QmlBrickStore::s_inst = nullptr;
 
 QmlBrickStore::QmlBrickStore()
     : QObject()
@@ -96,6 +97,20 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
             this, &QmlBrickStore::defaultCurrencyCodeChanged);
+}
+
+QmlBrickStore *QmlBrickStore::inst()
+{
+    return s_inst;
+}
+
+QmlBrickStore *QmlBrickStore::create(QQmlEngine *, QJSEngine *)
+{
+    if (!s_inst) {
+        s_inst = new QmlBrickStore();
+        QJSEngine::setObjectOwnership(s_inst, QJSEngine::CppOwnership);
+    }
+    return s_inst;
 }
 
 QmlDocumentList *QmlBrickStore::documents() const
@@ -226,31 +241,30 @@ QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
     return DocumentIO::nameFiltersForLDraw(includeAll);
 }
 
-QmlDocument *QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
+void QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
 {
-    return new QmlDocument(DocumentIO::importBrickLinkStore(store));
+    DocumentIO::importBrickLinkStore(store);
 }
 
-QmlDocument *QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
+void QmlBrickStore::importBrickLinkOrder(BrickLink::Order *order)
 {
-    return new QmlDocument(DocumentIO::importBrickLinkOrder(order));
+    DocumentIO::importBrickLinkOrder(order);
 }
 
-QmlDocument *QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
+void QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
 {
-    return new QmlDocument(DocumentIO::importBrickLinkCart(cart));
+    DocumentIO::importBrickLinkCart(cart);
 }
 
-QmlDocument *QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                             int multiply, BrickLink::Condition condition,
-                                             BrickLink::Status extraParts,
-                                             bool includeInstructions, bool includeAlternates,
-                                             bool includeCounterParts)
+void QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                        int multiply, BrickLink::Condition condition,
+                                        BrickLink::Status extraParts,
+                                        bool includeInstructions, bool includeAlternates,
+                                        bool includeCounterParts)
 {
-    return new QmlDocument(Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(),
-                                                       multiply, condition, extraParts,
-                                                       includeInstructions, includeAlternates,
-                                                       includeCounterParts));
+    Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(),
+                                multiply, condition, extraParts,
+                                includeInstructions, includeAlternates, includeCounterParts);
 }
 
 /*! \qmlmethod void BrickStore::updateDatabase()
@@ -1101,7 +1115,9 @@ QmlDocumentList::QmlDocumentList(QObject *parent)
             this, &QmlDocumentList::countChanged);
     connect(dl, &DocumentList::documentCreated,
             this, [this](Document *doc) {
-        auto qmlDoc = new QmlDocument(doc);
+        auto qmlDoc = m_docMapping.value(doc);
+        if (!qmlDoc)
+            qmlDoc = new QmlDocument(doc);
         m_docMapping.insert(doc, qmlDoc);
     });
     connect(dl, &DocumentList::documentAdded,

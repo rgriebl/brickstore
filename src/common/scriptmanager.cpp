@@ -51,7 +51,8 @@ public:
 };
 
 
-ScriptManager::ScriptManager()
+ScriptManager::ScriptManager(QQmlEngine *engine)
+    : m_engine(engine)
 { }
 
 ScriptManager::~ScriptManager()
@@ -64,21 +65,15 @@ ScriptManager *ScriptManager::s_inst = nullptr;
 
 ScriptManager *ScriptManager::inst()
 {
-    if (!s_inst)
-        s_inst = new ScriptManager();
     return s_inst;
 }
 
-void ScriptManager::initialize(QQmlEngine *engine)
+ScriptManager *ScriptManager::create(QQmlEngine *engine)
 {
-    m_engine = engine;
-
-    QmlPrintJob::registerTypes();
-    qmlRegisterType<Script>("BrickStore", 1, 0, "Script");
-    qmlRegisterType<ExtensionScriptAction>("BrickStore", 1, 0, "ExtensionScriptAction");
-    qmlRegisterType<PrintingScriptAction>("BrickStore", 1, 0, "PrintingScriptAction");
-
-    reload();
+    Q_ASSERT(!s_inst);
+    s_inst = new ScriptManager(engine);
+    s_inst->reload();
+    return s_inst;
 }
 
 bool ScriptManager::reload()

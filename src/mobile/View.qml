@@ -311,7 +311,7 @@ Page {
                                 bottom: colorCell.bottom
                             }
                             width: colorCell.font.pixelSize * 2
-                            image: BL.BrickLink.color(colorCell.display).image(width, height)
+                            image: BL.BrickLink.color(colorCell.display).sampleImage(width, height)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display

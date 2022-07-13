@@ -51,11 +51,11 @@
 
 #include "bricklink/core.h"
 #include "common/config.h"
+#include "common/scriptmanager.h"
 #include "desktop/brickstoreproxystyle.h"
 #include "desktop/desktopuihelpers.h"
 #include "desktop/developerconsole.h"
 #include "desktop/mainwindow.h"
-#include "desktop/scriptmanager.h"
 #include "desktop/smartvalidator.h"
 #include "utility/utility.h"
 
@@ -148,7 +148,7 @@ void DesktopApplication::init()
     // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();
 
-    ScriptManager::inst()->initialize(m_engine);
+    ScriptManager::create(m_engine);
 
     MainWindow::inst()->show();
 

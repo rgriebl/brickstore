@@ -18,6 +18,7 @@
 #include <QColor>
 #include <QVariant>
 #include <QSizeF>
+#include <QtQml/qqmlregistration.h>
 
 QT_FORWARD_DECLARE_CLASS(QPaintDevice)
 QT_FORWARD_DECLARE_CLASS(QPainter)
@@ -28,6 +29,8 @@ class QmlPrintJob;
 class QmlPrintPage : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(PrintPage)
+    QML_UNCREATABLE("")
     Q_PROPERTY(int number READ pageNumber CONSTANT)
     Q_PROPERTY(QFont font READ font WRITE setFont)
     Q_PROPERTY(QColor color READ color WRITE setColor)
@@ -126,9 +129,19 @@ private:
 };
 
 
+struct QmlPage
+{
+    Q_GADGET
+    QML_FOREIGN(QmlPrintPage)
+    QML_NAMED_ELEMENT(Page)
+};
+
+
 class QmlPrintJob : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(PrintJob)
+    QML_UNCREATABLE("")
     Q_PROPERTY(int pageCount READ pageCount NOTIFY pageCountChanged)
     Q_PROPERTY(QSizeF paperSize READ paperSize CONSTANT)
 
@@ -145,8 +158,6 @@ signals:
     void pageCountChanged(int pages);
 
 public:
-    static void registerTypes();
-
     QmlPrintJob(QPaintDevice *pd);
     ~QmlPrintJob() override;
 
@@ -160,8 +171,3 @@ private:
     QPaintDevice *m_pd;
     bool m_aborted = false;
 };
-
-Q_DECLARE_METATYPE(QmlPrintPage *)
-Q_DECLARE_METATYPE(QmlPrintPage::Alignment)
-Q_DECLARE_METATYPE(QmlPrintPage::LineStyle)
-Q_DECLARE_METATYPE(QmlPrintJob *)

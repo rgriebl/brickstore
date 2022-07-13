@@ -188,10 +188,13 @@ class QmlColor : public QmlWrapperBase<const Color>
     Q_PRIVATE_PROPERTY(wrapped, float particleVFraction READ particleVFraction CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QColor particleColor READ particleColor CONSTANT)
 
+    Q_PROPERTY(QImage image READ image CONSTANT) // for print-scripts backwards compatibility
+
 public:
     QmlColor(const Color *col = nullptr);
 
-    Q_INVOKABLE QImage image(int width, int height) const;
+    QImage image() const;
+    Q_INVOKABLE QImage sampleImage(int width, int height) const;
 
     friend class QmlBrickLink;
     friend class QmlLot;
@@ -484,10 +487,3 @@ private:
 };
 
 } // namespace BrickLink
-
-Q_DECLARE_METATYPE(BrickLink::QmlColor)
-Q_DECLARE_METATYPE(BrickLink::QmlItemType)
-Q_DECLARE_METATYPE(BrickLink::QmlCategory)
-Q_DECLARE_METATYPE(BrickLink::QmlItem)
-Q_DECLARE_METATYPE(BrickLink::QmlLot)
-Q_DECLARE_METATYPE(BrickLink::QmlBrickLink *)

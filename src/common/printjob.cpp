@@ -13,7 +13,11 @@
 */
 #include <QPaintDevice>
 #include <QPainter>
-#include <QPrinter>
+#if defined(BS_DESKTOP)
+#  include <QPrinter>
+#else
+#  include <QPdfWriter>
+#endif
 #include <QPaintEngine>
 #include <QDebug>
 #include <QStringBuilder>
@@ -466,22 +470,6 @@ void QmlPrintPage::drawImage(double left, double top, double width, double heigh
           normally from your extension's PrintingScriptAction::printFunction() function.
 */
 
-void QmlPrintJob::registerTypes()
-{
-    QString cannotCreate = tr("Cannot create objects of type %1");
-
-    qmlRegisterUncreatableType<QmlPrintJob>("BrickStore", 1, 0, "PrintJob",
-                                            cannotCreate.arg(u"PrintJob"_qs));
-    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "PrintPage",
-                                             cannotCreate.arg(u"PrintPage"_qs));
-    qRegisterMetaType<QmlPrintPage::Alignment>("PrintPage::Alignment");
-    qRegisterMetaType<QmlPrintPage::LineStyle>("PrintPage::LineStyle");
-
-    // deprecated as of 2022.1.1 ... use PrintPage instead
-    qmlRegisterUncreatableType<QmlPrintPage>("BrickStore", 1, 0, "Page",
-                                             cannotCreate.arg(u"Page"_qs));
-}
-
 QmlPrintJob::QmlPrintJob(QPaintDevice *pd)
     : QObject(nullptr)
     , m_pd(pd)
@@ -555,14 +543,18 @@ bool QmlPrintJob::print(const QList<uint> &pages)
     if (!p.begin(m_pd))
         return false;
 
+#if defined(BS_DESKTOP)
     QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : nullptr;
 
-#if defined(Q_OS_WIN) // workaround for QTBUG-5363
+#  if defined(Q_OS_WIN) // workaround for QTBUG-5363
     if (prt && prt->fullPage() && !prt->printerName().isEmpty()
             && (p.paintEngine()->type() != QPaintEngine::Picture)) { // printing to a real printer
         auto margins = prt->pageLayout().marginsPixels(prt->resolution());
         p.translate(-margins.left(), -margins.top());
     }
+#  endif
+#else
+    QPdfWriter *prt = static_cast<QPdfWriter *>(m_pd);
 #endif
 
     double scaling [2];

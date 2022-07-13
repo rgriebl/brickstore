@@ -96,7 +96,7 @@ namespace BrickLink {
     \e Wanted and \e{For Sale} columns in the \l{https://www.bricklink.com/catalogColors.asp}
     {BrickLink Color Guide table}.
 */
-/*! \qmlmethod image Color::image(int width, int height)
+/*! \qmlmethod image Color::sampleImage(int width, int height)
     \readonly
     Returns an image of this color, sized \a width x \a height.
 */
@@ -105,9 +105,14 @@ QmlColor::QmlColor(const Color *col)
     : QmlWrapperBase(col)
 { }
 
-QImage QmlColor::image(int width, int height) const
+QImage QmlColor::image() const
 {
-    return wrapped->image(width, height);
+    return wrapped->sampleImage(20, 20);
+}
+
+QImage QmlColor::sampleImage(int width, int height) const
+{
+    return wrapped->sampleImage(width, height);
 }
 
 
