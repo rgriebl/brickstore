@@ -70,19 +70,19 @@ AutoSizingDialog {
                     id: label
                     property color c
                     property string t
-                    text: t
+                    text: t + " [" + c.toString().toUpperCase() + "]"
                     leftPadding: height * 1.5
                     Rectangle { width: parent.height; height: parent.height; color: label.c }
                 }
 
-                ColorLabel { t: "textColor                  "; c: Style.textColor }
-                ColorLabel { t: "backgroundColor            "; c: Style.backgroundColor }
-                ColorLabel { t: "accentColor                "; c: Style.accentColor }
-                ColorLabel { t: "accentTextColor            "; c: Style.accentTextColor }
-                ColorLabel { t: "primaryColor               "; c: Style.primaryColor }
-                ColorLabel { t: "primaryTextColor           "; c: Style.primaryTextColor }
+                ColorLabel { t: "textColor"; c: Style.textColor }
+                ColorLabel { t: "backgroundColor"; c: Style.backgroundColor }
+                ColorLabel { t: "accentColor"; c: Style.accentColor }
+                ColorLabel { t: "accentTextColor"; c: Style.accentTextColor }
+                ColorLabel { t: "primaryColor"; c: Style.primaryColor }
+                ColorLabel { t: "primaryTextColor"; c: Style.primaryTextColor }
                 ColorLabel { t: "primaryHighlightedTextColor"; c: Style.primaryHighlightedTextColor }
-                ColorLabel { t: "hintTextColor              "; c: Style.hintTextColor }
+                ColorLabel { t: "hintTextColor"; c: Style.hintTextColor }
             }
         }
         ScrollableLayout {
