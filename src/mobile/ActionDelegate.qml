@@ -2,7 +2,7 @@ import Mobile
 import BrickStore
 
 
-MenuItem {
+ItemDelegate {
     id: control
 
     property string actionName
@@ -11,6 +11,8 @@ MenuItem {
     action: ActionManager.quickAction(actionName)
     Layout.fillWidth: true
     icon.color: "transparent"
+
+    Tracer { }
 
     height: visible ? implicitHeight : 0
 

@@ -18,21 +18,26 @@ AutoSizingMenu {
     parent: Overlay.overlay
     anchors.centerIn: parent
 
-    ActionDelegate { action: Action { text: qsTr("Sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.sort(root.field, Qt.AscendingOrder)
-        } }
-    ActionDelegate { action: Action { text: qsTr("Sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.sort(root.field, Qt.DescendingOrder)
-        } }
+    ActionDelegate {
+        text: qsTr("Sort ascending by %1").arg(root.fieldName)
+        onClicked: root.document.sort(root.field, Qt.AscendingOrder)
+    }
+    ActionDelegate {
+        text: qsTr("Sort descending by %1").arg(root.fieldName)
+        onClicked: root.document.sort(root.field, Qt.DescendingOrder)
+    }
     MenuSeparator { }
-    ActionDelegate { action: Action { text: qsTr("Additionally sort ascending by %1").arg(root.fieldName)
-            onTriggered: root.document.sortAdditionally(root.field, Qt.AscendingOrder)
-        } }
-    ActionDelegate { action: Action { text: qsTr("Additionally sort descending by %1").arg(root.fieldName)
-            onTriggered: root.document.sortAdditionally(root.field, Qt.DescendingOrder)
-        } }
+    ActionDelegate {
+        text: qsTr("Additionally sort ascending by %1").arg(root.fieldName)
+        onClicked: root.document.sortAdditionally(root.field, Qt.AscendingOrder)
+    }
+    ActionDelegate {
+        text: qsTr("Additionally sort descending by %1").arg(root.fieldName)
+        onClicked: root.document.sortAdditionally(root.field, Qt.DescendingOrder)
+    }
     MenuSeparator { }
-    ActionDelegate { action: Action { text: qsTr("Configure columns...") }
+    ActionDelegate {
+        text: qsTr("Configure columns...")
         AutoSizingDialog {
             id: columnDialog
             title: qsTr("Configure Columns")
@@ -89,16 +94,16 @@ AutoSizingMenu {
                 }
             }
         }
-        onTriggered: {
+        onClicked: {
             columnDialog.open()
         }
     }
     ActionDelegate { actionName: "view_column_layout_manage" }
     ActionDelegate { actionName: "view_column_layout_save"
-        onTriggered: root.document.saveCurrentColumnLayout()
+        onClicked: root.document.saveCurrentColumnLayout()
     }
     ActionDelegate { actionName: "view_column_layout_load"
-        onTriggered: loadLayoutMenu.open()
+        onClicked: loadLayoutMenu.open()
         AutoSizingMenu {
             id: loadLayoutMenu
             modal: true
@@ -121,7 +126,7 @@ AutoSizingMenu {
                             required property string id
                             required property string name
                             text: name
-                            onTriggered: Qt.callLater(root.document.setColumnLayoutFromId, id)
+                            onClicked: Qt.callLater(root.document.setColumnLayoutFromId, id)
                         }
                     }
                 }
