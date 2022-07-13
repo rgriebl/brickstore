@@ -22,6 +22,8 @@ AutoSizingDialog {
         none = (selected === 0)
 
         if (single) {
+            infoText.text = ''
+
             let lot = document.selectedLots[0]
             info.lot = lot
 
@@ -35,6 +37,9 @@ AutoSizingDialog {
         } else {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
+
+            let stat = document.selectionStatistics()
+            infoText.text = stat.asHtmlTable()
 
             info.lot = BL.BrickLink.noLot
 
@@ -88,9 +93,21 @@ AutoSizingDialog {
         currentIndex: tabBar.currentIndex
         clip: true
 
-        InfoWidget {
-            id: info
-            document: root.document
+        StackLayout {
+            clip: true
+            currentIndex: root.single ? 1 : 0
+
+            Label {
+                id: infoText
+                textFormat: Text.RichText
+                wrapMode: Text.Wrap
+                leftPadding: 8
+            }
+
+            InfoWidget {
+                id: info
+                document: root.document
+            }
         }
 
         ScrollableLayout {
