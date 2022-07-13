@@ -295,6 +295,7 @@ Page {
                         background: QImageItem {
                             fillColor: "white"
                             image: picCell.display
+                            fallbackImage: BL.BrickLink.noImage(width, height)
                         }
                     }
                 }

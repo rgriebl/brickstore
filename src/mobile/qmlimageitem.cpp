@@ -24,13 +24,25 @@ QmlImageItem::QmlImageItem(QQuickItem *parent)
 
 QImage QmlImageItem::image() const
 {
-   return m_image;
+    return m_image;
+}
+
+QImage QmlImageItem::fallbackImage() const
+{
+    return m_fallbackImage;
 }
 
 void QmlImageItem::setImage(const QImage &image)
 {
     m_image = image;
     update();
+}
+
+void QmlImageItem::setFallbackImage(const QImage &image)
+{
+    m_fallbackImage = image;
+    if (image.isNull())
+        update();
 }
 
 void QmlImageItem::clear()
@@ -40,12 +52,16 @@ void QmlImageItem::clear()
 
 void QmlImageItem::paint(QPainter *painter)
 {
-    if (m_image.isNull())
+    QImage image = m_image;
+
+    if (image.isNull())
+        image = m_fallbackImage;
+    if (image.isNull())
         return;
 
     QRect br = boundingRect().toRect();
     QSize itemSize = br.size();
-    QSize imageSize = m_image.size();
+    QSize imageSize = image.size();
 
     imageSize.scale(itemSize, Qt::KeepAspectRatio);
 
@@ -53,7 +69,7 @@ void QmlImageItem::paint(QPainter *painter)
     br.translate((itemSize.width() - imageSize.width()) / 2,
                  (itemSize.height() - imageSize.height()) / 2);
 
-    painter->drawImage(br, m_image);
+    painter->drawImage(br, image);
 }
 
 #include "moc_qmlimageitem.cpp"
