@@ -114,6 +114,7 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
     int cfgver = value(u"General/ConfigVersion"_qs, 0).toInt();
     setValue(u"General/ConfigVersion"_qs, mkver(vmajor, vminor, vpatch));
 
+#if defined(BS_DESKTOP)
     auto copyOldConfig = [this](const char *org, const char *app) -> bool {
         static const std::vector<const char *> ignore = {
             "MainWindow/",
@@ -152,9 +153,12 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
         if (copyOldConfig(organization_v12x, application_v12x))
             setValue(u"General/ImportedV12xSettings"_qs, 1);
     }
+#endif
 
     // do config upgrades as needed
-    Q_UNUSED(cfgver) // remove if upgrades are needed
+    if (!cfgver)
+        return;
+
     if (cfgver < mkver(2021, 10, 1)) {
         // update IconSize to IconSizeEnum
         int oldSize = value(u"Interface/IconSize"_qs, 0).toInt();

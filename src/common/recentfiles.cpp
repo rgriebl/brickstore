@@ -23,6 +23,13 @@ RecentFiles *RecentFiles::s_inst = nullptr;
 RecentFiles::RecentFiles(QObject *parent)
     : QAbstractListModel(parent)
 {
+    connect(this, &QAbstractListModel::rowsInserted, this, [this]() {
+        emit countChanged(count());
+    });
+    connect(this, &QAbstractListModel::rowsRemoved, this, [this]() {
+        emit countChanged(count());
+    });
+
     const auto saved = Config::inst()->recentFiles();
     for (const auto &file : saved)
         m_fileInfos << QFileInfo(file);

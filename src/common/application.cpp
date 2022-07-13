@@ -247,6 +247,12 @@ void Application::afterInit()
         m_undoGroup->addStack(document->model()->undoStack());
     });
 
+    try {
+        BrickLink::core()->database()->read();
+    } catch (const Exception &) {
+        // this is not a critical error, but expected on the first run, so just ignore it
+    }
+
     if (!BrickLink::core()->database()->isValid() || BrickLink::core()->database()->isUpdateNeeded()) {
         if (!QCoro::waitFor(updateDatabase())) {
             QCoro::waitFor(UIHelpers::warning(tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files.")));
@@ -871,11 +877,7 @@ bool Application::initBrickLink()
         BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
                                             Config::inst()->brickLinkPassword() });
     });
-    try {
-        BrickLink::core()->database()->read();
-    } catch (const Exception &) {
-        // this is not a critical error, but expected on the first run, so just ignore it
-    }
+
     connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
             this, [](BrickLink::Cart *cart, bool success, const QString &message) {
         Q_ASSERT(cart);

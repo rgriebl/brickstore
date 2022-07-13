@@ -66,6 +66,7 @@ qt_add_qml_module(mobile_module
         ImportWantedListDialog.qml
         InfoWidget.qml
         Main.qml
+        MainWindow.qml
         PriceGuideWidget.qml
         ScrollableLayout.qml
         SelectionInfoDialog.qml
