@@ -1030,7 +1030,7 @@
     <message>
         <location filename="../src/mobile/AppearsInWidget.qml" line="32"/>
         <source>No matches found</source>
-        <translation type="unfinished"></translation>
+        <translation>No se encontraron coincidencias</translation>
     </message>
 </context>
 <context>
@@ -1095,17 +1095,17 @@
     <message>
         <location filename="../src/common/application.cpp" line="322"/>
         <source>Started downloading an LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Empezada descarga de una actualizacón de la librería LDraw</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="327"/>
         <source>Finished downloading an LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Finalizada descarga de una actualizacón de la librería LDraw</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="329"/>
         <source>Failed to download a LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Fallo al descargar una actualizacón de la librería LDraw</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="453"/>
@@ -3050,7 +3050,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/mobile/ImportCartDialog.qml" line="120"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportCartDialog.qml" line="153"/>
@@ -3166,12 +3166,12 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/mobile/ImportInventoryDialog.qml" line="10"/>
         <source>Part out</source>
-        <translation type="unfinished"></translation>
+        <translation>Despiezar</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportInventoryDialog.qml" line="43"/>
         <source>Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Siguiente</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportInventoryDialog.qml" line="152"/>
@@ -3422,7 +3422,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="148"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="182"/>
@@ -3504,12 +3504,12 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/mobile/ImportWantedListDialog.qml" line="90"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportWantedListDialog.qml" line="97"/>
         <source>%1 items left, %2% filled</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artículos restantes, %2% rellenados</translation>
     </message>
 </context>
 <context>
@@ -3545,7 +3545,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/mobile/InfoWidget.qml" line="77"/>
         <source>No image available</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagen no disponible</translation>
     </message>
     <message>
         <location filename="../src/mobile/InfoWidget.qml" line="97"/>
@@ -3600,7 +3600,11 @@ Hold right button: Move
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Manten botón izquierdo: Rotar
+Manten botón derecho: Mover
+Rueda del ratón: Zoom
+Doble click: Restablecer cámara
+Click derecho: Menu</translation>
     </message>
 </context>
 <context>
@@ -3753,7 +3757,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/mobile/mobileapplication.cpp" line="65"/>
         <source>Would you like to consolidate %L1 lots?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Quiere consolidar %L1 lotes?</translation>
     </message>
 </context>
 <context>
@@ -4042,7 +4046,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="228"/>
         <source>3D render settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>Opciones de renderizado 3D...</translation>
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="230"/>
@@ -4072,7 +4076,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="357"/>
         <source>Center view</source>
-        <translation type="unfinished"></translation>
+        <translation>Centrar vista</translation>
     </message>
 </context>
 <context>
@@ -4531,7 +4535,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="14"/>
         <source>3D Render Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Opciones de Renderizado 3D</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="27"/>
@@ -4541,147 +4545,147 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="36"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Cámara</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="43"/>
         <source>Orthographic</source>
-        <translation type="unfinished"></translation>
+        <translation>Ortográfica</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="50"/>
         <source>Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Perspectiva</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="78"/>
         <source>Field of view</source>
-        <translation type="unfinished"></translation>
+        <translation>Campo de visión</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="101"/>
         <source> °</source>
-        <translation type="unfinished"></translation>
+        <translation> °</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="122"/>
         <source>Lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Líneas</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="129"/>
         <source>Show</source>
-        <translation type="unfinished">Mostrar</translation>
+        <translation>Mostrar</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="136"/>
         <source>Line width</source>
-        <translation type="unfinished"></translation>
+        <translation>Ancho de línea</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="164"/>
         <source> px</source>
-        <translation type="unfinished"></translation>
+        <translation> px</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="179"/>
         <source>Animation</source>
-        <translation type="unfinished"></translation>
+        <translation>Animación</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="207"/>
         <source> ° / tick</source>
-        <translation type="unfinished"></translation>
+        <translation> ° / marca</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="222"/>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Depurar</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="229"/>
         <source>Show bounding spheres</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar esferas delimitadoras</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="253"/>
         <source>Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Iluminación</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="264"/>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>Habilitar</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="271"/>
         <source>Realistic Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Iluminación Realista</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="278"/>
         <source>Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Brillo</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="323"/>
         <source>Ambient Occlusion</source>
-        <translation type="unfinished"></translation>
+        <translation>Oclusión Ambiental</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="329"/>
         <source>Strength</source>
-        <translation type="unfinished"></translation>
+        <translation>Fuerza</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="352"/>
         <source>Softness</source>
-        <translation type="unfinished"></translation>
+        <translation>Suavidad</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="375"/>
         <source>Distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Distancia</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="445"/>
         <source>Materials</source>
-        <translation type="unfinished"></translation>
+        <translation>Materiales</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="451"/>
         <source>Reflections</source>
-        <translation type="unfinished"></translation>
+        <translation>Reflejos</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="457"/>
         <source>Metalness</source>
-        <translation type="unfinished"></translation>
+        <translation>Metalizado</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="464"/>
         <source>Roughness</source>
-        <translation type="unfinished"></translation>
+        <translation>Rugosidad</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="471"/>
         <source>Plain</source>
-        <translation type="unfinished"></translation>
+        <translation>Liso</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="510"/>
         <source>Chrome</source>
-        <translation type="unfinished"></translation>
+        <translation>Cromado</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="549"/>
         <source>Metallic</source>
-        <translation type="unfinished"></translation>
+        <translation>Metálico</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="588"/>
         <source>Pearl</source>
-        <translation type="unfinished"></translation>
+        <translation>Perla</translation>
     </message>
 </context>
 <context>
@@ -5081,7 +5085,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="68"/>
         <source>Which price:</source>
-        <translation type="unfinished"></translation>
+        <translation>Qué precio:</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="78"/>
@@ -5485,17 +5489,17 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="173"/>
         <source>UI Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Disposición IU</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="180"/>
         <source>Automatic</source>
-        <translation type="unfinished"></translation>
+        <translation>Automática</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="182"/>
         <source>Large</source>
-        <translation type="unfinished"></translation>
+        <translation>Grande</translation>
     </message>
     <message>
         <source>Follow the system&apos;s theme</source>
@@ -5552,7 +5556,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/desktop/settingsdialog.cpp" line="1206"/>
         <source>Valid LDraw installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Instalación válida de LDraw</translation>
     </message>
     <message>
         <source>Valid LDraw installation, LDConfig from %1</source>
@@ -5645,7 +5649,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/mobile/SystemInfoDialog.qml" line="14"/>
         <source>Diagnostics</source>
-        <translation type="unfinished"></translation>
+        <translation>Diagnósticos</translation>
     </message>
 </context>
 <context>
@@ -5779,7 +5783,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/mobile/View.qml" line="265"/>
         <source>CP</source>
-        <translation type="unfinished"></translation>
+        <translation>CP</translation>
     </message>
     <message>
         <location filename="../src/desktop/view.cpp" line="305"/>
