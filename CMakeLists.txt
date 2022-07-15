@@ -226,18 +226,6 @@ qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
-# Workaround for https://stackoverflow.com/questions/30318941/cmake-generated-xcode-project-release-build-works-but-archive-fails-on-linker
-if (IOS AND FIX_IOS_ARCHIVE_BUILD)
-    message(STATUS "Applying workaround for iOS archive builds")
-
-    # for the static libs, we can force a common folder
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/out/library)
-
-    # for the object libs, we have to link all .o to the correct folder
-    # but we can't: https://gitlab.kitware.com/cmake/cmake/-/issues/23644
-    # we have to use a custom script for the archive custom target -- see below
-endif()
-
 include_directories(3rdparty)
 add_subdirectory(3rdparty)
 
@@ -557,19 +545,10 @@ elseif (LINUX)
 elseif (IOS)
     # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake
 
-    set(IOS_ARCH ${CMAKE_OSX_ARCHITECTURES})
-    if (NOT IOS_ARCH)
-        set(IOS_ARCH ${CMAKE_XCODE_ARCHS})
-    endif()
-
     add_custom_target(archive
+        DEPENDS ${PROJECT_NAME}  ## we need to build twice! see QTBUG-105006
         VERBATIM
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        # workaround for broken archive build (see above).
-        # a PRE_LINK custom command detecting the missing .o files dynamically would be nicer,
-        # but cmake/xcode has a bug and runs PRE_LINK command *after* linking.
-        COMMAND ${CMAKE_SOURCE_DIR}/scripts/fix-ios-archive-build.sh
-                Release ${CMAKE_OSX_SYSROOT} ${IOS_ARCH}
         COMMAND xcodebuild
                 -project ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj
                 -configuration Release
