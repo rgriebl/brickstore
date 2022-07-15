@@ -153,12 +153,12 @@ Control {
                                 leftPadding: 8
                             }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_inv") }
-                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_xml") }
-                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_order") }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_store_inv") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_order") }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_cart") }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_wanted") }
                             ActionDelegate { action: BS.ActionManager.quickAction("document_import_ldraw_model") }
+                            ActionDelegate { action: BS.ActionManager.quickAction("document_import_bl_xml") }
 
                             Label {
                                 text: qsTranslate("WelcomeWidget", "Currently Open Documents")
