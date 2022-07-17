@@ -19,7 +19,7 @@
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <QtQml/QQmlProperty>
-#include <QtQml/qqmlregistration.h>
+#include <QtQml/QQmlEngine>
 
 
 class QmlStyle : public QObject

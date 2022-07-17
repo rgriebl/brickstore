@@ -20,7 +20,7 @@
 #include <QVector>
 #include <QAction>
 #include <QPointer>
-#include <QtQml/qqmlregistration.h>
+#include <QtQml/QQmlEngine>
 
 #include "bricklink/lot.h"
 
