@@ -31,7 +31,7 @@
 
 
 ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
-    : ImportInventoryDialog(nullptr, 1, BrickLink::Condition::New, parent)
+    : ImportInventoryDialog(nullptr, 1, BrickLink::Condition::Count, parent)
 { }
 
 ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int quantity,
@@ -73,8 +73,12 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
     layout->addWidget(m_import);
     layout->addWidget(m_buttons);
 
+    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Details"_qs)
+            .toByteArray();
+    m_import->restoreState(ba);
+
     if (m_select) {
-        QByteArray ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Geometry"_qs).toByteArray();
+        ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Geometry"_qs).toByteArray();
         if (!ba.isEmpty())
             restoreGeometry(ba);
 
@@ -84,10 +88,6 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
             m_select->restoreState(SelectItem::defaultState());
             m_select->setCurrentItemType(BrickLink::core()->itemType('S'));
         }
-
-        ba = Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Details"_qs)
-                .toByteArray();
-        m_import->restoreState(ba);
 
         if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
@@ -112,7 +112,8 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
         checkItem(m_select->currentItem(), false);
     } else {
         m_import->setQuantity(quantity);
-        m_import->setCondition(condition);
+        if (condition != BrickLink::Condition::Count)
+            m_import->setCondition(condition);
 
         QMetaObject::invokeMethod(this, [this]() { setFixedSize(sizeHint()); }, Qt::QueuedConnection);
 
@@ -127,8 +128,8 @@ ImportInventoryDialog::~ImportInventoryDialog()
     if (!m_verifyItem) {
         Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Geometry"_qs, saveGeometry());
         Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/SelectItem"_qs, m_select->saveState());
-        Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Details"_qs, m_import->saveState());
     }
+    Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Details"_qs, m_import->saveState());
 }
 
 bool ImportInventoryDialog::setItem(const BrickLink::Item *item)

@@ -145,7 +145,7 @@ QCoro::Task<> AppearsInWidget::partOut()
     const BrickLink::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second) {
-        ImportInventoryDialog dlg(ai->second, 1, BrickLink::Condition::New, this);
+        ImportInventoryDialog dlg(ai->second, 1, BrickLink::Condition::Count, this);
         dlg.open();
 
         if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
