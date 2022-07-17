@@ -398,7 +398,7 @@ jobs:
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
-        qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release \
             -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos) \
             -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} \
             -DCMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }} \
@@ -406,7 +406,7 @@ jobs:
             -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual \
             -DFIX_IOS_ARCHIVE_BUILD=TRUE \
             ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target ipa
+        cmake --build . --config Release --parallel --target ipa
       shell: bash
 
     - name: Upload iOS IPA
