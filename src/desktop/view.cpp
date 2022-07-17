@@ -612,6 +612,7 @@ QCoro::Task<> View::addLots(LotList &&lotsRef, AddLotMode addLotMode)
                         && (lot->item() == otherLot->item())
                         && (lot->color() == otherLot->color())
                         && (lot->condition() == otherLot->condition())
+                        && (lot->subCondition() == otherLot->subCondition())
                         && ((lot->status() == BrickLink::Status::Exclude) ==
                             (otherLot->status() == BrickLink::Status::Exclude))) {
                     mergeLot = otherLot;
@@ -723,6 +724,7 @@ QCoro::Task<> View::consolidateLots(BrickLink::LotList lots)
                     && (lot->item() == otherLot->item())
                     && (lot->color() == otherLot->color())
                     && (lot->condition() == otherLot->condition())
+                    && (lot->subCondition() == otherLot->subCondition())
                     && ((lot->status() == BrickLink::Status::Exclude) ==
                         (otherLot->status() == BrickLink::Status::Exclude))) {
                 mergeLots << sourceLots.takeAt(j--);
