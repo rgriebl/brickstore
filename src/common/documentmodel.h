@@ -261,7 +261,13 @@ public:
 
     QUndoStack *undoStack() const;
 
-    void applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback,
+    enum ApplyToResult {
+        LotChanged = 1,
+        LotDidNotChange = 0,
+        AnotherLotChanged = -1,
+    };
+
+    void applyTo(const LotList &lots, std::function<ApplyToResult(const Lot &, Lot &)> callback,
                  const QString &actionText = { });
 
     const Lot *differenceBaseLot(const Lot *lot) const;

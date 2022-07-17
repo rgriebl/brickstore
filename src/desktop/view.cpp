@@ -245,13 +245,7 @@ void View::setActive(bool active)
     Q_ASSERT(active == !m_actionConnectionContext);
 
     if (active) {
-        m_actionConnectionContext = new QObject(this);
-
-        for (auto &at : qAsConst(m_actionTable)) {
-            if (QAction *a = ActionManager::inst()->qAction(at.first)) {
-                QObject::connect(a, &QAction::triggered, m_actionConnectionContext, at.second);
-            }
-        }
+        m_actionConnectionContext = ActionManager::inst()->connectActionTable(m_actionTable);
 
         connect(m_document, &Document::ensureVisible,
                 m_actionConnectionContext, [this](const QModelIndex &idx, bool centerItem) {
@@ -299,8 +293,8 @@ View::View(Document *document, QWidget *parent)
     m_latest_timer->setInterval(100ms);
 
     m_actionTable = {
-        { "edit_partoutitems", [this]() { partOutItems(); } },
-        { "edit_copy_fields", [this]() -> QCoro::Task<> {
+        { "edit_partoutitems", [this](auto) { partOutItems(); } },
+        { "edit_copy_fields", [this](auto) -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
                                         tr("Choose how fields are getting copied or merged."), this);
@@ -313,7 +307,7 @@ View::View(Document *document, QWidget *parent)
                   qDeleteAll(lots);
               }
           } },
-        { "edit_subtractitems", [this]() -> QCoro::Task<> {
+        { "edit_subtractitems", [this](auto) -> QCoro::Task<> {
               SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"), this);
               dlg.open();
 
@@ -324,7 +318,7 @@ View::View(Document *document, QWidget *parent)
                   qDeleteAll(lots);
               }
           } },
-        { "edit_price_to_priceguide", [this]() -> QCoro::Task<> {
+        { "edit_price_to_priceguide", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               //Q_ASSERT(m_setToPG.isNull());
 
@@ -334,7 +328,7 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate());
           } },
-        { "edit_price_inc_dec", [this]() -> QCoro::Task<> {
+        { "edit_price_inc_dec", [this](auto) -> QCoro::Task<> {
               bool showTiers = !m_header->isSectionHidden(DocumentModel::TierQ1);
               IncDecPricesDialog dlg(tr("Increase or decrease the prices of the selected items by"),
                                      showTiers, m_model->currencyCode(), this);
@@ -343,7 +337,7 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->priceAdjust(dlg.isFixed(), dlg.value(), dlg.applyToTiers());
           } },
-        { "edit_cost_inc_dec", [this]() -> QCoro::Task<> {
+        { "edit_cost_inc_dec", [this](auto) -> QCoro::Task<> {
               IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
                                      false, m_model->currencyCode(), this);
               dlg.open();
@@ -351,11 +345,11 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->costAdjust(dlg.isFixed(), dlg.value());
           } },
-        { "edit_color", [this]() { m_table->editCurrentItem(DocumentModel::Color); } },
-        { "edit_item", [this]() { m_table->editCurrentItem(DocumentModel::Description); } },
+        { "edit_color", [this](auto) { m_table->editCurrentItem(DocumentModel::Color); } },
+        { "edit_item", [this](auto) { m_table->editCurrentItem(DocumentModel::Description); } },
 
-        { "document_print", [this]() { print(false); } },
-        { "document_print_pdf", [this]() { print(true); } },
+        { "document_print", [this](auto) { print(false); } },
+        { "document_print_pdf", [this](auto) { print(true); } },
     };
 
     m_table = new TableView(this);

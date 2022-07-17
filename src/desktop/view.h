@@ -21,6 +21,7 @@
 
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
+#include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/documentmodel.h"
 #include "common/currency.h"
@@ -110,5 +111,5 @@ private:
 
     QObject *            m_actionConnectionContext = nullptr;
 
-    std::vector<std::pair<const char *, std::function<void()>>> m_actionTable;
+    ActionManager::ActionTable m_actionTable;
 };

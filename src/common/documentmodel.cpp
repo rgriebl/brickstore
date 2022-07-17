@@ -1188,7 +1188,7 @@ bool DocumentModel::mergeLotFields(const Lot &from, Lot &to, MergeMode defaultMe
     return changed;
 }
 
-void DocumentModel::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback,
+void DocumentModel::applyTo(const LotList &lots, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback,
                             const QString &actionText)
 {
     if (lots.isEmpty())
@@ -1205,10 +1205,16 @@ void DocumentModel::applyTo(const LotList &lots, std::function<bool(const Lot &,
 
     for (Lot *from : lots) {
         Lot to = *from;
-        if (callback(*from, to)) {
+        switch (callback(*from, to)) {
+        case LotChanged:
             changes.emplace_back(from, to);
-        } else {
+            break;
+        case LotDidNotChange:
             --count;
+            break;
+        case AnotherLotChanged:
+        default:
+            break;
         }
     }
     changeLots(changes);

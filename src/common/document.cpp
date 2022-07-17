@@ -275,10 +275,10 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
     }
 
     m_actionTable = {
-        { "edit_cut", [this]() { cut(); } },
-        { "edit_copy", [this]() { copy(); } },
-        { "edit_duplicate", [this]() { duplicate(); } },
-        { "edit_paste", [this]() -> QCoro::Task<> {
+        { "edit_cut", [this](auto) { cut(); } },
+        { "edit_copy", [this](auto) { copy(); } },
+        { "edit_duplicate", [this](auto) { duplicate(); } },
+        { "edit_paste", [this](auto) -> QCoro::Task<> {
               LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
 
               if (!lots.empty()) {
@@ -292,39 +292,39 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   addLots(std::move(lots), AddLotMode::ConsolidateInteractive);
               }
           } },
-        { "edit_paste_silent", [this]() {
+        { "edit_paste_silent", [this](auto) {
               LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
               if (!lots.empty())
                   addLots(std::move(lots), AddLotMode::AddAsNew);
           } },
-        { "edit_mergeitems", [this]() {
+        { "edit_mergeitems", [this](auto) {
               if (!selectedLots().isEmpty())
                   consolidateLots(selectedLots());
               else
                   consolidateLots(m_model->sortedLots());
           } },
-        { "edit_delete", [this]() { remove(); } },
-        { "edit_select_all", [this]() { selectAll(); } },
-        { "edit_select_none", [this]() { selectNone(); } },
-        { "edit_filter_from_selection", [this]() { setFilterFromSelection(); } },
-        { "edit_status_include", [this]() { setStatus(BrickLink::Status::Include); } },
-        { "edit_status_exclude", [this]() { setStatus(BrickLink::Status::Exclude); } },
-        { "edit_status_extra", [this]() { setStatus(BrickLink::Status::Extra); } },
-        { "edit_status_toggle", [this]() { toggleStatus(); } },
-        { "edit_cond_new", [this]() { setCondition(BrickLink::Condition::New); } },
-        { "edit_cond_used", [this]() { setCondition(BrickLink::Condition::Used); } },
-        { "edit_subcond_none", [this]() { setSubCondition(BrickLink::SubCondition::None); } },
-        { "edit_subcond_sealed", [this]() { setSubCondition(BrickLink::SubCondition::Sealed); } },
-        { "edit_subcond_complete", [this]() { setSubCondition(BrickLink::SubCondition::Complete); } },
-        { "edit_subcond_incomplete", [this]() { setSubCondition(BrickLink::SubCondition::Incomplete); } },
-        { "edit_retain_yes", [this]() { setRetain(true); } },
-        { "edit_retain_no", [this]() { setRetain(false); } },
-        { "edit_retain_toggle", [this]() { toggleRetain(); } },
-        { "edit_stockroom_no", [this]() { setStockroom(BrickLink::Stockroom::None); } },
-        { "edit_stockroom_a", [this]() { setStockroom(BrickLink::Stockroom::A); } },
-        { "edit_stockroom_b", [this]() { setStockroom(BrickLink::Stockroom::B); } },
-        { "edit_stockroom_c", [this]() { setStockroom(BrickLink::Stockroom::C); } },
-        { "edit_price_set", [this]() -> QCoro::Task<> {
+        { "edit_delete", [this](auto) { remove(); } },
+        { "edit_select_all", [this](auto) { selectAll(); } },
+        { "edit_select_none", [this](auto) { selectNone(); } },
+        { "edit_filter_from_selection", [this](auto) { setFilterFromSelection(); } },
+        { "edit_status_include", [this](auto) { setStatus(BrickLink::Status::Include); } },
+        { "edit_status_exclude", [this](auto) { setStatus(BrickLink::Status::Exclude); } },
+        { "edit_status_extra", [this](auto) { setStatus(BrickLink::Status::Extra); } },
+        { "edit_status_toggle", [this](auto) { toggleStatus(); } },
+        { "edit_cond_new", [this](auto) { setCondition(BrickLink::Condition::New); } },
+        { "edit_cond_used", [this](auto) { setCondition(BrickLink::Condition::Used); } },
+        { "edit_subcond_none", [this](auto) { setSubCondition(BrickLink::SubCondition::None); } },
+        { "edit_subcond_sealed", [this](auto) { setSubCondition(BrickLink::SubCondition::Sealed); } },
+        { "edit_subcond_complete", [this](auto) { setSubCondition(BrickLink::SubCondition::Complete); } },
+        { "edit_subcond_incomplete", [this](auto) { setSubCondition(BrickLink::SubCondition::Incomplete); } },
+        { "edit_retain_yes", [this](auto) { setRetain(true); } },
+        { "edit_retain_no", [this](auto) { setRetain(false); } },
+        { "edit_retain_toggle", [this](auto) { toggleRetain(); } },
+        { "edit_stockroom_no", [this](auto) { setStockroom(BrickLink::Stockroom::None); } },
+        { "edit_stockroom_a", [this](auto) { setStockroom(BrickLink::Stockroom::A); } },
+        { "edit_stockroom_b", [this](auto) { setStockroom(BrickLink::Stockroom::B); } },
+        { "edit_stockroom_c", [this](auto) { setStockroom(BrickLink::Stockroom::C); } },
+        { "edit_price_set", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new price for all selected items:"),
                                                          m_model->currencyCode(),
@@ -333,8 +333,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setPrice(*d);
               }
           } },
-        { "edit_price_round", [this]() { roundPrice(); } },
-        { "edit_cost_set", [this]() -> QCoro::Task<> {
+        { "edit_price_round", [this](auto) { roundPrice(); } },
+        { "edit_cost_set", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new cost for all selected items:"),
                                                          m_model->currencyCode(),
@@ -343,8 +343,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setCost(*d);
               }
           } },
-        { "edit_cost_round", [this]() { roundCost(); } },
-        { "edit_cost_spread_price", [this]() -> QCoro::Task<> {
+        { "edit_cost_round", [this](auto) { roundCost(); } },
+        { "edit_cost_spread_price", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
@@ -352,7 +352,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   spreadCost(*d, SpreadCost::ByPrice);
               }
           } },
-        { "edit_cost_spread_weight", [this]() -> QCoro::Task<> {
+        { "edit_cost_spread_weight", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
@@ -360,19 +360,19 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   spreadCost(*d, SpreadCost::ByWeight);
               }
           } },
-        { "edit_qty_divide", [this]() -> QCoro::Task<> {
+        { "edit_qty_divide", [this](auto) -> QCoro::Task<> {
               if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"),
                                                           QString(), 1, 1, 1000)) {
                   divideQuantity(*i);
               }
           } },
-        { "edit_qty_multiply", [this]() -> QCoro::Task<> {
+        { "edit_qty_multiply", [this](auto) -> QCoro::Task<> {
               if (auto i = co_await UIHelpers::getInteger(tr("Multiply the quantities of all selected items with this factor."),
                                                           tr("x"), 1, -1000, 1000)) {
                   multiplyQuantity(*i);
               }
           } },
-        { "edit_bulk", [this]() -> QCoro::Task<> {
+        { "edit_bulk", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto i = co_await UIHelpers::getInteger(tr("Set bulk quantity for the selected items:"),
                                                           QString(),
@@ -381,7 +381,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setBulkQuantity(*i);
               }
           } },
-        { "edit_sale", [this]() -> QCoro::Task<> {
+        { "edit_sale", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto i = co_await UIHelpers::getInteger(tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
                                                           tr("%"), selectedLots().front()->sale(),
@@ -389,7 +389,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setSale(*i);
               }
           } },
-        { "edit_qty_set", [this]() -> QCoro::Task<> {
+        { "edit_qty_set", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto i = co_await UIHelpers::getInteger(tr("Enter the new quantities for all selected items:"),
                                                           QString(), selectedLots().front()->quantity(),
@@ -397,94 +397,94 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setQuantity(*i);
               }
           } },
-        { "edit_remark_set", [this]() -> QCoro::Task<> {
+        { "edit_remark_set", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto s = co_await UIHelpers::getString(tr("Enter the new remark for all selected items:"),
                                                          selectedLots().front()->remarks())) {
                   setRemarks(*s);
               }
           } },
-        { "edit_remark_clear", [this]() { setRemarks({ }); } },
-        { "edit_remark_add", [this]() -> QCoro::Task<> {
+        { "edit_remark_clear", [this](auto) { setRemarks({ }); } },
+        { "edit_remark_add", [this](auto) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be added to the remarks of all selected items:"))) {
                   addRemarks(*s);
               }
           } },
-        { "edit_remark_rem", [this]() -> QCoro::Task<> {
+        { "edit_remark_rem", [this](auto) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be removed from the remarks of all selected items:"))) {
                   removeRemarks(*s);
               }
           } },
-        { "edit_comment_set", [this]() -> QCoro::Task<> {
+        { "edit_comment_set", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto s = co_await UIHelpers::getString(tr("Enter the new comment for all selected items:"),
                                                          selectedLots().front()->comments())) {
                   setComments(*s);
               }
           } },
-        { "edit_comment_clear", [this]() { setComments({ }); } },
-        { "edit_comment_add", [this]() -> QCoro::Task<> {
+        { "edit_comment_clear", [this](auto) { setComments({ }); } },
+        { "edit_comment_add", [this](auto) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be added to the comments of all selected items:"))) {
                   addComments(*s);
               }
           } },
-        { "edit_comment_rem", [this]() -> QCoro::Task<> {
+        { "edit_comment_rem", [this](auto) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be removed from the comments of all selected items:"))) {
                   removeComments(*s);
               }
           } },
-        { "edit_reserved", [this]() -> QCoro::Task<> {
+        { "edit_reserved", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto s = co_await UIHelpers::getString(tr("Reserve all selected items for this specific buyer (BrickLink username):"),
                                                          selectedLots().front()->reserved())) {
                   setReserved(*s);
               }
           } },
-        { "edit_marker_text", [this]() -> QCoro::Task<> {
+        { "edit_marker_text", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto s = co_await UIHelpers::getString(tr("Enter the new marker text for all selected items:"),
                                                          selectedLots().front()->markerText())) {
                   setMarkerText(*s);
               }
           } },
-        { "edit_marker_color", [this]() -> QCoro::Task<> {
+        { "edit_marker_color", [this](auto) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               if (auto c = co_await UIHelpers::getColor(selectedLots().front()->markerColor())) {
                   setMarkerColor(*c);
               }
           } },
-        { "edit_marker_clear", [this]() { clearMarker(); } },
+        { "edit_marker_clear", [this](auto) { clearMarker(); } },
 
-        { "view_reset_diff_mode", [this]() { resetDifferenceMode(); } },
-        { "view_goto_next_diff", [this]() { gotoNextErrorOrDifference(true); } },
-        { "view_goto_next_input_error", [this]() { gotoNextErrorOrDifference(false); } },
-        { "view_column_layout_save", [this]() { saveCurrentColumnLayout(); } },
+        { "view_reset_diff_mode", [this](auto) { resetDifferenceMode(); } },
+        { "view_goto_next_diff", [this](auto) { gotoNextErrorOrDifference(true); } },
+        { "view_goto_next_input_error", [this](auto) { gotoNextErrorOrDifference(false); } },
+        { "view_column_layout_save", [this](auto) { saveCurrentColumnLayout(); } },
 
-        { "document_save", [this]() { save(false); } },
-        { "document_save_as", [this]() { save(true); } },
-        { "document_close", [this]() { requestClose(); } },
-        { "document_export_bl_xml", [this]() { exportBrickLinkXMLToFile(); } },
-        { "document_export_bl_xml_clip", [this]() { exportBrickLinkXMLToClipboard(); } },
-        { "document_export_bl_update_clip", [this]() { exportBrickLinkUpdateXMLToClipboard(); } },
-        { "document_export_bl_invreq_clip", [this]() { exportBrickLinkInventoryRequestToClipboard(); } },
-        { "document_export_bl_wantedlist_clip", [this]() { exportBrickLinkWantedListToClipboard(); } },
+        { "document_save", [this](auto) { save(false); } },
+        { "document_save_as", [this](auto) { save(true); } },
+        { "document_close", [this](auto) { requestClose(); } },
+        { "document_export_bl_xml", [this](auto) { exportBrickLinkXMLToFile(); } },
+        { "document_export_bl_xml_clip", [this](auto) { exportBrickLinkXMLToClipboard(); } },
+        { "document_export_bl_update_clip", [this](auto) { exportBrickLinkUpdateXMLToClipboard(); } },
+        { "document_export_bl_invreq_clip", [this](auto) { exportBrickLinkInventoryRequestToClipboard(); } },
+        { "document_export_bl_wantedlist_clip", [this](auto) { exportBrickLinkWantedListToClipboard(); } },
 
-        { "bricklink_catalog", [this]() {
+        { "bricklink_catalog", [this](auto) {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, lot->item(), lot->color());
           } },
-        { "bricklink_priceguide", [this]() {
+        { "bricklink_priceguide", [this](auto) {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, lot->item(), lot->color());
           } },
-        { "bricklink_lotsforsale", [this]() {
+        { "bricklink_lotsforsale", [this](auto) {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, lot->item(), lot->color());
           } },
-        { "bricklink_myinventory", [this]() {
+        { "bricklink_myinventory", [this](auto) {
               Q_ASSERT(!selectedLots().isEmpty());
               const auto *lot = selectedLots().constFirst();
               uint lotid = lot->lotId();
@@ -529,13 +529,7 @@ int Document::refCount() const
 void Document::setActive(bool active)
 {
     if (active) {
-        m_actionConnectionContext = new QObject(this);
-
-        for (auto &at : qAsConst(m_actionTable)) {
-            if (QAction *a = ActionManager::inst()->qAction(at.first)) {
-                QObject::connect(a, &QAction::triggered, m_actionConnectionContext, at.second);
-            }
-        }
+        m_actionConnectionContext = ActionManager::inst()->connectActionTable(m_actionTable);
 
         if (!m_hasBeenActive) {
             if (!isRestoredFromAutosave()) {
@@ -790,13 +784,6 @@ void Document::updateItemFlagsMask()
     m_model->setLotFlagsMask({ em, dm });
 }
 
-QString Document::actionText() const
-{
-    if (auto a = qobject_cast<QAction *>(sender()))
-        return a->text();
-    return { };
-}
-
 void Document::resetDifferenceMode()
 {
     m_model->resetDifferenceMode(selectedLots());
@@ -825,7 +812,9 @@ void Document::duplicate()
     const QModelIndex oldCurrentIdx = m_selectionModel->currentIndex();
     QModelIndex newCurrentIdx;
 
-    applyTo(selectedLots(), [&](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_duplicate", [&](const auto &from, auto &to) {
+        Q_UNUSED(to)
+
         auto *lot = new Lot(from);
         m_model->insertLotsAfter(&from, { lot });
         QModelIndex idx = m_model->index(lot);
@@ -833,9 +822,7 @@ void Document::duplicate()
         if (m_model->lot(oldCurrentIdx) == &from)
             newCurrentIdx = m_model->index(idx.row(), oldCurrentIdx.column());
 
-        // this isn't necessary and we should just return false, but the counter would be wrong then
-        to = from;
-        return true;
+        return DocumentModel::AnotherLotChanged;
     });
 
     m_selectionModel->select(newSelection,
@@ -902,59 +889,96 @@ void Document::setFilterFromSelection()
 
 void Document::toggleStatus()
 {
-    applyTo(m_selectedLots, [](const auto &from, auto &to) {
+    applyTo(m_selectedLots, "edit_status_toggle", [](const auto &from, auto &to) {
         (to = from).setStatus(nextEnumValue(from.status(), { BrickLink::Status::Include,
                                                              BrickLink::Status::Exclude }));
-        return true;
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setStatus(BrickLink::Status status)
 {
-    applyTo(selectedLots(), [status](const auto &from, auto &to) {
-        (to = from).setStatus(status); return true;
+    const char *action = nullptr;
+
+    switch (status) {
+    case BrickLink::Status::Include: action = "edit_status_include"; break;
+    case BrickLink::Status::Exclude: action = "edit_status_exclude"; break;
+    case BrickLink::Status::Extra  : action = "edit_status_extra"; break;
+    default: break;
+    }
+
+    applyTo(selectedLots(), action, [status](const auto &from, auto &to) {
+        (to = from).setStatus(status);
+        return DocumentModel::LotChanged;
     });
 }
 void Document::setCondition(BrickLink::Condition condition)
 {
-    applyTo(selectedLots(), [condition](const auto &from, auto &to) {
+    applyTo(selectedLots(), (condition == BrickLink::Condition::New) ? "edit_cond_new" : "edit_cond_used",
+            [condition](const auto &from, auto &to) {
         (to = from).setCondition(condition);
-        return true;
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setSubCondition(BrickLink::SubCondition subCondition)
 {
-    applyTo(selectedLots(), [subCondition](const auto &from, auto &to) {
-        (to = from).setSubCondition(subCondition); return true;
+    const char *action = nullptr;
+
+    switch (subCondition) {
+    case BrickLink::SubCondition::None      : action = "edit_subcond_none"; break;
+    case BrickLink::SubCondition::Sealed    : action = "edit_subcond_sealed"; break;
+    case BrickLink::SubCondition::Complete  : action = "edit_subcond_complete"; break;
+    case BrickLink::SubCondition::Incomplete: action = "edit_subcond_incomplete"; break;
+    default: break;
+    }
+
+    applyTo(selectedLots(), action, [subCondition](const auto &from, auto &to) {
+        (to = from).setSubCondition(subCondition);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::toggleRetain()
 {
-    applyTo(selectedLots(), [](const auto &from, auto &to) {
-        (to = from).setRetain(!from.retain()); return true;
+    applyTo(selectedLots(), "edit_retain_toggle", [](const auto &from, auto &to) {
+        (to = from).setRetain(!from.retain());
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setRetain(bool retain)
 {
-    applyTo(selectedLots(), [retain](const auto &from, auto &to) {
-        (to = from).setRetain(retain); return true;
+    applyTo(selectedLots(), retain ? "edit_retain_yes" : "edit_retain_no",
+            [retain](const auto &from, auto &to) {
+        (to = from).setRetain(retain);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setStockroom(BrickLink::Stockroom stockroom)
 {
-    m_model->applyTo(selectedLots(), [stockroom](const auto &from, auto &to) {
-        (to = from).setStockroom(stockroom); return true;
+    const char *action = nullptr;
+
+    switch (stockroom) {
+    case BrickLink::Stockroom::A   : action = "edit_stockroom_a"; break;
+    case BrickLink::Stockroom::B   : action = "edit_stockroom_b"; break;
+    case BrickLink::Stockroom::C   : action = "edit_stockroom_c"; break;
+    case BrickLink::Stockroom::None: action = "edit_stockroom_no"; break;
+    default: break;
+    }
+
+    applyTo(selectedLots(), action, [stockroom](const auto &from, auto &to) {
+        (to = from).setStockroom(stockroom);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setPrice(double price)
 {
-    applyTo(selectedLots(), [price](const auto &from, auto &to) {
-        (to = from).setPrice(price); return true;
+    applyTo(selectedLots(), "edit_price_set", [price](const auto &from, auto &to) {
+        (to = from).setPrice(price);
+        return DocumentModel::LotChanged;
     });
 }
 
@@ -1089,13 +1113,13 @@ void Document::cancelPriceGuideUpdates()
 
 void Document::roundPrice()
 {
-    applyTo(selectedLots(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_price_round", [](const auto &from, auto &to) {
         double price = int(from.price() * 100 + .5) / 100.;
         if (!qFuzzyCompare(price, from.price())) {
             (to = from).setPrice(price);
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
@@ -1106,7 +1130,7 @@ void Document::priceAdjust(bool isFixed, double value, bool applyToTiers)
 
     double factor = isFixed ? 0 : (1.+ value / 100.);
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_price_inc_dec", [=](const auto &from, auto &to) {
         double price = from.price();
 
         if (isFixed)
@@ -1129,16 +1153,17 @@ void Document::priceAdjust(bool isFixed, double value, bool applyToTiers)
                     to.setTierPrice(i, price);
                 }
             }
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
 void Document::setCost(double cost)
 {
-    applyTo(m_selectedLots, [cost](const auto &from, auto &to) {
-        (to = from).setCost(cost); return true;
+    applyTo(m_selectedLots, "edit_cost_set", [cost](const auto &from, auto &to) {
+        (to = from).setCost(cost);
+        return DocumentModel::LotChanged;
     });
 }
 
@@ -1156,22 +1181,24 @@ void Document::spreadCost(double spreadAmount, SpreadCost how)
     if (qFuzzyCompare(f, 1))
         return;
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), (how == SpreadCost::ByPrice) ? "edit_cost_spread_price"
+                                                         : "edit_cost_spread_weight",
+            [=](const auto &from, auto &to) {
         (to = from).setCost(f * ((how == SpreadCost::ByPrice) ? from.price()
                                                               : from.weight()));
-        return true;
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::roundCost()
 {
-    applyTo(selectedLots(), [](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_cost_round", [](const auto &from, auto &to) {
         double cost = int(from.cost() * 100 + .5) / 100.;
         if (!qFuzzyCompare(cost, from.cost())) {
             (to = from).setCost(cost);
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
@@ -1182,7 +1209,7 @@ void Document::costAdjust(bool isFixed, double value)
 
     double factor = isFixed ? 0 : (1.+ value / 100.);
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_cost_inc_dec", [=](const auto &from, auto &to) {
         double cost = from.cost();
 
         if (isFixed)
@@ -1192,9 +1219,9 @@ void Document::costAdjust(bool isFixed, double value)
 
         if (!qFuzzyCompare(cost, from.cost())) {
             (to = from).setCost(cost);
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
@@ -1218,8 +1245,9 @@ void Document::divideQuantity(int divisor)
         return;
     }
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
-        (to = from).setQuantity(from.quantity() / divisor); return true;
+    applyTo(selectedLots(), "edit_qty_divide", [=](const auto &from, auto &to) {
+        (to = from).setQuantity(from.quantity() / divisor);
+        return DocumentModel::LotChanged;
     });
 }
 
@@ -1242,8 +1270,9 @@ void Document::multiplyQuantity(int factor)
         return;
     }
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
-        (to = from).setQuantity(from.quantity() * factor); return true;
+    applyTo(selectedLots(), "edit_qty_multiply", [=](const auto &from, auto &to) {
+        (to = from).setQuantity(from.quantity() * factor);
+        return DocumentModel::LotChanged;
     });
 }
 
@@ -1251,41 +1280,47 @@ void Document::multiplyQuantity(int factor)
 
 void Document::setSale(int sale)
 {
-    applyTo(selectedLots(), [sale](const auto &from, auto &to) {
-        (to = from).setSale(sale); return true;
+    applyTo(selectedLots(), "edit_sale", [sale](const auto &from, auto &to) {
+        (to = from).setSale(sale);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setBulkQuantity(int qty)
 {
-    applyTo(selectedLots(), [qty](const auto &from, auto &to) {
-        (to = from).setBulkQuantity(qty); return true;
+    applyTo(selectedLots(), "edit_bulk", [qty](const auto &from, auto &to) {
+        (to = from).setBulkQuantity(qty);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setQuantity(int quantity)
 {
-    applyTo(selectedLots(), [quantity](const auto &from, auto &to) {
-        (to = from).setQuantity(quantity); return true;
+    applyTo(selectedLots(), "edit_qty_set", [quantity](const auto &from, auto &to) {
+        (to = from).setQuantity(quantity);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setRemarks(const QString &remarks)
 {
-    applyTo(selectedLots(), [remarks](const auto &from, auto &to) {
-        (to = from).setRemarks(remarks); return true;
+    applyTo(selectedLots(), "edit_remark_set", [remarks](const auto &from, auto &to) {
+        (to = from).setRemarks(remarks);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::addRemarks(const QString &addRemarks)
 {
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_remark_add", [=](const auto &from, auto &to) {
         to = from;
         Lot tmp = from;
         tmp.setRemarks(addRemarks);
 
-        return DocumentModel::mergeLotFields(tmp, to, DocumentModel::MergeMode::Ignore,
-                                             {{ DocumentModel::Remarks, DocumentModel::MergeMode::MergeText }});
+        bool merged = DocumentModel::mergeLotFields(tmp, to, DocumentModel::MergeMode::Ignore,
+                                                    {{ DocumentModel::Remarks,
+                                                       DocumentModel::MergeMode::MergeText }});
+        return merged ? DocumentModel::LotChanged : DocumentModel::LotDidNotChange;
     });
 }
 
@@ -1293,34 +1328,37 @@ void Document::removeRemarks(const QString &remRemarks)
 {
     QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remRemarks) % u"\\b");
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_remark_rem", [=](const auto &from, auto &to) {
         QString remarks = from.remarks();
         if (!remarks.isEmpty())
             remarks = remarks.remove(regexp).simplified();
         if (from.remarks() != remarks) {
             (to = from).setRemarks(remarks);
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
 void Document::setComments(const QString &comments)
 {
-    applyTo(selectedLots(), [comments](const auto &from, auto &to) {
-        (to = from).setComments(comments); return true;
+    applyTo(selectedLots(), "edit_comment_set", [comments](const auto &from, auto &to) {
+        (to = from).setComments(comments);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::addComments(const QString &addComments)
 {
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_comment_add", [=](const auto &from, auto &to) {
         to = from;
         Lot tmp = from;
         tmp.setComments(addComments);
 
-        return DocumentModel::mergeLotFields(tmp, to, DocumentModel::MergeMode::Ignore,
-                                             {{ DocumentModel::Comments, DocumentModel::MergeMode::MergeText }});
+        bool merged = DocumentModel::mergeLotFields(tmp, to, DocumentModel::MergeMode::Ignore,
+                                                    {{ DocumentModel::Comments,
+                                                       DocumentModel::MergeMode::MergeText }});
+        return merged ? DocumentModel::LotChanged : DocumentModel::LotDidNotChange;
     });
 }
 
@@ -1328,43 +1366,47 @@ void Document::removeComments(const QString &remComments)
 {
     QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remComments) % u"\\b");
 
-    applyTo(selectedLots(), [=](const auto &from, auto &to) {
+    applyTo(selectedLots(), "edit_comment_rem", [=](const auto &from, auto &to) {
         QString comments = from.comments();
         if (!comments.isEmpty())
             comments = comments.remove(regexp).simplified();
         if (from.comments() != comments) {
             (to = from).setComments(comments);
-            return true;
+            return DocumentModel::LotChanged;
         }
-        return false;
+        return DocumentModel::LotDidNotChange;
     });
 }
 
 void Document::setReserved(const QString &reserved)
 {
-    applyTo(selectedLots(), [reserved](const auto &from, auto &to) {
-        (to = from).setReserved(reserved); return true;
+    applyTo(selectedLots(), "edit_reserved", [reserved](const auto &from, auto &to) {
+        (to = from).setReserved(reserved);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setMarkerText(const QString &text)
 {
-    applyTo(selectedLots(), [text](const auto &from, auto &to) {
-        (to = from).setMarkerText(text); return true;
+    applyTo(selectedLots(), "edit_marker_text", [text](const auto &from, auto &to) {
+        (to = from).setMarkerText(text);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::setMarkerColor(const QColor &color)
 {
-    applyTo(selectedLots(), [color](const auto &from, auto &to) {
-        (to = from).setMarkerColor(color); return true;
+    applyTo(selectedLots(), "edit_marker_color", [color](const auto &from, auto &to) {
+        (to = from).setMarkerColor(color);
+        return DocumentModel::LotChanged;
     });
 }
 
 void Document::clearMarker()
 {
-    applyTo(selectedLots(), [](const auto &from, auto &to) {
-        (to = from).setMarkerText({ }); to.setMarkerColor({ }); return true;
+    applyTo(selectedLots(), "edit_marker_clear", [](const auto &from, auto &to) {
+        (to = from).setMarkerText({ }); to.setMarkerColor({ });
+        return DocumentModel::LotChanged;
     });
 }
 
@@ -1697,10 +1739,11 @@ void Document::updateSelection()
     m_delayedSelectionUpdate->start();
 }
 
-void Document::applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback)
+void Document::applyTo(const LotList &lots, const char *actionName,
+                       std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback)
 {
     QString actionText;
-    if (auto a = qobject_cast<QAction *>(sender()))
+    if (auto a = ActionManager::inst()->action(actionName))
         actionText = a->text();
     model()->applyTo(lots, callback, actionText);
 }

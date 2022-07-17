@@ -26,6 +26,7 @@
 #include "bricklink/lot.h"
 #include "bricklink/order.h"
 #include "bricklink/qmlapi.h"
+#include "common/actionmanager.h"
 #include "common/documentmodel.h"
 #include "qcoro/qcoro.h"
 
@@ -311,8 +312,8 @@ signals:
     void orderChanged(BrickLink::Order *order);
 
 private:
-    QString actionText() const;
-    void applyTo(const LotList &lots, std::function<bool(const Lot &, Lot &)> callback);
+    void applyTo(const LotList &lots,
+                 const char *actionName, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback);
     int consolidateLotsHelper(const LotList &lots, LotConsolidation::Mode conMode) const;
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void cancelPriceGuideUpdates();
@@ -346,7 +347,7 @@ private:
     bool                 m_hasBeenActive = false;
     QObject *            m_actionConnectionContext = nullptr;
 
-    std::vector<std::pair<const char *, std::function<void()>>> m_actionTable;
+    ActionManager::ActionTable  m_actionTable;
 
     static std::function<QCoro::Task<>(Document::LotConsolidation &)> s_consolidationFunction;
 

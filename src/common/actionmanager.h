@@ -19,14 +19,18 @@
 #include <QKeySequence>
 #include <QVector>
 #include <QAction>
+#include <QPointer>
+#include <QtQml/qqmlregistration.h>
 
-#include <common/document.h>
+#include "bricklink/lot.h"
 
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 QT_FORWARD_DECLARE_CLASS(QJSEngine)
 QT_FORWARD_DECLARE_CLASS(QQuickAction)
 QT_FORWARD_DECLARE_CLASS(QJSValue)
+
+class Document;
 
 
 class ActionManager : public QObject
@@ -199,7 +203,7 @@ private:
     static ActionManager *s_inst;
 
     Document *m_document = nullptr;
-    LotList m_selection;
+    BrickLink::LotList m_selection;
 };
 
 
