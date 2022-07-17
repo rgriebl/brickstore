@@ -85,6 +85,9 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
             this, [emitSelected]() { emitSelected(); });
 
     QMetaObject::invokeMethod(this, emitSelected, Qt::QueuedConnection);
+
+    if (hasDocs || hasClip)
+        setFocusProxy(hasClip ? m_clipboard : m_document);
 }
 
 LotList SelectDocument::lots() const
@@ -417,6 +420,7 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QS
     dpage->setSubTitle(chooseDocText);
     auto *dlayout = new QVBoxLayout(dpage);
     dlayout->addWidget(m_sd);
+    dpage->setFocusProxy(m_sd);
     addPage(dpage);
 
     auto *mpage = new WizardPage();
@@ -472,6 +476,7 @@ void SelectCopyMergeDialog::showEvent(QShowEvent *e)
 {
     setFixedSize(sizeHint());
     QWizard::showEvent(e);
+    page(0)->setFocus();
 }
 
 
