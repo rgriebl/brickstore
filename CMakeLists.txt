@@ -315,9 +315,10 @@ endif()
 
 if (ANDROID)
     if (BUILD_NUMBER STREQUAL "custom")
-        math(EXPR VERSION_CODE "((${VERSION_MAJOR} - 2000) * 10000) + (${VERSION_MINOR} * 100) + ${VERSION_PATCH}")
+        set(VERSION_CODE "0")
     else()
-        set(VERSION_CODE "${BUILD_NUMBER}")
+        # the 1000000 offset is necessary because I screwed up the first PlayStore upload
+        math(EXPR VERSION_CODE "1000000 + ${BUILD_NUMBER}")
     endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
