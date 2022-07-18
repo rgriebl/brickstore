@@ -174,7 +174,8 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
 
         dlg.setPrintRange(window->selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
                                                           : QAbstractPrintDialog::Selection);
-        dlg.open();
+        dlg.setWindowModality(Qt::ApplicationModal);
+        dlg.show();
 
         if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
             print();

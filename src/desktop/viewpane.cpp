@@ -386,7 +386,8 @@ QCoro::Task<> ViewPane::changeDocumentCurrency(QAction *a)
 
     if (ccode != m_model->currencyCode()) {
         ChangeCurrencyDialog dlg(m_model->currencyCode(), ccode, m_model->legacyCurrencyCode(), this);
-        dlg.open();
+        dlg.setWindowModality(Qt::ApplicationModal);
+        dlg.show();
 
         if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
             double rate = dlg.exchangeRate();
@@ -632,7 +633,8 @@ void ViewPane::createToolBar()
         if (m_view && m_view->document()->order()) {
             auto *dlg = new OrderInformationDialog(m_view->document()->order(), this);
             dlg->setAttribute(Qt::WA_DeleteOnClose);
-            dlg->open();
+            dlg->setWindowModality(Qt::ApplicationModal);
+            dlg->show();
         }
     });
 
