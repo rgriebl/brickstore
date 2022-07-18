@@ -648,9 +648,13 @@ QQuickAction *ActionManager::quickAction(const QString &name)
             quickAction->setEnabled(qAction->isEnabled());
 
             QQuickIcon qi = quickAction->icon();
-            qi.setName(qAction->icon().isNull() ? u"dummy"_qs : a->iconName());
-            qi.setColor(Qt::transparent);
-            quickAction->setIcon(qi);
+            bool hasIcon = !qAction->icon().isNull();
+
+            if (!qAction->isCheckable() || hasIcon) {
+                qi.setName(hasIcon ? a->iconName() : u"dummy"_qs);
+                qi.setColor(Qt::transparent);
+                quickAction->setIcon(qi);
+            }
 
             connect(quickAction, &QQuickAction::triggered, qAction, &QAction::trigger);
             connect(quickAction, &QQuickAction::enabledChanged, qAction, &QAction::setEnabled);

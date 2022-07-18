@@ -50,6 +50,8 @@ qt_add_qml_module(mobile_module
     QML_FILES
         AboutDialog.qml
         ActionDelegate.qml
+        ActionMenuItem.qml
+        ActionMenuSeparator.qml
         AnnouncementsDialog.qml
         AppearsInWidget.qml
         AutoSizingMenu.qml
