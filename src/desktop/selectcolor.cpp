@@ -146,11 +146,11 @@ void SelectColor::updateColorFilter(int index)
 {
     int filter = index < 0 ? -1 : w_filter->itemData(index).toInt();
 
-    m_colorModel->unsetFilter();
+    m_colorModel->clearFilters();
 
     if (filter > 0) {
-        m_colorModel->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
-        m_colorModel->setFilterPopularity(0);
+        m_colorModel->setColorTypeFilter(static_cast<BrickLink::Color::TypeFlag>(filter));
+        m_colorModel->setPopularityFilter(0);
     } else if (filter < 0){
         float popularity = 0.f;
         if (filter == -2)
@@ -159,8 +159,8 @@ void SelectColor::updateColorFilter(int index)
             popularity = 0.05f;
 
         // Modulex colors are fine in their own category, but not in the 'all' lists
-        m_colorModel->setFilterType(BrickLink::Color::Type(BrickLink::Color::Mask) & ~BrickLink::Color::Modulex);
-        m_colorModel->setFilterPopularity(popularity);
+        m_colorModel->setColorTypeFilter(BrickLink::Color::Type(BrickLink::Color::Mask) & ~BrickLink::Color::Modulex);
+        m_colorModel->setPopularityFilter(popularity);
     } else if (filter == 0 && m_item) {
         m_colorModel->setColorListFilter(m_item->knownColors());
     }

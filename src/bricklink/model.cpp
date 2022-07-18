@@ -123,54 +123,61 @@ QVariant BrickLink::ColorModel::headerData(int section, Qt::Orientation orient, 
 
 bool BrickLink::ColorModel::isFiltered() const
 {
-    return m_itemtype_filter || m_type_filter || !qFuzzyIsNull(m_popularity_filter)
-            || !m_color_filter.isEmpty();
+    return m_colorTypeFilter || !qFuzzyIsNull(m_popularityFilter) || !m_colorListFilter.isEmpty();
 }
 
-void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
+void BrickLink::ColorModel::clearFilters()
 {
-    if (it == m_itemtype_filter)
+    if (isFiltered()) {
+        m_popularityFilter = 0;
+        m_colorTypeFilter = Color::Type();
+        m_colorListFilter.clear();
+        emit colorTypeFilterChanged();
+        emit popularityFilterChanged();
+        emit colorListFilterChanged();
+        invalidateFilter();
+    }
+}
+
+BrickLink::Color::Type BrickLink::ColorModel::colorTypeFilter() const
+{
+    return m_colorTypeFilter;
+}
+
+void BrickLink::ColorModel::setColorTypeFilter(Color::Type type)
+{
+    if (type == m_colorTypeFilter)
         return;
-    m_itemtype_filter = it;
-    m_color_filter.clear();
+    m_colorTypeFilter = type;
+    emit colorTypeFilterChanged();
     invalidateFilter();
 }
 
-void BrickLink::ColorModel::setFilterType(Color::Type type)
+float BrickLink::ColorModel::popularityFilter() const
 {
-    if (type == m_type_filter)
+    return m_popularityFilter;
+}
+
+void BrickLink::ColorModel::setPopularityFilter(float p)
+{
+    if (qFuzzyCompare(p, m_popularityFilter))
         return;
-    m_type_filter = type;
-    m_color_filter.clear();
+    m_popularityFilter = p;
+    emit popularityFilterChanged();
     invalidateFilter();
 }
 
-void BrickLink::ColorModel::unsetFilter()
+const QVector<const BrickLink::Color *> BrickLink::ColorModel::colorListFilter() const
 {
-    m_popularity_filter = 0;
-    m_type_filter = Color::Type();
-    m_itemtype_filter = nullptr;
-    m_color_filter.clear();
-    invalidateFilter();
-}
-
-void BrickLink::ColorModel::setFilterPopularity(float p)
-{
-    if (qFuzzyCompare(p, m_popularity_filter))
-        return;
-    m_popularity_filter = p;
-    m_color_filter.clear();
-    invalidateFilter();
+    return m_colorListFilter;
 }
 
 void BrickLink::ColorModel::setColorListFilter(const QVector<const BrickLink::Color *> &colorList)
 {
-    if (colorList == m_color_filter)
+    if (colorList == m_colorListFilter)
         return;
-    m_popularity_filter = 0;
-    m_type_filter = Color::Type();
-    m_itemtype_filter = nullptr;
-    m_color_filter = colorList;
+    m_colorListFilter = colorList;
+    emit colorListFilterChanged();
     invalidateFilter();
 }
 
@@ -208,13 +215,11 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
 {
     const auto *color = static_cast<const Color *>(pointer);
 
-    if (m_itemtype_filter && !(m_itemtype_filter->hasColors() || (color && color->id() == 0)))
+    if (m_colorTypeFilter && !(color->type() & m_colorTypeFilter))
         return false;
-    if (m_type_filter && !(color->type() & m_type_filter))
+    if (!qFuzzyIsNull(m_popularityFilter) && (color->popularity() < m_popularityFilter))
         return false;
-    if (!qFuzzyIsNull(m_popularity_filter) && (color->popularity() < m_popularity_filter))
-        return false;
-    if (!m_color_filter.isEmpty() && !m_color_filter.contains(color))
+    if (!m_colorListFilter.isEmpty() && !m_colorListFilter.contains(color))
         return false;
 
     return true;
@@ -297,7 +302,7 @@ QHash<int, QByteArray> BrickLink::CategoryModel::roleNames() const
 {
     static const QHash<int, QByteArray> roles = {
         { Qt::DisplayRole, "name" },
-        { CategoryPointerRole, "category" },
+        { CategoryPointerRole, "categoryPointer" },
     };
     return roles;
 }
@@ -439,7 +444,7 @@ QHash<int, QByteArray> BrickLink::ItemTypeModel::roleNames() const
 {
     static const QHash<int, QByteArray> roles = {
         { Qt::DisplayRole, "name" },
-        { ItemTypePointerRole, "itemType" },
+        { ItemTypePointerRole, "itemTypePointer" },
     };
     return roles;
 }
@@ -584,9 +589,9 @@ QHash<int, QByteArray> BrickLink::ItemModel::roleNames() const
     static const QHash<int, QByteArray> roles = {
         { IdRole, "id" },
         { NameRole, "name" },
-        { ItemPointerRole, "item" },
-        { ItemTypePointerRole, "itemType" },
-        { CategoryPointerRole, "category" },
+        { ItemPointerRole, "itemPointer" },
+        { ItemTypePointerRole, "itemTypePointer" },
+        { CategoryPointerRole, "categoryPointer" },
     };
     return roles;
 }
@@ -982,8 +987,8 @@ QHash<int, QByteArray> BrickLink::InternalAppearsInModel::roleNames() const
         { IdRole, "id" },
         { NameRole, "name" },
         { QuantityRole, "quantity" },
-        { ItemPointerRole, "item" },
-        { ColorPointerRole, "color" },
+        { ItemPointerRole, "itemPointer" },
+        { ColorPointerRole, "colorPointer" },
     };
     return roles;
 }

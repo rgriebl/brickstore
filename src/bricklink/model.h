@@ -28,7 +28,6 @@ namespace BrickLink {
 class ColorModel : public StaticPointerModel
 {
     Q_OBJECT
-    QML_ELEMENT
 
 public:
     ColorModel(QObject *parent = nullptr);
@@ -43,11 +42,18 @@ public:
     const Color *color(const QModelIndex &index) const;
 
     bool isFiltered() const override;
-    void unsetFilter();
-    void setFilterItemType(const ItemType *it);
-    void setFilterType(Color::Type type);
-    void setFilterPopularity(float p);
+    void clearFilters();
+    Color::Type colorTypeFilter() const;
+    void setColorTypeFilter(Color::Type type);
+    float popularityFilter() const;
+    void setPopularityFilter(float p);
+    const QVector<const Color *> colorListFilter() const;
     void setColorListFilter(const QVector<const Color *> &colorList);
+
+signals:
+    void colorTypeFilterChanged();
+    void popularityFilterChanged();
+    void colorListFilterChanged();
 
 protected:
     int pointerCount() const override;
@@ -58,10 +64,9 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    const ItemType *m_itemtype_filter = nullptr;
-    Color::Type m_type_filter {};
-    float m_popularity_filter = 0.f;
-    QVector<const Color *> m_color_filter;
+    Color::Type m_colorTypeFilter {};
+    float m_popularityFilter = 0.f;
+    QVector<const Color *> m_colorListFilter;
 
     friend class Core;
 };

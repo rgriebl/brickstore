@@ -530,6 +530,20 @@ Page {
         onAccepted: root.document.setPriceToGuide(item.time, item.price, item.forceUpdate)
     }
 
+    DialogLoader {
+        id: selectColorDialog
+        source: "SelectColor.qml"
+
+        onOpened: {
+            let rows = table.selectionModel.selectedRows()
+            if (root.document.selectedLots.length) {
+                let lot = root.document.selectedLots[0]
+                item.setItemAndColor(lot.item, lot.color)
+            }
+        }
+        onAccepted: root.document.setColor(item.color)
+    }
+
     property QtObject connectionContext: null
     property bool active: document && (document.document === BS.ActionManager.activeDocument)
 
@@ -537,9 +551,8 @@ Page {
         if (active) {
             connectionContext = BS.ActionManager.connectQuickActionTable
                     ({
-                         "edit_price_to_priceguide": () => {
-                             setToPGDialog.open()
-                         },
+                         "edit_price_to_priceguide": () => { setToPGDialog.open() },
+                         "edit_color": () => { selectColorDialog.open() },
                      })
         } else {
             BS.ActionManager.disconnectQuickActionTable(connectionContext)

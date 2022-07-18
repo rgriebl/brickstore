@@ -8,6 +8,7 @@ Loader {
 
     signal accepted()
     signal rejected()
+    signal opened()
 
     asynchronous: true
     active: false
@@ -16,11 +17,14 @@ Loader {
         item.onAccepted.connect(() => { root.accepted() })
         item.onRejected.connect(() => { root.rejected() })
         item.open()
+        opened()
     }
     function open() {
-        if (status === Loader.Ready)
+        if (status === Loader.Ready) {
             item.open()
-        else
+            opened()
+        } else {
             active = true
+        }
     }
 }

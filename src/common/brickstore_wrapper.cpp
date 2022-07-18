@@ -427,6 +427,11 @@ void QmlDocument::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, 
     m_doc->setPriceToGuide(time, price, forceUpdate);
 }
 
+void QmlDocument::setColor(BrickLink::QmlColor color)
+{
+    m_doc->setColor(color.wrappedObject());
+}
+
 
 void QmlDocument::setDocument(Document *doc)
 {

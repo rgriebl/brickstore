@@ -88,7 +88,7 @@ Page {
                             Component.onCompleted: { sort(0, Qt.DescendingOrder) }
                         }
                         delegate: TabButton {
-                            required property var itemType
+                            required property var itemTypePointer
                             required property string name
                             text: name
                         }
@@ -117,7 +117,7 @@ Page {
                         width: ListView.view.width
                         required property int index
                         required property string name
-                        required property var category
+                        required property var categoryPointer
                         text: name
                         highlighted: checked
                         ButtonGroup.group: catListGroup
@@ -125,7 +125,7 @@ Page {
 
                         onCheckedChanged: {
                             if (checked)
-                                itemListModel.filterCategory = category
+                                itemListModel.filterCategory = categoryPointer
                         }
                         onClicked: {
                             pages.currentIndex = 1
@@ -193,8 +193,8 @@ Page {
                         height: GridView.view.cellHeight
                         required property string id
                         required property string name
-                        required property var item
-                        property BL.Item blitem: BL.BrickLink.item(delegate.item)
+                        required property var itemPointer
+                        property BL.Item blitem: BL.BrickLink.item(delegate.itemPointer)
                         property BL.Picture pic: itemListPage.isPageVisible
                                                  ? BL.BrickLink.picture(blitem, blitem.defaultColor)
                                                  : null

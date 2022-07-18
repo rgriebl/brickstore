@@ -69,6 +69,7 @@ qt_add_qml_module(mobile_module
         MainWindow.qml
         PriceGuideWidget.qml
         ScrollableLayout.qml
+        SelectColor.qml
         SelectionInfoDialog.qml
         SettingsDialog.qml
         SetToPriceGuideDialog.qml

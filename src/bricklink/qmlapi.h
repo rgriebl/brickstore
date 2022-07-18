@@ -18,6 +18,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtCore/QObject>
+#include <QtCore/QIdentityProxyModel>
 #include <QtQml/QQmlEngine>
 
 #include "core.h"
@@ -64,6 +65,7 @@ class QmlBrickLink : public QObject
     Q_PROPERTY(BrickLink::QmlItem noItem READ noItem CONSTANT FINAL)
     Q_PROPERTY(BrickLink::QmlColor noColor READ noColor CONSTANT FINAL)
     Q_PROPERTY(BrickLink::QmlLot noLot READ noLot CONSTANT FINAL)
+    Q_PROPERTY(QVariantList colorTypes READ colorTypes CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Store *store READ store CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Orders *orders READ orders CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT FINAL)
@@ -76,8 +78,10 @@ public:
     QmlItem noItem() const;
     QmlColor noColor() const;
     QmlLot noLot() const;
+    QVariantList colorTypes() const;
 
     Q_INVOKABLE QImage noImage(int width, int height) const;
+    Q_INVOKABLE QString colorTypeName(int colorType) const;
 
     Q_INVOKABLE BrickLink::QmlColor color(const QVariant &v) const;
     Q_INVOKABLE BrickLink::QmlColor colorFromLDrawId(int ldrawId) const;
@@ -198,6 +202,49 @@ public:
 
     friend class QmlBrickLink;
     friend class QmlLot;
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+class QmlColorModel : public QIdentityProxyModel
+{
+    Q_OBJECT
+    QML_NAMED_ELEMENT(ColorModel)
+    Q_PROPERTY(float popularityFilter READ popularityFilter WRITE setPopuplarityFilter NOTIFY popularityFilterChanged)
+    Q_PROPERTY(int colorTypeFilter READ colorTypeFilter WRITE setColorTypeFilter NOTIFY colorTypeFilterChanged)
+    Q_PROPERTY(QVariantList colorListFilter READ colorListFilter WRITE setColorListFilter NOTIFY colorListFilterChanged)
+
+public:
+    QmlColorModel(QObject *parent = nullptr);
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Q_INVOKABLE QModelIndex indexOfColor(QmlColor color);
+
+    Q_INVOKABLE void sortByName();
+    Q_INVOKABLE void sortByHue();
+
+    Q_INVOKABLE void clearFilters();
+
+    float popularityFilter() const;
+    void setPopuplarityFilter(float p);
+    int colorTypeFilter() const;
+    void setColorTypeFilter(int ct);
+    QVariantList colorListFilter() const;
+    void setColorListFilter(const QVariantList &colors);
+
+signals:
+    void popularityFilterChanged();
+    void colorTypeFilterChanged();
+    void colorListFilterChanged();
+
+private:
+    ColorModel *m_model;
 };
 
 

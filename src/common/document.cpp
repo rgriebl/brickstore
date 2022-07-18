@@ -1410,6 +1410,14 @@ void Document::clearMarker()
     });
 }
 
+void Document::setColor(const BrickLink::Color *color)
+{
+    applyTo(selectedLots(), "edit_color", [color](const Lot &from, Lot &to) {
+        (to = from).setColor(color);
+        return DocumentModel::LotChanged;
+    });
+}
+
 QCoro::Task<> Document::exportBrickLinkXMLToFile()
 {
     LotList lots = co_await exportCheck(ExportToFile);

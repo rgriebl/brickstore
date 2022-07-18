@@ -722,6 +722,17 @@ QmlLot QmlBrickLink::noLot() const
     return QmlLot { };
 }
 
+QVariantList QmlBrickLink::colorTypes() const
+{
+    QVariantList result;
+
+    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
+        if (!BrickLink::Color::typeName(ct).isEmpty())
+            result.append(ct);
+    }
+    return result;
+}
+
 /*! \qmlmethod Image BrickLink::noImage(int width, int height)
     Returns an image (sized \a width x \a height), which can be used in place of a missing item
     image.
@@ -729,6 +740,11 @@ QmlLot QmlBrickLink::noLot() const
 QImage QmlBrickLink::noImage(int width, int height) const
 {
     return BrickLink::core()->noImage({ width, height });
+}
+
+QString QmlBrickLink::colorTypeName(int colorType) const
+{
+    return BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(colorType));
 }
 
 /*! \qmlmethod Color BrickLink::color(var color)
@@ -937,6 +953,103 @@ QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QC
 char QmlBrickLink::firstCharInString(const QString &str)
 {
     return (str.size() == 1) ? str.at(0).toLatin1() : 0;
+}
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+QmlColorModel::QmlColorModel(QObject *parent)
+    : QIdentityProxyModel(parent)
+    , m_model(new ColorModel(this))
+{
+    connect(m_model, &ColorModel::colorTypeFilterChanged,
+            this, &QmlColorModel::colorTypeFilterChanged);
+    connect(m_model, &ColorModel::popularityFilterChanged,
+            this, &QmlColorModel::popularityFilterChanged);
+    connect(m_model, &ColorModel::colorListFilterChanged,
+            this, &QmlColorModel::colorListFilterChanged);
+
+    setSourceModel(m_model);
+}
+
+QVariant QmlColorModel::data(const QModelIndex &index, int role) const
+{
+    if (role == ColorPointerRole) {
+        return QVariant::fromValue(QmlColor(QIdentityProxyModel::data(index, role).value<const Color *>()));
+    } else  {
+        return QIdentityProxyModel::data(index, role);
+    }
+}
+
+QHash<int, QByteArray> QmlColorModel::roleNames() const
+{
+    static const QHash<int, QByteArray> roles = {
+        { Qt::DisplayRole, "name" },
+        { Qt::DecorationRole, "sampleImage" },
+        { ColorPointerRole, "colorObject" },
+    };
+    return roles;
+}
+
+QModelIndex QmlColorModel::indexOfColor(QmlColor color)
+{
+    return mapFromSource(m_model->index(color.wrappedObject()));
+}
+
+void QmlColorModel::sortByName()
+{
+    m_model->sort(0, Qt::AscendingOrder);
+}
+
+void QmlColorModel::sortByHue()
+{
+    m_model->sort(0, Qt::DescendingOrder);
+}
+
+void QmlColorModel::clearFilters()
+{
+    m_model->clearFilters();
+}
+
+float QmlColorModel::popularityFilter() const
+{
+    return m_model->popularityFilter();
+}
+
+void QmlColorModel::setPopuplarityFilter(float p)
+{
+    m_model->setPopularityFilter(p);
+}
+
+int QmlColorModel::colorTypeFilter() const
+{
+    return m_model->colorTypeFilter();
+}
+
+void QmlColorModel::setColorTypeFilter(int ct)
+{
+    m_model->setColorTypeFilter(static_cast<Color::TypeFlag>(ct));
+}
+
+QVariantList QmlColorModel::colorListFilter() const
+{
+    QVariantList result;
+    const auto rawColors = m_model->colorListFilter();
+    for (const auto &raw : rawColors)
+        result.append(QVariant::fromValue(QmlColor(raw)));
+    return result;
+}
+
+void QmlColorModel::setColorListFilter(const QVariantList &colors)
+{
+    QVector<const Color *> rawColors;
+    for (const auto &c : colors) {
+        if (auto raw = c.value<QmlColor>().wrappedObject())
+            rawColors << raw;
+    }
+    m_model->setColorListFilter(rawColors);
 }
 
 

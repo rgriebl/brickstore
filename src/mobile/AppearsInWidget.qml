@@ -43,14 +43,13 @@ Control {
             required property string id
             required property string name
             required property int quantity
-            required property var item
-            required property var color
+            required property var itemPointer
 
             property int xspacing: 16
             width: ListView.view.width
             height: layout.height + xspacing
 
-            property BL.Item blitem: BL.BrickLink.item(item)
+            property BL.Item blitem: BL.BrickLink.item(itemPointer)
 
             GridLayout {
                 id: layout
