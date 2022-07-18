@@ -2085,7 +2085,7 @@ QCoro::Task<> Document::consolidateLots(BrickLink::LotList lots)
                         conMode, mi + 1, int(mergeList.size()) };
 
             if (s_consolidationFunction)
-                s_consolidationFunction(lc);
+                co_await s_consolidationFunction(lc);
 
             repeatForRemaining = lc.repeatForRemaining;
             costQtyAvg = lc.costQuantityAverage;
