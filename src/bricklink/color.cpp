@@ -88,13 +88,16 @@ const QImage Color::sampleImage(int w, int h) const
             p.fillRect(r, c);
             p.fillRect(r, brush);
         } else {
+            qreal pw = std::max(1., w / 30.);
+
             p.fillRect(0, 0, w, h, Qt::white);
-            p.setRenderHint(QPainter::Antialiasing);
-            p.setPen(Qt::darkGray);
+            p.setPen({ { Qt::darkGray }, pw });
             p.setBrush(QColor(255, 255, 255, 128));
-            p.drawRect(r);
-            p.drawLine(0, 0, w, h);
-            p.drawLine(0, h, w, 0);
+
+            QRectF rf = QRectF(r).adjusted(pw / 2, pw / 2, -pw / 2, -pw / 2);
+            p.drawRect(rf);
+            p.drawLine(rf.topLeft(), rf.bottomRight());
+            p.drawLine(rf.topRight(), rf.bottomLeft());
         }
 
         if (isTransparent()) {

@@ -311,8 +311,9 @@ Page {
                                 top: colorCell.top
                                 bottom: colorCell.bottom
                             }
+                            property real s: Screen.devicePixelRatio
                             width: colorCell.font.pixelSize * 2
-                            image: BL.BrickLink.color(colorCell.display).sampleImage(width, height)
+                            image: BL.BrickLink.color(colorCell.display).sampleImage(width * s, height * s)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display
