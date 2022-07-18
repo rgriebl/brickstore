@@ -295,7 +295,8 @@ MainWindow::MainWindow(QWidget *parent)
 
         ConsolidateItemsDialog dlg(view, lc.lots, lc.preselectedIndex,
                                    lc.mode, lc.current, lc.total, view);
-        dlg.open();
+        dlg.setWindowModality(Qt::ApplicationModal);
+        dlg.show();
 
         lc.accepted = (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted);
         lc.repeatForRemaining = dlg.repeatForAll();
@@ -1021,13 +1022,15 @@ void MainWindow::createActions()
         { "update_database", [](auto) { Application::inst()->updateDatabase(); } },
         { "help_about", [this](auto) {
               auto *dlg = new AboutDialog(this);
+              dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
-              dlg->open();
+              dlg->show();
           } },
         { "help_systeminfo", [this](auto) {
               auto *dlg = new SystemInfoDialog(this);
+              dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
-              dlg->open();
+              dlg->show();
           } },
         { "check_for_updates", [this](auto) { m_checkForUpdates->check(false /*not silent*/); } },
         { "view_filter", [this](auto) {
@@ -1036,8 +1039,9 @@ void MainWindow::createActions()
           } },
         { "view_column_layout_manage", [this](auto) {
               auto *dlg = new ManageColumnLayoutsDialog(this);
+              dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
-              dlg->open();
+              dlg->show();
           } },
         { "reload_scripts", [](auto) { ScriptManager::inst()->reload(); } },
     };
@@ -1249,8 +1253,9 @@ void MainWindow::transferProgressUpdate(int p, int t)
 void MainWindow::showSettings(const QString &page)
 {
     auto *dlg = new SettingsDialog(page, this);
+    dlg->setWindowModality(Qt::ApplicationModal);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->open();
+    dlg->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

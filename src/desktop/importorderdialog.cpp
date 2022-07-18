@@ -121,7 +121,8 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
             if (order) {
                 auto *dlg = new OrderInformationDialog(order, this);
                 dlg->setAttribute(Qt::WA_DeleteOnClose);
-                dlg->open();
+                dlg->setWindowModality(Qt::ApplicationModal);
+                dlg->show();
             }
         }
     });

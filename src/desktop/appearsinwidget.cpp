@@ -146,7 +146,8 @@ QCoro::Task<> AppearsInWidget::partOut()
 
     if (ai && ai->second) {
         ImportInventoryDialog dlg(ai->second, 1, BrickLink::Condition::Count, this);
-        dlg.open();
+        dlg.setWindowModality(Qt::ApplicationModal);
+        dlg.show();
 
         if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
             Document::fromPartInventory(dlg.item(), nullptr, dlg.quantity(), dlg.condition(),

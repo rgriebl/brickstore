@@ -128,8 +128,9 @@ QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(QString 
         mb.setStandardButtons(QMessageBox::StandardButton(int(buttons)));
         mb.setDefaultButton(QMessageBox::StandardButton(defaultButton));
         mb.setTextFormat(Qt::RichText);
+        mb.setWindowModality(Qt::ApplicationModal);
 
-        mb.open();
+        mb.show();
 
         int result = co_await qCoro(&mb, &QDialog::finished);
         co_return static_cast<StandardButton>(result);
@@ -160,14 +161,14 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getInputString(QString tex
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
-    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setWindowModality(Qt::ApplicationModal);
     dlg.setInputMode(QInputDialog::TextInput);
     dlg.setLabelText(text);
     dlg.setTextValue(initialValue);
     if (isPassword)
         dlg.setTextEchoMode(QLineEdit::Password);
 
-    dlg.open();
+    dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
         co_return dlg.textValue();
@@ -183,7 +184,7 @@ QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(QString text
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
-    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setWindowModality(Qt::ApplicationModal);
     dlg.setInputMode(QInputDialog::DoubleInput);
     dlg.setLabelText(text);
     dlg.setDoubleValue(initialValue);
@@ -200,7 +201,7 @@ QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(QString text
         sp->setButtonSymbols(QAbstractSpinBox::PlusMinus);
     }
 
-    dlg.open();
+    dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
         co_return dlg.doubleValue();
@@ -215,7 +216,7 @@ QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(QString text,
 {
     QInputDialog dlg(s_defaultParent, Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
-    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setWindowModality(Qt::ApplicationModal);
     dlg.setInputMode(QInputDialog::IntInput);
     dlg.setLabelText(text);
     dlg.setIntValue(initialValue);
@@ -231,7 +232,7 @@ QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(QString text,
         sp->setButtonSymbols(QAbstractSpinBox::PlusMinus);
     }
 
-    dlg.open();
+    dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
         co_return dlg.intValue();
@@ -245,11 +246,11 @@ QCoro::Task<std::optional<QColor>> DesktopUIHelpers::getInputColor(QColor initia
     QColorDialog dlg(s_defaultParent);
     dlg.setWindowFlag(Qt::Sheet);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
-    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setWindowModality(Qt::ApplicationModal);
     if (initialColor.isValid())
         dlg.setCurrentColor(initialColor);
 
-    dlg.open();
+    dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
         co_return dlg.selectedColor();
@@ -265,7 +266,13 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, Q
                    filters.join(u";;"));
     fd.setFileMode(doSave ? QFileDialog::AnyFile : QFileDialog::ExistingFile);
     fd.setAcceptMode(doSave ? QFileDialog::AcceptSave : QFileDialog::AcceptOpen);
-    fd.open();
+#if defined(Q_OS_MACOS)  // QTBUG-42516
+    fd.setWindowModality(Qt::WindowModal);
+#else
+    fd.setWindowModality(Qt::ApplicationModal);
+#endif
+
+    fd.show();
     if (co_await qCoro(&fd, &QFileDialog::finished) == QDialog::Accepted) {
         auto files = fd.selectedFiles();
         if (!files.isEmpty())

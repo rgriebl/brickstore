@@ -445,7 +445,8 @@ void HeaderView::showMenu(const QPoint &pos)
         if (li == -1) {
             auto *dlg = new SectionConfigDialog(this);
             dlg->setAttribute(Qt::WA_DeleteOnClose);
-            dlg->open();
+            dlg->setWindowModality(Qt::ApplicationModal);
+            dlg->show();
         } else if (li >= 0 && li < count()) {
             setSectionHidden(li, !on);
         }

@@ -720,6 +720,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
             if (!m_select_item) {
                 m_select_item = new SelectItemDialog(true /*popup mode*/, m_table);
                 m_select_item->setWindowTitle(tr("Modify Item"));
+                m_select_item->setWindowModality(Qt::ApplicationModal);
 
                 connect(m_select_item, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
@@ -740,7 +741,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
             m_select_item->setPopupPosition(centerOn);
             m_select_item->setProperty("contextIndex", idx);
-            m_select_item->open();
+            m_select_item->show();
         }
         break;
 
@@ -749,6 +750,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
             if (!m_select_color) {
                 m_select_color = new SelectColorDialog(true /*popup mode*/, m_table);
                 m_select_color->setWindowTitle(tr("Modify Color"));
+                m_select_color->setWindowModality(Qt::ApplicationModal);
 
                 connect(m_select_color, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
@@ -771,7 +773,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
             m_select_color->setPopupPosition(centerOn);
             m_select_color->setProperty("contextIndex", idx);
-            m_select_color->open();
+            m_select_color->show();
         }
         break;
 

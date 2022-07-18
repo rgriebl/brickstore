@@ -219,7 +219,8 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
         dlg->resize(dlg->fontMetrics().averageCharWidth() * 100, dlg->fontMetrics().height() * 30);
 
         dlg->setAttribute(Qt::WA_DeleteOnClose);
-        dlg->open();
+        dlg->setWindowModality(Qt::ApplicationModal);
+        dlg->show();
     }
 }
 

@@ -153,7 +153,8 @@ QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcem
         co_return;
 
     AnnouncementsDialog dlg(md, parent);
-    dlg.open();
+    dlg.setWindowModality(Qt::ApplicationModal);
+    dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
         for (const auto &id : qAsConst(shownIds))

@@ -128,7 +128,7 @@ public:
         , m_message(message)
         , m_pd(new ForceableProgressDialog(parent))
     {
-        m_pd->setModal(true);
+        m_pd->setWindowModality(Qt::ApplicationModal);
         m_pd->setWindowTitle(title);
         m_pd->setLabelText(message);
         m_pd->setAutoReset(false);

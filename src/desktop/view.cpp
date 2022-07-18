@@ -298,7 +298,8 @@ View::View(Document *document, QWidget *parent)
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
                                         tr("Choose how fields are getting copied or merged."), this);
-              dlg.open();
+              dlg.setWindowModality(Qt::ApplicationModal);
+              dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
@@ -309,7 +310,8 @@ View::View(Document *document, QWidget *parent)
           } },
         { "edit_subtractitems", [this](auto) -> QCoro::Task<> {
               SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"), this);
-              dlg.open();
+              dlg.setWindowModality(Qt::ApplicationModal);
+              dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
@@ -323,7 +325,8 @@ View::View(Document *document, QWidget *parent)
               //Q_ASSERT(m_setToPG.isNull());
 
               SetToPriceGuideDialog dlg(this);
-              dlg.open();
+              dlg.setWindowModality(Qt::ApplicationModal);
+              dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate());
@@ -332,7 +335,8 @@ View::View(Document *document, QWidget *parent)
               bool showTiers = !m_header->isSectionHidden(DocumentModel::TierQ1);
               IncDecPricesDialog dlg(tr("Increase or decrease the prices of the selected items by"),
                                      showTiers, m_model->currencyCode(), this);
-              dlg.open();
+              dlg.setWindowModality(Qt::ApplicationModal);
+              dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->priceAdjust(dlg.isFixed(), dlg.value(), dlg.applyToTiers());
@@ -340,7 +344,8 @@ View::View(Document *document, QWidget *parent)
         { "edit_cost_inc_dec", [this](auto) -> QCoro::Task<> {
               IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
                                      false, m_model->currencyCode(), this);
-              dlg.open();
+              dlg.setWindowModality(Qt::ApplicationModal);
+              dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->costAdjust(dlg.isFixed(), dlg.value());
@@ -578,7 +583,8 @@ QCoro::Task<> View::partOutItems()
 
             if (!BrickLink::Item::ConsistsOf::isSimple(lot->item()->consistsOf())) {
                 ImportInventoryDialog dlg(lot->item(), quantity, condition, this);
-                dlg.open();
+                dlg.setWindowModality(Qt::ApplicationModal);
+                dlg.show();
                 if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                     quantity = dlg.quantity();
                     condition = dlg.condition();
@@ -745,18 +751,19 @@ void View::print(bool asPdf)
                    ? selectedLots() : model()->filteredLots(),
                    pages, scaleFactor, maxPageCount, maxWidth);
     });
+    dlg->setWindowModality(Qt::ApplicationModal);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->open();
+    dlg->show();
 }
 
 void View::printScriptAction(PrintingScriptAction *printingAction)
 {
-    auto *pd = new PrintDialog(false /*asPdf*/, this);
-    pd->setModal(true);
-    pd->setAttribute(Qt::WA_DeleteOnClose);
-    pd->setProperty("bsFailOnce", false);
+    auto *dlg = new PrintDialog(false /*asPdf*/, this);
+    dlg->setWindowModality(Qt::ApplicationModal);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setProperty("bsFailOnce", false);
 
-    connect(pd, &PrintDialog::paintRequested,
+    connect(dlg, &PrintDialog::paintRequested,
             this, [=, this](QPrinter *previewPrt, const QList<uint> &pages, double scaleFactor,
             uint *maxPageCount, double *maxWidth) {
         try {
@@ -767,8 +774,8 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
                                          previewPrt->printRange() == QPrinter::Selection,
                                          pages, maxPageCount);
         } catch (const Exception &e) {
-            if (!pd->property("bsFailOnce").toBool()) {
-                pd->setProperty("bsFailOnce", true);
+            if (!dlg->property("bsFailOnce").toBool()) {
+                dlg->setProperty("bsFailOnce", true);
 
                 QString msg = e.error();
                 if (msg.isEmpty())
@@ -780,11 +787,11 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
                     UIHelpers::warning(msg);
                 }, Qt::QueuedConnection);
 
-                pd->deleteLater();
+                dlg->deleteLater();
             }
         }
     });
-    pd->open();
+    dlg->show();
 }
 
 bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,
