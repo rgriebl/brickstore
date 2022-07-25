@@ -291,6 +291,11 @@ QmlThenable *QmlBrickStore::checkBrickLinkLogin()
     return thenable;
 }
 
+double QmlBrickStore::maxLocalPrice(const QString &currencyCode)
+{
+    return DocumentModel::maxLocalPrice(currencyCode);
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -430,6 +435,16 @@ void QmlDocument::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, 
 void QmlDocument::setColor(BrickLink::QmlColor color)
 {
     m_doc->setColor(color.wrappedObject());
+}
+
+void QmlDocument::priceAdjust(bool isFixed, double value, bool applyToTiers)
+{
+    m_doc->priceAdjust(isFixed, value, applyToTiers);
+}
+
+void QmlDocument::costAdjust(bool isFixed, double value)
+{
+    m_doc->costAdjust(isFixed, value);
 }
 
 
@@ -637,6 +652,12 @@ void QmlDocument::internalMoveColumn(int viFrom, int viTo)
     m_doc->moveColumn(li, viFrom, viTo);
 }
 
+bool QmlDocument::internalIsColumnHidden(int li) const
+{
+    const auto &cd = m_doc->columnLayout().value(li);
+    return cd.m_hidden;
+}
+
 void QmlDocument::internalHideColumn(int vi, bool hidden)
 {
     int li = v2l[vi];
@@ -686,6 +707,11 @@ void QmlDocumentColumnModel::moveColumn(int viFrom, int viTo)
 void QmlDocumentColumnModel::hideColumn(int vi, bool hidden)
 {
     m_proxyModel->internalHideColumn(vi, hidden);
+}
+
+bool QmlDocumentColumnModel::isColumnHidden(int li) const
+{
+    return m_proxyModel->internalIsColumnHidden(li);
 }
 
 

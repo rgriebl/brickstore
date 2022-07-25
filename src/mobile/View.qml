@@ -544,6 +544,40 @@ Page {
         onAccepted: root.document.setColor(item.color)
     }
 
+    DialogLoader {
+        id: adjustPriceDialog
+
+        Component {
+            id: adjustPrice
+
+            IncDecPricesDialog {
+                showTiers: !root.document.columnModel.isColumnHidden(BS.Document.TierQ1)
+                text: qsTr("Increase or decrease the prices of the selected items by")
+                currencyCode: root.document.currencyCode
+            }
+        }
+
+        sourceComponent: adjustPrice
+        onAccepted: root.document.priceAdjust(item.fixed, item.value, item.applyToTiers)
+    }
+
+    DialogLoader {
+        id: adjustCostDialog
+
+        Component {
+            id: adjustCost
+
+            IncDecPricesDialog {
+                showTiers: false
+                text: qsTr("Increase or decrease the costs of the selected items by")
+                currencyCode: root.document.currencyCode
+            }
+        }
+
+        sourceComponent: adjustCost
+        onAccepted: root.document.costAdjust(item.fixed, item.value)
+    }
+
     property QtObject connectionContext: null
     property bool active: document && (document.document === BS.ActionManager.activeDocument)
 
@@ -553,6 +587,8 @@ Page {
                     ({
                          "edit_price_to_priceguide": () => { setToPGDialog.open() },
                          "edit_color": () => { selectColorDialog.open() },
+                         "edit_price_inc_dec": () => { adjustPriceDialog.open() },
+                         "edit_cost_inc_dec": () => { adjustCostDialog.open() },
                      })
         } else {
             BS.ActionManager.disconnectQuickActionTable(connectionContext)

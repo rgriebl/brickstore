@@ -66,6 +66,7 @@ qt_add_qml_module(mobile_module
         ImportInventoryDialog.qml
         ImportOrderDialog.qml
         ImportWantedListDialog.qml
+        IncDecPricesDialog.qml
         InfoWidget.qml
         Main.qml
         MainWindow.qml

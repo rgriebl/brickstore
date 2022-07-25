@@ -64,11 +64,11 @@ AutoSizingMenu {
     ActionMenuItem { actionName: "edit_qty_multiply"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionMenuItem { actionName: "edit_qty_divide"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionMenuItem { actionName: "edit_price_set"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
-//    ActionMenuItem { actionName: "edit_price_inc_dec"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
+    ActionMenuItem { actionName: "edit_price_inc_dec"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionMenuItem { actionName: "edit_price_round"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionMenuItem { actionName: "edit_price_to_priceguide"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
     ActionMenuItem { actionName: "edit_cost_set"; visible: enabled && root.is(BS.Document.Cost) }
-//    ActionMenuItem { actionName: "edit_cost_inc_dec"; visible: enabled && root.is(BS.Document.Cost) }
+    ActionMenuItem { actionName: "edit_cost_inc_dec"; visible: enabled && root.is(BS.Document.Cost) }
     ActionMenuItem { actionName: "edit_cost_round"; visible: enabled && root.is(BS.Document.Cost) }
     ActionMenuItem { actionName: "edit_cost_spread_price"; visible: enabled && root.is(BS.Document.Cost) }
     ActionMenuItem { actionName: "edit_cost_spread_weight"; visible: enabled && root.is(BS.Document.Cost) }

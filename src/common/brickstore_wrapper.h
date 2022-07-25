@@ -110,6 +110,9 @@ public:
     Q_INVOKABLE void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate);
     Q_INVOKABLE void setColor(BrickLink::QmlColor color);
 
+    Q_INVOKABLE void priceAdjust(bool isFixed, double value, bool applyToTiers);
+    Q_INVOKABLE void costAdjust(bool isFixed, double value);
+
 signals:
     void forceLayout();
 
@@ -146,6 +149,7 @@ private:
 
     void internalHideColumn(int vi, bool visible);
     void internalMoveColumn(int viFrom, int viTo);
+    bool internalIsColumnHidden(int li) const;
 
     QVector<int> l2v;
     QVector<int> v2l;
@@ -179,6 +183,8 @@ public:
 
     Q_INVOKABLE void moveColumn(int viFrom, int viTo);
     Q_INVOKABLE void hideColumn(int vi, bool hidden);
+
+    Q_INVOKABLE bool isColumnHidden(int li) const;
 
 private:
     QmlDocument *m_proxyModel;
@@ -577,6 +583,8 @@ public:
     QmlDocument *activeDocument() const;
 
     Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
+
+    Q_INVOKABLE double maxLocalPrice(const QString &currencyCode);
 
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);

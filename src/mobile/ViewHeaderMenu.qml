@@ -45,6 +45,7 @@ AutoSizingMenu {
             ListView {
                 anchors.fill: parent
                 model: root.document.columnModel
+                clip: true
 
                 ScrollIndicator.vertical: ScrollIndicator { }
 
