@@ -67,9 +67,11 @@ if (BS_DESKTOP)
 endif()
 
 if (MACOS)
-    target_link_libraries(common_module PRIVATE
-        "-framework SystemConfiguration"
-    )
+    target_link_libraries(common_module PRIVATE "-framework SystemConfiguration")
+endif()
+
+if (SENTRY)
+    target_link_libraries(common_module PRIVATE sentry::sentry)
 endif()
 
 qt_add_qml_module(common_module

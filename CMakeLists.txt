@@ -25,7 +25,6 @@ option(FORCE_MOBILE "Force a mobile build on desktop" OFF)
 option(SANITIZE     "Build with ASAN" OFF)
 option(MODELTEST    "Build with modeltest" OFF)
 option(SENTRY       "Build with sentry.io support" OFF)
-option(VCPKG_PATH   "VCPKG_PATH" "")
 
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")
@@ -141,6 +140,21 @@ endif()
 if (WIN32)
     add_compile_definitions(BS_HAS_PARALLEL_STL)
     add_compile_definitions(NOMINMAX)
+endif()
+
+if (SENTRY)
+    include(FetchContent)
+
+    FetchContent_Declare(
+      sentry
+      GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+      GIT_TAG        0.5.0
+    )
+
+    FetchContent_MakeAvailable(sentry)
+
+    add_compile_definitions(SENTRY_ENABLED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE sentry)
 endif()
 
 if (MODELTEST)
@@ -414,10 +428,19 @@ add_custom_target("Other-Files" SOURCES
 if (MACOS)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
+    # deploy sentry dependencies
+    set(COPY_SENTRY_COMMAND "")
+    if (SENTRY)
+        set(COPY_SENTRY_COMMAND COMMAND "${CMAKE_COMMAND}" -E copy
+            "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        )
+    endif()
+
     add_custom_target(dmg
         COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE_DIR:${PROJECT_NAME}>/../..
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
+        ${COPY_SENTRY_COMMAND}
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
                 "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
         COMMENT "Creating macOS DMG. Please wait..."
@@ -433,9 +456,8 @@ elseif (WIN32)
     set(COPY_SENTRY_COMMAND "")
     if (SENTRY)
         set(COPY_SENTRY_COMMAND COMMAND "${CMAKE_COMMAND}" -E copy
-            "${VCPKG_PATH}/bin/sentry.dll"
-            "${VCPKG_PATH}/bin/zlib1.dll"
-            "${VCPKG_PATH}/tools/sentry-native/crashpad_handler.exe" "${CMAKE_CURRENT_BINARY_DIR}/bin")
+            "$<TARGET_FILE:crashpad_handler>" "${CMAKE_CURRENT_BINARY_DIR}/bin"
+        )
     endif()
 
     set(INNO_ARCH ${CMAKE_SYSTEM_PROCESSOR})
@@ -601,5 +623,4 @@ message(STATUS "  FORCE_MOBILE ... ${FORCE_MOBILE}")
 message(STATUS "  SANITIZE ....... ${SANITIZE}")
 message(STATUS "  MODELTEST ...... ${MODELTEST}")
 message(STATUS "  SENTRY ......... ${SENTRY}")
-message(STATUS "  VCPKG_PATH ..... ${VCPKG_PATH}")
 message(STATUS "")

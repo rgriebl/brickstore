@@ -39,7 +39,6 @@ jobs:
           qt_arch: 'win64_msvc2019_64'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           cmake_extra_config: '-DSENTRY=ON'
-          vcpkg_triplet: 'x64-windows'
 
         - name: "Windows ARM 64bit"
           artifact: "Windows-ARM64"
@@ -49,7 +48,6 @@ jobs:
           qt_arch: 'win64_msvc2019_arm64'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
           cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
-          vcpkg_triplet: 'arm64-windows'
 
         - name: "Ubuntu 22.04 64bit"
           artifact: "Ubuntu-22.04"
@@ -80,13 +78,14 @@ jobs:
           os: macos
           qt_version: '6.2.4'
           qt_arch: ''
-          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
+          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
 
         - name: "Android ARM 32bit"
           artifact: "Android-ARM"
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'armeabi-v7a'
+          android_ndk: '23.2.8568313'
           qt_version: '6.4.0'
           qt_arch: 'android_armv7'
           qt_target: 'android'
@@ -97,6 +96,7 @@ jobs:
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'arm64-v8a'
+          android_ndk: '23.2.8568313'
           qt_version: '6.4.0'
           qt_arch: 'android_arm64_v8a'
           qt_target: 'android'
@@ -118,24 +118,6 @@ jobs:
 
     # Caching
     #################################################
-
-    - name: Cache vcpkg on Windows
-      uses: actions/cache@v3
-      if: (matrix.config.os == 'windows') && matrix.config.vcpkg_triplet
-      with:
-        path: |
-          C:\vcpkg\installed
-          C:\vcpkg\downloads
-        key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
-
-    - name: Cache vcpkg on Unix
-      uses: actions/cache@v3
-      if: (matrix.config.os != 'windows') && matrix.config.vcpkg_triplet
-      with:
-        path: |
-          /usr/local/share/vcpkg/installed
-          /usr/local/share/vcpkg/downloads
-        key: ${{ matrix.config.vcpkg_triplet }}-vcpkg-cache
 
     - name: Cache Qt from qt.io
       id: cache-qt
@@ -159,7 +141,6 @@ jobs:
         arch: ${{ matrix.config.qt_arch }}
         target: ${{ matrix.config.qt_target || 'desktop' }}
         tools: ${{ matrix.config.qt_tools }}
-        setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
 
     - name: Install Qt from qt.io (OS version for cross-compiling)
       if: (matrix.config.os == 'android') || (matrix.config.os == 'ios') || (matrix.config.qt_arch == 'win64_msvc2019_arm64')
@@ -171,7 +152,6 @@ jobs:
         modules: 'qtquick3d qtshadertools qttools'
         target: 'desktop'
         tools: ${{ matrix.config.qt_tools }}
-        setup-python: false # https://github.com/jurplel/install-qt-action/issues/142
         set-env: false
 
     - name: Fix broken Windows / ARM64 setup
@@ -213,15 +193,6 @@ jobs:
             debhelper lsb-release fakeroot build-essential
       shell: bash
 
-    # Install dependencies using vcpkg
-    #################################################
-
-    - name: Install sentry.io (vcpkg)
-      if: contains(matrix.config.cmake_extra_config, '-DSENTRY=ON')
-      run: |
-        $VCPKG_INSTALLATION_ROOT/vcpkg install --recurse sentry-native --triplet ${{ matrix.config.vcpkg_triplet }}
-      shell: sh
-
     # Checkout
     #################################################
 
@@ -236,7 +207,7 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=%VCPKG_INSTALLATION_ROOT%/installed/${{ matrix.config.vcpkg_triplet }}" .
+        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target installer
       shell: cmd
 
@@ -311,7 +282,7 @@ jobs:
     - name: Build for Android
       if: (matrix.config.os == 'android')
       run: |
-        echo "Using NDK: $ANDROID_NDK_HOME"
+        echo "Using NDK: $ANDROID_SDK_ROOT/ndk/${{ matrix.config.android_ndk }}"
         echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
         qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -319,7 +290,7 @@ jobs:
             -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
             -DANDROID_NATIVE_API_LEVEL=23 \
             -DANDROID_ABI=${{ matrix.config.android_abi }} \
-            -DANDROID_NDK_ROOT=${ANDROID_NDK_HOME} \
+            -DANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }} \
             -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
             ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target final-apk
@@ -338,7 +309,7 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} "-DVCPKG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.config.vcpkg_triplet }}" .
+        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
         cmake --build . --config RelWithDebInfo --parallel --target dmg
       shell: bash
 
