@@ -1940,7 +1940,7 @@ QCoro::Task<int> Document::addLots(LotList &&lotsRef, AddLotMode addLotMode)
             Lot *mergeLot = nullptr;
 
             const auto documentLots = model()->sortedLots();
-            for (int j = documentLots.count() - 1; j >= 0; --j) {
+            for (int j = int(documentLots.count()) - 1; j >= 0; --j) {
                 Lot *otherLot = documentLots.at(j);
                 if ((!lot->isIncomplete() && !otherLot->isIncomplete())
                         && (lot->item() == otherLot->item())
@@ -2138,7 +2138,7 @@ int Document::consolidateLotsHelper(const LotList &lots, LotConsolidation::Mode 
     case LotConsolidation::Mode::IntoTopSorted:
         return 0;
     case LotConsolidation::Mode::IntoBottomSorted:
-        return lots.count() - 1;
+        return int(lots.count()) - 1;
     case LotConsolidation::Mode::IntoLowestIndex: {
         const auto di = model()->lots();
         auto it = std::min_element(lots.cbegin(), lots.cend(), [di](const auto &a, const auto &b) {

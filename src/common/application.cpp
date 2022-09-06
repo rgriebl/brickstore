@@ -20,6 +20,7 @@
 #include <QtCore/QDirIterator>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QMutexLocker>
+#include <QtCore/QStandardPaths>
 #include <QtNetwork/QNetworkProxyFactory>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QFont>

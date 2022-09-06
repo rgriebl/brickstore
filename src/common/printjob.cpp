@@ -491,7 +491,7 @@ QmlPrintPage *QmlPrintJob::addPage()
 {
     auto *page = new QmlPrintPage(this);
     m_pages.append(page);
-    int pageNo = m_pages.size();
+    int pageNo = int(m_pages.size());
     page->setObjectName(u"Print page #"_qs + QString::number(pageNo));
     emit pageCountChanged(pageNo);
     return page;
@@ -514,7 +514,7 @@ bool QmlPrintJob::isAborted() const
 
 int QmlPrintJob::pageCount() const
 {
-    return m_pages.count();
+    return int(m_pages.count());
 }
 
 QSizeF QmlPrintJob::paperSize() const
