@@ -159,7 +159,7 @@ if (CLANG OR GCC)
 endif()
 
 if (SANITIZE)
-    if (NOT (LINUX AND (GCC OR CLANG)))
+    if (NOT (LINUX OR MACOS))
         message(FATAL_ERROR "Sanitizer builds are only supported on Linux, using GCC or Clang.")
         return()
     endif()
