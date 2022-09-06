@@ -491,6 +491,8 @@ View::View(Document *document, QWidget *parent)
 
 View::~View()
 {
+    delete m_actionConnectionContext;
+    m_actionConnectionContext = nullptr;
     m_document->deref();
     //qWarning() << "~" << this;
 }
