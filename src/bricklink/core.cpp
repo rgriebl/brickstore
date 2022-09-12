@@ -179,9 +179,9 @@ void Core::openUrl(UrlList u, const void *opt, const void *opt2)
                 queryTerm.remove('('_l1);
                 queryTerm.remove(')'_l1);
             }
-            query.addQueryItem("q"_l1, Utility::urlQueryEscape(queryTerm));
             if (item->itemType()->hasColors() && color)
-                query.addQueryItem("ColorID"_l1, QString::number(color->id()));
+                queryTerm = color->name() % u' ' % queryTerm;
+            query.addQueryItem("q"_l1, Utility::urlQueryEscape(queryTerm));
             url.setQuery(query);
         }
         break;
