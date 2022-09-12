@@ -21,6 +21,8 @@ on:
     branches:
       - main
       - next
+    tags:
+      - v*
 
 jobs:
   build:
