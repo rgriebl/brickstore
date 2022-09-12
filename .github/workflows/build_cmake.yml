@@ -125,7 +125,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.workspace }}/Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-4
+        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-5
 
     # Get Qt
     #################################################
