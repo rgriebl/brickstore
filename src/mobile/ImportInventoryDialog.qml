@@ -94,8 +94,8 @@ Page {
                         }
                     }
                     onCurrentItemChanged: {
-                        catList.model.filterItemType = currentItem.itemType
-                        itemListModel.filterItemType = currentItem.itemType
+                        catList.model.filterItemType = currentItem.itemTypePointer
+                        itemListModel.filterItemType = currentItem.itemTypePointer
                     }
                     currentIndex: 0
                 }
@@ -217,19 +217,17 @@ Page {
                             verticalAlignment: Text.AlignVCenter
                         }
                         onClicked: {
-                            let it = BL.BrickLink.item(delegate.item)
-
-                            root.currentItem = it
+                            root.currentItem = blitem
                             root.hasAlternates = false
                             root.hasCounterParts = false
                             root.hasInstructions = false
                             root.hasExtras = false
 
-                            if (!it.isNull) {
-                                if (it.itemType.id === "S")
-                                    root.hasInstructions = !BL.BrickLink.item("I", it.id).isNull
+                            if (!blitem.isNull) {
+                                if (blitem.itemType.id === "S")
+                                    root.hasInstructions = !BL.BrickLink.item("I", blitem.id).isNull
 
-                                it.consistsOf().forEach(function(lot) {
+                                blitem.consistsOf().forEach(function(lot) {
                                     if (lot.status === BL.BrickLink.Status.Extra)
                                         root.hasExtras = true
                                     if (lot.counterPart)
