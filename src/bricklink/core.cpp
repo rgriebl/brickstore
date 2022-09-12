@@ -170,15 +170,15 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
             url = u"https://www.bricklink.com/inventory_detail.asp?"_qs;
             QUrlQuery query;
             query.addQueryItem(u"catType"_qs, QString(QLatin1Char(item->itemTypeId())));
-            QString queryTerm = QLatin1String(item->id());
+            QString queryTerm = QString::fromLatin1(item->id());
             if (queryTerm.contains(u'-')) {
                 queryTerm = item->name();
                 queryTerm.remove(u'(');
                 queryTerm.remove(u')');
             }
-            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
             if (item->itemType()->hasColors() && color)
-                query.addQueryItem(u"ColorID"_qs, QString::number(color->id()));
+                queryTerm = color->name() % u' ' % queryTerm;
+            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
             url.setQuery(query);
         }
         break;

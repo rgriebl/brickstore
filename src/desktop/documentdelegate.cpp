@@ -204,7 +204,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (differenceFlags & (1ULL << idx.column())) {
         bool warn = (differenceFlags & differenceWarningMask & (1ULL << idx.column()));
         int s = option.fontMetrics.height() / 10 * 8;
-        QString key = u"dd_ti_"_qs % (warn ? u"!" : u"") % QString::number(s);
+        QString key = u"dd_ti_"_qs % (warn ? u"!"_qs : u""_qs) % QString::number(s);
         QPixmap pix;
 
         if (!QPixmapCache::find(key, &pix)) {
