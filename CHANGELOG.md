@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.9.1] - 2022-09-13
+
 This is a big modernization of both the libraries BrickStore is built upon and its build-system to
 keep BrickStore maintainable and also compatible with modern operating systems.
 
@@ -36,7 +38,9 @@ Other notable changes:
   App Store is currently being tested, but needs a bit more work before Apple will accept it.
 - The LDraw parts library is now mirrored to brickforge.de, which should really speed up these
   downloads.
- 
+
+Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
+
 
 ## [2022.4.1] - 2022-04-02
 This update is **mandatory** for users of 2022.3.1:
@@ -516,7 +520,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.4.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.1...HEAD
+[2022.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.1
 [2022.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.4.1
 [2022.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.3.1
 [2022.2.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.2.2
