@@ -26,6 +26,7 @@ class RenderWidget;
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QMenu)
 
 
 class PictureWidget : public QFrame
@@ -70,6 +71,7 @@ private:
     QToolButton *w_reloadRescale = nullptr;
     QIcon m_rescaleIcon;
     QIcon m_reloadIcon;
+    QMenu *m_contextMenu = nullptr;
 
     QAction *m_renderSettings;
     QAction *m_copyImage;

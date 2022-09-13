@@ -394,17 +394,18 @@ bool PictureWidget::event(QEvent *e)
 void PictureWidget::contextMenuEvent(QContextMenuEvent *e)
 {
     if (m_item) {
-        QMenu *m = new QMenu(this);
-        m->setAttribute(Qt::WA_DeleteOnClose);
-        m->addAction(m_blCatalog);
-        m->addAction(m_blPriceGuide);
-        m->addAction(m_blLotsForSale);
-        m->addSeparator();
-        m->addAction(m_renderSettings);
-        m->addSeparator();
-        m->addAction(m_copyImage);
-        m->addAction(m_saveImageAs);
-        m->popup(e->globalPos());
+        if (!m_contextMenu) {
+            m_contextMenu = new QMenu(this);
+            m_contextMenu->addAction(m_blCatalog);
+            m_contextMenu->addAction(m_blPriceGuide);
+            m_contextMenu->addAction(m_blLotsForSale);
+            m_contextMenu->addSeparator();
+            m_contextMenu->addAction(m_renderSettings);
+            m_contextMenu->addSeparator();
+            m_contextMenu->addAction(m_copyImage);
+            m_contextMenu->addAction(m_saveImageAs);
+        }
+        m_contextMenu->popup(e->globalPos());
     }
     e->accept();
 }
