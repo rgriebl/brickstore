@@ -128,10 +128,10 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
             bool noUpdatePossible = false;
 
 #if defined(Q_OS_MACOS)
-            noUpdatePossible = (QVersionNumber(QSysInfo::productVersion()) < QVersionNumber(10, 14));
+            noUpdatePossible = (QVersionNumber::fromString(QSysInfo::productVersion()) < QVersionNumber(10, 14));
 #elif defined(Q_OS_WINDOWS)
-            noUpdatePossible = (QVersionNumber(QSysInfo::productVersion()) < QVersionNumber(10, 0))
-                    || (QSysInfo::currentCpuArchitecture() == qL1S("i386"));
+            noUpdatePossible = (QVersionNumber::fromString(QSysInfo::productVersion()) < QVersionNumber(10, 0))
+                    || (QSysInfo::currentCpuArchitecture() == "i386"_l1);
 #endif
 
             if (noUpdatePossible) {
