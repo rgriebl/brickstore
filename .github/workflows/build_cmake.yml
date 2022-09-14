@@ -78,7 +78,7 @@ jobs:
           artifact: "macOS"
           runs-on: macos-11
           os: macos
-          qt_version: '6.2.4'
+          qt_version: '6.3.2'
           qt_arch: ''
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
 
