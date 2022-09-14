@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2022.9.2] - 2022-09-14
+## [2022.9.2] - 2022-09-15
 
 This is strictly a bug-fix release for a few annoying issues found in the 2022.9.1 release:
 - upgrades on Windows didn't finish correctly if BrickStore was running.
