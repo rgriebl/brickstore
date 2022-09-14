@@ -190,8 +190,10 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     if ((defaultIdx == -1) || (m_printer->outputFormat() == QPrinter::PdfFormat))
         defaultIdx = w_printers->count() - 1;
 
-    QMetaObject::invokeMethod(this, [this, defaultIdx]() {
-        w_printers->setCurrentIndex(defaultIdx);
+    w_printers->setCurrentIndex(defaultIdx);
+
+    QMetaObject::invokeMethod(this, [this]() {
+        updatePrinter(w_printers->currentIndex());
         m_setupComplete = true;
         w_print_preview->updatePreview();
    }, Qt::QueuedConnection);
@@ -265,11 +267,11 @@ void PrintDialog::updatePrinter(int idx)
     updateActions();
 
     blocker.unblock();
-    w_print_preview->updatePreview();
 
     m_saveAsPdf = m_printer->printerName().isEmpty();
-
     m_printButton->setText(m_saveAsPdf ? tr("Save") : tr("Print"));
+
+    w_print_preview->updatePreview();
 }
 
 void PrintDialog::updatePageRange()
