@@ -125,6 +125,22 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
             QMessageBox::information(m_parent, m_title,
                                      tr("Your currently installed version is up-to-date."));
         } else {
+            bool noUpdatePossible = false;
+
+#if defined(Q_OS_MACOS)
+            noUpdatePossible = (QVersionNumber(QSysInfo::productVersion()) < QVersionNumber(10, 14));
+#elif defined(Q_OS_WINDOWS)
+            noUpdatePossible = (QVersionNumber(QSysInfo::productVersion()) < QVersionNumber(10, 0))
+                    || (QSysInfo::currentCpuArchitecture() == qL1S("i386"));
+#endif
+
+            if (noUpdatePossible) {
+                if (!silent)
+                    QMessageBox::information(m_parent, m_title,
+                                             tr("Your system is too old to update to the newest version."));
+                co_return;
+            }
+
             showVersionChanges(latestVersion);
         }
     }
