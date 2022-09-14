@@ -456,6 +456,7 @@ if (MACOS)
     set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-background.png")
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}-${VERSION}")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION}")
 
 elseif (WIN32)
     # deploy sentry dependencies
