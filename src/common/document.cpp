@@ -957,8 +957,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     for (Lot *item : sel) {
         BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
-        if (pg && (forceUpdate || !pg->isValid())
-                && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
+        if (pg && forceUpdate && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
             pg->update();
         }
 
