@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.9.2] - 2022-09-14
+
+This is strictly a bug-fix release for a few annoying issues found in the 2022.9.1 release:
+- upgrades on Windows didn't finish correctly if BrickStore was running.
+- the build server produced a broken macOS package that wouldn't start.
+- popup-menus and dialogs sometimes got misplaced in multi-monitor setups.
+
+
 ## [2022.9.1] - 2022-09-13
 
 This is a big modernization of both the libraries BrickStore is built upon and its build-system to
@@ -520,7 +528,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.2...HEAD
+[2022.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.2
 [2022.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.1
 [2022.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.4.1
 [2022.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.3.1
