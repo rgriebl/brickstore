@@ -4,7 +4,7 @@
 #define SOURCE_DIR "."
 #endif
 #ifndef ARCH
-#define ARCH x64
+#define ARCH "x64"
 #endif
 
 #define ApplicationVersionFull GetVersionNumbersString(SOURCE_DIR + "\BrickStore.exe")
@@ -99,8 +99,21 @@ var
 begin
     RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\BrickStore_is1', 'UninstallString', UninstallString);
     if UninstallString <> '' then begin
-       UninstallString := RemoveQuotes(UninstallString);
-       if not Exec(UninstallString, '/SILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-         Result := 'Failed to remove the old 32bit BrickStore installer. Please manually uninstall the old version first.';
+         UninstallString := RemoveQuotes(UninstallString);
+         ShellExec('open', 'taskkill.exe', '/f /im BrickStore.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+         Sleep(2000)
+         if not Exec(UninstallString, '/SILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+             Result := 'Failed to remove the old 32bit BrickStore installer. Please manually uninstall the old version first.';
     end
+end;
+
+{ Inno Setup does not kill the app on uninstall, but the uninstallation isn't done }
+{ correctly if the app is running, so we have to kill it ourselves }
+
+function InitializeUninstall(): Boolean;
+    var ResultCode: Integer;
+begin
+    ShellExec('open', 'taskkill.exe', '/f /im BrickStore.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(2000)
+    result := True;
 end;
