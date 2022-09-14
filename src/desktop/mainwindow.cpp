@@ -230,6 +230,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     menuBar()->show();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 3, 2)
     // The second restore is needed, because sometimes the system's window-manager resizes us after
     // showing, so we need to restore again, once this resize has happened. For some reason, it
     // needs to be delayed as well to work on Windows...
@@ -243,6 +244,7 @@ MainWindow::MainWindow(QWidget *parent)
             return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
         });
     }
+#endif
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
