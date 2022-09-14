@@ -146,12 +146,18 @@ if (SENTRY)
     include(FetchContent)
 
     FetchContent_Declare(
-      sentry
-      GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-      GIT_TAG        0.5.0
+        sentry
+        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+        GIT_TAG        0.5.0
+        SOURCE_SUBDIR  "NeedManualAddSubDir"
     )
 
+    # we need EXCLUDE_FROM_ALL to suppress the installation of sentry into the macOS bundle
+    # and Linux packages
+
     FetchContent_MakeAvailable(sentry)
+    FetchContent_GetProperties(sentry)
+    add_subdirectory(${sentry_SOURCE_DIR} ${sentry_BINARY_DIR} EXCLUDE_FROM_ALL)
 
     add_compile_definitions(SENTRY_ENABLED)
     target_link_libraries(${PROJECT_NAME} PRIVATE sentry)
