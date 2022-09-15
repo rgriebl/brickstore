@@ -911,20 +911,33 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
     if (!inc)
         return false;
 
+    // there are a items that changed their name multiple times, so we have to loop (e.g. 3069bpb78)
+
     if (!item) {
         QByteArray itemTypeAndId = inc->m_itemtype_id % inc->m_item_id;
         if (!inc->m_itemtype_name.isEmpty())
             itemTypeAndId[0] = inc->m_itemtype_name.at(0).toUpper().toLatin1();
 
-        auto it = std::lower_bound(itemChangelog().cbegin(), itemChangelog().cend(), itemTypeAndId);
-        if ((it != itemChangelog().cend()) && (*it == itemTypeAndId))
+        while (!item) {
+            auto it = std::lower_bound(itemChangelog().cbegin(), itemChangelog().cend(), itemTypeAndId);
+            if ((it == itemChangelog().cend()) || (*it != itemTypeAndId))
+                break;
             item = core()->item(it->toItemTypeId(), it->toItemId());
+            if (!item)
+                itemTypeAndId = it->toItemTypeId() % it->toItemId();
+        }
     }
     if (!color) {
         uint colorId = inc->m_color_id;
-        auto it = std::lower_bound(colorChangelog().cbegin(), colorChangelog().cend(), colorId);
-        if ((it != colorChangelog().cend()) && (*it == colorId))
+
+        while (!color) {
+            auto it = std::lower_bound(colorChangelog().cbegin(), colorChangelog().cend(), colorId);
+            if ((it == colorChangelog().cend()) || (*it != colorId))
+                break;
             color = core()->color(it->toColorId());
+            if (!color)
+                colorId = it->toColorId();
+        }
     }
 
     return (item && color);
