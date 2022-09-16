@@ -36,7 +36,12 @@ public:
     bool import(const QString &path);
     void exportTo(Database *db);
 
-    bool importInventories(std::vector<bool> &processedInvs);
+    enum ImportInventoriesStep {
+        ImportFromDiskCache,
+        ImportAfterDownload,
+    };
+
+    bool importInventories(std::vector<bool> &processedInvs, ImportInventoriesStep step);
 
     void calculateCategoryRecency();
     void calculatePartsYearUsed();
@@ -51,7 +56,7 @@ private:
     void readItems(const QString &path, ItemType *itt);
     void readAdditionalItemCategories(const QString &path, BrickLink::ItemType *itt);
     void readPartColorCodes(const QString &path);
-    bool readInventory(const Item *item);
+    bool readInventory(const Item *item, ImportInventoriesStep step);
     void readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath);
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);

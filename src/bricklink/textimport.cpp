@@ -314,7 +314,7 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         uint code = p.elementText(e, "CODENAME").toUInt(&numeric, 10);
 
         if (!numeric) {
-            qWarning() << "Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME") << "is not numeric";
+            qWarning() << "  > Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME") << "is not numeric";
         }
 
         int itemIndex = findItemIndex(itemTypeId, itemId);
@@ -336,10 +336,10 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
                 }
             }
             if (!found)
-                qWarning() << "Parsing part_color_codes: skipping invalid color" << colorName
+                qWarning() << "  > Parsing part_color_codes: skipping invalid color" << colorName
                            << "on item" << itemTypeId << itemId;
         } else {
-            qWarning() << "Parsing part_color_codes: skipping invalid item" << itemTypeId << itemId;
+            qWarning() << "  > Parsing part_color_codes: skipping invalid item" << itemTypeId << itemId;
         }
     });
 
@@ -349,30 +349,35 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
 }
 
 
-bool BrickLink::TextImport::importInventories(std::vector<bool> &processedInvs)
+bool BrickLink::TextImport::importInventories(std::vector<bool> &processedInvs,
+                                              ImportInventoriesStep step)
 {
     for (uint i = 0; i < m_items.size(); ++i) {
         if (processedInvs[i]) // already yanked
             continue;
 
-        if (!m_items[i].hasInventory() || readInventory(&m_items[i]))
+        if (!m_items[i].hasInventory() || readInventory(&m_items[i], step))
             processedInvs[i] = true;
     }
     return true;
 }
 
-bool BrickLink::TextImport::readInventory(const Item *item)
+bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesStep step)
 {
     std::unique_ptr<QFile> f(BrickLink::core()->dataReadFile(u"inventory.xml", item));
 
-    if (!f || !f->isOpen() || (f->fileTime(QFileDevice::FileModificationTime) < item->inventoryUpdated()))
+    QDateTime fileTime = f->fileTime(QFileDevice::FileModificationTime);
+    QDate fileDate = fileTime.date();
+
+    if (!f || !f->isOpen() || (fileTime < item->inventoryUpdated()))
         return false;
 
     QVector<Item::ConsistsOf> inventory;
+    QVector<QPair<int, int>> knownColors;
 
     try {
         XmlHelpers::ParseXML p(f.release(), "INVENTORY", "ITEM");
-        p.parse([this, &p, &inventory](QDomElement e) {
+        p.parse([this, &p, &inventory, &knownColors, fileDate](QDomElement e) {
             char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
             const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
             uint colorId = p.elementText(e, "COLOR").toUInt();
@@ -385,8 +390,12 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             int itemIndex = findItemIndex(itemTypeId, itemId);
             int colorIndex = findColorIndex(colorId);
 
-            if ((itemIndex == -1) || (colorIndex == -1) || !qty)
-                throw Exception("Unknown item-id or color-id or 0 qty");
+            if (itemIndex == -1)
+                throw Exception("Unknown item-id %1").arg(QString::fromLatin1(itemTypeId + " " + itemId));
+            if (colorIndex == -1)
+                throw Exception("Unknown color-id %1").arg(colorId);
+            if (!qty)
+                throw Exception("Invalid Quantity %1").arg(qty);
 
             Item::ConsistsOf co;
             co.m_qty = qty;
@@ -397,10 +406,24 @@ bool BrickLink::TextImport::readInventory(const Item *item)
             co.m_altid = matchId;
             co.m_cpart = counterPart;
 
-            inventory.append(co);
+            // if this itemid was involved in a changelog entry after the last time we downloaded
+            // the inventory, we need to reload
+            QByteArray itemTypeAndId = itemTypeId % itemId;
+            auto it = std::lower_bound(m_itemChangelog.cbegin(), m_itemChangelog.cend(), itemTypeAndId);
+            if ((it != m_itemChangelog.cend()) && (*it == itemTypeAndId) && (it->date() > fileDate)) {
+                throw Exception("Item id %1 changed on %2 (last download: %3)")
+                    .arg(QString::fromLatin1(itemTypeAndId))
+                    .arg(it->date().toString(u"yyyy/MM/dd"))
+                    .arg(fileDate.toString(u"yyyy/MM/dd"));
+            }
 
-            addToKnownColors(itemIndex, colorIndex);
+            inventory.append(co);
+            knownColors.append({ itemIndex, colorIndex});
+
         });
+
+        for (const auto &kc : qAsConst(knownColors))
+            addToKnownColors(kc.first, kc.second);
 
         uint itemIndex = uint(item - items().data());
 
@@ -441,7 +464,9 @@ bool BrickLink::TextImport::readInventory(const Item *item)
         m_consists_of_hash.insert(itemIndex, inventory);
         return true;
 
-    } catch (const Exception &) {
+    } catch (const Exception &e) {
+        if (step != ImportFromDiskCache)
+            qWarning() << "  >" << qPrintable(e.error());
         return false;
     }
 }
@@ -632,7 +657,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
                 m_ldrawExtraColors.push_back(c);
 
                 if (!name.startsWith(u"Rubber_"))
-                    qWarning() << "Could not match LDraw color" << id << name << "to any BrickLink color";
+                    qWarning() << "  > Could not match LDraw color" << id << name << "to any BrickLink color";
             }
         }
     }
@@ -675,7 +700,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             c.m_ldraw_color.setAlpha(alpha);
 
             if (!c.isModulex())
-                qWarning() << "Could not match BrickLink color" << c.m_id << c.m_name << "to any LDraw color" << c.m_ldraw_color;
+                qWarning() << "  > Could not match BrickLink color" << c.m_id << c.m_name << "to any LDraw color" << c.m_ldraw_color;
         }
     }
 }
@@ -735,7 +760,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
             for (const auto &catIndex : catIndexes)
                 m_categories[catIndex].m_has_inventories |= (quint8(1) << item.m_itemTypeIndex);
         } else {
-            qWarning() << "WARNING: parsing btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
+            qWarning() << "  > btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
         }
     }
 }
@@ -759,6 +784,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);
 
         char c = ItemType::idFromFirstCharInString(strs.at(2));
+        QDate date = QDate::fromString(strs.at(1), u"M/d/yyyy"_qs); // not stored in the database
 
         switch (c) {
         case 'I':   // ItemId
@@ -771,7 +797,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             if ((fromType.length() == 1) && (toType.length() == 1)
                     && !fromId.isEmpty() && !toId.isEmpty()) {
                 m_itemChangelog.emplace_back((fromType % fromId).toLatin1(),
-                                             (toType % toId).toLatin1());
+                                             (toType % toId).toLatin1(), date);
             }
             break;
         }
@@ -780,7 +806,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             uint fromId = strs.at(3).toUInt(&fromOk);
             uint toId = strs.at(5).toUInt(&toOk);
             if (fromOk && toOk)
-                m_colorChangelog.emplace_back(fromId, toId);
+                m_colorChangelog.emplace_back(fromId, toId, date);
             break;
         }
         case 'E':   // CategoryName
@@ -788,7 +814,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         case 'C':   // ColorName
             break;
         default:
-            qWarning("Parsing btchglog: skipping invalid change code %x", uint(c));
+            qWarning("  > Parsing btchglog: skipping invalid change code %x", uint(c));
             break;
         }
     }

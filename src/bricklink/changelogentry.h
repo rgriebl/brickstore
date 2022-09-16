@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QtCore/QByteArray>
+#include <QtCore/QDate>
 #include <QDebug>
 
 #include "color.h"
@@ -34,14 +35,17 @@ public:
     friend bool operator<(const ColorChangeLogEntry &that, const ColorChangeLogEntry &other)
     { return that.m_fromColorId < other.m_fromColorId; }
 
-    ColorChangeLogEntry(uint fromColorId = Color::InvalidId, uint toColorId = Color::InvalidId)
+    ColorChangeLogEntry(uint fromColorId = Color::InvalidId, uint toColorId = Color::InvalidId,
+                        QDate date = { })
         : m_fromColorId(fromColorId)
         , m_toColorId(toColorId)
+        , m_date(date)
     { }
 
 private:
     uint m_fromColorId;
     uint m_toColorId;
+    QDate m_date; // only used when rebuilding the DB
 
     friend class Core;
     friend class Database;
@@ -57,6 +61,8 @@ public:
     char toItemTypeId() const    { return m_toTypeAndId.at(0); }
     QByteArray toItemId() const  { return m_toTypeAndId.mid(1); }
 
+    QDate date() const  { return m_date; }
+
     friend bool operator==(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
     { return e.m_fromTypeAndId == typeAndId; }
     friend bool operator<(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
@@ -64,14 +70,17 @@ public:
     friend bool operator<(const ItemChangeLogEntry &that, const ItemChangeLogEntry &other)
     { return that.m_fromTypeAndId < other.m_fromTypeAndId; }
 
-    ItemChangeLogEntry(const QByteArray &fromTypeAndId = { }, const QByteArray &toTypeAndId = { })
+    ItemChangeLogEntry(const QByteArray &fromTypeAndId = { }, const QByteArray &toTypeAndId = { },
+                       QDate date = { })
         : m_fromTypeAndId(fromTypeAndId)
         , m_toTypeAndId(toTypeAndId)
+        , m_date(date)
     { }
 
 private:
     QByteArray m_fromTypeAndId;
     QByteArray m_toTypeAndId;
+    QDate m_date; // only used when rebuilding the DB
 
     friend class Core;
     friend class Database;

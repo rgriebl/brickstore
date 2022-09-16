@@ -151,7 +151,7 @@ int RebuildDatabase::exec()
     printf("\nSTEP 4: Parsing inventories (part I)...\n");
 
     std::vector<bool> processedInvs(blti.items().size(), false);
-    blti.importInventories(processedInvs);
+    blti.importInventories(processedInvs, BrickLink::TextImport::ImportFromDiskCache);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 5: Downloading missing/updated inventories...\n");
@@ -162,7 +162,7 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 6: Parsing inventories (part II)...\n");
 
-    blti.importInventories(processedInvs);
+    blti.importInventories(processedInvs, BrickLink::TextImport::ImportAfterDownload);
 
     if (std::count(processedInvs.cbegin(), processedInvs.cend(), false)
             > (int(processedInvs.size()) / 50)) {            // more than 2% have failed
