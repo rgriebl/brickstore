@@ -369,7 +369,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case DocumentModel::Color: {
-        image = lot->color()->sampleImage(option.decorationSize.width(), option.rect.height());
+        if (lot->color())
+            image = lot->color()->sampleImage(option.decorationSize.width(), option.rect.height());
         break;
     }
     case DocumentModel::Retain:
