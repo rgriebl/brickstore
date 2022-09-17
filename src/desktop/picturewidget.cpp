@@ -15,6 +15,7 @@
 #include <QPalette>
 #include <QMenu>
 #include <QLayout>
+#include <QVector>
 #include <QApplication>
 #include <QAction>
 #include <QDesktopServices>
@@ -33,14 +34,33 @@
 #include "bricklink/picture.h"
 #include "common/application.h"
 #include "common/config.h"
+#include "common/eventfilter.h"
+#include "common/systeminfo.h"
 #include "ldraw/library.h"
 #include "ldraw/part.h"
 #include "ldraw/renderwidget.h"
 #include "qcoro/qcorosignal.h"
-#include "common/eventfilter.h"
-#include "utility/utility.h"
 #include "picturewidget.h"
 #include "rendersettingsdialog.h"
+
+
+static bool isGPUBlackListed()
+{
+    // these GPUs will crash QtQuick3D on Windows
+    static const QVector<QByteArray> gpuBlacklist = {
+        "Microsoft Basic Render Driver",
+        "Intel(R) HD Graphics",
+        "Intel(R) HD Graphics 3000",
+        "NVIDIA GeForce 210",
+        "NVIDIA GeForce GT 525M",
+        "NVIDIA Quadro 1000M",
+        "AMD Radeon HD 8240",
+    };
+    const auto gpu = SystemInfo::inst()->asMap().value(u"hw.gpu"_qs).toString();
+    bool blacklisted = gpuBlacklist.contains(gpu.toLatin1());
+    qWarning() << "Checking if GPU" << gpu << "is blacklisted:" << (blacklisted ? "yes" : "no");
+    return blacklisted;
+}
 
 
 PictureWidget::PictureWidget(QWidget *parent)
@@ -121,7 +141,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     w_reloadRescale->setIcon(m_rescaleIcon);
     connect(w_reloadRescale, &QToolButton::clicked,
-            w_ldraw, [this]() {
+            this, [this]() {
         if (m_is3D) {
             w_ldraw->resetCamera();
         } else if (m_pic) {
@@ -279,9 +299,11 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
             m_image = m_pic->image();
     }
 
+    static bool badGPU = isGPUBlackListed();
+
     if (m_part)
         m_part->release();
-    m_part = item ? LDraw::library()->partFromId(item->id()) : nullptr;
+    m_part = (item && !badGPU) ? LDraw::library()->partFromId(item->id()) : nullptr;
     if (m_part)
         m_part->addRef();
 

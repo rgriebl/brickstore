@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+Another bug-fix release for 2022.9.1 and .2:
+- the new 3D renderer is now disabled on very old GPUs (the list comes from recorded Sentry crash
+  reports).
+- loading documents containing items with invalid or missing color information no longer crashes.
+
+
 ## [2022.9.2] - 2022-09-15
 
 This is strictly a bug-fix release for a few annoying issues found in the 2022.9.1 release:
