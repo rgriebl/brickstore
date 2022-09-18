@@ -236,6 +236,8 @@ public:
     void setMarkerText(const QString &text);
     void setMarkerColor(const QColor &color);
     void clearMarker();
+    void copyLotId() const;
+    void clearLotId();
     void setColor(const BrickLink::Color *color);
 
     QCoro::Task<> exportBrickLinkXMLToFile();

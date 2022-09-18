@@ -696,6 +696,9 @@ void View::contextMenu(const QPoint &pos)
         case DocumentModel::Marker:
             actionNames = { "edit_marker_text", "edit_marker_color", "-", "edit_marker_clear" };
             break;
+        case DocumentModel::LotId:
+            actionNames = { "edit_lotid_copy", "edit_lotid_clear" };
+            break;
         }
         for (const auto &actionName : qAsConst(actionNames)) {
             if (actionName == "-")

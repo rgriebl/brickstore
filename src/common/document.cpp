@@ -454,6 +454,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_marker_clear", [this](auto) { clearMarker(); } },
+        { "edit_lotid_copy", [this](auto) { copyLotId(); } },
+        { "edit_lotid_clear", [this](auto) { clearLotId(); } },
 
         { "view_reset_diff_mode", [this](auto) { resetDifferenceMode(); } },
         { "view_goto_next_diff", [this](auto) { gotoNextErrorOrDifference(true); } },
@@ -1405,6 +1407,27 @@ void Document::clearMarker()
 {
     applyTo(selectedLots(), "edit_marker_clear", [](const auto &from, auto &to) {
         (to = from).setMarkerText({ }); to.setMarkerColor({ });
+        return DocumentModel::LotChanged;
+    });
+}
+
+void Document::copyLotId() const
+{
+    QString text;
+    for (const Lot *lot : m_selectedLots) {
+        if (lot->lotId()) {
+            if (!text.isEmpty())
+                text.append(u"\n"_qs);
+            text.append(QString::number(lot->lotId()));
+        }
+    }
+    QGuiApplication::clipboard()->setText(text);
+}
+
+void Document::clearLotId()
+{
+    applyTo(selectedLots(), "edit_lotid_clear", [](const auto &from, auto &to) {
+        (to = from).setLotId(0);
         return DocumentModel::LotChanged;
     });
 }

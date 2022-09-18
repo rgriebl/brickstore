@@ -488,6 +488,8 @@ void ActionManager::initialize()
     A("edit_marker_text",         QT_TR_NOOP("Set marker text"),                 NeedSelection(1));
     A("edit_marker_color",        QT_TR_NOOP("Set marker color..."),             NeedSelection(1));
     A("edit_marker_clear",        QT_TR_NOOP("Clear marker"),                    NeedSelection(1));
+    A("edit_lotid_copy",          QT_TR_NOOP("Copy lot id"),                     NeedSelection(1));
+    A("edit_lotid_clear",         QT_TR_NOOP("Clear lot id"),                    NeedSelection(1));
 
     A("bricklink_catalog",        QT_TR_NOOP("Show BrickLink Catalog Info..."),     QT_TR_NOOP("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info"),  NeedSelection(1, 1) | NeedNetwork);
     A("bricklink_priceguide",     QT_TR_NOOP("Show BrickLink Price Guide Info..."), QT_TR_NOOP("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide"),   NeedSelection(1, 1) | NeedNetwork);
