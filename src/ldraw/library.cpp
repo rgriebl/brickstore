@@ -91,8 +91,9 @@ Library::Library(const QString &updateUrl, QObject *parent)
                 if (m_zip)
                     m_zip->close();
                 if (!file->commit()) {
+                    QString error = file->errorString(); // file is dead after the co_await
                     co_await setPath(m_path, true); // at least try to reload the old library
-                    throw Exception(tr("saving failed") % u": " % file->errorString());
+                    throw Exception(tr("saving failed") % u": " % error);
                 }
                 if (!co_await setPath(file->fileName(), true))
                     throw Exception(tr("reloading failed - please restart the application."));
