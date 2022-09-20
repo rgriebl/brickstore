@@ -1018,9 +1018,10 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot)
 class PriceGuideLoaderJob : public QRunnable
 {
 public:
-    explicit PriceGuideLoaderJob(PriceGuide *pg)
+    explicit PriceGuideLoaderJob(PriceGuide *pg, int highPriority)
         : QRunnable()
         , m_pg(pg)
+        , m_highPriority(highPriority)
     {
         pg->addRef();
     }
@@ -1040,6 +1041,7 @@ private:
     Q_DISABLE_COPY(PriceGuideLoaderJob)
 
     PriceGuide *m_pg;
+    bool m_highPriority;
 };
 
 void PriceGuideLoaderJob::run()
@@ -1049,6 +1051,7 @@ void PriceGuideLoaderJob::run()
         PriceGuide::Data data;
         bool valid = m_pg->loadFromDisk(fetched, data);
         auto pg = m_pg;
+        bool highPriority = m_highPriority;
 
         pg->addRef(); // the release will happen in Core::priceGuideLoaded
         QMetaObject::invokeMethod(core(), [=]() {
@@ -1058,7 +1061,7 @@ void PriceGuideLoaderJob::run()
             }
             pg->setIsValid(valid);
             pg->setUpdateStatus(UpdateStatus::Ok);
-            core()->priceGuideLoaded(pg);
+            core()->priceGuideLoaded(pg, highPriority);
         }, Qt::QueuedConnection);
     }
 }
@@ -1084,32 +1087,22 @@ PriceGuide *Core::priceGuide(const Item *item, const Color *color, bool highPrio
         needToLoad = true;
     }
 
-    if (highPriority) {
-        if (!pg->isValid()) {
-            bool valid = pg->loadFromDisk(pg->m_fetched, pg->m_data);
-            pg->setIsValid(valid);
-            pg->setUpdateStatus(UpdateStatus::Ok);
-        }
-
-        if (updateNeeded(pg->isValid(), pg->lastUpdated(), m_pg_update_iv))
-            updatePriceGuide(pg, highPriority);
-    }
-    else if (needToLoad) {
+    if (needToLoad) {
         pg->setUpdateStatus(UpdateStatus::Loading);
-        m_diskloadPool.start(new PriceGuideLoaderJob(pg));
+        m_diskloadPool.start(new PriceGuideLoaderJob(pg, highPriority), highPriority ? 1 : 0);
     }
 
     return pg;
 }
 
 
-void Core::priceGuideLoaded(PriceGuide *pg)
+void Core::priceGuideLoaded(PriceGuide *pg, bool highPriority)
 {
     if (pg) {
          if (pg->m_updateAfterLoad
                  || updateNeeded(pg->isValid(), pg->lastUpdated(), m_pg_update_iv))  {
              pg->m_updateAfterLoad = false;
-             updatePriceGuide(pg, false);
+             updatePriceGuide(pg, highPriority);
          }
          emit priceGuideUpdated(pg);
          pg->release();
@@ -1207,9 +1200,10 @@ void Core::priceGuideJobFinished(TransferJob *j, PriceGuide *pg)
 class PictureLoaderJob : public QRunnable
 {
 public:
-    explicit PictureLoaderJob(Picture *pic)
+    explicit PictureLoaderJob(Picture *pic, bool highPriority)
         : QRunnable()
         , m_pic(pic)
+        , m_highPriority(highPriority)
     {
         pic->addRef();
     }
@@ -1229,6 +1223,7 @@ private:
     Q_DISABLE_COPY(PictureLoaderJob)
 
     Picture *m_pic;
+    bool m_highPriority;
 };
 
 void PictureLoaderJob::run()
@@ -1238,6 +1233,7 @@ void PictureLoaderJob::run()
         QImage image;
         bool valid = m_pic->loadFromDisk(fetched, image);
         auto pic = m_pic;
+        bool highPriority = m_highPriority;
 
         pic->addRef(); // the release will happen in Core::pictureLoaded
         QMetaObject::invokeMethod(core(), [=]() {
@@ -1247,7 +1243,7 @@ void PictureLoaderJob::run()
             }
             pic->setUpdateStatus(UpdateStatus::Ok);
             pic->setIsValid(valid);
-            core()->pictureLoaded(pic);
+            core()->pictureLoaded(pic, highPriority);
         }, Qt::QueuedConnection);
     }
 }
@@ -1283,27 +1279,9 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
         needToLoad = true;
     }
 
-    if (highPriority) {
-        if (!pic->isValid()) {
-            QDateTime dt;
-            QImage img;
-            bool valid = pic->loadFromDisk(dt, img);
-            pic->setIsValid(valid);
-            if (valid) {
-                pic->setLastUpdated(dt);
-                pic->setImage(img);
-            }
-            pic->setUpdateStatus(UpdateStatus::Ok);
-
-            m_pic_cache.setObjectCost(key, pic->cost());
-        }
-
-        if (updateNeeded(pic->isValid(), pic->lastUpdated(), m_pic_update_iv))
-            updatePicture(pic, highPriority);
-
-    } else if (needToLoad) {
+    if (needToLoad) {
         pic->setUpdateStatus(UpdateStatus::Loading);
-        m_diskloadPool.start(new PictureLoaderJob(pic));
+        m_diskloadPool.start(new PictureLoaderJob(pic, highPriority), highPriority ? 1 : 0);
     }
 
     return pic;
@@ -1317,13 +1295,13 @@ Picture *Core::largePicture(const Item *item, bool high_priority)
 }
 
 
-void Core::pictureLoaded(Picture *pic)
+void Core::pictureLoaded(Picture *pic, bool highPriority)
 {
     if (pic) {
         if (pic->m_updateAfterLoad
                 || updateNeeded(pic->isValid(), pic->lastUpdated(), m_pic_update_iv)) {
             pic->m_updateAfterLoad = false;
-            updatePicture(pic, false);
+            updatePicture(pic, highPriority);
         }
         emit pictureUpdated(pic);
         pic->release();
@@ -1398,7 +1376,7 @@ void Core::pictureJobFinished(TransferJob *j, Picture *pic)
         static_cast<QSaveFile *>(j->file())->commit();
 
         pic->setUpdateStatus(UpdateStatus::Loading);
-        m_diskloadPool.start(new PictureLoaderJob(pic));
+        m_diskloadPool.start(new PictureLoaderJob(pic, j->isHighPriority()), j->isHighPriority() ? 1 : 0);
         pic->release();
         return;
 

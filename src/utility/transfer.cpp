@@ -194,6 +194,7 @@ void Transfer::retrieve(TransferJob *job, bool highPriority)
         return;
     Q_ASSERT(!job->m_transfer);
     job->m_transfer = this;
+    job->m_high_priority = highPriority;
 
     QMetaObject::invokeMethod(m_retriever, [this, job, highPriority]() {
         m_retriever->addJob(job, highPriority);

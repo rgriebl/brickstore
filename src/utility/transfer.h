@@ -46,6 +46,7 @@ public:
     QDateTime lastModified() const   { return m_last_modified; }
     QString lastETag() const         { return m_last_etag; }
     bool wasNotModified() const      { return m_was_not_modified; }
+    bool isHighPriority() const      { return m_high_priority; }
 
     bool isActive() const            { return m_status == Active; }
 
@@ -111,6 +112,7 @@ private:
     uint         m_retries_left     : 4;
     int          m_was_not_modified : 1 = false;
     int          m_no_redirects     : 1;
+    bool         m_high_priority    : 1 = false;
 
     friend class Transfer;
     friend class TransferRetriever;

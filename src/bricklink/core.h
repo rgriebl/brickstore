@@ -157,8 +157,8 @@ private slots:
     void pictureJobFinished(TransferJob *j, BrickLink::Picture *pic);
     void priceGuideJobFinished(TransferJob *j, BrickLink::PriceGuide *pg);
 
-    void priceGuideLoaded(BrickLink::PriceGuide *pg);
-    void pictureLoaded(BrickLink::Picture *pic);
+    void priceGuideLoaded(BrickLink::PriceGuide *pg, bool highPriority);
+    void pictureLoaded(BrickLink::Picture *pic, bool highPriority);
 
 private:
     QString  m_datadir;
