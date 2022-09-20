@@ -4409,17 +4409,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="95"/>
+        <location filename="../src/ldraw/library.cpp" line="96"/>
         <source>saving failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="98"/>
+        <location filename="../src/ldraw/library.cpp" line="99"/>
         <source>reloading failed - please restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="113"/>
+        <location filename="../src/ldraw/library.cpp" line="114"/>
         <source>Could not load the new parts library</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4837,57 +4837,57 @@ Right click: Menu</source>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="208"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="211"/>
         <source>PNG Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="210"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="213"/>
         <source>Save image as</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="379"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
         <source>Update</source>
         <translation>Mettre à jour</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="249"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
         <source>Copy image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="248"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="251"/>
         <source>3D render settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="250"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
         <source>Save image as...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="251"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="254"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Ouvrir le catalogue sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="255"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Ouvrir le guide des prix sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="256"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Ouvrir lots en vente sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="338"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="341"/>
         <source>Please wait... updating</source>
         <translation>Patienter... mise à jour</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="379"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
         <source>Center view</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5399,82 +5399,107 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="253"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="252"/>
+        <source>Anti-Aliasing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="260"/>
+        <source>Off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="265"/>
+        <source>Medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="270"/>
+        <source>High</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="275"/>
+        <source>Very high</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="284"/>
         <source>Lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="264"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="295"/>
         <source>Enable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="271"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="302"/>
         <source>Realistic Lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="278"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="309"/>
         <source>Brightness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="323"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="354"/>
         <source>Ambient Occlusion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="329"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="360"/>
         <source>Strength</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="352"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="383"/>
         <source>Softness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="375"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="406"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="445"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="476"/>
         <source>Materials</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="451"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="482"/>
         <source>Reflections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="457"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="488"/>
         <source>Metalness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="464"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="495"/>
         <source>Roughness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="471"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="502"/>
         <source>Plain</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="510"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="541"/>
         <source>Chrome</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="549"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="580"/>
         <source>Metallic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="588"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="619"/>
         <source>Pearl</source>
         <translation type="unfinished"></translation>
     </message>

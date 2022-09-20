@@ -788,12 +788,12 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="491"/>
         <source>Copy lot id</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar ID Lote</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="492"/>
         <source>Clear lot id</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpiar ID Lote</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="494"/>
@@ -2575,7 +2575,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1849"/>
         <source>Lot Id</source>
-        <translation>Id Lote</translation>
+        <translation>ID Lote</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1858"/>
@@ -3589,17 +3589,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>descarga fallida</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="95"/>
+        <location filename="../src/ldraw/library.cpp" line="96"/>
         <source>saving failed</source>
         <translation>guardado fallido</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="98"/>
+        <location filename="../src/ldraw/library.cpp" line="99"/>
         <source>reloading failed - please restart the application.</source>
         <translation>recarga fallida - por favor reinicie la aplicación.</translation>
     </message>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="113"/>
+        <location filename="../src/ldraw/library.cpp" line="114"/>
         <source>Could not load the new parts library</source>
         <translation>No se pudo cargar la nueva librería de piezas</translation>
     </message>
@@ -4037,57 +4037,57 @@ Click derecho: Menu</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="208"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="211"/>
         <source>PNG Image</source>
         <translation>Imagen PNG</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="210"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="213"/>
         <source>Save image as</source>
         <translation>Guardar imagen como</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="379"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="249"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
         <source>Copy image</source>
         <translation>Copia imagen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="248"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="251"/>
         <source>3D render settings...</source>
         <translation>Opciones de renderizado 3D...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="250"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
         <source>Save image as...</source>
         <translation>Guardar imagen como...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="251"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="254"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Mostar Información del Catálogo de BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="255"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Mostar Información de la Guía de Precios de BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="256"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Mostar Lotes a la Venta en BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="338"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="341"/>
         <source>Please wait... updating</source>
         <translation>Espere por favor... actualizando</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="379"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
         <source>Center view</source>
         <translation>Centrar vista</translation>
     </message>
@@ -4620,82 +4620,107 @@ Click derecho: Menu</translation>
         <translation>Mostrar esferas delimitadoras</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="253"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="252"/>
+        <source>Anti-Aliasing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="260"/>
+        <source>Off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="265"/>
+        <source>Medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="270"/>
+        <source>High</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="275"/>
+        <source>Very high</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="284"/>
         <source>Lighting</source>
         <translation>Iluminación</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="264"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="295"/>
         <source>Enable</source>
         <translation>Habilitar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="271"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="302"/>
         <source>Realistic Lighting</source>
         <translation>Iluminación Realista</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="278"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="309"/>
         <source>Brightness</source>
         <translation>Brillo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="323"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="354"/>
         <source>Ambient Occlusion</source>
         <translation>Oclusión Ambiental</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="329"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="360"/>
         <source>Strength</source>
         <translation>Fuerza</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="352"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="383"/>
         <source>Softness</source>
         <translation>Suavidad</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="375"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="406"/>
         <source>Distance</source>
         <translation>Distancia</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="445"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="476"/>
         <source>Materials</source>
         <translation>Materiales</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="451"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="482"/>
         <source>Reflections</source>
         <translation>Reflejos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="457"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="488"/>
         <source>Metalness</source>
         <translation>Metalizado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="464"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="495"/>
         <source>Roughness</source>
         <translation>Rugosidad</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="471"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="502"/>
         <source>Plain</source>
         <translation>Liso</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="510"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="541"/>
         <source>Chrome</source>
         <translation>Cromado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="549"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="580"/>
         <source>Metallic</source>
         <translation>Metálico</translation>
     </message>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="588"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui" line="619"/>
         <source>Pearl</source>
         <translation>Perla</translation>
     </message>
@@ -4756,12 +4781,12 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="93"/>
         <source>Color by Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Color por Nombre</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="97"/>
         <source>Color by Hue</source>
-        <translation type="unfinished"></translation>
+        <translation>Color por Tono</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectcolor.cpp" line="129"/>
