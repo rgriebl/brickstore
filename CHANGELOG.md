@@ -3,10 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.9.3] - 2022-09-21
+
 Another bug-fix release for 2022.9.1 and .2:
-- the new 3D renderer is now disabled on very old GPUs (the list comes from recorded Sentry crash
-  reports).
+- in order to prevent crashes from broken graphics drivers, the new 3D renderer is now disabled on
+  very old GPUs (the list comes from recorded crash reports and will likely be extended in the future).
 - loading documents containing items with invalid or missing color information no longer crashes.
+- reduced the 3D anti-aliasing level to "High" in order to not stress old GPUs too much (you can
+  change that back to "Very high" in the render settings dialog)
 
 
 ## [2022.9.2] - 2022-09-15
@@ -534,7 +538,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.3...HEAD
+[2022.9.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.3
 [2022.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.2
 [2022.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.1
 [2022.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.4.1
