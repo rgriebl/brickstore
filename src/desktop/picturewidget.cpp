@@ -55,6 +55,7 @@ static bool isGPUBlackListed()
         "NVIDIA GeForce 210",
         "NVIDIA nForce 980a/780a SLI",
         "NVIDIA GeForce GT 525M",
+        "NVIDIA GeForce 8400 GS",
         "NVIDIA NVS 5100M",
         "NVIDIA Quadro 1000M",
         "AMD Radeon HD 8240",

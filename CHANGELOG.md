@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 
 ## [2022.9.3] - 2022-09-21
 
-Another bug-fix release for 2022.9.1 and .2:
+Another bug-fix release for 2022.9.1 and 2022.9.2. Most importantly:
 - in order to prevent crashes from broken graphics drivers, the new 3D renderer is now disabled on
   very old GPUs (the list comes from recorded crash reports and will likely be extended in the future).
-- loading documents containing items with invalid or missing color information no longer crashes.
 - reduced the 3D anti-aliasing level to "High" in order to not stress old GPUs too much (you can
-  change that back to "Very high" in the render settings dialog)
+  change that back to "Very high" in the render settings dialog).
+- loading documents containing items with invalid or missing color information no longer crashes.
 
 
 ## [2022.9.2] - 2022-09-15

@@ -1608,47 +1608,47 @@
 <context>
     <name>CheckForUpdates</name>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="122"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="123"/>
         <source>Version information is not available.</source>
         <translation>L&apos;information sur la version n&apos;est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="125"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="126"/>
         <source>Your currently installed version is up-to-date.</source>
         <translation>Votre version actuellement installée est à jour.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="141"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="142"/>
         <source>Update</source>
         <translation>Mise à jour</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="176"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="177"/>
         <source>A newer version than the one currently installed is available:</source>
         <translation>Une version plus récente que celle installée est disponible:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="177"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="178"/>
         <source>Changes:</source>
         <translation>Changements:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="199"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="200"/>
         <source>Show</source>
         <translation>Montrer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="209"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="210"/>
         <source>Install</source>
         <translation>Installer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="237"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="238"/>
         <source>Downloading installer</source>
         <translation>Téléchargement de l&apos;installateur</translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="254"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="255"/>
         <source>Download failed: %1</source>
         <translation>Echec lors du téléchargement: %1</translation>
     </message>
@@ -4837,57 +4837,57 @@ Right click: Menu</source>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="211"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="212"/>
         <source>PNG Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="213"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="214"/>
         <source>Save image as</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="383"/>
         <source>Update</source>
         <translation>Mettre à jour</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
         <source>Copy image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="251"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="252"/>
         <source>3D render settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="253"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="254"/>
         <source>Save image as...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="254"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="255"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Ouvrir le catalogue sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="255"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="256"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Ouvrir le guide des prix sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="256"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="257"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Ouvrir lots en vente sur BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="341"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="342"/>
         <source>Please wait... updating</source>
         <translation>Patienter... mise à jour</translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="382"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="383"/>
         <source>Center view</source>
         <translation type="unfinished"></translation>
     </message>

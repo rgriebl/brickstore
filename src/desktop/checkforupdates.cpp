@@ -96,11 +96,12 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
         for (const QJsonValue &&asset : assets) {
             QString name = asset[u"name"].toString();
 #if defined(Q_OS_MACOS)
-            if (name.startsWith(u"macOS-")) {
-#elif defined(Q_OS_WIN64)
-            if (name.startsWith(u"Windows-x64-")) {
-#elif defined(Q_OS_WIN)
-            if (name.startsWith(u"Windows-x86-")) {
+            if (name.startsWith(u"macOS-", Qt::CaseInsensitive)) {
+#elif defined(Q_OS_WINDOWS) && defined(_M_AMD64)
+            if (name.startsWith(u"Windows-x64-", Qt::CaseInsensitive)
+                    || name.startsWith(u"Windows-Intel64-", Qt::CaseInsensitive)) {
+#elif defined(Q_OS_WINDOWS) && defined(_M_ARM64)
+            if (name.startsWith(u"Windows-ARM64-", Qt::CaseInsensitive)) {
 #else
             if (false) {
 #endif
