@@ -1158,8 +1158,10 @@ QmlDocumentList::QmlDocumentList(QObject *parent)
     });
     connect(dl, &DocumentList::documentRemoved,
             this, [this](Document *doc) {
-        if (auto qmlDoc = m_docMapping.value(doc))
+        if (auto qmlDoc = m_docMapping.take(doc)) {
             emit documentRemoved(qmlDoc);
+            qmlDoc->deleteLater();
+        }
     });
     setSourceModel(dl);
 }
