@@ -35,6 +35,7 @@ class RenderSettings : public QObject
     Q_PROPERTY(float tumblingAnimationAngle MEMBER m_tumblingAnimationAngle NOTIFY tumblingAnimationAngleChanged FINAL)
     Q_PROPERTY(QVector3D tumblingAnimationAxis MEMBER m_tumblingAnimationAxis NOTIFY tumblingAnimationAxisChanged FINAL)
     Q_PROPERTY(float fieldOfView MEMBER m_fieldOfView NOTIFY fieldOfViewChanged FINAL)
+    Q_PROPERTY(int antiAliasing MEMBER m_antiAliasing NOTIFY antiAliasingChanged FINAL)
 
     Q_PROPERTY(float aoStrength MEMBER m_aoStrength NOTIFY aoStrengthChanged FINAL)
     Q_PROPERTY(float aoDistance MEMBER m_aoDistance NOTIFY aoDistanceChanged FINAL)
@@ -54,6 +55,14 @@ public:
     static RenderSettings *inst();
     static RenderSettings *create(QQmlEngine *qe, QJSEngine *je); // QML_SINGLETON
 
+    enum AntiAliasing {
+        NoAA,
+        MediumAA,
+        HighAA,
+        VeryHighAA,
+    };
+    Q_ENUM(AntiAliasing)
+
 public:
     void save();
     void load();
@@ -71,6 +80,7 @@ signals:
     void tumblingAnimationAngleChanged(float newTumblingAnimationAngle);
     void tumblingAnimationAxisChanged(const QVector3D &newTumblingAnimationAxis);
     void fieldOfViewChanged(float newFieldOfView);
+    void antiAliasingChanged(int newAntiAliasing);
 
     void aoStrengthChanged(float newAoStrength);
     void aoDistanceChanged(float newAoDistance);
@@ -101,6 +111,7 @@ private:
     float m_tumblingAnimationAngle;
     QVector3D m_tumblingAnimationAxis;
     float m_fieldOfView;
+    int m_antiAliasing;
 
     float m_aoStrength;
     float m_aoSoftness;

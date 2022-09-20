@@ -51,6 +51,8 @@ RenderSettingsDialog::RenderSettingsDialog()
     connectToggleButton(ui->showBoundingSpheres, "showBoundingSpheres");
     connectToggleButton(ui->enableLighting,      "lighting");
 
+    connectComboBox(ui->antiAliasing,  "antiAliasing");
+
     connect(ui->buttonBox, &QDialogButtonBox::clicked,
             this, [this](QAbstractButton *button) {
         switch (ui->buttonBox->standardButton(button)) {
@@ -95,6 +97,28 @@ void RenderSettingsDialog::connectToggleButton(QAbstractButton *checkBox, const 
 
     auto dummyMapper = new QSignalMapper(checkBox);
     QByteArray chgSig = "2" % propName % "Changed(bool)";
+    connect(rs, chgSig.constData(), dummyMapper, SLOT(map()));
+    dummyMapper->setMapping(rs, 42);
+    connect(dummyMapper, &QSignalMapper::mappedInt, this, setter);
+
+    setter();
+}
+
+void RenderSettingsDialog::connectComboBox(QComboBox *comboBox, const QByteArray &propName)
+{
+    auto rs = LDraw::RenderSettings::inst();
+
+    connect(comboBox, &QComboBox::currentIndexChanged,
+            rs, [=](int i) {
+        rs->setProperty(propName, i);
+    });
+
+    auto setter = [=]() {
+        comboBox->setCurrentIndex(rs->property(propName).toInt());
+    };
+
+    auto dummyMapper = new QSignalMapper(comboBox);
+    QByteArray chgSig = "2" % propName % "Changed(int)";
     connect(rs, chgSig.constData(), dummyMapper, SLOT(map()));
     dummyMapper->setMapping(rs, 42);
     connect(dummyMapper, &QSignalMapper::mappedInt, this, setter);

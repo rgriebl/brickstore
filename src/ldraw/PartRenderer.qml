@@ -62,8 +62,13 @@ Item {
             id: env
             clearColor: root.renderController.clearColor
             backgroundMode: SceneEnvironment.Color
-            antialiasingMode: SceneEnvironment.SSAA
-            antialiasingQuality: SceneEnvironment.VeryHigh
+            antialiasingMode: (RenderSettings.antiAliasing === RenderSettings.NoAA) ?
+                                  SceneEnvironment.NoAA : SceneEnvironment.SSAA
+            antialiasingQuality: (RenderSettings.antiAliasing === RenderSettings.MediumAA)
+                                 ? SceneEnvironment.Medium
+                                 : ((RenderSettings.antiAliasing === RenderSettings.VeryHighAA)
+                                    ? SceneEnvironment.VeryHigh
+                                    : SceneEnvironment.High)
             lightProbe: Texture { source: "./textures/lightbox.ktx" }
             probeExposure: 0.9
             aoStrength: RenderSettings.aoStrength * 100

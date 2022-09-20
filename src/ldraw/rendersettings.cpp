@@ -86,6 +86,7 @@ QVariantMap RenderSettings::propertyDefaultValues() const
         { u"tumblingAnimationAngle"_qs, 0.1 },
         { u"tumblingAnimationAxis"_qs, QVariant::fromValue(QVector3D { 0.5, 0.375, 0.25 }) },
         { u"fieldOfView"_qs, 40. },
+        { u"antiAliasing"_qs, int(AntiAliasing::HighAA) },
 
         { u"aoStrength"_qs, 0.6 },
         { u"aoSoftness"_qs, 0.7 },
