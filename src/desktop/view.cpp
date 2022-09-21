@@ -217,7 +217,9 @@ TableView::TableView(QWidget *parent)
 void TableView::keyPressEvent(QKeyEvent *e)
 {
     // ignore ctrl/alt+tab ... ViewPane needs to handle that
-    if (DesktopUIHelpers::shouldSwitchViews(e)) {
+    // QAbstractItemView thinks it is a good idea to handle 'copy', but we don't want that
+    if (DesktopUIHelpers::shouldSwitchViews(e)
+            || (e == QKeySequence::Copy)) {
         e->ignore();
         return;
     }
