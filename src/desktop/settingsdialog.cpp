@@ -108,11 +108,11 @@ public:
 
     static QString rootMenu(const QAction *action)
     {
-        QList<QWidget *> widgets = action->associatedWidgets();
-        for (QWidget *w : qAsConst(widgets)) {
-            if (auto m = qobject_cast<QMenu *>(w))
+        const auto objects = action->associatedObjects();
+        for (auto *object : objects) {
+            if (auto m = qobject_cast<QMenu *>(object))
                 return rootMenu(m->menuAction());
-            else if (qobject_cast<QMenuBar *>(w))
+            else if (qobject_cast<QMenuBar *>(object))
                 return action->text();
         }
         return { };
@@ -242,9 +242,9 @@ public:
                 if (a && !a->text().isEmpty()) {
                     path.prepend(removeMnemonic(a->text()));
 
-                    const QList<QWidget *> widgets = a->associatedWidgets();
-                    for (auto w : widgets) {
-                        if (auto *m = qobject_cast<QMenu *>(w))
+                    const auto objects = a->associatedObjects();
+                    for (auto *object : objects) {
+                        if (auto *m = qobject_cast<QMenu *>(object))
                             path = buildPath(m->menuAction()) + path;
                     }
                 }

@@ -115,9 +115,9 @@ WelcomeButton::WelcomeButton(QAction *action, QWidget *parent)
         if (!a->icon().isNull()) {
             setIcon(a->icon());
         } else {
-            const auto containers = a->associatedWidgets();
-            for (auto *widget : containers) {
-                if (QMenu *menu = qobject_cast<QMenu *>(widget)) {
+            const auto objects = a->associatedObjects();
+            for (auto *object : objects) {
+                if (QMenu *menu = qobject_cast<QMenu *>(object)) {
                     if (!menu->icon().isNull())
                         setIcon(menu->icon());
                 }
