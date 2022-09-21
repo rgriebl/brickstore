@@ -74,4 +74,5 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
+    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 };

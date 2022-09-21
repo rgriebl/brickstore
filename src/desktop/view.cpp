@@ -234,6 +234,15 @@ void TableView::keyPressEvent(QKeyEvent *e)
 #endif
 }
 
+QModelIndex TableView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
+{
+    // QTableView maps Home/End to left/right, but we want top/bottom instead
+    if (cursorAction == MoveHome || cursorAction == MoveEnd)
+        modifiers ^= Qt::ControlModifier;
+
+    return QTableView::moveCursor(cursorAction, modifiers);
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
