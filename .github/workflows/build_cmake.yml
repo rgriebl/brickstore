@@ -224,7 +224,7 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         curl.exe -L --output ..\\sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
-        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore .
+        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore bin
       shell: cmd
 
     # Build for Linux
@@ -327,22 +327,11 @@ jobs:
       run: |
         brew install getsentry/tools/sentry-cli
         brew link getsentry/tools/sentry-cli
-        # specifying just "." to make sentry-cli look for dSYM files on itself does not work on
-        # the CI ... the sentry-cli process will just freeze forever
         /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
-            --org brickstore --project brickstore \
-            bin/BrickStore.app.dSYM/Contents/Resources/DWARF/BrickStore
+            --org brickstore --project brickstore BrickStore.app.dSYM ${Qt6_DIR}/lib/
 
     # Build for iOS
     #################################################
-
-#    - name: Fix qmake script for iOS
-#      if: (matrix.config.os == 'ios')
-#      run: |
-#        # fix a bug in aqtinstall - the qmake script for iOS isn't patched correctly
-#        cd ../Qt/${{ matrix.config.qt_version }}
-#        ln -s macos clang_64
-#      shell: bash
 
     - name: Import signing certificate
       if: (matrix.config.os == 'ios')
