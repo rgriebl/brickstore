@@ -325,7 +325,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "edit_stockroom_b", [this](auto) { setStockroom(BrickLink::Stockroom::B); } },
         { "edit_stockroom_c", [this](auto) { setStockroom(BrickLink::Stockroom::C); } },
         { "edit_price_set", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new price for all selected items:"),
                                                          m_model->currencyCode(),
                                                          selectedLots().front()->price(),
@@ -335,7 +336,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
           } },
         { "edit_price_round", [this](auto) { roundPrice(); } },
         { "edit_cost_set", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new cost for all selected items:"),
                                                          m_model->currencyCode(),
                                                          selectedLots().front()->cost(),
@@ -373,7 +375,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_bulk", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Set bulk quantity for the selected items:"),
                                                           QString(),
                                                           selectedLots().front()->bulkQuantity(),
@@ -382,7 +385,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_sale", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
                                                           tr("%"), selectedLots().front()->sale(),
                                                           -1000, 99)) {
@@ -390,7 +394,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_qty_set", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Enter the new quantities for all selected items:"),
                                                           QString(), selectedLots().front()->quantity(),
                                                           -DocumentModel::maxQuantity, DocumentModel::maxQuantity)) {
@@ -398,7 +403,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_remark_set", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new remark for all selected items:"),
                                                          selectedLots().front()->remarks())) {
                   setRemarks(*s);
@@ -416,7 +422,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_comment_set", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new comment for all selected items:"),
                                                          selectedLots().front()->comments())) {
                   setComments(*s);
@@ -434,21 +441,24 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_reserved", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto s = co_await UIHelpers::getString(tr("Reserve all selected items for this specific buyer (BrickLink username):"),
                                                          selectedLots().front()->reserved())) {
                   setReserved(*s);
               }
           } },
         { "edit_marker_text", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new marker text for all selected items:"),
                                                          selectedLots().front()->markerText())) {
                   setMarkerText(*s);
               }
           } },
         { "edit_marker_color", [this](auto) -> QCoro::Task<> {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  co_return;
               if (auto c = co_await UIHelpers::getColor(selectedLots().front()->markerColor())) {
                   setMarkerColor(*c);
               }
@@ -472,22 +482,26 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "document_export_bl_wantedlist_clip", [this](auto) { exportBrickLinkWantedListToClipboard(); } },
 
         { "bricklink_catalog", [this](auto) {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  return;
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, lot->item(), lot->color());
           } },
         { "bricklink_priceguide", [this](auto) {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  return;
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, lot->item(), lot->color());
           } },
         { "bricklink_lotsforsale", [this](auto) {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  return;
               const auto *lot = selectedLots().constFirst();
               BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, lot->item(), lot->color());
           } },
         { "bricklink_myinventory", [this](auto) {
-              Q_ASSERT(!selectedLots().isEmpty());
+              if (selectedLots().isEmpty())
+                  return;
               const auto *lot = selectedLots().constFirst();
               uint lotid = lot->lotId();
               if (lotid)
