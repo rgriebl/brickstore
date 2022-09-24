@@ -873,6 +873,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     m_tb_actions = new ToolBarModel(tbActionNames, this);
     w_tb_toolbar->setModel(m_tb_actions);
     w_tb_toolbar->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    w_tb_toolbar->viewport()->setAttribute(Qt::WA_Hover);  // needed for the (x) button
     w_tb_toolbar->setItemDelegate(new ToolBarDelegate(BetterItemDelegate::AlwaysShowSelection, this));
 
     connect(w_tb_reset, &QPushButton::clicked, this, [this]() {

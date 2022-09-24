@@ -67,6 +67,7 @@ void BrickStoreProxyStyle::polish(QWidget *w)
             });
         }
     }
+    QProxyStyle::polish(w);
 }
 
 void BrickStoreProxyStyle::unpolish(QWidget *w)
@@ -74,6 +75,7 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
     if (auto *le = qobject_cast<QLineEdit *>(w)) {
         le->removeEventFilter(this);
     }
+    QProxyStyle::unpolish(w);
 }
 
 int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
