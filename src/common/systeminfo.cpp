@@ -185,7 +185,11 @@ QCoro::Task<> SystemInfo::init()
        auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
        auto o = json.object().value(u"SPDisplaysDataType"_qs).toArray().first().toObject();
        result.first = o.value(u"sppci_model"_qs).toString();
-       result.second = o.value(u"spdisplays_vendor"_qs).toString().toLower();
+       auto vendorIdString = o.value(u"spdisplays_vendor-id"_qs).toString();
+       if (!vendorIdString.isEmpty())
+           vendor = vendorIdString.toUInt(nullptr, 16);
+       else
+           result.second = o.value(u"spdisplays_vendor"_qs).toString();
 
 #  endif
 #endif

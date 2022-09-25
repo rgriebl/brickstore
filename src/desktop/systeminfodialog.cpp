@@ -55,7 +55,6 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     auto sysInfo = SystemInfo::inst()->asMap();
     sysInfo.remove(u"os.type"_qs);
     sysInfo.remove(u"os.version"_qs);
-    sysInfo.remove(u"hw.gpu.arch"_qs);
     sysInfo.remove(u"hw.memory"_qs);
     sysInfo.remove(u"brickstore.version"_qs);
     sysInfo[u"brickstore.ldraw"_qs] = LDraw::library()->lastUpdated().toString(Qt::RFC2822Date);
