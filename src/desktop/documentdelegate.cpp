@@ -36,12 +36,10 @@
 
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
-#include "bricklink/picture.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
-#include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -137,7 +135,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     Qt::Alignment align = (Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()) & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
 
-    if ((idx.column() == DocumentModel::Index) && (p->device()->devType() != QInternal::Printer)) {
+    bool isPrinting = (p->device()->devType() == QInternal::Printer);
+
+    if ((idx.column() == DocumentModel::Index) && !isPrinting) {
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
         QStyleOptionHeader headerOption;
         headerOption.initFrom(option.widget);
@@ -467,21 +467,25 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     p->setPen(fg);
 
     if (checkmark != 0) {
-        QStyleOptionViewItem opt(option);
-        opt.state &= ~QStyle::State_HasFocus;
-        opt.state |= ((checkmark > 0) ? QStyle::State_On : QStyle::State_Off);
-        opt.features |= QStyleOptionViewItem::HasCheckIndicator;
+        if (isPrinting) {
+            str = QString((checkmark > 0) ? u'\x2714' : u' ');
+        } else {
+            QStyleOptionViewItem opt(option);
+            opt.state &= ~QStyle::State_HasFocus;
+            opt.state |= ((checkmark > 0) ? QStyle::State_On : QStyle::State_Off);
+            opt.features |= QStyleOptionViewItem::HasCheckIndicator;
 
-        QStyle *style = option.widget ? option.widget->style() : QApplication::style();
-        QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
-        r = r.translated(-r.left() + opt.rect.left(), 0);
-        int dx = margin;
-        if (align & Qt::AlignHCenter)
-            dx = (w - r.width()) / 2;
-        else if (align & Qt::AlignRight)
-            dx = (w - r.width() - margin);
-        opt.rect = r.translated(dx, 0);
-        style->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &opt, p, option.widget);
+            QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+            QRect r = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, option.widget);
+            r = r.translated(-r.left() + opt.rect.left(), 0);
+            int dx = margin;
+            if (align & Qt::AlignHCenter)
+                dx = (w - r.width()) / 2;
+            else if (align & Qt::AlignRight)
+                dx = (w - r.width() - margin);
+            opt.rect = r.translated(dx, 0);
+            style->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &opt, p, option.widget);
+        }
     }
     else if (!image.isNull()) {
         int px = x;
