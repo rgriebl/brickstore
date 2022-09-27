@@ -995,15 +995,19 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot)
         auto item = lot->item();
         auto color = lot->color();
 
-        qWarning().noquote() << "Unknown item/color id:"
-                             << (ic.m_itemtype_id ? QByteArray(1, ic.m_itemtype_id) : QByteArray("-"))
-                             << ic.m_item_id << "@" << ic.m_color_id;
-
         bool ok = applyChangeLog(item, color, lot->isIncomplete());
 
         if (ok) {
-            qWarning().noquote() << " > resolved via CL to:" << QByteArray(1, item->itemTypeId())
-                                 << item->id() << "@" << color->id();
+            qInfo().nospace() << " [ OK ] Resolve: "
+                                 << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
+                                 << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')'
+                                 << " -> "
+                                 << item->itemTypeId()
+                                 << '-' << item->id().constData() << " (" << color->id() << ')';
+        } else {
+            qWarning().nospace() << " [FAIL] Resolve: "
+                                 << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
+                                 << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')';
         }
 
         lot->setItem(item);
