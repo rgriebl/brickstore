@@ -280,16 +280,23 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "edit_duplicate", [this](auto) { duplicate(); } },
         { "edit_paste", [this](auto) -> QCoro::Task<> {
               LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              QModelIndex oldCurrentIdx;
 
               if (!lots.empty()) {
                   if (!selectedLots().isEmpty()) {
                        if (co_await UIHelpers::question(tr("Overwrite the currently selected items?"),
                                                         UIHelpers::Yes | UIHelpers::No, UIHelpers::Yes
                                                ) == UIHelpers::Yes) {
+                          oldCurrentIdx = m_selectionModel->currentIndex();
                           m_model->removeLots(selectedLots());
                       }
                   }
-                  addLots(std::move(lots), AddLotMode::ConsolidateInteractive);
+                  auto newRow = co_await addLots(std::move(lots), AddLotMode::ConsolidateInteractive);
+
+                  if (oldCurrentIdx.isValid() && (newRow >= 0)) {
+                      m_selectionModel->setCurrentIndex(m_model->index(newRow, oldCurrentIdx.column()),
+                                                        QItemSelectionModel::Current);
+                  }
               }
           } },
         { "edit_paste_silent", [this](auto) {
@@ -807,10 +814,8 @@ void Document::resetDifferenceMode()
 
 void Document::cut()
 {
-    if (!m_selectedLots.isEmpty()) {
-        Application::inst()->mimeClipboardSet(new DocumentLotsMimeData(m_selectedLots));
-        m_model->removeLots(m_selectedLots);
-    }
+    copy();
+    remove();
 }
 
 void Document::copy()
@@ -849,8 +854,18 @@ void Document::duplicate()
 
 void Document::remove()
 {
-    if (!m_selectedLots.isEmpty())
-        m_model->removeLots(m_selectedLots);
+    if (m_selectedLots.isEmpty())
+        return;
+
+    const QModelIndex oldCurrentIdx = m_selectionModel->currentIndex();
+    int oldRow = oldCurrentIdx.row();
+    int oldCol = oldCurrentIdx.column();
+
+    m_model->removeLots(m_selectedLots);
+
+    int rowCount = m_model->rowCount();
+    QModelIndex newCurrentIdx = m_model->index(oldRow >= rowCount ? rowCount - 1 : oldRow, oldCol);
+    m_selectionModel->setCurrentIndex(newCurrentIdx, QItemSelectionModel::Current);
 }
 
 void Document::selectAll()
