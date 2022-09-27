@@ -137,31 +137,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     bool isPrinting = (p->device()->devType() == QInternal::Printer);
 
-    if ((idx.column() == DocumentModel::Index) && !isPrinting) {
-        QStyle *style = option.widget ? option.widget->style() : QApplication::style();
-        QStyleOptionHeader headerOption;
-        headerOption.initFrom(option.widget);
-        headerOption.text = idx.data().toString();
-        headerOption.state = option.state;
-        headerOption.textAlignment = align;
-        headerOption.orientation = Qt::Vertical;
-        headerOption.section = idx.row();
-        headerOption.rect = option.rect;
-        switch (option.viewItemPosition) {
-        case QStyleOptionViewItem::Beginning:
-            headerOption.position = QStyleOptionHeader::Beginning; break;
-        case QStyleOptionViewItem::Middle:
-            headerOption.position = QStyleOptionHeader::Middle; break;
-        case QStyleOptionViewItem::End:
-            headerOption.position = QStyleOptionHeader::End; break;
-        default:
-        case QStyleOptionViewItem::OnlyOne:
-            headerOption.position = QStyleOptionHeader::OnlyOneSection; break;
-        }
-        style->drawControl(QStyle::CE_Header, &headerOption, p, option.widget);
-        return;
-    }
-
     bool selected = (option.state & QStyle::State_Selected);
     bool active = (option.state & QStyle::State_Active);
     bool disabled = !(option.state & QStyle::State_Enabled);
@@ -524,65 +499,65 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
         if (!richTextColumns.contains(idx.column())) {
             p->drawText(x + margin, y, rw, h, int(align), str);
-            return;
-        }
+        } else {
+            static const QString elide = u"..."_qs;
+            auto key = TextLayoutCacheKey { str, QSize(rw, h), uint(fm.height()) };
+            QTextLayout *tlp = s_textLayoutCache.object(key);
 
-        static const QString elide = u"..."_qs;
-        auto key = TextLayoutCacheKey { str, QSize(rw, h), uint(fm.height()) };
-        QTextLayout *tlp = s_textLayoutCache.object(key);
-
-        // an unlikely hash collision
-        if (tlp && !(tlp->text() == str && QFontMetrics(tlp->font()).height() == fm.height())) {
-            qDebug() << "TextLayoutCache: hash collision on:" << str;
-            tlp = nullptr;
-        }
-
-        if (!tlp) {
-            tlp = new QTextLayout(str, option.font, nullptr);
-            tlp->setCacheEnabled(true);
-            tlp->setTextOption(QTextOption(align));
-
-            int lineCount = (h + fm.leading()) / fm.lineSpacing();
-            int height = 0;
-
-            tlp->beginLayout();
-            for (int i = 0; i < lineCount; i++) {
-                QTextLine line = tlp->createLine();
-                if (!line.isValid())
-                    break;
-
-                line.setLineWidth(rw);
-                height += fm.leading();
-                line.setPosition(QPoint(0, height));
-                height += int(line.height());
-
-                if ((i == (lineCount - 1)) && ((line.textStart() + line.textLength()) < str.length())) {
-                    int elide_width = fm.horizontalAdvance(elide) + margin;
-                    line.setLineWidth(rw - elide_width);
-                }
-            }
-            tlp->endLayout();
-
-            if (!s_textLayoutCache.insert(key, tlp))
+            // an unlikely hash collision
+            if (tlp && !(tlp->text() == str && QFontMetrics(tlp->font()).height() == fm.height())) {
+                qDebug() << "TextLayoutCache: hash collision on:" << str;
                 tlp = nullptr;
-        }
+            }
 
-        if (tlp && tlp->lineCount()) {
-            const auto lastLine = tlp->lineAt(tlp->lineCount() - 1);
-            int height = tlp->lineCount() * (fm.leading() + int(lastLine.height()));
+            if (!tlp) {
+                tlp = new QTextLayout(str, option.font, nullptr);
+                tlp->setCacheEnabled(true);
+                tlp->setTextOption(QTextOption(align));
 
-            quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+                int lineCount = (h + fm.leading()) / fm.lineSpacing();
+                int height = 0;
 
-            p->setClipRect(option.rect.adjusted(margin, 0, -margin, 0)); // QTextLayout doesn't clip
-            tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
-            if (lastLine.textStart() + lastLine.textLength() < str.length()) {
-                int elidePos = int(lastLine.naturalTextWidth());
-                p->drawText(QPoint(x + margin + int(elidePos),
-                                   y + (h - height)/2 + (tlp->lineCount() - 1) * fm.lineSpacing() + fm.ascent()),
-                            elide);
-                m_elided.insert(elideHash);
-            } else {
-                m_elided.remove(elideHash);
+                tlp->beginLayout();
+                for (int i = 0; i < lineCount; i++) {
+                    QTextLine line = tlp->createLine();
+                    if (!line.isValid())
+                        break;
+
+                    line.setLineWidth(rw);
+                    height += fm.leading();
+                    line.setPosition(QPoint(0, height));
+                    height += int(line.height());
+
+                    if ((i == (lineCount - 1)) && ((line.textStart() + line.textLength()) < str.length())) {
+                        int elide_width = fm.horizontalAdvance(elide) + margin;
+                        line.setLineWidth(rw - elide_width);
+                    }
+                }
+                tlp->endLayout();
+
+                if (!s_textLayoutCache.insert(key, tlp))
+                    tlp = nullptr;
+            }
+
+            if (tlp && tlp->lineCount()) {
+                const auto lastLine = tlp->lineAt(tlp->lineCount() - 1);
+                int height = tlp->lineCount() * (fm.leading() + int(lastLine.height()));
+
+                quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+
+                p->setClipRect(option.rect.adjusted(margin, 0, -margin, 0)); // QTextLayout doesn't clip
+                tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
+                if (lastLine.textStart() + lastLine.textLength() < str.length()) {
+                    int elidePos = int(lastLine.naturalTextWidth());
+                    p->drawText(QPoint(x + margin + int(elidePos),
+                                       y + (h - height)/2 + (tlp->lineCount() - 1) * fm.lineSpacing() + fm.ascent()),
+                                elide);
+                    m_elided.insert(elideHash);
+                } else {
+                    m_elided.remove(elideHash);
+                }
+                p->setClipRect(option.rect);
             }
         }
     }
@@ -594,6 +569,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             p->setPen(c);
             p->drawRect(option.rect.adjusted(i, i, -i - 1, -i -1));
         }
+    }
+    if (focus && !selected) {
+        p->setPen(QPen { fg, 1, Qt::DotLine });
+        p->drawRect(option.rect.adjusted(0, 0, -1, -1));
     }
 }
 
