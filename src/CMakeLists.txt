@@ -13,8 +13,8 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/exception.cpp
     utility/exception.h
     utility/q3cache.h
-    utility/q3cache6.h
-    utility/q5hashfunctions.cpp
+    utility/q5hash.cpp
+    utility/q5hash.h
     utility/q5hashfunctions.h
     utility/qparallelsort.h
     utility/ref.cpp

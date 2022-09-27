@@ -30,3 +30,9 @@ Q_DECL_PURE_FUNCTION uint q5Hash(const QString &key, uint seed = 0) noexcept;
 #endif
 Q_DECL_PURE_FUNCTION uint q5Hash(QStringView key, uint seed = 0) noexcept;
 
+Q_DECL_CONST_FUNCTION Q_DECL_CONSTEXPR inline uint q5Hash(ulong key, uint seed = 0) Q_DECL_NOTHROW
+{
+    return (sizeof(ulong) > sizeof(uint))
+        ? (uint(((key >> (8 * sizeof(uint) - 1)) ^ key) & (~0U)) ^ seed)
+        : (uint(key & (~0U)) ^ seed);
+}

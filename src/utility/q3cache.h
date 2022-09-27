@@ -38,11 +38,6 @@
 ****************************************************************************/
 #pragma once
 
-#include <QtCore/qhash.h>
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#  include "q3cache6.h"
-#else
 /*
  Qt 5's version of QCache lost the qIsDetached check, that would prevent items being trimmed, when
  they are still in use somewhere else. Although this is an obscure feature and messes with the
@@ -50,7 +45,20 @@
  to keep tabs on the PriceGuide and Picture objects.
  QCache in Qt 3 and Qt 5 are nearly identical (minus the qIsDetached() check), so this file is a
  copy of the Qt 5 QCache with the check added back in.
+
+ Qt 6's versions of QCache and QHash have a race condition when trimming (QTBUG-99710).
+ The problem is that our recursiveTrim/q3IsDetached checks do not work with the fixed
+ algorithm, because that only works by repeatedly unlinking the last entry. We cannot
+ guarantee however, that the last entry CAN be unlinked and this will throw us into
+ an endless loop sooner or later.
+ 
+ Both these problems combined result in the need for a copy of Qt 5's QCache with the qIsDetched
+ check added back in -> this file, q3cache.h / Q3Cache
+ In addition, with Qt 6 we also need a copy of Qt 5's QHash -> q5hash.h / Q5Hash
 */
+
+#include "q5hash.h"
+#include <QDebug>
 
 template <typename T> inline bool q3IsDetached(T &) { return true; }
 
@@ -69,7 +77,7 @@ class Q3Cache
         const Key *keyPtr; T *t; int c; Node *p,*n;
     };
     Node *f, *l;
-    QHash<Key, Node> hash;
+    Q5Hash<Key, Node> hash;
     int mx, total;
 
     inline void unlink(Node &n) {
@@ -83,8 +91,8 @@ class Q3Cache
         delete obj;
     }
     inline T *relink(const Key &key) {
-        typename QHash<Key, Node>::iterator i = hash.find(key);
-        if (typename QHash<Key, Node>::const_iterator(i) == hash.constEnd())
+        typename Q5Hash<Key, Node>::iterator i = hash.find(key);
+        if (typename Q5Hash<Key, Node>::const_iterator(i) == hash.constEnd())
             return 0;
 
         Node &n = *i;
@@ -156,8 +164,8 @@ inline T *Q3Cache<Key,T>::operator[](const Key &key) const
 template <class Key, class T>
 inline bool Q3Cache<Key,T>::remove(const Key &key)
 {
-    typename QHash<Key, Node>::iterator i = hash.find(key);
-    if (typename QHash<Key, Node>::const_iterator(i) == hash.constEnd()) {
+    typename Q5Hash<Key, Node>::iterator i = hash.find(key);
+    if (typename Q5Hash<Key, Node>::const_iterator(i) == hash.constEnd()) {
         return false;
     } else {
         unlink(*i);
@@ -168,7 +176,7 @@ inline bool Q3Cache<Key,T>::remove(const Key &key)
 template <class Key, class T>
 inline T *Q3Cache<Key,T>::take(const Key &key)
 {
-    typename QHash<Key, Node>::iterator i = hash.find(key);
+    typename Q5Hash<Key, Node>::iterator i = hash.find(key);
     if (i == hash.end())
         return 0;
 
@@ -189,7 +197,7 @@ bool Q3Cache<Key,T>::insert(const Key &akey, T *aobject, int acost)
     }
     trim(mx - acost);
     Node sn(aobject, acost);
-    typename QHash<Key, Node>::iterator i = hash.insert(akey, sn);
+    typename Q5Hash<Key, Node>::iterator i = hash.insert(akey, sn);
     total += acost;
     Node *n = &i.value();
     n->keyPtr = &i.key();
@@ -223,7 +231,14 @@ void Q3Cache<Key, T>::clearRecursive()
             break;
         s = new_s;
     }
-    clear();
+    if (s) {
+        qWarning() << "Q3Cache::clearRecursive: leaking" << s << "entries with non-zero ref count";
+        // we cannot clear(), as this deletes objects that may still be in use, we HAVE TO leak them
+
+        const auto leakKeys = keys();
+        for (const auto &key : leakKeys)
+            (void) take(key);
+    }
 }
 
 template <class Key, class T>
@@ -247,4 +262,3 @@ inline void Q3Cache<Key,T>::setObjectCost(const Key &key, int cost)
 
 
 QT_END_NAMESPACE
-#endif
