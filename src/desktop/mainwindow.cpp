@@ -413,27 +413,12 @@ MainWindow::~MainWindow()
     delete m_importwanted_dialog.data();
 
     s_inst = reinterpret_cast<MainWindow *>(-1);
-}
 
-void MainWindow::forEachViewPane(std::function<bool(ViewPane *)> callback)
-{
-    if (!callback)
-        return;
-
-    QWidget *cw = centralWidget();
-
-    std::function<bool(QWidget *)> recurse = [&callback, &recurse](QWidget *w) {
-        if (auto *splitter = qobject_cast<QSplitter *>(w)) {
-            for (int i = 0; i < splitter->count(); ++i) {
-                if (recurse(splitter->widget(i)))
-                    return true;
-            }
-        } else if (auto *vp = qobject_cast<ViewPane *>(w)) {
-            return callback(vp);
-        }
-        return false;
-    };
-    recurse(cw);
+    // we have to break a connection loop here to prevent a crash: if we didn't do this, then
+    // the ViewPane's d'tors would be called AFTER "this" is not a MainWindow anymore, but the
+    // deletedViewPane() callback wants to update members of "this".
+    for (const auto *vp : qAsConst(m_allViewPanes))
+        vp->disconnect();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e)
@@ -468,7 +453,7 @@ void MainWindow::createCentralWidget()
 
     auto *rootSplitter = new QSplitter();
     rootSplitter->setObjectName(u"RootSplitter"_qs);
-    auto *vp = createViewPane(nullptr);
+    auto *vp = createViewPane(nullptr, this);
     rootSplitter->addWidget(vp);
     setCentralWidget(rootSplitter);
     setActiveViewPane(vp);
@@ -498,11 +483,12 @@ void MainWindow::setActiveViewPane(ViewPane *newActive)
         m_activeViewPane->setActive(true);
 }
 
-ViewPane *MainWindow::createViewPane(Document *activeDocument)
+ViewPane *MainWindow::createViewPane(Document *activeDocument, QWidget *window)
 {
-    auto vp = new ViewPane([this](Document *doc) { return createViewPane(doc); },
-            [this](ViewPane *vpl) { deleteViewPane(vpl); },
-            activeDocument);
+    Q_ASSERT(window);
+
+    auto vp = new ViewPane([this](Document *doc, QWidget *win) { return createViewPane(doc, win); },
+                           activeDocument);
 
     connect(vp, &ViewPane::viewActivated,
             this, [this, vp](View *view) {
@@ -510,35 +496,40 @@ ViewPane *MainWindow::createViewPane(Document *activeDocument)
         connectView(view);
     });
 
+    m_allViewPanes.insert(window, vp);
+
+    // QObject destroyed is too late, because ViewPane is just an QObject at this point then
+    connect(vp, &ViewPane::beingDestroyed,
+            this, [this, window, vp]() {
+
+        // vp is just a QObject at this point!
+        m_allViewPanes.remove(window, vp);
+
+        if (m_activeViewPane == vp) {
+            // try the current window first
+            ViewPane *newActive = m_allViewPanes.value(window);
+
+            if (!newActive) {
+                // we need to find another pane to transfer the active state
+                for (const auto &check : qAsConst(m_allViewPanes)) {
+                    if (check != vp) {
+                        newActive = check;
+                        break;
+                    }
+                }
+            }
+            setActiveViewPane(newActive);
+        }
+    });
+
     setActiveViewPane(vp);
     return vp;
-}
-
-void MainWindow::deleteViewPane(ViewPane *viewPane)
-{
-    if (m_activeViewPane == viewPane) {
-        ViewPane *newActive = nullptr;
-
-        // we need to find another pane to transfer the active state
-        forEachViewPane([viewPane, &newActive](ViewPane *vp) {
-            if (vp != viewPane) {
-                newActive = vp;
-                return true;
-            }
-            return false;
-        });
-
-        Q_ASSERT(viewPane);
-        setActiveViewPane(newActive);
-    }
-
-    viewPane->deleteLater();
 }
 
 QDockWidget *MainWindow::createDock(QWidget *widget, const char *name)
 {
     QDockWidget *dock = new QDockWidget(QString(), this);
-    dock->setObjectName(QLatin1String(name));
+    dock->setObjectName(QString::fromLatin1(name));
     dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
     dock->setTitleBarWidget(new FancyDockTitleBar(dock));
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -945,11 +936,10 @@ void MainWindow::createActions()
                   if (doc->model()->isModified()) {
                       if (doc->filePath().isEmpty()) {
                           QVector<ViewPane *> possibleVPs;
-                          forEachViewPane([doc, &possibleVPs](ViewPane *vp) {
+                          for (const auto &vp : qAsConst(m_allViewPanes)) {
                               if (vp->viewForDocument(doc))
                                   possibleVPs << vp;
-                              return false;
-                          });
+                          }
                           if (!possibleVPs.contains(m_activeViewPane)) {
                               Q_ASSERT(!possibleVPs.isEmpty());
                               setActiveViewPane(possibleVPs.constFirst());

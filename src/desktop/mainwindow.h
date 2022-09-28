@@ -111,10 +111,8 @@ private:
     bool setupToolBar();
     void setupDockWidgets();
     QDockWidget *createDock(QWidget *widget, const char *name);
-    void forEachViewPane(std::function<bool(ViewPane *)> callback);
     void setActiveViewPane(ViewPane *newActive);
-    ViewPane *createViewPane(Document *activeDocument);
-    void deleteViewPane(ViewPane *viewPane);
+    ViewPane *createViewPane(Document *activeDocument, QWidget *window);
 
     Workspace *m_workspace;
     QList<QAction *> m_extensionContextActions;
@@ -137,6 +135,7 @@ private:
 
     QPointer<View> m_activeView;
     QPointer<ViewPane> m_activeViewPane;
+    QMultiHash<QWidget *, ViewPane *> m_allViewPanes;
 
     QWidget *m_welcomeWidget;
 

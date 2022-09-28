@@ -94,9 +94,6 @@ public:
     QmlDocumentLots *qmlLots();
     QList<BrickLink::QmlLot> qmlSelectedLots();
 
-    Q_INVOKABLE void ref() { m_doc->ref(); }
-    Q_INVOKABLE void deref() { m_doc->deref(); }
-
     Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
     Q_INVOKABLE void sortAdditionally(int column, Qt::SortOrder order);
 

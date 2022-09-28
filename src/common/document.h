@@ -104,10 +104,6 @@ public:
     Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave, QObject *parent = nullptr);
     ~Document() override;
 
-    void ref();
-    void deref();
-    int refCount() const;
-
     void setActive(bool active);
 
     QCoro::Task<bool> requestClose();
@@ -341,7 +337,6 @@ private:
     void deleteAutosave();
 
 private:
-    QBasicAtomicInt      m_ref = 0;
     DocumentModel *      m_model;
     QItemSelectionModel *m_selectionModel;
     LotList              m_selectedLots;

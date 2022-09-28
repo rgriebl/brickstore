@@ -63,10 +63,9 @@ QSize CollapsibleLabel::minimumSizeHint() const
 }
 
 
-ViewPane::ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate, std::function<void (ViewPane *)> viewPaneDelete, Document *activeDocument)
+ViewPane::ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCreate, Document *activeDocument)
     : QWidget()
     , m_viewPaneCreate(viewPaneCreate)
-    , m_viewPaneDelete(viewPaneDelete)
 {
     Q_ASSERT(viewPaneCreate);
 
@@ -140,6 +139,8 @@ ViewPane::~ViewPane()
         disconnect(w, &QObject::destroyed, this, nullptr);
         delete w;
     }
+
+    emit beingDestroyed();
 }
 
 void ViewPane::newWindow()
@@ -153,17 +154,15 @@ void ViewPane::newWindow()
     nw->setAttribute(Qt::WA_DeleteOnClose);
     auto *rootSplitter = new QSplitter();
     rootSplitter->setObjectName(u"WindowSplitter"_qs);
-    auto *vp = m_viewPaneCreate(nullptr);
+    auto *vp = m_viewPaneCreate(nullptr, nw);
     rootSplitter->addWidget(vp);
     nw->setCentralWidget(rootSplitter);
     nw->show();
     vp->activateDocument(activeDocument());
 
-    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [this, nw, vp]() {
-        if (vp->m_viewStack->count() == 0) {
-            m_viewPaneDelete(vp);
+    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [nw, vp]() {
+        if (vp->m_viewStack->count() == 0)
             nw->close();
-        }
     });
 }
 
@@ -175,7 +174,7 @@ void ViewPane::split(Qt::Orientation o)
         newSplitter->setChildrenCollapsible(false);
         parentSplitter->replaceWidget(idx, newSplitter);
         newSplitter->insertWidget(0, this);
-        newSplitter->insertWidget(1, m_viewPaneCreate(activeDocument()));
+        newSplitter->insertWidget(1, m_viewPaneCreate(activeDocument(), window()));
         auto sizes = newSplitter->sizes();
         int h = (sizes.at(0) + sizes.at(1)) / 2;
         newSplitter->setSizes({ h, h });
@@ -204,7 +203,7 @@ void ViewPane::unsplit()
                 delete parentSplitter;
             }
 
-            m_viewPaneDelete(this);
+            deleteLater();
         }
     }
 }
@@ -341,6 +340,8 @@ void ViewPane::setActive(bool b)
 
         fontChange();
         paletteChange();
+        if (b)
+            activateWindow();
         emit viewActivated(activeView());
     }
 }
@@ -737,5 +738,5 @@ void ViewPane::createToolBar()
     });
 }
 
-//#include "moc_viewpane.cpp"  // QTBUG-98845
+//#include "moc_viewpane.cpp"  // QTBUG-98845 //TODO: fixed in 6.5
 //#include "viewpane.moc"

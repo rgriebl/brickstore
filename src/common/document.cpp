@@ -533,22 +533,6 @@ Document::~Document()
     //qWarning() << "~" << this;
 }
 
-void Document::ref()
-{
-    m_ref.ref();
-}
-
-void Document::deref()
-{
-    if (!m_ref.deref())
-        deleteLater();
-}
-
-int Document::refCount() const
-{
-    return m_ref;
-}
-
 void Document::setActive(bool active)
 {
     if (active) {
@@ -610,8 +594,10 @@ QCoro::Task<bool> Document::requestClose()
             break;
         }
     }
-    if (doClose)
+    if (doClose) {
         emit closeAllViewsForDocument();
+        deleteLater();
+    }
     co_return doClose;
 }
 

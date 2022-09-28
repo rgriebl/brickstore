@@ -38,8 +38,7 @@ class ViewPane : public QWidget
     Q_OBJECT
 
 public:
-    ViewPane(std::function<ViewPane *(Document *)> viewPaneCreate,
-             std::function<void(ViewPane *)> viewPaneDelete, Document *activeDocument);
+    ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCreate, Document *activeDocument);
     ~ViewPane() override;
 
     void newWindow();
@@ -66,6 +65,7 @@ public:
 
 signals:
     void viewActivated(View *view);
+    void beingDestroyed();
 
 protected:
     void languageChange();
@@ -109,6 +109,5 @@ private:
 
     bool m_active = false;
     QObject *m_viewConnectionContext = nullptr;
-    std::function<ViewPane *(Document *)> m_viewPaneCreate;
-    std::function<void(ViewPane *)> m_viewPaneDelete;
+    std::function<ViewPane *(Document *, QWidget *)> m_viewPaneCreate;
 };

@@ -292,8 +292,9 @@ View::View(Document *document, QWidget *parent)
 {
     Q_ASSERT(document && document->model());
 
+    //qWarning() << "+" << this;
+
     m_model = document->model();
-    m_document->ref();
 
     connect(m_document, &Document::closeAllViewsForDocument,
             this, [this]() { delete this; });
@@ -504,7 +505,6 @@ View::~View()
 {
     delete m_actionConnectionContext;
     m_actionConnectionContext = nullptr;
-    m_document->deref();
     //qWarning() << "~" << this;
 }
 
