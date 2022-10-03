@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.10.1] - 2022-10-04
+
+More bug fixes. This time:
+- fixed Sentry crash reports on macOS being next to useless due to a bug in the build setup.
+- fixed printing related crashes on Windows and macOS.
+- fixed most mouse hover effects not working correctly.
+- fixed a few annoyances when navigating documents with the keyboard (Home/End key, sudden jumps).
+- fixed cache related crashes when updating the BrickStore database or LDraw library.
+- fixed a possible data loss situation when un-splitting a view containing an unsaved document.
+
+
 ## [2022.9.3] - 2022-09-21
 
 Another bug-fix release for 2022.9.1 and 2022.9.2. Most importantly:
@@ -538,7 +549,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.9.3...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.10.1...HEAD
+[2022.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.1
 [2022.9.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.3
 [2022.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.2
 [2022.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.1
