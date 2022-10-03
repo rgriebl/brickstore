@@ -90,9 +90,9 @@ void MobileApplication::setupLogging()
     });
 }
 
-QCoro::Task<bool> MobileApplication::closeAllViews()
+QCoro::Task<bool> MobileApplication::closeAllDocuments()
 {
-    return Application::closeAllViews();
+    return Application::closeAllDocuments();
 }
 
 void MobileApplication::setupQml()

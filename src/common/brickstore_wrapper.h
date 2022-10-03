@@ -515,6 +515,8 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE QmlDocument *document(int index) const;
+
 signals:
     void lastDocumentClosed();
     void countChanged(int count);

@@ -1256,7 +1256,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     QStringList files = DocumentList::inst()->allFiles();
     Config::inst()->setValue(u"/MainWindow/LastSessionDocuments"_qs, files);
 
-    if (!QCoro::waitFor(Application::inst()->closeAllViews())) {
+    if (!QCoro::waitFor(Application::inst()->closeAllDocuments())) {
         e->ignore();
         return;
     }

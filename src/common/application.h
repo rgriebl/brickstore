@@ -68,7 +68,7 @@ public:
 
     void raise();
 
-    virtual QCoro::Task<bool> closeAllViews();
+    virtual QCoro::Task<bool> closeAllDocuments();
 
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);

@@ -811,7 +811,7 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
 }
 
 bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pages,
-                        double scaleFactor, uint *maxPageCount, double *maxWidth)
+                      double scaleFactor, uint *maxPageCount, double *maxWidth)
 {
     if (maxPageCount)
         *maxPageCount = 0;

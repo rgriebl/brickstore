@@ -216,9 +216,9 @@ void DesktopApplication::setupLogging()
     });
 }
 
-QCoro::Task<bool> DesktopApplication::closeAllViews()
+QCoro::Task<bool> DesktopApplication::closeAllDocuments()
 {
-    auto result = co_await Application::closeAllViews();
+    auto result = co_await Application::closeAllDocuments();
 
     MainWindow::inst()->closeAllDialogs();
     co_return result;

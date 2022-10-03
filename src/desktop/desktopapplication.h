@@ -39,7 +39,7 @@ public:
 protected:
     void setupLogging() override;
 
-    QCoro::Task<bool> closeAllViews() override;
+    QCoro::Task<bool> closeAllDocuments() override;
 
 private:
     bool notifyOtherInstance();

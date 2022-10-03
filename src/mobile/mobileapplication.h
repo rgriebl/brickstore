@@ -29,7 +29,7 @@ public:
     void init() override;
 
 protected:
-    QCoro::Task<bool> closeAllViews() override;
+    QCoro::Task<bool> closeAllDocuments() override;
     void setupQml() override;
     void setupLogging() override;
 

@@ -385,7 +385,7 @@ void Application::mimeClipboardSet(QMimeData *data)
 #endif
 }
 
-QCoro::Task<bool> Application::closeAllViews()
+QCoro::Task<bool> Application::closeAllDocuments()
 {
     const auto docs = DocumentList::inst()->documents();
 
@@ -481,7 +481,7 @@ QCoro::Task<bool> Application::updateDatabase()
 
     QStringList files = DocumentList::inst()->allFiles();
 
-    if (co_await closeAllViews()) {
+    if (co_await closeAllDocuments()) {
         if (DocumentList::inst()->count())
             co_await qCoro(DocumentList::inst(), &DocumentList::lastDocumentClosed);
 

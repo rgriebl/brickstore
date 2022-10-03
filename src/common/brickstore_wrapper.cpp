@@ -1187,6 +1187,14 @@ QHash<int, QByteArray> QmlDocumentList::roleNames() const
     };
 }
 
+QmlDocument *QmlDocumentList::document(int index) const
+{
+    if (index < 0 || index >= rowCount())
+        return nullptr;
+
+    return map(QIdentityProxyModel::data(this->index(index, 0), Qt::UserRole).value<Document *>());
+}
+
 DocumentList *QmlDocumentList::docList()
 {
     return DocumentList::inst();

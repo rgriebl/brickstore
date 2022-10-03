@@ -252,41 +252,41 @@ Control {
         homeAndView.setCurrentIndex(view ? 1: 0)
     }
 
+    function createViewForDocument(doc : BS.Document) {
+        console.log("Document added: " + doc.fileNameOrTitle)
+        doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
+        doc.closeAllViewsForDocument.connect(
+                    () => {
+                        let index = indexOfDocument(doc)
+                        if (index >= 0) {
+                            if (views[index] === currentView) {
+                                setActiveDocument(null)
+                            }
+                            views.splice(index, 1).forEach(v => v.destroy())
+                        }
+                    })
+
+        let viewComponent = Qt.createComponent("View.qml")
+        if (viewComponent.status === Component.Ready) {
+            let view = viewComponent.createObject(viewProxy, {
+                                                      visible: false,
+                                                      document: doc,
+                                                      goHomeFunction: function() { setActiveDocument(null) },
+                                                      })
+            if (view) {
+                views.push(view)
+                setActiveDocument(doc)
+            } else {
+                console.error("could not create a View item")
+            }
+        } else {
+            console.error(viewComponent.errorString())
+        }
+    }
+
     Connections {
         target: BS.BrickStore.documents
-
-        function onDocumentAdded(doc : BS.Document) {
-            doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
-            doc.closeAllViewsForDocument.connect(
-                        () => {
-                            let index = indexOfDocument(doc)
-                            if (index >= 0) {
-                                if (views[index] === currentView) {
-                                    setActiveDocument(null)
-                                }
-                                views.splice(index, 1).forEach(v => v.destroy())
-                                doc.deref()
-                            }
-                        })
-
-            let viewComponent = Qt.createComponent("View.qml")
-            if (viewComponent.status === Component.Ready) {
-                let view = viewComponent.createObject(viewProxy, {
-                                                          visible: false,
-                                                          document: doc,
-                                                          goHomeFunction: function() { setActiveDocument(null) },
-                                                          })
-                if (view) {
-                    doc.ref()
-                    views.push(view)
-                    setActiveDocument(doc)
-                } else {
-                    console.error("could not create a View item")
-                }
-            } else {
-                console.error(viewComponent.errorString())
-            }
-        }
+        function onDocumentAdded(doc : BS.Document) { createViewForDocument(doc) }
     }
 
     DialogLoader {
@@ -366,5 +366,8 @@ Control {
                      "help_systeminfo": () => { systemInfoDialog.open() },
                      "help_announcements": () => { },
                  })
+        for (let i = 0; i < BS.BrickStore.documents.count; ++i) {
+            createViewForDocument(BS.BrickStore.documents.document(i));
+        }
     }
 }
