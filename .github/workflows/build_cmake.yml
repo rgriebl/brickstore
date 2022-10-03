@@ -37,7 +37,7 @@ jobs:
           artifact: "Windows-x64"
           runs-on: windows-2019
           os: windows
-          qt_version: '6.3.2'
+          qt_version: '6.4.0'
           qt_arch: 'win64_msvc2019_64'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           cmake_extra_config: '-DSENTRY=ON'
@@ -46,7 +46,7 @@ jobs:
           artifact: "Windows-ARM64"
           runs-on: windows-2019
           os: windows
-          qt_version: '6.3.2'
+          qt_version: '6.4.0'
           qt_arch: 'win64_msvc2019_arm64'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
           cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
@@ -71,14 +71,14 @@ jobs:
           runs-on: ubuntu-20.04
           os: linux
           appimage: true
-          qt_version: '6.3.2'
+          qt_version: '6.4.0'
           qt_arch: ''
 
         - name: "macOS Universal"
           artifact: "macOS"
           runs-on: macos-11
           os: macos
-          qt_version: '6.3.2'
+          qt_version: '6.4.0'
           qt_arch: ''
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
 
