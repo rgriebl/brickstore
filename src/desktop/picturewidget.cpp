@@ -53,6 +53,7 @@ static bool isGPUBlackListed()
         "Intel(R) HD Graphics 3000",
         "Intel(R) Q45/Q43 Express Chipset (Microsoft Corporation - WDDM 1.1)",
         "NVIDIA GeForce 210",
+        "NVIDIA GeForce 210 ",
         "NVIDIA nForce 980a/780a SLI",
         "NVIDIA GeForce GT 525M",
         "NVIDIA GeForce 8400 GS",
