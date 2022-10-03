@@ -190,6 +190,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connectView(nullptr);
 
+    m_defaultDockState = saveState();
+
     bool doNotRestoreGeometry = false;
 
 #if defined(Q_OS_WINDOWS)
@@ -230,21 +232,19 @@ MainWindow::MainWindow(QWidget *parent)
     }
     menuBar()->show();
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 3, 2)
     // The second restore is needed, because sometimes the system's window-manager resizes us after
     // showing, so we need to restore again, once this resize has happened. For some reason, it
     // needs to be delayed as well to work on Windows...
 
     if (!state.isEmpty()) {
         new EventFilter(this, { QEvent::Resize }, [this, state](QObject *, QEvent *) -> EventFilter::Result {
-            QTimer::singleShot(200, this, [this, state]() {
+            QTimer::singleShot(300, this, [this, state]() {
                 restoreState(state, DockStateVersion);
                 menuBar()->show();
             });
             return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
         });
     }
-#endif
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
@@ -1202,6 +1202,12 @@ QMenu *MainWindow::createPopupMenu()
     if (menu) {
         menu->addAction(tr("Customize Toolbar..."), this, [this]() {
             showSettings(u"toolbar"_qs);
+        });
+        menu->addSeparator();
+        menu->addAction(tr("Reset Info Docks layout"), this, [this]() {
+            restoreState(m_defaultDockState);
+            // somehow the width ends up being too wide, so we try to squeeze the dock
+            resizeDocks({ m_dock_widgets.at(0) }, { 20 }, Qt::Horizontal);
         });
     }
     return menu;

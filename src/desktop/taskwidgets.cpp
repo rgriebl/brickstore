@@ -43,7 +43,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     : PriceGuideWidget(parent), m_document(nullptr), m_dock(nullptr)
 {
     setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
@@ -55,7 +55,6 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
                                                          m_selection.constFirst()->color(), true)
                          : nullptr);
     });
-
 
     connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, &TaskPriceGuideWidget::documentUpdate);
@@ -290,7 +289,7 @@ void TaskInfoWidget::changeEvent(QEvent *e)
 TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     : AppearsInWidget(parent), m_document(nullptr)
 {
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     connect(MainWindow::inst(), &MainWindow::documentActivated, this, &TaskAppearsInWidget::documentUpdate);
 
@@ -337,6 +336,7 @@ void TaskAppearsInWidget::selectionUpdate(const LotList &list)
 TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setAlternatingRowColors(true);
     setHeaderHidden(true);
@@ -412,6 +412,7 @@ void TaskOpenDocumentsWidget::changeEvent(QEvent *e)
 TaskRecentDocumentsWidget::TaskRecentDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     //setItemDelegate(new QStyledItemDelegate());
     setAlternatingRowColors(true);
     setHeaderHidden(true);

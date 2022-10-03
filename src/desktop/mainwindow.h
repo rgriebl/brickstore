@@ -139,5 +139,7 @@ private:
 
     QWidget *m_welcomeWidget;
 
+    QByteArray m_defaultDockState;
+
     friend class DocumentDelegate;
 };
