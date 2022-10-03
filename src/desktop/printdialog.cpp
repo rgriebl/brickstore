@@ -147,7 +147,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
             this, &PrintDialog::updateScaling);
 
     connect(w_sysprint, &QLabel::linkActivated,
-            this, [this, window](const QString &) -> QCoro::Task<> {
+            this, [this, window](const QString &) {
         if (m_saveAsPdf)
             m_printer->setPrinterName(QPrinter().printerName());
 
@@ -162,11 +162,9 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
             dlg.setOption(QAbstractPrintDialog::PrintSelection);
 
         dlg.setPrintRange(window->selectedLots().isEmpty() ? QAbstractPrintDialog::AllPages
-                                                          : QAbstractPrintDialog::Selection);
-        dlg.setWindowModality(Qt::ApplicationModal);
-        dlg.show();
+                                                           : QAbstractPrintDialog::Selection);
 
-        if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
+        if (dlg.exec() == QDialog::Accepted)
             print();
     });
 
