@@ -3685,6 +3685,11 @@ Click derecho: Menu</translation>
         <source>Customize Toolbar...</source>
         <translation>Personalizar Barra de heramientas...</translation>
     </message>
+    <message>
+        <location filename="../src/desktop/mainwindow.cpp" line="1207"/>
+        <source>Reset Info Docks layout</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ManageColumnLayoutsDialog</name>
@@ -5711,12 +5716,12 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation type="vanished">min.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Document statistics</source>
         <translation>Estadísticas del documento</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Multiple lots selected</source>
         <translation>Múltiples lotes selecionados</translation>
     </message>

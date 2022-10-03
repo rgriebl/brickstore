@@ -4135,6 +4135,11 @@ Rechts-Click: Menü</translation>
         <source>Customize Toolbar...</source>
         <translation>Werkzeugleiste anpassen...</translation>
     </message>
+    <message>
+        <location filename="../src/desktop/mainwindow.cpp" line="1207"/>
+        <source>Reset Info Docks layout</source>
+        <translation>Anordnung der Infoleisten zurücksetzen</translation>
+    </message>
 </context>
 <context>
     <name>ManageColumnLayoutsDialog</name>
@@ -6245,12 +6250,12 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">min.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Multiple lots selected</source>
         <translation>Mehrere Posten ausgewählt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Document statistics</source>
         <translation>Dokumentstatistik</translation>
     </message>

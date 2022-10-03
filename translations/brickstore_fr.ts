@@ -4501,6 +4501,11 @@ Right click: Menu</source>
         <source>Customize Toolbar...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/desktop/mainwindow.cpp" line="1207"/>
+        <source>Reset Info Docks layout</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ManageColumnLayoutsDialog</name>
@@ -6478,12 +6483,12 @@ If you do not want to save your password, then just leave this field empty and y
         <translation type="vanished">min.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Multiple lots selected</source>
         <translation>Lots multiples sélectionnés</translation>
     </message>
     <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="258"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Document statistics</source>
         <translation>Statistiques sur le document</translation>
     </message>
