@@ -54,6 +54,9 @@
 #  include "bricklink/wantedlist.h"
 #endif
 
+Q_LOGGING_CATEGORY(LogResolver, "resolver")
+Q_LOGGING_CATEGORY(LogCache, "cache")
+
 
 namespace BrickLink {
 
@@ -271,8 +274,8 @@ QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Colo
 
     auto f = new QSaveFile(p);
     if (!f->open(QIODevice::WriteOnly)) {
-        qWarning() << "BrickLink::Core::dataSaveFile failed to open" << f->fileName()
-                   << "for writing:" << f->errorString();
+        qCWarning(LogCache) << "BrickLink::Core::dataSaveFile failed to open" << f->fileName()
+                            << "for writing:" << f->errorString();
     }
     return f;
 }
@@ -401,8 +404,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         m_pg_cache.setMaxCost(oldcost);
 
         if (!m_pg_cache.isEmpty()) {
-            qWarning() << "PriceGuide cache:" << m_pg_cache.count()
-                       << "objects still have a reference after a DB update";
+            qCWarning(LogCache) << "PriceGuide cache:" << m_pg_cache.count()
+                                << "objects still have a reference after a DB update";
 
             // not deleting (but leaking) these might prevent a crash
             const auto keys = m_pg_cache.keys();
@@ -415,8 +418,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         m_pic_cache.setMaxCost(oldcost);
 
         if (!m_pic_cache.isEmpty()) {
-            qWarning() << "Picture cache:" << m_pic_cache.count()
-                       << "objects still have a reference after a DB update";
+            qCWarning(LogCache) << "Picture cache:" << m_pic_cache.count()
+                                << "objects still have a reference after a DB update";
 
             // not deleting (but leaking) these might prevent a crash
             const auto keys = m_pic_cache.keys();
@@ -998,16 +1001,16 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot)
         bool ok = applyChangeLog(item, color, lot->isIncomplete());
 
         if (ok) {
-            qInfo().nospace() << " [ OK ] Resolve: "
-                                 << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
-                                 << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')'
-                                 << " -> "
-                                 << item->itemTypeId()
-                                 << '-' << item->id().constData() << " (" << color->id() << ')';
+            qCInfo(LogResolver).nospace() << " [ OK ] "
+                                          << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
+                                          << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')'
+                                          << " -> "
+                                          << item->itemTypeId()
+                                          << '-' << item->id().constData() << " (" << color->id() << ')';
         } else {
-            qWarning().nospace() << " [FAIL] Resolve: "
-                                 << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
-                                 << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')';
+            qCWarning(LogResolver).nospace() << " [FAIL] "
+                                             << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
+                                             << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')';
         }
 
         lot->setItem(item);
@@ -1084,8 +1087,8 @@ PriceGuide *Core::priceGuide(const Item *item, const Color *color, bool highPrio
     if (!pg) {
         pg = new PriceGuide(item, color);
         if (!m_pg_cache.insert(key, pg)) {
-            qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)",
-                     int(m_pg_cache.maxCost()), int(m_pg_cache.totalCost()), 1);
+            qCWarning(LogCache, "Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)",
+                      int(m_pg_cache.maxCost()), int(m_pg_cache.totalCost()), 1);
             return nullptr;
         }
         needToLoad = true;
@@ -1276,8 +1279,8 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
         pic = new Picture(item, color);
         auto cost = pic->cost();
         if (!m_pic_cache.insert(key, pic, cost)) {
-            qWarning("Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
-                     int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), int(cost), item->id().constData());
+            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
+                      int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), int(cost), item->id().constData());
             return nullptr;
         }
         needToLoad = true;

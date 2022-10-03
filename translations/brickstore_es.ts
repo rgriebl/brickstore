@@ -1275,7 +1275,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="363"/>
+        <location filename="../src/bricklink/core.cpp" line="366"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>La carpeta de datos &apos;%1&apos; no es de lectura y escritura.</translation>
     </message>
@@ -5911,7 +5911,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation>Impresion fallida.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="909"/>
+        <location filename="../src/desktop/view.cpp" line="919"/>
         <source>Page %1/%2</source>
         <translation>Página %1/%2</translation>
     </message>

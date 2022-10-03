@@ -385,7 +385,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             j->m_reply->deleteLater();
             j->m_reply = m_nam->get(j->m_reply->request());
             j->m_reply->setProperty("bsJob", QVariant::fromValue(j));
-            qWarning() << "Got a 404 on" << j->m_url << " ... retrying (still" << j->m_retries_left << "retries left)";
+            qCWarning(LogTransfer) << "Got a 404 on" << j->m_url << "... retrying (still" << j->m_retries_left << "retries left)";
             return;
         } else if ((j->m_respcode == 302) && (error == QNetworkReply::HostNotFoundError)) {
             // this only happens on Windows, starting in April 2021: BL sends a relative redirect,

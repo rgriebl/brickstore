@@ -1323,7 +1323,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="363"/>
+        <location filename="../src/bricklink/core.cpp" line="366"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>Das Datenverzeichnis &apos;%1&apos; ist nicht sowohl les- als auch beschreibbar.</translation>
     </message>
@@ -6419,7 +6419,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Spaltenlayout gesetzt:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="909"/>
+        <location filename="../src/desktop/view.cpp" line="919"/>
         <source>Page %1/%2</source>
         <translation>Seite %1/%2</translation>
     </message>

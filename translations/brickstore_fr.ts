@@ -1291,7 +1291,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="363"/>
+        <location filename="../src/bricklink/core.cpp" line="366"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>Le dossier des données &apos;%1&apos; n&apos;est pas autorisé en lecture/écriture.</translation>
     </message>
@@ -6743,7 +6743,7 @@ If you do not want to save your password, then just leave this field empty and y
         <translation type="vanished">Voulez-vous enregistrer les changements?</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="909"/>
+        <location filename="../src/desktop/view.cpp" line="919"/>
         <source>Page %1/%2</source>
         <translation type="unfinished"></translation>
     </message>
