@@ -160,9 +160,9 @@ void ViewPane::newWindow()
     nw->show();
     vp->activateDocument(activeDocument());
 
-    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [nw, vp]() {
+    connect(vp->m_viewStack, &QStackedWidget::widgetRemoved, this, [vp]() {
         if (vp->m_viewStack->count() == 0)
-            nw->close();
+            vp->window()->close();
     });
 }
 

@@ -278,8 +278,6 @@
         <widget class="QLabel" name="label">
          <property name="font">
           <font>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -313,7 +311,11 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="w_printers"/>
+        <layout class="QVBoxLayout" name="verticalLayout42">
+         <item>
+          <widget class="QComboBox" name="w_printers"/>
+         </item>
+        </layout>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_4">
@@ -357,7 +359,6 @@
           <widget class="QLabel" name="w_pageSelectWarning">
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -379,14 +380,18 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QSpinBox" name="w_copies">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="value">
-          <number>1</number>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout47">
+         <item>
+          <widget class="QSpinBox" name="w_copies">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_6">
@@ -396,18 +401,22 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QComboBox" name="w_layout">
+        <layout class="QVBoxLayout" name="verticalLayout46">
          <item>
-          <property name="text">
-           <string>Portrait</string>
-          </property>
+          <widget class="QComboBox" name="w_layout">
+           <item>
+            <property name="text">
+             <string>Portrait</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Landscape</string>
+            </property>
+           </item>
+          </widget>
          </item>
-         <item>
-          <property name="text">
-           <string>Landscape</string>
-          </property>
-         </item>
-        </widget>
+        </layout>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_7">
@@ -417,18 +426,22 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QComboBox" name="w_color">
+        <layout class="QVBoxLayout" name="verticalLayout45">
          <item>
-          <property name="text">
-           <string>Color</string>
-          </property>
+          <widget class="QComboBox" name="w_color">
+           <item>
+            <property name="text">
+             <string>Color</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Black and white</string>
+            </property>
+           </item>
+          </widget>
          </item>
-         <item>
-          <property name="text">
-           <string>Black and white</string>
-          </property>
-         </item>
-        </widget>
+        </layout>
        </item>
        <item row="5" column="0">
         <widget class="QLabel" name="label_8">
@@ -438,7 +451,11 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QComboBox" name="w_paperSize"/>
+        <layout class="QVBoxLayout" name="verticalLayout44">
+         <item>
+          <widget class="QComboBox" name="w_paperSize"/>
+         </item>
+        </layout>
        </item>
        <item row="6" column="0">
         <widget class="QLabel" name="label_9">
@@ -448,23 +465,27 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QComboBox" name="w_margins">
+        <layout class="QVBoxLayout" name="verticalLayout43">
          <item>
-          <property name="text">
-           <string>Default</string>
-          </property>
+          <widget class="QComboBox" name="w_margins">
+           <item>
+            <property name="text">
+             <string>Default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </item>
+          </widget>
          </item>
-         <item>
-          <property name="text">
-           <string>None</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Minimum</string>
-          </property>
-         </item>
-        </widget>
+        </layout>
        </item>
        <item row="7" column="0">
         <widget class="QLabel" name="label_10">
@@ -520,7 +541,7 @@
      <item>
       <widget class="QLabel" name="w_sysprint">
        <property name="text">
-        <string notr="true">print sys dialog link...</string>
+        <string notr="true">print system dialog link...</string>
        </property>
       </widget>
      </item>
