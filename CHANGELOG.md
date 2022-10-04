@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2022.10.1] - 2022-10-04
+## [2022.10.1] - 2022-10-05
 
 More bug fixes. This time:
 - fixed Sentry crash reports on macOS being next to useless due to a bug in the build setup.
@@ -12,6 +12,7 @@ More bug fixes. This time:
 - fixed a few annoyances when navigating documents with the keyboard (Home/End key, sudden jumps).
 - fixed cache related crashes when updating the BrickStore database or LDraw library.
 - fixed a possible data loss situation when un-splitting a view containing an unsaved document.
+- fixed a crash on Windows when restarting BrickStore after running in a maximized window.
 
 
 ## [2022.9.3] - 2022-09-21

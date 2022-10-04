@@ -170,6 +170,12 @@ void Application::init()
         m_startupErrors << tr("Could not initialize the BrickLink kernel:") % u' ' % e.error();
     }
 
+    try {
+        BrickLink::core()->database()->read();
+    } catch (const Exception &) {
+        // this is not a critical error, but expected on the first run, so just ignore it
+    }
+
     LDraw::create(ldrawUrl());
 
     connect(BrickLink::core(), &BrickLink::Core::authenticationFailed,
@@ -247,12 +253,6 @@ void Application::afterInit()
             this, [this](Document *document) {
         m_undoGroup->addStack(document->model()->undoStack());
     });
-
-    try {
-        BrickLink::core()->database()->read();
-    } catch (const Exception &) {
-        // this is not a critical error, but expected on the first run, so just ignore it
-    }
 
     if (!BrickLink::core()->database()->isValid() || BrickLink::core()->database()->isUpdateNeeded()) {
         if (!QCoro::waitFor(updateDatabase())) {
