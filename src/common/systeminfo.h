@@ -27,6 +27,7 @@ public:
     static SystemInfo *inst();
     ~SystemInfo() override;
     Q_INVOKABLE QVariantMap asMap() const;
+    Q_INVOKABLE QVariant value(const QString &key) const;
     quint64 physicalMemory() const;
     Q_INVOKABLE QString qtDiag() const;
 

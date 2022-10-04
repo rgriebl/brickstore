@@ -59,7 +59,7 @@ SystemInfo::SystemInfo()
 {
     m_map[u"os.type"_qs] = QSysInfo::productType();
     m_map[u"os.version"_qs] = QSysInfo::productVersion();
-    m_map[u"os.name"_qs] = QSysInfo::prettyProductName();
+    m_map[u"os.productname"_qs] = QSysInfo::prettyProductName();
     m_map[u"os.arch"_qs] = QSysInfo::currentCpuArchitecture();
     m_map[u"qt.version"_qs] = QString::fromLatin1(qVersion());
     m_map[u"qt.debug"_qs] = QLibraryInfo::isDebugBuild();
@@ -108,6 +108,13 @@ SystemInfo::SystemInfo()
     m_map[u"hw.memory"_qs] = physmem;
     m_map[u"hw.memory.gb"_qs] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 
+    // -- Platform specific ----------------------------------
+
+#if defined(Q_OS_WINDOWS)
+    if (auto wa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>())
+        m_map[u"windows.tabletmode"_qs] = wa->isTabletMode();
+
+#endif
 
     // we cannot use co-routines in a constructor
     QMetaObject::invokeMethod(this, &SystemInfo::init, Qt::QueuedConnection);
@@ -215,6 +222,11 @@ QCoro::Task<> SystemInfo::init()
 QVariantMap SystemInfo::asMap() const
 {
     return m_map;
+}
+
+QVariant SystemInfo::value(const QString &key) const
+{
+    return m_map.value(key);
 }
 
 quint64 SystemInfo::physicalMemory() const

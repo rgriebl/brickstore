@@ -706,7 +706,7 @@ void Application::setupSentry()
 
     auto sysInfo = SystemInfo::inst()->asMap();
     for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-        if (!it.key().startsWith(u"os."))
+        if (!it.key().startsWith(u"os.") || (it.key() == u"os.productname"))
             sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
     }
     sentry_set_tag("language", Config::inst()->language().toUtf8().constData());

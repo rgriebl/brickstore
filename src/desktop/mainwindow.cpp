@@ -51,7 +51,6 @@
 #if defined(Q_OS_WINDOWS)
 #  include <qtwinextras/qwintaskbarbutton.h>
 #  include <qtwinextras/qwintaskbarprogress.h>
-#  include <QtGui/private/qguiapplication_p.h>
 #endif
 
 #include "bricklink/store.h"
@@ -64,6 +63,7 @@
 #include "common/documentio.h"
 #include "common/onlinestate.h"
 #include "common/scriptmanager.h"
+#include "common/systeminfo.h"
 #include "qcoro/qcorosignal.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
@@ -214,8 +214,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
-    if (auto wa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>())
-        doNotRestoreGeometry = wa->isTabletMode();
+    doNotRestoreGeometry = SystemInfo::inst()->value(u"windows.tabletmode"_qs).toBool();
 #endif
 
     auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
