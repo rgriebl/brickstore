@@ -213,16 +213,20 @@ MainWindow::MainWindow(QWidget *parent)
         return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
     });
 
-    // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
-    doNotRestoreGeometry = SystemInfo::inst()->value(u"windows.tabletmode"_qs).toBool();
+    if (SystemInfo::inst()->value(u"windows.tabletmode"_qs).toBool()) {
+        // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
+        // (as in: we end up in a weird state)
+        doNotRestoreGeometry = true;
+
+        // if we don't do this, we get force maximized by Windows after showing and this messes
+        // up the dock widget layout
+        setWindowState(Qt::WindowMaximized);
+    }
 #endif
 
     auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
     if (!doNotRestoreGeometry)
         restoreGeometry(geo);
-
-    // We need to restore twice. The first time to at least hide all the hidden dock widgets:
-    // otherwise the dock overflows on small screens and the geometry restore is completely off.
 
     auto state = Config::inst()->value(u"/MainWindow/Layout/State"_qs).toByteArray();
     if (state.isEmpty() || !restoreState(state, DockStateVersion)) {
@@ -230,20 +234,6 @@ MainWindow::MainWindow(QWidget *parent)
         state.clear();
     }
     menuBar()->show();
-
-    // The second restore is needed, because sometimes the system's window-manager resizes us after
-    // showing, so we need to restore again, once this resize has happened. For some reason, it
-    // needs to be delayed as well to work on Windows...
-
-    if (!state.isEmpty()) {
-        new EventFilter(this, { QEvent::Resize }, [this, state](QObject *, QEvent *) -> EventFilter::Result {
-            QTimer::singleShot(300, this, [this, state]() {
-                restoreState(state, DockStateVersion);
-                menuBar()->show();
-            });
-            return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
-        });
-    }
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
