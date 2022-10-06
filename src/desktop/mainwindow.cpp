@@ -189,7 +189,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::transferProgress,
             this, &MainWindow::transferProgressUpdate);
 
-    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/Filter").toStringList());
+    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/Filter"_qs).toStringList());
 
     connectView(nullptr);
 
