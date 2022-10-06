@@ -87,6 +87,16 @@ BrickLink::ToolTip *BrickLink::ToolTip::inst()
     if (!s_inst) {
         s_inst = new ToolTip();
         connect(core(), &Core::pictureUpdated, s_inst, &ToolTip::pictureUpdated);
+
+        // animated tooltips do not work for us, because the tooltip widget is not "visible"
+        // until the animation is finished, effectively breaking pictureUpdated() below
+        QApplication::setEffectEnabled(Qt::UI_AnimateTooltip, false);
+
+#if defined(Q_OS_WINDOWS)
+        // on Windows we can at least use the fade animation, as this is done via the window
+        // opacity (see qeffects.cpp, QAlphaWidget::run).
+        QApplication::setEffectEnabled(Qt::UI_FadeTooltip, true);
+#endif
     }
     return s_inst;
 }
@@ -96,7 +106,8 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
     Q_UNUSED(color)
 
     if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
-        m_tooltip_pic = (pic->updateStatus() == UpdateStatus::Updating) ? pic : nullptr;
+        m_tooltip_pic = ((pic->updateStatus() == UpdateStatus::Updating)
+                         || (pic->updateStatus() == UpdateStatus::Loading)) ? pic : nullptr;
 
         // need to 'clear' to reset the image cache of the QTextDocument
         const auto tlwidgets = QApplication::topLevelWidgets();
@@ -133,7 +144,8 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
             uR"(" style="background-color: )" % color.name() % uR"(;">&nbsp;)" %
             item->itemType()->name() % uR"(&nbsp;</font></i>)";
 
-    if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
+    if (pic && ((pic->updateStatus() == UpdateStatus::Updating)
+                || (pic->updateStatus() == UpdateStatus::Loading))) {
         return str.arg(note_left, id, item->name(), yearStr);
     } else {
         QByteArray ba;
@@ -152,7 +164,10 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
     if (!pic || pic != m_tooltip_pic)
         return;
 
-    m_tooltip_pic = nullptr;
+    if ((pic->updateStatus() != UpdateStatus::Updating)
+            && (pic->updateStatus() != UpdateStatus::Loading)) {
+        m_tooltip_pic = nullptr;
+    }
 
     if (QToolTip::isVisible() && QToolTip::text().startsWith(uR"(<table class="tooltip_picture")")) {
         const auto tlwidgets = QApplication::topLevelWidgets();
