@@ -29,6 +29,7 @@ QT_FORWARD_DECLARE_CLASS(QWidgetAction)
 QT_FORWARD_DECLARE_CLASS(QSizeGrip)
 QT_FORWARD_DECLARE_CLASS(QSplitter)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
 class HistoryLineEdit;
 class Workspace;
@@ -138,7 +139,7 @@ private:
     QMultiHash<QWidget *, ViewPane *> m_allViewPanes;
 
     QWidget *m_welcomeWidget;
-
+    QStringListModel *m_favoriteFilters;
     QByteArray m_defaultDockState;
 
     friend class DocumentDelegate;

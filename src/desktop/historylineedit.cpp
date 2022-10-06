@@ -106,15 +106,16 @@ void HistoryView::mousePressEvent(QMouseEvent *me)
 
 
 HistoryLineEdit::HistoryLineEdit(QWidget *parent)
-    : HistoryLineEdit(10, parent)
+    : HistoryLineEdit(20, parent)
 { }
 
 HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     : QLineEdit(parent)
+    , m_filterModel(new QStringListModel(this))
     , m_deleteIcon(QIcon::fromTheme(u"window-close"_qs))
     , m_maximumHistorySize(maximumHistorySize)
 {
-    auto *comp = new QCompleter(&m_filterModel, this);
+    auto *comp = new QCompleter(m_filterModel, this);
     comp->setMaxVisibleItems(maximumHistorySize);
 
     comp->setCaseSensitivity(Qt::CaseInsensitive);
@@ -143,12 +144,12 @@ void HistoryLineEdit::appendToModel()
     if (t.isEmpty())
         return;
 
-    QStringList sl = m_filterModel.stringList();
+    QStringList sl = m_filterModel->stringList();
     sl.removeAll(t);
     sl.append(t);
     while (sl.size() > m_maximumHistorySize)
         sl.removeFirst();
-    m_filterModel.setStringList(sl);
+    m_filterModel->setStringList(sl);
 }
 
 bool HistoryLineEdit::isInFavoritesMode() const
@@ -168,6 +169,14 @@ void HistoryLineEdit::setToFavoritesMode(bool favoritesMode)
     }
 }
 
+void HistoryLineEdit::setModel(QStringListModel *model)
+{
+    m_filterModel->deleteLater();
+    model->setParent(this);
+    m_filterModel = model;
+    completer()->setModel(model);
+}
+
 QString HistoryLineEdit::instructionToolTip() const
 {
     return tr("<p>" \
@@ -185,7 +194,7 @@ QByteArray HistoryLineEdit::saveState() const
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray("FH") << qint32(3);
     ds << text();
-    ds << m_filterModel.stringList();
+    ds << m_filterModel->stringList();
 
     return ba;
 }
@@ -206,7 +215,7 @@ bool HistoryLineEdit::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    m_filterModel.setStringList(list);
+    m_filterModel->setStringList(list);
     setText(text);
     return true;
 }
@@ -220,12 +229,12 @@ void HistoryLineEdit::showPopup()
 {
     //if (text().isEmpty())
     completer()->setCompletionPrefix(QString());
-    bool forcePopup = (m_filterModel.rowCount() == 0);
+    bool forcePopup = (m_filterModel->rowCount() == 0);
     if (forcePopup)
-        m_filterModel.insertRow(0); // dummy row to enable popup
+        m_filterModel->insertRow(0); // dummy row to enable popup
     completer()->complete();
     if (forcePopup)
-        m_filterModel.removeRow(0);
+        m_filterModel->removeRow(0);
 }
 
 void HistoryLineEdit::setFilterPixmap()

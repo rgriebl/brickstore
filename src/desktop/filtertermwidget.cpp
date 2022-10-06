@@ -363,6 +363,7 @@ FilterWidget::FilterWidget(QWidget *parent)
     layout->addWidget(m_termsContainer, 1);
 
     m_edit = new HistoryLineEdit();
+    m_edit->setToFavoritesMode(true);
     m_edit->hide();
     new EventFilter(m_edit, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
     layout->addWidget(m_edit, 1);
@@ -478,8 +479,13 @@ void FilterWidget::setDocument(Document *doc)
         });
         setFilterFromModel();
 
-        m_edit->setToolTip(m_doc->model()->filterParser()->toolTip());
+        m_edit->setToolTip(m_doc->model()->filterParser()->toolTip() + m_edit->instructionToolTip());
     }
+}
+
+void FilterWidget::setFavoritesModel(QStringListModel *model)
+{
+    m_edit->setModel(model);
 }
 
 QAction *FilterWidget::action()

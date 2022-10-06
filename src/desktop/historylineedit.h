@@ -32,6 +32,8 @@ public:
     bool isInFavoritesMode() const;
     void setToFavoritesMode(bool favoritesMode);
 
+    void setModel(QStringListModel *model);
+
     QString instructionToolTip() const;
 
     QByteArray saveState() const;
@@ -48,7 +50,7 @@ private:
     void showPopup();
     void setFilterPixmap();
 
-    QStringListModel m_filterModel;
+    QStringListModel *m_filterModel;
     QIcon m_deleteIcon;
     QAction *m_popupAction;
     int m_maximumHistorySize;

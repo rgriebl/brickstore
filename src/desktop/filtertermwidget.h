@@ -23,6 +23,7 @@ QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QButtonGroup)
 QT_FORWARD_DECLARE_CLASS(QTimer)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
 class Document;
 class HistoryLineEdit;
@@ -37,6 +38,8 @@ public:
 
     void setIconSize(const QSize &s);
     void setDocument(Document *doc);
+
+    void setFavoritesModel(QStringListModel *model);
 
     QAction *action();
 

@@ -25,6 +25,7 @@ QT_FORWARD_DECLARE_CLASS(QStackedWidget)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QButtonGroup)
 QT_FORWARD_DECLARE_CLASS(QSplitter)
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
 class Document;
 class DocumentModel;
@@ -52,6 +53,8 @@ public:
     void updateStatistics();
     void updateBlockState(bool blocked);
     void focusFilter();
+
+    void setFilterFavoritesModel(QStringListModel *model);
 
     void setView(View *view);
 

@@ -123,6 +123,7 @@ MainWindow *MainWindow::inst()
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , m_favoriteFilters(new QStringListModel(this))
 {
     s_inst = this;
 
@@ -187,6 +188,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(BrickLink::core(), &BrickLink::Core::transferProgress,
             this, &MainWindow::transferProgressUpdate);
+
+    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/Filter").toStringList());
 
     connectView(nullptr);
 
@@ -392,6 +395,8 @@ void MainWindow::languageChange()
 
 MainWindow::~MainWindow()
 {
+    Config::inst()->setValue(u"/MainWindow/Filter"_qs, m_favoriteFilters->stringList());
+
     Config::inst()->setValue(u"/MainWindow/Layout/State"_qs, saveState(DockStateVersion));
     Config::inst()->setValue(u"/MainWindow/Layout/Geometry"_qs, saveGeometry());
 
@@ -478,6 +483,8 @@ ViewPane *MainWindow::createViewPane(Document *activeDocument, QWidget *window)
 
     auto vp = new ViewPane([this](Document *doc, QWidget *win) { return createViewPane(doc, win); },
                            activeDocument);
+
+    vp->setFilterFavoritesModel(m_favoriteFilters);
 
     connect(vp, &ViewPane::viewActivated,
             this, [this, vp](View *view) {

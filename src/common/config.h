@@ -57,8 +57,6 @@ public:
     QString language() const;
     QLocale::MeasurementSystem measurementSystem() const;
 
-    bool areFiltersInFavoritesMode() const;
-
     QPair<QString, double> legacyCurrencyCodeAndRate() const;
     QString defaultCurrencyCode() const;
 
@@ -159,7 +157,6 @@ public:
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
-    void setFiltersInFavoritesMode(bool b);
     void setDefaultCurrencyCode(const QString &ccode);
 
     void setDocumentDir(const QString &dir);
@@ -190,7 +187,6 @@ signals:
     void ldrawDirChanged(const QString &dir);
     void restoreLastSessionChanged(bool b);
     void partOutModeChanged(Config::PartOutMode partMode);
-    void filtersInFavoritesModeChanged(bool favoritesMode);
     void defaultCurrencyCodeChanged(const QString &ccode);
     void openBrowserOnExportChanged(bool b);
     void showInputErrorsChanged(bool b);

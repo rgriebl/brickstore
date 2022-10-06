@@ -484,6 +484,11 @@ void ViewPane::focusFilter()
         m_filter->setFocus(Qt::ShortcutFocusReason);
 }
 
+void ViewPane::setFilterFavoritesModel(QStringListModel *model)
+{
+    m_filter->setFavoritesModel(model);
+}
+
 void ViewPane::fontChange()
 {
     // Windows' menu font is slightly larger, making the ViewPane look odd in comparison

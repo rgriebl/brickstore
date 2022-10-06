@@ -262,9 +262,7 @@ void SelectItem::init()
             this, [this]() { d->m_filter_delay->start(); });
     connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
             this, [this]() { d->w_filter->setFocus(Qt::ShortcutFocusReason); });
-    connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
-            d->w_filter, &HistoryLineEdit::setToFavoritesMode);
-    d->w_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
+    d->w_filter->setToFavoritesMode(true);
 
     new EventFilter(d->w_filter, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
