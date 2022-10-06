@@ -85,42 +85,47 @@ void Filter::setCombination(Combination cmb)
 
 bool Filter::matches(const QVariant &v) const
 {
+    static QLocale loc;
     bool isInt = false;
     qint64 i1 = 0, i2 = 0;
-    QString s1, s2;
-    
+    const QString s1 = m_expression;
+    QString s2;
+
     switch (v.userType()) {
     case QMetaType::Int:
     case QMetaType::UInt:
     case QMetaType::LongLong:
     case QMetaType::ULongLong: {
-        if (!m_isInt)
-            return false; // data is int, but expression is not
-        i1 = m_asInt;
-        i2 = v.toInt();
-        isInt = true;
+        if (m_isInt) {
+            i1 = m_asInt;
+            i2 = v.toInt();
+            isInt = true;
+        }
+        s2 = loc.toString(i2);
         break;
     }   
     case QMetaType::Double: {
-        if (!m_isDouble)
-            return false;
-        i1 = qRound64(m_asDouble * 1000.);
-        i2 = qRound64(v.toDouble() * 1000.);
-        isInt = true;
+        if (m_isDouble) {
+            i1 = qRound64(m_asDouble * 1000.);
+            i2 = qRound64(v.toDouble() * 1000.);
+            isInt = true;
+        }
+        s2 = loc.toString(v.toDouble(), 'f', 3);
         break;
     }
     case QMetaType::QDateTime: {
-        if (!m_asDateTime.isValid())
-            return false;
-        i1 = m_asDateTime.toSecsSinceEpoch();
-        i2 = v.toDateTime().toSecsSinceEpoch();
-        isInt = true;
+        if (m_asDateTime.isValid()) {
+            i1 = m_asDateTime.toSecsSinceEpoch();
+            i2 = v.toDateTime().toSecsSinceEpoch();
+            isInt = true;
+        }
+        s2 = loc.toString(v.toDateTime(), QLocale::ShortFormat);
         break;
     }
-    default:
-        s1 = m_expression;
+    default: {
         s2 = v.toString();
         break;
+    }
     }
 
     switch (comparison()) {
@@ -137,24 +142,26 @@ bool Filter::matches(const QVariant &v) const
     case GreaterEqual:
         return isInt ? i2 >= i1 : false;
     case StartsWith:
-        return isInt ? false : s2.startsWith(s1, Qt::CaseInsensitive);
+        return s1.isEmpty() || s2.startsWith(s1, Qt::CaseInsensitive);
     case DoesNotStartWith:
-        return isInt ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
+        return s1.isEmpty() || !s2.startsWith(s1, Qt::CaseInsensitive);
     case EndsWith:
-        return isInt ? false : s2.endsWith(s1, Qt::CaseInsensitive);
+        return s1.isEmpty() || s2.endsWith(s1, Qt::CaseInsensitive);
     case DoesNotEndWith:
-        return isInt ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
+        return s1.isEmpty() || !s2.endsWith(s1, Qt::CaseInsensitive);
     case Matches:
     case DoesNotMatch: {
-        if (m_isRegExp) {
+        if (s1.isEmpty()) {
+            return true;
+        } else if (m_isRegExp) {
             // We are using QRegularExpressions in multiple threads here, although the class is not
             // marked thread-safe. We are relying on the const match() function to be thread-safe,
             // which it currently is up to Qt 6.2.
 
-            bool res = m_asRegExp.match(v.toString()).hasMatch();
+            bool res = m_asRegExp.match(s2).hasMatch();
             return (comparison() == Matches) ? res : !res;
         } else {
-            bool res = v.toString().contains(m_expression, Qt::CaseInsensitive);
+            bool res = s2.contains(s1, Qt::CaseInsensitive);
             return (comparison() == Matches) ? res : !res;
         }
     }
