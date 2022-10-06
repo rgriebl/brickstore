@@ -17,6 +17,11 @@
 #include "utility/utility.h"
 #include "settopriceguidedialog.h"
 
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+#  include <QKeyEvent>
+#  include "common/eventfilter.h"
+#endif
+
 
 SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     : QDialog(parent)
@@ -49,6 +54,18 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     connect(w_advanced_button, &QToolButton::clicked,
             this, toggleAdvancedOptions);
     toggleAdvancedOptions(true /* initialize */);
+
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+    auto ignoreDefaultKey = [](QObject *, QEvent *e) {
+        auto *ke = static_cast<QKeyEvent *>(e);
+        if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter)
+            ke->ignore();
+        return EventFilter::ContinueEventProcessing;
+    };
+
+    new EventFilter(w_type_time, { QEvent::KeyPress }, ignoreDefaultKey);
+    new EventFilter(w_type_price, { QEvent::KeyPress }, ignoreDefaultKey);
+#endif
 }
 
 SetToPriceGuideDialog::~SetToPriceGuideDialog()
