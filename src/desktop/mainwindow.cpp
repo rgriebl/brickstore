@@ -378,7 +378,7 @@ void MainWindow::languageChange()
         if (name == u"dock_priceguide")
             dock->setWindowTitle(tr("Price Guide"));
         if (name == u"dock_appearsin")
-            dock->setWindowTitle(tr("Appears In Sets"));
+            dock->setWindowTitle(tr("Appears In"));
         if (name == u"dock_opendocuments")
             dock->setWindowTitle(tr("Open Documents"));
         if (name == u"dock_recentdocuments")

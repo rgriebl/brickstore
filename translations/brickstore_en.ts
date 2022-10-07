@@ -1351,7 +1351,7 @@
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="580"/>
-        <source>Item-Id</source>
+        <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3504,7 +3504,7 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="388"/>
-        <source>Appears In Sets</source>
+        <source>Appears In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

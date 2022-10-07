@@ -577,7 +577,7 @@ QVariant BrickLink::ItemModel::headerData(int section, Qt::Orientation orient, i
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
         switch(section) {
-        case 1: return tr("Item-Id");
+        case 1: return tr("Item Id");
         case 2: return tr("Description");
         }
     }
@@ -941,7 +941,8 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
     case Qt::DisplayRole:
         switch (col) {
         case 0: res = appears->first < 0 ? u"-"_qs : QString::number(appears->first); break;
-        case 1: res = appears->second->id(); break;
+        case 1: res = QString(QLatin1Char(appears->second->itemTypeId()) % u' '
+                              % QLatin1StringView(appears->second->id())); break;
         case 2: res = appears->second->name(); break;
         }
         break;
@@ -974,8 +975,8 @@ QVariant BrickLink::InternalAppearsInModel::headerData(int section, Qt::Orientat
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
         switch (section) {
         case 0: return tr("Qty.");
-        case 1: return tr("Set");
-        case 2: return tr("Name");
+        case 1: return tr("Item Id");
+        case 2: return tr("Description");
         }
     }
     return QVariant();

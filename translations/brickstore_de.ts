@@ -1433,7 +1433,7 @@
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="580"/>
-        <source>Item-Id</source>
+        <source>Item Id</source>
         <translation>Teile-Id</translation>
     </message>
     <message>
@@ -3164,8 +3164,8 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Richtpreise</translation>
     </message>
     <message>
-        <source>Appears In Sets</source>
-        <translation type="vanished">Enthalten in Sets</translation>
+        <source>Appears In</source>
+        <translation type="vanished">Enthalten in</translation>
     </message>
     <message>
         <source>Open Documents</source>

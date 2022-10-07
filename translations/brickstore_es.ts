@@ -1376,8 +1376,8 @@
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="580"/>
-        <source>Item-Id</source>
-        <translation>Artículo-Id</translation>
+        <source>Item Id</source>
+        <translation>Id Artículo</translation>
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="581"/>
