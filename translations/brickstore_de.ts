@@ -1379,25 +1379,33 @@
 <context>
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="976"/>
+        <location filename="../src/bricklink/model.cpp" line="977"/>
         <source>Qty.</source>
         <translation>Anz.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="977"/>
-        <source>Set</source>
-        <translation>Set</translation>
+        <location filename="../src/bricklink/model.cpp" line="978"/>
+        <source>Item Id</source>
+        <translation type="unfinished">Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="978"/>
+        <location filename="../src/bricklink/model.cpp" line="979"/>
+        <source>Description</source>
+        <translation type="unfinished">Beschreibung</translation>
+    </message>
+    <message>
+        <source>Set</source>
+        <translation type="vanished">Set</translation>
+    </message>
+    <message>
         <source>Name</source>
-        <translation>Name</translation>
+        <translation type="vanished">Name</translation>
     </message>
 </context>
 <context>
     <name>BrickLink::ItemDelegate</name>
     <message>
-        <location filename="../src/bricklink/delegate.cpp" line="122"/>
+        <location filename="../src/bricklink/delegate.cpp" line="133"/>
         <source>[Image is loading]</source>
         <translation>[Bild wird geladen]</translation>
     </message>
@@ -1437,7 +1445,7 @@
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="981"/>
+        <location filename="../src/desktop/selectitem.cpp" line="979"/>
         <source>consists-of:</source>
         <translation>besteht-aus:</translation>
     </message>
@@ -2971,13 +2979,13 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="561"/>
-        <source>Value:</source>
-        <translation>Wert:</translation>
+        <source>Total:</source>
+        <translation>Gesamt:</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="562"/>
-        <source>Value (min.):</source>
-        <translation>Wert (mind.):</translation>
+        <source>Total (min.):</source>
+        <translation>Gesamt (mind.):</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="563"/>
@@ -3006,92 +3014,92 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/common/filter.cpp" line="325"/>
+        <location filename="../src/common/filter.cpp" line="332"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Der Filterausdruck kann entweder in (fast) natürlicher Sprache oder mit logischen Operatoren eingegeben werden.&lt;br /&gt;Ein einzelner Ausdruck entspricht dabei folgendem Muster: &lt;b&gt;&lt;i&gt;FELDNAME VERGLEICH&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FELDNAME&lt;/i&gt;&lt;/b&gt; und &lt;b&gt;&lt;i&gt;VERGLEICH&lt;/i&gt;&lt;/b&gt; sind dabei optional und sind standardmässig  &lt;b&gt;in irgendeinem Feld&lt;/b&gt;, bzw. &lt;b&gt;beinhaltet&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Mehrere Ausdrücke können mit &lt;b&gt;KOMBINATIONs&lt;/b&gt; Symbolen verbunden werden.&lt;/p&gt;&lt;p&gt;Um z.B. nach irgendeinem Stein in  blau  zu suchen, könnte man schreiben: &lt;b&gt;brick und Farbe ist blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="332"/>
+        <location filename="../src/common/filter.cpp" line="339"/>
         <source>Field names:</source>
         <translation>Feldnamen:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="337"/>
+        <location filename="../src/common/filter.cpp" line="344"/>
         <source>Comparisons:</source>
         <translation>Vergleiche:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="342"/>
+        <location filename="../src/common/filter.cpp" line="349"/>
         <source>Combinations:</source>
         <translation>Kombinationen:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="397"/>
+        <location filename="../src/common/filter.cpp" line="404"/>
         <source>and</source>
         <translation>und</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="398"/>
+        <location filename="../src/common/filter.cpp" line="405"/>
         <source>or</source>
         <translation>oder</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="424"/>
+        <location filename="../src/common/filter.cpp" line="431"/>
         <source>is,equals</source>
         <translation>ist,ist gleich</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="425"/>
+        <location filename="../src/common/filter.cpp" line="432"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation>ist nicht,ist nicht gleich,ist ungleich</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="426"/>
+        <location filename="../src/common/filter.cpp" line="433"/>
         <source>less than</source>
         <translation>kleiner</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="427"/>
+        <location filename="../src/common/filter.cpp" line="434"/>
         <source>less equal than</source>
         <translation>kleiner gleich</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="428"/>
+        <location filename="../src/common/filter.cpp" line="435"/>
         <source>greater than</source>
         <translation>größer,grösser</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="429"/>
+        <location filename="../src/common/filter.cpp" line="436"/>
         <source>greater equal than</source>
         <translation>größer gleich,grösser gleich</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="430"/>
+        <location filename="../src/common/filter.cpp" line="437"/>
         <source>contains,matches</source>
         <translation>beinhaltet,entspricht</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="431"/>
+        <location filename="../src/common/filter.cpp" line="438"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation>beinhaltet nicht,entspricht nicht</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="432"/>
+        <location filename="../src/common/filter.cpp" line="439"/>
         <source>starts with,begins with</source>
         <translation>beginnt mit</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="433"/>
+        <location filename="../src/common/filter.cpp" line="440"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation>beginnt nicht mit</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="434"/>
+        <location filename="../src/common/filter.cpp" line="441"/>
         <source>ends with</source>
         <translation>endet auf</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="435"/>
+        <location filename="../src/common/filter.cpp" line="442"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation>endet nicht auf</translation>
     </message>
@@ -3115,32 +3123,32 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>FilterWidget</name>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="492"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="498"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="493"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="499"/>
         <source>Re-apply filter</source>
         <translation>Filter erneut auswerten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="494"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="500"/>
         <source>More actions for this filter</source>
         <translation>Zusätzliche Aktionen für diesen Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="495"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="501"/>
         <source>Copy filter</source>
         <translation>Filter kopieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="496"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="502"/>
         <source>Paste filter</source>
         <translation>Filter einfügen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="497"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="503"/>
         <source>Text-only filter mode</source>
         <translation>Nur-Text Filtermodus</translation>
     </message>
@@ -3321,7 +3329,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Keine Filterfavoriten vorhanden. Bitte den Tooltip lesen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/historylineedit.cpp" line="173"/>
+        <location filename="../src/desktop/historylineedit.cpp" line="182"/>
         <source>&lt;p&gt;Pressing &lt;b&gt;Return&lt;/b&gt; will save the current filter expression as a favorite. You can recall saved filters by clicking the filter icon on the left or by pressing &lt;b&gt;Down Arrow&lt;/b&gt; to open a drop down menu. The number of favorites is limited to the last %1, but you can delete saved filters from this drop down menu as well by clicking the &lt;b&gt;X&lt;/b&gt; button on the right.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Drücken Sie &lt;b&gt;Return&lt;/b&gt; um die den aktuellen Filterausdruck als Favorit zu speichern. Diese gespeicherten Favoiten können entweder per Klick auf das Filtersymbol links oder durch drücken von &lt;b&gt;Pfeil nach unten&lt;/b&gt; abgerufen werden: es öffnet sich ein Aufklappmenü. Die Anzahl der möglichen Favoriten ist auf %1 begrenzt, aber es können gespeicherte Filter auch wieder gelöscht werden: klicken Sie auf den &lt;b&gt;X&lt;/b&gt; Knopf rechts im Aufklappmenü.&lt;/p&gt;</translation>
     </message>
@@ -4081,62 +4089,66 @@ Rechts-Click: Menü</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="378"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="371"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="384"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="377"/>
         <source>Info</source>
         <translation>Info</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="386"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="379"/>
         <source>Price Guide</source>
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="388"/>
         <source>Appears In Sets</source>
-        <translation>Enthalten in Sets</translation>
+        <translation type="vanished">Enthalten in Sets</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="381"/>
+        <source>Appears In</source>
+        <translation type="unfinished">Enthalten in</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/mainwindow.cpp" line="383"/>
         <source>Open Documents</source>
         <translation>Offene Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="385"/>
         <source>Recent Documents</source>
         <translation>Zuletzt geöffnete</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="394"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="387"/>
         <source>Error Log</source>
         <translation>Fehlerprotokoll</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="397"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="398"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="391"/>
         <source>No outstanding jobs</source>
         <translation>Nichts zu tun</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="399"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation>Download...&lt;br&gt;Zu &lt;b&gt;%p%&lt;/b&gt; fertig&lt;br&gt;(%v von %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1202"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1199"/>
         <source>Customize Toolbar...</source>
         <translation>Werkzeugleiste anpassen...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1206"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1203"/>
         <source>Reset Info Docks layout</source>
         <translation>Anordnung der Infoleisten zurücksetzen</translation>
     </message>
@@ -4784,113 +4796,113 @@ Rechts-Click: Menü</translation>
         <translation>Vergrößern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="287"/>
+        <location filename="../src/desktop/printdialog.ui" line="285"/>
         <location filename="../src/desktop/printdialog.cpp" line="270"/>
         <source>Print</source>
         <translation>Drucken</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="311"/>
+        <location filename="../src/desktop/printdialog.ui" line="309"/>
         <source>Destination</source>
         <translation>Ziel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="321"/>
+        <location filename="../src/desktop/printdialog.ui" line="323"/>
         <source>Pages</source>
         <translation>Seiten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="334"/>
+        <location filename="../src/desktop/printdialog.ui" line="336"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="339"/>
+        <location filename="../src/desktop/printdialog.ui" line="341"/>
         <source>Selection Only</source>
         <translation>Nur die Auswahl</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="344"/>
-        <location filename="../src/desktop/printdialog.ui" line="495"/>
+        <location filename="../src/desktop/printdialog.ui" line="346"/>
+        <location filename="../src/desktop/printdialog.ui" line="516"/>
         <source>Custom</source>
         <translation>Benutzerdefiniert</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="352"/>
+        <location filename="../src/desktop/printdialog.ui" line="354"/>
         <source>e.g. 1-5,8,11-13</source>
         <translation>z.B. 1-5,8,11-13</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="365"/>
+        <location filename="../src/desktop/printdialog.ui" line="366"/>
         <source>Invalid page range, use e.g. 1-5,8,11-13</source>
         <translation>Ungültiger Seitenbereich, verwende z.B. 1-5,8,11-13</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="377"/>
+        <location filename="../src/desktop/printdialog.ui" line="378"/>
         <source>Copies</source>
         <translation>Kopien</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="394"/>
+        <location filename="../src/desktop/printdialog.ui" line="399"/>
         <source>Layout</source>
         <translation>Ausrichtung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="402"/>
+        <location filename="../src/desktop/printdialog.ui" line="409"/>
         <source>Portrait</source>
         <translation>Hochformat</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="407"/>
+        <location filename="../src/desktop/printdialog.ui" line="414"/>
         <source>Landscape</source>
         <translation>Querformat</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="415"/>
-        <location filename="../src/desktop/printdialog.ui" line="423"/>
+        <location filename="../src/desktop/printdialog.ui" line="424"/>
+        <location filename="../src/desktop/printdialog.ui" line="434"/>
         <location filename="../src/desktop/printdialog.cpp" line="255"/>
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="428"/>
+        <location filename="../src/desktop/printdialog.ui" line="439"/>
         <location filename="../src/desktop/printdialog.cpp" line="257"/>
         <source>Black and white</source>
         <translation>Schwarz-Weiß</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="436"/>
+        <location filename="../src/desktop/printdialog.ui" line="449"/>
         <source>Paper size</source>
         <translation>Papierformat</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="446"/>
+        <location filename="../src/desktop/printdialog.ui" line="463"/>
         <source>Margins</source>
         <translation>Ränder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="454"/>
-        <location filename="../src/desktop/printdialog.ui" line="485"/>
+        <location filename="../src/desktop/printdialog.ui" line="473"/>
+        <location filename="../src/desktop/printdialog.ui" line="506"/>
         <source>Default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="459"/>
+        <location filename="../src/desktop/printdialog.ui" line="478"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="464"/>
+        <location filename="../src/desktop/printdialog.ui" line="483"/>
         <source>Minimum</source>
         <translation>Minimum</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="472"/>
+        <location filename="../src/desktop/printdialog.ui" line="493"/>
         <source>Scale</source>
         <translation>Skalierung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="490"/>
+        <location filename="../src/desktop/printdialog.ui" line="511"/>
         <source>Fit to width</source>
         <translation>An Seitenbreite anpassen</translation>
     </message>
@@ -5301,37 +5313,37 @@ Rechts-Click: Menü</translation>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="327"/>
+        <location filename="../src/desktop/selectitem.cpp" line="325"/>
         <source>Ctrl+1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="334"/>
+        <location filename="../src/desktop/selectitem.cpp" line="332"/>
         <source>Ctrl+2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="342"/>
+        <location filename="../src/desktop/selectitem.cpp" line="340"/>
         <source>Ctrl+3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="515"/>
+        <location filename="../src/desktop/selectitem.cpp" line="513"/>
         <source>Item type:</source>
         <translation>Teiletyp:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="516"/>
+        <location filename="../src/desktop/selectitem.cpp" line="514"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="536"/>
+        <location filename="../src/desktop/selectitem.cpp" line="534"/>
         <source>List</source>
         <translation>Liste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="538"/>
+        <location filename="../src/desktop/selectitem.cpp" line="536"/>
         <source>List with Images</source>
         <translation>Liste mit Bildern</translation>
     </message>
@@ -5340,68 +5352,68 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Zur Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="951"/>
+        <location filename="../src/desktop/selectitem.cpp" line="949"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="537"/>
+        <location filename="../src/desktop/selectitem.cpp" line="535"/>
         <source>Thumbnails</source>
         <translation>Bilder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="279"/>
+        <location filename="../src/desktop/selectitem.cpp" line="277"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation>Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="282"/>
+        <location filename="../src/desktop/selectitem.cpp" line="280"/>
         <source>Find element number</source>
         <translation>Suche Elementnummer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="283"/>
+        <location filename="../src/desktop/selectitem.cpp" line="281"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation>Geben Sie eine 7-stellige Lego Elementnummer, auch bekannt als Part-Color-Code (PCC), ein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="518"/>
+        <location filename="../src/desktop/selectitem.cpp" line="516"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Zeige nur Teile an, in deren Namen oder Teilenummer alle eingegebenen Wörter (unabhängig der Gross- und Kleinschreibung) vorkommen. Das Prinzip ist ähnlich einer Web Suchmaschine:&lt;ul&gt;&lt;li&gt;um Wörter auszuschliessen, wird ihnen ein &lt;tt&gt;-&lt;/tt&gt; vorangestellt. (z.B. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um einen Ausdruck mit Leerzeichen zu finden, werden die Wörter in Anführungszeichen eingeschlossen. (z.B. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um nach Teilen zu filtern, die in einem spezifischen Set vorkommen, stelle der Setnummer ein &lt;tt&gt;enthalten-in:&lt;/tt&gt; voran. (z.B. &lt;tt&gt;enthalten-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um Sets oder Minifigs einzuschränken, die ein spezielles Teile enthalten, stelle der Teilenummer ein &lt;tt&gt;besteht-aus:&lt;/tt&gt; voran. (z.B. &lt;tt&gt;besteht-aus:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="529"/>
+        <location filename="../src/desktop/selectitem.cpp" line="527"/>
         <source>Filter the list using this expression</source>
         <translation>Die Liste anhand dieses Ausdrucks filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="535"/>
+        <location filename="../src/desktop/selectitem.cpp" line="533"/>
         <source>Find a 7-digit Lego element number</source>
         <translation>Suche eine 7-stellige Lego Elementnummer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="537"/>
         <source>Zoom in</source>
         <translation>Vergrößern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="540"/>
+        <location filename="../src/desktop/selectitem.cpp" line="538"/>
         <source>Zoom out</source>
         <translation>Verkleinern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="961"/>
+        <location filename="../src/desktop/selectitem.cpp" line="959"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="995"/>
+        <location filename="../src/desktop/selectitem.cpp" line="993"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Setze den Filter auf Minifigs, die aus diesem Teil bestehen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="1000"/>
+        <location filename="../src/desktop/selectitem.cpp" line="998"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Schränke den Filter auf Minifigs, die aus diesem Teil bestehen, ein</translation>
     </message>
@@ -5594,13 +5606,13 @@ Rechts-Click: Menü</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="58"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="26"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
         <source>Last 6 Months Sales</source>
         <translation>Verkäufe der letzten 6 Monate</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="63"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="27"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
         <source>Current Inventory</source>
         <translation>Momentaner Bestand</translation>
     </message>
@@ -5611,25 +5623,25 @@ Rechts-Click: Menü</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="78"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="29"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="34"/>
         <source>Minimum</source>
         <translation>Minimum</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="83"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="30"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="35"/>
         <source>Average</source>
         <translation>Durchschnitt</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="88"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="36"/>
         <source>Quantity Average</source>
         <translation>Gewichteter Durchschnitt</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="93"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="37"/>
         <source>Maximum</source>
         <translation>Maximum</translation>
     </message>
@@ -6697,47 +6709,47 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation>Teile</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="542"/>
+        <location filename="../src/desktop/viewpane.cpp" line="547"/>
         <source>Go to the next difference</source>
         <translation>Springe zum nächsten Unterschied</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="544"/>
+        <location filename="../src/desktop/viewpane.cpp" line="549"/>
         <source>Go to the next error</source>
         <translation>Springe zum nächsten Fehler</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="546"/>
+        <location filename="../src/desktop/viewpane.cpp" line="551"/>
         <source>Show order information</source>
         <translation>Zeige Bestellinfos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="547"/>
+        <location filename="../src/desktop/viewpane.cpp" line="552"/>
         <source>Currency:</source>
         <translation>Währung:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="549"/>
+        <location filename="../src/desktop/viewpane.cpp" line="554"/>
         <source>Split</source>
         <translation>Teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="550"/>
+        <location filename="../src/desktop/viewpane.cpp" line="555"/>
         <source>Split horizontally</source>
         <translation>Nebeneinander teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="551"/>
+        <location filename="../src/desktop/viewpane.cpp" line="556"/>
         <source>Split vertically</source>
         <translation>Untereinander teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="552"/>
+        <location filename="../src/desktop/viewpane.cpp" line="557"/>
         <source>Remove split</source>
         <translation>Teilung entfernen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="553"/>
+        <location filename="../src/desktop/viewpane.cpp" line="558"/>
         <source>Open in new window</source>
         <translation>In neuem Fenster öffnen</translation>
     </message>

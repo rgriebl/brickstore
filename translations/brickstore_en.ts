@@ -1297,24 +1297,24 @@
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
         <location filename="../src/bricklink/model.cpp" line="977"/>
-        <source>Set</source>
+        <source>Qty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="978"/>
-        <source>Name</source>
+        <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="976"/>
-        <source>Qty.</source>
+        <location filename="../src/bricklink/model.cpp" line="979"/>
+        <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>BrickLink::ItemDelegate</name>
     <message>
-        <location filename="../src/bricklink/delegate.cpp" line="122"/>
+        <location filename="../src/bricklink/delegate.cpp" line="133"/>
         <source>[Image is loading]</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1339,7 +1339,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="981"/>
+        <location filename="../src/desktop/selectitem.cpp" line="979"/>
         <source>consists-of:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2666,12 +2666,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="561"/>
-        <source>Value:</source>
+        <source>Total:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="562"/>
-        <source>Value (min.):</source>
+        <source>Total (min.):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2701,92 +2701,92 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/common/filter.cpp" line="325"/>
+        <location filename="../src/common/filter.cpp" line="332"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="332"/>
+        <location filename="../src/common/filter.cpp" line="339"/>
         <source>Field names:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="337"/>
+        <location filename="../src/common/filter.cpp" line="344"/>
         <source>Comparisons:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="342"/>
+        <location filename="../src/common/filter.cpp" line="349"/>
         <source>Combinations:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="397"/>
+        <location filename="../src/common/filter.cpp" line="404"/>
         <source>and</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="398"/>
+        <location filename="../src/common/filter.cpp" line="405"/>
         <source>or</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="424"/>
+        <location filename="../src/common/filter.cpp" line="431"/>
         <source>is,equals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="425"/>
+        <location filename="../src/common/filter.cpp" line="432"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="426"/>
+        <location filename="../src/common/filter.cpp" line="433"/>
         <source>less than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="427"/>
+        <location filename="../src/common/filter.cpp" line="434"/>
         <source>less equal than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="428"/>
+        <location filename="../src/common/filter.cpp" line="435"/>
         <source>greater than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="429"/>
+        <location filename="../src/common/filter.cpp" line="436"/>
         <source>greater equal than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="430"/>
+        <location filename="../src/common/filter.cpp" line="437"/>
         <source>contains,matches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="431"/>
+        <location filename="../src/common/filter.cpp" line="438"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="432"/>
+        <location filename="../src/common/filter.cpp" line="439"/>
         <source>starts with,begins with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="433"/>
+        <location filename="../src/common/filter.cpp" line="440"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="434"/>
+        <location filename="../src/common/filter.cpp" line="441"/>
         <source>ends with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="435"/>
+        <location filename="../src/common/filter.cpp" line="442"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2810,32 +2810,32 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>FilterWidget</name>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="492"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="498"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="493"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="499"/>
         <source>Re-apply filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="494"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="500"/>
         <source>More actions for this filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="495"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="501"/>
         <source>Copy filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="496"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="502"/>
         <source>Paste filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="497"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="503"/>
         <source>Text-only filter mode</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2900,7 +2900,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/historylineedit.cpp" line="173"/>
+        <location filename="../src/desktop/historylineedit.cpp" line="182"/>
         <source>&lt;p&gt;Pressing &lt;b&gt;Return&lt;/b&gt; will save the current filter expression as a favorite. You can recall saved filters by clicking the filter icon on the left or by pressing &lt;b&gt;Down Arrow&lt;/b&gt; to open a drop down menu. The number of favorites is limited to the last %1, but you can delete saved filters from this drop down menu as well by clicking the &lt;b&gt;X&lt;/b&gt; button on the right.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3488,62 +3488,62 @@ Right click: Menu</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="378"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="371"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="384"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="377"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="386"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="379"/>
         <source>Price Guide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="388"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="381"/>
         <source>Appears In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="383"/>
         <source>Open Documents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="385"/>
         <source>Recent Documents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="394"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="387"/>
         <source>Error Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="397"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
         <source>Offline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="398"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="391"/>
         <source>No outstanding jobs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="399"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1202"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1199"/>
         <source>Customize Toolbar...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1206"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1203"/>
         <source>Reset Info Docks layout</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4133,108 +4133,108 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="287"/>
+        <location filename="../src/desktop/printdialog.ui" line="285"/>
         <location filename="../src/desktop/printdialog.cpp" line="270"/>
         <source>Print</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="311"/>
+        <location filename="../src/desktop/printdialog.ui" line="309"/>
         <source>Destination</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="321"/>
+        <location filename="../src/desktop/printdialog.ui" line="323"/>
         <source>Pages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="334"/>
+        <location filename="../src/desktop/printdialog.ui" line="336"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="339"/>
+        <location filename="../src/desktop/printdialog.ui" line="341"/>
         <source>Selection Only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="344"/>
-        <location filename="../src/desktop/printdialog.ui" line="495"/>
+        <location filename="../src/desktop/printdialog.ui" line="346"/>
+        <location filename="../src/desktop/printdialog.ui" line="516"/>
         <source>Custom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="365"/>
+        <location filename="../src/desktop/printdialog.ui" line="366"/>
         <source>Invalid page range, use e.g. 1-5,8,11-13</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="377"/>
+        <location filename="../src/desktop/printdialog.ui" line="378"/>
         <source>Copies</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="394"/>
+        <location filename="../src/desktop/printdialog.ui" line="399"/>
         <source>Layout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="402"/>
+        <location filename="../src/desktop/printdialog.ui" line="409"/>
         <source>Portrait</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="407"/>
+        <location filename="../src/desktop/printdialog.ui" line="414"/>
         <source>Landscape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="415"/>
-        <location filename="../src/desktop/printdialog.ui" line="423"/>
+        <location filename="../src/desktop/printdialog.ui" line="424"/>
+        <location filename="../src/desktop/printdialog.ui" line="434"/>
         <location filename="../src/desktop/printdialog.cpp" line="255"/>
         <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="428"/>
+        <location filename="../src/desktop/printdialog.ui" line="439"/>
         <location filename="../src/desktop/printdialog.cpp" line="257"/>
         <source>Black and white</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="436"/>
+        <location filename="../src/desktop/printdialog.ui" line="449"/>
         <source>Paper size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="446"/>
+        <location filename="../src/desktop/printdialog.ui" line="463"/>
         <source>Margins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="454"/>
-        <location filename="../src/desktop/printdialog.ui" line="485"/>
+        <location filename="../src/desktop/printdialog.ui" line="473"/>
+        <location filename="../src/desktop/printdialog.ui" line="506"/>
         <source>Default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="459"/>
+        <location filename="../src/desktop/printdialog.ui" line="478"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="464"/>
+        <location filename="../src/desktop/printdialog.ui" line="483"/>
         <source>Minimum</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="472"/>
+        <location filename="../src/desktop/printdialog.ui" line="493"/>
         <source>Scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="490"/>
+        <location filename="../src/desktop/printdialog.ui" line="511"/>
         <source>Fit to width</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4266,7 +4266,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="352"/>
+        <location filename="../src/desktop/printdialog.ui" line="354"/>
         <source>e.g. 1-5,8,11-13</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4625,103 +4625,103 @@ Right click: Menu</source>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="515"/>
+        <location filename="../src/desktop/selectitem.cpp" line="513"/>
         <source>Item type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="516"/>
+        <location filename="../src/desktop/selectitem.cpp" line="514"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="536"/>
+        <location filename="../src/desktop/selectitem.cpp" line="534"/>
         <source>List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="538"/>
+        <location filename="../src/desktop/selectitem.cpp" line="536"/>
         <source>List with Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="537"/>
+        <location filename="../src/desktop/selectitem.cpp" line="535"/>
         <source>Thumbnails</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="327"/>
+        <location filename="../src/desktop/selectitem.cpp" line="325"/>
         <source>Ctrl+1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="334"/>
+        <location filename="../src/desktop/selectitem.cpp" line="332"/>
         <source>Ctrl+2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="342"/>
+        <location filename="../src/desktop/selectitem.cpp" line="340"/>
         <source>Ctrl+3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="537"/>
         <source>Zoom in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="540"/>
+        <location filename="../src/desktop/selectitem.cpp" line="538"/>
         <source>Zoom out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="951"/>
+        <location filename="../src/desktop/selectitem.cpp" line="949"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="279"/>
+        <location filename="../src/desktop/selectitem.cpp" line="277"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="282"/>
+        <location filename="../src/desktop/selectitem.cpp" line="280"/>
         <source>Find element number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="283"/>
+        <location filename="../src/desktop/selectitem.cpp" line="281"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="518"/>
+        <location filename="../src/desktop/selectitem.cpp" line="516"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="529"/>
+        <location filename="../src/desktop/selectitem.cpp" line="527"/>
         <source>Filter the list using this expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="535"/>
+        <location filename="../src/desktop/selectitem.cpp" line="533"/>
         <source>Find a 7-digit Lego element number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="961"/>
+        <location filename="../src/desktop/selectitem.cpp" line="959"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="995"/>
+        <location filename="../src/desktop/selectitem.cpp" line="993"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="1000"/>
+        <location filename="../src/desktop/selectitem.cpp" line="998"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4896,13 +4896,13 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="58"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="26"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
         <source>Last 6 Months Sales</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="63"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="27"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
         <source>Current Inventory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4913,25 +4913,25 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="78"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="29"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="34"/>
         <source>Minimum</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="83"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="30"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="35"/>
         <source>Average</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="88"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="36"/>
         <source>Quantity Average</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="93"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="37"/>
         <source>Maximum</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5695,47 +5695,47 @@ If you do not want to save your password, then just leave this field empty and y
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="542"/>
+        <location filename="../src/desktop/viewpane.cpp" line="547"/>
         <source>Go to the next difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="544"/>
+        <location filename="../src/desktop/viewpane.cpp" line="549"/>
         <source>Go to the next error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="546"/>
+        <location filename="../src/desktop/viewpane.cpp" line="551"/>
         <source>Show order information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="547"/>
+        <location filename="../src/desktop/viewpane.cpp" line="552"/>
         <source>Currency:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="549"/>
+        <location filename="../src/desktop/viewpane.cpp" line="554"/>
         <source>Split</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="550"/>
+        <location filename="../src/desktop/viewpane.cpp" line="555"/>
         <source>Split horizontally</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="551"/>
+        <location filename="../src/desktop/viewpane.cpp" line="556"/>
         <source>Split vertically</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="552"/>
+        <location filename="../src/desktop/viewpane.cpp" line="557"/>
         <source>Remove split</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="553"/>
+        <location filename="../src/desktop/viewpane.cpp" line="558"/>
         <source>Open in new window</source>
         <translation type="unfinished"></translation>
     </message>

@@ -1331,25 +1331,33 @@
 <context>
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="976"/>
+        <location filename="../src/bricklink/model.cpp" line="977"/>
         <source>Qty.</source>
         <translation>Cant.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="977"/>
-        <source>Set</source>
-        <translation>Set</translation>
+        <location filename="../src/bricklink/model.cpp" line="978"/>
+        <source>Item Id</source>
+        <translation type="unfinished">Id Artículo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="978"/>
+        <location filename="../src/bricklink/model.cpp" line="979"/>
+        <source>Description</source>
+        <translation type="unfinished">Descripción</translation>
+    </message>
+    <message>
+        <source>Set</source>
+        <translation type="vanished">Set</translation>
+    </message>
+    <message>
         <source>Name</source>
-        <translation>Nombre</translation>
+        <translation type="vanished">Nombre</translation>
     </message>
 </context>
 <context>
     <name>BrickLink::ItemDelegate</name>
     <message>
-        <location filename="../src/bricklink/delegate.cpp" line="122"/>
+        <location filename="../src/bricklink/delegate.cpp" line="133"/>
         <source>[Image is loading]</source>
         <translation>[Cargando imagen]</translation>
     </message>
@@ -1385,7 +1393,7 @@
         <translation>Descripción</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="981"/>
+        <location filename="../src/desktop/selectitem.cpp" line="979"/>
         <source>consists-of:</source>
         <translation>consta-de:</translation>
     </message>
@@ -2690,13 +2698,13 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="561"/>
-        <source>Value:</source>
-        <translation>Valor:</translation>
+        <source>Total:</source>
+        <translation>Total:</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="562"/>
-        <source>Value (min.):</source>
-        <translation>Valor (min.):</translation>
+        <source>Total (min.):</source>
+        <translation>Total (min.):</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="563"/>
@@ -2725,92 +2733,92 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>Filter</name>
     <message>
-        <location filename="../src/common/filter.cpp" line="325"/>
+        <location filename="../src/common/filter.cpp" line="332"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ingrese la expresión para filtrar en (casi) lenguaje natural o con operadores lógicos.&lt;br /&gt;Una sola expresión se parece a &lt;b&gt;&lt;i&gt;NOMBREDELCAMPO COMPARACIÓN&lt;/i&gt; TEXTO&lt;/b&gt;. &lt;b&gt;&lt;i&gt;NOMBREDELCAMPO&lt;/i&gt;&lt;/b&gt; y &lt;b&gt;&lt;i&gt;COMPARACIÓN&lt;/i&gt;&lt;/b&gt; son opcionales y por defecto a &lt;b&gt;cualquier campo&lt;/b&gt; y &lt;b&gt;contenido&lt;/b&gt; respectivamente.&lt;/p&gt;&lt;p&gt;Se pueden combinar múltiples expresiones separandolas con un token de &lt;b&gt;COMBINACIÓN&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;P.ej. para buscar algo que se parece a un ladrillo azul, puedes usar: &lt;b&gt;brick y color es blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="332"/>
+        <location filename="../src/common/filter.cpp" line="339"/>
         <source>Field names:</source>
         <translation>Nombres de campos:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="337"/>
+        <location filename="../src/common/filter.cpp" line="344"/>
         <source>Comparisons:</source>
         <translation>Comparaciones:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="342"/>
+        <location filename="../src/common/filter.cpp" line="349"/>
         <source>Combinations:</source>
         <translation>Combinaciones:</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="397"/>
+        <location filename="../src/common/filter.cpp" line="404"/>
         <source>and</source>
         <translation>y</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="398"/>
+        <location filename="../src/common/filter.cpp" line="405"/>
         <source>or</source>
         <translation>o</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="424"/>
+        <location filename="../src/common/filter.cpp" line="431"/>
         <source>is,equals</source>
         <translation>es, igual</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="425"/>
+        <location filename="../src/common/filter.cpp" line="432"/>
         <source>is not,doesn&apos;t equal,does not equal</source>
         <translation>no es, no es igual</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="426"/>
+        <location filename="../src/common/filter.cpp" line="433"/>
         <source>less than</source>
         <translation>menor que</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="427"/>
+        <location filename="../src/common/filter.cpp" line="434"/>
         <source>less equal than</source>
         <translation>menor igual que</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="428"/>
+        <location filename="../src/common/filter.cpp" line="435"/>
         <source>greater than</source>
         <translation>mayor que</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="429"/>
+        <location filename="../src/common/filter.cpp" line="436"/>
         <source>greater equal than</source>
         <translation>mayor igual que</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="430"/>
+        <location filename="../src/common/filter.cpp" line="437"/>
         <source>contains,matches</source>
         <translation>contiene, coincide</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="431"/>
+        <location filename="../src/common/filter.cpp" line="438"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
         <translation>no contiene, no coincide</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="432"/>
+        <location filename="../src/common/filter.cpp" line="439"/>
         <source>starts with,begins with</source>
         <translation>empieza por, comienza por</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="433"/>
+        <location filename="../src/common/filter.cpp" line="440"/>
         <source>doesn&apos;t start with,does not start with,doesn&apos;t begin with,does not begin with</source>
         <translation>no empiza por, no comienza por</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="434"/>
+        <location filename="../src/common/filter.cpp" line="441"/>
         <source>ends with</source>
         <translation>acabe en</translation>
     </message>
     <message>
-        <location filename="../src/common/filter.cpp" line="435"/>
+        <location filename="../src/common/filter.cpp" line="442"/>
         <source>doesn&apos;t end with,does not end with</source>
         <translation>no acabe en</translation>
     </message>
@@ -2834,32 +2842,32 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>FilterWidget</name>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="492"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="498"/>
         <source>Filter</source>
         <translation>Filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="493"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="499"/>
         <source>Re-apply filter</source>
         <translation>Re-aplicar filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="494"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="500"/>
         <source>More actions for this filter</source>
         <translation>Más acciones para este filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="495"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="501"/>
         <source>Copy filter</source>
         <translation>Copiar filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="496"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="502"/>
         <source>Paste filter</source>
         <translation>Pegar filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="497"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="503"/>
         <source>Text-only filter mode</source>
         <translation>Modo filtro de solo-texto</translation>
     </message>
@@ -2947,7 +2955,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Sin filtros favoritos. Lea la descripción emergente.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/historylineedit.cpp" line="173"/>
+        <location filename="../src/desktop/historylineedit.cpp" line="182"/>
         <source>&lt;p&gt;Pressing &lt;b&gt;Return&lt;/b&gt; will save the current filter expression as a favorite. You can recall saved filters by clicking the filter icon on the left or by pressing &lt;b&gt;Down Arrow&lt;/b&gt; to open a drop down menu. The number of favorites is limited to the last %1, but you can delete saved filters from this drop down menu as well by clicking the &lt;b&gt;X&lt;/b&gt; button on the right.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Al presionar &lt;b&gt;Retorno&lt;/b&gt; se guardará el filtro actual como favorito. Puede recuperar los filtros guardados haciendo clic en el icono de filtro a la izquierda o presionando la &lt;b&gt;Flecha Abajo&lt;/b&gt; para abrir un menú desplegable. El número de favoritos está limitado a los últimos %1, pero también puede eliminar los filtros guardados de este menú desplegable haciendo clic en el botón &lt;b&gt;X&lt;/b&gt; a la derecha.&lt;/p&gt;</translation>
     </message>
@@ -3631,62 +3639,66 @@ Click derecho: Menu</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="378"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="371"/>
         <source>Toolbar</source>
         <translation>Barra de herramientas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="384"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="377"/>
         <source>Info</source>
         <translation>Info</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="386"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="379"/>
         <source>Price Guide</source>
         <translation>Guía de Precios</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="388"/>
         <source>Appears In Sets</source>
-        <translation>Aparece en Sets</translation>
+        <translation type="vanished">Aparece en Sets</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="381"/>
+        <source>Appears In</source>
+        <translation type="unfinished">Aparece en</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/mainwindow.cpp" line="383"/>
         <source>Open Documents</source>
         <translation>Abrir Documentos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="385"/>
         <source>Recent Documents</source>
         <translation>Documentos Recientes</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="394"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="387"/>
         <source>Error Log</source>
         <translation>Log de Error</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="397"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="390"/>
         <source>Offline</source>
         <translation>Desconectado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="398"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="391"/>
         <source>No outstanding jobs</source>
         <translation>Sin trabajos pendientes</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="399"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="392"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation>Descargando...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finalizado&lt;br&gt;(%v de %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1202"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1199"/>
         <source>Customize Toolbar...</source>
         <translation>Personalizar Barra de heramientas...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1206"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1203"/>
         <source>Reset Info Docks layout</source>
         <translation>Restablecer disposición Cuadros de Información</translation>
     </message>
@@ -4323,113 +4335,113 @@ Click derecho: Menu</translation>
         <translation>Acercar Zoom</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="287"/>
+        <location filename="../src/desktop/printdialog.ui" line="285"/>
         <location filename="../src/desktop/printdialog.cpp" line="270"/>
         <source>Print</source>
         <translation>Imprimir</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="311"/>
+        <location filename="../src/desktop/printdialog.ui" line="309"/>
         <source>Destination</source>
         <translation>Destino</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="321"/>
+        <location filename="../src/desktop/printdialog.ui" line="323"/>
         <source>Pages</source>
         <translation>Páginas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="334"/>
+        <location filename="../src/desktop/printdialog.ui" line="336"/>
         <source>All</source>
         <translation>Todas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="339"/>
+        <location filename="../src/desktop/printdialog.ui" line="341"/>
         <source>Selection Only</source>
         <translation>Solo Selección</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="344"/>
-        <location filename="../src/desktop/printdialog.ui" line="495"/>
+        <location filename="../src/desktop/printdialog.ui" line="346"/>
+        <location filename="../src/desktop/printdialog.ui" line="516"/>
         <source>Custom</source>
         <translation>Personalizado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="352"/>
+        <location filename="../src/desktop/printdialog.ui" line="354"/>
         <source>e.g. 1-5,8,11-13</source>
         <translation>P.Ej. 1-5,8,11-13</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="365"/>
+        <location filename="../src/desktop/printdialog.ui" line="366"/>
         <source>Invalid page range, use e.g. 1-5,8,11-13</source>
         <translation>Rango de página invalido, use P.Ej. 1-5,8,11-13</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="377"/>
+        <location filename="../src/desktop/printdialog.ui" line="378"/>
         <source>Copies</source>
         <translation>Copias</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="394"/>
+        <location filename="../src/desktop/printdialog.ui" line="399"/>
         <source>Layout</source>
         <translation>Disposición</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="402"/>
+        <location filename="../src/desktop/printdialog.ui" line="409"/>
         <source>Portrait</source>
         <translation>Vertical</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="407"/>
+        <location filename="../src/desktop/printdialog.ui" line="414"/>
         <source>Landscape</source>
         <translation>Horizontal</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="415"/>
-        <location filename="../src/desktop/printdialog.ui" line="423"/>
+        <location filename="../src/desktop/printdialog.ui" line="424"/>
+        <location filename="../src/desktop/printdialog.ui" line="434"/>
         <location filename="../src/desktop/printdialog.cpp" line="255"/>
         <source>Color</source>
         <translation>Color</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="428"/>
+        <location filename="../src/desktop/printdialog.ui" line="439"/>
         <location filename="../src/desktop/printdialog.cpp" line="257"/>
         <source>Black and white</source>
         <translation>Blanco y negro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="436"/>
+        <location filename="../src/desktop/printdialog.ui" line="449"/>
         <source>Paper size</source>
         <translation>Tamaño del papel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="446"/>
+        <location filename="../src/desktop/printdialog.ui" line="463"/>
         <source>Margins</source>
         <translation>Márgenes</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="454"/>
-        <location filename="../src/desktop/printdialog.ui" line="485"/>
+        <location filename="../src/desktop/printdialog.ui" line="473"/>
+        <location filename="../src/desktop/printdialog.ui" line="506"/>
         <source>Default</source>
         <translation>Predeterminado</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="459"/>
+        <location filename="../src/desktop/printdialog.ui" line="478"/>
         <source>None</source>
         <translation>Nada</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="464"/>
+        <location filename="../src/desktop/printdialog.ui" line="483"/>
         <source>Minimum</source>
         <translation>Mínimo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="472"/>
+        <location filename="../src/desktop/printdialog.ui" line="493"/>
         <source>Scale</source>
         <translation>Escala</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="490"/>
+        <location filename="../src/desktop/printdialog.ui" line="511"/>
         <source>Fit to width</source>
         <translation>Ajustar al ancho</translation>
     </message>
@@ -4836,83 +4848,83 @@ Click derecho: Menu</translation>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="279"/>
+        <location filename="../src/desktop/selectitem.cpp" line="277"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation>Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="282"/>
+        <location filename="../src/desktop/selectitem.cpp" line="280"/>
         <source>Find element number</source>
         <translation>Encontrar número de elemento</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="283"/>
+        <location filename="../src/desktop/selectitem.cpp" line="281"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation>Ingrese un número de elemento de Lego de 7 dígitos, también conocido como Pieza-Color-Código (PCC)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="327"/>
+        <location filename="../src/desktop/selectitem.cpp" line="325"/>
         <source>Ctrl+1</source>
         <translation>Ctrl+1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="334"/>
+        <location filename="../src/desktop/selectitem.cpp" line="332"/>
         <source>Ctrl+2</source>
         <translation>Ctrl+2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="342"/>
+        <location filename="../src/desktop/selectitem.cpp" line="340"/>
         <source>Ctrl+3</source>
         <translation>Ctrl+3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="515"/>
+        <location filename="../src/desktop/selectitem.cpp" line="513"/>
         <source>Item type:</source>
         <translation>Tipo de artículo:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="516"/>
+        <location filename="../src/desktop/selectitem.cpp" line="514"/>
         <source>Filter</source>
         <translation>Filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="518"/>
+        <location filename="../src/desktop/selectitem.cpp" line="516"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Mostrar solo los artículos que contengan todas las palabras ingresadas, independientemente del caso, ya sea en el nombre o en el número de pieza. Esto funciona de manera muy similar a un motor de búsqueda web: &lt;ul&gt;&lt;li&gt;para excluir palabras, antepóngalas con &lt;tt&gt;-&lt;/tt&gt;. (P.Ej. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para que coincida con una frase, colóquela entre comillas. (P.Ej. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar las partes que aparecen en un set específico, coloque &lt;tt&gt;aparece-en:&lt;/tt&gt; delante del nombre del set. (P.Ej.&lt;tt&gt; aparece-en:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar sets o minifigs que consta de una pieza específica, coloque &lt;tt&gt;consta-de:&lt;/tt&gt; delante de la Id de la pieza. (P.Ej. &lt;tt&gt;consta-de:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="529"/>
+        <location filename="../src/desktop/selectitem.cpp" line="527"/>
         <source>Filter the list using this expression</source>
         <translation>Filtrar la lista usando esta expresión</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="535"/>
+        <location filename="../src/desktop/selectitem.cpp" line="533"/>
         <source>Find a 7-digit Lego element number</source>
         <translation>Encontrar un número de elemento de Lego de 7 dígitos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="536"/>
+        <location filename="../src/desktop/selectitem.cpp" line="534"/>
         <source>List</source>
         <translation>Lista</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="537"/>
+        <location filename="../src/desktop/selectitem.cpp" line="535"/>
         <source>Thumbnails</source>
         <translation>Miniaturas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="538"/>
+        <location filename="../src/desktop/selectitem.cpp" line="536"/>
         <source>List with Images</source>
         <translation>Lista con Imágenes</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="537"/>
         <source>Zoom in</source>
         <translation>Acercar Zoom</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="540"/>
+        <location filename="../src/desktop/selectitem.cpp" line="538"/>
         <source>Zoom out</source>
         <translation>Alejar Zoom</translation>
     </message>
@@ -4921,22 +4933,22 @@ Click derecho: Menu</translation>
         <translation type="vanished">Cambiar a la categoría del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="951"/>
+        <location filename="../src/desktop/selectitem.cpp" line="949"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Cambiar a la catecoría &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="961"/>
+        <location filename="../src/desktop/selectitem.cpp" line="959"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Cambiar a la categoría &quot;%1&quot; del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="995"/>
+        <location filename="../src/desktop/selectitem.cpp" line="993"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Establecer el filtro para Minifiguras que constan de esta pieza</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="1000"/>
+        <location filename="../src/desktop/selectitem.cpp" line="998"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Delimitar el filtro a Minifiguras que constan de esta pieza</translation>
     </message>
@@ -5129,13 +5141,13 @@ Click derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="58"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="26"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
         <source>Last 6 Months Sales</source>
         <translation>Ventas Últimos 6 Meses</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="63"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="27"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
         <source>Current Inventory</source>
         <translation>Inventario Actual</translation>
     </message>
@@ -5146,25 +5158,25 @@ Click derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="78"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="29"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="34"/>
         <source>Minimum</source>
         <translation>Mínimo</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="83"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="30"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="35"/>
         <source>Average</source>
         <translation>Media</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="88"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="31"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="36"/>
         <source>Quantity Average</source>
         <translation>Media por Cantidad</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="93"/>
-        <location filename="../src/desktop/settopriceguidedialog.cpp" line="32"/>
+        <location filename="../src/desktop/settopriceguidedialog.cpp" line="37"/>
         <source>Maximum</source>
         <translation>Máximo</translation>
     </message>
@@ -5971,47 +5983,47 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation>Artículos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="542"/>
+        <location filename="../src/desktop/viewpane.cpp" line="547"/>
         <source>Go to the next difference</source>
         <translation>Ir a la siguiente diferencia</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="544"/>
+        <location filename="../src/desktop/viewpane.cpp" line="549"/>
         <source>Go to the next error</source>
         <translation>Ir al siguiente erro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="546"/>
+        <location filename="../src/desktop/viewpane.cpp" line="551"/>
         <source>Show order information</source>
         <translation>Mostrar información del pedido</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="547"/>
+        <location filename="../src/desktop/viewpane.cpp" line="552"/>
         <source>Currency:</source>
         <translation>Moneda:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="549"/>
+        <location filename="../src/desktop/viewpane.cpp" line="554"/>
         <source>Split</source>
         <translation>Partir</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="550"/>
+        <location filename="../src/desktop/viewpane.cpp" line="555"/>
         <source>Split horizontally</source>
         <translation>Partir horizontalmente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="551"/>
+        <location filename="../src/desktop/viewpane.cpp" line="556"/>
         <source>Split vertically</source>
         <translation>Partir verticalmente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="552"/>
+        <location filename="../src/desktop/viewpane.cpp" line="557"/>
         <source>Remove split</source>
         <translation>Eliminar partición</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="553"/>
+        <location filename="../src/desktop/viewpane.cpp" line="558"/>
         <source>Open in new window</source>
         <translation>Abrir en nueva ventana</translation>
     </message>

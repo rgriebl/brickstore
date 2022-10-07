@@ -558,8 +558,8 @@ QString DocumentStatistics::asHtmlTable() const
     return QString::fromLatin1(fmt).arg(
                 tr("Lots:"), loc.toString(lots()),
                 tr("Items:"), loc.toString(items()),
-                tr("Value:"), m_ccode, valstr).arg(
-                hasMinValue ? tr("Value (min.):") : QString(), hasMinValue ? m_ccode : QString(), minvalstr,
+                tr("Total:"), m_ccode, valstr).arg(
+                hasMinValue ? tr("Total (min.):") : QString(), hasMinValue ? m_ccode : QString(), minvalstr,
                 tr("Cost:"), m_ccode, coststr, profitstr,
                 tr("Weight:"), wgtstr);
 }
