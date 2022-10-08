@@ -336,7 +336,6 @@ void TaskAppearsInWidget::selectionUpdate(const LotList &list)
 TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setAlternatingRowColors(true);
     setHeaderHidden(true);
@@ -412,7 +411,6 @@ void TaskOpenDocumentsWidget::changeEvent(QEvent *e)
 TaskRecentDocumentsWidget::TaskRecentDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     //setItemDelegate(new QStyledItemDelegate());
     setAlternatingRowColors(true);
     setHeaderHidden(true);
