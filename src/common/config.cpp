@@ -60,6 +60,10 @@ Config::Config()
 {
     m_show_input_errors = value(u"General/ShowInputErrors"_qs, true).toBool();
     m_show_difference_indicators = value(u"General/ShowDifferenceIndicators"_qs, false).toBool();
+    m_columnSpacing = qBound(0, value(u"Interface/ColumnSpacing"_qs, 1).toInt(), 2);
+    m_wheelZoomEnabled = value(u"Interface/WheelZoomEnabled"_qs, true).toBool();
+    m_documentZoom = qBound(50, value(u"Interface/ItemImageSizePercent"_qs, 100).toInt(), 200);
+
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
@@ -366,13 +370,14 @@ void Config::setFontSizePercent(int p)
     }
 }
 
-void Config::setItemImageSizePercent(int p)
+void Config::setDocumentZoomPercent(int p)
 {
-    auto oldp = itemImageSizePercent();
+    p = qBound(50, p, 200);
 
-    if (oldp != p) {
-        setValue(u"Interface/ItemImageSizePercent"_qs, qBound(50, p, 200));
-        emit itemImageSizePercentChanged(p);
+    if (m_documentZoom != p) {
+        m_documentZoom = p;
+        setValue(u"Interface/ItemImageSizePercent"_qs, p);
+        emit documentZoomPercentChanged(p);
     }
 }
 
@@ -682,9 +687,9 @@ int Config::fontSizePercent() const
     return value(u"Interface/FontSizePercent"_qs, 100).toInt();
 }
 
-int Config::itemImageSizePercent() const
+int Config::documentZoomPercent() const
 {
-    return value(u"Interface/ItemImageSizePercent"_qs, 100).toInt();
+    return m_documentZoom;
 }
 
 Config::UISize Config::iconSize() const
@@ -698,6 +703,36 @@ void Config::setIconSize(UISize iconSize)
     if (this->iconSize() != iconSize) {
         setValue(u"Interface/IconSizeEnum"_qs, int(iconSize));
         emit iconSizeChanged(iconSize);
+    }
+}
+
+int Config::columnSpacing() const
+{
+    return m_columnSpacing;
+}
+
+void Config::setColumnSpacing(int newColumnSpacing)
+{
+    newColumnSpacing = qBound(0, newColumnSpacing, 2);
+
+    if (m_columnSpacing != newColumnSpacing) {
+        m_columnSpacing = newColumnSpacing;
+        setValue(u"Interface/ColumnSpacing"_qs, newColumnSpacing);
+        emit columnSpacingChanged(newColumnSpacing);
+    }
+}
+
+bool Config::wheelZoomEnabled() const
+{
+    return m_wheelZoomEnabled;
+}
+
+void Config::setWheelZoomEnabled(bool newWheelZoomEnabled)
+{
+    if (m_wheelZoomEnabled != newWheelZoomEnabled) {
+        m_wheelZoomEnabled = newWheelZoomEnabled;
+        setValue(u"Interface/WheelZoomEnabled"_qs, newWheelZoomEnabled);
+        emit wheelZoomEnabledChanged(newWheelZoomEnabled);
     }
 }
 

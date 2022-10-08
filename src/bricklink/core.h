@@ -94,9 +94,6 @@ public:
     Picture *picture(const Item *item, const Color *color, bool highPriority = false);
     Picture *largePicture(const Item *item, bool highPriority = false);
 
-    double itemImageScaleFactor() const;
-    void setItemImageScaleFactor(double f);
-
     bool applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc);
 
     bool onlineStatus() const;
@@ -117,7 +114,6 @@ public slots:
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *pic);
-    void itemImageScaleFactorChanged(double f);
 
     void transferProgress(int progress, int total);
     void authenticatedTransferOverallProgress(int progress, int total);
@@ -180,8 +176,6 @@ private:
     int                          m_pic_update_iv = 0;
     QThreadPool                  m_diskloadPool;
     Q3Cache<quint64, Picture>    m_pic_cache;
-
-    double m_item_image_scale_factor = 1.;
 
     Database *m_database = nullptr;
     Store *m_store = nullptr;

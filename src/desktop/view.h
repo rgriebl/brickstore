@@ -23,8 +23,9 @@
 #include "bricklink/lot.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "common/documentmodel.h"
 #include "common/currency.h"
+#include "common/documentmodel.h"
+#include "common/eventfilter.h"
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QProgressBar)
@@ -66,12 +67,16 @@ public:
 
     void setLatestRow(int row);
 
+    double zoomFactor() const;
+    void setZoomFactor(double zoom);
+
 signals:
     void currentColumnOrderChanged(const QVector<int> &newOrder);
 
 protected:
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
+    EventFilter::Result zoomFilter(QObject *o, QEvent *e);
 
     void print(bool aspdf);
 
@@ -110,6 +115,7 @@ private:
     QTimer *             m_latest_timer;
 
     QObject *            m_actionConnectionContext = nullptr;
+    double               m_zoom = 1.;
 
     ActionManager::ActionTable m_actionTable;
 };

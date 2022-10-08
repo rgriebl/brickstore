@@ -721,7 +721,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     setupUi(this);
 
     w_font_size_percent->setFixedWidth(w_font_size_percent->width());
-    w_item_image_size_percent->setFixedWidth(w_item_image_size_percent->width());
 
     auto setFontSize = [this](int v) {
         w_font_size_percent->setText(QString::number(v * 10) % u" %");
@@ -739,22 +738,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     connect(w_font_size_reset, &QToolButton::clicked,
             this, [this]() { w_font_size->setValue(10); });
-
-    auto setImageSize = [this](int v) {
-        w_item_image_size_percent->setText(QString::number(v * 10) % u" %");
-        int s = int(BrickLink::core()->standardPictureSize().height() * v
-                    / 10 / BrickLink::core()->itemImageScaleFactor());
-        QImage img(u":/assets/generated-app-icons/brickstore.png"_qs);
-        img = img.scaled(s, s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        w_item_image_example->setPixmap(QPixmap::fromImage(img));
-    };
-
-    connect(w_item_image_size, &QAbstractSlider::valueChanged,
-            this, setImageSize);
-    setImageSize(10);
-
-    connect(w_item_image_size_reset, &QToolButton::clicked,
-            this, [this]() { w_item_image_size->setValue(10); });
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
     w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
@@ -1084,12 +1067,12 @@ void SettingsDialog::load()
 
     // --[ INTERFACE ]-------------------------------------------------
 
+    w_theme->setCurrentIndex(int(Config::inst()->uiTheme()));
     w_icon_size->setCurrentIndex(int(Config::inst()->iconSize()));
     w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
 
-    w_item_image_size->setValue(Config::inst()->itemImageSizePercent() / 10);
-
-    w_theme->setCurrentIndex(int(Config::inst()->uiTheme()));
+    w_wheelZoom->setChecked(Config::inst()->wheelZoomEnabled());
+    w_columnSpacing->setCurrentIndex(Config::inst()->columnSpacing());
 
     // --[ UPDATES ]---------------------------------------------------
 
@@ -1158,8 +1141,8 @@ void SettingsDialog::save()
 
     Config::inst()->setIconSize(static_cast<Config::UISize>(w_icon_size->currentIndex()));
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
-
-    Config::inst()->setItemImageSizePercent(w_item_image_size->value() * 10);
+    Config::inst()->setColumnSpacing(w_columnSpacing->currentIndex());
+    Config::inst()->setWheelZoomEnabled(w_wheelZoom->isChecked());
 
     Config::inst()->setUITheme(Config::UITheme(w_theme->currentIndex()));
 

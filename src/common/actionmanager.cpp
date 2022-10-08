@@ -399,6 +399,9 @@ void ActionManager::initialize()
     A("view_toolbar",                   QT_TR_NOOP("View Toolbar"),                                                                   NoNeed, FlagCheckable);
     A("view_docks",                     QT_TR_NOOP("View Info Docks"), NoNeed, FlagMenu);
     A("view_fullscreen",                QT_TR_NOOP("Full Screen"),                       QKeySequence::FullScreen,                    NoNeed, FlagCheckable);
+    A("view_zoom_in",                   QT_TR_NOOP("Zoom In"),                                                                        NeedDocument);
+    A("view_zoom_out",                  QT_TR_NOOP("Zoom Out"),                                                                       NeedDocument);
+    A("view_zoom_reset",                QT_TR_NOOP("Zoom Reset"),                                                                     NeedDocument);
     A("view_show_input_errors",         QT_TR_NOOP("Show Input Errors"),                                                              NoNeed, FlagCheckable);
     A("view_goto_next_input_error",     QT_TR_NOOP("Go to the Next Error"),              QT_TR_NOOP("F6", "View|Go Next Error"),      NeedDocument | NeedLots);
     a->m_iconName = "emblem-warning";

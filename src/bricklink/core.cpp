@@ -946,19 +946,6 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
     return (item && color);
 }
 
-double Core::itemImageScaleFactor() const
-{
-    return m_item_image_scale_factor;
-}
-
-void Core::setItemImageScaleFactor(double f)
-{
-    if (!qFuzzyCompare(f, m_item_image_scale_factor)) {
-        m_item_image_scale_factor = f;
-        emit itemImageScaleFactorChanged(f);
-    }
-}
-
 Core::ResolveResult Core::resolveIncomplete(Lot *lot)
 {
     if (!lot->isIncomplete())
@@ -1258,11 +1245,7 @@ void PictureLoaderJob::run()
 
 QSize Core::standardPictureSize() const
 {
-    QSize s(80, 60);
-    double f = core()->itemImageScaleFactor();
-    if (!qFuzzyCompare(f, 1.))
-        s *= f;
-    return s;
+    return QSize { 80, 60 };
 }
 
 Picture *Core::picture(const Item *item, const Color *color, bool highPriority)

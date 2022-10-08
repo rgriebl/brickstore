@@ -102,7 +102,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_image = new QLabel();
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    w_image->setMinimumSize(BrickLink::core()->standardPictureSize());
+    w_image->setMinimumSize(2 * BrickLink::core()->standardPictureSize());
     w_image->setAutoFillBackground(true);
 
     w_ldraw = new LDraw::RenderWidget(Application::inst()->qmlEngine(), this);
@@ -352,7 +352,7 @@ void PictureWidget::redraw()
             p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
             pSize = p.size();
         } else {
-            pSize = BrickLink::core()->standardPictureSize();
+            pSize = 4 * BrickLink::core()->standardPictureSize();
         }
         QSize sz = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2) * dpr;
 

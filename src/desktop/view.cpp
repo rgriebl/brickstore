@@ -83,6 +83,7 @@
 
 
 using namespace std::chrono_literals;
+using namespace std::placeholders;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -496,6 +497,17 @@ View::View(Document *document, QWidget *parent)
     connect(m_blockCancel, &QToolButton::clicked,
             this, [this]() { m_document->cancelBlockingOperation(); });
 
+    auto dzp = Config::inst()->documentZoomPercent();
+    if (dzp != 100)
+        m_zoom = double(dzp) / 100.;
+    connect(Config::inst(), &Config::documentZoomPercentChanged,
+            this, [this](int p) {
+        qWarning() << "FPP" << p;
+        m_table->resizeRowsToContents();
+    });
+    new EventFilter(m_table->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
+                    std::bind(&View::zoomFilter, this, _1, _2));
+
     updateCaption();
 
     languageChange();
@@ -751,6 +763,46 @@ void View::repositionBlockOverlay()
     m_blockOverlay->resize(m_blockOverlay->sizeHint());
     auto p = rect().center() - QPoint(m_blockOverlay->width(), m_blockOverlay->height()) / 2;
     m_blockOverlay->move(p);
+}
+
+EventFilter::Result View::zoomFilter(QObject *o, QEvent *e)
+{
+    if ((e->type() == QEvent::Wheel) && (o == m_table->viewport())) {
+        const auto *we = static_cast<QWheelEvent *>(e);
+        if (we->modifiers() == Qt::ControlModifier) {
+            double z = std::pow(1.001, we->angleDelta().y());
+            setZoomFactor(m_zoom * z);
+            e->accept();
+            return EventFilter::StopEventProcessing;
+        }
+    } else if ((e->type() == QEvent::NativeGesture) && (o == m_table->viewport())) {
+        const auto *nge = static_cast<QNativeGestureEvent *>(e);
+        if (nge->gestureType() == Qt::ZoomNativeGesture) {
+            double z = 1 + nge->value();
+            setZoomFactor(m_zoom * z);
+            e->accept();
+            return EventFilter::StopEventProcessing;
+        }
+    }
+    return EventFilter::ContinueEventProcessing;
+}
+
+double View::zoomFactor() const
+{
+    return m_zoom;
+}
+
+void View::setZoomFactor(double zoom)
+{
+    if (!Config::inst()->wheelZoomEnabled())
+        return;
+
+    zoom = qBound(.5, zoom, 2.);
+
+    if (!qFuzzyCompare(zoom, m_zoom)) {
+        m_zoom = zoom;
+        Config::inst()->setDocumentZoomPercent(int(zoom * 100));
+    }
 }
 
 

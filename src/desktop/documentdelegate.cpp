@@ -54,6 +54,11 @@ static const quint64 differenceWarningMask = 0ULL
         | (1ULL << DocumentModel::Color)
         | (1ULL << DocumentModel::Reserved);
 
+static int columnSpacingInPixel()
+{
+    return 2 << Config::inst()->columnSpacing(); // 0,1,2 -> 2,4,8
+}
+
 
 DocumentDelegate::DocumentDelegate(QTableView *table)
     : QItemDelegate(table)
@@ -68,16 +73,13 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
         languageChange();
         return EventFilter::ContinueEventProcessing;
     });
-
-    connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
-            this, [this]() {
-        m_table->resizeRowsToContents();
-    });
 }
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
 {
-    QSize picsize = BrickLink::core()->standardPictureSize();
+    QSize picsize = BrickLink::core()->standardPictureSize()
+            * double(Config::inst()->documentZoomPercent()) / 100.;
+
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
     return qMax(2 + fm.height(), picsize.height() + 1 /* the grid lines */);
@@ -89,11 +91,18 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
         return {};
 
     int w = -1;
+    const int columnSpacing = columnSpacingInPixel();
 
-    if (idx.column() == DocumentModel::Picture)
-        w = 4 + BrickLink::core()->standardPictureSize().width();
-    else
+    if (idx.column() == DocumentModel::Picture) {
+        w = 4 + (BrickLink::core()->standardPictureSize()
+                 * double(Config::inst()->documentZoomPercent()) / 100.0).width();
+    } else {
         w = QItemDelegate::sizeHint(option1, idx).width();
+
+        const int qtTextMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr) + 1;
+        w -= 2 * qtTextMargin;
+        w += 2 * columnSpacing;
+    }
 
     static const QVector<int> twoLiners = {
         DocumentModel::Description,
@@ -108,9 +117,10 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     }
 
     if (idx.column() == DocumentModel::Color)
-        w += (option1.decorationSize.width() + 4);
+        w += (option1.decorationSize.width() + columnSpacing);
 
     QStyleOptionViewItem option(option1);
+
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
 }
 
@@ -166,7 +176,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     int x = option.rect.x(), y = option.rect.y();
     int w = option.rect.width();
     int h = option.rect.height();
-    int margin = int(std::ceil(2 * float(p->device()->logicalDpiX()) / 96.f));
+    int margin = columnSpacingInPixel();
 
     struct Tag {
         QColor foreground { Qt::transparent };

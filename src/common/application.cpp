@@ -864,10 +864,6 @@ bool Application::initBrickLink()
     BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), databaseUrl(),
                                             SystemInfo::inst()->physicalMemory());
 
-    bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
-    connect(Config::inst(), &Config::itemImageSizePercentChanged,
-            this, [](double p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
-
     connect(Config::inst(), &Config::updateIntervalsChanged,
             BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
     BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
