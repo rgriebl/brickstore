@@ -766,7 +766,7 @@ QmlColor QmlBrickLink::color(const QVariant &v) const
     else if (v.userType() == QMetaType::QString)
         return core()->colorFromName(v.toString());
     else
-        return core()->color(v.value<uint>());
+        return core()->color(v.toUInt());
 }
 
 /*! \qmlmethod Color BrickLink::colorFromLDrawId(int colorId)
@@ -791,7 +791,7 @@ QmlCategory QmlBrickLink::category(const QVariant &v) const
     if (v.userType() == qMetaTypeId<const BrickLink::Category *>())
         return v.value<const BrickLink::Category *>();
     else
-        return core()->category(v.value<uint>());
+        return core()->category(v.toUInt());
 }
 
 /*! \qmlmethod ItemType BrickLink::itemType(var itemType)
@@ -1025,7 +1025,7 @@ void QmlColorModel::setPopuplarityFilter(float p)
 
 int QmlColorModel::colorTypeFilter() const
 {
-    return m_model->colorTypeFilter();
+    return int(m_model->colorTypeFilter());
 }
 
 void QmlColorModel::setColorTypeFilter(int ct)

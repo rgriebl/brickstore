@@ -510,7 +510,7 @@ private:
             node = node->next;
         return (static_cast<void *>(node) == d);
 #else
-        Q_UNUSED(node);
+        Q_UNUSED(node)
         return true;
 #endif
     }

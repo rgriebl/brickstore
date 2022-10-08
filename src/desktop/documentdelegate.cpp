@@ -127,8 +127,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     const auto *lot = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
     const auto *base = idx.data(DocumentModel::BaseLotPointerRole).value<const Lot *>();
-    const auto errorFlags = idx.data(DocumentModel::ErrorFlagsRole).value<quint64>();
-    const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).value<quint64>();
+    const auto errorFlags = idx.data(DocumentModel::ErrorFlagsRole).toULongLong();
+    const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).toULongLong();
 
     p->save();
     auto restorePainter = qScopeGuard([p] { p->restore(); });
@@ -849,7 +849,7 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
         QString text = displayData(idx, v, false);
         QString tip = displayData(idx, v, true);
 
-        const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).value<quint64>();
+        const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).toULongLong();
         if (differenceFlags & (1ULL << idx.column())) {
             if (tip.isEmpty())
                 tip = text;

@@ -108,7 +108,6 @@ public:
     enum Role {
         WantedListPointerRole = Qt::UserRole + 1,
         WantedListSortRole,
-        NameRole,
     };
 
     bool isValid() const          { return m_valid; }

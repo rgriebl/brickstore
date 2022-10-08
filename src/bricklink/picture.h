@@ -55,7 +55,7 @@ public:
 
     const QImage image() const;
 
-    qsizetype cost() const;
+    int cost() const;
 
     Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
     ~Picture() override;

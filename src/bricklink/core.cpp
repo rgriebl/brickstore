@@ -1277,7 +1277,7 @@ Picture *Core::picture(const Item *item, const Color *color, bool highPriority)
 
     if (!pic) {
         pic = new Picture(item, color);
-        auto cost = pic->cost();
+        int cost = pic->cost();
         if (!m_pic_cache.insert(key, pic, cost)) {
             qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
                       int(m_pic_cache.maxCost()), int(m_pic_cache.totalCost()), int(cost), item->id().constData());

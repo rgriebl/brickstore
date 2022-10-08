@@ -224,7 +224,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE QModelIndex indexOfColor(QmlColor color);
+    Q_INVOKABLE QModelIndex indexOfColor(BrickLink::QmlColor color);
 
     Q_INVOKABLE void sortByName();
     Q_INVOKABLE void sortByHue();

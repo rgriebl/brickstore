@@ -62,7 +62,7 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
 
 int FlowLayout::count() const
 {
-    return m_items.count();
+    return int(m_items.count());
 }
 
 QLayoutItem *FlowLayout::itemAt(int index) const

@@ -176,7 +176,7 @@ public:
     }
 
     static void toast(const QString &message, int timeout = 3000) {
-        return inst()->showToastMessageHelper(message, timeout);
+        inst()->showToastMessageHelper(message, timeout);
     }
 
 protected:

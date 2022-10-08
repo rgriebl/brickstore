@@ -942,7 +942,7 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
         switch (col) {
         case 0: res = appears->first < 0 ? u"-"_qs : QString::number(appears->first); break;
         case 1: res = QString(QLatin1Char(appears->second->itemTypeId()) % u' '
-                              % QLatin1StringView(appears->second->id())); break;
+                              % QLatin1String(appears->second->id())); break;
         case 2: res = appears->second->name(); break;
         }
         break;

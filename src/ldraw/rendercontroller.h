@@ -47,7 +47,7 @@ public:
     RenderController(QObject *parent = nullptr);
     ~RenderController() override;
 
-    QList<QmlRenderGeometry *> surfaces();
+    QList<LDraw::QmlRenderGeometry *> surfaces();
     QQuick3DGeometry *lineGeometry();
     QQuick3DInstancing *lines();
     QQuick3DInstancing *conditionalLines();

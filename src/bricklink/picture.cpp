@@ -40,12 +40,12 @@ const QImage Picture::image() const
     return m_image;
 }
 
-qsizetype Picture::cost() const
+int Picture::cost() const
 {
     if (m_image.isNull())
         return 640*480*4 / 1024;      // ~ 640*480 32bpp
     else
-        return m_image.sizeInBytes() / 1024;
+        return int(m_image.sizeInBytes() / 1024);
 }
 
 QFile *Picture::readFile() const

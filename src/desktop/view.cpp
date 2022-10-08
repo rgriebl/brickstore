@@ -148,7 +148,7 @@ ColumnChangeWatcher::ColumnChangeWatcher(View *view, HeaderView *header)
         hideColumn(li, data.m_hidden);
     }
     // hide columns that got added after this was saved
-    for (int li = columnData.count(); li < DocumentModel::FieldCount; ++li)
+    for (int li = int(columnData.count()); li < DocumentModel::FieldCount; ++li)
         hideColumn(li, true);
 
     QVector<int> v2l, l2v;
@@ -849,7 +849,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
     if (rowsPerPage <= 0)
         return false;
 
-    int pagesDown = (lots.size() + rowsPerPage - 1) / rowsPerPage;
+    int pagesDown = (int(lots.size()) + rowsPerPage - 1) / rowsPerPage;
 
     QMap<int, QPair<DocumentModel::Field, double>> colWidths;
     for (int f = DocumentModel::Index; f < DocumentModel::FieldCount; ++f) {
@@ -880,7 +880,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
     if (!curPageColWidths.isEmpty())
         colWidthsPerPageAcross.append(curPageColWidths);
 
-    int pagesAcross = colWidthsPerPageAcross.size();
+    int pagesAcross = int(colWidthsPerPageAcross.size());
     int pageCount = 0;
     bool needNewPage = false;
 

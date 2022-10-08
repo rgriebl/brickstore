@@ -31,7 +31,7 @@ QmlRenderLineInstancing::QmlRenderLineInstancing()
 
 QByteArray QmlRenderLineInstancing::getInstanceBuffer(int *instanceCount)
 {
-    *instanceCount = int(m_buffer.size() / sizeof(InstanceTableEntry));
+    *instanceCount = int(m_buffer.size()) / int(sizeof(InstanceTableEntry));
     return m_buffer;
 }
 

@@ -144,10 +144,10 @@ public:
         if (parent.column() > 0)
             return 0;
         if (!parent.isValid()) {
-            return m_actions.uniqueKeys().size();
+            return int(m_actions.uniqueKeys().size());
         } else {
             if (isCategory(parent))
-                return m_actions.values(m_actions.uniqueKeys().at(parent.row())).size();
+                return int(m_actions.values(m_actions.uniqueKeys().at(parent.row())).size());
             else
                 return 0;
         }
@@ -335,7 +335,7 @@ public:
 
     int rowCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : m_actions.size();
+        return parent.isValid() ? 0 : int(m_actions.size());
     }
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const override
@@ -397,7 +397,7 @@ public:
 
                 // no duplicated allowed
                 if (!m_separatorActions.contains(newAction) && actions.contains(newAction)) {
-                    int removeRow = actions.indexOf(newAction);
+                    int removeRow = int(actions.indexOf(newAction));
 
                     if ((row == removeRow) || (row == (removeRow + 1))) // no-op
                         return false;
@@ -930,7 +930,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, [this]() {
         auto newShortcut = w_sc_edit->keySequence();
         // disallow Alt only shortcuts, because this interferes with standard menu handling
-        for (int i = 0; i < newShortcut.count(); ++i) {
+        for (uint i = 0; i < newShortcut.count(); ++i) {
             auto mod = newShortcut[i].keyboardModifiers();
 
             if ((mod & Qt::AltModifier) && !(mod & Qt::ControlModifier)) {

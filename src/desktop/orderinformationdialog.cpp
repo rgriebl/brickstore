@@ -69,7 +69,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     });
 
     const QStringList adr = order->address().split(u"\n"_qs);
-    int adrSize = adr.size();
+    int adrSize = int(adr.size());
 
     setup(w_address1, w_address1Copy, adr.value(0), adrSize >= 1);
     setup(w_address2, w_address2Copy, adr.value(1), adrSize >= 2);

@@ -152,9 +152,9 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
     static const QRegularExpression header(uR"(^## \[([0-9.]+)\] - \d{4}-\d{2}-\d{2}$)"_qs,
                                            QRegularExpression::MultilineOption);
 
-    int fromHeader = 0;
-    int toHeader = 0;
-    int nextHeader = 0;
+    qsizetype fromHeader = 0;
+    qsizetype toHeader = 0;
+    qsizetype nextHeader = 0;
 
     while (!fromHeader || !toHeader) {
         QRegularExpressionMatch match =

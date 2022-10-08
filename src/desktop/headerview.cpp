@@ -313,7 +313,7 @@ bool HeaderView::restoreLayout(const QByteArray &config)
 
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < count; ++vi) {
-        int li = positions.indexOf(vi);
+        int li = int(positions.indexOf(vi));
         if (li >= this->count()) // ignore columns that we don't know about yet
             continue;
         setSectionHidden(li, isHiddens.at(li));

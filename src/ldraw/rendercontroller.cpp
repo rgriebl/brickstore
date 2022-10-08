@@ -195,11 +195,11 @@ QCoro::Task<void> RenderController::updateGeometries()
             if (data.isEmpty())
                 continue;
 
-            const BrickLink::Color *color = it.key();
+            const BrickLink::Color *surfaceColor = it.key();
 
-            const int stride = (3 + 3 + (color->hasParticles() ? 2 : 0)) * sizeof(float);
+            const int stride = (3 + 3 + (surfaceColor->hasParticles() ? 2 : 0)) * sizeof(float);
 
-            auto geo = new QmlRenderGeometry(color);
+            auto geo = new QmlRenderGeometry(surfaceColor);
 
             // calculate bounding box
             static constexpr auto fmin = std::numeric_limits<float>::min();
@@ -215,35 +215,35 @@ QCoro::Task<void> RenderController::updateGeometries()
             }
 
             // calculate bounding sphere
-            QVector3D center = (vmin + vmax) / 2;
-            float radius = 0;
+            QVector3D surfaceCenter = (vmin + vmax) / 2;
+            float surfaceRadius = 0;
 
             for (int i = 0; i < data.size(); i += stride) {
                 auto v = reinterpret_cast<const float *>(it->constData() + i);
-                radius = std::max(radius, (center - QVector3D { v[0], v[1], v[2] }).lengthSquared());
+                surfaceRadius = std::max(surfaceRadius, (surfaceCenter - QVector3D { v[0], v[1], v[2] }).lengthSquared());
             }
-            radius = std::sqrt(radius);
+            surfaceRadius = std::sqrt(surfaceRadius);
 
             geo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
             geo->setStride(stride);
             geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
             geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-            if (color->hasParticles()) {
+            if (surfaceColor->hasParticles()) {
                 geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
 
-                QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
+                QQuick3DTextureData *texData = s_materialTextureDatas.value(surfaceColor);
                 if (!texData) {
-                    texData = generateMaterialTextureData(color);
+                    texData = generateMaterialTextureData(surfaceColor);
                     if (texData) {
                         QQmlEngine::setObjectOwnership(texData, QQmlEngine::CppOwnership);
-                        s_materialTextureDatas.insert(color, texData);
+                        s_materialTextureDatas.insert(surfaceColor, texData);
                     }
                 }
                 geo->setTextureData(texData);
             }
             geo->setBounds(vmin, vmax);
-            geo->setCenter(center);
-            geo->setRadius(radius);
+            geo->setCenter(surfaceCenter);
+            geo->setRadius(surfaceRadius);
             geo->setVertexData(data);
 
             geos.append(geo);
@@ -380,8 +380,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
                 const float h2 = QVector3D::crossProduct(p2m - p0m, p2m - p1m).length() / (p1m - p0m).length() / 24;
 
                 QRandomGenerator *rd = QRandomGenerator::global();
-                float su = rd->generateDouble();
-                float sv = rd->generateDouble();
+                float su = float(rd->generateDouble());
+                float sv = float(rd->generateDouble());
 
                 u[0] = su;
                 v[0] = sv;
@@ -417,8 +417,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
                 const float l1 = p0m.distanceToPoint(p1m) / 24;
                 const float l3 = p0m.distanceToPoint(p3m)/ 24;
                 QRandomGenerator *rd = QRandomGenerator::global();
-                const float su = rd->generateDouble();
-                const float sv = rd->generateDouble();
+                const float su = float(rd->generateDouble());
+                const float sv = float(rd->generateDouble());
 
                 u[0] = su;
                 v[0] = sv;
@@ -494,9 +494,9 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
             QString cacheName = QLatin1String(isSpeckle ? "Speckle" : "Glitter")
                     % u'_' % color->ldrawColor().name(QColor::HexArgb)
                     % u'_' % color->particleColor().name(QColor::HexArgb)
-                    % u'_' % QString::number(color->particleMinSize())
-                    % u'_' % QString::number(color->particleMaxSize())
-                    % u'_' % QString::number(color->particleFraction());
+                    % u'_' % QString::number(double(color->particleMinSize()))
+                    % u'_' % QString::number(double(color->particleMaxSize()))
+                    % u'_' % QString::number(double(color->particleFraction()));
 
             static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
             QString cacheFile = cacheDir % u"/ldraw-textures/" % cacheName % u".png";
@@ -525,8 +525,8 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
                 const float ldus = 24.f;
 
-                int particleCount = std::floor((ldus * ldus * color->particleFraction()) / particleArea);
-                int delta = std::ceil(color->particleMaxSize() * texSize / ldus);
+                int particleCount = int(std::floor((ldus * ldus * color->particleFraction()) / particleArea));
+                int delta = int(std::ceil(color->particleMaxSize() * texSize / ldus));
 
                 QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
                 // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
@@ -535,7 +535,8 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 QList<QPainter::PixmapFragment> fragments;
                 fragments.reserve(particleCount);
                 QRandomGenerator *rd = QRandomGenerator::global();
-                std::uniform_real_distribution<> dis(color->particleMinSize(), color->particleMaxSize());
+                std::uniform_real_distribution<> dis(double(color->particleMinSize()),
+                                                     double(color->particleMaxSize()));
 
                 float neededArea = std::floor(texSize * texSize * color->particleFraction());
                 float filledArea = 0;
@@ -544,8 +545,8 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 //      into each cell to get a more uniform distribution
 
                 while (filledArea < neededArea) {
-                    float x = rd->bounded(texSize) + delta;
-                    float y = rd->bounded(texSize) + delta;
+                    float x = float(rd->bounded(texSize) + delta);
+                    float y = float(rd->bounded(texSize) + delta);
                     float sx = qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
                     float sy = isSpeckle ? sx : qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
                     float rot = isSpeckle ? 0.f : rd->bounded(90.f);

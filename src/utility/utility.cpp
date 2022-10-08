@@ -159,7 +159,7 @@ QColor Utility::shadeColor(int n, float alpha)
     }
 
     QColor c = shades[n % 12];
-    if (alpha)
+    if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
 }

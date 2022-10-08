@@ -366,7 +366,7 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
 
     connect(MainWindow::inst(), &MainWindow::documentActivated,
             this, [this](Document *doc) {
-        int row = DocumentList::inst()->documents().indexOf(doc);
+        int row = int(DocumentList::inst()->documents().indexOf(doc));
         selectionModel()->select(DocumentList::inst()->index(row, 0),
                                  QItemSelectionModel::ClearAndSelect);
     });

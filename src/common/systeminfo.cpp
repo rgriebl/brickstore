@@ -236,7 +236,7 @@ quint64 SystemInfo::physicalMemory() const
 
 QString SystemInfo::qtDiag() const
 {
-    return QT_PREPEND_NAMESPACE(qtDiag)(-1);
+    return QT_PREPEND_NAMESPACE(qtDiag)(0xff);
 }
 
 #include "moc_systeminfo.cpp"

@@ -25,9 +25,6 @@
 // directory names, we need to keep using crc32 hashes for that.
 
 Q_DECL_PURE_FUNCTION uint q5Hash(const QByteArray &key, uint seed = 0) noexcept;
-#if QT_STRINGVIEW_LEVEL < 2
-Q_DECL_PURE_FUNCTION uint q5Hash(const QString &key, uint seed = 0) noexcept;
-#endif
 Q_DECL_PURE_FUNCTION uint q5Hash(QStringView key, uint seed = 0) noexcept;
 
 Q_DECL_CONST_FUNCTION Q_DECL_CONSTEXPR inline uint q5Hash(ulong key, uint seed = 0) Q_DECL_NOTHROW

@@ -70,7 +70,7 @@ DeveloperConsole::DeveloperConsole(QWidget *parent)
             }
         }
         m_cmd->clear();
-        m_historyIndex = m_history.size();
+        m_historyIndex = int(m_history.size());
     });
 
     QVBoxLayout *layout = new QVBoxLayout(this);

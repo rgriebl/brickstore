@@ -56,7 +56,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const View *view, const LotList &
 
     QVector<int> fakeIndexes;
     for (int i = 0; i < lots.size(); ++i)
-        fakeIndexes << view->model()->lots().indexOf(lots.at(i));
+        fakeIndexes << int(view->model()->lots().indexOf(lots.at(i)));
 
     DocumentModel *docModel = DocumentModel::createTemporary(lots, fakeIndexes);
     docModel->setParent(this);
