@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include <QStringBuilder>
 #include <QQmlApplicationEngine>
+#include <QStackedWidget>
 
 #include "bricklink/color.h"
 #include "bricklink/core.h"
@@ -104,14 +105,17 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     w_image->setMinimumSize(2 * BrickLink::core()->standardPictureSize());
     w_image->setAutoFillBackground(true);
+    w_image->setWordWrap(true);
 
     w_ldraw = new LDraw::RenderWidget(Application::inst()->qmlEngine(), this);
-    w_ldraw->hide();
+
+    w_stack = new QStackedWidget();
 
     auto layout = new QVBoxLayout(this);
     layout->addWidget(w_text);
-    layout->addWidget(w_image, 10);
-    layout->addWidget(w_ldraw, 10);
+    layout->addWidget(w_stack, 10);
+    w_stack->addWidget(w_image);
+    w_stack->addWidget(w_ldraw);
     layout->setContentsMargins(2, 6, 2, 2);
 
     w_2d = new QToolButton();
@@ -120,7 +124,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
         m_prefer3D = false;
-        redraw();
+        w_stack->setCurrentWidget(w_image);
     });
 
     w_3d = new QToolButton();
@@ -129,7 +133,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
         m_prefer3D = true;
-        redraw();
+        w_stack->setCurrentWidget(w_ldraw);
     });
 
     auto font = w_2d->font();
@@ -144,20 +148,17 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_reloadRescale->setAutoRaise(true);
     w_reloadRescale->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    w_reloadRescale->setIcon(m_rescaleIcon);
+    w_reloadRescale->setIcon(m_reloadIcon);
     connect(w_reloadRescale, &QToolButton::clicked,
             this, [this]() {
-        if (m_is3D) {
+        if (w_stack->currentWidget() == w_ldraw) {
             w_ldraw->resetCamera();
         } else if (m_pic) {
             m_pic->update(true);
-            redraw();
+            m_currentImageSize = { };
+            showImage();
         }
     });
-
-    w_2d->setEnabled(false);
-    w_3d->setEnabled(false);
-    w_reloadRescale->setEnabled(false);
 
     auto buttons = new QHBoxLayout();
     buttons->setContentsMargins(0, 0, 0, 0);
@@ -230,7 +231,8 @@ PictureWidget::PictureWidget(QWidget *parent)
         if (pic == m_pic) {
             if (pic->isValid())
                 m_image = pic->image();
-            redraw();
+            m_currentImageSize = { };
+            showImage();
         }
     });
 
@@ -239,13 +241,50 @@ PictureWidget::PictureWidget(QWidget *parent)
         if (m_part) {
             m_part->release();
             m_part = nullptr;
-            redraw();
+            w_ldraw->setPartAndColor(nullptr, -1);
         }
+    });
+
+    connect(w_stack, &QStackedWidget::currentChanged,
+            this, [this]() {
+        stackSwitch();
+    });
+
+    new EventFilter(w_image, { QEvent::Resize, QEvent::Show }, [this](QObject *, QEvent *) {
+        showImage();
+        return EventFilter::ContinueEventProcessing;
     });
 
     paletteChange();
     languageChange();
-    redraw();
+
+    stackSwitch();
+    setPrefer3D(m_prefer3D);
+}
+
+void PictureWidget::stackSwitch()
+{
+    bool is3D = (w_stack->currentWidget() == w_ldraw);
+    w_reloadRescale->setIcon(is3D ? m_rescaleIcon : m_reloadIcon);
+    w_reloadRescale->setToolTip(is3D ? tr("Center view") : tr("Update"));
+    m_renderSettings->setVisible(is3D);
+
+    if (is3D)
+        w_ldraw->setPartAndColor(m_part, m_color);
+    else
+        showImage();
+
+    auto markText = [](const char *text, bool marked) {
+        QString str = QString::fromLatin1(text);
+        if (marked) {
+            str.prepend(u'\x2308');
+            str.append(u'\x230b');
+        }
+        return str;
+    };
+
+    w_2d->setText(markText("2D", !is3D));
+    w_3d->setText(markText("3D", is3D));
 }
 
 void PictureWidget::languageChange()
@@ -272,12 +311,6 @@ void PictureWidget::paletteChange()
     }
 }
 
-void PictureWidget::resizeEvent(QResizeEvent *e)
-{
-    QFrame::resizeEvent(e);
-    redraw();
-}
-
 PictureWidget::~PictureWidget()
 {
     if (m_pic)
@@ -294,6 +327,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     m_item = item;
     m_color = color;
     m_image = { };
+    m_currentImageSize = { };
 
     if (m_pic)
         m_pic->release();
@@ -315,7 +349,23 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     m_blCatalog->setVisible(item);
     m_blPriceGuide->setVisible(item && color);
     m_blLotsForSale->setVisible(item && color);
-    redraw();
+
+    QString s = BrickLink::Core::itemHtmlDescription(m_item, m_color,
+                                                     palette().color(QPalette::Highlight));
+    w_text->setText(s);
+    w_image->setPixmap({ });
+    w_3d->setEnabled(m_part);
+    w_reloadRescale->setEnabled(m_item);
+
+    if (m_part && m_prefer3D) {
+        w_ldraw->setPartAndColor(m_part, m_color);
+        w_stack->setCurrentWidget(w_ldraw);
+    } else {
+        w_stack->setCurrentWidget(w_image);
+        w_ldraw->setPartAndColor(nullptr, -1);
+        w_ldraw->stopAnimation();
+        showImage();
+    }
 }
 
 bool PictureWidget::prefer3D() const
@@ -325,79 +375,51 @@ bool PictureWidget::prefer3D() const
 
 void PictureWidget::setPrefer3D(bool b)
 {
-    if (m_prefer3D != b) {
+    if (m_prefer3D != b)
         m_prefer3D = b;
-        redraw();
-    }
+
+    w_stack->setCurrentWidget(b ? static_cast<QWidget *>(w_ldraw) : w_image);
 }
 
-void PictureWidget::redraw()
+void PictureWidget::showImage()
 {
-    w_image->setPixmap({ });
+    if (w_stack->currentWidget() != w_image)
+        return;
 
-    QString s = BrickLink::Core::itemHtmlDescription(m_item, m_color,
-                                                     palette().color(QPalette::Highlight));
-    w_text->setText(s);
-
-    if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
+    if (m_pic && ((m_pic->updateStatus() == BrickLink::UpdateStatus::Updating) ||
+                  (m_pic->updateStatus() == BrickLink::UpdateStatus::Loading))) {
         w_image->setText(u"<center><i>" % tr("Please wait... updating") % u"</i></center>");
-    } else if (m_pic) {
+    } else if (m_pic && w_image->isVisible()) {
         bool hasImage = !m_image.isNull();
-        auto dpr = devicePixelRatioF();
         QPixmap p;
         QSize pSize;
         QSize displaySize = w_image->contentsRect().size();
 
         if (hasImage) {
-            p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
-            pSize = p.size();
+            if (displaySize == m_currentImageSize)
+                return;
+
+            pSize = m_image.size();
         } else {
             pSize = 4 * BrickLink::core()->standardPictureSize();
         }
-        QSize sz = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2) * dpr;
+        m_currentImageSize = hasImage ? displaySize : QSize { };
 
-        if (hasImage)
-            p = p.scaled(sz, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        else
+        QSize sz = pSize.scaled(displaySize, Qt::KeepAspectRatio).boundedTo(pSize * 2);
+
+        if (hasImage) {
+            auto dpr = devicePixelRatioF();
+            QImage img = m_image.scaled(sz * dpr, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            p = QPixmap::fromImage(std::move(img));
+            p.setDevicePixelRatio(dpr);
+        } else {
             p = QPixmap::fromImage(BrickLink::core()->noImage(sz));
-
-        p.setDevicePixelRatio(dpr);
+        }
         w_image->setPixmap(p);
 
     } else {
         w_image->setText({ });
     }
-
-    m_is3D = m_part && m_prefer3D;
-
-    if (m_is3D) {
-        w_image->hide();
-        w_ldraw->show();
-        w_ldraw->setPartAndColor(m_part, m_color);
-    } else {
-        w_ldraw->setPartAndColor(nullptr, -1);
-        w_ldraw->hide();
-        w_ldraw->stopAnimation();
-        w_image->show();
-    }
-    w_reloadRescale->setIcon(m_is3D ? m_rescaleIcon : m_reloadIcon);
-    w_reloadRescale->setToolTip(m_is3D ? tr("Center view") : tr("Update"));
-    m_renderSettings->setVisible(m_is3D);
-
-    auto markText = [](const char *text, bool marked) {
-        QString str = QString::fromLatin1(text);
-        if (marked) {
-            str.prepend(u'\x2308');
-            str.append(u'\x230b');
-        }
-        return str;
-    };
-
-    w_2d->setText(markText("2D", !m_is3D && m_item));
-    w_3d->setText(markText("3D", m_is3D));
-    w_2d->setEnabled(m_is3D);
-    w_3d->setEnabled(!m_is3D && m_part);
-    w_reloadRescale->setEnabled(m_item);
 }
 
 void PictureWidget::changeEvent(QEvent *e)

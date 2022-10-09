@@ -27,6 +27,7 @@ QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QMenu)
+QT_FORWARD_DECLARE_CLASS(QStackedWidget)
 
 
 class PictureWidget : public QFrame
@@ -43,12 +44,12 @@ public:
     void setPrefer3D(bool b);
 
 protected slots:
-    void redraw();
+    void showImage();
+    void stackSwitch();
     void languageChange();
     void paletteChange();
 
 protected:
-    void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
     void contextMenuEvent(QContextMenuEvent *e) override;
@@ -63,7 +64,6 @@ private:
     QLabel *w_image = nullptr;
     QImage m_image;
     bool m_prefer3D = false;
-    bool m_is3D = false;
     LDraw::RenderWidget *w_ldraw = nullptr;
     LDraw::Part *m_part = nullptr;
     QToolButton *w_2d = nullptr;
@@ -72,6 +72,8 @@ private:
     QIcon m_rescaleIcon;
     QIcon m_reloadIcon;
     QMenu *m_contextMenu = nullptr;
+    QStackedWidget *w_stack;
+    QSize m_currentImageSize;
 
     QAction *m_renderSettings;
     QAction *m_copyImage;

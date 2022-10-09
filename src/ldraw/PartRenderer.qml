@@ -56,8 +56,6 @@ Item {
         id: view
         anchors.fill: parent
 
-        renderMode: View3D.Offscreen
-
         environment: SceneEnvironment {
             id: env
             clearColor: root.renderController.clearColor

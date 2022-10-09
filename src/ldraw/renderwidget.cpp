@@ -28,6 +28,8 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
     , m_controller(new RenderController(this))
 {
+    setFocusPolicy(Qt::NoFocus);
+
     connect(m_controller, &RenderController::tumblingAnimationActiveChanged,
             this, &RenderWidget::animationActiveChanged);
     connect(m_controller, &RenderController::requestContextMenu,
@@ -58,6 +60,7 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
 
     m_widget = QWidget::createWindowContainer(m_window, this);
     m_widget->setMinimumSize(100, 100);
+    m_widget->setFocusPolicy(Qt::NoFocus);
 
     layout->addWidget(m_widget, 10);
     languageChange();
