@@ -892,7 +892,7 @@ void Document::setFilterFromSelection()
         default:
         case QMetaType::QString  : s = v.toString(); break;
         }
-        if (idx.column() == DocumentModel::Weight)
+        if (idx.column() == DocumentModel::Weight || idx.column() == DocumentModel::TotalWeight)
             s = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
 
         Filter f;
@@ -2285,6 +2285,7 @@ QVector<ColumnData> Document::defaultColumnLayout(bool simpleMode)
         DocumentModel::Stockroom,
         DocumentModel::Reserved,
         DocumentModel::Weight,
+        DocumentModel::TotalWeight,
         DocumentModel::YearReleased,
     };
 
@@ -2308,6 +2309,7 @@ QVector<ColumnData> Document::defaultColumnLayout(bool simpleMode)
         DocumentModel::PriceDiff,
         DocumentModel::QuantityOrig,
         DocumentModel::QuantityDiff,
+        DocumentModel::Weight,
     };
 
     for (auto i : hiddenColumns)

@@ -806,8 +806,9 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     case DocumentModel::TierP3      : valid = new SmartDoubleValidator(0, DocumentModel::maxLocalPrice(model->currencyCode()), 3, 0, nullptr); break;
     case DocumentModel::PriceDiff   : valid = new SmartDoubleValidator(-DocumentModel::maxLocalPrice(model->currencyCode()),
                                                                        DocumentModel::maxLocalPrice(model->currencyCode()), 3, 0, nullptr); break;
+    case DocumentModel::TotalWeight :
     case DocumentModel::Weight      : valid = new SmartDoubleValidator(0., 100000., 2, 0, nullptr); break;
-    default                    : break;
+    default                         : break;
     }
 
     if (!m_lineedit) {
@@ -897,6 +898,7 @@ void DocumentDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
     case DocumentModel::TierP3:
         v = Currency::toString(v.toDouble());
         break;
+    case DocumentModel::TotalWeight:
     case DocumentModel::Weight:
         v = Utility::weightToString(v.toDouble(), Config::inst()->measurementSystem());
         break;
@@ -928,6 +930,7 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
             if (!v.toString().startsWith(u'='))
                 v = Currency::fromString(v.toString());
             break;
+        case DocumentModel::TotalWeight:
         case DocumentModel::Weight:
             if (!v.toString().startsWith(u'='))
                 v = Utility::stringToWeight(v.toString(), Config::inst()->measurementSystem());
@@ -1106,7 +1109,8 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
         int i = display.toInt();
         return (!i && !toolTip) ? dash : loc.toString(i) % u'%';
     }
-    case DocumentModel::Weight: {
+    case DocumentModel::Weight:
+    case DocumentModel::TotalWeight: {
         double d = display.toDouble();
         return (qFuzzyIsNull(d) && !toolTip) ? dash : Utility::weightToString
                                                (d, Config::inst()->measurementSystem(), true, true);

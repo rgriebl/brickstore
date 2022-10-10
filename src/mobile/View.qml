@@ -339,6 +339,12 @@ Page {
                     }
                 }
 
+                DelegateChoice { roleValue: BS.Document.TotalWeight
+                    GridCell {
+                        text: BS.BrickStore.toWeightString(display, true)
+                    }
+                }
+
                 DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         id: stockroomCell

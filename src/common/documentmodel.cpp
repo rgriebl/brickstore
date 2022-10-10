@@ -1060,6 +1060,7 @@ void DocumentModel::updateLotFlags(const Lot *lot)
                 | (1ULL << ItemType)
                 | (1ULL << LotId)
                 | (1ULL << Weight)
+                | (1ULL << TotalWeight)
                 | (1ULL << YearReleased)
                 | (1ULL << Marker)
                 | (1ULL << DateAdded)
@@ -1895,6 +1896,15 @@ void DocumentModel::initializeColumns()
     C(Weight, Column {
           .alignment = Qt::AlignRight,
           .title = QT_TR_NOOP("Weight"),
+          .dataFn = [&](const Lot *lot) { return lot->weight(); },
+          .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setWeight(v.toDouble()); },
+          .compareFn = [&](const Lot *l1, const Lot *l2) {
+              return doubleCompare(l1->weight(), l2->weight());
+          },
+      });
+    C(TotalWeight, Column {
+          .alignment = Qt::AlignRight,
+          .title = QT_TR_NOOP("Total Weight"),
           .dataFn = [&](const Lot *lot) { return lot->totalWeight(); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setTotalWeight(v.toDouble()); },
           .compareFn = [&](const Lot *l1, const Lot *l2) {

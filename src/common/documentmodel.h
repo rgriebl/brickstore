@@ -124,11 +124,12 @@ public:
         Retain,
         Stockroom,
         Reserved,
-        Weight,
+        TotalWeight,
         YearReleased,
         Marker,
         DateAdded,
         DateLastSold,
+        Weight,
 
         FieldCount
     };

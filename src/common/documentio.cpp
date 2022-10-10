@@ -242,7 +242,7 @@ bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, BrickLink::IO::ParseRe
     }
     {
         stopwatch consolidate("removing duplicates");
-        // consolidate everything
+        // remove duplicate lot pointers that get added due to sub-module cacheing
         for (int i = 0; i < ldrawLots.count(); ++i) {
             if (auto *lot = ldrawLots[i]) {
                 for (int j = i + 1; j < ldrawLots.count(); ++j) {
