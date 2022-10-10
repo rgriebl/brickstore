@@ -1760,28 +1760,19 @@ QCoro::Task<BrickLink::LotList> Document::exportCheck(int exportCheckMode) const
 
 void Document::updateSelection()
 {
-    if (!m_delayedSelectionUpdate) {
-        m_delayedSelectionUpdate = new QTimer(this);
-        m_delayedSelectionUpdate->setSingleShot(true);
-        m_delayedSelectionUpdate->setInterval(0);
+    m_selectedLots.clear();
 
-        connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
-            m_selectedLots.clear();
+    auto sel = m_selectionModel->selectedRows();
+    std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
+        return idx1.row() < idx2.row(); });
 
-            auto sel = m_selectionModel->selectedRows();
-            std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
-                return idx1.row() < idx2.row(); });
+    for (const QModelIndex &idx : qAsConst(sel))
+        m_selectedLots.append(m_model->lot(idx));
 
-            for (const QModelIndex &idx : qAsConst(sel))
-                m_selectedLots.append(m_model->lot(idx));
+    emit selectedLotsChanged(m_selectedLots);
 
-            emit selectedLotsChanged(m_selectedLots);
-
-            if (m_selectionModel->currentIndex().isValid())
-                emit ensureVisible(m_selectionModel->currentIndex());
-        });
-    }
-    m_delayedSelectionUpdate->start();
+    if (m_selectionModel->currentIndex().isValid())
+        emit ensureVisible(m_selectionModel->currentIndex());
 }
 
 void Document::applyTo(const LotList &lots, const char *actionName,

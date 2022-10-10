@@ -340,7 +340,6 @@ private:
     DocumentModel *      m_model;
     QItemSelectionModel *m_selectionModel;
     LotList              m_selectedLots;
-    QTimer *             m_delayedSelectionUpdate = nullptr;
 
     bool                 m_hasBeenActive = false;
     QObject *            m_actionConnectionContext = nullptr;
