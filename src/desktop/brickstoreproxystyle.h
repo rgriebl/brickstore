@@ -35,7 +35,12 @@ public:
                        const QWidget *widget) const override;
     void drawControl(ControlElement element, const QStyleOption *opt, QPainter *p,
                      const QWidget *widget) const override;
+    QSize sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &size,
+                           const QWidget *widget) const override;
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
+
+private:
+    bool m_isWindowsVistaStyle = false;
 };

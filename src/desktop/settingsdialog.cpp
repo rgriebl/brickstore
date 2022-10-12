@@ -35,13 +35,10 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
-#include "bricklink/core.h"
-#include "bricklink/model.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "ldraw/library.h"
 #include "common/currency.h"
-#include "utility/utility.h"
 #include "betteritemdelegate.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -913,7 +910,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, [this]() {
         auto newShortcut = w_sc_edit->keySequence();
         // disallow Alt only shortcuts, because this interferes with standard menu handling
-        for (uint i = 0; i < newShortcut.count(); ++i) {
+        for (uint i = 0; i < uint(newShortcut.count()); ++i) {
             auto mod = newShortcut[i].keyboardModifiers();
 
             if ((mod & Qt::AltModifier) && !(mod & Qt::ControlModifier)) {
