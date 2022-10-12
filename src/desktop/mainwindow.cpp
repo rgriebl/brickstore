@@ -742,9 +742,9 @@ void MainWindow::setupMenuBar()
                   "-",
                   "view_fullscreen",
                   "-",
-                  "view_zoom_in",
-                  "view_zoom_out",
-                  "view_zoom_reset",
+                  "view_row_height_inc",
+                  "view_row_height_dec",
+                  "view_row_height_reset",
                   "-",
                   "view_show_input_errors",
                   "view_goto_next_input_error",
@@ -1011,16 +1011,16 @@ void MainWindow::createActions()
         { "view_fullscreen", [this](bool fullScreen) {
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
           } },
-        { "view_zoom_in", [](auto) {
+        { "view_row_height_inc", [](auto) {
               // round up to 10% and add 10%
-              Config::inst()->setDocumentZoomPercent((((Config::inst()->documentZoomPercent() + 5) / 10) + 1) * 10);
+              Config::inst()->setRowHeightPercent((((Config::inst()->rowHeightPercent() + 5) / 10) + 1) * 10);
           } },
-        { "view_zoom_out", [](auto) {
+        { "view_row_height_dec", [](auto) {
               // round down to 10% and subtract 10%
-              Config::inst()->setDocumentZoomPercent((((Config::inst()->documentZoomPercent()) / 10) - 1) * 10);
+              Config::inst()->setRowHeightPercent((((Config::inst()->rowHeightPercent()) / 10) - 1) * 10);
           } },
-        { "view_zoom_reset", [](auto) {
-              Config::inst()->setDocumentZoomPercent(100);
+        { "view_row_height_reset", [](auto) {
+              Config::inst()->setRowHeightPercent(100);
           } },
         { "update_database", [](auto) { Application::inst()->updateDatabase(); } },
         { "help_about", [this](auto) {

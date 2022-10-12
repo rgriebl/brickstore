@@ -1071,7 +1071,7 @@ void SettingsDialog::load()
     w_icon_size->setCurrentIndex(int(Config::inst()->iconSize()));
     w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
 
-    w_wheelZoom->setChecked(Config::inst()->wheelZoomEnabled());
+    w_rowHeight->setChecked(Config::inst()->liveEditRowHeight());
     w_columnSpacing->setCurrentIndex(Config::inst()->columnSpacing());
 
     // --[ UPDATES ]---------------------------------------------------
@@ -1142,7 +1142,7 @@ void SettingsDialog::save()
     Config::inst()->setIconSize(static_cast<Config::UISize>(w_icon_size->currentIndex()));
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
     Config::inst()->setColumnSpacing(w_columnSpacing->currentIndex());
-    Config::inst()->setWheelZoomEnabled(w_wheelZoom->isChecked());
+    Config::inst()->setLiveEditRowHeight(w_rowHeight->isChecked());
 
     Config::inst()->setUITheme(Config::UITheme(w_theme->currentIndex()));
 

@@ -78,7 +78,7 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
 {
     QSize picsize = BrickLink::core()->standardPictureSize()
-            * double(Config::inst()->documentZoomPercent()) / 100.;
+            * double(Config::inst()->rowHeightPercent()) / 100.;
 
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
@@ -95,7 +95,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
 
     if (idx.column() == DocumentModel::Picture) {
         w = 4 + (BrickLink::core()->standardPictureSize()
-                 * double(Config::inst()->documentZoomPercent()) / 100.0).width();
+                 * double(Config::inst()->rowHeightPercent()) / 100.0).width();
     } else {
         w = QItemDelegate::sizeHint(option1, idx).width();
 

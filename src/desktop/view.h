@@ -67,8 +67,8 @@ public:
 
     void setLatestRow(int row);
 
-    double zoomFactor() const;
-    void setZoomFactor(double zoom);
+    double rowHeightFactor() const;
+    void setRowHeightFactor(double factor);
 
 signals:
     void currentColumnOrderChanged(const QVector<int> &newOrder);
@@ -115,7 +115,7 @@ private:
     QTimer *             m_latest_timer;
 
     QObject *            m_actionConnectionContext = nullptr;
-    double               m_zoom = 1.;
+    double               m_rowHeightFactor = 1.;
 
     ActionManager::ActionTable m_actionTable;
 };

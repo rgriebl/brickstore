@@ -38,10 +38,10 @@ class Config : public QSettings
     Q_PROPERTY(QString brickLinkPassword READ brickLinkPassword WRITE setBrickLinkPassword NOTIFY brickLinkCredentialsChanged)
     Q_PROPERTY(Config::UITheme uiTheme READ uiTheme WRITE setUITheme NOTIFY uiThemeChanged)
     Q_PROPERTY(Config::UISize mobileUISize READ mobileUISize WRITE setMobileUISize NOTIFY mobileUISizeChanged)
-    Q_PROPERTY(int documentZoomPercent READ documentZoomPercent WRITE setDocumentZoomPercent NOTIFY documentZoomPercentChanged)
+    Q_PROPERTY(int rowHeightPercent READ rowHeightPercent WRITE setRowHeightPercent NOTIFY rowHeightPercentChanged)
     Q_PROPERTY(int fontSizePercent READ fontSizePercent WRITE setFontSizePercent NOTIFY fontSizePercentChanged)
     Q_PROPERTY(int columnSpacing READ columnSpacing WRITE setColumnSpacing NOTIFY columnSpacingChanged)
-    Q_PROPERTY(bool wheelZoomEnabled READ wheelZoomEnabled WRITE setWheelZoomEnabled NOTIFY wheelZoomEnabledChanged)
+    Q_PROPERTY(bool liveEditRowHeight READ liveEditRowHeight WRITE setLiveEditRowHeight NOTIFY liveEditRowHeightChanged)
 
 private:
     Config();
@@ -119,7 +119,8 @@ public:
     void setIconSize(UISize iconSize);
 
     int fontSizePercent() const;
-    int documentZoomPercent() const;
+    int rowHeightPercent() const;
+    bool liveEditRowHeight() const;
 
     int columnSpacing() const;
     void setColumnSpacing(int newColumnSpacing);
@@ -155,7 +156,6 @@ public:
 
     UITheme uiTheme() const;
     UISize mobileUISize() const;
-    bool wheelZoomEnabled() const;
 
 public slots:
     void setLanguage(const QString &lang);
@@ -176,7 +176,7 @@ public slots:
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void setFontSizePercent(int p);
-    void setDocumentZoomPercent(int p);
+    void setRowHeightPercent(int p);
 
     QString setColumnLayout(const QString &id, const QByteArray &layout);
     bool deleteColumnLayout(const QString &id);
@@ -185,7 +185,7 @@ public slots:
 
     void setUITheme(Config::UITheme theme);
     void setMobileUISize(Config::UISize size);
-    void setWheelZoomEnabled(bool newWheelZoomEnabled);
+    void setLiveEditRowHeight(bool newLiveEditRowHeight);
 
 signals:
     void languageChanged();
@@ -204,7 +204,7 @@ signals:
     void recentFilesChanged(const QStringList &recent);
     void iconSizeChanged(Config::UISize iconSize);
     void fontSizePercentChanged(int p);
-    void documentZoomPercentChanged(int p);
+    void rowHeightPercentChanged(int p);
     void columnLayoutChanged(const QString &id, const QByteArray &layout);
     void columnLayoutNameChanged(const QString &id, const QString &name);
     void columnLayoutIdsOrderChanged(const QStringList &ids);
@@ -216,7 +216,7 @@ signals:
     void mobileUISizeChanged(Config::UISize size);
     void brickLinkCredentialsChanged();
     void columnSpacingChanged(int spacing);
-    void wheelZoomEnabledChanged(bool wheelZoom);
+    void liveEditRowHeightChanged(bool liveEdit);
 
 protected:
     bool parseTranslations() const;
@@ -225,8 +225,8 @@ private:
     bool                       m_show_input_errors = false;
     bool                       m_show_difference_indicators = false;
     int                        m_columnSpacing = 0;
-    bool                       m_wheelZoomEnabled = false;
-    int                        m_documentZoom = 100;
+    bool                       m_liveEditRowHeight = false;
+    int                        m_rowHeightPercent = 100;
     QLocale::MeasurementSystem m_measurement = QLocale::MetricSystem;
     mutable bool               m_translations_parsed = false;
     mutable QVector<Translation> m_translations;

@@ -61,8 +61,8 @@ Config::Config()
     m_show_input_errors = value(u"General/ShowInputErrors"_qs, true).toBool();
     m_show_difference_indicators = value(u"General/ShowDifferenceIndicators"_qs, false).toBool();
     m_columnSpacing = qBound(0, value(u"Interface/ColumnSpacing"_qs, 1).toInt(), 2);
-    m_wheelZoomEnabled = value(u"Interface/WheelZoomEnabled"_qs, true).toBool();
-    m_documentZoom = qBound(50, value(u"Interface/ItemImageSizePercent"_qs, 100).toInt(), 200);
+    m_liveEditRowHeight = value(u"Interface/LiveEditRowHeight"_qs, true).toBool();
+    m_rowHeightPercent = qBound(50, value(u"Interface/ItemImageSizePercent"_qs, 100).toInt(), 200);
 
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
@@ -370,14 +370,14 @@ void Config::setFontSizePercent(int p)
     }
 }
 
-void Config::setDocumentZoomPercent(int p)
+void Config::setRowHeightPercent(int p)
 {
     p = qBound(50, p, 200);
 
-    if (m_documentZoom != p) {
-        m_documentZoom = p;
+    if (m_rowHeightPercent != p) {
+        m_rowHeightPercent = p;
         setValue(u"Interface/ItemImageSizePercent"_qs, p);
-        emit documentZoomPercentChanged(p);
+        emit rowHeightPercentChanged(p);
     }
 }
 
@@ -687,9 +687,9 @@ int Config::fontSizePercent() const
     return value(u"Interface/FontSizePercent"_qs, 100).toInt();
 }
 
-int Config::documentZoomPercent() const
+int Config::rowHeightPercent() const
 {
-    return m_documentZoom;
+    return m_rowHeightPercent;
 }
 
 Config::UISize Config::iconSize() const
@@ -722,17 +722,17 @@ void Config::setColumnSpacing(int newColumnSpacing)
     }
 }
 
-bool Config::wheelZoomEnabled() const
+bool Config::liveEditRowHeight() const
 {
-    return m_wheelZoomEnabled;
+    return m_liveEditRowHeight;
 }
 
-void Config::setWheelZoomEnabled(bool newWheelZoomEnabled)
+void Config::setLiveEditRowHeight(bool liveEdit)
 {
-    if (m_wheelZoomEnabled != newWheelZoomEnabled) {
-        m_wheelZoomEnabled = newWheelZoomEnabled;
-        setValue(u"Interface/WheelZoomEnabled"_qs, newWheelZoomEnabled);
-        emit wheelZoomEnabledChanged(newWheelZoomEnabled);
+    if (m_liveEditRowHeight != liveEdit) {
+        m_liveEditRowHeight = liveEdit;
+        setValue(u"Interface/LiveEditRowHeight"_qs, liveEdit);
+        emit liveEditRowHeightChanged(liveEdit);
     }
 }
 

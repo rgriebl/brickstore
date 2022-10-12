@@ -524,14 +524,14 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
-             <string>Zooming</string>
+             <string>Row height</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QCheckBox" name="w_wheelZoom">
+           <widget class="QCheckBox" name="w_rowHeight">
             <property name="text">
-             <string>Enable via scroll wheel and zoom gesture</string>
+             <string>Editable via scroll wheel and zoom gesture</string>
             </property>
            </widget>
           </item>

@@ -497,13 +497,12 @@ View::View(Document *document, QWidget *parent)
     connect(m_blockCancel, &QToolButton::clicked,
             this, [this]() { m_document->cancelBlockingOperation(); });
 
-    auto dzp = Config::inst()->documentZoomPercent();
-    if (dzp != 100)
-        m_zoom = double(dzp) / 100.;
-    connect(Config::inst(), &Config::documentZoomPercentChanged,
-            this, [this](int p) {
-        qWarning() << "FPP" << p;
-        m_table->resizeRowsToContents();
+    auto rhp = Config::inst()->rowHeightPercent();
+    if (rhp != 100)
+        m_rowHeightFactor = double(rhp) / 100.;
+    connect(Config::inst(), &Config::rowHeightPercentChanged,
+            this, [this, dd](int) {
+        m_table->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(m_table));
     });
     new EventFilter(m_table->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
                     std::bind(&View::zoomFilter, this, _1, _2));
@@ -771,7 +770,7 @@ EventFilter::Result View::zoomFilter(QObject *o, QEvent *e)
         const auto *we = static_cast<QWheelEvent *>(e);
         if (we->modifiers() == Qt::ControlModifier) {
             double z = std::pow(1.001, we->angleDelta().y());
-            setZoomFactor(m_zoom * z);
+            setRowHeightFactor(m_rowHeightFactor * z);
             e->accept();
             return EventFilter::StopEventProcessing;
         }
@@ -779,7 +778,7 @@ EventFilter::Result View::zoomFilter(QObject *o, QEvent *e)
         const auto *nge = static_cast<QNativeGestureEvent *>(e);
         if (nge->gestureType() == Qt::ZoomNativeGesture) {
             double z = 1 + nge->value();
-            setZoomFactor(m_zoom * z);
+            setRowHeightFactor(m_rowHeightFactor * z);
             e->accept();
             return EventFilter::StopEventProcessing;
         }
@@ -787,21 +786,21 @@ EventFilter::Result View::zoomFilter(QObject *o, QEvent *e)
     return EventFilter::ContinueEventProcessing;
 }
 
-double View::zoomFactor() const
+double View::rowHeightFactor() const
 {
-    return m_zoom;
+    return m_rowHeightFactor;
 }
 
-void View::setZoomFactor(double zoom)
+void View::setRowHeightFactor(double factor)
 {
-    if (!Config::inst()->wheelZoomEnabled())
+    if (!Config::inst()->liveEditRowHeight())
         return;
 
-    zoom = qBound(.5, zoom, 2.);
+    factor = qBound(.5, factor, 2.);
 
-    if (!qFuzzyCompare(zoom, m_zoom)) {
-        m_zoom = zoom;
-        Config::inst()->setDocumentZoomPercent(int(zoom * 100));
+    if (!qFuzzyCompare(factor, m_rowHeightFactor)) {
+        m_rowHeightFactor = factor;
+        Config::inst()->setRowHeightPercent(int(factor * 100));
     }
 }
 
