@@ -618,11 +618,14 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
 
 bool AddItemDialog::checkAddPossible()
 {
+    bool priceOk = w_price->hasAcceptableInput();
+    bool qtyOk = w_qty->hasAcceptableInput();
+    bool bulkOk = w_bulk->hasAcceptableInput();
+    w_price->setProperty("showInputError", !priceOk);
+    w_qty->setProperty("showInputError", !qtyOk);
+    w_bulk->setProperty("showInputError", !bulkOk);
 
-    bool acceptable = w_select_item->currentItem()
-            && w_price->hasAcceptableInput()
-            && w_qty->hasAcceptableInput()
-            && w_bulk->hasAcceptableInput();
+    bool acceptable = w_select_item->currentItem() && priceOk && qtyOk && bulkOk;
 
     if (auto currentType = w_select_item->currentItemType()) {
         if (currentType->hasColors())
@@ -630,23 +633,25 @@ bool AddItemDialog::checkAddPossible()
     }
 
     for (int i = 0; i < 3; i++) {
-        if (!w_tier_price [i]->isEnabled())
-            break;
+        bool tierEnabled = w_tier_price [i]->isEnabled();
 
-        acceptable = acceptable
-                && w_tier_qty[i]->hasAcceptableInput()
-                && w_tier_price[i]->hasAcceptableInput();
+        bool tqtyOk = w_tier_qty[i]->hasAcceptableInput();
+        bool tpriceOk = w_tier_price[i]->hasAcceptableInput();
+        bool tpriceLower = true;
+        bool tqtyHigher = true;
 
         if (i > 0) {
-            acceptable = acceptable
-                    && (tierPriceValue(i - 1) > tierPriceValue(i))
-                    && (w_tier_qty[i - 1]->text().toInt() < w_tier_qty[i]->text().toInt());
+            tpriceLower = (tierPriceValue(i - 1) > tierPriceValue(i));
+            tqtyHigher = (w_tier_qty[i - 1]->text().toInt() < w_tier_qty[i]->text().toInt());
         } else {
-            acceptable = acceptable
-                    && (Currency::fromString(w_price->text()) > tierPriceValue(i));
+            tpriceLower = (Currency::fromString(w_price->text()) > tierPriceValue(i));
         }
-    }
+        w_tier_price[i]->setProperty("showInputError", tierEnabled && (!tpriceOk || !tpriceLower));
+        w_tier_qty[i]->setProperty("showInputError", tierEnabled && (!tqtyOk || !tqtyHigher));
 
+        if (tierEnabled)
+            acceptable = acceptable && tpriceOk && tqtyOk && tpriceLower && tqtyHigher;
+    }
 
     w_add->setEnabled(acceptable);
     return acceptable;

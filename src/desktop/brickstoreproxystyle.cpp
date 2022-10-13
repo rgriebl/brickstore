@@ -16,6 +16,8 @@
 #include <QToolButton>
 #include <QToolBar>
 #include <QLineEdit>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QPainter>
 #include <QApplication>
 #include <QPalette>
@@ -40,13 +42,15 @@ BrickStoreProxyStyle::BrickStoreProxyStyle(QStyle *baseStyle)
     extern void removeUnneededMacMenuItems();
     removeUnneededMacMenuItems();
 #endif
-    m_isWindowsVistaStyle = (baseStyle->name() == u"windowsvista");
+    m_isWindowsVistaStyle = baseStyle && (baseStyle->name() == u"windowsvista");
 }
 
 void BrickStoreProxyStyle::polish(QWidget *w)
 {
-    if (auto *le = qobject_cast<QLineEdit *>(w)) {
-        le->installEventFilter(this);
+    if (qobject_cast<QLineEdit *>(w)
+            || qobject_cast<QDoubleSpinBox *>(w)
+            || qobject_cast<QSpinBox *>(w)) {
+        w->installEventFilter(this);
     } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
         if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
             QPointer<QToolButton> tbptr(tb);
@@ -237,18 +241,20 @@ QSize BrickStoreProxyStyle::sizeFromContents(ContentsType type, const QStyleOpti
 
 bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
 {
-    if (auto *le = qobject_cast<QLineEdit *>(o)) {
+    if (qobject_cast<QLineEdit *>(o)
+            || qobject_cast<QDoubleSpinBox *>(o)
+            || qobject_cast<QSpinBox *>(o)) {
         if (e->type() == QEvent::DynamicPropertyChange) {
             auto *dpce = static_cast<QDynamicPropertyChangeEvent *>(e);
             if (dpce->propertyName() == "showInputError") {
-                bool error = le->property("showInputError").toBool();
+                auto *w = qobject_cast<QWidget *>(o);
 
-                QPalette pal = QApplication::palette("QLineEdit");
-                if (error) {
+                QPalette pal = QApplication::palette(w);
+                if (w->property("showInputError").toBool()) {
                     pal.setColor(QPalette::Base,
                                  Utility::gradientColor(pal.color(QPalette::Base), Qt::red, 0.25));
                 }
-                le->setPalette(pal);
+                w->setPalette(pal);
             }
         }
     }
