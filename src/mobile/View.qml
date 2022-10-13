@@ -170,7 +170,7 @@ Page {
             reuseItems: true
 
             FontMetrics { id: fontMetrics; font: root.font }
-            property int cellHeight: fontMetrics.height * 2 * BS.Config.itemImageSizePercent / 100 + 8
+            property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8
             onCellHeightChanged: Qt.callLater(function() { forceLayout() })
 
             columnWidthProvider: (c) => table.model.headerData(c, Qt.Horizontal, Qt.CheckStateRole)

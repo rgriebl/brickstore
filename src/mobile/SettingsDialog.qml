@@ -197,8 +197,8 @@ AutoSizingDialog {
                         to: 200
                         stepSize: 25
 
-                        onValueModified: { BS.Config.itemImageSizePercent = value }
-                        Component.onCompleted: { value = 25 * Math.round(BS.Config.itemImageSizePercent / 25) }
+                        onValueModified: { BS.Config.rowHeightPercent = value }
+                        Component.onCompleted: { value = 25 * Math.round(BS.Config.rowHeightPercent / 25) }
                     }
                 }
             }

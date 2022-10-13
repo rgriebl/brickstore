@@ -253,7 +253,7 @@ Control {
     }
 
     function createViewForDocument(doc : BS.Document) {
-        console.log("Document added: " + doc.fileNameOrTitle)
+        console.log("Document added:", doc.title, doc.fileName)
         doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
         doc.closeAllViewsForDocument.connect(
                     () => {
