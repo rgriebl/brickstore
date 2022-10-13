@@ -351,17 +351,17 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="402"/>
         <source>Increase row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Aumentar altura fila</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="403"/>
         <source>Decrease row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Disminuir altura fila</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="404"/>
         <source>Reset row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Restablecer altura fila</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="405"/>
@@ -1353,12 +1353,12 @@
     <message>
         <location filename="../src/bricklink/model.cpp" line="978"/>
         <source>Item Id</source>
-        <translation type="unfinished">Id Artículo</translation>
+        <translation>Id Artículo</translation>
     </message>
     <message>
         <location filename="../src/bricklink/model.cpp" line="979"/>
         <source>Description</source>
-        <translation type="unfinished">Descripción</translation>
+        <translation>Descripción</translation>
     </message>
     <message>
         <source>Set</source>
@@ -2656,7 +2656,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1907"/>
         <source>Total Weight</source>
-        <translation type="unfinished"></translation>
+        <translation>Peso Total</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1918"/>
@@ -3680,7 +3680,7 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="381"/>
         <source>Appears In</source>
-        <translation type="unfinished">Aparece en</translation>
+        <translation>Aparece en</translation>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="383"/>
@@ -5333,7 +5333,7 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="329"/>
         <source>Global</source>
-        <translation type="unfinished"></translation>
+        <translation>Global</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="338"/>
@@ -5400,17 +5400,17 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="518"/>
         <source>Document Views</source>
-        <translation type="unfinished"></translation>
+        <translation>Vistas Documento</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="541"/>
         <source>Column spacing</source>
-        <translation type="unfinished"></translation>
+        <translation>Espaciado columnas</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="554"/>
         <source>Medium</source>
-        <translation type="unfinished">Medio</translation>
+        <translation>Medio</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="587"/>
@@ -5489,12 +5489,12 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="527"/>
         <source>Row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Altura fila</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="534"/>
         <source>Editable via scroll wheel and zoom gesture</source>
-        <translation type="unfinished"></translation>
+        <translation>Editable mediante rueda de desplazamiento y gesto de zoom</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="648"/>
