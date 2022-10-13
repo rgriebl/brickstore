@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2022.10.2] - 2022-10-14
+
+New features:
+- added an optional column for single item weights (the existing *Weight* column was renamed to *Total Weight*).
+- changing the row height in document views is now done browser-like: eiter via `Ctrl+MouseWheel`, a zoom gesture or the `View` menu, instead of changing the "Item image size" in the settings dialog)
+- the column spacing in document views can be modified, helping with readability.
+- in the Add Item dialog, invalid values for (tier) quantities and prices that would prevent you from clicking the `Add` button are now marked in red.
+
+Again, more bug fixes:
+- fixed another crash on Windows when restarting BrickStore after running in a maximized window.
+- fixed the 3D part view becoming unrepsonsive on macOS.
+- fixed the item tooltips sometimes not showing an image on the first try.
+- fixed a few inconsistencies with filters on numeric columns.
+
+
 ## [2022.10.1] - 2022-10-05
 
 More bug fixes. This time:
