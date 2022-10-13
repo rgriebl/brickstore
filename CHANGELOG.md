@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 New features:
 - added an optional column for single item weights (the existing *Weight* column was renamed to *Total Weight*).
-- changing the row height in document views is now done browser-like: eiter via `Ctrl+MouseWheel`, a zoom gesture or the `View` menu, instead of changing the "Item image size" in the settings dialog)
+- changing the row height in document views is now done browser-like: either via `Ctrl/Cmd+MouseWheel`, a zoom gesture or the `View` menu (instead of changing the "Item image size" in the settings dialog).
 - the column spacing in document views can be modified, helping with readability.
 - in the Add Item dialog, invalid values for (tier) quantities and prices that would prevent you from clicking the `Add` button are now marked in red.
 
@@ -33,10 +33,8 @@ More bug fixes. This time:
 ## [2022.9.3] - 2022-09-21
 
 Another bug-fix release for 2022.9.1 and 2022.9.2. Most importantly:
-- in order to prevent crashes from broken graphics drivers, the new 3D renderer is now disabled on
-  very old GPUs (the list comes from recorded crash reports and will likely be extended in the future).
-- reduced the 3D anti-aliasing level to "High" in order to not stress old GPUs too much (you can
-  change that back to "Very high" in the render settings dialog).
+- in order to prevent crashes from broken graphics drivers, the new 3D renderer is now disabled on very old GPUs (the list comes from recorded crash reports and will likely be extended in the future).
+- reduced the 3D anti-aliasing level to "High" in order to not stress old GPUs too much (you can change that back to "Very high" in the render settings dialog).
 - loading documents containing items with invalid or missing color information no longer crashes.
 
 
@@ -55,34 +53,22 @@ keep BrickStore maintainable and also compatible with modern operating systems.
 
 This comes with a lot of advantages, but also disadvantages for a few users.
 The disadvantages:
-- Windows 7, 8.1 and macOS 10.13 are no longer supported, as they have been discontinued by their
-  respective vendors. Support for these platforms will not come back!
-- 32bit Windows (x86) is no longer offered as pre-built package to download. Qt (the library
-  BrickStore is built upon) doesn't offer an installer for this platform anymore, because there are
-  too few users left using it. Getting BrickStore running on a 32bit Windows 10 is technically
-  possible, but you are on your own here, having to build Qt 6.2.4 plus BrickStore yourself.
+- Windows 7, 8.1 and macOS 10.13 are no longer supported, as they have been discontinued by their respective vendors. Support for these platforms will not come back!
+- 32bit Windows (x86) is no longer offered as pre-built package to download. Qt (the library BrickStore is built upon) doesn't offer an installer for this platform anymore, because there are too few users left using it. Getting BrickStore running on a 32bit Windows 10 is technically possible, but you are on your own here, having to build Qt 6.2.4 plus BrickStore yourself.
 
 The advantages:
 - Better integration in current desktop systems, like Windows 11 and macOS 12.
 - The macOS package is now a Universal Binary which supports both Intel and ARM (M1) natively.
 - Added support for Windows' "Tablet" mode as well as automatic detection of dark themes.
-- Windows on ARM is now a supported platform, but it needs a separate installer: there is no
-  concept like Apple's "Universal Binaries" on the Windows platform.
+- Windows on ARM is now a supported platform, but it needs a separate installer: there is no concept like Apple's "Universal Binaries" on the Windows platform.
 - Ubuntu 22.04 LTS is shipping up-to-date Qt libraries again, so there's a native package for that.
-- 3D part rendering has once again taken a big step forward to more realistic rendering with better
-  lighting and support for different part materials (e.g. reflections on chrome parts), as well
-  as texturing for glitter, satin and speckle parts.
-- In order to support the upcoming macOS 13 as well as Windows on ARM, the 3D renderer now always
-  uses the platform's native render interface (Direct3D on Windows, Metal on macOS/iOS, Vulkan
-  or OpenGL on Linux/Android) directly.
+- 3D part rendering has once again taken a big step forward to more realistic rendering with better lighting and support for different part materials (e.g. reflections on chrome parts), as well as texturing for glitter, satin and speckle parts.
+- In order to support the upcoming macOS 13 as well as Windows on ARM, the 3D renderer now always uses the platform's native render interface (Direct3D on Windows, Metal on macOS/iOS, Vulkan or OpenGL on Linux/Android) directly.
 
 Other notable changes:
-- The mobile UIs for Android and iOS have taken a huge step forward, but they still are not feature
-  complete.
-- The IPA download for iOS is only installable on jailbroken devices - a version for the official
-  App Store is currently being tested, but needs a bit more work before Apple will accept it.
-- The LDraw parts library is now mirrored to brickforge.de, which should really speed up these
-  downloads.
+- The mobile UIs for Android and iOS have taken a huge step forward, but they still are not feature complete.
+- The IPA download for iOS is only installable on jailbroken devices - a version for the official App Store is currently being tested, but needs a bit more work before Apple will accept it.
+- The LDraw parts library is now mirrored to brickforge.de, which should really speed up these downloads.
 
 Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
 
@@ -90,10 +76,8 @@ Please read the [installation instructions](https://github.com/rgriebl/brickstor
 ## [2022.4.1] - 2022-04-02
 This update is **mandatory** for users of 2022.3.1:
 
-Ever since LDraw released their March update, the affected BrickStore version re-downloads the
-60 MB LDraw parts library every time it is started.
-This not only affects your internet connection, but also puts an unnecessary load on LDraw's
-servers.
+Ever since LDraw released their March update, the affected BrickStore version re-downloads the 60 MB LDraw parts library every time it is started.
+This not only affects your internet connection, but also puts an unnecessary load on LDraw's servers.
 
 Please update as soon as possible!
 
@@ -103,22 +87,18 @@ This update is mostly about improvements to the handling of LDraw 3D part models
 - BrickStore will now automatically download and update its own copy of the LDraw parts library.
 - Transparent parts are rendered correctly now.
 - If available, high resolution parts are loaded and studs are rendered with a LEGO logo on top.
-- Made the mouse controls for rotating parts much more intuitive (think of the part as being enclosed
-  in a transparent sphere, that you can grab and roll around).
-- On Windows, the rendering is now done via Direct3D instead of OpenGL. This should hopefully get
-  rid of some crashes with those ever broken Intel graphics drivers.
+- Made the mouse controls for rotating parts much more intuitive (think of the part as being enclosed in a transparent sphere, that you can grab and roll around).
+- On Windows, the rendering is now done via Direct3D instead of OpenGL. This should hopefully get rid of some crashes with those ever broken Intel graphics drivers.
 
 ## Fixed
 - Fixed a rendering issues with buttons on macOS, introduced in 2022.2.1
-- Removed workarounds for various bugs in BrickLink's order metadata, as they are now fixed on
-  BrickLink's side (this also means that older BrickStore versions might now display wrong order totals).
+- Removed workarounds for various bugs in BrickLink's order metadata, as they are now fixed on BrickLink's side (this also means that older BrickStore versions might now display wrong order totals).
 
 
 ## [2022.2.2] - 2022-02-09
 This .2 release fixes two bugs:
 - Fixed a crash when adding and also consolidating lots.
-- If you had saved a custom *User Standard* column layout, the layout's sort order was not applied
-  to newly created documents.
+- If you had saved a custom *User Standard* column layout, the layout's sort order was not applied to newly created documents.
 
 
 ## [2022.2.1] - 2022-02-09
@@ -126,25 +106,18 @@ This release is a bit of a mixed bag: a lot of crucial fixes, but also a bunch o
 
 ### Added
 - Wanted lists can now be imported via the UI, just like shopping carts and orders.
-- The production span of an item is now calculated from the sets it is contained in and the years
-  those sets have been released in. This is currently accessible via tooltips and the `Year`
-  column in the document view.
+- The production span of an item is now calculated from the sets it is contained in and the years those sets have been released in. This is currently accessible via tooltips and the `Year` column in the document view.
 - Parting out from the *Appears-In* list will now ask the user for more details.
-- Parting out from a document item will also ask the user, but only if the inventory contains
-  extras, alternates or counterparts.
-- Added a tag to the info dock and the tooltips to clarify which item-type the item belongs to
-  (a set, its instructions and original box all share the same id and name)
+- Parting out from a document item will also ask the user, but only if the inventory contains extras, alternates or counterparts.
+- Added a tag to the info dock and the tooltips to clarify which item-type the item belongs to (a set, its instructions and original box all share the same id and name)
 
 ### Fixed
-- BrickLink's inventories do not correctly handle alternates on extra items: these are not marked
-  as *extra*. BrickStore will now detect this and will mark any alternates as *extra* as well.
+- BrickLink's inventories do not correctly handle alternates on extra items: these are not marked as *extra*. BrickStore will now detect this and will mark any alternates as *extra* as well.
 - Difference-mode base values were not restored when opening BSX files.
 - Closing the main window with a modified document in a split view would crash on exit.
 - Fixed a long-standing crash when consolidating currently filtered out lots.
-- The picture and price-guide cache was not reset correctly after a manual database update and this
-  could lead to crashes.
-- Rendering 3D LDraw models on Windows should now also work even if you have bad OpenGL drivers
-  (or none at all).
+- The picture and price-guide cache was not reset correctly after a manual database update and this could lead to crashes.
+- Rendering 3D LDraw models on Windows should now also work even if you have bad OpenGL drivers (or none at all).
 - Instructions no longer share the image with their corresponding set entry.
 
 
@@ -172,32 +145,19 @@ This is a bug-fix release.
 ## [2022.1.1] - 2022-01-21
 
 ### Added
-- Replaced the document selector tabs with a drop-down list, which scales a lot better with multiple
-  open documents.
-- The info "docks" are now really dockable and can be rearranged (and even stacked) to your liking
-  by dragging them around. Also added two new docks: a list of recent documents and currently
-  open documents.
-- Detailed information about orders is now available in the order import dialog (right-click on any
-  order) and also by clicking the order information button in the document toolbar after importing.
-- Windows can now be split horizontally and vertically (as often as you like) to make working on
-  multiple documents in parallel easier.
-- Filters can now be edited both via UI controls and in text form: just click the dots menu on the
-  right of the filter controls and switch to "text only mode". Copying and pasting filters in UI
-  mode is also available via this menu.
-- The JavaScript scripting API has been heavily extended and documented. The printing part is more
-  or less stable by now, the UI extension part still needs some testing.
-  [The documentation](https://rgriebl.github.io/brickstore/extensions/) is auto generated from the
-  code.
+- Replaced the document selector tabs with a drop-down list, which scales a lot better with multiple open documents.
+- The info "docks" are now really dockable and can be rearranged (and even stacked) to your liking by dragging them around. Also added two new docks: a list of recent documents and currently open documents.
+- Detailed information about orders is now available in the order import dialog (right-click on any order) and also by clicking the order information button in the document toolbar after importing.
+- Windows can now be split horizontally and vertically (as often as you like) to make working on multiple documents in parallel easier.
+- Filters can now be edited both via UI controls and in text form: just click the dots menu on the right of the filter controls and switch to "text only mode". Copying and pasting filters in UI mode is also available via this menu.
+- The JavaScript scripting API has been heavily extended and documented. The printing part is more or less stable by now, the UI extension part still needs some testing. [The documentation](https://rgriebl.github.io/brickstore/extensions/) is auto generated from the code.
 - Thanks to Sergio, we now have a complete Spanish translation.
 
 ### Fixed
 - Printing only the selected items also does work now using the default print preview mechanism.
-- Version 2021.10 broke the update check mechanism, so the automatic check in these versions will
-  not report that a newer update is available. The affected users will be notified via the
-  Announcements mechanism instead, but they will have to install the update manually.
+- Version 2021.10 broke the update check mechanism, so the automatic check in these versions will not report that a newer update is available. The affected users will be notified via the Announcements mechanism instead, but they will have to install the update manually.
 
-This release also adds a rudimentary mobile port for Android tablets, but the UI part is far from
-being finished. Most of the functionality of the desktop version is there, but not accessible yet.
+This release also adds a rudimentary mobile port for Android tablets, but the UI part is far from being finished. Most of the functionality of the desktop version is there, but not accessible yet.
 An improved UI and iPadOS support is planned for the upcoming releases.
 
 
@@ -207,63 +167,46 @@ This .2 release additionally fixes two bugs introduced in the 2021.10.1 release:
 - Fixed the Windows installer not shipping the newly required `zlib1.dll`.
 
 ### Added
-- This release brings back the classic filter mechanism from the old BrickStore versions, but it
-  also adds a lot of convenience functionality:
+- This release brings back the classic filter mechanism from the old BrickStore versions, but it also adds a lot of convenience functionality:
   - The fields to filter on are limited to the currently visible columns.
-  - If a field has a limited set of possible values (e.g., colors, status, condition), these
-    values can be auto-completed while typing or just picked from a drop-down list.
+  - If a field has a limited set of possible values (e.g., colors, status, condition), these values can be auto-completed while typing or just picked from a drop-down list.
   - Even complex filters can be (de)activated by a single click on the filter icon.
-- Added support for simple calculations on all numeric document fields. Columns such as price or
-  quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation
-  term (e.g. `=+42` to add 42 to all selected values).
+- Added support for simple calculations on all numeric document fields. Columns such as price or quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation term (e.g. `=+42` to add 42 to all selected values).
 
-  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being
-  a valid integer or floating-point number (depending on the column's data type).
+  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being a valid integer or floating-point number (depending on the column's data type).
 
 ### Improvements
 - Fixed a few problems with failing authentications against the BrickLink servers.
 
 ### Technical Changes
-- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20
-  respectively.
+- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20 respectively.
 - BrickStore can be built against Qt 6.2 now, but a few small features are still missing.
 
 
 ## [2021.10.1] - 2021-10-07
 ### Added
-- This release brings back the classic filter mechanism from the old BrickStore versions, but it
-  also adds a lot of convenience functionality:
+- This release brings back the classic filter mechanism from the old BrickStore versions, but it also adds a lot of convenience functionality:
   - The fields to filter on are limited to the currently visible columns.
-  - If a field has a limited set of possible values (e.g., colors, status, condition), these
-    values can be auto-completed while typing or just picked from a drop-down list.
+  - If a field has a limited set of possible values (e.g., colors, status, condition), these values can be auto-completed while typing or just picked from a drop-down list.
   - Even complex filters can be (de)activated by a single click on the filter icon.
-- Added support for simple calculations on all numeric document fields. Columns such as price or
-  quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation
-  term (e.g. `=+42` to add 42 to all selected values).
+- Added support for simple calculations on all numeric document fields. Columns such as price or quantity now allow you to enter either an absolute numeric value (e.g. `42`) or a calculation term (e.g. `=+42` to add 42 to all selected values).
 
-  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being
-  a valid integer or floating-point number (depending on the column's data type).
+  The syntax is `=<operation><value>` with `<operation>` being one of `+-*/` and `<value>` being a valid integer or floating-point number (depending on the column's data type).
 
 ### Improvements
 - Fixed a few problems with failing authentications against the BrickLink servers.
 
 ### Technical Changes
-- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20
-  respectively.
+- To simplify the code base, the minimum supported Qt and C++ version were raised to 5.15 and 20 respectively.
 - BrickStore can be built against Qt 6.2 now, but a few small features are still missing.
 
 
 ## [2021.6.1] - 2021-06-02
 ### Added
-- Added support for light and dark themes for all platforms. This uses the native themeing on
-  macOS, while it uses a custom style and color palette for the *Light* and *Dark* themes on
-  Windows and Linux.
+- Added support for light and dark themes for all platforms. This uses the native themeing on macOS, while it uses a custom style and color palette for the *Light* and *Dark* themes on Windows and Linux.
 
 ### Improvements
-- Adjusted the picture cache RAM consumption to avoid crashes on 32bit Windows because the 
-  BrickStore process is consuming too much memory. You should however use the 64bit version if
-  possible: the larger item images used nowadays fill up the cache quite quickly and force the
-  32bit version to constantly reload images from disk.
+- Adjusted the picture cache RAM consumption to avoid crashes on 32bit Windows because the  BrickStore process is consuming too much memory. You should however use the 64bit version if possible: the larger item images used nowadays fill up the cache quite quickly and force the 32bit version to constantly reload images from disk.
 - Parting out variable colored items (e.g. `973c00`) works correctly now.
 
 
@@ -272,101 +215,73 @@ This .2 release additionally fixes two bugs introduced in the 2021.10.1 release:
 - The Toolbar is now fully customizable via the `Settings` dialog.
 
 ### Improvements
-- Enabled most secondary keyboard shortcuts (e.g. `Ctrl+W` to close documents on Windows). See the
-  `Keyboard` page in the `Settings` dialog for a full list.
+- Enabled most secondary keyboard shortcuts (e.g. `Ctrl+W` to close documents on Windows). See the `Keyboard` page in the `Settings` dialog for a full list.
 
 ### Fixed
 - `Reset difference mode base values` is now only acting on the selected items again.
-- Fixed a few macOS printing bugs: the scaling was off, the wrong colors where used on dark themes
-  and the default paper size was not detected correctly.
+- Fixed a few macOS printing bugs: the scaling was off, the wrong colors where used on dark themes and the default paper size was not detected correctly.
 
 
 ## [2021.5.1] - 2021-05-18
 ### Added
-- The list of items in the `Add Item` dialog can now also be filtered by known-colors by clicking
-  the new *lock* icon in the top, right of the color selector.
-- Added an announcement mechanism to be able to announce important changes or problem solutions to
-  all users.
+- The list of items in the `Add Item` dialog can now also be filtered by known-colors by clicking the new *lock* icon in the top, right of the color selector.
+- Added an announcement mechanism to be able to announce important changes or problem solutions to all users.
 - Extended the `Help` menu with easy access to the project's resources on GitHub.
 
 ### Improvements
 - Optimized database loading and access and improved the known-colors coverage.
 
 ### Please Note
-BrickLink's server are still unstable, but this version adds yet more workarounds to better deal
-with this situation.
+BrickLink's server are still unstable, but this version adds yet more workarounds to better deal with this situation.
 
 
 ## [2021.4.1] - 2021-04-21
 ### Added
 - All item image views now have `Copy` and `Save` action in their context menus.
-- Documents can be sorted on multiple columns now: clicking the column header sets and toggles the
-  primary sort key, while shift-clicking sets and toggles the additional sort keys. You can sort by
-  as many additional columns as you like.
+- Documents can be sorted on multiple columns now: clicking the column header sets and toggles the primary sort key, while shift-clicking sets and toggles the additional sort keys. You can sort by as many additional columns as you like.
 
 ### Please Note
-BrickLink's servers are very unstable right now (April 2021). This version of BrickStore tries to
-work around some of the problems, but the price guide download interface is still broken on
-BrickLink's side and may lead to invalid price guide data in BrickStore.
+BrickLink's servers are very unstable right now (April 2021). This version of BrickStore tries to work around some of the problems, but the price guide download interface is still broken on BrickLink's side and may lead to invalid price guide data in BrickStore.
 
-See https://github.com/rgriebl/brickstore/issues/335 and https://www.bricklink.com/message.asp?ID=1266428
-for more information.
+See https://github.com/rgriebl/brickstore/issues/335 and https://www.bricklink.com/message.asp?ID=1266428 for more information.
 
 The problem has been reported to BrickLink, but no feedback was received yet.
 
 ## [2021.3.3] - 2021-03-25
 ### Added
-- Printing a document will now print exactly what you see on the screen, using a preview window.
-  The old print script (as well as any customized print scripts) are still available via the 
-  `Extras` menu.
+- Printing a document will now print exactly what you see on the screen, using a preview window. The old print script (as well as any customized print scripts) are still available via the  `Extras` menu.
 - Multiple orders with differing currencies can now be combined on import.
 
 ### Improvements
 - The marker column is now saved and restored.
-- In addition to the in-place duplication, there is now also a `Paste silent` functionality which
-  works just like `Paste`, but never asks about overwriting or consolidating - it just appends to
-  the document.
+- In addition to the in-place duplication, there is now also a `Paste silent` functionality which works just like `Paste`, but never asks about overwriting or consolidating - it just appends to the document.
 
 
 ## [2021.3.2] - 2021-03-22
 ### Added
-- Experimental support for a marker column that can be used for the multi-order picking: multiple
-  orders can be imported into the same document now. Markers are not saved at the moment.
+- Experimental support for a marker column that can be used for the multi-order picking: multiple orders can be imported into the same document now. Markers are not saved at the moment.
 - All main window keyboard shortcuts are now configurable in the Settings dialog.
 
 ### Improvements
-- When loading files with outdated item or color references, BrickStore will now mark the file as
-  modified after updating them.
+- When loading files with outdated item or color references, BrickStore will now mark the file as modified after updating them.
 - BrickLink Studio models should now import without any missing parts or mismatched colors.
 - Added a quick way to duplicate selected lots: `Edit` > `Duplicate` or `Ctrl+D`.
-- The Windows x64 release will now automatically send anonymized crash reports to
-  https://sentry.io This might be extended to the other platforms if it proves to be useful.
+- The Windows x64 release will now automatically send anonymized crash reports to https://sentry.io This might be extended to the other platforms if it proves to be useful.
 
 
 ## [2021.3.1] - 2021-03-05
 ### Added
 - *Import LDraw Model* can now import BrickLink Studio models as well.
-- Editing a field while multiple rows are selected will change the value in all selected rows.
-  You can also navigate within a selection with `Ctrl+cursor keys` (`Cmd` on macOS), so you don't
-  have to use your mouse at all.
-- *Copy remarks from document* got extended to *Copy fields from document* and can now copy and
-  merge any field in multiple ways from one document to another (e.g. merging in prices from another
-  document using weighted averages).
-- The context menu is really context sensitive now and will only show specific field commands for
-  the clicked column.
-- BrickStore will now restore all the saved documents in your last session on startup (this can be
-  disabled in the settings dialog).
-- The separate *Difference Mode* is gone. Instead it is always active and works on all fields. Just
-  like with errors, you can choose to show or hide the difference markers via the `View` menu. This
-  makes it possible to *Mass-Update* all possible fields in your BrickLink store from within
-  BrickStore.
-- The status bar moved to the top of the document and got more interactive: clicking on `Errors` or 
-  `Differences` will jump to the next one (also available on the keyboard: `F5` or `F6`).
+- Editing a field while multiple rows are selected will change the value in all selected rows. You can also navigate within a selection with `Ctrl+cursor keys` (`Cmd` on macOS), so you don't have to use your mouse at all.
+- *Copy remarks from document* got extended to *Copy fields from document* and can now copy and merge any field in multiple ways from one document to another (e.g. merging in prices from another document using weighted averages).
+- The context menu is really context sensitive now and will only show specific field commands for the clicked column.
+- BrickStore will now restore all the saved documents in your last session on startup (this can be disabled in the settings dialog).
+- The separate *Difference Mode* is gone. Instead it is always active and works on all fields. Just like with errors, you can choose to show or hide the difference markers via the `View` menu. This makes it possible to *Mass-Update* all possible fields in your BrickLink store from within BrickStore.
+- The status bar moved to the top of the document and got more interactive: clicking on `Errors` or  `Differences` will jump to the next one (also available on the keyboard: `F5` or `F6`).
 - Experimental support for distribution independent Linux *AppImage* builds.
 
 ### Improvements
-- Sorting and filtering are now independent operations again: the filter edit has a specific 
-  re-apply filter button now and clicking on the last sorted column header will re-sort the list.
+- Sorting and filtering are now independent operations again: the filter edit has a specific re-apply filter button now and clicking on the last sorted column header will re-sort the list.
 - All import dialogs are non-modal now to allow multiple imports easily.
 - High-DPI support has been enhanced.
 - Multi-threaded price guide loading to (partially) compensate for the slow I/O on Windows.
@@ -374,41 +289,29 @@ The problem has been reported to BrickLink, but no feedback was received yet.
 - Undo/redo actions are now named exactly after the action that triggered them.
 - The update check can now download and start the new installer for you.
 - All numbers should now show with localized thousand's separators.
-- Set-to-price-guide will now block the current document until it is finished. This is to prevent
-  odd behavior if you played around with undo/redo too much while the download was happening in the
-  background, plus you can undo the whole operation in a single click on *Undo* now.
-- Clicking on the logo/progress circle in the top, right corner gives you the option to cancel all
-  current downloads (pictures and price guides).
+- Set-to-price-guide will now block the current document until it is finished. This is to prevent odd behavior if you played around with undo/redo too much while the download was happening in the background, plus you can undo the whole operation in a single click on *Undo* now.
+- Clicking on the logo/progress circle in the top, right corner gives you the option to cancel all current downloads (pictures and price guides).
 - Updating the BrickLink order list is a lot faster now.
 - There is now an option to set a default for part-out operations within documents.
 - All open and save file dialogs remember the last used directory during a session.
 - Renovated the price increase/decrease dialog.
-- The modify item and color dialogs remember their last state and geometry. You can reset their
-  size and position to be centered on the currently active item by double-clicking the title bar.
+- The modify item and color dialogs remember their last state and geometry. You can reset their size and position to be centered on the currently active item by double-clicking the title bar.
 
 
 ## [2021.2.2] - 2021-02-17
-This is a quick-fix release for 2021.2.1: it adds the missing German translation and fixes a bug
-where the language would sometimes revert to English.
+This is a quick-fix release for 2021.2.1: it adds the missing German translation and fixes a bug where the language would sometimes revert to English.
 
 
 ## [2021.2.1] - 2021-02-17
 ### Improvements
 - Complete overhaul of BrickLink cart and order importing.
-- Sorting and filtering are undoable operations now just like in Excel. Also both are really 
-  one-time actions now: adding or removing items will not dynamically re-apply the sorting and
-  filtering. There's reapply button to do it manually when you want to have the list resorted.
+- Sorting and filtering are undoable operations now just like in Excel. Also both are really one-time actions now: adding or removing items will not dynamically re-apply the sorting and filtering. There's reapply button to do it manually when you want to have the list resorted.
 
 ### Added
-- BrickLink Mass **Update** works on all supported fields now. The document you want to export has
-  to be in **Difference Mode**, but this is activated automatically when importing your store
-  inventory.
-- Clicking the **Error** label (or pressing `F6`) will jump to the next field that has erroneous 
-  input.
-- The filter in the add-item and import-set dialogs gained even more functionality: have a look at
-  the tool-tip label to learn about it.
-- Right-clicking on Minifigs gives you the option to quickly and easily filter for similar body
-  parts, head gear, etc.
+- BrickLink Mass **Update** works on all supported fields now. The document you want to export has to be in **Difference Mode**, but this is activated automatically when importing your store inventory.
+- Clicking the **Error** label (or pressing `F6`) will jump to the next field that has erroneous input.
+- The filter in the add-item and import-set dialogs gained even more functionality: have a look at the tool-tip label to learn about it.
+- Right-clicking on Minifigs gives you the option to quickly and easily filter for similar body parts, head gear, etc.
 - Added support for finding parts using part-color-codes (element numbers) in the add-item dialog.
 
 ### Fixed
@@ -421,13 +324,9 @@ A lot.
 - Picture downloads are now done completely in a background thread, keeping the UI more responsive.
 
 ### Added
-- New, modern icons bases on KDE's breeze theme. These icons can now adapt to dark desktop themes
-  on macOS and Linux.
-- The filter in the add-item and import-set dialogs gained the ability to handle **exclude** words:
-  e.g. `brick 1 x 2 -pattern` or `slope -33 -45`.
-- You can save your favorite filters now by pressing `Return` in an filter edit field. Recall them
-  by pressing `Cursor Down` or by clicking the filter icon on the left. The `X` in pop-up list
-  lets you delete unwanted filters.
+- New, modern icons bases on KDE's breeze theme. These icons can now adapt to dark desktop themes on macOS and Linux.
+- The filter in the add-item and import-set dialogs gained the ability to handle **exclude** words: e.g. `brick 1 x 2 -pattern` or `slope -33 -45`.
+- You can save your favorite filters now by pressing `Return` in an filter edit field. Recall them by pressing `Cursor Down` or by clicking the filter icon on the left. The `X` in pop-up list lets you delete unwanted filters.
 
 ### Fixed
 A lot.
@@ -436,27 +335,22 @@ Please read the [installation instructions](https://github.com/rgriebl/brickstor
 
 
 ## [2021.1.7] - 2021-01-27
-The **Defaults** page in the settings dialog was completely removed. Instead, the affected dialogs
-will now remember their last settings, even when exiting and restarting BrickStore.
+The **Defaults** page in the settings dialog was completely removed. Instead, the affected dialogs will now remember their last settings, even when exiting and restarting BrickStore.
 
 ### Added
 - Basic support for BrickLink's *My Cost* field was added.
-- Auto-saving is finally activated: BrickStore saves any changes you make to temporary files every
-  minute. If it crashes, it will ask on restart if you want to restore any unsaved changes.
+- Auto-saving is finally activated: BrickStore saves any changes you make to temporary files every minute. If it crashes, it will ask on restart if you want to restore any unsaved changes.
 - Minifigs have a weight and a year-of-release now.
 - Adding or importing items is faster now by simply double-clicking the item (or color).
 - Satin colors got their own color category.
 - New shortcuts for consolidating items and quickly jumping to BrickLink web-pages.
 
 ### Fixed
-- Price guide data includes VAT now, so it is a lot closer to what you would see on BrickLink's
-  web pages. It's still not perfect, but if you are interested in the details why this is so hard: 
-  #80
+- Price guide data includes VAT now, so it is a lot closer to what you would see on BrickLink's web pages. It's still not perfect, but if you are interested in the details why this is so hard: #80
 - Buyer/Collector mode was not restored on restarts.
 - Reimplemented item consolidation, which was actually semi-broken for the last 15 years.
 - All column layouts should be restored correctly now.
-- Sub-conditions on sets can now be set in the add-item window and will show up correctly in the 
-  document's item list.
+- Sub-conditions on sets can now be set in the add-item window and will show up correctly in the document's item list.
 - Filtering for an empty field is possible by specifying it as `""` (two quotes).
 
 
@@ -468,17 +362,11 @@ Fixed a crash when closing the settings dialog.
 A lot of bug-fixing all over the place, too much to mention all in here. 
 
 ### Added
-- Switched from using the classic 80x60 small images to BrickLink's newer *normal* format. This
-  should make all item images nice to look at, even on Hi-Dpi screens.
-- This change made it possible to have zoom controls in all catalog item views (e.g. the add-item
-  and import-inventory dialogs). Use the `+`/`-` buttons, `Control` + scroll wheel or a touchpad
-  gesture to zoom seamlessly between 50% and 500%.
-- The add-item dialog is now more customizable with splitters between elements and these
-  customizations are saved and restored.
-- The LDraw detection has been improved, but even if does not work, you can now also specify your
-  LDraw directory in the settings.
-- The database update is now honoring the expiration time from the settings dialog and will update
-  automatically on startup, if the database is past its expiry date.
+- Switched from using the classic 80x60 small images to BrickLink's newer *normal* format. This should make all item images nice to look at, even on Hi-Dpi screens.
+- This change made it possible to have zoom controls in all catalog item views (e.g. the add-item and import-inventory dialogs). Use the `+`/`-` buttons, `Control` + scroll wheel or a touchpad gesture to zoom seamlessly between 50% and 500%.
+- The add-item dialog is now more customizable with splitters between elements and these customizations are saved and restored.
+- The LDraw detection has been improved, but even if does not work, you can now also specify your LDraw directory in the settings.
+- The database update is now honoring the expiration time from the settings dialog and will update automatically on startup, if the database is past its expiry date.
 - BrickStore will also check for newer versions on startup automatically.
 
 
@@ -486,10 +374,7 @@ A lot of bug-fixing all over the place, too much to mention all in here.
 Performance improvements across the board, especially in the table rendering.
 
 ### Added
-- First implementation of a generic JavaScript extension interface, not public yet.
-  As a side effect, the old JavaScript printing was replaced with the new one. Any old printing
-  scripts for BrickStore 1.x are not compatible anymore, but porting will be simple once the new
-  API is stable and documented.
+- First implementation of a generic JavaScript extension interface, not public yet. As a side effect, the old JavaScript printing was replaced with the new one. Any old printing scripts for BrickStore 1.x are not compatible anymore, but porting will be simple once the new API is stable and documented.
 - The new column layout load/save mechanism got its missing management dialog.
 
 ### Fixed
@@ -497,8 +382,7 @@ Performance improvements across the board, especially in the table rendering.
 - Problems with "TLS initialization" on Windows should hopefully be fixed.
 - Fixed a crash that occured when setting prices to price guide in two documents in parallel.
 - Difference mode is now a per-document setting and survives saving and re-loading the document.
-- Order imports now cope with changes to the BrickLink interface. The `Any` order type had to be
-  removed for the time being though.
+- Order imports now cope with changes to the BrickLink interface. The `Any` order type had to be removed for the time being though.
 - A lot of small fixes all over the place.
 
 
@@ -548,24 +432,20 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 ### Added
 - LDraw support with 3D parts rendering.
 - Lightning fast multi-threaded filtering and sorting.
-- "Natural language" like filtering for the main document view (the tool-tip on the input field
-  tells the whole story).
+- "Natural language" like filtering for the main document view (the tool-tip on the input field tells the whole story).
 - Item and color id changes are now resolved automatically using BrickLink's change log.
 - Modernized UI with Hi-Dpi support, still on all of Windows, macOS and Linux.
-- Single-app mode: opening an BrickStore document from the Explorer/Finder will now just open a new
-  tab in an already running BrickStore process.
+- Single-app mode: opening an BrickStore document from the Explorer/Finder will now just open a new tab in an already running BrickStore process.
 - The font and icon sizes can be scaled between 50% and 200%.
 - Undo/redo actions are now presented in a list with human readable labels.
 
 ### Removed
-- Custom UIs in printing scripts do not work anymore, because the JavaScript runtime is totally
-  different. Even the normal printing scripts have to be adapted slightly, but in the end, I will
-  have to replace the current mechanism once again for future proof Qt 6 based solution next year.
-- Per-document column configurations and the "Collector" as well as the "Simple" view mode
-  are not (re)implemented yet.
+- Custom UIs in printing scripts do not work anymore, because the JavaScript runtime is totally different. Even the normal printing scripts have to be adapted slightly, but in the end, I will have to replace the current mechanism once again for future proof Qt 6 based solution next year.
+- Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.10.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.10.2...HEAD
+[2022.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.2
 [2022.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.1
 [2022.9.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.3
 [2022.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.2
