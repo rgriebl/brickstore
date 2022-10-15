@@ -769,6 +769,49 @@ void DocumentModel::insertLotsAfter(const Lot *afterLot, LotList &&lots)
     lots.clear();
 }
 
+void DocumentModel::insertLotsAfter(const LotList &afterLots, LotList &&lots)
+{
+    if (lots.empty())
+        return;
+    if (afterLots.size() != lots.size())
+        return;
+
+    QVector<int> positions(int(lots.size()));
+    QVector<int> sortedPositions(int(lots.size()));
+    QVector<int> filteredPositions(int(lots.size()));
+
+    // since we're inserting multiple lots at different places, inserting one might influence the
+    // position (index) of the following ones. To account for this, we need to simulate the
+    // actual insertion (x*Lots) to get the correct position for each lot.
+    auto xlots = m_lots;
+    auto xsortedLots = m_sortedLots;
+    auto xfilteredLots = m_filteredLots;
+
+    for (auto i = 0; i < lots.size(); ++i) {
+        const Lot *afterLot = afterLots.at(i);
+
+        int afterPos = int(xlots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+        int afterSortedPos = int(xsortedLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+        int afterFilteredPos = int(xfilteredLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+
+        Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
+        if (afterFilteredPos == 0)
+            afterFilteredPos = int(m_filteredLots.size());
+
+        positions[i] = afterPos;
+        sortedPositions[i] = afterSortedPos;
+        filteredPositions[i] = afterFilteredPos;
+
+        xlots.insert(afterPos, nullptr);
+        xsortedLots.insert(afterSortedPos, nullptr);
+        xfilteredLots.insert(afterFilteredPos, nullptr);
+    }
+
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, sortedPositions,
+                                  filteredPositions, lots));
+    lots.clear();
+}
+
 void DocumentModel::removeLot(Lot *lot)
 {
     removeLots({ lot });
@@ -1211,7 +1254,6 @@ void DocumentModel::applyTo(const LotList &lots, std::function<DocumentModel::Ap
         case LotDidNotChange:
             --count;
             break;
-        case AnotherLotChanged:
         default:
             break;
         }

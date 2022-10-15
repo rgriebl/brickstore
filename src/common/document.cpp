@@ -815,23 +815,41 @@ void Document::duplicate()
 
     QItemSelection newSelection;
     const QModelIndex oldCurrentIdx = m_selectionModel->currentIndex();
+    const Lot *oldCurrent = m_model->lot(oldCurrentIdx);
     QModelIndex newCurrentIdx;
 
-    applyTo(selectedLots(), "edit_duplicate", [&](const auto &from, auto &to) {
-        Q_UNUSED(to)
+    model()->beginMacro();
 
-        auto *lot = new Lot(from);
-        m_model->insertLotsAfter(&from, { lot });
-        QModelIndex idx = m_model->index(lot);
-        newSelection.merge(QItemSelection(idx, idx), QItemSelectionModel::Select);
-        if (m_model->lot(oldCurrentIdx) == &from)
+    // we need to copy here, because adding lots implicitly changes m_selectedLots!
+    auto selectionCopy = selectedLots();
+
+    m_selectionModel->clearSelection();
+
+    LotList newLots;
+    newLots.reserve(selectionCopy.size());
+
+    for (Lot *from : selectionCopy)
+        newLots.append(new Lot(*from));
+
+    // insertLotsAfter takes ownership, but we still need the pointers to calculate the selection
+    LotList newLotsCopy = newLots;
+    newLotsCopy.detach();
+
+    m_model->insertLotsAfter(selectionCopy, std::move(newLots));
+
+    model()->endMacro(tr("Duplicated %Ln item(s)", nullptr, selectionCopy.size()));
+
+    int colCount = m_model->columnCount();
+    for (auto i = 0; i < newLotsCopy.size(); ++i) {
+        QModelIndex idx = m_model->index(newLotsCopy.at(i));
+        newSelection.select(idx, idx.siblingAtColumn(colCount - 1));
+        if (oldCurrent == selectionCopy.at(i))
             newCurrentIdx = m_model->index(idx.row(), oldCurrentIdx.column());
+    }
 
-        return DocumentModel::AnotherLotChanged;
-    });
+    // it's way faster to select the complete rows ourselves instead of relying on "Rows" here
+    m_selectionModel->select(newSelection, QItemSelectionModel::ClearAndSelect);
 
-    m_selectionModel->select(newSelection,
-                             QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     if (newCurrentIdx.isValid())
         m_selectionModel->setCurrentIndex(newCurrentIdx, QItemSelectionModel::Current);
 }
@@ -857,7 +875,8 @@ void Document::selectAll()
     QItemSelection all(m_model->index(0, 0),
                        m_model->index(m_model->rowCount() - 1, m_model->columnCount() - 1));
 
-    m_selectionModel->select(all, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    // it's way faster to select the complete rows ourselves instead of relying on "Rows" here
+    m_selectionModel->select(all, QItemSelectionModel::ClearAndSelect);
 }
 
 void Document::selectNone()
@@ -1760,14 +1779,33 @@ void Document::updateSelection()
 {
     m_selectedLots.clear();
 
-    auto sel = m_selectionModel->selectedRows();
-    std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
-        return idx1.row() < idx2.row(); });
+    LotList newSelectedLots;
 
-    for (const QModelIndex &idx : qAsConst(sel))
-        m_selectedLots.append(m_model->lot(idx));
+    // Ideally, we would do something like this, but this is way too slow for huge disjointed
+    // selections (e.g. 10000 lots, with every second one being selected)
+    //
+    //    auto sel = m_selectionModel->selectedRows();
+    //    std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
+    //        return idx1.row() < idx2.row(); });
+    //    for (const QModelIndex &idx : qAsConst(sel))
+    //        newSelectedLots.append(m_model->lot(idx));
 
-    emit selectedLotsChanged(m_selectedLots);
+    QVector<int> rows;
+    const auto sel = m_selectionModel->selection();
+    for (const auto &selRange : sel) {
+        for (int row = selRange.top(); row <= selRange.bottom(); ++row)
+            rows << row;
+    }
+    std::sort(rows.begin(), rows.end());
+
+    for (int row : qAsConst(rows))
+        newSelectedLots.append(m_model->filteredLots().at(row));
+
+    if (newSelectedLots != m_selectedLots) {
+        m_selectedLots = newSelectedLots;
+
+        emit selectedLotsChanged(m_selectedLots);
+    }
 
     if (m_selectionModel->currentIndex().isValid())
         emit ensureVisible(m_selectionModel->currentIndex());

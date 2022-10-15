@@ -2047,18 +2047,26 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <source>Do you want to save your changes?</source>
         <translation>Sollen die Änderungen gespeichert werden?</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../src/common/document.cpp" line="837"/>
+        <source>Duplicated %Ln item(s)</source>
+        <translation>
+            <numerusform>Ein Teil dupliziert</numerusform>
+            <numerusform>%Ln Teile dupliziert</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1008"/>
+        <location filename="../src/common/document.cpp" line="1012"/>
         <source>Loading price guide data from disk</source>
         <translation>Lade Richtpreise vom Dateisystem</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1055"/>
+        <location filename="../src/common/document.cpp" line="1059"/>
         <source>Downloading price guide data from BrickLink</source>
         <translation>Lade Richtpreise von BrickLink herunter</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1102"/>
+        <location filename="../src/common/document.cpp" line="1106"/>
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform>Preis für ein Teil auf Richtpreis gesetzt</numerusform>
@@ -2066,17 +2074,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1106"/>
+        <location filename="../src/common/document.cpp" line="1110"/>
         <source>Prices of the selected items have been updated to Price Guide values.</source>
         <translation>Die Preise der ausgewählten Teile wurden auf Richtpreise gesetzt.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1108"/>
+        <location filename="../src/common/document.cpp" line="1112"/>
         <source>%1 have been skipped, because of missing Price Guide records or network errors.</source>
         <translation>%1 wurden ausgelassen, da entweder keine Daten vorlagen oder Fehler auftraten.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1259"/>
+        <location filename="../src/common/document.cpp" line="1263"/>
         <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>Die Anzahl der Teile in einem Posten ist nicht ohne Rest durch %1 teilbar.&lt;br /&gt;&lt;br /&gt;Es wurden keine Werte geändert.</numerusform>
@@ -2084,7 +2092,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1284"/>
+        <location filename="../src/common/document.cpp" line="1288"/>
         <source>The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>Die Menge der Teile in einem Posten würde bei einer Multiplikation mit %1 die Höchstzahl (%2) übersteigen.&lt;br&gt;&lt;br&gt;Es wurden keine Werte geändert.</numerusform>
@@ -2092,49 +2100,49 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1466"/>
+        <location filename="../src/common/document.cpp" line="1470"/>
         <source>Export File</source>
         <translation>Datei exportieren</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1483"/>
+        <location filename="../src/common/document.cpp" line="1487"/>
         <source>Failed to open file %1 for writing.</source>
         <translation>Datei %1 konnte nicht zum Schreiben geöffnet werden.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1485"/>
-        <location filename="../src/common/document.cpp" line="1487"/>
+        <location filename="../src/common/document.cpp" line="1489"/>
+        <location filename="../src/common/document.cpp" line="1491"/>
         <source>Failed to save data to file %1.</source>
         <translation>Datenspeicherung in Datei %1 ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1515"/>
+        <location filename="../src/common/document.cpp" line="1519"/>
         <source>There are problems: %1Do you really want to export this list?</source>
         <translation>Es wurden Probleme gefunden: %1Soll die Liste trotzdem exportiert werden?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1549"/>
+        <location filename="../src/common/document.cpp" line="1553"/>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
         <translation>Geben Sie die ID-Nummer der Suchliste ein (für die Standardsuchliste das Feld einfach leer lassen)</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1582"/>
+        <location filename="../src/common/document.cpp" line="1586"/>
         <source>Open File</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1616"/>
+        <location filename="../src/common/document.cpp" line="1620"/>
         <source>Failed to load document %1: %2</source>
         <translation>Dokument %1 konnte nicht geladen werden: %2</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1631"/>
+        <location filename="../src/common/document.cpp" line="1635"/>
         <source>Save File as</source>
         <translation>Datei speichern unter</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1664"/>
-        <location filename="../src/common/document.cpp" line="1667"/>
+        <location filename="../src/common/document.cpp" line="1668"/>
+        <location filename="../src/common/document.cpp" line="1671"/>
         <source>Failed to save document</source>
         <translation>Dokument %1 konnte nicht gesichert werden: %2</translation>
     </message>
@@ -2143,17 +2151,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Warenkorb in Shop %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1692"/>
+        <location filename="../src/common/document.cpp" line="1696"/>
         <source>Inventory for %1</source>
         <translation>Inventarliste von %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1745"/>
+        <location filename="../src/common/document.cpp" line="1749"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Sie haben mehr als 1.000 Posten selektiert, aber die BrickLink Server können diese Anzahl an Posten nicht auf einmal verarbeiten.&lt;br&gt;Es wäre besser den Export auf mehrere, kleinere Sätze aufzuteilen.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1752"/>
+        <location filename="../src/common/document.cpp" line="1756"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
@@ -2162,7 +2170,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1815"/>
+        <location filename="../src/common/document.cpp" line="1819"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform>Ein Teil wurde kopiert oder zusammengeführt</numerusform>
@@ -2170,7 +2178,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1891"/>
+        <location filename="../src/common/document.cpp" line="1895"/>
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform>Ein Teil abgezogen</numerusform>
@@ -2178,12 +2186,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2058"/>
+        <location filename="../src/common/document.cpp" line="2062"/>
         <source>Added %1, consolidated %2 items</source>
         <translation>%1 Teile hinzugefügt, %2 zusammengeführt</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="2155"/>
+        <location filename="../src/common/document.cpp" line="2159"/>
         <source>Consolidated %n item(s)</source>
         <translation>
             <numerusform>Ein Teil zusammengeführt</numerusform>
@@ -2191,37 +2199,37 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2202"/>
+        <location filename="../src/common/document.cpp" line="2206"/>
         <source>BrickStore default</source>
         <translation>BrickStore Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2204"/>
+        <location filename="../src/common/document.cpp" line="2208"/>
         <source>BrickStore buyer/collector default</source>
         <translation>BrickStore Käufer/Sammler Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2206"/>
+        <location filename="../src/common/document.cpp" line="2210"/>
         <source>Auto-resize once</source>
         <translation>Einmalige automatische Anpassung</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2208"/>
+        <location filename="../src/common/document.cpp" line="2212"/>
         <source>User default</source>
         <translation>Benutzer Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2343"/>
+        <location filename="../src/common/document.cpp" line="2347"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation>Geben Sie einen eindeutigen Namen für dieses Spaltenlayout ein. Lassen Sie das Feld leer, um das Benutzer Standard Layout zu ändern.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2375"/>
+        <location filename="../src/common/document.cpp" line="2379"/>
         <source>Set column layout:</source>
         <translation>Spaltenlayout gesetzt:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2714"/>
+        <location filename="../src/common/document.cpp" line="2718"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>WIEDERHERGESTELLT</translation>
@@ -2703,7 +2711,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/documentmodel.cpp" line="1225"/>
+        <location filename="../src/common/documentmodel.cpp" line="1224"/>
         <source>%1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
@@ -2712,270 +2720,270 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1503"/>
+        <location filename="../src/common/documentmodel.cpp" line="1502"/>
         <source>Index</source>
         <translation>Index</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1520"/>
+        <location filename="../src/common/documentmodel.cpp" line="1519"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1521"/>
-        <location filename="../src/common/documentmodel.cpp" line="1526"/>
+        <location filename="../src/common/documentmodel.cpp" line="1520"/>
+        <location filename="../src/common/documentmodel.cpp" line="1525"/>
         <source>Include</source>
         <translation>Einschliessen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1521"/>
-        <location filename="../src/common/documentmodel.cpp" line="1529"/>
+        <location filename="../src/common/documentmodel.cpp" line="1520"/>
+        <location filename="../src/common/documentmodel.cpp" line="1528"/>
         <source>Exclude</source>
         <translation>Ausschliessen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1521"/>
-        <location filename="../src/common/documentmodel.cpp" line="1527"/>
+        <location filename="../src/common/documentmodel.cpp" line="1520"/>
+        <location filename="../src/common/documentmodel.cpp" line="1526"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1551"/>
+        <location filename="../src/common/documentmodel.cpp" line="1550"/>
         <source>Image</source>
         <translation>Bild</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1564"/>
+        <location filename="../src/common/documentmodel.cpp" line="1563"/>
         <source>Item Id</source>
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1577"/>
+        <location filename="../src/common/documentmodel.cpp" line="1576"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1586"/>
+        <location filename="../src/common/documentmodel.cpp" line="1585"/>
         <source>Comments</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1594"/>
+        <location filename="../src/common/documentmodel.cpp" line="1593"/>
         <source>Remarks</source>
         <translation>Anmerkungen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1605"/>
+        <location filename="../src/common/documentmodel.cpp" line="1604"/>
         <source>Orig. Quantity</source>
         <translation>Orig. Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1619"/>
+        <location filename="../src/common/documentmodel.cpp" line="1618"/>
         <source>Diff. Quantity</source>
         <translation>Diff. Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1637"/>
+        <location filename="../src/common/documentmodel.cpp" line="1636"/>
         <source>Quantity</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1647"/>
+        <location filename="../src/common/documentmodel.cpp" line="1646"/>
         <source>Bulk</source>
         <translation>Gebinde</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1657"/>
+        <location filename="../src/common/documentmodel.cpp" line="1656"/>
         <source>Orig. Price</source>
         <translation>Orig. Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1670"/>
+        <location filename="../src/common/documentmodel.cpp" line="1669"/>
         <source>Diff. Price</source>
         <translation>Diff. Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1687"/>
+        <location filename="../src/common/documentmodel.cpp" line="1686"/>
         <source>Cost</source>
         <translation>Unkosten</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1696"/>
+        <location filename="../src/common/documentmodel.cpp" line="1695"/>
         <source>Price</source>
         <translation>Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1706"/>
+        <location filename="../src/common/documentmodel.cpp" line="1705"/>
         <source>Total</source>
         <translation>Gesamt</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1715"/>
+        <location filename="../src/common/documentmodel.cpp" line="1714"/>
         <source>Sale</source>
         <translation>Ausverkauf</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1725"/>
+        <location filename="../src/common/documentmodel.cpp" line="1724"/>
         <source>Condition</source>
         <translation>Zustand</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1726"/>
-        <location filename="../src/common/documentmodel.cpp" line="1731"/>
+        <location filename="../src/common/documentmodel.cpp" line="1725"/>
+        <location filename="../src/common/documentmodel.cpp" line="1730"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1726"/>
-        <location filename="../src/common/documentmodel.cpp" line="1731"/>
+        <location filename="../src/common/documentmodel.cpp" line="1725"/>
+        <location filename="../src/common/documentmodel.cpp" line="1730"/>
         <source>Used</source>
         <translation>Gebraucht</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1740"/>
+        <location filename="../src/common/documentmodel.cpp" line="1739"/>
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1760"/>
+        <location filename="../src/common/documentmodel.cpp" line="1759"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1777"/>
+        <location filename="../src/common/documentmodel.cpp" line="1776"/>
         <source>Item Type</source>
         <translation>Teiletyp</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1793"/>
+        <location filename="../src/common/documentmodel.cpp" line="1792"/>
         <source>Tier Q1</source>
         <translation>Anz. S1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1802"/>
+        <location filename="../src/common/documentmodel.cpp" line="1801"/>
         <source>Tier P1</source>
         <translation>Preis S1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1812"/>
+        <location filename="../src/common/documentmodel.cpp" line="1811"/>
         <source>Tier Q2</source>
         <translation>Anz. S2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1821"/>
+        <location filename="../src/common/documentmodel.cpp" line="1820"/>
         <source>Tier P2</source>
         <translation>Preis S2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1831"/>
+        <location filename="../src/common/documentmodel.cpp" line="1830"/>
         <source>Tier Q3</source>
         <translation>Anz. S3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1840"/>
+        <location filename="../src/common/documentmodel.cpp" line="1839"/>
         <source>Tier P3</source>
         <translation>Preis S3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1850"/>
+        <location filename="../src/common/documentmodel.cpp" line="1849"/>
         <source>Lot Id</source>
         <translation>Posten Id</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1859"/>
+        <location filename="../src/common/documentmodel.cpp" line="1858"/>
         <source>Retain</source>
         <translation>Halten</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1860"/>
+        <location filename="../src/common/documentmodel.cpp" line="1859"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1860"/>
+        <location filename="../src/common/documentmodel.cpp" line="1859"/>
         <source>No</source>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1864"/>
+        <location filename="../src/common/documentmodel.cpp" line="1863"/>
         <source>Yes</source>
         <comment>Filter&gt;Retain&gt;Yes</comment>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1864"/>
+        <location filename="../src/common/documentmodel.cpp" line="1863"/>
         <source>No</source>
         <comment>Filter&gt;Retain&gt;No</comment>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1872"/>
+        <location filename="../src/common/documentmodel.cpp" line="1871"/>
         <source>Stockroom</source>
         <translation>Auf Lager</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1873"/>
+        <location filename="../src/common/documentmodel.cpp" line="1872"/>
         <source>None</source>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1881"/>
+        <location filename="../src/common/documentmodel.cpp" line="1880"/>
         <source>None</source>
         <comment>Filter&gt;Stockroom&gt;None</comment>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1889"/>
+        <location filename="../src/common/documentmodel.cpp" line="1888"/>
         <source>Reserved</source>
         <translation>Reserviert</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1898"/>
+        <location filename="../src/common/documentmodel.cpp" line="1897"/>
         <source>Weight</source>
         <translation>Gewicht</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1907"/>
+        <location filename="../src/common/documentmodel.cpp" line="1906"/>
         <source>Total Weight</source>
         <translation>Gesamtgewicht</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1918"/>
+        <location filename="../src/common/documentmodel.cpp" line="1917"/>
         <source>Year</source>
         <translation>Jahr</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1925"/>
+        <location filename="../src/common/documentmodel.cpp" line="1924"/>
         <source>Marker</source>
         <translation>Markierung</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1937"/>
+        <location filename="../src/common/documentmodel.cpp" line="1936"/>
         <source>Added</source>
         <translation>Hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1946"/>
+        <location filename="../src/common/documentmodel.cpp" line="1945"/>
         <source>Last Sold</source>
         <translation>Zuletzt verkauft</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2249"/>
+        <location filename="../src/common/documentmodel.cpp" line="2248"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Dieses Dokument hat keine Differenzen die exportiert werden könnenten.</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2251"/>
+        <location filename="../src/common/documentmodel.cpp" line="2250"/>
         <source>This list contains items without a BrickLink Lot Id.</source>
         <translation>Diese Liste enthält Teile mit doppelten BrickLink Posten Ids (Lot Id).</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2253"/>
+        <location filename="../src/common/documentmodel.cpp" line="2252"/>
         <source>This list contains items with duplicate BrickLink Lot Ids.</source>
         <translation>Diese Liste enthält Teile mit doppelten BrickLink Posten Ids (Lot Id).</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2335"/>
+        <location filename="../src/common/documentmodel.cpp" line="2334"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>

@@ -16,7 +16,6 @@
 
 #include "bricklink/core.h"
 #include "bricklink/lot.h"
-#include "bricklink/picture.h"
 
 
 namespace BrickLink {

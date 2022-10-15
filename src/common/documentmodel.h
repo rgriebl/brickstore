@@ -230,6 +230,7 @@ public:
 
     void appendLot(Lot * &&lot);
     void appendLots(BrickLink::LotList &&lots);
+    void insertLotsAfter(const LotList &afterLots, BrickLink::LotList &&lots);
     void insertLotsAfter(const Lot *afterLot, BrickLink::LotList &&lots);
 
     void removeLots(const LotList &lots);
@@ -265,7 +266,6 @@ public:
     enum ApplyToResult {
         LotChanged = 1,
         LotDidNotChange = 0,
-        AnotherLotChanged = -1,
     };
 
     void applyTo(const LotList &lots, std::function<ApplyToResult(const Lot &, Lot &)> callback,
