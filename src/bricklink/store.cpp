@@ -15,7 +15,6 @@
 #include <QUrl>
 #include <QUrlQuery>
 
-#include "utility/utility.h"
 #include "utility/transfer.h"
 #include "utility/exception.h"
 #include "bricklink/core.h"

@@ -25,7 +25,6 @@
 #include <QDebug>
 
 #include "utility/exception.h"
-#include "utility/xmlhelpers.h"
 #include "utility/utility.h"
 #include "utility/stopwatch.h"
 #include "minizip/minizip.h"

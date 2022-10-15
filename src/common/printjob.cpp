@@ -23,7 +23,6 @@
 #include <QStringBuilder>
 #include <QQmlEngine>
 
-#include "utility/utility.h"
 #include "printjob.h"
 
 

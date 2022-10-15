@@ -18,10 +18,8 @@
 #include "utility/utility.h"
 #include "utility/xmlhelpers.h"
 #include "utility/exception.h"
-#include "utility/stopwatch.h"
 #include "bricklink/core.h"
 #include "bricklink/io.h"
-#include "bricklink/order.h"
 
 
 static QDateTime parseESTDateTimeString(const QString &v)

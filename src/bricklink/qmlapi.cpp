@@ -14,7 +14,6 @@
 #include <QQmlInfo>
 #include <QQmlEngine>
 
-#include "utility/utility.h"
 #include "model.h"
 #include "picture.h"
 #include "priceguide.h"

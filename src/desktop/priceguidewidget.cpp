@@ -29,7 +29,6 @@
 #include "bricklink/priceguide.h"
 #include "common/config.h"
 #include "common/currency.h"
-#include "utility/utility.h"
 #include "priceguidewidget.h"
 
 namespace {

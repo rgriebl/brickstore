@@ -30,13 +30,11 @@
 #include <QTimer>
 
 #include "common/document.h"
-#include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "filtertermwidget.h"
 #include "flowlayout.h"
 #include "historylineedit.h"
 #include "menucombobox.h"
-#include "view.h"
 
 using namespace std::chrono_literals;
 

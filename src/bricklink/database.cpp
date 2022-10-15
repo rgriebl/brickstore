@@ -23,8 +23,6 @@
 #include <QStringBuilder>
 #include <QScopeGuard>
 
-#include "utility/q5hashfunctions.h"
-#include "utility/utility.h"
 #include "utility/stopwatch.h"
 #include "utility/chunkreader.h"
 #include "utility/chunkwriter.h"

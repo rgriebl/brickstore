@@ -17,12 +17,9 @@
 #include <QFile>
 #include <QUrl>
 #include <QGuiApplication>
-#include "qqmlinfo.h"
 
 #include "utility/utility.h"
 #include "common/currency.h"
-#include "bricklink/picture.h"
-#include "bricklink/priceguide.h"
 #include "bricklink/order.h"
 #include "common/actionmanager.h"
 #include "common/application.h"

@@ -18,7 +18,6 @@
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include "common/config.h"
-#include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "selectitemdialog.h"
 #include "selectitem.h"

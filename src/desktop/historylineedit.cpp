@@ -24,7 +24,6 @@
 #include <QListView>
 #include <QDebug>
 
-#include "utility/utility.h"
 #include "historylineedit.h"
 
 

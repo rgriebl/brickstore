@@ -49,10 +49,8 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
-#include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "historylineedit.h"
-#include "mainwindow.h"
 #include "selectitem.h"
 
 using namespace std::chrono_literals;

@@ -21,9 +21,8 @@
 #include <QCheckBox>
 
 #include "common/actionmanager.h"
-#include "utility/utility.h"
+#include "common/documentmodel.h"
 #include "incdecpricesdialog.h"
-#include "mainwindow.h"
 
 
 IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,

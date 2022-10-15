@@ -25,12 +25,10 @@
 
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
-#include "bricklink/io.h"
 
 #include "common/currency.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "utility/xmlhelpers.h"
 
 namespace BrickLink {
 

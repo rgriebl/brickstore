@@ -29,7 +29,6 @@
 #include "common/config.h"
 #include "common/document.h"
 #include "common/eventfilter.h"
-#include "utility/utility.h"
 #include "view.h"
 
 

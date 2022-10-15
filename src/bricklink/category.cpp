@@ -15,7 +15,6 @@
 #include "bricklink/category.h"
 #include "bricklink/itemtype.h"
 #include "bricklink/core.h"
-#include "utility/utility.h"
 
 
 namespace BrickLink {

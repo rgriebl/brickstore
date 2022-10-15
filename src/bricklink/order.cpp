@@ -30,7 +30,6 @@
 #include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "utility/utility.h"
-#include "utility/xmlhelpers.h"
 
 
 namespace BrickLink {

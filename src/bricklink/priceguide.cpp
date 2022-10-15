@@ -22,7 +22,6 @@
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include "bricklink/color.h"
-#include "utility/utility.h"
 
 
 namespace BrickLink {

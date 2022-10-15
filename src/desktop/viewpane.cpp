@@ -30,6 +30,8 @@
 #include <QDebug>
 
 #include "common/actionmanager.h"
+#include "common/config.h"
+#include "common/currency.h"
 #include "common/document.h"
 #include "common/documentlist.h"
 #include "common/documentmodel.h"

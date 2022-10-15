@@ -21,7 +21,6 @@
 #include <QSet>
 #include <QCache>
 
-#include "common/documentmodel.h"
 
 class SelectItemDialog;
 class SelectColorDialog;

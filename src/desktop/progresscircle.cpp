@@ -21,7 +21,6 @@
 
 #include <limits>
 
-#include "utility/utility.h"
 #include "progresscircle.h"
 
 

@@ -14,7 +14,6 @@
 
 #include "bricklink/item.h"
 #include "bricklink/core.h"
-#include "bricklink/lot.h"
 
 
 extern int _dwords_for_appears;

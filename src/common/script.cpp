@@ -16,11 +16,9 @@
 #include <QQmlContext>
 
 #include "utility/exception.h"
-#include "utility/utility.h"
 #include "brickstore_wrapper.h"
 #include "printjob.h"
 #include "script.h"
-#include "document.h"
 
 
 static QString formatJSError(const QJSValue &error)

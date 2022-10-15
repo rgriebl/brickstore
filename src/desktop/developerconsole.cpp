@@ -19,7 +19,6 @@
 #include <QTimer>
 
 #include "common/eventfilter.h"
-#include "utility/utility.h"
 #include "developerconsole.h"
 
 

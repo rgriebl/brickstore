@@ -14,7 +14,6 @@
 #include <QtQuick3D/QQuick3DTextureData>
 
 #include "ldraw/rendergeometry.h"
-#include "bricklink/core.h"
 
 
 namespace LDraw {

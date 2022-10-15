@@ -30,7 +30,6 @@
 #include <QPixmapCache>
 #include <QStyleFactory>
 
-#include "utility/utility.h"
 #include "headerview.h"
 
 

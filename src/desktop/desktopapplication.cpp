@@ -49,7 +49,6 @@
 #  include <QtGui/private/qshortcutmap_p.h>
 #endif
 
-#include "bricklink/core.h"
 #include "common/config.h"
 #include "common/scriptmanager.h"
 #include "desktop/brickstoreproxystyle.h"
@@ -57,7 +56,6 @@
 #include "desktop/developerconsole.h"
 #include "desktop/mainwindow.h"
 #include "desktop/smartvalidator.h"
-#include "utility/utility.h"
 
 #include "desktopapplication.h"
 

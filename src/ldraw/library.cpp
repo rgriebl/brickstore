@@ -32,12 +32,10 @@
 
 #include "qcoro/qcorofuture.h"
 #include "utility/exception.h"
-#include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "minizip/minizip.h"
 #include "ldraw/library.h"
 #include "ldraw/part.h"
-#include "ldraw/rendersettings.h"
 
 
 Q_LOGGING_CATEGORY(LogLDraw, "ldraw")

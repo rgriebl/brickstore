@@ -27,7 +27,6 @@
 #include "common/onlinestate.h"
 #include "qcoro/qcoronetworkreply.h"
 #include "currency.h"
-#include "utility/utility.h"
 
 
 // all rates as downloaded are relative to the Euro, but

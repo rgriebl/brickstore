@@ -19,11 +19,7 @@
 #include <QHash>
 #include <QTimer>
 
-#include "bricklink/global.h"
-#include "bricklink/lot.h"
 #include "common/actionmanager.h"
-#include "common/config.h"
-#include "common/currency.h"
 #include "common/documentmodel.h"
 #include "common/eventfilter.h"
 

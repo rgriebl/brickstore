@@ -19,7 +19,6 @@
 #include <QtGui/QDesktopServices>
 
 #include "qcoro/qcoronetworkreply.h"
-#include "utility/utility.h"
 #include "common/systeminfo.h"
 #include "announcements.h"
 #include "config.h"

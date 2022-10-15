@@ -57,7 +57,6 @@
 #include "common/systeminfo.h"
 #include "utility/transfer.h"
 #include "common/undo.h"
-#include "utility/utility.h"
 #include "version.h"
 
 #if defined(SENTRY_ENABLED)

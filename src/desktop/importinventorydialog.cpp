@@ -22,12 +22,9 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
-#include "common/documentio.h"
-#include "utility/utility.h"
 #include "importinventorydialog.h"
 #include "importinventorywidget.h"
 #include "selectitem.h"
-#include "progressdialog.h"
 
 
 ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)

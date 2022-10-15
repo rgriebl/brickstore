@@ -34,7 +34,6 @@
 #include <QAction>
 
 #include "bricklink/core.h"
-#include "bricklink/model.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
@@ -50,7 +49,6 @@
 #include "priceguidewidget.h"
 #include "selectcolor.h"
 #include "selectitem.h"
-#include "smartvalidator.h"
 #include "view.h"
 
 

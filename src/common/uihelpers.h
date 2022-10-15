@@ -19,7 +19,7 @@
 #include <QColor>
 #include <QStringBuilder>
 
-#include "qcoro/qcoro.h"
+#include "qcoro/task.h"
 
 
 inline QString CMB_BOLD(const QString &str)

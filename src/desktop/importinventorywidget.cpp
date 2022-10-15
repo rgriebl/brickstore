@@ -18,13 +18,7 @@
 #include <QKeyEvent>
 
 #include "bricklink/core.h"
-#include "common/actionmanager.h"
-#include "common/config.h"
-#include "common/document.h"
-#include "common/documentio.h"
-#include "utility/utility.h"
 #include "importinventorywidget.h"
-#include "progressdialog.h"
 
 
 ImportInventoryWidget::ImportInventoryWidget(QWidget *parent)

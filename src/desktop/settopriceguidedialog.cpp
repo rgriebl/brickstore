@@ -14,7 +14,6 @@
 #include <QDebug>
 
 #include "common/config.h"
-#include "utility/utility.h"
 #include "settopriceguidedialog.h"
 
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262

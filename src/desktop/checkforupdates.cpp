@@ -31,9 +31,9 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 
-#include "qcoro/qcoro.h"
+#include "qcoro/qcorocore.h"
+#include "qcoro/qcoronetwork.h"
 #include "checkforupdates.h"
-#include "progressdialog.h"
 
 
 CheckForUpdates::CheckForUpdates(const QString &baseUrl, QWidget *parent)

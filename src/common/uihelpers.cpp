@@ -14,8 +14,8 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 
-#include "utility/utility.h"
 #include "common/config.h"
+#include "qcoro/qcorocore.h"
 #include "uihelpers.h"
 
 

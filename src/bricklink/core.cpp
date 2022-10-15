@@ -31,7 +31,6 @@
 
 #include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
-#include "utility/stopwatch.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
 
@@ -48,7 +47,6 @@
 #include "bricklink/priceguide.h"
 #if !defined(BS_BACKEND)
 #  include "bricklink/cart.h"
-#  include "bricklink/model.h"
 #  include "bricklink/order.h"
 #  include "bricklink/store.h"
 #  include "bricklink/wantedlist.h"

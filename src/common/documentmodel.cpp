@@ -32,9 +32,7 @@
 #endif
 
 #include "utility/utility.h"
-#include "utility/stopwatch.h"
 #include "common/currency.h"
-#include "utility/exception.h"
 #include "common/undo.h"
 #include "utility/qparallelsort.h"
 #include "bricklink/core.h"

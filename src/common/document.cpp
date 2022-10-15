@@ -25,12 +25,10 @@
 #include <QAction>
 #include <QDebug>
 
-#include "bricklink/cart.h"
 #include "bricklink/core.h"
 #include "bricklink/order.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
-#include "bricklink/store.h"
 #include "common/application.h"
 #include "common/currency.h"
 #include "utility/exception.h"

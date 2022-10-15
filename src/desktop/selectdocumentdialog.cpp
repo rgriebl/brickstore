@@ -32,7 +32,6 @@
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentlist.h"
-#include "utility/utility.h"
 #include "selectdocumentdialog.h"
 
 

@@ -25,10 +25,9 @@
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
 #include "bricklink/order.h"
-#include "bricklink/qmlapi.h"
 #include "common/actionmanager.h"
 #include "common/documentmodel.h"
-#include "qcoro/qcoro.h"
+#include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QTimer)
 QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)

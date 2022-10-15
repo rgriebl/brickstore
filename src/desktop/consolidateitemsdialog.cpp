@@ -20,8 +20,6 @@
 #include <QScreen>
 #include <QWindow>
 
-#include "bricklink/core.h"
-#include "common/config.h"
 #include "common/documentmodel.h"
 #include "consolidateitemsdialog.h"
 #include "documentdelegate.h"

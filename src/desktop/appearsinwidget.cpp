@@ -21,10 +21,8 @@
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
-#include "utility/utility.h"
 #include "common/document.h"
 #include "importinventorydialog.h"
-#include "picturewidget.h"
 
 #include "appearsinwidget.h"
 

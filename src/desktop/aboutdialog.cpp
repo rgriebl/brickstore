@@ -13,8 +13,6 @@
 */
 
 #include "common/application.h"
-#include "common/config.h"
-#include "utility/utility.h"
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 

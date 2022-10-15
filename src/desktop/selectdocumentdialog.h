@@ -16,7 +16,6 @@
 #include <QDialog>
 #include <QWizard>
 #include <QHash>
-#include "bricklink/global.h"
 #include "common/documentmodel.h"
 
 class DocumentModel;

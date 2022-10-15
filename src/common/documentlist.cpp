@@ -16,7 +16,6 @@
 #include <QIcon>
 #include <QPainter>
 
-#include "utility/utility.h"
 #include "documentlist.h"
 
 

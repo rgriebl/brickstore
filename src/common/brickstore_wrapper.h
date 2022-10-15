@@ -32,6 +32,8 @@
 
 #include "common/document.h"
 #include "common/documentlist.h"
+
+#include <bricklink/qmlapi.h>
 #include "utility/utility.h"
 
 class QmlColor;

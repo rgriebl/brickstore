@@ -17,7 +17,6 @@
 
 #include "utility/utility.h"
 #include "bricklink/color.h"
-#include "bricklink/core.h"
 
 
 namespace BrickLink {

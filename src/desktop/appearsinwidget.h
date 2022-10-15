@@ -15,7 +15,6 @@
 
 #include <QTreeView>
 
-#include "bricklink/global.h"
 #include "bricklink/lot.h"
 #include "qcoro/task.h"
 

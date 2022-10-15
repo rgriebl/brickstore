@@ -19,9 +19,6 @@
 #include <QStringList>
 #include <QPointer>
 
-#include "bricklink/global.h"
-#include "common/documentmodel.h"
-#include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)

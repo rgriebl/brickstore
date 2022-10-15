@@ -23,13 +23,7 @@
 #include <QQmlExpression>
 #include <QStringBuilder>
 
-#include "bricklink/core.h"
-#include "bricklink/database.h"
-#include "common/application.h"
-#include "ldraw/library.h"
-#include "common/brickstore_wrapper.h"
 #include "utility/exception.h"
-#include "printjob.h"
 #include "script.h"
 #include "scriptmanager.h"
 

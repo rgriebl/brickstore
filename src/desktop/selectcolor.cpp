@@ -19,7 +19,6 @@
 #include <QToolButton>
 #include <QIODevice>
 
-#include "utility/utility.h"
 #include "bricklink/model.h"
 #include "bricklink/core.h"
 #include "bricklink/item.h"

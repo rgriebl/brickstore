@@ -26,9 +26,7 @@
 #include <QKeySequence>
 #include <QStringBuilder>
 
-#include "utility/utility.h"
 #include "config.h"
-#include "common/currency.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)

@@ -16,7 +16,6 @@
 #include <QDialog>
 #include <QDateTime>
 
-#include "bricklink/global.h"
 #include "ui_importwantedlistdialog.h"
 
 class Transfer;

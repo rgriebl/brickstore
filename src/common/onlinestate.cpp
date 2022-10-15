@@ -28,7 +28,6 @@
 #elif defined(Q_OS_LINUX)
 #  include <QProcess>
 #endif
-#include "utility/utility.h"
 #include "onlinestate.h"
 
 

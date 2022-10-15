@@ -8,7 +8,6 @@
 #include "common/config.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
-#include "utility/utility.h"
 #include "changecurrencydialog.h"
 #include "smartvalidator.h"
 

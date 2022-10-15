@@ -21,7 +21,6 @@
 #include <QCoreApplication>
 #include <QUrlQuery>
 
-#include "common/config.h"
 #include "transfer.h"
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)

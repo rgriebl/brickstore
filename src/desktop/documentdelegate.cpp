@@ -39,6 +39,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/currency.h"
+#include "common/documentmodel.h"
 #include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "documentdelegate.h"

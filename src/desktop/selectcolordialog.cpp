@@ -16,12 +16,9 @@
 #include <QAction>
 
 #include "bricklink/color.h"
-#include "bricklink/core.h"
 #include "common/config.h"
-#include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "selectcolordialog.h"
-#include "selectcolor.h"
 
 
 SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)

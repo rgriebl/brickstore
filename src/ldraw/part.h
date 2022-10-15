@@ -20,7 +20,6 @@
 #include <QMatrix4x4>
 
 #include "utility/ref.h"
-#include "utility/q3cache.h"
 
 
 namespace LDraw {

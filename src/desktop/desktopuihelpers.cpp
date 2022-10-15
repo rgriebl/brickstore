@@ -28,9 +28,7 @@
 #include <QComboBox>
 #include <QDebug>
 
-#include "common/config.h"
 #include "qcoro/qcorosignal.h"
-#include "utility/utility.h"
 #include "desktopuihelpers.h"
 #include "desktopuihelpers_p.h"
 
