@@ -97,11 +97,6 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
-    // add all relevant QML modules here
-    extern void qml_register_types_LDraw(); qml_register_types_LDraw();
-    extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
-    extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
-
     qInfo() << "UI:";
     qInfo() << "  Device pixel ratio :" << qApp->devicePixelRatio()
             << QGuiApplication::highDpiScaleFactorRoundingPolicy();
@@ -906,6 +901,19 @@ bool Application::initBrickLink()
 
 void Application::setupQml()
 {
+    // suppress the "value types have to be lower case" typeregistration warnings
+    m_defaultLoggingFilter = QLoggingCategory::installFilter([](QLoggingCategory *lc) {
+        if (qstrcmp(lc->categoryName(), "qt.qml.typeregistration") == 0)
+            lc->setEnabled(QtWarningMsg, false);
+        else if (s_inst && s_inst->m_defaultLoggingFilter)
+            s_inst->m_defaultLoggingFilter(lc);
+    });
+
+    // add all relevant QML modules here
+    extern void qml_register_types_LDraw(); qml_register_types_LDraw();
+    extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
+    extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
+
     m_engine = new QQmlApplicationEngine(this);
     redirectQmlEngineWarnings(LogQml());
 

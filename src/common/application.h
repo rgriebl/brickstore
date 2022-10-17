@@ -17,10 +17,10 @@
 #include <QPointer>
 #include <QTimer>
 #include <QMutex>
+#include <QLoggingCategory>
 
 #include "qcoro/task.h"
 
-QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QTranslator)
 QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
 QT_FORWARD_DECLARE_CLASS(QGuiApplication)
@@ -116,6 +116,7 @@ protected:
     QTimer m_loggingTimer;
     QMutex m_loggingMutex;
     QVector<UILogMessage> m_loggingMessages;
+    QLoggingCategory::CategoryFilter m_defaultLoggingFilter = nullptr;
 
     QPointer<Announcements> m_announcements;
 
