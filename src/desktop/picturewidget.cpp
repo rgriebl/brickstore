@@ -238,16 +238,21 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     connect(LDraw::library(), &LDraw::Library::libraryAboutToBeReset,
             this, [this]() {
-        if (m_part) {
-            m_part->release();
-            m_part = nullptr;
-            w_ldraw->setPartAndColor(nullptr, -1);
-        }
+        w_ldraw->clear();
     });
 
     connect(w_stack, &QStackedWidget::currentChanged,
             this, [this]() {
         stackSwitch();
+    });
+
+    connect(w_ldraw, &LDraw::RenderWidget::canRenderChanged,
+            this, [this](bool b) {
+        if (!b)
+            w_stack->setCurrentWidget(w_image);
+        else if (m_prefer3D)
+            w_stack->setCurrentWidget(w_ldraw);
+        w_3d->setEnabled(b);
     });
 
     new EventFilter(w_image, { QEvent::Resize, QEvent::Show }, [this](QObject *, QEvent *) {
@@ -269,10 +274,10 @@ void PictureWidget::stackSwitch()
     w_reloadRescale->setToolTip(is3D ? tr("Center view") : tr("Update"));
     m_renderSettings->setVisible(is3D);
 
-    if (is3D)
-        w_ldraw->setPartAndColor(m_part, m_color);
-    else
+    if (!is3D) {
+        w_ldraw->stopAnimation();
         showImage();
+    }
 
     auto markText = [](const char *text, bool marked) {
         QString str = QString::fromLatin1(text);
@@ -315,8 +320,6 @@ PictureWidget::~PictureWidget()
 {
     if (m_pic)
         m_pic->release();
-    if (m_part)
-        m_part->release();
 }
 
 void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
@@ -339,12 +342,8 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     }
 
     static bool badGPU = isGPUBlackListed();
-
-    if (m_part)
-        m_part->release();
-    m_part = (item && !badGPU) ? LDraw::library()->partFromId(item->id()) : nullptr;
-    if (m_part)
-        m_part->addRef();
+    if (!badGPU)
+        w_ldraw->setItemAndColor(item, color);
 
     m_blCatalog->setVisible(item);
     m_blPriceGuide->setVisible(item && color);
@@ -354,16 +353,13 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
                                                      palette().color(QPalette::Highlight));
     w_text->setText(s);
     w_image->setPixmap({ });
-    w_3d->setEnabled(m_part);
+    w_3d->setEnabled(w_ldraw->canRender());
     w_reloadRescale->setEnabled(m_item);
 
-    if (m_part && m_prefer3D) {
-        w_ldraw->setPartAndColor(m_part, m_color);
+    if (w_ldraw->canRender() && m_prefer3D) {
         w_stack->setCurrentWidget(w_ldraw);
     } else {
         w_stack->setCurrentWidget(w_image);
-        w_ldraw->setPartAndColor(nullptr, -1);
-        w_ldraw->stopAnimation();
         showImage();
     }
 }

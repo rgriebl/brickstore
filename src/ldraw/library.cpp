@@ -43,6 +43,47 @@ Q_LOGGING_CATEGORY(LogLDraw, "ldraw")
 
 namespace LDraw {
 
+class PartLoaderJob
+{
+public:
+    PartLoaderJob(const QString &file, const QString &path, QPromise<Part *> &&promise)
+        : m_file(file)
+        , m_path(path)
+        , m_promise(std::move(promise))
+    { }
+
+    QString file() const { return m_file; }
+    QString path() const { return m_path; }
+
+    void start();
+    void finish(Part *part);
+
+private:
+    QString m_file;
+    QString m_path;
+    QPromise<Part *> m_promise;
+    bool m_started = false;
+};
+
+void PartLoaderJob::start()
+{
+    m_promise.start();
+    m_started = true;
+}
+
+void PartLoaderJob::finish(Part *part)
+{
+    if (!m_started)
+        start();
+    if (part)
+        part->addRef();
+    m_promise.addResult(part);
+    m_promise.finish();
+    delete this;
+}
+
+
+
 Library *Library::s_inst = nullptr;
 
 Library::Library(const QString &updateUrl, QObject *parent)
@@ -114,7 +155,6 @@ Library::Library(const QString &updateUrl, QObject *parent)
         }
         emit libraryReset();
     });
-
 }
 
 Library *Library::create(const QString &updateUrl)
@@ -126,24 +166,87 @@ Library *Library::create(const QString &updateUrl)
 
 Library::~Library()
 {
+    shutdownPartLoaderThread();
+}
+
+QFuture<Part *> Library::partFromId(const QByteArray &id)
+{
+    QString filename = QLatin1String(id) % u".dat";
+    return partFromFile(filename);
+}
+
+QFuture<Part *> Library::partFromFile(const QString &file)
+{
+    QPromise<Part *> promise;
+    QFuture<Part *> result = promise.future();
+
+    if (m_locked) {
+        promise.start();
+        promise.addResult(static_cast<Part *>(nullptr));
+        promise.finish();
+    } else {
+        auto plj = new PartLoaderJob(file, QFileInfo(file).path(), std::move(promise));
+
+        m_partLoaderMutex.lock();
+        m_partLoaderJobs.append(plj);
+        m_partLoaderCondition.wakeOne();
+        m_partLoaderMutex.unlock();
+    }
+    return result;
+}
+
+void Library::partLoaderThread()
+{
+    while (!m_partLoaderShutdown) {
+        m_partLoaderMutex.lock();
+        m_partLoaderCondition.wait(&m_partLoaderMutex);
+
+        if (m_partLoaderShutdown) {
+            m_partLoaderMutex.unlock();
+            continue;
+        }
+
+        PartLoaderJob *plj = m_partLoaderJobs.isEmpty() ? nullptr : m_partLoaderJobs.takeFirst();
+        m_partLoaderMutex.unlock();
+
+        if (!plj)
+            continue;
+
+        plj->start();
+        auto *part = m_partLoaderShutdown ? nullptr : findPart(plj->file(), plj->path());
+        plj->finish(part);
+    }
+}
+
+void Library::startPartLoaderThread()
+{
+    if (!m_partLoaderThread)
+        m_partLoaderThread.reset(QThread::create(&Library::partLoaderThread, this));
+    m_partLoaderThread->start();
+}
+
+void Library::shutdownPartLoaderThread()
+{
+    if (m_partLoaderThread) {
+        if (m_partLoaderThread->isRunning()) {
+            m_partLoaderMutex.lock();
+            m_partLoaderShutdown = 1;
+            m_partLoaderCondition.wakeOne();
+            m_partLoaderMutex.unlock();
+
+            m_partLoaderThread->wait();
+            m_partLoaderShutdown = 0;
+        }
+        m_partLoaderThread.reset();
+    }
+    for (auto *plj : std::as_const(m_partLoaderJobs))
+        plj->finish(nullptr);
+
+    m_partLoaderJobs.clear();
+
     // the parts in cache are referencing each other, so a plain clear will not work
     m_cache.clearRecursive();
 }
-
-Part *Library::partFromFile(const QString &file)
-{
-    return findPart(file, QFileInfo(file).path());
-}
-
-Part *Library::partFromId(const QByteArray &id)
-{
-    if (m_locked)
-        return nullptr;
-
-    QString filename = QLatin1String(id) % u".dat";
-    return findPart(filename);
-}
-
 
 QString Library::path() const
 {
@@ -157,7 +260,8 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 
     emit libraryAboutToBeReset();
 
-    m_cache.clearRecursive();
+    shutdownPartLoaderThread();
+
     if (!m_cache.isEmpty()) {
         emit libraryReset();
         co_return false;
@@ -237,8 +341,10 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
         m_valid = valid;
         emit validChanged(valid);
     }
-    if (valid)
+    if (valid) {
+        startPartLoaderThread();
         emit lastUpdatedChanged(m_lastUpdated);
+    }
 
     co_return true;
 }

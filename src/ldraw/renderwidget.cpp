@@ -30,6 +30,8 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
 {
     setFocusPolicy(Qt::NoFocus);
 
+    connect(m_controller, &RenderController::canRenderChanged,
+            this, &RenderWidget::canRenderChanged);
     connect(m_controller, &RenderController::tumblingAnimationActiveChanged,
             this, &RenderWidget::animationActiveChanged);
     connect(m_controller, &RenderController::requestContextMenu,
@@ -78,14 +80,19 @@ RenderController *RenderWidget::controller()
     return m_controller;
 }
 
-void RenderWidget::setPartAndColor(Part *part, int ldrawColorId)
+void RenderWidget::clear()
 {
-    m_controller->setPartAndColor(part, ldrawColorId);
+    m_controller->setItemAndColor(nullptr, nullptr);
 }
 
-void RenderWidget::setPartAndColor(Part *part, const BrickLink::Color *color)
+void RenderWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    m_controller->setPartAndColor(part, color);
+    m_controller->setItemAndColor(item, color);
+}
+
+bool RenderWidget::canRender() const
+{
+    return m_controller->canRender();
 }
 
 bool RenderWidget::isAnimationActive() const

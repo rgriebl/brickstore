@@ -19,7 +19,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include "ldraw/rendergeometry.h"
-#include "qcoro/qcoro.h"
+#include "qcoro/task.h"
 #include "bricklink/color.h"
 #include "bricklink/item.h"
 #include "bricklink/qmlapi.h"
@@ -42,6 +42,7 @@ class RenderController : public QObject
     Q_PROPERTY(QVector3D center READ center NOTIFY centerChanged FINAL)
     Q_PROPERTY(float radius READ radius NOTIFY radiusChanged FINAL)
     Q_PROPERTY(bool tumblingAnimationActive READ isTumblingAnimationActive WRITE setTumblingAnimationActive NOTIFY tumblingAnimationActiveChanged FINAL)
+    Q_PROPERTY(bool canRender READ canRender NOTIFY canRenderChanged FINAL)
 
 public:
     RenderController(QObject *parent = nullptr);
@@ -57,11 +58,11 @@ public:
     Q_INVOKABLE QQuaternion rotateArcBall(QPointF pressPos, QPointF mousePos,
                                           QQuaternion pressRotation, QSizeF viewportSize);
 
-    Part *part() const;
+    const BrickLink::Item *item() const;
     const BrickLink::Color *color() const;
-    Q_INVOKABLE bool setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
-    void setPartAndColor(Part *part, const BrickLink::Color *color);
-    void setPartAndColor(Part *part, int ldrawColorId);
+    Q_INVOKABLE bool setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
+    bool setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color);
+    bool canRender() const;
 
     bool isTumblingAnimationActive() const;
     void setTumblingAnimationActive(bool active);
@@ -75,7 +76,8 @@ public slots:
 signals:
     void surfacesChanged();
     void linesChanged();
-    void partOrColorChanged();
+    void itemOrColorChanged();
+    void canRenderChanged(bool b);
 
     void centerChanged();
     void radiusChanged();
@@ -90,6 +92,7 @@ signals:
     void clearColorChanged(const QColor &clearColor);
 
 private:
+    void setPartAndColor(Part *part, const BrickLink::Item *item, const BrickLink::Color *color);
     QCoro::Task<void> updateGeometries();
     static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
@@ -104,6 +107,7 @@ private:
     static QHash<const BrickLink::Color *, QQuick3DTextureData *> s_materialTextureDatas;
 
     Part *m_part = nullptr;
+    const BrickLink::Item *m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
 
     QVector3D m_center;

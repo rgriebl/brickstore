@@ -12,6 +12,7 @@ Control {
     property BL.Lot lot
 
     property bool is3D: true
+    property bool prefer3D: true
     property BL.Picture picture
     property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
 
@@ -26,13 +27,8 @@ Control {
         if (picture)
             picture.addRef()
 
-        Qt.callLater(function() {
-            let has3D = info3D.renderController.setPartAndColor(lot.item, lot.color)
-            if (root.is3D && !has3D)
-                root.is3D = false
-            else if (!root.is3D && has3D && (!root.picture || !root.picture.isValid))
-                root.is3D = true;
-        })
+        info3D.renderController.setItemAndColor(lot.item, lot.color)
+        root.is3D = prefer3D && info3D.renderController.canRender
     }
 
     Component.onDestruction: {
@@ -91,7 +87,14 @@ Control {
 
         PartRenderer {
             id: info3D
-            renderController: RenderController { }
+            renderController: RenderController {
+                onCanRenderChanged: {
+                    if (!root.is3D && root.prefer3D && canRender)
+                        root.is3D = true;
+                    else if (root.is3D && !canRender)
+                        root.is3D = false;
+                }
+            }
         }
     }
     RowLayout {
@@ -108,7 +111,7 @@ Control {
             topPadding: 16
             rightPadding: 16
             text: root.is3D ? "2D" : "3D"
-            onClicked: { root.is3D = !root.is3D }
+            onClicked: { root.is3D = !root.is3D; root.prefer3D = root.is3D }
         }
         Item { Layout.fillWidth: true }
         Basic.Button {

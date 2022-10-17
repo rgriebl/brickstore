@@ -17,6 +17,7 @@
 #include <QQuickView>
 
 #include "bricklink/color.h"
+#include "bricklink/item.h"
 
 QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
 
@@ -35,8 +36,10 @@ public:
 
     RenderController *controller();
 
-    void setPartAndColor(Part *part, int ldrawColorId);
-    void setPartAndColor(Part *part, const BrickLink::Color *color);
+    void clear();
+    void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color);
+
+    bool canRender() const;
 
     bool isAnimationActive() const;
     void setAnimationActive(bool active);
@@ -51,6 +54,7 @@ public slots:
 signals:
     void animationActiveChanged();
     void grabFinished(QImage grabbedImage);
+    void canRenderChanged(bool b);
 
 protected:
     void changeEvent(QEvent *e) override;

@@ -65,7 +65,6 @@ private:
     QImage m_image;
     bool m_prefer3D = false;
     LDraw::RenderWidget *w_ldraw = nullptr;
-    LDraw::Part *m_part = nullptr;
     QToolButton *w_2d = nullptr;
     QToolButton *w_3d = nullptr;
     QToolButton *w_reloadRescale = nullptr;

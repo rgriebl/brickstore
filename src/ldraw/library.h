@@ -22,6 +22,11 @@
 #include <QVector>
 #include <QColor>
 #include <QQmlEngine>
+#include <QFuture>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QThread>
+#include <QAtomicInt>
 
 #include "qcoro/task.h"
 #include "utility/q3cache.h"
@@ -37,6 +42,7 @@ namespace LDraw {
 
 class Part;
 class PartElement;
+class PartLoaderJob;
 
 enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
 
@@ -61,8 +67,8 @@ public:
     bool startUpdate(bool force);
     void cancelUpdate();
 
-    Part *partFromId(const QByteArray &id);
-    Part *partFromFile(const QString &filename);
+    QFuture<Part *> partFromId(const QByteArray &id);
+    QFuture<Part *> partFromFile(const QString &filename);
 
     static QStringList potentialLDrawDirs();
     static bool checkLDrawDir(const QString &dir);
@@ -86,12 +92,14 @@ private:
     friend Library *library();
     friend Library *create(const QString &);
 
-    Part *findPart(const QString &filename, const QString &parentdir = { });
+    void partLoaderThread();
+    Part *findPart(const QString &_filename, const QString &_parentdir);
     QByteArray readLDrawFile(const QString &filename);
     void setUpdateStatus(UpdateStatus updateStatus);
     void emitUpdateStartedIfNecessary();
 
-    void clear();
+    void startPartLoaderThread();
+    void shutdownPartLoaderThread();
 
     QString m_updateUrl;
     bool m_valid = false;
@@ -108,6 +116,13 @@ private:
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
     Q3Cache<QString, Part> m_cache;  // path -> part
+
+    QVector<PartLoaderJob *> m_partLoaderJobs;
+    QMutex m_partLoaderMutex;
+    QWaitCondition m_partLoaderCondition;
+    std::unique_ptr<QThread> m_partLoaderThread;
+    QAtomicInt m_partLoaderShutdown = 0;
+    QAtomicInt m_partLoaderClear = 0;
 
     friend class PartElement;
 };

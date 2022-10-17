@@ -104,9 +104,9 @@ QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
     return q * pressRotation;
 }
 
-Part *RenderController::part() const
+const BrickLink::Item *RenderController::item() const
 {
-    return m_part;
+    return m_item;
 }
 
 const BrickLink::Color *RenderController::color() const
@@ -129,29 +129,53 @@ QQuick3DInstancing *RenderController::lines()
     return m_lines;
 }
 
-bool RenderController::setPartAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
+bool RenderController::setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
 {
     const BrickLink::Item *i = item.wrappedObject();
     const BrickLink::Color *c = color.wrappedObject();
 
-    //TODO: this is expensive and should also be moved to a background thread
-    Part *part = i ? LDraw::library()->partFromId(i->id()) : nullptr;
-    setPartAndColor(part, c);
-    return (part);
+    return setItemAndColor(i, c);
 }
 
-void RenderController::setPartAndColor(Part *part, int ldrawColorId)
+bool RenderController::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    setPartAndColor(part, (ldrawColorId < 0) ? nullptr
-                                             : BrickLink::core()->colorFromLDrawId(ldrawColorId));
+    const auto *currentItem = m_item;
+    const auto *currentColor = m_color;
+    m_item = item;
+    m_color = item ? color : nullptr;
+
+    if (!item) {
+        setPartAndColor(nullptr, nullptr, nullptr);
+        return false;
+    } else if (currentItem == item) {
+        if (currentColor != color)
+            setPartAndColor(m_part, item, color);
+        return true;
+    } else {
+        LDraw::library()->partFromId(item->id()).then(this, [this, item, color](Part *part) {
+            // the future comes already ref'ed
+            setPartAndColor(part, item, color);
+            if (part)
+                part->release();
+        });
+        return true;
+    }
 }
 
-void RenderController::setPartAndColor(Part *part, const BrickLink::Color *color)
+bool RenderController::canRender() const
 {
+    return (m_part);
+}
+
+void RenderController::setPartAndColor(Part *part, const BrickLink::Item *item, const BrickLink::Color *color)
+{
+    if (item != m_item || color != m_color) // too late, we switched to another part already
+        return;
+
     if (!color)
         color = BrickLink::core()->color(9); // light gray
 
-    if ((m_part == part) && (m_color == color))
+    if (m_part == part)
         return;
 
     if (m_part)
@@ -172,7 +196,8 @@ QCoro::Task<void> RenderController::updateGeometries()
         m_lines->clear();
 
         emit surfacesChanged();
-        emit partOrColorChanged();
+        emit itemOrColorChanged();
+        emit canRenderChanged(canRender());
         co_return;
     }
 
@@ -292,7 +317,8 @@ QCoro::Task<void> RenderController::updateGeometries()
         m_radius = radius;
         emit radiusChanged();
     }
-    emit partOrColorChanged();
+    emit itemOrColorChanged();
+    emit canRenderChanged(canRender());
 }
 
 void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,

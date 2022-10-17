@@ -1777,8 +1777,6 @@ QCoro::Task<BrickLink::LotList> Document::exportCheck(int exportCheckMode) const
 
 void Document::updateSelection()
 {
-    m_selectedLots.clear();
-
     LotList newSelectedLots;
 
     // Ideally, we would do something like this, but this is way too slow for huge disjointed
@@ -1803,7 +1801,6 @@ void Document::updateSelection()
 
     if (newSelectedLots != m_selectedLots) {
         m_selectedLots = newSelectedLots;
-
         emit selectedLotsChanged(m_selectedLots);
     }
 

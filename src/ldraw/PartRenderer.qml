@@ -12,7 +12,7 @@ Item {
         function onQmlResetCamera() {
             root.animateScaleToFit()
         }
-        function onPartOrColorChanged() {
+        function onItemOrColorChanged() {
             root.scaleToFit()
         }
     }
