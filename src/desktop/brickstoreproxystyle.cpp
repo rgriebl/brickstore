@@ -42,7 +42,7 @@ BrickStoreProxyStyle::BrickStoreProxyStyle(QStyle *baseStyle)
     extern void removeUnneededMacMenuItems();
     removeUnneededMacMenuItems();
 #endif
-    m_isWindowsVistaStyle = baseStyle && (baseStyle->name() == u"windowsvista");
+    m_isWindowsVistaStyle = ((baseStyle ? baseStyle : qApp->style())->name() == u"windowsvista");
 }
 
 void BrickStoreProxyStyle::polish(QWidget *w)
@@ -234,7 +234,7 @@ QSize BrickStoreProxyStyle::sizeFromContents(ContentsType type, const QStyleOpti
     QSize s = QProxyStyle::sizeFromContents(type, option, size, widget);
     if ((type == CT_ComboBox) && m_isWindowsVistaStyle) {
         // the Vista Style has problems with the width in high-dpi modes
-        s.setWidth(int(s.width() * 1.1));
+        s.setWidth(int(s.width() + 16));
     }
     return s;
 }

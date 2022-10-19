@@ -109,7 +109,7 @@ public:
                 QModelIndex idx = DocumentList::inst()->index(i);
                 QString s = idx.data().toString();
                 if (m_shortcut && (cnt < 10))
-                    s = s % u'&' % QString::number((cnt + 1) % 10) % u"   ";
+                    s = u'&' % QString::number((cnt + 1) % 10) % u"   " % s;
 
                 QAction *a = m_menu->addAction(s);
                 a->setCheckable(true);
