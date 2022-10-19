@@ -37,8 +37,10 @@ jobs:
           artifact: "Windows-x64"
           runs-on: windows-2019
           os: windows
+          qt_host: 'windows'
           qt_version: '6.4.0'
           qt_arch: 'win64_msvc2019_64'
+          qt_dir: "msvc2019_64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           cmake_extra_config: '-DSENTRY=ON'
 
@@ -46,8 +48,11 @@ jobs:
           artifact: "Windows-ARM64"
           runs-on: windows-2019
           os: windows
+          qt_host: 'windows'
+          qt_host_arch: 'win64_msvc2019_64'
           qt_version: '6.4.0'
           qt_arch: 'win64_msvc2019_arm64'
+          qt_dir: "msvc2019_arm64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
           cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
 
@@ -71,46 +76,43 @@ jobs:
           runs-on: ubuntu-20.04
           os: linux
           appimage: true
+          qt_host: 'linux'
           qt_version: '6.4.0'
-          qt_arch: ''
+          qt_arch: 'gcc_64'
 
         - name: "macOS Universal"
           artifact: "macOS"
           runs-on: macos-11
           os: macos
+          qt_host: 'mac'
           qt_version: '6.4.0'
-          qt_arch: ''
+          qt_arch: 'clang_64'
+          qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
 
-        - name: "Android ARM 32bit"
-          artifact: "Android-ARM"
-          runs-on: ubuntu-20.04
-          os: android
-          android_abi: 'armeabi-v7a'
-          android_ndk: '23.2.8568313'
-          qt_version: '6.4.0'
-          qt_arch: 'android_armv7'
-          qt_target: 'android'
-          cmake_extra_config: ''
-
-        - name: "Android ARM 64bit"
-          artifact: "Android-ARM64"
+        - name: "Android"
+          artifact: "Android"
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'arm64-v8a'
           android_ndk: '23.2.8568313'
-          qt_version: '6.4.0'
-          qt_arch: 'android_arm64_v8a'
+          qt_host: 'linux'
+          qt_host_arch: 'gcc_64'
           qt_target: 'android'
+          qt_version: '6.4.0'
+          qt_arch: 'android_x86_64'
+          qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: ''
 
         - name: "iOS"
           artifact: "iOS"
           runs-on: macos-12
           os: ios
-          qt_version: '6.4.0'
-          qt_arch: ''
+          qt_host: 'mac'
+          qt_host_arch: 'clang_64'
           qt_target: 'ios'
+          qt_version: '6.4.0'
+          qt_arch: 'ios'
           cmake_extra_config: ''
 
   # BUILD
@@ -118,76 +120,44 @@ jobs:
 
     steps:
 
-    # Caching
-    #################################################
-
-    - name: Cache Qt from qt.io
-      id: cache-qt
-      if: (matrix.config.os != 'linux') || matrix.config.appimage
-      uses: actions/cache@v3
-      with:
-        path: ${{ github.workspace }}/Qt
-        key: ${{ matrix.config.os }}-${{ matrix.config.qt_version }}-${{ matrix.config.qt_arch }}-QtCache-5
-
     # Get Qt
     #################################################
 
-    - name: Install Qt from qt.io
+    - name: Install Qt via aqtinstall
       if: (matrix.config.os != 'linux') || matrix.config.appimage
-      uses: jurplel/install-qt-action@v2
-      with:
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
-        version: ${{ matrix.config.qt_version }}
-        # increase the trailing number in Qt's cache key (QtCache-X) above, if you change the module list below
-        modules: 'qtsvg qtquick3d qtshadertools qttools qtquicktimeline qt5compat'
-        arch: ${{ matrix.config.qt_arch }}
-        target: ${{ matrix.config.qt_target || 'desktop' }}
-        tools: ${{ matrix.config.qt_tools }}
-
-    - name: Install Qt from qt.io (OS version for cross-compiling)
-      if: (matrix.config.os == 'android') || (matrix.config.os == 'ios') || (matrix.config.qt_arch == 'win64_msvc2019_arm64')
-      uses: jurplel/install-qt-action@v2
-      with:
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
-        version: ${{ matrix.config.qt_version }}
-        # increase the trailing number in Qt's cache key (QtCache-X) above, if you change the module list below
-        modules: 'qtquick3d qtshadertools qttools'
-        target: 'desktop'
-        tools: ${{ matrix.config.qt_tools }}
-        set-env: false
+      shell: sh
+      run: |
+        python3 -m pip install aqtinstall
+        if [ "${{ matrix.config.qt_host_arch }}" != "" ]; then
+          python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
+                         ${{ matrix.config.qt_host }} desktop \
+                         ${{ matrix.config.qt_version }} ${{ matrix.config.qt_host_arch }} \
+                         -m qtquick3d qtshadertools qtquicktimeline
+        fi
+        for arch in ${{ matrix.config.qt_arch }} ${{ matrix.config.qt_extra_archs }}; do
+          python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
+                         ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
+                         ${{ matrix.config.qt_version }} $arch \
+                         -m qtquick3d qtshadertools qtquicktimeline
+        done
+        if [ "${{ matrix.config.os }}" = "windows" ]; then
+          echo "Qt6_DIR=${{ runner.workspace }}\\Qt\\${{ matrix.config.qt_version }}\\${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
+        else
+          echo "Qt6_DIR=${{ runner.workspace }}/Qt/${{ matrix.config.qt_version }}/${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
+        fi
 
     - name: Fix broken Windows / ARM64 setup
       if: (matrix.config.qt_arch == 'win64_msvc2019_arm64')
-      # part 1: QTBUG-101059
-      # part 2: jurplel/install-qt-action always exports Qt6_DIR for the first Qt installation
-      #         found, but after a cache restore msvc2019_64 sorts BEFORE msvc2919_arm64
       run: |
-        sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qtpaths.bat"
-        sed -i "s,/Users/qt/work/install/,${Qt6_DIR}/../msvc2019_64/," "${Qt6_DIR}/../msvc2019_arm64/bin/qmake.bat"
-        echo "Qt6_DIR=${Qt6_DIR}/../msvc2019_arm64" >> $GITHUB_ENV
+        sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qtpaths.bat"
+        sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qmake.bat"
+        ${Qt6_DIR}/bin/qmake.bat -query
       shell: sh
-
-    - name: Fix broken iOS / ARM64 setup
-      if: (matrix.config.os == 'ios')
-      # see "part 2" above, only this time for macos vs ios
-      run: |
-        echo "Qt6_DIR=${Qt6_DIR}/../ios" >> $GITHUB_ENV
-      shell: sh
-
-    - name: Install Qt from Linux Distro (native)
-      if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
-      run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            $BRICKSTORE_QT6_MODULES \
-            $BRICKSTORE_GUI_QT6_MODULES \
-            debhelper lsb-release fakeroot build-essential
-      shell: bash
 
     - name: Install Qt from Linux Distro (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
+        sudo docker run -v `pwd`:/brickstore --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install \
             $BRICKSTORE_QT6_MODULES \
@@ -209,101 +179,111 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        call qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target installer
+        call %Qt6_DIR%\bin\qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config RelWithDebInfo --parallel --target installer --verbose
       shell: cmd
 
     - name: Upload Windows Installer
       if: (matrix.config.os == 'windows')
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
-        path: "*.exe"
+        path: "build/*.exe"
 
     - name: Upload Windows debug info to sentry.io
       if: (matrix.config.os == 'windows')
       run: |
         curl.exe -L --output ..\\sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
-        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore bin
+        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore build/bin
       shell: cmd
 
     # Build for Linux
     #################################################
 
-    - name: Build for Linux (native)
-      if: (matrix.config.os == 'linux') && !matrix.config.debian_container && !matrix.config.appimage
-      run: |
-        /usr/lib/qt6/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target deb-package
-      shell: bash
-
     - name: Build for Linux (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker exec -w /build "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        sudo docker exec -w /build "debian-build" cmake --build . --config RelWithDebInfo \
-            --parallel --target deb-package
+        sudo docker exec -w /brickstore "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -B build -S .
+        sudo docker exec -w /brickstore "debian-build" cmake --build build --config RelWithDebInfo \
+            --parallel --target deb-package --verbose
       shell: bash
 
     - name: Build for Linux (appimage)
       if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev
-        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 libxcb-\*
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
-            ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target appimage
+            ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config RelWithDebInfo --parallel --target appimage --verbose
       shell: bash
 
     - name: Upload Linux DEB
       if: (matrix.config.os == 'linux') && !matrix.config.appimage
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
-        path: "*.deb"
+        path: "build/*.deb"
 
     - name: Upload Linux AppImage
       if: (matrix.config.os == 'linux') && matrix.config.appimage
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
-        path: "*.AppImage"
+        path: "build/*.AppImage"
 
     # Build for Android
     #################################################
-
-    - name: Checkout Android openssl
-      if: (matrix.config.os == 'android')
-      run: |
-        cd $ANDROID_SDK_ROOT
-        echo "Checking out KDAB's OpenSSL into $ANDROID_SDK_ROOT"
-        sudo git clone https://github.com/KDAB/android_openssl.git
 
     - name: Build for Android
       if: (matrix.config.os == 'android')
       run: |
         echo "Using NDK: $ANDROID_SDK_ROOT/ndk/${{ matrix.config.android_ndk }}"
         echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
+        # fix build-tools 33 (dx missing)
+        if [ -e $ANDROID_SDK_ROOT/build-tools/33.0.0 ]; then
+          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.0/lib/d8.jar $ANDROID_SDK_ROOT/build-tools/33.0.0/lib/dx.jar
+          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.0/d8 $ANDROID_SDK_ROOT/build-tools/33.0.0/dx
+        fi
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
-        qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) \
             -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
             -DANDROID_NATIVE_API_LEVEL=23 \
-            -DANDROID_ABI=${{ matrix.config.android_abi }} \
+            -DQT_ANDROID_BUILD_ALL_ABIS=TRUE \
             -DANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }} \
             -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
-            ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target final-apk
+            ${{ matrix.config.cmake_extra_config }} -B build -S .
+        echo "Creating AAB"
+        cmake --build build --config Release --parallel --target final-aab --verbose
+        echo "Creating ARM64 APK"
+        cmake --build build/android_abi_builds/arm64-v8a --config Release --parallel --target final-apk --verbose
+        echo "Creating ARM APK"
+        cmake --build build/android_abi_builds/armeabi-v7a --config Release --parallel --target final-apk --verbose
       shell: bash
 
-    - name: Upload Android APK
+    - name: Upload Android AAB
       if: (matrix.config.os == 'android')
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.config.artifact }}
-        path: "*.apk"
+        name: ${{ matrix.config.artifact }}-PlayStore
+        path: "build/*.aab"
+
+    - name: Upload Android ARM64 APK
+      if: (matrix.config.os == 'android')
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.config.artifact }}-ARM64
+        path: "build/android_abi_builds/arm64-v8a/*.apk"
+
+    - name: Upload Android ARM APK
+      if: (matrix.config.os == 'android')
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.config.artifact }}-ARM
+        path: "build/android_abi_builds/armeabi-v7a/*.apk"
 
     # Build for macOS
     #################################################
@@ -311,16 +291,16 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config RelWithDebInfo --parallel --target dmg
+        ${Qt6_DIR}/bin/qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config RelWithDebInfo --parallel --target dmg --verbose
       shell: bash
 
     - name: Upload macOS DMG
       if: (matrix.config.os == 'macos')
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
-        path: "*.dmg"
+        path: "build/*.dmg"
 
     - name: Upload macOS debug info to sentry.io
       if: (matrix.config.os == 'macos')
@@ -328,7 +308,7 @@ jobs:
         brew install getsentry/tools/sentry-cli
         brew link getsentry/tools/sentry-cli
         /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
-            --org brickstore --project brickstore BrickStore.app.dSYM ${Qt6_DIR}/lib/
+            --org brickstore --project brickstore build/BrickStore.app.dSYM ${Qt6_DIR}/lib/
 
     # Build for iOS
     #################################################
@@ -360,28 +340,28 @@ jobs:
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
-        qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release \
+        ${Qt6_DIR}/bin/qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release \
             -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos) \
             -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} \
             -DCMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }} \
             -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=${{ secrets.IOS_CODE_SIGN_IDENTITY }} \
             -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual \
             -DFIX_IOS_ARCHIVE_BUILD=TRUE \
-            ${{ matrix.config.cmake_extra_config }} .
-        cmake --build . --config Release --parallel --target ipa
+            ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config Release --parallel --target ipa --verbose
       shell: bash
 
     - name: Upload iOS IPA
       if: (matrix.config.os == 'ios')
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.config.artifact }}
-        path: "*.ipa"
+        name: ${{ matrix.config.artifact }}-AppStore
+        path: "build/*.ipa"
 
     - name: Upload iOS IPA to the AppStore
       if: (matrix.config.os == 'ios')
       run: |
-        xcrun altool --upload-app -f ./BrickStore-*.ipa -t ios \
+        xcrun altool --upload-app -f build/BrickStore-*.ipa -t ios \
             --apiIssuer "${{ secrets.IOS_API_ISSUER }}" \
             --apiKey "${{ secrets.IOS_API_KEY }}"
       shell: bash
@@ -392,14 +372,14 @@ jobs:
     - name: Generate Documentation
       if: (matrix.config.os == 'linux') && matrix.config.debian_container && matrix.config.generate_docs && (github.ref == 'refs/heads/main')
       run: |
-        sudo docker exec -w /build "debian-build" cmake --build . --target extensions-doc
+        sudo docker exec -w /brickstore "debian-build" cmake --build build --target extensions-doc --verbose
 
     - name: Publish Documentation
       if: matrix.config.generate_docs && (github.ref == 'refs/heads/main')
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./doc/html
+        publish_dir: ./build/doc/html
 
     # Generate the Backend Docker image
     #################################################
@@ -410,7 +390,7 @@ jobs:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        cp *.deb docker/brickstore-backend.deb
+        cp build/*.deb docker/brickstore-backend.deb
         cd docker
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
         docker build . --tag "rgriebl/brickstore-backend:$BUILD_NUMBER"

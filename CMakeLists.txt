@@ -353,13 +353,19 @@ if (ANDROID)
         )
     endif()
 
-    # We expect KDAB's OpenSSL libs in $ANDROID_SDK_ROOT/android_openssl
-    # cd $ANDROID_SDK_ROOT && git clone https://github.com/KDAB/android_openssl.git
-    set(OPENSSL_CMAKE "${ANDROID_SDK_ROOT}/android_openssl/CMakeLists.txt")
-    if (NOT EXISTS ${OPENSSL_CMAKE})
-        message(FATAL_ERROR "${OPENSSL_CMAKE} is missing - please clone KDAB's android_openssl into ${ANDROID_SDK_ROOT}")
-    endif()
-    include(${OPENSSL_CMAKE})
+    include(FetchContent)
+
+    FetchContent_Declare(
+        android_openssl
+        GIT_REPOSITORY https://github.com/KDAB/android_openssl.git
+        GIT_TAG master
+        GIT_SHALLOW YES
+    )
+
+    FetchContent_MakeAvailable(android_openssl)
+    FetchContent_GetProperties(android_openssl)
+
+    include(${android_openssl_SOURCE_DIR}/CMakeLists.txt)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_EXTRA_LIBS "${ANDROID_EXTRA_LIBS}"
     )
@@ -474,7 +480,7 @@ elseif (WIN32)
 
     if (QT_HOST_PATH)
         set(WINDEPLOYQT_PATH "${QT_HOST_PATH}/${QT6_HOST_INFO_BINDIR}")
-        set(WINDEPLOYQT_EXTRA_ARGS "--qmake=${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/qmake.bat")
+        set(WINDEPLOYQT_EXTRA_ARGS "--qtpaths=${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/qtpaths.bat")
     else()
         set(WINDEPLOYQT_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
     endif()
@@ -565,6 +571,7 @@ elseif (LINUX)
         COMMAND "VERSION=${VERSION}"
                 "QML_SOURCES_PATHS=\"${CMAKE_SOURCE_DIR}\""
                 "EXTRA_QT_PLUGINS=\"svg\""
+                "QMAKE=\"${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/qmake\""
                 ${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage "--appdir=${APPIMAGE_DIR}"
                     -e "${CMAKE_BINARY_DIR}/bin/brickstore"
                     -i "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png"
