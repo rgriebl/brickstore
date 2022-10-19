@@ -33,8 +33,6 @@ public:
     static void create();
     static void setDefaultParent(QWidget *defaultParent);
 
-    static int shouldSwitchViews(QKeyEvent *e);
-
     static void setPopupPos(QWidget *w, const QRect &pos);
 
     static EventFilter::Result selectAllFilter(QObject *o, QEvent *e);

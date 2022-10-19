@@ -48,22 +48,6 @@ void DesktopUIHelpers::setDefaultParent(QWidget *defaultParent)
 DesktopUIHelpers::DesktopUIHelpers()
 { }
 
-int DesktopUIHelpers::shouldSwitchViews(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) {
-        if ((e->modifiers() & ~Qt::ShiftModifier) ==
-#if defined(Q_OS_MACOS)
-                Qt::AltModifier
-#else
-                Qt::ControlModifier
-#endif
-                ) {
-            return (e->key() == Qt::Key_Backtab) || (e->modifiers() & Qt::ShiftModifier) ? -1 : 1;
-        }
-    }
-    return 0;
-}
-
 void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
 {
     QSize sh = w->sizeHint();

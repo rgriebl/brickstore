@@ -32,6 +32,7 @@ class DocumentModel;
 class FilterWidget;
 class HistoryLineEdit;
 class View;
+class OpenDocumentsMenu;
 
 
 class ViewPane : public QWidget
@@ -75,7 +76,6 @@ protected:
     void fontChange();
     void paletteChange();
     void changeEvent(QEvent *e) override;
-    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void createToolBar();
@@ -113,4 +113,6 @@ private:
     bool m_active = false;
     QObject *m_viewConnectionContext = nullptr;
     std::function<ViewPane *(Document *, QWidget *)> m_viewPaneCreate;
+
+    OpenDocumentsMenu *m_openDocumentsMenu;
 };

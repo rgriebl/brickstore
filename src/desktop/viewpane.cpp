@@ -28,6 +28,9 @@
 #include <QMainWindow>
 #include <QKeyEvent>
 #include <QDebug>
+#include <QTreeView>
+#include <QScrollBar>
+#include <QShortcut>
 
 #include "common/actionmanager.h"
 #include "common/config.h"
@@ -35,9 +38,9 @@
 #include "common/document.h"
 #include "common/documentlist.h"
 #include "common/documentmodel.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 #include "changecurrencydialog.h"
-#include "desktopuihelpers.h"
 #include "filtertermwidget.h"
 #include "menucombobox.h"
 #include "orderinformationdialog.h"
@@ -65,9 +68,122 @@ QSize CollapsibleLabel::minimumSizeHint() const
 }
 
 
+class OpenDocumentsMenu : public QFrame
+{
+public:
+    OpenDocumentsMenu(ViewPane *viewPane)
+        : QFrame(viewPane, Qt::Popup)
+        , m_viewPane(viewPane)
+        , m_list(new QTreeView(this))
+    {
+        setMinimumSize(300, 200);
+        setFocusProxy(m_list);
+        m_list->setContextMenuPolicy(Qt::NoContextMenu);
+        m_list->setAlternatingRowColors(false);
+        m_list->setHeaderHidden(true);
+        m_list->setAllColumnsShowFocus(true);
+        m_list->setUniformRowHeights(true);
+        m_list->setRootIsDecorated(false);
+        m_list->setTextElideMode(Qt::ElideMiddle);
+        m_list->setSelectionMode(QAbstractItemView::SingleSelection);
+        m_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        m_list->setModel(DocumentList::inst());
+        int is = style()->pixelMetric(QStyle::PM_ListViewIconSize, nullptr, m_list);
+        m_list->setIconSize({ int(is * 2), int(is * 2) });
+
+        // We disable the frame on this list view and use a QFrame around it instead.
+        // This improves the look with QGTKStyle. (from QtCreator)
+#if !defined(Q_OS_MACOS)
+        setFrameStyle(m_list->frameStyle());
+#endif
+        m_list->setFrameStyle(QFrame::NoFrame);
+
+        auto layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(m_list);
+
+        new EventFilter(m_list, { QEvent::KeyPress, QEvent::KeyRelease }, [this](QObject *, QEvent *e) {
+            if (e->type() == QEvent::KeyPress) {
+                auto ke = static_cast<QKeyEvent*>(e);
+                if (ke->key() == Qt::Key_Escape) {
+                    hide();
+                    return EventFilter::StopEventProcessing;
+                }
+                if (ke->key() == Qt::Key_Return
+                        || ke->key() == Qt::Key_Enter) {
+                    activateIndex(m_list->currentIndex());
+                    return EventFilter::StopEventProcessing;
+                }
+            } else if (e->type() == QEvent::KeyRelease) {
+                auto ke = static_cast<QKeyEvent*>(e);
+                if (ke->modifiers() == 0
+                        /*HACK this is to overcome some event inconsistencies between platforms*/
+                        || (ke->modifiers() == Qt::AltModifier
+                            && (ke->key() == Qt::Key_Alt || ke->key() == -1))) {
+                    activateIndex(m_list->currentIndex());
+                    hide();
+                }
+            }
+            return EventFilter::ContinueEventProcessing;
+        });
+
+        connect(m_list, &QTreeView::clicked, this, [this](const QModelIndex &idx) {
+            activateIndex(idx);
+            hide();
+        });
+    }
+
+    QSize sizeHint() const override
+    {
+        class MyTreeView : public QTreeView {
+        public:
+            using QTreeView::viewportSizeHint;
+            using QTreeView::sizeHintForColumn;
+        };
+
+        auto *view = static_cast<const MyTreeView *>(m_list);
+
+        return QSize(view->sizeHintForColumn(0) + m_list->verticalScrollBar()->width() + m_list->frameWidth() * 2,
+                     view->viewportSizeHint().height() + m_list->frameWidth() * 2)
+                + QSize(frameWidth() * 2, frameWidth() * 2);
+    }
+
+    void openAndSelect(int delta)
+    {
+        int row = m_list->currentIndex().row();
+
+        if (!isVisible()) {
+            auto maxSize = m_viewPane->size() / 2;
+            resize(sizeHint().boundedTo(maxSize));
+            move(m_viewPane->mapToGlobal(m_viewPane->rect().center()) - rect().center());
+            show();
+            setFocus();
+            if (auto *doc = m_viewPane->activeDocument())
+                row = int(DocumentList::inst()->documents().indexOf(doc));
+        }
+        int cnt = DocumentList::inst()->count();
+        row = ((row + delta) % cnt + cnt) % cnt;
+        m_list->setCurrentIndex(DocumentList::inst()->index(row, 0));
+        m_list->scrollTo(m_list->currentIndex(), QAbstractItemView::PositionAtCenter);
+    }
+
+private:
+    void activateIndex(const QModelIndex &idx)
+    {
+        if (idx.isValid()) {
+            if (auto *doc = idx.data(Qt::UserRole).value<Document *>())
+                m_viewPane->activateDocument(doc);
+        }
+    }
+
+    ViewPane *m_viewPane;
+    QTreeView *m_list;
+};
+
 ViewPane::ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCreate, Document *activeDocument)
     : QWidget()
     , m_viewPaneCreate(viewPaneCreate)
+    , m_openDocumentsMenu(new OpenDocumentsMenu(this))
 {
     Q_ASSERT(viewPaneCreate);
 
@@ -127,6 +243,30 @@ ViewPane::ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCrea
     m_viewStack->setMinimumHeight(qMax(m_viewStack->minimumHeight(), fontMetrics().height() * 20));
 
     setupViewStack();
+
+    auto nextDoc = new QAction(this);
+    nextDoc->setShortcut(
+#if defined(Q_OS_MACOS)
+                u"Alt+Tab"_qs
+#else
+                u"Ctrl+Tab"_qs
+#endif
+                );
+    nextDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(nextDoc, &QAction::triggered, this, [this]() { m_openDocumentsMenu->openAndSelect(1); });
+    addAction(nextDoc);
+
+    auto prevDoc = new QAction(this);
+    prevDoc->setShortcut(
+#if defined(Q_OS_MACOS)
+                u"Alt+Shift+Tab"_qs
+#else
+                u"Ctrl+Shift+Tab"_qs
+#endif
+                );
+    prevDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(prevDoc, &QAction::triggered, this, [this]() { m_openDocumentsMenu->openAndSelect(-1); });
+    addAction(prevDoc);
 
     if (activeDocument)
         activateDocument(activeDocument);
@@ -229,10 +369,10 @@ void ViewPane::setupViewStack()
     });
     connect(m_viewList, qOverload<int>(&QComboBox::currentIndexChanged),
             this, [this](int docIdx) {
-        auto *doc = m_viewList->itemData(docIdx).value<Document *>();
-        if (doc)
+        if (auto *doc = m_viewList->itemData(docIdx).value<Document *>())
             activateDocument(doc);
-        m_viewList->setToolTip(doc ? doc->filePathOrTitle() : QString());
+        else
+            m_viewList->setToolTip({ });
     });
 
     connect(DocumentList::inst(), &DocumentList::rowsAboutToBeRemoved,
@@ -247,15 +387,16 @@ void ViewPane::setupViewStack()
         }
     });
 
-/*  for (int i = 0; i < 9; ++i) {
-        //: Shortcut to activate window 0-9
-        auto sc = new QShortcut(tr("Alt+%1").arg(i), this);
-        connect(sc, &QShortcut::activated, this, [this, i]() {
-            const int j = (i == 0) ? 9 : i - 1;
-            if (j < m_viewStack->count())
-                m_viewStack->setCurrentIndex(j);
-        });
-    }  */
+//  for (int i = 0; i <= 9; ++i) {
+//        //: Shortcut to activate window 0-9
+//        auto sc = new QShortcut(tr("Alt+%1").arg(i), this);
+//        sc->setContext(Qt::WidgetWithChildrenShortcut);
+//        connect(sc, &QShortcut::activated, this, [this, i]() {
+//            int docIdx = (i == 0) ? 9 : i - 1;
+//            if (auto *doc = m_viewList->itemData(docIdx).value<Document *>())
+//                activateDocument(doc);
+//        });
+//    }
 }
 
 void ViewPane::setView(View *view)
@@ -265,7 +406,6 @@ void ViewPane::setView(View *view)
     m_view = nullptr;
     m_model = nullptr;
     m_filter->setDocument(nullptr);
-    //m_filter->setFilter({ });
     if (!view)
         return;
     m_viewConnectionContext = new QObject(this);
@@ -309,6 +449,7 @@ void ViewPane::activateDocument(Document *document)
     }
     m_viewStack->setCurrentWidget(view);
     view->setFocus();
+    m_viewList->setToolTip(document->filePathOrTitle());
 }
 
 Document *ViewPane::activeDocument() const
@@ -571,20 +712,6 @@ void ViewPane::changeEvent(QEvent *e)
     else if (e->type() == QEvent::FontChange)
         fontChange();
     QWidget::changeEvent(e);
-}
-
-void ViewPane::keyPressEvent(QKeyEvent *e)
-{
-    int d = DesktopUIHelpers::shouldSwitchViews(e);
-    if (d) {
-        int cnt = m_viewList->count();
-        if (cnt > 1) {
-            int idx = (m_viewList->currentIndex() + d + cnt) % cnt;
-            m_viewList->setCurrentIndex(idx);
-        }
-        e->accept();
-    }
-    QWidget::keyPressEvent(e);
 }
 
 void ViewPane::createToolBar()
