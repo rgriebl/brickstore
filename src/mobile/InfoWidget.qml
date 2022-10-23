@@ -106,6 +106,8 @@ Control {
         Basic.Button {
             flat: true
             font.bold: true
+            palette.windowText: "black"
+            palette.buttonText: "black"
             leftPadding: 8
             bottomPadding: 8
             topPadding: 16
@@ -116,6 +118,8 @@ Control {
         Item { Layout.fillWidth: true }
         Basic.Button {
             flat: true
+            palette.windowText: "black"
+            palette.buttonText: "black"
             icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
             rightPadding: 8
             bottomPadding: 8

@@ -15,6 +15,7 @@ Page {
     property int updateLastNDays: 60
 
     header: ToolBar {
+        topPadding: Style.topScreenMargin
         RowLayout {
             anchors.fill: parent
             ToolButton {
