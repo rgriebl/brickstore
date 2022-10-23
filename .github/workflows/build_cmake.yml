@@ -2,18 +2,20 @@ name: CMake Build Matrix
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  BRICKSTORE_QT6_MODULES: >-
+  BRICKSTORE_QT6_DEB_PACKAGES: >-
       build-essential cmake ninja-build
       libglvnd-dev libtbb-dev
       qt6-tools-dev qt6-tools-dev-tools
       qt6-l10n-tools qt6-documentation-tools
       qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
       qt6-qpa-plugins
-  BRICKSTORE_GUI_QT6_MODULES: >-
+  BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
       qt6-gtk-platformtheme
       qml6-module-qt5compat-graphicaleffects
+  BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
+      qtquick3d qtshadertools qtquicktimeline qt5compat
 
 on:
   workflow_dispatch:
@@ -132,13 +134,13 @@ jobs:
           python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
                          ${{ matrix.config.qt_host }} desktop \
                          ${{ matrix.config.qt_version }} ${{ matrix.config.qt_host_arch }} \
-                         -m qtquick3d qtshadertools qtquicktimeline
+                         -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
         fi
         for arch in ${{ matrix.config.qt_arch }} ${{ matrix.config.qt_extra_archs }}; do
           python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
                          ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
                          ${{ matrix.config.qt_version }} $arch \
-                         -m qtquick3d qtshadertools qtquicktimeline
+                         -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
         done
         if [ "${{ matrix.config.os }}" = "windows" ]; then
           echo "Qt6_DIR=${{ runner.workspace }}\\Qt\\${{ matrix.config.qt_version }}\\${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
@@ -160,8 +162,8 @@ jobs:
         sudo docker run -v `pwd`:/brickstore --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install \
-            $BRICKSTORE_QT6_MODULES \
-            $BRICKSTORE_GUI_QT6_MODULES \
+            $BRICKSTORE_QT6_DEB_PACKAGES \
+            $BRICKSTORE_GUI_QT6_DEB_PACKAGES \
             debhelper lsb-release fakeroot build-essential
       shell: bash
 
