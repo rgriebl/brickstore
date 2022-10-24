@@ -36,6 +36,8 @@ public:
     void checkRestart() override;
     DeveloperConsole *developerConsole();
 
+    QCoro::Task<> shutdown();
+
 protected:
     void setupLogging() override;
 

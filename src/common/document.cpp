@@ -594,7 +594,7 @@ QCoro::Task<bool> Document::requestClose()
     }
     if (doClose) {
         emit closeAllViewsForDocument();
-        deleteLater();
+        delete this;
     }
     co_return doClose;
 }

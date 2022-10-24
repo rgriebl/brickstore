@@ -150,10 +150,7 @@ void DesktopApplication::init()
 
     MainWindow::inst()->show();
 
-#if defined(Q_OS_MACOS)
-    MainWindow::inst()->raise();
-
-#elif defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS)
     RegisterApplicationRestart(nullptr, 0); // make us restart-able by installers
 
 #endif

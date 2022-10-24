@@ -116,7 +116,61 @@ MainWindow *MainWindow::inst()
     return s_inst;
 }
 
+void MainWindow::show()
+{
+    QMetaObject::invokeMethod(this, [this]() {
+        bool doNotRestoreGeometry = false;
 
+        if (SystemInfo::inst()->value(u"windows.tabletmode"_qs).toBool()) {
+            // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
+            // (as in: we end up in a weird state)
+            doNotRestoreGeometry = true;
+
+            // if we don't do this, we get force maximized by Windows after showing and this messes
+            // up the dock widget layout
+            setWindowState(Qt::WindowMaximized);
+        }
+
+        auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
+        if (!doNotRestoreGeometry)
+            restoreGeometry(geo);
+
+        auto state = Config::inst()->value(u"/MainWindow/Layout/State"_qs).toByteArray();
+        if (state.isEmpty() || !restoreState(state, DockStateVersion))
+            m_toolbar->show();
+
+        QMainWindow::show();
+
+#if defined(Q_OS_MACOS)
+        MainWindow::inst()->raise();
+#endif
+    }, Qt::QueuedConnection);
+}
+
+QCoro::Task<> MainWindow::shutdown()
+{
+    QStringList files = DocumentList::inst()->allFiles();
+
+    if (co_await Application::inst()->closeAllDocuments()) {
+        Config::inst()->setValue(u"/MainWindow/LastSessionDocuments"_qs, files);
+
+#if defined(Q_OS_MACOS)
+        // from QtCreator:
+        // On OS X applications usually do not restore their full screen state.
+        // To be able to restore the correct non-full screen geometry, we have to put
+        // the window out of full screen before saving the geometry.
+        // Works around QTBUG-45241
+
+        if (isFullScreen())
+            setWindowState(windowState() & ~Qt::WindowFullScreen);
+#endif
+
+        Config::inst()->setValue(u"/MainWindow/Layout/Geometry"_qs, saveGeometry());
+        Config::inst()->setValue(u"/MainWindow/Layout/State"_qs, saveState(DockStateVersion));
+
+        qApp->exit();
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -192,8 +246,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_defaultDockState = saveState();
 
-    bool doNotRestoreGeometry = false;
-
 #if defined(Q_OS_WINDOWS)
     new EventFilter(this, { QEvent::Show }, [this](QObject *, QEvent *) -> EventFilter::Result {
         auto winTaskbarButton = new QWinTaskbarButton(this);
@@ -212,27 +264,8 @@ MainWindow::MainWindow(QWidget *parent)
         });
         return EventFilter::ContinueEventProcessing | EventFilter::DeleteEventFilter;
     });
-
-    if (SystemInfo::inst()->value(u"windows.tabletmode"_qs).toBool()) {
-        // in tablet mode, the window is auto-maximized, but the geometry restore prevents that
-        // (as in: we end up in a weird state)
-        doNotRestoreGeometry = true;
-
-        // if we don't do this, we get force maximized by Windows after showing and this messes
-        // up the dock widget layout
-        setWindowState(Qt::WindowMaximized);
-    }
 #endif
 
-    auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
-    if (!doNotRestoreGeometry)
-        restoreGeometry(geo);
-
-    auto state = Config::inst()->value(u"/MainWindow/Layout/State"_qs).toByteArray();
-    if (state.isEmpty() || !restoreState(state, DockStateVersion)) {
-        m_toolbar->show();
-        state.clear();
-    }
     menuBar()->show();
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
@@ -393,9 +426,6 @@ void MainWindow::languageChange()
 MainWindow::~MainWindow()
 {
     Config::inst()->setValue(u"/MainWindow/Filter"_qs, m_favoriteFilters->stringList());
-
-    Config::inst()->setValue(u"/MainWindow/Layout/State"_qs, saveState(DockStateVersion));
-    Config::inst()->setValue(u"/MainWindow/Layout/Geometry"_qs, saveGeometry());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
@@ -1266,16 +1296,8 @@ void MainWindow::showSettings(const QString &page)
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-    //TODO move to Application and get rid of QCoro::waitFor
-    QStringList files = DocumentList::inst()->allFiles();
-    Config::inst()->setValue(u"/MainWindow/LastSessionDocuments"_qs, files);
-
-    if (!QCoro::waitFor(Application::inst()->closeAllDocuments())) {
-        e->ignore();
-        return;
-    }
-    e->accept();
-    QMainWindow::closeEvent(e);
+    e->ignore();
+    QMetaObject::invokeMethod(this, &MainWindow::shutdown, Qt::QueuedConnection);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *e)
