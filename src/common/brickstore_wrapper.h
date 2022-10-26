@@ -587,6 +587,8 @@ public:
 
     Q_INVOKABLE double maxLocalPrice(const QString &currencyCode);
 
+    Q_INVOKABLE QString cacheStats() const;
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);

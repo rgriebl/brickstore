@@ -73,6 +73,8 @@ public:
     static QStringList potentialLDrawDirs();
     static bool checkLDrawDir(const QString &dir);
 
+    QPair<int, int> partCacheStats() const;
+
 signals:
     void updateStarted();
     void updateProgress(int received, int total);

@@ -105,6 +105,9 @@ public:
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot);
 
+    QPair<int, int> pictureCacheStats() const;
+    QPair<int, int> priceGuideCacheStats() const;
+
 public slots:
     void setOnlineStatus(bool on);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
@@ -182,9 +185,6 @@ private:
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
     WantedLists *m_wantedLists = nullptr;
-
-    QPair<int, int> pictureCacheStats() const;
-    QPair<int, int> priceGuideCacheStats() const;
 
     friend class PriceGuideLoaderJob;
     friend class PictureLoaderJob;

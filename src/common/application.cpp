@@ -97,12 +97,6 @@ Application::Application(int &argc, char **argv)
 
 void Application::init()
 {
-    qInfo() << "UI:";
-    qInfo() << "  Device pixel ratio :" << qApp->devicePixelRatio()
-            << QGuiApplication::highDpiScaleFactorRoundingPolicy();
-    const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();
-    qInfo() << "  Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
-
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     new EventFilter(qApp, { QEvent::FileOpen }, [this](QObject *, QEvent *e) {
@@ -184,6 +178,12 @@ void Application::init()
     connect(this, &Application::languageChanged,
             am, &ActionManager::retranslate);
     am->retranslate();
+
+    qInfo() << "UI:";
+    qInfo() << "  Device pixel ratio :" << qApp->devicePixelRatio()
+            << QGuiApplication::highDpiScaleFactorRoundingPolicy();
+    const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();
+    qInfo() << "  Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
 
     setupQml();
 }
@@ -936,10 +936,10 @@ void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)
 
     QObject::connect(m_engine, &QQmlEngine::warnings,
                      qApp, [&cat](const QList<QQmlError> &list) {
-        if (!cat.isWarningEnabled())
-            return;
-
         for (auto &err : list) {
+            if (!cat.isEnabled(err.messageType()))
+                continue;
+
             QByteArray func;
             if (err.object())
                 func = err.object()->objectName().toLocal8Bit();
@@ -949,11 +949,11 @@ void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)
             else
                 file = err.url().toDisplayString().toLocal8Bit();
 
-            QMessageLogger ml(file, err.line(), func, cat.categoryName());
-            ml.warning().nospace().noquote() << err.description();
+            qt_message_output(err.messageType(),
+                              { file.constData(), err.line(), func, cat.categoryName() },
+                              err.description());
         }
     });
-
 }
 
 #include "moc_application.cpp"

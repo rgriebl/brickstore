@@ -14,13 +14,16 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QQmlInfo>
 #include <QFile>
 #include <QUrl>
 #include <QGuiApplication>
+#include <QStringBuilder>
 
 #include "utility/utility.h"
 #include "common/currency.h"
 #include "bricklink/order.h"
+#include "ldraw/library.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
 #include "common/document.h"
@@ -291,6 +294,28 @@ QmlThenable *QmlBrickStore::checkBrickLinkLogin()
 double QmlBrickStore::maxLocalPrice(const QString &currencyCode)
 {
     return DocumentModel::maxLocalPrice(currencyCode);
+}
+
+QString QmlBrickStore::cacheStats() const
+{
+    auto pic = BrickLink::core()->pictureCacheStats();
+    auto pg = BrickLink::core()->priceGuideCacheStats();
+    auto ld = LDraw::library()->partCacheStats();
+
+    QString picBar(int(double(pic.first) / pic.second * 16), u'=');
+    picBar += QString(16 - picBar.length(), u' ');
+    QString pgBar(int(double(pg.first) / pg.second * 16), u'=');
+    pgBar += QString(16 - pgBar.length(), u' ');
+    QString ldBar(int(double(ld.first) / ld.second * 16), u'=');
+    ldBar += QString(16 - ldBar.length(), u' ');
+
+    return u"Cache stats:\n"_qs
+                  % u"Pictures    : [" % picBar % u"] " % QString::number(pic.first / 1000)
+                  % u" / " % QString::number(pic.second / 1000) % u" MB\n"
+                  % u"Price guides: [" % pgBar % u"] " % QString::number(pg.first)
+                  % u" / " % QString::number(pg.second) % u" entries\n"
+                  % u"LDraw parts : [" % ldBar % u"] " % QString::number(ld.first)
+                  % u" / " % QString::number(ld.second) % u" lines";
 }
 
 

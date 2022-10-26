@@ -15,7 +15,7 @@
 
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
-#include "qqmlregistration.h"
+#include <QtQml/qqmlregistration.h>
 
 #include "bricklink/color.h"
 #include "bricklink/global.h"

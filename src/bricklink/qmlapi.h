@@ -102,8 +102,6 @@ public:
     Q_INVOKABLE BrickLink::AppearsInModel *appearsInModel(const QVariantList &items,
                                                           const QVariantList &colors);
 
-    Q_INVOKABLE void cacheStat() const;
-
     Q_INVOKABLE QString itemHtmlDescription(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                             const QColor &highlight) const;
 

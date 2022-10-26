@@ -570,6 +570,11 @@ bool Library::checkLDrawDir(const QString &ldir)
     return ok;
 }
 
+QPair<int, int> Library::partCacheStats() const
+{
+    return qMakePair(m_cache.totalCost(), m_cache.maxCost());
+}
+
 QStringList Library::potentialLDrawDirs()
 {
     QStringList dirs;
