@@ -187,10 +187,8 @@ void DesktopApplication::checkRestart()
 DeveloperConsole *DesktopApplication::developerConsole()
 {
     if (!m_devConsole) {
-        m_devConsole = new DeveloperConsole();
-        connect(m_devConsole, &DeveloperConsole::execute,
-                this, [](const QString &command, bool *successful) {
-            *successful = ScriptManager::inst()->executeString(command);
+        m_devConsole = new DeveloperConsole(u"\u2771\u2771\u2771 "_qs, [](QString command) {
+                return ScriptManager::inst()->executeString(command);
         });
         if (!m_loggingTimer.isActive())
             m_loggingTimer.start();
@@ -205,8 +203,8 @@ void DesktopApplication::setupLogging()
     setUILoggingHandler([](const UILogMessage &lm) {
         if (auto *that = inst()) {
             if (auto devConsole = that->developerConsole())
-                devConsole->append(std::get<0>(lm), std::get<1>(lm), std::get<2>(lm),
-                                   std::get<3>(lm), std::get<4>(lm));
+                devConsole->appendLogMessage(std::get<0>(lm), std::get<1>(lm), std::get<2>(lm),
+                                             std::get<3>(lm), std::get<4>(lm));
         }
     });
 }

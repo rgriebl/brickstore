@@ -11,122 +11,121 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QPlainTextEdit>
-#include <QStringBuilder>
 #include <QLineEdit>
-#include <QVBoxLayout>
+#include <QPlainTextEdit>
+#include <QLabel>
+#include <QScrollBar>
+#include <QGridLayout>
+#include <QTextBlock>
+#include <QStringBuilder>
 #include <QKeyEvent>
-#include <QTimer>
+#include <QApplication>
 
 #include "common/eventfilter.h"
 #include "developerconsole.h"
 
 
-DeveloperConsole::DeveloperConsole(QWidget *parent)
-    : QWidget(parent)
+DeveloperConsole::DeveloperConsole(const QString &prompt,
+                                   std::function<std::tuple<QString, bool>(QString)> executeFunction,
+                                   QWidget *parent)
+    : QFrame(parent)
+    , m_log(new QPlainTextEdit(this))
+    , m_cmd(new QLineEdit(this))
+    , m_prompt(new QLabel(this))
+    , m_executeFunction(executeFunction)
 {
-    m_log = new QPlainTextEdit(this);
+    setFrameStyle(QFrame::StyledPanel);
+
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
-    new EventFilter(m_log, { QEvent::KeyPress }, [this](QObject *, QEvent *e) {
-        if (static_cast<QKeyEvent *>(e)->text() == m_consoleKey) {
-            activateConsole(!m_consoleActive);
-            return EventFilter::StopEventProcessing;
-        }
-        return EventFilter::ContinueEventProcessing;
-    });
-    m_cmd = new QLineEdit(this);
-    m_cmd->hide();
+    m_log->setFrameStyle(QFrame::NoFrame);
+
+    m_cmd->setFrame(false);
+    m_cmd->setPlaceholderText(u"JS console, type \"help\" for help, \u2191/\u2193 for history"_qs);
+
+    m_prompt->setBackgroundRole(QPalette::Base);
+    m_prompt->setAutoFillBackground(true);
+    m_prompt->setIndent(int(m_log->document()->documentMargin()));
+    setPrompt(prompt);
 
     new EventFilter(m_cmd, { QEvent::KeyPress }, [this](QObject *, QEvent *e) {
         auto *ke = static_cast<QKeyEvent *>(e);
 
         int hd = (ke->key() == Qt::Key_Up) ? -1 : ((ke->key() == Qt::Key_Down) ? 1 : 0);
         if (hd) {
-            if (((m_historyIndex + hd) >= 0) && ((m_historyIndex + hd) < m_history.size())) {
+            if (((m_historyIndex + hd) >= 0) && ((m_historyIndex + hd) <= m_history.size())) {
+                if (m_historyIndex == m_history.size())
+                    m_current = m_cmd->text();
                 m_historyIndex += hd;
-                m_cmd->setText(m_history.at(m_historyIndex));
+                m_cmd->setText((m_historyIndex == m_history.size())
+                               ? m_current : m_history.at(m_historyIndex));
             }
+            return EventFilter::StopEventProcessing;
         } else if (ke->key() == Qt::Key_Escape) {
             m_cmd->clear();
-        } else if ((ke->text() == m_consoleKey) && m_cmd->text().isEmpty()) {
-            m_cmd->clear();
-            activateConsole(!m_consoleActive);
             return EventFilter::StopEventProcessing;
+        } else {
+            return EventFilter::ContinueEventProcessing;
         }
-        return EventFilter::ContinueEventProcessing;
     });
 
     connect(m_cmd, &QLineEdit::returnPressed,
             this, [this]() {
-        auto s = m_cmd->text();
-        if (!s.isEmpty()) {
-            bool successful = false;
-            emit execute(s, &successful);
-            if (successful) {
-                if (!m_history.endsWith(s))
-                    m_history.append(s);
+        auto cmd = m_cmd->text();
+        if (!cmd.isEmpty() && m_executeFunction) {
+            m_log->appendPlainText(m_prompt->text() % cmd);
+            auto [message, succeeded] = m_executeFunction(cmd);
+            if (succeeded) {
+                m_log->appendPlainText(message);
+                m_history.removeAll(cmd);
+                m_history.append(cmd);
+            } else {
+                m_log->appendPlainText(u"ERROR: " % message);
             }
+            m_log->moveCursor(QTextCursor::End);
         }
         m_cmd->clear();
         m_historyIndex = int(m_history.size());
+        m_log->ensureCursorVisible();
     });
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QGridLayout(this);
+    layout->setColumnStretch(1, 10);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(m_log);
-    layout->addWidget(m_cmd);
+    layout->setVerticalSpacing(0);
+    layout->setHorizontalSpacing(0);
+    layout->addWidget(m_log, 0, 0, 1, 2);
+    layout->addWidget(m_prompt, 1, 0);
+    layout->addWidget(m_cmd, 1, 1);
 
-    languageChange();
     fontChange();
+}
+
+void DeveloperConsole::setPrompt(const QString &prompt)
+{
+    if (m_prompt->text() != prompt)
+        m_prompt->setText(prompt);
 }
 
 void DeveloperConsole::changeEvent(QEvent *e)
 {
-    if (e->type() == QEvent::LanguageChange)
-        languageChange();
-    else if (e->type() == QEvent::FontChange)
+    if (e->type() == QEvent::FontChange)
         fontChange();
     QWidget::changeEvent(e);
-}
-
-void DeveloperConsole::activateConsole(bool active)
-{
-    if (active == m_consoleActive)
-        return;
-    m_consoleActive = active;
-    if (m_consoleActive) {
-        m_cmd->show();
-        m_cmd->setFocus();
-    } else {
-        m_cmd->hide();
-        m_log->setFocus();
-    }
-    auto tc = m_log->textCursor();
-    if (!tc.atEnd()) {
-        tc.movePosition(QTextCursor::End);
-        m_log->setTextCursor(tc);
-    }
-    m_log->ensureCursorVisible();
-}
-
-void DeveloperConsole::languageChange()
-{
-    m_consoleKey = tr("`", "Hotkey for DevConsole, key below ESC");
-
-    m_log->setToolTip(tr("Press %1 to activate the developer console").arg(m_consoleKey));
 }
 
 void DeveloperConsole::fontChange()
 {
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    f.setPointSizeF(font().pointSizeF());
-    m_log->setFont(f);
+    f.setPointSizeF(qApp->font().pointSizeF());
+    m_log->document()->setDefaultFont(f);
+    //m_cmd->setCursorWidth(QFontMetrics(f).averageCharWidth());
+    m_cmd->setFont(f);
+    m_prompt->setFont(f);
 }
 
-
-void DeveloperConsole::append(QtMsgType type, const QString &category, const QString &file,
-                              int line, const QString &msg)
+void DeveloperConsole::appendLogMessage(QtMsgType type, const QString &category,
+                                        const QString &file, int line, const QString &msg)
 {
     static const char *msgTypeNames[] =   { "DBG ",   "WARN",   "CRIT",   "FATL",   "INFO" };
     static const char *msgTypeColor[] =   { "000000", "000000", "ff0000", "ffffff", "ffffff" };
@@ -148,6 +147,8 @@ void DeveloperConsole::append(QtMsgType type, const QString &category, const QSt
         filename = filename.mid(pos + 1);
     }
 
+    int catIndex = (category.isEmpty() ? 0 : category.at(0).unicode()) % 6;
+
     QString str = u"<pre>"_qs;
     const auto lines = msg.split(u"\n"_qs);
     for (int i = 0; i < lines.count(); ++i) {
@@ -155,7 +156,7 @@ void DeveloperConsole::append(QtMsgType type, const QString &category, const QSt
                 % uR"(;background-color:#)" % QLatin1String(msgTypeBgColor[type]) % uR"(;">)"
                 % QLatin1String(msgTypeNames[type]) % uR"(</span>)"
                 % uR"(&nbsp;<span style="color:#)"
-                % QLatin1String(categoryColor[qHashBits(category.constData(), category.size() * 2, 1) % 6])
+                % QLatin1String(categoryColor[catIndex])
                 % uR"(;font-weight:bold;">)" % category % uR"(</span>)" % u":&nbsp;"
                 % lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
@@ -172,7 +173,14 @@ void DeveloperConsole::append(QtMsgType type, const QString &category, const QSt
         }
     }
 
+    // only scroll to bottom, if we were at the bottom to begin with
+    auto *sb = m_log->verticalScrollBar();
+    bool atBottom = (sb->value() == sb->maximum());
+
     m_log->appendHtml(str);
+
+    if (atBottom)
+        m_log->ensureCursorVisible();
 }
 
 #include "moc_developerconsole.cpp"

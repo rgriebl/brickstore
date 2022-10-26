@@ -311,7 +311,7 @@ QVector<Script *> ScriptManager::scripts() const
     return m_scripts;
 }
 
-bool ScriptManager::executeString(const QString &s)
+std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
 {
     Q_ASSERT(m_engine);
 
@@ -328,23 +328,19 @@ bool ScriptManager::executeString(const QString &s)
     QQmlComponent component(m_engine);
     component.setData(script, QUrl());
     if (component.status() == QQmlComponent::Error)
-        qCWarning(LogScript) << "JS compile error:" << component.errorString();
+        return { u"JS compile error: "_qs % component.errorString(), false };
     m_rootObject = component.create();
 
     QQmlExpression e(m_engine->rootContext(), m_rootObject, s);
-    qCInfo(LogScript).noquote() << "#" << s;
     bool isUndefined = false;
     auto result = e.evaluate(&isUndefined);
-    if (e.hasError()) {
-        qCInfo(LogScript).noquote() << "> <error>:" << e.error().toString();
-        return false;
-    } else if (isUndefined) {
-        qCInfo(LogScript, "> <undefined>");
-        return true;
-    } else {
-        qCInfo(LogScript).noquote() << ">" << stringify(result, 1, false);
-        return true;
-    }
+
+    if (e.hasError())
+        return { e.error().toString(), false };
+    else if (isUndefined)
+        return { QString { }, true };
+    else
+        return { stringify(result, 0, false), true };
 }
 
 void ScriptManager::clearScripts()

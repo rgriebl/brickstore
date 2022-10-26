@@ -37,7 +37,7 @@ public:
 
     QVector<Script *> scripts() const;
 
-    bool executeString(const QString &s);
+    std::tuple<QString, bool> executeString(const QString &s);
 
 signals:
     void aboutToReload();

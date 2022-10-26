@@ -13,40 +13,42 @@
 */
 #pragma once
 
-#include <QWidget>
-#include <QMutex>
+#include <functional>
+
+#include <QFrame>
 #include <QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
-QT_FORWARD_DECLARE_CLASS(QTimer)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 
-class DeveloperConsole : public QWidget
+class DeveloperConsole : public QFrame
 {
     Q_OBJECT
 
 public:
-    DeveloperConsole(QWidget *parent = nullptr);
+    DeveloperConsole(const QString &prompt, std::function<std::tuple<QString, bool>(QString)> executeFunction,
+                     QWidget *parent = nullptr);
 
-    void append(QtMsgType type, const QString &category, const QString &file,
-                int line, const QString &msg);
+    void setPrompt(const QString &prompt);
 
-signals:
-    void execute(const QString &command, bool *successful);
+    void appendLogMessage(QtMsgType type, const QString &category, const QString &file,
+                          int line, const QString &msg);
 
 protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    void activateConsole(bool b);
-    void languageChange();
     void fontChange();
 
     QPlainTextEdit *m_log;
     QLineEdit *m_cmd;
+    QLabel *m_prompt;
+
     QStringList m_history;
-    QString m_consoleKey;
     int m_historyIndex = 0;
-    bool m_consoleActive = false;
+    QString m_current;
+
+    std::function<std::tuple<QString, bool>(QString)> m_executeFunction;
 };
