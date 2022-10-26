@@ -60,7 +60,11 @@ static QString stringifyType(QMetaType mt)
     case QMetaType::QVariant    : return u"var"_qs;
     case QMetaType::QVariantList: return u"list"_qs;
     case QMetaType::QVariantMap : return u"object"_qs;
-    case QMetaType::QSize       : return u"size"_qs;
+    case QMetaType::QDate       :
+    case QMetaType::QTime       :
+    case QMetaType::QDateTime   : return u"date"_qs;
+    case QMetaType::QSize       :
+    case QMetaType::QSizeF      : return u"size"_qs;
     case QMetaType::QColor      : return u"color"_qs;
     case QMetaType::Float       :
     case QMetaType::Double      : return u"real"_qs;
@@ -94,7 +98,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         str = str % nextIndent % stringifyType(p.metaType()) % u' '
                 % QLatin1String(p.name()) % u": " % stringify(value, level + 1, false) % u'\n';
     }
-
+/*
     for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
         QMetaMethod m = mo->method(i);
         switch (m.methodType()) {
@@ -110,7 +114,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         str = str % nextIndent % stringifyType(m.returnMetaType()) % u' ' % QLatin1String(m.name())
                 % u'(' % params.join(u", ") % u")\n";
     }
-
+*/
     str = str % indent % u'}';
     return str;
 }
@@ -167,7 +171,21 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
         break;
     }
     case QMetaType::QString: {
-        str = str % u'"' % value.toString().remove(u"\0"_qs) % u'"';
+        if (level > 0)
+            str = str % u'"' % value.toString().remove(u"\0"_qs) % u'"';
+        else
+            str = value.toString().remove(u"\0"_qs);
+        break;
+    }
+    case QMetaType::QSize:
+    case QMetaType::QSizeF: {
+        const auto s = value.toSizeF();
+        str = QString::number(s.width()) % u" x " % QString::number(s.height());
+        break;
+    }
+    case QMetaType::QDateTime: {
+        const auto dt = value.toDateTime();
+        str = dt.isValid() ? dt.toString() : u"<invalid date>"_qs;
         break;
     }
     case QMetaType::QObjectStar: {
@@ -179,12 +197,23 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
         str.append(stringifyQObject(o, o->metaObject(), level, false));
         break;
     }
+    case QMetaType::Nullptr:
+        str = u"null"_qs;
+        break;
     default: {
         QMetaType meta(value.typeId());
-        if (meta.flags().testFlag(QMetaType::IsGadget))
+        if (meta.flags().testFlag(QMetaType::IsGadget)) {
             str.append(stringifyQGadget(value.data(), meta.metaObject(), level, false));
-        else
+        } else if (meta.flags().testFlag(QMetaType::PointerToQObject)) {
+            QObject *o = qvariant_cast<QObject *>(value);
+            if (!o) {
+                str.append(u"<invalid QObject>");
+                break;
+            }
+            str.append(stringifyQObject(o, o->metaObject(), level, false));
+        } else {
             str.append(value.toString());
+        }
         break;
     }
     }
