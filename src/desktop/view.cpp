@@ -363,8 +363,6 @@ View::View(Document *document, QWidget *parent)
     m_table->setAlternatingRowColors(true);
     m_table->setAutoFillBackground(false);
     m_table->setTabKeyNavigation(true);
-    m_table->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_table->setContextMenuPolicy(Qt::CustomContextMenu);
     m_table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_table->verticalHeader()->hide();

@@ -91,6 +91,9 @@ int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *
     } else if (hint == SH_ItemView_MovementWithoutUpdatingSelection) {
         // move the current item within a selection in a QTableView
         return true;
+    } else if (hint == SH_ItemView_ScrollMode) {
+        // smooth scrolling on all platforms - not just macOS
+        return QAbstractItemView::ScrollPerPixel;
     }
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }
