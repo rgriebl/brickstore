@@ -765,9 +765,19 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 
 void Application::setupLogging()
 {
-//    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message}"_qs);
     qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_qs);
-//    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})\n%{backtrace}\n"_qs);
+
+    m_defaultLoggingFilter = QLoggingCategory::installFilter([](QLoggingCategory *lc) {
+        if (qstrcmp(lc->categoryName(), "qt.qml.typeregistration") == 0) {
+            // suppress the "value types have to be lower case" typeregistration warnings
+            lc->setEnabled(QtWarningMsg, false);
+        } else if (qstrcmp(lc->categoryName(), "qt.gui.imageio") == 0) {
+            // suppress the "incorrect color profile" messages from libpng
+            lc->setEnabled(QtInfoMsg, false);
+        } else if (s_inst && s_inst->m_defaultLoggingFilter) {
+            s_inst->m_defaultLoggingFilter(lc);
+        }
+    });
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
     {
@@ -901,14 +911,6 @@ bool Application::initBrickLink()
 
 void Application::setupQml()
 {
-    // suppress the "value types have to be lower case" typeregistration warnings
-    m_defaultLoggingFilter = QLoggingCategory::installFilter([](QLoggingCategory *lc) {
-        if (qstrcmp(lc->categoryName(), "qt.qml.typeregistration") == 0)
-            lc->setEnabled(QtWarningMsg, false);
-        else if (s_inst && s_inst->m_defaultLoggingFilter)
-            s_inst->m_defaultLoggingFilter(lc);
-    });
-
     // add all relevant QML modules here
     extern void qml_register_types_LDraw(); qml_register_types_LDraw();
     extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
