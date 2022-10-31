@@ -250,6 +250,13 @@ jobs:
           sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.0/d8 $ANDROID_SDK_ROOT/build-tools/33.0.0/dx
         fi
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
+
+        echo "${{ secrets.ANDROID_KEYSTORE_STORE_DATA }}" | base64 --decode >android_release.keystore
+        export QT_ANDROID_KEYSTORE_PATH="`pwd`/android_release.keystore"
+        export QT_ANDROID_KEYSTORE_ALIAS="${{ secrets.ANDROID_KEYSTORE_ALIAS }}"
+        export QT_ANDROID_KEYSTORE_STORE_PASS="${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}"
+        export QT_ANDROID_KEYSTORE_KEY_PASS="${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}"
+
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) \
             -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
@@ -257,6 +264,7 @@ jobs:
             -DQT_ANDROID_BUILD_ALL_ABIS=TRUE \
             -DANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }} \
             -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
+            -DQT_ANDROID_SIGN_AAB=TRUE \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         echo "Creating AAB"
         cmake --build build --config Release --parallel --target final-aab --verbose
@@ -264,6 +272,8 @@ jobs:
         cmake --build build/android_abi_builds/arm64-v8a --config Release --parallel --target final-apk --verbose
         echo "Creating ARM APK"
         cmake --build build/android_abi_builds/armeabi-v7a --config Release --parallel --target final-apk --verbose
+
+        echo VERSION_NUMBER="`cat VERSION_NUMBER`" >> $GITHUB_ENV
       shell: bash
 
     - name: Upload Android AAB
@@ -286,6 +296,17 @@ jobs:
       with:
         name: ${{ matrix.config.artifact }}-ARM
         path: "build/android_abi_builds/armeabi-v7a/*.apk"
+
+    - name: Upload Android AAB to the PlayStore
+      if: (matrix.config.os == 'android')
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
+        packageName: de.brickforge.brickstore
+        releaseFiles: build/*.aab
+        status: completed
+        track: beta
+        releaseName: "${{ env.VERSION_NUMBER }} (build: ${{ env.BUILD_NUMBER }})"
 
     # Build for macOS
     #################################################
