@@ -90,7 +90,7 @@ class WantedLists : public QAbstractTableModel
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
-    Q_PROPERTY(QVector<WantedList *> wantedLists READ wantedLists NOTIFY updateFinished FINAL)
+    Q_PROPERTY(int count READ rowCount NOTIFY updateFinished FINAL)
 
 public:
     enum Column {
@@ -117,9 +117,9 @@ public:
     Q_INVOKABLE void startUpdate();
     Q_INVOKABLE void cancelUpdate();
 
-    QVector<WantedList *> wantedLists() const;
-
     Q_INVOKABLE void startFetchLots(BrickLink::WantedList *wantedList);
+
+    Q_INVOKABLE BrickLink::WantedList *wantedList(int index) const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

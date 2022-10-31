@@ -20,6 +20,7 @@
 #include <QRegularExpression>
 #include <QJsonDocument>
 #include <QXmlStreamReader>
+#include <QQmlEngine>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
@@ -890,6 +891,8 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                     startOfOrder = int(xml.characterOffset());
                     order.reset(new Order());
 
+                    QQmlEngine::setObjectOwnership(order.get(), QQmlEngine::CppOwnership);
+
                 } else if (tagName != u"ORDERS") {
                     auto it = rootTagHash.find(xml.name());
                     if (it != rootTagHash.end())
@@ -1180,14 +1183,9 @@ LotList Orders::loadOrderLots(const Order *order) const
     return pr.takeLots();
 }
 
-const Order *Orders::order(int row) const
+Order *Orders::order(int index) const
 {
-    return (row < 0 || row >= m_orders.size()) ? nullptr : m_orders.at(row);
-}
-
-QVector<Order *> Orders::orders() const
-{
-    return m_orders;
+    return m_orders.value(index);
 }
 
 int Orders::indexOfOrder(const QString &orderId) const

@@ -22,6 +22,7 @@
 #include <QJsonParseError>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QQmlEngine>
 
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
@@ -395,7 +396,7 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
         QString totalPrice = jsonCart[u"totalPriceNative"].toString();
 
         if (sellerId && !totalPrice.isEmpty() && lots && items) {
-            auto cart = new BrickLink::Cart;
+            auto cart = new Cart;
             cart->setSellerId(sellerId);
             cart->setLotCount(lots);
             cart->setItemCount(items);
@@ -412,6 +413,8 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
             cart->setCountryCode(jsonCart[u"countryID"].toString());
 
             carts << cart;
+
+            QQmlEngine::setObjectOwnership(cart, QQmlEngine::CppOwnership);
         }
     }
     return carts;
@@ -474,9 +477,9 @@ void Carts::startFetchLots(Cart *cart)
     m_core->retrieveAuthenticated(job);
 }
 
-QVector<Cart *> Carts::carts() const
+Cart *Carts::cart(int index) const
 {
-    return m_carts;
+    return m_carts.value(index);
 }
 
 int Carts::rowCount(const QModelIndex &parent) const

@@ -186,7 +186,7 @@ class Orders : public QAbstractTableModel
     Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
-    Q_PROPERTY(QVector<Order *> orders READ orders NOTIFY updateFinished FINAL)
+    Q_PROPERTY(int count READ rowCount NOTIFY updateFinished FINAL)
 
 public:
     enum Column {
@@ -218,12 +218,11 @@ public:
     Q_INVOKABLE void startUpdate(const QDate &fromDate, const QDate &toDate);
     Q_INVOKABLE void cancelUpdate();
 
+    Q_INVOKABLE BrickLink::Order *order(int index) const;
+
     //Q_INVOKABLE void trimDatabase(int keepLastNDays);
 
     LotList loadOrderLots(const Order *order) const;
-
-    Q_INVOKABLE const BrickLink::Order *order(int row) const;
-    QVector<Order *> orders() const;
 
     int indexOfOrder(const QString &orderId) const;
 

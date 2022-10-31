@@ -22,6 +22,7 @@
 #include <QJsonParseError>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QQmlEngine>
 
 #include "bricklink/wantedlist.h"
 #include "bricklink/core.h"
@@ -301,7 +302,7 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
         int itemsLeft = jsonWantedList[u"totalLeft"].toInt();
 
         if (id >= 0 && !name.isEmpty() && lots && items) {
-            auto wantedList = new BrickLink::WantedList;
+            auto wantedList = new WantedList;
             wantedList->setId(id);
             wantedList->setName(name);
             wantedList->setDescription(desc);
@@ -311,6 +312,8 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
             wantedList->setFilled(filled / 100.);
 
             wantedLists << wantedList;
+
+            QQmlEngine::setObjectOwnership(wantedList, QQmlEngine::CppOwnership);
         }
     }
     return wantedLists;
@@ -355,6 +358,11 @@ void WantedLists::cancelUpdate()
         m_job->abort();
 }
 
+WantedList *WantedLists::wantedList(int index) const
+{
+    return m_wantedLists.value(index);
+}
+
 void WantedLists::startFetchLots(WantedList *wantedList)
 {
     if (!wantedList)
@@ -371,11 +379,6 @@ void WantedLists::startFetchLots(WantedList *wantedList)
     m_wantedListJobs << job;
 
     m_core->retrieveAuthenticated(job);
-}
-
-QVector<WantedList *> WantedLists::wantedLists() const
-{
-    return m_wantedLists;
 }
 
 int WantedLists::rowCount(const QModelIndex &parent) const
