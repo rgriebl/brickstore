@@ -170,8 +170,8 @@ void HistoryLineEdit::setToFavoritesMode(bool favoritesMode)
 
 void HistoryLineEdit::setModel(QStringListModel *model)
 {
-    m_filterModel->deleteLater();
-    model->setParent(this);
+    if (m_filterModel->parent() == this)
+        m_filterModel->deleteLater();
     m_filterModel = model;
     completer()->setModel(model);
 }
