@@ -36,6 +36,8 @@ public:
 
     RenderController *controller();
 
+    static bool isGPUSupported();
+
     void clear();
     void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color);
 
@@ -64,7 +66,7 @@ private:
     void languageChange();
 
     RenderController *m_controller;
-    QQuickView *m_window;
+    QQuickView *m_window = nullptr;
     QWidget *m_widget;
     QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };

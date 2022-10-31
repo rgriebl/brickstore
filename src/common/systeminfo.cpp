@@ -35,7 +35,6 @@
 #endif
 
 #include "qtdiag/qtdiag.h"
-#include "qcoro/qcorofuture.h"
 #include "version.h"
 #include "systeminfo.h"
 
@@ -74,16 +73,15 @@ SystemInfo::SystemInfo()
     m_map[u"brickstore.version"_qs] = QCoreApplication::applicationVersion();
 
     m_map[u"hw.cpu.arch"_qs] = QSysInfo::currentCpuArchitecture();
-    // set below - may be delayed due to external processes involved
-    // m_map[u"hw.cpu"_qs] = "e.g. Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
-    // m_map[u"hw.gpu"_qs] = "e.g. NVIDIA GeForce GTX 1650";
-    // m_map[u"hw.gpu.arch"_qs] = "intel|amd|nvidia";
-
-    // -- Memory ---------------------------------------------
 
     quint64 physmem = 0;
+    QString cpuName = u"?"_qs;
+    QString gpuName = cpuName;
+    QString gpuVendorName = gpuName;
+    uint gpuVendorId = 0;
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+    // memory
     uint64_t ram;
     int sctl[] = { CTL_HW, HW_MEMSIZE };
     size_t ramsize = sizeof(ram);
@@ -91,86 +89,81 @@ SystemInfo::SystemInfo()
     if (sysctl(sctl, 2, &ram, &ramsize, nullptr, 0) == 0)
         physmem = quint64(ram);
 
+    // cpu
+    char brand[1024];
+    size_t brandSize = sizeof(brand) - 1;
+
+    if (sysctlbyname("machdep.cpu.brand_string", brand, &brandSize, nullptr, 0) == 0)
+        cpuName = QString::fromLocal8Bit(brand, int(brandSize) - 1);
+
+    // gpu
+#  if defined(Q_OS_MACOS) && !defined(BS_BACKEND)
+    QProcess p;
+    p.start(u"system_profiler"_qs, { u"-json"_qs, u"SPDisplaysDataType"_qs }, QIODevice::ReadOnly);
+    p.waitForFinished(3000);
+
+    auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
+    auto o = json.object().value(u"SPDisplaysDataType"_qs).toArray().first().toObject();
+    gpuName = o.value(u"sppci_model"_qs).toString();
+    auto vendorIdString = o.value(u"spdisplays_vendor-id"_qs).toString();
+    if (!vendorIdString.isEmpty())
+        gpuVendorId = vendorIdString.toUInt(nullptr, 16);
+    else
+        gpuVendorName = o.value(u"spdisplays_vendor"_qs).toString();
+#  endif
 #elif defined(Q_OS_WINDOWS)
+    // memory
     MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
     GlobalMemoryStatusEx(&memstatex);
     physmem = memstatex.ullTotalPhys;
 
+    // cpu
+    wchar_t pns[256] = { 0 };
+    DWORD pnsSize = sizeof(pns) - sizeof(*pns);
+    auto r = RegGetValueW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+                     L"ProcessorNameString", RRF_RT_REG_SZ, nullptr, &pns, &pnsSize);
+    qWarning() << r << pnsSize << pns;
+            if (r == ERROR_SUCCESS) {
+        cpuName = QString::fromWCharArray(pns);
+    }
+
+    // gpu
+#  if !defined(BS_BACKEND)
+    if (auto *ni = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>()) {
+        const QVariantList gpuInfos = ni->gpuList().toList();
+        if (gpuInfos.size() > 0) {
+
+            const auto gpuMap = gpuInfos.constFirst().toMap();
+            gpuName = gpuMap.value(u"description"_qs).toString();
+            gpuVendorId = gpuMap.value(u"vendorId"_qs).toUInt();
+        }
+
+        // tablet mode
+        m_map[u"windows.tabletmode"_qs] = ni->isTabletMode();
+    }
+#  endif
 #elif defined(Q_OS_LINUX)
+    // memory
     struct sysinfo si;
     if (sysinfo(&si) == 0)
         physmem = quint64(si.totalram) * si.mem_unit;
 
-#else
-#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
-#endif
-
-    m_map[u"hw.memory"_qs] = physmem;
-    m_map[u"hw.memory.gb"_qs] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
-
-    // -- Platform specific ----------------------------------
-
-#if defined(Q_OS_WINDOWS)
-    if (auto wa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>())
-        m_map[u"windows.tabletmode"_qs] = wa->isTabletMode();
-
-#endif
-
-    // we cannot use co-routines in a constructor
-    QMetaObject::invokeMethod(this, &SystemInfo::init, Qt::QueuedConnection);
-}
-
-QCoro::Task<> SystemInfo::init()
-{
-    // -- CPU ------------------------------------------------
-
-    auto checkCpu = []() -> QString {
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-        QProcess p;
-        p.start(u"sh"_qs, { u"-c"_qs, uR"(grep -m 1 '^model name' /proc/cpuinfo | sed -e 's/^.*: //g')"_qs },
-                QIODevice::ReadOnly);
-        p.waitForFinished(1000);
-        return QString::fromUtf8(p.readAllStandardOutput()).simplified();
-
-#elif defined(Q_OS_WIN) && !defined(BS_BACKEND)
-        QProcess p;
-        p.start(u"wmic"_qs, { u"/locale:ms_409"_qs, u"cpu"_qs, u"get"_qs, u"name"_qs, u"/value"_qs },
-                QIODevice::ReadOnly);
-        p.waitForFinished(1000);
-        return QString::fromUtf8(p.readAllStandardOutput()).simplified().mid(5);
-
-#elif defined(Q_OS_MACOS)
-        char brand[1024];
-        size_t brandSize = sizeof(brand) - 1;
-
-        if (sysctlbyname("machdep.cpu.brand_string", brand, &brandSize, nullptr, 0) == 0)
-            return QString::fromLocal8Bit(brand, int(brandSize) - 1);
-        else
-            return u"?"_qs;
-#else
-        return u"?"_qs;
-#endif
-    };
-
-    // -- GPU ------------------------------------------------
-
-    auto checkGpu = []() -> QPair<QString, QString> {
-        QPair<QString, QString> result;
-        uint vendor = 0;
-
-#if !defined(BS_BACKEND)
-#  if defined(Q_OS_WIN)
-        // On Windows, this will provide additional GPU info similar to the output of dxdiag.
-        if (auto *ni = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>()) {
-            const QVariantList gpuInfos = ni->gpuList().toList();
-            if (gpuInfos.size() > 0) {
-
-                const auto gpuMap = gpuInfos.constFirst().toMap();
-                result.first = gpuMap.value(u"description"_qs).toString();
-                vendor = gpuMap.value(u"vendorId"_qs).toUInt();
+    // cpu
+#  if !defined(Q_OS_ANDROID)
+        QFile f(u"/proc/cpuinfo"_qs);
+        if (f.open(QIODevice::ReadOnly)) {
+            for (int i = 0; i < 20; ++i) {
+                QByteArray line = f.readLine(512);
+                if (line.startsWith("model name")) {
+                    cpuName = QString::fromLocal8Bit(line.mid(line.indexOf(':') + 2).trimmed());
+                    break;
+                }
             }
         }
-#  elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#  endif
+
+    // gpu
+#  if !defined(BS_BACKEND)
         QProcess p;
         p.start(u"lspci"_qs, { u"-d"_qs, u"::0300"_qs, u"-vmm"_qs, u"-nn"_qs }, QIODevice::ReadOnly);
         p.waitForFinished(1000);
@@ -178,45 +171,32 @@ QCoro::Task<> SystemInfo::init()
         QStringList lspci = QString::fromUtf8(p.readAllStandardOutput()).split(u'\n');
         for (const auto &line : lspci) {
             if (line.startsWith(u"SDevice:"))
-                result.first = line.mid(8).simplified().chopped(7);
-            else if (line.startsWith(u"Device:") && result.first.isEmpty())
-                result.first = line.mid(7).simplified().chopped(7);
+                gpuName = line.mid(8).simplified().chopped(7);
+            else if (line.startsWith(u"Device:") && gpuName.isEmpty())
+                gpuName = line.mid(7).simplified().chopped(7);
             else if (line.startsWith(u"Vendor:"))
-                vendor = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
+                gpuVendorId = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
         }
-
-#  elif defined(Q_OS_MACOS)
-       QProcess p;
-       p.start(u"system_profiler"_qs, { u"-json"_qs, u"SPDisplaysDataType"_qs }, QIODevice::ReadOnly);
-       p.waitForFinished(3000);
-       auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
-       auto o = json.object().value(u"SPDisplaysDataType"_qs).toArray().first().toObject();
-       result.first = o.value(u"sppci_model"_qs).toString();
-       auto vendorIdString = o.value(u"spdisplays_vendor-id"_qs).toString();
-       if (!vendorIdString.isEmpty())
-           vendor = vendorIdString.toUInt(nullptr, 16);
-       else
-           result.second = o.value(u"spdisplays_vendor"_qs).toString();
-
 #  endif
+#else
+#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
 #endif
-        if (vendor) {
-            switch (vendor) {
-            case 0x10de: result.second = u"nvidia"_qs; break;
-            case 0x8086: result.second = u"intel"_qs; break;
-            case 0x1002: result.second = u"amd"_qs; break;
-            case 0x15ad: result.second = u"vmware"_qs; break;
-            }
+
+    if (gpuVendorId) {
+        switch (gpuVendorId) {
+        case 0x10de: gpuVendorName = u"nvidia"_qs; break;
+        case 0x8086: gpuVendorName = u"intel"_qs; break;
+        case 0x1002: gpuVendorName = u"amd"_qs; break;
+        case 0x15ad: gpuVendorName = u"vmware"_qs; break;
         }
-        return result;
-    };
+    }
 
-    m_map[u"hw.cpu"_qs] = co_await QtConcurrent::run(checkCpu);
-    auto gpuResultPair = co_await QtConcurrent::run(checkGpu);
-    m_map[u"hw.gpu"_qs] = gpuResultPair.first;
-    m_map[u"hw.gpu.arch"_qs] = gpuResultPair.second;
+    m_map[u"hw.memory"_qs] = physmem;
+    m_map[u"hw.memory.gb"_qs] = QString::number(double(physmem / 1024 / 1024) / 1024, 'f', 1);
 
-    emit initialized();
+    m_map[u"hw.cpu"_qs] = cpuName;
+    m_map[u"hw.gpu"_qs] = gpuName;
+    m_map[u"hw.gpu.arch"_qs] = gpuVendorName;
 }
 
 QVariantMap SystemInfo::asMap() const

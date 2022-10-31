@@ -18,11 +18,39 @@
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
 
+#include "common/systeminfo.h"
 #include "rendercontroller.h"
 #include "renderwidget.h"
 
 namespace LDraw {
 
+bool RenderWidget::isGPUSupported()
+{
+    static std::optional<bool> blacklisted;
+
+    if (!blacklisted.has_value()) {
+        // these GPUs will crash QtQuick3D on Windows
+        static const QVector<QByteArray> gpuBlacklist = {
+            "Microsoft Basic Render Driver",
+            "Intel(R) HD Graphics",
+            "Intel(R) HD Graphics 3000",
+            "Intel(R) Q45/Q43 Express Chipset (Microsoft Corporation - WDDM 1.1)",
+            "NVIDIA GeForce 210",
+            "NVIDIA GeForce 210 ",
+            "NVIDIA nForce 980a/780a SLI",
+            "NVIDIA GeForce GT 525M",
+            "NVIDIA GeForce 8400 GS",
+            "NVIDIA NVS 5100M",
+            "NVIDIA Quadro 1000M",
+            "AMD Radeon HD 8240",
+        };
+        const auto gpu = SystemInfo::inst()->asMap().value(u"hw.gpu"_qs).toString();
+        blacklisted = !gpuBlacklist.contains(gpu.toLatin1());
+        if (blacklisted.value())
+            qWarning() << "GPU" << gpu << "is blacklisted!";
+    }
+    return !blacklisted.value();
+}
 
 RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
@@ -48,19 +76,33 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
+    if (isGPUSupported()) {
+        m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
 
-    QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
-    m_window->setFormat(fmt);
-    m_window->setResizeMode(QQuickView::SizeRootObjectToView);
-    paletteChange();
+        QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
+        m_window->setFormat(fmt);
+        m_window->setResizeMode(QQuickView::SizeRootObjectToView);
+        paletteChange();
 
-    m_window->setInitialProperties({
-                                       { u"renderController"_qs, QVariant::fromValue(m_controller) },
-                                   });
-    m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
+        m_window->setInitialProperties({
+                                           { u"renderController"_qs, QVariant::fromValue(m_controller) },
+                                       });
+        m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
 
-    m_widget = QWidget::createWindowContainer(m_window, this);
+        m_widget = QWidget::createWindowContainer(m_window, this);
+
+    } else {
+        m_widget = new QWidget(this);
+        m_widget->setBackgroundRole(QPalette::Window);
+        m_widget->setAutoFillBackground(true);
+        connect(m_controller, &RenderController::clearColorChanged,
+                m_widget, [this](const QColor &color) {
+            auto pal = m_widget->palette();
+            pal.setColor(QPalette::Window, color);
+            m_widget->setPalette(pal);
+        });
+        paletteChange();
+    }
     m_widget->setMinimumSize(100, 100);
     m_widget->setFocusPolicy(Qt::NoFocus);
 
@@ -107,7 +149,7 @@ void RenderWidget::setAnimationActive(bool active)
 
 bool RenderWidget::startGrab()
 {
-    if (!m_grabResult) {
+    if (m_window && !m_grabResult) {
         m_grabResult = m_window->rootObject()->grabToImage();
         if (m_grabResult) {
             connect(m_grabResult.get(), &QQuickItemGrabResult::ready,
@@ -152,7 +194,8 @@ void RenderWidget::paletteChange()
 
 void RenderWidget::languageChange()
 {
-    setToolTip(tr("Hold left button: Rotate\nHold right button: Move\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
+    if (m_window)
+        setToolTip(tr("Hold left button: Rotate\nHold right button: Move\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
 }
 
 } // namespace LDraw

@@ -16,8 +16,6 @@
 #include <QObject>
 #include <QVariantMap>
 
-#include "qcoro/task.h"
-
 
 class SystemInfo : public QObject
 {
@@ -31,12 +29,8 @@ public:
     quint64 physicalMemory() const;
     Q_INVOKABLE QString qtDiag() const;
 
-signals:
-    void initialized();
-
 private:
     SystemInfo();
-    QCoro::Task<> init();
     Q_DISABLE_COPY(SystemInfo)
 
     static SystemInfo *s_inst;

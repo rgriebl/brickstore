@@ -36,37 +36,11 @@
 #include "common/application.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
-#include "common/systeminfo.h"
 #include "ldraw/library.h"
-#include "ldraw/part.h"
 #include "ldraw/renderwidget.h"
 #include "qcoro/qcorosignal.h"
 #include "picturewidget.h"
 #include "rendersettingsdialog.h"
-
-
-static bool isGPUBlackListed()
-{
-    // these GPUs will crash QtQuick3D on Windows
-    static const QVector<QByteArray> gpuBlacklist = {
-        "Microsoft Basic Render Driver",
-        "Intel(R) HD Graphics",
-        "Intel(R) HD Graphics 3000",
-        "Intel(R) Q45/Q43 Express Chipset (Microsoft Corporation - WDDM 1.1)",
-        "NVIDIA GeForce 210",
-        "NVIDIA GeForce 210 ",
-        "NVIDIA nForce 980a/780a SLI",
-        "NVIDIA GeForce GT 525M",
-        "NVIDIA GeForce 8400 GS",
-        "NVIDIA NVS 5100M",
-        "NVIDIA Quadro 1000M",
-        "AMD Radeon HD 8240",
-    };
-    const auto gpu = SystemInfo::inst()->asMap().value(u"hw.gpu"_qs).toString();
-    bool blacklisted = gpuBlacklist.contains(gpu.toLatin1());
-    qWarning() << "Checking if GPU" << gpu << "is blacklisted:" << (blacklisted ? "yes" : "no");
-    return blacklisted;
-}
 
 
 PictureWidget::PictureWidget(QWidget *parent)
@@ -123,8 +97,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_2d->setAutoRaise(true);
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
-        m_prefer3D = false;
-        w_stack->setCurrentWidget(w_image);
+        setPrefer3D(false);
     });
 
     w_3d = new QToolButton();
@@ -132,8 +105,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_3d->setAutoRaise(true);
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
-        m_prefer3D = true;
-        w_stack->setCurrentWidget(w_ldraw);
+        setPrefer3D(true);
     });
 
     auto font = w_2d->font();
@@ -250,7 +222,7 @@ PictureWidget::PictureWidget(QWidget *parent)
             this, [this](bool b) {
         if (!b)
             w_stack->setCurrentWidget(w_image);
-        else if (m_prefer3D)
+        else if (prefer3D() && m_supports3D)
             w_stack->setCurrentWidget(w_ldraw);
         w_3d->setEnabled(b);
     });
@@ -263,8 +235,12 @@ PictureWidget::PictureWidget(QWidget *parent)
     paletteChange();
     languageChange();
 
-    stackSwitch();
+    m_supports3D = w_ldraw->isGPUSupported();
+    if (!m_supports3D)
+        w_3d->setVisible(false);
+
     setPrefer3D(m_prefer3D);
+    stackSwitch();
 }
 
 void PictureWidget::stackSwitch()
@@ -341,9 +317,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
             m_image = m_pic->image();
     }
 
-    static bool badGPU = isGPUBlackListed();
-    if (!badGPU)
-        w_ldraw->setItemAndColor(item, color);
+    w_ldraw->setItemAndColor(item, color);
 
     m_blCatalog->setVisible(item);
     m_blPriceGuide->setVisible(item && color);
@@ -356,7 +330,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     w_3d->setEnabled(w_ldraw->canRender());
     w_reloadRescale->setEnabled(m_item);
 
-    if (w_ldraw->canRender() && m_prefer3D) {
+    if (w_ldraw->canRender() && prefer3D() && m_supports3D) {
         w_stack->setCurrentWidget(w_ldraw);
     } else {
         w_stack->setCurrentWidget(w_image);
@@ -374,7 +348,7 @@ void PictureWidget::setPrefer3D(bool b)
     if (m_prefer3D != b)
         m_prefer3D = b;
 
-    w_stack->setCurrentWidget(b ? static_cast<QWidget *>(w_ldraw) : w_image);
+    w_stack->setCurrentWidget((b && m_supports3D) ? static_cast<QWidget *>(w_ldraw) : w_image);
 }
 
 void PictureWidget::showImage()

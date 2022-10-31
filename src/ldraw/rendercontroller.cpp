@@ -175,14 +175,13 @@ void RenderController::setPartAndColor(Part *part, const BrickLink::Item *item, 
     if (!color)
         color = BrickLink::core()->color(9); // light gray
 
-    if (m_part == part)
-        return;
-
-    if (m_part)
-        m_part->release();
-    m_part = part;
-    if (m_part)
-        m_part->addRef();
+    if (m_part != part) {
+        if (m_part)
+            m_part->release();
+        m_part = part;
+        if (m_part)
+            m_part->addRef();
+    }
     m_color = color;
 
     updateGeometries();

@@ -64,6 +64,7 @@ private:
     QLabel *w_image = nullptr;
     QImage m_image;
     bool m_prefer3D = false;
+    bool m_supports3D = true;
     LDraw::RenderWidget *w_ldraw = nullptr;
     QToolButton *w_2d = nullptr;
     QToolButton *w_3d = nullptr;
