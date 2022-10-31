@@ -1645,10 +1645,16 @@ QCoro::Task<bool> Document::save(bool saveAs)
         if (fn.right(4) == u".xml")
             fn.truncate(fn.length() - 4);
 
-        if (auto f = co_await UIHelpers::getSaveFileName(fn, filters, tr("Save File as"), title()))
-            fn = *f;
-        else
+        if (auto f = co_await UIHelpers::getSaveFileName(fn, filters, tr("Save File as"), title())) {
+            if (!DocumentList::inst()->documentForFile(*f)) {
+                fn = *f;
+            } else {
+                co_await UIHelpers::warning(tr("You cannot save this document with the same name as another currently open document. Choose a different name, or close the other document first."));
+                fn.clear();
+            }
+        } else {
             fn.clear();
+        }
     } else if (model()->canBeSaved()) {
         fn = filePath();
     }
