@@ -33,6 +33,7 @@
 
 #include "qcoro/qcorocore.h"
 #include "qcoro/qcoronetwork.h"
+#include "common/config.h"
 #include "checkforupdates.h"
 
 
@@ -113,7 +114,11 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
     }
     m_checking = false;
 
-    if (!m_silent || (latestVersion > m_currentVersion)) {
+    const auto ignoreVersion = QVersionNumber::fromString(
+                Config::inst()->value(u"General/IgnoreUpdateVersion"_qs).toString());
+
+    if (!m_silent || ((latestVersion > m_currentVersion)
+                      && (ignoreVersion != latestVersion))) {
         QTimer t;
         t.start(0);
         co_await t;
@@ -196,7 +201,7 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
         browser->setOpenExternalLinks(true);
         browser->zoomIn();
         layout->addWidget(browser);
-        auto buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Ignore);
         auto showDL = new QPushButton(tr("Show"));
         QObject::connect(showDL, &QPushButton::clicked, dlg, [dlg, url]() {
             QDesktopServices::openUrl(url);
@@ -216,6 +221,10 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
             });
         }
         QObject::connect(buttons, &QDialogButtonBox::rejected, dlg, &QDialog::reject);
+        QObject::connect(buttons, &QDialogButtonBox::accepted, dlg, [latestVersion, dlg]() {
+            Config::inst()->setValue(u"General/IgnoreUpdateVersion"_qs, latestVersion.toString());
+            dlg->close();
+        });
         layout->addWidget(buttons);
         dlg->resize(dlg->fontMetrics().averageCharWidth() * 100, dlg->fontMetrics().height() * 30);
 
