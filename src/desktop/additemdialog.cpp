@@ -443,13 +443,13 @@ void AddItemDialog::updateItemAndColor()
     auto item = w_select_item->currentItem();
     auto color = w_select_color->currentColor();
 
+    w_picture->setItemAndColor(item, color);
+
     if (item && color) {
-        w_picture->setItemAndColor(item, color);
         w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(item, color, true));
         w_appears_in->setItem(item, color);
     }
     else {
-        w_picture->setItemAndColor(nullptr);
         w_price_guide->setPriceGuide(nullptr);
         w_appears_in->setItem(nullptr, nullptr);
     }
