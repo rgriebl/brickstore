@@ -122,7 +122,6 @@ SystemInfo::SystemInfo()
     DWORD pnsSize = sizeof(pns) - sizeof(*pns);
     auto r = RegGetValueW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
                      L"ProcessorNameString", RRF_RT_REG_SZ, nullptr, &pns, &pnsSize);
-    qWarning() << r << pnsSize << pns;
             if (r == ERROR_SUCCESS) {
         cpuName = QString::fromWCharArray(pns);
     }

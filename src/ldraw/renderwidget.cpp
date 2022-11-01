@@ -45,7 +45,7 @@ bool RenderWidget::isGPUSupported()
             "AMD Radeon HD 8240",
         };
         const auto gpu = SystemInfo::inst()->asMap().value(u"hw.gpu"_qs).toString();
-        blacklisted = !gpuBlacklist.contains(gpu.toLatin1());
+        blacklisted = gpuBlacklist.contains(gpu.toLatin1());
         if (blacklisted.value())
             qWarning() << "GPU" << gpu << "is blacklisted!";
     }
