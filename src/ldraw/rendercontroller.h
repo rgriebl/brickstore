@@ -25,6 +25,7 @@
 #include "bricklink/qmlapi.h"
 
 QT_FORWARD_DECLARE_CLASS(QQuick3DTextureData)
+QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 namespace LDraw {
@@ -60,8 +61,8 @@ public:
 
     const BrickLink::Item *item() const;
     const BrickLink::Color *color() const;
-    Q_INVOKABLE bool setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
-    bool setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color);
+    Q_INVOKABLE void setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color);
+    void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color);
     bool canRender() const;
 
     bool isTumblingAnimationActive() const;
@@ -92,7 +93,6 @@ signals:
     void clearColorChanged(const QColor &clearColor);
 
 private:
-    void setPartAndColor(Part *part, const BrickLink::Item *item, const BrickLink::Color *color);
     QCoro::Task<void> updateGeometries();
     static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
@@ -114,6 +114,8 @@ private:
     float m_radius = 0;
     bool m_tumblingAnimationActive = false;
     QColor m_clearColor;
+
+    QTimer *m_updateTimer;
 };
 
 //class QmlVectorRenderGeometry

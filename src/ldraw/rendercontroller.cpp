@@ -40,6 +40,7 @@ RenderController::RenderController(QObject *parent)
     , m_lineGeo(new QQuick3DGeometry())
     , m_lines(new QmlRenderLineInstancing())
     , m_clearColor(Qt::white)
+    , m_updateTimer(new QTimer(this))
 {
     static const float lineGeo[] = {
         0, -0.5, 0,
@@ -55,7 +56,10 @@ RenderController::RenderController(QObject *parent)
     m_lineGeo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
     m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo), sizeof(lineGeo)));
 
-    updateGeometries();
+    m_updateTimer->setInterval(200);
+    m_updateTimer->setSingleShot(true);
+    connect(m_updateTimer, &QTimer::timeout, this, &RenderController::updateGeometries);
+    m_updateTimer->start();
 }
 
 RenderController::~RenderController()
@@ -129,36 +133,55 @@ QQuick3DInstancing *RenderController::lines()
     return m_lines;
 }
 
-bool RenderController::setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
+void RenderController::setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlColor color)
 {
     const BrickLink::Item *i = item.wrappedObject();
     const BrickLink::Color *c = color.wrappedObject();
 
-    return setItemAndColor(i, c);
+    setItemAndColor(i, c);
 }
 
-bool RenderController::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
+void RenderController::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    const auto *currentItem = m_item;
-    const auto *currentColor = m_color;
-    m_item = item;
-    m_color = item ? color : nullptr;
+    if (!color)
+        color = BrickLink::core()->color(99); // Very Light Bluish Gray
 
-    if (!item) {
-        setPartAndColor(nullptr, nullptr, nullptr);
-        return false;
-    } else if (currentItem == item) {
-        if (currentColor != color)
-            setPartAndColor(m_part, item, color);
-        return true;
+    if (item == m_item) {
+        if (!item || (color == m_color))
+            return;
+
+        // switch color - redraw, if we have a Part loaded already
+        m_color = color;
+        if (m_part)
+            m_updateTimer->start();
     } else {
-        LDraw::library()->partFromId(item->id()).then(this, [this, item, color](Part *part) {
-            // the future comes already ref'ed
-            setPartAndColor(part, item, color);
-            if (part)
-                part->release();
-        });
-        return true;
+        // new item
+        if (m_part)
+            m_part->release();
+        m_part = nullptr;
+        m_item = item;
+        m_color = color;
+
+        m_updateTimer->start();
+
+        if (item) {
+            LDraw::library()->partFromId(item->id()).then(this, [this, item](Part *part) {
+                bool stillCurrentItem = (item == m_item);
+
+                if ((m_part != part) && stillCurrentItem) {
+                    if (m_part)
+                        m_part->release();
+                    m_part = part;
+                    if (m_part)
+                        m_part->addRef();
+                }
+                // the future comes already ref'ed
+                if (part)
+                    part->release();
+                if (stillCurrentItem)
+                    updateGeometries();
+            });
+        }
     }
 }
 
@@ -167,28 +190,10 @@ bool RenderController::canRender() const
     return (m_part);
 }
 
-void RenderController::setPartAndColor(Part *part, const BrickLink::Item *item, const BrickLink::Color *color)
-{
-    if (item != m_item || color != m_color) // too late, we switched to another part already
-        return;
-
-    if (!color)
-        color = BrickLink::core()->color(9); // light gray
-
-    if (m_part != part) {
-        if (m_part)
-            m_part->release();
-        m_part = part;
-        if (m_part)
-            m_part->addRef();
-    }
-    m_color = color;
-
-    updateGeometries();
-}
-
 QCoro::Task<void> RenderController::updateGeometries()
 {
+    m_updateTimer->stop();
+
     if (!m_part) {
         qDeleteAll(m_geos);
         m_geos.clear();

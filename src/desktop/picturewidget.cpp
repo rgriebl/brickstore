@@ -330,12 +330,9 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     w_3d->setEnabled(w_ldraw->canRender());
     w_reloadRescale->setEnabled(m_item);
 
-    if (w_ldraw->canRender() && prefer3D() && m_supports3D) {
-        w_stack->setCurrentWidget(w_ldraw);
-    } else {
-        w_stack->setCurrentWidget(w_image);
+    // the RenderWidget will emit canRender() asynchronously, so we don't handle that here
+    if (w_stack->currentWidget() == w_image)
         showImage();
-    }
 }
 
 bool PictureWidget::prefer3D() const
