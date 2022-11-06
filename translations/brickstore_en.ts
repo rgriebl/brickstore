@@ -932,6 +932,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/desktop/additemdialog.ui" line="484"/>
+        <source>Click to go back one item, hold to see history</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.ui" line="501"/>
+        <source>Click to go forward one item, hold to see history</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/desktop/additemdialog.ui" line="148"/>
         <source>Co&amp;mments</source>
         <translation type="unfinished"></translation>
@@ -942,18 +952,43 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="305"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
+        <source>Browsing history</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
+        <source>Show item inventory and appearance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.cpp" line="369"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="507"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="370"/>
+        <source>Go to Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.cpp" line="583"/>
         <source>Your recently added items will be listed here</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="527"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="603"/>
         <source>Added %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.cpp" line="882"/>
+        <source>Clear history</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.cpp" line="890"/>
+        <source>No browsing history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -972,32 +1007,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="623"/>
+        <location filename="../src/desktop/additemdialog.ui" line="518"/>
+        <source>Menu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemdialog.ui" line="595"/>
         <source>Conso&amp;lidate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="484"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="243"/>
         <source>Show item information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="504"/>
-        <source>Show which sets the item appears in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/additemdialog.ui" line="524"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="245"/>
         <source>Show price guide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="620"/>
+        <location filename="../src/desktop/additemdialog.ui" line="592"/>
         <source>Consolidate added items into document</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="544"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="256"/>
         <source>Show additional input fields for sellers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1028,26 +1063,6 @@
 </context>
 <context>
     <name>AppearsInWidget</name>
-    <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="124"/>
-        <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="125"/>
-        <source>Show BrickLink Catalog Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="126"/>
-        <source>Show BrickLink Price Guide Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/appearsinwidget.cpp" line="127"/>
-        <source>Show Lots for Sale on BrickLink...</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="../src/mobile/AppearsInWidget.qml" line="32"/>
         <source>No matches found</source>
@@ -1239,12 +1254,12 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="288"/>
+        <location filename="../src/bricklink/model.cpp" line="298"/>
         <source>All Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="297"/>
+        <location filename="../src/bricklink/model.cpp" line="307"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1252,22 +1267,22 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="106"/>
+        <location filename="../src/bricklink/model.cpp" line="110"/>
         <source>RGB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="120"/>
+        <location filename="../src/bricklink/model.cpp" line="130"/>
         <source>Color by %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="120"/>
+        <location filename="../src/bricklink/model.cpp" line="130"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="120"/>
+        <location filename="../src/bricklink/model.cpp" line="130"/>
         <source>Hue</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1309,20 +1324,25 @@
     </message>
 </context>
 <context>
-    <name>BrickLink::InternalAppearsInModel</name>
+    <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="977"/>
+        <location filename="../src/bricklink/model.cpp" line="1014"/>
         <source>Qty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="978"/>
+        <location filename="../src/bricklink/model.cpp" line="1015"/>
         <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="979"/>
+        <location filename="../src/bricklink/model.cpp" line="1016"/>
         <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bricklink/model.cpp" line="1017"/>
+        <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1337,35 +1357,35 @@
 <context>
     <name>BrickLink::ItemModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="581"/>
+        <location filename="../src/bricklink/model.cpp" line="591"/>
         <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="504"/>
+        <location filename="../src/bricklink/model.cpp" line="514"/>
         <source>consists-of:</source>
         <comment>Filter prefix</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="505"/>
+        <location filename="../src/bricklink/model.cpp" line="515"/>
         <source>appears-in:</source>
         <comment>Filter prefix</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="977"/>
+        <location filename="../src/desktop/selectitem.cpp" line="928"/>
         <source>consists-of:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="506"/>
+        <location filename="../src/bricklink/model.cpp" line="516"/>
         <source>id:</source>
         <comment>Id prefix</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="580"/>
+        <location filename="../src/bricklink/model.cpp" line="590"/>
         <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1373,7 +1393,7 @@
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="439"/>
+        <location filename="../src/bricklink/model.cpp" line="449"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1588,47 +1608,47 @@
 <context>
     <name>CheckForUpdates</name>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="123"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="128"/>
         <source>Version information is not available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="126"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="131"/>
         <source>Your currently installed version is up-to-date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="142"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="147"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="177"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="182"/>
         <source>A newer version than the one currently installed is available:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="178"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="183"/>
         <source>Changes:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="200"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="205"/>
         <source>Show</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="210"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="215"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="238"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="247"/>
         <source>Downloading installer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/checkforupdates.cpp" line="255"/>
+        <location filename="../src/desktop/checkforupdates.cpp" line="264"/>
         <source>Download failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3465,6 +3485,39 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>InventoryWidget</name>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="163"/>
+        <source>Appears in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="164"/>
+        <source>Consists of</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="165"/>
+        <source>Part out Item...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="166"/>
+        <source>Show BrickLink Catalog Info...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="167"/>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/inventorywidget.cpp" line="168"/>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LDraw::Library</name>
     <message>
         <location filename="../src/ldraw/library.cpp" line="125"/>
@@ -3526,7 +3579,7 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="411"/>
-        <source>Appears In</source>
+        <source>Item Inventory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3560,12 +3613,12 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1241"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1223"/>
         <source>Customize Toolbar...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1245"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1227"/>
         <source>Reset Info Docks layout</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3899,7 +3952,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="361"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="358"/>
         <source>Please wait... updating</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4566,25 +4619,25 @@ Right click: Menu</source>
     <name>SelectColor</name>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="71"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="119"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="131"/>
         <source>All Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="72"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="120"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="132"/>
         <source>Popular Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="73"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="121"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="133"/>
         <source>Most Popular Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="76"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="126"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="138"/>
         <source>Only &quot;%1&quot; Colors</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4600,12 +4653,12 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="70"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="118"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="130"/>
         <source>Known Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectcolor.cpp" line="128"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="140"/>
         <source>Lock color selection: only shows items known to be available in this color</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4647,103 +4700,83 @@ Right click: Menu</source>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="511"/>
+        <location filename="../src/desktop/selectitem.cpp" line="514"/>
         <source>Item type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="512"/>
+        <location filename="../src/desktop/selectitem.cpp" line="515"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="532"/>
-        <source>List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/selectitem.cpp" line="534"/>
+        <location filename="../src/desktop/selectitem.cpp" line="535"/>
         <source>List with Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="533"/>
+        <location filename="../src/desktop/selectitem.cpp" line="536"/>
         <source>Thumbnails</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="323"/>
+        <location filename="../src/desktop/selectitem.cpp" line="321"/>
         <source>Ctrl+1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="330"/>
+        <location filename="../src/desktop/selectitem.cpp" line="329"/>
         <source>Ctrl+2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="338"/>
-        <source>Ctrl+3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/selectitem.cpp" line="535"/>
-        <source>Zoom in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/selectitem.cpp" line="536"/>
-        <source>Zoom out</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/selectitem.cpp" line="947"/>
+        <location filename="../src/desktop/selectitem.cpp" line="898"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="275"/>
+        <location filename="../src/desktop/selectitem.cpp" line="272"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="278"/>
+        <location filename="../src/desktop/selectitem.cpp" line="275"/>
         <source>Find element number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="279"/>
+        <location filename="../src/desktop/selectitem.cpp" line="276"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="514"/>
+        <location filename="../src/desktop/selectitem.cpp" line="517"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="525"/>
+        <location filename="../src/desktop/selectitem.cpp" line="528"/>
         <source>Filter the list using this expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="531"/>
+        <location filename="../src/desktop/selectitem.cpp" line="534"/>
         <source>Find a 7-digit Lego element number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="957"/>
+        <location filename="../src/desktop/selectitem.cpp" line="908"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="991"/>
+        <location filename="../src/desktop/selectitem.cpp" line="942"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="996"/>
+        <location filename="../src/desktop/selectitem.cpp" line="947"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5523,6 +5556,14 @@ If you do not want to save your password, then just leave this field empty and y
     <message>
         <location filename="../src/desktop/taskwidgets.cpp" line="257"/>
         <source>Document statistics</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TaskInventoryWidget</name>
+    <message>
+        <location filename="../src/desktop/taskwidgets.cpp" line="342"/>
+        <source>Add Item...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
