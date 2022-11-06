@@ -44,7 +44,7 @@ public:
     const BrickLink::ItemType *currentItemType() const;
     const BrickLink::Item *currentItem() const;
 
-    bool setCurrentCategory(const BrickLink::Category *cat);
+    void setCurrentCategory(const BrickLink::Category *cat);
     bool setCurrentItemType(const BrickLink::ItemType *it);
     bool setCurrentItem(const BrickLink::Item *item, bool force_items_category = false);
 
@@ -62,13 +62,8 @@ signals:
     void hasSubConditions(bool);
     void itemSelected(const BrickLink::Item *, bool confirmed);
     void showInColor(const BrickLink::Color *color);
-    void currentItemTypeChanged(const BrickLink::ItemType *itemType);
 
 public slots:
-    void itemTypeUpdated();
-    void categoryUpdated();
-    void itemUpdated();
-
     void itemConfirmed();
 
 protected slots:

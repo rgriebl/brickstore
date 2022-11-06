@@ -70,13 +70,10 @@ public:
     QTreeView *      w_categories;
     QStackedLayout * m_stack;
     QTreeView *      w_items;
-    QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     HistoryLineEdit *w_filter;
     QToolButton *    w_pcc;
     QToolButton *    w_dateFilter;
-    QToolButton *    w_zoomIn;
-    QToolButton *    w_zoomOut;
     QToolButton *    w_zoomLevel;
     QButtonGroup *   w_viewmode;
     bool             m_inv_only;
@@ -296,38 +293,32 @@ void SelectItem::init()
         d->itemModel->setFilterYearRange(minYear, maxYear);
     });
 
-    d->w_zoomOut = new QToolButton();
-    d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    d->w_zoomOut->setIcon(QIcon::fromTheme(u"zoom-out"_qs));
-    d->w_zoomOut->setAutoRaise(true);
-    d->w_zoomOut->setAutoRepeat(true);
-    connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
+    connect(new QShortcut(QKeySequence::ZoomOut, this), &QShortcut::activated,
+            this, [this]() {
         setZoomFactor((int(std::round(d->m_zoom * 4)) - 1) / 4.); // 25% steps
+    });
+    connect(new QShortcut(QKeySequence::ZoomIn, this), &QShortcut::activated,
+            this, [this]() {
+        setZoomFactor((int(std::round(d->m_zoom * 4)) + 1) / 4.); // 25% steps
     });
     d->w_zoomLevel = new QToolButton();
     d->w_zoomLevel->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    d->w_zoomLevel->setPopupMode(QToolButton::MenuButtonPopup);
     d->w_zoomLevel->setAutoRaise(true);
     connect(d->w_zoomLevel, &QToolButton::clicked,
             this, [this]() { setZoomFactor(2); });
-    d->w_zoomIn = new QToolButton();
-    d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    d->w_zoomIn->setIcon(QIcon::fromTheme(u"zoom-in"_qs));
-    d->w_zoomIn->setAutoRaise(true);
-    d->w_zoomIn->setAutoRepeat(true);
-    connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
-        setZoomFactor((int(std::round(d->m_zoom * 4)) + 1) / 4.); // 25% steps
+    auto *zoomMenu = new QMenu(d->w_zoomLevel);
+    for (int zl : { 50, 75, 100, 125, 150, 175, 200, 250, 300, 350, 400, 500 }) {
+        zoomMenu->addAction(QString::number(zl) % u'%')->setData(zl);
+    }
+    connect(zoomMenu, &QMenu::triggered, this, [this](QAction *a) {
+        setZoomFactor(double(a->data().toInt()) / 100.);
     });
+    d->w_zoomLevel->setMenu(zoomMenu);
 
     QToolButton *tb;
     tb = new QToolButton();
     tb->setShortcut(tr("Ctrl+1"));
-    tb->setIcon(QIcon::fromTheme(u"view-list-text"_qs));
-    tb->setAutoRaise(true);
-    tb->setCheckable(true);
-    d->w_viewmode->addButton(tb, 0);
-
-    tb = new QToolButton();
-    tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon::fromTheme(u"view-list-details"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
@@ -335,7 +326,7 @@ void SelectItem::init()
     d->w_viewmode->addButton(tb, 1);
 
     tb = new QToolButton();
-    tb->setShortcut(tr("Ctrl+3"));
+    tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon::fromTheme(u"view-list-icons"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
@@ -345,26 +336,15 @@ void SelectItem::init()
     d->w_items->setAlternatingRowColors(true);
     d->w_items->setAllColumnsShowFocus(true);
     d->w_items->setUniformRowHeights(true);
+    d->w_items->setWordWrap(true);
     d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_items->setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, this));
+    d->w_items->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_items->header()->setSectionsMovable(false);
-
-    d->w_itemthumbs = new QTreeView();
-    d->w_itemthumbs->setAlternatingRowColors(true);
-    d->w_itemthumbs->setAllColumnsShowFocus(true);
-    d->w_itemthumbs->setUniformRowHeights(true);
-    d->w_itemthumbs->setWordWrap(true);
-    d->w_itemthumbs->setRootIsDecorated(false);
-    d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
-    d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
-    d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    new EventFilter(d->w_itemthumbs->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
+    new EventFilter(d->w_items->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
                     std::bind(&SelectItem::zoomFilter, this, _1, _2));
-    d->w_itemthumbs->header()->setSectionsMovable(false);
+    d->w_items->header()->setSectionsMovable(false);
 
     d->w_thumbs = new QListView();
     d->w_thumbs->setUniformItemSizes(true);
@@ -388,12 +368,9 @@ void SelectItem::init()
     d->w_item_types->setModel(d->itemTypeModel);
     d->w_categories->setModel(d->categoryModel);
     d->w_items->setModel(d->itemModel);
-    d->w_items->hideColumn(0);
-    d->w_itemthumbs->setModel(d->itemModel);
     d->w_thumbs->setModel(d->itemModel);
     d->w_thumbs->setModelColumn(0);
 
-    d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
 
     // setSortingEnabled(true) is a bit weird: it defaults to descending, (re)sorts on activation
@@ -409,6 +386,7 @@ void SelectItem::init()
         d->w_categories->scrollTo(d->w_categories->currentIndex());
     });
 
+    d->w_items->header()->setSortIndicator(2, Qt::AscendingOrder); // the model is sorted already
     d->w_items->header()->setSortIndicatorShown(true);
     d->w_items->header()->setSectionsClickable(true);
 
@@ -417,40 +395,70 @@ void SelectItem::init()
         sortItems(section, d->w_items->header()->sortIndicatorOrder());
     });
 
-    d->w_itemthumbs->header()->setSortIndicator(2, Qt::AscendingOrder); // the model is sorted already
-    d->w_itemthumbs->header()->setSortIndicatorShown(true);
-    d->w_itemthumbs->header()->setSectionsClickable(true);
-
-    connect(d->w_itemthumbs->header(), &QHeaderView::sectionClicked,
-                     this, [this](int section) {
-        sortItems(section, d->w_itemthumbs->header()->sortIndicatorOrder());
-    });
-
     connect(d->m_filter_delay, &QTimer::timeout,
             this, &SelectItem::applyFilter);
 
     connect(d->w_item_types, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &SelectItem::itemTypeUpdated);
+            this, [this]() {
+        const BrickLink::ItemType *itemtype = currentItemType();
+        const BrickLink::Category *oldCat = currentCategory();
+        const BrickLink::Item *oldItem = currentItem();
+
+        d->w_categories->selectionModel()->blockSignals(true);
+        d->w_items->selectionModel()->blockSignals(true);
+
+        d->categoryModel->setFilterItemType(itemtype);
+        // try to stick to same category or switch to AllCats if it is not available anymore
+        setCurrentCategory(oldCat);
+
+        d->itemModel->setFilterItemType(itemtype);
+        d->itemModel->setFilterCategory(currentCategory());
+        if (!itemtype || !itemtype->hasColors())
+            d->itemModel->setFilterColor(nullptr);
+
+        d->w_categories->selectionModel()->blockSignals(false);
+        d->w_items->selectionModel()->blockSignals(false);
+
+        // we switch itemtypes, so the same item cannot exist, but we may have the same id
+        // (e.g. keeping the same item id, when switching between sets and instructions)
+        if (oldItem) {
+            if (auto newItem = BrickLink::core()->item(currentItemType()->id(), oldItem->id()))
+                setCurrentItem(newItem);
+        }
+        if (!currentItem()) // a model reset doesn't emit selectionChanged
+            emit itemSelected(nullptr, false);
+
+        ensureSelectionVisible();
+
+        emit hasColors(itemtype ? itemtype->hasColors() : false);
+        emit hasSubConditions(itemtype ? itemtype->hasSubConditions() : false);
+    });
+
     connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectItem::categoryUpdated);
+            this, [this]() {
+        const BrickLink::Item *oldItem = currentItem();
+        d->itemModel->setFilterCategory(currentCategory());
+        setCurrentItem(oldItem);
+    });
+
+    connect(d->itemModel, &QAbstractItemModel::modelReset, this, [this]() {
+        emit itemSelected(nullptr, false);
+    });
 
     connect(d->w_items->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectItem::itemUpdated);
+            this, [this]() {
+        emit itemSelected(currentItem(), false);
+    });
+
     connect(d->w_items, &QAbstractItemView::doubleClicked,
-            this, &SelectItem::itemConfirmed);
-    connect(d->w_itemthumbs, &QAbstractItemView::doubleClicked,
             this, &SelectItem::itemConfirmed);
     connect(d->w_thumbs, &QAbstractItemView::doubleClicked,
             this, &SelectItem::itemConfirmed);
     connect(d->w_items, &QAbstractItemView::activated,
             this, &SelectItem::itemConfirmed);
-    connect(d->w_itemthumbs, &QAbstractItemView::activated,
-            this, &SelectItem::itemConfirmed);
     connect(d->w_thumbs, &QAbstractItemView::activated,
             this, &SelectItem::itemConfirmed);
     connect(d->w_items, &QWidget::customContextMenuRequested,
-            this, &SelectItem::showContextMenu);
-    connect(d->w_itemthumbs, &QWidget::customContextMenuRequested,
             this, &SelectItem::showContextMenu);
     connect(d->w_thumbs, &QWidget::customContextMenuRequested,
             this, &SelectItem::showContextMenu);
@@ -476,11 +484,8 @@ void SelectItem::init()
     viewlay->addWidget(d->w_filter);
     viewlay->addWidget(d->w_pcc);
     viewlay->addSpacing(11);
-    viewlay->addWidget(d->w_zoomOut);
     viewlay->addWidget(d->w_zoomLevel);
-    viewlay->addWidget(d->w_zoomIn);
     viewlay->addSpacing(11);
-    viewlay->addWidget(d->w_viewmode->button(0));
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
     lay->addLayout(viewlay, 0, 1);
@@ -489,17 +494,15 @@ void SelectItem::init()
     lay->addLayout(d->m_stack, 1, 1, 1, 1);
 
     d->m_stack->addWidget(d->w_items);
-    d->m_stack->addWidget(d->w_itemthumbs);
     d->m_stack->addWidget(d->w_thumbs);
 
-    d->m_stack->setCurrentWidget(d->w_itemthumbs);
+    d->m_stack->setCurrentWidget(d->w_items);
 
     setFocusProxy(d->w_filter);
     setTabOrder(d->w_item_types, d->w_categories);
     setTabOrder(d->w_categories, d->w_filter);
     setTabOrder(d->w_filter, d->w_items);
-    setTabOrder(d->w_items, d->w_itemthumbs);
-    setTabOrder(d->w_itemthumbs, d->w_thumbs);
+    setTabOrder(d->w_items, d->w_thumbs);
 
     setZoomFactor(2);
 
@@ -529,20 +532,17 @@ void SelectItem::languageChange()
         b->setToolTip(ActionManager::toolTipLabel(text, b->shortcut()));
     };
     setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
-    setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
-    setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
-    setToolTipOnButton(d->w_zoomIn, tr("Zoom in"));
-    setToolTipOnButton(d->w_zoomOut, tr("Zoom out"));
+    setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
 }
 
 EventFilter::Result SelectItem::zoomFilter(QObject *o, QEvent *e)
 {
-    if (!d->w_itemthumbs || !d->w_thumbs)
+    if (!d->w_items || !d->w_thumbs)
         return EventFilter::ContinueEventProcessing;
 
     if ((e->type() == QEvent::Wheel)
-            && (o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())) {
+            && (o == d->w_items->viewport() || o == d->w_thumbs->viewport())) {
         const auto *we = static_cast<QWheelEvent *>(e);
         if (we->modifiers() & Qt::ControlModifier) {
             double z = std::pow(1.001, we->angleDelta().y());
@@ -551,7 +551,7 @@ EventFilter::Result SelectItem::zoomFilter(QObject *o, QEvent *e)
             return EventFilter::StopEventProcessing;
         }
     } else if ((e->type() == QEvent::NativeGesture)
-               && (o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())) {
+               && (o == d->w_items->viewport() || o == d->w_thumbs->viewport())) {
         const auto *nge = static_cast<QNativeGestureEvent *>(e);
         if (nge->gestureType() == Qt::ZoomNativeGesture) {
             double z = 1 + nge->value();
@@ -572,10 +572,7 @@ void SelectItem::changeEvent(QEvent *e)
 
 void SelectItem::sortItems(int section, Qt::SortOrder order)
 {
-    d->w_itemthumbs->sortByColumn(section, order);
-    d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
-
-    d->w_items->header()->setSortIndicator(section ? section : 1, order);
+    d->w_items->sortByColumn(section, order);
     d->w_items->scrollTo(d->w_items->currentIndex());
 
     d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
@@ -633,30 +630,6 @@ void SelectItem::setColorFilter(const BrickLink::Color *color)
     }
 }
 
-void SelectItem::itemTypeUpdated()
-{
-    const BrickLink::ItemType *itemtype = currentItemType();
-
-    const BrickLink::Category *oldCat = currentCategory();
-    const BrickLink::Item *oldItem = currentItem();
-    d->w_categories->clearSelection();
-    d->w_items->clearSelection();
-
-    d->categoryModel->setFilterItemType(itemtype);
-    d->itemModel->setFilterItemType(itemtype);
-
-    setCurrentCategory(oldCat);
-    setCurrentItem(oldItem);
-
-    d->w_itemthumbs->setColumnWidth(0, int((itemtype ? itemtype->pictureSize().width() : 80) * d->m_zoom));
-
-    if (!itemtype || !itemtype->hasColors())
-        d->itemModel->setFilterColor(nullptr);
-
-    emit currentItemTypeChanged(itemtype);
-    emit hasColors(itemtype ? itemtype->hasColors() : false);
-    emit hasSubConditions(itemtype ? itemtype->hasSubConditions() : false);
-}
 
 const BrickLink::ItemType *SelectItem::currentItemType() const
 {
@@ -675,33 +648,18 @@ bool SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
     return idx.isValid();
 }
 
-
-void SelectItem::categoryUpdated()
-{
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    const BrickLink::Item *oldItem = currentItem();
-    d->w_items->clearSelection();
-
-    d->itemModel->setFilterCategory(currentCategory());
-
-    setCurrentItem(oldItem);
-    QApplication::restoreOverrideCursor();
-}
-
 const BrickLink::Category *SelectItem::currentCategory() const
 {
     QModelIndexList idxlst = d->w_categories->selectionModel()->selectedRows();
     return idxlst.isEmpty() ? nullptr : d->categoryModel->category(idxlst.front());
 }
 
-bool SelectItem::setCurrentCategory(const BrickLink::Category *cat)
+void SelectItem::setCurrentCategory(const BrickLink::Category *cat)
 {
     QModelIndex idx = d->categoryModel->index(cat);
-    if (idx.isValid())
-        d->w_categories->setCurrentIndex(idx);
-    else
-        d->w_categories->clearSelection();
-    return idx.isValid();
+    if (!idx.isValid())
+        idx = d->categoryModel->index(BrickLink::CategoryModel::AllCategories);
+    d->w_categories->setCurrentIndex(idx);
 }
 
 const BrickLink::Item *SelectItem::currentItem() const
@@ -749,7 +707,7 @@ void SelectItem::setZoomFactor(double zoom)
         d->m_zoom = zoom;
 
         auto d1 = static_cast<ItemThumbsDelegate *>(d->w_thumbs->itemDelegate());
-        auto d2 = static_cast<ItemThumbsDelegate *>(d->w_itemthumbs->itemDelegate());
+        auto d2 = static_cast<ItemThumbsDelegate *>(d->w_items->itemDelegate());
 
         d1->setZoomFactor(zoom);
         d2->setZoomFactor(zoom);
@@ -758,7 +716,7 @@ void SelectItem::setZoomFactor(double zoom)
         emit d2->sizeHintChanged(d->itemModel->index(0, 0));
         
         d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100), 3));
-        d->w_itemthumbs->resizeColumnToContents(0);
+        d->w_items->resizeColumnToContents(0);
     }
 }
 
@@ -783,8 +741,8 @@ QByteArray SelectItem::saveState() const
        << zoomFactor()
        << d->w_viewmode->checkedId()
        << (d->w_categories->header()->sortIndicatorOrder() == Qt::AscendingOrder)
-       << (d->w_itemthumbs->header()->sortIndicatorOrder() == Qt::AscendingOrder)
-       << d->w_itemthumbs->header()->sortIndicatorSection();
+       << (d->w_items->header()->sortIndicatorOrder() == Qt::AscendingOrder)
+       << d->w_items->header()->sortIndicatorSection();
 
     return ba;
 }
@@ -852,11 +810,13 @@ QByteArray SelectItem::defaultState()
 
 void SelectItem::setViewMode(int mode)
 {
+    if (mode == 0) // legacy
+        mode = 1;
+
     QWidget *w = nullptr;
     switch (mode) {
-    case 0 : w = d->w_items; break;
-    case 1 : w = d->w_itemthumbs; break;
-    case 2 : w = d->w_thumbs; break;
+    case 1: w = d->w_items; break;
+    case 2: w = d->w_thumbs; break;
     default: return;
     }
     d->m_stack->setCurrentWidget(w);
@@ -864,19 +824,11 @@ void SelectItem::setViewMode(int mode)
 }
 
 
-void SelectItem::itemUpdated()
-{
-    emit itemSelected(currentItem(), false);
-}
-
 void SelectItem::itemConfirmed()
 {
-    const BrickLink::Item *item = currentItem();
-    if (item)
+    if (const BrickLink::Item *item = currentItem())
         emit itemSelected(item, true);
 }
-
-
 
 void SelectItem::showEvent(QShowEvent *e)
 {
@@ -896,7 +848,6 @@ void SelectItem::ensureSelectionVisible()
         QModelIndex idx = d->itemModel->index(item);
 
         d->w_items->scrollTo(idx, QAbstractItemView::PositionAtCenter);
-        d->w_itemthumbs->scrollTo(idx, QAbstractItemView::PositionAtCenter);
         d->w_thumbs->scrollTo(idx, QAbstractItemView::PositionAtCenter);
     }
 }
