@@ -282,7 +282,7 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
             std::copy_if(otherChange->m_changes.cbegin(), otherChange->m_changes.cend(),
                          std::back_inserter(m_changes), [this](const auto &change) {
                 return !std::binary_search(m_changes.begin(), m_changes.end(),
-                                           std::make_pair(change.first, Lot()),
+                                           std::make_pair(change.first, Lot { }),
                                            [](const auto &a, const auto &b) {
                     return a.first < b.first;
                 });

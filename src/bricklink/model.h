@@ -222,36 +222,7 @@ private:
 };
 
 
-class AppearsInModel;
-
-class InternalAppearsInModel : public QAbstractTableModel
-{
-    Q_OBJECT
-
-public:
-    ~InternalAppearsInModel() override;
-
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
-    QModelIndex index(const AppearsInItem *const_ai) const;
-
-protected:
-    InternalAppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
-
-    AppearsIn m_appearsin;
-    QVector<AppearsInItem *> m_items;
-
-    friend class AppearsInModel;
-};
-
-class AppearsInModel : public QSortFilterProxyModel
+class InventoryModel : public QSortFilterProxyModel
 {
     Q_OBJECT
     QML_ELEMENT
@@ -259,13 +230,13 @@ class AppearsInModel : public QSortFilterProxyModel
     Q_PROPERTY(int count READ count CONSTANT FINAL)
 
 public:
-    AppearsInModel(const QVector<QPair<const Item *, const Color *> > &list, QObject *parent);
-    AppearsInModel(const Item *item, const Color *color, QObject *parent);
+    enum class Mode { AppearsIn, ConsistsOf };
+
+    InventoryModel(Mode mode, const QVector<QPair<const Item *, const Color *>> &list, QObject *parent);
 
     int count() const;
 
     using QSortFilterProxyModel::index;
-    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
     QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:

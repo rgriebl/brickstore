@@ -20,7 +20,7 @@
 
 #include "common/documentmodel.h"
 #include "common/document.h"
-#include "appearsinwidget.h"
+#include "inventorywidget.h"
 #include "picturewidget.h"
 #include "priceguidewidget.h"
 
@@ -96,12 +96,12 @@ private:
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-class TaskAppearsInWidget : public AppearsInWidget
+class TaskInventoryWidget : public InventoryWidget
 {
     Q_OBJECT
 
 public:
-    TaskAppearsInWidget(QWidget *parent = nullptr);
+    TaskInventoryWidget(QWidget *parent = nullptr);
 
 protected slots:
     void documentUpdate(Document *document);

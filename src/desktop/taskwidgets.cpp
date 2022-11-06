@@ -286,12 +286,12 @@ void TaskInfoWidget::changeEvent(QEvent *e)
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
-    : AppearsInWidget(parent), m_document(nullptr)
+TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
+    : InventoryWidget(parent), m_document(nullptr)
 {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    connect(MainWindow::inst(), &MainWindow::documentActivated, this, &TaskAppearsInWidget::documentUpdate);
+    connect(MainWindow::inst(), &MainWindow::documentActivated, this, &TaskInventoryWidget::documentUpdate);
 
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
@@ -306,22 +306,22 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     });
 }
 
-void TaskAppearsInWidget::documentUpdate(Document *document)
+void TaskInventoryWidget::documentUpdate(Document *document)
 {
     if (m_document) {
         disconnect(m_document.data(), &Document::selectedLotsChanged,
-                   this, &TaskAppearsInWidget::selectionUpdate);
+                   this, &TaskInventoryWidget::selectionUpdate);
     }
     m_document = document;
     if (m_document) {
         connect(m_document.data(), &Document::selectedLotsChanged,
-                this, &TaskAppearsInWidget::selectionUpdate);
+                this, &TaskInventoryWidget::selectionUpdate);
     }
 
     selectionUpdate(m_document ? m_document->selectedLots() : LotList());
 }
 
-void TaskAppearsInWidget::selectionUpdate(const LotList &list)
+void TaskInventoryWidget::selectionUpdate(const LotList &list)
 {
     m_selection = list;
     m_delayTimer.start();

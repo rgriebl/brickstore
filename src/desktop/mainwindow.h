@@ -37,7 +37,7 @@ class UndoGroup;
 class TaskInfoWidget;
 class TaskPriceGuideWidget;
 class TaskLinksWidget;
-class TaskAppearsInWidget;
+class TaskInventoryWidget;
 class DocumentModel;
 class AddItemDialog;
 class ScriptManager;

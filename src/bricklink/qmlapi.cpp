@@ -354,7 +354,7 @@ QVariantList QmlItem::consistsOf() const
     const auto consists = wrapped->consistsOf();
     QVariantList result;
     for (const auto &co : consists) {
-        auto *lot = new Lot { co.color(), co.item() };
+        auto *lot = new Lot { co.item(), co.color() };
         lot->setAlternate(co.isAlternate());
         lot->setAlternateId(co.alternateId());
         lot->setCounterPart(co.isCounterPart());
@@ -897,7 +897,8 @@ QmlLot QmlBrickLink::lot(const QVariant &v) const
         return v.value<BrickLink::Lot *>();
 }
 
-AppearsInModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QVariantList &colors)
+InventoryModel *QmlBrickLink::inventoryModel(bool appearsIn, const QVariantList &items,
+                                             const QVariantList &colors)
 {
     QVector<QPair<const Item *, const Color *>> list;
     if (items.size() == colors.size()) {
@@ -922,9 +923,20 @@ AppearsInModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QV
         }
     }
 
-    auto *aim = new AppearsInModel(list, nullptr);
-    aim->sort(0, Qt::DescendingOrder);
-    return aim;
+    auto *iim = new InventoryModel(appearsIn ? InventoryModel::Mode::AppearsIn
+                                             : InventoryModel::Mode::ConsistsOf, list, nullptr);
+    iim->sort(0, Qt::DescendingOrder);
+    return iim;
+}
+
+InventoryModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QVariantList &colors)
+{
+    return inventoryModel(true, items, colors);
+}
+
+InventoryModel *QmlBrickLink::consistsOfModel(const QVariantList &items, const QVariantList &colors)
+{
+    return inventoryModel(false, items, colors);
 }
 
 QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const

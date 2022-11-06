@@ -395,7 +395,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                     if (colp && (colp->id() == BrickLink::Color::InvalidId)) // LDraw-only color
                         colp = nullptr;
 
-                    auto *lot = new Lot(colp, itemp);
+                    auto *lot = new Lot(itemp, colp);
                     lot->setQuantity(1);
 
                     if (!colp || !itemp) {

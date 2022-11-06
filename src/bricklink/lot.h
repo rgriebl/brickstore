@@ -28,7 +28,7 @@ namespace BrickLink {
 class Lot
 {
 public:
-    Lot(const Color *color = nullptr, const Item *item = nullptr);
+    Lot(const Item *item = nullptr, const Color *color = nullptr);
     Lot(const Lot &copy);
     ~Lot();
 

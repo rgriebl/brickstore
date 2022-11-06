@@ -99,8 +99,10 @@ public:
 
     Q_INVOKABLE BrickLink::QmlLot lot(const QVariant &v) const;
 
-    Q_INVOKABLE BrickLink::AppearsInModel *appearsInModel(const QVariantList &items,
+    Q_INVOKABLE BrickLink::InventoryModel *appearsInModel(const QVariantList &items,
                                                           const QVariantList &colors);
+    Q_INVOKABLE BrickLink::InventoryModel *consistsOfModel(const QVariantList &items,
+                                                           const QVariantList &colors);
 
     Q_INVOKABLE QString itemHtmlDescription(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                             const QColor &highlight) const;
@@ -110,6 +112,8 @@ signals:
     void pictureUpdated(BrickLink::Picture *picture);
 
 private:
+    BrickLink::InventoryModel *inventoryModel(bool appearsIn, const QVariantList &items,
+                                              const QVariantList &colors);
     static char firstCharInString(const QString &str);
     inline Core *core() { return BrickLink::core(); }
     inline const Core *core() const { return BrickLink::core(); }

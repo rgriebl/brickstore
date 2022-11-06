@@ -446,7 +446,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, co
 
     if (includeInstructions) {
         if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
-            auto *lot = new Lot(BrickLink::core()->color(0), instructions);
+            auto *lot = new Lot(instructions, BrickLink::core()->color(0));
             lot->setQuantity(quantity);
             lot->setCondition(condition);
 
@@ -497,7 +497,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, co
         }
 
 
-        Lot *lot = new Lot(partColor, partItem);
+        Lot *lot = new Lot(partItem, partColor);
         lot->setQuantity(part.quantity() * quantity);
         lot->setCondition(condition);
         if (part.isExtra())

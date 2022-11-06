@@ -43,7 +43,7 @@
 #include "common/humanreadabletimedelta.h"
 #include "utility/utility.h"
 #include "additemdialog.h"
-#include "appearsinwidget.h"
+#include "inventorywidget.h"
 #include "desktopuihelpers.h"
 #include "picturewidget.h"
 #include "priceguidewidget.h"
@@ -96,8 +96,20 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_price_guide->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_price_guide->setLineWidth(2);
 
-    w_appears_in->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
-    w_appears_in->setLineWidth(2);
+    w_inventory->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
+    w_inventory->setLineWidth(2);
+
+    m_invGoToAction = new QAction(this);
+    connect(m_invGoToAction, &QAction::triggered, this, [this]() {
+        const auto selected = w_inventory->selected();
+        if (selected.item) {
+            w_select_item->clearFilter();
+            w_select_item->setCurrentItem(selected.item, true);
+            if (selected.color)
+                w_select_color->setCurrentColorAndItem(selected.color, selected.item);
+        }
+    });
+    w_inventory->addAction(m_invGoToAction);
 
     w_qty->setRange(1, DocumentModel::maxQuantity);
     w_qty->setValue(1);
@@ -303,6 +315,7 @@ void AddItemDialog::languageChange()
     m_price_label_fmt = w_label_currency->text();
 
     w_add->setText(tr("Add"));
+    m_invGoToAction->setText(tr("Go to this Item"));
 
     updateCurrencyCode();
     updateCaption();
@@ -330,7 +343,7 @@ AddItemDialog::~AddItemDialog()
 
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
-    w_appears_in->setItem(nullptr, nullptr);
+    w_inventory->setItem(nullptr, nullptr);
 }
 
 void AddItemDialog::updateCaption()
@@ -447,11 +460,11 @@ void AddItemDialog::updateItemAndColor()
 
     if (item && color) {
         w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(item, color, true));
-        w_appears_in->setItem(item, color);
+        w_inventory->setItem(item, color);
     }
     else {
         w_price_guide->setPriceGuide(nullptr);
-        w_appears_in->setItem(nullptr, nullptr);
+        w_inventory->setItem(nullptr, nullptr);
     }
     checkAddPossible();
 }
@@ -667,7 +680,7 @@ void AddItemDialog::addClicked()
     else
         color = BrickLink::core()->color(0);
 
-    auto lot = new BrickLink::Lot(color, item);
+    auto lot = new BrickLink::Lot(item, color);
 
     lot->setQuantity(w_qty->text().toInt());
     lot->setPrice(Currency::fromString(w_price->text()));

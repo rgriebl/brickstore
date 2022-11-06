@@ -408,7 +408,7 @@ void MainWindow::languageChange()
         if (name == u"dock_priceguide")
             dock->setWindowTitle(tr("Price Guide"));
         if (name == u"dock_appearsin")
-            dock->setWindowTitle(tr("Appears In"));
+            dock->setWindowTitle(tr("Item Inventory"));
         if (name == u"dock_opendocuments")
             dock->setWindowTitle(tr("Open Documents"));
         if (name == u"dock_recentdocuments")
@@ -888,17 +888,17 @@ void MainWindow::setupDockWidgets()
     auto dockInfo = createDock(new TaskInfoWidget, "dock_info");
     auto dockOpen = createDock(new TaskOpenDocumentsWidget, "dock_opendocuments");
     auto dockRecent = createDock(new TaskRecentDocumentsWidget, "dock_recentdocuments");
-    auto dockAppearsIn = createDock(new TaskAppearsInWidget, "dock_appearsin");
+    auto dockInventory = createDock(new TaskInventoryWidget, "dock_appearsin");
     auto dockPriceGuide = createDock(new TaskPriceGuideWidget, "dock_priceguide");
 
     addDockWidget(Qt::LeftDockWidgetArea, dockInfo);
     addDockWidget(Qt::LeftDockWidgetArea, dockOpen);
     addDockWidget(Qt::LeftDockWidgetArea, dockRecent);
-    addDockWidget(Qt::LeftDockWidgetArea, dockAppearsIn);
+    addDockWidget(Qt::LeftDockWidgetArea, dockInventory);
     addDockWidget(Qt::LeftDockWidgetArea, dockPriceGuide);
     tabifyDockWidget(dockRecent, dockOpen);
     tabifyDockWidget(dockOpen, dockInfo);
-    tabifyDockWidget(dockAppearsIn, dockPriceGuide);
+    tabifyDockWidget(dockInventory, dockPriceGuide);
 
     auto logDock = createDock(DesktopApplication::inst()->developerConsole(), "dock_errorlog");
     logDock->setAllowedAreas(Qt::BottomDockWidgetArea);

@@ -341,7 +341,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
         if (!item || !color) {
             ++invalidCount;
         } else {
-            auto *lot = new Lot(color, item);
+            auto *lot = new Lot(item, color);
             lot->setCondition(cond);
 
             if (lot->itemType()->hasSubConditions()) {

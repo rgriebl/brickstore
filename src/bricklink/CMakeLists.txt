@@ -61,6 +61,7 @@ if (BS_DESKTOP OR BS_MOBILE)
         io.h
         io.cpp
         model.h
+        model_p.h
         model.cpp
         order.h
         order.cpp

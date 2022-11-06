@@ -20,7 +20,7 @@
 
 namespace BrickLink {
 
-Lot::Lot(const Color *color, const Item *item)
+Lot::Lot(const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
 { }
@@ -263,7 +263,7 @@ Lot *Lot::restore(QDataStream &ds)
         if (core()->applyChangeLog(item, color, inc.get()))
             inc.reset();
     }
-    lot.reset(new Lot(color, item));
+    lot.reset(new Lot(item, color));
     if (inc)
         lot->setIncomplete(inc.release());
 

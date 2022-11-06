@@ -8,8 +8,6 @@ qt_add_library(desktop_module STATIC
     additemdialog.ui
     announcementsdialog.h
     announcementsdialog.cpp
-    appearsinwidget.cpp
-    appearsinwidget.h
     betteritemdelegate.cpp
     betteritemdelegate.h
     brickstoreproxystyle.cpp
@@ -55,6 +53,8 @@ qt_add_library(desktop_module STATIC
     importwantedlistdialog.ui
     incdecpricesdialog.cpp
     incdecpricesdialog.h
+    inventorywidget.cpp
+    inventorywidget.h
     mainwindow.cpp
     mainwindow.h
     managecolumnlayoutsdialog.cpp

@@ -68,6 +68,7 @@ private:
 private:
     QPointer<View> m_view;
 
+    QAction *m_invGoToAction;
     QPushButton *w_add;
     QSpinBox *w_tier_qty[3];
     QDoubleSpinBox *w_tier_price[3];

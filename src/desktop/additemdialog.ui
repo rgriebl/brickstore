@@ -79,7 +79,7 @@
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
-      <widget class="AppearsInWidget" name="w_appears_in" native="true"/>
+      <widget class="InventoryWidget" name="w_inventory" native="true"/>
       <widget class="PriceGuideWidget" name="w_price_guide">
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
@@ -680,9 +680,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>AppearsInWidget</class>
+   <class>InventoryWidget</class>
    <extends>QWidget</extends>
-   <header>desktop/appearsinwidget.h</header>
+   <header>desktop/inventorywidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

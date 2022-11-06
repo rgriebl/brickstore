@@ -13,21 +13,26 @@
 */
 #pragma once
 
-#include <QTreeView>
+#include <QFrame>
 
 #include "bricklink/lot.h"
 #include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
-class AppearsInWidgetPrivate;
+class InventoryWidgetPrivate;
 
 
-class AppearsInWidget : public QTreeView
+class InventoryWidget : public QFrame
 {
     Q_OBJECT
 public:
-    explicit AppearsInWidget(QWidget *parent);
-    ~AppearsInWidget() override;
+    explicit InventoryWidget(QWidget *parent);
+    ~InventoryWidget() override;
+
+    enum class Mode { AppearsIn, ConsistsOf };
+
+    Mode mode() const;
+    void setMode(Mode newMode);
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
     void setItems(const BrickLink::LotList &lots);
@@ -35,8 +40,21 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+    struct Item
+    {
+        const BrickLink::Item *item = nullptr;
+        const BrickLink::Color *color = nullptr;
+        int quantity = 0;
+    };
+
+    const InventoryWidget::Item selected() const;
+
+signals:
+    void customActionTriggered();
+
 protected:
     void languageChange();
+    void actionEvent(QActionEvent *e) override;
     void changeEvent(QEvent *e) override;
 
 private slots:
@@ -44,8 +62,7 @@ private slots:
     void resizeColumns();
 
 private:
-    const BrickLink::AppearsInItem *appearsIn() const;
+    void updateModel(const QVector<QPair<const BrickLink::Item *, const BrickLink::Color *> > &list);
 
-private:
-    std::unique_ptr<AppearsInWidgetPrivate> d;
+    std::unique_ptr<InventoryWidgetPrivate> d;
 };

@@ -67,9 +67,9 @@ enum ModelRoles {
     CategoryPointerRole,
     ItemTypePointerRole,
     ItemPointerRole,
-    AppearsInItemPointerRole,
     IdRole,
     NameRole,
+    ColorNameRole,
     QuantityRole,
 
     RoleMax
@@ -103,8 +103,8 @@ class InternalColorModel;
 class CategoryModel;
 class ItemTypeModel;
 class ItemModel;
-class AppearsInModel;
-class InternalAppearsInModel;
+class InventoryModel;
+class InternalInventoryModel;
 class ItemDelegate;
 
 } // namespace BrickLink
