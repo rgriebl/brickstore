@@ -162,6 +162,9 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
 {
     init();
 
+    if ((column == lastSortColumn) && (order == lastSortOrder))
+        return;
+
     lastSortColumn = column;
     lastSortOrder = order;
 
