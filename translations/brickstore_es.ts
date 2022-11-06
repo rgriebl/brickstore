@@ -1978,8 +1978,8 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message numerus="yes">
         <location filename="../src/common/document.cpp" line="840"/>
         <source>Duplicated %Ln item(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln artículo(s) duplicados</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
@@ -2071,7 +2071,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/common/document.cpp" line="1652"/>
         <source>You cannot save this document with the same name as another currently open document. Choose a different name, or close the other document first.</source>
-        <translation type="unfinished"></translation>
+        <translation>No puede guardar este documento con el mismo nombre que otro documento abierto actualmente. Elija un nombre diferente o cierre primero el otro documento.</translation>
     </message>
     <message>
         <location filename="../src/common/document.cpp" line="1687"/>
