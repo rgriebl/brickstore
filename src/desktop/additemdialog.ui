@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1488</width>
-    <height>382</height>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -479,19 +479,16 @@
    <item>
     <layout class="QHBoxLayout">
      <item>
-      <widget class="QToolButton" name="w_toggle_picture">
+      <widget class="QToolButton" name="w_go_back">
        <property name="toolTip">
-        <string>Show item information</string>
+        <string>Click to go back one item, hold to see history</string>
        </property>
        <property name="icon">
-        <iconset theme="help-about">
+        <iconset theme="go-previous">
          <normaloff>.</normaloff>.</iconset>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+       <property name="shortcut">
+        <string notr="true">Back</string>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -499,19 +496,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="w_toggle_appears_in">
+      <widget class="QToolButton" name="w_go_next">
        <property name="toolTip">
-        <string>Show which sets the item appears in</string>
+        <string>Click to go forward one item, hold to see history</string>
        </property>
        <property name="icon">
-        <iconset theme="go-jump-definition">
+        <iconset theme="go-next">
          <normaloff>.</normaloff>.</iconset>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+       <property name="shortcut">
+        <string notr="true">Forward</string>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -519,38 +513,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="w_toggle_price_guide">
+      <widget class="QToolButton" name="w_menu">
        <property name="toolTip">
-        <string>Show price guide</string>
+        <string>Menu</string>
        </property>
        <property name="icon">
-        <iconset theme="taxes-finances">
+        <iconset theme="application-menu">
          <normaloff>.</normaloff>.</iconset>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="w_toggle_seller_mode">
-       <property name="toolTip">
-        <string>Show additional input fields for sellers</string>
-       </property>
-       <property name="icon">
-        <iconset theme="insert-more-mark"/>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+       <property name="popupMode">
+        <enum>QToolButton::InstantPopup</enum>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -710,9 +682,6 @@
   <tabstop>w_comments</tabstop>
   <tabstop>w_remarks</tabstop>
   <tabstop>w_merge</tabstop>
-  <tabstop>w_toggle_picture</tabstop>
-  <tabstop>w_toggle_appears_in</tabstop>
-  <tabstop>w_toggle_price_guide</tabstop>
  </tabstops>
  <resources/>
  <connections>

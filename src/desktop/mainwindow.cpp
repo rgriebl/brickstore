@@ -1015,25 +1015,7 @@ void MainWindow::createActions()
           } },
         { "application_exit", [this](auto) { close(); } },
         { "edit_additems", [this](auto) {
-              if (!m_add_dialog) {
-                  m_add_dialog = new AddItemDialog();
-                  m_add_dialog->setObjectName(u"additems"_qs);
-                  m_add_dialog->attach(m_activeView);
-
-                  connect(m_add_dialog, &AddItemDialog::closed,
-                          this, [this]() {
-                      show();
-                      raise();
-                      activateWindow();
-                  });
-              }
-
-              if (m_add_dialog->isVisible()) {
-                  m_add_dialog->raise();
-                  m_add_dialog->activateWindow();
-              } else {
-                  m_add_dialog->show();
-              }
+              showAddItemDialog();
           } },
         { "view_fullscreen", [this](bool fullScreen) {
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
@@ -1249,6 +1231,36 @@ QMenu *MainWindow::createPopupMenu()
         });
     }
     return menu;
+}
+
+void MainWindow::showAddItemDialog(const BrickLink::Item *item, const BrickLink::Color *color)
+{
+    if (!m_add_dialog) {
+        m_add_dialog = new AddItemDialog();
+        m_add_dialog->setObjectName(u"additems"_qs);
+        m_add_dialog->attach(m_activeView);
+
+        connect(m_add_dialog, &AddItemDialog::closed,
+                this, [this]() {
+            show();
+            raise();
+            activateWindow();
+        });
+    }
+
+    if (m_add_dialog->isVisible()) {
+        m_add_dialog->raise();
+        m_add_dialog->activateWindow();
+    } else {
+        m_add_dialog->show();
+    }
+
+    if (item) {
+        QMetaObject::invokeMethod(m_add_dialog.get(), [this, item, color]() {
+            if (m_add_dialog)
+                m_add_dialog->goToItem(item, color);
+        }, Qt::QueuedConnection);
+    }
 }
 
 void MainWindow::blockUpdate(bool blocked)

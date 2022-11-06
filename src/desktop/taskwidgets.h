@@ -107,10 +107,15 @@ protected slots:
     void documentUpdate(Document *document);
     void selectionUpdate(const BrickLink::LotList &list);
 
+protected:
+    void languageChange();
+    void changeEvent(QEvent *e) override;
+
 private:
     QPointer<Document> m_document;
     QTimer m_delayTimer;
     LotList m_selection;
+    QAction *m_invGoToAction;
 };
 
 

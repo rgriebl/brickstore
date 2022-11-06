@@ -19,6 +19,7 @@
 #include <QStringList>
 #include <QPointer>
 
+#include "bricklink/global.h"
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
@@ -71,6 +72,9 @@ public:
     void setActiveView(View *view);
 
     QMenu *createPopupMenu() override;
+
+    void showAddItemDialog(const BrickLink::Item *item = nullptr,
+                            const BrickLink::Color *color = nullptr);
 
 public slots:
     void blockUpdate(bool blocked);

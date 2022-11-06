@@ -32,8 +32,10 @@
 #include <QStringBuilder>
 #include <QTimer>
 #include <QAction>
+#include <QMenu>
 
 #include "bricklink/core.h"
+#include "bricklink/picture.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/document.h"
@@ -102,12 +104,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_invGoToAction = new QAction(this);
     connect(m_invGoToAction, &QAction::triggered, this, [this]() {
         const auto selected = w_inventory->selected();
-        if (selected.item) {
-            w_select_item->clearFilter();
-            w_select_item->setCurrentItem(selected.item, true);
-            if (selected.color)
-                w_select_color->setCurrentColorAndItem(selected.color, selected.item);
-        }
+        if (selected.item)
+            goToItem(selected.item, selected.color);
     });
     w_inventory->addAction(m_invGoToAction);
 
@@ -161,6 +159,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             this, [this](const BrickLink::Item *item, bool confirmed) {
         updateItemAndColor();
         w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+        recordBrowseEntry();
         if (confirmed)
             w_add->animateClick();
     });
@@ -172,6 +171,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_select_color, &SelectColor::colorSelected,
             this, [this](const BrickLink::Color *, bool confirmed) {
         updateItemAndColor();
+        recordBrowseEntry();
         if (confirmed)
             w_add->animateClick();
     });
@@ -199,16 +199,68 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_radio_percent->click();
 
-    w_toggles[0] = w_toggle_picture;
-    w_toggles[1] = w_toggle_appears_in;
-    w_toggles[2] = w_toggle_price_guide;
+    m_backMenu = new QMenu(this);
+    m_nextMenu = new QMenu(this);
+    connect(m_backMenu, &QMenu::aboutToShow, this, [this]() {
+        buildBrowseMenu(BrowseMenuType::Back);
+    });
+    connect(m_nextMenu, &QMenu::aboutToShow, this, [this]() {
+        buildBrowseMenu(BrowseMenuType::Next);
+    });
+    connect(w_go_back, &QToolButton::clicked, this, [this]() {
+        replayBrowseEntry(BrowseMenuType::Back, m_browseStackIndex + 1);
+    });
+    connect(w_go_next, &QToolButton::clicked, this, [this]() {
+        replayBrowseEntry(BrowseMenuType::Next, m_browseStackIndex - 1);
+    });
+    connect(m_backMenu, &QMenu::triggered, this, [this](QAction *a) {
+        replayBrowseEntry(BrowseMenuType::Back, a->data().toInt());
+    });
+    connect(m_nextMenu, &QMenu::triggered, this, [this](QAction *a) {
+        replayBrowseEntry(BrowseMenuType::Next, a->data().toInt());
+    });
+
+    w_go_back->setMenu(m_backMenu);
+    w_go_back->setProperty("noMenuArrow", true);
+    w_go_next->setMenu(m_nextMenu);
+    w_go_next->setProperty("noMenuArrow", true);
+
+    updateBrowseActions();
+
+    auto *menu = new QMenu(this);
+    m_historyMenu = menu->addMenu(tr("Browsing history"));
+    m_historyMenu->setProperty("scrollableMenu", true);
+
+    connect(m_historyMenu, &QMenu::aboutToShow, this, [this]() {
+        buildBrowseMenu(BrowseMenuType::History);
+    });
+    connect(m_historyMenu, &QMenu::triggered, this, [this](QAction *a) {
+        replayBrowseEntry(BrowseMenuType::History, a->data().toInt());
+    });
+
+    menu->addSeparator();
+
+    m_toggles[0] = menu->addAction(QIcon::fromTheme(u"help-about"_qs), tr("Show item information"));
+    m_toggles[1] = menu->addAction(QIcon::fromTheme(u"go-jump-definition"_qs), tr("Show item inventory and appearance"));
+    m_toggles[2] = menu->addAction(QIcon::fromTheme(u"taxes-finances"_qs), tr("Show price guide"));
+
     for (int i = 0; i < 3; ++i) {
-        connect(w_toggles[i], &QToolButton::toggled, this, [this, i](bool on) {
+        m_toggles[i]->setCheckable(true);
+        m_toggles[i]->setChecked(true);
+        connect(m_toggles[i], &QAction::toggled, this, [this, i](bool on) {
             w_splitter_bottom->widget(i)->setVisible(on);
         });
     }
-    connect(w_toggle_seller_mode, &QToolButton::toggled,
+    menu->addSeparator();
+
+    m_sellerMode = menu->addAction(QIcon::fromTheme(u"insert-more-mark"_qs), tr("Show additional input fields for sellers"));
+    m_sellerMode->setCheckable(true);
+    m_sellerMode->setChecked(true);
+    connect(m_sellerMode, &QAction::toggled,
             this, &AddItemDialog::setSellerMode);
+
+    w_menu->setMenu(menu);
+    w_menu->setProperty("noMenuArrow", true);
 
     w_splitter_bottom->setStretchFactor(0, 2);
     w_splitter_bottom->setStretchFactor(1, 1);
@@ -233,30 +285,30 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         for (int i = 0; i < 3; ++i) {
             if (hidden & (1 << i)) {
                 w_splitter_bottom->widget(i)->hide();
-                w_toggles[i]->setChecked(false);
+                m_toggles[i]->setChecked(false);
             }
         }
         if (hidden & (1 << 7)) {
-            w_toggle_seller_mode->setChecked(false);
+            m_sellerMode->setChecked(false);
             setSellerMode(false);
         }
 
         w_splitter_bottom->restoreState(ba.mid(1));
     }
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectItem"_qs)
-            .toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectItem"_qs).toByteArray();
     if (!w_select_item->restoreState(ba))
         w_select_item->restoreState(SelectItem::defaultState());
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectColor"_qs)
-            .toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectColor"_qs).toByteArray();
     if (!w_select_color->restoreState(ba))
         w_select_color->restoreState(SelectColor::defaultState());
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/ItemDetails"_qs)
-            .toByteArray();
+    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/ItemDetails"_qs).toByteArray();
     restoreState(ba);
+
+    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/BrowseState"_qs).toByteArray();
+    restoreBrowseState(ba);
 
     new EventFilter(w_last_added, { QEvent::ToolTip }, [this](QObject *, QEvent *e) { // dynamic tooltip
         const auto *he = static_cast<QHelpEvent *>(e);
@@ -266,7 +318,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             QString tips;
 
             for (const auto &entry : m_addHistory)
-                tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
+                tips = tips % pre % addhistoryTextFor(entry.first, entry.second) % post;
 
             QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
         }
@@ -275,7 +327,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     m_historyTimer = new QTimer(this);
     m_historyTimer->setInterval(30s);
-    connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
+    connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateAddHistoryText);
 
 
     if (QAction *a = ActionManager::inst()->qAction("bricklink_catalog")) {
@@ -315,11 +367,11 @@ void AddItemDialog::languageChange()
     m_price_label_fmt = w_label_currency->text();
 
     w_add->setText(tr("Add"));
-    m_invGoToAction->setText(tr("Go to this Item"));
+    m_invGoToAction->setText(tr("Go to Item"));
 
     updateCurrencyCode();
     updateCaption();
-    updateHistoryText();
+    updateAddHistoryText();
 }
 
 AddItemDialog::~AddItemDialog()
@@ -330,16 +382,17 @@ AddItemDialog::~AddItemDialog()
     QByteArray ba = w_splitter_bottom->saveState();
     char hidden = 0;
     for (int i = 0; i < 3; ++i) {
-        if (!w_toggles[i]->isChecked())
+        if (!m_toggles[i]->isChecked())
             hidden |= (1 << i);
     }
-    if (!w_toggle_seller_mode->isChecked())
+    if (!m_sellerMode->isChecked())
         hidden |= (1 << 7);
     ba.prepend(hidden);
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/HSplitter"_qs, ba);
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/SelectItem"_qs, w_select_item->saveState());
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/SelectColor"_qs, w_select_color->saveState());
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/ItemDetails"_qs, saveState());
+    Config::inst()->setValue(u"/MainWindow/AddItemDialog/BrowseState"_qs, saveBrowseState());
 
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
@@ -381,6 +434,16 @@ void AddItemDialog::attach(View *view)
 
     updateCaption();
     updateCurrencyCode();
+}
+
+void AddItemDialog::goToItem(const BrickLink::Item *item, const BrickLink::Color *color)
+{
+    if (item) {
+        w_select_item->clearFilter();
+        w_select_item->setCurrentItem(item, true);
+        if (color)
+            w_select_color->setCurrentColorAndItem(color, item);
+    }
 }
 
 void AddItemDialog::closeEvent(QCloseEvent *e)
@@ -514,19 +577,19 @@ double AddItemDialog::tierPriceValue(int i)
     return val;
 }
 
-void AddItemDialog::updateHistoryText()
+void AddItemDialog::updateAddHistoryText()
 {
-    if (m_addHistory.empty()) {
+    if (m_addHistory.isEmpty()) {
         w_last_added->setText(tr("Your recently added items will be listed here"));
         m_historyTimer->stop();
     } else {
         const auto &hist = *m_addHistory.crbegin();
-        w_last_added->setText(historyTextFor(hist.first, hist.second));
+        w_last_added->setText(addhistoryTextFor(hist.first, hist.second));
         m_historyTimer->start();
     }
 }
 
-QString AddItemDialog::historyTextFor(const QDateTime &when, const Lot &lot)
+QString AddItemDialog::addhistoryTextFor(const QDateTime &when, const BrickLink::Lot &lot)
 {
     auto now = QDateTime::currentDateTime();
     QString cs;
@@ -700,10 +763,10 @@ void AddItemDialog::addClicked()
         lot->setTierPrice(i, tierPriceValue(i));
     }
 
-    m_addHistory.emplace_back(qMakePair(QDateTime::currentDateTime(), *lot));
+    m_addHistory.emplace_back(QDateTime::currentDateTime(), *lot);
     while (m_addHistory.size() > 6)
         m_addHistory.pop_front();
-    updateHistoryText();
+    updateAddHistoryText();
 
     m_view->document()->addLots({ lot }, w_merge->isChecked() ? Document::AddLotMode::ConsolidateWithExisting
                                                               : Document::AddLotMode::AddAsNew)
@@ -712,6 +775,218 @@ void AddItemDialog::addClicked()
             view->setLatestRow(lastAddedRow);
         }
     });
+}
+
+void AddItemDialog::recordBrowseEntry(bool onlyUpdateHistory)
+{
+    if (m_currentlyRestoringBrowseHistory)
+        return;
+
+    auto item = w_select_item->currentItem();
+    auto color = w_select_color->currentColor();
+
+    if (!item)
+        return;
+
+    QByteArray fullItemId = item->itemTypeId() % item->id();
+
+    BrowseHistoryEntry he { fullItemId, color ? color->id() : BrickLink::Color::InvalidId,
+                QDateTime::currentDateTime(), w_select_item->saveState(),
+                w_select_color->saveState(), saveState() };
+
+    if (!onlyUpdateHistory) {
+        // Add, if not already the first item. If the first item is the same, but without color,
+        // then replace the uncolored entry
+        if (m_browseStack.isEmpty() || (m_browseStack.at(m_browseStackIndex).m_fullItemId != fullItemId)) {
+            if (m_browseStackIndex > 0)
+                m_browseStack.remove(0, m_browseStackIndex);
+            m_browseStackIndex = 0;
+            m_browseStack.prepend(he);
+            if (m_browseStack.size() > MaxBrowseStack)
+                m_browseStack.resize(MaxBrowseStack);
+        } else if (color) {
+            m_browseStack[m_browseStackIndex] = he;
+        }
+    }
+
+    // (Re)add item to the history, unless it is the last added anyway
+    if (m_browseHistory.isEmpty() || (m_browseHistory.constFirst().m_fullItemId != fullItemId)) {
+        m_browseHistory.removeIf([fullItemId](const auto &i) { return i.m_fullItemId == fullItemId; });
+        m_browseHistory.prepend(he);
+        if (m_browseHistory.size() > MaxBrowseHistory)
+            m_browseHistory.resize(MaxBrowseHistory);
+    }
+
+    updateBrowseActions();
+}
+
+bool AddItemDialog::replayBrowseEntry(BrowseMenuType type, int pos)
+{
+    const auto &vector = (type == BrowseMenuType::History) ? m_browseHistory : m_browseStack;
+
+    if (pos < 0 || pos >= vector.size())
+        return false;
+
+    const auto &bhe = vector.at(pos);
+    if (bhe.m_fullItemId.isEmpty())
+        return false;
+
+    if (type != BrowseMenuType::History)
+        m_browseStackIndex = pos;
+
+    m_currentlyRestoringBrowseHistory = true;
+    w_select_item->restoreState(bhe.m_itemState);
+    w_select_color->restoreState(bhe.m_colorState);
+    restoreState(bhe.m_addState);
+    m_currentlyRestoringBrowseHistory = false;
+
+    recordBrowseEntry(type != BrowseMenuType::History);
+    updateBrowseActions();
+    return true;
+}
+
+void AddItemDialog::updateBrowseActions()
+{
+    w_go_back->setEnabled(m_browseStackIndex < (m_browseStack.size() - 1));
+    w_go_next->setEnabled(m_browseStackIndex > 0);
+}
+
+void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
+{
+    const auto &vector = (type == BrowseMenuType::History) ? m_browseHistory : m_browseStack;
+
+    QMenu *m = nullptr;
+    int d = 1;
+    int start;
+
+    switch (type) {
+    case BrowseMenuType::Back:
+        m = m_backMenu;
+        start = m_browseStackIndex + 1;
+        break;
+    case BrowseMenuType::Next:
+        m = m_nextMenu;
+        d = -1;
+        start = m_browseStackIndex - 1;
+        break;
+    case BrowseMenuType::History:
+        m = m_historyMenu;
+        start = 0;
+        break;
+    }
+    if (!m)
+        return;
+    m->clear();
+
+    if (type == BrowseMenuType::History) {
+        auto clearHistory = m->addAction(tr("Clear history"));
+        connect(clearHistory, &QAction::triggered, this, [this]() {
+            m_browseHistory.clear();
+            updateBrowseActions();
+        });
+        m->addSeparator();
+
+        if (m_browseHistory.isEmpty())
+            m->addAction(tr("No browsing history"))->setEnabled(false);
+    }
+
+    auto now = QDateTime::currentDateTime();
+
+    for (int i = start; (d < 0) ? (i >= 0) : (i < vector.size()); i += d) {
+        const auto &bhe = vector.at(i);
+
+        if (!bhe.m_fullItemId.isEmpty()) {
+            auto *item = BrickLink::core()->item(bhe.m_fullItemId.at(0), bhe.m_fullItemId.mid(1));
+            auto *color = BrickLink::core()->color(bhe.m_colorId);
+
+            if (item) {
+                QString s = item->name();
+                if (color && color->id())
+                    s = color->name() % u' ' % s;
+                if (type == BrowseMenuType::History)
+                    s = s % u"\t(" % HumanReadableTimeDelta::toString(now, bhe.m_lastVisited) % u')';
+
+                auto *a = m->addAction(s);
+                a->setData(i);
+                auto *pic = BrickLink::core()->picture(item, color, true);
+                if (pic && pic->isValid())
+                    a->setIcon(QPixmap::fromImage(pic->image()));
+            }
+        }
+    }
+}
+
+QByteArray AddItemDialog::saveBrowseState() const
+{
+    auto saveBrowseHistoryEntry = [](QDataStream &ds, const BrowseHistoryEntry &bhe) {
+        ds << bhe.m_fullItemId << bhe.m_colorId << bhe.m_lastVisited
+           << bhe.m_itemState << bhe.m_colorState << bhe.m_addState;
+    };
+
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("BS") << qint32(1)
+       << int(m_browseHistory.size()) << int(m_browseStack.size()) << int(m_browseStackIndex);
+
+    for (int i = 0; i < m_browseHistory.size(); ++i)
+        saveBrowseHistoryEntry(ds, m_browseHistory.at(i));
+    for (int i = 0; i < m_browseStack.size(); ++i)
+        saveBrowseHistoryEntry(ds, m_browseStack.at(i));
+
+    return ba;
+}
+
+bool AddItemDialog::restoreBrowseState(const QByteArray &ba)
+{
+    auto restoreBrowseHistoryEntry = [](QDataStream &ds, BrowseHistoryEntry &bhe) -> bool {
+        ds >> bhe.m_fullItemId >> bhe.m_colorId >> bhe.m_lastVisited
+           >> bhe.m_itemState >> bhe.m_colorState >> bhe.m_addState;
+
+        return (ds.status() == QDataStream::Ok);
+    };
+
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "BS") || (version < 1) || (version > 1))
+        return false;
+
+    int bhSize, bsSize, bsIndex;
+    ds >> bhSize >> bsSize >> bsIndex;
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    if ((bhSize < 0) || (bhSize > MaxBrowseHistory) || (bsSize < 0) || (bsSize > MaxBrowseStack)
+            || (bsIndex < -1) || (bsIndex >= bsSize)) {
+        return false;
+    }
+
+    QVector<BrowseHistoryEntry> history;
+    history.reserve(bhSize);
+    for (int i = 0; i < bhSize; ++i) {
+        BrowseHistoryEntry bhe;
+        if (!restoreBrowseHistoryEntry(ds, bhe))
+            return false;
+        history.append(bhe);
+    }
+
+    QVector<BrowseHistoryEntry> stack;
+    stack.reserve(bsSize);
+    for (int i = 0; i < bsSize; ++i) {
+        BrowseHistoryEntry bhe;
+        if (!restoreBrowseHistoryEntry(ds, bhe))
+            return false;
+        stack.append(bhe);
+    }
+
+    m_browseHistory = history;
+    m_browseStack = stack;
+    m_browseStackIndex = bsIndex;
+
+    updateBrowseActions();
+    return true;
 }
 
 #include "moc_additemdialog.cpp"

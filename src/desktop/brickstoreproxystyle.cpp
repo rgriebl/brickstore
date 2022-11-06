@@ -18,6 +18,7 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QMenu>
 #include <QPainter>
 #include <QApplication>
 #include <QPalette>
@@ -51,6 +52,13 @@ void BrickStoreProxyStyle::polish(QWidget *w)
             || qobject_cast<QDoubleSpinBox *>(w)
             || qobject_cast<QSpinBox *>(w)) {
         w->installEventFilter(this);
+
+    } else if (qobject_cast<QMenu *>(w)) {
+        // SH_Menu_Scrollable is checked early in the QMenu constructor,
+        // so we need to force an re-evaluation
+        if (w->property("scrollableMenu").toBool())
+            qApp->postEvent(w, new QEvent(QEvent::StyleChange));
+
     } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
         if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
             QPointer<QToolButton> tbptr(tb);
@@ -101,6 +109,9 @@ int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *
     } else if (hint == SH_ItemView_ScrollMode) {
         // smooth scrolling on all platforms - not just macOS
         return QAbstractItemView::ScrollPerPixel;
+    } else if (hint == SH_Menu_Scrollable) {
+        if (widget && widget->property("scrollableMenu").toBool())
+            return true;
     }
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }

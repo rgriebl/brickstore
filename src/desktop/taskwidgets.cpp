@@ -304,6 +304,16 @@ TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
         else
             setItems(m_selection);
     });
+
+    m_invGoToAction = new QAction(this);
+    m_invGoToAction->setIcon(QIcon::fromTheme(u"edit-additems"_qs));
+    connect(m_invGoToAction, &QAction::triggered, this, [this]() {
+        const auto sel = selected();
+        if (sel.item)
+            MainWindow::inst()->showAddItemDialog(sel.item, sel.color);
+    });
+    addAction(m_invGoToAction);
+    languageChange();
 }
 
 void TaskInventoryWidget::documentUpdate(Document *document)
@@ -325,6 +335,18 @@ void TaskInventoryWidget::selectionUpdate(const LotList &list)
 {
     m_selection = list;
     m_delayTimer.start();
+}
+
+void TaskInventoryWidget::languageChange()
+{
+    m_invGoToAction->setText(tr("Add Item..."));
+}
+
+void TaskInventoryWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    InventoryWidget::changeEvent(e);
 }
 
 

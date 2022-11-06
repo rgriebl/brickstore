@@ -36,6 +36,8 @@ public:
 
     void attach(View *view);
 
+    void goToItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
+
 signals:
     void closed();
 
@@ -59,8 +61,8 @@ private slots:
 
 private:
     double tierPriceValue(int i);
-    void updateHistoryText();
-    static QString historyTextFor(const QDateTime &when, const Lot &lot);
+    void updateAddHistoryText();
+    static QString addhistoryTextFor(const QDateTime &when, const BrickLink::Lot &lot);
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
@@ -81,8 +83,43 @@ private:
 
     QString m_currency_code;
 
-    QToolButton *w_toggles[3];
+    QAction *m_toggles[3];
+    QAction *m_sellerMode;
+
+    QMenu *m_backMenu;
+    QMenu *m_nextMenu;
+    QMenu *m_historyMenu;
 
     QTimer *m_historyTimer;
-    std::list<QPair<QDateTime, const Lot>> m_addHistory;
+    QVector<std::pair<QDateTime, BrickLink::Lot>> m_addHistory;
+
+    struct BrowseHistoryEntry
+    {
+        QByteArray m_fullItemId;
+        uint m_colorId;
+        QDateTime m_lastVisited;
+        QByteArray m_itemState;
+        QByteArray m_colorState;
+        QByteArray m_addState;
+    };
+
+    QVector<BrowseHistoryEntry> m_browseStack;
+    QVector<BrowseHistoryEntry> m_browseHistory;
+
+    int m_browseStackIndex = -1;
+    bool m_currentlyRestoringBrowseHistory = false;
+
+    static constexpr qsizetype MaxBrowseHistory = 100;
+    static constexpr qsizetype MaxBrowseStack = 15;
+
+    enum class BrowseMenuType { Back, Next, History };
+
+    void recordBrowseEntry(bool onlyUpdateHistory = false);
+    bool replayBrowseEntry(BrowseMenuType type, int pos);
+    void buildBrowseMenu(BrowseMenuType type);
+    void updateBrowseActions();
+
+
+    QByteArray saveBrowseState() const;
+    bool restoreBrowseState(const QByteArray &ba);
 };
