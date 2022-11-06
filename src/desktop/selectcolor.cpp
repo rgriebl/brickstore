@@ -67,9 +67,7 @@ SelectColor::SelectColor(QWidget *parent)
     w_lock->setAutoRaise(true);
     w_lock->setCheckable(true);
     w_lock->setChecked(false);
-    connect(w_lock, &QToolButton::toggled, this, [this](bool locked) {
-        emit colorLockChanged(locked ? currentColor() : nullptr);
-    });
+    connect(w_lock, &QToolButton::toggled, this, &SelectColor::setColorLock);
 
     w_colors = new ColorTreeView();
     w_colors->setAlternatingRowColors(true);
@@ -94,7 +92,21 @@ SelectColor::SelectColor(QWidget *parent)
     setFocusProxy(w_colors);
 
     connect(w_colors->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectColor::colorChanged);
+            this, [this]() {
+        auto col = currentColor();
+        emit colorSelected(col, false);
+        if (colorLock()) {
+            if (col)
+                emit colorLockChanged(col);
+            else
+                setColorLock(false);
+        }
+        w_lock->setEnabled(col);
+    });
+    connect(m_colorModel, &QAbstractItemModel::modelReset, this, [this]() {
+        emit colorSelected(nullptr, false);
+    });
+
     connect(w_colors, &QAbstractItemView::activated,
             this, &SelectColor::colorConfirmed);
     connect(w_filter, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -145,6 +157,8 @@ void SelectColor::updateColorFilter(int index)
 {
     int filter = index < 0 ? -1 : w_filter->itemData(index).toInt();
 
+    auto oldColor = currentColor();
+
     m_colorModel->clearFilters();
 
     if (filter > 0) {
@@ -165,6 +179,13 @@ void SelectColor::updateColorFilter(int index)
     }
 
     m_colorModel->invalidateFilterNow();
+
+    auto colorIndex = m_colorModel->index(oldColor);
+    if (colorIndex.isValid())
+        w_colors->setCurrentIndex(colorIndex);
+    else
+        w_colors->clearSelection();
+    w_colors->scrollTo(colorIndex);
 }
 
 const BrickLink::Color *SelectColor::currentColor() const
@@ -178,14 +199,15 @@ const BrickLink::Color *SelectColor::currentColor() const
 
 bool SelectColor::colorLock() const
 {
-    return w_lock->isChecked();
+    return m_locked;
 }
 
-void SelectColor::unlockColor()
+void SelectColor::setColorLock(bool locked)
 {
-    if (colorLock()) {
-        w_lock->setChecked(false);
-        emit colorLockChanged(nullptr);
+    if (locked != m_locked) {
+        m_locked = locked;
+        w_lock->setChecked(locked);
+        emit colorLockChanged(locked ? currentColor() : nullptr);
     }
 }
 
@@ -195,12 +217,13 @@ QByteArray SelectColor::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SC") << qint32(1)
+    ds << QByteArray("SC") << qint32(2)
        << (col ? col->id() : uint(-1))
        << qint8(m_item && m_item->itemType() ? m_item->itemTypeId() : char(-1))
        << (m_item ? QString::fromLatin1(m_item->id()) : QString())
        << w_filter->currentIndex()
-       << (w_colors->header()->sortIndicatorOrder() == Qt::AscendingOrder);
+       << (w_colors->header()->sortIndicatorOrder() == Qt::AscendingOrder)
+       << colorLock();
 
     return ba;
 }
@@ -211,7 +234,7 @@ bool SelectColor::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SC") || (version != 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SC") || (version < 1) || (version > 2))
         return false;
 
     uint col;
@@ -219,8 +242,12 @@ bool SelectColor::restoreState(const QByteArray &ba)
     QString itemid;
     int filterIndex;
     bool colSortAsc;
+    bool colLock = false;
 
     ds >> col >> itt >> itemid >> filterIndex >> colSortAsc;
+
+    if (version >= 2)
+        ds >> colLock;
 
     if (ds.status() != QDataStream::Ok)
         return false;
@@ -230,6 +257,8 @@ bool SelectColor::restoreState(const QByteArray &ba)
     w_filter->setCurrentIndex(filterIndex);
 
     w_colors->sortByColumn(0, colSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
+    setColorLock(colLock);
+
     return true;
 }
 
@@ -263,19 +292,6 @@ void SelectColor::setCurrentColorAndItem(const BrickLink::Color *color, const Br
     else
         w_colors->clearSelection();
     w_colors->scrollTo(colorIndex);
-}
-
-void SelectColor::colorChanged()
-{
-    auto col = currentColor();
-    emit colorSelected(col, false);
-    if (colorLock()) {
-        if (col)
-            emit colorLockChanged(col);
-        else
-            unlockColor();
-    }
-    w_lock->setEnabled(col);
 }
 
 void SelectColor::colorConfirmed()

@@ -35,7 +35,7 @@ public:
     const BrickLink::Color *currentColor() const;
 
     bool colorLock() const;
-    void unlockColor();
+    void setColorLock(bool locked);
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
@@ -46,7 +46,6 @@ signals:
     void colorLockChanged(const BrickLink::Color *color);
 
 protected slots:
-    void colorChanged();
     void colorConfirmed();
     void updateColorFilter(int filter);
     void languageChange();
@@ -63,4 +62,5 @@ protected:
     QToolButton *w_lock;
     BrickLink::ColorModel *m_colorModel;
     const BrickLink::Item *m_item = nullptr;
+    bool m_locked = false;
 };

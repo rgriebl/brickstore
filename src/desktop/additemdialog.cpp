@@ -150,7 +150,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_select_color->setEnabled(b);
         if (!b) {
             w_select_color->setCurrentColor(BrickLink::core()->color(0));
-            w_select_color->unlockColor();
+            w_select_color->setColorLock(false);
         }
     });
     connect(w_select_item, &SelectItem::hasSubConditions,

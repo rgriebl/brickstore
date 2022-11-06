@@ -50,12 +50,12 @@ void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewIte
                 QImage image;
 
                 Picture *pic = core()->picture(item, item->defaultColor());
-
                 if (pic && pic->isValid())
                     image = pic->image();
                 else
                     image = BrickLink::core()->noImage(option.rect.size());
 
+                painter->fillRect(option.rect, Qt::white);
                 if (!image.isNull()) {
                     QSizeF s = image.size().scaled(option.rect.size(), Qt::KeepAspectRatio);
                     QPointF p = option.rect.center() - QRectF({ }, s).center() + QPointF(.5, .5);
