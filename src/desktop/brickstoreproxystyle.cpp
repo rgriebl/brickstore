@@ -54,14 +54,19 @@ void BrickStoreProxyStyle::polish(QWidget *w)
     } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
         if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
             QPointer<QToolButton> tbptr(tb);
-            QMetaObject::invokeMethod(this, [tbptr]() {
+            QMetaObject::invokeMethod(this, [this, tbptr]() {
                 if (tbptr && tbptr->autoRaise()) {
 #if defined(Q_OS_MACOS)
                     // QToolButtons look really ugly on macOS, so we re-style them
                     static QStyle *fusion = QStyleFactory::create(u"fusion"_qs);
                     tbptr->setStyle(fusion);
 #endif
-                    if (qstrcmp(tbptr->style()->metaObject()->className(), "QFusionStyle") == 0) {
+                    QStyle *checkStyle = tbptr->style();
+                    if (checkStyle == this)
+                        checkStyle = baseStyle();
+
+                    // checked Fusion buttons are barely distinguishable from non-checked ones
+                    if (checkStyle && (qstrcmp(checkStyle->metaObject()->className(), "QFusionStyle") == 0)) {
                         QPalette pal = tbptr->palette();
                         pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
                                          qApp->palette("QAbstractItemView")
@@ -77,8 +82,10 @@ void BrickStoreProxyStyle::polish(QWidget *w)
 
 void BrickStoreProxyStyle::unpolish(QWidget *w)
 {
-    if (auto *le = qobject_cast<QLineEdit *>(w)) {
-        le->removeEventFilter(this);
+    if (qobject_cast<QLineEdit *>(w)
+            || qobject_cast<QDoubleSpinBox *>(w)
+            || qobject_cast<QSpinBox *>(w)) {
+        w->removeEventFilter(this);
     }
     QProxyStyle::unpolish(w);
 }
