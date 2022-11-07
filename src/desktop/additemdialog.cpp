@@ -228,18 +228,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     updateBrowseActions();
 
     auto *menu = new QMenu(this);
-    m_historyMenu = menu->addMenu(tr("Browsing history"));
-    m_historyMenu->setProperty("scrollableMenu", true);
-
-    connect(m_historyMenu, &QMenu::aboutToShow, this, [this]() {
-        buildBrowseMenu(BrowseMenuType::History);
-    });
-    connect(m_historyMenu, &QMenu::triggered, this, [this](QAction *a) {
-        replayBrowseEntry(BrowseMenuType::History, a->data().toInt());
-    });
-
-    menu->addSeparator();
-
     m_toggles[0] = menu->addAction(QIcon::fromTheme(u"help-about"_qs), tr("Show item information"));
     m_toggles[1] = menu->addAction(QIcon::fromTheme(u"go-jump-definition"_qs), tr("Show item inventory and appearance"));
     m_toggles[2] = menu->addAction(QIcon::fromTheme(u"taxes-finances"_qs), tr("Show price guide"));
@@ -258,6 +246,18 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_sellerMode->setChecked(true);
     connect(m_sellerMode, &QAction::toggled,
             this, &AddItemDialog::setSellerMode);
+
+    menu->addSeparator();
+
+    m_historyMenu = menu->addMenu(tr("Browsing history"));
+    m_historyMenu->setProperty("scrollableMenu", true);
+
+    connect(m_historyMenu, &QMenu::aboutToShow, this, [this]() {
+        buildBrowseMenu(BrowseMenuType::History);
+    });
+    connect(m_historyMenu, &QMenu::triggered, this, [this](QAction *a) {
+        replayBrowseEntry(BrowseMenuType::History, a->data().toInt());
+    });
 
     w_menu->setMenu(menu);
     w_menu->setProperty("noMenuArrow", true);
