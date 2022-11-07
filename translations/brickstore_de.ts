@@ -970,7 +970,7 @@
         <translation>Menü</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="243"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
         <source>Show item information</source>
         <translation>Zeige Infomationen</translation>
     </message>
@@ -979,12 +979,12 @@
         <translation type="vanished">Zeige die Sets in denen ein Teil vorkommt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="245"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="233"/>
         <source>Show price guide</source>
         <translation>Zeige Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="256"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
         <source>Show additional input fields for sellers</source>
         <translation>Zeige zusätzliche Eingabefelder für Verkäufer</translation>
     </message>
@@ -1034,12 +1034,12 @@
         <translation>An&amp;merkungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="252"/>
         <source>Browsing history</source>
         <translation>Chronik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="232"/>
         <source>Show item inventory and appearance</source>
         <translation>Zeige Inventarlisten und Vorkommen</translation>
     </message>
@@ -6469,17 +6469,17 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>UndoAction</name>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Undo</source>
         <translation>Rückgängig</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Redo</source>
         <translation>Wiederholen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="372"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="376"/>
         <source>Undo %n action(s)</source>
         <translation>
             <numerusform>Eine Aktion rückgängig machen</numerusform>
@@ -6487,7 +6487,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="373"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="377"/>
         <source>Redo %n action(s)</source>
         <translation>
             <numerusform>Eine Aktion wiederholen</numerusform>

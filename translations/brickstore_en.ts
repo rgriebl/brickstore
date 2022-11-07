@@ -952,12 +952,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="252"/>
         <source>Browsing history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="232"/>
         <source>Show item inventory and appearance</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1017,12 +1017,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="243"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
         <source>Show item information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="245"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="233"/>
         <source>Show price guide</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1032,7 +1032,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="256"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
         <source>Show additional input fields for sellers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5587,17 +5587,17 @@ If you do not want to save your password, then just leave this field empty and y
 <context>
     <name>UndoAction</name>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="372"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="376"/>
         <source>Undo %n action(s)</source>
         <translation>
             <numerusform>Undo one action</numerusform>
@@ -5605,7 +5605,7 @@ If you do not want to save your password, then just leave this field empty and y
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="373"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="377"/>
         <source>Redo %n action(s)</source>
         <translation>
             <numerusform>Redo one action</numerusform>

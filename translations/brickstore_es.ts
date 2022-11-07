@@ -968,20 +968,20 @@
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="484"/>
         <source>Click to go back one item, hold to see history</source>
-        <translation type="unfinished"></translation>
+        <translation>Hacer clic para retroceder un artículo, mantener para ver el historial</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="501"/>
         <source>Click to go forward one item, hold to see history</source>
-        <translation type="unfinished"></translation>
+        <translation>Hacer clic para avanzar un artículo, mantener para ver el historial</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="518"/>
         <source>Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Menú</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="243"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
         <source>Show item information</source>
         <translation>Mostrar información del artículo</translation>
     </message>
@@ -990,12 +990,12 @@
         <translation type="vanished">Mostrar en que sets aparece el artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="245"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="233"/>
         <source>Show price guide</source>
         <translation>Mostrar guía de precios</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="256"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
         <source>Show additional input fields for sellers</source>
         <translation>Mostrar campos de entrada adicionales para vendedores</translation>
     </message>
@@ -1010,14 +1010,14 @@
         <translation>Conso&amp;lidar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="252"/>
         <source>Browsing history</source>
-        <translation type="unfinished"></translation>
+        <translation>Historial de navegación</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="232"/>
         <source>Show item inventory and appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar inventario del artículo y procedencia</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="369"/>
@@ -1027,7 +1027,7 @@
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="370"/>
         <source>Go to Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Ir al Artículo</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="583"/>
@@ -1042,12 +1042,12 @@
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="882"/>
         <source>Clear history</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpiar historial</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="890"/>
         <source>No browsing history</source>
-        <translation type="unfinished"></translation>
+        <translation>Sin historial de navegación</translation>
     </message>
 </context>
 <context>
@@ -3010,17 +3010,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/headerview.cpp" line="399"/>
         <source>Click to set as primary sort column.</source>
-        <translation>Click para establecer como la columna de orden principal.</translation>
+        <translation>Clic para establecer como la columna de orden principal.</translation>
     </message>
     <message>
         <location filename="../src/desktop/headerview.cpp" line="400"/>
         <source>Shift-click to set as additional sort column.</source>
-        <translation>Shift-click para establecer como columna de orden adicional.</translation>
+        <translation>Shift-clic para establecer como columna de orden adicional.</translation>
     </message>
     <message>
         <location filename="../src/desktop/headerview.cpp" line="401"/>
         <source>Right-click for context menu.</source>
-        <translation>Click-derecho para el menú contextual.</translation>
+        <translation>Clic-derecho para el menú contextual.</translation>
     </message>
     <message>
         <location filename="../src/desktop/headerview.cpp" line="402"/>
@@ -3743,8 +3743,8 @@ Right click: Menu</source>
         <translation>Manten botón izquierdo: Rotar
 Manten botón derecho: Mover
 Rueda del ratón: Zoom
-Doble click: Restablecer cámara
-Click derecho: Menu</translation>
+Doble clic: Restablecer cámara
+Clic derecho: Menu</translation>
     </message>
 </context>
 <context>
@@ -3783,7 +3783,7 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="411"/>
         <source>Item Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Inventario del Artículo</translation>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="413"/>
@@ -4362,7 +4362,7 @@ Click derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/priceguidewidget.cpp" line="740"/>
         <source>Double-click to set the price of the current item</source>
-        <translation>Doble-click para establecer el precio al artículo actual</translation>
+        <translation>Doble-clic para establecer el precio al artículo actual</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/desktop/priceguidewidget.cpp" line="749"/>
@@ -5916,7 +5916,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
     <message>
         <location filename="../src/desktop/taskwidgets.cpp" line="342"/>
         <source>Add Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Añadir Artículo...</translation>
     </message>
 </context>
 <context>
@@ -5939,17 +5939,17 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
 <context>
     <name>UndoAction</name>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Undo</source>
         <translation>Deshacer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow_p.h" line="328"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="332"/>
         <source>Redo</source>
         <translation>Rehacer</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="372"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="376"/>
         <source>Undo %n action(s)</source>
         <translation>
             <numerusform>Deshacer %n acción</numerusform>
@@ -5957,7 +5957,7 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/mainwindow_p.h" line="373"/>
+        <location filename="../src/desktop/mainwindow_p.h" line="377"/>
         <source>Redo %n action(s)</source>
         <translation>
             <numerusform>Rehacer %n acción</numerusform>
