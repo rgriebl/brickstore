@@ -104,12 +104,19 @@ QVariant ColorModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::ToolTipRole) {
+        QString s;
         if (c->id()) {
-            res = QString::fromLatin1(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)")
+            s = QString::fromLatin1(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br>%1: %2)")
                     .arg(tr("RGB"), c->color().name(), c->color().name());
+
+            if (c->id() != Color::InvalidId)
+                s = s % u"<br>BrickLink id: " % QString::number(c->id());
+            if (c->ldrawId() != -1)
+                s = s % u"<br>LDraw id: " % QString::number(c->ldrawId());
         } else {
-            res = c->name();
+            s = c->name();
         }
+        res = s;
     }
     else if (role == ColorPointerRole) {
         res.setValue(c);
