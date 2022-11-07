@@ -267,7 +267,12 @@ QCoro::Task<> CheckForUpdates::downloadInstaller()
         if (f.open(QIODevice::WriteOnly))
             f.write(reply->readAll());
         f.close();
-        QDesktopServices::openUrl(QUrl::fromLocalFile(f.fileName()));
+        QUrl startUrl = QUrl::fromLocalFile(f.fileName());
+
+        QMetaObject::invokeMethod(qApp, [=]() {
+            QDesktopServices::openUrl(startUrl);
+            QCoreApplication::quit();
+        }, Qt::QueuedConnection);
     }
 }
 
