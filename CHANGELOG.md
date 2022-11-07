@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+New features:
+- loading 3D models is now done in a background thread, making the UI more responsive.
+- switching between documents via `Ctrl+Tab` (or `Alt+Tab` on macOS) now shows a list of documents.
+- the "appears-in" list views will now also show the "consists-of" relationship of the selected item.
+- also in these lists, the context menu was extended to directly go to an item in the Add Items dialog.
+- the Add Items dialog gained a browsing history, much like a web browser: this is accessible via the new back, forward and menu buttons in the lower left corner.
+
+Some fixes, the most important being:
+- duplicating more than one lot would crash.
+- importing an LDraw/Studio file would not correctly import sub-models.
+- black-listing very old NVIDIA GPUs for the 3D renderer did not always work.
+- the checked/on state of buttons was very hard to see in dark themes.
+
+Also simplified the Add Items dialog a bit by removing the text-only item view: this was a relevant optimization 15 years ago, but doesn't add value anymore nowadays.
+
+
 ## [2022.10.2] - 2022-10-14
 
 New features:
