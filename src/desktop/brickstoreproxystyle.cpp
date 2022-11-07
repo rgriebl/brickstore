@@ -64,17 +64,22 @@ void BrickStoreProxyStyle::polish(QWidget *w)
             QPointer<QToolButton> tbptr(tb);
             QMetaObject::invokeMethod(this, [this, tbptr]() {
                 if (tbptr && tbptr->autoRaise()) {
-#if defined(Q_OS_MACOS)
-                    // QToolButtons look really ugly on macOS, so we re-style them
-                    static QStyle *fusion = QStyleFactory::create(u"fusion"_qs);
-                    tbptr->setStyle(fusion);
-#endif
-                    QStyle *checkStyle = tbptr->style();
-                    if (checkStyle == this)
-                        checkStyle = baseStyle();
+                    QStyle *style = tbptr->style();
+                    if (auto *proxyStyle = qobject_cast<QProxyStyle *>(style))
+                        style = proxyStyle->baseStyle();
+                    QString styleName = style ? style->name() : QString {};
 
+#if defined(Q_OS_MACOS)
+                    if (styleName == u"macos") {
+                        // QToolButtons look really ugly on macOS, so we re-style them
+                        static QStyle *fusion = QStyleFactory::create(u"fusion"_qs);
+                        static QStyle *proxyFusion = new BrickStoreProxyStyle(fusion);
+                        tbptr->setStyle(proxyFusion);
+                        styleName = fusion->name();
+                    }
+#endif
                     // checked Fusion buttons are barely distinguishable from non-checked ones
-                    if (checkStyle && (qstrcmp(checkStyle->metaObject()->className(), "QFusionStyle") == 0)) {
+                    if (styleName == u"fusion") {
                         QPalette pal = tbptr->palette();
                         pal.setColor(QPalette::Button, Utility::premultiplyAlpha(
                                          qApp->palette("QAbstractItemView")

@@ -128,6 +128,10 @@ public:
                     emit doc->requestActivation();
             }
         });
+
+#if defined Q_OS_MACOS
+        m_menu->addAction(u"dummy"_qs); // macOS ignores initially empty menus
+#endif
     }
 
 private:
