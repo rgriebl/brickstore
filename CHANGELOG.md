@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2022.11.1] - 2022-11-08
+
 New features:
 - loading 3D models is now done in a background thread, making the UI more responsive.
 - switching between documents via `Ctrl+Tab` (or `Alt+Tab` on macOS) now shows a list of documents.
@@ -16,7 +19,7 @@ Some fixes, the most important being:
 - black-listing very old NVIDIA GPUs for the 3D renderer did not always work.
 - the checked/on state of buttons was very hard to see in dark themes.
 
-Also simplified the Add Items dialog a bit by removing the text-only item view: this was a relevant optimization 15 years ago, but doesn't add value anymore nowadays.
+Also, the Add Items dialog was simplified a bit by removing the text-only item view: this was a relevant optimization 15 years ago, but doesn't add value anymore nowadays.
 
 
 ## [2022.10.2] - 2022-10-14
@@ -460,7 +463,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.10.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.11.1...HEAD
+[2022.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.1
 [2022.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.2
 [2022.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.1
 [2022.9.3]: https://github.com/rgriebl/brickstore/releases/tag/v2022.9.3
