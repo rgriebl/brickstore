@@ -1463,7 +1463,7 @@
         <translation>Descripción</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="928"/>
+        <location filename="../src/desktop/selectitem.cpp" line="934"/>
         <source>consists-of:</source>
         <translation>consta-de:</translation>
     </message>
@@ -5052,22 +5052,22 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Cambiar a la categoría del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="898"/>
+        <location filename="../src/desktop/selectitem.cpp" line="904"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Cambiar a la catecoría &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="908"/>
+        <location filename="../src/desktop/selectitem.cpp" line="914"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Cambiar a la categoría &quot;%1&quot; del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="942"/>
+        <location filename="../src/desktop/selectitem.cpp" line="948"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Establecer el filtro para Minifiguras que constan de esta pieza</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="947"/>
+        <location filename="../src/desktop/selectitem.cpp" line="953"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Delimitar el filtro a Minifiguras que constan de esta pieza</translation>
     </message>

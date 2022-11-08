@@ -1455,7 +1455,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="928"/>
+        <location filename="../src/desktop/selectitem.cpp" line="934"/>
         <source>consists-of:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5771,7 +5771,7 @@ Right click: Menu</source>
         <translation type="vanished">Basculer dans la catégorie de l&apos;article</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="898"/>
+        <location filename="../src/desktop/selectitem.cpp" line="904"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Basculer dans la catégorie &quot;%1&quot;</translation>
     </message>
@@ -5812,17 +5812,17 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="908"/>
+        <location filename="../src/desktop/selectitem.cpp" line="914"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="942"/>
+        <location filename="../src/desktop/selectitem.cpp" line="948"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="947"/>
+        <location filename="../src/desktop/selectitem.cpp" line="953"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation type="unfinished"></translation>
     </message>

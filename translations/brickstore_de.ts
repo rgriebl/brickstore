@@ -1515,7 +1515,7 @@
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="928"/>
+        <location filename="../src/desktop/selectitem.cpp" line="934"/>
         <source>consists-of:</source>
         <translation>besteht-aus:</translation>
     </message>
@@ -5469,7 +5469,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Zur Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="898"/>
+        <location filename="../src/desktop/selectitem.cpp" line="904"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie</translation>
     </message>
@@ -5518,17 +5518,17 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Verkleinern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="908"/>
+        <location filename="../src/desktop/selectitem.cpp" line="914"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="942"/>
+        <location filename="../src/desktop/selectitem.cpp" line="948"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Setze den Filter auf Minifigs, die aus diesem Teil bestehen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="947"/>
+        <location filename="../src/desktop/selectitem.cpp" line="953"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Schränke den Filter auf Minifigs, die aus diesem Teil bestehen, ein</translation>
     </message>

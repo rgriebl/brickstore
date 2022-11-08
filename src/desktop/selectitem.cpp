@@ -76,10 +76,11 @@ public:
     QToolButton *    w_dateFilter;
     QToolButton *    w_zoomLevel;
     QButtonGroup *   w_viewmode;
-    bool             m_inv_only;
+    bool             m_inv_only = false;
     QTimer *         m_filter_delay;
     double           m_zoom = 0;
-    const BrickLink::Color *m_colorFilter;
+    const BrickLink::Color *m_colorFilter = nullptr;
+    const BrickLink::Item *m_colorFilterLastItem = nullptr;
 };
 
 
@@ -233,7 +234,6 @@ SelectItem::SelectItem(QWidget *parent)
     : QWidget(parent)
     , d(new SelectItemPrivate())
 {
-    d->m_inv_only = false;
     init();
 }
 
@@ -620,12 +620,18 @@ void SelectItem::setColorFilter(const BrickLink::Color *color)
 
         if (currentItemType() && currentItemType()->hasColors()) {
             const BrickLink::Item *oldItem = currentItem();
-            d->w_items->clearSelection();
+            if (oldItem)
+                d->m_colorFilterLastItem = oldItem;
+            else
+                oldItem = d->m_colorFilterLastItem;
 
+            d->w_items->clearSelection();
             d->itemModel->setFilterColor(color);
 
-            if (d->itemModel->index(oldItem).isValid())
+            if (d->itemModel->index(oldItem).isValid()) {
+                d->m_colorFilterLastItem = nullptr;
                 setCurrentItem(oldItem, false);
+            }
         }
     }
 }
