@@ -41,7 +41,11 @@ public:
     QSize pictureSize() const;
 
     ItemType() = default;
-    ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
+    explicit ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
+
+    constexpr std::strong_ordering operator<=>(char id) const { return m_id <=> id; }
+    constexpr std::strong_ordering operator<=>(const ItemType &other) const { return *this <=> other.m_id; }
+    constexpr bool operator==(char id) const { return (*this <=> id) == std::strong_ordering::equal; }
 
     static char idFromFirstCharInString(const QString &str);
 
@@ -57,9 +61,6 @@ private:
 
     QString m_name;
     std::vector<quint16> m_categoryIndexes;
-
-private:
-    static bool lessThan(const ItemType &itt, char id) { return itt.m_id < id; }
 
     friend class Core;
     friend class Database;

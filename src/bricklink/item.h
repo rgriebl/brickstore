@@ -102,7 +102,21 @@ public:
     uint index() const;   // only for internal use (picture/priceguide hashes)
 
     Item() = default;
-    Item(std::nullptr_t) : Item() { } // for scripting only!
+    explicit Item(std::nullptr_t) : Item() { } // for scripting only!
+
+    constexpr std::strong_ordering operator<=>(const std::pair<char, QByteArray> &ids) const
+    {
+        int d = (m_itemTypeId - ids.first);
+        return d == 0 ? (m_id.compare(ids.second) <=> 0) : (d <=> 0);
+    }
+    std::strong_ordering operator<=>(const Item &other) const
+    {
+        return *this <=> std::make_pair(other.m_itemTypeId, other.m_id);
+    }
+    constexpr bool operator==(const std::pair<char, QByteArray> &ids) const
+    {
+        return (*this <=> ids) == std::strong_ordering::equal;
+    }
 
 private:
     QString    m_name;
@@ -148,10 +162,6 @@ private:
 private:
     void setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash);
     void setConsistsOf(const QVector<ConsistsOf> &items);
-
-
-    static int compare(const Item **a, const Item **b);
-    static bool lessThan(const Item &item, const std::pair<char, QByteArray> &ids);
 
     friend class Core;
     friend class Database;

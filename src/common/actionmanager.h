@@ -112,7 +112,9 @@ public:
         inline char groupId() const        { return char(quint32(m_flags) >> 24); }
         inline QAction *qAction() const    { return m_qaction; }
 
-        static bool lessThan(const Action &action, const char *name);
+        std::strong_ordering operator<=>(const char *name) const { return qstrcmp(m_name, name) <=> 0; }
+        std::strong_ordering operator<=>(const Action &other) const { return *this <=> other.m_name; }
+        bool operator==(const char *name) const { return (*this <=> name) == std::strong_ordering::equal; }
 
     private:
         Action(const char *name, const char *text, Needs needs, Flags flags,

@@ -78,10 +78,7 @@ protected:
         QSize size;
         uint fontSize;
 
-        bool operator==(const TextLayoutCacheKey &other) const
-        {
-            return (text == other.text) && (size == other.size) && (fontSize == other.fontSize);
-        }
+        bool operator==(const TextLayoutCacheKey &other) const = default;
     };
     friend size_t qHash(const DocumentDelegate::TextLayoutCacheKey &key, size_t seed);
     static QCache<TextLayoutCacheKey, QTextLayout> s_textLayoutCache;

@@ -812,16 +812,16 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
 
 const Category *Core::category(uint id) const
 {
-    auto it = std::lower_bound(categories().cbegin(), categories().cend(), id, &Category::lessThan);
-    if ((it != categories().cend()) && (it->id() == id))
+    auto it = std::lower_bound(categories().cbegin(), categories().cend(), id);
+    if ((it != categories().cend()) && (*it == id))
         return &(*it);
     return nullptr;
 }
 
 const Color *Core::color(uint id) const
 {
-    auto it = std::lower_bound(colors().cbegin(), colors().cend(), id, &Color::lessThan);
-    if ((it != colors().cend()) && (it->id() == id))
+    auto it = std::lower_bound(colors().cbegin(), colors().cend(), id);
+    if ((it != colors().cend()) && (*it == id))
         return &(*it);
     return nullptr;
 }
@@ -862,8 +862,8 @@ const Color *Core::colorFromLDrawId(int ldrawId) const
 
 const ItemType *Core::itemType(char id) const
 {
-    auto it = std::lower_bound(itemTypes().cbegin(), itemTypes().cend(), id, &ItemType::lessThan);
-    if ((it != itemTypes().cend()) && (it->id() == id))
+    auto it = std::lower_bound(itemTypes().cbegin(), itemTypes().cend(), id);
+    if ((it != itemTypes().cend()) && (*it == id))
         return &(*it);
     return nullptr;
 }
@@ -871,8 +871,8 @@ const ItemType *Core::itemType(char id) const
 const Item *Core::item(char tid, const QByteArray &id) const
 {
     auto needle = std::make_pair(tid, id);
-    auto it = std::lower_bound(items().cbegin(), items().cend(), needle, Item::lessThan);
-    if ((it != items().cend()) && (it->m_itemTypeId == tid) && (it->m_id == id))
+    auto it = std::lower_bound(items().cbegin(), items().cend(), needle);
+    if ((it != items().cend()) && (*it == needle))
         return &(*it);
     return nullptr;
 }
@@ -881,8 +881,8 @@ const Item *Core::item(const std::string &tids, const QByteArray &id) const
 {
     for (const char &tid : tids) {
         auto needle = std::make_pair(tid, id);
-        auto it = std::lower_bound(items().cbegin(), items().cend(), needle, Item::lessThan);
-        if ((it != items().cend()) && (it->m_itemTypeId == tid) && (it->m_id == id))
+        auto it = std::lower_bound(items().cbegin(), items().cend(), needle);
+        if ((it != items().cend()) && (*it == needle))
             return &(*it);
     }
     return nullptr;
@@ -890,8 +890,8 @@ const Item *Core::item(const std::string &tids, const QByteArray &id) const
 
 const PartColorCode *Core::partColorCode(uint id)
 {
-    auto it = std::lower_bound(pccs().cbegin(), pccs().cend(), id, &PartColorCode::lessThan);
-    if ((it != pccs().cend()) && (it->id() == id))
+    auto it = std::lower_bound(pccs().cbegin(), pccs().cend(), id);
+    if ((it != pccs().cend()) && (*it == id))
         return &(*it);
     return nullptr;
 }

@@ -66,7 +66,11 @@ public:
     uint index() const;   // only for internal use
 
     Color() = default;
-    Color(std::nullptr_t) : Color() { } // for scripting only!
+    explicit Color(std::nullptr_t) : Color() { } // for scripting only!
+
+    constexpr std::strong_ordering operator<=>(uint id) const { return m_id <=> id; }
+    constexpr std::strong_ordering operator<=>(const Color &other) const { return *this <=> other.m_id; }
+    constexpr bool operator==(uint id) const { return (*this <=> id) == std::strong_ordering::equal; }
 
     const QImage sampleImage(int w, int h) const;
 
@@ -87,9 +91,6 @@ private:
     float   m_particleFraction = 0;
     float   m_particleVFraction = 0;
     QColor  m_particleColor;
-
-private:
-    static bool lessThan(const Color &color, uint id) { return color.m_id < id; }
 
     static QHash<uint, QImage> s_colorImageCache; //TODO: clear cache on DB update
 

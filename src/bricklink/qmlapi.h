@@ -134,10 +134,7 @@ public:
     }
     inline bool isNull() const { return !wrappedObject(); }
 
-    inline bool operator==(const QmlWrapperBase &other) const
-    {
-        return other.wrapped == wrapped;
-    }
+    inline bool operator==(const QmlWrapperBase &other) const = default;
 
 protected:
     QmlWrapperBase(T *_wrappedObject)

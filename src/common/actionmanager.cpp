@@ -86,13 +86,6 @@ const QList<QKeySequence> ActionManager::Action::shortcuts() const
         return m_shortcuts;
 }
 
-bool ActionManager::Action::lessThan(const Action &action, const char *name)
-{
-    return qstrcmp(action.m_name, name) < 0;
-}
-
-
-
 
 
 ActionManager *ActionManager::s_inst = nullptr;
@@ -499,9 +492,7 @@ void ActionManager::initialize()
     A("bricklink_lotsforsale",    QT_TR_NOOP("Show Lots for Sale on BrickLink..."), QT_TR_NOOP("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale"), NeedSelection(1, 1) | NeedNetwork);
     A("bricklink_myinventory",    QT_TR_NOOP("Show in my Store on BrickLink..."),   QT_TR_NOOP("Ctrl+B,Ctrl+I", "Edit|Show BL my Inventory"),  NeedSelection(1, 1) | NeedNetwork);
 
-    std::sort(m_actions.begin(), m_actions.end(), [](const auto &a1, const auto &a2) {
-        return Action::lessThan(a1, a2.m_name);
-    });
+    std::sort(m_actions.begin(), m_actions.end());
 
     loadCustomShortcuts();
 }
@@ -516,8 +507,8 @@ const ActionManager::Action *ActionManager::action(const char *name) const
     if (!name || !*name)
         return nullptr;
 
-    auto it = std::lower_bound(m_actions.cbegin(), m_actions.cend(), name, &Action::lessThan);
-    if ((it != m_actions.cend()) && (qstrcmp(it->m_name, name) == 0))
+    auto it = std::lower_bound(m_actions.cbegin(), m_actions.cend(), name);
+    if ((it != m_actions.cend()) && (*it == name))
         return &(*it);
     return nullptr;
 }

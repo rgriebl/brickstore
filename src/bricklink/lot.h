@@ -28,13 +28,12 @@ namespace BrickLink {
 class Lot
 {
 public:
-    Lot(const Item *item = nullptr, const Color *color = nullptr);
+    explicit Lot(const Item *item = nullptr, const Color *color = nullptr);
     Lot(const Lot &copy);
     ~Lot();
 
     Lot &operator=(const Lot &copy);
     bool operator==(const Lot &cmp) const;
-    bool operator!=(const Lot &cmp) const;
 
     const Item *item() const           { return m_item; }
     void setItem(const Item *i);

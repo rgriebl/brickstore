@@ -72,11 +72,6 @@ Lot &Lot::operator=(const Lot &copy)
     return *this;
 }
 
-bool Lot::operator!=(const Lot &cmp) const
-{
-    return !operator==(cmp);
-}
-
 void Lot::setItem(const Item *i)
 {
     m_item = i;

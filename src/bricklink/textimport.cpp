@@ -36,24 +36,24 @@
 int BrickLink::TextImport::findItemIndex(char tid, const QByteArray &id) const
 {
     auto needle = std::make_pair(tid, id);
-    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lessThan);
-    if ((it != m_items.cend()) && (it->itemTypeId() == tid) && (it->id() == id))
+    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle);
+    if ((it != m_items.cend()) && (*it == needle))
         return int(std::distance(m_items.cbegin(), it));
     return -1;
 }
 
 int BrickLink::TextImport::findColorIndex(uint id) const
 {
-    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, Color::lessThan);
-    if ((it != m_colors.cend()) && (it->id() == id))
+    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id);
+    if ((it != m_colors.cend()) && (*it == id))
         return int(std::distance(m_colors.cbegin(), it));
     return -1;
 }
 
 int BrickLink::TextImport::findCategoryIndex(uint id) const
 {
-    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, Category::lessThan);
-    if ((it != m_categories.cend()) && (it->id() == id))
+    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id);
+    if ((it != m_categories.cend()) && (*it == id))
         return int(std::distance(m_categories.cbegin(), it));
     return -1;
 }
@@ -149,9 +149,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         m_colors.push_back(col);
     });
 
-    std::sort(m_colors.begin(), m_colors.end(), [](const auto &col1, const auto &col2) {
-        return Color::lessThan(col1, col2.id());
-    });
+    std::sort(m_colors.begin(), m_colors.end());
 }
 
 void BrickLink::TextImport::readCategories(const QString &path)
@@ -167,9 +165,7 @@ void BrickLink::TextImport::readCategories(const QString &path)
         m_categories.push_back(cat);
     });
 
-    std::sort(m_categories.begin(), m_categories.end(), [](const auto &cat1, const auto &cat2) {
-        return Category::lessThan(cat1, cat2.id());
-    });
+    std::sort(m_categories.begin(), m_categories.end());
 
 }
 
@@ -261,9 +257,7 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
         m_item_types.push_back(itt);
     });
 
-    std::sort(m_item_types.begin(), m_item_types.end(), [](const auto &itt1, const auto &itt2) {
-        return ItemType::lessThan(itt1, itt2.id());
-    });
+    std::sort(m_item_types.begin(), m_item_types.end());
 }
 
 void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *itt)
@@ -299,9 +293,7 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
         m_items.push_back(item);
     });
 
-    std::sort(m_items.begin(), m_items.end(), [](const auto &item1, const auto &item2) {
-        return Item::lessThan(item1, std::make_pair(item2.itemTypeId(), item2.id()));
-    });
+    std::sort(m_items.begin(), m_items.end());
 }
 
 void BrickLink::TextImport::readPartColorCodes(const QString &path)
@@ -344,9 +336,7 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         }
     });
 
-    std::sort(m_pccs.begin(), m_pccs.end(), [](const auto &item1, const auto &item2) {
-        return PartColorCode::lessThan(item1, item2.id());
-    });
+    std::sort(m_pccs.begin(), m_pccs.end());
 }
 
 

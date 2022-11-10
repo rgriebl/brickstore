@@ -28,19 +28,18 @@ public:
     uint fromColorId() const  { return m_fromColorId; }
     uint toColorId() const  { return m_toColorId; }
 
-    friend bool operator==(const ColorChangeLogEntry &e, uint colorId)
-    { return e.m_fromColorId == colorId; }
-    friend bool operator<(const ColorChangeLogEntry &e, uint colorId)
-    { return e.m_fromColorId < colorId; }
-    friend bool operator<(const ColorChangeLogEntry &that, const ColorChangeLogEntry &other)
-    { return that.m_fromColorId < other.m_fromColorId; }
+    explicit ColorChangeLogEntry(uint fromColorId = Color::InvalidId, uint toColorId = Color::InvalidId,
+                                 QDate date = { })
 
-    ColorChangeLogEntry(uint fromColorId = Color::InvalidId, uint toColorId = Color::InvalidId,
-                        QDate date = { })
         : m_fromColorId(fromColorId)
         , m_toColorId(toColorId)
         , m_date(date)
     { }
+
+    constexpr std::weak_ordering operator<=>(uint colorId) const { return m_fromColorId <=> colorId; }
+    constexpr std::weak_ordering operator<=>(const ColorChangeLogEntry &other) const { return *this <=> other.m_fromColorId; }
+    constexpr bool operator==(uint colorId) const { return (*this <=> colorId) == std::weak_ordering::equivalent; }
+    constexpr bool operator==(const ColorChangeLogEntry &other) const { return *this == other.m_fromColorId; }
 
 private:
     uint m_fromColorId;
@@ -63,19 +62,17 @@ public:
 
     QDate date() const  { return m_date; }
 
-    friend bool operator==(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
-    { return e.m_fromTypeAndId == typeAndId; }
-    friend bool operator<(const ItemChangeLogEntry &e, const QByteArray &typeAndId)
-    { return e.m_fromTypeAndId < typeAndId; }
-    friend bool operator<(const ItemChangeLogEntry &that, const ItemChangeLogEntry &other)
-    { return that.m_fromTypeAndId < other.m_fromTypeAndId; }
-
-    ItemChangeLogEntry(const QByteArray &fromTypeAndId = { }, const QByteArray &toTypeAndId = { },
-                       QDate date = { })
+    explicit ItemChangeLogEntry(const QByteArray &fromTypeAndId = { }, const QByteArray &toTypeAndId = { },
+                                QDate date = { })
         : m_fromTypeAndId(fromTypeAndId)
         , m_toTypeAndId(toTypeAndId)
         , m_date(date)
     { }
+
+    std::weak_ordering operator<=>(const QByteArray &typeAndId) const { return m_fromTypeAndId.compare(typeAndId) <=> 0; }
+    std::weak_ordering operator<=>(const ItemChangeLogEntry &other) const { return *this <=> other.m_fromTypeAndId; }
+    bool operator==(const QByteArray &typeAndId) const { return (*this <=> typeAndId) == std::weak_ordering::equivalent; }
+    bool operator==(const ItemChangeLogEntry &other) const { return *this == other.m_fromTypeAndId; }
 
 private:
     QByteArray m_fromTypeAndId;

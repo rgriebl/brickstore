@@ -37,7 +37,11 @@ public:
 
     Category() = default;
 
-    Category(std::nullptr_t) : Category() { } // for scripting only!
+    explicit Category(std::nullptr_t) : Category() { } // for scripting only!
+
+    constexpr std::strong_ordering operator<=>(uint id) const { return m_id <=> id; }
+    constexpr std::strong_ordering operator<=>(const Category &other) const { return *this <=> other.m_id; }
+    constexpr bool operator==(uint id) const { return (*this <=> id) == std::strong_ordering::equal; }
 
 private:
     uint     m_id = InvalidId;
@@ -46,9 +50,6 @@ private:
     quint8   m_year_recency = 0;
     quint8   m_has_inventories = 0;
     QString  m_name;
-
-private:
-    static bool lessThan(const Category &cat, uint id) { return cat.m_id < id; }
 
     friend class Core;
     friend class Database;

@@ -25,12 +25,6 @@ int _qwords_for_consists = 0;
 
 namespace BrickLink {
 
-bool Item::lessThan(const Item &item, const std::pair<char, QByteArray> &ids)
-{
-    int d = (item.m_itemTypeId - ids.first);
-    return d == 0 ? (item.m_id.compare(ids.second) < 0) : (d < 0);
-}
-
 // color-idx -> { vector < qty, item-idx > }
 void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash)
 {
