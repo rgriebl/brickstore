@@ -18,8 +18,7 @@
 #include "bricklink/global.h"
 #include "common/eventfilter.h"
 
-QT_FORWARD_DECLARE_CLASS(QListViewItem)
-QT_FORWARD_DECLARE_CLASS(QIconViewItem)
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
 
 class SelectItemPrivate;
@@ -52,6 +51,7 @@ public:
     void setZoomFactor(double zoom);
 
     void clearFilter();
+    void setFilterFavoritesModel(QStringListModel *model);
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);

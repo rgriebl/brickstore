@@ -731,19 +731,27 @@ void SelectItem::clearFilter()
     d->w_filter->clear();
 }
 
+void SelectItem::setFilterFavoritesModel(QStringListModel *model)
+{
+    d->w_filter->setModel(model);
+}
+
 QByteArray SelectItem::saveState() const
 {
     auto itt = currentItemType();
     auto cat = currentCategory();
     auto item = currentItem();
+    auto color = colorFilter();
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(3)
-       << qint8(itt ? itt->id() : char(-1))
-       << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id()) : uint(-1))
+    ds << QByteArray("SI") << qint32(4)
+       << qint8(itt ? itt->id() : BrickLink::ItemType::InvalidId)
+       << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id())
+               : BrickLink::Category::InvalidId)
        << (item ? QString::fromLatin1(item->id()) : QString())
-       << d->w_filter->saveState()
+       << d->w_filter->text()
+       << (color ? color->id() : BrickLink::Color::InvalidId)
        << zoomFactor()
        << d->w_viewmode->checkedId()
        << (d->w_categories->header()->sortIndicatorOrder() == Qt::AscendingOrder)
@@ -759,28 +767,48 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version != 3))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 3) || (version > 4))
         return false;
 
     qint8 itt;
     uint cat;
     QString itemid;
     QByteArray filterState;
+    QString filterText;
+    uint colorFilterId;
     double zoom;
     int viewMode;
     bool catSortAsc;
     bool itemSortAsc;
     int itemSortColumn;
 
-    ds >> itt >> cat >> itemid >> filterState >> zoom >> viewMode
-            >> catSortAsc >> itemSortAsc >> itemSortColumn;
+    ds >> itt >> cat >> itemid;
+    if (version == 3)
+        ds >> filterState;
+    else
+        ds >> filterText >> colorFilterId;
+    ds >> zoom >> viewMode >> catSortAsc >> itemSortAsc >> itemSortColumn;
 
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    if (itt != -1)
+    // we need to reset the filter before setCurrentItem ... otherwise we might not be able to
+    // find the item in the model
+    if (version == 3) {
+        if (!filterState.isEmpty() && d->w_filter->restoreState(filterState))
+            applyFilter();
+        // v3 forgot to save the color filter
+        // v3 also saved the completer history in the filter edit
+    } else {
+        d->w_filter->setText(filterText);
+        applyFilter();
+        setColorFilter((colorFilterId == BrickLink::Color::InvalidId)
+                       ? nullptr : BrickLink::core()->color(colorFilterId));
+    }
+
+    if ((itt != BrickLink::ItemType::InvalidId) && (itt != -1 /*v3*/))
         setCurrentItemType(BrickLink::core()->itemType(itt));
-    if (cat != uint(-1)) {
+    if (cat != BrickLink::Category::InvalidId) {
         setCurrentCategory(cat == uint(-2) ? BrickLink::CategoryModel::AllCategories
                                            : BrickLink::core()->category(cat));
     }
@@ -790,8 +818,6 @@ bool SelectItem::restoreState(const QByteArray &ba)
     setViewMode(viewMode);
     d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
     sortItems(itemSortColumn, itemSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
-    if (!filterState.isEmpty() && d->w_filter->restoreState(filterState))
-        applyFilter();
     return true;
 }
 
@@ -799,18 +825,17 @@ QByteArray SelectItem::defaultState()
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(1)
-       << qint8('P')
-       << uint(-2)
-       << QString()
-       << QString()
-       << false
-       << false
-       << double(2)
-       << int(1)
-       << true
-       << true
-       << int(2);
+    ds << QByteArray("SI") << qint32(4)
+       << qint8('P')  // parts
+       << uint(-2)    // all categories
+       << QString()   // no item id
+       << QString()   // no text filter
+       << BrickLink::Color::InvalidId // no color filter
+       << double(2)   // zoom 200%
+       << int(1)      // listview
+       << true        // cat sorted asc
+       << true        // items sorted asc
+       << int(2);     // items sorted by name
     return ba;
 }
 
@@ -861,6 +886,8 @@ void SelectItem::ensureSelectionVisible()
 
 void SelectItem::applyFilter()
 {
+    d->m_filter_delay->stop();
+
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();

@@ -20,7 +20,7 @@
 #include "ui_additemdialog.h"
 
 
-QT_FORWARD_DECLARE_CLASS(QValidator)
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
 QT_FORWARD_DECLARE_CLASS(QTimer)
 
@@ -85,6 +85,8 @@ private:
 
     QAction *m_toggles[3];
     QAction *m_sellerMode;
+
+    QStringListModel *m_favoriteFilters;
 
     QMenu *m_backMenu;
     QMenu *m_nextMenu;

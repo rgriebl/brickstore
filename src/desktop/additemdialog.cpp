@@ -33,6 +33,7 @@
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
+#include <QStringListModel>
 
 #include "bricklink/core.h"
 #include "bricklink/picture.h"
@@ -70,6 +71,7 @@ public:
 
 AddItemDialog::AddItemDialog(QWidget *parent)
     : QWidget(parent, Qt::Window)
+    , m_favoriteFilters(new QStringListModel(this))
 {
     setupUi(this);
 
@@ -86,6 +88,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_condition->addButton(w_radio_new, int(BrickLink::Condition::New));
     m_condition->addButton(w_radio_used, int(BrickLink::Condition::Used));
 
+    w_select_item->setFilterFavoritesModel(m_favoriteFilters);
     w_select_color->setWidthToContents(true);
 
     w_add = new QPushButton();
@@ -310,6 +313,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     ba = Config::inst()->value(u"/MainWindow/AddItemDialog/BrowseState"_qs).toByteArray();
     restoreBrowseState(ba);
 
+    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/AddItemDialog/Filter"_qs).toStringList());
+
     new EventFilter(w_last_added, { QEvent::ToolTip }, [this](QObject *, QEvent *e) { // dynamic tooltip
         const auto *he = static_cast<QHelpEvent *>(e);
         if (m_addHistory.size() > 1) {
@@ -376,6 +381,8 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
+    Config::inst()->setValue(u"/MainWindow/AddItemDialog/Filter"_qs, m_favoriteFilters->stringList());
+
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"/MainWindow/AddItemDialog/VSplitter"_qs, w_splitter_vertical->saveState());
 

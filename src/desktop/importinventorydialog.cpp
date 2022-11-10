@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QShortcut>
 #include <QKeyEvent>
+#include <QStringListModel>
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
@@ -35,6 +36,7 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
                                              BrickLink::Condition condition, QWidget *parent)
     : QDialog(parent)
     , m_verifyItem(item)
+    , m_favoriteFilters(new QStringListModel(this))
 {
     setWindowTitle(tr("Import BrickLink Inventory"));
 
@@ -43,6 +45,7 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
     if (!m_verifyItem) {
         m_select = new SelectItem(this);
         m_select->setExcludeWithoutInventoryFilter(true);
+        m_select->setFilterFavoritesModel(m_favoriteFilters);
         connect(m_select, &SelectItem::itemSelected,
                 this, &ImportInventoryDialog::checkItem);
         setSizeGripEnabled(true);
@@ -86,6 +89,8 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
             m_select->setCurrentItemType(BrickLink::core()->itemType('S'));
         }
 
+        m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/ImportInventoryDialog/Filter"_qs).toStringList());
+
         if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 if (const auto currentItem = m_select->currentItem())
@@ -123,6 +128,7 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
 ImportInventoryDialog::~ImportInventoryDialog()
 {
     if (!m_verifyItem) {
+        Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Filter"_qs, m_favoriteFilters->stringList());
         Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/Geometry"_qs, saveGeometry());
         Config::inst()->setValue(u"/MainWindow/ImportInventoryDialog/SelectItem"_qs, m_select->saveState());
     }

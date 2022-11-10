@@ -16,6 +16,7 @@
 #include <QDialog>
 #include "bricklink/global.h"
 
+QT_FORWARD_DECLARE_CLASS(QStringListModel)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
 QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
 QT_FORWARD_DECLARE_CLASS(QLabel)
@@ -60,4 +61,5 @@ private:
     QLabel *m_verifyLabel = nullptr;
     ImportInventoryWidget *m_import;
     QDialogButtonBox *m_buttons;
+    QStringListModel *m_favoriteFilters;
 };
