@@ -219,7 +219,7 @@ QCoro::Task<> InventoryWidget::partOut()
 {
     auto entry = selected();
 
-    if (entry.quantity && entry.item && entry.item->hasInventory()) {
+    if (entry.item && entry.item->hasInventory()) {
         ImportInventoryDialog dlg(entry.item, 1, BrickLink::Condition::Count, this);
         dlg.setWindowModality(Qt::ApplicationModal);
         dlg.show();
