@@ -47,6 +47,12 @@ HistoryViewDelegate::HistoryViewDelegate(HistoryLineEdit *filter)
 void HistoryViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                 const QModelIndex &index) const
 {
+    // copied from QCompleterItemDelegate
+    QStyleOptionViewItem optionCopy = option;
+    optionCopy.showDecorationSelected = true;
+    if (m_edit->completer()->popup()->currentIndex() == index)
+        optionCopy.state |= QStyle::State_HasFocus;
+
     QStyledItemDelegate::paint(painter, option, index);
 
     QRect r = option.rect;
@@ -173,7 +179,17 @@ void HistoryLineEdit::setModel(QStringListModel *model)
     if (m_filterModel->parent() == this)
         m_filterModel->deleteLater();
     m_filterModel = model;
+
+    auto view = completer()->popup();
+    auto *oldDelegate = view ? view->itemDelegate() : nullptr;
+
+    // weird Qt behavior: setModel() calls setPopup(), which silently replaces any custom delegate
     completer()->setModel(model);
+
+    if (view && (completer()->popup()->itemDelegate() != oldDelegate)) {
+        delete oldDelegate;
+        view->setItemDelegate(new HistoryViewDelegate(this));
+    }
 }
 
 QString HistoryLineEdit::instructionToolTip() const
