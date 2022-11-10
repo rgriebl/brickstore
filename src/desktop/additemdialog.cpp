@@ -932,13 +932,16 @@ QByteArray AddItemDialog::saveBrowseState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("BS") << qint32(1)
+    ds << QByteArray("BS") << qint32(2)
        << int(m_browseHistory.size()) << int(m_browseStack.size()) << int(m_browseStackIndex);
 
+    QByteArray compressedHistory;
+    QDataStream dsCompressed(&compressedHistory, QIODevice::WriteOnly);
+
     for (int i = 0; i < m_browseHistory.size(); ++i)
-        saveBrowseHistoryEntry(ds, m_browseHistory.at(i));
+        saveBrowseHistoryEntry(dsCompressed, m_browseHistory.at(i));
     for (int i = 0; i < m_browseStack.size(); ++i)
-        saveBrowseHistoryEntry(ds, m_browseStack.at(i));
+        saveBrowseHistoryEntry(dsCompressed, m_browseStack.at(i));
 
     return ba;
 }
@@ -956,7 +959,7 @@ bool AddItemDialog::restoreBrowseState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "BS") || (version < 1) || (version > 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "BS") || (version < 1) || (version > 2))
         return false;
 
     int bhSize, bsSize, bsIndex;
@@ -970,11 +973,25 @@ bool AddItemDialog::restoreBrowseState(const QByteArray &ba)
         return false;
     }
 
+    QByteArray compressedHistory;
+    std::unique_ptr<QDataStream> dsCompressed;
+    QDataStream *dsData = &ds;
+    if (version >= 2) {
+        ds >> compressedHistory;
+        compressedHistory = qUncompress(compressedHistory);
+
+        if (compressedHistory.isEmpty() || (ds.status() != QDataStream::Ok))
+            return false;
+
+        dsCompressed.reset(new QDataStream(compressedHistory));
+        dsData = dsCompressed.get();
+    }
+
     QVector<BrowseHistoryEntry> history;
     history.reserve(bhSize);
     for (int i = 0; i < bhSize; ++i) {
         BrowseHistoryEntry bhe;
-        if (!restoreBrowseHistoryEntry(ds, bhe))
+        if (!restoreBrowseHistoryEntry(*dsData, bhe))
             return false;
         history.append(bhe);
     }
@@ -983,7 +1000,7 @@ bool AddItemDialog::restoreBrowseState(const QByteArray &ba)
     stack.reserve(bsSize);
     for (int i = 0; i < bsSize; ++i) {
         BrowseHistoryEntry bhe;
-        if (!restoreBrowseHistoryEntry(ds, bhe))
+        if (!restoreBrowseHistoryEntry(*dsData, bhe))
             return false;
         stack.append(bhe);
     }
