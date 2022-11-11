@@ -18,7 +18,7 @@ endif()
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
 
 # Supported languages
-set(LANGUAGES en de fr es)
+set(LANGUAGES en de fr es sv)
 
 option(BACKEND_ONLY "Backend only" OFF)
 option(FORCE_MOBILE "Force a mobile build on desktop" OFF)
@@ -198,13 +198,18 @@ foreach (LANG ${LANGUAGES})
     set(qqm "${qt_qm_base}/qtbase_${LANG}.qm")
     if (EXISTS ${qqm})
         list(APPEND QT_QM_FILES ${qqm})
+    else()
+        set(qts "translations/qtbase_${LANG}.ts")
+        if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${qts}")
+            list(APPEND QT_TS_FILES ${qts})
+        endif()
     endif()
 endforeach()
-target_sources(${PROJECT_NAME} PUBLIC ${TS_FILES})
-set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/qm")
+target_sources(${PROJECT_NAME} PUBLIC ${TS_FILES} ${QT_TS_FILES})
+set_source_files_properties(${TS_FILES} ${QT_TS_FILES} PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/qm")
 
 qt_add_lrelease(${PROJECT_NAME}
-    TS_FILES ${TS_FILES}
+    TS_FILES ${TS_FILES} ${QT_TS_FILES}
     QM_FILES_OUTPUT_VARIABLE QM_FILES
 )
 # qt_add_lupdate is not flexible enough to scan all the required sources, so we better
@@ -227,7 +232,7 @@ qt_add_resources(${PROJECT_NAME} qt_translations_qrc
     FILES ${QT_QM_FILES}
 )
 qt_add_resources(${PROJECT_NAME} bs_translations_qrc
-    PREFIX /translations
+    PREFIX "/translations"
     BASE "${CMAKE_CURRENT_BINARY_DIR}/qm"
     FILES ${QM_FILES}
 )

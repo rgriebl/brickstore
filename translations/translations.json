@@ -19,5 +19,11 @@
     "localName":   "Español",
     "author":      "Sergio Sobrevela",
     "authorEmail": "info@stellarbricks.com"
+  },
+  "sv": {
+    "name":        "Swedish",
+    "localName":   "Svenska",
+    "author":      "SkaraborgJohan",
+    "authorEmail": "skaraborgjohan@outlook.com"
   }
 }
