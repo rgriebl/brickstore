@@ -60,6 +60,10 @@ void QmlRenderLineInstancing::setBuffer(const QByteArray &ba)
 void QmlRenderLineInstancing::addLineToBuffer(QByteArray &buffer, const QColor &c,
                                               const QVector3D &p0, const QVector3D &p1)
 {
+    // no more than 100MB to prevent bad_allocs in Quick3D
+    if (buffer.size() > 100000000)
+        return;
+
     QQuick3DInstancing::InstanceTableEntry entry { { p0, 0 },
                                                    { p1, 0 },
                                                    { },
@@ -72,6 +76,10 @@ void QmlRenderLineInstancing::addConditionalLineToBuffer(QByteArray &buffer, con
                                                          const QVector3D &p0, const QVector3D &p1,
                                                          const QVector3D &p2, const QVector3D &p3)
 {
+    // no more than 100MB to prevent bad_allocs in Quick3D
+    if (buffer.size() > 100000000)
+        return;
+
     QQuick3DInstancing::InstanceTableEntry entry { { p0, 0 },
                                                    { p1, 0 },
                                                    { p2, 0 },
