@@ -582,7 +582,7 @@ QCoro::Task<> View::partOutItems()
             BrickLink::PartOutTraits partOutTraits = { };
             BrickLink::Status extraParts = BrickLink::Status::Extra;
 
-            if (!BrickLink::Item::ConsistsOf::isSimple(lot->item()->consistsOf())) {
+            if (lot->item()->partOutTraits()) {
                 ImportInventoryDialog dlg(lot->item(), quantity, condition, this);
                 dlg.setWindowModality(Qt::ApplicationModal);
                 dlg.show();
