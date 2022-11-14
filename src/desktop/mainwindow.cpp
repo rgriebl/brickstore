@@ -1242,7 +1242,6 @@ void MainWindow::showAddItemDialog(const BrickLink::Item *item, const BrickLink:
 
         connect(m_add_dialog, &AddItemDialog::closed,
                 this, [this]() {
-            show();
             raise();
             activateWindow();
         });
