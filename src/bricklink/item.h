@@ -91,6 +91,8 @@ public:
 
     const QVector<ConsistsOf> &consistsOf() const;
 
+    PartOutTraits partOutTraits() const;
+
     uint index() const;   // only for internal use (picture/priceguide hashes)
 
     Item() = default;

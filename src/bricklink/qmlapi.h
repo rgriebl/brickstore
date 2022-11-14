@@ -335,6 +335,8 @@ public:
 
     Q_INVOKABLE QVariantList consistsOf() const;
 
+    Q_INVOKABLE BrickLink::PartOutTraits partOutTraits() const;
+
     // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
 
     friend class QmlBrickLink;

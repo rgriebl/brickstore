@@ -277,8 +277,7 @@ public:
                                        const BrickLink::Color *color = nullptr, int multiply = 1,
                                        BrickLink::Condition condition = BrickLink::Condition::New,
                                        BrickLink::Status extraParts = BrickLink::Status::Extra,
-                                       bool includeInstructions = false, bool includeAlternates = false,
-                                       bool includeCounterParts = false);
+                                       BrickLink::PartOutTraits partOutTraits = { });
 
     static int restorableAutosaves();
     enum class AutosaveAction { Restore, Delete };

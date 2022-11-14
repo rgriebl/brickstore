@@ -21,6 +21,11 @@
 #include "importinventorywidget.h"
 
 
+namespace {
+
+
+} // namspace
+
 ImportInventoryWidget::ImportInventoryWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -33,31 +38,17 @@ ImportInventoryWidget::~ImportInventoryWidget()
 
 void ImportInventoryWidget::setItem(const BrickLink::Item *item)
 {
-    bool hasInstructions = false;
-    bool hasCounterParts = false;
-    bool hasAlternates = false;
-    bool hasExtras = false;
+    BrickLink::PartOutTraits traits;
+    if (item)
+        traits = item->partOutTraits();
 
-    if (item) {
-        if (item->itemTypeId() == 'S')
-            hasInstructions = (BrickLink::core()->item('I', item->id()));
-
-        const auto &inv = item->consistsOf();
-        for (const auto &co : inv) {
-            if (co.isExtra())
-                hasExtras = true;
-            if (co.isCounterPart())
-                hasCounterParts = true;
-            if (co.isAlternate())
-                hasAlternates = true;
-            if (hasAlternates && hasCounterParts && hasExtras)
-                break;
-        }
-    }
-    w_extra->setEnabled(hasExtras);
-    w_instructions->setEnabled(hasInstructions);
-    w_alternates->setEnabled(hasAlternates);
-    w_counterParts->setEnabled(hasCounterParts);
+    w_extra->setEnabled(traits & BrickLink::PartOutTrait::Extras);
+    w_instructions->setEnabled(traits & BrickLink::PartOutTrait::Instructions);
+    w_originalBox->setEnabled(traits & BrickLink::PartOutTrait::OriginalBox);
+    w_alternates->setEnabled(traits & BrickLink::PartOutTrait::Alternates);
+    w_counterParts->setEnabled(traits & BrickLink::PartOutTrait::CounterParts);
+    w_setsInSet->setEnabled(traits & BrickLink::PartOutTrait::SetsInSet);
+    w_minifigs->setEnabled(traits & BrickLink::PartOutTrait::Minifigs);
 }
 
 int ImportInventoryWidget::quantity() const
@@ -86,20 +77,24 @@ BrickLink::Status ImportInventoryWidget::extraParts() const
     return static_cast<BrickLink::Status>(w_extra->currentIndex());
 }
 
-bool ImportInventoryWidget::includeInstructions() const
+BrickLink::PartOutTraits ImportInventoryWidget::partOutTraits() const
 {
-    return w_instructions->isEnabled() && w_instructions->isChecked();
+    BrickLink::PartOutTraits traits = { };
+    if (w_instructions->isEnabled() && w_instructions->isChecked())
+        traits |= BrickLink::PartOutTrait::Instructions;
+    if (w_originalBox->isEnabled() && w_originalBox->isChecked())
+        traits |= BrickLink::PartOutTrait::OriginalBox;
+    if (w_alternates->isEnabled() && w_alternates->isChecked())
+        traits |= BrickLink::PartOutTrait::Alternates;
+    if (w_counterParts->isEnabled() && w_counterParts->isChecked())
+        traits |= BrickLink::PartOutTrait::CounterParts;
+    if (w_setsInSet->isEnabled() && w_setsInSet->isChecked())
+        traits |= BrickLink::PartOutTrait::SetsInSet;
+    if (w_minifigs->isEnabled() && w_minifigs->isChecked())
+        traits |= BrickLink::PartOutTrait::Minifigs;
+    return traits;
 }
 
-bool ImportInventoryWidget::includeAlternates() const
-{
-    return w_alternates->isEnabled() && w_alternates->isChecked();
-}
-
-bool ImportInventoryWidget::includeCounterParts() const
-{
-    return w_counterParts->isEnabled() && w_counterParts->isChecked();
-}
 
 void ImportInventoryWidget::languageChange()
 {
@@ -118,13 +113,16 @@ QByteArray ImportInventoryWidget::saveState() const
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("II") << qint32(3)
+    ds << QByteArray("II") << qint32(4)
        << w_condition_new->isChecked()
        << qint32(w_qty->value())
        << qint32(w_extra->currentIndex())
        << w_instructions->isChecked()
        << w_alternates->isChecked()
-       << w_counterParts->isChecked();
+       << w_counterParts->isChecked()
+       << w_originalBox->isChecked()
+       << w_setsInSet->isChecked()
+       << w_minifigs->isChecked();
     return ba;
 }
 
@@ -134,7 +132,7 @@ bool ImportInventoryWidget::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 3))
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 4))
         return false;
 
     bool isNew;
@@ -172,6 +170,20 @@ bool ImportInventoryWidget::restoreState(const QByteArray &ba)
 
         w_alternates->setChecked(alternates);
         w_counterParts->setChecked(counterParts);
+    }
+    if (version >= 4) {
+        bool originalBox;
+        bool setsInSet;
+        bool minifigs;
+
+        ds >> originalBox >> setsInSet >> minifigs;
+
+        if (ds.status() != QDataStream::Ok)
+            return false;
+
+        w_originalBox->setChecked(originalBox);
+        w_setsInSet->setChecked(setsInSet);
+        w_minifigs->setChecked(minifigs);
     }
 
     return true;

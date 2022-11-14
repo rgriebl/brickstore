@@ -579,9 +579,7 @@ QCoro::Task<> View::partOutItems()
 
             int quantity = lot->quantity();
             auto condition = lot->condition();
-            bool includeInstructions = false;
-            bool includeAlternates = false;
-            bool includeCounterparts = false;
+            BrickLink::PartOutTraits partOutTraits = { };
             BrickLink::Status extraParts = BrickLink::Status::Extra;
 
             if (!BrickLink::Item::ConsistsOf::isSimple(lot->item()->consistsOf())) {
@@ -591,9 +589,7 @@ QCoro::Task<> View::partOutItems()
                 if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                     quantity = dlg.quantity();
                     condition = dlg.condition();
-                    includeInstructions = dlg.includeInstructions();
-                    includeAlternates = dlg.includeAlternates();
-                    includeCounterparts = dlg.includeCounterParts();
+                    partOutTraits = dlg.partOutTraits();
                     extraParts = dlg.extraParts();
                 }
             }
@@ -601,9 +597,7 @@ QCoro::Task<> View::partOutItems()
             if (inplace) {
                 if (quantity) {
                     auto pr = BrickLink::IO::fromPartInventory(lot->item(), lot->color(), quantity,
-                                                               condition, extraParts,
-                                                               includeInstructions, includeAlternates,
-                                                               includeCounterparts);
+                                                               condition, extraParts, partOutTraits);
                     auto newLots = pr.takeLots();
                     if (!newLots.isEmpty()) {
                         m_model->insertLotsAfter(lot, std::move(newLots));
@@ -613,8 +607,7 @@ QCoro::Task<> View::partOutItems()
                 }
             } else {
                 Document::fromPartInventory(lot->item(), lot->color(), quantity, condition,
-                                            extraParts, includeInstructions, includeAlternates,
-                                            includeCounterparts);
+                                            extraParts, partOutTraits);
             }
         }
         if (inplace)

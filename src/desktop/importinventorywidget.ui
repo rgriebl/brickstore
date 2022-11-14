@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
-    <height>73</height>
+    <width>791</width>
+    <height>119</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -202,6 +202,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="w_originalBox">
+       <property name="text">
+        <string>Original Box</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="w_alternates">
        <property name="text">
         <string>&amp;Alternates</string>
@@ -233,6 +240,44 @@
         <size>
          <width>13</width>
          <height>21</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Also part out:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_setsInSet">
+       <property name="text">
+        <string>Sets in set</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_minifigs">
+       <property name="text">
+        <string>Minifigs</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
         </size>
        </property>
       </spacer>

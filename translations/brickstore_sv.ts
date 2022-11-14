@@ -1180,32 +1180,32 @@
         <translation>Uppdaterar BrickLink databas</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="638"/>
+        <location filename="../src/common/application.cpp" line="632"/>
         <source>Version %1 (build: %2)</source>
         <translation>Version %1 (build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="640"/>
+        <location filename="../src/common/application.cpp" line="634"/>
         <source>Copyright &amp;copy; %1</source>
         <translation>Copyright &amp;copy; %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="641"/>
+        <location filename="../src/common/application.cpp" line="635"/>
         <source>Visit %1</source>
         <translation>Besök %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="644"/>
+        <location filename="../src/common/application.cpp" line="638"/>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br/&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br/&gt;See &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.&lt;/p&gt;&lt;p&gt;Only made possible by &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezek&apos;s&lt;/a&gt; support.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Detta program är fri programvara; det kan distribueras och/eller modifieras under villkoren i GNU General Public License version 2 som publicerats av Free Software Foundation och som finns i filen LICENSE.GPL som ingår i detta programpaket.&lt;br/&gt;Detta program tillhandahålls i befintligt skick. INGEN GARANTI AV NÅGOT SLAG, INKLUSIVE GARANTI FÖR DESIGN, SÄLJBARHET OCH LÄMPLIGHET FÖR ETT SÄRSKILT SYFTE.&lt;br/&gt;Se &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0 .html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; för GPL-licensinformation.&lt;/p&gt;&lt;p&gt;All data från &lt;a href=&quot;https://www .bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; ägs av BrickLink. Både BrickLink och LEGO är varumärken som tillhör LEGO-gruppen, som inte sponsrar, godkänner eller stöder denna programvara. Alla andra varumärken erkända.&lt;/p&gt;&lt;p&gt;Endast möjliggjort av &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezeks&lt;/a&gt; support.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="645"/>
+        <location filename="../src/common/application.cpp" line="639"/>
         <source>License</source>
         <translation>Licens</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="657"/>
+        <location filename="../src/common/application.cpp" line="651"/>
         <source>Translators</source>
         <translation>Översättare</translation>
     </message>
@@ -2090,22 +2090,22 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>Misslyckades sparra dokument</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1715"/>
+        <location filename="../src/common/document.cpp" line="1713"/>
         <source>Inventory for %1</source>
         <translation>Lager för %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1768"/>
+        <location filename="../src/common/document.cpp" line="1766"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Du har valt mer än 1000 poster, men BrickLink&apos;s servrar klarar inte av så många poster samtidigt.&lt;br&gt;Du bör exportera flera mindre omgångar.&lt;br&gt;&lt;br&gt;Vill du exportera den här listan ändå?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1775"/>
+        <location filename="../src/common/document.cpp" line="1773"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Denna lista innehåller poster med fel.&lt;br&gt;&lt;br&gt;Vill du exportera denna listan ändå?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1854"/>
+        <location filename="../src/common/document.cpp" line="1852"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform>Kopierat eller slått ihop %n artikel</numerusform>
@@ -2113,7 +2113,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1930"/>
+        <location filename="../src/common/document.cpp" line="1928"/>
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform></numerusform>
@@ -2121,12 +2121,12 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2097"/>
+        <location filename="../src/common/document.cpp" line="2095"/>
         <source>Added %1, consolidated %2 items</source>
         <translation>La till %1, slog ihop %2 artiklar</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="2194"/>
+        <location filename="../src/common/document.cpp" line="2192"/>
         <source>Consolidated %n item(s)</source>
         <translation>
             <numerusform>Slog ihop %n artikel</numerusform>
@@ -2134,37 +2134,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2241"/>
+        <location filename="../src/common/document.cpp" line="2239"/>
         <source>BrickStore default</source>
         <translation>BrickStore standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2243"/>
+        <location filename="../src/common/document.cpp" line="2241"/>
         <source>BrickStore buyer/collector default</source>
         <translation>BrickStore köpare/samlare standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2245"/>
+        <location filename="../src/common/document.cpp" line="2243"/>
         <source>Auto-resize once</source>
         <translation>Automatisk ändring av storlek en gång</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2247"/>
+        <location filename="../src/common/document.cpp" line="2245"/>
         <source>User default</source>
         <translation>Användarens standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2382"/>
+        <location filename="../src/common/document.cpp" line="2380"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation>Ange ett unikt namn för denna kolumn layout. Lämna tom för ändra din standard layout.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2414"/>
+        <location filename="../src/common/document.cpp" line="2412"/>
         <source>Set column layout:</source>
         <translation>Ange kolumn layout:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2753"/>
+        <location filename="../src/common/document.cpp" line="2751"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>ÅTERSTÄLLD</translation>
@@ -3121,76 +3121,64 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>Bryta isär</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="43"/>
-        <location filename="../src/desktop/importinventorydialog.cpp" line="180"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="39"/>
+        <location filename="../src/desktop/importinventorydialog.cpp" line="170"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="43"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="39"/>
         <source>Next</source>
         <translation>Nästa</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="151"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="144"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="303"/>
         <source>Quantity</source>
-        <translation>Antal</translation>
+        <translation type="vanished">Antal</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="306"/>
         <source>Condition</source>
-        <translation>Skick</translation>
+        <translation type="vanished">Skick</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="310"/>
         <source>New</source>
-        <translation>Ny</translation>
+        <translation type="vanished">Ny</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="311"/>
         <source>Used</source>
-        <translation>Använd</translation>
+        <translation type="vanished">Använd</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="314"/>
         <source>Extra parts</source>
-        <translation>Extrabitar</translation>
+        <translation type="vanished">Extrabitar</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="321"/>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="326"/>
         <source>Include</source>
-        <translation>Inkludera</translation>
+        <translation type="vanished">Inkludera</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="322"/>
         <source>Exclude</source>
-        <translation>Uteslut</translation>
+        <translation type="vanished">Uteslut</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="323"/>
         <source>Extra</source>
-        <translation>Extra</translation>
+        <translation type="vanished">Extra</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="327"/>
         <source>Instructions</source>
-        <translation>Instruktioner</translation>
+        <translation type="vanished">Instruktioner</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="329"/>
         <source>Alternates</source>
-        <translation>Alternativ</translation>
+        <translation type="vanished">Alternativ</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="331"/>
         <source>Counterparts</source>
-        <translation>Motsvarande bitar</translation>
+        <translation type="vanished">Motsvarande bitar</translation>
     </message>
 </context>
 <context>
@@ -3202,6 +3190,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="82"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="72"/>
         <source>Condition:</source>
         <translation>Skick:</translation>
     </message>
@@ -3222,22 +3211,26 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="143"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="87"/>
         <source>Include</source>
         <extracomment>Extra parts state</extracomment>
         <translation>Inkludera</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="152"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="88"/>
         <source>Exclude</source>
         <translation>Utesluta</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="161"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="89"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="193"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="92"/>
         <source>Include:</source>
         <extracomment>Label on the left</extracomment>
         <translation>Inkludera:</translation>
@@ -3249,13 +3242,84 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="207"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="101"/>
+        <source>Original Box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="214"/>
         <source>&amp;Alternates</source>
         <translation>&amp;Al&amp;ternativ</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importinventorywidget.ui" line="217"/>
+        <location filename="../src/desktop/importinventorywidget.ui" line="224"/>
         <source>&amp;Counterparts</source>
         <translation>&amp;Motsvarande bitar</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="254"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="117"/>
+        <source>Also part out:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="261"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="120"/>
+        <source>Sets in set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="268"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="126"/>
+        <source>Minifigs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation type="obsolete">Antal</translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="obsolete">Skick</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="76"/>
+        <source>New</source>
+        <translation>Ny</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="77"/>
+        <source>Used</source>
+        <translation>Använd</translation>
+    </message>
+    <message>
+        <source>Extra parts</source>
+        <translation type="obsolete">Extrabitar</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="69"/>
+        <source>Quantity:</source>
+        <translation>Antal:</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="80"/>
+        <source>Extra parts:</source>
+        <translation>Extrabitar:</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="95"/>
+        <source>Instructions</source>
+        <translation>Instruktioner</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="107"/>
+        <source>Alternates</source>
+        <translation>Alternativ</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="113"/>
+        <source>Counterparts</source>
+        <translation>Motsvarande bitar</translation>
     </message>
 </context>
 <context>
@@ -5776,7 +5840,7 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         <translation>Ska de markerade artiklarna brytas isär i det nuvarande dokumentet, och byta ut de markerade artiklarna?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/view.cpp" line="621"/>
+        <location filename="../src/desktop/view.cpp" line="614"/>
         <source>Parted out %n item(s)</source>
         <translation>
             <numerusform>Bröt ut %n artikel</numerusform>
@@ -5784,12 +5848,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         </translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="828"/>
+        <location filename="../src/desktop/view.cpp" line="821"/>
         <source>Printing failed.</source>
         <translation>Fel vid utskrift.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="949"/>
+        <location filename="../src/desktop/view.cpp" line="942"/>
         <source>Page %1/%2</source>
         <translation>Sida %1/%2</translation>
     </message>

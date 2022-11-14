@@ -12,10 +12,6 @@ Page {
     property var goBackFunction
 
     property BL.Item currentItem: BL.BrickLink.noItem
-    property bool hasInstructions: false
-    property bool hasCounterParts: false
-    property bool hasAlternates: false
-    property bool hasExtras: false
 
     header: ToolBar {
         topPadding: Style.topScreenMargin
@@ -45,16 +41,9 @@ Page {
                 enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
                 onClicked: {
                     if (lastPage && !root.currentItem.isNull) {
-                        let condition = conditionNew.checked ? BL.BrickLink.Condition.New
-                                                             : BL.BrickLink.Condition.Used
-                        let extra = extraInclude.checked ? BL.BrickLink.Status.Include
-                                                         : extraExclude.checked ? BL.BrickLink.Status.Exclude
-                                                                                : BL.BrickLink.Status.Extra
                         BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
-                                                          quantity.value, condition, extra,
-                                                          root.hasInstructions && includeInstructions.checked,
-                                                          root.hasAlternates && includeAlternates.checked,
-                                                          root.hasCounterParts && includeCounterParts.checked)
+                                                          importWidget.quantity, importWidget.condition,
+                                                          importWidget.extraParts, importWidget.partOutTraits)
                         goBackFunction()
                     } else if (visible) {
                         pages.currentIndex = pages.currentIndex + 1
@@ -97,7 +86,12 @@ Page {
                         catList.model.filterItemType = currentItem.itemTypePointer
                         itemListModel.filterItemType = currentItem.itemTypePointer
                     }
+
                     currentIndex: 0
+
+                    // the sort comes after the first setCurrentIndex, so we have to re-do the
+                    // filterItemType settings
+                    Component.onCompleted: Qt.callLater(function() { ittTabs.onCurrentItemChanged() })
                 }
 
                 ListView {
@@ -138,7 +132,6 @@ Page {
         Pane {
             id: itemListPage
             padding: 0
-            property bool isPageVisible: SwipeView.isCurrentItem
 
             ColumnLayout {
                 anchors.fill: parent
@@ -195,9 +188,7 @@ Page {
                         required property string name
                         required property var itemPointer
                         property BL.Item blitem: BL.BrickLink.item(delegate.itemPointer)
-                        property BL.Picture pic: itemListPage.isPageVisible
-                                                 ? BL.BrickLink.picture(blitem, blitem.defaultColor)
-                                                 : null
+                        property BL.Picture pic: BL.BrickLink.picture(blitem, blitem.defaultColor)
 
                         QImageItem {
                             anchors.fill: parent
@@ -218,24 +209,6 @@ Page {
                         }
                         onClicked: {
                             root.currentItem = blitem
-                            root.hasAlternates = false
-                            root.hasCounterParts = false
-                            root.hasInstructions = false
-                            root.hasExtras = false
-
-                            if (!blitem.isNull) {
-                                if (blitem.itemType.id === "S")
-                                    root.hasInstructions = !BL.BrickLink.item("I", blitem.id).isNull
-
-                                blitem.consistsOf().forEach(function(lot) {
-                                    if (lot.status === BL.BrickLink.Status.Extra)
-                                        root.hasExtras = true
-                                    if (lot.counterPart)
-                                        root.hasCounterParts = true
-                                    if (lot.alternate)
-                                        root.hasAlternates = true
-                                })
-                            }
                             pages.currentIndex = 2
                         }
                     }
@@ -260,80 +233,10 @@ Page {
             }
         }
 
-        Pane {
+        ImportInventoryWidget {
+            id: importWidget
             padding: 0
-
-            ScrollableLayout {
-                id: finalImportLayout
-                anchors.fill: parent
-
-                ColumnLayout {
-                    enabled: !root.currentItem.isNull
-                    width: finalImportLayout.width
-
-                    RowLayout {
-                        Layout.topMargin: 8
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 0
-                        QImageItem {
-                            implicitHeight: lfm.height * 5
-                            implicitWidth: height * 4 / 3
-
-                            property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
-                            image: pic ? pic.image : BL.BrickLink.noImage(width, height)
-                        }
-                        Label {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            text: "<b>" + root.currentItem.id + "</b> " + root.currentItem.name
-                                  + " <i>(" + root.currentItem.itemType.name + ")</i>"
-                            textFormat: Text.StyledText
-                            wrapMode: Text.Wrap
-                            verticalAlignment: Text.AlignVCenter
-
-                            FontMetrics { id: lfm }
-                        }
-                    }
-                    GridLayout {
-                        id: importDetailsGrid
-                        columns: 2
-                        columnSpacing: 16
-                        Layout.rightMargin: 16
-                        ItemDelegate { text: qsTr("Quantity") }
-                        SpinBox { id: quantity; editable: true; from: 1; to: 1000; value: 1 }
-
-                        ItemDelegate { text: qsTr("Condition") }
-                        Flow {
-                            Layout.fillWidth: true
-                            spacing: importDetailsGrid.columnSpacing
-                            CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
-                            CheckButton { text: qsTr("Used") }
-                        }
-                        ItemDelegate {
-                            text: qsTr("Extra parts")
-                            visible: root.hasExtras
-                        }
-                        Flow {
-                            Layout.fillWidth: true
-                            spacing: importDetailsGrid.columnSpacing
-                            visible: root.hasExtras
-                            CheckButton { icon.name: "vcs-normal";  text: qsTr("Include"); id: extraInclude; checked: true }
-                            CheckButton { icon.name: "vcs-removed"; text: qsTr("Exclude"); id: extraExclude }
-                            CheckButton { icon.name: "vcs-added";   text: qsTr("Extra");   id: extraExtra }
-                        }
-
-                        ItemDelegate { text: qsTr("Include") }
-                        Switch { text: qsTr("Instructions"); enabled: root.hasInstructions; id: includeInstructions }
-                        ItemDelegate { }
-                        Switch { text: qsTr("Alternates"); enabled: root.hasAlternates; id: includeAlternates }
-                        ItemDelegate { }
-                        Switch { text: qsTr("Counterparts"); enabled: root.hasCounterParts; id: includeCounterParts }
-
-                        Item { Layout.fillHeight: true }
-                    }
-                }
-            }
+            currentItem: root.currentItem
         }
     }
 }

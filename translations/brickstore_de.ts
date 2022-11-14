@@ -970,7 +970,7 @@
         <translation>Menü</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="231"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="234"/>
         <source>Show item information</source>
         <translation>Zeige Infomationen</translation>
     </message>
@@ -979,12 +979,12 @@
         <translation type="vanished">Zeige die Sets in denen ein Teil vorkommt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="233"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="236"/>
         <source>Show price guide</source>
         <translation>Zeige Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="244"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="247"/>
         <source>Show additional input fields for sellers</source>
         <translation>Zeige zusätzliche Eingabefelder für Verkäufer</translation>
     </message>
@@ -1034,42 +1034,42 @@
         <translation>An&amp;merkungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="252"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="255"/>
         <source>Browsing history</source>
         <translation>Chronik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="232"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="235"/>
         <source>Show item inventory and appearance</source>
         <translation>Zeige Inventarlisten und Vorkommen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="369"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="374"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="370"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="375"/>
         <source>Go to Item</source>
         <translation>Springe zu diesem Teil</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="583"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="590"/>
         <source>Your recently added items will be listed here</source>
         <translation>Die zuletzt hinzugefügten Teile werden hier aufgelistet</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="603"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="610"/>
         <source>Added %1</source>
         <translation>%1 hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="882"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="889"/>
         <source>Clear history</source>
         <translation>Chronik löschen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="890"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="897"/>
         <source>No browsing history</source>
         <translation>Keine Chronik vorhanden</translation>
     </message>
@@ -1515,7 +1515,7 @@
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="934"/>
+        <location filename="../src/desktop/selectitem.cpp" line="961"/>
         <source>consists-of:</source>
         <translation>besteht-aus:</translation>
     </message>
@@ -2209,17 +2209,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Warenkorb in Shop %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1715"/>
+        <location filename="../src/common/document.cpp" line="1713"/>
         <source>Inventory for %1</source>
         <translation>Inventarliste von %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1768"/>
+        <location filename="../src/common/document.cpp" line="1766"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Sie haben mehr als 1.000 Posten selektiert, aber die BrickLink Server können diese Anzahl an Posten nicht auf einmal verarbeiten.&lt;br&gt;Es wäre besser den Export auf mehrere, kleinere Sätze aufzuteilen.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1775"/>
+        <location filename="../src/common/document.cpp" line="1773"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
@@ -2228,7 +2228,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1854"/>
+        <location filename="../src/common/document.cpp" line="1852"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform>Ein Teil wurde kopiert oder zusammengeführt</numerusform>
@@ -2236,7 +2236,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1930"/>
+        <location filename="../src/common/document.cpp" line="1928"/>
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform>Ein Teil abgezogen</numerusform>
@@ -2244,12 +2244,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2097"/>
+        <location filename="../src/common/document.cpp" line="2095"/>
         <source>Added %1, consolidated %2 items</source>
         <translation>%1 Teile hinzugefügt, %2 zusammengeführt</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="2194"/>
+        <location filename="../src/common/document.cpp" line="2192"/>
         <source>Consolidated %n item(s)</source>
         <translation>
             <numerusform>Ein Teil zusammengeführt</numerusform>
@@ -2257,37 +2257,37 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2241"/>
+        <location filename="../src/common/document.cpp" line="2239"/>
         <source>BrickStore default</source>
         <translation>BrickStore Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2243"/>
+        <location filename="../src/common/document.cpp" line="2241"/>
         <source>BrickStore buyer/collector default</source>
         <translation>BrickStore Käufer/Sammler Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2245"/>
+        <location filename="../src/common/document.cpp" line="2243"/>
         <source>Auto-resize once</source>
         <translation>Einmalige automatische Anpassung</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2247"/>
+        <location filename="../src/common/document.cpp" line="2245"/>
         <source>User default</source>
         <translation>Benutzer Standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2382"/>
+        <location filename="../src/common/document.cpp" line="2380"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation>Geben Sie einen eindeutigen Namen für dieses Spaltenlayout ein. Lassen Sie das Feld leer, um das Benutzer Standard Layout zu ändern.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2414"/>
+        <location filename="../src/common/document.cpp" line="2412"/>
         <source>Set column layout:</source>
         <translation>Spaltenlayout gesetzt:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2753"/>
+        <location filename="../src/common/document.cpp" line="2751"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>WIEDERHERGESTELLT</translation>
@@ -3410,12 +3410,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>HistoryLineEdit</name>
     <message>
-        <location filename="../src/desktop/historylineedit.cpp" line="79"/>
+        <location filename="../src/desktop/historylineedit.cpp" line="85"/>
         <source>No favorite filters. Read the tooltip.</source>
         <translation>Keine Filterfavoriten vorhanden. Bitte den Tooltip lesen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/historylineedit.cpp" line="181"/>
+        <location filename="../src/desktop/historylineedit.cpp" line="197"/>
         <source>&lt;p&gt;Pressing &lt;b&gt;Return&lt;/b&gt; will save the current filter expression as a favorite. You can recall saved filters by clicking the filter icon on the left or by pressing &lt;b&gt;Down Arrow&lt;/b&gt; to open a drop down menu. The number of favorites is limited to the last %1, but you can delete saved filters from this drop down menu as well by clicking the &lt;b&gt;X&lt;/b&gt; button on the right.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Drücken Sie &lt;b&gt;Return&lt;/b&gt; um die den aktuellen Filterausdruck als Favorit zu speichern. Diese gespeicherten Favoiten können entweder per Klick auf das Filtersymbol links oder durch drücken von &lt;b&gt;Pfeil nach unten&lt;/b&gt; abgerufen werden: es öffnet sich ein Aufklappmenü. Die Anzahl der möglichen Favoriten ist auf %1 begrenzt, aber es können gespeicherte Filter auch wieder gelöscht werden: klicken Sie auf den &lt;b&gt;X&lt;/b&gt; Knopf rechts im Aufklappmenü.&lt;/p&gt;</translation>
     </message>
@@ -3615,12 +3615,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>ImportInventoryDialog</name>
     <message>
-        <location filename="../src/desktop/importinventorydialog.cpp" line="39"/>
+        <location filename="../src/desktop/importinventorydialog.cpp" line="41"/>
         <source>Import BrickLink Inventory</source>
         <translation>BrickLink Inventarliste importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importinventorydialog.cpp" line="52"/>
+        <location filename="../src/desktop/importinventorydialog.cpp" line="55"/>
         <source>Parting out:</source>
         <translation>Zum Zerlegen:</translation>
     </message>
@@ -3642,9 +3642,8 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">&amp;Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="306"/>
         <source>Condition</source>
-        <translation>Zustand</translation>
+        <translation type="vanished">Zustand</translation>
     </message>
     <message>
         <source>&amp;New</source>
@@ -3659,10 +3658,8 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">E&amp;xtra Teile</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="321"/>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="326"/>
         <source>Include</source>
-        <translation>Einschliessen</translation>
+        <translation type="vanished">Einschliessen</translation>
     </message>
     <message>
         <source>E&amp;xtra parts:</source>
@@ -3679,59 +3676,50 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>Zerlegen</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="43"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="39"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="151"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="144"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="303"/>
         <source>Quantity</source>
-        <translation>Anzahl</translation>
+        <translation type="vanished">Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="310"/>
         <source>New</source>
-        <translation>Neu</translation>
+        <translation type="vanished">Neu</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="311"/>
         <source>Used</source>
-        <translation>Gebraucht</translation>
+        <translation type="vanished">Gebraucht</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="314"/>
         <source>Extra parts</source>
-        <translation>Extra Teile</translation>
+        <translation type="vanished">Extra Teile</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="322"/>
         <source>Exclude</source>
-        <translation>Ausschliessen</translation>
+        <translation type="vanished">Ausschliessen</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="323"/>
         <source>Extra</source>
-        <translation>Extra</translation>
+        <translation type="vanished">Extra</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="327"/>
         <source>Instructions</source>
-        <translation>Anleitung</translation>
+        <translation type="vanished">Anleitung</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="329"/>
         <source>Alternates</source>
-        <translation>Alternativen</translation>
+        <translation type="vanished">Alternativen</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="331"/>
         <source>Counterparts</source>
-        <translation>Counterparts</translation>
+        <translation type="vanished">Counterparts</translation>
     </message>
     <message>
         <source>&amp;Instructions</source>
@@ -3750,8 +3738,8 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">&amp;Inklusive Anleitung</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="43"/>
-        <location filename="../src/desktop/importinventorydialog.cpp" line="174"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="39"/>
+        <location filename="../src/desktop/importinventorydialog.cpp" line="170"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
@@ -3765,6 +3753,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="82"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="72"/>
         <source>Condition:</source>
         <translation>Zustand:</translation>
     </message>
@@ -3785,22 +3774,26 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="143"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="87"/>
         <source>Include</source>
         <extracomment>Extra parts state</extracomment>
         <translation>Einschliessen</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="152"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="88"/>
         <source>Exclude</source>
         <translation>Ausschliessen</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="161"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="89"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="193"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="92"/>
         <source>Include:</source>
         <extracomment>Label on the left</extracomment>
         <translation>Einschliesslich:</translation>
@@ -3812,13 +3805,84 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="207"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="101"/>
+        <source>Original Box</source>
+        <translation>Originalverpackung</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="214"/>
         <source>&amp;Alternates</source>
         <translation>Alternati&amp;ven</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importinventorywidget.ui" line="217"/>
+        <location filename="../src/desktop/importinventorywidget.ui" line="224"/>
         <source>&amp;Counterparts</source>
         <translation>&amp;Counterparts</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="254"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="117"/>
+        <source>Also part out:</source>
+        <translation>Ebenfalls zerlegen:</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="261"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="120"/>
+        <source>Sets in set</source>
+        <translation>Sets im Set</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/importinventorywidget.ui" line="268"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="126"/>
+        <source>Minifigs</source>
+        <translation>Minifigs</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation type="vanished">Anzahl</translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="vanished">Zustand</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="76"/>
+        <source>New</source>
+        <translation>Neu</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="77"/>
+        <source>Used</source>
+        <translation>Gebraucht</translation>
+    </message>
+    <message>
+        <source>Extra parts</source>
+        <translation type="vanished">Extra Teile</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="69"/>
+        <source>Quantity:</source>
+        <translation>Anzahl:</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="80"/>
+        <source>Extra parts:</source>
+        <translation>Extra Teile:</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="95"/>
+        <source>Instructions</source>
+        <translation>Anleitung</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="107"/>
+        <source>Alternates</source>
+        <translation>Alternativen</translation>
+    </message>
+    <message>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="113"/>
+        <source>Counterparts</source>
+        <translation>Counterparts</translation>
     </message>
 </context>
 <context>
@@ -5469,7 +5533,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Zur Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="904"/>
+        <location filename="../src/desktop/selectitem.cpp" line="931"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie</translation>
     </message>
@@ -5518,17 +5582,17 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Verkleinern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="914"/>
+        <location filename="../src/desktop/selectitem.cpp" line="941"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="948"/>
+        <location filename="../src/desktop/selectitem.cpp" line="975"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Setze den Filter auf Minifigs, die aus diesem Teil bestehen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="953"/>
+        <location filename="../src/desktop/selectitem.cpp" line="980"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Schränke den Filter auf Minifigs, die aus diesem Teil bestehen, ein</translation>
     </message>
@@ -6589,7 +6653,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Spaltenlayout gesetzt:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="949"/>
+        <location filename="../src/desktop/view.cpp" line="942"/>
         <source>Page %1/%2</source>
         <translation>Seite %1/%2</translation>
     </message>
@@ -6606,7 +6670,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/view.cpp" line="621"/>
+        <location filename="../src/desktop/view.cpp" line="614"/>
         <source>Parted out %n item(s)</source>
         <translation>
             <numerusform>Ein Teil zerlegt</numerusform>
@@ -6618,7 +6682,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Geben Sie einen eindeutigen Namen für dieses Spaltenlayout ein. Lassen Sie das Feld leer, um das Benutzer Standard Layout zu ändern.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="828"/>
+        <location filename="../src/desktop/view.cpp" line="821"/>
         <source>Printing failed.</source>
         <translation>Das Drucken ist fehlgeschlagen.</translation>
     </message>

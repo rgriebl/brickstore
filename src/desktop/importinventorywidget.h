@@ -32,9 +32,7 @@ public:
     BrickLink::Condition condition() const;
     void setCondition(BrickLink::Condition condition);
     BrickLink::Status extraParts() const;
-    bool includeInstructions() const;
-    bool includeAlternates() const;
-    bool includeCounterParts() const;
+    BrickLink::PartOutTraits partOutTraits() const;
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);

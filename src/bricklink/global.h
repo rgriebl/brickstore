@@ -49,6 +49,22 @@ enum class Url {
     WantedList,
 };
 
+enum class PartOutTrait {
+    None         = 0x00,
+    Instructions = 0x01,
+    OriginalBox  = 0x02,
+    CounterParts = 0x04,
+    Alternates   = 0x08,
+    Extras       = 0x10,
+    SetsInSet    = 0x20,
+    Minifigs     = 0x40,
+};
+
+Q_DECLARE_FLAGS(PartOutTraits, PartOutTrait);
+Q_DECLARE_OPERATORS_FOR_FLAGS(PartOutTraits);
+
+Q_FLAG_NS(PartOutTraits)
+
 Q_ENUM_NS(Time)
 Q_ENUM_NS(Price)
 Q_ENUM_NS(Condition)

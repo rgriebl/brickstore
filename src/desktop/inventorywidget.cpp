@@ -226,8 +226,7 @@ QCoro::Task<> InventoryWidget::partOut()
 
         if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
             Document::fromPartInventory(dlg.item(), nullptr, dlg.quantity(), dlg.condition(),
-                                        dlg.extraParts(), dlg.includeInstructions(),
-                                        dlg.includeAlternates(), dlg.includeCounterParts());
+                                        dlg.extraParts(), dlg.partOutTraits());
         }
     }
 }

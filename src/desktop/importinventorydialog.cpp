@@ -160,19 +160,9 @@ BrickLink::Status ImportInventoryDialog::extraParts() const
     return m_import->extraParts();
 }
 
-bool ImportInventoryDialog::includeInstructions() const
+BrickLink::PartOutTraits ImportInventoryDialog::partOutTraits() const
 {
-    return m_import->includeInstructions();
-}
-
-bool ImportInventoryDialog::includeAlternates() const
-{
-    return m_import->includeAlternates();
-}
-
-bool ImportInventoryDialog::includeCounterParts() const
-{
-    return m_import->includeCounterParts();
+    return m_import->partOutTraits();
 }
 
 void ImportInventoryDialog::languageChange()
@@ -241,8 +231,7 @@ void ImportInventoryDialog::importInventory()
         accept();
     } else {
         Document::fromPartInventory(item(), nullptr, quantity(), condition(),
-                                    extraParts(), includeInstructions(),
-                                    includeAlternates(), includeCounterParts());
+                                    extraParts(), partOutTraits());
     }
 }
 

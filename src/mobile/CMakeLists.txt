@@ -64,6 +64,7 @@ qt_add_qml_module(mobile_module
         GridHeader.qml
         ImportCartDialog.qml
         ImportInventoryDialog.qml
+        ImportInventoryWidget.qml
         ImportOrderDialog.qml
         ImportWantedListDialog.qml
         IncDecPricesDialog.qml

@@ -39,9 +39,7 @@ public:
     int quantity() const;
     BrickLink::Condition condition() const;
     BrickLink::Status extraParts() const;
-    bool includeInstructions() const;
-    bool includeAlternates() const;
-    bool includeCounterParts() const;
+    BrickLink::PartOutTraits partOutTraits() const;
 
 protected:
     void changeEvent(QEvent *e) override;

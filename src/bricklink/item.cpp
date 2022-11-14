@@ -95,6 +95,34 @@ const QVector<Item::ConsistsOf> &Item::consistsOf() const
     return m_consists_of;
 }
 
+PartOutTraits Item::partOutTraits() const
+{
+    PartOutTraits traits;
+
+    if (itemTypeId() == 'S') {
+        if (core()->item('I', id()))
+            traits |= PartOutTrait::Instructions;
+        if (core()->item('O', id()))
+            traits |= PartOutTrait::OriginalBox;
+    }
+
+    for (const auto &co : m_consists_of) {
+        if (co.isExtra())
+            traits |= PartOutTrait::Extras;
+        if (co.isCounterPart())
+            traits |= PartOutTrait::CounterParts;
+        if (co.isAlternate())
+            traits |= PartOutTrait::Alternates;
+
+        const auto itemTypeId = co.item()->itemTypeId();
+        if (co.item()->hasInventory() && ((itemTypeId == 'M') || (itemTypeId == 'S'))) {
+            traits |= ((itemTypeId == 'M') ? PartOutTrait::Minifigs : PartOutTrait::SetsInSet);
+            traits |= co.item()->partOutTraits();
+        }
+    }
+    return traits;
+}
+
 const ItemType *Item::itemType() const
 {
     return (m_itemTypeIndex > -1) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;

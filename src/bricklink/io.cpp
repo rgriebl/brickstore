@@ -47,13 +47,14 @@ static QDateTime parseESTDateTimeString(const QString &v)
     }
 }
 
+namespace BrickLink {
 
-QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
+QString IO::toBrickLinkXML(const LotList &lots)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
-        if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude))
+        if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
         xml.createElement();
@@ -63,7 +64,7 @@ QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
         xml.createText("CATEGORY", QString::number(lot->categoryId()));
         xml.createText("QTY", QString::number(lot->quantity()));
         xml.createText("PRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
-        xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
+        xml.createText("CONDITION", (lot->condition() == Condition::New) ? u"N" : u"U");
 
         if (lot->bulkQuantity() != 1)   xml.createText("BULK", QString::number(lot->bulkQuantity()));
         if (lot->sale())                xml.createText("SALE", QString::number(lot->sale()));
@@ -83,24 +84,24 @@ QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
             xml.createText("TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
         }
 
-        if (lot->subCondition() != BrickLink::SubCondition::None) {
+        if (lot->subCondition() != SubCondition::None) {
             const char16_t *st = nullptr;
             switch (lot->subCondition()) {
-            case BrickLink::SubCondition::Incomplete: st = u"I"; break;
-            case BrickLink::SubCondition::Complete  : st = u"C"; break;
-            case BrickLink::SubCondition::Sealed    : st = u"S"; break;
-            default                                 : break;
+            case SubCondition::Incomplete: st = u"I"; break;
+            case SubCondition::Complete  : st = u"C"; break;
+            case SubCondition::Sealed    : st = u"S"; break;
+            default                      : break;
             }
             if (st)
                 xml.createText("SUBCONDITION", st);
         }
-        if (lot->stockroom() != BrickLink::Stockroom::None) {
+        if (lot->stockroom() != Stockroom::None) {
             const char16_t *st = nullptr;
             switch (lot->stockroom()) {
-            case BrickLink::Stockroom::A: st = u"A"; break;
-            case BrickLink::Stockroom::B: st = u"B"; break;
-            case BrickLink::Stockroom::C: st = u"C"; break;
-            default                     : break;
+            case Stockroom::A: st = u"A"; break;
+            case Stockroom::B: st = u"B"; break;
+            case Stockroom::C: st = u"C"; break;
+            default          : break;
             }
             if (st) {
                 xml.createText("STOCKROOM", u"Y");
@@ -112,7 +113,7 @@ QString BrickLink::IO::toBrickLinkXML(const LotList &lots)
 }
 
 
-BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &data, Hint hint)
+IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint)
 {
     //stopwatch loadXMLWatch("Load XML");
 
@@ -209,7 +210,7 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
                     foundRoot = true;
                 } else if (tagName == u"ITEM") {
                     auto *lot = new Lot();
-                    auto inc = new BrickLink::Incomplete;
+                    auto inc = new Incomplete;
                     inc->m_color_id = 0;
                     inc->m_category_id = 0;
                     lot->setIncomplete(inc);
@@ -260,12 +261,12 @@ BrickLink::IO::ParseResult BrickLink::IO::fromBrickLinkXML(const QByteArray &dat
     }
 }
 
-QString BrickLink::IO::toWantedListXML(const LotList &lots, const QString &wantedList)
+QString IO::toWantedListXML(const LotList &lots, const QString &wantedList)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
-        if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude))
+        if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
         xml.createElement();
@@ -279,7 +280,7 @@ QString BrickLink::IO::toWantedListXML(const LotList &lots, const QString &wante
             xml.createText("MAXPRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         if (!lot->remarks().isEmpty())
             xml.createText("REMARKS", lot->remarks());
-        if (lot->condition() == BrickLink::Condition::New)
+        if (lot->condition() == Condition::New)
             xml.createText("CONDITION", u"N");
         if (!wantedList.isEmpty())
             xml.createText("WANTEDLISTID", wantedList);
@@ -287,12 +288,12 @@ QString BrickLink::IO::toWantedListXML(const LotList &lots, const QString &wante
     return xml.toString();
 }
 
-QString BrickLink::IO::toInventoryRequest(const LotList &lots)
+QString IO::toInventoryRequest(const LotList &lots)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
-        if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude))
+        if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
         xml.createElement();
@@ -300,19 +301,19 @@ QString BrickLink::IO::toInventoryRequest(const LotList &lots)
         xml.createText("ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
         xml.createText("COLOR", QString::number(lot->colorId()));
         xml.createText("QTY", QString::number(lot->quantity()));
-        if (lot->status() == BrickLink::Status::Extra)
+        if (lot->status() == Status::Extra)
             xml.createText("EXTRA", u"Y");
     }
     return xml.toString();
 }
 
-QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
+QString IO::toBrickLinkUpdateXML(const LotList &lots,
                                             std::function<const Lot *(const Lot *)> differenceBaseLot)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
     for (const Lot *lot : lots) {
-        if (lot->isIncomplete() || (lot->status() == BrickLink::Status::Exclude))
+        if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
         auto *base = differenceBaseLot(lot);
@@ -340,7 +341,7 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
         if (!qFuzzyCompare(base->cost(), lot->cost()))
             xml.createText("MYCOST", QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
         if (base->condition() != lot->condition())
-            xml.createText("CONDITION", (lot->condition() == BrickLink::Condition::New) ? u"N" : u"U");
+            xml.createText("CONDITION", (lot->condition() == Condition::New) ? u"N" : u"U");
         if (base->bulkQuantity() != lot->bulkQuantity())
             xml.createText("BULK", QString::number(lot->bulkQuantity()));
         if (base->sale() != lot->sale())
@@ -368,10 +369,10 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
         if (base->subCondition() != lot->subCondition()) {
             const char16_t *st = nullptr;
             switch (lot->subCondition()) {
-            case BrickLink::SubCondition::Incomplete: st = u"I"; break;
-            case BrickLink::SubCondition::Complete  : st = u"C"; break;
-            case BrickLink::SubCondition::Sealed    : st = u"S"; break;
-            default                                 : break;
+            case SubCondition::Incomplete: st = u"I"; break;
+            case SubCondition::Complete  : st = u"C"; break;
+            case SubCondition::Sealed    : st = u"S"; break;
+            default                      : break;
             }
             if (st)
                 xml.createText("SUBCONDITION", st);
@@ -379,10 +380,10 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
         if (base->stockroom() != lot->stockroom()) {
             const char16_t *st = nullptr;
             switch (lot->stockroom()) {
-            case BrickLink::Stockroom::A: st = u"A"; break;
-            case BrickLink::Stockroom::B: st = u"B"; break;
-            case BrickLink::Stockroom::C: st = u"C"; break;
-            default                     : break;
+            case Stockroom::A: st = u"A"; break;
+            case Stockroom::B: st = u"B"; break;
+            case Stockroom::C: st = u"C"; break;
+            default          : break;
             }
             xml.createText("STOCKROOM", st ? u"Y" : u"N");
             if (st)
@@ -397,12 +398,12 @@ QString BrickLink::IO::toBrickLinkUpdateXML(const LotList &lots,
     return xml.toString();
 }
 
-BrickLink::IO::ParseResult::ParseResult(const LotList &lots)
+IO::ParseResult::ParseResult(const LotList &lots)
     : m_lots(lots)
     , m_ownLots(false)
 { }
 
-BrickLink::IO::ParseResult::ParseResult(ParseResult &&pr)
+IO::ParseResult::ParseResult(ParseResult &&pr)
     : m_lots(pr.m_lots)
     , m_currencyCode(pr.m_currencyCode)
     , m_ownLots(pr.m_ownLots)
@@ -413,13 +414,13 @@ BrickLink::IO::ParseResult::ParseResult(ParseResult &&pr)
     pr.m_lots.clear();
 }
 
-BrickLink::IO::ParseResult::~ParseResult()
+IO::ParseResult::~ParseResult()
 {
     if (m_ownLots)
         qDeleteAll(m_lots);
 }
 
-BrickLink::LotList BrickLink::IO::ParseResult::takeLots()
+LotList IO::ParseResult::takeLots()
 {
     Q_ASSERT(m_ownLots);
     m_ownLots = false;
@@ -428,25 +429,35 @@ BrickLink::LotList BrickLink::IO::ParseResult::takeLots()
     return result;
 }
 
-void BrickLink::IO::ParseResult::addLot(Lot * &&lot)
+void IO::ParseResult::addLot(Lot * &&lot)
 {
     Q_ASSERT(m_ownLots);
     m_lots << lot;
 }
 
-void BrickLink::IO::ParseResult::addToDifferenceModeBase(const Lot *lot, const Lot &base)
+void IO::ParseResult::addToDifferenceModeBase(const Lot *lot, const Lot &base)
 {
     m_differenceModeBase.insert(lot, base);
 }
 
-BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, const Color *color, int quantity, Condition condition, Status extraParts, bool includeInstructions, bool includeAlternates, bool includeCounterParts)
+static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, const Color *color,
+                                      int quantity, Condition condition,
+                                      Status extraParts, PartOutTraits partOutTraits)
 {
     const auto &parts = item->consistsOf();
-    BrickLink::IO::ParseResult pr;
 
-    if (includeInstructions) {
-        if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
-            auto *lot = new Lot(instructions, BrickLink::core()->color(0));
+    if (partOutTraits.testFlag(PartOutTrait::Instructions)) {
+        if (const auto *instructions = core()->item('I', item->id())) {
+            auto *lot = new Lot(instructions, core()->color(0));
+            lot->setQuantity(quantity);
+            lot->setCondition(condition);
+
+            pr.addLot(std::move(lot));
+        }
+    }
+    if (partOutTraits.testFlag(PartOutTrait::OriginalBox)) {
+        if (const auto *originalBox = core()->item('O', item->id())) {
+            auto *lot = new Lot(originalBox, core()->color(0));
             lot->setQuantity(quantity);
             lot->setCondition(condition);
 
@@ -454,59 +465,70 @@ BrickLink::IO::ParseResult BrickLink::IO::fromPartInventory(const Item *item, co
         }
     }
 
-    for (const BrickLink::Item::ConsistsOf &part : parts) {
-        const BrickLink::Item *partItem = part.item();
-        const BrickLink::Color *partColor = part.color();
+    for (const Item::ConsistsOf &part : parts) {
+        const Item *partItem = part.item();
+        const Color *partColor = part.color();
+
         if (!partItem)
             continue;
+
+        if ((!partOutTraits.testFlag(PartOutTrait::Alternates) && part.isAlternate())
+                || (!partOutTraits.testFlag(PartOutTrait::CounterParts) && part.isCounterPart())) {
+            continue;
+        }
+
         if (color && color->id() && partItem->itemType()->hasColors()
                 && partColor && (partColor->id() == 0)) {
             partColor = color;
         }
 
-        if ((!includeAlternates && part.isAlternate())
-                || (!includeCounterParts && part.isCounterPart())) {
+        const auto itemTypeId = part.item()->itemTypeId();
+        if ((partOutTraits.testFlag(PartOutTrait::SetsInSet) && (itemTypeId == 'S'))
+                || (partOutTraits.testFlag(PartOutTrait::Minifigs) && (itemTypeId == 'M'))) {
+            fromPartInventoryInternal(pr, part.item(), part.color(), quantity * part.quantity(),
+                                      condition, extraParts, partOutTraits);
             continue;
         }
 
-        if (part.isExtra()) {
-            switch (extraParts) {
-            case BrickLink::Status::Include: {
-                bool found = false;
-                for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
-                    if (partItem == (*it)->item() && (partColor == (*it)->color())
-                            && (part.isAlternate() == (*it)->alternate())
-                            && (part.alternateId() == (*it)->alternateId())
-                            && (part.isCounterPart() == (*it)->counterPart())) {
-                        (*it)->setQuantity((*it)->quantity() + quantity * part.quantity());
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    continue;
-                if (!found)
-                    qWarning() << "Couldn't consolidate extra part" << partItem->id();
-                break;
-            }
-            case BrickLink::Status::Exclude:
-                continue;
-            default:
+        if (part.isExtra() && (extraParts == Status::Exclude))
+            continue;
+
+        bool addAsExtra = part.isExtra() && (extraParts == Status::Extra);
+
+        bool found = false;
+        for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
+            if (partItem == (*it)->item() && (partColor == (*it)->color())
+                    && (part.isAlternate() == (*it)->alternate())
+                    && (part.alternateId() == (*it)->alternateId())
+                    && (part.isCounterPart() == (*it)->counterPart())
+                    && (addAsExtra == ((*it)->status() == Status::Extra))) {
+                (*it)->setQuantity((*it)->quantity() + quantity * part.quantity());
+                found = true;
                 break;
             }
         }
+        if (!found) {
+            Lot *lot = new Lot(partItem, partColor);
+            lot->setQuantity(part.quantity() * quantity);
+            lot->setCondition(condition);
+            if (addAsExtra)
+                lot->setStatus(Status::Extra);
+            lot->setAlternate(part.isAlternate());
+            lot->setAlternateId(part.alternateId());
+            lot->setCounterPart(part.isCounterPart());
 
-
-        Lot *lot = new Lot(partItem, partColor);
-        lot->setQuantity(part.quantity() * quantity);
-        lot->setCondition(condition);
-        if (part.isExtra())
-            lot->setStatus(extraParts);
-        lot->setAlternate(part.isAlternate());
-        lot->setAlternateId(part.alternateId());
-        lot->setCounterPart(part.isCounterPart());
-
-        pr.addLot(std::move(lot));
+            pr.addLot(std::move(lot));
+        }
     }
+}
+
+IO::ParseResult IO::fromPartInventory(const Item *item, const Color *color,
+                                      int quantity, Condition condition,
+                                      Status extraParts, PartOutTraits partOutTraits)
+{
+    ParseResult pr;
+    fromPartInventoryInternal(pr, item, color, quantity, condition, extraParts, partOutTraits);
     return pr;
 }
+
+} // namespace BrickLink
