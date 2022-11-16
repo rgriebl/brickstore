@@ -351,17 +351,17 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="402"/>
         <source>Increase row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Öka radhöjd</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="403"/>
         <source>Decrease row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Minska radhöjd</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="404"/>
         <source>Reset row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Återställ radhöjd</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="405"/>
@@ -799,12 +799,12 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="494"/>
         <source>Copy lot id</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopiera post-id</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="495"/>
         <source>Clear lot id</source>
-        <translation type="unfinished"></translation>
+        <translation>Rensa post-id</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="497"/>
@@ -964,17 +964,17 @@
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="484"/>
         <source>Click to go back one item, hold to see history</source>
-        <translation type="unfinished"></translation>
+        <translation>Klicka för att gå tillbaka en artikel, håll inne för att se historik</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="501"/>
         <source>Click to go forward one item, hold to see history</source>
-        <translation type="unfinished"></translation>
+        <translation>Klicka för att gå framåt en artikel, håll inne för att se historik</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="518"/>
         <source>Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Meny</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="234"/>
@@ -1008,12 +1008,12 @@
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="235"/>
         <source>Show item inventory and appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Visa artikelns innehåll och vilket set den ingår i</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="255"/>
         <source>Browsing history</source>
-        <translation type="unfinished"></translation>
+        <translation>Sökhistorik</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="374"/>
@@ -1023,7 +1023,7 @@
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="375"/>
         <source>Go to Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Gå till Artikel</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="590"/>
@@ -1038,12 +1038,12 @@
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="889"/>
         <source>Clear history</source>
-        <translation type="unfinished"></translation>
+        <translation>Rensa historik</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.cpp" line="897"/>
         <source>No browsing history</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen sökhistorik</translation>
     </message>
 </context>
 <context>
@@ -1147,17 +1147,17 @@
     <message>
         <location filename="../src/common/application.cpp" line="323"/>
         <source>Started downloading an LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Startat nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="328"/>
         <source>Finished downloading an LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Färdig med nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="330"/>
         <source>Failed to download a LDraw library update</source>
-        <translation type="unfinished"></translation>
+        <translation>Misslyckades med nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
         <location filename="../src/common/application.cpp" line="454"/>
@@ -1988,9 +1988,9 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message numerus="yes">
         <location filename="../src/common/document.cpp" line="840"/>
         <source>Duplicated %Ln item(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Dupplicerat %Ln artikel</numerusform>
+            <numerusform>Dupplicerat %Ln artiklar</numerusform>
         </translation>
     </message>
     <message>
@@ -2081,7 +2081,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/document.cpp" line="1652"/>
         <source>You cannot save this document with the same name as another currently open document. Choose a different name, or close the other document first.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du kan inte spara detta dokument med samma namn som ett annat redan öppet dokument. Välj ett annat namn, eller stäng det andra dokumentet först.</translation>
     </message>
     <message>
         <location filename="../src/common/document.cpp" line="1687"/>
@@ -2670,7 +2670,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1947"/>
         <source>Total Weight</source>
-        <translation type="unfinished"></translation>
+        <translation>Total Vikt</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="1958"/>
@@ -2733,12 +2733,12 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/documentmodel.cpp" line="559"/>
         <source>Total:</source>
-        <translation type="unfinished"></translation>
+        <translation>Totalt:</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="560"/>
         <source>Total (min.):</source>
-        <translation type="unfinished"></translation>
+        <translation>Totalt (min):</translation>
     </message>
     <message>
         <location filename="../src/common/documentmodel.cpp" line="561"/>
@@ -3085,12 +3085,12 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/mobile/ImportCartDialog.qml" line="11"/>
         <source>Import Cart</source>
-        <translation type="unfinished"></translation>
+        <translation>Importera Kundvagn</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportCartDialog.qml" line="120"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artiklar (%2 poster)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportCartDialog.qml" line="153"/>
@@ -3275,12 +3275,9 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Quantity</source>
-        <translation type="obsolete">Antal</translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="obsolete">Skick</translation>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="69"/>
+        <source>Quantity:</source>
+        <translation>Antal:</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="76"/>
@@ -3291,15 +3288,6 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="77"/>
         <source>Used</source>
         <translation>Använd</translation>
-    </message>
-    <message>
-        <source>Extra parts</source>
-        <translation type="obsolete">Extrabitar</translation>
-    </message>
-    <message>
-        <location filename="../src/mobile/ImportInventoryWidget.qml" line="69"/>
-        <source>Quantity:</source>
-        <translation>Antal:</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="80"/>
@@ -3365,7 +3353,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="149"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artiklar (%2 poster)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="183"/>
@@ -3503,12 +3491,12 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/mobile/ImportWantedListDialog.qml" line="91"/>
         <source>%1 items (%2 lots)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artiklar (%2 poster)</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportWantedListDialog.qml" line="98"/>
         <source>%1 items left, %2% filled</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 artiklar kvar, %2% klara</translation>
     </message>
 </context>
 <context>
@@ -3547,7 +3535,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/mobile/InfoWidget.qml" line="61"/>
         <source>No image available</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen bild tillgänglig</translation>
     </message>
     <message>
         <location filename="../src/mobile/InfoWidget.qml" line="75"/>
@@ -3624,7 +3612,11 @@ Hold right button: Move
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Håll nere vänster knapp: Rotera
+Håll nere höger knapp: Flytta
+Musens hjul: Zooma
+Dubbelklicka: Återställ kameran
+Högerklicka: Meny</translation>
     </message>
 </context>
 <context>
@@ -3659,7 +3651,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="411"/>
         <source>Item Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Artikel består av</translation>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="413"/>
@@ -3699,7 +3691,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/mainwindow.cpp" line="1227"/>
         <source>Reset Info Docks layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Återställ info rutans placering</translation>
     </message>
 </context>
 <context>
@@ -3771,7 +3763,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/mobile/mobileapplication.cpp" line="65"/>
         <source>Would you like to consolidate %L1 lots?</source>
-        <translation type="unfinished"></translation>
+        <translation>Vill du slå ihop %L1 poster?</translation>
     </message>
 </context>
 <context>
@@ -4024,12 +4016,12 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="250"/>
         <source>Center view</source>
-        <translation type="unfinished"></translation>
+        <translation>Centrera vy</translation>
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="273"/>
         <source>3D render settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>3 renderings inställningar...</translation>
     </message>
     <message>
         <location filename="../src/desktop/picturewidget.cpp" line="274"/>
@@ -4517,7 +4509,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="14"/>
         <source>3D Render Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>3D Renderings inställningar</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="27"/>
@@ -4527,172 +4519,172 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="36"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Kamera</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="43"/>
         <source>Orthographic</source>
-        <translation type="unfinished"></translation>
+        <translation>Ortografisk</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="50"/>
         <source>Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Perspektiv</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="78"/>
         <source>Field of view</source>
-        <translation type="unfinished"></translation>
+        <translation>Synfält</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="101"/>
         <source> °</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="122"/>
         <source>Lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Linjer</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="129"/>
         <source>Show</source>
-        <translation type="unfinished">Visa</translation>
+        <translation>Visa</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="136"/>
         <source>Line width</source>
-        <translation type="unfinished"></translation>
+        <translation>Linjebredd</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="164"/>
         <source> px</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="179"/>
         <source>Animation</source>
-        <translation type="unfinished"></translation>
+        <translation>Animation</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="207"/>
         <source> ° / tick</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="222"/>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Felsöka</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="229"/>
         <source>Show bounding spheres</source>
-        <translation type="unfinished"></translation>
+        <translation>Visa avgränsade sfärer</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="252"/>
         <source>Anti-Aliasing</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="260"/>
         <source>Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Av</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="265"/>
         <source>Medium</source>
-        <translation type="unfinished"></translation>
+        <translation>Medium</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="270"/>
         <source>High</source>
-        <translation type="unfinished"></translation>
+        <translation>Hög</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="275"/>
         <source>Very high</source>
-        <translation type="unfinished"></translation>
+        <translation>Väldigt högt</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="284"/>
         <source>Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Blixt</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="295"/>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktiverad</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="302"/>
         <source>Realistic Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Realistisk blixt</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="309"/>
         <source>Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Ljusstyrka</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="354"/>
         <source>Ambient Occlusion</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="360"/>
         <source>Strength</source>
-        <translation type="unfinished"></translation>
+        <translation>Styrka</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="383"/>
         <source>Softness</source>
-        <translation type="unfinished"></translation>
+        <translation>Mjukhet</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="406"/>
         <source>Distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Distans</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="476"/>
         <source>Materials</source>
-        <translation type="unfinished"></translation>
+        <translation>Material</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="482"/>
         <source>Reflections</source>
-        <translation type="unfinished"></translation>
+        <translation>Reflektioner</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="488"/>
         <source>Metalness</source>
-        <translation type="unfinished"></translation>
+        <translation>Metallighet</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="495"/>
         <source>Roughness</source>
-        <translation type="unfinished"></translation>
+        <translation>Hårdhet</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="502"/>
         <source>Plain</source>
-        <translation type="unfinished"></translation>
+        <translation>Enkel</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="541"/>
         <source>Chrome</source>
-        <translation type="unfinished"></translation>
+        <translation>Krom</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="580"/>
         <source>Metallic</source>
-        <translation type="unfinished"></translation>
+        <translation>Metallisk</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="619"/>
         <source>Pearl</source>
-        <translation type="unfinished"></translation>
+        <translation>Pärlig</translation>
     </message>
 </context>
 <context>
@@ -4751,12 +4743,12 @@ Right click: Menu</source>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="93"/>
         <source>Color by Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Färg efter Namn</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="97"/>
         <source>Color by Hue</source>
-        <translation type="unfinished"></translation>
+        <translation>Färg efter Nyans</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectcolor.cpp" line="140"/>
@@ -5100,7 +5092,7 @@ Right click: Menu</source>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="68"/>
         <source>Which price:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vilket pris:</translation>
     </message>
     <message>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="78"/>
@@ -5321,38 +5313,38 @@ Right click: Menu</source>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="329"/>
         <source>Global</source>
-        <translation type="unfinished"></translation>
+        <translation>Global</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="518"/>
         <source>Document Views</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentvyer</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="527"/>
         <source>Row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Radhöjd</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="534"/>
         <source>Editable via scroll wheel and zoom gesture</source>
-        <translation type="unfinished"></translation>
+        <translation>Redigerbar med rullhjul och zoom rörelse</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="541"/>
         <source>Column spacing</source>
-        <translation type="unfinished"></translation>
+        <translation>Kolumnavstånd</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="554"/>
         <source>Medium</source>
-        <translation type="unfinished"></translation>
+        <translation>Medium</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="559"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="182"/>
         <source>Large</source>
-        <translation type="unfinished"></translation>
+        <translation>Stor</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="587"/>
@@ -5535,12 +5527,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="173"/>
         <source>UI Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>UI Layout</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="180"/>
         <source>Automatic</source>
-        <translation type="unfinished"></translation>
+        <translation>Automatisk</translation>
     </message>
     <message>
         <source>Follow the system&apos;s theme</source>
