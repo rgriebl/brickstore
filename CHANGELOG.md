@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+New features:
+- BrickStore now has a full Swedish translation (thank you Johan!)
+- Added more part-out options: you can now also part out sets-in-set as well as Minifigs in one go.
+
+Fixes:
+- Rendering some 3D parts with an excessive amount of lines could crash due to an out-of-memory in the 3D pipeline (the stud alone on a 48x48 baseplate consist of more than 300,000 lines).
+- Fixed some glitches in the Add Item dialog's new browse history.
+
 
 ## [2022.11.1] - 2022-11-08
 
