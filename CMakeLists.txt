@@ -351,10 +351,15 @@ if (ANDROID)
         QT_ANDROID_VERSION_NAME ${VERSION}
     )
 
-    if (QT_ANDROID_SDK_BUILD_TOOLS_REVISION)
-        # Qt bug: this has to be set as a target property to stick
+    if (QT_ANDROID_SDK_BUILD_TOOLS_REVISION) # this has to be set as a target property to stick
         set_target_properties(${PROJECT_NAME} PROPERTIES
             QT_ANDROID_SDK_BUILD_TOOLS_REVISION "${QT_ANDROID_SDK_BUILD_TOOLS_REVISION}"
+        )
+    endif()
+
+    if (QT_ANDROID_TARGET_SDK_VERSION) # this has to be set as a target property to stick
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+            QT_ANDROID_TARGET_SDK_VERSION "${QT_ANDROID_TARGET_SDK_VERSION}"
         )
     endif()
 
