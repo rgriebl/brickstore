@@ -136,7 +136,10 @@ public:
         m_pd->setMinimumWidth(m_pd->fontMetrics().averageCharWidth() * 60);
 
         connect(m_pd, &QProgressDialog::canceled,
-                this, &DesktopPDI::cancel);
+                this, [this]() {
+            emit cancel();
+            m_pd->reject();
+        });
     }
 
     ~DesktopPDI() override
@@ -149,7 +152,7 @@ public:
         emit start();
         m_pd->show();
         int result = co_await qCoro(m_pd, &ForceableProgressDialog::finished);
-        co_return (result == 0);
+        co_return (result == QDialog::Accepted);
     }
 
     void progress(int done, int total) override
@@ -174,7 +177,7 @@ public:
 
         if (!showMessage) {
             m_pd->reset();
-            m_pd->done(success ? 0 : 1);
+            m_pd->done(success ? QDialog::Accepted : QDialog::Rejected);
         }
     }
 
