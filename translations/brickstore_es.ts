@@ -3401,7 +3401,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <location filename="../src/desktop/importinventorywidget.ui" line="207"/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="101"/>
         <source>Original Box</source>
-        <translation type="unfinished"></translation>
+        <translation>Caja Original</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="214"/>
@@ -3417,19 +3417,19 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <location filename="../src/desktop/importinventorywidget.ui" line="254"/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="117"/>
         <source>Also part out:</source>
-        <translation type="unfinished"></translation>
+        <translation>Despiezar también:</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="261"/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="120"/>
         <source>Sets in set</source>
-        <translation type="unfinished"></translation>
+        <translation>Sets en set</translation>
     </message>
     <message>
         <location filename="../src/desktop/importinventorywidget.ui" line="268"/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="126"/>
         <source>Minifigs</source>
-        <translation type="unfinished"></translation>
+        <translation>Minifiguras</translation>
     </message>
     <message>
         <source>Quantity</source>

@@ -1447,77 +1447,77 @@
 <context>
     <name>BrickLink::Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="691"/>
+        <location filename="../src/bricklink/order.cpp" line="708"/>
         <source>Address not available</source>
         <translation>Adress är inte tillgänglig</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="707"/>
+        <location filename="../src/bricklink/order.cpp" line="724"/>
         <source>Cannot write order address to cache</source>
         <translation>Kan inte skriva oderns address till cacheminnet</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="739"/>
+        <location filename="../src/bricklink/order.cpp" line="756"/>
         <source>Cannot write order XML to cache</source>
         <translation>Kan inte skriva oderns XML till cacheminnet</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="750"/>
+        <location filename="../src/bricklink/order.cpp" line="767"/>
         <source>Could not parse the received order XML data</source>
         <translation>Kunde inte behandla den mottagna orderns XML data</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1180"/>
+        <location filename="../src/bricklink/order.cpp" line="1197"/>
         <source>Cannot open order XML</source>
         <translation>Kan inte öppa order XML</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1222"/>
+        <location filename="../src/bricklink/order.cpp" line="1239"/>
         <source>Received</source>
         <translation>Mottagen</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1222"/>
+        <location filename="../src/bricklink/order.cpp" line="1239"/>
         <source>Placed</source>
         <translation>Lagd</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1295"/>
+        <location filename="../src/bricklink/order.cpp" line="1312"/>
         <source>Date</source>
         <translation>Datum</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1296"/>
+        <location filename="../src/bricklink/order.cpp" line="1313"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1297"/>
+        <location filename="../src/bricklink/order.cpp" line="1314"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1298"/>
+        <location filename="../src/bricklink/order.cpp" line="1315"/>
         <source>Order ID</source>
         <translation>Order nummer</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1299"/>
+        <location filename="../src/bricklink/order.cpp" line="1316"/>
         <source>Buyer/Seller</source>
         <translation>Köpare/Säljare</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1300"/>
+        <location filename="../src/bricklink/order.cpp" line="1317"/>
         <source>Items</source>
         <translation>Artiklar</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1301"/>
+        <location filename="../src/bricklink/order.cpp" line="1318"/>
         <source>Lots</source>
         <translation>Poster</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1302"/>
+        <location filename="../src/bricklink/order.cpp" line="1319"/>
         <source>Total</source>
         <translation>Totalt</translation>
     </message>
@@ -3048,37 +3048,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>%v / %m</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="169"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="173"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="170"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="174"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan efter linjer som innehåller följande ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="172"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="176"/>
         <source>Show</source>
         <translation>Visa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="173"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="226"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="230"/>
         <source>Last updated %1</source>
         <translation>Senaste uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="232"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
         <source>Currently updating carts</source>
         <translation>Uppdaterar för nuvarande kundvagnarna</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="240"/>
         <source>Last update failed</source>
         <translation>Senaste uppdataring misslyckades</translation>
     </message>
@@ -3346,7 +3346,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="11"/>
-        <location filename="../src/desktop/importorderdialog.cpp" line="239"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="243"/>
         <source>Import Order</source>
         <translation>Importera Order</translation>
     </message>
@@ -3366,62 +3366,62 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>Lagd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="209"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="210"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
         <source>Import combined</source>
         <translation>Importera tillsammans</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="211"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan för att hitta orderlinjer innehålande dessa ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
         <source>Show order information</source>
         <translation>Visa order information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="218"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="240"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="244"/>
         <source>You have selected multiple orders with differing currencies, which cannot be combined as-is.</source>
         <translation>Du har markerat flera ordrar med olika valutor, vilket inte kan slås ihop.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="242"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
         <source>Do you want to continue and convert all prices to your default currency (%1)?</source>
         <translation>Vill du fortsätta och konvertera alla priser till din standard valuta (%1)?</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="271"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="275"/>
         <source>Batch</source>
         <translation>Delorder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="292"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="296"/>
         <source>Multiple Orders</source>
         <translation>Flera ordrar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="340"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="344"/>
         <source>Last updated %1</source>
         <translation>Senast uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="346"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
         <source>Currently updating orders</source>
         <translation>Uppdatering av ordrar pågår</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="354"/>
         <source>Last update failed</source>
         <translation>Senaste uppdateringen misslyckades</translation>
     </message>
@@ -3449,37 +3449,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>%v / %m</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="169"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="173"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="170"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="174"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan på orderlinjer som innehåller desssa ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="172"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="176"/>
         <source>Show</source>
         <translation>Visa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="173"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="224"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="228"/>
         <source>Last updated %1</source>
         <translation>Senast uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="230"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
         <source>Currently updating wanted lists</source>
         <translation>Uppdatering av önskelistor pågår</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="238"/>
         <source>Last update failed</source>
         <translation>Senaste uppdateringen misslyckades</translation>
     </message>
@@ -3916,82 +3916,82 @@ Högerklicka: Meny</translation>
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="596"/>
+        <location filename="../src/bricklink/order.cpp" line="613"/>
         <source>Unknown</source>
         <translation>Okänd</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="597"/>
+        <location filename="../src/bricklink/order.cpp" line="614"/>
         <source>Pending</source>
         <translation>I väntan på</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="598"/>
+        <location filename="../src/bricklink/order.cpp" line="615"/>
         <source>Updated</source>
         <translation>Uppdaterad</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="599"/>
+        <location filename="../src/bricklink/order.cpp" line="616"/>
         <source>Processing</source>
         <translation>Bearbetning</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="600"/>
+        <location filename="../src/bricklink/order.cpp" line="617"/>
         <source>Ready</source>
         <translation>Klar</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="601"/>
+        <location filename="../src/bricklink/order.cpp" line="618"/>
         <source>Paid</source>
         <translation>Betald</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="602"/>
+        <location filename="../src/bricklink/order.cpp" line="619"/>
         <source>Packed</source>
         <translation>Packad</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="603"/>
+        <location filename="../src/bricklink/order.cpp" line="620"/>
         <source>Shipped</source>
         <translation>Skickad</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="604"/>
+        <location filename="../src/bricklink/order.cpp" line="621"/>
         <source>Received</source>
         <translation>Mottagen</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="605"/>
+        <location filename="../src/bricklink/order.cpp" line="622"/>
         <source>Completed</source>
         <translation>Avslutad</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="606"/>
+        <location filename="../src/bricklink/order.cpp" line="623"/>
         <source>OCR</source>
         <translation>OCR (Begäran om att avbryta order)</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="607"/>
+        <location filename="../src/bricklink/order.cpp" line="624"/>
         <source>NPB</source>
         <translation>NPB (Ej betalande kund)</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="608"/>
+        <location filename="../src/bricklink/order.cpp" line="625"/>
         <source>NPX</source>
         <translation>NPX (Ej betalnde kund, där kund vill ta bort ordern)</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="609"/>
+        <location filename="../src/bricklink/order.cpp" line="626"/>
         <source>NRS</source>
         <translation>NRS (Säljare som inte svarar)</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="610"/>
+        <location filename="../src/bricklink/order.cpp" line="627"/>
         <source>NSS</source>
         <translation>NSS (Säljare som inte skickar)</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="611"/>
+        <location filename="../src/bricklink/order.cpp" line="628"/>
         <source>Cancelled</source>
         <translation>Avbruten</translation>
     </message>
@@ -4465,7 +4465,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>QDialogButtonBox</name>
     <message>
-        <location filename="../src/desktop/desktopuihelpers_p.h" line="171"/>
+        <location filename="../src/desktop/desktopuihelpers_p.h" line="174"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>

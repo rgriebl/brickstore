@@ -1531,12 +1531,12 @@
 <context>
     <name>BrickLink::Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="691"/>
+        <location filename="../src/bricklink/order.cpp" line="708"/>
         <source>Address not available</source>
         <translation>Adresse ist nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="707"/>
+        <location filename="../src/bricklink/order.cpp" line="724"/>
         <source>Cannot write order address to cache</source>
         <translation>Konnte Adresse zur Bestellung nicht in den Cache schreiben</translation>
     </message>
@@ -1545,67 +1545,67 @@
         <translation type="vanished">Konnte Bestellung nicht in eine Datei speichern</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="739"/>
+        <location filename="../src/bricklink/order.cpp" line="756"/>
         <source>Cannot write order XML to cache</source>
         <translation>Konnte die XML Daten der Bestellung nicht in den Cache schreiben</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="750"/>
+        <location filename="../src/bricklink/order.cpp" line="767"/>
         <source>Could not parse the received order XML data</source>
         <translation>Konnte XML Daten nicht verarbeiten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1180"/>
+        <location filename="../src/bricklink/order.cpp" line="1197"/>
         <source>Cannot open order XML</source>
         <translation>Konnte die XML Daten der Bestellung nicht laden</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1222"/>
+        <location filename="../src/bricklink/order.cpp" line="1239"/>
         <source>Received</source>
         <translation>Erhalten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1222"/>
+        <location filename="../src/bricklink/order.cpp" line="1239"/>
         <source>Placed</source>
         <translation>Getätigt</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1295"/>
+        <location filename="../src/bricklink/order.cpp" line="1312"/>
         <source>Date</source>
         <translation>Datum</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1296"/>
+        <location filename="../src/bricklink/order.cpp" line="1313"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1297"/>
+        <location filename="../src/bricklink/order.cpp" line="1314"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1298"/>
+        <location filename="../src/bricklink/order.cpp" line="1315"/>
         <source>Order ID</source>
         <translation>Bestellnr.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1299"/>
+        <location filename="../src/bricklink/order.cpp" line="1316"/>
         <source>Buyer/Seller</source>
         <translation>Käufer/Verkäufer</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1300"/>
+        <location filename="../src/bricklink/order.cpp" line="1317"/>
         <source>Items</source>
         <translation>Teile</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1301"/>
+        <location filename="../src/bricklink/order.cpp" line="1318"/>
         <source>Lots</source>
         <translation>Posten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="1302"/>
+        <location filename="../src/bricklink/order.cpp" line="1319"/>
         <source>Total</source>
         <translation>Gesamt</translation>
     </message>
@@ -3569,27 +3569,27 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Warenkorb in Shop %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="169"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="173"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="170"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="174"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="172"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="176"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="173"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="240"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -3602,12 +3602,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">%1 Posten des Warenkorbs konnten nicht importiert werden.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="226"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="230"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="232"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
         <source>Currently updating carts</source>
         <translation>Warenkörbe werden aktualisiert</translation>
     </message>
@@ -3967,17 +3967,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Betrag</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="209"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="210"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
         <source>Import combined</source>
         <translation>Zusammen importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="211"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
@@ -3986,18 +3986,18 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="218"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="11"/>
-        <location filename="../src/desktop/importorderdialog.cpp" line="239"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="243"/>
         <source>Import Order</source>
         <translation>Bestellung Import</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="354"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -4018,37 +4018,37 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Konnte Bestellung %1 nicht importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
         <source>Show order information</source>
         <translation>Zeige Bestellinfos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="240"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="244"/>
         <source>You have selected multiple orders with differing currencies, which cannot be combined as-is.</source>
         <translation>Es sind mehrere Bestellungen mit unterschiedlichen Währung ausgewählt, die so nicht zusammen importiert werden können.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="242"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
         <source>Do you want to continue and convert all prices to your default currency (%1)?</source>
         <translation>Sollen zum Weitermachen alle Preise in deine Standardwährung (%1) konvertiert werden?</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="271"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="275"/>
         <source>Batch</source>
         <translation>Charge</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="292"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="296"/>
         <source>Multiple Orders</source>
         <translation>Mehrere Bestellungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="340"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="344"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="346"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
         <source>Currently updating orders</source>
         <translation>Bestellungen werden aktualisiert</translation>
     </message>
@@ -4091,32 +4091,32 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>%1 Teile fehlen, %2% erledigt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="169"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="173"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="170"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="174"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="172"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="176"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="173"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="224"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="228"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="230"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
         <source>Currently updating wanted lists</source>
         <translation>Suchlisten werden aktualisiert</translation>
     </message>
@@ -4125,7 +4125,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Suchlisten werden aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="238"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -4619,82 +4619,82 @@ Rechts-Click: Menü</translation>
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="596"/>
+        <location filename="../src/bricklink/order.cpp" line="613"/>
         <source>Unknown</source>
         <translation>Unknown</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="597"/>
+        <location filename="../src/bricklink/order.cpp" line="614"/>
         <source>Pending</source>
         <translation>Pending</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="598"/>
+        <location filename="../src/bricklink/order.cpp" line="615"/>
         <source>Updated</source>
         <translation>Updated</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="599"/>
+        <location filename="../src/bricklink/order.cpp" line="616"/>
         <source>Processing</source>
         <translation>Processing</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="600"/>
+        <location filename="../src/bricklink/order.cpp" line="617"/>
         <source>Ready</source>
         <translation>Ready</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="601"/>
+        <location filename="../src/bricklink/order.cpp" line="618"/>
         <source>Paid</source>
         <translation>Paid</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="602"/>
+        <location filename="../src/bricklink/order.cpp" line="619"/>
         <source>Packed</source>
         <translation>Packed</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="603"/>
+        <location filename="../src/bricklink/order.cpp" line="620"/>
         <source>Shipped</source>
         <translation>Shipped</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="604"/>
+        <location filename="../src/bricklink/order.cpp" line="621"/>
         <source>Received</source>
         <translation>Erhalten</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="605"/>
+        <location filename="../src/bricklink/order.cpp" line="622"/>
         <source>Completed</source>
         <translation>Completed</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="606"/>
+        <location filename="../src/bricklink/order.cpp" line="623"/>
         <source>OCR</source>
         <translation>OCR</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="607"/>
+        <location filename="../src/bricklink/order.cpp" line="624"/>
         <source>NPB</source>
         <translation>NPB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="608"/>
+        <location filename="../src/bricklink/order.cpp" line="625"/>
         <source>NPX</source>
         <translation>NPX</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="609"/>
+        <location filename="../src/bricklink/order.cpp" line="626"/>
         <source>NRS</source>
         <translation>NRS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="610"/>
+        <location filename="../src/bricklink/order.cpp" line="627"/>
         <source>NSS</source>
         <translation>NSS</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="611"/>
+        <location filename="../src/bricklink/order.cpp" line="628"/>
         <source>Cancelled</source>
         <translation>Cancelled</translation>
     </message>
@@ -5172,7 +5172,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>QDialogButtonBox</name>
     <message>
-        <location filename="../src/desktop/desktopuihelpers_p.h" line="171"/>
+        <location filename="../src/desktop/desktopuihelpers_p.h" line="174"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
