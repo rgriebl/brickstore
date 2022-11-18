@@ -342,4 +342,9 @@ QQmlContext *Script::qmlContext() const
     return m_context;
 }
 
+QQmlComponent *Script::qmlComponent() const
+{
+    return m_component;
+}
+
 #include "moc_script.cpp"

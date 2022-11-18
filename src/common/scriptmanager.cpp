@@ -300,6 +300,8 @@ void ScriptManager::loadScript(const QString &fileName)
 
     auto script = static_cast<Script *>(root.release());
     script->m_fileName = fileName;
+
+    // the Script cannot own these, as they have to be deleted, AFTER the Script object
     script->m_context = ctx;
     script->m_component = comp;
 
@@ -345,8 +347,15 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
 
 void ScriptManager::clearScripts()
 {
-    qDeleteAll(m_scripts);
+    for (auto *script : std::as_const(m_scripts)) {
+        auto ctx = script->qmlContext();
+        auto comp = script->qmlComponent();
+        delete script;
+        delete ctx;
+        delete comp;
+    }
     m_scripts.clear();
+    m_engine->clearComponentCache();
 }
 
 #include "moc_scriptmanager.cpp"

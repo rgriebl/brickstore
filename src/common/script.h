@@ -110,18 +110,7 @@ class Script : public QQuickItem
     Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
     Q_PROPERTY(QString version READ version WRITE setVersion NOTIFY versionChanged)
 
-    Q_PROPERTY(Type type READ type WRITE setType) // deprecated as of 2022.1.1, never been actually used
-
 public:
-    enum class Type { // deprecated as of 2022.1.1, never been actually used
-        ExtensionScript,
-        PrintingScript,
-    };
-    Q_ENUM(Type)
-
-    Type type() const { return Type::ExtensionScript; }
-    void setType(Type) { qmlInfo(this) << "the 'type' property is deprecated and should be removed"; }
-
     QString name() const;
     QString author() const;
     void setName(QString name);
@@ -143,6 +132,8 @@ signals:
     void versionChanged(QString version);
 
 private:
+    QQmlComponent *qmlComponent() const;
+
     QString m_name;
     QString m_author;
     QString m_version;
