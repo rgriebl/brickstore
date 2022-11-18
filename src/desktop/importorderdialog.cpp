@@ -166,6 +166,9 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
+    ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/ListState"_qs).toByteArray();
+    if (!ba.isEmpty())
+        w_orders->header()->restoreState(ba);
 
     setFocusProxy(w_filter);
 }
@@ -175,6 +178,7 @@ ImportOrderDialog::~ImportOrderDialog()
     Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/DaysBack"_qs, w_daysBack->value());
     Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Filter"_qs, w_filter->saveState());
+    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/ListState"_qs, w_orders->header()->saveState());
 }
 
 void ImportOrderDialog::keyPressEvent(QKeyEvent *e)

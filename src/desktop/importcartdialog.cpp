@@ -127,6 +127,9 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
     ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
+    ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/ListState"_qs).toByteArray();
+    if (!ba.isEmpty())
+        w_carts->header()->restoreState(ba);
 
     setFocusProxy(w_filter);
 }
@@ -135,6 +138,7 @@ ImportCartDialog::~ImportCartDialog()
 {
     Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Filter"_qs, w_filter->saveState());
+    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/ListState"_qs, w_carts->header()->saveState());
 }
 
 void ImportCartDialog::keyPressEvent(QKeyEvent *e)
