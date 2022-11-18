@@ -358,7 +358,7 @@ Script {
                       item.color.name)
 
         page.drawText(ps.x + xs(ps.w, 111), y, xs(ps.w, 6), h, PrintPage.AlignCenter,
-                      item.condition == BrickLink.Used ? "U" : "N")
+                      item.condition == BrickLink.Condition.Used ? "U" : "N")
         page.drawText(ps.x + xs(ps.w, 117), y, xs(ps.w, 12), h, PrintPage.AlignRight | PrintPage.AlignVCenter,
                       item.quantity)
         page.drawText(ps.x + xs(ps.w, 129), y, xs(ps.w, 20), h, PrintPage.AlignRight | PrintPage.AlignVCenter,

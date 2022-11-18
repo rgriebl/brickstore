@@ -1,5 +1,6 @@
-import BrickStore 1.0
-import QtQuick 2.12
+import BrickStore
+import BrickLink
+import QtQuick
 
 Script {
     name: "Classic print script"
@@ -234,7 +235,7 @@ Script {
 
         page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h,
                       PrintPage.AlignHCenter | PrintPage.AlignVCenter,
-                      lot.condition == BrickLink.Used ? "Used" : "New")
+                      lot.condition == BrickLink.Condition.Used ? "Used" : "New")
         page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 85), h,
                       PrintPage.AlignLeft | PrintPage.AlignVCenter | PrintPage.TextWordWrap,
                       lot.color.name + " " + lot.name + " [" + lot.id + "]")

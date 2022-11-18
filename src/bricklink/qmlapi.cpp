@@ -23,7 +23,7 @@
 namespace BrickLink {
 
 /*! \qmltype Color
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents a BrickLink color.
 
@@ -121,7 +121,7 @@ QImage QmlColor::sampleImage(int width, int height) const
 
 
 /*! \qmltype ItemType
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents a BrickLink item type.
 
@@ -226,7 +226,7 @@ QVariantList QmlItemType::categories() const
 
 
 /*! \qmltype Category
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents a BrickLink item category.
 
@@ -263,7 +263,7 @@ QmlCategory::QmlCategory(const Category *cat)
 
 
 /*! \qmltype Item
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents a BrickLink item.
 
@@ -377,7 +377,7 @@ PartOutTraits QmlItem::partOutTraits() const
 
 
 /*! \qmltype Lot
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represent a lot in a document.
 
@@ -442,22 +442,22 @@ PartOutTraits QmlItem::partOutTraits() const
 
 /*! \qmlproperty Status Lot::status
     Represents the status of this lot. The Status enumeration has these values:
-    \value BrickLink.Include   The green checkmark in the UI.
-    \value BrickLink.Exclude   The red stop sign in the UI.
-    \value BrickLink.Extra     The blue plus sign in the UI.
+    \value BrickLink.Status.Include   The green checkmark in the UI.
+    \value BrickLink.Status.Exclude   The red stop sign in the UI.
+    \value BrickLink.Status.Extra     The blue plus sign in the UI.
 */
 /*! \qmlproperty Condition Lot::condition
     Describes the condition of this lot. The Condition enumeration has these values:
-    \value BrickLink.New    The items in this lot are new.
-    \value BrickLink.Used   The items in this lot are used.
+    \value BrickLink.Condition.New    The items in this lot are new.
+    \value BrickLink.Condition.Used   The items in this lot are used.
 */
 /*! \qmlproperty SubCondition Lot::subCondition
     Describes the sub-condition of this lot, if it represents a set. The SubCondition enumeration
     has these values:
-    \value BrickLink.None         No sub-condition is set.
-    \value BrickLink.Complete     The set is complete.
-    \value BrickLink.Incomplete   The set is not complete.
-    \value BrickLink.Sealed       The set is still sealed.
+    \value BrickLink.SubCondition.None         No sub-condition is set.
+    \value BrickLink.SubCondition.Complete     The set is complete.
+    \value BrickLink.SubCondition.Incomplete   The set is not complete.
+    \value BrickLink.SubCondition.Sealed       The set is still sealed.
 */
 
 /*! \qmlproperty string Lot::comments
@@ -522,10 +522,10 @@ PartOutTraits QmlItem::partOutTraits() const
 /*! \qmlproperty Stockroom Lot::stockroom
     Describes if and in which stockroom this lot is located. The Stockroom enumeration has these
     values:
-    \value BrickLink.None  Not in a stockroom.
-    \value BrickLink.A     In stockroom \c A.
-    \value BrickLink.B     In stockroom \c B.
-    \value BrickLink.C     In stockroom \c C.
+    \value BrickLink.Stockroom.None  Not in a stockroom.
+    \value BrickLink.Stockroom.A     In stockroom \c A.
+    \value BrickLink.Stockroom.B     In stockroom \c B.
+    \value BrickLink.Stockroom.C     In stockroom \c C.
 */
 
 /*! \qmlproperty real Lot::totalWeight
@@ -660,7 +660,7 @@ Lot *QmlLot::get() const
 
 /*! \qmltype BrickLink
     \inherits QtObject
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief The core singleton managing the data transfer from and to BrickLink.
 

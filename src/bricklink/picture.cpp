@@ -158,7 +158,7 @@ void Picture::cancelUpdate()
 ///////////////////////////////////////////////////////////////////////
 
 /*! \qmltype Picture
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents a picture of a BrickLink item.
 
@@ -191,12 +191,12 @@ void Picture::cancelUpdate()
 /*! \qmlproperty UpdateStatus Picture::updateStatus
     \readonly
     Returns the current update status. The available values are:
-    \value BrickLink::Ok            The last picture load (or download) was successful.
-    \value BrickLink::Loading       BrickStore is currently loading the picture from the local cache.
-    \value BrickLink::Updating      BrickStore is currently downloading the picture from BrickLink.
-    \value BrickLink::UpdateFailed  The last download from BrickLink failed. isValid might still be
-                                    \c true, if there was a valid picture available before the
-                                    failed update!
+    \value BrickLink.UpdateStatus.Ok            The last picture load (or download) was successful.
+    \value BrickLink.UpdateStatus.Loading       BrickStore is currently loading the picture from the local cache.
+    \value BrickLink.UpdateStatus.Updating      BrickStore is currently downloading the picture from BrickLink.
+    \value BrickLink.UpdateStatus.UpdateFailed  The last download from BrickLink failed. isValid might still be
+                                                \c true, if there was a valid picture available before the
+                                                failed update!
 */
 /*! \qmlproperty bool Picture::isValid
     \readonly

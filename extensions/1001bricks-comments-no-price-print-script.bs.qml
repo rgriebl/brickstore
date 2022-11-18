@@ -227,7 +227,7 @@ Script {
         page. backgroundColor = "white"
         page. drawImage ( ps. x + 2, y, xs( ps. w, 15 ), h, item. image );
 
-        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, item. condition. used ? "Used" : "New" );
+        page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, item. condition == BrickLink.Condition.Used ? "Used" : "New" );
         page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, PrintPage.AlignLeft    | PrintPage.AlignVCenter | PrintPage.TextWordWrap, item. color. name + " " + item. name + " [" + item. id + "]" );
         page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, PrintPage.AlignHCenter | PrintPage.AlignVCenter, item. quantity );
         page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ), h, PrintPage.AlignLeft   | PrintPage.AlignVCenter, item. comments );

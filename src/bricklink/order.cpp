@@ -73,7 +73,7 @@ private:
 };
 
 /*! \qmltype Order
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This type holds the information about a BrickLink order.
 */
@@ -84,8 +84,8 @@ private:
 /*! \qmlproperty enumeration Order::type
     \readonly
     The type of order. The possible values are:
-    \value BrickLink.Received  A received order.
-    \value BrickLink.Placed    A placed order.
+    \value BrickLink.OrderType.Received  A received order.
+    \value BrickLink.OrderType.Placed    A placed order.
 */
 /*! \qmlproperty date Order::date
     \readonly
@@ -148,6 +148,23 @@ private:
 */
 /*! \qmlproperty enumeration Order::status
     \readonly
+    The status of the order. Can be one of:
+    \value BrickLink.OrderStatus.Unknown
+    \value BrickLink.OrderStatus.Pending
+    \value BrickLink.OrderStatus.Updated
+    \value BrickLink.OrderStatus.Processing
+    \value BrickLink.OrderStatus.Ready
+    \value BrickLink.OrderStatus.Paid
+    \value BrickLink.OrderStatus.Packed
+    \value BrickLink.OrderStatus.Shipped
+    \value BrickLink.OrderStatus.Received
+    \value BrickLink.OrderStatus.Completed
+    \value BrickLink.OrderStatus.OCR
+    \value BrickLink.OrderStatus.NPB
+    \value BrickLink.OrderStatus.NPX
+    \value BrickLink.OrderStatus.NRS
+    \value BrickLink.OrderStatus.NSS
+    \value BrickLink.OrderStatus.Cancelled
 */
 /*! \qmlproperty string Order::paymentType
     \readonly

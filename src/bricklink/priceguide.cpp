@@ -240,7 +240,7 @@ void PriceGuide::cancelUpdate()
 ///////////////////////////////////////////////////////////////////////
 
 /*! \qmltype PriceGuide
-    \inqmlmodule BrickStore
+    \inqmlmodule BrickLink
     \ingroup qml-api
     \brief This value type represents the price guide for a BrickLink item.
 
@@ -256,18 +256,18 @@ void PriceGuide::cancelUpdate()
     The following three enumerations are used to retrieve the price guide data from this object:
 
     \b Time
-    \value BrickLink.PastSix   The sales in the last six months.
-    \value BrickLink.Current   The items currently for sale.
+    \value BrickLink.Time.PastSix   The sales in the last six months.
+    \value BrickLink.Time.Current   The items currently for sale.
 
     \b Condition
-    \value BrickLink.New       Only items in new condition.
-    \value BrickLink.Used      Only items in used condition.
+    \value BrickLink.Condition.New       Only items in new condition.
+    \value BrickLink.Condition.Used      Only items in used condition.
 
     \b Price
-    \value BrickLink.Lowest    The lowest price.
-    \value BrickLink.Average   The average price.
-    \value BrickLink.WAverage  The weighted average price.
-    \value BrickLink.Highest   The highest price.
+    \value BrickLink.Price.Lowest    The lowest price.
+    \value BrickLink.Price.Average   The average price.
+    \value BrickLink.Price.WAverage  The weighted average price.
+    \value BrickLink.Price.Highest   The highest price.
 
 */
 /*! \qmlproperty bool PriceGuide::isNull
@@ -290,12 +290,12 @@ void PriceGuide::cancelUpdate()
 /*! \qmlproperty UpdateStatus PriceGuide::updateStatus
     \readonly
     Returns the current update status. The available values are:
-    \value BrickLink.Ok            The last picture load (or download) was successful.
-    \value BrickLink.Loading       BrickStore is currently loading the picture from the local cache.
-    \value BrickLink.Updating      BrickStore is currently downloading the picture from BrickLink.
-    \value BrickLink.UpdateFailed  The last download from BrickLink failed. isValid might still be
-                                   \c true, if there was a valid picture available before the failed
-                                   update!
+    \value BrickLink.UpdateStatus.Ok            The last picture load (or download) was successful.
+    \value BrickLink.UpdateStatus.Loading       BrickStore is currently loading the picture from the local cache.
+    \value BrickLink.UpdateStatus.Updating      BrickStore is currently downloading the picture from BrickLink.
+    \value BrickLink.UpdateStatus.UpdateFailed  The last download from BrickLink failed. isValid might still be
+                                                \c true, if there was a valid picture available before the failed
+                                                update!
 */
 /*! \qmlproperty bool PriceGuide::isValid
     \readonly
