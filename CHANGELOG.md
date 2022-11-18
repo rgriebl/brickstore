@@ -10,7 +10,11 @@ New features:
 Fixes:
 - Rendering some 3D parts with an excessive amount of lines could crash due to an out-of-memory in the 3D pipeline (the stud alone on a 48x48 baseplate consist of more than 300,000 lines).
 - Fixed some glitches in the Add Item dialog's new browse history.
+- The `Reload User Scripts` command would sometimes not reload scripts.
+- Column widths in all the import dialogs are now saved and restored.
 
+Changes to the scripting interface:
+- The current JavaScript engine handles scoped enumerations correctly now, but both the documentation and the example scripts have been using the unscoped values, which are just *undefined* nowadays. Please adapt your scripts accordingly (e.g. `BrickLink.Used` needs to be `BrickLink.Condition.Used` now). See also [the documentation here](https://rgriebl.github.io/brickstore/extensions/).
 
 ## [2022.11.1] - 2022-11-08
 
