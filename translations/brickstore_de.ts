@@ -4248,7 +4248,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="198"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="199"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -6978,7 +6978,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>WelcomeButton</name>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="110"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="112"/>
         <source>Shortcut:</source>
         <translation>Tastenkürzel:</translation>
     </message>
@@ -6986,30 +6986,30 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>WelcomeWidget</name>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="393"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="446"/>
         <source>version %1 (build: %2)</source>
         <translation>Version %1 (Build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="395"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="448"/>
         <source>Using a database that was generated %1</source>
         <translation>Die aktuelle Datenbank wurde %1 generiert</translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="192"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="401"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="454"/>
         <source>Open recent files</source>
         <translation>Zuletzt geöffnete Dateien</translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="141"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="402"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="455"/>
         <source>Document</source>
         <translation>Dokumente</translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="151"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="403"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="456"/>
         <source>Import items</source>
         <translation>Teile importieren</translation>
     </message>
@@ -7020,7 +7020,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="211"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="408"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="461"/>
         <source>No recent files</source>
         <translation>Keine zuletzt geöffneten Dateien</translation>
     </message>

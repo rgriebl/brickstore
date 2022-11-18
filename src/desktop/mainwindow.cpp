@@ -468,11 +468,8 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::createCentralWidget()
 {
-    m_welcomeWidget = new WelcomeWidget(this);
-    m_welcomeWidget->setAutoFillBackground(true);
-    m_welcomeWidget->hide();
-
     auto *rootSplitter = new QSplitter();
+
     rootSplitter->setObjectName(u"RootSplitter"_qs);
     auto *vp = createViewPane(nullptr, this);
     rootSplitter->addWidget(vp);
@@ -490,6 +487,9 @@ void MainWindow::createCentralWidget()
             }
         }
     });
+
+    m_welcomeWidget = new WelcomeWidget(this);
+    m_welcomeWidget->setAutoFillBackground(true);
 }
 
 void MainWindow::setActiveViewPane(ViewPane *newActive)
@@ -565,11 +565,11 @@ void MainWindow::goHome(bool home)
 {
     if (home) {
         repositionHomeWidget();
-        m_welcomeWidget->show();
+        m_welcomeWidget->fadeIn();
         m_welcomeWidget->setFocus();
         connectView(nullptr);
     } else {
-        m_welcomeWidget->hide();
+        m_welcomeWidget->fadeOut();
         if (View *v = m_activeViewPane ? m_activeViewPane->activeView() : nullptr) {
             v->setFocus();
             connectView(v);

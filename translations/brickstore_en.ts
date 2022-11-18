@@ -3551,7 +3551,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="198"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="199"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -5844,7 +5844,7 @@ If you do not want to save your password, then just leave this field empty and y
 <context>
     <name>WelcomeButton</name>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="110"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="112"/>
         <source>Shortcut:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5853,35 +5853,35 @@ If you do not want to save your password, then just leave this field empty and y
     <name>WelcomeWidget</name>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="192"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="401"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="454"/>
         <source>Open recent files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="141"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="402"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="455"/>
         <source>Document</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="151"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="403"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="456"/>
         <source>Import items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="211"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="408"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="461"/>
         <source>No recent files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="393"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="446"/>
         <source>version %1 (build: %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="395"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="448"/>
         <source>Using a database that was generated %1</source>
         <translation type="unfinished"></translation>
     </message>

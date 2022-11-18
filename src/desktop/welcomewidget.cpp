@@ -28,6 +28,8 @@
 #include <QStyleFactory>
 #include <QStringBuilder>
 #include <QSizeGrip>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
@@ -290,6 +292,25 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
     , m_docIcon(u":/assets/generated-app-icons/brickstore_doc"_qs)
 {
+    m_effect = new QGraphicsOpacityEffect(this);
+    m_effect->setEnabled(false);
+    setGraphicsEffect(m_effect);
+
+    m_animation = new QPropertyAnimation(m_effect, "opacity");
+    m_animation->setDuration(200);
+
+    connect(m_animation, &QAbstractAnimation::stateChanged,
+            this, [this](QAbstractAnimation::State newState, QAbstractAnimation::State oldState) {
+        if ((newState == QAbstractAnimation::Running) && (oldState == QAbstractAnimation::Stopped)) {
+            m_effect->setEnabled(true);
+            show();
+        } else if (newState == QAbstractAnimation::Stopped) {
+            if (m_effect->opacity() == 0)
+                hide();
+            m_effect->setEnabled(false);
+        }
+    });
+
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 
     auto *layout = new QGridLayout();
@@ -379,6 +400,38 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
     languageChange();
     setLayout(layout);
+}
+
+void WelcomeWidget::fadeIn()
+{
+    fade(true);
+}
+
+void WelcomeWidget::fadeOut()
+{
+    fade(false);
+}
+
+void WelcomeWidget::fade(bool in)
+{
+    auto direction = in ? QAbstractAnimation::Forward : QAbstractAnimation::Backward;
+
+    if (!m_effect->isEnabled() && (in == isVisibleTo(parentWidget()))) {
+        return;
+    } else if (m_animation->state() == QAbstractAnimation::Running) {
+        if (m_animation->direction() == direction) {
+            return;
+        } else {
+            m_animation->pause();
+            m_animation->setDirection(direction);
+            m_animation->resume();
+        }
+    } else {
+        m_animation->setDirection(direction);
+        m_animation->setStartValue(0);
+        m_animation->setEndValue(1);
+        m_animation->start();
+    }
 }
 
 void WelcomeWidget::updateVersionsText()

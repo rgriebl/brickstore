@@ -1,5 +1,6 @@
-import BrickStore 1.0
-import QtQuick 2.12
+import BrickStore
+import BrickLink
+import QtQuick
 
 Script {
     name: "BrickForge invoice print script"

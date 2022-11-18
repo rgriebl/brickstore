@@ -3606,7 +3606,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="198"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="199"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -5949,7 +5949,7 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
 <context>
     <name>WelcomeButton</name>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="110"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="112"/>
         <source>Shortcut:</source>
         <translation>Genväg:</translation>
     </message>
@@ -5958,13 +5958,13 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     <name>WelcomeWidget</name>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="141"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="402"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="455"/>
         <source>Document</source>
         <translation>Dokument</translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="151"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="403"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="456"/>
         <source>Import items</source>
         <translation>Importera artiklar</translation>
     </message>
@@ -5975,23 +5975,23 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="192"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="401"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="454"/>
         <source>Open recent files</source>
         <translation>Öppna senaste filer</translation>
     </message>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="211"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="408"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="461"/>
         <source>No recent files</source>
         <translation>Inga senaste filer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="393"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="446"/>
         <source>version %1 (build: %2)</source>
         <translation>version %1 (build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="395"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="448"/>
         <source>Using a database that was generated %1</source>
         <translation>Anänder en databas som skapades %1</translation>
     </message>

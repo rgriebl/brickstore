@@ -51,6 +51,7 @@ class Announcements;
 class DeveloperConsole;
 class ViewPane;
 class LoadColumnLayoutMenuAdapter;
+class WelcomeWidget;
 
 
 class MainWindow : public QMainWindow
@@ -142,7 +143,7 @@ private:
     QPointer<ViewPane> m_activeViewPane;
     QMultiHash<QWidget *, ViewPane *> m_allViewPanes;
 
-    QWidget *m_welcomeWidget;
+    WelcomeWidget *m_welcomeWidget;
     QStringListModel *m_favoriteFilters;
     QByteArray m_defaultDockState;
 

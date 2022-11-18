@@ -14,12 +14,12 @@
 #pragma once
 
 #include <QWidget>
-#include <QQuickView>
 
 #include "bricklink/color.h"
 #include "bricklink/item.h"
 
 QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
+QT_FORWARD_DECLARE_CLASS(QQuickView)
 
 
 namespace LDraw {

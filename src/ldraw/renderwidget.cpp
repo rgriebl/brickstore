@@ -15,6 +15,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtGui/QHelpEvent>
 #include <QtQuick3D/QQuick3D>
+#include <QtQuick/QQuickView>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
 
