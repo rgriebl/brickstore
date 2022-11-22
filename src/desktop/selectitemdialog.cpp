@@ -87,8 +87,8 @@ void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)
 
 void SelectItemDialog::setItem(const BrickLink::Item *item)
 {
-    w_si->setCurrentItem(item, true);
     w_si->clearFilter();
+    w_si->setCurrentItem(item, true);
 }
 
 const BrickLink::Item *SelectItemDialog::item() const

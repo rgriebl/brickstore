@@ -729,6 +729,7 @@ void SelectItem::setZoomFactor(double zoom)
 void SelectItem::clearFilter()
 {
     d->w_filter->clear();
+    applyFilter();
 }
 
 void SelectItem::setFilterFavoritesModel(QStringListModel *model)

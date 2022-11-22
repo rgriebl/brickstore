@@ -943,6 +943,7 @@ QByteArray AddItemDialog::saveBrowseState() const
     for (int i = 0; i < m_browseStack.size(); ++i)
         saveBrowseHistoryEntry(dsCompressed, m_browseStack.at(i));
 
+    ds << qCompress(compressedHistory, 9);
     return ba;
 }
 
