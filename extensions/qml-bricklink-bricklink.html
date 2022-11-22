@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- qmlapi.cpp -->
+  <title>BrickLink QML Type | BrickStore Extensions</title>
+  <link rel="stylesheet" type="text/css" href="style/extensions.css" />
+</head>
+<body>
+<div class="main">
+<div class="main-rounded">
+<div class="navigationbar">
+    <ul>
+<li><a href="index.html">BrickStore Extensions</a></li>
+<li><a href="qml-bricklink-bricklink.html">BrickLink</a></li>
+<li>BrickLink</li>
+    </ul>
+</div>
+<div class="content">
+    <div class="line">
+        <div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="context">
+<h1 class="title">BrickLink QML Type</h1>
+<!-- $$$BrickLink-brief -->
+<p>The core singleton managing the data transfer from and to BrickLink. <a href="#details">More...</a></p>
+<!-- @@@BrickLink -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickLink 1.0</td></tr></table></div><ul>
+<li><a href="qml-bricklink-bricklink-members.html">List of all members, including inherited members</a></li>
+</ul>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><a href="qml-bricklink-bricklink.html#noColor-prop">noColor</a></b> : Color</li>
+<li class="fn"><b><a href="qml-bricklink-bricklink.html#noItem-prop">noItem</a></b> : Item</li>
+<li class="fn"><b><a href="qml-bricklink-bricklink.html#noLot-prop">noLot</a></b> : Lot</li>
+</ul>
+<h2 id="signals">Signals</h2>
+<ul>
+<li class="fn"><b><a href="qml-bricklink-bricklink.html#pictureUpdated-signal">pictureUpdated</a></b>(Picture <i>picture</i>)</li>
+<li class="fn"><b><a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">priceGuideUpdated</a></b>(PriceGuide <i>priceGuide</i>)</li>
+</ul>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">Category <b><a href="qml-bricklink-bricklink.html#category-method-1">category</a></b>(int <i>categoryId</i>)</li>
+<li class="fn">Category <b><a href="qml-bricklink-bricklink.html#category-method">category</a></b>(var <i>category</i>)</li>
+<li class="fn">Color <b><a href="qml-bricklink-bricklink.html#color-method-2">color</a></b>(uint <i>colorId</i>)</li>
+<li class="fn">Color <b><a href="qml-bricklink-bricklink.html#color-method-1">color</a></b>(string <i>colorName</i>)</li>
+<li class="fn">Color <b><a href="qml-bricklink-bricklink.html#color-method">color</a></b>(var <i>color</i>)</li>
+<li class="fn">Color <b><a href="qml-bricklink-bricklink.html#colorFromLDrawId-method">colorFromLDrawId</a></b>(int <i>colorId</i>)</li>
+<li class="fn">Item <b><a href="qml-bricklink-bricklink.html#item-method">item</a></b>(string <i>itemTypeId</i>, string <i>itemId</i>)</li>
+<li class="fn">Item <b><a href="qml-bricklink-bricklink.html#itemType-method-2">itemType</a></b>(var <i>item</i>)</li>
+<li class="fn">ItemType <b><a href="qml-bricklink-bricklink.html#itemType-method-1">itemType</a></b>(string <i>itemTypeId</i>)</li>
+<li class="fn">ItemType <b><a href="qml-bricklink-bricklink.html#itemType-method">itemType</a></b>(var <i>itemType</i>)</li>
+<li class="fn">Picture <b><a href="qml-bricklink-bricklink.html#largePicture-method">largePicture</a></b>(Item <i>item</i>, bool <i>highPriority</i>)</li>
+<li class="fn">Lot <b><a href="qml-bricklink-bricklink.html#lot-method">lot</a></b>(var <i>lot</i>)</li>
+<li class="fn">Image <b><a href="qml-bricklink-bricklink.html#noImage-method">noImage</a></b>(int <i>width</i>, int <i>height</i>)</li>
+<li class="fn">Picture <b><a href="qml-bricklink-bricklink.html#picture-method">picture</a></b>(Item <i>item</i>, Color <i>color</i>, bool <i>highPriority</i>)</li>
+<li class="fn">PriceGuide <b><a href="qml-bricklink-bricklink.html#priceGuide-method">priceGuide</a></b>(Item <i>item</i>, Color <i>color</i>, bool <i>highPriority</i>)</li>
+</ul>
+<!-- $$$BrickLink-description -->
+<h2 id="details">Detailed Description</h2>
+<p>This singleton is responsible for handling all communications with the BrickLink servers, as well as giving access to the BrickLink item catalog, which is available through these types:</p>
+<ul>
+<li><a href="qml-bricklink-itemtype.html">ItemType</a></li>
+<li><a href="qml-bricklink-category.html">Category</a></li>
+<li><a href="qml-bricklink-color.html">Color</a></li>
+<li><a href="qml-bricklink-item.html">Item</a></li>
+<li><a href="qml-bricklink-picture.html">Picture</a></li>
+<li><a href="qml-bricklink-priceguide.html">PriceGuide</a></li>
+</ul>
+<!-- @@@BrickLink -->
+<h2>Property Documentation</h2>
+<!-- $$$noColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="noColor-prop">
+<td class="tblQmlPropNode"><p>
+<span class="qmlextra">[read-only] </span><span class="name">noColor</span> : <span class="type"><a href="qml-bricklink-color.html">Color</a></span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>A special <a href="qml-bricklink-color.html">Color</a> object denoting an invalid color. The object's <a href="qml-bricklink-color.html#isNull-prop">Color::isNull</a> returns <code>true</code>. Used as a return value for functions that can fail.</p>
+</div></div><!-- @@@noColor -->
+<br/>
+<!-- $$$noItem -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="noItem-prop">
+<td class="tblQmlPropNode"><p>
+<span class="qmlextra">[read-only] </span><span class="name">noItem</span> : <span class="type"><a href="qml-bricklink-item.html">Item</a></span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>A special Item object denoting an invalid item. The object's <a href="qml-bricklink-item.html#isNull-prop">Item::isNull</a> returns <code>true</code>. Used as a return value for functions that can fail.</p>
+</div></div><!-- @@@noItem -->
+<br/>
+<!-- $$$noLot -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="noLot-prop">
+<td class="tblQmlPropNode"><p>
+<span class="qmlextra">[read-only] </span><span class="name">noLot</span> : <span class="type"><a href="qml-bricklink-lot.html">Lot</a></span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>A special <a href="qml-bricklink-lot.html">Lot</a> object denoting an invalid lot. The object's <a href="qml-bricklink-lot.html#isNull-prop">Lot::isNull</a> returns <code>true</code>. Used as a return value for functions that can fail.</p>
+</div></div><!-- @@@noLot -->
+<br/>
+<h2>Signal Documentation</h2>
+<!-- $$$pictureUpdated[overload1]$$$pictureUpdatedPicture -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="pictureUpdated-signal">
+<td class="tblQmlFuncNode"><p>
+<span class="name">pictureUpdated</span>(<span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <i>picture</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This signal is emitted everytime the state of the <i>picture</i> object changes. Receiving this signal doesn't mean the picture is available: you have to check the object's properties to see what has changed.</p>
+<p><b>Note: </b>The corresponding handler is <code>onPictureUpdated</code>.</p>
+</div></div><!-- @@@pictureUpdated -->
+<br/>
+<!-- $$$priceGuideUpdated[overload1]$$$priceGuideUpdatedPriceGuide -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="priceGuideUpdated-signal">
+<td class="tblQmlFuncNode"><p>
+<span class="name">priceGuideUpdated</span>(<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <i>priceGuide</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This signal is emitted everytime the state of the <i>priceGuide</i> object changes. Receiving this signal doesn't mean the preice guide data is available: you have to check the object's properties to see what has changed.</p>
+<p><b>Note: </b>The corresponding handler is <code>onPriceGuideUpdated</code>.</p>
+</div></div><!-- @@@priceGuideUpdated -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$category$$$categoryint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="category-method-1">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-category.html">Category</a></span> <span class="name">category</span>(<span class="type">int</span> <i>categoryId</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a Category object corresponding to the given BrickLink <i>categoryId</i>. If there is no match, the returned object is noCategory.</p>
+</div></div><!-- @@@category -->
+<br/>
+<!-- $$$category[overload1]$$$categoryvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="category-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-category.html">Category</a></span> <span class="name">category</span>(<span class="type">var</span> <i>category</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Create a JavaScript Category wrapper for a C++ <code>BrickLink::Category *</code> <i>category</i> obtained from a data model.</p>
+</div></div><!-- @@@category -->
+<br/>
+<!-- $$$color$$$coloruint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="color-method-2">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-color.html">Color</a></span> <span class="name">color</span>(<span class="type">uint</span> <i>colorId</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a Color object corresponding to the given BrickLink <i>colorId</i>. If there is no match, the returned object is <a href="qml-bricklink-bricklink.html#noColor-prop">noColor</a>.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$color$$$colorstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="color-method-1">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-color.html">Color</a></span> <span class="name">color</span>(<span class="type">string</span> <i>colorName</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a Color object corresponding to the given BrickLink <i>colorName</i>. If there is no match, the returned object is <a href="qml-bricklink-bricklink.html#noColor-prop">noColor</a>.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$color[overload1]$$$colorvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="color-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-color.html">Color</a></span> <span class="name">color</span>(<span class="type">var</span> <i>color</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Create a JavaScript Color wrapper for a C++ <code>BrickLink::Color *</code> <i>color</i> obtained from a data model.</p>
+</div></div><!-- @@@color -->
+<br/>
+<!-- $$$colorFromLDrawId[overload1]$$$colorFromLDrawIdint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="colorFromLDrawId-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-color.html">Color</a></span> <span class="name">colorFromLDrawId</span>(<span class="type">int</span> <i>colorId</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns a Color object corresponding to the given LDraw <i>colorId</i>. If there is no match (or if a LDraw installation isn't available), the returned object is <a href="qml-bricklink-bricklink.html#noColor-prop">noColor</a>.</p>
+</div></div><!-- @@@colorFromLDrawId -->
+<br/>
+<!-- $$$item[overload1]$$$itemstringstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="item-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <span class="name">item</span>(<span class="type">string</span> <i>itemTypeId</i>, <span class="type">string</span> <i>itemId</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns an <a href="qml-bricklink-item.html">Item</a> object corresponding to the given BrickLink <i>itemTypeId</i> and <i>itemId</i>. If there is no match, the returned object is <a href="qml-bricklink-bricklink.html#noItem-prop">noItem</a>.</p>
+</div></div><!-- @@@item -->
+<br/>
+<!-- $$$itemType$$$itemTypevar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="itemType-method-2">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <span class="name">itemType</span>(<span class="type">var</span> <i>item</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Create a JavaScript Item wrapper for a C++ <code>BrickLink::Item *</code> <i>item</i> obtained from a data model.</p>
+</div></div><!-- @@@itemType -->
+<br/>
+<!-- $$$itemType$$$itemTypestring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="itemType-method-1">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-itemtype.html">ItemType</a></span> <span class="name">itemType</span>(<span class="type">string</span> <i>itemTypeId</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns an <a href="qml-bricklink-itemtype.html">ItemType</a> object corresponding to the given BrickLink <i>itemTypeId</i>. If there is no match, the returned object is noItemType.</p>
+<div class="admonition note">
+<p><b>Note: </b>The id is a single letter string and has to be one of <code>PCGIMOPS</code>.</p>
+</div>
+</div></div><!-- @@@itemType -->
+<br/>
+<!-- $$$itemType[overload1]$$$itemTypevar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="itemType-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-itemtype.html">ItemType</a></span> <span class="name">itemType</span>(<span class="type">var</span> <i>itemType</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Create a JavaScript <a href="qml-bricklink-itemtype.html">ItemType</a> wrapper for a C++ <code>BrickLink::ItemType *</code> <i>itemType</i> obtained from a data model.</p>
+</div></div><!-- @@@itemType -->
+<br/>
+<!-- $$$largePicture[overload1]$$$largePictureItembool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="largePicture-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <span class="name">largePicture</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Creates a Picture object that asynchronously loads (or downloads) the large picture for the given <i>item</i>. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
+<p><b>See also </b><a href="qml-bricklink-picture.html">Picture</a>.</p>
+</div></div><!-- @@@largePicture -->
+<br/>
+<!-- $$$lot[overload1]$$$lotvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="lot-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-lot.html">Lot</a></span> <span class="name">lot</span>(<span class="type">var</span> <i>lot</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Create a JavaScript Lot wrapper for a C++ <code>BrickLink::Lot *</code> <i>lot</i> obtained from a data model.</p>
+</div></div><!-- @@@lot -->
+<br/>
+<!-- $$$noImage[overload1]$$$noImageintint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="noImage-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type">Image</span> <span class="name">noImage</span>(<span class="type">int</span> <i>width</i>, <span class="type">int</span> <i>height</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns an image (sized <i>width</i> x <i>height</i>), which can be used in place of a missing item image.</p>
+</div></div><!-- @@@noImage -->
+<br/>
+<!-- $$$picture[overload1]$$$pictureItemColorbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="picture-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <span class="name">picture</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-picture.html">Picture</a> object that asynchronously loads (or downloads) the picture for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
+<p><b>See also </b><a href="qml-bricklink-picture.html">Picture</a>.</p>
+</div></div><!-- @@@picture -->
+<br/>
+<!-- $$$priceGuide[overload1]$$$priceGuideItemColorbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="priceGuide-method">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<p><b>See also </b><a href="qml-bricklink-priceguide.html">PriceGuide</a>.</p>
+</div></div><!-- @@@priceGuide -->
+<br/>
+</div>
+   <p class="copy-notice">
+   <acronym title="Copyright">&copy;</acronym> 2004-2022 Robert Griebl.
+   The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.
+   All trademarks are property of their respective owners.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -33,7 +33,9 @@
 <h2 id="writing-extensions">Writing Extensions</h2>
 <p>Your best bet is to start by cloning an existing extension to get all the needed boiler plate code.</p>
 <p>Extensions are based on <a href="https://doc.qt.io/qt-5/qmlreference.html">QML</a> and JavaScript. These QML types can be imported into your application or extension using the following import statement in your <code>.qml</code> file:</p>
-<pre class="cpp plain">import BrickStore 1.0</pre>
+<pre class="cpp plain">import BrickStore
+import BrickLink
+import QtQuick</pre>
 <p>Your root object is always <a href="qml-brickstore-script.html">Script</a> followed by one or more child elements of type <a href="qml-brickstore-printingscriptaction.html">PrintingScriptAction</a> and <a href="qml-brickstore-extensionscriptaction.html">ExtensionScriptAction</a>. All the other types can not be instantiated in a declarative way, but are instead provided to your extensions interface functions as parameters, or they can be dynamically created/retrieved via the global singletons <a href="qml-brickstore-brickstore.html">BrickStore</a> and BrickLink.</p>
 <p>These types are available to setup and manage an extension:</p>
 <div class="table"><table class="annotated">
@@ -43,17 +45,17 @@
 </table></div>
 <p>While the extension is active, you have acess to these types:</p>
 <div class="table"><table class="annotated">
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-bricklink.html">BrickLink</a></p></td><td class="tblDescr"><p>Core singleton managing the data transfer from and to BrickLink</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-bricklink.html">BrickLink</a></p></td><td class="tblDescr"><p>Core singleton managing the data transfer from and to BrickLink</p></td></tr>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-brickstore.html">BrickStore</a></p></td><td class="tblDescr"><p>This singleton represents global settings and state</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-category.html">Category</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item category</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-color.html">Color</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink color</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-category.html">Category</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item category</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-color.html">Color</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink color</p></td></tr>
 <tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-document.html">Document</a></p></td><td class="tblDescr"><p>Each instance of this type represents an open document</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-item.html">Item</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-itemtype.html">ItemType</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item type</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-lot.html">Lot</a></p></td><td class="tblDescr"><p>This value type represent a lot in a document</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-order.html">Order</a></p></td><td class="tblDescr"><p>This type holds the information about a BrickLink order</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-picture.html">Picture</a></p></td><td class="tblDescr"><p>This value type represents a picture of a BrickLink item</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-priceguide.html">PriceGuide</a></p></td><td class="tblDescr"><p>This value type represents the price guide for a BrickLink item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-item.html">Item</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-itemtype.html">ItemType</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item type</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-lot.html">Lot</a></p></td><td class="tblDescr"><p>This value type represent a lot in a document</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-order.html">Order</a></p></td><td class="tblDescr"><p>This type holds the information about a BrickLink order</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-picture.html">Picture</a></p></td><td class="tblDescr"><p>This value type represents a picture of a BrickLink item</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-priceguide.html">PriceGuide</a></p></td><td class="tblDescr"><p>This value type represents the price guide for a BrickLink item</p></td></tr>
 </table></div>
 <p>In addition to that, printing extensions also use these types:</p>
 <div class="table"><table class="annotated">

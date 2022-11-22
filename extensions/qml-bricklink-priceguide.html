@@ -12,7 +12,7 @@
 <div class="navigationbar">
     <ul>
 <li><a href="index.html">BrickStore Extensions</a></li>
-<li><a href="qml-brickstore-brickstore.html">BrickStore</a></li>
+<li><a href="qml-bricklink-bricklink.html">BrickLink</a></li>
 <li>PriceGuide</li>
     </ul>
 </div>
@@ -35,49 +35,49 @@
 <p>This value type represents the price guide for a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@PriceGuide -->
 <div class="table"><table class="alignedsummary">
-<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
-<li><a href="qml-brickstore-priceguide-members.html">List of all members, including inherited members</a></li>
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickLink 1.0</td></tr></table></div><ul>
+<li><a href="qml-bricklink-priceguide-members.html">List of all members, including inherited members</a></li>
 </ul>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#color-prop">color</a></b> : Color</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#isNull-prop">isNull</a></b> : bool</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#isValid-prop">isValid</a></b> : bool</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#item-prop">item</a></b> : Item</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#lastUpdated-prop">lastUpdated</a></b> : date</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#updateStatus-prop">updateStatus</a></b> : UpdateStatus</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#color-prop">color</a></b> : Color</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#isNull-prop">isNull</a></b> : bool</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#isValid-prop">isValid</a></b> : bool</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#item-prop">item</a></b> : Item</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#lastUpdated-prop">lastUpdated</a></b> : date</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#updateStatus-prop">updateStatus</a></b> : UpdateStatus</li>
 </ul>
 <h2 id="methods">Methods</h2>
 <ul>
-<li class="fn">int <b><a href="qml-brickstore-priceguide.html#lots-method">lots</a></b>(Time <i>time</i>, Condition <i>condition</i>)</li>
-<li class="fn">real <b><a href="qml-brickstore-priceguide.html#price-method">price</a></b>(Time <i>time</i>, Condition <i>condition</i>, Price <i>price</i>)</li>
-<li class="fn">int <b><a href="qml-brickstore-priceguide.html#quantity-method">quantity</a></b>(Time <i>time</i>, Condition <i>condition</i>)</li>
-<li class="fn"><b><a href="qml-brickstore-priceguide.html#update-method">update</a></b>(bool <i>highPriority</i>)</li>
+<li class="fn">int <b><a href="qml-bricklink-priceguide.html#lots-method">lots</a></b>(Time <i>time</i>, Condition <i>condition</i>)</li>
+<li class="fn">real <b><a href="qml-bricklink-priceguide.html#price-method">price</a></b>(Time <i>time</i>, Condition <i>condition</i>, Price <i>price</i>)</li>
+<li class="fn">int <b><a href="qml-bricklink-priceguide.html#quantity-method">quantity</a></b>(Time <i>time</i>, Condition <i>condition</i>)</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#update-method">update</a></b>(bool <i>highPriority</i>)</li>
 </ul>
 <!-- $$$PriceGuide-description -->
 <h2 id="details">Detailed Description</h2>
 <p>Each price guide of an item in the BrickLink catalog is available as a PriceGuide object.</p>
-<p>You cannot create PriceGuide objects yourself, but you can retrieve a PriceGuide object given the item and color id via <a href="qml-brickstore-bricklink.html#priceGuide-method">BrickLink::priceGuide</a>().</p>
+<p>You cannot create PriceGuide objects yourself, but you can retrieve a PriceGuide object given the item and color id via <a href="qml-bricklink-bricklink.html#priceGuide-method">BrickLink::priceGuide</a>().</p>
 <div class="admonition note">
-<p><b>Note: </b>PriceGuides aren't readily available, but need to be asynchronously loaded (or even downloaded) at runtime. You need to connect to the signal <a href="qml-brickstore-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<p><b>Note: </b>PriceGuides aren't readily available, but need to be asynchronously loaded (or even downloaded) at runtime. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
 </div>
 <p>The following three enumerations are used to retrieve the price guide data from this object:</p>
 <p><b>Time</b></p>
 <div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
-<tr><td class="topAlign"><code>BrickLink.PastSix</code></td><td class="topAlign">The sales in the last six months.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Current</code></td><td class="topAlign">The items currently for sale.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Time.PastSix</code></td><td class="topAlign">The sales in the last six months.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Time.Current</code></td><td class="topAlign">The items currently for sale.</td></tr>
 </table></div>
 <p><b>Condition</b></p>
 <div class="table"><table class="valuelist"><tr valign="top" class="even"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
-<tr><td class="topAlign"><code>BrickLink.New</code></td><td class="topAlign">Only items in new condition.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Used</code></td><td class="topAlign">Only items in used condition.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Condition.New</code></td><td class="topAlign">Only items in new condition.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Condition.Used</code></td><td class="topAlign">Only items in used condition.</td></tr>
 </table></div>
 <p><b>Price</b></p>
 <div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
-<tr><td class="topAlign"><code>BrickLink.Lowest</code></td><td class="topAlign">The lowest price.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Average</code></td><td class="topAlign">The average price.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.WAverage</code></td><td class="topAlign">The weighted average price.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Highest</code></td><td class="topAlign">The highest price.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Price.Lowest</code></td><td class="topAlign">The lowest price.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Price.Average</code></td><td class="topAlign">The average price.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Price.WAverage</code></td><td class="topAlign">The weighted average price.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.Price.Highest</code></td><td class="topAlign">The highest price.</td></tr>
 </table></div>
 <!-- @@@PriceGuide -->
 <h2>Property Documentation</h2>
@@ -86,7 +86,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="color-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-brickstore-color.html">Color</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-bricklink-color.html">Color</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink color reference this price guide is requested for.</p>
 </div></div><!-- @@@color -->
@@ -98,7 +98,7 @@
 <td class="tblQmlPropNode"><p>
 <span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns whether this <a href="qml-brickstore-priceguide.html">PriceGuide</a> is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
+<div class="qmldoc"><p>Returns whether this <a href="qml-bricklink-priceguide.html">PriceGuide</a> is <code>null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code>null</code> notation.</p>
 </div></div><!-- @@@isNull -->
 <br/>
 <!-- $$$isValid -->
@@ -116,7 +116,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="item-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-brickstore-item.html">Item</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-bricklink-item.html">Item</a></span></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink item reference this price guide is requested for.</p>
 </div></div><!-- @@@item -->
@@ -140,10 +140,10 @@
 </table></div></div>
 <div class="qmldoc"><p>Returns the current update status. The available values are:</p>
 <div class="table"><table class="valuelist"><tr valign="top" class="odd"><th class="tblConst">Constant</th><th class="tbldscr">Description</th></tr>
-<tr><td class="topAlign"><code>BrickLink.Ok</code></td><td class="topAlign">The last picture load (or download) was successful.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Loading</code></td><td class="topAlign">BrickStore is currently loading the picture from the local cache.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.Updating</code></td><td class="topAlign">BrickStore is currently downloading the picture from BrickLink.</td></tr>
-<tr><td class="topAlign"><code>BrickLink.UpdateFailed</code></td><td class="topAlign">The last download from BrickLink failed. <a href="qml-brickstore-priceguide.html#isValid-prop">isValid</a> might still be <code>true</code>, if there was a valid picture available before the failed update!</td></tr>
+<tr><td class="topAlign"><code>BrickLink.UpdateStatus.Ok</code></td><td class="topAlign">The last picture load (or download) was successful.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.UpdateStatus.Loading</code></td><td class="topAlign">BrickStore is currently loading the picture from the local cache.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.UpdateStatus.Updating</code></td><td class="topAlign">BrickStore is currently downloading the picture from BrickLink.</td></tr>
+<tr><td class="topAlign"><code>BrickLink.UpdateStatus.UpdateFailed</code></td><td class="topAlign">The last download from BrickLink failed. <a href="qml-bricklink-priceguide.html#isValid-prop">isValid</a> might still be <code>true</code>, if there was a valid picture available before the failed update!</td></tr>
 </table></div>
 </div></div><!-- @@@updateStatus -->
 <br/>
@@ -155,7 +155,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type">int</span> <span class="name">lots</span>(<span class="type">Time</span> <i>time</i>, <span class="type">Condition</span> <i>condition</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns the number of lots for sale (or lots that have been sold) given the <i>time</i> frame and <i>condition</i>. Returns <code>0</code> if no data is available. See the <a href="qml-brickstore-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time and Condition enumerations.</p>
+<div class="qmldoc"><p>Returns the number of lots for sale (or lots that have been sold) given the <i>time</i> frame and <i>condition</i>. Returns <code>0</code> if no data is available. See the <a href="qml-bricklink-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time and Condition enumerations.</p>
 </div></div><!-- @@@lots -->
 <br/>
 <!-- $$$price[overload1]$$$priceTimeConditionPrice -->
@@ -165,7 +165,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type">real</span> <span class="name">price</span>(<span class="type">Time</span> <i>time</i>, <span class="type">Condition</span> <i>condition</i>, <span class="type">Price</span> <i>price</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns the price of items for sale (or item that have been sold) given the <i>time</i> frame, <i>condition</i> and <i>price</i> type. Returns <code>0</code> if no data is available. See the <a href="qml-brickstore-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time, Condition and Price enumerations.</p>
+<div class="qmldoc"><p>Returns the price of items for sale (or item that have been sold) given the <i>time</i> frame, <i>condition</i> and <i>price</i> type. Returns <code>0</code> if no data is available. See the <a href="qml-bricklink-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time, Condition and Price enumerations.</p>
 </div></div><!-- @@@price -->
 <br/>
 <!-- $$$quantity[overload1]$$$quantityTimeCondition -->
@@ -175,7 +175,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type">int</span> <span class="name">quantity</span>(<span class="type">Time</span> <i>time</i>, <span class="type">Condition</span> <i>condition</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns the number of items for sale (or item that have been sold) given the <i>time</i> frame and <i>condition</i>. Returns <code>0</code> if no data is available. See the <a href="qml-brickstore-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time and Condition enumerations.</p>
+<div class="qmldoc"><p>Returns the number of items for sale (or item that have been sold) given the <i>time</i> frame and <i>condition</i>. Returns <code>0</code> if no data is available. See the <a href="qml-bricklink-priceguide.html">PriceGuide</a> type documentation for the possible values of the Time and Condition enumerations.</p>
 </div></div><!-- @@@quantity -->
 <br/>
 <!-- $$$update[overload1]$$$updatebool -->

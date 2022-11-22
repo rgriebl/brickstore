@@ -2,80 +2,68 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="BrickStore Extensions" version="" project="BrickStore">
     <namespace name="" status="active" access="public" module="brickstore">
-        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="74" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
-        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="1" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
-            <contents name="installation" title="Installation" level="1"/>
-            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
-            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
-            <contents name="debugging" title="Debugging" level="1"/>
-        </page>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="128" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
-            <contents name="the-simple-changes" title="The simple changes" level="2"/>
-            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
-            <contents name="complex-changes" title="Complex changes" level="2"/>
-        </page>
-        <qmlclass name="BrickLink" qml-module-name="BrickStore" fullname="BrickStore.BrickLink" href="qml-brickstore-bricklink.html" status="active" access="public" documented="true" groups="qml-api" title="BrickLink" fulltitle="BrickLink" subtitle="" brief="Core singleton managing the data transfer from and to BrickLink">
-            <function name="category" fullname="BrickStore.BrickLink.category" href="qml-brickstore-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
+        <qmlclass name="BrickLink" qml-module-name="BrickLink" fullname="BrickLink.BrickLink" href="qml-bricklink-bricklink.html" status="active" access="public" documented="true" groups="qml-api" title="BrickLink" fulltitle="BrickLink" subtitle="" brief="Core singleton managing the data transfer from and to BrickLink">
+            <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
                 <parameter type="var" name="category" default=""/>
             </function>
-            <function name="category" fullname="BrickStore.BrickLink.category" href="qml-brickstore-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
+            <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
                 <parameter type="int" name="categoryId" default=""/>
             </function>
-            <function name="color" fullname="BrickStore.BrickLink.color" href="qml-brickstore-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
+            <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="var" name="color" default=""/>
             </function>
-            <function name="color" fullname="BrickStore.BrickLink.color" href="qml-brickstore-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
+            <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="string" name="colorName" default=""/>
             </function>
-            <function name="color" fullname="BrickStore.BrickLink.color" href="qml-brickstore-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
+            <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="uint" name="colorId" default=""/>
             </function>
-            <function name="colorFromLDrawId" fullname="BrickStore.BrickLink.colorFromLDrawId" href="qml-brickstore-bricklink.html#colorFromLDrawId-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
+            <function name="colorFromLDrawId" fullname="BrickLink.BrickLink.colorFromLDrawId" href="qml-bricklink-bricklink.html#colorFromLDrawId-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="int" name="colorId" default=""/>
             </function>
-            <function name="item" fullname="BrickStore.BrickLink.item" href="qml-brickstore-bricklink.html#item-method" status="active" access="public" documented="true" meta="qmlmethod" type="Item">
+            <function name="item" fullname="BrickLink.BrickLink.item" href="qml-bricklink-bricklink.html#item-method" status="active" access="public" documented="true" meta="qmlmethod" type="Item">
                 <parameter type="string" name="itemTypeId" default=""/>
                 <parameter type="string" name="itemId" default=""/>
             </function>
-            <function name="itemType" fullname="BrickStore.BrickLink.itemType" href="qml-brickstore-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
+            <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
                 <parameter type="var" name="itemType" default=""/>
             </function>
-            <function name="itemType" fullname="BrickStore.BrickLink.itemType" href="qml-brickstore-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
+            <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
                 <parameter type="string" name="itemTypeId" default=""/>
             </function>
-            <function name="itemType" fullname="BrickStore.BrickLink.itemType" href="qml-brickstore-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="Item">
+            <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="Item">
                 <parameter type="var" name="item" default=""/>
             </function>
-            <function name="largePicture" fullname="BrickStore.BrickLink.largePicture" href="qml-brickstore-bricklink.html#largePicture-method" status="active" access="public" documented="true" meta="qmlmethod" type="Picture">
+            <function name="largePicture" fullname="BrickLink.BrickLink.largePicture" href="qml-bricklink-bricklink.html#largePicture-method" status="active" access="public" documented="true" meta="qmlmethod" type="Picture">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <function name="lot" fullname="BrickStore.BrickLink.lot" href="qml-brickstore-bricklink.html#lot-method" status="active" access="public" documented="true" meta="qmlmethod" type="Lot">
+            <function name="lot" fullname="BrickLink.BrickLink.lot" href="qml-bricklink-bricklink.html#lot-method" status="active" access="public" documented="true" meta="qmlmethod" type="Lot">
                 <parameter type="var" name="lot" default=""/>
             </function>
-            <function name="noImage" fullname="BrickStore.BrickLink.noImage" href="qml-brickstore-bricklink.html#noImage-method" status="active" access="public" documented="true" meta="qmlmethod" type="Image">
+            <function name="noImage" fullname="BrickLink.BrickLink.noImage" href="qml-bricklink-bricklink.html#noImage-method" status="active" access="public" documented="true" meta="qmlmethod" type="Image">
                 <parameter type="int" name="width" default=""/>
                 <parameter type="int" name="height" default=""/>
             </function>
-            <function name="picture" fullname="BrickStore.BrickLink.picture" href="qml-brickstore-bricklink.html#picture-method" status="active" access="public" documented="true" meta="qmlmethod" type="Picture">
+            <function name="picture" fullname="BrickLink.BrickLink.picture" href="qml-bricklink-bricklink.html#picture-method" status="active" access="public" documented="true" meta="qmlmethod" type="Picture">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="Color" name="color" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <function name="pictureUpdated" fullname="BrickStore.BrickLink.pictureUpdated" href="qml-brickstore-bricklink.html#pictureUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
+            <function name="pictureUpdated" fullname="BrickLink.BrickLink.pictureUpdated" href="qml-bricklink-bricklink.html#pictureUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
                 <parameter type="Picture" name="picture" default=""/>
             </function>
-            <function name="priceGuide" fullname="BrickStore.BrickLink.priceGuide" href="qml-brickstore-bricklink.html#priceGuide-method" status="active" access="public" documented="true" meta="qmlmethod" type="PriceGuide">
+            <function name="priceGuide" fullname="BrickLink.BrickLink.priceGuide" href="qml-bricklink-bricklink.html#priceGuide-method" status="active" access="public" documented="true" meta="qmlmethod" type="PriceGuide">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="Color" name="color" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <function name="priceGuideUpdated" fullname="BrickStore.BrickLink.priceGuideUpdated" href="qml-brickstore-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
+            <function name="priceGuideUpdated" fullname="BrickLink.BrickLink.priceGuideUpdated" href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
                 <parameter type="PriceGuide" name="priceGuide" default=""/>
             </function>
-            <qmlproperty name="noColor" fullname="BrickStore.BrickLink.noColor" href="qml-brickstore-bricklink.html#noColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
-            <qmlproperty name="noItem" fullname="BrickStore.BrickLink.noItem" href="qml-brickstore-bricklink.html#noItem-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
-            <qmlproperty name="noLot" fullname="BrickStore.BrickLink.noLot" href="qml-brickstore-bricklink.html#noLot-prop" status="active" access="public" documented="true" type="Lot" attached="false" writable="false"/>
+            <qmlproperty name="noColor" fullname="BrickLink.BrickLink.noColor" href="qml-bricklink-bricklink.html#noColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="noItem" fullname="BrickLink.BrickLink.noItem" href="qml-bricklink-bricklink.html#noItem-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="noLot" fullname="BrickLink.BrickLink.noLot" href="qml-bricklink-bricklink.html#noLot-prop" status="active" access="public" documented="true" type="Lot" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="BrickStore" qml-module-name="BrickStore" fullname="BrickStore.BrickStore" href="qml-brickstore-brickstore.html" status="active" access="public" documented="true" groups="qml-api" title="BrickStore" fulltitle="BrickStore" subtitle="" brief="This singleton represents global settings and state">
             <function name="nameFiltersForBrickLinkXML" fullname="BrickStore.BrickStore.nameFiltersForBrickLinkXML" href="qml-brickstore-brickstore.html#nameFiltersForBrickLinkXML-method" status="active" access="public" documented="true" meta="qmlmethod" type="stringlist">
@@ -108,30 +96,37 @@
             <qmlproperty name="online" fullname="BrickStore.BrickStore.online" href="qml-brickstore-brickstore.html#online-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="versionNumber" fullname="BrickStore.BrickStore.versionNumber" href="qml-brickstore-brickstore.html#versionNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="Category" qml-module-name="BrickStore" fullname="BrickStore.Category" href="qml-brickstore-category.html" status="active" access="public" documented="true" groups="qml-api" title="Category" fulltitle="Category" subtitle="" brief="This value type represents a BrickLink item category">
-            <qmlproperty name="id" fullname="BrickStore.Category.id" href="qml-brickstore-category.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.Category.isNull" href="qml-brickstore-category.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="name" fullname="BrickStore.Category.name" href="qml-brickstore-category.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="84" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
+        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="1" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
+            <contents name="installation" title="Installation" level="1"/>
+            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
+            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
+            <contents name="debugging" title="Debugging" level="1"/>
+        </page>
+        <qmlclass name="Category" qml-module-name="BrickLink" fullname="BrickLink.Category" href="qml-bricklink-category.html" status="active" access="public" documented="true" groups="qml-api" title="Category" fulltitle="Category" subtitle="" brief="This value type represents a BrickLink item category">
+            <qmlproperty name="id" fullname="BrickLink.Category.id" href="qml-bricklink-category.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.Category.isNull" href="qml-bricklink-category.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="name" fullname="BrickLink.Category.name" href="qml-bricklink-category.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="Color" qml-module-name="BrickStore" fullname="BrickStore.Color" href="qml-brickstore-color.html" status="active" access="public" documented="true" groups="qml-api" title="Color" fulltitle="Color" subtitle="" brief="This value type represents a BrickLink color">
-            <function name="sampleImage" fullname="BrickStore.Color.sampleImage" href="qml-brickstore-color.html#sampleImage-method" status="active" access="public" documented="true" meta="qmlmethod" type="image">
+        <qmlclass name="Color" qml-module-name="BrickLink" fullname="BrickLink.Color" href="qml-bricklink-color.html" status="active" access="public" documented="true" groups="qml-api" title="Color" fulltitle="Color" subtitle="" brief="This value type represents a BrickLink color">
+            <function name="sampleImage" fullname="BrickLink.Color.sampleImage" href="qml-bricklink-color.html#sampleImage-method" status="active" access="public" documented="true" meta="qmlmethod" type="image">
                 <parameter type="int" name="width" default=""/>
                 <parameter type="int" name="height" default=""/>
             </function>
-            <qmlproperty name="chrome" fullname="BrickStore.Color.chrome" href="qml-brickstore-color.html#chrome-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="color" fullname="BrickStore.Color.color" href="qml-brickstore-color.html#color-prop" status="active" access="public" documented="true" type="color" attached="false" writable="false"/>
-            <qmlproperty name="glitter" fullname="BrickStore.Color.glitter" href="qml-brickstore-color.html#glitter-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="id" fullname="BrickStore.Color.id" href="qml-brickstore-color.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.Color.isNull" href="qml-brickstore-color.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="ldrawId" fullname="BrickStore.Color.ldrawId" href="qml-brickstore-color.html#ldrawId-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="metallic" fullname="BrickStore.Color.metallic" href="qml-brickstore-color.html#metallic-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="milky" fullname="BrickStore.Color.milky" href="qml-brickstore-color.html#milky-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="modulex" fullname="BrickStore.Color.modulex" href="qml-brickstore-color.html#modulex-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="name" fullname="BrickStore.Color.name" href="qml-brickstore-color.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="popularity" fullname="BrickStore.Color.popularity" href="qml-brickstore-color.html#popularity-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="solid" fullname="BrickStore.Color.solid" href="qml-brickstore-color.html#solid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="speckle" fullname="BrickStore.Color.speckle" href="qml-brickstore-color.html#speckle-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="transparent" fullname="BrickStore.Color.transparent" href="qml-brickstore-color.html#transparent-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="chrome" fullname="BrickLink.Color.chrome" href="qml-bricklink-color.html#chrome-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.Color.color" href="qml-bricklink-color.html#color-prop" status="active" access="public" documented="true" type="color" attached="false" writable="false"/>
+            <qmlproperty name="glitter" fullname="BrickLink.Color.glitter" href="qml-bricklink-color.html#glitter-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="id" fullname="BrickLink.Color.id" href="qml-bricklink-color.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.Color.isNull" href="qml-bricklink-color.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="ldrawId" fullname="BrickLink.Color.ldrawId" href="qml-bricklink-color.html#ldrawId-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="metallic" fullname="BrickLink.Color.metallic" href="qml-bricklink-color.html#metallic-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="milky" fullname="BrickLink.Color.milky" href="qml-bricklink-color.html#milky-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="modulex" fullname="BrickLink.Color.modulex" href="qml-bricklink-color.html#modulex-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="name" fullname="BrickLink.Color.name" href="qml-bricklink-color.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="popularity" fullname="BrickLink.Color.popularity" href="qml-bricklink-color.html#popularity-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="solid" fullname="BrickLink.Color.solid" href="qml-bricklink-color.html#solid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="speckle" fullname="BrickLink.Color.speckle" href="qml-bricklink-color.html#speckle-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="transparent" fullname="BrickLink.Color.transparent" href="qml-bricklink-color.html#transparent-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="Document" qml-module-name="BrickStore" fullname="BrickStore.Document" href="qml-brickstore-document.html" status="active" access="public" documented="true" groups="qml-api" title="Document" fulltitle="Document" subtitle="" brief="Each instance of this type represents an open document">
             <function name="lots.add" fullname="BrickStore.Document.lots.add" href="qml-brickstore-document.html#lots.add-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
@@ -154,137 +149,142 @@
             <qmlproperty name="title" fullname="BrickStore.Document.title" href="qml-brickstore-document.html#title-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" groups="qml-extension" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" brief="Use this type to add an UI action to your extension"/>
-        <qmlclass name="Item" qml-module-name="BrickStore" fullname="BrickStore.Item" href="qml-brickstore-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
-            <function name="hasKnownColor" fullname="BrickStore.Item.hasKnownColor" href="qml-brickstore-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
+        <qmlclass name="Item" qml-module-name="BrickLink" fullname="BrickLink.Item" href="qml-bricklink-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
+            <function name="hasKnownColor" fullname="BrickLink.Item.hasKnownColor" href="qml-bricklink-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
                 <parameter type="Color" name="color" default=""/>
             </function>
-            <qmlproperty name="category" fullname="BrickStore.Item.category" href="qml-brickstore-item.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
-            <qmlproperty name="defaultColor" fullname="BrickStore.Item.defaultColor" href="qml-brickstore-item.html#defaultColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
-            <qmlproperty name="hasInventory" fullname="BrickStore.Item.hasInventory" href="qml-brickstore-item.html#hasInventory-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="id" fullname="BrickStore.Item.id" href="qml-brickstore-item.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="inventoryUpdated" fullname="BrickStore.Item.inventoryUpdated" href="qml-brickstore-item.html#inventoryUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.Item.isNull" href="qml-brickstore-item.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="itemType" fullname="BrickStore.Item.itemType" href="qml-brickstore-item.html#itemType-prop" status="active" access="public" documented="true" type="ItemType" attached="false" writable="false"/>
-            <qmlproperty name="knownColors" fullname="BrickStore.Item.knownColors" href="qml-brickstore-item.html#knownColors-prop" status="active" access="public" documented="true" type="list&lt;Color&gt;" attached="false" writable="false"/>
-            <qmlproperty name="name" fullname="BrickStore.Item.name" href="qml-brickstore-item.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="weight" fullname="BrickStore.Item.weight" href="qml-brickstore-item.html#weight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="yearReleased" fullname="BrickStore.Item.yearReleased" href="qml-brickstore-item.html#yearReleased-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="category" fullname="BrickLink.Item.category" href="qml-bricklink-item.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
+            <qmlproperty name="defaultColor" fullname="BrickLink.Item.defaultColor" href="qml-bricklink-item.html#defaultColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="hasInventory" fullname="BrickLink.Item.hasInventory" href="qml-bricklink-item.html#hasInventory-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="id" fullname="BrickLink.Item.id" href="qml-bricklink-item.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="inventoryUpdated" fullname="BrickLink.Item.inventoryUpdated" href="qml-bricklink-item.html#inventoryUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.Item.isNull" href="qml-bricklink-item.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="itemType" fullname="BrickLink.Item.itemType" href="qml-bricklink-item.html#itemType-prop" status="active" access="public" documented="true" type="ItemType" attached="false" writable="false"/>
+            <qmlproperty name="knownColors" fullname="BrickLink.Item.knownColors" href="qml-bricklink-item.html#knownColors-prop" status="active" access="public" documented="true" type="list&lt;Color&gt;" attached="false" writable="false"/>
+            <qmlproperty name="name" fullname="BrickLink.Item.name" href="qml-bricklink-item.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="weight" fullname="BrickLink.Item.weight" href="qml-bricklink-item.html#weight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="yearReleased" fullname="BrickLink.Item.yearReleased" href="qml-bricklink-item.html#yearReleased-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="ItemType" qml-module-name="BrickStore" fullname="BrickStore.ItemType" href="qml-brickstore-itemtype.html" status="active" access="public" documented="true" groups="qml-api" title="ItemType" fulltitle="ItemType" subtitle="" brief="This value type represents a BrickLink item type">
-            <qmlproperty name="categories" fullname="BrickStore.ItemType.categories" href="qml-brickstore-itemtype.html#categories-prop" status="active" access="public" documented="true" type="list&lt;Category&gt;" attached="false" writable="false"/>
-            <qmlproperty name="hasColors" fullname="BrickStore.ItemType.hasColors" href="qml-brickstore-itemtype.html#hasColors-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="hasInventories" fullname="BrickStore.ItemType.hasInventories" href="qml-brickstore-itemtype.html#hasInventories-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="hasSubConditions" fullname="BrickStore.ItemType.hasSubConditions" href="qml-brickstore-itemtype.html#hasSubConditions-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="hasWeight" fullname="BrickStore.ItemType.hasWeight" href="qml-brickstore-itemtype.html#hasWeight-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="id" fullname="BrickStore.ItemType.id" href="qml-brickstore-itemtype.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.ItemType.isNull" href="qml-brickstore-itemtype.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="name" fullname="BrickStore.ItemType.name" href="qml-brickstore-itemtype.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="pictureSize" fullname="BrickStore.ItemType.pictureSize" href="qml-brickstore-itemtype.html#pictureSize-prop" status="active" access="public" documented="true" type="size" attached="false" writable="false"/>
+        <qmlclass name="ItemType" qml-module-name="BrickLink" fullname="BrickLink.ItemType" href="qml-bricklink-itemtype.html" status="active" access="public" documented="true" groups="qml-api" title="ItemType" fulltitle="ItemType" subtitle="" brief="This value type represents a BrickLink item type">
+            <qmlproperty name="categories" fullname="BrickLink.ItemType.categories" href="qml-bricklink-itemtype.html#categories-prop" status="active" access="public" documented="true" type="list&lt;Category&gt;" attached="false" writable="false"/>
+            <qmlproperty name="hasColors" fullname="BrickLink.ItemType.hasColors" href="qml-bricklink-itemtype.html#hasColors-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="hasInventories" fullname="BrickLink.ItemType.hasInventories" href="qml-bricklink-itemtype.html#hasInventories-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="hasSubConditions" fullname="BrickLink.ItemType.hasSubConditions" href="qml-bricklink-itemtype.html#hasSubConditions-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="hasWeight" fullname="BrickLink.ItemType.hasWeight" href="qml-bricklink-itemtype.html#hasWeight-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="id" fullname="BrickLink.ItemType.id" href="qml-bricklink-itemtype.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.ItemType.isNull" href="qml-bricklink-itemtype.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="name" fullname="BrickLink.ItemType.name" href="qml-bricklink-itemtype.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="pictureSize" fullname="BrickLink.ItemType.pictureSize" href="qml-bricklink-itemtype.html#pictureSize-prop" status="active" access="public" documented="true" type="size" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="Lot" qml-module-name="BrickStore" fullname="BrickStore.Lot" href="qml-brickstore-lot.html" status="active" access="public" documented="true" groups="qml-api" title="Lot" fulltitle="Lot" subtitle="" brief="This value type represent a lot in a document">
-            <qmlproperty name="alternate" fullname="BrickStore.Lot.alternate" href="qml-brickstore-lot.html#alternate-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
-            <qmlproperty name="alternateId" fullname="BrickStore.Lot.alternateId" href="qml-brickstore-lot.html#alternateId-prop" status="active" access="public" documented="true" type="uint" attached="false" writable="true"/>
-            <qmlproperty name="bulkQuantity" fullname="BrickStore.Lot.bulkQuantity" href="qml-brickstore-lot.html#bulkQuantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="category" fullname="BrickStore.Lot.category" href="qml-brickstore-lot.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
-            <qmlproperty name="categoryName" fullname="BrickStore.Lot.categoryName" href="qml-brickstore-lot.html#categoryName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="color" fullname="BrickStore.Lot.color" href="qml-brickstore-lot.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="true"/>
-            <qmlproperty name="colorName" fullname="BrickStore.Lot.colorName" href="qml-brickstore-lot.html#colorName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="comments" fullname="BrickStore.Lot.comments" href="qml-brickstore-lot.html#comments-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
-            <qmlproperty name="condition" fullname="BrickStore.Lot.condition" href="qml-brickstore-lot.html#condition-prop" status="active" access="public" documented="true" type="Condition" attached="false" writable="true"/>
-            <qmlproperty name="counterPart" fullname="BrickStore.Lot.counterPart" href="qml-brickstore-lot.html#counterPart-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
-            <qmlproperty name="id" fullname="BrickStore.Lot.id" href="qml-brickstore-lot.html#id-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="image" fullname="BrickStore.Lot.image" href="qml-brickstore-lot.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
-            <qmlproperty name="incomplete" fullname="BrickStore.Lot.incomplete" href="qml-brickstore-lot.html#incomplete-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.Lot.isNull" href="qml-brickstore-lot.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="item" fullname="BrickStore.Lot.item" href="qml-brickstore-lot.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="true"/>
-            <qmlproperty name="itemId" fullname="BrickStore.Lot.itemId" href="qml-brickstore-lot.html#itemId-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="itemName" fullname="BrickStore.Lot.itemName" href="qml-brickstore-lot.html#itemName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="itemType" fullname="BrickStore.Lot.itemType" href="qml-brickstore-lot.html#itemType-prop" status="active" access="public" documented="true" type="ItemType" attached="false" writable="false"/>
-            <qmlproperty name="itemTypeName" fullname="BrickStore.Lot.itemTypeName" href="qml-brickstore-lot.html#itemTypeName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="itemYearReleased" fullname="BrickStore.Lot.itemYearReleased" href="qml-brickstore-lot.html#itemYearReleased-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="lotId" fullname="BrickStore.Lot.lotId" href="qml-brickstore-lot.html#lotId-prop" status="active" access="public" documented="true" type="uint" attached="false" writable="true"/>
-            <qmlproperty name="name" fullname="BrickStore.Lot.name" href="qml-brickstore-lot.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="price" fullname="BrickStore.Lot.price" href="qml-brickstore-lot.html#price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
-            <qmlproperty name="quantity" fullname="BrickStore.Lot.quantity" href="qml-brickstore-lot.html#quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="remarks" fullname="BrickStore.Lot.remarks" href="qml-brickstore-lot.html#remarks-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
-            <qmlproperty name="reserved" fullname="BrickStore.Lot.reserved" href="qml-brickstore-lot.html#reserved-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
-            <qmlproperty name="retain" fullname="BrickStore.Lot.retain" href="qml-brickstore-lot.html#retain-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
-            <qmlproperty name="sale" fullname="BrickStore.Lot.sale" href="qml-brickstore-lot.html#sale-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="status" fullname="BrickStore.Lot.status" href="qml-brickstore-lot.html#status-prop" status="active" access="public" documented="true" type="Status" attached="false" writable="true"/>
-            <qmlproperty name="stockroom" fullname="BrickStore.Lot.stockroom" href="qml-brickstore-lot.html#stockroom-prop" status="active" access="public" documented="true" type="Stockroom" attached="false" writable="true"/>
-            <qmlproperty name="subCondition" fullname="BrickStore.Lot.subCondition" href="qml-brickstore-lot.html#subCondition-prop" status="active" access="public" documented="true" type="SubCondition" attached="false" writable="true"/>
-            <qmlproperty name="tier1Price" fullname="BrickStore.Lot.tier1Price" href="qml-brickstore-lot.html#tier1Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
-            <qmlproperty name="tier1Quantity" fullname="BrickStore.Lot.tier1Quantity" href="qml-brickstore-lot.html#tier1Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="tier2Price" fullname="BrickStore.Lot.tier2Price" href="qml-brickstore-lot.html#tier2Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
-            <qmlproperty name="tier2Quantity" fullname="BrickStore.Lot.tier2Quantity" href="qml-brickstore-lot.html#tier2Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="tier3Price" fullname="BrickStore.Lot.tier3Price" href="qml-brickstore-lot.html#tier3Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
-            <qmlproperty name="tier3Quantity" fullname="BrickStore.Lot.tier3Quantity" href="qml-brickstore-lot.html#tier3Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
-            <qmlproperty name="total" fullname="BrickStore.Lot.total" href="qml-brickstore-lot.html#total-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="totalWeight" fullname="BrickStore.Lot.totalWeight" href="qml-brickstore-lot.html#totalWeight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
+        <qmlclass name="Lot" qml-module-name="BrickLink" fullname="BrickLink.Lot" href="qml-bricklink-lot.html" status="active" access="public" documented="true" groups="qml-api" title="Lot" fulltitle="Lot" subtitle="" brief="This value type represent a lot in a document">
+            <qmlproperty name="alternate" fullname="BrickLink.Lot.alternate" href="qml-bricklink-lot.html#alternate-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
+            <qmlproperty name="alternateId" fullname="BrickLink.Lot.alternateId" href="qml-bricklink-lot.html#alternateId-prop" status="active" access="public" documented="true" type="uint" attached="false" writable="true"/>
+            <qmlproperty name="bulkQuantity" fullname="BrickLink.Lot.bulkQuantity" href="qml-bricklink-lot.html#bulkQuantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="category" fullname="BrickLink.Lot.category" href="qml-bricklink-lot.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
+            <qmlproperty name="categoryName" fullname="BrickLink.Lot.categoryName" href="qml-bricklink-lot.html#categoryName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.Lot.color" href="qml-bricklink-lot.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="true"/>
+            <qmlproperty name="colorName" fullname="BrickLink.Lot.colorName" href="qml-bricklink-lot.html#colorName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="comments" fullname="BrickLink.Lot.comments" href="qml-bricklink-lot.html#comments-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
+            <qmlproperty name="condition" fullname="BrickLink.Lot.condition" href="qml-bricklink-lot.html#condition-prop" status="active" access="public" documented="true" type="Condition" attached="false" writable="true"/>
+            <qmlproperty name="counterPart" fullname="BrickLink.Lot.counterPart" href="qml-bricklink-lot.html#counterPart-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
+            <qmlproperty name="id" fullname="BrickLink.Lot.id" href="qml-bricklink-lot.html#id-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="image" fullname="BrickLink.Lot.image" href="qml-bricklink-lot.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
+            <qmlproperty name="incomplete" fullname="BrickLink.Lot.incomplete" href="qml-bricklink-lot.html#incomplete-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.Lot.isNull" href="qml-bricklink-lot.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="item" fullname="BrickLink.Lot.item" href="qml-bricklink-lot.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="true"/>
+            <qmlproperty name="itemId" fullname="BrickLink.Lot.itemId" href="qml-bricklink-lot.html#itemId-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="itemName" fullname="BrickLink.Lot.itemName" href="qml-bricklink-lot.html#itemName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="itemType" fullname="BrickLink.Lot.itemType" href="qml-bricklink-lot.html#itemType-prop" status="active" access="public" documented="true" type="ItemType" attached="false" writable="false"/>
+            <qmlproperty name="itemTypeName" fullname="BrickLink.Lot.itemTypeName" href="qml-bricklink-lot.html#itemTypeName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="itemYearReleased" fullname="BrickLink.Lot.itemYearReleased" href="qml-bricklink-lot.html#itemYearReleased-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="lotId" fullname="BrickLink.Lot.lotId" href="qml-bricklink-lot.html#lotId-prop" status="active" access="public" documented="true" type="uint" attached="false" writable="true"/>
+            <qmlproperty name="name" fullname="BrickLink.Lot.name" href="qml-bricklink-lot.html#name-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="price" fullname="BrickLink.Lot.price" href="qml-bricklink-lot.html#price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
+            <qmlproperty name="quantity" fullname="BrickLink.Lot.quantity" href="qml-bricklink-lot.html#quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="remarks" fullname="BrickLink.Lot.remarks" href="qml-bricklink-lot.html#remarks-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
+            <qmlproperty name="reserved" fullname="BrickLink.Lot.reserved" href="qml-bricklink-lot.html#reserved-prop" status="active" access="public" documented="true" type="string" attached="false" writable="true"/>
+            <qmlproperty name="retain" fullname="BrickLink.Lot.retain" href="qml-bricklink-lot.html#retain-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
+            <qmlproperty name="sale" fullname="BrickLink.Lot.sale" href="qml-bricklink-lot.html#sale-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="status" fullname="BrickLink.Lot.status" href="qml-bricklink-lot.html#status-prop" status="active" access="public" documented="true" type="Status" attached="false" writable="true"/>
+            <qmlproperty name="stockroom" fullname="BrickLink.Lot.stockroom" href="qml-bricklink-lot.html#stockroom-prop" status="active" access="public" documented="true" type="Stockroom" attached="false" writable="true"/>
+            <qmlproperty name="subCondition" fullname="BrickLink.Lot.subCondition" href="qml-bricklink-lot.html#subCondition-prop" status="active" access="public" documented="true" type="SubCondition" attached="false" writable="true"/>
+            <qmlproperty name="tier1Price" fullname="BrickLink.Lot.tier1Price" href="qml-bricklink-lot.html#tier1Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
+            <qmlproperty name="tier1Quantity" fullname="BrickLink.Lot.tier1Quantity" href="qml-bricklink-lot.html#tier1Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="tier2Price" fullname="BrickLink.Lot.tier2Price" href="qml-bricklink-lot.html#tier2Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
+            <qmlproperty name="tier2Quantity" fullname="BrickLink.Lot.tier2Quantity" href="qml-bricklink-lot.html#tier2Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="tier3Price" fullname="BrickLink.Lot.tier3Price" href="qml-bricklink-lot.html#tier3Price-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
+            <qmlproperty name="tier3Quantity" fullname="BrickLink.Lot.tier3Quantity" href="qml-bricklink-lot.html#tier3Quantity-prop" status="active" access="public" documented="true" type="int" attached="false" writable="true"/>
+            <qmlproperty name="total" fullname="BrickLink.Lot.total" href="qml-bricklink-lot.html#total-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="totalWeight" fullname="BrickLink.Lot.totalWeight" href="qml-bricklink-lot.html#totalWeight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
         </qmlclass>
-        <qmlclass name="Order" qml-module-name="BrickStore" fullname="BrickStore.Order" href="qml-brickstore-order.html" status="active" access="public" documented="true" groups="qml-api" title="Order" fulltitle="Order" subtitle="" brief="This type holds the information about a BrickLink order">
-            <qmlproperty name="additionalCharges1" fullname="BrickStore.Order.additionalCharges1" href="qml-brickstore-order.html#additionalCharges1-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="additionalCharges2" fullname="BrickStore.Order.additionalCharges2" href="qml-brickstore-order.html#additionalCharges2-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="address" fullname="BrickStore.Order.address" href="qml-brickstore-order.html#address-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="countryCode" fullname="BrickStore.Order.countryCode" href="qml-brickstore-order.html#countryCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="credit" fullname="BrickStore.Order.credit" href="qml-brickstore-order.html#credit-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="creditCoupon" fullname="BrickStore.Order.creditCoupon" href="qml-brickstore-order.html#creditCoupon-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="currencyCode" fullname="BrickStore.Order.currencyCode" href="qml-brickstore-order.html#currencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="date" fullname="BrickStore.Order.date" href="qml-brickstore-order.html#date-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="grandTotal" fullname="BrickStore.Order.grandTotal" href="qml-brickstore-order.html#grandTotal-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="id" fullname="BrickStore.Order.id" href="qml-brickstore-order.html#id-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="insurance" fullname="BrickStore.Order.insurance" href="qml-brickstore-order.html#insurance-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="itemCount" fullname="BrickStore.Order.itemCount" href="qml-brickstore-order.html#itemCount-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="lastUpdated" fullname="BrickStore.Order.lastUpdated" href="qml-brickstore-order.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="lotCount" fullname="BrickStore.Order.lotCount" href="qml-brickstore-order.html#lotCount-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
-            <qmlproperty name="orderTotal" fullname="BrickStore.Order.orderTotal" href="qml-brickstore-order.html#orderTotal-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="otherParty" fullname="BrickStore.Order.otherParty" href="qml-brickstore-order.html#otherParty-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="paymentCurrencyCode" fullname="BrickStore.Order.paymentCurrencyCode" href="qml-brickstore-order.html#paymentCurrencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="paymentType" fullname="BrickStore.Order.paymentType" href="qml-brickstore-order.html#paymentType-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="phone" fullname="BrickStore.Order.phone" href="qml-brickstore-order.html#phone-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="shipping" fullname="BrickStore.Order.shipping" href="qml-brickstore-order.html#shipping-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="status" fullname="BrickStore.Order.status" href="qml-brickstore-order.html#status-prop" status="active" access="public" documented="true" type="enumeration" attached="false" writable="false"/>
-            <qmlproperty name="trackingNumber" fullname="BrickStore.Order.trackingNumber" href="qml-brickstore-order.html#trackingNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="type" fullname="BrickStore.Order.type" href="qml-brickstore-order.html#type-prop" status="active" access="public" documented="true" type="enumeration" attached="false" writable="false"/>
-            <qmlproperty name="usSalesTax" fullname="BrickStore.Order.usSalesTax" href="qml-brickstore-order.html#usSalesTax-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="vatChargeBrickLink" fullname="BrickStore.Order.vatChargeBrickLink" href="qml-brickstore-order.html#vatChargeBrickLink-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
-            <qmlproperty name="vatChargeSeller" fullname="BrickStore.Order.vatChargeSeller" href="qml-brickstore-order.html#vatChargeSeller-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+        <qmlclass name="Order" qml-module-name="BrickLink" fullname="BrickLink.Order" href="qml-bricklink-order.html" status="active" access="public" documented="true" groups="qml-api" title="Order" fulltitle="Order" subtitle="" brief="This type holds the information about a BrickLink order">
+            <qmlproperty name="additionalCharges1" fullname="BrickLink.Order.additionalCharges1" href="qml-bricklink-order.html#additionalCharges1-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="additionalCharges2" fullname="BrickLink.Order.additionalCharges2" href="qml-bricklink-order.html#additionalCharges2-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="address" fullname="BrickLink.Order.address" href="qml-bricklink-order.html#address-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="countryCode" fullname="BrickLink.Order.countryCode" href="qml-bricklink-order.html#countryCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="credit" fullname="BrickLink.Order.credit" href="qml-bricklink-order.html#credit-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="creditCoupon" fullname="BrickLink.Order.creditCoupon" href="qml-bricklink-order.html#creditCoupon-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="currencyCode" fullname="BrickLink.Order.currencyCode" href="qml-bricklink-order.html#currencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="date" fullname="BrickLink.Order.date" href="qml-bricklink-order.html#date-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="grandTotal" fullname="BrickLink.Order.grandTotal" href="qml-bricklink-order.html#grandTotal-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="id" fullname="BrickLink.Order.id" href="qml-bricklink-order.html#id-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="insurance" fullname="BrickLink.Order.insurance" href="qml-bricklink-order.html#insurance-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="itemCount" fullname="BrickLink.Order.itemCount" href="qml-bricklink-order.html#itemCount-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="lastUpdated" fullname="BrickLink.Order.lastUpdated" href="qml-bricklink-order.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="lotCount" fullname="BrickLink.Order.lotCount" href="qml-bricklink-order.html#lotCount-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
+            <qmlproperty name="orderTotal" fullname="BrickLink.Order.orderTotal" href="qml-bricklink-order.html#orderTotal-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="otherParty" fullname="BrickLink.Order.otherParty" href="qml-bricklink-order.html#otherParty-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="paymentCurrencyCode" fullname="BrickLink.Order.paymentCurrencyCode" href="qml-bricklink-order.html#paymentCurrencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="paymentType" fullname="BrickLink.Order.paymentType" href="qml-bricklink-order.html#paymentType-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="phone" fullname="BrickLink.Order.phone" href="qml-bricklink-order.html#phone-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="shipping" fullname="BrickLink.Order.shipping" href="qml-bricklink-order.html#shipping-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="status" fullname="BrickLink.Order.status" href="qml-bricklink-order.html#status-prop" status="active" access="public" documented="true" type="enumeration" attached="false" writable="false"/>
+            <qmlproperty name="trackingNumber" fullname="BrickLink.Order.trackingNumber" href="qml-bricklink-order.html#trackingNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="type" fullname="BrickLink.Order.type" href="qml-bricklink-order.html#type-prop" status="active" access="public" documented="true" type="enumeration" attached="false" writable="false"/>
+            <qmlproperty name="usSalesTax" fullname="BrickLink.Order.usSalesTax" href="qml-bricklink-order.html#usSalesTax-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="vatChargeBrickLink" fullname="BrickLink.Order.vatChargeBrickLink" href="qml-bricklink-order.html#vatChargeBrickLink-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
+            <qmlproperty name="vatChargeSeller" fullname="BrickLink.Order.vatChargeSeller" href="qml-bricklink-order.html#vatChargeSeller-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="Picture" qml-module-name="BrickStore" fullname="BrickStore.Picture" href="qml-brickstore-picture.html" status="active" access="public" documented="true" groups="qml-api" title="Picture" fulltitle="Picture" subtitle="" brief="This value type represents a picture of a BrickLink item">
-            <function name="update" fullname="BrickStore.Picture.update" href="qml-brickstore-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+        <qmlclass name="Picture" qml-module-name="BrickLink" fullname="BrickLink.Picture" href="qml-bricklink-picture.html" status="active" access="public" documented="true" groups="qml-api" title="Picture" fulltitle="Picture" subtitle="" brief="This value type represents a picture of a BrickLink item">
+            <function name="update" fullname="BrickLink.Picture.update" href="qml-bricklink-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <qmlproperty name="color" fullname="BrickStore.Picture.color" href="qml-brickstore-picture.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
-            <qmlproperty name="image" fullname="BrickStore.Picture.image" href="qml-brickstore-picture.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.Picture.isNull" href="qml-brickstore-picture.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="isValid" fullname="BrickStore.Picture.isValid" href="qml-brickstore-picture.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="item" fullname="BrickStore.Picture.item" href="qml-brickstore-picture.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
-            <qmlproperty name="lastUpdated" fullname="BrickStore.Picture.lastUpdated" href="qml-brickstore-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="updateStatus" fullname="BrickStore.Picture.updateStatus" href="qml-brickstore-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.Picture.color" href="qml-bricklink-picture.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="image" fullname="BrickLink.Picture.image" href="qml-bricklink-picture.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.Picture.isNull" href="qml-bricklink-picture.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="isValid" fullname="BrickLink.Picture.isValid" href="qml-bricklink-picture.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="item" fullname="BrickLink.Picture.item" href="qml-bricklink-picture.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="PriceGuide" qml-module-name="BrickStore" fullname="BrickStore.PriceGuide" href="qml-brickstore-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
-            <function name="lots" fullname="BrickStore.PriceGuide.lots" href="qml-brickstore-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="138" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
+        </page>
+        <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
+            <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
                 <parameter type="Condition" name="condition" default=""/>
             </function>
-            <function name="price" fullname="BrickStore.PriceGuide.price" href="qml-brickstore-priceguide.html#price-method" status="active" access="public" documented="true" meta="qmlmethod" type="real">
+            <function name="price" fullname="BrickLink.PriceGuide.price" href="qml-bricklink-priceguide.html#price-method" status="active" access="public" documented="true" meta="qmlmethod" type="real">
                 <parameter type="Time" name="time" default=""/>
                 <parameter type="Condition" name="condition" default=""/>
                 <parameter type="Price" name="price" default=""/>
             </function>
-            <function name="quantity" fullname="BrickStore.PriceGuide.quantity" href="qml-brickstore-priceguide.html#quantity-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
+            <function name="quantity" fullname="BrickLink.PriceGuide.quantity" href="qml-bricklink-priceguide.html#quantity-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
                 <parameter type="Condition" name="condition" default=""/>
             </function>
-            <function name="update" fullname="BrickStore.PriceGuide.update" href="qml-brickstore-priceguide.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="update" fullname="BrickLink.PriceGuide.update" href="qml-bricklink-priceguide.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <qmlproperty name="color" fullname="BrickStore.PriceGuide.color" href="qml-brickstore-priceguide.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickStore.PriceGuide.isNull" href="qml-brickstore-priceguide.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="isValid" fullname="BrickStore.PriceGuide.isValid" href="qml-brickstore-priceguide.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="item" fullname="BrickStore.PriceGuide.item" href="qml-brickstore-priceguide.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
-            <qmlproperty name="lastUpdated" fullname="BrickStore.PriceGuide.lastUpdated" href="qml-brickstore-priceguide.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="updateStatus" fullname="BrickStore.PriceGuide.updateStatus" href="qml-brickstore-priceguide.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.PriceGuide.color" href="qml-bricklink-priceguide.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="isNull" fullname="BrickLink.PriceGuide.isNull" href="qml-bricklink-priceguide.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="isValid" fullname="BrickLink.PriceGuide.isValid" href="qml-bricklink-priceguide.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="item" fullname="BrickLink.PriceGuide.item" href="qml-bricklink-priceguide.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="lastUpdated" fullname="BrickLink.PriceGuide.lastUpdated" href="qml-bricklink-priceguide.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="updateStatus" fullname="BrickLink.PriceGuide.updateStatus" href="qml-bricklink-priceguide.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="PrintJob" qml-module-name="BrickStore" fullname="BrickStore.PrintJob" href="qml-brickstore-printjob.html" status="active" access="public" documented="true" groups="qml-printing" title="PrintJob" fulltitle="PrintJob" subtitle="" brief="An instance of this type represents an active print job">
             <function name="abort" fullname="BrickStore.PrintJob.abort" href="qml-brickstore-printjob.html#abort-method" status="active" access="public" documented="true" meta="qmlmethod" type=""/>
@@ -352,6 +352,7 @@
         <group name="qml-extension" href="qml-extension.html" status="internal" seen="false" title=""/>
         <group name="qml-printing" href="qml-printing.html" status="internal" seen="false" title=""/>
         <group name="qmlmodules" href="qmlmodules.html" status="internal" seen="false" title=""/>
-        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="67" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore"/>
+        <qmlmodule name="BrickLink" qml-module-name="BrickLink" qml-module-version="1.0" href="bricklink-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="76" documented="true" groups="qmlmodules" seen="true" title="BrickLink QML types" brief="Provides QML types for interfacing with the BrickLink database"/>
+        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="69" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore specific functionality"/>
     </namespace>
 </INDEX>
