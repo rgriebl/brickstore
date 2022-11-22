@@ -123,11 +123,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     connect(w_pageSelect, &QLineEdit::textChanged,
             this, &PrintDialog::updatePageRange);
     connect(w_layout, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, [this](int idx) {
-        if (w_print_preview)
-            w_print_preview->setOrientation(idx == 0 ? QPageLayout::Orientation::Portrait
-                                                     : QPageLayout::Orientation::Landscape);
-    });
+            this, &PrintDialog::updateOrientation);
     connect(w_color, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PrintDialog::updateColorMode);
     connect(w_paperSize, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -261,6 +257,7 @@ void PrintDialog::updatePrinter(int idx)
     updateColorMode();
     updateMargins();
     updatePaperSize();
+    updateScaling();
     updateActions();
 
     blocker.unblock();
@@ -340,11 +337,21 @@ void PrintDialog::updateColorMode()
     w_print_preview->updatePreview();
 }
 
+void PrintDialog::updateOrientation()
+{
+    if (!m_printer || !w_print_preview)
+        return;
+    w_print_preview->setOrientation(w_layout->currentIndex() == 0 ? QPageLayout::Orientation::Portrait
+                                                                  : QPageLayout::Orientation::Landscape);
+    updateScaling();
+}
+
 void PrintDialog::updatePaperSize()
 {
     if (!m_printer || !w_print_preview)
         return;
     m_printer->setPageSize(w_paperSize->currentData().value<QPageSize>());
+    updateScaling();
     w_print_preview->updatePreview();
 }
 
@@ -364,6 +371,7 @@ void PrintDialog::updateMargins()
     }
     pl.setMargins(m);
     m_printer->setPageLayout(pl);
+    updateScaling();
     w_print_preview->updatePreview();
 }
 
@@ -371,7 +379,7 @@ void PrintDialog::updateScaling()
 {
     int percent = 100;
     switch (w_scaleMode->currentIndex()) {
-    case 1:
+    case 1: // fit to width
         if (!qFuzzyIsNull(m_maxWidth)) {
             QRectF pr = m_printer->pageLayout().paintRect(QPageLayout::Inch);
             double dpi = double(m_printer->logicalDpiX() + m_printer->logicalDpiY()) / 2;

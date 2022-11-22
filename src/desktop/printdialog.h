@@ -36,6 +36,7 @@ private:
     void updatePrinter(int idx);
     void updatePageRange();
     void updateColorMode();
+    void updateOrientation();
     void updatePaperSize();
     void updateMargins();
     void updateScaling();
