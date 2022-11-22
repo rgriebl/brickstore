@@ -87,8 +87,9 @@ Control {
 
         PartRenderer {
             id: info3D
-            renderController: RenderController {
-                onCanRenderChanged: {
+            Connections {
+                target: renderController
+                function onCanRenderChanged() {
                     if (!root.is3D && root.prefer3D && canRender)
                         root.is3D = true;
                     else if (root.is3D && !canRender)

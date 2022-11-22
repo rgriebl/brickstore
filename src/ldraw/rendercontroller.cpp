@@ -32,7 +32,7 @@
 
 namespace LDraw {
 
-QHash<const BrickLink::Color *, QQuick3DTextureData *> RenderController::s_materialTextureDatas;
+QHash<const BrickLink::Color *, QImage> RenderController::s_materialTextureDatas;
 
 
 RenderController::RenderController(QObject *parent)
@@ -260,14 +260,8 @@ QCoro::Task<void> RenderController::updateGeometries()
             if (surfaceColor->hasParticles()) {
                 geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
 
-                QQuick3DTextureData *texData = s_materialTextureDatas.value(surfaceColor);
-                if (!texData) {
-                    texData = generateMaterialTextureData(surfaceColor);
-                    if (texData) {
-                        QQmlEngine::setObjectOwnership(texData, QQmlEngine::CppOwnership);
-                        s_materialTextureDatas.insert(surfaceColor, texData);
-                    }
-                }
+                QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
+                texData->setParentItem(geo);
                 geo->setTextureData(texData);
             }
             geo->setBounds(vmin, vmax);
@@ -516,9 +510,9 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
 QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color)
 {
     if (color && color->hasParticles()) {
-        QQuick3DTextureData *texData = s_materialTextureDatas.value(color);
+        QImage texImage = s_materialTextureDatas.value(color);
 
-        if (!texData) {
+        if (texImage.isNull()) {
             const bool isSpeckle = color->isSpeckle();
 
             QString cacheName = QLatin1String(isSpeckle ? "Speckle" : "Glitter")
@@ -530,9 +524,8 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
 
             static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
             QString cacheFile = cacheDir % u"/ldraw-textures/" % cacheName % u".png";
-            QImage texImg;
 
-            if (!texImg.load(cacheFile) || texImg.isNull()) {
+            if (!texImage.load(cacheFile) || texImage.isNull()) {
                 const int particleSize = 50;
 
                 QPixmap particle(particleSize, particleSize);
@@ -605,21 +598,21 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 p.drawPixmapFragments(fragments.constData(), int(fragments.count()), particle);
                 p.end();
 
-                texImg = img.copy(delta, delta, texSize, texSize).rgbSwapped()
+                texImage = img.copy(delta, delta, texSize, texSize).rgbSwapped()
                         .scaled(texSize / 2, texSize / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
                 QDir(QFileInfo(cacheFile).absolutePath()).mkpath(QLatin1String("."));
-                texImg.save(cacheFile);
+                texImage.save(cacheFile);
             }
-            texData = new QQuick3DTextureData();
-            texData->setFormat(QQuick3DTextureData::RGBA8);
-            texData->setSize(texImg.size());
-            texData->setHasTransparency(color->ldrawColor().alpha() < 255);
-            texData->setTextureData(QByteArray { reinterpret_cast<const char *>(texImg.constBits()),
-                                                 texImg.sizeInBytes() });
-
-            s_materialTextureDatas.insert(color, texData);
+            s_materialTextureDatas.insert(color, texImage);
         }
+
+        auto texData = new QQuick3DTextureData();
+        texData->setFormat(QQuick3DTextureData::RGBA8);
+        texData->setSize(texImage.size());
+        texData->setHasTransparency(color->ldrawColor().alpha() < 255);
+        texData->setTextureData(QByteArray { reinterpret_cast<const char *>(texImage.constBits()),
+                                             texImage.sizeInBytes() });
         return texData;
     }
     return nullptr;

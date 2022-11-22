@@ -55,9 +55,40 @@ bool RenderWidget::isGPUSupported()
 
 RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
-    , m_controller(new RenderController(this))
 {
     setFocusPolicy(Qt::NoFocus);
+
+    auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if (isGPUSupported()) {
+        m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
+
+        QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
+        m_window->setFormat(fmt);
+        m_window->setResizeMode(QQuickView::SizeRootObjectToView);
+
+        m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
+        m_widget = QWidget::createWindowContainer(m_window, this);
+
+        m_controller = m_window->rootObject()->property("renderController").value<RenderController *>();
+    } else {
+        m_controller = new RenderController(this);
+
+        m_widget = new QWidget(this);
+        m_widget->setBackgroundRole(QPalette::Window);
+        m_widget->setAutoFillBackground(true);
+        connect(m_controller, &RenderController::clearColorChanged,
+                m_widget, [this](const QColor &color) {
+            auto pal = m_widget->palette();
+            pal.setColor(QPalette::Window, color);
+            m_widget->setPalette(pal);
+        });
+    }
+    paletteChange();
+
+    m_widget->setMinimumSize(100, 100);
+    m_widget->setFocusPolicy(Qt::NoFocus);
 
     connect(m_controller, &RenderController::canRenderChanged,
             this, &RenderWidget::canRenderChanged);
@@ -73,39 +104,6 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
         auto he = new QHelpEvent(QHelpEvent::ToolTip, pos.toPoint(), mapToGlobal(pos.toPoint()));
         QCoreApplication::postEvent(this, he);
     });
-
-    auto layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    if (isGPUSupported()) {
-        m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
-
-        QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
-        m_window->setFormat(fmt);
-        m_window->setResizeMode(QQuickView::SizeRootObjectToView);
-        paletteChange();
-
-        m_window->setInitialProperties({
-                                           { u"renderController"_qs, QVariant::fromValue(m_controller) },
-                                       });
-        m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
-
-        m_widget = QWidget::createWindowContainer(m_window, this);
-
-    } else {
-        m_widget = new QWidget(this);
-        m_widget->setBackgroundRole(QPalette::Window);
-        m_widget->setAutoFillBackground(true);
-        connect(m_controller, &RenderController::clearColorChanged,
-                m_widget, [this](const QColor &color) {
-            auto pal = m_widget->palette();
-            pal.setColor(QPalette::Window, color);
-            m_widget->setPalette(pal);
-        });
-        paletteChange();
-    }
-    m_widget->setMinimumSize(100, 100);
-    m_widget->setFocusPolicy(Qt::NoFocus);
 
     layout->addWidget(m_widget, 10);
     languageChange();

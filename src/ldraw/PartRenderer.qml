@@ -5,7 +5,7 @@ import LDraw
 Item {
     id: root
 
-    required property RenderController renderController
+    property RenderController renderController: RenderController { }
 
     Connections {
         target: root.renderController
@@ -147,11 +147,6 @@ Item {
                 }
             }
 
-            // Workaround for QtQuick3D bug:
-            //  custom textures are unloaded from the GPU when no model is referencing them anymore,
-            //  but they are not re-uploaded when a new model references them again in the future.
-            property var textureKeepAlive: ({})
-
             Loader3D {
                 asynchronous: true
                 Repeater3D {
@@ -171,17 +166,6 @@ Item {
                             property bool isPearl      : model.modelData && model.modelData.isPearl
                             property bool isTransparent: (color.a < 1)
                             property var textureData   : model.modelData ? model.modelData.textureData : null
-
-                            onTextureDataChanged: {
-                                if (textureData) {
-                                    if (rootNode.textureKeepAlive[textureData] === undefined) {
-                                        let obj = Qt.createQmlObject('import QtQuick3D; Texture { }', rootNode)
-                                        obj.textureData = textureData
-                                        rootNode.textureKeepAlive[textureData] = true
-                                        console.log("Texture keep-alive for color " + color)
-                                    }
-                                }
-                            }
 
                             property var texture: Texture { textureData: material.textureData }
 

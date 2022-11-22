@@ -104,7 +104,7 @@ private:
     QQuick3DGeometry *m_lineGeo = nullptr;
     QmlRenderLineInstancing *m_lines = nullptr;
 
-    static QHash<const BrickLink::Color *, QQuick3DTextureData *> s_materialTextureDatas;
+    static QHash<const BrickLink::Color *, QImage> s_materialTextureDatas;
 
     Part *m_part = nullptr;
     const BrickLink::Item *m_item = nullptr;
