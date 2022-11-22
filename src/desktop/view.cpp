@@ -206,6 +206,12 @@ TableView::TableView(QWidget *parent)
 
 void TableView::keyPressEvent(QKeyEvent *e)
 {
+    // QAbstractItemView thinks it is a good idea to handle 'copy', but we don't want that
+    if (e == QKeySequence::Copy) {
+        e->ignore();
+        return;
+    }
+
     QTableView::keyPressEvent(e);
 
 #if !defined(Q_OS_MACOS)
