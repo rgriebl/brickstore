@@ -27,6 +27,7 @@
 #include <QMouseEvent>
 #include <QMessageBox>
 #include <QMenuBar>
+#include <QToolTip>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -760,22 +761,42 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &SettingsDialog::currenciesUpdated);
 
-    w_bl_username_note->hide();
     connect(w_bl_username, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool b = s.contains(QLatin1Char('@'));
-        if (w_bl_username_note->isVisible() != b) {
-            w_bl_username_note->setVisible(b);
-            w_bl_username->setProperty("showInputError", b);
+        bool isWrong = s.contains(QLatin1Char('@'));
+        bool wasWrong = w_bl_username->property("showInputError").toBool();
+
+        if (isWrong != wasWrong) {
+            w_bl_username->setProperty("showInputError", isWrong);
+
+            if (isWrong) {
+                QString msg = tr("Your username is required here - not your email address.");
+                w_bl_username->setToolTip(msg);
+                QToolTip::showText(w_bl_username->mapToGlobal(w_bl_username->rect().bottomLeft()),
+                                   msg, w_bl_username, { }, 2000);
+            } else {
+                w_bl_username->setToolTip({ });
+                QToolTip::hideText();
+            }
         }
     });
-    w_bl_password_note->hide();
     connect(w_bl_password, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool b = (s.length() > 15);
-        if (w_bl_password_note->isVisible() != b) {
-            w_bl_password_note->setVisible(b);
-            w_bl_password->setProperty("showInputError", b);
+        bool isWrong = (s.length() > 15);
+        bool wasWrong = w_bl_password->property("showInputError").toBool();
+
+        if (isWrong != wasWrong) {
+            w_bl_password->setProperty("showInputError", isWrong);
+
+            if (isWrong) {
+                QString msg = tr("BrickLink's maximum password length is 15.");
+                w_bl_password->setToolTip(msg);
+                QToolTip::showText(w_bl_password->mapToGlobal(w_bl_password->rect().bottomLeft()),
+                                   msg, w_bl_password, { }, 2000);
+            } else {
+                w_bl_password->setToolTip({ });
+                QToolTip::hideText();
+            }
         }
     });
 
