@@ -185,6 +185,10 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
 
     w_printers->setCurrentIndex(defaultIdx);
 
+    QByteArray ba = Config::inst()->value(u"/MainWindow/PrintDialog/Geometry"_qs).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+
     QMetaObject::invokeMethod(this, [this]() {
         updatePrinter(w_printers->currentIndex());
         m_setupComplete = true;
@@ -194,6 +198,8 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
 
 PrintDialog::~PrintDialog()
 {
+    Config::inst()->setValue(u"/MainWindow/PrintDialog/Geometry"_qs, saveGeometry());
+
     delete m_pdfWriter;
     delete m_printer;
 }
