@@ -78,8 +78,15 @@ OnlineState *OnlineState::inst()
 OnlineState::OnlineState(QObject *parent)
     : QObject(parent)
 {
-    m_checkThread = new CheckThread(this);
-    m_checkThread->start();
+    m_online = checkOnline();
+}
+
+void OnlineState::startBackgroundCheck()
+{
+    if (!m_checkThread) {
+        m_checkThread = new CheckThread(this);
+        m_checkThread->start();
+    }
 }
 
 OnlineState::~OnlineState()

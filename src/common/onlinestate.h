@@ -28,6 +28,7 @@ public:
     ~OnlineState() override;
 
     bool isOnline() const;
+    void startBackgroundCheck();
 
 signals:
     void onlineStateChanged(bool isOnline);
@@ -38,7 +39,7 @@ private:
     static bool checkOnline();
 
     bool m_online = true;
-    CheckThread *m_checkThread;
+    CheckThread *m_checkThread = nullptr;
 
     static OnlineState *s_inst;
 

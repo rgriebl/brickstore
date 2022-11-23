@@ -271,6 +271,8 @@ void Application::afterInit()
     currencyUpdateTimer->callOnTimeout(Currency::inst(),
                                        []() { Currency::inst()->updateRates(true /*silent*/); });
 
+    OnlineState::inst()->startBackgroundCheck();
+
     QMetaObject::invokeMethod(this, [this]() { setupLDraw(); }, Qt::QueuedConnection);
 }
 
