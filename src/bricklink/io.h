@@ -79,7 +79,7 @@ ParseResult fromBrickLinkXML(const QByteArray &xml, Hint hint = Hint::Plain);
 
 ParseResult fromPartInventory(const Item *item, const Color *color = nullptr, int quantity = 1,
                               Condition condition = Condition::New, Status extraParts = Status::Extra,
-                              PartOutTraits partOutTraits = { });
+                              PartOutTraits partOutTraits = { }, Status status = Status::Include);
 
 } // namespace IO
 } // namespace BrickLink

@@ -441,8 +441,8 @@ void IO::ParseResult::addToDifferenceModeBase(const Lot *lot, const Lot &base)
 }
 
 static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, const Color *color,
-                                      int quantity, Condition condition,
-                                      Status extraParts, PartOutTraits partOutTraits)
+                                      int quantity, Condition condition, Status extraParts,
+                                      PartOutTraits partOutTraits, Status status)
 {
     const auto &parts = item->consistsOf();
 
@@ -451,6 +451,7 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
             auto *lot = new Lot(instructions, core()->color(0));
             lot->setQuantity(quantity);
             lot->setCondition(condition);
+            lot->setStatus(status);
 
             pr.addLot(std::move(lot));
         }
@@ -460,6 +461,7 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
             auto *lot = new Lot(originalBox, core()->color(0));
             lot->setQuantity(quantity);
             lot->setCondition(condition);
+            lot->setStatus(status);
 
             pr.addLot(std::move(lot));
         }
@@ -486,7 +488,7 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
         if ((partOutTraits.testFlag(PartOutTrait::SetsInSet) && (itemTypeId == 'S'))
                 || (partOutTraits.testFlag(PartOutTrait::Minifigs) && (itemTypeId == 'M'))) {
             fromPartInventoryInternal(pr, part.item(), part.color(), quantity * part.quantity(),
-                                      condition, extraParts, partOutTraits);
+                                      condition, extraParts, partOutTraits, status);
             continue;
         }
 
@@ -513,6 +515,8 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
             lot->setCondition(condition);
             if (addAsExtra)
                 lot->setStatus(Status::Extra);
+            else
+                lot->setStatus(status);
             lot->setAlternate(part.isAlternate());
             lot->setAlternateId(part.alternateId());
             lot->setCounterPart(part.isCounterPart());
@@ -522,12 +526,12 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
     }
 }
 
-IO::ParseResult IO::fromPartInventory(const Item *item, const Color *color,
-                                      int quantity, Condition condition,
-                                      Status extraParts, PartOutTraits partOutTraits)
+IO::ParseResult IO::fromPartInventory(const Item *item, const Color *color, int quantity,
+                                      Condition condition, Status extraParts,
+                                      PartOutTraits partOutTraits, Status status)
 {
     ParseResult pr;
-    fromPartInventoryInternal(pr, item, color, quantity, condition, extraParts, partOutTraits);
+    fromPartInventoryInternal(pr, item, color, quantity, condition, extraParts, partOutTraits, status);
     return pr;
 }
 

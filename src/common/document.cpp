@@ -1699,7 +1699,8 @@ void Document::saveToFile(const QString &fileName)
 Document *Document::fromPartInventory(const BrickLink::Item *item,
                                       const BrickLink::Color *color, int multiply,
                                       BrickLink::Condition condition, BrickLink::Status extraParts,
-                                      BrickLink::PartOutTraits partOutTraits)
+                                      BrickLink::PartOutTraits partOutTraits,
+                                      BrickLink::Status status)
 {
     Q_ASSERT(item);
     Q_ASSERT(item && item->hasInventory());
@@ -1707,7 +1708,7 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
     Q_ASSERT(multiply != 0);
 
     auto pr = BrickLink::IO::fromPartInventory(item, color, multiply, condition, extraParts,
-                                               partOutTraits);
+                                               partOutTraits, status);
 
     auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
     document->setTitle(tr("Inventory for %1").arg(QLatin1String(item->id())));

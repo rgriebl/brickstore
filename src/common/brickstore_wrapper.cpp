@@ -259,10 +259,11 @@ void QmlBrickStore::importBrickLinkCart(BrickLink::Cart *cart)
 void QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                         int multiply, BrickLink::Condition condition,
                                         BrickLink::Status extraParts,
-                                        BrickLink::PartOutTraits partOutTraits)
+                                        BrickLink::PartOutTraits partOutTraits,
+                                        BrickLink::Status status)
 {
     Document::fromPartInventory(item.wrappedObject(), color.wrappedObject(),
-                                multiply, condition, extraParts, partOutTraits);
+                                multiply, condition, extraParts, partOutTraits, status);
 }
 
 /*! \qmlmethod void BrickStore::updateDatabase()

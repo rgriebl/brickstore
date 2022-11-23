@@ -576,7 +576,8 @@ public:
     Q_INVOKABLE void importPartInventory(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                          int multiply, BrickLink::Condition condition,
                                          BrickLink::Status extraParts,
-                                         BrickLink::PartOutTraits partOutTraits);
+                                         BrickLink::PartOutTraits partOutTraits,
+                                         BrickLink::Status status = BrickLink::Status::Include);
 
     Q_INVOKABLE void updateDatabase();
 

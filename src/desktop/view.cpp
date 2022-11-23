@@ -583,6 +583,7 @@ QCoro::Task<> View::partOutItems()
             if (!lot->item() || !lot->item()->hasInventory())
                 continue;
 
+            BrickLink::Status status = lot->status();
             int quantity = lot->quantity();
             auto condition = lot->condition();
             BrickLink::PartOutTraits partOutTraits = { };
@@ -603,7 +604,8 @@ QCoro::Task<> View::partOutItems()
             if (inplace) {
                 if (quantity) {
                     auto pr = BrickLink::IO::fromPartInventory(lot->item(), lot->color(), quantity,
-                                                               condition, extraParts, partOutTraits);
+                                                               condition, extraParts, partOutTraits,
+                                                               status);
                     auto newLots = pr.takeLots();
                     if (!newLots.isEmpty()) {
                         m_model->insertLotsAfter(lot, std::move(newLots));
@@ -613,7 +615,7 @@ QCoro::Task<> View::partOutItems()
                 }
             } else {
                 Document::fromPartInventory(lot->item(), lot->color(), quantity, condition,
-                                            extraParts, partOutTraits);
+                                            extraParts, partOutTraits, status);
             }
         }
         if (inplace)
