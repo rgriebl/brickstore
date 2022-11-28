@@ -3,18 +3,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2022.11.2] - 2022-11-28
+
 New features:
 - BrickStore now has a full Swedish translation (thank you Johan!)
 - Added more part-out options: you can now also part out sets-in-set as well as Minifigs in one go.
+- When parting out from within a document, the *status* is now inherited by the new lots.
 
-Fixes:
-- Rendering some 3D parts with an excessive amount of lines could crash due to an out-of-memory in the 3D pipeline (the stud alone on a 48x48 baseplate consist of more than 300,000 lines).
+Quite a few fixes, most importantly:
+- Rendering some 3D parts with an excessive amount of lines could crash due to an out-of-memory in the 3D pipeline (just the studs on a 48x48 baseplate consist of more than 300,000 lines).
 - Fixed some glitches in the Add Item dialog's new browse history.
 - The `Reload User Scripts` command would sometimes not reload scripts.
 - Column widths in all the import dialogs are now saved and restored.
 
 Changes to the scripting interface:
 - The current JavaScript engine handles scoped enumerations correctly now, but both the documentation and the example scripts have been using the unscoped values, which are just *undefined* nowadays. Please adapt your scripts accordingly (e.g. `BrickLink.Used` needs to be `BrickLink.Condition.Used` now). See also [the documentation here](https://rgriebl.github.io/brickstore/extensions/).
+
 
 ## [2022.11.1] - 2022-11-08
 
@@ -475,7 +480,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.11.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.11.2...HEAD
+[2022.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.2
 [2022.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.1
 [2022.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.2
 [2022.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.1
