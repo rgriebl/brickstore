@@ -196,9 +196,11 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     });
     connect(m_fields, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, [&](int index) {
-        updateValueModel(m_fields->itemData(index).toInt());
-        emitFilterChanged();
-        m_value->setFocus();
+        if (index >= 0) {
+            updateValueModel(m_fields->itemData(index).toInt());
+            emitFilterChanged();
+            m_value->setFocus();
+        }
     });
     updateValueModel(filter.field());
 
@@ -225,6 +227,9 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
 
 void FilterTermWidget::updateValueModel(int field)
 {
+    if (!m_doc)
+        return;
+
     auto model = m_doc->model()->headerData(field, Qt::Horizontal,
                                             DocumentModel::HeaderValueModelRole)
             .value<QAbstractItemModel *>();
