@@ -537,7 +537,7 @@ elseif (LINUX)
     install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
     install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes)
 
-    # Arch has Qt 6.2+ and is handled upstream via AUR (TODO: update to Qt6)
+    # Arch has Qt 6.2+ and is handled upstream via AUR
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
     # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
 
@@ -546,9 +546,12 @@ elseif (LINUX)
 
     if (NOT BS_BACKEND)
         list(APPEND DEBIAN_PACKAGE_DEPENDS
+            "libqt6svg6"
+            "qml6-module-qtqml-workerscript"
             "qml6-module-qtquick"
             "qml6-module-qtquick-controls"
             "qml6-module-qt5compat-graphicaleffects"
+            "qml6-module-quick3d"
     )
     endif()
     string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS "${DEBIAN_PACKAGE_DEPENDS}")
