@@ -2332,6 +2332,12 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
     Filter::Combination nextcomb = Filter::Or;
 
     for (const Filter &f : m_filter) {
+        // short circuit
+        if (((nextcomb == Filter::And) && !result) || ((nextcomb == Filter::Or) && result)) {
+            nextcomb = f.combination();
+            continue;
+        }
+
         int firstcol = f.field();
         int lastcol = firstcol;
         if (firstcol < 0) {
