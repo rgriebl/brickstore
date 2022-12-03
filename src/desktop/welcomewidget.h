@@ -22,7 +22,7 @@ QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QGraphicsOpacityEffect)
 QT_FORWARD_DECLARE_CLASS(QPropertyAnimation)
 
-class WelcomeButton;
+class BetterCommandButton;
 
 
 class WelcomeWidget : public QWidget

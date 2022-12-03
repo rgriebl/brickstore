@@ -8,6 +8,8 @@ qt_add_library(desktop_module STATIC
     additemdialog.ui
     announcementsdialog.h
     announcementsdialog.cpp
+    bettercommandbutton.cpp
+    bettercommandbutton.h
     betteritemdelegate.cpp
     betteritemdelegate.h
     brickstoreproxystyle.cpp
