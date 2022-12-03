@@ -84,6 +84,13 @@ Application::Application(int &argc, char **argv)
     Q_UNUSED(argc)
     Q_UNUSED(argv)
 
+#if defined(Q_OS_MACOS)
+    // the System locale on macOS is ~1000 times slower than the built-in ones for toString()
+    QString sysLocaleName = QLocale::system().name();
+    QLocale::setDefault(QLocale(sysLocaleName));
+    qInfo() << "Enabled workaround for slow macOS system locale. System:" << sysLocaleName << ", mapped to:" << QLocale().name();
+#endif
+
     s_inst = this;
 
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
