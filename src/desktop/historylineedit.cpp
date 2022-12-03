@@ -258,7 +258,7 @@ void HistoryLineEdit::setFilterPixmap()
     // only the right side of the icon will react to mouse clicks
     QPixmap filterPix(QIcon::fromTheme(u"view-filter"_qs)
                       .pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));
-    {
+    if (!filterPix.isNull()) {
         QPainter p(&filterPix);
         QStyleOption so;
         so.initFrom(this);
@@ -271,9 +271,10 @@ void HistoryLineEdit::setFilterPixmap()
 #endif
         so.rect = QRect(0, so.rect.bottom() - mbi, mbi, mbi);
         style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, this);
-    }
-    m_popupAction->setIcon(QIcon(filterPix));
+        p.end();
 
+        m_popupAction->setIcon(QIcon(filterPix));
+    }
 }
 
 void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
