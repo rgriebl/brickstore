@@ -246,9 +246,9 @@ jobs:
         echo "Using NDK: $ANDROID_SDK_ROOT/ndk/${{ matrix.config.android_ndk }}"
         echo "QT_HOST_PATH: $(readlink -f $Qt6_DIR/../gcc_64)"
         # fix build-tools 33 (dx missing)
-        if [ -e $ANDROID_SDK_ROOT/build-tools/33.0.0 ]; then
-          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.0/lib/d8.jar $ANDROID_SDK_ROOT/build-tools/33.0.0/lib/dx.jar
-          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.0/d8 $ANDROID_SDK_ROOT/build-tools/33.0.0/dx
+        if [ -e $ANDROID_SDK_ROOT/build-tools/33.0.1 ]; then
+          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.1/lib/d8.jar $ANDROID_SDK_ROOT/build-tools/33.0.1/lib/dx.jar
+          sudo cp -a $ANDROID_SDK_ROOT/build-tools/33.0.1/d8 $ANDROID_SDK_ROOT/build-tools/33.0.1/dx
         fi
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
 
