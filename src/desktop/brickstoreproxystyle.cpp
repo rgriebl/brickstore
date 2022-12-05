@@ -26,6 +26,10 @@
 #include <QStyleFactory>
 #include <QPointer>
 #include <QDynamicPropertyChangeEvent>
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+#  include <QDialog>
+#  include <QKeyEvent>
+#endif
 
 #include "utility/utility.h"
 #include "desktop/headerview.h"
@@ -89,6 +93,11 @@ void BrickStoreProxyStyle::polish(QWidget *w)
                 }
             });
         }
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+    } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
+        if (qobject_cast<QDialog *>(cb->window()))
+            w->installEventFilter(this);
+#endif
     }
     QProxyStyle::polish(w);
 }
@@ -99,6 +108,10 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
             || qobject_cast<QDoubleSpinBox *>(w)
             || qobject_cast<QSpinBox *>(w)) {
         w->removeEventFilter(this);
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+    } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
+        w->removeEventFilter(this);
+#endif
     }
     QProxyStyle::unpolish(w);
 }
@@ -283,6 +296,14 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
                 w->setPalette(pal);
             }
         }
+#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
+    } else if (auto *cb = qobject_cast<QComboBox *>(o)) {
+        if (e->type() == QEvent::KeyPress) {
+            auto *ke = static_cast<QKeyEvent *>(e);
+            if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter)
+                ke->ignore();
+        }
+#endif
     }
 
     return QProxyStyle::eventFilter(o, e);
