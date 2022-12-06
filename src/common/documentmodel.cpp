@@ -1526,6 +1526,22 @@ void DocumentModel::setCurrencyCode(const QString &ccode, double crate)
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
+void DocumentModel::adjustLotCurrencyToModel(BrickLink::LotList &lots, const QString &fromCurrency)
+{
+    if (currencyCode() != fromCurrency) {
+        double r = Currency::inst()->crossRate(fromCurrency, currencyCode());
+        if (!qFuzzyCompare(r, 1.)) {
+            for (auto lot : lots) {
+                lot->setCost(lot->cost() * r);
+                lot->setPrice(lot->price() * r);
+                lot->setTierPrice(0, lot->tierPrice(0) * r);
+                lot->setTierPrice(1, lot->tierPrice(1) * r);
+                lot->setTierPrice(2, lot->tierPrice(2) * r);
+            }
+        }
+    }
+}
+
 void DocumentModel::applyTo(const LotList &lots, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback,
                             const QString &actionText)
 {
@@ -2702,20 +2718,21 @@ LotList DocumentModel::sortLotList(const LotList &list) const
 
 const QString DocumentLotsMimeData::s_mimetype = u"application/x-bricklink-invlots"_qs;
 
-DocumentLotsMimeData::DocumentLotsMimeData(const LotList &lots)
+DocumentLotsMimeData::DocumentLotsMimeData(const LotList &lots, const QString &currencyCode)
     : QMimeData()
 {
-    setLots(lots);
+    setLots(lots, currencyCode);
 }
 
-void DocumentLotsMimeData::setLots(const LotList &lots)
+void DocumentLotsMimeData::setLots(const LotList &lots, const QString &currencyCode)
 {
     QByteArray data;
     QString text;
 
     QDataStream ds(&data, QIODevice::WriteOnly);
+    ds << QByteArray("LOTS") << qint32(1);
 
-    ds << quint32(lots.count());
+    ds << currencyCode << quint32(lots.count());
     for (const Lot *lot : lots) {
         lot->save(ds);
         if (!text.isEmpty())
@@ -2726,26 +2743,34 @@ void DocumentLotsMimeData::setLots(const LotList &lots)
     setData(s_mimetype, data);
 }
 
-LotList DocumentLotsMimeData::lots(const QMimeData *md)
+std::tuple<LotList, QString> DocumentLotsMimeData::lots(const QMimeData *md)
 {
     LotList lots;
+    QString currencyCode;
 
     if (md) {
         QByteArray data = md->data(s_mimetype);
         QDataStream ds(data);
 
-        if (!data.isEmpty()) {
-            quint32 count = 0;
-            ds >> count;
+        QByteArray tag;
+        qint32 version;
+        ds >> tag >> version;
+        if ((ds.status() != QDataStream::Ok) || (tag != "LOTS") || (version != 1))
+            return { };
 
-            lots.reserve(count);
-            for (; count && !ds.atEnd(); count--) {
-                if (auto lot = Lot::restore(ds))
-                    lots << lot;
-            }
+        quint32 count = 0;
+        ds >> currencyCode >> count;
+
+        if ((ds.status() != QDataStream::Ok) || (currencyCode.size() != 3) || (count > 1000000))
+            return { };
+
+        lots.reserve(count);
+        for (; count && !ds.atEnd(); count--) {
+            if (auto lot = Lot::restore(ds))
+                lots << lot;
         }
     }
-    return lots;
+    return { lots, currencyCode };
 }
 
 QStringList DocumentLotsMimeData::formats() const

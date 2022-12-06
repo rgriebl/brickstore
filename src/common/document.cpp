@@ -275,10 +275,12 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "edit_copy", [this](auto) { copy(); } },
         { "edit_duplicate", [this](auto) { duplicate(); } },
         { "edit_paste", [this](auto) -> QCoro::Task<> {
-              LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
               QModelIndex oldCurrentIdx;
 
               if (!lots.empty()) {
+                  m_model->adjustLotCurrencyToModel(lots, currencyCode);
+
                   if (!selectedLots().isEmpty()) {
                        if (co_await UIHelpers::question(tr("Overwrite the currently selected items?"),
                                                         UIHelpers::Yes | UIHelpers::No, UIHelpers::Yes
@@ -296,9 +298,11 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_paste_silent", [this](auto) {
-              LotList lots = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
-              if (!lots.empty())
+              auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              if (!lots.empty()) {
+                  m_model->adjustLotCurrencyToModel(lots, currencyCode);
                   m_model->addLots(std::move(lots), DocumentModel::AddLotMode::AddAsNew);
+              }
           } },
         { "edit_mergeitems", [this](auto) {
               if (!selectedLots().isEmpty())
@@ -802,8 +806,10 @@ void Document::cut()
 
 void Document::copy()
 {
-    if (!m_selectedLots.isEmpty())
-        Application::inst()->mimeClipboardSet(new DocumentLotsMimeData(m_selectedLots));
+    if (!m_selectedLots.isEmpty()) {
+        Application::inst()->mimeClipboardSet(new DocumentLotsMimeData(m_selectedLots,
+                                                                       model()->currencyCode()));
+    }
 }
 
 void Document::duplicate()

@@ -52,7 +52,9 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
     layout->addWidget(m_document, 1, 0, 1, 2);
     layout->addWidget(m_documentList, 2, 1, 1, 1);
 
-    m_lotsFromClipboard = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+    auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+    m_lotsFromClipboard = lots;
+    m_currencyCodeFromClipboard = currencyCode;
 
     const auto docs = DocumentList::inst()->documents();
     for (const Document *doc : docs) {
@@ -94,21 +96,38 @@ LotList SelectDocument::lots() const
 {
     LotList srcList;
 
+    if (!isDocumentSelected())
+        return srcList;
+
     if (m_clipboard->isChecked()) {
         srcList = m_lotsFromClipboard;
     } else {
-        if (!m_documentList->selectedItems().isEmpty()) {
-            const auto *model = m_documentList->selectedItems().constFirst()
-                    ->data(Qt::UserRole).value<DocumentModel *>();
-            if (model)
-                srcList = model->lots();
-        }
+        const auto *model = m_documentList->selectedItems().constFirst()
+                ->data(Qt::UserRole).value<DocumentModel *>();
+        if (model)
+            srcList = model->lots();
     }
 
     LotList list;
     for (const Lot *lot : qAsConst(srcList))
         list << new Lot(*lot);
     return list;
+}
+
+QString SelectDocument::currencyCode() const
+{
+    if (!isDocumentSelected())
+        return { };
+
+    if (m_clipboard->isChecked()) {
+        return m_currencyCodeFromClipboard;
+    } else  {
+        const auto *model = m_documentList->selectedItems().constFirst()
+                ->data(Qt::UserRole).value<DocumentModel *>();
+        if (model)
+            return model->currencyCode();
+    }
+    return { };
 }
 
 SelectDocument::~SelectDocument()
@@ -151,6 +170,11 @@ SelectDocumentDialog::SelectDocumentDialog(const DocumentModel *self, const QStr
 LotList SelectDocumentDialog::lots() const
 {
     return m_sd->lots();
+}
+
+QString SelectDocumentDialog::currencyCode() const
+{
+    return m_sd->currencyCode();
 }
 
 
@@ -241,6 +265,11 @@ SelectCopyMergeDialog::~SelectCopyMergeDialog()
 LotList SelectCopyMergeDialog::lots() const
 {
     return m_sd->lots();
+}
+
+QString SelectCopyMergeDialog::currencyCode() const
+{
+    return m_sd->currencyCode();
 }
 
 QHash<DocumentModel::Field, DocumentModel::MergeMode> SelectCopyMergeDialog::fieldMergeModes() const

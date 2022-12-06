@@ -330,8 +330,10 @@ View::View(Document *document, QWidget *parent)
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   LotList lots = dlg.lots();
-                  if (!lots.empty())
+                  if (!lots.empty()) {
+                      m_model->adjustLotCurrencyToModel(lots, dlg.currencyCode());
                       m_document->copyFields(lots, dlg.fieldMergeModes());
+                  }
                   qDeleteAll(lots);
               }
           } },

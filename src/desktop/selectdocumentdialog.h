@@ -35,12 +35,14 @@ public:
 
     bool isDocumentSelected() const;
     BrickLink::LotList lots() const;
+    QString currencyCode() const;
 
 signals:
     void documentSelected(bool valid);
 
 private:
     LotList m_lotsFromClipboard;
+    QString m_currencyCodeFromClipboard;
 
     QRadioButton *m_clipboard;
     QRadioButton *m_document;
@@ -56,6 +58,7 @@ public:
                          QWidget *parent = nullptr);
 
     LotList lots() const;
+    QString currencyCode() const;
     
 private:
     SelectDocument *m_sd;
@@ -72,6 +75,7 @@ public:
     ~SelectCopyMergeDialog() override;
 
     LotList lots() const;
+    QString currencyCode() const;
     QHash<DocumentModel::Field, DocumentModel::MergeMode> fieldMergeModes() const;
 
 protected:

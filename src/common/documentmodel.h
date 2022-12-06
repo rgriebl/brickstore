@@ -282,6 +282,8 @@ public:
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, double crate = 1.);
 
+    void adjustLotCurrencyToModel(LotList &lots, const QString &fromCurrency);
+
     Filter::Parser *filterParser();
 
 public:
@@ -411,15 +413,16 @@ class DocumentLotsMimeData : public QMimeData
 {
     Q_OBJECT
 public:
-    DocumentLotsMimeData(const LotList &lots);
+    DocumentLotsMimeData(const LotList &lots, const QString &currencyCode);
 
     QStringList formats() const override;
     bool hasFormat(const QString &mimeType) const override;
 
-    void setLots(const LotList &lots);
-    static BrickLink::LotList lots(const QMimeData *md);
+    static std::tuple<BrickLink::LotList, QString> lots(const QMimeData *md);
 
 private:
+    void setLots(const LotList &lots, const QString &currencyCode);
+
     static const QString s_mimetype;
 };
 
