@@ -25,6 +25,7 @@
 #include <QDebug>
 #include <QKeySequence>
 #include <QStringBuilder>
+#include <QFileInfo>
 
 #include "config.h"
 
@@ -179,7 +180,7 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 #endif
     }
     if (cfgver < mkver(2022, 6, 3)) {
-        auto vl = Config::inst()->value(u"Announcements/ReadIds"_qs).toList();
+        auto vl = value(u"Announcements/ReadIds"_qs).toList();
         for (QVariant &v : vl) {
             if (v.typeId() == QMetaType::ULongLong) {
                 quint64 q = v.toULongLong();
@@ -188,7 +189,21 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
                 v.setValue<quint32>(quint32(q));
             }
         }
-        Config::inst()->setValue(u"Announcements/ReadIds"_qs, vl);
+        setValue(u"Announcements/ReadIds"_qs, vl);
+    }
+    if (cfgver < mkver(2022, 12, 1)) {
+#if defined(BS_DESKTOP)
+        const auto recentFiles = value(u"Files/Recent"_qs).toStringList();
+        beginWriteArray(u"RecentFiles"_qs);
+        for (int i = 0; i < recentFiles.size(); ++i) {
+            QFileInfo fi(recentFiles.at(i));
+            setArrayIndex(i);
+            setValue(u"Path"_qs, fi.absoluteFilePath());
+            setValue(u"Name"_qs, fi.fileName());
+        }
+        endArray();
+#endif
+        remove(u"Files"_qs);
     }
 }
 
@@ -206,19 +221,6 @@ QVariantList Config::availableLanguages() const
                   });
     }
     return al;
-}
-
-QStringList Config::recentFiles() const
-{
-    return value(u"/Files/Recent"_qs).toStringList();
-}
-
-void Config::setRecentFiles(const QStringList &recent)
-{
-    if (recent != recentFiles()) {
-        setValue(u"/Files/Recent"_qs, recent);
-        emit recentFilesChanged(recent);
-    }
 }
 
 bool Config::showInputErrors() const

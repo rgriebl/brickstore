@@ -24,13 +24,14 @@
 #include <QSizeGrip>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
+#include <QDir>
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
-#include "common/config.h"
 #include "common/document.h"
 #include "common/humanreadabletimedelta.h"
+#include "common/recentfiles.h"
 #include "bettercommandbutton.h"
 #include "flowlayout.h"
 #include "welcomewidget.h"
@@ -89,24 +90,24 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
             delete li;
         }
 
-        auto recent = Config::inst()->recentFiles();
-        if (recent.isEmpty()) {
+        if (RecentFiles::inst()->count() == 0) {
             if (!m_no_recent)
                 m_no_recent = new QLabel();
             recent_layout->addWidget(m_no_recent);
         }
 
-        for (const auto &f : recent) {
-            auto b = new BetterCommandButton(QFileInfo(f).fileName(), QFileInfo(f).absolutePath());
+        for (int i = 0; i < RecentFiles::inst()->count(); ++i) {
+            auto [filePath, fileName] = RecentFiles::inst()->filePathAndName(i);
+            auto b = new BetterCommandButton(fileName, QDir::toNativeSeparators(filePath));
             b->setFocusPolicy(Qt::NoFocus);
             b->setIcon(m_docIcon);
             recent_layout->addWidget(b);
             connect(b, &BetterCommandButton::clicked,
-                    this, [f]() { Document::load(f); });
+                    this, [=]() { RecentFiles::inst()->open(i); });
         }
     };
     recreateRecentGroup();
-    connect(Config::inst(), &Config::recentFilesChanged,
+    connect(RecentFiles::inst(), &RecentFiles::recentFilesChanged,
             this, recreateRecentGroup);
 
     // document

@@ -1644,7 +1644,7 @@ Document *Document::loadFromFile(const QString &fileName)
     try {
         auto doc = DocumentIO::parseBsxInventory(&f);
         doc->setFilePath(fileName);
-        RecentFiles::inst()->add(fileName);
+        RecentFiles::inst()->add(doc->filePath(), doc->fileName());
         return doc;
     } catch (const Exception &e) {
         throw Exception(tr("Failed to load document %1: %2").arg(fileName).arg(e.error()));
@@ -1709,7 +1709,7 @@ void Document::saveToFile(const QString &fileName)
     model()->unsetModified();
     setFilePath(fileName);
 
-    RecentFiles::inst()->add(fileName);
+    RecentFiles::inst()->add(filePath(), this->fileName());
     deleteAutosave();
 }
 

@@ -30,9 +30,30 @@ RecentFiles::RecentFiles(QObject *parent)
         emit countChanged(count());
     });
 
-    const auto saved = Config::inst()->recentFiles();
-    for (const auto &file : saved)
-        m_fileInfos << QFileInfo(file);
+    auto config = Config::inst();
+    auto size = qBound(0, config->beginReadArray(u"RecentFiles"_qs), MaxRecentFiles);
+    for (int i = 0; i < size; ++i) {
+        config->setArrayIndex(i);
+        auto path = config->value(u"Path"_qs).toString();
+        auto name = config->value(u"Name"_qs).toString();
+        m_pathsAndNames.append({ path, name });
+    }
+    config->endArray();
+}
+
+void RecentFiles::save()
+{
+    emit recentFilesChanged();
+
+    auto config = Config::inst();
+    config->beginWriteArray(u"RecentFiles"_qs);
+    for (int i = 0; i < m_pathsAndNames.size(); ++i) {
+        const auto &pan = m_pathsAndNames.at(i);
+        config->setArrayIndex(i);
+        config->setValue(u"Path"_qs, pan.first);
+        config->setValue(u"Name"_qs, pan.second);
+    }
+    config->endArray();
 }
 
 RecentFiles *RecentFiles::inst()
@@ -42,50 +63,45 @@ RecentFiles *RecentFiles::inst()
     return s_inst;
 }
 
-void RecentFiles::add(const QString &file)
+void RecentFiles::add(const QString &filePath, const QString &fileName)
 {
-    QFileInfo fileInfo(file);
-    bool save = true;
+    QString absFilePath = filePath;
+#if !defined(BS_MOBILE)
+    absFilePath = QFileInfo(filePath).absoluteFilePath();
+#endif
 
-    int idx = int(m_fileInfos.indexOf(fileInfo));
+    auto pan = std::make_pair(absFilePath, fileName);
+
+    int idx = int(m_pathsAndNames.indexOf(pan));
     if (idx > 0) {
         beginMoveRows({ }, idx, idx, { }, 0);
-        m_fileInfos.move(idx, 0);
+        m_pathsAndNames.move(idx, 0);
         endMoveRows();
+        save();
     } else if (idx < 0) {
-        if (m_fileInfos.size() >= MaxRecentFiles) {
+        if (m_pathsAndNames.size() >= MaxRecentFiles) {
             beginRemoveRows({ }, MaxRecentFiles - 1, count() - 1);
-            m_fileInfos.resize(MaxRecentFiles - 1);
+            m_pathsAndNames.resize(MaxRecentFiles - 1);
             endRemoveRows();
         }
         beginInsertRows({ }, 0, 0);
-        m_fileInfos.prepend(fileInfo);
+        m_pathsAndNames.prepend(pan);
         endInsertRows();
-    } else {
-        save = false;
-    }
-
-    if (save) {
-        QStringList recent;
-        recent.reserve(m_fileInfos.count());
-        for (const auto &fi : qAsConst(m_fileInfos))
-            recent << QDir::toNativeSeparators(fi.absoluteFilePath());
-        Config::inst()->setRecentFiles(recent);
+        save();
     }
 }
 
 void RecentFiles::clear()
 {
     beginRemoveRows({ }, 0, count() - 1);
-    m_fileInfos.clear();
+    m_pathsAndNames.clear();
     endRemoveRows();
-
-    Config::inst()->setRecentFiles({ });
+    save();
 }
 
 int RecentFiles::count() const
 {
-    return int(m_fileInfos.count());
+    return int(m_pathsAndNames.count());
 }
 
 int RecentFiles::rowCount(const QModelIndex &parent) const
@@ -98,19 +114,28 @@ QVariant RecentFiles::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.row() < 0 || index.row() >= count())
         return { };
 
-    const QFileInfo &fi = m_fileInfos.at(index.row());
+    const auto [filePath, fileName] = m_pathsAndNames.at(index.row());
+#if !defined(BS_MOBILE)
+    QFileInfo fi(filePath);
+#endif
 
     switch (role) {
     case Qt::DisplayRole:
+#if defined(BS_MOBILE)
+        return fileName;
+#else
         return QDir::toNativeSeparators(fi.absoluteFilePath());
+#endif
     case FilePathRole:
-        return fi.absoluteFilePath();
+        return filePath;
     case FileNameRole:
-        return fi.fileName();
+        return fileName;
     case DirNameRole:
+#if defined(BS_MOBILE)
+        return QString { };
+#else
         return QDir::toNativeSeparators(fi.absolutePath());
-    case LastModifiedRole:
-        return fi.lastModified();
+#endif
     }
     return { };
 }
@@ -122,13 +147,21 @@ QHash<int, QByteArray> RecentFiles::roleNames() const
         { FilePathRole, "filePath" },
         { FileNameRole, "fileName" },
         { DirNameRole, "dirName" },
-        { LastModifiedRole, "lastModified" },
     };
+}
+
+std::pair<QString, QString> RecentFiles::filePathAndName(int index) const
+{
+    if ((index >= 0) && (index < m_pathsAndNames.size()))
+        return m_pathsAndNames.at(index);
+    else
+        return { };
 }
 
 void RecentFiles::open(int index)
 {
-    emit openDocument(data(createIndex(index, 0), FilePathRole).toString());
+    if ((index >= 0) && (index < m_pathsAndNames.size()))
+        emit openDocument(m_pathsAndNames.at(index).first);
 }
 
 #include "moc_recentfiles.cpp"

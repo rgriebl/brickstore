@@ -33,7 +33,6 @@ class Config : public QSettings
     Q_PROPERTY(bool restoreLastSession READ restoreLastSession WRITE setRestoreLastSession NOTIFY restoreLastSessionChanged)
     Q_PROPERTY(bool showInputErrors READ showInputErrors WRITE setShowInputErrors NOTIFY showInputErrorsChanged)
     Q_PROPERTY(bool showDifferenceIndicators READ showDifferenceIndicators WRITE setShowDifferenceIndicators NOTIFY showDifferenceIndicatorsChanged)
-    Q_PROPERTY(QStringList recentFiles READ recentFiles WRITE setRecentFiles NOTIFY recentFilesChanged)
     Q_PROPERTY(QString brickLinkUsername READ brickLinkUsername WRITE setBrickLinkUsername NOTIFY brickLinkCredentialsChanged)
     Q_PROPERTY(QString brickLinkPassword READ brickLinkPassword WRITE setBrickLinkPassword NOTIFY brickLinkCredentialsChanged)
     Q_PROPERTY(Config::UITheme uiTheme READ uiTheme WRITE setUITheme NOTIFY uiThemeChanged)
@@ -88,8 +87,6 @@ public:
 
     bool openBrowserOnExport() const;
     void setOpenBrowserOnExport(bool b);
-
-    QStringList recentFiles() const;
 
     static constexpr int MaxFilterHistory = 20;
 
@@ -169,8 +166,6 @@ public slots:
     void setShowDifferenceIndicators(bool b);
     void setOnlineStatus(bool b);
 
-    void setRecentFiles(const QStringList &recent);
-
     void setBrickLinkUsername(const QString &user);
     void setBrickLinkPassword(const QString &pass, bool doNotSave = false);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
@@ -201,7 +196,6 @@ signals:
     void visualChangesMarkModifiedChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
-    void recentFilesChanged(const QStringList &recent);
     void iconSizeChanged(Config::UISize iconSize);
     void fontSizePercentChanged(int p);
     void rowHeightPercentChanged(int p);
