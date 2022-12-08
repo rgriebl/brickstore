@@ -80,7 +80,7 @@ jobs:
           os: linux
           appimage: true
           qt_host: 'linux'
-          qt_version: '6.4.0'
+          qt_version: '6.4.1'
           qt_arch: 'gcc_64'
 
         - name: "macOS Universal"
@@ -88,7 +88,7 @@ jobs:
           runs-on: macos-11
           os: macos
           qt_host: 'mac'
-          qt_version: '6.4.0'
+          qt_version: '6.4.1'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
@@ -102,7 +102,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'gcc_64'
           qt_target: 'android'
-          qt_version: '6.4.0'
+          qt_version: '6.4.1'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: ''
@@ -114,7 +114,7 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.4.0'
+          qt_version: '6.4.1'
           qt_arch: 'ios'
           cmake_extra_config: ''
 

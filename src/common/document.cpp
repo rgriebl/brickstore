@@ -608,13 +608,18 @@ QString Document::filePath() const
 
 QString Document::fileName() const
 {
-    return QFileInfo(m_filePath).fileName();
+    return m_fileName;
 }
 
 void Document::setFilePath(const QString &str)
 {
     if (str != m_filePath) {
         m_filePath = str;
+#if defined(Q_OS_ANDROID)
+        m_fileName = Utility::Android::fileNameFromUrl(QUrl(str));
+#else
+        m_fileName = QFileInfo(str).fileName();
+#endif
         emit filePathChanged(str);
         emit fileNameChanged(fileName());
 
@@ -632,6 +637,14 @@ QString Document::filePathOrTitle() const
         return m_title;
 
     return m_filePath;
+}
+
+QString Document::fileNameOrTitle() const
+{
+    if (!m_fileName.isEmpty())
+        return m_fileName;
+    else
+        return m_title;
 }
 
 QString Document::title() const

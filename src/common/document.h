@@ -113,6 +113,7 @@ public:
     QString title() const;
     void setTitle(const QString &title);
     QString filePathOrTitle() const;
+    QString fileNameOrTitle() const;
 
     QImage thumbnail() const;
     void setThumbnail(const QImage &image);
@@ -320,6 +321,7 @@ private:
     QVector<ColumnData>   m_columnData;
 
     QString               m_filePath;
+    QString               m_fileName; // on mobile, this may be different from m_filePath
     QString               m_title;
     QImage                m_thumbnail;
 

@@ -22,6 +22,12 @@
 #include <QtGui/QPainter>
 #include <QtGui/QLinearGradient>
 
+#if defined(Q_OS_ANDROID)
+#  include <QCoreApplication>
+#  include <jni.h>
+#  include <QJniObject>
+#endif
+
 #include "utility.h"
 
 
@@ -282,4 +288,19 @@ QImage Utility::stripeImage(int h, const QColor &stripeColor, const QColor &base
 QString Utility::urlQueryEscape(const QString &str)
 {
     return QString::fromUtf8(QUrl::toPercentEncoding(str));
+}
+
+QString Utility::Android::fileNameFromUrl(const QUrl &url)
+{
+#if defined(Q_OS_ANDROID)
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    QJniObject jniUrl = QJniObject::fromString(url.toString());
+    auto jniFileName = activity.callObjectMethod("getFileName", "(Ljava/lang/String;)Ljava/lang/String;", jniUrl.object<jstring>());
+    auto fileName = jniFileName.toString();
+    qWarning() << "ANDROID: url=" << url << " -> filename=" << fileName;
+    return fileName;
+#else
+    Q_UNUSED(url);
+    return { };
+#endif
 }

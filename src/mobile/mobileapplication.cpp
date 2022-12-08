@@ -28,6 +28,22 @@
 #include "mobileuihelpers.h"
 #include "common/brickstore_wrapper.h"
 
+#if defined(Q_OS_ANDROID)
+#  include <jni.h>
+#  include <QJniObject>
+
+extern "C" JNIEXPORT void JNICALL
+Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)
+{
+    jboolean isCopy = false;
+    const char *utf8 = env->GetStringUTFChars(jurl, &isCopy);
+    qWarning() << "opening" << utf8;
+    QCoreApplication::postEvent(qApp, new QFileOpenEvent(QString::fromUtf8(utf8)));
+    env->ReleaseStringUTFChars(jurl, utf8);
+}
+
+#endif
+
 
 MobileApplication::MobileApplication(int &argc, char **argv)
     : Application(argc, argv)

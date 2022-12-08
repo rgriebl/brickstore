@@ -870,17 +870,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
     if (!prt)
         return false;
 
-    auto fileNameOrTitle = [](Document *doc) {
-        QFileInfo fi(doc->filePath());
-        if (fi.exists())
-            return doc->fileName();
-        const auto title = doc->title();
-        if (!title.isEmpty())
-            return title;
-        return doc->fileName();
-    };
-
-    prt->setDocName(fileNameOrTitle(document())); // no absolute paths allowed
+    prt->setDocName(document()->fileNameOrTitle()); // no absolute paths allowed
 
     QPainter p;
     if (!p.begin(prt))

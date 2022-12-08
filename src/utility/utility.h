@@ -66,4 +66,10 @@ QString urlQueryEscape(const QString &str);
 inline QString urlQueryEscape(const char *str)  { return urlQueryEscape(QString::fromLatin1(str)); }
 inline QString urlQueryEscape(const QByteArray &str)   { return urlQueryEscape(QString::fromLatin1(str)); }
 
+namespace Android {
+
+QString fileNameFromUrl(const QUrl &url);
+
+}
+
 } // namespace Utility

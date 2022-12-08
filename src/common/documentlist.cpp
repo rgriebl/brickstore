@@ -92,9 +92,10 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         QString s = document->title();
         if (s.isEmpty()) {
-            QFileInfo fi(document->filePath());
-            s = fi.fileName();
+            s = document->fileName();
 
+#if !defined(BS_MOBILE)
+            QFileInfo fi(document->filePath());
             QStringList clashes;
             std::for_each(m_documents.cbegin(), m_documents.cend(),
                           [s, document, &clashes](const Document *otherDoc) {
@@ -123,6 +124,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
                 }
                 s = fi.absoluteFilePath();
             }
+#endif
         }
         if (document->model()->isModified())
             s.append(u"*"_qs);
