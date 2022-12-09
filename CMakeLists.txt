@@ -463,6 +463,7 @@ if (MACOS)
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
         ${COPY_SENTRY_COMMAND}
+        COMMAND codesign --force -s - --deep $<TARGET_FILE_DIR:${PROJECT_NAME}>/../..
         COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
                 "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
         COMMENT "Creating macOS DMG. Please wait..."
