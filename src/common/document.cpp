@@ -854,7 +854,7 @@ void Document::duplicate()
 
     m_model->insertLotsAfter(selectionCopy, std::move(newLots));
 
-    model()->endMacro(tr("Duplicated %Ln item(s)", nullptr, selectionCopy.size()));
+    model()->endMacro(tr("Duplicated %Ln item(s)", nullptr, int(selectionCopy.size())));
 
     int colCount = m_model->columnCount();
     for (auto i = 0; i < newLotsCopy.size(); ++i) {

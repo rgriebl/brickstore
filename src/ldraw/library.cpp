@@ -469,7 +469,7 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
                 }
             } else {
                 QString testname = sp % u'/' % filename;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_IOS)
                 if (!QFile::exists(testname))
                     testname = testname.toLower();
 #endif
@@ -482,7 +482,7 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
             }
         }
     } else {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_IOS)
         if (!QFile::exists(filename))
             filename = filename.toLower();
 #endif

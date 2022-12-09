@@ -50,7 +50,8 @@ class QmlStyle : public QObject
     Q_PROPERTY(int leftScreenMargin READ leftScreenMargin NOTIFY screenMarginsChanged FINAL)
     Q_PROPERTY(int rightScreenMargin READ rightScreenMargin NOTIFY screenMarginsChanged FINAL)
 
-    Q_PROPERTY(QObject *rootWindow WRITE setRootWindow)
+    // this is really a write-once only property, but QML does not like these
+    Q_PROPERTY(QObject *rootWindow READ rootWindow WRITE setRootWindow NOTIFY rootWindowChanged FINAL)
 
 public:
     QmlStyle(QObject *parent = nullptr);
@@ -75,6 +76,7 @@ public:
     int leftScreenMargin() const;
     int rightScreenMargin() const;
 
+    QObject *rootWindow() const;
     void setRootWindow(QObject *root);
 
 signals:
@@ -82,6 +84,7 @@ signals:
     void darkThemeChanged(bool newDarkTheme);
     void styleColorChanged();
     void screenMarginsChanged();
+    void rootWindowChanged(); // dummy, never emitted
 
 private slots:
     void updateTheme();

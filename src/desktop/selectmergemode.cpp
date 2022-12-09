@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#pragma once
 
 #include <QButtonGroup>
 #include <QToolButton>

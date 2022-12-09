@@ -236,6 +236,11 @@ int QmlStyle::rightScreenMargin() const
     return rsm;
 }
 
+QObject *QmlStyle::rootWindow() const
+{
+    return m_root;
+}
+
 void QmlStyle::setRootWindow(QObject *root)
 {
     Q_ASSERT(!m_root);
