@@ -41,16 +41,13 @@ static inline qint32 mkver(int a, int b, int c)
 
 } // namespace
 
-static const char *organization_v12x = "patrickbrans.com";
-static const char *application_v12x = "BrickStock";
 #if defined(Q_OS_MACOS)
-static const char *organization_v11x = "softforge.de";
-static const char *organization = "brickstore.org";
+static const char *organization = "brickstore.org"; // this is wrong, but it can't be fixed easily
+#elif defined(Q_OS_IOS)
+static const char *organization = "brickforge.de";
 #else
-static const char *organization_v11x = "softforge";
 static const char *organization = "BrickStore";
 #endif
-static const char *application_v11x = "BrickStore";
 static const char *application = "BrickStore";
 
 
@@ -95,40 +92,25 @@ QString Config::scramble(const QString &str)
     return result;
 }
 
-QPair<QString, double> Config::legacyCurrencyCodeAndRate() const
-{
-    const QString localCCode = QLocale::system().currencySymbol(QLocale::CurrencyIsoCode);
-
-    QSettings old_v12x(QLatin1String { organization_v12x }, QLatin1String { application_v12x });
-    bool localized = old_v12x.value(u"/General/Money/Localized"_qs, false).toBool();
-    if (localized) {
-        return qMakePair(localCCode, old_v12x.value(u"/General/Money/Factor"_qs, 1).toDouble());
-    } else {
-        QSettings old_v11x(QLatin1String { organization_v11x }, QLatin1String { application_v11x });
-        localized = old_v11x.value(u"/General/Money/Localized"_qs, false).toBool();
-        if (localized)
-            return qMakePair(localCCode, old_v11x.value(u"/General/Money/Factor"_qs, 1).toDouble());
-    }
-    return qMakePair(QString(), 0);
-}
-
 void Config::upgrade(int vmajor, int vminor, int vpatch)
 {
     int cfgver = value(u"General/ConfigVersion"_qs, 0).toInt();
     setValue(u"General/ConfigVersion"_qs, mkver(vmajor, vminor, vpatch));
 
 #if defined(BS_DESKTOP)
-    auto copyOldConfig = [this](const char *org, const char *app) -> bool {
+    // import old settings from BrickStock 1.2.x
+    if (!value(u"General/ImportedV12xSettings"_qs, 0).toInt()) {
         static const std::vector<const char *> ignore = {
             "MainWindow/",
             "General/Registration/",
             "General/ConfigVersion",
+            "General/Money/",
             "General/lastApplicationUpdateCheck",
             "Internet/UseProxy",
             "Internet/Proxy"
         };
 
-        QSettings old(QLatin1String { org }, QLatin1String { app });
+        QSettings old(u"patrickbrans.com"_qs, u"BrickStock"_qs);
         if (old.value(u"General/ConfigVersion"_qs, 0).toInt()) {
             const auto allOldKeys = old.allKeys();
             for (const QString &key : allOldKeys) {
@@ -140,21 +122,10 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
                 if (!skip)
                     setValue(key, old.value(key));
             }
-            return true;
-        } else {
-            return false;
+            if (old.value(u"General/Money/Localized"_qs, false).toBool())
+                setValue(u"Rates/Legacy"_qs, old.value(u"General/Money/Factor"_qs, 1).toDouble());
         }
-    };
-
-    // import old settings from BrickStore 1.1.x
-    if (!value(u"General/ImportedV11xSettings"_qs, 0).toInt()) {
-        if (copyOldConfig(organization_v11x, application_v11x))
-            setValue(u"General/ImportedV11xSettings"_qs, 1);
-    }
-    // import old settings from BrickStock 1.2.x
-    if (!value(u"General/ImportedV12xSettings"_qs, 0).toInt()) {
-        if (copyOldConfig(organization_v12x, application_v12x))
-            setValue(u"General/ImportedV12xSettings"_qs, 1);
+        setValue(u"General/ImportedV12xSettings"_qs, 1);
     }
 #endif
 

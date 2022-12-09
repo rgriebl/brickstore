@@ -39,6 +39,7 @@ public:
     Q_INVOKABLE double crossRate(const QString &fromCode, const QString &toCode) const;
     Q_INVOKABLE double customRate(const QString &currencyCode) const;
     QStringList currencyCodes() const;
+    double legacyRate() const;
 
     Q_INVOKABLE void setCustomRate(const QString &currencyCode, double rate);
     Q_INVOKABLE void unsetCustomRate(const QString &currenyCode);
@@ -70,4 +71,5 @@ private:
     QHash<QString, double> m_customRates;
     QDateTime m_lastUpdate;
     bool m_silent = false;
+    double m_legacyRate = 0;
 };

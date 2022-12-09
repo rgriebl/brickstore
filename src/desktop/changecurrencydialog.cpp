@@ -1,3 +1,17 @@
+/* Copyright (C) 2004-2022 Robert Griebl. All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
+#include <QLocale>
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -5,7 +19,6 @@
 #include <QButtonGroup>
 #include <QMouseEvent>
 
-#include "common/config.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
 #include "changecurrencydialog.h"
@@ -53,10 +66,12 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
         m_wasLegacy = false;
 
     if (m_wasLegacy) {
-        auto legacy = Config::inst()->legacyCurrencyCodeAndRate();
-        if (!legacy.first.isEmpty() && !qFuzzyIsNull(legacy.second) && (m_to == legacy.first)) {
-            w_labelLegacy->setText(w_labelLegacy->text().arg(legacy.first,
-                                                             Currency::toDisplayString(legacy.second)));
+        const QString legacyCCode = QLocale::system().currencySymbol(QLocale::CurrencyIsoCode);
+        double legacyRate = Currency::inst()->legacyRate();
+
+        if (!legacyCCode.isEmpty() && !qFuzzyIsNull(legacyRate) && (m_to == legacyCCode)) {
+            w_labelLegacy->setText(w_labelLegacy->text().arg(legacyCCode,
+                                                             Currency::toDisplayString(legacyRate)));
         } else {
             m_wasLegacy = false;
         }

@@ -58,7 +58,6 @@ public:
     QString language() const;
     QLocale::MeasurementSystem measurementSystem() const;
 
-    QPair<QString, double> legacyCurrencyCodeAndRate() const;
     QString defaultCurrencyCode() const;
 
     QString documentDir() const;

@@ -57,6 +57,7 @@ Currency::Currency()
     m_lastUpdate = QDateTime::fromSecsSinceEpoch(tt);
     QStringList rates = Config::inst()->value(u"/Rates/Normal"_qs).toString().split(u',');
     QStringList customRates = Config::inst()->value(u"/Rates/Custom"_qs).toString().split(u',');
+    m_legacyRate = Config::inst()->value(u"/Rates/Legacy"_qs, 0).toDouble();
 
     parseRates(rates, m_rates);
     parseRates(customRates, m_customRates);
@@ -110,6 +111,11 @@ QStringList Currency::currencyCodes() const
     QStringList sl = m_rates.keys();
     sl.sort();
     return sl;
+}
+
+double Currency::legacyRate() const
+{
+    return m_legacyRate;
 }
 
 QHash<QString, double> Currency::rates() const
