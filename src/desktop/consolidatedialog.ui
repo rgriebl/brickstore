@@ -30,7 +30,7 @@
     </sizepolicy>
    </property>
    <property name="title">
-    <string notr="true">There are are %n possible consolidations</string>
+    <string notr="true">There are %n possible consolidations</string>
    </property>
    <property name="subTitle">
     <string>Please choose how you want to resolve them</string>
@@ -82,7 +82,7 @@
          <string>Ctrl+S</string>
         </property>
         <property name="description">
-         <string>A quick way to consolidate a large number of lots, but you are restricted when it comes to merge directions and options.</string>
+         <string>A quick way to consolidate a large number of lots, but you are restricted when it comes to merge destinations and options.</string>
         </property>
        </widget>
       </item>
@@ -111,7 +111,7 @@
          <string>Ctrl+I</string>
         </property>
         <property name="description">
-         <string>A step-by-step guide through each single consolidation, asking for input on merge directions and options.</string>
+         <string>A step-by-step guide through each single consolidation, asking for your input on merge destinations and options.</string>
         </property>
        </widget>
       </item>
@@ -182,7 +182,7 @@
     </sizepolicy>
    </property>
    <property name="title">
-    <string notr="true">There are are %n possible consolidations</string>
+    <string notr="true">There are %n possible consolidations</string>
    </property>
    <property name="subTitle">
     <string notr="true">Use these options to consolidate all lots</string>
@@ -214,22 +214,31 @@
      </widget>
     </item>
     <item>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>3</number>
       </property>
       <property name="leftMargin">
        <number>20</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Destination</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item>
        <widget class="QComboBox" name="w_defaultDestination"/>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

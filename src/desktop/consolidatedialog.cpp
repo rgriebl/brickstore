@@ -50,7 +50,7 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     w_individual->setIcon(QIcon::fromTheme(u"vcs-conflicting"_qs));
     w_justAdd->setIcon(QIcon::fromTheme(u"vcs-added"_qs));
 
-    QString title = tr("There are are %n possible consolidation(s)", nullptr, list.size());
+    QString title = tr("There are %n possible consolidation(s)", nullptr, list.size());
     startPage->setTitle(title);
     defaultsPage->setTitle(title);
 
@@ -101,16 +101,16 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     w_individualFieldMergeModes->setQuantityEnabled(false);
 
     if (addItems) {
-        w_defaultDestination->addItem(tr("Existing Item"), QVariant::fromValue(Destination::IntoExisting));
-        w_defaultDestination->addItem(tr("New Item"), QVariant::fromValue(Destination::IntoNew));
+        w_defaultDestination->addItem(tr("Existing lot"), QVariant::fromValue(Destination::IntoExisting));
+        w_defaultDestination->addItem(tr("New lot"), QVariant::fromValue(Destination::IntoNew));
 
         w_defaultDoNotDeleteEmpty->hide();
         w_individualDoNotDeleteEmpty->hide();
     } else {
-        w_defaultDestination->addItem(tr("Topmost in Sort Order"), QVariant::fromValue(Destination::IntoTopSorted));
-        w_defaultDestination->addItem(tr("Bottommost in Sort Order"), QVariant::fromValue(Destination::IntoBottomSorted));
-        w_defaultDestination->addItem(tr("Lowest Index"), QVariant::fromValue(Destination::IntoLowestIndex));
-        w_defaultDestination->addItem(tr("Highest Index"), QVariant::fromValue(Destination::IntoHighestIndex));
+        w_defaultDestination->addItem(tr("Topmost lot in sort order"), QVariant::fromValue(Destination::IntoTopSorted));
+        w_defaultDestination->addItem(tr("Bottommost lot in sort order"), QVariant::fromValue(Destination::IntoBottomSorted));
+        w_defaultDestination->addItem(tr("Lot with lowest index"), QVariant::fromValue(Destination::IntoLowestIndex));
+        w_defaultDestination->addItem(tr("Lot with highest index"), QVariant::fromValue(Destination::IntoHighestIndex));
 
         w_justAddSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
         w_justAdd->hide();
@@ -156,12 +156,19 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
             if (!unmerged) {
                 accept();
             } else {
-                QString question = tr("%1 of %2 consolidations will not be done, because no destination lot has been set.")
-                        .arg(unmerged).arg(m_list.size())
-                        % u"<br><br>"
-                        % tr("Do you still want to consolidate the rest?");
-                if (QMessageBox::question(this, tr("Consolidate"), question) == QMessageBox::Yes)
-                    accept();
+                QString title = tr("Consolidate");
+                QString text = tr("%1 of %2 consolidations will not be done, because no destination lot has been set.")
+                        .arg(unmerged).arg(m_list.size());
+
+                if (unmerged == m_list.size()) {
+                    QMessageBox::information(this, title, text);
+                    reject();
+                } else {
+                    text = text % u"<br><br>"
+                            % tr("Do you still want to consolidate the rest?");
+                    if (QMessageBox::question(this, title, text) == QMessageBox::Yes)
+                        accept();
+                }
             }
             return;
         }
