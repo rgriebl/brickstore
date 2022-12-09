@@ -89,6 +89,10 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     headerView->showSection(DocumentModel::Index);
     if (headerView->visualIndex(DocumentModel::Index) != 0)
         headerView->moveSection(headerView->visualIndex(DocumentModel::Index), 0);
+    for (auto field : { DocumentModel::Category, DocumentModel::ItemType,
+         DocumentModel::TotalWeight, DocumentModel::YearReleased, DocumentModel::Weight }) {
+        headerView->hideSection(field);
+    }
 
     w_individualMoreOptions->setExpandingWidget(w_individualFieldMergeModes);
     w_individualMoreOptions->setResizeTopLevelOnExpand(true);
@@ -132,6 +136,12 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     setButtonText(CustomButton1, buttonText(BackButton));   // custom back
     setButtonText(CustomButton2, buttonText(NextButton));   // custom next
     setButtonText(CustomButton3, buttonText(FinishButton)); // custom finish
+
+    connect(w_individualDestination, &QTableView::activated,
+            this, [this](const QModelIndex &) {
+        auto b = button((m_individualIdx < (m_list.size() - 1)) ? CustomButton2 : CustomButton3);
+        b->animateClick();
+    });
 
     connect(this, &QWizard::customButtonClicked,
             this, [=](int which) {
@@ -348,6 +358,8 @@ void ConsolidateDialog::showIndividualMerge(int idx)
 
     individualPage->setTitle(tr("Consolidation %1 of %2").arg(m_individualIdx + 1).arg(m_list.size()));
     individualPage->setSubTitle(tr("Select the destination lot (from %1 source lots) and adjust the options if needed").arg(docModel->rowCount()));
+
+    w_individualDestination->setFocus();
 }
 
 int ConsolidateDialog::calculateIndex(const DocumentModel::Consolidate &consolidate,

@@ -162,16 +162,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     QColor fg = option.palette.color(cg, QPalette::Text);
 
     if (selected) {
-        if (m_read_only) {
-            bg = Utility::gradientColor(bg, option.palette.color(cg, QPalette::Highlight));
-        } else {
-            bg = Utility::premultiplyAlpha(option.palette.color(QPalette::Active, QPalette::Highlight));
-            fg = Utility::premultiplyAlpha(option.palette.color(QPalette::Active, QPalette::HighlightedText));
-            if (!focus)
-                bg.setAlphaF(0.65f);
-            if (!active || disabled)
-                bg = QColor::fromHslF(bg.hslHueF(), bg.hslSaturationF() / 4, bg.lightnessF(), bg.alphaF());
-        }
+        bg = Utility::premultiplyAlpha(option.palette.color(QPalette::Active, QPalette::Highlight));
+        fg = Utility::premultiplyAlpha(option.palette.color(QPalette::Active, QPalette::HighlightedText));
+        if (!focus && !m_read_only)
+            bg.setAlphaF(0.65f);
+        if (!active || disabled)
+            bg = QColor::fromHslF(bg.hslHueF(), bg.hslSaturationF() / 4, bg.lightnessF(), bg.alphaF());
     }
 
     int x = option.rect.x(), y = option.rect.y();
