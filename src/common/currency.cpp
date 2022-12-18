@@ -53,11 +53,11 @@ Currency *Currency::s_inst = nullptr;
 Currency::Currency()
     : m_nam(nullptr)
 {
-    qint64 tt = Config::inst()->value(u"/Rates/LastUpdate"_qs, 0).toLongLong();
+    qint64 tt = Config::inst()->value(u"Rates/LastUpdate"_qs, 0).toLongLong();
     m_lastUpdate = QDateTime::fromSecsSinceEpoch(tt);
-    QStringList rates = Config::inst()->value(u"/Rates/Normal"_qs).toString().split(u',');
-    QStringList customRates = Config::inst()->value(u"/Rates/Custom"_qs).toString().split(u',');
-    m_legacyRate = Config::inst()->value(u"/Rates/Legacy"_qs, 0).toDouble();
+    QStringList rates = Config::inst()->value(u"Rates/Normal"_qs).toString().split(u',');
+    QStringList customRates = Config::inst()->value(u"Rates/Custom"_qs).toString().split(u',');
+    m_legacyRate = Config::inst()->value(u"Rates/Legacy"_qs, 0).toDouble();
 
     parseRates(rates, m_rates);
     parseRates(customRates, m_customRates);
@@ -65,21 +65,21 @@ Currency::Currency()
 
 Currency::~Currency()
 {
-    Config::inst()->setValue(u"/Rates/LastUpdate"_qs, m_lastUpdate.toSecsSinceEpoch());
+    Config::inst()->setValue(u"Rates/LastUpdate"_qs, m_lastUpdate.toSecsSinceEpoch());
 
     QStringList sl;
     for (auto it = m_rates.constBegin(); it != m_rates.constEnd(); ++it) {
         QString s = u"%1|%2"_qs;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue(u"/Rates/Normal"_qs, sl.join(u","));
+    Config::inst()->setValue(u"Rates/Normal"_qs, sl.join(u","));
 
     sl.clear();
     for (auto it = m_customRates.constBegin(); it != m_customRates.constEnd(); ++it) {
         QString s = u"%1|%2"_qs;
         sl << s.arg(it.key()).arg(it.value());
     }
-    Config::inst()->setValue(u"/Rates/Custom"_qs, sl.join(u","));
+    Config::inst()->setValue(u"Rates/Custom"_qs, sl.join(u","));
 
     s_inst = nullptr;
 }

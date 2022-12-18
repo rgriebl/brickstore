@@ -120,14 +120,14 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportWantedListDialog::updateWantedLists, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportWantedListDialog/Geometry"_qs)
+    QByteArray ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    ba = Config::inst()->value(u"/MainWindow/ImportWantedListDialog/Filter"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
-    ba = Config::inst()->value(u"/MainWindow/ImportWantedListDialog/ListState"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/ListState"_qs).toByteArray();
     if (!ba.isEmpty())
         w_wantedLists->header()->restoreState(ba);
 
@@ -136,9 +136,9 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
 ImportWantedListDialog::~ImportWantedListDialog()
 {
-    Config::inst()->setValue(u"/MainWindow/ImportWantedListDialog/Geometry"_qs, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/ImportWantedListDialog/Filter"_qs, w_filter->saveState());
-    Config::inst()->setValue(u"/MainWindow/ImportWantedListDialog/ListState"_qs, w_wantedLists->header()->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/Filter"_qs, w_filter->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/ListState"_qs, w_wantedLists->header()->saveState());
 }
 
 void ImportWantedListDialog::keyPressEvent(QKeyEvent *e)

@@ -120,14 +120,14 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportCartDialog::updateCarts, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/Geometry"_qs)
+    QByteArray ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
-    ba = Config::inst()->value(u"/MainWindow/ImportCartDialog/ListState"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportCartDialog/ListState"_qs).toByteArray();
     if (!ba.isEmpty())
         w_carts->header()->restoreState(ba);
 
@@ -136,9 +136,9 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
 ImportCartDialog::~ImportCartDialog()
 {
-    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/Filter"_qs, w_filter->saveState());
-    Config::inst()->setValue(u"/MainWindow/ImportCartDialog/ListState"_qs, w_carts->header()->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"MainWindow/ImportCartDialog/Filter"_qs, w_filter->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportCartDialog/ListState"_qs, w_carts->header()->saveState());
 }
 
 void ImportCartDialog::keyPressEvent(QKeyEvent *e)

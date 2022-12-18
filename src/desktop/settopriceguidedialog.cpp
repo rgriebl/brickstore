@@ -33,17 +33,17 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     w_type_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
     w_type_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
 
-    w_type_time->setCurrentIndex(Config::inst()->value(u"/MainWindow/SetToPriceGuideDialog/Time"_qs,
+    w_type_time->setCurrentIndex(Config::inst()->value(u"MainWindow/SetToPriceGuideDialog/Time"_qs,
                                                        int(BrickLink::Time::PastSix)).toInt());
 
-    w_type_price->setCurrentIndex(Config::inst()->value(u"/MainWindow/SetToPriceGuideDialog/Price"_qs,
+    w_type_price->setCurrentIndex(Config::inst()->value(u"MainWindow/SetToPriceGuideDialog/Price"_qs,
                                                         int(BrickLink::Price::Average)).toInt());
 }
 
 SetToPriceGuideDialog::~SetToPriceGuideDialog()
 {
-    Config::inst()->setValue(u"/MainWindow/SetToPriceGuideDialog/Time"_qs, w_type_time->currentIndex());
-    Config::inst()->setValue(u"/MainWindow/SetToPriceGuideDialog/Price"_qs, w_type_price->currentIndex());
+    Config::inst()->setValue(u"MainWindow/SetToPriceGuideDialog/Time"_qs, w_type_time->currentIndex());
+    Config::inst()->setValue(u"MainWindow/SetToPriceGuideDialog/Price"_qs, w_type_price->currentIndex());
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const

@@ -31,7 +31,7 @@ enum PageIds {
     IndividualPage
 };
 
-QString ConsolidateDialog::s_baseConfigPath = u"/MainWindow/ConsolidateDialog/"_qs;
+QString ConsolidateDialog::s_baseConfigPath = u"MainWindow/ConsolidateDialog/"_qs;
 
 
 ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolidate> &list, bool addItems)

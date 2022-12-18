@@ -635,13 +635,13 @@ void Config::setRestoreLastSession(bool b)
 
 bool Config::openBrowserOnExport() const
 {
-    return value(u"/General/Export/OpenBrowser"_qs, true).toBool();
+    return value(u"General/Export/OpenBrowser"_qs, true).toBool();
 }
 
 void Config::setOpenBrowserOnExport(bool b)
 {
     if (openBrowserOnExport() != b) {
-        setValue(u"/General/Export/OpenBrowser"_qs, b);
+        setValue(u"General/Export/OpenBrowser"_qs, b);
         emit openBrowserOnExportChanged(b);
     }
 }

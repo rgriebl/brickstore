@@ -300,7 +300,7 @@ QCoro::Task<> Application::restoreLastSession()
 
     if (!autosavesRestored) {
         if (Config::inst()->restoreLastSession()) {
-            const auto files = Config::inst()->value(u"/MainWindow/LastSessionDocuments"_qs).toStringList();
+            const auto files = Config::inst()->value(u"MainWindow/LastSessionDocuments"_qs).toStringList();
             for (const auto &file : files)
                 Document::load(file);
         }

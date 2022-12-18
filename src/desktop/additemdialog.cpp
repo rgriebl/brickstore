@@ -272,16 +272,16 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     checkTieredPrices();
 
-    QByteArray ba = Config::inst()->value(u"/MainWindow/AddItemDialog/Geometry"_qs)
+    QByteArray ba = Config::inst()->value(u"MainWindow/AddItemDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/VSplitter"_qs)
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/VSplitter"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         w_splitter_vertical->restoreState(ba);
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/HSplitter"_qs)
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/HSplitter"_qs)
             .toByteArray();
     if (!ba.isEmpty()) {
         char hidden = ba.at(0);
@@ -299,21 +299,24 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_splitter_bottom->restoreState(ba.mid(1));
     }
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectItem"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/SelectItem"_qs).toByteArray();
     if (!w_select_item->restoreState(ba))
         w_select_item->restoreState(SelectItem::defaultState());
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/SelectColor"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/SelectColor"_qs).toByteArray();
     if (!w_select_color->restoreState(ba))
         w_select_color->restoreState(SelectColor::defaultState());
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/ItemDetails"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/Inventory"_qs).toByteArray();
+    w_inventory->restoreState(ba);
+
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/ItemDetails"_qs).toByteArray();
     restoreState(ba);
 
-    ba = Config::inst()->value(u"/MainWindow/AddItemDialog/BrowseState"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/BrowseState"_qs).toByteArray();
     restoreBrowseState(ba);
 
-    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/AddItemDialog/Filter"_qs).toStringList());
+    m_favoriteFilters->setStringList(Config::inst()->value(u"MainWindow/AddItemDialog/Filter"_qs).toStringList());
 
     new EventFilter(w_last_added, { QEvent::ToolTip }, [this](QObject *, QEvent *e) { // dynamic tooltip
         const auto *he = static_cast<QHelpEvent *>(e);
@@ -381,10 +384,10 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/Filter"_qs, m_favoriteFilters->stringList());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/Filter"_qs, m_favoriteFilters->stringList());
 
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/Geometry"_qs, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/VSplitter"_qs, w_splitter_vertical->saveState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/VSplitter"_qs, w_splitter_vertical->saveState());
 
     QByteArray ba = w_splitter_bottom->saveState();
     char hidden = 0;
@@ -395,11 +398,12 @@ AddItemDialog::~AddItemDialog()
     if (!m_sellerMode->isChecked())
         hidden |= (1 << 7);
     ba.prepend(hidden);
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/HSplitter"_qs, ba);
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/SelectItem"_qs, w_select_item->saveState());
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/SelectColor"_qs, w_select_color->saveState());
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/ItemDetails"_qs, saveState());
-    Config::inst()->setValue(u"/MainWindow/AddItemDialog/BrowseState"_qs, saveBrowseState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/HSplitter"_qs, ba);
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/SelectItem"_qs, w_select_item->saveState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/SelectColor"_qs, w_select_color->saveState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/Inventory"_qs, w_inventory->saveState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/ItemDetails"_qs, saveState());
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/BrowseState"_qs, saveBrowseState());
 
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);

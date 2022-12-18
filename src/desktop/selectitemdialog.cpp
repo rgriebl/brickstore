@@ -33,7 +33,7 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
     setupUi(this);
     w_si->setExcludeWithoutInventoryFilter(false);
 
-    auto ba = Config::inst()->value(u"/MainWindow/ModifyItemDialog/SelectItem"_qs)
+    auto ba = Config::inst()->value(u"MainWindow/ModifyItemDialog/SelectItem"_qs)
             .toByteArray();
     if (!w_si->restoreState(ba)) {
         w_si->restoreState(SelectItem::defaultState());
@@ -66,8 +66,8 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
 
     setFocusProxy(w_si);
 
-    m_geometryConfigKey = popupMode ? u"/MainWindow/ModifyItemPopup/Geometry"_qs
-                                    : u"/MainWindow/ModifyItemDialog/Geometry"_qs;
+    m_geometryConfigKey = popupMode ? u"MainWindow/ModifyItemPopup/Geometry"_qs
+                                    : u"MainWindow/ModifyItemDialog/Geometry"_qs;
 
     if (!popupMode)
         restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
@@ -77,7 +77,7 @@ SelectItemDialog::~SelectItemDialog()
 {
     if (!m_popupMode)
         Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/ModifyItemDialog/SelectItem"_qs, w_si->saveState());
+    Config::inst()->setValue(u"MainWindow/ModifyItemDialog/SelectItem"_qs, w_si->saveState());
 }
 
 void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)

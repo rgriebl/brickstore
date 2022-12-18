@@ -131,11 +131,11 @@ void MainWindow::show()
             setWindowState(Qt::WindowMaximized);
         }
 
-        auto geo = Config::inst()->value(u"/MainWindow/Layout/Geometry"_qs).toByteArray();
+        auto geo = Config::inst()->value(u"MainWindow/Layout/Geometry"_qs).toByteArray();
         if (!doNotRestoreGeometry)
             restoreGeometry(geo);
 
-        auto state = Config::inst()->value(u"/MainWindow/Layout/State"_qs).toByteArray();
+        auto state = Config::inst()->value(u"MainWindow/Layout/State"_qs).toByteArray();
         if (state.isEmpty() || !restoreState(state, DockStateVersion))
             m_toolbar->show();
 
@@ -152,7 +152,7 @@ QCoro::Task<> MainWindow::shutdown()
     QStringList files = DocumentList::inst()->allFiles();
 
     if (co_await Application::inst()->closeAllDocuments()) {
-        Config::inst()->setValue(u"/MainWindow/LastSessionDocuments"_qs, files);
+        Config::inst()->setValue(u"MainWindow/LastSessionDocuments"_qs, files);
 
 #if defined(Q_OS_MACOS)
         // from QtCreator:
@@ -165,8 +165,8 @@ QCoro::Task<> MainWindow::shutdown()
             setWindowState(windowState() & ~Qt::WindowFullScreen);
 #endif
 
-        Config::inst()->setValue(u"/MainWindow/Layout/Geometry"_qs, saveGeometry());
-        Config::inst()->setValue(u"/MainWindow/Layout/State"_qs, saveState(DockStateVersion));
+        Config::inst()->setValue(u"MainWindow/Layout/Geometry"_qs, saveGeometry());
+        Config::inst()->setValue(u"MainWindow/Layout/State"_qs, saveState(DockStateVersion));
 
         qApp->exit();
     }
@@ -240,7 +240,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::transferProgress,
             this, &MainWindow::transferProgressUpdate);
 
-    m_favoriteFilters->setStringList(Config::inst()->value(u"/MainWindow/Filter"_qs).toStringList());
+    m_favoriteFilters->setStringList(Config::inst()->value(u"MainWindow/Filter"_qs).toStringList());
 
     connectView(nullptr);
 
@@ -421,7 +421,7 @@ void MainWindow::languageChange()
 
 MainWindow::~MainWindow()
 {
-    Config::inst()->setValue(u"/MainWindow/Filter"_qs, m_favoriteFilters->stringList());
+    Config::inst()->setValue(u"MainWindow/Filter"_qs, m_favoriteFilters->stringList());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();

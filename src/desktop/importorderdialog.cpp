@@ -156,17 +156,17 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     if (!BrickLink::core()->orders()->rowCount())
         QMetaObject::invokeMethod(this, &ImportOrderDialog::updateOrders, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/Geometry"_qs)
+    QByteArray ba = Config::inst()->value(u"MainWindow/ImportOrderDialog/Geometry"_qs)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
-    int daysBack = Config::inst()->value(u"/MainWindow/ImportOrderDialog/DaysBack"_qs, -1).toInt();
+    int daysBack = Config::inst()->value(u"MainWindow/ImportOrderDialog/DaysBack"_qs, -1).toInt();
     if (daysBack > 0)
         w_daysBack->setValue(daysBack);
-    ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/Filter"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportOrderDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
-    ba = Config::inst()->value(u"/MainWindow/ImportOrderDialog/ListState"_qs).toByteArray();
+    ba = Config::inst()->value(u"MainWindow/ImportOrderDialog/ListState"_qs).toByteArray();
     if (!ba.isEmpty())
         w_orders->header()->restoreState(ba);
 
@@ -175,10 +175,10 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
 ImportOrderDialog::~ImportOrderDialog()
 {
-    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Geometry"_qs, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/DaysBack"_qs, w_daysBack->value());
-    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/Filter"_qs, w_filter->saveState());
-    Config::inst()->setValue(u"/MainWindow/ImportOrderDialog/ListState"_qs, w_orders->header()->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportOrderDialog/Geometry"_qs, saveGeometry());
+    Config::inst()->setValue(u"MainWindow/ImportOrderDialog/DaysBack"_qs, w_daysBack->value());
+    Config::inst()->setValue(u"MainWindow/ImportOrderDialog/Filter"_qs, w_filter->saveState());
+    Config::inst()->setValue(u"MainWindow/ImportOrderDialog/ListState"_qs, w_orders->header()->saveState());
 }
 
 void ImportOrderDialog::keyPressEvent(QKeyEvent *e)

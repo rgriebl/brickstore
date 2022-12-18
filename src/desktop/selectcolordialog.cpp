@@ -30,7 +30,7 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 
     setupUi(this);
 
-    auto ba = Config::inst()->value(u"/MainWindow/ModifyColorDialog/SelectColor"_qs)
+    auto ba = Config::inst()->value(u"MainWindow/ModifyColorDialog/SelectColor"_qs)
             .toByteArray();
     if (!w_sc->restoreState(ba))
         w_sc->restoreState(SelectColor::defaultState());
@@ -61,8 +61,8 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 
     setFocusProxy(w_sc);
 
-    m_geometryConfigKey = popupMode ? u"/MainWindow/ModifyColorPopup/Geometry"_qs
-                                    : u"/MainWindow/ModifyColorDialog/Geometry"_qs;
+    m_geometryConfigKey = popupMode ? u"MainWindow/ModifyColorPopup/Geometry"_qs
+                                    : u"MainWindow/ModifyColorDialog/Geometry"_qs;
 
     if (!popupMode)
         restoreGeometry(Config::inst()->value(m_geometryConfigKey).toByteArray());
@@ -72,7 +72,7 @@ SelectColorDialog::~SelectColorDialog()
 {
     if (!m_popupMode)
         Config::inst()->setValue(m_geometryConfigKey, saveGeometry());
-    Config::inst()->setValue(u"/MainWindow/ModifyColorDialog/SelectColor"_qs, w_sc->saveState());
+    Config::inst()->setValue(u"MainWindow/ModifyColorDialog/SelectColor"_qs, w_sc->saveState());
 }
 
 
