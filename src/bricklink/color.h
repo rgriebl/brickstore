@@ -76,6 +76,8 @@ public:
 
     static QString typeName(TypeFlag t);
 
+    uint index() const;   // only for internal use
+
     Color() = default;
     Color(std::nullptr_t) : Color() { } // for scripting only!
 

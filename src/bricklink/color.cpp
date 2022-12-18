@@ -17,6 +17,7 @@
 
 #include "utility/utility.h"
 #include "bricklink/color.h"
+#include "bricklink/core.h"
 
 
 namespace BrickLink {
@@ -39,6 +40,11 @@ QString Color::typeName(TypeFlag t)
         { Satin,       u"Satin"_qs },
     };
     return colortypes.value(t);
+}
+
+uint Color::index() const
+{
+    return uint(this - core()->colors().data());
 }
 
 const QImage Color::sampleImage(int w, int h) const
