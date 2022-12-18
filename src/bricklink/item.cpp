@@ -41,10 +41,17 @@ void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash
     for (auto it = appearHash.cbegin(); it != appearHash.cend(); ++it) {
         const auto &colorVector = it.value();
 
-        m_appears_in.push_back({ it.key() /*colorIndex*/, uint(colorVector.size()) /*vectorSize*/ });
+        AppearsInRecord cair;
+        cair.m_colorIndex = it.key();
+        cair.m_colorSize = colorVector.size();
+        m_appears_in.push_back(cair);
 
-        for (auto vecIt = colorVector.cbegin(); vecIt != colorVector.cend(); ++vecIt)
-            m_appears_in.push_back({ uint(vecIt->first) /*quantity*/, vecIt->second /*itemIndex*/ });
+        for (auto vecIt = colorVector.cbegin(); vecIt != colorVector.cend(); ++vecIt) {
+            AppearsInRecord iair;
+            iair.m_quantity = vecIt->first;
+            iair.m_itemIndex = vecIt->second;
+            m_appears_in.push_back(iair);
+        }
     }
     m_appears_in.shrink_to_fit();
 
@@ -56,26 +63,21 @@ AppearsIn Item::appearsIn(const Color *onlyColor) const
     AppearsIn appearsHash;
 
     for (auto it = m_appears_in.cbegin(); it != m_appears_in.cend(); ) {
-        // 1st level (color header):  m12: color index / m20: size of 2nd level vector
-        quint32 colorIndex = it->m12;
-        quint32 vectorSize = it->m20;
+        // 1st level (color header)
+        quint32 vectorSize = it->m_colorSize;
+        const Color *color = &core()->colors()[it->m_colorIndex];
 
         ++it;
-        const Color *color = &core()->colors()[colorIndex];
 
         if (!onlyColor || (color == onlyColor)) {
             AppearsInColor &vec = appearsHash[color];
 
             for (quint32 i = 0; i < vectorSize; ++i, ++it) {
-                // 2nd level (color entry):   m12: quantity / m20: item index
+                // 2nd level (color entry)
+                const Item *item = &core()->items()[it->m_itemIndex];
 
-                int quantity = int(it->m12);
-                quint32 itemIndex = it->m20;
-
-                const Item *item = &core()->items()[itemIndex];
-
-                if (quantity)
-                    vec.append(qMakePair(quantity, item));
+                if (it->m_quantity)
+                    vec.append(qMakePair(it->m_quantity, item));
             }
         } else {
             it += vectorSize; // skip 2nd level

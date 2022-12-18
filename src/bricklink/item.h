@@ -54,32 +54,40 @@ public:
     public:
         const Item *item() const;
         const Color *color() const;
-        int quantity() const        { return m_qty; }
+        int quantity() const        { return m_quantity; }
         bool isExtra() const        { return m_extra; }
         bool isAlternate() const    { return m_isalt; }
         uint alternateId() const    { return m_altid; }
         bool isCounterPart() const  { return m_cpart; }
 
+        uint itemIndex() const      { return m_itemIndex; }  // only for internal use
+        uint colorIndex() const     { return m_colorIndex; } // only for internal use
+
     private:
+        union {
+            struct {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-        quint64  m_qty      : 12;
-        quint64  m_itemIndex  : 20;
-        quint64  m_colorIndex : 12;
-        quint64  m_extra    : 1;
-        quint64  m_isalt    : 1;
-        quint64  m_altid    : 6;
-        quint64  m_cpart    : 1;
-        quint64  m_reserved : 11;
+                quint64  m_quantity   : 12;
+                quint64  m_itemIndex  : 20;
+                quint64  m_colorIndex : 12;
+                quint64  m_extra      : 1;
+                quint64  m_isalt      : 1;
+                quint64  m_altid      : 6;
+                quint64  m_cpart      : 1;
+                quint64  m_reserved   : 11;
 #else
-        quint64  m_reserved : 11;
-        quint64  m_cpart    : 1;
-        quint64  m_altid    : 6;
-        quint64  m_isalt    : 1;
-        quint64  m_extra    : 1;
-        quint64  m_colorIndex : 12;
-        quint64  m_itemIndex  : 20;
-        quint64  m_qty      : 12;
+                quint64  m_reserved   : 11;
+                quint64  m_cpart      : 1;
+                quint64  m_altid      : 6;
+                quint64  m_isalt      : 1;
+                quint64  m_extra      : 1;
+                quint64  m_colorIndex : 12;
+                quint64  m_itemIndex  : 20;
+                quint64  m_quantity   : 12;
 #endif
+            };
+            quint64 m_data = 0;
+        };
 
         friend class Core;
         friend class Database;
@@ -111,14 +119,26 @@ private:
     std::vector<qint16> m_additionalCategoryIndexes;
     std::vector<quint16> m_knownColorIndexes;
 
-    struct AppearsInRecord {
+    union AppearsInRecord {
+        struct {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-        quint32  m12  : 12;
-        quint32  m20  : 20;
+            quint32  m_colorIndex : 12;
+            quint32  m_colorSize  : 20;
 #else
-        quint32  m20  : 20;
-        quint32  m12  : 12;
+            quint32  m_colorSize  : 20;
+            quint32  m_colorIndex : 12;
 #endif
+        };
+        struct {
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+            quint32  m_quantity  : 12;
+            quint32  m_itemIndex : 20;
+#else
+            quint32  m_itemIndex : 20;
+            quint32  m_quantity  : 12;
+#endif
+        };
+        quint32 m_data = 0;
     };
     Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
 

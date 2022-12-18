@@ -23,6 +23,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonValue>
+#include <QtCore/QStringBuilder>
 
 #include "utility/exception.h"
 #include "utility/xmlhelpers.h"
@@ -391,14 +392,14 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             int colorIndex = findColorIndex(colorId);
 
             if (itemIndex == -1)
-                throw Exception("Unknown item-id %1").arg(QString::fromLatin1(itemTypeId + " " + itemId));
+                throw Exception("Unknown item-id %1 %2").arg(itemTypeId).arg(QString::fromLatin1(itemId));
             if (colorIndex == -1)
                 throw Exception("Unknown color-id %1").arg(colorId);
             if (!qty)
                 throw Exception("Invalid Quantity %1").arg(qty);
 
             Item::ConsistsOf co;
-            co.m_qty = qty;
+            co.m_quantity = qty;
             co.m_itemIndex = itemIndex;
             co.m_colorIndex = colorIndex;
             co.m_extra = extra;

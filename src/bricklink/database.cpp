@@ -618,14 +618,10 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_appears_in.clear();
     item.m_appears_in.reserve(appearsInSize);
 
-    union {
-        quint32 ui32;
-        Item::AppearsInRecord ai;
-    } appearsInUnion;
-
+    Item::AppearsInRecord air;
     while (appearsInSize-- > 0) {
-        dataStream >> appearsInUnion.ui32;
-        item.m_appears_in.push_back(appearsInUnion.ai);
+        dataStream >> air.m_data;
+        item.m_appears_in.push_back(air);
     }
     item.m_appears_in.shrink_to_fit();
 
@@ -634,14 +630,10 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_consists_of.clear();
     item.m_consists_of.reserve(int(consistsOfSize));
 
-    union {
-        quint64 ui64;
-        Item::ConsistsOf co;
-    } consistsOfUnion;
-
+    Item::ConsistsOf co;
     while (consistsOfSize-- > 0) {
-        dataStream >> consistsOfUnion.ui64;
-        item.m_consists_of.push_back(consistsOfUnion.co);
+        dataStream >> co.m_data;
+        item.m_consists_of.push_back(co);
     }
     item.m_consists_of.shrink_to_fit();
 
@@ -650,8 +642,8 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_knownColorIndexes.clear();
     item.m_knownColorIndexes.reserve(knownColorsSize);
 
+    quint16 colorIndex;
     while (knownColorsSize-- > 0) {
-        quint16 colorIndex;
         dataStream >> colorIndex;
         item.m_knownColorIndexes.push_back(colorIndex);
     }
@@ -662,8 +654,8 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     item.m_additionalCategoryIndexes.clear();
     item.m_additionalCategoryIndexes.reserve(additonalCategoriesSize);
 
+    qint16 catIndex;
     while (additonalCategoriesSize-- > 0) {
-        qint16 catIndex;
         dataStream >> catIndex;
         item.m_additionalCategoryIndexes.push_back(catIndex);
     }
@@ -679,26 +671,13 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
     if (v >= Version::V6)
         dataStream << item.m_year_to;
 
-    union {
-        quint32 ui32;
-        Item::AppearsInRecord ai;
-    } appearsInUnion;
-
     dataStream << quint32(item.m_appears_in.size());
-    for (const auto &ai : item.m_appears_in) {
-        appearsInUnion.ai = ai;
-        dataStream << appearsInUnion.ui32;
-    }
+    for (const auto &ai : item.m_appears_in)
+        dataStream << ai.m_data;
 
     dataStream << quint32(item.m_consists_of.size());
-    union {
-        quint64 ui64;
-        Item::ConsistsOf co;
-    } consistsOfUnion;
-    for (const auto &co : item.m_consists_of) {
-        consistsOfUnion.co = co;
-        dataStream << consistsOfUnion.ui64;
-    }
+    for (const auto &co : item.m_consists_of)
+        dataStream << co.m_data;
 
     dataStream << quint32(item.m_knownColorIndexes.size());
     for (const quint16 colorIndex : item.m_knownColorIndexes)
