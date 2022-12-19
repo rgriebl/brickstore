@@ -16,6 +16,8 @@
 #include <QAbstractTableModel>
 
 #include "bricklink/item.h"
+#include "bricklink/model.h"
+
 
 namespace BrickLink {
 
@@ -27,8 +29,6 @@ class InternalInventoryModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    enum class Mode { AppearsIn, ConsistsOf };
-
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -48,9 +48,15 @@ public:
     };
     Entry entry(const QModelIndex &idx) const;
 
+    using Mode = InventoryModel::Mode;
+    using SimpleLot = InventoryModel::SimpleLot;
+
 protected:
-    InternalInventoryModel(Mode mode, const QVector<QPair<const Item *, const Color *>> &list,
-                           QObject *parent);
+    InternalInventoryModel(Mode mode, const QVector<SimpleLot> &list, QObject *parent);
+
+    void fillConsistsOf(const QVector<SimpleLot> &list);
+    void fillAppearsIn(const QVector<SimpleLot> &list);
+    void fillCanBuild(const QVector<SimpleLot> &lots);
 
     QVector<Entry> m_items;
     Mode m_mode;

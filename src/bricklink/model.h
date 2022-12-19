@@ -230,9 +230,31 @@ class InventoryModel : public QSortFilterProxyModel
     Q_PROPERTY(int count READ count CONSTANT FINAL)
 
 public:
-    enum class Mode { AppearsIn, ConsistsOf };
+    enum class Mode { AppearsIn, ConsistsOf, CanBuild };
 
-    InventoryModel(Mode mode, const QVector<QPair<const Item *, const Color *>> &list, QObject *parent);
+    struct SimpleLot
+    {
+        SimpleLot() = default;
+        explicit SimpleLot(const BrickLink::Item *item, const BrickLink::Color *color,
+                           int quantity = 0)
+            : m_item(item), m_color(color), m_quantity(quantity)
+        { }
+
+        const BrickLink::Item *m_item = nullptr;
+        const BrickLink::Color *m_color = nullptr;
+        int m_quantity = 0;
+    };
+
+    enum Columns {
+        PictureColumn,
+        QuantityColumn,
+        ColorColumn,
+        ItemIdColumn,
+        ItemNameColumn,
+        ColumnCount,
+    };
+
+    InventoryModel(Mode mode, const QVector<SimpleLot> &simpleLots, QObject *parent);
 
     int count() const;
 

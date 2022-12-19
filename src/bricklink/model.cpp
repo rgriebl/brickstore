@@ -15,6 +15,8 @@
 #include <QtCore/QStringBuilder>
 #include <QtCore/QThreadStorage>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QBitArray>
+#include <QtConcurrent/QtConcurrentMap>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QPixmap>
@@ -22,6 +24,7 @@
 #include <QtGui/QIcon>
 
 #include "utility/utility.h"
+#include "utility/stopwatch.h"
 #include "bricklink/core.h"
 #include "bricklink/category.h"
 #include "bricklink/item.h"
@@ -91,8 +94,7 @@ QVariant ColorModel::data(const QModelIndex &index, int role) const
 
     if ((role == Qt::DisplayRole) || (role == Qt::EditRole)) {
         res = c->name();
-    }
-    else if (role == Qt::DecorationRole) {
+    } else if (role == Qt::DecorationRole) {
         QFontMetricsF fm(QGuiApplication::font());
         QImage img = c->sampleImage(int(fm.height()) + 4, int(fm.height()) + 4);
         if (!img.isNull()) {
@@ -102,23 +104,7 @@ QVariant ColorModel::data(const QModelIndex &index, int role) const
             ico.addPixmap(pix, QIcon::Selected);
             res = ico;
         }
-    }
-    else if (role == Qt::ToolTipRole) {
-        QString s;
-        if (c->id()) {
-            s = QString::fromLatin1(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br>%1: %2)")
-                    .arg(tr("RGB"), c->color().name(), c->color().name());
-
-            if (c->id() != Color::InvalidId)
-                s = s % u"<br>BrickLink id: " % QString::number(c->id());
-            if (c->ldrawId() != -1)
-                s = s % u"<br>LDraw id: " % QString::number(c->ldrawId());
-        } else {
-            s = c->name();
-        }
-        res = s;
-    }
-    else if (role == ColorPointerRole) {
+    } else if (role == ColorPointerRole) {
         res.setValue(c);
     }
     return res;
@@ -868,79 +854,186 @@ bool ItemModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 
 
-InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<QPair<const Item *,
-                                               const Color *>> &list, QObject *parent)
+InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLot> &list, QObject *parent)
     : QAbstractTableModel(parent)
     , m_mode(mode)
 {
     MODELTEST_ATTACH(this)
 
+    switch (mode) {
+        case Mode::ConsistsOf: fillConsistsOf(list); break;
+        case Mode::AppearsIn:  fillAppearsIn(list); break;
+        case Mode::CanBuild:   fillCanBuild(list); break;
+    }
+    connect(core(), &Core::pictureUpdated, this, [this](Picture *pic) {
+        if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
+            return;
+
+        for (int row = 0; row < m_items.size(); ++row) {
+            if (m_items.at(row).m_item == pic->item()) {
+                QModelIndex idx = index(row, InventoryModel::PictureColumn);
+                emit dataChanged(idx, idx);
+            }
+        }
+    });
+}
+
+void InternalInventoryModel::fillConsistsOf(const QVector<SimpleLot> &list)
+{
+    QHash<std::pair<const Item *, const Color *>, Entry> unique;
+
+    for (const auto &p : list) {
+        if (!p.m_item)
+            continue;
+
+        if (!p.m_item->hasInventory())
+            continue;
+
+        const auto consistsvec = p.m_item->consistsOf();
+
+        for (const auto &coi : consistsvec) {
+            if (coi.isExtra() || coi.isCounterPart() || coi.isAlternate())
+                continue;
+
+            const auto *partItem = coi.item();
+            const auto *partColor = coi.color();
+
+            if (p.m_color && p.m_color->id() && partItem->itemType()->hasColors()
+                    && partColor && (partColor->id() == 0)) {
+                partColor = p.m_color;
+            }
+
+            const auto key = std::make_pair(partItem, partColor);
+
+            auto it = unique.find(key);
+            if (it != unique.end())
+                it.value().m_quantity += coi.quantity();
+            else
+                unique.emplace(key, partItem, partColor, coi.quantity());
+        }
+    }
+
+    m_items = unique.values();
+}
+
+void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
+{
     QHash<std::pair<const Item *, const Color *>, Entry> unique;
     bool first_item = true;
     bool single_item = (list.count() == 1);
 
     for (const auto &p : list) {
-        const auto *item = p.first;
-        const auto *color = p.second;
-
-        if (!item)
+        if (!p.m_item)
             continue;
 
-        if (mode == Mode::ConsistsOf) {
-            if (!item->hasInventory())
-                continue;
+        const auto appearsvec = p.m_item->appearsIn(p.m_color);
+        for (const AppearsInColor &vec : appearsvec) {
+            for (const AppearsInItem &aii : vec) {
+                const auto key = std::make_pair(aii.second, nullptr);
 
-            const auto consistsvec = item->consistsOf();
+                if (single_item) {
+                    m_items.emplace_back(aii.second, nullptr, aii.first);
+                } else {
+                    auto it = unique.find(key);
+                    if (it != unique.end())
+                        ++it->m_quantity;
+                    else if (first_item)
+                        unique.emplace(key, aii.second, nullptr, 1);
+                }
+            }
+        }
+        first_item = false;
+    }
 
-            for (const auto &coi : consistsvec) {
-                if (coi.isExtra() || coi.isCounterPart() || coi.isAlternate())
+    for (auto it = unique.begin(); it != unique.end(); ++it) {
+        if (it->m_quantity >= list.count())
+            m_items.emplace_back(it->m_item, nullptr, -1);
+    }
+}
+
+void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
+{
+    QVector<std::pair<quint32, qint32>> have;
+    have.reserve(lots.size());
+    for (const auto &lot : lots) {
+        if (!lot.m_item || !lot.m_color || lot.m_quantity <= 0)
+            continue;
+
+        // squeeze the data as tightly as possible: this map/reduce is quite CPU intensive and
+        // comparing 32 bits instead of 128 for each check helps a lot (plus is also keeps more
+        // data in the cache, as each entry is only 64 bits instead of 192).
+        have.append({ (quint32(lot.m_color->index()) << 20) | quint32(lot.m_item->index()),
+                     lot.m_quantity });
+    }
+
+    static auto indexCompare = [](const std::pair<quint32, qint32> &a,
+            const std::pair<quint32, qint32> &b) -> bool {
+        return a.first < b.first;
+    };
+
+    // sort by colorindex | itemindex
+    std::sort(have.begin(), have.end(), indexCompare);
+
+    auto map = [=](const Item &set) -> const Item * {
+        bool matched = false;
+        if (set.hasInventory() && set.itemTypeId() == 'S') {
+            const QVector<Item::ConsistsOf> &inv = set.consistsOf();
+
+            // copy the have vector, as we need to modify it for counting down quantities
+            auto checkHave = have;
+
+            QBitArray alternatesMatched;
+
+            for (const auto &co : inv) {
+                if (co.isExtra() || co.isCounterPart())
                     continue;
 
-                const auto *partItem = coi.item();
-                const auto *partColor = coi.color();
-
-                if (color && color->id() && partItem->itemType()->hasColors()
-                        && partColor && (partColor->id() == 0)) {
-                    partColor = color;
+                uint alternate = co.alternateId();
+                if (alternate) {
+                    if (alternatesMatched.size() < alternate)
+                        alternatesMatched.resize(alternate);
+                    else if (alternatesMatched.at(alternate - 1))
+                        continue;
                 }
 
-                const auto key = std::make_pair(partItem, partColor);
-
-                auto it = unique.find(key);
-                if (it != unique.end())
-                    it.value().m_quantity += coi.quantity();
-                else
-                    unique.emplace(key, partItem, partColor, coi.quantity());
-            }
-        } else {
-            const auto appearsvec = item->appearsIn(color);
-            for (const AppearsInColor &vec : appearsvec) {
-                for (const AppearsInItem &aii : vec) {
-                    const auto key = std::make_pair(aii.second, nullptr);
-
-                    if (single_item) {
-                        m_items.emplace_back(aii.second, nullptr, aii.first);
-                    } else {
-                        auto it = unique.find(key);
-                        if (it != unique.end())
-                            ++it->m_quantity;
-                        else if (first_item)
-                            unique.emplace(key, aii.second, nullptr, 1);
+                quint32 index = (co.colorIndex() << 20) | co.itemIndex();
+                auto it = std::lower_bound(checkHave.begin(), checkHave.end(),
+                                           std::make_pair(index, 0), indexCompare);
+                if ((it != checkHave.end()) && (it->first == index)) {
+                    it->second -= co.quantity();
+                    if (it->second >= 0) {
+                        matched = true;
+                        if (alternate)
+                            alternatesMatched.setBit(alternate - 1);
+                        continue;
                     }
                 }
+                if (!alternate) {
+                    matched = false;
+                    break;
+                }
             }
-            first_item = false;
-        }
-    }
 
-    if (mode == Mode::ConsistsOf) {
-        m_items = unique.values();
-    } else {
-        for (auto it = unique.begin(); it != unique.end(); ++it) {
-            if (it->m_quantity >= list.count())
-                m_items.emplace_back(it->m_item, nullptr, -1);
+            // if we had alternatives, make sure all of them matched up
+            if (matched && !alternatesMatched.isEmpty())
+                matched = (alternatesMatched.count(true) == alternatesMatched.count());
         }
-    }
+        return matched ? &set : nullptr;
+    };
+
+    const auto &sets = core()->items();
+    QtConcurrent::mapped(sets.cbegin(), sets.cend(), map)
+            .then(this, [this](QFuture<const BrickLink::Item *> future) {
+        if (!m_items.isEmpty() || (m_mode != Mode::CanBuild))
+            return;
+
+        beginResetModel();
+        for (const auto *match : std::as_const(future)) {
+            if (match)
+                m_items.emplace_back(match, nullptr, -1);
+        }
+        endResetModel();
+    });
 }
 
 QModelIndex InternalInventoryModel::index(int row, int column, const QModelIndex &parent) const
@@ -962,7 +1055,7 @@ int InternalInventoryModel::rowCount(const QModelIndex &parent) const
 
 int InternalInventoryModel::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : (m_mode == Mode::AppearsIn ? 3 : 4);
+    return parent.isValid() ? 0 : InventoryModel::ColumnCount;
 }
 
 QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
@@ -978,22 +1071,29 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::DisplayRole:
         switch (index.column()) {
-        case 0: return e.m_quantity < 0 ? u"-"_qs : QString::number(e.m_quantity);
-        case 1: return QString(QLatin1Char(e.m_item->itemTypeId()) % u' '
-                              % QLatin1String(e.m_item->id()));
-        case 2: return e.m_item->name();
-        case 3: return e.m_color ? e.m_color->name() : u"-"_qs;
+        case InventoryModel::QuantityColumn:
+            return (e.m_quantity < 0) ? u"-"_qs : QString::number(e.m_quantity);
+        case InventoryModel::ItemIdColumn:
+            return QString(QChar::fromLatin1(e.m_item->itemTypeId()) % u' ' % QString::fromLatin1(e.m_item->id()));
+        case InventoryModel::ItemNameColumn:
+            return e.m_item->name();
+        case InventoryModel::ColorColumn:
+            return e.m_color ? e.m_color->name() : u"-"_qs;
         default: return { };
         }
     case Qt::DecorationRole:
         switch (index.column()) { //TODO: cache and size
-        case 3: return e.m_color ? e.m_color->sampleImage(20, 20) : QImage { };
-        default: return { };
+        case InventoryModel::ColorColumn:
+            return e.m_color ? e.m_color->sampleImage(20, 20) : QImage { };
+        default:
+            return { };
         }
     case ItemPointerRole:
-        return QVariant::fromValue(e.m_item);
+        return (index.column() != InventoryModel::ColorColumn)
+                ? QVariant::fromValue(e.m_item) : QVariant { };
     case ColorPointerRole:
-        return QVariant::fromValue((m_mode == Mode::ConsistsOf) ? e.m_color : e.m_item->defaultColor());
+        return QVariant::fromValue((m_mode == Mode::ConsistsOf)
+                                   ? e.m_color : e.m_item->defaultColor());
     case QuantityRole:
         return qMax(0, e.m_quantity);
     case NameRole:
@@ -1011,10 +1111,10 @@ QVariant InternalInventoryModel::headerData(int section, Qt::Orientation orient,
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
         switch (section) {
-        case 0: return tr("Qty.");
-        case 1: return tr("Item Id");
-        case 2: return tr("Description");
-        case 3: return tr("Color");
+        case InventoryModel::QuantityColumn: return tr("Qty.");
+        case InventoryModel::ColorColumn:    return tr("Color");
+        case InventoryModel::ItemIdColumn:   return tr("Item Id");
+        case InventoryModel::ItemNameColumn: return tr("Description");
         }
     }
     return QVariant();
@@ -1038,15 +1138,10 @@ QHash<int, QByteArray> InternalInventoryModel::roleNames() const
 // INVENTORY MODEL
 /////////////////////////////////////////////////////////////
 
-
-InventoryModel::InventoryModel(Mode mode, const QVector<QPair<const Item *, const Color *>> &list,
-                               QObject *parent)
+InventoryModel::InventoryModel(Mode mode, const QVector<SimpleLot> &simpleLots, QObject *parent)
     : QSortFilterProxyModel(parent)
 {
-    auto imode = (mode == Mode::AppearsIn) ? InternalInventoryModel::Mode::AppearsIn
-                                           : InternalInventoryModel::Mode::ConsistsOf;
-
-    setSourceModel(new InternalInventoryModel(imode, list, this));
+    setSourceModel(new InternalInventoryModel(mode, simpleLots, this));
 }
 
 int InventoryModel::count() const
@@ -1069,19 +1164,15 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     else {
         switch (left.column()) {
         default:
-        case  0: return e1.m_quantity < e2.m_quantity;
-        case  1: return (Utility::naturalCompare(QLatin1String(e1.m_item->id()),
-                                                 QLatin1String(e2.m_item->id())) < 0);
-        case  2: return (Utility::naturalCompare(e1.m_item->name(),
-                                                 e2.m_item->name()) < 0);
-        case  3: {
-            if (!e1.m_color)
-                return true;
-            else if (!e2.m_color)
-                return false;
-            else
-                return e1.m_color->name() < e2.m_color->name();
-        }
+        case InventoryModel::QuantityColumn:
+            return e1.m_quantity < e2.m_quantity;
+        case InventoryModel::ItemIdColumn:
+            return (Utility::naturalCompare(QLatin1String(e1.m_item->id()),
+                                            QLatin1String(e2.m_item->id())) < 0);
+        case InventoryModel::ItemNameColumn:
+            return (Utility::naturalCompare(e1.m_item->name(), e2.m_item->name()) < 0);
+        case InventoryModel::ColorColumn:
+            return !e1.m_color ? true : (!e2.m_color ? false : e1.m_color->name() < e2.m_color->name());
         }
     }
 }

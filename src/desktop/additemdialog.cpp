@@ -107,8 +107,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_invGoToAction = new QAction(this);
     connect(m_invGoToAction, &QAction::triggered, this, [this]() {
         const auto selected = w_inventory->selected();
-        if (selected.item)
-            goToItem(selected.item, selected.color);
+        if (selected.m_item)
+            goToItem(selected.m_item, selected.m_color);
     });
     w_inventory->addAction(m_invGoToAction);
 

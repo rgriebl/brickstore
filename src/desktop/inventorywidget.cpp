@@ -17,7 +17,7 @@
 #include <QActionEvent>
 #include <QHeaderView>
 #include <QApplication>
-#include <QTimer>
+#include <QBitArray>
 #include <QTreeView>
 #include <QToolButton>
 #include <QGridLayout>
@@ -33,12 +33,15 @@
 
 class InventoryWidgetPrivate {
 public:
-    QVector<QPair<const BrickLink::Item *, const BrickLink::Color *>> m_list;
+    QVector<BrickLink::InventoryModel::SimpleLot> m_lots;
     InventoryWidget::Mode m_mode = InventoryWidget::Mode::AppearsIn;
+    bool m_modeSet = false;
+    bool m_showCanBuild = false;
     QTreeView *m_view;
+    BrickLink::ItemThumbsDelegate *m_viewDelegate;
     QToolButton *m_appearsIn;
     QToolButton *m_consistsOf;
-    QTimer *m_resize_timer;
+    QToolButton *m_canBuild;
     QMenu *m_contextMenu;
     QAction *m_partOutAction;
     QAction *m_separatorAction;
@@ -48,12 +51,14 @@ public:
 };
 
 InventoryWidget::InventoryWidget(QWidget *parent)
+    : InventoryWidget(false, parent)
+{ }
+
+InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     : QFrame(parent)
     , d(new InventoryWidgetPrivate())
 {
-
-    d->m_resize_timer = new QTimer(this);
-    d->m_resize_timer->setSingleShot(true);
+    d->m_showCanBuild = showCanBuild;
 
     d->m_contextMenu = new QMenu(this);
 
@@ -63,12 +68,14 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     d->m_view->setAlternatingRowColors(true);
     d->m_view->setAllColumnsShowFocus(true);
     d->m_view->setUniformRowHeights(true);
+    d->m_view->setWordWrap(true);
     d->m_view->setRootIsDecorated(false);
     d->m_view->setSortingEnabled(true);
     d->m_view->sortByColumn(0, Qt::DescendingOrder);
     d->m_view->header()->setSortIndicatorShown(false);
     d->m_view->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->m_view->setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::None, this));
+    d->m_viewDelegate = new BrickLink::ItemThumbsDelegate(1., d->m_view);
+    d->m_view->setItemDelegate(d->m_viewDelegate);
 
     d->m_appearsIn = new QToolButton();
     d->m_appearsIn->setCheckable(true);
@@ -85,13 +92,24 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     d->m_consistsOf->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(d->m_consistsOf, &QToolButton::clicked, this, [this]() { setMode(Mode::ConsistsOf); });
 
+    d->m_canBuild = new QToolButton();
+    d->m_canBuild->setCheckable(true);
+    d->m_canBuild->setAutoExclusive(true);
+    d->m_canBuild->setAutoRaise(true);
+    d->m_canBuild->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    connect(d->m_canBuild, &QToolButton::clicked, this, [this]() { setMode(Mode::CanBuild); });
+
     auto *grid = new QGridLayout(this);
     grid->setContentsMargins(0, 0, 0, 0);
     grid->setSpacing(0);
     grid->setRowStretch(1, 10);
     grid->addWidget(d->m_appearsIn, 0, 0);
     grid->addWidget(d->m_consistsOf, 0, 1);
-    grid->addWidget(d->m_view, 1, 0, 1, 2);
+    if (d->m_showCanBuild)
+        grid->addWidget(d->m_canBuild, 0, 2);
+    else
+        d->m_canBuild->hide();
+    grid->addWidget(d->m_view, 1, 0, 1, d->m_showCanBuild ? 3 : 2);
 
     d->m_partOutAction = new QAction(this);
     d->m_partOutAction->setObjectName(u"appearsin_partoutitems"_qs);
@@ -105,8 +123,8 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     connect(d->m_catalogAction, &QAction::triggered, this, [this]() {
         const auto entry = selected();
 
-        if (entry.item)
-            BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, entry.item);
+        if (entry.m_item)
+            BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, entry.m_item);
     });
 
     d->m_priceGuideAction = new QAction(this);
@@ -115,9 +133,9 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     connect(d->m_priceGuideAction, &QAction::triggered, this, [this]() {
         const auto entry = selected();
 
-        if (entry.item)
-            BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, entry.item,
-                                       entry.color ? entry.color : BrickLink::core()->color(0));
+        if (entry.m_item)
+            BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, entry.m_item,
+                                       entry.m_color ? entry.m_color : BrickLink::core()->color(0));
     });
 
     d->m_lotsForSaleAction = new QAction(this);
@@ -126,9 +144,9 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     connect(d->m_lotsForSaleAction, &QAction::triggered, this, [this]() {
         const auto entry = selected();
 
-        if (entry.item)
-            BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, entry.item,
-                                       entry.color ? entry.color : BrickLink::core()->color(0));
+        if (entry.m_item)
+            BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, entry.m_item,
+                                       entry.m_color ? entry.m_color : BrickLink::core()->color(0));
     });
 
     d->m_contextMenu->addAction(d->m_partOutAction);
@@ -137,12 +155,9 @@ InventoryWidget::InventoryWidget(QWidget *parent)
     d->m_contextMenu->addAction(d->m_priceGuideAction);
     d->m_contextMenu->addAction(d->m_lotsForSaleAction);
 
-    connect(d->m_resize_timer, &QTimer::timeout,
-            this, &InventoryWidget::resizeColumns);
-
     connect(d->m_view, &QWidget::customContextMenuRequested,
             this, [this](const QPoint &pos) {
-        if (auto item = selected().item) {
+        if (auto item = selected().m_item) {
             d->m_partOutAction->setEnabled(item->hasInventory());
             d->m_contextMenu->popup(d->m_view->viewport()->mapToGlobal(pos));
         }
@@ -152,7 +167,8 @@ InventoryWidget::InventoryWidget(QWidget *parent)
             this, &InventoryWidget::partOut);
 
     languageChange();
-    setItem(nullptr, nullptr);
+    updateModel({ });
+    setMode(d->m_mode);
 }
 
 InventoryWidget::~InventoryWidget()
@@ -162,6 +178,7 @@ void InventoryWidget::languageChange()
 {
     d->m_appearsIn->setText(tr("Appears in"));
     d->m_consistsOf->setText(tr("Consists of"));
+    d->m_canBuild->setText(tr("Can build"));
     d->m_partOutAction->setText(tr("Part out Item..."));
     d->m_catalogAction->setText(tr("Show BrickLink Catalog Info..."));
     d->m_priceGuideAction->setText(tr("Show BrickLink Price Guide Info..."));
@@ -190,37 +207,86 @@ InventoryWidget::Mode InventoryWidget::mode() const
 
 void InventoryWidget::setMode(Mode newMode)
 {
-    if (d->m_mode != newMode) {
-        d->m_mode = newMode;
-        if (newMode == Mode::AppearsIn)
+    if ((d->m_mode != newMode) || !d->m_modeSet) {
+        d->m_mode = newMode;   
+        d->m_modeSet = true;
+
+        QBitArray columnVisible { BrickLink::InventoryModel::ColumnCount, true };
+        switch (d->m_mode) {
+        case Mode::AppearsIn:
             d->m_appearsIn->setChecked(true);
-        else
+            columnVisible[BrickLink::InventoryModel::ColorColumn] = false;
+            break;
+        case Mode::CanBuild:
+            d->m_canBuild->setChecked(true);
+            columnVisible[BrickLink::InventoryModel::QuantityColumn] = false;
+            columnVisible[BrickLink::InventoryModel::ColorColumn] = false;
+            break;
+        case Mode::ConsistsOf:
             d->m_consistsOf->setChecked(true);
-        updateModel(d->m_list);
+            break;
+        }
+        for (int c = 0; c < BrickLink::InventoryModel::ColumnCount; ++c)
+            d->m_view->setColumnHidden(c, !columnVisible.at(c));
+
+        updateModel(d->m_lots);
     }
 }
 
-const InventoryWidget::Item InventoryWidget::selected() const
+BrickLink::InventoryModel::SimpleLot InventoryWidget::selected() const
 {
     auto *m = qobject_cast<BrickLink::InventoryModel *>(d->m_view->model());
 
     if (m && !d->m_view->selectionModel()->selectedIndexes().isEmpty()) {
-        const auto idx = d->m_view->selectionModel()->selectedIndexes().front();
+        const auto idx = d->m_view->selectionModel()->selectedIndexes().front().siblingAtColumn(0);
         auto i = m->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
         auto c = m->data(idx, BrickLink::ColorPointerRole).value<const BrickLink::Color *>();
         auto q = m->data(idx, BrickLink::QuantityRole).toInt();
-        return Item { i, c, q };
+        return BrickLink::InventoryModel::SimpleLot { i, c, q };
     } else {
         return { };
     }
+}
+
+QByteArray InventoryWidget::saveState() const
+{
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("IW") << qint32(1)
+       << qint32(d->m_mode)
+       << d->m_viewDelegate->zoomFactor();
+
+    return ba;
+}
+
+bool InventoryWidget::restoreState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "IW") || (version < 1) || (version > 1))
+        return false;
+
+    qint32 mode;
+    double zoom;
+    ds >> mode >> zoom;
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    static QVector<int> validModes { int(Mode::AppearsIn), int(Mode::ConsistsOf), int(Mode::CanBuild) };
+    d->m_viewDelegate->setZoomFactor(zoom);
+    setMode(validModes.contains(mode) ? static_cast<Mode>(mode) : Mode::AppearsIn);
+
+    return true;
 }
 
 QCoro::Task<> InventoryWidget::partOut()
 {
     auto entry = selected();
 
-    if (entry.item && entry.item->hasInventory()) {
-        ImportInventoryDialog dlg(entry.item, 1, BrickLink::Condition::Count, this);
+    if (entry.m_item && entry.m_item->hasInventory()) {
+        ImportInventoryDialog dlg(entry.m_item, 1, BrickLink::Condition::Count, this);
         dlg.setWindowModality(Qt::ApplicationModal);
         dlg.show();
 
@@ -243,41 +309,54 @@ QSize InventoryWidget::sizeHint() const
     return minimumSizeHint();
 }
 
-void InventoryWidget::setItem(const BrickLink::Item *item, const BrickLink::Color *color)
+void InventoryWidget::setItem(const BrickLink::Item *item, const BrickLink::Color *color, int quantity)
 {
-    updateModel({ { item, color } });
+    BrickLink::InventoryModel::SimpleLot simpleLot(item, color, quantity);
+    updateModel({ simpleLot });
 }
 
 void InventoryWidget::setItems(const LotList &lots)
-
 {
-    QVector<QPair<const BrickLink::Item *, const BrickLink::Color *>> list;
-    list.reserve(lots.size());
+    QVector<BrickLink::InventoryModel::SimpleLot> simpleLots;
+    simpleLots.reserve(lots.size());
     for (const auto &lot : lots)
-        list.append({ lot->item(), lot->color() });
-
-    updateModel(list);
+        simpleLots.emplace_back(lot->item(), lot->color(), lot->quantity());
+    updateModel(simpleLots);
 }
 
-void InventoryWidget::updateModel(const QVector<QPair<const BrickLink::Item *, const BrickLink::Color *>> &list)
+void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::SimpleLot> &lots)
 {
-    d->m_list = list;
+    d->m_lots = lots;
 
-    QAbstractItemModel *old_model = d->m_view->model();
-    auto mmode = (d->m_mode == Mode::AppearsIn) ? BrickLink::InventoryModel::Mode::AppearsIn
-                                                : BrickLink::InventoryModel::Mode::ConsistsOf;
-    d->m_view->setModel(new BrickLink::InventoryModel(mmode, list, this));
+    auto *oldModel = d->m_view->model();
+    auto *newModel = new BrickLink::InventoryModel(d->m_mode, d->m_lots, this);
+    d->m_view->setModel(newModel);
+
+    auto resizeColumns = [this]() {
+        setUpdatesEnabled(false);
+        d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::PictureColumn, QHeaderView::Fixed);
+        d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::ColorColumn, QHeaderView::Fixed);
+
+        QStyleOptionViewItem sovi;
+        struct MyTreeView : public QTreeView {
+            using QTreeView::initViewItemOption;
+        };
+        static_cast<const MyTreeView *>(d->m_view)->initViewItemOption(&sovi);
+        int colorWidth = sovi.decorationSize.width() + 4;
+
+        d->m_view->header()->resizeSection(BrickLink::InventoryModel::ColorColumn, colorWidth);
+        d->m_view->header()->setMinimumSectionSize(colorWidth); // not ideal, as this is for all columns
+
+        d->m_view->resizeColumnToContents(BrickLink::InventoryModel::PictureColumn);
+        d->m_view->resizeColumnToContents(BrickLink::InventoryModel::QuantityColumn);
+        d->m_view->resizeColumnToContents(BrickLink::InventoryModel::ItemIdColumn);
+        setUpdatesEnabled(true);
+    };
+
     resizeColumns();
+    connect(newModel, &QAbstractItemModel::modelReset, this, resizeColumns);
 
-    delete old_model;
-}
-
-void InventoryWidget::resizeColumns()
-{
-    setUpdatesEnabled(false);
-    d->m_view->resizeColumnToContents(0);
-    d->m_view->resizeColumnToContents(1);
-    setUpdatesEnabled(true);
+    delete oldModel;
 }
 
 void InventoryWidget::changeEvent(QEvent *e)

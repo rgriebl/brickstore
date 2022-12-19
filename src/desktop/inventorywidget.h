@@ -16,6 +16,7 @@
 #include <QFrame>
 
 #include "bricklink/lot.h"
+#include "bricklink/model.h"
 #include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
@@ -26,28 +27,25 @@ class InventoryWidget : public QFrame
 {
     Q_OBJECT
 public:
+    explicit InventoryWidget(bool showCanBuild, QWidget *parent);
     explicit InventoryWidget(QWidget *parent);
     ~InventoryWidget() override;
 
-    enum class Mode { AppearsIn, ConsistsOf };
+    using Mode = BrickLink::InventoryModel::Mode;
 
     Mode mode() const;
     void setMode(Mode newMode);
 
-    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
+    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr, int quantity = 1);
     void setItems(const BrickLink::LotList &lots);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-    struct Item
-    {
-        const BrickLink::Item *item = nullptr;
-        const BrickLink::Color *color = nullptr;
-        int quantity = 0;
-    };
+    BrickLink::InventoryModel::SimpleLot selected() const;
 
-    const InventoryWidget::Item selected() const;
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
 
 signals:
     void customActionTriggered();
@@ -59,10 +57,9 @@ protected:
 
 private slots:
     QCoro::Task<> partOut();
-    void resizeColumns();
 
 private:
-    void updateModel(const QVector<QPair<const BrickLink::Item *, const BrickLink::Color *> > &list);
+    void updateModel(const QVector<BrickLink::InventoryModel::SimpleLot> &lots);
 
     std::unique_ptr<InventoryWidgetPrivate> d;
 };

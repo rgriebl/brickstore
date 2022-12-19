@@ -905,8 +905,11 @@ QmlLot QmlBrickLink::lot(const QVariant &v) const
 InventoryModel *QmlBrickLink::inventoryModel(bool appearsIn, const QVariantList &items,
                                              const QVariantList &colors)
 {
-    QVector<QPair<const Item *, const Color *>> list;
+    QVector<BrickLink::InventoryModel::SimpleLot> list;
+
     if (items.size() == colors.size()) {
+        list.reserve(items.size());
+
         for (int i = 0; i < int(items.size()); ++i) {
             QVariant vitem = items.at(i);
             QVariant vcolor = colors.at(i);
@@ -924,7 +927,7 @@ InventoryModel *QmlBrickLink::inventoryModel(bool appearsIn, const QVariantList 
                 color = vcolor.value<BrickLink::QmlColor>().wrappedObject();
 
             if (item && color)
-                list.append({ item, color });
+                list.emplace_back(item, color);
         }
     }
 

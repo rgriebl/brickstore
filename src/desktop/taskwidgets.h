@@ -102,6 +102,7 @@ class TaskInventoryWidget : public InventoryWidget
 
 public:
     TaskInventoryWidget(QWidget *parent = nullptr);
+    ~TaskInventoryWidget() override;
 
 protected slots:
     void documentUpdate(Document *document);

@@ -287,7 +287,8 @@ void TaskInfoWidget::changeEvent(QEvent *e)
 // ----------------------------------------------------------------------
 
 TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
-    : InventoryWidget(parent), m_document(nullptr)
+    : InventoryWidget(true /*showCanBuild*/, parent)
+    , m_document(nullptr)
 {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -309,11 +310,18 @@ TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
     m_invGoToAction->setIcon(QIcon::fromTheme(u"edit-additems"_qs));
     connect(m_invGoToAction, &QAction::triggered, this, [this]() {
         const auto sel = selected();
-        if (sel.item)
-            MainWindow::inst()->showAddItemDialog(sel.item, sel.color);
+        if (sel.m_item)
+            MainWindow::inst()->showAddItemDialog(sel.m_item, sel.m_color);
     });
     addAction(m_invGoToAction);
     languageChange();
+
+    restoreState(Config::inst()->value(u"MainWindow/TaskInventory/State"_qs).toByteArray());
+}
+
+TaskInventoryWidget::~TaskInventoryWidget()
+{
+    Config::inst()->setValue(u"MainWindow/TaskInventory/State"_qs, saveState());
 }
 
 void TaskInventoryWidget::documentUpdate(Document *document)
