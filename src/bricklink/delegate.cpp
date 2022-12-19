@@ -31,29 +31,31 @@
 #include "utility/utility.h"
 
 
+namespace BrickLink {
+
 /////////////////////////////////////////////////////////////
 // ITEMDELEGATE
 /////////////////////////////////////////////////////////////
 
 
-BrickLink::ItemDelegate::ItemDelegate(Options options, QObject *parent)
+ItemDelegate::ItemDelegate(Options options, QObject *parent)
     : BetterItemDelegate(options, parent)
 { }
 
-void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     BetterItemDelegate::extendedPaint(painter, option, index, [this, painter, option, index]() {
         bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
 
         if (firstColumnImageOnly) {
-            if (auto *item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
+            if (auto *item = index.data(ItemPointerRole).value<const Item *>()) {
                 QImage image;
 
                 Picture *pic = core()->picture(item, item->defaultColor());
                 if (pic && pic->isValid())
                     image = pic->image();
                 else
-                    image = BrickLink::core()->noImage(option.rect.size());
+                    image = core()->noImage(option.rect.size());
 
                 painter->fillRect(option.rect, Qt::white);
                 if (!image.isNull()) {
@@ -67,7 +69,7 @@ void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewIte
     });
 }
 
-bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
+bool ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     if (event->type() == QEvent::ToolTip && index.isValid()) {
         if (auto item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
@@ -80,9 +82,9 @@ bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *vi
 
 
 
-BrickLink::ToolTip *BrickLink::ToolTip::s_inst = nullptr;
+ToolTip *ToolTip::s_inst = nullptr;
 
-BrickLink::ToolTip *BrickLink::ToolTip::inst()
+ToolTip *ToolTip::inst()
 {
     if (!s_inst) {
         s_inst = new ToolTip();
@@ -101,36 +103,41 @@ BrickLink::ToolTip *BrickLink::ToolTip::inst()
     return s_inst;
 }
 
-bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Color *color, const QPoint &globalPos, QWidget *parent)
+bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos, QWidget *parent)
 {
-    Q_UNUSED(color)
+    QString tt;
 
-    if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
-        m_tooltip_pic = ((pic->updateStatus() == UpdateStatus::Updating)
-                         || (pic->updateStatus() == UpdateStatus::Loading)) ? pic : nullptr;
+    if (item) {
+        if (Picture *pic = core()->picture(item, nullptr, true)) {
+            m_tooltip_pic = ((pic->updateStatus() == UpdateStatus::Updating)
+                             || (pic->updateStatus() == UpdateStatus::Loading)) ? pic : nullptr;
 
-        // need to 'clear' to reset the image cache of the QTextDocument
-        const auto tlwidgets = QApplication::topLevelWidgets();
-        for (QWidget *w : tlwidgets) {
-            if (w->inherits("QTipLabel")) {
-                qobject_cast<QLabel *>(w)->clear();
-                break;
+            // need to 'clear' to reset the image cache of the QTextDocument
+            const auto tlwidgets = QApplication::topLevelWidgets();
+            for (QWidget *w : tlwidgets) {
+                if (w->inherits("QTipLabel")) {
+                    qobject_cast<QLabel *>(w)->clear();
+                    break;
+                }
             }
+            tt = createItemToolTip(pic->item(), pic);
         }
-        QString tt = createToolTip(pic->item(), pic);
-        if (!tt.isEmpty()) {
-            QToolTip::showText(globalPos, tt, parent);
-            return true;
-        }
+    } else if (color) {
+        tt = createColorToolTip(color);
+    }
+
+    if (!tt.isEmpty()) {
+        QToolTip::showText(globalPos, tt, parent);
+        return true;
     }
     return false;
 }
 
-QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
+QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
 {
     static const QString str = QLatin1String(R"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)");
     static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
-    QString note_left = u"<i>" % BrickLink::ItemDelegate::tr("[Image is loading]") % u"</i>";
+    QString note_left = u"<i>" % ItemDelegate::tr("[Image is loading]") % u"</i>";
     QString yearStr;
     QString id = QString::fromLatin1(item->id());
 
@@ -187,5 +194,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
         }
     }
 }
+
+} // namespace BrickLink
 
 #include "moc_delegate.cpp"
