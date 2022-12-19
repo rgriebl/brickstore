@@ -611,12 +611,13 @@ QCoro::Task<> View::partOutItems()
                 ImportInventoryDialog dlg(lot->item(), quantity, condition, this);
                 dlg.setWindowModality(Qt::ApplicationModal);
                 dlg.show();
-                if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
-                    quantity = dlg.quantity();
-                    condition = dlg.condition();
-                    partOutTraits = dlg.partOutTraits();
-                    extraParts = dlg.extraParts();
-                }
+                if (co_await qCoro(&dlg, &QDialog::finished) != QDialog::Accepted)
+                    continue;
+
+                quantity = dlg.quantity();
+                condition = dlg.condition();
+                partOutTraits = dlg.partOutTraits();
+                extraParts = dlg.extraParts();
             }
 
             if (inplace) {

@@ -69,6 +69,7 @@ BrickLink::Condition ImportInventoryWidget::condition() const
 
 void ImportInventoryWidget::setCondition(BrickLink::Condition condition)
 {
+    w_condition_new->setChecked(condition == BrickLink::Condition::New);
     w_condition_used->setChecked(condition != BrickLink::Condition::New);
 }
 
