@@ -165,14 +165,16 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
     if (cfgver < mkver(2022, 12, 1)) {
 #if defined(BS_DESKTOP)
         const auto recentFiles = value(u"Files/Recent"_qs).toStringList();
-        beginWriteArray(u"RecentFiles"_qs);
-        for (int i = 0; i < recentFiles.size(); ++i) {
-            QFileInfo fi(recentFiles.at(i));
-            setArrayIndex(i);
-            setValue(u"Path"_qs, fi.absoluteFilePath());
-            setValue(u"Name"_qs, fi.fileName());
+        if (recentFiles.size() > 0) {
+            beginWriteArray(u"RecentFiles"_qs);
+            for (int i = 0; i < recentFiles.size(); ++i) {
+                QFileInfo fi(recentFiles.at(i));
+                setArrayIndex(i);
+                setValue(u"Path"_qs, fi.absoluteFilePath());
+                setValue(u"Name"_qs, fi.fileName());
+            }
+            endArray();
         }
-        endArray();
 #endif
         remove(u"Files"_qs);
     }
