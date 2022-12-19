@@ -176,6 +176,7 @@ void DesktopApplication::init()
 DesktopApplication::~DesktopApplication()
 {
     delete ScriptManager::inst();
+    delete MainWindow::inst();
 }
 
 void DesktopApplication::checkRestart()

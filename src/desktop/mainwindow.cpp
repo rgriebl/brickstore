@@ -153,6 +153,7 @@ QCoro::Task<> MainWindow::shutdown()
 
     if (co_await Application::inst()->closeAllDocuments()) {
         Config::inst()->setValue(u"MainWindow/LastSessionDocuments"_qs, files);
+        Config::inst()->setValue(u"MainWindow/Filter"_qs, m_favoriteFilters->stringList());
 
 #if defined(Q_OS_MACOS)
         // from QtCreator:
@@ -421,13 +422,7 @@ void MainWindow::languageChange()
 
 MainWindow::~MainWindow()
 {
-    Config::inst()->setValue(u"MainWindow/Filter"_qs, m_favoriteFilters->stringList());
-
-    delete m_add_dialog.data();
-    delete m_importinventory_dialog.data();
-    delete m_importorder_dialog.data();
-    delete m_importcart_dialog.data();
-    delete m_importwanted_dialog.data();
+    closeAllDialogs();
 
     s_inst = reinterpret_cast<MainWindow *>(-1);
 
@@ -881,11 +876,11 @@ void MainWindow::setupDockWidgets()
 
     setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks);
 
-    auto dockInfo = createDock(new TaskInfoWidget, "dock_info");
-    auto dockOpen = createDock(new TaskOpenDocumentsWidget, "dock_opendocuments");
-    auto dockRecent = createDock(new TaskRecentDocumentsWidget, "dock_recentdocuments");
-    auto dockInventory = createDock(new TaskInventoryWidget, "dock_appearsin");
-    auto dockPriceGuide = createDock(new TaskPriceGuideWidget, "dock_priceguide");
+    auto dockInfo = createDock(new TaskInfoWidget(this), "dock_info");
+    auto dockOpen = createDock(new TaskOpenDocumentsWidget(this), "dock_opendocuments");
+    auto dockRecent = createDock(new TaskRecentDocumentsWidget(this), "dock_recentdocuments");
+    auto dockInventory = createDock(new TaskInventoryWidget(this), "dock_appearsin");
+    auto dockPriceGuide = createDock(new TaskPriceGuideWidget(this), "dock_priceguide");
 
     addDockWidget(Qt::LeftDockWidgetArea, dockInfo);
     addDockWidget(Qt::LeftDockWidgetArea, dockOpen);
