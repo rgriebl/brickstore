@@ -16,7 +16,6 @@
 #include <QDialog>
 
 #include "bricklink/global.h"
-#include "common/eventfilter.h"
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
@@ -80,7 +79,6 @@ private:
     void init();
     void ensureSelectionVisible();
     void sortItems(int section, Qt::SortOrder order);
-    EventFilter::Result zoomFilter(QObject *o, QEvent *e);
 
 protected:
     std::unique_ptr<SelectItemPrivate> d;

@@ -36,6 +36,26 @@ public slots:
 };
 
 
+class ItemThumbsDelegate : public BrickLink::ItemDelegate
+{
+    Q_OBJECT
+public:
+    ItemThumbsDelegate(double initialZoom, QAbstractItemView *view = nullptr);
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+    double zoomFactor() const;
+    void setZoomFactor(double zoom);
+
+signals:
+    void zoomFactorChanged(double newZoom);
+
+private:
+    double m_zoom;
+    QAbstractItemView *m_view;
+};
+
+
 class ToolTip : public QObject
 {
     Q_OBJECT
@@ -48,7 +68,8 @@ private slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 private:
-    QString createToolTip(const Item *item, Picture *pic) const;
+    QString createItemToolTip(const Item *item, Picture *pic) const;
+    QString createColorToolTip(const Color *color) const;
 
     static ToolTip *s_inst;
     Picture *m_tooltip_pic = nullptr;

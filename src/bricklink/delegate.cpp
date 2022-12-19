@@ -18,16 +18,19 @@
 #include <QtGui/QHelpEvent>
 #include <QtGui/QScreen>
 #include <QtGui/QWindow>
+#include <QtGui/QWheelEvent>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QAbstractItemView>
 #include <QtWidgets/QToolTip>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QTreeView>
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include "bricklink/picture.h"
 #include "bricklink/item.h"
 #include "bricklink/delegate.h"
+#include "common/eventfilter.h"
 #include "utility/utility.h"
 
 
@@ -72,14 +75,88 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
 bool ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     if (event->type() == QEvent::ToolTip && index.isValid()) {
-        if (auto item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
-            ToolTip::inst()->show(item, nullptr, event->globalPos(), view);
+        auto item = index.data(ItemPointerRole).value<const Item *>();
+        auto color = index.data(ColorPointerRole).value<const Color *>();
+
+        if (item || color) {
+            ToolTip::inst()->show(item, color, event->globalPos(), view);
             return true;
         }
     }
     return QStyledItemDelegate::helpEvent(event, view, option, index);
 }
 
+
+/////////////////////////////////////////////////////////////
+// ITEMTHUMBSDELEGATE
+/////////////////////////////////////////////////////////////
+
+
+ItemThumbsDelegate::ItemThumbsDelegate(double initialZoom, QAbstractItemView *view)
+    : ItemDelegate(ItemDelegate::AlwaysShowSelection
+                   | ItemDelegate::FirstColumnImageOnly, view)
+    , m_zoom(initialZoom)
+    , m_view(view)
+{
+    new EventFilter(view->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
+                    [this](QObject *o, QEvent *e) -> EventFilter::Result {
+        if ((e->type() == QEvent::Wheel)
+                && m_view && (o == m_view->viewport())) {
+            const auto *we = static_cast<QWheelEvent *>(e);
+            if (we->modifiers() & Qt::ControlModifier) {
+                double z = std::pow(1.001, we->angleDelta().y());
+                setZoomFactor(m_zoom * z);
+                e->accept();
+                return EventFilter::StopEventProcessing;
+            }
+        } else if ((e->type() == QEvent::NativeGesture)
+                   && m_view && (o == m_view->viewport())) {
+            const auto *nge = static_cast<QNativeGestureEvent *>(e);
+            if (nge->gestureType() == Qt::ZoomNativeGesture) {
+                double z = 1 + nge->value();
+                setZoomFactor(m_zoom * z);
+                e->accept();
+                return EventFilter::StopEventProcessing;
+            }
+        }
+        return EventFilter::ContinueEventProcessing;
+    });
+}
+
+double ItemThumbsDelegate::zoomFactor() const
+{
+    return m_zoom;
+}
+
+void ItemThumbsDelegate::setZoomFactor(double zoom)
+{
+    zoom = qBound(.5, zoom, 5.);
+
+    if (m_view && !qFuzzyCompare(zoom, m_zoom)) {
+        m_zoom = zoom;
+
+        emit zoomFactorChanged(m_zoom);
+        emit sizeHintChanged(m_view->model()->index(0, 0));
+
+        if (auto tv = qobject_cast<QTreeView *>(m_view))
+            tv->resizeColumnToContents(0);
+    }
+}
+
+QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (index.column() == 0) {
+        const auto *item = qvariant_cast<const Item *>(index.data(ItemPointerRole));
+        return (item ? item->itemType()->pictureSize() : QSize(80, 60)) * m_zoom;
+    } else {
+        return ItemDelegate::sizeHint(option, index);
+    }
+}
+
+
+/////////////////////////////////////////////////////////////
+// TOOLTIP
+/////////////////////////////////////////////////////////////
 
 
 ToolTip *ToolTip::s_inst = nullptr;
@@ -166,7 +243,24 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
     }
 }
 
-void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
+QString ToolTip::createColorToolTip(const Color *color) const
+{
+    QString str;
+
+    if (color->id() > 0) {
+        static const QString tpl = uR"(<table width="100%" border="0" bgcolor="%1"><tr><td><br><br></td></tr></table><br>%2 (%3)<br>BrickLink id: %4)"_qs;
+        str = str % tpl.arg(color->color().name(), color->name(), color->color().name(),
+                            QString::number(color->id()));
+
+        if (color->ldrawId() != -1)
+            str = str % u", LDraw id: " % QString::number(color->ldrawId());
+    } else {
+        str = color->name();
+    }
+    return str;
+}
+
+void ToolTip::pictureUpdated(Picture *pic)
 {
     if (!pic || pic != m_tooltip_pic)
         return;
@@ -181,7 +275,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {
                 qobject_cast<QLabel *>(w)->clear();
-                qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
+                qobject_cast<QLabel *>(w)->setText(createItemToolTip(pic->item(), pic));
 
                 QRect r(w->pos(), w->sizeHint());
                 QRect desktop = w->window()->windowHandle()->screen()->availableGeometry();

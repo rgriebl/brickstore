@@ -65,6 +65,9 @@ public:
     BrickLink::CategoryModel *categoryModel;
     BrickLink::ItemModel *    itemModel;
 
+    BrickLink::ItemThumbsDelegate *m_itemsDelegate;
+    BrickLink::ItemThumbsDelegate *m_thumbsDelegate;
+
     QLabel *         w_item_types_label;
     QComboBox *      w_item_types;
     QTreeView *      w_categories;
@@ -101,38 +104,6 @@ void CategoryDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories)
         myoption.font.setBold(true);
     BrickLink::ItemDelegate::paint(painter, myoption, index);
-}
-
-
-class ItemThumbsDelegate : public BrickLink::ItemDelegate
-{
-    Q_OBJECT
-public:
-    ItemThumbsDelegate(double initialZoom, QObject *parent = nullptr)
-        : BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection
-                                  | BrickLink::ItemDelegate::FirstColumnImageOnly, parent)
-        , m_zoom(initialZoom)
-    { }
-
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-
-    void setZoomFactor(double zoom)
-    {
-        m_zoom = zoom;
-    }
-
-private:
-    double m_zoom;
-};
-
-QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    if (index.column() == 0) {
-        const auto *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
-        return (item ? item->itemType()->pictureSize() : QSize(80, 60)) * m_zoom;
-    } else {
-        return BrickLink::ItemDelegate::sizeHint(option, index);
-    }
 }
 
 
@@ -340,11 +311,10 @@ void SelectItem::init()
     d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_items->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
-    new EventFilter(d->w_items->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
-                    std::bind(&SelectItem::zoomFilter, this, _1, _2));
     d->w_items->header()->setSectionsMovable(false);
+    d->m_itemsDelegate = new BrickLink::ItemThumbsDelegate(d->m_zoom, d->w_items);
+    d->w_items->setItemDelegate(d->m_itemsDelegate);
 
     d->w_thumbs = new QListView();
     d->w_thumbs->setUniformItemSizes(true);
@@ -356,10 +326,13 @@ void SelectItem::init()
     d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
-    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    new EventFilter(d->w_thumbs->viewport(), { QEvent::Wheel, QEvent::NativeGesture },
-                    std::bind(&SelectItem::zoomFilter, this, _1, _2));
+    d->m_thumbsDelegate = new BrickLink::ItemThumbsDelegate(d->m_zoom, d->w_thumbs);
+    d->w_thumbs->setItemDelegate(d->m_thumbsDelegate);
+    connect(d->m_itemsDelegate, &BrickLink::ItemThumbsDelegate::zoomFactorChanged,
+            this, &SelectItem::setZoomFactor);
+    connect(d->m_thumbsDelegate, &BrickLink::ItemThumbsDelegate::zoomFactorChanged,
+            this, &SelectItem::setZoomFactor);
 
     d->itemTypeModel = new BrickLink::ItemTypeModel(this);
     d->categoryModel = new BrickLink::CategoryModel(this);
@@ -536,33 +509,6 @@ void SelectItem::languageChange()
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
 }
 
-EventFilter::Result SelectItem::zoomFilter(QObject *o, QEvent *e)
-{
-    if (!d->w_items || !d->w_thumbs)
-        return EventFilter::ContinueEventProcessing;
-
-    if ((e->type() == QEvent::Wheel)
-            && (o == d->w_items->viewport() || o == d->w_thumbs->viewport())) {
-        const auto *we = static_cast<QWheelEvent *>(e);
-        if (we->modifiers() & Qt::ControlModifier) {
-            double z = std::pow(1.001, we->angleDelta().y());
-            setZoomFactor(d->m_zoom * z);
-            e->accept();
-            return EventFilter::StopEventProcessing;
-        }
-    } else if ((e->type() == QEvent::NativeGesture)
-               && (o == d->w_items->viewport() || o == d->w_thumbs->viewport())) {
-        const auto *nge = static_cast<QNativeGestureEvent *>(e);
-        if (nge->gestureType() == Qt::ZoomNativeGesture) {
-            double z = 1 + nge->value();
-            setZoomFactor(d->m_zoom * z);
-            e->accept();
-            return EventFilter::StopEventProcessing;
-        }
-    }
-    return EventFilter::ContinueEventProcessing;
-}
-
 void SelectItem::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
@@ -707,22 +653,14 @@ double SelectItem::zoomFactor() const
 
 void SelectItem::setZoomFactor(double zoom)
 {
-    zoom = qBound(.5, zoom, 5.);
+    d->m_itemsDelegate->setZoomFactor(zoom);
+    d->m_thumbsDelegate->setZoomFactor(zoom);
+
+    zoom = d->m_itemsDelegate->zoomFactor();
 
     if (!qFuzzyCompare(zoom, d->m_zoom)) {
         d->m_zoom = zoom;
-
-        auto d1 = static_cast<ItemThumbsDelegate *>(d->w_thumbs->itemDelegate());
-        auto d2 = static_cast<ItemThumbsDelegate *>(d->w_items->itemDelegate());
-
-        d1->setZoomFactor(zoom);
-        d2->setZoomFactor(zoom);
-
-        emit d1->sizeHintChanged(d->itemModel->index(0, 0));
-        emit d2->sizeHintChanged(d->itemModel->index(0, 0));
-        
         d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100), 3));
-        d->w_items->resizeColumnToContents(0);
     }
 }
 
