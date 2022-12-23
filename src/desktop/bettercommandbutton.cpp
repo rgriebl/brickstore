@@ -154,8 +154,8 @@ void BetterCommandButton::paintEvent(QPaintEvent *)
     initStyleOption(&option);
 
     //Enable command link appearance on Vista
-    option.features |= QStyleOptionButton::CommandLinkButton;
-    option.features &= ~QStyleOptionButton::Flat;
+    option.features.setFlag(QStyleOptionButton::CommandLinkButton, true);
+    option.features.setFlag(QStyleOptionButton::Flat, false);
     option.text = QString();
     option.icon = QIcon(); //we draw this ourselves
     QSize pixmapSize = icon().actualSize(iconSize());

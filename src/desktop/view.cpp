@@ -968,7 +968,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
             for (const auto &cw : colWidthsAcross) {
                 QString title = model()->headerData(cw.first, Qt::Horizontal).toString();
                 Qt::Alignment align = Qt::Alignment(model()->headerData(cw.first, Qt::Horizontal,
-                                                             Qt::TextAlignmentRole).toInt());
+                                                                        Qt::TextAlignmentRole).toInt());
                 double w = cw.second;
 
                 double dy = pageRect.top();
@@ -998,7 +998,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
                     options.font = p.font();
                     options.fontMetrics = p.fontMetrics();
                     options.index = idx;
-                    options.state &= ~QStyle::State_Selected;
+                    options.state.setFlag(QStyle::State_Selected, false);
                     options.palette = QPalette(Qt::lightGray);
 
                     dd->paint(&p, options, idx);

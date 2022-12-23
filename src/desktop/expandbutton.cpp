@@ -35,7 +35,7 @@ ExpandButton::ExpandButton(QWidget *parent)
     m_animation->setDuration(150);
     m_animation->setEasingCurve(QEasingCurve::InOutQuad);
     m_animation->setStartValue(0);
-    connect(m_animation, &QVariantAnimation::valueChanged, [this](const QVariant &value) {
+    connect(m_animation, &QVariantAnimation::valueChanged, this, [this](const QVariant &value) {
         int h = value.toInt();
 
         QWidget *tlw = m_resizeTopLevel ? window() : nullptr;

@@ -49,7 +49,7 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     w_individual->setIcon(QIcon::fromTheme(u"vcs-conflicting"_qs));
     w_justAdd->setIcon(QIcon::fromTheme(u"vcs-added"_qs));
 
-    QString title = tr("There are %n possible consolidation(s)", nullptr, list.size());
+    QString title = tr("There are %n possible consolidation(s)", nullptr, int(list.size()));
     startPage->setTitle(title);
     defaultsPage->setTitle(title);
 
@@ -77,7 +77,7 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
         w_individualDestination->setModel(nullptr);
     }
 
-    float rowsToShow = 2.15f;
+    double rowsToShow = 2.15;
     int listHeight = int(rowsToShow * rowHeight)
             + headerHeight
             + w_individualDestination->horizontalScrollBar()->sizeHint().height()
@@ -115,15 +115,15 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
         w_justAdd->hide();
     }
 
-    connect(w_forAll, &BetterCommandButton::clicked, this, [=]() {
+    connect(w_forAll, &BetterCommandButton::clicked, this, [this]() {
         m_forAll = true;
         next();
     });
-    connect(w_individual, &BetterCommandButton::clicked, this, [=]() {
+    connect(w_individual, &BetterCommandButton::clicked, this, [this]() {
         m_forAll = false;
         next();
     });
-    connect(w_justAdd, &BetterCommandButton::clicked, this, [=]() {
+    connect(w_justAdd, &BetterCommandButton::clicked, this, [this]() {
         accept();
     });
     connect(this, &QWizard::currentIdChanged,
@@ -143,12 +143,12 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     });
 
     connect(this, &QWizard::customButtonClicked,
-            this, [=](int which) {
+            this, [this](int which) {
         validateCurrentPage();
 
         switch (which) {
         case CustomButton3: { // finish
-            int unmerged = std::count_if(m_list.cbegin(), m_list.cend(), [](const auto &c) {
+            auto unmerged = std::count_if(m_list.cbegin(), m_list.cend(), [](const auto &c) {
                 return c.destinationIndex < 0;
             });
 
@@ -344,7 +344,7 @@ void ConsolidateDialog::showIndividualMerge(int idx)
 
     QVector<int> fakeIndexes;
     for (const auto lot : c.lots)
-        fakeIndexes << m_documentLots.indexOf(lot);
+        fakeIndexes << int(m_documentLots.indexOf(lot));
 
     DocumentModel *docModel = DocumentModel::createTemporary(c.lots, fakeIndexes);
     docModel->setParent(this);
@@ -376,15 +376,15 @@ int ConsolidateDialog::calculateIndex(const DocumentModel::Consolidate &consolid
         return 0;
 
     case Destination::IntoNew:
-        return consolidate.lots.size() - 1;
+        return int(consolidate.lots.size() - 1);
 
     case Destination::IntoTopSorted:
     case Destination::IntoBottomSorted:
     case Destination::IntoHighestIndex:
     case Destination::IntoLowestIndex: {
-        std::vector<int> docIndexes;
+        QVector<qsizetype> docIndexes;
         docIndexes.reserve(consolidate.lots.size());
-        std::vector<int> sortIndexes;
+        QVector<qsizetype> sortIndexes;
         sortIndexes.reserve(consolidate.lots.size());
 
         for (const auto lot : std::as_const(consolidate.lots)) {
@@ -396,13 +396,13 @@ int ConsolidateDialog::calculateIndex(const DocumentModel::Consolidate &consolid
 
         switch (destination) {
         case Destination::IntoTopSorted:
-            return std::distance(sortIndexes.cbegin(), minSortIt);
+            return int(std::distance(sortIndexes.cbegin(), minSortIt));
         case Destination::IntoBottomSorted:
-            return std::distance(sortIndexes.cbegin(), maxSortIt);
+            return int(std::distance(sortIndexes.cbegin(), maxSortIt));
         case Destination::IntoHighestIndex:
-            return std::distance(docIndexes.cbegin(), maxDocIt);
+            return int(std::distance(docIndexes.cbegin(), maxDocIt));
         case Destination::IntoLowestIndex:
-            return std::distance(docIndexes.cbegin(), minDocIt);
+            return int(std::distance(docIndexes.cbegin(), minDocIt));
         default:
             break;
         }

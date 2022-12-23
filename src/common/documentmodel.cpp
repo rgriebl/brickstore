@@ -712,7 +712,7 @@ QCoro::Task<int> DocumentModel::addLots(BrickLink::LotList &&lotsRef, AddLotMode
     // would have been deleted by the time we resolve the second consolidation.
     // The old system popped up the consolidation dialog for each single lot while looping, so
     // it didn't have to deal with this problem.
-    QMap<BrickLink::Lot *, qsizetype> mergedLots;
+    QHash<BrickLink::Lot *, qsizetype> mergedLots;
     int mergedCount = 0;
 
     for (int i = 0; i < lots.size(); ++i) {
