@@ -83,16 +83,16 @@ public:
     int quantity() const               { return m_quantity; }
     void setQuantity(int q)            { m_quantity = q; }
     int bulkQuantity() const           { return m_bulk_quantity; }
-    void setBulkQuantity(int q)        { m_bulk_quantity = qMax(1, q); }
-    int tierQuantity(int i) const      { return m_tier_quantity [qBound(0, i, 2)]; }
-    void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
+    void setBulkQuantity(int q)        { m_bulk_quantity = std::max(1, q); }
+    int tierQuantity(int i) const      { return m_tier_quantity [std::clamp(0, i, 2)]; }
+    void setTierQuantity(int i, int q) { m_tier_quantity [std::clamp(0, i, 2)] = q; }
     double price() const               { return m_price; }
     void setPrice(double p)            { m_price = p; }
-    double tierPrice(int i) const      { return m_tier_price[qBound(0, i, 2)]; }
-    void setTierPrice(int i, double p) { m_tier_price[qBound(0, i, 2)] = p; }
+    double tierPrice(int i) const      { return m_tier_price[std::clamp(0, i, 2)]; }
+    void setTierPrice(int i, double p) { m_tier_price[std::clamp(0, i, 2)] = p; }
 
     int sale() const                   { return m_sale; }
-    void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
+    void setSale(int s)                { m_sale = std::clamp(-99, s, 100); }
     double total() const               { return m_price * m_quantity; }
     void setCost(double c)             { m_cost = c; }
     double cost() const                { return m_cost; }

@@ -113,7 +113,7 @@ void ChangeCurrencyDialog::ratesUpdated()
     w_newCurrency->insertItems(0, currencies);
     if (!wasUSD && currencies.count() > 1)
         w_newCurrency->insertSeparator(1);
-    w_newCurrency->setCurrentIndex(qMax(0, w_newCurrency->findText(oldto)));
+    w_newCurrency->setCurrentIndex(std::max(0, w_newCurrency->findText(oldto)));
 }
 
 void ChangeCurrencyDialog::languageChange()

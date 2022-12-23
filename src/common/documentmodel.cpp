@@ -163,7 +163,7 @@ enum {
 AddRemoveCmd::AddRemoveCmd(Type t, DocumentModel *model, const QVector<int> &positions,
                            const QVector<int> &sortedPositions,
                            const QVector<int> &filteredPositions, const LotList &lots)
-    : QUndoCommand(genDesc(t == Add, int(qMax(lots.count(), positions.count()))))
+    : QUndoCommand(genDesc(t == Add, int(std::max(lots.count(), positions.count()))))
     , m_model(model)
     , m_positions(positions)
     , m_sortedPositions(sortedPositions)

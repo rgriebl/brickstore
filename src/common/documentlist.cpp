@@ -133,7 +133,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
         if (!document->thumbnail().isNull()) {
             QImage img = document->thumbnail();
             if (img.height() != img.width()) {
-                int d = qMax(img.height(), img.width());
+                int d = std::max(img.height(), img.width());
 
                 QImage canvas({ d, d }, QImage::Format_ARGB32);
                 canvas.fill(Qt::transparent);

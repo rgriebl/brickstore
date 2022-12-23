@@ -203,7 +203,7 @@ qint64 HashHeaderCheckFilter::writeData(const char *data, qint64 maxSize)
 
     if (!m_gotHeader) {
         qint64 need = m_hashSize - m_header.size();
-        qint64 got = qMin(need, maxSize);
+        qint64 got = std::min(need, maxSize);
         m_header.append(data, got);
         dataSize -= got;
         data += got;

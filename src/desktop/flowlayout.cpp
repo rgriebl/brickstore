@@ -109,7 +109,7 @@ QSize FlowLayout::sizeHint() const
     for (const auto &item : m_items) {
         QSize sh = item->sizeHint();
         if (m_mode == VerticalOnly) {
-            s.rwidth() = qMax(s.width(), sh.width());
+            s.rwidth() = std::max(s.width(), sh.width());
             s.rheight() += sh.height();
         }
     }

@@ -61,7 +61,7 @@ QRect BetterCommandButton::titleRect() const
     QRect r = rect().adjusted(textOffset(), m_margin, -m_margin, 0);
     if (m_description.text().isEmpty()) {
         QFontMetrics fm(m_titleFont);
-        r.setTop(r.top() + qMax(0, (icon().actualSize(iconSize()).height() - fm.height()) / 2));
+        r.setTop(r.top() + std::max(0, (icon().actualSize(iconSize()).height() - fm.height()) / 2));
     }
     return r;
 }
@@ -94,13 +94,13 @@ QSize BetterCommandButton::sizeHint() const
 {
     QSize size = QPushButton::sizeHint();
     QFontMetrics fm(m_titleFont);
-    int textWidth = qMax(fm.horizontalAdvance(text()), 135);
+    int textWidth = std::max(fm.horizontalAdvance(text()), 135);
     int buttonWidth = m_margin + icon().actualSize(iconSize()).width() + m_margin + textWidth + m_margin;
     int heightWithoutDescription = descriptionOffset() + m_margin;
 
-    size.setWidth(qMax(size.width(), buttonWidth));
-    size.setHeight(qMax(m_description.text().isEmpty() ? 41 : 60,
-                        heightWithoutDescription + descriptionHeight(buttonWidth)));
+    size.setWidth(std::max(size.width(), buttonWidth));
+    size.setHeight(std::max(m_description.text().isEmpty() ? 41 : 60,
+                            heightWithoutDescription + descriptionHeight(buttonWidth)));
     return size;
 }
 
@@ -123,8 +123,8 @@ bool BetterCommandButton::hasHeightForWidth() const
 int BetterCommandButton::heightForWidth(int width) const
 {
     int heightWithoutDescription = descriptionOffset() + m_margin;
-    return qMax(heightWithoutDescription + descriptionHeight(width),
-                m_margin + icon().actualSize(iconSize()).height() + m_margin);
+    return std::max(heightWithoutDescription + descriptionHeight(width),
+                    m_margin + icon().actualSize(iconSize()).height() + m_margin);
 }
 
 void BetterCommandButton::changeEvent(QEvent *e)
@@ -169,7 +169,8 @@ void BetterCommandButton::paintEvent(QPaintEvent *)
     p.drawControl(QStyle::CE_PushButton, option);
     if (!icon().isNull()) {
         QFontMetrics fm(m_titleFont);
-        p.drawPixmap(m_margin + hOffset, m_margin + qMax(0, fm.height() - pixmapSize.height()) / 2 + vOffset,
+        p.drawPixmap(m_margin + hOffset,
+                     m_margin + std::max(0, fm.height() - pixmapSize.height()) / 2 + vOffset,
                      icon().pixmap(pixmapSize,
                                    isEnabled() ? QIcon::Normal : QIcon::Disabled,
                                    isChecked() ? QIcon::On : QIcon::Off));

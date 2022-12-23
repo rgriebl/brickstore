@@ -38,7 +38,7 @@ static void fixNumberOfOpenFiles()
 
         if (rlim.rlim_cur < noFile) {
             rlim_t soft = (rlim.rlim_max == RLIM_INFINITY) ? noFile
-                                                           : qMin(rlim.rlim_max, noFile);
+                                                           : std::min(rlim.rlim_max, noFile);
             if (soft > rlim.rlim_cur) {
                 rlim.rlim_cur = soft;
                 setrlimit(RLIMIT_NOFILE, &rlim);

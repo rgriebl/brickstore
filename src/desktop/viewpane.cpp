@@ -239,7 +239,7 @@ ViewPane::ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCrea
     paletteChange();
     languageChange();
 
-    m_viewStack->setMinimumHeight(qMax(m_viewStack->minimumHeight(), fontMetrics().height() * 20));
+    m_viewStack->setMinimumHeight(std::max(m_viewStack->minimumHeight(), fontMetrics().height() * 20));
 
     setupViewStack();
 

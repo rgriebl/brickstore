@@ -1032,7 +1032,7 @@ void SettingsDialog::currenciesUpdated()
     w_currency->insertItems(0, currencies);
     if (currencies.count() > 1)
         w_currency->insertSeparator(1);
-    w_currency->setCurrentIndex(qMax(0, w_currency->findText(oldprefered)));
+    w_currency->setCurrentIndex(std::max(0, w_currency->findText(oldprefered)));
 
 //    currentCurrencyChanged(w_currency->currentText());
 }

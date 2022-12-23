@@ -292,18 +292,18 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     cw[0] = 0; // not used
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
-        cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
+        cw[1] = std::max(cw[1], fm.horizontalAdvance(cond));
+    cw[2] = std::max(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
-        cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
+        cw[3] = std::max(cw[3], fm.horizontalAdvance(price));
 
     for (int i = 1; i < 4; i++)
         cw[i] += (2 * hborder);
 
     dx = 0;
     for (const auto &vtime : d->m_str_vtime)
-        dx = qMax(dx, fmb.horizontalAdvance(vtime));
+        dx = std::max(dx, fmb.horizontalAdvance(vtime));
 
     if ((cw[1] + cw[2] + d->s_price_count * cw[3]) < dx)
         cw[1] = dx - (cw[2] + d->s_price_count * cw[3]);
@@ -381,15 +381,14 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
 
     cw[0] = 0;
     for (auto &htime : d->m_str_htime)
-        cw[0] = qMax(cw[0], qMax(fmb.horizontalAdvance(htime[0]),
-                fmb.horizontalAdvance(htime[1])));
+        cw[0] = std::max({ cw[0], fmb.horizontalAdvance(htime[0]), fmb.horizontalAdvance(htime[1]) });
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
-        cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
+        cw[1] = std::max(cw[1], fm.horizontalAdvance(cond));
+    cw[2] = std::max(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     cw[3] = fm.horizontalAdvance(Currency::toDisplayString(9000));
     for (const auto &price : d->m_str_price)
-        cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
+        cw[3] = std::max(cw[3], fm.horizontalAdvance(price));
 
     for (int &i : cw)
         i += (2 * hborder);
@@ -469,18 +468,18 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     cw[0] = fm.horizontalAdvance(d->m_str_qty);
 
     for (const auto &price : d->m_str_price)
-        cw[0] = qMax(cw[0], fm.horizontalAdvance(price));
+        cw[0] = std::max(cw[0], fm.horizontalAdvance(price));
     cw[0] += 2 * hborder;
 
-    cw[1] = qMax(fm.horizontalAdvance(Currency::toDisplayString(9000)),
-                  fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
+    cw[1] = std::max(fm.horizontalAdvance(Currency::toDisplayString(9000)),
+                     fm.horizontalAdvance(u"9.000.000 (90.000)"_qs));
     for (const auto &cond : d->m_str_cond)
-        cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
+        cw[1] = std::max(cw[1], fm.horizontalAdvance(cond));
     cw[1] += 2 * hborder;
 
     dx = 0;
     for (const auto &vtime : d->m_str_vtime)
-        dx = qMax(dx, fmb.horizontalAdvance(vtime));
+        dx = std::max(dx, fmb.horizontalAdvance(vtime));
 
     if (dx > (cw[0] + d->s_cond_count * cw[1])) {
         dx -= (cw[0] + d->s_cond_count * cw[1]);

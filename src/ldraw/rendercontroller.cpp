@@ -539,14 +539,13 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                     particle.fill(color->particleColor());
                 }
 
-                float particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.f;
+                double particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.;
                 particleArea *= particleArea;
                 if (isSpeckle)
-                    particleArea *= (float(M_PI) / 4.f);
+                    particleArea *= (M_PI / 4.);
 
                 const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
-                const float ldus = 24.f;
-
+                const double ldus = 24.;
                 int particleCount = int(std::floor((ldus * ldus * color->particleFraction()) / particleArea));
                 int delta = int(std::ceil(color->particleMaxSize() * texSize / ldus));
 
@@ -557,36 +556,36 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 QList<QPainter::PixmapFragment> fragments;
                 fragments.reserve(particleCount);
                 QRandomGenerator *rd = QRandomGenerator::global();
-                std::uniform_real_distribution<> dis(double(color->particleMinSize()),
-                                                     double(color->particleMaxSize()));
+                std::uniform_real_distribution<double> dis(color->particleMinSize(),
+                                                           color->particleMaxSize());
 
-                float neededArea = std::floor(texSize * texSize * color->particleFraction());
-                float filledArea = 0;
+                double neededArea = std::floor(texSize * texSize * color->particleFraction());
+                double filledArea = 0;
 
                 //TODO: maybe partition the square into a grid and use random noise to offset drawing
                 //      into each cell to get a more uniform distribution
 
                 while (filledArea < neededArea) {
-                    float x = float(rd->bounded(texSize) + delta);
-                    float y = float(rd->bounded(texSize) + delta);
-                    float sx = qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    float sy = isSpeckle ? sx : qMax(1.f / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    float rot = isSpeckle ? 0.f : rd->bounded(90.f);
-                    float opacity = isSpeckle ? 1.f : qBound(0.f, (rd->bounded(.3f) + .7f), 1.f);
+                    double x = rd->bounded(texSize) + delta;
+                    double y = rd->bounded(texSize) + delta;
+                    double sx = std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    double sy = isSpeckle ? sx : std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                    double rot = isSpeckle ? 0. : rd->bounded(90.);
+                    double opacity = isSpeckle ? 1. : std::clamp(0., (rd->bounded(.3) + .7), 1.);
 
-                    float area = particleSize * particleSize * sx * sy;
+                    double area = particleSize * particleSize * sx * sy;
                     if (isSpeckle)
-                        area *= (M_PI / 4.f);
+                        area *= (M_PI / 4.);
                     filledArea += area;
 
                     fragments << QPainter::PixmapFragment::create({ x, y }, particle.rect(), sx, sy, rot, opacity);
 
                     // make it seamless
-                    if (x < 2 * delta)
+                    if (x < (2 * delta))
                         fragments << QPainter::PixmapFragment::create({ x + texSize, y }, particle.rect(), sx, sy, rot, opacity);
                     else if (x > texSize)
                         fragments << QPainter::PixmapFragment::create({ x - texSize, y }, particle.rect(), sx, sy, rot, opacity);
-                    if (y < 2 * delta)
+                    if (y < (2 * delta))
                         fragments << QPainter::PixmapFragment::create({ x, y + texSize }, particle.rect(), sx, sy, rot, opacity);
                     else if (y > texSize)
                         fragments << QPainter::PixmapFragment::create({ x, y - texSize }, particle.rect(), sx, sy, rot, opacity);

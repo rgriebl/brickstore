@@ -369,8 +369,8 @@ void PrintDialog::updateMargins()
     QMarginsF mm = pl.minimumMargins();
     QMarginsF m;
     switch (w_margins->currentIndex()) {
-    case 0: m = QMarginsF(qMax(30., mm.left()), qMax(30., mm.top()), // 30pt == 10.5mm
-                          qMax(30., mm.right()), qMax(30., mm.bottom())); break; // default
+    case 0: m = QMarginsF(std::max(30., mm.left()),  std::max(30., mm.top()), // 30pt == 10.5mm
+                          std::max(30., mm.right()), std::max(30., mm.bottom())); break; // default
     case 1: break; // none
     case 2: m = mm; break; // minimal
     }

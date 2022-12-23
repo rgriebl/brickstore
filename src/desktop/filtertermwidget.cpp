@@ -150,7 +150,7 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
 
         m_fields->blockSignals(unblock);
 
-        m_fields->setCurrentIndex(qMax(0, m_fields->findData(oldField)));
+        m_fields->setCurrentIndex(std::max(0, m_fields->findData(oldField)));
     };
     connect(m_doc, &Document::columnPositionChanged,
             this, populateFields);

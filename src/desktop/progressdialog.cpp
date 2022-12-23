@@ -217,7 +217,7 @@ void ProgressDialog::layout()
     QSize now = size();
     QSize then = sizeHint();
 
-    setFixedSize(QSize(qMax(now.width(), then.height()), qMax(now.height(), then.height())));
+    setFixedSize(QSize(std::max(now.width(), then.height()), std::max(now.height(), then.height())));
 #else
     setFixedSize(sizeHint());
 #endif

@@ -147,8 +147,8 @@ void SelectColor::setWidthToContents(bool b)
                 + 2 * w_colors->frameWidth()
                 + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4;
         int w2 = w_filter->minimumSizeHint().width();
-        w_filter->setMinimumWidth(qMax(w1, w2));
-        w_colors->setMinimumWidth(qMax(w1, w2));
+        w_filter->setMinimumWidth(std::max(w1, w2));
+        w_colors->setMinimumWidth(std::max(w1, w2));
         w_colors->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     }
 }

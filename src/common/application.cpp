@@ -750,7 +750,7 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
     sentry_value_t crumb = sentry_value_new_breadcrumb("default", msg.toUtf8());
     if (msgCtx.category)
         sentry_value_set_by_key(crumb, "category", sentry_value_new_string(msgCtx.category));
-    msgType = qBound(QtDebugMsg, msgType, QtInfoMsg);
+    msgType = std::clamp(QtDebugMsg, msgType, QtInfoMsg);
     static const char *msgTypeLevels[5] = { "debug", "warning", "error", "fatal", "info" };
     sentry_value_set_by_key(crumb, "level", sentry_value_new_string(msgTypeLevels[msgType]));
     const auto now = QDateTime::currentSecsSinceEpoch();

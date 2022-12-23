@@ -55,9 +55,9 @@ Config::Config()
 {
     m_show_input_errors = value(u"General/ShowInputErrors"_qs, true).toBool();
     m_show_difference_indicators = value(u"General/ShowDifferenceIndicators"_qs, false).toBool();
-    m_columnSpacing = qBound(0, value(u"Interface/ColumnSpacing"_qs, 1).toInt(), 2);
+    m_columnSpacing = std::clamp(0, value(u"Interface/ColumnSpacing"_qs, 1).toInt(), 2);
     m_liveEditRowHeight = value(u"Interface/LiveEditRowHeight"_qs, true).toBool();
-    m_rowHeightPercent = qBound(50, value(u"Interface/ItemImageSizePercent"_qs, 100).toInt(), 200);
+    m_rowHeightPercent = std::clamp(50, value(u"Interface/ItemImageSizePercent"_qs, 100).toInt(), 200);
 
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
@@ -136,7 +136,7 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
         // update IconSize to IconSizeEnum
         int oldSize = value(u"Interface/IconSize"_qs, 0).toInt();
         if (oldSize)
-            oldSize = qBound(0, (oldSize - 12) / 10, 2); // 22->1, 32->2
+            oldSize = std::clamp(0, (oldSize - 12) / 10, 2); // 22->1, 32->2
         setValue(u"Interface/IconSizeEnum"_qs, oldSize);
     }
     if (cfgver < mkver(2022, 2, 3)) {
@@ -337,14 +337,14 @@ void Config::setFontSizePercent(int p)
     auto oldp = fontSizePercent();
 
     if (oldp != p) {
-        setValue(u"Interface/FontSizePercent"_qs, qBound(50, p, 200));
+        setValue(u"Interface/FontSizePercent"_qs, std::clamp(50, p, 200));
         emit fontSizePercentChanged(p);
     }
 }
 
 void Config::setRowHeightPercent(int p)
 {
-    p = qBound(50, p, 200);
+    p = std::clamp(50, p, 200);
 
     if (m_rowHeightPercent != p) {
         m_rowHeightPercent = p;
@@ -537,7 +537,7 @@ void Config::setUITheme(UITheme theme)
 Config::UISize Config::mobileUISize() const
 {
     int s = value(u"Interface/MobileUISize"_qs, 0).toInt();
-    return static_cast<UISize>(qBound(0, s, 2));
+    return static_cast<UISize>(std::clamp(0, s, 2));
 }
 
 void Config::setMobileUISize(UISize size)
@@ -667,7 +667,7 @@ int Config::rowHeightPercent() const
 Config::UISize Config::iconSize() const
 {
     int s = value(u"Interface/IconSizeEnum"_qs, 0).toInt();
-    return static_cast<UISize>(qBound(0, s, 2));
+    return static_cast<UISize>(std::clamp(0, s, 2));
 }
 
 void Config::setIconSize(UISize iconSize)
@@ -685,7 +685,7 @@ int Config::columnSpacing() const
 
 void Config::setColumnSpacing(int newColumnSpacing)
 {
-    newColumnSpacing = qBound(0, newColumnSpacing, 2);
+    newColumnSpacing = std::clamp(0, newColumnSpacing, 2);
 
     if (m_columnSpacing != newColumnSpacing) {
         m_columnSpacing = newColumnSpacing;

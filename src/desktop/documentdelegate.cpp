@@ -82,7 +82,7 @@ int DocumentDelegate::defaultItemHeight(const QWidget *w)
 
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
-    return qMax(2 + fm.height(), picsize.height() + 1 /* the grid lines */);
+    return std::max(2 + fm.height(), picsize.height() + 1 /* the grid lines */);
 }
 
 QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const
@@ -394,8 +394,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QFont font = option.font;
         font.setBold(tag.bold);
         QFontMetrics fontmetrics(font);
-        int itw = qMax(int(1.5 * fontmetrics.height()),
-                       2 * fontmetrics.horizontalAdvance(tag.text));
+        int itw = std::max(int(1.5 * fontmetrics.height()),
+                           2 * fontmetrics.horizontalAdvance(tag.text));
 
         QString key = u"dd_tag_" + QString::number(itw) + u"-" + tag.background.name();
         QPixmap pix;
@@ -413,8 +413,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             pixp.end();
             QPixmapCache::insert(key, pix);
         }
-        int pw = qMin(pix.width(), option.rect.width());
-        int ph = qMin(pix.height(), option.rect.height());
+        int pw = std::min(pix.width(), option.rect.width());
+        int ph = std::min(pix.height(), option.rect.height());
 
         p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, pix,
                       pix.width() - pw, pix.height() - ph, pw, ph);
@@ -568,7 +568,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         }
     }
     if (selectionFrame && selected) {
-        int lines = qMax(4, option.rect.height() / 20);
+        int lines = std::max(4, option.rect.height() / 20);
         QColor c = bg;
         for (int i = 0; i < lines; ++i) {
             c.setAlphaF(1.f - float(i) / float(lines + lines - 2));

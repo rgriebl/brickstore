@@ -504,7 +504,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 
 #if Q_PROCESSOR_WORDSIZE >= 8
     if (physicalMem) {
-        picCacheMem = qBound(picCacheMem, physicalMem / 4, picCacheMem * 8);
+        picCacheMem = std::clamp(picCacheMem, physicalMem / 4, picCacheMem * 8);
         if (physicalMem >= 3'000'000'000ULL)
             pgCacheEntries *= 2;
     }

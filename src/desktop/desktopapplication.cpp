@@ -126,7 +126,7 @@ void DesktopApplication::init()
 
     auto setFontSizePercentLambda = [this](int p) {
         QFont f = QApplication::font();
-        f.setPointSizeF(qreal(m_defaultFontSize * qBound(50, p, 200) / 100.));
+        f.setPointSizeF(qreal(m_defaultFontSize * std::clamp(50, p, 200) / 100.));
         QApplication::setFont(f);
     };
     connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);

@@ -52,10 +52,10 @@ public:
     QColor ldrawEdgeColor() const  { return m_ldraw_edge_color; }
 
     bool hasParticles() const           { return !qFuzzyIsNull(m_particleMinSize) && !qFuzzyIsNull(m_particleMaxSize); }
-    float particleMinSize() const       { return m_particleMinSize; }
-    float particleMaxSize() const       { return m_particleMaxSize; }
-    float particleFraction() const      { return m_particleFraction; }
-    float particleVFraction() const     { return m_particleVFraction; }
+    double particleMinSize() const      { return double(m_particleMinSize); }
+    double particleMaxSize() const      { return double(m_particleMaxSize); }
+    double particleFraction() const     { return double(m_particleFraction); }
+    double particleVFraction() const    { return double(m_particleVFraction); }
     QColor particleColor() const        { return m_particleColor; }
 
     float popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }

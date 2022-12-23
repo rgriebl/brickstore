@@ -1095,7 +1095,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         return QVariant::fromValue((m_mode == Mode::ConsistsOf)
                                    ? e.m_color : e.m_item->defaultColor());
     case QuantityRole:
-        return qMax(0, e.m_quantity);
+        return std::max(0, e.m_quantity);
     case NameRole:
         return e.m_item->name();
     case IdRole:

@@ -218,7 +218,7 @@ void TableView::editCurrentItem(int column)
 void TableView::updateMinimumSectionSize()
 
 {
-    int s = qMax(16, fontMetrics().height() * 2);
+    int s = std::max(16, fontMetrics().height() * 2);
     horizontalHeader()->setMinimumSectionSize(s);
     setIconSize({ s, s });
 }
@@ -794,7 +794,7 @@ void View::setRowHeightFactor(double factor)
     if (!Config::inst()->liveEditRowHeight())
         return;
 
-    factor = qBound(.5, factor, 2.);
+    factor = std::clamp(.5, factor, 2.);
 
     if (!qFuzzyCompare(factor, m_rowHeightFactor)) {
         m_rowHeightFactor = factor;
@@ -912,7 +912,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
             curPageColWidths.clear();
             cwUsed = 0;
         }
-        auto cwClamped = qMakePair(cw.first, qMin(cw.second, double(pageRect.width())));
+        auto cwClamped = qMakePair(cw.first, std::min(cw.second, double(pageRect.width())));
         cwUsed += cwClamped.second;
         curPageColWidths.append(cwClamped);
     }
@@ -986,7 +986,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
                 dy += rowHeight;
 
                 int li = pd * rowsPerPage; // start at lot index
-                for (int l = li; l < qMin(li + rowsPerPage, lots.size()); ++l) {
+                for (int l = li; l < std::min(li + rowsPerPage, int(lots.size())); ++l) {
                     const Lot *lot = lots.at(l);
                     QModelIndex idx = model()->index(lot, cw.first);
 

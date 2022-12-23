@@ -112,7 +112,7 @@ QColor Utility::gradientColor(const QColor &c1, const QColor &c2, float f)
     c1.getRgbF(&r1, &g1, &b1, &a1);
     c2.getRgbF(&r2, &g2, &b2, &a2);
 
-    f = qBound(0.f, f, 1.f);
+    f = std::clamp(0.f, f, 1.f);
     float e = 1.f - f;
 
     return QColor::fromRgbF(r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f);
@@ -146,10 +146,10 @@ QColor Utility::contrastColor(const QColor &c, float f)
     float h, s, l, a;
     c.getHslF(&h, &s, &l, &a);
 
-    f = qBound(0.f, f, 1.f);
+    f = std::clamp(0.f, f, 1.f);
 
     l += f * ((l <= 0.55f) ? 1.f : -1.f);
-    l = qBound(0.f, l, 1.f);
+    l = std::clamp(0.f, l, 1.f);
 
     return QColor::fromHslF(h, s, l, a);
 }

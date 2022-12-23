@@ -70,18 +70,18 @@ int ProgressCircle::value() const
 
 void ProgressCircle::setMinimum(int mini)
 {
-    setRange(mini, qMax(mini, m_max));
+    setRange(mini, std::max(mini, m_max));
 }
 
 void ProgressCircle::setMaximum(int maxi)
 {
-    setRange(qMin(maxi, m_min), maxi);
+    setRange(std::min(maxi, m_min), maxi);
 }
 
 void ProgressCircle::setRange(int mini, int maxi)
 {
     m_min = mini;
-    m_max = qMax(mini, maxi);
+    m_max = std::max(mini, maxi);
     if (m_value < (m_min - 1) || m_value > m_max)
         reset();
 }
@@ -123,7 +123,7 @@ void ProgressCircle::mousePressEvent(QMouseEvent *e)
 
 void ProgressCircle::paintEvent(QPaintEvent *)
 {
-    qreal s = qMin(width(), height());
+    qreal s = std::min(width(), height());
     qreal dx = (width() - s) / 2;
     qreal dy = (height() - s) / 2;
     QRectF r(dx, dy, s, s);

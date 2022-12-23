@@ -247,7 +247,7 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
                                 pix2.setDevicePixelRatio(pix.devicePixelRatio());
                                 pix2.fill(Qt::transparent);
                                 QPainter pPix2(&pix2);
-                                pPix2.setOpacity(qMax(0.15, 0.75 - (i / 4.)));
+                                pPix2.setOpacity(std::max(0.15, 0.75 - (i / 4.)));
                                 pPix2.drawPixmap(QRect({ }, pix2.deviceIndependentSize().toSize()), pix);
                                 pPix2.end();
                                 pix = pix2;

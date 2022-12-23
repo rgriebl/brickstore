@@ -133,7 +133,7 @@ void DeveloperConsole::appendLogMessage(QtMsgType type, const QString &category,
     static const char *lineColor = "ff00ff";
     static const char *categoryColor[] = { "e81717", "e8e817", "17e817", "17e8e8", "1717e8", "e817e8" };
 
-    type = qBound(QtDebugMsg, type, QtInfoMsg);
+    type = std::clamp(QtDebugMsg, type, QtInfoMsg);
     QString filename;
     if (!file.isEmpty() && line > 1) {
         filename = file;
