@@ -140,8 +140,24 @@ if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
 endif()
 
 if (WIN32)
-    add_compile_definitions(BS_HAS_PARALLEL_STL)
-    add_compile_definitions(NOMINMAX)
+    set(PARALLEL_STL ON)
+    add_compile_definitions(
+        BS_HAS_PARALLEL_STL
+        NOINMAX
+    )
+endif()
+
+if (LINUX)
+    find_package(TBB)
+    if (TBB_FOUND)
+        set(PARALLEL_STL ON)
+        add_compile_definitions(
+            BS_HAS_PARALLEL_STL
+            TBB_SUPPRESS_DEPRECATED_MESSAGES=1
+        )
+    else()
+        message(WARNING "No libtbb found: parallel STL algorithms will not be used.")
+    endif()
 endif()
 
 if (SENTRY)
@@ -271,6 +287,10 @@ if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE user32 advapi32 wininet)
 endif()
 
+if (LINUX AND TBB_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE TBB::tbb)
+endif()
+
 if (APPLE)
     set(EXECUTABLE ${PROJECT_NAME})
     if (CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -325,19 +345,6 @@ if (APPLE)
             MACOSX_PACKAGE_LOCATION "Resources/${LANG}.lproj"
         )
     endforeach()
-endif()
-
-if (LINUX)
-    find_package(TBB)
-    if (TBB_FOUND)
-        add_compile_definitions(
-            BS_HAS_PARALLEL_STL
-            TBB_SUPPRESS_DEPRECATED_MESSAGES=1
-        )
-        target_link_libraries(${PROJECT_NAME} PRIVATE TBB::tbb)
-    else()
-        message(STATUS "No libtbb found: parallel STL algorithms will not be used.")
-    endif()
 endif()
 
 if (ANDROID)
@@ -653,4 +660,5 @@ message(STATUS "  FORCE_MOBILE ... ${FORCE_MOBILE}")
 message(STATUS "  SANITIZE ....... ${SANITIZE}")
 message(STATUS "  MODELTEST ...... ${MODELTEST}")
 message(STATUS "  SENTRY ......... ${SENTRY}")
+message(STATUS "  PARALLEL_STL ... ${PARALLEL_STL}")
 message(STATUS "")

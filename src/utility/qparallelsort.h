@@ -48,6 +48,71 @@
  */
 #pragma once
 
+#include <QtConcurrentRun>
+
+
+static constexpr qsizetype MinParallelSpan = 500;
+
+template <typename RandomAccessIterator, typename T, typename LessThan>
+void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan,
+                         T *tmp, int threadCount)
+{
+    qsizetype span = end - begin;
+
+    // stop if there are no threads left OR if size of array is at most MinParallelSpan (to avoid overhead)
+    if ((threadCount == 1) || (span <= MinParallelSpan)) {
+        // let's just sort this in serial
+        std::sort(begin, end, lessThan);
+    } else {
+        // divide & conquer
+        qsizetype a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
+        qsizetype b_span = span - a_span;  // smaller half of array if array-size is uneven
+
+        QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>,
+                                                 begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
+        qParallelSortThread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
+        future.waitForFinished();
+
+        RandomAccessIterator a = begin;
+        RandomAccessIterator b = begin + a_span;
+
+        Q_ASSERT(span == (end - begin));
+        Q_ASSERT((b + b_span) == end);
+
+        for (qsizetype i = 0; i < span; ++i) {
+            // 'a' if no b left or a < b
+            // 'b' if no a left or a >= b
+            if (!b_span || (a_span && b_span && lessThan(*a, *b))) {
+                *(tmp + i) = *a;
+                a++;
+                a_span--;
+            } else {
+                *(tmp + i) = *b;
+                b++;
+                b_span--;
+            }
+        }
+        std::copy(begin, end, tmp);
+    }
+}
+
+template <typename RandomAccessIterator, typename LessThan>
+inline void qParallelSortImpl(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan)
+{
+    const qsizetype span = end - begin;
+    if (span >= 2) {
+        int threadCount = QThread::idealThreadCount();
+        if ((threadCount == 1) || (span <= MinParallelSpan)) {
+            std::sort(begin, end, lessThan);
+        } else {
+            auto *tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
+            qParallelSortThread(begin, end, lessThan, tmp, threadCount);
+            delete [] tmp;
+        }
+    }
+}
+
+
 #if defined(BS_HAS_PARALLEL_STL) && __has_include(<execution>)
 #  if defined(emit)
 #    undef emit // libtbb uses a function named emit()
@@ -71,166 +136,45 @@ inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
 }
 
 #else
-#  include <QtConcurrentRun>
-#  include <QtAlgorithms>
 
-namespace QAlgorithmsPrivate {
-
-
-template <typename RandomAccessIterator, typename T, typename LessThan>
-static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, qsizetype a_span, qsizetype b_span)
+template <class IT, class LT>
+inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
 {
-    RandomAccessIterator a = begin;
-    RandomAccessIterator b = begin + a_span;
-    qsizetype span = a_span + b_span;
-
-    Q_ASSERT(span == (end - begin));
-    Q_ASSERT((b + b_span) == end);
-
-    for (qsizetype i = 0; i < span; ++i) {
-        // 'a' if no b left or a < b
-        // 'b' if no a left or a >= b
-        if (!b_span || (a_span && b_span && lessThan(*a, *b))) {
-            *(tmp + i) = *a;
-            a++;
-            a_span--;
-        } else {
-            *(tmp + i) = *b;
-            b++;
-            b_span--;
-        }
-    }
-    while (begin != end)
-        *begin++ = *tmp++;
+    qParallelSortImpl(begin, end, lt);
 }
 
-template <typename RandomAccessIterator, typename T, typename LessThan>
-static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp)
-{
-    qsizetype span = end - begin;
-
-    if (span < 2) {
-        return;
-    } else if (span == 2) {
-        if (!lessThan(*begin, *(begin + 1)))
-            std::swap(*begin, *(begin + 1));
-    } else {
-        qsizetype a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
-        qsizetype b_span = span / 2;        // smaller half of array if array-size is uneven
-
-        if (a_span > 1) // no sorting necessary if size == 1
-            qParallelSortSerial(begin, begin + a_span, lessThan, tmp);
-
-        if (b_span > 1) // no sorting necessary if size == 1
-            qParallelSortSerial(begin + a_span, end, lessThan, tmp + a_span);
-
-        qParallelSortJoin(begin, end, lessThan, tmp, a_span, b_span);
-    }
-}
-
-template <typename RandomAccessIterator, typename T, typename LessThan>
-void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int threadCount)
-{
-    qsizetype span = end - begin;
-
-    // stop if there are no threads left OR if size of array is at most 100 (to avoid overhead)
-    if (threadCount == 1 || span <= 100) {
-        // let's just sort this in serial
-        qParallelSortSerial(begin, end, lessThan, tmp);
-        return;
-    } else {
-        // divide & conquer
-        qsizetype a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
-        qsizetype b_span = span - a_span;  // smaller half of array if array-size is uneven
-
-        if (b_span > 1) { // prepare thread only if sorting is necessary
-            QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>, begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
-            qParallelSortThread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
-            future.waitForFinished();
-        } else if (a_span == 2) {
-            qParallelSortSerial(begin, end, lessThan, tmp);
-        }
-
-        qParallelSortJoin(begin, end, lessThan, tmp, a_span, b_span);
-    }
-}
-
-template <typename RandomAccessIterator, typename T, typename LessThan>
-Q_OUTOFLINE_TEMPLATE void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &, LessThan lessThan)
-{
-    const qsizetype span = end - begin;
-    if (span < 2)
-       return;
-
-    int threadCount = QThread::idealThreadCount();
-    if (threadCount == 1 || span < 1000) {
-        std::sort(begin, end, lessThan);
-        return;
-    }
-
-    T *tmp = new T[span];
-    qParallelSortThread(begin, end, lessThan, tmp, threadCount);
-    delete [] tmp;
-}
-
-template <typename RandomAccessIterator, typename T>
-inline void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &dummy)
-{
-    qParallelSortHelper(begin, end, dummy, std::less<T>());
-}
-
-} // namespace QAlgorithmsPrivate
-
-template <typename RandomAccessIterator>
-inline void qParallelSort(RandomAccessIterator start, RandomAccessIterator end)
-{
-    if (start != end)
-        QAlgorithmsPrivate::qParallelSortHelper(start, end, *start);
-}
-
-template <typename RandomAccessIterator, typename LessThan>
-inline void qParallelSort(RandomAccessIterator start, RandomAccessIterator end, LessThan lessThan)
-{
-    if (start != end)
-        QAlgorithmsPrivate::qParallelSortHelper(start, end, *start, lessThan);
-}
-
-template<typename Container>
-inline void qParallelSort(Container &c)
-{
-    if (!c.empty())
-        QAlgorithmsPrivate::qParallelSortHelper(c.begin(), c.end(), *c.begin());
-}
+#endif // BS_HAS_PARALLEL_STL_EXECUTION
 
 
-#  ifdef QPARALLELSORT_TESTING // benchmarking
+#ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
 
-void test_par_sort()
+static void test_par_sort()
 {
-    for (int k = 0; k < 4; ++k) {
-        const char *which = (k == 0 ? "Stable Sort  " :
-                            (k == 1 ? "Quick Sort   " :
-                                      "Parallel Sort"));
+    for (int k = 0; k < 3; ++k) {
+        const char *which = (k == 0 ? "std::sort           " :
+                            (k == 1 ? "std::sort par_unseq ":
+                                      "Parallel Sort       "));
         int maxloop = 24;
         int *src = new int[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
             src[j] = rand();
 
         for (int i = 0; i <= maxloop; ++i) {
-            int count = 1 << i;
-            QByteArray msg = QString("%3 test run %1 ... %2 values").arg(i).arg(count).arg(which).toLatin1();
+            size_t count = 1 << i;
+            QByteArray msg = u"%3 test run %1 ... %2 values"_qs.arg(i).arg(count)
+                    .arg(QString::fromLatin1(which)).toLatin1();
             int *array = new int[count];
             memcpy(array, src, sizeof(int) * count);
 
             {
                 stopwatch sw(msg.constData());
                 if (k == 0)
-                    qStableSort(array, array + count);
+                    std::sort(array, array + count);
                 else if (k == 1)
-                    qSort(array, array + count);
+                    std::sort(std::execution::par_unseq, array, array + count);
                 else
-                    qParallelSort(array, array + count);
+                    qParallelSortImpl(array, array + count, std::less<int>());
             }
             delete [] array;
         }
@@ -239,4 +183,3 @@ void test_par_sort()
 }
 #  endif
 
-#endif // BS_HAS_PARALLEL_STL_EXECUTION
