@@ -95,6 +95,14 @@ elseif (GCC)
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>")
 endif()
 
+if (MSVC)
+    # need to disable C4127 due to 6.4.0 QStringBuilder
+    # need to disable C4702 due to 6.4.0 QAnyStringView
+    add_compile_options(/W4 /WX /wd4127 /wd4702)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
+
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
 if (NOT IOS) # somehow this tries to access the wrong build dir on iOS
@@ -143,7 +151,7 @@ if (WIN32)
     set(PARALLEL_STL ON)
     add_compile_definitions(
         BS_HAS_PARALLEL_STL
-        NOINMAX
+        NOMINMAX
     )
 endif()
 

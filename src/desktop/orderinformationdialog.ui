@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>792</width>
-    <height>578</height>
+    <height>833</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -89,7 +89,6 @@
          <widget class="QLabel" name="w_status">
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -913,7 +912,6 @@
          <widget class="QLabel" name="w_vatInfoLabel">
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -1116,7 +1114,7 @@
          </spacer>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="label_x">
           <property name="text">
            <string>Payment By</string>
           </property>

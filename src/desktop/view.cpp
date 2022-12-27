@@ -423,7 +423,7 @@ View::View(Document *document, QWidget *parent)
     connect(m_header, &HeaderView::sortColumnsChanged,
             this, [this](const QVector<QPair<int, Qt::SortOrder>> &sortColumns) {
         if (model()->sortColumns() != sortColumns) {
-            model()->sort(sortColumns);
+            model()->multiSort(sortColumns);
             m_table->scrollTo(m_document->currentIndex());
         }
     });

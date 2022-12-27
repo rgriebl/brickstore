@@ -575,12 +575,12 @@ lzmadec_internal_init (lzmadec_stream *strm)
 
 #define RangeDecoderBitTreeDecode(probs, numLevels, res) \
         { \
-            int i = numLevels; \
+            int _i = numLevels; \
             res = 1; \
             do { \
-                CProb *p = probs + res; \
-                RC_GET_BIT(p, res) \
-            } while(--i != 0); \
+                CProb *_p = probs + res; \
+                RC_GET_BIT(_p, res) \
+            } while(--_i != 0); \
             res -= (1 << numLevels); \
         }
 

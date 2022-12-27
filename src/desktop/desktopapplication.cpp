@@ -41,8 +41,14 @@
 #  endif
 #  if defined(Q_CC_MSVC) // needed for themed common controls (e.g. file open dialogs)
 #    pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#    pragma warning(push)
+#    pragma warning(disable: 4458)
+#    pragma warning(disable: 4201)
 #  endif
 #  include <QtGui/private/qguiapplication_p.h>
+#  if defined(Q_CC_MSVC)
+#    pragma warning(pop)
+#  endif
 #elif defined(Q_OS_MACOS)
 #  include <QtCore/QVersionNumber>
 #  include <QtGui/private/qguiapplication_p.h>

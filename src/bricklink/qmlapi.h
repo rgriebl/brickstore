@@ -140,10 +140,6 @@ protected:
     QmlWrapperBase(T *_wrappedObject)
         : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
     { }
-    QmlWrapperBase(const QmlWrapperBase &copy)
-        : wrapped(copy.wrapped)
-    { }
-    virtual ~QmlWrapperBase() = default;
 
     static T *wrappedNull()
     {
@@ -415,7 +411,7 @@ public:
     QmlLot(const Lot *lot);
     QmlLot(const QmlLot &copy);
     QmlLot(QmlLot &&move);
-    ~QmlLot() override;
+    ~QmlLot();
 
     static QmlLot create(Lot * &&lot); // QmlLot owns the lot
     QmlLot &operator=(const QmlLot &assign);

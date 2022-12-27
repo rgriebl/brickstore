@@ -42,7 +42,15 @@
 #include <QtCore/QVersionNumber>
 
 #include <private/qsimd_p.h>
+#ifdef Q_CC_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4458)
+#  pragma warning(disable: 4201)
+#endif
 #include <private/qguiapplication_p.h>
+#ifdef Q_CC_MSVC
+#  pragma warning(pop)
+#endif
 #include <qpa/qplatformintegration.h>
 #include <qpa/qplatformscreen.h>
 #include <qpa/qplatformtheme.h>

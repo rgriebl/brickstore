@@ -230,12 +230,12 @@ void SelectMergeMode::createFields()
             DocumentModel::FieldMergeModes newModes = m_modes;
 
             const auto mode = static_cast<DocumentModel::MergeMode>(id);
-            const auto fields = fieldGroup->property("documentFields").value<QVector<DocumentModel::Field>>();
-            for (const auto &field : fields) {
+            const auto docFields = fieldGroup->property("documentFields").value<QVector<DocumentModel::Field>>();
+            for (const auto &docField : docFields) {
                 if (mode == DocumentModel::MergeMode::Ignore)
-                    newModes.remove(field);
+                    newModes.remove(docField);
                 else
-                    newModes.insert(field, mode);
+                    newModes.insert(docField, mode);
             }
             if (newModes != m_modes)
                 m_modes = newModes;

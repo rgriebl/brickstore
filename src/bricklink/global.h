@@ -19,19 +19,19 @@ namespace BrickLink {
 
 Q_NAMESPACE
 
-enum class Time          { PastSix, Current, Count };
-enum class Price         { Lowest, Average, WAverage, Highest, Count };
-enum class Condition     { New, Used, Count };
-enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
-enum class Stockroom     { None, A, B, C, Count };
-enum class Status        { Include, Exclude, Extra, Count };
-enum class UpdateStatus  { Ok, Loading, Updating, UpdateFailed };
+enum class Time         : uint { PastSix, Current, Count };
+enum class Price        : uint { Lowest, Average, WAverage, Highest, Count };
+enum class Condition    : uint { New, Used, Count };
+enum class SubCondition : uint { None, Complete, Incomplete, Sealed, Count };
+enum class Stockroom    : uint { None, A, B, C, Count };
+enum class Status       : uint { Include, Exclude, Extra, Count };
+enum class UpdateStatus : uint { Ok, Loading, Updating, UpdateFailed };
 
-enum class OrderType     { Received, Placed, Any };
-enum class OrderStatus   { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
-                           Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
+enum class OrderType    : uint { Received, Placed, Any };
+enum class OrderStatus  : uint { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
+                                 Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
-enum class Url {
+enum class Url : uint {
     InventoryRequest,
     WantedListUpload,
     InventoryUpload,
@@ -49,7 +49,7 @@ enum class Url {
     WantedList,
 };
 
-enum class PartOutTrait {
+enum class PartOutTrait : uint {
     None         = 0x00,
     Instructions = 0x01,
     OriginalBox  = 0x02,
@@ -63,7 +63,7 @@ enum class PartOutTrait {
 Q_DECLARE_FLAGS(PartOutTraits, PartOutTrait);
 Q_DECLARE_OPERATORS_FOR_FLAGS(PartOutTraits);
 
-enum class ColorTypeFlag {
+enum class ColorTypeFlag : uint {
     Solid        = 0x0001,
     Transparent  = 0x0002,
     Glitter      = 0x0004,

@@ -65,7 +65,7 @@ void BrickStoreProxyStyle::polish(QWidget *w)
     } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
         if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
             QPointer<QToolButton> tbptr(tb);
-            QMetaObject::invokeMethod(this, [this, tbptr]() {
+            QMetaObject::invokeMethod(this, [tbptr]() {
                 if (tbptr && tbptr->autoRaise()) {
                     QStyle *style = tbptr->style();
                     if (auto *proxyStyle = qobject_cast<QProxyStyle *>(style))
@@ -108,7 +108,7 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
             || qobject_cast<QSpinBox *>(w)) {
         w->removeEventFilter(this);
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-    } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
+    } else if (qobject_cast<QComboBox *>(w)) {
         w->removeEventFilter(this);
 #endif
     }
@@ -296,7 +296,7 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
             }
         }
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-    } else if (auto *cb = qobject_cast<QComboBox *>(o)) {
+    } else if (qobject_cast<QComboBox *>(o)) {
         if (e->type() == QEvent::KeyPress) {
             auto *ke = static_cast<QKeyEvent *>(e);
             if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter)

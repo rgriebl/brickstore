@@ -36,14 +36,14 @@ void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash
         const auto &colorVector = it.value();
 
         AppearsInRecord cair;
-        cair.m_colorIndex = it.key();
-        cair.m_colorSize = colorVector.size();
+        cair.m_colorBits.m_colorIndex = it.key();
+        cair.m_colorBits.m_colorSize = colorVector.size();
         m_appears_in.push_back(cair);
 
         for (auto vecIt = colorVector.cbegin(); vecIt != colorVector.cend(); ++vecIt) {
             AppearsInRecord iair;
-            iair.m_quantity = vecIt->first;
-            iair.m_itemIndex = vecIt->second;
+            iair.m_itemBits.m_quantity = vecIt->first;
+            iair.m_itemBits.m_itemIndex = vecIt->second;
             m_appears_in.push_back(iair);
         }
     }
@@ -58,8 +58,8 @@ AppearsIn Item::appearsIn(const Color *onlyColor) const
 
     for (auto it = m_appears_in.cbegin(); it != m_appears_in.cend(); ) {
         // 1st level (color header)
-        quint32 vectorSize = it->m_colorSize;
-        const Color *color = &core()->colors()[it->m_colorIndex];
+        quint32 vectorSize = it->m_colorBits.m_colorSize;
+        const Color *color = &core()->colors()[it->m_colorBits.m_colorIndex];
 
         ++it;
 
@@ -68,10 +68,10 @@ AppearsIn Item::appearsIn(const Color *onlyColor) const
 
             for (quint32 i = 0; i < vectorSize; ++i, ++it) {
                 // 2nd level (color entry)
-                const Item *item = &core()->items()[it->m_itemIndex];
+                const Item *item = &core()->items()[it->m_itemBits.m_itemIndex];
 
-                if (it->m_quantity)
-                    vec.append(qMakePair(it->m_quantity, item));
+                if (quint32 qty = it->m_itemBits.m_quantity)
+                    vec.append(qMakePair(qty, item));
             }
         } else {
             it += vectorSize; // skip 2nd level
@@ -179,12 +179,12 @@ uint Item::index() const
 
 const Item *Item::ConsistsOf::item() const
 {
-    return &core()->items().at(m_itemIndex);
+    return &core()->items().at(m_bits.m_itemIndex);
 }
 
 const Color *Item::ConsistsOf::color() const
 {
-    return &core()->colors().at(m_colorIndex);
+    return &core()->colors().at(m_bits.m_colorIndex);
 }
 
 } // namespace BrickLink

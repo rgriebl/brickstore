@@ -2325,7 +2325,7 @@ QVector<QPair<int, Qt::SortOrder>> DocumentModel::sortColumns() const
     return m_sortColumns;
 }
 
-void DocumentModel::sort(const QVector<QPair<int, Qt::SortOrder>> &columns)
+void DocumentModel::multiSort(const QVector<QPair<int, Qt::SortOrder>> &columns)
 {
     if (((columns.size() == 1) && (columns.at(0).first == -1)) || (columns == m_sortColumns))
         return;

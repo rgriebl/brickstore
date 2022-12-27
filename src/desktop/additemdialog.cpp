@@ -867,7 +867,7 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
 
     QMenu *m = nullptr;
     int d = 1;
-    int start;
+    int start = 0;
 
     switch (type) {
     case BrowseMenuType::Back:

@@ -349,8 +349,9 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
             dx = cw[1];
 
             cell cq(cell::Quantity, dx, dy, cw[2], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), flip);
-            cq.m_time      = time;
+            cq.m_time = time;
             cq.m_condition = cond;
+            cq.m_price = BrickLink::Price::Count;
             d->m_cells.push_back(cq);
 
             dx += cw[2];
@@ -437,8 +438,9 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
             dx = cw[0] + cw[1];
 
             cell cq(cell::Quantity, dx, dy, cw[2], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), flip);
-            cq.m_time      = time;
+            cq.m_time = time;
             cq.m_condition = cond;
+            cq.m_price = BrickLink::Price::Count;
             d->m_cells.push_back(cq);
             dx += cw[2];
 
@@ -547,6 +549,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
             cell cq(cell::Quantity, dx, dy, cw[1], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), false);
             cq.m_time = time;
             cq.m_condition = cond;
+            cq.m_price = BrickLink::Price::Count;
             d->m_cells.push_back(cq);
             dy += ch;
 

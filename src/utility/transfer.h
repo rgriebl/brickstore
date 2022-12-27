@@ -106,12 +106,12 @@ private:
 //    int          m_user_tag = 0;
 
     uint         m_respcode         : 16 = 0;
-    uint         m_status           : 4 = Inactive;
-    uint         m_http_method      : 1;
-    int          m_reset_for_reuse  : 1 = false;
+    Status       m_status           : 4 = Inactive;
+    HttpMethod   m_http_method      : 1;
+    bool         m_reset_for_reuse  : 1 = false;
     uint         m_retries_left     : 4;
-    int          m_was_not_modified : 1 = false;
-    int          m_no_redirects     : 1;
+    bool         m_was_not_modified : 1 = false;
+    bool         m_no_redirects     : 1;
     bool         m_high_priority    : 1 = false;
 
     friend class Transfer;

@@ -2186,7 +2186,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
     case ColumnLayoutCommand::BrickStoreDefault:
     case ColumnLayoutCommand::BrickStoreSimpleDefault:
         resizeColumnsToDefault(clc == ColumnLayoutCommand::BrickStoreSimpleDefault);
-        model()->sort({ { 0, Qt::AscendingOrder } });
+        model()->multiSort({ { 0, Qt::AscendingOrder } });
         break;
     case ColumnLayoutCommand::AutoResize:
         emit resizeColumnsToContents();
@@ -2195,7 +2195,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
         userLayout = Config::inst()->columnLayout(layoutId);
         if (userLayout.isEmpty()) { // use brickstore default
             resizeColumnsToDefault(false);
-            model()->sort({ { 0, Qt::AscendingOrder } });
+            model()->multiSort({ { 0, Qt::AscendingOrder } });
             break;
         }
         Q_FALLTHROUGH();
@@ -2204,7 +2204,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
             auto [columnData, sortColumns] = parseColumnsState(userLayout);
             { } // { } to work around QtCreator being confused by the [] return tuple
             model()->undoStack()->push(new ColumnLayoutCmd(this, columnData));
-            model()->sort(sortColumns);
+            model()->multiSort(sortColumns);
         } catch (const Exception &) {
         }
         break;

@@ -54,14 +54,14 @@ public:
     public:
         const Item *item() const;
         const Color *color() const;
-        int quantity() const        { return m_quantity; }
-        bool isExtra() const        { return m_extra; }
-        bool isAlternate() const    { return m_isalt; }
-        uint alternateId() const    { return m_altid; }
-        bool isCounterPart() const  { return m_cpart; }
+        int quantity() const        { return m_bits.m_quantity; }
+        bool isExtra() const        { return m_bits.m_extra; }
+        bool isAlternate() const    { return m_bits.m_isalt; }
+        uint alternateId() const    { return m_bits.m_altid; }
+        bool isCounterPart() const  { return m_bits.m_cpart; }
 
-        uint itemIndex() const      { return m_itemIndex; }  // only for internal use
-        uint colorIndex() const     { return m_colorIndex; } // only for internal use
+        uint itemIndex() const      { return m_bits.m_itemIndex; }  // only for internal use
+        uint colorIndex() const     { return m_bits.m_colorIndex; } // only for internal use
 
     private:
         union {
@@ -85,7 +85,7 @@ public:
                 quint64  m_itemIndex  : 20;
                 quint64  m_quantity   : 12;
 #endif
-            };
+            } m_bits;
             quint64 m_data = 0;
         };
 
@@ -142,7 +142,7 @@ private:
             quint32  m_colorSize  : 20;
             quint32  m_colorIndex : 12;
 #endif
-        };
+        } m_colorBits;
         struct {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
             quint32  m_quantity  : 12;
@@ -151,9 +151,10 @@ private:
             quint32  m_itemIndex : 20;
             quint32  m_quantity  : 12;
 #endif
-        };
+        } m_itemBits;
         quint32 m_data = 0;
     };
+
     Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
 
     std::vector<AppearsInRecord> m_appears_in;

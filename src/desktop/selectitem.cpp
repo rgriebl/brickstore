@@ -88,7 +88,7 @@ public:
 
 class CategoryDelegate : public BrickLink::ItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 public:
     CategoryDelegate(QObject *parent = nullptr)
         : BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, parent)
@@ -713,7 +713,7 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QString itemid;
     QByteArray filterState;
     QString filterText;
-    uint colorFilterId;
+    uint colorFilterId = BrickLink::Color::InvalidId;
     double zoom;
     int viewMode;
     bool catSortAsc;

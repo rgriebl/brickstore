@@ -269,13 +269,13 @@ static uint qt_create_q5hash_seed()
 #ifndef QT_BOOTSTRAPPED
     QByteArray envSeed = qgetenv("QT_HASH_SEED");
     if (!envSeed.isNull()) {
-        uint seed = envSeed.toUInt();
-        if (seed) {
+        uint _seed = envSeed.toUInt();
+        if (_seed) {
             // can't use qWarning here (reentrancy)
             fprintf(stderr, "QT_HASH_SEED: forced seed value is not 0, cannot guarantee that the "
                      "hashing functions will produce a stable value.");
         }
-        return seed;
+        return _seed;
     }
 
     seed = QRandomGenerator::system()->generate();
@@ -473,7 +473,7 @@ void Q5HashData::freeNode(void *node)
 
 Q5HashData *Q5HashData::detach_helper(void (*node_duplicate)(Node *, void *),
                                     void (*node_delete)(Node *),
-                                    int nodeSize,
+                                    int _nodeSize,
                                     int nodeAlign)
 {
     union {
@@ -487,7 +487,7 @@ Q5HashData *Q5HashData::detach_helper(void (*node_duplicate)(Node *, void *),
     d->buckets = nullptr;
     d->ref.initializeOwned();
     d->size = size;
-    d->nodeSize = nodeSize;
+    d->nodeSize = _nodeSize;
     d->userNumBits = userNumBits;
     d->numBits = numBits;
     d->numBuckets = numBuckets;

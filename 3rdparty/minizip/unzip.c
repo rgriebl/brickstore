@@ -982,7 +982,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
             /* ZIP64 extra fields */
             if (headerId == 0x0001)
             {
-                                                        uLong uL;
+                                                        uLong huL;
 
                                                                 if(file_info.uncompressed_size == MAXU32)
                                                                 {
@@ -1006,7 +1006,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
                                                                 if(file_info.disk_num_start == MAXU32)
                                                                 {
                                                                         /* Disk Start Number */
-                                                                        if (unz64local_getLong(&s->z_filefunc, s->filestream,&uL) != UNZ_OK)
+                                                                        if (unz64local_getLong(&s->z_filefunc, s->filestream,&huL) != UNZ_OK)
                                                                                 err=UNZ_ERRNO;
                                                                 }
 
@@ -1689,7 +1689,7 @@ extern int ZEXPORT unzReadCurrentFile  (unzFile file, voidp buf, unsigned len)
             {
                 uInt i;
                 for(i=0;i<uReadThis;i++)
-                  pfile_in_zip_read_info->read_buffer[i] =
+                  pfile_in_zip_read_info->read_buffer[i] = (char)
                       zdecode(s->keys,s->pcrc_32_tab,
                               pfile_in_zip_read_info->read_buffer[i]);
             }

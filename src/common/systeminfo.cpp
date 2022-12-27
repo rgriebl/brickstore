@@ -19,8 +19,15 @@
 
 #if defined(Q_OS_WINDOWS)
 #  if !defined(BS_BACKEND)
+#    if defined(Q_CC_MSVC)
+#      pragma warning(push)
+#      pragma warning(disable: 4458)
+#      pragma warning(disable: 4201)
+#    endif
 #    include <private/qguiapplication_p.h>
-#    include <qpa/qplatformnativeinterface.h>
+#    if defined(Q_CC_MSVC)
+#      pragma warning(pop)
+#    endif
 #  endif
 #  if defined(Q_CC_MINGW)
 #    undef _WIN32_WINNT

@@ -216,7 +216,7 @@ public:
 
     bool isSorted() const;
     QVector<QPair<int, Qt::SortOrder>> sortColumns() const;
-    void sort(const QVector<QPair<int, Qt::SortOrder>> &columns);
+    void multiSort(const QVector<QPair<int, Qt::SortOrder>> &columns);
 
     bool isFiltered() const;
     const QVector<Filter> &filter() const;

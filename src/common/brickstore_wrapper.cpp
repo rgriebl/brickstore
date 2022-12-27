@@ -413,14 +413,14 @@ QList<BrickLink::QmlLot> QmlDocument::qmlSelectedLots()
 
 void QmlDocument::sort(int column, Qt::SortOrder order)
 {
-    model()->sort({ { column, order } });
+    model()->multiSort({ { column, order } });
 }
 
 void QmlDocument::sortAdditionally(int column, Qt::SortOrder order)
 {
     auto sc = model()->sortColumns();
     sc.append({ column, order });
-    model()->sort(sc);
+    model()->multiSort(sc);
 }
 
 DocumentStatistics QmlDocument::selectionStatistics(bool ignoreExcluded) const
