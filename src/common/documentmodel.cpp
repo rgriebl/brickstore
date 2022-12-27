@@ -1115,9 +1115,9 @@ void DocumentModel::insertLotsAfter(const Lot *afterLot, LotList &&lots)
     if (lots.empty())
         return;
 
-    int afterPos = int(m_lots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+    int afterPos = m_lotIndex.value(afterLot, -1) + 1;
     int afterSortedPos = int(m_sortedLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
-    int afterFilteredPos = int(m_filteredLots.indexOf(const_cast<Lot *>(afterLot))) + 1;
+    int afterFilteredPos = m_filteredLotIndex.value(afterLot, -1) + 1;
 
     Q_ASSERT((afterPos > 0) && (afterSortedPos > 0));
     if (afterFilteredPos == 0)
@@ -1222,6 +1222,9 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
+    m_lotIndex.clear();
+    m_filteredLotIndex.clear();
+
     for (Lot *lot : std::as_const(lots)) {
         if (!isAppend) {
             m_lots.insert(*pos++, lot);
@@ -1238,9 +1241,13 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
         // this is really a new lot, not just a redo - start with no differences
         if (!m_differenceBase.contains(lot))
             m_differenceBase.insert(lot, *lot);
-
-        updateLotFlags(lot);
     }
+
+    rebuildLotIndex();
+    rebuildFilteredLotIndex();
+
+    for (Lot *lot : std::as_const(lots))
+        updateLotFlags(lot);
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
@@ -1267,6 +1274,9 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
+    m_lotIndex.clear();
+    m_filteredLotIndex.clear();
+
     for (int i = int(lots.count()) - 1; i >= 0; --i) {
         Lot *lot = lots.at(i);
         int idx = int(m_lots.indexOf(lot));
@@ -1281,6 +1291,9 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
         if (filterIdx >= 0)
             m_filteredLots.removeAt(filterIdx);
     }
+
+    rebuildLotIndex();
+    rebuildFilteredLotIndex();
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
@@ -1587,6 +1600,20 @@ void DocumentModel::setFakeIndexes(const QVector<int> &fakeIndexes)
     m_fakeIndexes = fakeIndexes;
 }
 
+void DocumentModel::rebuildLotIndex()
+{
+    m_lotIndex.clear();
+    for (auto i = 0; i < m_lots.size(); ++i)
+        m_lotIndex[m_lots.at(i)] = i;
+}
+
+void DocumentModel::rebuildFilteredLotIndex()
+{
+    m_filteredLotIndex.clear();
+    for (auto i = 0; i < m_filteredLots.size(); ++i)
+        m_filteredLotIndex[m_filteredLots.at(i)] = i;
+}
+
 bool DocumentModel::isModified() const
 {
     bool modified = !m_undo->isClean();
@@ -1673,7 +1700,7 @@ Lot *DocumentModel::lot(const QModelIndex &idx) const
 
 QModelIndex DocumentModel::index(const Lot *lot, int column) const
 {
-    int row = int(m_filteredLots.indexOf(const_cast<Lot *>(lot)));
+    int row = m_filteredLotIndex.value(lot, -1);
     if (row >= 0)
         return createIndex(row, column, const_cast<Lot *>(lot));
     return { };
@@ -1854,14 +1881,14 @@ void DocumentModel::initializeColumns()
           .title = QT_TR_NOOP("Index"),
           .displayFn = [&](const Lot *lot) {
               if (m_fakeIndexes.isEmpty()) {
-                  return QString::number(m_lots.indexOf(const_cast<Lot *>(lot)) + 1);
+                  return QString::number(m_lotIndex.value(lot, -1) + 1);
               } else {
-                  auto fi = m_fakeIndexes.at(m_lots.indexOf(const_cast<Lot *>(lot)));
+                  auto fi = m_fakeIndexes.at(m_lotIndex.value(lot, -1));
                   return fi >= 0 ? QString::number(fi + 1) : QString::fromLatin1("+");
               }
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-              return m_lots.indexOf(const_cast<Lot *>(l1)) - m_lots.indexOf(const_cast<Lot *>(l2));
+              return m_lotIndex.value(l1, -1) - m_lotIndex.value(l2, -1);
           },
       });
 
@@ -2372,6 +2399,8 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
+    m_filteredLotIndex.clear();
+
     m_sortColumns = columns;
 
     if (!unsortedLots.isEmpty()) {
@@ -2419,6 +2448,8 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
         m_filteredLots = m_sortedLots;
     }
 
+    rebuildFilteredLotIndex();
+
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
         after.append(index(lot(idx), idx.column()));
@@ -2441,6 +2472,8 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
+    m_filteredLotIndex.clear();
+
     m_filter = filter;
 
     if (!unfilteredLots.isEmpty()) {
@@ -2460,6 +2493,8 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
             });
         }
     }
+
+    rebuildFilteredLotIndex();
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
@@ -2491,8 +2526,8 @@ QByteArray DocumentModel::saveSortFilterState() const
     ds << qint32(m_sortedLots.size());
     for (int i = 0; i < m_sortedLots.size(); ++i) {
         auto *lot = m_sortedLots.at(i);
-        qint32 row = qint32(m_lots.indexOf(lot));
-        bool visible = m_filteredLots.contains(lot);
+        qint32 row = qint32(m_lotIndex.value(lot, -1));
+        bool visible = m_filteredLotIndex.contains(lot);
 
         ds << (visible ? row : (-row - 1)); // can't have -0
     }

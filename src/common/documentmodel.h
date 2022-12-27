@@ -329,6 +329,8 @@ private:
     DocumentModel(int dummy);
 
     void setFakeIndexes(const QVector<int> &fakeIndexes);
+    void rebuildLotIndex();
+    void rebuildFilteredLotIndex();
 
     void setLotsDirect(const LotList &lots);
     void insertLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
@@ -380,6 +382,9 @@ private:
     QVector<Lot *> m_lots;
     QVector<Lot *> m_sortedLots;
     QVector<Lot *> m_filteredLots;
+
+    mutable QHash<const Lot *, int> m_lotIndex;
+    mutable QHash<const Lot *, int> m_filteredLotIndex;
 
     QHash<const Lot *, Lot> m_differenceBase;
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs

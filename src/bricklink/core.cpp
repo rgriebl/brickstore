@@ -906,7 +906,7 @@ void Core::cancelTransfers()
     m_diskloadPool.waitForDone();
 }
 
-bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc)
+bool Core::applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc)
 {
     if (!inc)
         return false;
@@ -945,64 +945,61 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
 
 Core::ResolveResult Core::resolveIncomplete(Lot *lot)
 {
-    if (!lot->isIncomplete())
+    Incomplete *inc = lot->isIncomplete();
+
+    if (!inc)
         return ResolveResult::Direct;
 
-    Incomplete ic = *lot->isIncomplete();
+    const Item *item = nullptr;
+    const Color *color = nullptr;
 
-    if ((ic.m_itemtype_id != ItemType::InvalidId) && !ic.m_item_id.isEmpty())
-        lot->setItem(core()->item(ic.m_itemtype_id, ic.m_item_id));
+    if ((inc->m_itemtype_id != ItemType::InvalidId) && !inc->m_item_id.isEmpty())
+        item = core()->item(inc->m_itemtype_id, inc->m_item_id);
 
-    if (lot->item()) {
-        if (auto *lic = lot->isIncomplete()) {
-            lic->m_item_id.clear();
-            lic->m_item_name.clear();
-            lic->m_itemtype_id = ItemType::InvalidId;
-            lic->m_itemtype_name.clear();
-            lic->m_category_id = Category::InvalidId;
-            lic->m_category_name.clear();
-        }
-    }
+    if (inc->m_color_id != Color::InvalidId)
+        color = core()->color(inc->m_color_id);
 
-    if (ic.m_color_id != Color::InvalidId)
-        lot->setColor(core()->color(ic.m_color_id));
-
-    if (lot->color()) {
-        if (auto *lic = lot->isIncomplete()) {
-            lic->m_color_id = Color::InvalidId;
-            lic->m_color_name.clear();
-        }
-    }
-
-    if (lot->item() && lot->color()) {
-        lot->setIncomplete(nullptr);
-        return ResolveResult::Direct;
-
-    } else {
-        auto item = lot->item();
-        auto color = lot->color();
-
-        bool ok = applyChangeLog(item, color, lot->isIncomplete());
-
-        if (ok) {
-            qCInfo(LogResolver).nospace() << " [ OK ] "
-                                          << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
-                                          << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')'
-                                          << " -> "
-                                          << item->itemTypeId()
-                                          << '-' << item->id().constData() << " (" << color->id() << ')';
-        } else {
-            qCWarning(LogResolver).nospace() << " [FAIL] "
-                                             << (ic.m_itemtype_id ? ic.m_itemtype_id : '?')
-                                             << '-' << ic.m_item_id.constData() << " (" << ic.m_color_id << ')';
-        }
-
+    if (item)
         lot->setItem(item);
+    if (color)
+        lot->setColor(color);
+    if (lot->item() && lot->color())
+        return ResolveResult::Direct;
+
+    bool ok = applyChangeLog(item, color, inc);
+
+    if (ok) {
+        qCInfo(LogResolver).nospace() << " [ OK ] "
+                                      << (inc->m_itemtype_id ? inc->m_itemtype_id : '?')
+                                      << '-' << inc->m_item_id.constData() << " (" << int(inc->m_color_id) << ')'
+                                      << " -> "
+                                      << item->itemTypeId()
+                                      << '-' << item->id().constData() << " (" << color->id() << ')';
+    } else {
+        qCWarning(LogResolver).nospace() << " [FAIL] "
+                                         << (inc->m_itemtype_id ? inc->m_itemtype_id : '?')
+                                         << '-' << inc->m_item_id.constData() << " (" << int(inc->m_color_id) << ')';
+
+        if (item) {
+            inc->m_item_id.clear();
+            inc->m_item_name.clear();
+            inc->m_itemtype_id = ItemType::InvalidId;
+            inc->m_itemtype_name.clear();
+            inc->m_category_id = Category::InvalidId;
+            inc->m_category_name.clear();
+        }
+        if (color) {
+            inc->m_color_id = Color::InvalidId;
+            inc->m_color_name.clear();
+        }
+    }
+    if (item)
+        lot->setItem(item);
+    if (color)
         lot->setColor(color);
 
-        Q_ASSERT(ok == !lot->isIncomplete());
-        return ok ? ResolveResult::ChangeLog : ResolveResult::Fail;
-    }
+    Q_ASSERT(ok == !lot->isIncomplete());
+    return ok ? ResolveResult::ChangeLog : ResolveResult::Fail;
 }
 
 

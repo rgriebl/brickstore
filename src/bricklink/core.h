@@ -94,7 +94,7 @@ public:
     Picture *picture(const Item *item, const Color *color, bool highPriority = false);
     Picture *largePicture(const Item *item, bool highPriority = false);
 
-    bool applyChangeLog(const Item *&item, const Color *&color, Incomplete *inc);
+    bool applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc);
 
     bool onlineStatus() const;
 
