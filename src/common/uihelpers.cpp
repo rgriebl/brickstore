@@ -82,7 +82,7 @@ QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, Q
         if (!fileName.isEmpty())
             fn = fileName;
         else if (!fileTitle.isEmpty())
-            fn = fn % u'/' % sanitizeFileName(fileTitle);
+            fn = fn + u'/' + sanitizeFileName(fileTitle);
     }
 
     auto result = co_await getFileName(doSave, fn, filters, title);

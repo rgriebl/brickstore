@@ -31,7 +31,6 @@
 #include <QDesktopServices>
 #include <QPrinter>
 #include <QPrintDialog>
-#include <QStringBuilder>
 #include <QScrollBar>
 #include <QMenu>
 #include <QPainter>
@@ -843,7 +842,7 @@ void View::printScriptAction(PrintingScriptAction *printingAction)
             if (!dlg->property("bsFailOnce").toBool()) {
                 dlg->setProperty("bsFailOnce", true);
 
-                QString msg = e.error();
+                QString msg = e.errorString();
                 if (msg.isEmpty())
                     msg = tr("Printing failed.");
                 else

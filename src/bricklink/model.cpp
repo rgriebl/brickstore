@@ -678,7 +678,7 @@ void ItemModel::setFilterText(const QString &filter)
             continue;
 
         if (!quoted.isEmpty()) {
-            quoted = quoted % u' ' % s;
+            quoted = quoted + u' ' + s;
             if (quoted.endsWith(u'"')) {
                 quoted.chop(1);
                 m_filter_text << qMakePair(quotedNegate, quoted);
@@ -799,7 +799,7 @@ bool ItemModel::filterAccepts(const void *pointer) const
     else if (m_year_max_filter && (!item->yearLastProduced() || (item->yearLastProduced() > m_year_max_filter)))
         return false;
     else {
-        const QString matchStr = QLatin1String(item->id()) % u' ' % item->name();
+        const QString matchStr = QLatin1String(item->id()) + u' ' + item->name();
 
         // .first is always "bool negate"
 
@@ -1074,7 +1074,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         case InventoryModel::QuantityColumn:
             return (e.m_quantity < 0) ? u"-"_qs : QString::number(e.m_quantity);
         case InventoryModel::ItemIdColumn:
-            return QString(QChar::fromLatin1(e.m_item->itemTypeId()) % u' ' % QString::fromLatin1(e.m_item->id()));
+            return QString(QChar::fromLatin1(e.m_item->itemTypeId()) + u' ' + QString::fromLatin1(e.m_item->id()));
         case InventoryModel::ItemNameColumn:
             return e.m_item->name();
         case InventoryModel::ColorColumn:

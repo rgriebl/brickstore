@@ -15,7 +15,6 @@
 #include <QPrinterInfo>
 #include <QPrintDialog>
 #include <QPdfWriter>
-#include <QStringBuilder>
 #include <QStackedWidget>
 #include <QPushButton>
 #include <QDir>
@@ -83,7 +82,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     w_pageSelectWarning->hide();
     w_scalePercent->hide();
 
-    w_sysprint->setText(uR"(<a href="sysprint">)" % tr("Print using the system dialog...") % u"</a>");
+    w_sysprint->setText(uR"(<a href="sysprint">)" + tr("Print using the system dialog...") + u"</a>");
 
     connect(w_page_first, &QToolButton::clicked,
             this, [this]() { gotoPage(1); });
@@ -415,9 +414,9 @@ void PrintDialog::updateActions()
     w_page_next->setEnabled(p < last);
     w_page_last->setEnabled(p < last);
 
-    w_pages->setText(QString::number(p) % u" / " % QString::number(last));
+    w_pages->setText(QString::number(p) + u" / " + QString::number(last));
     double z = w_print_preview->zoomFactor() * logicalDpiX() / physicalDpiX();
-    w_zoom->setText(QString::number(int(z * 100)) % u" %");
+    w_zoom->setText(QString::number(int(z * 100)) + u" %");
 }
 
 void PrintDialog::gotoPage(int page)
@@ -439,7 +438,7 @@ void PrintDialog::print()
             pdfname = d.filePath(pdfname);
 
         pdfname = QFileDialog::getSaveFileName(this, tr("Save as PDF"), pdfname,
-                                               tr("PDF Documents") % u" (*" % suffix % u")");
+                                               tr("PDF Documents") + u" (*" + suffix + u")");
         if (pdfname.isEmpty())
             return;
         if (QFileInfo(pdfname).suffix().isEmpty())

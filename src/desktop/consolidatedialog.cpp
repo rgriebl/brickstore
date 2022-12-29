@@ -15,7 +15,6 @@
 #include <QScreen>
 #include <QScrollBar>
 #include <QStringListModel>
-#include <QStringBuilder>
 #include <QMessageBox>
 
 #include "common/config.h"
@@ -164,8 +163,8 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
                     QMessageBox::information(this, title, text);
                     reject();
                 } else {
-                    text = text % u"<br><br>"
-                            % tr("Do you still want to consolidate the rest?");
+                    text = text + u"<br><br>"
+                            + tr("Do you still want to consolidate the rest?");
                     if (QMessageBox::question(this, title, text) == QMessageBox::Yes)
                         accept();
                 }
@@ -193,14 +192,14 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
     // The geometry is the same for both the "add" and "consolidate" modes.
     // All the other settings are saved individually.
 
-    QByteArray ba = Config::inst()->value(s_baseConfigPath % u"Geometry").toByteArray();
+    QByteArray ba = Config::inst()->value(s_baseConfigPath + u"Geometry").toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
 }
 
 ConsolidateDialog::~ConsolidateDialog()
 {
-    Config::inst()->setValue(s_baseConfigPath % u"Geometry", saveGeometry());
+    Config::inst()->setValue(s_baseConfigPath + u"Geometry", saveGeometry());
 }
 
 int ConsolidateDialog::nextId() const
@@ -248,13 +247,13 @@ void ConsolidateDialog::initializeCurrentPage()
         // load default settings
 
         const QString configPath = s_baseConfigPath
-                % (m_addingItems ? u"Add/" : u"Consolidate/");
+                + (m_addingItems ? u"Add/" : u"Consolidate/");
 
         const auto destinationDefault = m_addingItems ? Destination::IntoExisting
                                                       : Destination::IntoTopSorted;
 
         const auto destination = static_cast<Destination>(
-                    Config::inst()->value(configPath % u"Destination/" % (m_forAll ? u"ForAll/" : u"Individual/"),
+                    Config::inst()->value(configPath + u"Destination/" + (m_forAll ? u"ForAll/" : u"Individual/"),
                                           int(destinationDefault)).toInt());
 
         int destinationIndex = w_defaultDestination->findData(QVariant::fromValue(destination));
@@ -262,7 +261,7 @@ void ConsolidateDialog::initializeCurrentPage()
             destinationIndex = w_defaultDestination->findData(QVariant::fromValue(destinationDefault));
         w_defaultDestination->setCurrentIndex(destinationIndex < 0 ? 0 : destinationIndex);
 
-        QByteArray ba = Config::inst()->value(configPath % u"FieldMergeModes").toByteArray();
+        QByteArray ba = Config::inst()->value(configPath + u"FieldMergeModes").toByteArray();
         if (ba.isEmpty() || !w_defaultFieldMergeModes->restoreState(ba)) {
             w_defaultFieldMergeModes->setFieldMergeModes(DocumentModel::createFieldMergeModes(
                                                              DocumentModel::MergeMode::MergeAverage));
@@ -270,7 +269,7 @@ void ConsolidateDialog::initializeCurrentPage()
 
         if (!m_addingItems) {
             w_defaultDoNotDeleteEmpty->setChecked(
-                        Config::inst()->value(configPath % u"DoNotDeleteEmpty", false).toBool());
+                        Config::inst()->value(configPath + u"DoNotDeleteEmpty", false).toBool());
         }
         break;
     }
@@ -306,13 +305,13 @@ bool ConsolidateDialog::validateCurrentPage()
         // save default settings
 
         QString configPath = s_baseConfigPath
-                % (m_addingItems ? u"Add/" : u"Consolidate/");
+                + (m_addingItems ? u"Add/" : u"Consolidate/");
 
-        Config::inst()->setValue(configPath % u"Destination/" % (m_forAll ? u"ForAll/" : u"Individual/"),
+        Config::inst()->setValue(configPath + u"Destination/" + (m_forAll ? u"ForAll/" : u"Individual/"),
                                  int(w_defaultDestination->currentData().value<Destination>()));
-        Config::inst()->setValue(configPath % u"FieldMergeModes", w_defaultFieldMergeModes->saveState());
+        Config::inst()->setValue(configPath + u"FieldMergeModes", w_defaultFieldMergeModes->saveState());
         if (!m_addingItems)
-            Config::inst()->setValue(configPath % u"DoNotDeleteEmpty", w_defaultDoNotDeleteEmpty->isChecked());
+            Config::inst()->setValue(configPath + u"DoNotDeleteEmpty", w_defaultDoNotDeleteEmpty->isChecked());
 
         return true;
     }

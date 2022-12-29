@@ -170,7 +170,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
     if (reply->error() != QNetworkReply::NoError) {
         if (OnlineState::inst()->isOnline() && !m_silent)
             emit updateRatesFailed(tr("There was an error downloading the exchange rates from the ECB server:")
-                                   % u"<br>" % reply->errorString());
+                                   + u"<br>" + reply->errorString());
     } else {
         auto r = reply->readAll();
         QXmlStreamReader reader(r);
@@ -199,7 +199,7 @@ QCoro::Task<> Currency::updateRates(bool silent)
                 else
                     err = tr("no currency data found");
                 emit updateRatesFailed(tr("There was an error parsing the exchange rates from the ECB server:")
-                                       % u"<br>" % err);
+                                       + u"<br>" + err);
             }
         } else {
             m_rates = newRates;
@@ -221,7 +221,7 @@ QString Currency::toDisplayString(double value, const QString &currencyCode, int
     if (currencyCode.isEmpty())
         return loc.toString(value, 'f', precision);
     else
-        return currencyCode % u' ' % loc.toString(value, 'f', precision);
+        return currencyCode + u' ' + loc.toString(value, 'f', precision);
 }
 
 QString Currency::toString(double value, const QString &currencyCode, int precision)
@@ -231,7 +231,7 @@ QString Currency::toString(double value, const QString &currencyCode, int precis
     if (currencyCode.isEmpty())
         return loc.toString(value, 'f', precision);
     else
-        return loc.toString(value, 'f', precision) % u' ' % currencyCode;
+        return loc.toString(value, 'f', precision) + u' ' + currencyCode;
 }
 
 double Currency::fromString(const QString &str)

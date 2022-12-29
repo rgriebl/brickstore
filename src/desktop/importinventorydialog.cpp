@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -52,8 +51,8 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
         setFocusProxy(m_select);
     } else {
         m_verifyLabel = new QLabel(this);
-        m_verifyLabel->setText(tr("Parting out:") % u" <b>" % QString::fromLatin1(m_verifyItem->id())
-                               % u" " % m_verifyItem->name() % u"</b");
+        m_verifyLabel->setText(tr("Parting out:") + u" <b>" + QString::fromLatin1(m_verifyItem->id())
+                               + u" " + m_verifyItem->name() + u"</b");
 
         setFocusProxy(m_import);
     }

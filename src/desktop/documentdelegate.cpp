@@ -29,7 +29,6 @@
 #include <QScrollBar>
 #include <QtMath>
 #include <QScopeGuard>
-#include <QStringBuilder>
 #include <QMetaProperty>
 #include <QPixmapCache>
 #include <QDebug>
@@ -186,7 +185,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (differenceFlags & (1ULL << idx.column())) {
         bool warn = (differenceFlags & differenceWarningMask & (1ULL << idx.column()));
         int s = option.fontMetrics.height() / 10 * 8;
-        QString key = u"dd_ti_"_qs % (warn ? u"!"_qs : u""_qs) % QString::number(s);
+        QString key = u"dd_ti_"_qs + (warn ? u"!"_qs : u""_qs) + QString::number(s);
         QPixmap pix;
 
         if (!QPixmapCache::find(key, &pix)) {
@@ -289,7 +288,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
     case DocumentModel::Status: {
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
-        QString key = u"dd_st_" % QString::number(quint32(lot->status())) % u"-" %
+        QString key = u"dd_st_" + QString::number(quint32(lot->status())) + u"-" %
                 QString::number(iconSize);
         QPixmap pix;
 
@@ -380,7 +379,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     if (nocolor || noitem) {
         int d = option.rect.height();
-        QString key = u"dd_stripe_" % QString::number(d);
+        QString key = u"dd_stripe_" + QString::number(d);
         QPixmap pix;
         if (!QPixmapCache::find(key, &pix)) {
             pix = QPixmap::fromImage(Utility::stripeImage(d, Qt::red));
@@ -398,7 +397,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int itw = qMax(int(1.5 * fontmetrics.height()),
                        2 * fontmetrics.horizontalAdvance(tag.text));
 
-        QString key = u"dd_tag_" % QString::number(itw) % u"-" % tag.background.name();
+        QString key = u"dd_tag_" + QString::number(itw) + u"-" + tag.background.name();
         QPixmap pix;
         if (!QPixmapCache::find(key, &pix)) {
             pix = QPixmap(itw, itw);
@@ -862,14 +861,14 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
             if (tip.isEmpty())
                 tip = text;
             if (differenceFlags & differenceWarningMask & (1ULL << idx.column())) {
-                tip = tip % u"<br><br>" %
+                tip = tip + u"<br><br>" %
                         tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
             }
             QVariant vold = idx.data(DocumentModel::BaseDisplayRole);
             QString oldText = displayData(idx, vold, true);
 
-            tip = tip % u"<br><br>" %
-                    tr("The original value of this field was:") % u"<br><b>" % oldText % u"</b>";
+            tip = tip + u"<br><br>" %
+                    tr("The original value of this field was:") + u"<br><b>" + oldText + u"</b>";
         }
 
         bool isElided = m_elided.contains(quint64(idx.row()) << 32 | quint64(idx.column()));
@@ -1006,9 +1005,9 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
 
         const auto *item = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
         if (item->counterPart())
-            tip = tip % u"<br>(" % tr("Counter part") % u")";
+            tip = tip + u"<br>(" + tr("Counter part") + u")";
         else if (item->alternateId())
-            tip = tip % u"<br>(" % tr("Alternate match id: %1").arg(item->alternateId()) % u")";
+            tip = tip + u"<br>(" + tr("Alternate match id: %1").arg(item->alternateId()) + u")";
         return tip;
     }
     case DocumentModel::Condition: {
@@ -1034,9 +1033,9 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
             }
             if (!scStr.isEmpty()) {
                 if (toolTip)
-                    str = str % u"<br><i>" % scStr % u"</i>";
+                    str = str + u"<br><i>" + scStr + u"</i>";
                 else
-                    str = str % u" (" % scStr % u")";
+                    str = str + u" (" + scStr + u")";
             }
         }
         return str;
@@ -1058,7 +1057,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
         default:
         case BrickLink::Stockroom::None: tip = tr("None", "ToolTip Stockroom>None"); break;
         }
-        tip = tr("Stockroom") % u": " % tip;
+        tip = tr("Stockroom") + u": " + tip;
         return tip;
     }
     case DocumentModel::QuantityOrig:
@@ -1078,7 +1077,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
             const auto *lot = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
             int yearTo = lot->itemYearLastProduced();
             if (yearTo && (yearTo != yearFrom))
-                return QString::number(yearFrom) % u" - " % QString::number(yearTo);
+                return QString::number(yearFrom) + u" - " + QString::number(yearTo);
             else
                 return QString::number(yearFrom);
         }
@@ -1104,7 +1103,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
     }
     case DocumentModel::Sale: {
         int i = display.toInt();
-        return (!i && !toolTip) ? dash : loc.toString(i) % u'%';
+        return (!i && !toolTip) ? dash : loc.toString(i) + u'%';
     }
     case DocumentModel::Weight:
     case DocumentModel::TotalWeight: {

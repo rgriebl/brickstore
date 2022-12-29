@@ -23,7 +23,6 @@
 #include <QStyleOptionHeader>
 #include <QDesktopServices>
 #include <QApplication>
-#include <QStringBuilder>
 
 #include "bricklink/core.h"
 #include "bricklink/priceguide.h"
@@ -419,7 +418,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     dy = ch;
 
     for (const auto &htime : d->m_str_htime) {
-        d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], d->s_cond_count * ch, Qt::AlignLeft | Qt::AlignVCenter, htime[0] % u'\n' % htime[1], true);
+        d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], d->s_cond_count * ch, Qt::AlignLeft | Qt::AlignVCenter, htime[0] + u'\n' + htime[1], true);
 
         for (const auto &cond : d->m_str_cond) {
             d->m_cells.emplace_back(cell::Header, dx + cw[0], dy, cw[1], ch, Qt::AlignCenter, cond);
@@ -738,7 +737,7 @@ bool PriceGuideWidget::event(QEvent *e)
             }
 
             tt = tr("Double-click to set the price of the current item")
-                    % u"<br><br><i>" % pt % u"</i>";
+                    + u"<br><br><i>" + pt + u"</i>";
 
         } else if (c && (c->m_type == cell::Quantity) && d->m_pg && d->m_pg->isValid()) {
             int items = d->m_pg->quantity(c->m_time, c->m_condition);
@@ -747,10 +746,10 @@ bool PriceGuideWidget::event(QEvent *e)
             if (items && lots) {
                 if (c->m_time == BrickLink::Time::Current) {
                     tt = tr("A total quantity of %Ln item(s) is available for purchase", nullptr, items)
-                            % u" (" % tr("in %Ln individual lot(s)", nullptr, lots) % u")";
+                            + u" (" + tr("in %Ln individual lot(s)", nullptr, lots) + u")";
                 } else {
                     tt = tr("A total quantity of %Ln item(s) has been sold", nullptr, items)
-                            % u" (" % tr("in %Ln individual lot(s)", nullptr, lots) % u")";
+                            + u" (" + tr("in %Ln individual lot(s)", nullptr, lots) + u")";
                 }
             } else {
                 if (c->m_time == BrickLink::Time::Current)

@@ -50,8 +50,8 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
         QGuiApplication::clipboard()->setText(text);
     });
 
-    QString text = u"### BrickStore " % QCoreApplication::applicationVersion()
-            % u" (build: " % Application::inst()->buildNumber() % u")\n\n";
+    QString text = u"### BrickStore " + QCoreApplication::applicationVersion()
+            + u" (build: " + Application::inst()->buildNumber() + u")\n\n";
     auto sysInfo = SystemInfo::inst()->asMap();
     sysInfo.remove(u"os.type"_qs);
     sysInfo.remove(u"os.version"_qs);
@@ -60,7 +60,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
     sysInfo[u"brickstore.ldraw"_qs] = LDraw::library()->lastUpdated().toString(Qt::RFC2822Date);
 
     for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-        text = text % u" * **" % it.key() % u"**: " % it.value().toString() % u"\n";
+        text = text + u" * **" + it.key() + u"**: " + it.value().toString() + u"\n";
     }
 
     ui->text->setMarkdown(text);

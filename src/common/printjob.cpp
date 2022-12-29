@@ -20,7 +20,6 @@
 #endif
 #include <QPaintEngine>
 #include <QDebug>
-#include <QStringBuilder>
 #include <QQmlEngine>
 
 #include "printjob.h"
@@ -160,7 +159,7 @@
 QmlPrintPage::QmlPrintPage(const QmlPrintJob *job)
     : QObject(const_cast <QmlPrintJob *>(job)), m_job(job)
 {
-    setObjectName(u"Page" % QString::number(job->pageCount() + 1));
+    setObjectName(u"Page" + QString::number(job->pageCount() + 1));
 
     m_attr.m_font = QFont(u"Arial"_qs, 10);
     m_attr.m_color = QColor(Qt::black);

@@ -20,7 +20,6 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
-#include <QStringBuilder>
 #include <QScopeGuard>
 
 #include "utility/stopwatch.h"
@@ -76,16 +75,16 @@ Database::Database(const QString &updateUrl, QObject *parent)
                 emit updateFinished(true, tr("Already up-to-date."));
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
-                throw Exception(tr("download and decompress failed") % u":\n" % j->errorString());
+                throw Exception(tr("download and decompress failed") + u":\n" + j->errorString());
             } else if (!hhc->hasValidChecksum()) {
                 throw Exception(tr("checksum mismatch after decompression"));
             } else if (!file->commit()) {
-                throw Exception(tr("saving failed") % u":\n" % file->errorString());
+                throw Exception(tr("saving failed") + u":\n" + file->errorString());
             } else {
                 read(file->fileName());
 
                 m_etag = j->lastETag();
-                QFile etagf(file->fileName() % u".etag");
+                QFile etagf(file->fileName() + u".etag");
                 if (etagf.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
                     etagf.write(m_etag.toUtf8());
                     etagf.close();
@@ -97,7 +96,7 @@ Database::Database(const QString &updateUrl, QObject *parent)
             emit databaseReset();
 
         } catch (const Exception &e) {
-            emit updateFinished(false, tr("Could not load the new database") % u":\n" % e.error());
+            emit updateFinished(false, tr("Could not load the new database") + u":\n" + e.errorString());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
     });
@@ -116,7 +115,7 @@ bool Database::isUpdateNeeded() const
 
 QString Database::defaultDatabaseName(Version version)
 {
-    return u"database-v" % QString::number(int(version));
+    return u"database-v" + QString::number(int(version));
 }
 
 void Database::setUpdateStatus(UpdateStatus updateStatus)
@@ -150,15 +149,15 @@ bool Database::startUpdate(bool force)
         return false;
 
     QString dbName = defaultDatabaseName();
-    QString remotefile = m_updateUrl % dbName % u".lzma";
-    QString localfile = core()->dataPath() % dbName;
+    QString remotefile = m_updateUrl + dbName + u".lzma";
+    QString localfile = core()->dataPath() + dbName;
 
     if (!QFile::exists(localfile))
         force = true;
 
     if (m_etag.isEmpty()) {
         QString dbfile = core()->dataPath() + Database::defaultDatabaseName();
-        QFile etagf(dbfile % u".etag");
+        QFile etagf(dbfile + u".etag");
         if (etagf.open(QIODevice::ReadOnly))
             m_etag = QString::fromUtf8(etagf.readAll());
     }
@@ -499,12 +498,12 @@ void Database::write(const QString &filename, Version version) const
         check(cw.startChunk(ChunkId('C','H','G','L'), 1));
         ds << quint32(m_itemChangelog.size() + m_colorChangelog.size());
         for (const ItemChangeLogEntry &e : m_itemChangelog) {
-            ds << static_cast<QByteArray>("\x03\t" % QByteArray(1, e.fromItemTypeId()) % '\t' % e.fromItemId()
-                                          % '\t' % e.toItemTypeId() % '\t' % e.toItemId());
+            ds << static_cast<QByteArray>("\x03\t" + QByteArray(1, e.fromItemTypeId()) + '\t' + e.fromItemId()
+                                          + '\t' + e.toItemTypeId() + '\t' + e.toItemId());
         }
         for (const ColorChangeLogEntry &e : m_colorChangelog) {
-            ds << static_cast<QByteArray>("\x07\t" % QByteArray::number(e.fromColorId()) % "\tx\t"
-                                          % QByteArray::number(e.toColorId()) % "\tx");
+            ds << static_cast<QByteArray>("\x07\t" + QByteArray::number(e.fromColorId()) + "\tx\t"
+                                          + QByteArray::number(e.toColorId()) + "\tx");
         }
         check(cw.endChunk());
     }

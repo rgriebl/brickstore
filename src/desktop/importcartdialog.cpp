@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QPushButton>
 #include <QHeaderView>
 #include <QAbstractTableModel>
@@ -237,7 +236,7 @@ void ImportCartDialog::updateStatusLabel()
         break;
 
     case BrickLink::UpdateStatus::UpdateFailed:
-        s = tr("Last update failed") % u": " % m_updateMessage;
+        s = tr("Last update failed") + u": " + m_updateMessage;
         break;
 
     default:

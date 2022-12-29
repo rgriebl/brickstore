@@ -17,7 +17,6 @@
 #include <QScrollBar>
 #include <QGridLayout>
 #include <QTextBlock>
-#include <QStringBuilder>
 #include <QKeyEvent>
 #include <QApplication>
 
@@ -73,14 +72,14 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
             this, [this]() {
         auto cmd = m_cmd->text();
         if (!cmd.isEmpty() && m_executeFunction) {
-            m_log->appendPlainText(m_prompt->text() % cmd);
+            m_log->appendPlainText(m_prompt->text() + cmd);
             auto [message, succeeded] = m_executeFunction(cmd);
             if (succeeded) {
                 m_log->appendPlainText(message);
                 m_history.removeAll(cmd);
                 m_history.append(cmd);
             } else {
-                m_log->appendPlainText(u"ERROR: " % message);
+                m_log->appendPlainText(u"ERROR: " + message);
             }
             m_log->moveCursor(QTextCursor::End);
         }
@@ -152,24 +151,24 @@ void DeveloperConsole::appendLogMessage(QtMsgType type, const QString &category,
     QString str = u"<pre>"_qs;
     const auto lines = msg.split(u"\n"_qs);
     for (int i = 0; i < lines.count(); ++i) {
-        str = str % uR"(<span style="color:#)" % QLatin1String(msgTypeColor[type])
-                % uR"(;background-color:#)" % QLatin1String(msgTypeBgColor[type]) % uR"(;">)"
-                % QLatin1String(msgTypeNames[type]) % uR"(</span>)"
-                % uR"(&nbsp;<span style="color:#)"
-                % QLatin1String(categoryColor[catIndex])
-                % uR"(;font-weight:bold;">)" % category % uR"(</span>)" % u":&nbsp;"
-                % lines.at(i).toHtmlEscaped();
+        str = str + uR"(<span style="color:#)" + QLatin1String(msgTypeColor[type])
+                + uR"(;background-color:#)" + QLatin1String(msgTypeBgColor[type]) + uR"(;">)"
+                + QLatin1String(msgTypeNames[type]) + uR"(</span>)"
+                + uR"(&nbsp;<span style="color:#)"
+                + QLatin1String(categoryColor[catIndex])
+                + uR"(;font-weight:bold;">)" + category + uR"(</span>)" + u":&nbsp;"
+                + lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if ((type != QtInfoMsg) && !filename.isEmpty()) {
-                str = str % uR"( at <span style="color:#)" % QLatin1String(fileColor)
-                        % uR"(;font-weight:bold;">)" % filename
-                        % uR"(</span>, line <span style="color:#)" % QLatin1String(lineColor)
-                        % uR"(;font-weight:bold;">)" % QString::number(line) % uR"(</span></pre>)";
+                str = str + uR"( at <span style="color:#)" + QLatin1String(fileColor)
+                        + uR"(;font-weight:bold;">)" + filename
+                        + uR"(</span>, line <span style="color:#)" + QLatin1String(lineColor)
+                        + uR"(;font-weight:bold;">)" + QString::number(line) + uR"(</span></pre>)";
             } else {
-                str = str % u"</pre>";
+                str = str + u"</pre>";
             }
         } else {
-            str = str % u"<br>";
+            str = str + u"<br>";
         }
     }
 

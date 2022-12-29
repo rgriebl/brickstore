@@ -126,8 +126,8 @@ void Application::init()
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent(u"Br1ckstore/" % QCoreApplication::applicationVersion()
-                                  % u" (" + QSysInfo::prettyProductName() % u')');
+    Transfer::setDefaultUserAgent(u"Br1ckstore/" + QCoreApplication::applicationVersion()
+                                  + u" (" + QSysInfo::prettyProductName() + u')');
 
 #if defined(Q_CC_MSVC)
     // std::set_terminate is a per-thread setting on Windows
@@ -162,7 +162,7 @@ void Application::init()
     try {
         initBrickLink();
     } catch (const Exception &e) {
-        m_startupErrors << tr("Could not initialize the BrickLink kernel:") % u' ' % e.error();
+        m_startupErrors << tr("Could not initialize the BrickLink kernel:") + u' ' + e.errorString();
     }
 
     try {
@@ -176,7 +176,7 @@ void Application::init()
     connect(BrickLink::core(), &BrickLink::Core::authenticationFailed,
             this, [](const QString &userName, const QString &error) {
         UIHelpers::warning(tr("Failed to authenticate with BrickLink as user %1")
-                            .arg(userName) % u"<br><b>" % error % u"</b>");
+                            .arg(userName) + u"<br><b>" + error + u"</b>");
     });
 
     m_undoGroup = new UndoGroup(this);
@@ -231,15 +231,15 @@ void Application::afterInit()
           } },
         { "configure", [this](auto) { emit showSettings(); } },
         { "help_extensions", [](auto) {
-              QString url = u"https://" % Application::inst()->gitHubPagesUrl() % u"/extensions/";
+              QString url = u"https://" + Application::inst()->gitHubPagesUrl() + u"/extensions/";
               QDesktopServices::openUrl(url);
           } },
         { "help_reportbug", [](auto) {
-              QString url = u"https://" % Application::inst()->gitHubUrl() % u"/issues/new";
+              QString url = u"https://" + Application::inst()->gitHubUrl() + u"/issues/new";
               QDesktopServices::openUrl(url);
           } },
         { "help_releasenotes", [](auto) {
-              QString url = u"https://" % Application::inst()->gitHubUrl() % u"/releases";
+              QString url = u"https://" + Application::inst()->gitHubUrl() + u"/releases";
               QDesktopServices::openUrl(url);
           } },
         { "help_announcements", [](auto) {
@@ -289,7 +289,7 @@ QCoro::Task<> Application::restoreLastSession()
     int restorable = Document::restorableAutosaves();
     if (restorable > 0) {
         bool b = (co_await UIHelpers::question(tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
-                                               % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
+                                               + u"<br><br>" + tr("Should these documents be restored from their last available auto-save state?"),
                                                UIHelpers::Yes | UIHelpers::No, UIHelpers::Yes, tr("Restore Documents"))
                   == UIHelpers::Yes);
 
@@ -336,14 +336,14 @@ QCoro::Task<> Application::setupLDraw()
         if (success)
             UIHelpers::toast(tr("Finished downloading an LDraw library update"));
         else
-            UIHelpers::toast(tr("Failed to download a LDraw library update") % u":<br>" % message);
+            UIHelpers::toast(tr("Failed to download a LDraw library update") + u":<br>" + message);
     });
 
     auto loadLibrary = [](QString ldrawDirLoad) -> QCoro::Task<> {
         bool isInternalZip = ldrawDirLoad.isEmpty();
 
         if (isInternalZip)
-            ldrawDirLoad = Config::inst()->cacheDir() % u"/ldraw/complete.zip";
+            ldrawDirLoad = Config::inst()->cacheDir() + u"/ldraw/complete.zip";
 
         co_await LDraw::library()->setPath(ldrawDirLoad);
 
@@ -438,7 +438,7 @@ QString Application::gitHubPagesUrl() const
 {
     const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split(u"/"_qs);
     Q_ASSERT(sections.count() == 3);
-    return sections[1] % u".github.io/" % sections[2];
+    return sections[1] + u".github.io/" + sections[2];
 }
 
 QString Application::databaseUrl() const
@@ -461,7 +461,7 @@ QCoro::Task<bool> Application::checkBrickLinkLogin()
             co_return true;
         } else {
             if (auto pw = co_await UIHelpers::getPassword(tr("Please enter the password for the BrickLink account %1:")
-                                                          .arg(u"<b>" % Config::inst()->brickLinkUsername() % u"</b>"))) {
+                                                          .arg(u"<b>" + Config::inst()->brickLinkUsername() + u"</b>"))) {
                 Config::inst()->setBrickLinkPassword(*pw, true /*do not save*/);
                 co_return true;
             }
@@ -620,7 +620,7 @@ void Application::updateTranslations()
             QCoreApplication::installTranslator(m_trans_qt.get());
     }
     if ((language != u"en") || (!m_translationOverride.isEmpty())) {
-        QString translationFile = u"brickstore_"_qs % language;
+        QString translationFile = u"brickstore_"_qs + language;
         QString translationDir = i18n;
 
         QFileInfo qm(m_translationOverride);
@@ -637,28 +637,28 @@ void Application::updateTranslations()
 QVariantMap Application::about() const
 {
     QString header = uR"(<p style="line-height: 150%;">)"_qs
-            % uR"(<span style="font-size: large"><b>)" BRICKSTORE_NAME "</b></span><br>"
-            % u"<b>" % tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION u"", BRICKSTORE_BUILD_NUMBER u"")
-            % u"</b><br>"
-            % tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT u"") % u"<br>"
-            % tr("Visit %1").arg(uR"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)")
-            % u"</p>";
+            + uR"(<span style="font-size: large"><b>)" BRICKSTORE_NAME "</b></span><br>"
+            + u"<b>" + tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION u"", BRICKSTORE_BUILD_NUMBER u"")
+            + u"</b><br>"
+            + tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT u"") + u"<br>"
+            + tr("Visit %1").arg(uR"(<a href="https://)" BRICKSTORE_URL R"(">)" BRICKSTORE_URL R"(</a>)")
+            + u"</p>";
 
     QString license = tr(R"(<p>This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.<br/>This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.<br/>See <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for GPL licensing information.</p><p>All data from <a href="https://www.bricklink.com">www.bricklink.com</a> is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks recognized.</p><p>Only made possible by <a href="https://www.danjezek.com/">Dan Jezek's</a> support.</p>)");
-    license = u"<br><b>" % tr("License") % uR"(</b><div style="margin-left: 10px">)"
-            % license % u"</div>";
+    license = u"<br><b>" + tr("License") + uR"(</b><div style="margin-left: 10px">)"
+            + license + u"</div>";
 
     QString translators;
     const QString transRow = uR"(<tr><td>%1</td><td width="2em">&nbsp;</td><td>%2 <a href="mailto:%3">%4</a></td></tr>)"_qs;
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
         if ((trans.language != u"en") && !trans.author.isEmpty()) {
-            QString langname = trans.localName % u" (" % trans.name % u")";
-            translators = translators % transRow.arg(langname, trans.author, trans.authorEmail, trans.authorEmail);
+            QString langname = trans.localName + u" (" + trans.name + u")";
+            translators = translators + transRow.arg(langname, trans.author, trans.authorEmail, trans.authorEmail);
         }
     }
-    translators = u"<br><b>" % tr("Translators") % uR"(</b><div style="margin-left: 10px">)"
-            % uR"(<p><table border="0">)" % translators % uR"(</p></table>)" % u"</div>";
+    translators = u"<br><b>" + tr("Translators") + uR"(</b><div style="margin-left: 10px">)"
+            + uR"(<p><table border="0">)" + translators + uR"(</p></table>)" + u"</div>";
 
     return QVariantMap {
         { u"header"_qs, header },
@@ -691,8 +691,8 @@ void Application::setupSentry()
     sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
     sentry_options_set_require_user_consent(sentry, 1);
 
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % u"/.sentry";
-    QString crashHandler = QCoreApplication::applicationDirPath() % u"/crashpad_handler";
+    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + u"/.sentry";
+    QString crashHandler = QCoreApplication::applicationDirPath() + u"/crashpad_handler";
 
 #  if defined(Q_OS_WINDOWS)
     crashHandler.append(u".exe"_qs);

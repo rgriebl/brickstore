@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QSignalMapper>
 
 #include "ldraw/rendersettings.h"
@@ -96,7 +95,7 @@ void RenderSettingsDialog::connectToggleButton(QAbstractButton *checkBox, const 
     };
 
     auto dummyMapper = new QSignalMapper(checkBox);
-    QByteArray chgSig = "2" % propName % "Changed(bool)";
+    QByteArray chgSig = "2" + propName + "Changed(bool)";
     connect(rs, chgSig.constData(), dummyMapper, SLOT(map()));
     dummyMapper->setMapping(rs, 42);
     connect(dummyMapper, &QSignalMapper::mappedInt, this, setter);
@@ -118,7 +117,7 @@ void RenderSettingsDialog::connectComboBox(QComboBox *comboBox, const QByteArray
     };
 
     auto dummyMapper = new QSignalMapper(comboBox);
-    QByteArray chgSig = "2" % propName % "Changed(int)";
+    QByteArray chgSig = "2" + propName + "Changed(int)";
     connect(rs, chgSig.constData(), dummyMapper, SLOT(map()));
     dummyMapper->setMapping(rs, 42);
     connect(dummyMapper, &QSignalMapper::mappedInt, this, setter);
@@ -151,7 +150,7 @@ void RenderSettingsDialog::connectSliderAndSpinBox(QSlider *slider, QDoubleSpinB
     };
 
     auto dummyMapper = new QSignalMapper(spinBox);
-    QByteArray chgSig = "2" % propName + "Changed(float)";
+    QByteArray chgSig = "2" + propName + "Changed(float)";
     connect(rs, chgSig.constData(), dummyMapper, SLOT(map()));
     dummyMapper->setMapping(rs, 42);
     connect(dummyMapper, &QSignalMapper::mappedInt, this, setter);

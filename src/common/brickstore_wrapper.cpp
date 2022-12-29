@@ -18,7 +18,6 @@
 #include <QFile>
 #include <QUrl>
 #include <QGuiApplication>
-#include <QStringBuilder>
 
 #include "utility/utility.h"
 #include "common/currency.h"
@@ -309,12 +308,12 @@ QString QmlBrickStore::cacheStats() const
     ldBar += QString(16 - ldBar.length(), u' ');
 
     return u"Cache stats:\n"_qs
-                  % u"Pictures    : [" % picBar % u"] " % QString::number(pic.first / 1000)
-                  % u" / " % QString::number(pic.second / 1000) % u" MB\n"
-                  % u"Price guides: [" % pgBar % u"] " % QString::number(pg.first)
-                  % u" / " % QString::number(pg.second) % u" entries\n"
-                  % u"LDraw parts : [" % ldBar % u"] " % QString::number(ld.first)
-                  % u" / " % QString::number(ld.second) % u" lines";
+                  + u"Pictures    : [" + picBar + u"] " + QString::number(pic.first / 1000)
+                  + u" / " + QString::number(pic.second / 1000) + u" MB\n"
+                  + u"Price guides: [" + pgBar + u"] " + QString::number(pg.first)
+                  + u" / " + QString::number(pg.second) + u" entries\n"
+                  + u"LDraw parts : [" + ldBar + u"] " + QString::number(ld.first)
+                  + u" / " + QString::number(ld.second) + u" lines";
 }
 
 

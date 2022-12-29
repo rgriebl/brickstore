@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QThread>
 #include <QUrlQuery>
-#include <QStringBuilder>
 #include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -178,7 +177,7 @@ void Core::openUrl(Url u, const void *opt, const void *opt2)
                 queryTerm.remove(u')');
             }
             if (item->itemType()->hasColors() && color)
-                queryTerm = color->name() % u' ' % queryTerm;
+                queryTerm = color->name() + u' ' + queryTerm;
             query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
             url.setQuery(query);
         }
@@ -248,10 +247,10 @@ QString Core::dataFileName(QStringView fileName, const Item *item, const Color *
     // please note: Qt6's qHash is incompatible
     uchar hash = q5Hash(QString::fromLatin1(item->id()), 42) & 0xff;
 
-    QString p = m_datadir % QLatin1Char(item->itemTypeId()) % u'/' % (hash < 0x10 ? u"0" : u"")
-            % QString::number(hash, 16) % u'/' % QLatin1String(item->id()) % u'/'
-            % (color ? QString::number(color->id()) : QString()) % (color ? u"/" : u"")
-            % fileName;
+    QString p = m_datadir + QLatin1Char(item->itemTypeId()) + u'/' + (hash < 0x10 ? u"0" : u"")
+            + QString::number(hash, 16) + u'/' + QLatin1String(item->id()) + u'/'
+            + (color ? QString::number(color->id()) : QString()) + (color ? u"/" : u"")
+            + fileName;
 
     return p;
 }
@@ -793,19 +792,19 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
     if (item) {
         QString cs;
         if (!QByteArray("MP").contains(item->itemTypeId())) {
-            cs = cs % uR"(<i><font color=")" % Utility::textColor(highlight).name() %
-                    uR"(" style="background-color: )" % highlight.name() % uR"(;">&nbsp;)" %
-                    item->itemType()->name() % uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
+            cs = cs + uR"(<i><font color=")" + Utility::textColor(highlight).name() %
+                    uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)" %
+                    item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
         }
         if (color && color->id()) {
             QColor c = color->color();
-            cs = cs % uR"(<b><font color=")" % Utility::textColor(c).name() %
-                    uR"(" style="background-color: )" % c.name() % uR"(;">&nbsp;)" %
-                    color->name() % uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
+            cs = cs + uR"(<b><font color=")" + Utility::textColor(c).name() %
+                    uR"(" style="background-color: )" + c.name() + uR"(;">&nbsp;)" %
+                    color->name() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
         }
 
-        return u"<center><b>" % QLatin1String(item->id()) % u"</b>&nbsp; " % cs %
-                item->name() % u"</center>";
+        return u"<center><b>" + QLatin1String(item->id()) + u"</b>&nbsp; " + cs %
+                item->name() + u"</center>";
     } else {
         return { };
     }
@@ -915,7 +914,7 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
     // there are a items that changed their name multiple times, so we have to loop (e.g. 3069bpb78)
 
     if (!item) {
-        QByteArray itemTypeAndId = inc->m_itemtype_id % inc->m_item_id;
+        QByteArray itemTypeAndId = inc->m_itemtype_id + inc->m_item_id;
         if (!inc->m_itemtype_name.isEmpty())
             itemTypeAndId[0] = inc->m_itemtype_name.at(0).toUpper().toLatin1();
 
@@ -925,7 +924,7 @@ bool Core::applyChangeLog(const Item *&item, const Color *&color, Incomplete *in
                 break;
             item = core()->item(it->toItemTypeId(), it->toItemId());
             if (!item)
-                itemTypeAndId = it->toItemTypeId() % it->toItemId();
+                itemTypeAndId = it->toItemTypeId() + it->toItemId();
         }
     }
     if (!color) {
@@ -1332,13 +1331,13 @@ void Core::updatePicture(Picture *pic, bool highPriority)
     QString url;
 
     if (large) {
-        url = u"https://img.bricklink.com/" % QLatin1Char(pic->item()->itemType()->id())
-                % u"L/" % QLatin1String(pic->item()->id()) % u".jpg";
+        url = u"https://img.bricklink.com/" + QLatin1Char(pic->item()->itemType()->id())
+                + u"L/" + QLatin1String(pic->item()->id()) + u".jpg";
     }
     else {
-        url = u"https://img.bricklink.com/ItemImage/" % QLatin1Char(pic->item()->itemType()->id())
-                % u"N/" % QString::number(pic->color()->id()) % u'/'
-                % QLatin1String(pic->item()->id()) % u".png";
+        url = u"https://img.bricklink.com/ItemImage/" + QLatin1Char(pic->item()->itemType()->id())
+                + u"N/" + QString::number(pic->color()->id()) + u'/'
+                + QLatin1String(pic->item()->id()) + u".png";
     }
 
     //qDebug() << "PIC request started for" << url;

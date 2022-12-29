@@ -42,8 +42,8 @@ BackendApplication::~BackendApplication()
 void BackendApplication::init()
 {
     //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent(u"Br1ckstore/" % QCoreApplication::applicationVersion()
-                                  % u" (" + QSysInfo::prettyProductName() % u')');
+    Transfer::setDefaultUserAgent(u"Br1ckstore/" + QCoreApplication::applicationVersion()
+                                  + u" (" + QSysInfo::prettyProductName() + u')');
 
     try {
         BrickLink::create(QStandardPaths::writableLocation(QStandardPaths::CacheLocation));

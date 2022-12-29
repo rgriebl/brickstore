@@ -15,7 +15,6 @@
 
 #include <QtConcurrent>
 #include <QRandomGenerator>
-#include <QStringBuilder>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -516,14 +515,14 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
             const bool isSpeckle = color->isSpeckle();
 
             QString cacheName = QLatin1String(isSpeckle ? "Speckle" : "Glitter")
-                    % u'_' % color->ldrawColor().name(QColor::HexArgb)
-                    % u'_' % color->particleColor().name(QColor::HexArgb)
-                    % u'_' % QString::number(double(color->particleMinSize()))
-                    % u'_' % QString::number(double(color->particleMaxSize()))
-                    % u'_' % QString::number(double(color->particleFraction()));
+                    + u'_' + color->ldrawColor().name(QColor::HexArgb)
+                    + u'_' + color->particleColor().name(QColor::HexArgb)
+                    + u'_' + QString::number(double(color->particleMinSize()))
+                    + u'_' + QString::number(double(color->particleMaxSize()))
+                    + u'_' + QString::number(double(color->particleFraction()));
 
             static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-            QString cacheFile = cacheDir % u"/ldraw-textures/" % cacheName % u".png";
+            QString cacheFile = cacheDir + u"/ldraw-textures/" + cacheName + u".png";
 
             if (!texImage.load(cacheFile) || texImage.isNull()) {
                 const int particleSize = 50;

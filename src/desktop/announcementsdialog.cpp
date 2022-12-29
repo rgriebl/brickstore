@@ -61,7 +61,7 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
     m_browser = new QTextBrowser();
     m_browser->setReadOnly(true);
     m_browser->setFrameStyle(QFrame::NoFrame);
-    m_browser->setMarkdown(markdown % u"\n\n___\n");
+    m_browser->setMarkdown(markdown + u"\n\n___\n");
     m_browser->setOpenLinks(true);
     m_browser->setOpenExternalLinks(true);
     m_browser->viewport()->setAutoFillBackground(false);
@@ -143,10 +143,10 @@ QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcem
         shownIds << vm.value(u"id"_qs).toUInt();
 
         if (!md.isEmpty())
-            md = md % u"\n\n___\n\n";
-        md = md % u"**" % vm.value(u"title"_qs).toString() % u"** &mdash; *"
-                % QLocale().toString(vm.value(u"date"_qs).toDate(), QLocale::ShortFormat)
-                % u"*\n\n" % vm.value(u"text"_qs).toString();
+            md = md + u"\n\n___\n\n";
+        md = md + u"**" + vm.value(u"title"_qs).toString() + u"** &mdash; *"
+                + QLocale().toString(vm.value(u"date"_qs).toDate(), QLocale::ShortFormat)
+                + u"*\n\n" + vm.value(u"text"_qs).toString();
     }
 
     if (shownIds.isEmpty())

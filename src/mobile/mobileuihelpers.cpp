@@ -238,7 +238,7 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
         fileName = QFileInfo(fileName).fileName();
 
         if (auto fn = co_await getInputString(tr("Save File as"), fileName, false, title))
-           co_return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) % u'/' % *fn;
+           co_return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + u'/' + *fn;
         co_return { };
     }
 #endif

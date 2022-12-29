@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QPushButton>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
@@ -242,8 +241,8 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
     if (combined && m_selectedCurrencyCodes.size() > 1) {
         if (QMessageBox::question(this, tr("Import Order"),
                                   tr("You have selected multiple orders with differing currencies, which cannot be combined as-is.")
-                                  % u"<br><br>"
-                                  % tr("Do you want to continue and convert all prices to your default currency (%1)?")
+                                  + u"<br><br>"
+                                  + tr("Do you want to continue and convert all prices to your default currency (%1)?")
                                   .arg(Config::inst()->defaultCurrencyCode())) == QMessageBox::No) {
             return;
         }
@@ -270,9 +269,9 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
                 for (auto orderLot : orderLots) {
                     QString marker = orderLot->markerText();
 
-                    orderLot->setMarkerText(order->id() % u' ' % order->otherParty() %
+                    orderLot->setMarkerText(order->id() + u' ' + order->otherParty() %
                                             (marker.isEmpty() ? QString()
-                                                              : QString(u' ' % tr("Batch") % u": " % marker)));
+                                                              : QString(u' ' + tr("Batch") + u": " + marker)));
                     orderLot->setMarkerColor(col);
 
                     if (!qFuzzyIsNull(crate)) {
@@ -351,7 +350,7 @@ void ImportOrderDialog::updateStatusLabel()
         break;
 
     case BrickLink::UpdateStatus::UpdateFailed:
-        s = tr("Last update failed") % u": " % m_updateMessage;
+        s = tr("Last update failed") + u": " + m_updateMessage;
         break;
 
     default:

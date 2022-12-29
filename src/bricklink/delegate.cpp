@@ -214,19 +214,19 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
 {
     static const QString str = QLatin1String(R"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)");
     static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
-    QString note_left = u"<i>" % ItemDelegate::tr("[Image is loading]") % u"</i>";
+    QString note_left = u"<i>" + ItemDelegate::tr("[Image is loading]") + u"</i>";
     QString yearStr;
     QString id = QString::fromLatin1(item->id());
 
     if (item->yearReleased())
         yearStr = QString::number(item->yearReleased());
     if (item->yearLastProduced() && (item->yearLastProduced() != item->yearReleased()))
-        yearStr = yearStr % u'-' % QString::number(item->yearLastProduced());
+        yearStr = yearStr + u'-' + QString::number(item->yearLastProduced());
 
     QColor color = qApp->palette().color(QPalette::Highlight);
-    id = id % uR"(&nbsp;&nbsp;<i><font color=")" % Utility::textColor(color).name() %
-            uR"(" style="background-color: )" % color.name() % uR"(;">&nbsp;)" %
-            item->itemType()->name() % uR"(&nbsp;</font></i>)";
+    id = id + uR"(&nbsp;&nbsp;<i><font color=")" + Utility::textColor(color).name() %
+            uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)" %
+            item->itemType()->name() + uR"(&nbsp;</font></i>)";
 
     if (pic && ((pic->updateStatus() == UpdateStatus::Updating)
                 || (pic->updateStatus() == UpdateStatus::Loading))) {
@@ -249,11 +249,11 @@ QString ToolTip::createColorToolTip(const Color *color) const
 
     if (color->id() > 0) {
         static const QString tpl = uR"(<table width="100%" border="0" bgcolor="%1"><tr><td><br><br></td></tr></table><br>%2 (%3)<br>BrickLink id: %4)"_qs;
-        str = str % tpl.arg(color->color().name(), color->name(), color->color().name(),
+        str = str + tpl.arg(color->color().name(), color->name(), color->color().name(),
                             QString::number(color->id()));
 
         if (color->ldrawId() != -1)
-            str = str % u", LDraw id: " % QString::number(color->ldrawId());
+            str = str + u", LDraw id: " + QString::number(color->ldrawId());
     } else {
         str = color->name();
     }

@@ -14,78 +14,52 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QException>
 #include <QString>
-#include <QStringBuilder>
-#include <QByteArray>
-#include <QFile>
+
+QT_FORWARD_DECLARE_CLASS(QIODevice);
+QT_FORWARD_DECLARE_CLASS(QFileDevice);
 
 
 class Exception : public QException
 {
 public:
-    Exception(const QString &message)
-        : QException()
-        , m_message(message)
-    { }
+    explicit Exception(const QString &message = { });
+    explicit Exception(const char *message);
+    explicit Exception(QFileDevice *f, const QString &message);
+    explicit Exception(QFileDevice *f, const char *message);
 
-    Exception(const char *message)
-        : Exception(QString::fromLatin1(message))
-    { }
+    Exception(const Exception &copy);
+    Exception(Exception &&move);
 
-    Exception(QFileDevice *f, const QString &message)
-        : Exception(message % fileMessage(f))
-    { }
+    virtual ~Exception() = default;
 
-    Exception(QFileDevice *f, const char *message)
-        : Exception(QLatin1String(message) % fileMessage(f))
-    { }
-
-    template <typename T> Exception &arg(const T &t)
+    template <typename... Ts> inline Exception &arg(const Ts & ...ts)
     {
-        m_message = m_message.arg(t);
+        m_errorString = m_errorString.arg(ts...);
         return *this;
     }
 
-    QString error() const
-    {
-        return m_message;
-    }
-
+    inline QString errorString() const  { return m_errorString; }
     const char *what() const noexcept override;
 
 protected:
-    static QString fileMessage(QFileDevice *f)
-    {
-        return f ? QString(u" (" % f->fileName() % u"): " % f->errorString()) : QString();
-    }
+    static QString fileMessage(QFileDevice *f);
 
-    QString m_message;
+    QString m_errorString;
 
 private:
-    mutable QByteArray whatBuffer;
+    mutable std::unique_ptr<QByteArray> m_whatBuffer;
 };
 
 class ParseException : public Exception
 {
 public:
-    ParseException(const char *message)
-        : Exception(u"Parse error: "_qs + QLatin1String(message))
-    { }
-
-    ParseException(QIODevice *dev, const char *message)
-        : Exception(QString::fromLatin1("Parse error%1: %2")
-                    .arg(fileName(dev)).arg(QLatin1String(message)))
-    { }
+    ParseException(const char *message);
+    ParseException(QIODevice *dev, const char *message);
 
 private:
-    static QString fileName(QIODevice *dev)
-    {
-        if (auto file = qobject_cast<QFile *>(dev))
-            return u" in file " % file->fileName();
-        return { };
-    }
+    static QString fileName(QIODevice *dev);
 };
-
-
-

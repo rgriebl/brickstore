@@ -12,7 +12,6 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QDataStream>
-#include <QStringBuilder>
 #include <QtGui/QMatrix4x4>
 
 #include "common/config.h"
@@ -50,7 +49,7 @@ void RenderSettings::forEachProperty(std::function<void(QMetaProperty &)> callba
 void RenderSettings::save()
 {
     forEachProperty([this](QMetaProperty &mp) {
-        Config::inst()->setValue(u"LDraw/RenderSettings/" % QLatin1String(mp.name()), mp.read(this));
+        Config::inst()->setValue(u"LDraw/RenderSettings/" + QLatin1String(mp.name()), mp.read(this));
     });
 }
 
@@ -60,7 +59,7 @@ void RenderSettings::load()
 
     forEachProperty([this, pdv](QMetaProperty &mp) {
         QString name = QLatin1String(mp.name());
-        auto v = Config::inst()->value(u"LDraw/RenderSettings/" % name);
+        auto v = Config::inst()->value(u"LDraw/RenderSettings/" + name);
         if (!v.isValid())
             v = pdv.value(name);
         if (v.isValid())
@@ -118,7 +117,7 @@ void RenderSettings::resetToDefaults()
         auto v = pdv.value(name);
         if (v.isValid())
             mp.write(this, v);
-        Config::inst()->remove(u"LDraw/RenderSettings/" % name);
+        Config::inst()->remove(u"LDraw/RenderSettings/" + name);
     });
 }
 

@@ -13,7 +13,6 @@
 */
 #pragma once
 
-#include <QStringBuilder>
 #include <QProgressDialog>
 #include <QMenu>
 #include <QLabel>
@@ -58,7 +57,7 @@ public:
                 QString fn = rf->data(rf->index(i, 0), RecentFiles::FileNameRole).toString();
                 QString dn = rf->data(rf->index(i, 0), RecentFiles::DirNameRole).toString();
 
-                QString s = fn % u" (" % dn % u")";
+                QString s = fn + u" (" + dn + u")";
 #if !defined(Q_OS_MACOS)
                 if (i < 9)
                     s.prepend(QString(u"&%1   "_qs).arg(i + 1));
@@ -109,7 +108,7 @@ public:
                 QModelIndex idx = DocumentList::inst()->index(i);
                 QString s = idx.data().toString();
                 if (m_shortcut && (cnt < 10))
-                    s = u'&' % QString::number((cnt + 1) % 10) % u"   " % s;
+                    s = u'&' + QString::number((cnt + 1) % 10) + u"   " + s;
 
                 QAction *a = m_menu->addAction(s);
                 a->setCheckable(true);
@@ -331,7 +330,7 @@ public slots:
     {
         QString str = (m_type == Undo) ? tr("Undo") : tr("Redo");
         if (!desc.isEmpty())
-            str = str % u" (" % desc % u')';
+            str = str + u" (" + desc + u')';
         setText(str);
     }
 

@@ -27,7 +27,6 @@
 #include <QDir>
 #include <QProgressDialog>
 #include <QRegularExpression>
-#include <QStringBuilder>
 #include <QStandardPaths>
 #include <QMessageBox>
 
@@ -54,7 +53,7 @@ CheckForUpdates::CheckForUpdates(const QString &baseUrl, QWidget *parent)
     m_downloadUrl.prepend(u"https://"_qs);
     m_downloadUrl.append(u"/releases/tag/v%1"_qs);
 
-    m_updatesPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) % u"/updates/";
+    m_updatesPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + u"/updates/";
     QDir d(m_updatesPath);
     d.mkpath(u"."_qs);
     const auto leftOvers = d.entryList(QDir::Files);
@@ -185,7 +184,7 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
                 .arg(s1, latestVersion.toString(), s2);
         const QString url = m_downloadUrl.arg(latestVersion.toString());
 
-        md = top % md.mid(toHeader, fromHeader - toHeader);
+        md = top + md.mid(toHeader, fromHeader - toHeader);
 
         QTimer t;
         t.start(0);
@@ -263,7 +262,7 @@ QCoro::Task<> CheckForUpdates::downloadInstaller()
     if (reply->error() != QNetworkReply::NoError) {
         QMessageBox::warning(nullptr, m_title, tr("Download failed: %1").arg(reply->errorString()));
     } else {
-        QFile f(m_updatesPath % m_installerName);
+        QFile f(m_updatesPath + m_installerName);
         if (f.open(QIODevice::WriteOnly))
             f.write(reply->readAll());
         f.close();

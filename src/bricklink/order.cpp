@@ -202,7 +202,7 @@ LotList Order::loadLots() const
         try {
             return orders->loadOrderLots(this);
         } catch (const Exception &e) {
-            qWarning() << "Order::loadLots() failed:" << e.error();
+            qWarning() << "Order::loadLots() failed:" << e.errorString();
             return { };
         }
     } else {
@@ -654,7 +654,7 @@ Orders::Orders(Core *core)
     , m_core(core)
 {
     //TODO: Remove in 2022.6.x
-    QDir legacyPath(core->dataPath() % u"orders/");
+    QDir legacyPath(core->dataPath() + u"orders/");
     if (legacyPath.cd(u"received"_qs)) {
         legacyPath.removeRecursively();
         legacyPath.cdUp();
@@ -715,7 +715,7 @@ Orders::Orders(Core *core)
                     QJsonDocument json = QJsonDocument::fromVariant(vm);
                     QByteArray utf8 = json.toJson();
 
-                    std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() % u".brickstore.json"),
+                    std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() + u".brickstore.json"),
                                                                         order->type(), order->date()) };
 
                     if (!saveFile
@@ -727,7 +727,7 @@ Orders::Orders(Core *core)
                 }
             } catch (const Exception &e) {
                 qWarning() << "Failed to retrieve address for order"
-                           << job->userData(type).toString() << ":" << e.error();
+                           << job->userData(type).toString() << ":" << e.errorString();
             }
         } else if ((m_updateStatus == UpdateStatus::Updating) && m_jobs.contains(job)) {
             bool success = true;
@@ -748,7 +748,7 @@ Orders::Orders(Core *core)
                         if (order->id().isEmpty() || !order->date().isValid())
                             throw Exception("Invalid order without ID and DATE");
 
-                        std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() % u".order.xml"),
+                        std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() + u".order.xml"),
                                                                             orderType, order->date()) };
                         if (!saveFile
                                 || (saveFile->write(orderXml) != orderXml.size())
@@ -764,7 +764,7 @@ Orders::Orders(Core *core)
                     }
                 } catch (const Exception &e) {
                     success = false;
-                    message = tr("Could not parse the received order XML data") % u": " % e.error();
+                    message = tr("Could not parse the received order XML data") + u": " + e.errorString();
                 }
                 qDeleteAll(orders.keyBegin(), orders.keyEnd());
             }
@@ -781,7 +781,7 @@ Orders::Orders(Core *core)
                 }
                 setUpdateStatus(overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
-                QFile stampFile(m_core->dataPath() % u"orders/" % m_core->userId() % u"/.stamp");
+                QFile stampFile(m_core->dataPath() + u"orders/" + m_core->userId() + u"/.stamp");
                 if (overallSuccess) {
                     m_lastUpdated = QDateTime::currentDateTime();
                     stampFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -808,9 +808,9 @@ void Orders::reloadOrdersFromCache()
     if (m_core->userId().isEmpty())
         return;
 
-    QString path = m_core->dataPath() % u"orders/" % m_core->userId();
+    QString path = m_core->dataPath() + u"orders/" + m_core->userId();
 
-    QFileInfo stamp(path % u"/.stamp");
+    QFileInfo stamp(path + u"/.stamp");
     m_lastUpdated = stamp.lastModified();
     setUpdateStatus(stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
@@ -832,7 +832,7 @@ void Orders::reloadOrdersFromCache()
                 order->moveToThread(this->thread());
 
                 QDir d = dit.fileInfo().absoluteDir();
-                QString addressFileName = order->id() % u".brickstore.json";
+                QString addressFileName = order->id() + u".brickstore.json";
                 if (d.exists(addressFileName)) {
                     QFile fa(d.absoluteFilePath(addressFileName));
                     if (fa.open(QIODevice::ReadOnly) && (fa.size() < 5000)) {
@@ -849,7 +849,7 @@ void Orders::reloadOrdersFromCache()
                 });
             } catch (const Exception &e) {
                 // keep this UI silent for now
-                qWarning() << "Failed to load order XML:" << e.error();
+                qWarning() << "Failed to load order XML:" << e.errorString();
             }
         }
     });
@@ -1114,11 +1114,11 @@ QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDa
 
 QString Orders::orderFilePath(QStringView fileName, OrderType type, const QDate &date) const
 {
-    return m_core->dataPath() % u"orders/" % m_core->userId()
-            % ((type == OrderType::Received) ? u"/received/": u"/placed/")
-            % QString::number(date.year()) % u'/'
-            % u"%1"_qs.arg(date.month(), 2, 10, QChar(u'0')) % u'/'
-            % fileName;
+    return m_core->dataPath() + u"orders/" + m_core->userId()
+            + ((type == OrderType::Received) ? u"/received/": u"/placed/")
+            + QString::number(date.year()) + u'/'
+            + u"%1"_qs.arg(date.month(), 2, 10, QChar(u'0')) + u'/'
+            + fileName;
 }
 
 
@@ -1191,7 +1191,7 @@ void Orders::cancelUpdate()
 
 LotList Orders::loadOrderLots(const Order *order) const
 {
-    QString fileName = order->id() % u".order.xml";
+    QString fileName = order->id() + u".order.xml";
     QFile f(Orders::orderFilePath(fileName, order->type(), order->date()));
     if (!f.open(QIODevice::ReadOnly))
         throw Exception(&f, tr("Cannot open order XML"));
@@ -1257,8 +1257,8 @@ QVariant Orders::data(const QModelIndex &index, int role) const
             QString cc = order->countryCode();
             flag = m_flags.value(cc);
             if (flag.isNull()) {
-                flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Normal);
-                flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Selected);
+                flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Normal);
+                flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Selected);
                 m_flags.insert(cc, flag);
             }
             return flag;
@@ -1280,7 +1280,7 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         QString tt = data(index, Qt::DisplayRole).toString();
 
         if (!order->address().isEmpty())
-            tt = tt % u"\n\n" % order->address();
+            tt = tt + u"\n\n" + order->address();
         return tt;
     } else if (role == OrderPointerRole) {
         return QVariant::fromValue(order);

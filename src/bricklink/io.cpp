@@ -27,7 +27,7 @@ static QDateTime parseESTDateTimeString(const QString &v)
     if (v.isEmpty())
         return { };
 
-    //TOO SLOW: QDateTime::fromString(v % u" EST", u"M/d/yyyy h:mm:ss AP t"));
+    //TOO SLOW: QDateTime::fromString(v + u" EST", u"M/d/yyyy h:mm:ss AP t"));
     //TOO SLOW: { QDate::fromString(v, u"M/d/yyyy"), QTime(0, 0), est };
 
     QStringList sl = QString(v).replace(u'/', u' ').replace(u':', u' ').split(u' ');
@@ -257,7 +257,7 @@ IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint)
         }
     } catch (const Exception &e) {
         throw Exception("XML parse error at line %1, column %2: %3")
-                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
+                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.errorString());
     }
 }
 

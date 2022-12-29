@@ -75,27 +75,27 @@ bool BrickLink::TextImport::import(const QString &path)
 {
     try {
         // colors
-        readColors(path % u"colors.xml");
-        readLDrawColors(path % u"ldconfig.ldr", path % u"rebrickable_colors.json");
+        readColors(path + u"colors.xml");
+        readLDrawColors(path + u"ldconfig.ldr", path + u"rebrickable_colors.json");
         calculateColorPopularity();
 
         // categories
-        readCategories(path % u"categories.xml");
+        readCategories(path + u"categories.xml");
 
         // itemtypes
-        readItemTypes(path % u"itemtypes.xml");
+        readItemTypes(path + u"itemtypes.xml");
 
         // speed up loading (exactly 137522 items on 16.06.2020)
         m_items.reserve(200000);
 
         for (ItemType &itt : m_item_types) {
-            readItems(path % u"items_" % QLatin1Char(itt.m_id) % u".xml", &itt);
-            readAdditionalItemCategories(path % u"items_" % QLatin1Char(itt.m_id) % u".csv", &itt);
+            readItems(path + u"items_" + QLatin1Char(itt.m_id) + u".xml", &itt);
+            readAdditionalItemCategories(path + u"items_" + QLatin1Char(itt.m_id) + u".csv", &itt);
         }
 
-        readPartColorCodes(path % u"part_color_codes.xml");
-        readInventoryList(path % u"btinvlist.csv");
-        readChangeLog(path % u"btchglog.csv");
+        readPartColorCodes(path + u"part_color_codes.xml");
+        readInventoryList(path + u"btinvlist.csv");
+        readChangeLog(path + u"btchglog.csv");
 
         return true;
     } catch (const Exception &e) {
@@ -114,7 +114,7 @@ void BrickLink::TextImport::readColors(const QString &path)
 
         col.m_id       = colid;
         col.m_name     = p.elementText(e, "COLORNAME").simplified();
-        col.m_color    = QColor(u'#' % p.elementText(e, "COLORRGB"));
+        col.m_color    = QColor(u'#' + p.elementText(e, "COLORRGB"));
 
         col.m_ldraw_id = -1;
         col.m_type     = Color::Type();
@@ -409,7 +409,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
 
             // if this itemid was involved in a changelog entry after the last time we downloaded
             // the inventory, we need to reload
-            QByteArray itemTypeAndId = itemTypeId % itemId;
+            QByteArray itemTypeAndId = itemTypeId + itemId;
             auto it = std::lower_bound(m_itemChangelog.cbegin(), m_itemChangelog.cend(), itemTypeAndId);
             if ((it != m_itemChangelog.cend()) && (*it == itemTypeAndId) && (it->date() > fileDate)) {
                 throw Exception("Item id %1 changed on %2 (last download: %3)")
@@ -467,7 +467,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
 
     } catch (const Exception &e) {
         if (step != ImportFromDiskCache)
-            qWarning() << "  >" << qPrintable(e.error());
+            qWarning() << "  >" << qPrintable(e.errorString());
         return false;
     }
 }
@@ -650,7 +650,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             // be able to render composite parts with fixed colors (e.g. electric motors)
             if (!found) {
                 Color c;
-                c.m_name = u"LDraw: " % name;
+                c.m_name = u"LDraw: " + name;
                 c.m_type = type;
                 c.m_color = color;
                 updateColor(c);
@@ -797,8 +797,8 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             QString toId = strs.at(6);
             if ((fromType.length() == 1) && (toType.length() == 1)
                     && !fromId.isEmpty() && !toId.isEmpty()) {
-                m_itemChangelog.emplace_back((fromType % fromId).toLatin1(),
-                                             (toType % toId).toLatin1(), date);
+                m_itemChangelog.emplace_back((fromType + fromId).toLatin1(),
+                                             (toType + toId).toLatin1(), date);
             }
             break;
         }

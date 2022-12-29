@@ -38,7 +38,6 @@
 #include <QCommandLinkButton>
 #include <QStyle>
 #include <QLinearGradient>
-#include <QStringBuilder>
 #include <QDesktopServices>
 #include <QWidgetAction>
 #include <QPlainTextEdit>
@@ -349,7 +348,7 @@ void MainWindow::setupScripts()
                     try {
                         extensionAction->executeAction();
                     } catch (const Exception &e) {
-                        UIHelpers::warning(e.error());
+                        UIHelpers::warning(e.errorString());
                     }
                 });
             }
@@ -1267,7 +1266,7 @@ void MainWindow::titleUpdate()
     QString file;
 
     if (m_activeView) {
-        title = m_activeView->windowTitle() % u" \u2014 " % title;
+        title = m_activeView->windowTitle() + u" \u2014 " + title;
         file = m_activeView->document()->filePath();
     }
     setWindowTitle(title);

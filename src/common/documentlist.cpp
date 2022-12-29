@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QFileInfo>
 #include <QIcon>
 #include <QPainter>
@@ -118,7 +117,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
                         }
                     }
                     if (noClash) {
-                        s = minBase % u'/' % s;
+                        s = minBase + u'/' + s;
                         break;
                     }
                 }

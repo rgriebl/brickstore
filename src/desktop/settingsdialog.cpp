@@ -22,7 +22,6 @@
 #include <QImage>
 #include <QSortFilterProxyModel>
 #include <QMenu>
-#include <QStringBuilder>
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QMessageBox>
@@ -721,7 +720,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_font_size_percent->setFixedWidth(w_font_size_percent->width());
 
     auto setFontSize = [this](int v) {
-        w_font_size_percent->setText(QString::number(v * 10) % u" %");
+        w_font_size_percent->setText(QString::number(v * 10) + u" %");
         QFont f = font();
         double defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
         if (defaultFontSize <= 0)
@@ -1053,7 +1052,7 @@ void SettingsDialog::load()
         for (const auto &trans : translations) {
             QString s = trans.name;
             if (!trans.localName.isEmpty())
-                s = trans.localName % u" (" % s % u')';
+                s = trans.localName + u" (" + s + u')';
             w_language->addItem(s, trans.language);
 
 
@@ -1199,7 +1198,7 @@ void SettingsDialog::checkLDrawDir()
 
     QString checkDir = isExternal
             ? w_ldraw_dir->currentText()
-            : Config::inst()->cacheDir() % u"/ldraw/complete.zip";
+            : Config::inst()->cacheDir() + u"/ldraw/complete.zip";
 
     bool valid = LDraw::Library::checkLDrawDir(checkDir);
 

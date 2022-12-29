@@ -13,7 +13,6 @@
 */
 
 #include <QStringList>
-#include <QStringBuilder>
 #include <QCoreApplication>
 #include <QVariant>
 #include <QRegularExpression>
@@ -26,7 +25,7 @@
 static QString quote(const QString &str)
 {
     if (str.isEmpty() || str.contains(u' '))
-        return u'"' % str % u'"';
+        return u'"' + str + u'"';
     else
         return str;
 };
@@ -179,7 +178,7 @@ QString Filter::Parser::toString(const QVector<Filter> &filter, bool preferSymbo
         if ((f.field() != -1) || (f.comparison() != Matches)) {
             for (const auto &ft : m_field_tokens) {
                 if (ft.first == f.field()) {
-                    result = result % quote(ft.second);
+                    result = result + quote(ft.second);
                     break;
                 }
             }
@@ -187,19 +186,19 @@ QString Filter::Parser::toString(const QVector<Filter> &filter, bool preferSymbo
                 if (ct.first == f.comparison()) {
                     if (preferSymbolic && ct.second.at(0).isLetterOrNumber())
                         continue;
-                    result = result % u' ' % quote(ct.second) % u' ';
+                    result = result + u' ' + quote(ct.second) + u' ';
                     break;
                 }
             }
         }
-        result = result % quote(f.expression());
+        result = result + quote(f.expression());
 
         if (i < (filter.size() - 1)) {
             for (const auto &ct : m_combination_tokens) {
                 if (ct.first == f.combination()) {
                     if (preferSymbolic && ct.second.at(0).isLetterOrNumber())
                         continue;
-                    result = result % u' ' % quote(ct.second) % u' ';
+                    result = result + u' ' + quote(ct.second) + u' ';
                     break;
                 }
             }
@@ -234,7 +233,7 @@ QVector<Filter> Filter::Parser::parse(const QString &str)
 {
     // match words, which are either quoted with ["], quoted with ['] or unquoted
     static const QRegularExpression re(uR"-("([^"]*)"|'([^']*)'|([^ ]+))-"_qs);
-    auto matches = re.globalMatch(str % u" &&"_qs);
+    auto matches = re.globalMatch(str + u" &&"_qs);
 
     QVector<Filter> filters;
     Filter f;
@@ -242,7 +241,7 @@ QVector<Filter> Filter::Parser::parse(const QString &str)
 
     while (state != StateInvalid && matches.hasNext()) {
         auto match = matches.next();
-        QString word = match.captured(1) % match.captured(2) % match.captured(3);
+        QString word = match.captured(1) + match.captured(2) + match.captured(3);
 
 retryState:
         switch(state) {
@@ -307,8 +306,8 @@ static QString toHtml(const QVector<QPair<T, QString>> &tokens, const QString &b
         if (first_key)
             first_key = false;
         else
-            res = res % key_separator;
-        res = res % key_before;
+            res = res + key_separator;
+        res = res + key_before;
         bool first_value = true;
         for (const auto &p : tokens) {
             if (p.first != key)
@@ -317,13 +316,13 @@ static QString toHtml(const QVector<QPair<T, QString>> &tokens, const QString &b
             if (first_value)
                 first_value = false;
             else
-                res = res % value_separator;
-            res = res % value_before % quote(p.second).toHtmlEscaped() % value_after;
+                res = res + value_separator;
+            res = res + value_before + quote(p.second).toHtmlEscaped() + value_after;
         }
-        res = res % key_after;
+        res = res + key_after;
     }
     if (!res.isEmpty())
-        res = before % res % after;
+        res = before + res + after;
     return res;
 }
 

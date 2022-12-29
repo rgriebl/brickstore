@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QComboBox>
 #include <QToolButton>
 #include <QToolBar>
@@ -227,15 +226,15 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
 
                 for (int i = 0; i < sortColumns.size(); ++i) {
                     if (sortColumns.at(i).first == headerOpt->section) {
-                        QString key = u"hv_" % QString::number(iconSize) % u"-" %
-                                QString::number(i) % u"-" % QString::number(
+                        QString key = u"hv_" + QString::number(iconSize) + u"-" %
+                                QString::number(i) + u"-" + QString::number(
                                     headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
 
                         QPixmap pix;
                         if (!QPixmapCache::find(key, &pix)) {
                             QString name = u"view-sort"_qs;
                             if (headerView->isSorted()) {
-                                name = name % ((sortColumns.at(i).second == Qt::AscendingOrder)
+                                name = name + ((sortColumns.at(i).second == Qt::AscendingOrder)
                                                ? u"-ascending" : u"-descending");
                             }
                             pix = QIcon::fromTheme(name).pixmap(QSize(iconSize, iconSize),

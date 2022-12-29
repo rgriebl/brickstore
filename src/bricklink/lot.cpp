@@ -12,7 +12,6 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QRegularExpression>
-#include <QStringBuilder>
 
 #include "bricklink/core.h"
 #include "bricklink/lot.h"

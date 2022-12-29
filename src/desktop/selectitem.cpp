@@ -24,7 +24,6 @@
 #include <QToolButton>
 #include <QApplication>
 #include <QCursor>
-#include <QStringBuilder>
 #include <QToolTip>
 #include <QTreeView>
 #include <QListView>
@@ -280,7 +279,7 @@ void SelectItem::init()
             this, [this]() { setZoomFactor(2); });
     auto *zoomMenu = new QMenu(d->w_zoomLevel);
     for (int zl : { 50, 75, 100, 125, 150, 175, 200, 250, 300, 350, 400, 500 }) {
-        zoomMenu->addAction(QString::number(zl) % u'%')->setData(zl);
+        zoomMenu->addAction(QString::number(zl) + u'%')->setData(zl);
     }
     connect(zoomMenu, &QMenu::triggered, this, [this](QAction *a) {
         setZoomFactor(double(a->data().toInt()) / 100.);
@@ -897,9 +896,9 @@ void SelectItem::showContextMenu(const QPoint &p)
                 auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
 
 
-                QString filter = BrickLink::ItemModel::tr("consists-of:") % QLatin1String(partItem->id());
+                QString filter = BrickLink::ItemModel::tr("consists-of:") + QLatin1String(partItem->id());
                 if (partItem->itemType()->hasColors() && partColor)
-                    filter = filter % u'@' % QString::number(partColor->id());
+                    filter = filter + u'@' + QString::number(partColor->id());
                 QIcon icon;
                 if (partPicture->isValid())
                     icon = QPixmap::fromImage(partPicture->image());
@@ -907,8 +906,8 @@ void SelectItem::showContextMenu(const QPoint &p)
                 m->addSeparator();
                 QString section;
                 if (partColor && partColor->id())
-                    section = partColor->name() % u' ';
-                section = section % partItem->name() % u" [" % QLatin1String(partItem->id()) % u']';
+                    section = partColor->name() + u' ';
+                section = section + partItem->name() + u" [" + QLatin1String(partItem->id()) + u']';
                 m->addAction(icon, section)->setEnabled(false);
 
                 connect(m->addAction(tr("Set filter to Minifigs consisting of this part")),
@@ -918,7 +917,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 if (!d->w_filter->text().isEmpty()) {
                     connect(m->addAction(tr("Narrow filter to Minifigs consisting of this part")),
                                         &QAction::triggered, this, [this, filter]() {
-                        d->w_filter->setText(d->w_filter->text() % u' ' % filter);
+                        d->w_filter->setText(d->w_filter->text() + u' ' + filter);
                     });
                 }
             }

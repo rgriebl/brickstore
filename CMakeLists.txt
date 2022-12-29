@@ -106,6 +106,7 @@ add_compile_definitions(
     QT_NO_CAST_TO_ASCII
     QT_NO_CAST_FROM_ASCII
     QT_MESSAGELOGCONTEXT
+    QT_USE_QSTRINGBUILDER
 )
 
 find_package(Qt6

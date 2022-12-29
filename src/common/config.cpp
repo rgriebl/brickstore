@@ -24,7 +24,6 @@
 #include <QUuid>
 #include <QDebug>
 #include <QKeySequence>
-#include <QStringBuilder>
 #include <QFileInfo>
 
 #include "config.h"
@@ -324,7 +323,7 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
         it.next();
 
         if (it.value() != old_uiv.value(it.key())) {
-            setValue(u"BrickLink/UpdateInterval/"_qs % QLatin1String(it.key()), it.value());
+            setValue(u"BrickLink/UpdateInterval/"_qs + QLatin1String(it.key()), it.value());
             modified = true;
         }
     }
@@ -358,21 +357,21 @@ QByteArray Config::columnLayout(const QString &id) const
 {
     if (id.isEmpty())
         return { };
-    return value(u"ColumnLayouts/"_qs % id % u"/Layout").toByteArray();
+    return value(u"ColumnLayouts/"_qs + id + u"/Layout").toByteArray();
 }
 
 QString Config::columnLayoutName(const QString &id) const
 {
     if (id.isEmpty())
         return { };
-    return value(u"ColumnLayouts/"_qs % id % u"/Name").toString();
+    return value(u"ColumnLayouts/"_qs + id + u"/Name").toString();
 }
 
 int Config::columnLayoutOrder(const QString &id) const
 {
     if (id.isEmpty())
         return -1;
-    return value(u"ColumnLayouts/"_qs % id % u"/Order", -1).toInt();
+    return value(u"ColumnLayouts/"_qs + id + u"/Order", -1).toInt();
 }
 
 QStringList Config::columnLayoutIds() const
@@ -402,11 +401,11 @@ QString Config::setColumnLayout(const QString &id, const QByteArray &layout)
                     return { };
             }
         }
-        setValue(u"ColumnLayouts/"_qs % nid % u"/Layout", layout);
+        setValue(u"ColumnLayouts/"_qs + nid + u"/Layout", layout);
 
         if (isNew) {
             auto newIds = columnLayoutIds();
-            setValue(u"ColumnLayouts/"_qs % nid % u"/Order", newIds.count() - 1);
+            setValue(u"ColumnLayouts/"_qs + nid + u"/Order", newIds.count() - 1);
             emit columnLayoutIdsChanged(newIds);
         }
         emit columnLayoutChanged(nid, layout);
@@ -422,7 +421,7 @@ bool Config::deleteColumnLayout(const QString &id)
         bool hasLayout = childGroups().contains(id);
         endGroup();
         if (hasLayout) {
-            remove(u"ColumnLayouts/"_qs % id);
+            remove(u"ColumnLayouts/"_qs + id);
             emit columnLayoutIdsChanged(columnLayoutIds());
             return true;
         }
@@ -438,9 +437,9 @@ bool Config::renameColumnLayout(const QString &id, const QString &name)
         endGroup();
 
         if (hasLayout) {
-            QString oldname = value(u"ColumnLayouts/"_qs % id % u"/Name").toString();
+            QString oldname = value(u"ColumnLayouts/"_qs + id + u"/Name").toString();
             if (oldname != name) {
-                setValue(u"ColumnLayouts/"_qs % id % u"/Name", name);
+                setValue(u"ColumnLayouts/"_qs + id + u"/Name", name);
                 emit columnLayoutNameChanged(id, name);
                 return true;
             }
@@ -458,7 +457,7 @@ bool Config::reorderColumnLayouts(const QStringList &ids)
 
     if (oldIds == newIds) {
         for (int i = 0; i < ids.count(); ++i)
-            setValue(u"ColumnLayouts/"_qs % ids.at(i) % u"/Order", i);
+            setValue(u"ColumnLayouts/"_qs + ids.at(i) + u"/Order", i);
         emit columnLayoutIdsOrderChanged(ids);
         return true;
     }

@@ -49,10 +49,10 @@ BrickLink::Store::Store(Core *core)
                     m_valid = true;
                 } catch (const Exception &e) {
                     success = false;
-                    message = tr("Failed to import the store inventory") % u": " % e.error();
+                    message = tr("Failed to import the store inventory") + u": " + e.errorString();
                 }
             } else {
-                message = tr("Failed to download the store inventory") % u": " % job->errorString();
+                message = tr("Failed to download the store inventory") + u": " + job->errorString();
             }
             setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
             emit updateFinished(success, message);

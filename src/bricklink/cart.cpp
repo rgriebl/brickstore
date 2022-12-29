@@ -247,7 +247,7 @@ Carts::Carts(Core *core)
 
             try {
                 if (!jobCompleted) {
-                    throw Exception(message % u": " % job->errorString());
+                    throw Exception(message + u": " + job->errorString());
                 } else {
                     int invalidCount = parseSellerCart(*it, *job->data());
                     if (invalidCount) {
@@ -258,7 +258,7 @@ Carts::Carts(Core *core)
                 }
             } catch (const Exception &e) {
                 success = false;
-                message = message % u": " % e.error();
+                message = message + u": " + e.errorString();
             }
             emit fetchLotsFinished(*it, success, message);
 
@@ -290,7 +290,7 @@ Carts::Carts(Core *core)
 
                 } catch (const Exception &e) {
                     success = false;
-                    message = message % u": " % e.error();
+                    message = message + u": " + e.errorString();
                 }
             }
             m_lastUpdated = QDateTime::currentDateTime();
@@ -334,7 +334,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
         double price = en_US.toDouble(priceStr.mid(4));
 
         if (itemSeq)
-            itemId = itemId % '-' % QByteArray::number(itemSeq);
+            itemId = itemId + '-' + QByteArray::number(itemSeq);
 
         auto item = m_core->item(itemTypeId, itemId);
         auto color = m_core->color(colorId);
@@ -401,7 +401,7 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
             cart->setLotCount(lots);
             cart->setItemCount(items);
             if (totalPrice.mid(2, 2) == u" $") // why does if have to be different?
-                cart->setCurrencyCode(totalPrice.left(2) % u'D');
+                cart->setCurrencyCode(totalPrice.left(2) + u'D');
             else
                 cart->setCurrencyCode(totalPrice.left(3));
             cart->setTotal(totalPrice.mid(4).toDouble());
@@ -504,7 +504,7 @@ QVariant Carts::data(const QModelIndex &index, int role) const
         switch (col) {
         case Date: return QLocale::system().toString(cart->lastUpdated(), QLocale::ShortFormat);
         case Type: return cart->domestic() ? tr("Domestic") : tr("International");
-        case Store: return QString(cart->storeName() % u" (" % cart->sellerName() % u")");
+        case Store: return QString(cart->storeName() + u" (" + cart->sellerName() + u")");
         case ItemCount: return QLocale::system().toString(cart->itemCount());
         case LotCount: return QLocale::system().toString(cart->lotCount());
         case Total: return Currency::toDisplayString(cart->total(), cart->currencyCode(), 2);
@@ -516,8 +516,8 @@ QVariant Carts::data(const QModelIndex &index, int role) const
             QString cc = cart->countryCode();
             flag = m_flags.value(cc);
             if (flag.isNull()) {
-                flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Normal);
-                flag.addFile(u":/assets/flags/" % cc, { }, QIcon::Selected);
+                flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Normal);
+                flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Selected);
                 m_flags.insert(cc, flag);
             }
             return flag;

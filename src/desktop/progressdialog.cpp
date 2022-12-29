@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QPushButton>
 #include <QLabel>
 #include <QProgressBar>
@@ -95,7 +94,7 @@ void ProgressDialog::done(int r)
 
 void ProgressDialog::setHeaderText(const QString &str)
 {
-    m_header->setText(u"<b>" % str % u"</b>");
+    m_header->setText(u"<b>" + str + u"</b>");
     syncRepaint(m_header);
 }
 
@@ -114,7 +113,7 @@ void ProgressDialog::setMessageText(const QString &str)
 
 void ProgressDialog::setErrorText(const QString &str)
 {
-    m_message->setText(u"<b>" % tr("Error") % u"</b>: " % str);
+    m_message->setText(u"<b>" + tr("Error") + u"</b>: " + str);
     setFinished(false);
 
     syncRepaint(m_message);

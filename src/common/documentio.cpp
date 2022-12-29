@@ -17,7 +17,6 @@
 #include <QtGui/QCursor>
 #include <QFileInfo>
 #include <QDir>
-#include <QStringBuilder>
 #include <QStringView>
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
@@ -44,29 +43,29 @@
 QStringList DocumentIO::nameFiltersForBrickLinkXML(bool includeAll)
 {
     QStringList filters;
-    filters << tr("BrickLink XML File") % u" (*.xml)";
+    filters << tr("BrickLink XML File") + u" (*.xml)";
     if (includeAll)
-        filters << tr("All Files") % u"(*)";
+        filters << tr("All Files") + u"(*)";
     return filters;
 }
 
 QStringList DocumentIO::nameFiltersForBrickStoreXML(bool includeAll)
 {
     QStringList filters;
-    filters << tr("BrickStore XML Data") % u" (*.bsx)";
+    filters << tr("BrickStore XML Data") + u" (*.bsx)";
     if (includeAll)
-        filters << tr("All Files") % u"(*)";
+        filters << tr("All Files") + u"(*)";
     return filters;
 }
 
 QStringList DocumentIO::nameFiltersForLDraw(bool includeAll)
 {
     QStringList filters;
-    filters << tr("All Models") % u" (*.dat *.ldr *.mpd *.io)";
-    filters << tr("LDraw Models") % u" (*.dat *.ldr *.mpd)";
-    filters << tr("BrickLink Studio Models") % u" (*.io)";
+    filters << tr("All Models") + u" (*.dat *.ldr *.mpd *.io)";
+    filters << tr("LDraw Models") + u" (*.dat *.ldr *.mpd)";
+    filters << tr("BrickLink Studio Models") + u" (*.io)";
     if (includeAll)
-        filters << tr("All Files") % u" (*)";
+        filters << tr("All Files") + u" (*)";
     return filters;
 }
 
@@ -157,7 +156,7 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
             co_return document;
 
         } catch (const Exception &e) {
-            UIHelpers::warning(tr("Could not parse the XML data.") % u"<br><br>" % e.error());
+            UIHelpers::warning(tr("Could not parse the XML data.") + u"<br><br>" + e.errorString());
         }
     } else {
         co_await UIHelpers::warning(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
@@ -194,7 +193,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
                     MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
                     f->close();
                 } catch (const Exception &e) {
-                    throw Exception(tr("Could not open the Studio ZIP container") % u": " % e.error());
+                    throw Exception(tr("Could not open the Studio ZIP container") + u": " + e.errorString());
                 }
             }
         } else {
@@ -222,7 +221,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 
     } catch (const Exception &e) {
         UIHelpers::warning(tr("Failed to import the LDraw/Studio model %1")
-                           .arg(QFileInfo(fn).fileName()) % u":<br><br>" % e.error());
+                           .arg(QFileInfo(fn).fileName()) + u":<br><br>" + e.errorString());
     }
     co_return nullptr;
 }
@@ -370,8 +369,8 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                         }
 
                         if (!got_subfile) {
-                            for (const auto &path : qAsConst(searchpath)) {
-                                QFile subf(path % u'/' % partname);
+                            for (const auto &path : std::as_const(searchpath)) {
+                                QFile subf(path + u'/' + partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
 
@@ -657,7 +656,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
         }
     } catch (const Exception &e) {
         throw Exception("XML parse error at line %1, column %2: %3")
-                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
+                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.errorString());
     }
 }
 

@@ -20,7 +20,6 @@
 #include <QFileInfo>
 #include <QtMath>
 #include <QStyle>
-#include <QStringBuilder>
 #include <QSizeGrip>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
@@ -191,10 +190,10 @@ void WelcomeWidget::updateVersionsText()
     auto delta = HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
                                                   BrickLink::core()->database()->lastUpdated());
 
-    QString dbd = u"<b>" % delta % u"</b>";
-    QString ver = u"<b>" % QCoreApplication::applicationVersion() % u"</b>";
+    QString dbd = u"<b>" + delta + u"</b>";
+    QString ver = u"<b>" + QCoreApplication::applicationVersion() + u"</b>";
 
-    QString s = QCoreApplication::applicationName() % u" " %
+    QString s = QCoreApplication::applicationName() + u" " %
             tr("version %1 (build: %2)").arg(ver).arg(Application::inst()->buildNumber()) %
             u"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" %
             tr("Using a database that was generated %1").arg(dbd);

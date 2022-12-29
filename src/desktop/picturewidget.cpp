@@ -24,7 +24,6 @@
 #include <QStyle>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QStringBuilder>
 #include <QQmlApplicationEngine>
 #include <QStackedWidget>
 
@@ -183,7 +182,7 @@ PictureWidget::PictureWidget(QWidget *parent)
                     img = m_image;
                 }
                 QStringList filters;
-                filters << tr("PNG Image") % u" (*.png)";
+                filters << tr("PNG Image") + u" (*.png)";
 
                 QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
                 Config::inst()->lastDirectory(),
@@ -355,7 +354,7 @@ void PictureWidget::showImage()
 
     if (m_pic && ((m_pic->updateStatus() == BrickLink::UpdateStatus::Updating) ||
                   (m_pic->updateStatus() == BrickLink::UpdateStatus::Loading))) {
-        w_image->setText(u"<center><i>" % tr("Please wait... updating") % u"</i></center>");
+        w_image->setText(u"<center><i>" + tr("Please wait... updating") + u"</i></center>");
     } else if (m_pic && w_image->isVisible()) {
         bool hasImage = !m_image.isNull();
         QPixmap p;

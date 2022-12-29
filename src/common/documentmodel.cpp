@@ -19,7 +19,6 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QTimer>
-#include <QStringBuilder>
 #include <QtConcurrentFilter>
 #include <QtAlgorithms>
 #include <QStringListModel>
@@ -118,15 +117,15 @@ private:
             QString t = (to.*G)();
 
             if (!f.isEmpty() && !t.isEmpty() && (f != t)) {
-                QRegularExpression fromRe { u"\\b" % QRegularExpression::escape(f) % u"\\b" };
+                QRegularExpression fromRe { u"\\b" + QRegularExpression::escape(f) + u"\\b" };
 
                 if (!fromRe.match(t).hasMatch()) {
-                    QRegularExpression toRe { u"\\b" % QRegularExpression::escape(t) % u"\\b" };
+                    QRegularExpression toRe { u"\\b" + QRegularExpression::escape(t) + u"\\b" };
 
                     if (toRe.match(f).hasMatch())
                         (to.*S)(f);
                     else
-                        (to.*S)(t % u" " % f);
+                        (to.*S)(t + u" " + f);
                     return true;
                 }
             } else if (!f.isEmpty()) {
@@ -524,7 +523,7 @@ QString DocumentStatistics::asHtmlTable() const
     QString profitstr;
     if (!qFuzzyIsNull(cost())) {
         int percent = int(std::round(value() / cost() * 100. - 100.));
-        profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
+        profitstr = (percent > 0 ? u"(+" : u"(") + loc.toString(percent) + u" %)";
     }
 
 
@@ -535,7 +534,7 @@ QString DocumentStatistics::asHtmlTable() const
 
         if (weight < 0) {
             weight = -weight;
-            wgtstr = tr("min.") % u' ';
+            wgtstr = tr("min.") + u' ';
         }
 
         wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);

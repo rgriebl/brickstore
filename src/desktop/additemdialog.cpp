@@ -29,7 +29,6 @@
 #include <QWheelEvent>
 #include <QShortcut>
 #include <QToolTip>
-#include <QStringBuilder>
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
@@ -326,7 +325,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             QString tips;
 
             for (const auto &entry : m_addHistory)
-                tips = tips % pre % addhistoryTextFor(entry.first, entry.second) % post;
+                tips = tips + pre + addhistoryTextFor(entry.first, entry.second) + post;
 
             QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
         }
@@ -606,14 +605,14 @@ QString AddItemDialog::addhistoryTextFor(const QDateTime &when, const BrickLink:
     QString cs;
     if (lot.color() && lot.color()->id()) {
         QColor color = lot.color()->color();
-        cs = uR"(<b><font color=")" % Utility::textColor(color).name() %
-                uR"(" style="background-color: )" % color.name() % uR"(;">&nbsp;)" %
-                lot.colorName() % uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
+        cs = uR"(<b><font color=")" + Utility::textColor(color).name() %
+                uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)" %
+                lot.colorName() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
     }
 
     QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %
-            u":&nbsp;&nbsp;<b>" % QString::number(lot.quantity()) % u"</b>&nbsp;&nbsp;" % cs %
-            lot.itemName() % u" <i>[" + QLatin1String(lot.itemId()) % u"]</i>";
+            u":&nbsp;&nbsp;<b>" + QString::number(lot.quantity()) + u"</b>&nbsp;&nbsp;" + cs %
+            lot.itemName() + u" <i>[" + QLatin1String(lot.itemId()) + u"]</i>";
 
     return s;
 }
@@ -799,7 +798,7 @@ void AddItemDialog::recordBrowseEntry(bool onlyUpdateHistory)
     if (!item)
         return;
 
-    QByteArray fullItemId = item->itemTypeId() % item->id();
+    QByteArray fullItemId = item->itemTypeId() + item->id();
 
     BrowseHistoryEntry he { fullItemId, color ? color->id() : BrickLink::Color::InvalidId,
                 QDateTime::currentDateTime(), w_select_item->saveState(),
@@ -913,9 +912,9 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
             if (item) {
                 QString s = item->name();
                 if (color && color->id())
-                    s = color->name() % u' ' % s;
+                    s = color->name() + u' ' + s;
                 if (type == BrowseMenuType::History)
-                    s = s % u"\t(" % HumanReadableTimeDelta::toString(now, bhe.m_lastVisited) % u')';
+                    s = s + u"\t(" + HumanReadableTimeDelta::toString(now, bhe.m_lastVisited) + u')';
 
                 auto *a = m->addAction(s);
                 a->setData(i);

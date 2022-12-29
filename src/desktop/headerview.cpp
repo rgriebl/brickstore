@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QContextMenuEvent>
 #include <QHelpEvent>
 #include <QMenu>
@@ -395,11 +394,11 @@ bool HeaderView::viewportEvent(QEvent *e)
         auto he = static_cast<QHelpEvent *>(e);
         int li = logicalIndexAt(he->pos());
         if (li >= 0) {
-            QString t = model()->headerData(li, orientation()).toString() % u"\n\n"
-                    % tr("Click to set as primary sort column.") % u"\n"
-                    % tr("Shift-click to set as additional sort column.") % u"\n"
-                    % tr("Right-click for context menu.") % u"\n"
-                    % tr("Drag to reposition and resize.");
+            QString t = model()->headerData(li, orientation()).toString() + u"\n\n"
+                    + tr("Click to set as primary sort column.") + u"\n"
+                    + tr("Shift-click to set as additional sort column.") + u"\n"
+                    + tr("Right-click for context menu.") + u"\n"
+                    + tr("Drag to reposition and resize.");
             QToolTip::showText(he->globalPos(), t, this);
         }
         e->accept();

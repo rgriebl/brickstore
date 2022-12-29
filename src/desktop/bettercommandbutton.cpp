@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QMenu>
 #include <QTextLayout>
 #include <QStylePainter>
@@ -235,7 +234,7 @@ void BetterCommandButton::updateDescriptionText()
     QString desc = m_descriptionText;
 
     if (!sc.isEmpty())
-        desc = desc % u" <i>(%1)</i>"_qs.arg(sc.toString(QKeySequence::NativeText));
+        desc = desc + u" <i>(%1)</i>"_qs.arg(sc.toString(QKeySequence::NativeText));
 
     if (m_description.text() != desc) {
         m_description.setText(desc);

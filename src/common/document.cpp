@@ -554,8 +554,8 @@ void Document::setActive(bool active)
                 }
 
                 if (!messages.isEmpty()) {
-                    const QString msg = u"<b>" % filePathOrTitle() % u"</b><br><ul><li>"
-                            % messages.join(u"</li><li>") % u"</li></ul>";
+                    const QString msg = u"<b>" + filePathOrTitle() + u"</b><br><ul><li>"
+                            + messages.join(u"</li><li>") + u"</li></ul>";
 
                     static auto notifyUser = [](QString s) -> QCoro::Task<> {
                         co_await UIHelpers::information(s);
@@ -578,7 +578,7 @@ QCoro::Task<bool> Document::requestClose()
 
     if (m_model->isModified()) {
         switch (co_await UIHelpers::question(tr("The document %1 has been modified.").arg(CMB_BOLD(fileName()))
-                                             % u"<br><br>" % tr("Do you want to save your changes?"),
+                                             + u"<br><br>" + tr("Do you want to save your changes?"),
                                              UIHelpers::Save | UIHelpers::Discard | UIHelpers::Cancel,
                                              UIHelpers::Save)) {
         case UIHelpers::Save:
@@ -1139,7 +1139,7 @@ void Document::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
         QString s = tr("Prices of the selected items have been updated to Price Guide values.");
         if (failCount) {
-            s = s % u"<br><br>" % tr("%1 have been skipped, because of missing Price Guide records or network errors.")
+            s = s + u"<br><br>" + tr("%1 have been skipped, because of missing Price Guide records or network errors.")
                     .arg(CMB_BOLD(QString::number(failCount)));
         }
 
@@ -1376,7 +1376,7 @@ void Document::addRemarks(const QString &addRemarks)
 
 void Document::removeRemarks(const QString &remRemarks)
 {
-    QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remRemarks) % u"\\b");
+    QRegularExpression regexp(u"\\b" + QRegularExpression::escape(remRemarks) + u"\\b");
 
     applyTo(selectedLots(), "edit_remark_rem", [=](const auto &from, auto &to) {
         QString remarks = from.remarks();
@@ -1414,7 +1414,7 @@ void Document::addComments(const QString &addComments)
 
 void Document::removeComments(const QString &remComments)
 {
-    QRegularExpression regexp(u"\\b" % QRegularExpression::escape(remComments) % u"\\b");
+    QRegularExpression regexp(u"\\b" + QRegularExpression::escape(remComments) + u"\\b");
 
     applyTo(selectedLots(), "edit_comment_rem", [=](const auto &from, auto &to) {
         QString comments = from.comments();
@@ -1505,7 +1505,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
 
 #if !defined(Q_OS_ANDROID)
     if (fn.right(4) != u".xml")
-        fn = fn % u".xml";
+        fn = fn + u".xml";
 #endif
 
     const QByteArray xml = BrickLink::IO::toBrickLinkXML(lots).toUtf8();
@@ -1521,7 +1521,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
             throw Exception(tr("Failed to save data to file %1."));
 
     } catch (const Exception &e) {
-        UIHelpers::warning(e.error().arg(f.fileName()) % u"<br><br>" % f.errorString());
+        UIHelpers::warning(e.errorString().arg(f.fileName()) + u"<br><br>" + f.errorString());
     }
 }
 
@@ -1545,7 +1545,7 @@ QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
     if (!lots.isEmpty()) {
         auto warnings = model()->hasDifferenceUpdateWarnings(lots);
         if (!warnings.isEmpty()) {
-            QString s = u"<ul><li>" % warnings.join(u"</li><li>") % u"</li></ul>";
+            QString s = u"<ul><li>" + warnings.join(u"</li><li>") + u"</li></ul>";
             s = tr("There are problems: %1Do you really want to export this list?").arg(s);
 
             if (co_await UIHelpers::question(s) != UIHelpers::Yes)
@@ -1630,7 +1630,7 @@ QCoro::Task<Document *> Document::load(QString fileName)
         QMetaObject::invokeMethod(doc, &Document::requestActivation, Qt::QueuedConnection);
         co_return doc;
     } catch (const Exception &e) {
-        UIHelpers::warning(e.error());
+        UIHelpers::warning(e.errorString());
         co_return nullptr;
     }
 }
@@ -1647,7 +1647,7 @@ Document *Document::loadFromFile(const QString &fileName)
         RecentFiles::inst()->add(doc->filePath(), doc->fileName());
         return doc;
     } catch (const Exception &e) {
-        throw Exception(tr("Failed to load document %1: %2").arg(fileName).arg(e.error()));
+        throw Exception(tr("Failed to load document %1: %2").arg(fileName).arg(e.errorString()));
     }
 }
 
@@ -1681,7 +1681,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
         QString suffix = filters.at(0).right(5).left(4);
 
         if (fn.right(4) != suffix)
-            fn = fn % suffix;
+            fn = fn + suffix;
 #endif
         try {
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1690,7 +1690,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
             co_return true;
 
         } catch (const Exception &e) {
-            UIHelpers::warning(e.error());
+            UIHelpers::warning(e.errorString());
         }
     }
     co_return false;
@@ -2180,7 +2180,7 @@ void Document::setColumnLayoutFromId(const QString &layoutId)
         undoName = Config::inst()->columnLayoutName(layoutId);
     }
 
-    model()->undoStack()->beginMacro(tr("Set column layout:") % u' ' % undoName);
+    model()->undoStack()->beginMacro(tr("Set column layout:") + u' ' + undoName);
 
     switch (clc) {
     case ColumnLayoutCommand::BrickStoreDefault:
@@ -2408,7 +2408,7 @@ void AutosaveJob::run()
 {
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     QString fileName = QString::fromLatin1(autosaveTemplate).arg(m_uuid.toString());
-    QString newFileName = fileName % u".new";
+    QString newFileName = fileName + u".new";
 
     { // reading is cheaper than writing, so check first
         QFile f(temp.filePath(fileName));
@@ -2529,14 +2529,14 @@ int Document::processAutosaves(AutosaveAction action)
 
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);
-                        QString newFileName = fi.dir().filePath(restoredTag % u" " % fi.fileName());
+                        QString newFileName = fi.dir().filePath(restoredTag + u" " + fi.fileName());
                         try {
                             doc->saveToFile(newFileName);
                         } catch (const Exception &) {
                             // not really much we can do here
                         }
                     } else {
-                        doc->setTitle(restoredTag % u" " % savedTitle);
+                        doc->setTitle(restoredTag + u" " + savedTitle);
                     }
                     QMetaObject::invokeMethod(doc, &Document::requestActivation, Qt::QueuedConnection);
 

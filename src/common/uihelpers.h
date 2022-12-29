@@ -17,14 +17,13 @@
 
 #include <QObject>
 #include <QColor>
-#include <QStringBuilder>
 
 #include "qcoro/task.h"
 
 
 inline QString CMB_BOLD(const QString &str)
 {
-    return u"<b>" % str % u"</b>";
+    return u"<b>" + str + u"</b>";
 }
 
 class UIHelpers_ProgressDialogInterface : public QObject

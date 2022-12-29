@@ -21,7 +21,6 @@
 #include <QDesktopServices>
 #include <QStatusTipEvent>
 #include <QApplication>
-#include <QStringBuilder>
 #include <QStyledItemDelegate>
 #include <QItemSelectionModel>
 #include <QMenu>
@@ -255,7 +254,7 @@ void TaskInfoWidget::delayedSelectionUpdate()
 
         QString s = QString::fromLatin1("<h3>%1</h3>")
                 .arg(m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"))
-                % stat.asHtmlTable();
+                + stat.asHtmlTable();
 
         m_pic->setItemAndColor(nullptr);
         m_text->setText(s);

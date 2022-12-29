@@ -206,7 +206,7 @@ WantedLists::WantedLists(Core *core)
 
             try {
                 if (!jobCompleted) {
-                    throw Exception(message % u": " % job->errorString());
+                    throw Exception(message + u": " + job->errorString());
                 } else {
                     int invalidCount = parseWantedList(*it, *job->data());
                     if (invalidCount) {
@@ -217,7 +217,7 @@ WantedLists::WantedLists(Core *core)
                 }
             } catch (const Exception &e) {
                 success = false;
-                message = message % u": " % e.error();
+                message = message + u": " + e.errorString();
             }
             emit fetchLotsFinished(*it, success, message);
 
@@ -247,7 +247,7 @@ WantedLists::WantedLists(Core *core)
 
                 } catch (const Exception &e) {
                     success = false;
-                    message = message % u": " % e.error();
+                    message = message + u": " + e.errorString();
                 }
             }
             m_lastUpdated = QDateTime::currentDateTime();
@@ -406,7 +406,7 @@ QVariant WantedLists::data(const QModelIndex &index, int role) const
         case ItemLeftCount: return QLocale::system().toString(wantedList->itemLeftCount());
         case ItemCount:     return QLocale::system().toString(wantedList->itemCount());
         case LotCount:      return QLocale::system().toString(wantedList->lotCount());
-        case Filled:        return QLocale::system().toString(int(wantedList->filled() * 100)) + u'%';
+        case Filled:        return QLocale::system().toString(int(wantedList->filled() * 100)).append(u'%');
         }
     } else if (role == Qt::TextAlignmentRole) {
         return int(Qt::AlignVCenter) | Qt::AlignLeft;
@@ -419,7 +419,7 @@ QVariant WantedLists::data(const QModelIndex &index, int role) const
         case ItemLeftCount: return wantedList->itemLeftCount();
         case ItemCount:     return wantedList->itemCount();
         case LotCount:      return wantedList->lotCount();
-        case Filled:        return QString::number(int(wantedList->filled() * 100)) + u'%';
+        case Filled:        return QString::number(int(wantedList->filled() * 100)).append(u'%');
         }
     } else if (role == NameRole) {
         return wantedList->name();

@@ -55,7 +55,7 @@ public:
         setPalette(pal);
         auto *layout = new QHBoxLayout(this);
         layout->setContentsMargins(20, 10, 20, 10);
-        auto *label = new QLabel(u"<b>" % message % u"</b>");
+        auto *label = new QLabel(u"<b>" + message + u"</b>");
         label->setTextFormat(Qt::AutoText);
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label, 1);

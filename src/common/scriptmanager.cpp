@@ -21,7 +21,6 @@
 #include <QQmlEngine>
 #include <QQmlInfo>
 #include <QQmlExpression>
-#include <QStringBuilder>
 
 #include "utility/exception.h"
 #include "script.h"
@@ -38,7 +37,7 @@ public:
         : Exception(msg)
     {
         for (auto &error : errors)
-            m_message = m_message % u'\n' % error.toString();
+            m_errorString = m_errorString + u'\n' + error.toString();
     }
 };
 
@@ -85,18 +84,19 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
     if (indentFirstLine)
         str.append(indent);
 
-    str = str % QLatin1String(mo->className()) % u" {\n";
+    str = str + QLatin1String(mo->className()) + u" {\n";
 
-    if (!isGadget && mo->superClass()) {
-        str = str % nextIndent % u"superclass: "
-                % stringifyQObject(o, mo->superClass(), level + 1, false) % u'\n';
+    if (!isGadget && mo->superClass()
+            && ((mo->superClass() != &QObject::staticMetaObject) || !o->objectName().isEmpty())) {
+        str = str + nextIndent + u"superclass: "
+                + stringifyQObject(o, mo->superClass(), level + 1, false) + u'\n';
     }
 
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
         QMetaProperty p = mo->property(i);
         QVariant value = isGadget ? p.readOnGadget(o) : p.read(o);
-        str = str % nextIndent % stringifyType(p.metaType()) % u' '
-                % QLatin1String(p.name()) % u": " % stringify(value, level + 1, false) % u'\n';
+        str = str + nextIndent + stringifyType(p.metaType()) + u' '
+                + QLatin1String(p.name()) + u": " + stringify(value, level + 1, false) + u'\n';
     }
 /*
     for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
@@ -109,13 +109,13 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         const auto pnames = m.parameterNames();
         QStringList params;
         for (int pi = 0; pi < m.parameterCount(); ++pi)
-            params.append(stringifyType(m.parameterMetaType(pi)) % u' ' % QLatin1String(pnames.at(pi)));
+            params.append(stringifyType(m.parameterMetaType(pi)) + u' ' + QLatin1String(pnames.at(pi)));
 
-        str = str % nextIndent % stringifyType(m.returnMetaType()) % u' ' % QLatin1String(m.name())
-                % u'(' % params.join(u", ") % u")\n";
+        str = str + nextIndent + stringifyType(m.returnMetaType()) + u' ' + QLatin1String(m.name())
+                + u'(' + params.join(u", ") + u")\n";
     }
 */
-    str = str % indent % u'}';
+    str = str + indent + u'}';
     return str;
 }
 
@@ -143,12 +143,12 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
             str = str.append(u"[\n");
 
             while (it.hasNext()) {
-                str = str % stringify(it.next(), level + 1, true);
+                str = str + stringify(it.next(), level + 1, true);
                 if (it.hasNext())
                     str.append(u',');
                 str.append(u'\n');
             }
-            str = str % indent % u']';
+            str = str + indent + u']';
         }
         break;
     }
@@ -161,18 +161,18 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
 
             while (it.hasNext()) {
                 it.next();
-                str = str % nextIndent % it.key() % u": " % stringify(it.value(), level + 1, false);
+                str = str + nextIndent + it.key() + u": " + stringify(it.value(), level + 1, false);
                 if (it.hasNext())
                     str.append(u',');
                 str.append(u'\n');
             }
-            str = str % indent % u'}';
+            str = str + indent + u'}';
         }
         break;
     }
     case QMetaType::QString: {
         if (level > 0)
-            str = str % u'"' % value.toString().remove(u"\0"_qs) % u'"';
+            str = str + u'"' + value.toString().remove(u"\0"_qs) + u'"';
         else
             str = value.toString().remove(u"\0"_qs);
         break;
@@ -180,7 +180,7 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
     case QMetaType::QSize:
     case QMetaType::QSizeF: {
         const auto s = value.toSizeF();
-        str = QString::number(s.width()) % u" x " % QString::number(s.height());
+        str = QString::number(s.width()) + u" x " + QString::number(s.height());
         break;
     }
     case QMetaType::QDateTime: {
@@ -269,7 +269,7 @@ bool ScriptManager::reload()
         for (const QFileInfo &fi : fis) {
             QString filePath = fi.absoluteFilePath();
             if (filePath.startsWith(u':'))
-                filePath = u"qrc://" % filePath.mid(1);
+                filePath = u"qrc://" + filePath.mid(1);
 
             try {
                 loadScript(filePath);
@@ -330,7 +330,7 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
     QQmlComponent component(m_engine);
     component.setData(script, QUrl());
     if (component.status() == QQmlComponent::Error)
-        return { u"JS compile error: "_qs % component.errorString(), false };
+        return { u"JS compile error: "_qs + component.errorString(), false };
     m_rootObject = component.create();
 
     QQmlExpression e(m_engine->rootContext(), m_rootObject, s);

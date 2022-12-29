@@ -12,7 +12,6 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QLocale>
-#include <QStringBuilder>
 #include <QStyle>
 #include <QBoxLayout>
 #include <QApplication>
@@ -517,7 +516,7 @@ void ViewPane::updateCurrencyRates()
 
 void ViewPane::documentCurrencyChanged(const QString &ccode)
 {
-    m_currency->setText(ccode % u"  ");
+    m_currency->setText(ccode + u"  ");
     // the menu might still be open right now, so we need to delay deleting the actions
     QMetaObject::invokeMethod(this, &ViewPane::updateCurrencyRates, Qt::QueuedConnection);
 }
@@ -554,7 +553,7 @@ void ViewPane::updateStatistics()
     bool b = (stat.differences() > 0);
     if (b && Config::inst()->showDifferenceIndicators()) {
         auto oldShortcut = m_differences->shortcut();
-        m_differences->setText(u' ' % loc.toString(stat.differences()));
+        m_differences->setText(u' ' + loc.toString(stat.differences()));
         m_differences->setShortcut(oldShortcut);
     }
     m_differences->setVisible(b);
@@ -563,14 +562,14 @@ void ViewPane::updateStatistics()
     b = (stat.errors() > 0);
     if (b && Config::inst()->showInputErrors()) {
         auto oldShortcut = m_errors->shortcut();
-        m_errors->setText(u' ' % loc.toString(stat.errors()));
+        m_errors->setText(u' ' + loc.toString(stat.errors()));
         m_errors->setShortcut(oldShortcut);
     }
     m_errors->setVisible(b);
     m_errorsSeparator->setVisible(b);
 
-    QString cntstr = tr("Items") % u": " % loc.toString(stat.items())
-            % u" (" % loc.toString(stat.lots()) % u")";
+    QString cntstr = tr("Items") + u": " + loc.toString(stat.items())
+            + u" (" + loc.toString(stat.lots()) + u")";
     m_count->setText(cntstr);
 
     QString wgtstr;
@@ -593,7 +592,7 @@ void ViewPane::updateStatistics()
     b = !qFuzzyIsNull(stat.cost());
     if (b) {
         int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
-        QString profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
+        QString profitstr = (percent > 0 ? u"(+" : u"(") + loc.toString(percent) + u" %)";
         m_profit->setText(profitstr);
     }
     m_profit->setVisible(/*b*/ false);

@@ -13,7 +13,6 @@
 */
 #include <QGuiApplication>
 #include <QClipboard>
-#include <QStringBuilder>
 #include <QLabel>
 #include <QToolButton>
 #include "utility/utility.h"
@@ -53,10 +52,10 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     const QString boff(u"</b>"_qs);
 
     w_info->setText(tr("Order %1, %2 %3 on %4").arg(
-                        bon % order->id() % boff,
+                        bon + order->id() + boff,
                         order->type() == BrickLink::OrderType::Received ? tr("received from")
                                                                         : tr("placed at"),
-                        bon % order->otherParty() % boff,
+                        bon + order->otherParty() + boff,
                         loc.toString(order->date())));
     w_status->setText(order->statusAsString());
     w_lastUpdated->setText(loc.toString(order->lastUpdated()));
@@ -81,13 +80,13 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     setup(w_address8, w_address8Copy, adr.value(7), adrSize >= 8);
     setup(w_phone, w_phoneCopy, order->phone(), !order->phone().isEmpty(), w_phoneLabel);
 
-    w_countryFlag->setPixmap(QPixmap(u":/assets/flags/" % order->countryCode()));
+    w_countryFlag->setPixmap(QPixmap(u":/assets/flags/" + order->countryCode()));
 
     w_paymentType->setText(order->paymentType());
     if (!order->paymentStatus().isEmpty() && !order->paymentLastUpdated().isValid()) {
-        w_paymentStatus->setText(order->paymentStatus() % u" ("
-                                 % loc.toString(order->paymentLastUpdated(), QLocale::ShortFormat)
-                                 % u')');
+        w_paymentStatus->setText(order->paymentStatus() + u" ("
+                                 + loc.toString(order->paymentLastUpdated(), QLocale::ShortFormat)
+                                 + u')');
     } else {
         w_paymentStatus->hide();
         w_paymentStatusLabel->hide();
@@ -96,8 +95,8 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     if (order->currencyCode() == order->paymentCurrencyCode()) {
         w_currencyCode->setText(order->currencyCode());
     } else {
-        w_currencyCode->setText(order->currencyCode() % u", " % tr("Payment in") % u' '
-                                % order->paymentCurrencyCode());
+        w_currencyCode->setText(order->currencyCode() + u", " + tr("Payment in") + u' '
+                                + order->paymentCurrencyCode());
     }
 
     bool vatFromSeller = !qFuzzyIsNull(order->vatChargeSeller());
@@ -113,9 +112,9 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     w_vatInfoLabel->setVisible(vatFromSeller);
     w_vatSeparator->setVisible(vatFromSeller);
     w_vatSellerLabel->setText(w_vatSellerLabel->text()
-                              .arg(loc.toString(vatPercent, 'f', QLocale::FloatingPointShortest) % u'%'));
+                              .arg(loc.toString(vatPercent, 'f', QLocale::FloatingPointShortest) + u'%'));
     w_vatBLLabel->setText(w_vatBLLabel->text()
-                          .arg(loc.toString(vatPercent, 'f', QLocale::FloatingPointShortest) % u'%'));
+                          .arg(loc.toString(vatPercent, 'f', QLocale::FloatingPointShortest) + u'%'));
 
     setup(w_shipping,        w_shippingCopy,        Currency::toDisplayString(order->shipping(), { }, 2),
           !qFuzzyIsNull(order->shipping()),         w_shippingLabel);

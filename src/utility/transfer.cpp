@@ -11,7 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QStringBuilder>
 #include <QThread>
 #include <QFile>
 #include <QLocale>
@@ -133,7 +132,7 @@ Transfer::Transfer(QObject *parent)
     : QObject(parent)
 {
     if (s_default_user_agent.isEmpty())
-        s_default_user_agent = qApp->applicationName() % u'/' % qApp->applicationVersion();
+        s_default_user_agent = qApp->applicationName() + u'/' + qApp->applicationVersion();
     m_user_agent = s_default_user_agent;
 
     m_retriever = new TransferRetriever(this);

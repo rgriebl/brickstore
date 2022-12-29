@@ -24,7 +24,6 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -130,7 +129,7 @@ int RebuildDatabase::exec()
                 this, &RebuildDatabase::downloadJobFinished);
 
         if (!httpReply.isEmpty())
-            return error(u"Failed to log into BrickLink:\n"_qs % QLatin1String(httpReply));
+            return error(u"Failed to log into BrickLink:\n"_qs + QLatin1String(httpReply));
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -363,12 +362,12 @@ bool RebuildDatabase::download()
     m_downloads_failed = 0;
 
     { // workaround for U type
-        QFile uif(path % u"items_U.txt"_qs);
+        QFile uif(path + u"items_U.txt"_qs);
         uif.open(QIODevice::WriteOnly);
     }
 
     for (tptr = table; tptr->m_url; tptr++) {
-        auto *f = new QSaveFile(path % QLatin1String(tptr->m_file));
+        auto *f = new QSaveFile(path + QLatin1String(tptr->m_file));
 
         if (!f->open(QIODevice::WriteOnly)) {
             m_error = QString::fromLatin1("failed to write %1: %2")
@@ -446,9 +445,9 @@ bool RebuildDatabase::downloadInventories(const std::vector<BrickLink::Item> &in
 
             if (!f || !f->isOpen()) {
                 if (f)
-                    m_error = u"failed to write "_qs % f->fileName() % u": " % f->errorString();
+                    m_error = u"failed to write "_qs + f->fileName() + u": " + f->errorString();
                 else
-                    m_error = u"could not get a file handle to write inventory for "_qs % QLatin1String(item->id());
+                    m_error = u"could not get a file handle to write inventory for "_qs + QLatin1String(item->id());
                 delete f;
                 failed = true;
                 break;

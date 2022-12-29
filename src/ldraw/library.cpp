@@ -19,9 +19,7 @@
 #include <QMap>
 #include <QDir>
 #include <QDirIterator>
-#include <QStringBuilder>
 #include <QDebug>
-#include <QStringBuilder>
 #include <QtConcurrent>
 
 #if defined(Q_OS_WINDOWS)
@@ -122,17 +120,17 @@ Library::Library(const QString &updateUrl, QObject *parent)
                 // no need to emit updateFinished() here, because we didn't emit updateStarted()
                 setUpdateStatus(UpdateStatus::Ok);
             } else if (j->isFailed()) {
-                throw Exception(tr("download failed") % u": " % j->errorString());
+                throw Exception(tr("download failed") + u": " + j->errorString());
             } else {
                 QString etag = j->lastETag();
-                QFile etagf(file->fileName() % u".etag");
+                QFile etagf(file->fileName() + u".etag");
 
                 if (m_zip)
                     m_zip->close();
                 if (!file->commit()) {
                     QString error = file->errorString(); // file is dead after the co_await
                     co_await setPath(m_path, true); // at least try to reload the old library
-                    throw Exception(tr("saving failed") % u": " % error);
+                    throw Exception(tr("saving failed") + u": " + error);
                 }
                 if (!co_await setPath(file->fileName(), true))
                     throw Exception(tr("reloading failed - please restart the application."));
@@ -150,7 +148,7 @@ Library::Library(const QString &updateUrl, QObject *parent)
 
         } catch (const Exception &e) {
             emitUpdateStartedIfNecessary();
-            emit updateFinished(false, tr("Could not load the new parts library") % u": \n\n" % e.error());
+            emit updateFinished(false, tr("Could not load the new parts library") + u": \n\n" + e.errorString());
             setUpdateStatus(UpdateStatus::UpdateFailed);
         }
         emit libraryReset();
@@ -171,7 +169,7 @@ Library::~Library()
 
 QFuture<Part *> Library::partFromId(const QByteArray &id)
 {
-    QString filename = QLatin1String(id) % u".dat";
+    QString filename = QLatin1String(id) + u".dat";
     return partFromFile(filename);
 }
 
@@ -305,7 +303,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 
         for (auto subdir : subdirs) {
             if (m_zip) {
-                m_searchpath << QString(u"!ZIP!ldraw/" % QLatin1String(subdir));
+                m_searchpath << QString(u"!ZIP!ldraw/" + QLatin1String(subdir));
             } else {
                 QDir sdir(m_path);
                 QString s = QLatin1String(subdir);
@@ -319,7 +317,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 
         m_etag.clear();
         if (m_zip) {
-            QFile f(m_path % u".etag");
+            QFile f(m_path + u".etag");
             if (f.open(QIODevice::ReadOnly))
                 m_etag = QString::fromUtf8(f.readAll());
         }
@@ -364,7 +362,7 @@ bool Library::startUpdate(bool force)
 
     QScopedValueRollback locker(m_locked, true);
 
-    QString remotefile = m_updateUrl % u"complete.zip";
+    QString remotefile = m_updateUrl + u"complete.zip";
     QString localfile = m_path;
 
     if (!QFile::exists(localfile))
@@ -396,11 +394,11 @@ QByteArray Library::readLDrawFile(const QString &filename)
 {
     QByteArray data;
     if (m_zip) {
-        QString zipFilename = u"ldraw/" % filename;
+        QString zipFilename = u"ldraw/" + filename;
         if (m_zip->contains(zipFilename))
             data = m_zip->readFile(zipFilename);
     } else {
-        QFile f(path() % u'/' % filename);
+        QFile f(path() + u'/' + filename);
 
         if (!f.open(QIODevice::ReadOnly))
             throw Exception(&f, "Failed to read file");
@@ -452,23 +450,23 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
         if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
             searchpath.prepend(parentdir);
 
-        for (const QString &sp : qAsConst(searchpath)) {
+        for (const QString &sp : std::as_const(searchpath)) {
 
             if (sp.startsWith(u"!ZIP!")) {
                 filename = filename.toLower();
-                QString testname = sp.mid(5) % u'/' % filename;
+                QString testname = sp.mid(5) + u'/' + filename;
                 if (m_zip->contains(testname)) {
                     QFileInfo fi(filename);
                     parentdir = sp;
                     if (fi.path() != u".")
-                        parentdir = parentdir % u'/' % fi.path();
+                        parentdir = parentdir + u'/' + fi.path();
                     filename = testname;
                     inZip = true;
                     found = true;
                     break;
                 }
             } else {
-                QString testname = sp % u'/' % filename;
+                QString testname = sp + u'/' + filename;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_IOS)
                 if (!QFile::exists(testname))
                     testname = testname.toLower();
@@ -505,7 +503,7 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
             try {
                 data = m_zip->readFile(filename);
             } catch (const Exception &e) {
-                qCWarning(LogLDraw) << "Failed to read from LDraw ZIP:" << e.error();
+                qCWarning(LogLDraw) << "Failed to read from LDraw ZIP:" << e.errorString();
             }
         } else {
             QFile f(filename);
@@ -547,7 +545,7 @@ bool Library::checkLDrawDir(const QString &ldir)
             if (dir.exists(u"stud.dat"_qs) || dir.exists(u"STUD.DAT"_qs)) {
                 if (dir.cd(u"../parts"_qs) || dir.cd(u"../PARTS"_qs)) {
                     if (dir.exists(u"3001.dat"_qs) || dir.exists(u"3001.DAT"_qs)) {
-                        QFile f(ldir % u"/LDConfig.ldr");
+                        QFile f(ldir + u"/LDConfig.ldr");
                         if (f.open(QIODevice::ReadOnly) && f.size()) {
                             ok = true;
                         }
