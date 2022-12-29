@@ -720,7 +720,7 @@ void View::contextMenu(const QPoint &pos)
             actionNames = { "edit_lotid_copy", "edit_lotid_clear" };
             break;
         }
-        for (const auto &actionName : qAsConst(actionNames)) {
+        for (const auto &actionName : std::as_const(actionNames)) {
             if (actionName == "-")
                 m_contextMenu->addSeparator();
             else
@@ -732,7 +732,7 @@ void View::contextMenu(const QPoint &pos)
         m_contextMenu->addSeparator();
 
     const auto actions = MainWindow::inst()->contextMenuActions();
-    for (auto action : qAsConst(actions)) {
+    for (auto action : std::as_const(actions)) {
         if (action)
             m_contextMenu->addAction(action);
         else

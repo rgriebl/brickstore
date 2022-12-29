@@ -271,7 +271,7 @@ QCoro::Task<void> RenderController::updateGeometries()
             geos.append(geo);
         }
 
-        for (auto *geo : qAsConst(geos)) {
+        for (auto *geo : std::as_const(geos)) {
             // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
             const auto geoCenter = geo->center();
             const auto geoRadius = geo->radius();

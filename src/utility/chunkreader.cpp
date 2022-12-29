@@ -83,7 +83,7 @@ bool ChunkReader::startChunk()
         return false;
 
     if (!m_chunks.isEmpty()) {
-        const read_chunk_info &parent = qAsConst(m_chunks).top();
+        const read_chunk_info &parent = std::as_const(m_chunks).top();
 
         if (m_file->pos() >= (parent.startpos + parent.size))
             return false;
@@ -105,7 +105,7 @@ bool ChunkReader::skipChunk()
     if (!m_file || m_chunks.isEmpty() || (m_stream.status() != QDataStream::Ok))
         return false;
 
-    const read_chunk_info &ci = qAsConst(m_chunks).top();
+    const read_chunk_info &ci = std::as_const(m_chunks).top();
 
     m_stream.skipRawData(int(ci.size));
     return (m_stream.status() == QDataStream::Ok);

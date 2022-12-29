@@ -796,7 +796,7 @@ void ColumnLayoutsModel::update()
     for (const auto &layoutId : userLayoutIds)
         orderedUserLayoutIds.insert(Config::inst()->columnLayoutOrder(layoutId), layoutId);
 
-    for (const auto &layoutId : qAsConst(orderedUserLayoutIds)) {
+    for (const auto &layoutId : std::as_const(orderedUserLayoutIds)) {
         auto name = Config::inst()->columnLayoutName(layoutId);
         m_idAndName.append({ layoutId, name });
     }

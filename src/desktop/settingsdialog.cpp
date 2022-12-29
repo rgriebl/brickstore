@@ -87,7 +87,7 @@ public:
         }
 
         if (options.testFlag(AddSeparators)) {
-            for (const QAction *a : qAsConst(m_separatorActions))
+            for (const QAction *a : std::as_const(m_separatorActions))
                 m_actions.insert(tr("Separators"), a->objectName());
         }
         if (!options.testFlag(AddSubMenus)) {
@@ -552,7 +552,7 @@ public:
                 return true; // no change
 
             if (!newShortcuts.isEmpty()) {
-                for (const Entry &e : qAsConst(m_entries)) {
+                for (const Entry &e : std::as_const(m_entries)) {
                     if (e.keys == newShortcuts)
                         return false; // duplicate
                 }

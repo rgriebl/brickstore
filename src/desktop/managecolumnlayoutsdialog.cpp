@@ -58,7 +58,7 @@ ManageColumnLayoutsDialog::ManageColumnLayoutsDialog(QWidget *parent)
     for (const auto &id : ids)
         pos.insert(Config::inst()->columnLayoutOrder(id), id);
 
-    for (auto &id : qAsConst(pos)) {
+    for (auto &id : std::as_const(pos)) {
         auto cli = new ColumnLayoutItem();
 
         cli->m_id = id;

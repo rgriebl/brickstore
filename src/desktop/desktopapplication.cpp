@@ -272,7 +272,7 @@ bool DesktopApplication::notifyOtherInstance()
                 client->write("X", 1);
                 client->close();
 
-                for (const auto &f : qAsConst(files))
+                for (const auto &f : std::as_const(files))
                     QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
 
                 raise();

@@ -302,7 +302,7 @@ static QString toHtml(const QVector<QPair<T, QString>> &tokens, const QString &b
 
     QString res;
     bool first_key = true;
-    for (const T &key : qAsConst(keys)) {
+    for (const T &key : std::as_const(keys)) {
         if (first_key)
             first_key = false;
         else

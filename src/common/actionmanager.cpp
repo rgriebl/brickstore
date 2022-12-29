@@ -183,7 +183,7 @@ void ActionManager::updateActions(int updateReason)
         int stockroom  = firstLot ? int(firstLot->stockroom())    : -1;
 
         if (firstLot) {
-            for (const Lot *item : qAsConst(m_selection)) {
+            for (const Lot *item : std::as_const(m_selection)) {
                 if ((status >= 0) && (status != int(item->status())))
                     status = -1;
                 if ((condition >= 0) && (condition != int(item->condition())))
@@ -252,7 +252,7 @@ void ActionManager::updateActions(int updateReason)
         }
 
         if (a.m_needs & NeedItemMask) {
-            for (const Lot *item : qAsConst(m_selection)) {
+            for (const Lot *item : std::as_const(m_selection)) {
                 if (a.m_needs & NeedLotId)
                     b = b && (item->lotId() != 0);
                 if (a.m_needs & NeedInventory)
@@ -701,7 +701,7 @@ QObject *ActionManager::connectActionTable(const ActionTable &actionTable)
 {
     QObject *contextObject = new QObject(this);
 
-    for (auto &at : qAsConst(actionTable)) {
+    for (auto &at : std::as_const(actionTable)) {
         if (QAction *a = qAction(at.first))
             QObject::connect(a, &QAction::triggered, contextObject, at.second);
     }

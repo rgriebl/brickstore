@@ -587,7 +587,7 @@ void Application::openQueuedDocuments()
 {
     m_canEmitOpenDocuments = true;
 
-    for (const auto &f : qAsConst(m_queuedDocuments))
+    for (const auto &f : std::as_const(m_queuedDocuments))
         QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
     m_queuedDocuments.clear();
 }

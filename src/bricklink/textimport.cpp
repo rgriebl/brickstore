@@ -423,7 +423,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
 
         });
 
-        for (const auto &kc : qAsConst(knownColors))
+        for (const auto &kc : std::as_const(knownColors))
             addToKnownColors(kc.first, kc.second);
 
         uint itemIndex = uint(item - items().data());
@@ -433,7 +433,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
         //         alternatives have the 'extra' flag set.
         for (Item::ConsistsOf &co : inventory) {
             if (co.m_isalt && !co.m_extra) {
-                for (const Item::ConsistsOf &mainCo : qAsConst(inventory)) {
+                for (const Item::ConsistsOf &mainCo : std::as_const(inventory)) {
                     if ((mainCo.m_altid == co.m_altid) && !mainCo.m_isalt) {
                         co.m_extra = mainCo.m_extra;
                         break;
@@ -455,7 +455,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
                 return co1.m_itemIndex < co2.m_itemIndex;
         });
 
-        for (const Item::ConsistsOf &co : qAsConst(inventory)) {
+        for (const Item::ConsistsOf &co : std::as_const(inventory)) {
             if (!co.m_extra) {
                 auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];
                 vec.append(qMakePair(co.quantity(), itemIndex));

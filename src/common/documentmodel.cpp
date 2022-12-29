@@ -179,7 +179,7 @@ AddRemoveCmd::~AddRemoveCmd()
 {
     if (m_type == Add) {
         if (m_model) {
-            for (const auto lot : qAsConst(m_lots))
+            for (const auto lot : std::as_const(m_lots))
                 m_model->m_differenceBase.remove(lot);
         }
         qDeleteAll(m_lots);
@@ -1222,7 +1222,7 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     QModelIndexList before = persistentIndexList();
 
-    for (Lot *lot : qAsConst(lots)) {
+    for (Lot *lot : std::as_const(lots)) {
         if (!isAppend) {
             m_lots.insert(*pos++, lot);
             m_sortedLots.insert(*sortedPos++, lot);
@@ -1494,7 +1494,7 @@ void DocumentModel::resetDifferenceModeDirect(QHash<const Lot *, Lot> &differenc
 {
     std::swap(m_differenceBase, differenceBase);
 
-    for (const auto *lot : qAsConst(m_lots))
+    for (const auto *lot : std::as_const(m_lots))
         updateLotFlags(lot);
 
     emitDataChanged();
@@ -2093,7 +2093,7 @@ void DocumentModel::initializeColumns()
               auto model = new BrickLink::ColorModel(nullptr);
               model->sort(0, Qt::AscendingOrder);
               QSet<const BrickLink::Color *> colors;
-              for (const auto &lot : qAsConst(m_lots))
+              for (const auto &lot : std::as_const(m_lots))
                   colors.insert(lot->color());
               model->setColorListFilter(QVector<const BrickLink::Color *>(colors.cbegin(), colors.cend()));
               return model;
@@ -2307,7 +2307,7 @@ void DocumentModel::pictureUpdated(BrickLink::Picture *pic)
     if (!pic || !pic->item())
         return;
 
-    for (const auto *lot : qAsConst(m_lots)) {
+    for (const auto *lot : std::as_const(m_lots)) {
         if ((pic->item() == lot->item()) && (pic->color() == lot->color())) {
             QModelIndex idx = index(const_cast<Lot *>(lot), Picture);
             emitDataChanged(idx, idx);

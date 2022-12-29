@@ -257,7 +257,7 @@ bool ScriptManager::reload()
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + u"/extensions"_qs);
 
-    for (const QString &path : qAsConst(spath)) {
+    for (const QString &path : std::as_const(spath)) {
         QDir dir(path);
         if (!path.startsWith(u':')) {
             qCInfo(LogScript) << "Loading scripts from directory:" << path;

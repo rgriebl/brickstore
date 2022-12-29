@@ -630,7 +630,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     QString str = d->m_pg ? QStringLiteral("-") : QString();
     auto crate = Currency::inst()->rate(d->m_ccode);
 
-    for (const cell &c : qAsConst(d->m_cells)) {
+    for (const cell &c : std::as_const(d->m_cells)) {
         if ((e->rect() & c).isEmpty())
             continue;
 
@@ -779,7 +779,7 @@ void PriceGuideWidget::changeEvent(QEvent *e)
 void PriceGuideWidget::updateNonStaticCells() const
 {
     QRegion r;
-    for (const auto &c : qAsConst(d->m_cells)) {
+    for (const auto &c : std::as_const(d->m_cells)) {
         switch (c.m_type) {
         case cell::Quantity:
         case cell::Price   :

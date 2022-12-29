@@ -375,7 +375,7 @@ void MainWindow::setupScripts()
             this, [this]() {
         auto actions = m_extrasMenu->actions();
         bool deleteRest = false;
-        for (QAction *a : qAsConst(actions)) {
+        for (QAction *a : std::as_const(actions)) {
             if (a->objectName() == u"scripts-start")
                 deleteRest = true;
             else if (a->objectName() == u"scripts-end")
@@ -428,7 +428,7 @@ MainWindow::~MainWindow()
     // we have to break a connection loop here to prevent a crash: if we didn't do this, then
     // the ViewPane's d'tors would be called AFTER "this" is not a MainWindow anymore, but the
     // deletedViewPane() callback wants to update members of "this".
-    for (const auto *vp : qAsConst(m_allViewPanes))
+    for (const auto *vp : std::as_const(m_allViewPanes))
         vp->disconnect();
 }
 
@@ -524,7 +524,7 @@ ViewPane *MainWindow::createViewPane(Document *activeDocument, QWidget *window)
 
             if (!newActive) {
                 // we need to find another pane to transfer the active state
-                for (const auto &check : qAsConst(m_allViewPanes)) {
+                for (const auto &check : std::as_const(m_allViewPanes)) {
                     if (check != vp) {
                         newActive = check;
                         break;
@@ -590,7 +590,7 @@ void MainWindow::setupMenuBar()
     connect(viewDocksMenu, &QMenu::aboutToShow,
             this, [this, viewDocksMenu]() {
         viewDocksMenu->clear();
-        for (QDockWidget *dock : qAsConst(m_dock_widgets))
+        for (QDockWidget *dock : std::as_const(m_dock_widgets))
             viewDocksMenu->addAction(dock->toggleViewAction());
     });
 
@@ -830,7 +830,7 @@ bool MainWindow::setupToolBar()
     actionNames = QStringList { u"go_home"_qs, u"-"_qs } + actionNames
             + QStringList { u"<>"_qs, u"widget_progress"_qs, u"|"_qs };
 
-    for (const QString &an : qAsConst(actionNames)) {
+    for (const QString &an : std::as_const(actionNames)) {
         if (an == u"-") {
             m_toolbar->addSeparator()->setObjectName(an);
         } else if (an == u"|") {
@@ -953,7 +953,7 @@ void MainWindow::createActions()
                   if (doc->model()->isModified()) {
                       if (doc->filePath().isEmpty()) {
                           QVector<ViewPane *> possibleVPs;
-                          for (const auto &vp : qAsConst(m_allViewPanes)) {
+                          for (const auto &vp : std::as_const(m_allViewPanes)) {
                               if (vp->viewForDocument(doc))
                                   possibleVPs << vp;
                           }

@@ -140,7 +140,7 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
         const auto anyToken = m_parser->fieldTokens().constFirst();
         m_fields->insertItem(m_fields->count(), anyToken.second, anyToken.first);
 
-        for (int col : qAsConst(m_visualColumnOrder)) {
+        for (int col : std::as_const(m_visualColumnOrder)) {
             if (m_doc->model()->headerData(col, Qt::Horizontal, DocumentModel::HeaderFilterableRole).toBool()) {
                 auto colName = m_doc->model()->headerData(col, Qt::Horizontal).toString();
                 m_fields->insertItem(m_fields->count(), colName, col);

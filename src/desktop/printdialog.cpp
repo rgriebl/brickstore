@@ -246,7 +246,7 @@ void PrintDialog::updatePrinter(int idx)
     QSignalBlocker blocker(this);
 
     w_paperSize->clear();
-    for (const auto &ps : qAsConst(pageSizes))
+    for (const auto &ps : std::as_const(pageSizes))
         w_paperSize->addItem(ps.name(), QVariant::fromValue(ps));
     w_paperSize->setCurrentIndex(w_paperSize->findData(QVariant::fromValue(defaultPageSize)));
 

@@ -1221,7 +1221,7 @@ void Document::spreadCost(double spreadAmount, SpreadCost how)
 {
     double total = 0;
 
-    for (const Lot *lot : qAsConst(m_selectedLots)) {
+    for (const Lot *lot : std::as_const(m_selectedLots)) {
         total += (how == SpreadCost::ByPrice) ? (lot->price() * lot->quantity())
                                               : (lot->totalWeight());
     }
@@ -1284,7 +1284,7 @@ void Document::divideQuantity(int divisor)
 
     int lotsNotDivisible = 0;
 
-    for (const Lot *item : qAsConst(m_selectedLots)) {
+    for (const Lot *item : std::as_const(m_selectedLots)) {
         if (qAbs(item->quantity()) % divisor)
             ++lotsNotDivisible;
     }
@@ -1309,7 +1309,7 @@ void Document::multiplyQuantity(int factor)
     int lotsTooLarge = 0;
     int maxQty = DocumentModel::maxQuantity / qAbs(factor);
 
-    for (const Lot *item : qAsConst(m_selectedLots)) {
+    for (const Lot *item : std::as_const(m_selectedLots)) {
         if (qAbs(item->quantity()) > maxQty)
             lotsTooLarge++;
     }
@@ -1807,7 +1807,7 @@ void Document::updateSelection()
     //    auto sel = m_selectionModel->selectedRows();
     //    std::sort(sel.begin(), sel.end(), [](const auto &idx1, const auto &idx2) {
     //        return idx1.row() < idx2.row(); });
-    //    for (const QModelIndex &idx : qAsConst(sel))
+    //    for (const QModelIndex &idx : std::as_const(sel))
     //        newSelectedLots.append(m_model->lot(idx));
 
     QVector<int> rows;
@@ -1818,7 +1818,7 @@ void Document::updateSelection()
     }
     std::sort(rows.begin(), rows.end());
 
-    for (int row : qAsConst(rows))
+    for (int row : std::as_const(rows))
         newSelectedLots.append(m_model->filteredLots().at(row));
 
     if (newSelectedLots != m_selectedLots) {

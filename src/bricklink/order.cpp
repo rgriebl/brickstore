@@ -681,7 +681,7 @@ Orders::Orders(Core *core)
             m_jobProgress[job] = qMakePair(progress, total);
 
             int overallProgress = 0, overallTotal = 0;
-            for (auto pair : qAsConst(m_jobProgress)) {
+            for (auto pair : std::as_const(m_jobProgress)) {
                 overallProgress += pair.first;
                 overallTotal += pair.second;
             }
@@ -774,7 +774,7 @@ Orders::Orders(Core *core)
             if (m_jobs.isEmpty()) {
                 bool overallSuccess = true;
                 QString overallMessage;
-                for (const auto &pair : qAsConst(m_jobResult)) {
+                for (const auto &pair : std::as_const(m_jobResult)) {
                     overallSuccess = overallSuccess && pair.first;
                     if (overallMessage.isEmpty()) // only show the first error message
                         overallMessage = pair.second;
@@ -948,13 +948,13 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
     } catch (const Exception &e) {
         qDeleteAll(result.keyBegin(), result.keyEnd());
         throw Exception("XML parse error at line %1, column %2: %3")
-                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.error());
+                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.errorString());
     }
 }
 
 void Orders::updateOrder(std::unique_ptr<Order> newOrder)
 {
-    for (Order *order : qAsConst(m_orders)) {
+    for (Order *order : std::as_const(m_orders)) {
         if (order->id() != newOrder->id())
             continue;
 
@@ -1042,7 +1042,7 @@ void Orders::emitDataChanged(int row, int col)
 void Orders::startUpdateAddress(Order *order)
 {
     // is there already a job scheduled for this order's address?
-    for (const auto *job : qAsConst(m_addressJobs)) {
+    for (const auto *job : std::as_const(m_addressJobs)) {
         if (job->userData("address").toString() == order->id())
             return;
     }

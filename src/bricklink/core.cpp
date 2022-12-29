@@ -463,7 +463,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             if (!error.isEmpty())
                 emit authenticationFailed(m_credentials.first, error);
 
-            for (TransferJob *authJob : qAsConst(m_jobsWaitingForAuthentication))
+            for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication))
                 m_authenticatedTransfer->retrieve(authJob);
             m_jobsWaitingForAuthentication.clear();
 

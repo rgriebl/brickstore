@@ -109,7 +109,7 @@ LotList SelectDocument::lots() const
     }
 
     LotList list;
-    for (const Lot *lot : qAsConst(srcList))
+    for (const Lot *lot : std::as_const(srcList))
         list << new Lot(*lot);
     return list;
 }

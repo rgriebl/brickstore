@@ -277,7 +277,7 @@ void TransferRetriever::abortJob(TransferJob *j)
 
 void TransferRetriever::abortAllJobs()
 {
-    for (auto &j : qAsConst(m_jobs)) {
+    for (auto &j : std::as_const(m_jobs)) {
         j->abortInternal();
         emit finished(j);
     }
@@ -289,7 +289,7 @@ void TransferRetriever::abortAllJobs()
 
     m_jobs.clear();
 
-    for (auto &j : qAsConst(m_currentJobs))
+    for (auto &j : std::as_const(m_currentJobs))
         j->abortInternal();
 }
 

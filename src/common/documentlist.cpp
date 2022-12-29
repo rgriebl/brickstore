@@ -110,7 +110,7 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
                     QString minBase = base.section(u'/', -1 - i, -1);
                     bool noClash = true;
 
-                    for (const auto &clash : qAsConst(clashes)) {
+                    for (const auto &clash : std::as_const(clashes)) {
                         if (clash.section(u'/', -1 - i, -1) == minBase) {
                             noClash = false;
                             break;

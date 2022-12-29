@@ -546,7 +546,7 @@ void AddItemDialog::setTierType(int type)
 {
     (type == 0 ? w_radio_percent : w_radio_currency)->setChecked(true);
 
-    for (auto *tp : qAsConst(w_tier_price)) {
+    for (auto *tp : std::as_const(w_tier_price)) {
         if (type == 0) {
             tp->setRange(0, 99);
             tp->setDecimals(0);

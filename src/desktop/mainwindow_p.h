@@ -170,7 +170,7 @@ public:
                 for (const auto &id : ids)
                     pos.insert(Config::inst()->columnLayoutOrder(id), id);
 
-                for (const auto &id : qAsConst(pos))
+                for (const auto &id : std::as_const(pos))
                     m_menu->addAction(Config::inst()->columnLayoutName(id))->setData(id);
             }
         });

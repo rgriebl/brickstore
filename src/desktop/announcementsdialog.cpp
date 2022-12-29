@@ -157,7 +157,7 @@ QCoro::Task<> AnnouncementsDialog::showNewAnnouncements(Announcements *announcem
     dlg.show();
 
     if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
-        for (const auto &id : qAsConst(shownIds))
+        for (const auto &id : std::as_const(shownIds))
             announcements->markAnnouncementRead(id);
     }
 }
