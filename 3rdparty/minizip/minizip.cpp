@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QIODevice>
+#include <QFile>
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
 #  error "The read() optimizations in unzip.c are incompatible with big endian machines"

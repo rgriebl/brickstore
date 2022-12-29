@@ -332,7 +332,7 @@ QmlDocument::QmlDocument(Document *doc)
     connect(m_forceLayoutDelay, &QTimer::timeout,
             this, &QmlDocument::forceLayout);
 
-    setDocument(doc); //TODO: inline
+    setDocument(doc);
 
     // relay signals for the QML API
 
@@ -488,7 +488,7 @@ void QmlDocument::setDocument(Document *doc)
             update();
             endResetModel();
             m_columnModel->endResetModel();
-            emitForceLayout(); //TODO: check if needed
+            emitForceLayout();
         });
         connect(m_doc, &Document::columnSizeChanged,
                 m_connectionContext, [this](int li, int /*size*/) {

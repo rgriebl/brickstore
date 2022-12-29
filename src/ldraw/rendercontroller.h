@@ -118,6 +118,7 @@ private:
     QTimer *m_updateTimer;
 };
 
+//TODO: QTBUG-104744
 //class QmlVectorRenderGeometry
 //{
 //    Q_GADGET
