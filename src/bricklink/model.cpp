@@ -502,7 +502,8 @@ ItemModel::ItemModel(QObject *parent)
         s_idPrefix = tr("id:", "Id prefix");
     }
 
-    connect(core(), &Core::pictureUpdated, this, &ItemModel::pictureUpdated);
+    connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
+            this, &ItemModel::pictureUpdated);
 }
 
 int ItemModel::columnCount(const QModelIndex &parent) const
@@ -865,7 +866,8 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
         case Mode::AppearsIn:  fillAppearsIn(list); break;
         case Mode::CanBuild:   fillCanBuild(list); break;
     }
-    connect(core(), &Core::pictureUpdated, this, [this](Picture *pic) {
+    connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
+            this, [this](Picture *pic) {
         if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
             return;
 
@@ -1082,7 +1084,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         default: return { };
         }
     case Qt::DecorationRole:
-        switch (index.column()) { //TODO: cache and size
+        switch (index.column()) { //TODO: size
         case InventoryModel::ColorColumn:
             return e.m_color ? e.m_color->sampleImage(20, 20) : QImage { };
         default:

@@ -35,6 +35,8 @@ public:
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
     static TransferJob *getIfDifferent(const QUrl &url, const QString &etag, QIODevice *file = nullptr);
     static TransferJob *post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
+    static TransferJob *postContent(const QUrl &url, const QString &contentType, const QByteArray &content,
+                                    QIODevice *file = nullptr, bool noRedirects = false);
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -101,6 +103,8 @@ private:
     QDateTime    m_only_if_newer;
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
+    QString      m_postContentType;
+    QByteArray   m_postContent;
 
     QByteArray   m_userTag;
     QVariant     m_userData;

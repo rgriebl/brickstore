@@ -71,6 +71,8 @@ class QmlBrickLink : public QObject
     Q_PRIVATE_PROPERTY(core(), BrickLink::Carts *carts READ carts CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Database *database READ database CONSTANT FINAL)
+    Q_PROPERTY(BrickLink::VatType currentVatType READ currentVatType WRITE setCurrentVatType NOTIFY currentVatTypeChanged FINAL)
+    Q_PROPERTY(QVector<BrickLink::VatType> supportedVatTypes READ supportedVatTypes CONSTANT FINAL)
 
 public:
     QmlBrickLink();
@@ -92,10 +94,11 @@ public:
 
     Q_INVOKABLE BrickLink::PriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                                   bool highPriority = false);
+    Q_INVOKABLE BrickLink::PriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                  BrickLink::VatType vatType, bool highPriority = false);
 
     Q_INVOKABLE BrickLink::Picture *picture(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                             bool highPriority = false);
-    Q_INVOKABLE BrickLink::Picture *largePicture(BrickLink::QmlItem item, bool highPriority = false);
 
     Q_INVOKABLE BrickLink::QmlLot lot(const QVariant &v) const;
 
@@ -107,9 +110,16 @@ public:
     Q_INVOKABLE QString itemHtmlDescription(BrickLink::QmlItem item, BrickLink::QmlColor color,
                                             const QColor &highlight) const;
 
+    BrickLink::VatType currentVatType() const;
+    void setCurrentVatType(BrickLink::VatType vatType);
+    QVector<BrickLink::VatType> supportedVatTypes() const;
+    Q_INVOKABLE QString descriptionForVatType(BrickLink::VatType vatType) const;
+    Q_INVOKABLE QString iconForVatType(BrickLink::VatType vatType) const;
+
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);
     void pictureUpdated(BrickLink::Picture *picture);
+    void currentVatTypeChanged(BrickLink::VatType vatType);
 
 private:
     BrickLink::InventoryModel *inventoryModel(bool appearsIn, const QVariantList &items,

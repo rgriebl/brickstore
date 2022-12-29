@@ -1,3 +1,4 @@
+import QtQuick.Controls
 import Mobile
 import BrickLink as BL
 
@@ -94,17 +95,29 @@ AutoSizingDialog {
                     value: BL.BrickLink.Price.Highest
                 }
             }
-            Label {
-                text: qsTr("Advanced options")
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: { advanced.visible = !advanced.visible }
+            RowLayout {
+                IconImage {
+                    name: BL.BrickLink.iconForVatType(BL.BrickLink.currentVatType)
+                    color: "transparent"
+                    sourceSize: Qt.size(vatTypeDescription.implicitHeight, vatTypeDescription.implicitHeight)
                 }
+                Label {
+                    id: vatTypeDescription
+                    text: BL.BrickLink.descriptionForVatType(BL.BrickLink.currentVatType)
+                }
+            }
+            Switch {
+                id: advancedSwitch
+                text: qsTr("Advanced options")
+                checked: false
             }
             ColumnLayout {
                 id: advanced
                 enabled: visible
-                visible: false
+                visible: advancedSwitch.checked
+
+                Layout.leftMargin: 20
+
                 Label {
                     text: qsTr("Only use these options if you know what you are doing!")
                     wrapMode: Text.Wrap

@@ -197,7 +197,7 @@ PictureWidget::PictureWidget(QWidget *parent)
                 }
             });
 
-    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+    connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, [this](BrickLink::Picture *pic) {
         if (pic == m_pic) {
             if (pic->isValid())
@@ -309,7 +309,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (m_pic)
         m_pic->release();
-    m_pic = item ? BrickLink::core()->picture(item, color, true) : nullptr;
+    m_pic = item ? BrickLink::core()->pictureCache()->picture(item, color, true) : nullptr;
     if (m_pic) {
         m_pic->addRef();
         if (m_pic->isValid())

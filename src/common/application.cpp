@@ -28,6 +28,7 @@
 #include <QtGui/QFileOpenEvent>
 #include <QtGui/QPixmapCache>
 #include <QtGui/QImageReader>
+#include <QtGui/QImageWriter>
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
 #include <QtQml/QQmlApplicationEngine>
@@ -155,9 +156,12 @@ void Application::init()
             Application::inst(), &Application::updateTranslations);
 
     // sanity check - we might run into endless update loops later on if one of these is missing
-    const auto imgFormats = QImageReader::supportedImageFormats();
-    if (!imgFormats.contains("png") || !imgFormats.contains("jpg") || !imgFormats.contains("gif"))
+    const auto readFmts = QImageReader::supportedImageFormats();
+    const auto writeFmts = QImageWriter::supportedImageFormats();
+    if (!readFmts.contains("png") || !readFmts.contains("jpg") || !readFmts.contains("gif")
+            || !readFmts.contains("webp") || !writeFmts.contains("webp")) {
         m_startupErrors << tr("Your installation is broken: image format plugins are missing!");
+    }
 
     try {
         initBrickLink();
@@ -197,6 +201,17 @@ void Application::init()
 
 void Application::afterInit()
 {
+    if (!m_startupErrors.isEmpty()) {
+        QCoro::waitFor(UIHelpers::critical(m_startupErrors.join(u"\n\n")));
+
+        // we cannot call quit directly, since there is no event loop to quit from...
+        QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
+        return;
+    }
+    if (!m_startupMessages.isEmpty()) {
+        QCoro::waitFor(UIHelpers::information(m_startupMessages.join(u"\n\n")));
+    }
+
     ActionManager::ActionTable applicationActionTable = {
         { "document_new", [](auto) { new Document(); } },
         { "document_open", [](auto) { Document::load(); } },
@@ -887,9 +902,30 @@ bool Application::initBrickLink()
     BrickLink::Core *bl = BrickLink::create(Config::inst()->cacheDir(), databaseUrl(),
                                             SystemInfo::inst()->physicalMemory());
 
+    BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
     connect(Config::inst(), &Config::updateIntervalsChanged,
             BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
-    BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
+
+    QString lastRetrieverId = Config::inst()->value(u"BrickLink/VAT/LastRetrieverId"_qs).toString();
+    QString retrieverId = BrickLink::core()->priceGuideCache()->retrieverId();
+    int vatType = Config::inst()->value(u"BrickLink/VAT/"_qs + retrieverId,
+                                        int(BrickLink::VatType::Excluded)).toInt();
+    BrickLink::core()->priceGuideCache()->setCurrentVatType(static_cast<BrickLink::VatType>(vatType));
+
+    connect(BrickLink::core()->priceGuideCache(), &BrickLink::PriceGuideCache::currentVatTypeChanged,
+            this, [](BrickLink::VatType vatType) {
+        QString retrieverId = BrickLink::core()->priceGuideCache()->retrieverId();
+        Config::inst()->setValue(u"BrickLink/VAT/"_qs + retrieverId, int(vatType));
+    });
+
+    if (retrieverId != lastRetrieverId) {
+        Config::inst()->setValue(u"BrickLink/VAT/LastRetrieverId"_qs, retrieverId);
+
+        m_startupMessages << tr("The price-guide download mechanism changed. Please make sure "
+                                "your VAT setup is still correct on the BrickLink page in the "
+                                "Settings dialog.");
+    }
+
     BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
                                         Config::inst()->brickLinkPassword() });
     connect(Config::inst(), &Config::brickLinkCredentialsChanged,

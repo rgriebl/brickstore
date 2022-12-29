@@ -893,7 +893,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 if (!partItem)
                     continue;
                 auto partColor = part.color();
-                auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
+                auto partPicture = BrickLink::core()->pictureCache()->picture(partItem, partColor, true);
 
 
                 QString filter = BrickLink::ItemModel::tr("consists-of:") + QLatin1String(partItem->id());

@@ -31,6 +31,14 @@ enum class OrderType    : uint { Received, Placed, Any };
 enum class OrderStatus  : uint { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
                                  Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
+enum class VatType : int {
+    Excluded = 0,
+    Included = -1,
+    EU       = 1,
+    Norway   = 2,
+    UK       = 3,
+};
+
 enum class PartOutTrait : uint {
     None         = 0x00,
     Instructions = 0x01,
@@ -75,6 +83,7 @@ Q_ENUM_NS(Status)
 Q_ENUM_NS(UpdateStatus)
 Q_ENUM_NS(OrderType)
 Q_ENUM_NS(OrderStatus)
+Q_ENUM_NS(VatType)
 
 enum ModelRoles {
     RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
@@ -98,7 +107,9 @@ class Item;
 class PartColorCode;
 
 class Picture;
+class PictureCache;
 class PriceGuide;
+class PriceGuideCache;
 class Order;
 class Orders;
 class Cart;

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import Mobile
+import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import BrickLink as BL
 import BrickStore as BS
@@ -78,7 +79,26 @@ Control {
 
         columns: 3
 
-        HeaderLabel { text: root.document ? root.document.currencyCode : '' }
+        RowLayout {
+            IconImage {
+                id: vatType
+                name: BL.BrickLink.iconForVatType(BL.BrickLink.currentVatType)
+                color: "transparent"
+                sourceSize: Qt.size(currency.implicitHeight, currency.implicitHeight)
+
+                ToolTip.text: BL.BrickLink.descriptionForVatType(BL.BrickLink.currentVatType)
+                ToolTip.timeout: 5000
+                TapHandler {
+                    acceptedButtons: Qt.LeftButton
+                    gesturePolicy: TapHandler.ReleaseWithinBounds
+                    onTapped: vatType.ToolTip.visible = true
+                }
+            }
+            HeaderLabel {
+                id: currency
+                text: root.document ? root.document.currencyCode : ''
+            }
+        }
         HeaderLabel { text: qsTr("New") }
         HeaderLabel { text: qsTr("Used") }
 

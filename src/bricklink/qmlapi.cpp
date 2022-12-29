@@ -605,7 +605,7 @@ QmlLot &QmlLot::operator=(const QmlLot &assign)
 QImage QmlLot::image() const
 {
     static QImage dummy;
-    auto pic = core()->picture(get()->item(), get()->color(), true);
+    auto pic = core()->pictureCache()->picture(get()->item(), get()->color(), true);
     return pic ? pic->image() : dummy;
 }
 
@@ -681,13 +681,19 @@ QmlBrickLink::QmlBrickLink()
 {
     setObjectName(u"BrickLink"_qs);
 
-    connect(core(), &BrickLink::Core::priceGuideUpdated,
+    connect(core()->priceGuideCache(), &BrickLink::PriceGuideCache::currentVatTypeChanged,
+            this, [this](::BrickLink::VatType vatType) {
+        static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::currentVatTypeChanged);
+        if (isSignalConnected(sig))
+            emit currentVatTypeChanged(vatType);
+    });
+    connect(core()->priceGuideCache(), &BrickLink::PriceGuideCache::priceGuideUpdated,
             this, [this](::BrickLink::PriceGuide *pg) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::priceGuideUpdated);
         if (isSignalConnected(sig))
             emit priceGuideUpdated(pg);
     });
-    connect(core(), &BrickLink::Core::pictureUpdated,
+    connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, [this](::BrickLink::Picture *pic) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::pictureUpdated);
         if (isSignalConnected(sig))
@@ -838,20 +844,35 @@ QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) con
     signal doesn't mean the preice guide data is available: you have to check the object's
     properties to see what has changed.
 */
-/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
+/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, VatType vatType, bool highPriority = false)
     Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
-    the given \a item and \a color combination. If you set \a highPriority to \c true the
-    load/download request will be pre-prended to the work queue instead of appended.
+    the given \a item, \a color and \a vatType combination. If you set \a highPriority to \c true, the
+    load/download request will be preprended to the work queue instead of appended.
     You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
     been loaded.
     \sa PriceGuide
 */
-BrickLink::PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
+PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, VatType vatType, bool highPriority)
 {
-    auto pg = core()->priceGuide(item.wrappedObject(), color.wrappedObject(), highPriority);
+    auto pg = core()->priceGuideCache()->priceGuide(item.wrappedObject(), color.wrappedObject(),
+                                                    vatType, highPriority);
     QQmlEngine::setObjectOwnership(pg, QQmlEngine::CppOwnership);
     return pg;
 }
+
+/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
+    Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
+    the given \a item, \a color and currentVatType combination. If you set \a highPriority to \c true, the
+    load/download request will be preprended to the work queue instead of appended.
+    You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
+    been loaded.
+    \sa PriceGuide
+*/
+PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
+{
+    return priceGuide(item, color, currentVatType(), highPriority);
+}
+
 
 /*! \qmlsignal BrickLink::pictureUpdated(Picture picture)
     This signal is emitted everytime the state of the \a picture object changes. Receiving this
@@ -868,22 +889,7 @@ BrickLink::PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bo
 */
 BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
 {
-    auto pic = core()->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
-    QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
-    return pic;
-}
-
-/*! \qmlmethod Picture BrickLink::largePicture(Item item, bool highPriority = false)
-    Creates a Picture object that asynchronously loads (or downloads) the large picture for the
-    given \a item. If you set \a highPriority to \c true the load/download request will be
-    pre-prended to the work queue instead of appended.
-    You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
-    been loaded.
-    \sa Picture
-*/
-BrickLink::Picture *QmlBrickLink::largePicture(QmlItem item, bool highPriority)
-{
-    auto pic = core()->largePicture(item.wrappedObject(), highPriority);
+    auto pic = core()->pictureCache()->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
     QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
     return pic;
 }
@@ -947,6 +953,31 @@ InventoryModel *QmlBrickLink::consistsOfModel(const QVariantList &items, const Q
 QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const
 {
     return BrickLink::Core::itemHtmlDescription(item.wrappedObject(), color.wrappedObject(), highlight);
+}
+
+VatType QmlBrickLink::currentVatType() const
+{
+    return BrickLink::core()->priceGuideCache()->currentVatType();
+}
+
+void QmlBrickLink::setCurrentVatType(VatType vatType)
+{
+    BrickLink::core()->priceGuideCache()->setCurrentVatType(vatType);
+}
+
+QVector<VatType> QmlBrickLink::supportedVatTypes() const
+{
+    return BrickLink::core()->priceGuideCache()->supportedVatTypes();
+}
+
+QString QmlBrickLink::descriptionForVatType(VatType vatType) const
+{
+    return BrickLink::core()->priceGuideCache()->descriptionForVatType(vatType);
+}
+
+QString QmlBrickLink::iconForVatType(VatType vatType) const
+{
+    return BrickLink::core()->priceGuideCache()->iconForVatType(vatType).name();
 }
 
 char QmlBrickLink::firstCharInString(const QString &str)

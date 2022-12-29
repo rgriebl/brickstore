@@ -55,6 +55,14 @@ TransferJob *TransferJob::post(const QUrl &url, QIODevice *file, bool noRedirect
     return create(HttpPost, url, { }, { }, file, noRedirects);
 }
 
+TransferJob *TransferJob::postContent(const QUrl &url, const QString &contentType, const QByteArray &content, QIODevice *file, bool noRedirects)
+{
+    auto job = post(url, file, noRedirects);
+    job->m_postContentType = contentType;
+    job->m_postContent = content;
+    return job;
+}
+
 QString TransferJob::errorString() const
 {
     return isFailed() ? m_error_string
@@ -337,7 +345,7 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
+        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); // QTBUG-105043
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
@@ -358,12 +366,18 @@ void TransferRetriever::schedule()
             if (!j->m_only_if_different.isEmpty())
                 req.setHeader(QNetworkRequest::IfNoneMatchHeader, j->m_only_if_different);
             j->m_reply = m_nam->get(req);
-        }
-        else {
-            req.setHeader(QNetworkRequest::ContentTypeHeader, u"application/x-www-form-urlencoded"_qs);
-            QByteArray postdata = url.query(QUrl::FullyEncoded).toLatin1();
-            url.setQuery(QUrlQuery());
-            req.setUrl(url);
+        } else {
+            QByteArray postdata;
+
+            if (!j->m_postContentType.isEmpty()) {
+                req.setHeader(QNetworkRequest::ContentTypeHeader, j->m_postContentType);
+                postdata = j->m_postContent;
+            } else {
+                req.setHeader(QNetworkRequest::ContentTypeHeader, u"application/x-www-form-urlencoded"_qs);
+                postdata = url.query(QUrl::FullyEncoded).toLatin1();
+                url.setQuery(QUrlQuery());
+                req.setUrl(url);
+            }
             j->m_reply = m_nam->post(req, postdata);
         }
 

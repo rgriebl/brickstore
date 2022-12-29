@@ -20,13 +20,12 @@
 #include "global.h"
 #include "utility/ref.h"
 
-QT_FORWARD_DECLARE_CLASS(QFile)
-QT_FORWARD_DECLARE_CLASS(QSaveFile)
-
 class TransferJob;
 
 
 namespace BrickLink {
+
+class PictureCache;
 
 class Picture : public QObject, protected Ref
 {
@@ -41,17 +40,15 @@ class Picture : public QObject, protected Ref
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
 
 public:
-    static quint64 key(const Item *item, const Color *color);
-
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
 
     Q_INVOKABLE void update(bool highPriority = false);
-    QDateTime lastUpdated() const      { return m_fetched; }
+    QDateTime lastUpdated() const      { return m_lastUpdated; }
     Q_INVOKABLE void cancelUpdate();
 
     bool isValid() const              { return m_valid; }
-    UpdateStatus updateStatus() const { return m_update_status; }
+    UpdateStatus updateStatus() const { return m_updateStatus; }
 
     const QImage image() const;
 
@@ -71,33 +68,58 @@ signals:
     void imageChanged(const QImage &newImage);
 
 private:
-    const Item *  m_item;
-    const Color * m_color;
+    const Item * m_item;
+    const Color *m_color;
 
-    QDateTime     m_fetched;
+    QDateTime    m_lastUpdated;
 
-    bool          m_valid;
-    bool          m_updateAfterLoad;
-    // 2 bytes padding here
-    UpdateStatus  m_update_status;
+    bool         m_valid           : 1 = false;
+    bool         m_updateAfterLoad : 1 = false;
+    UpdateStatus m_updateStatus    : 3 = UpdateStatus::Ok;
+    uint         m_reserved        : 27 = 0;
 
-    TransferJob * m_transferJob = nullptr;
+    TransferJob *m_transferJob = nullptr;
 
-    QImage        m_image;
+    QImage       m_image;
+
+    static PictureCache *s_cache;
 
 private:
     Picture(const Item *item, const Color *color);
 
-    QFile *readFile() const;
-    QSaveFile *saveFile() const;
-    bool loadFromDisk(QDateTime &fetched, QImage &image) const;
     void setIsValid(bool valid);
     void setUpdateStatus(UpdateStatus status);
     void setLastUpdated(const QDateTime &dt);
     void setImage(const QImage &newImage);
 
-    friend class Core;
-    friend class PictureLoaderJob;
+    friend class PictureCache;
+    friend class PictureCachePrivate;
+};
+
+class PictureCachePrivate;
+
+class PictureCache : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit PictureCache(Core *core, quint64 physicalMem);
+    ~PictureCache() override;
+
+    void setUpdateInterval(int interval);
+    void clearCache();
+    QPair<int, int> cacheStats() const;
+
+    Picture *picture(const Item *item, const Color *color, bool highPriority = false);
+
+    void updatePicture(Picture *pic, bool highPriority = false);
+    void cancelPictureUpdate(Picture *pic);
+
+signals:
+    void pictureUpdated(BrickLink::Picture *pic);
+
+private:
+    PictureCachePrivate *d;
 };
 
 } // namespace BrickLink

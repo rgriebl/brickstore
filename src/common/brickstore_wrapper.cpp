@@ -296,8 +296,8 @@ double QmlBrickStore::maxLocalPrice(const QString &currencyCode)
 
 QString QmlBrickStore::cacheStats() const
 {
-    auto pic = BrickLink::core()->pictureCacheStats();
-    auto pg = BrickLink::core()->priceGuideCacheStats();
+    auto pic = BrickLink::core()->pictureCache()->cacheStats();
+    auto pg = BrickLink::core()->priceGuideCache()->cacheStats();
     auto ld = LDraw::library()->partCacheStats();
 
     QString picBar(int(double(pic.first) / pic.second * 16), u'=');

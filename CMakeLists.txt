@@ -144,7 +144,7 @@ add_compile_definitions(
 )
 
 find_package(Qt6
-    REQUIRED Core Gui Xml Network Concurrent LinguistTools
+    REQUIRED Core Gui Xml Network Concurrent Sql LinguistTools
     OPTIONAL_COMPONENTS ToolsTools
 )
 
@@ -340,6 +340,9 @@ if (APPLE)
                 Qt::QGifPlugin
                 Qt::QJpegPlugin
                 Qt::QSvgPlugin
+                Qt::QWebpPlugin
+            INCLUDE_BY_TYPE sqldrivers
+                Qt::QSQLiteDriverPlugin
         )
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES

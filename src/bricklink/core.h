@@ -28,8 +28,9 @@
 
 #include "bricklink/global.h"
 #include "bricklink/database.h"
+#include "bricklink/priceguide.h"
+#include "bricklink/picture.h"
 #include "bricklink/lot.h"
-#include "utility/q3cache.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QSaveFile)
@@ -74,11 +75,15 @@ public:
     bool isAuthenticated() const;
     void retrieveAuthenticated(TransferJob *job);
 
+    void retrieve(TransferJob *job, bool highPriority = false);
+
     Store *store() const  { return m_store; }
     Orders *orders() const  { return m_orders; }
     Carts *carts() const  { return m_carts; }
     WantedLists *wantedLists() const  { return m_wantedLists; }
     Database *database() const  { return m_database; }
+    PriceGuideCache *priceGuideCache() const { return m_priceGuideCache; }
+    PictureCache *pictureCache() const { return m_pictureCache; }
 
     inline const std::vector<Color> &colors() const         { return database()->m_colors; }
     inline const std::vector<Category> &categories() const  { return database()->m_categories; }
@@ -100,11 +105,7 @@ public:
 
     const PartColorCode *partColorCode(uint id);
 
-    PriceGuide *priceGuide(const Item *item, const Color *color, bool highPriority = false);
-
     QSize standardPictureSize() const;
-    Picture *picture(const Item *item, const Color *color, bool highPriority = false);
-    Picture *largePicture(const Item *item, bool highPriority = false);
 
     bool applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc);
 
@@ -115,18 +116,13 @@ public:
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot);
 
-    QPair<int, int> pictureCacheStats() const;
-    QPair<int, int> priceGuideCacheStats() const;
-
 public slots:
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void cancelTransfers();
 
 signals:
-    void priceGuideUpdated(BrickLink::PriceGuide *pg);
-    void pictureUpdated(BrickLink::Picture *pic);
-
+    void transferFinished(TransferJob *job);
     void transferProgress(int progress, int total);
     void authenticatedTransferOverallProgress(int progress, int total);
     void authenticatedTransferStarted(TransferJob *job);
@@ -151,23 +147,6 @@ private:
 private:
     QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
 
-    void updatePriceGuide(BrickLink::PriceGuide *pg, bool highPriority = false);
-    void updatePicture(BrickLink::Picture *pic, bool highPriority = false);
-    friend class PriceGuide;
-    friend class Picture;
-
-    void cancelPriceGuideUpdate(BrickLink::PriceGuide *pg);
-    void cancelPictureUpdate(BrickLink::Picture *pic);
-
-    static bool updateNeeded(bool valid, const QDateTime &last, int iv);
-
-private slots:
-    void pictureJobFinished(TransferJob *j, BrickLink::Picture *pic);
-    void priceGuideJobFinished(TransferJob *j, BrickLink::PriceGuide *pg);
-
-    void priceGuideLoaded(BrickLink::PriceGuide *pg, bool highPriority);
-    void pictureLoaded(BrickLink::Picture *pic, bool highPriority);
-
 private:
     QString  m_datadir;
 
@@ -181,21 +160,13 @@ private:
     TransferJob *              m_loginJob = nullptr;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
 
-    int                          m_pg_update_iv = 0;
-    Q3Cache<quint64, PriceGuide> m_pg_cache;
-
-    int                          m_pic_update_iv = 0;
-    QThreadPool                  m_diskloadPool;
-    Q3Cache<quint64, Picture>    m_pic_cache;
-
     Database *m_database = nullptr;
     Store *m_store = nullptr;
     Orders *m_orders = nullptr;
     Carts *m_carts = nullptr;
     WantedLists *m_wantedLists = nullptr;
-
-    friend class PriceGuideLoaderJob;
-    friend class PictureLoaderJob;
+    PriceGuideCache *m_priceGuideCache = nullptr;
+    PictureCache *m_pictureCache = nullptr;
 
     friend class QmlBrickLink;
 };

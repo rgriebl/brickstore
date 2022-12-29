@@ -50,8 +50,8 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
         bool ok = (m_document && (m_selection.count() == 1));
 
-        setPriceGuide(ok ? BrickLink::core()->priceGuide(m_selection.constFirst()->item(),
-                                                         m_selection.constFirst()->color(), true)
+        setPriceGuide(ok ? BrickLink::core()->priceGuideCache()->priceGuide(m_selection.constFirst()->item(),
+                                                                            m_selection.constFirst()->color(), true)
                          : nullptr);
     });
 

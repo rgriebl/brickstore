@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>522</width>
-    <height>293</height>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,30 @@
      </item>
      <item>
       <widget class="QComboBox" name="w_type_price"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="w_vatTypeIcon">
+       <property name="text">
+        <string notr="true">&lt;icon&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="w_vatTypeDescription">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string notr="true">vatType</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

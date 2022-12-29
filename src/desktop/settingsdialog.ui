@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1131</width>
-    <height>657</height>
+    <width>873</width>
+    <height>688</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,6 +32,9 @@
       <layout class="QFormLayout" name="formLayout_3">
        <property name="fieldGrowthPolicy">
         <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
+       <property name="formAlignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
@@ -332,6 +335,9 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::ExpandingFieldsGrow</enum>
           </property>
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_23">
             <property name="text">
@@ -521,6 +527,9 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::ExpandingFieldsGrow</enum>
           </property>
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
@@ -586,78 +595,89 @@
       <attribute name="title">
        <string>BrickLink</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,10">
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,10">
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>BrickLink Login</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Username</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="w_bl_username">
-              <property name="maxLength">
-               <number>30</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Password</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="w_bl_password">
-              <property name="maxLength">
-               <number>30</number>
-              </property>
-              <property name="echoMode">
-               <enum>QLineEdit::PasswordEchoOnEdit</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="w_bl_password_notice">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
+         <layout class="QFormLayout" name="formLayout_9">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+          </property>
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>If you set a password, it is saved in your system: it is just scrambled, but **not** encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.
-
-If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</string>
+             <string>Username</string>
             </property>
-            <property name="textFormat">
-             <enum>Qt::MarkdownText</enum>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="w_bl_username">
+            <property name="maxLength">
+             <number>30</number>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Password</string>
             </property>
-            <property name="wordWrap">
-             <bool>true</bool>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="w_bl_password">
+            <property name="toolTip">
+             <string>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</string>
             </property>
-            <property name="margin">
-             <number>4</number>
+            <property name="maxLength">
+             <number>30</number>
+            </property>
+            <property name="echoMode">
+             <enum>QLineEdit::PasswordEchoOnEdit</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Price guide</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>Values</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="w_bl_pg_vat"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Source</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="w_bl_pg_retriever">
+            <property name="text">
+             <string>&lt;pg retriever name&gt;</string>
             </property>
            </widget>
           </item>
@@ -672,6 +692,12 @@ If you do not want to save your password, then just leave this field empty and y
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <layout class="QFormLayout" name="formLayout_6">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::ExpandingFieldsGrow</enum>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_13">
               <property name="text">
@@ -761,6 +787,9 @@ If you do not want to save your password, then just leave this field empty and y
           </item>
           <item>
            <layout class="QFormLayout" name="formLayout_8">
+            <property name="formAlignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
             <item row="0" column="0">
              <spacer name="horizontalSpacer">
               <property name="orientation">
@@ -1265,8 +1294,6 @@ If you do not want to save your password, then just leave this field empty and y
   <tabstop>w_theme</tabstop>
   <tabstop>w_font_size</tabstop>
   <tabstop>w_font_size_reset</tabstop>
-  <tabstop>w_bl_username</tabstop>
-  <tabstop>w_bl_password</tabstop>
   <tabstop>w_upd_database</tabstop>
   <tabstop>w_upd_picture</tabstop>
   <tabstop>w_upd_priceguide</tabstop>

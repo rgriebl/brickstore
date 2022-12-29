@@ -594,7 +594,7 @@ DocumentModel::DocumentModel(int /*is temporary*/)
 
     MODELTEST_ATTACH(this)
 
-    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+    connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, &DocumentModel::pictureUpdated);
 
     languageChange();
@@ -1927,10 +1927,10 @@ void DocumentModel::initializeColumns()
           .alignment = Qt::AlignHCenter,
           .filterable = false,
           .title = QT_TR_NOOP("Image"),
-          .dataFn = [&](const Lot *lot) { return QVariant::fromValue(BrickLink::core()->picture(lot->item(), lot->color())); },
+          .dataFn = [&](const Lot *lot) { return QVariant::fromValue(BrickLink::core()->pictureCache()->picture(lot->item(), lot->color())); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setItem(v.value<const BrickLink::Item *>()); },
           .displayFn = [&](const Lot *lot) {
-              auto pic = BrickLink::core()->picture(lot->item(), lot->color());
+              auto pic = BrickLink::core()->pictureCache()->picture(lot->item(), lot->color());
               return QVariant::fromValue(pic ? pic->image() : QImage { });
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {

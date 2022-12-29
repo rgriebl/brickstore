@@ -90,6 +90,7 @@ for color in "" "-dark"; do
   rsvg-convert $b/custom/brick-1x1$color.svg -w $s -h $s -f png -o $tmp/brick-1x1$color.png
   rsvg-convert $b/icons/$theme$color/svg/taxes-finances.svg -w $s -h $s -f png -o $tmp/dollar$color.png
   rsvg-convert $b/icons/$theme$color/svg/help-about.svg -w $s -h $s -f png -o $tmp/info$color.png
+  rsvg-convert $b/icons/$theme$color/svg/format-number-percent.svg -w $s -h $s -f png -o $tmp/percent$color.png
 
   out="$b/icons/$theme$color/generated"
   mkdir -p "$out"
@@ -130,6 +131,32 @@ for color in "" "-dark"; do
         \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
         \( $tmp/brick-1x1$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
         $out/bricklink-lotsforsale.png
+
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/icons/$theme$color/svg/package-remove.svg -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/vat-excluded.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/icons/$theme$color/svg/emblem-checked.svg -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/vat-included.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/flags/EU.png -scale $((s * 9 / 10)) -gravity southeast \) -composite \
+        $out/vat-included-eu.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/flags/UK.png -scale $((s * 10 / 10)) -gravity southeast \) -composite \
+        $out/vat-included-uk.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/flags/US.png -scale $((s * 10 / 10)) -gravity southeast \) -composite \
+        $out/vat-included-us.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/percent$color.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $b/flags/NO.png -scale $((s * 8 / 10)) -gravity southeast \) -composite \
+        $out/vat-included-no.png
+
 done
 
 rm -rf "$tmp"

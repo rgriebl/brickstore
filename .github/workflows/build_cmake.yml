@@ -13,10 +13,11 @@ env:
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
       qt6-gtk-platformtheme libqt6svg6
+      qt6-image-formats-plugins
       qml6-module-qt5compat-graphicaleffects
       qml6-module-qtqml-workerscript qml6-module-quick3d
   BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
-      qtquick3d qtshadertools qtquicktimeline qt5compat
+      qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats
 
 on:
   workflow_dispatch:

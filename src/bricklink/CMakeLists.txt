@@ -19,8 +19,10 @@ qt_add_library(bricklink_module STATIC
     partcolorcode.h
     partcolorcode.cpp
     picture.h
+    picture_p.h
     picture.cpp
     priceguide.h
+    priceguide_p.h
     priceguide.cpp
 )
 
@@ -45,6 +47,7 @@ target_link_libraries(bricklink_module PRIVATE
     Qt6::Gui
     Qt6::Xml
     Qt6::Concurrent
+    Qt6::Sql
 )
 
 if (BS_BACKEND)
@@ -86,5 +89,10 @@ if (BS_DESKTOP)
     )
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_module)
+if (BRICKLINK_AFFILIATE_API_KEY)
+    set_source_files_properties(priceguide.cpp PROPERTIES COMPILE_DEFINITIONS
+        BS_BRICKLINK_AFFILIATE_API_KEY=${BRICKLINK_AFFILIATE_API_KEY}
+    )
+endif()
 
+target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_module)

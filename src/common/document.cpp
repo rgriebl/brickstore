@@ -233,7 +233,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
     connect(m_model, &DocumentModel::dataChanged,
             this, &Document::documentDataChanged);
 
-    connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
+    connect(BrickLink::core()->priceGuideCache(), &BrickLink::PriceGuideCache::priceGuideUpdated,
             this, &Document::priceGuideUpdated);
 
     updateItemFlagsMask();
@@ -1064,7 +1064,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     m_setToPG->currencyRate = Currency::inst()->rate(m_model->currencyCode());
 
     for (Lot *item : sel) {
-        BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
+        BrickLink::PriceGuide *pg = BrickLink::core()->priceGuideCache()->priceGuide(item->item(), item->color());
 
         if (pg && forceUpdate && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
             pg->update();
@@ -1742,14 +1742,14 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
     auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
     document->setTitle(tr("Inventory for %1").arg(QLatin1String(item->id())));
 
-    auto thumbnail = BrickLink::core()->picture(item, color, true);
+    auto thumbnail = BrickLink::core()->pictureCache()->picture(item, color, true);
     if (thumbnail) {
         if (thumbnail->isValid()) {
             document->setThumbnail(thumbnail->image());
         } else if ((thumbnail->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (thumbnail->updateStatus() == BrickLink::UpdateStatus::Updating)) {
             QMetaObject::Connection *conn = new QMetaObject::Connection;
-            *conn = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+            *conn = connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
                             document, [=](BrickLink::Picture *pic) {
                 if (pic == thumbnail) {
                     if (thumbnail->isValid())

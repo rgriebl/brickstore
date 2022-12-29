@@ -12,7 +12,9 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QDebug>
+#include <QStyle>
 
+#include "bricklink/core.h"
 #include "common/config.h"
 #include "settopriceguidedialog.h"
 
@@ -38,6 +40,11 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
 
     w_type_price->setCurrentIndex(Config::inst()->value(u"MainWindow/SetToPriceGuideDialog/Price"_qs,
                                                         int(BrickLink::Price::Average)).toInt());
+
+    auto pgCache = BrickLink::core()->priceGuideCache();
+    w_vatTypeDescription->setText(pgCache->descriptionForVatType(pgCache->currentVatType()));
+    w_vatTypeIcon->setPixmap(pgCache->iconForVatType(pgCache->currentVatType()).pixmap(
+                                 style()->pixelMetric(QStyle::PM_SmallIconSize)));
 }
 
 SetToPriceGuideDialog::~SetToPriceGuideDialog()

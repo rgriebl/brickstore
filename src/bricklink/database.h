@@ -59,6 +59,8 @@ public:
         Latest = V8
     };
 
+    void setUpdateInterval(int interval);
+
     Q_INVOKABLE bool isUpdateNeeded() const;
 
     bool isValid() const          { return m_valid; }

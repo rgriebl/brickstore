@@ -39,14 +39,16 @@ static const int vborder = 3;
 struct cell : public QRect {
     enum cell_type {
         Header,
+        VatHeader,
         Quantity,
         Price,
         Update,
         Empty
     };
 
-    cell(cell_type t, int x, int y, int w, int h, int tfl, const QString &str, bool flag = false)
-            : QRect(x, y, w, h), m_type(t), m_text_flags(tfl), m_text(str), m_flag(flag)
+    cell(cell_type t, int x, int y, int w, int h, int tfl = Qt::AlignLeft, const QString &str = {},
+         bool flag = false)
+        : QRect(x, y, w, h), m_type(t), m_text_flags(tfl), m_text(str), m_flag(flag)
     { }
 
     cell_type     m_type;
@@ -91,7 +93,6 @@ private:
     const cell *              m_cellUnderMouse = nullptr;
     QString                   m_ccode;
     PriceGuideWidget::Layout  m_layout = PriceGuideWidget::Normal;
-    bool                      m_connected = false;
 
     static constexpr int s_cond_count = int(BrickLink::Condition::Count);
     static constexpr int s_time_count = int(BrickLink::Time::Count);
@@ -103,6 +104,9 @@ private:
     QString m_str_vtime[s_time_count];
     QString m_str_htime[s_time_count][2];
     QString m_str_wait;
+
+    QIcon m_vatIcon;
+    QString m_vatDescription;
 };
 
 PriceGuideWidget::PriceGuideWidget(QWidget *parent)
@@ -112,6 +116,12 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     d->m_ccode = Config::inst()->defaultCurrencyCode();
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &PriceGuideWidget::updateNonStaticCells);
+
+    connect(BrickLink::core()->priceGuideCache(), &BrickLink::PriceGuideCache::priceGuideUpdated,
+            this, &PriceGuideWidget::gotUpdate);
+
+    connect(BrickLink::core()->priceGuideCache(), &BrickLink::PriceGuideCache::currentVatTypeChanged,
+            this, &PriceGuideWidget::updateVatType);
 
     setMouseTracking(true);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -148,8 +158,8 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
             this, &PriceGuideWidget::showBLLotsForSale);
     addAction(a);
 
-
     languageChange();
+    updateVatType(BrickLink::core()->priceGuideCache()->currentVatType());
 }
 
 void PriceGuideWidget::languageChange()
@@ -230,11 +240,6 @@ void PriceGuideWidget::setPriceGuide(BrickLink::PriceGuide *pg)
         d->m_pg->release();
     if (pg)
         pg->addRef();
-
-    if (!d->m_connected && pg) {
-        d->m_connected = connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
-                                 this, &PriceGuideWidget::gotUpdate);
-    }
     d->m_pg = pg;
 
     setContextMenuPolicy(pg ? Qt::ActionsContextMenu : Qt::NoContextMenu);
@@ -317,8 +322,8 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
 
     dx = cw[1] + cw[2];
 
-    for (const auto &prive : d->m_str_price) {
-        d->m_cells.emplace_back(cell::Header, dx, 0, cw[3], ch, Qt::AlignCenter, prive);
+    for (const auto &price : d->m_str_price) {
+        d->m_cells.emplace_back(cell::Header, dx, 0, cw[3], ch, Qt::AlignCenter, price);
         dx += cw[3];
     }
 
@@ -327,8 +332,12 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     dx = cw[1] + cw[2] + cw[3] * d->s_price_count;
     dy = ch;
 
-    for (const auto &vtime : d->m_str_vtime) {
-        d->m_cells.emplace_back(cell::Header, 0, dy, dx, ch, Qt::AlignCenter, vtime, true);
+    for (int tc = 0; tc < d->s_time_count; ++tc) {
+        if (tc == 0)
+            d->m_cells.emplace_back(cell::VatHeader, 0, dy, cw[1], ch, Qt::AlignCenter, u"%%%"_qs, false);
+        else
+            d->m_cells.emplace_back(cell::Header, 0, dy, cw[1], ch);
+        d->m_cells.emplace_back(cell::Header, cw[1], dy, dx - cw[1], ch, Qt::AlignCenter, d->m_str_vtime[tc], true);
         dy += ch;
 
         for (int j = 0; j < d->s_cond_count; j++)
@@ -403,7 +412,8 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     dx = cw[0] + cw[1];
     dy = 0;
 
-    d->m_cells.emplace_back(cell::Header, 0,  dy, dx,    ch, Qt::AlignCenter, u"$$$"_qs, true);
+    d->m_cells.emplace_back(cell::Header, 0,  dy, cw[0], ch, Qt::AlignCenter, u"$$$"_qs, true);
+    d->m_cells.emplace_back(cell::VatHeader, cw[0], dy, cw[1], ch, Qt::AlignCenter, u"%%%"_qs, false);
     d->m_cells.emplace_back(cell::Header, dx, dy, cw[2], ch, Qt::AlignCenter, d->m_str_qty);
 
     dx += cw[2];
@@ -520,8 +530,13 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     dx = 0;
     dy = ch;
 
-    for (const auto &vtime : d->m_str_vtime) {
-        d->m_cells.emplace_back(cell::Header, dx, dy, cw[0] + d->s_cond_count * cw[1], ch, Qt::AlignCenter, vtime, true);
+    for (int tc = 0; tc < d->s_time_count; ++tc) {
+        if (tc == 0)
+            d->m_cells.emplace_back(cell::VatHeader, dx, dy, cw[0], ch, Qt::AlignCenter, u"%%%"_qs, false);
+        else
+            d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], ch);
+
+        d->m_cells.emplace_back(cell::Header, dx + cw[0], dy, d->s_cond_count * cw[1], ch, Qt::AlignCenter, d->m_str_vtime[tc], true);
         dy += ch;
 
         d->m_cells.emplace_back(cell::Header, dx, dy, cw[0], ch, Qt::AlignLeft | Qt::AlignVCenter, d->m_str_qty, false);
@@ -646,6 +661,14 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
                                                                     : c.m_text, c.m_flag, left, right);
             break;
         }
+        case cell::VatHeader: {
+            bool left = (c.left() == 0);
+            bool right = (c.right() == (viewport()->width() - 1));
+
+            paintHeader(&p, c, c.m_text_flags, { }, c.m_flag, left, right);
+            d->m_vatIcon.paint(&p, c, Qt::AlignCenter, QIcon::Normal, QIcon::On);
+            break;
+        }
         case cell::Quantity:
             if (!is_updating) {
                 if (valid) {
@@ -767,6 +790,8 @@ bool PriceGuideWidget::event(QEvent *e)
                 else
                     tt = tr("No items have been sold");
             }
+        } else if (c && (c->m_type == cell::VatHeader)) {
+            tt = d->m_vatDescription;
         }
         if (!tt.isEmpty())
             QToolTip::showText(he->globalPos(), tt, this);
@@ -798,6 +823,17 @@ void PriceGuideWidget::updateNonStaticCells() const
         }
     }
     viewport()->update(r);
+}
+
+void PriceGuideWidget::updateVatType(BrickLink::VatType vatType)
+{
+    if (d->m_pg) {
+        setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(
+                          d->m_pg->item(), d->m_pg->color(), vatType, true));
+    }
+    d->m_vatIcon = BrickLink::PriceGuideCache::iconForVatType(vatType);
+    d->m_vatDescription = BrickLink::PriceGuideCache::descriptionForVatType(vatType);
+    recalcLayout();
 }
 
 QString PriceGuideWidget::currencyCode() const

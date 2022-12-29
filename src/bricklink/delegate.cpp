@@ -54,7 +54,7 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
             if (auto *item = index.data(ItemPointerRole).value<const Item *>()) {
                 QImage image;
 
-                Picture *pic = core()->picture(item, item->defaultColor());
+                Picture *pic = core()->pictureCache()->picture(item, item->defaultColor());
                 if (pic && pic->isValid())
                     image = pic->image();
                 else
@@ -165,7 +165,8 @@ ToolTip *ToolTip::inst()
 {
     if (!s_inst) {
         s_inst = new ToolTip();
-        connect(core(), &Core::pictureUpdated, s_inst, &ToolTip::pictureUpdated);
+        connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
+                s_inst, &ToolTip::pictureUpdated);
 
         // animated tooltips do not work for us, because the tooltip widget is not "visible"
         // until the animation is finished, effectively breaking pictureUpdated() below
@@ -185,7 +186,7 @@ bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos
     QString tt;
 
     if (item) {
-        if (Picture *pic = core()->picture(item, nullptr, true)) {
+        if (Picture *pic = core()->pictureCache()->picture(item, nullptr, true)) {
             m_tooltip_pic = ((pic->updateStatus() == UpdateStatus::Updating)
                              || (pic->updateStatus() == UpdateStatus::Loading)) ? pic : nullptr;
 

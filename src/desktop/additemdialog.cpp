@@ -530,7 +530,7 @@ void AddItemDialog::updateItemAndColor()
     w_picture->setItemAndColor(item, color);
 
     if (item && color) {
-        w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(item, color, true));
+        w_price_guide->setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(item, color, true));
         w_inventory->setItem(item, color);
     }
     else {
@@ -916,7 +916,7 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
 
                 auto *a = m->addAction(s);
                 a->setData(i);
-                auto *pic = BrickLink::core()->picture(item, color, true);
+                auto *pic = BrickLink::core()->pictureCache()->picture(item, color, true);
                 if (pic && pic->isValid())
                     a->setIcon(QPixmap::fromImage(pic->image()));
             }

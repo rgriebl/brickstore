@@ -134,7 +134,7 @@ public:
     T *take(const Key &key);
 
     void setObjectCost(const Key &key, int cost);
-    void clearRecursive();
+    int clearRecursive();
 
 private:
     void trim(int m);
@@ -221,7 +221,7 @@ void Q3Cache<Key,T>::trim(int m)
 }
 
 template<class Key, class T>
-void Q3Cache<Key, T>::clearRecursive()
+int Q3Cache<Key, T>::clearRecursive()
 {
     int s = size();
     while (s) {
@@ -232,13 +232,13 @@ void Q3Cache<Key, T>::clearRecursive()
         s = new_s;
     }
     if (s) {
-        qWarning() << "Q3Cache::clearRecursive: leaking" << s << "entries with non-zero ref count";
         // we cannot clear(), as this deletes objects that may still be in use, we HAVE TO leak them
 
         const auto leakKeys = keys();
         for (const auto &key : leakKeys)
             (void) take(key);
     }
+    return s;
 }
 
 template <class Key, class T>

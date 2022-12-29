@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import Mobile
 import BrickStore as BS
+import BrickLink as BL
 
 
 AutoSizingDialog {
@@ -258,6 +259,58 @@ AutoSizingDialog {
                         font.bold: true
                         color: Qt.rgba(1, .4, .4)
                         visible: blPassword.text.length > 15
+                    }
+                }
+                RowLayout {
+                    spacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
+
+                    Label {
+                        text: qsTr("Price-guide")
+                        font.pixelSize: vatTypeCombo.font.pixelSize
+                    }
+                    ComboBox {
+                        Layout.fillWidth: true
+                        id: vatTypeCombo
+                        textRole: "text"
+                        valueRole: "value"
+                        property string iconRole: "icon"
+
+                        model: ListModel { id: vatTypeModel }
+                        Component.onCompleted: {
+                            let svt = BL.BrickLink.supportedVatTypes
+                            for (let i = 0; i < svt.length; ++i) {
+                                vatTypeModel.append({
+                                                        "text": BL.BrickLink.descriptionForVatType(svt[i]),
+                                                        "icon": BL.BrickLink.iconForVatType(svt[i]),
+                                                        "value": svt[i]
+                                                    })
+                            }
+                            currentIndex = indexOfValue(BL.BrickLink.currentVatType)
+                        }
+                        onActivated: { BL.BrickLink.currentVatType = currentValue }
+
+                        delegate: ItemDelegate {
+                            required property int index
+                            required property var model
+                            width: vatTypeCombo.width
+                            icon.name: model[vatTypeCombo.iconRole]
+                            icon.color: "transparent"
+                            text: model[vatTypeCombo.textRole]
+                            highlighted: vatTypeCombo.highlightedIndex === index
+                        }
+                        contentItem: ItemDelegate {
+                            // ignore all mouse/touch events and disable the background
+                            containmentMask: QtObject {
+                                function contains(point: point) : bool { return false }
+                            }
+                            background: null
+                            hoverEnabled: false
+                            icon.name: vatTypeModel.get(vatTypeCombo.currentIndex)[vatTypeCombo.iconRole]
+                            icon.color: "transparent"
+                            text: vatTypeCombo.displayText
+                        }
                     }
                 }
             }

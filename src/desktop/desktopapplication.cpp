@@ -140,14 +140,6 @@ void DesktopApplication::init()
     if (fsp != 100)
         setFontSizePercentLambda(fsp);
 
-    if (!m_startupErrors.isEmpty()) {
-        QCoro::waitFor(UIHelpers::critical(m_startupErrors.join(u"\n\n")));
-
-        // we cannot call quit directly, since there is no event loop to quit from...
-        QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
-        return;
-    }
-
     // tranform . or , into the local decimal separator in all QDoubleSpinBoxes and all
     // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();

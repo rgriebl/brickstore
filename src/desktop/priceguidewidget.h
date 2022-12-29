@@ -81,6 +81,7 @@ private:
     void paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str,
                    bool alternate = false, bool mouseOver = false);
     void updateNonStaticCells() const;
+    void updateVatType(BrickLink::VatType vatType);
 
 private:
     std::unique_ptr<PriceGuideWidgetPrivate> d;

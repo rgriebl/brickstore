@@ -35,10 +35,12 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
+#include "bricklink/core.h"
+#include "bricklink/priceguide.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
-#include "ldraw/library.h"
 #include "common/currency.h"
+#include "ldraw/library.h"
 #include "betteritemdelegate.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -738,7 +740,16 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
     w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
-    w_bl_password_notice->setAttribute(Qt::WA_MacSmallSize);
+
+    auto *pgCache = BrickLink::core()->priceGuideCache();
+    auto supportedVatTypes = pgCache->supportedVatTypes();
+    for (auto vatType : supportedVatTypes) {
+        auto text = pgCache->descriptionForVatType(vatType);
+        auto icon = pgCache->iconForVatType(vatType);
+        w_bl_pg_vat->addItem(icon, text, QVariant::fromValue(vatType));
+    }
+    w_bl_pg_retriever->setText(pgCache->retrieverName());
+
     w_bl_username->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
     w_bl_password->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
 
@@ -1104,6 +1115,9 @@ void SettingsDialog::load()
     w_bl_username->setText(Config::inst()->brickLinkUsername());
     w_bl_password->setText(Config::inst()->brickLinkPassword());
 
+    auto vatType = BrickLink::core()->priceGuideCache()->currentVatType();
+    w_bl_pg_vat->setCurrentIndex(w_bl_pg_vat->findData(QVariant::fromValue(vatType)));
+
     // --[ LDRAW ]-----------------------------------------------------
 
     const auto potentialLDrawDirs = LDraw::Library::potentialLDrawDirs();
@@ -1177,6 +1191,9 @@ void SettingsDialog::save()
 
     Config::inst()->setBrickLinkUsername(w_bl_username->text());
     Config::inst()->setBrickLinkPassword(w_bl_password->text());
+
+    auto vatType = w_bl_pg_vat->currentData().value<BrickLink::VatType>();
+    BrickLink::core()->priceGuideCache()->setCurrentVatType(vatType);
 
     // --[ LDRAW ]---------------------------------------------------------------------
 

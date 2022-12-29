@@ -107,6 +107,11 @@ Database::~Database()
     clear();
 }
 
+void Database::setUpdateInterval(int interval)
+{
+    m_updateInterval = interval;
+}
+
 bool Database::isUpdateNeeded() const
 {
     return (m_updateInterval > 0)
