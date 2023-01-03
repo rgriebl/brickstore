@@ -126,7 +126,7 @@ void ColorModel::clearFilters()
 {
     if (isFiltered()) {
         m_popularityFilter = 0;
-        m_colorTypeFilter = Color::Type();
+        m_colorTypeFilter = ColorType();
         m_colorListFilter.clear();
         emit colorTypeFilterChanged();
         emit popularityFilterChanged();
@@ -135,12 +135,12 @@ void ColorModel::clearFilters()
     }
 }
 
-Color::Type ColorModel::colorTypeFilter() const
+ColorType ColorModel::colorTypeFilter() const
 {
     return m_colorTypeFilter;
 }
 
-void ColorModel::setColorTypeFilter(Color::Type type)
+void ColorModel::setColorTypeFilter(ColorType type)
 {
     if (type == m_colorTypeFilter)
         return;

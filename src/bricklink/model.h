@@ -43,8 +43,8 @@ public:
 
     bool isFiltered() const override;
     void clearFilters();
-    Color::Type colorTypeFilter() const;
-    void setColorTypeFilter(Color::Type type);
+    ColorType colorTypeFilter() const;
+    void setColorTypeFilter(ColorType type);
     float popularityFilter() const;
     void setPopularityFilter(float p);
     const QVector<const Color *> colorListFilter() const;
@@ -64,7 +64,7 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    Color::Type m_colorTypeFilter {};
+    ColorType m_colorTypeFilter {};
     float m_popularityFilter = 0.f;
     QVector<const Color *> m_colorListFilter;
 

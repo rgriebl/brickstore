@@ -49,16 +49,16 @@ SelectColor::SelectColor(QWidget *parent)
     : QWidget(parent)
 {
     w_filter = new QComboBox();
-    w_filter->addItem({ }, KnownColors);
+    w_filter->addItem({ }, int(KnownColors));
     w_filter->insertSeparator(w_filter->count());
-    w_filter->addItem({ }, AllColors);
-    w_filter->addItem({ }, PopularColors);
-    w_filter->addItem({ }, MostPopularColors);
+    w_filter->addItem({ }, int(AllColors));
+    w_filter->addItem({ }, int(PopularColors));
+    w_filter->addItem({ }, int(MostPopularColors));
     w_filter->insertSeparator(w_filter->count());
 
-    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
+    for (auto ct : BrickLink::Color::allColorTypes()) {
         if (!BrickLink::Color::typeName(ct).isEmpty())
-            w_filter->addItem({ }, ct);
+            w_filter->addItem({ }, int(ct));
     }
     w_filter->setMaxVisibleItems(w_filter->count());
 
@@ -132,7 +132,7 @@ void SelectColor::languageChange()
     w_filter->setItemText(w_filter->findData(PopularColors), tr("Popular Colors"));
     w_filter->setItemText(w_filter->findData(MostPopularColors), tr("Most Popular Colors"));
 
-    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
+    for (auto ct : BrickLink::Color::allColorTypes()) {
         const QString ctName = BrickLink::Color::typeName(ct);
         if (!ctName.isEmpty())
             w_filter->setItemText(w_filter->findData(int(ct)), tr("Only \"%1\" Colors").arg(ctName));
@@ -162,7 +162,7 @@ void SelectColor::updateColorFilter(int index)
     m_colorModel->clearFilters();
 
     if (filter > 0) {
-        m_colorModel->setColorTypeFilter(static_cast<BrickLink::Color::TypeFlag>(filter));
+        m_colorModel->setColorTypeFilter(static_cast<BrickLink::ColorTypeFlag>(filter));
         m_colorModel->setPopularityFilter(0);
     } else if (filter < 0){
         float popularity = 0.f;
@@ -172,7 +172,7 @@ void SelectColor::updateColorFilter(int index)
             popularity = 0.05f;
 
         // Modulex colors are fine in their own category, but not in the 'all' lists
-        m_colorModel->setColorTypeFilter(BrickLink::Color::Type(BrickLink::Color::Mask) & ~BrickLink::Color::Modulex);
+        m_colorModel->setColorTypeFilter(BrickLink::ColorType(BrickLink::ColorTypeFlag::Mask).setFlag(BrickLink::ColorTypeFlag::Modulex, false));
         m_colorModel->setPopularityFilter(popularity);
     } else if (filter == 0 && m_item) {
         m_colorModel->setColorListFilter(m_item->knownColors());

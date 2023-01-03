@@ -532,7 +532,7 @@ void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, Versio
 
     dataStream >> col.m_id >> col.m_name >> col.m_ldraw_id >> col.m_color >> flags
             >> col.m_popularity >> col.m_year_from >> col.m_year_to;
-    col.m_type = static_cast<Color::Type>(flags);
+    col.m_type = static_cast<ColorType>(flags);
 
     dataStream >> col.m_ldraw_color >> col.m_ldraw_edge_color >> col.m_luminance
             >> col.m_particleMinSize >> col.m_particleMaxSize >> col.m_particleColor

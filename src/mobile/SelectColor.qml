@@ -27,20 +27,22 @@ AutoSizingDialog {
     function updateColorFilter() {
         colorModel.clearFilters()
 
-        if (filter.currentValue > 0) {
-            colorModel.colorTypeFilter = filter.currentValue
-        } else if (filter.currentValue < 0) {
+        const filterType = Number(filter.currentValue)
+
+        if (filterType > 0) {
+            colorModel.colorTypeFilter = filterType
+        } else if (filterType < 0) {
             let popularity = 0
-            if (filter.currentValue === -2)
+            if (filterType === -2)
                 popularity = 0.005
-            else if (filter.currentValue === -3)
+            else if (filterType === -3)
                 popularity = 0.05
 
             // Modulex colors are fine in their own category, but not in the 'all' lists
-            colorModel.colorTypeFilter = 0x3ff & ~0x100 //TODO (Color::Mask & ~Color::Modulex);
+            colorModel.colorTypeFilter = BL.BrickLink.ColorType.Mask & ~BL.BrickLink.ColorType.Modulex
             colorModel.popularityFilter = popularity
 
-        } else if (filter.currentValue === 0 && !root.item.isNull) {
+        } else if (filterType === 0 && !root.item.isNull) {
             colorModel.colorListFilter = root.item.knownColors
         }
 

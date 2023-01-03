@@ -81,7 +81,7 @@ public:
     QVariantList colorTypes() const;
 
     Q_INVOKABLE QImage noImage(int width, int height) const;
-    Q_INVOKABLE QString colorTypeName(int colorType) const;
+    Q_INVOKABLE QString colorTypeName(BrickLink::ColorTypeFlag colorType) const;
 
     Q_INVOKABLE BrickLink::QmlColor color(const QVariant &v) const;
     Q_INVOKABLE BrickLink::QmlColor colorFromLDrawId(int ldrawId) const;
@@ -193,6 +193,7 @@ class QmlColor : public QmlWrapperBase<const Color>
     Q_PRIVATE_PROPERTY(wrapped, float particleFraction READ particleFraction CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, float particleVFraction READ particleVFraction CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, QColor particleColor READ particleColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrapped, BrickLink::ColorType type READ type CONSTANT)
 
     Q_PROPERTY(QImage image READ image CONSTANT) // for print-scripts backwards compatibility
 
@@ -217,7 +218,7 @@ class QmlColorModel : public QIdentityProxyModel
     Q_OBJECT
     QML_NAMED_ELEMENT(ColorModel)
     Q_PROPERTY(float popularityFilter READ popularityFilter WRITE setPopuplarityFilter NOTIFY popularityFilterChanged)
-    Q_PROPERTY(int colorTypeFilter READ colorTypeFilter WRITE setColorTypeFilter NOTIFY colorTypeFilterChanged)
+    Q_PROPERTY(BrickLink::ColorType colorTypeFilter READ colorTypeFilter WRITE setColorTypeFilter NOTIFY colorTypeFilterChanged)
     Q_PROPERTY(QVariantList colorListFilter READ colorListFilter WRITE setColorListFilter NOTIFY colorListFilterChanged)
 
 public:
@@ -235,8 +236,8 @@ public:
 
     float popularityFilter() const;
     void setPopuplarityFilter(float p);
-    int colorTypeFilter() const;
-    void setColorTypeFilter(int ct);
+    ColorType colorTypeFilter() const;
+    void setColorTypeFilter(ColorType ct);
     QVariantList colorListFilter() const;
     void setColorListFilter(const QVariantList &colors);
 

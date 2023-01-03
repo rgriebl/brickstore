@@ -25,19 +25,29 @@ namespace BrickLink {
 QHash<uint, QImage> Color::s_colorImageCache;
 
 
-QString Color::typeName(TypeFlag t)
+const QVector<ColorTypeFlag> &Color::allColorTypes()
 {
-    static const QMap<TypeFlag, QString> colortypes = {
-        { Solid,       u"Solid"_qs },
-        { Transparent, u"Transparent"_qs },
-        { Glitter,     u"Glitter"_qs },
-        { Speckle,     u"Speckle"_qs },
-        { Metallic,    u"Metallic"_qs },
-        { Chrome,      u"Chrome"_qs },
-        { Pearl,       u"Pearl"_qs },
-        { Milky,       u"Milky"_qs },
-        { Modulex,     u"Modulex"_qs },
-        { Satin,       u"Satin"_qs },
+    static QVector<ColorTypeFlag> all;
+    if (all.isEmpty()) [[unlikely]] {
+        for (int ct = int(ColorTypeFlag::Solid); ct & int(ColorTypeFlag::Mask); ct <<= 1)
+            all.append(ColorTypeFlag(ct));
+    }
+    return all;
+}
+
+QString Color::typeName(ColorTypeFlag t)
+{
+    static const QMap<ColorTypeFlag, QString> colortypes = {
+        { ColorTypeFlag::Solid,       u"Solid"_qs },
+        { ColorTypeFlag::Transparent, u"Transparent"_qs },
+        { ColorTypeFlag::Glitter,     u"Glitter"_qs },
+        { ColorTypeFlag::Speckle,     u"Speckle"_qs },
+        { ColorTypeFlag::Metallic,    u"Metallic"_qs },
+        { ColorTypeFlag::Chrome,      u"Chrome"_qs },
+        { ColorTypeFlag::Pearl,       u"Pearl"_qs },
+        { ColorTypeFlag::Milky,       u"Milky"_qs },
+        { ColorTypeFlag::Modulex,     u"Modulex"_qs },
+        { ColorTypeFlag::Satin,       u"Satin"_qs },
     };
     return colortypes.value(t);
 }

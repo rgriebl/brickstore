@@ -18,6 +18,8 @@
 #include <QtGui/QColor>
 #include <QtGui/QImage>
 
+#include "bricklink/global.h"
+
 
 namespace BrickLink {
 
@@ -30,34 +32,18 @@ public:
     QString name() const      { return m_name; }
     QColor color() const      { return m_color; }
 
-    enum TypeFlag {
-        Solid        = 0x0001,
-        Transparent  = 0x0002,
-        Glitter      = 0x0004,
-        Speckle      = 0x0008,
-        Metallic     = 0x0010,
-        Chrome       = 0x0020,
-        Pearl        = 0x0040,
-        Milky        = 0x0080,
-        Modulex      = 0x0100,
-        Satin        = 0x0200,
+    ColorType type() const    { return m_type; }
 
-        Mask         = 0x03ff
-    };
-
-    Q_DECLARE_FLAGS(Type, TypeFlag)
-    Type type() const          { return m_type; }
-
-    bool isSolid() const       { return m_type & Solid; }
-    bool isTransparent() const { return m_type & Transparent; }
-    bool isGlitter() const     { return m_type & Glitter; }
-    bool isSpeckle() const     { return m_type & Speckle; }
-    bool isMetallic() const    { return m_type & Metallic; }
-    bool isChrome() const      { return m_type & Chrome; }
-    bool isPearl() const       { return m_type & Pearl; }
-    bool isMilky() const       { return m_type & Milky; }
-    bool isModulex() const     { return m_type & Modulex; }
-    bool isSatin() const       { return m_type & Satin; }
+    bool isSolid() const       { return m_type & ColorTypeFlag::Solid; }
+    bool isTransparent() const { return m_type & ColorTypeFlag::Transparent; }
+    bool isGlitter() const     { return m_type & ColorTypeFlag::Glitter; }
+    bool isSpeckle() const     { return m_type & ColorTypeFlag::Speckle; }
+    bool isMetallic() const    { return m_type & ColorTypeFlag::Metallic; }
+    bool isChrome() const      { return m_type & ColorTypeFlag::Chrome; }
+    bool isPearl() const       { return m_type & ColorTypeFlag::Pearl; }
+    bool isMilky() const       { return m_type & ColorTypeFlag::Milky; }
+    bool isModulex() const     { return m_type & ColorTypeFlag::Modulex; }
+    bool isSatin() const       { return m_type & ColorTypeFlag::Satin; }
 
     float luminance() const    { return m_luminance; }
 
@@ -74,7 +60,8 @@ public:
 
     float popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
 
-    static QString typeName(TypeFlag t);
+    static const QVector<ColorTypeFlag> &allColorTypes();
+    static QString typeName(ColorTypeFlag t);
 
     uint index() const;   // only for internal use
 
@@ -90,7 +77,7 @@ private:
     QColor  m_color;
     QColor  m_ldraw_color;
     QColor  m_ldraw_edge_color;
-    Type    m_type = {};
+    ColorType m_type = {};
     float   m_popularity = 0;
     quint16 m_year_from = 0;
     quint16 m_year_to = 0;
@@ -114,4 +101,3 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(const BrickLink::Color *)
-Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::Color::Type)

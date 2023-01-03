@@ -63,6 +63,25 @@ enum class PartOutTrait {
 Q_DECLARE_FLAGS(PartOutTraits, PartOutTrait);
 Q_DECLARE_OPERATORS_FOR_FLAGS(PartOutTraits);
 
+enum class ColorTypeFlag {
+    Solid        = 0x0001,
+    Transparent  = 0x0002,
+    Glitter      = 0x0004,
+    Speckle      = 0x0008,
+    Metallic     = 0x0010,
+    Chrome       = 0x0020,
+    Pearl        = 0x0040,
+    Milky        = 0x0080,
+    Modulex      = 0x0100,
+    Satin        = 0x0200,
+
+    Mask         = 0x03ff
+};
+
+Q_DECLARE_FLAGS(ColorType, ColorTypeFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(ColorType);
+
+Q_FLAG_NS(ColorType)
 Q_FLAG_NS(PartOutTraits)
 
 Q_ENUM_NS(Time)

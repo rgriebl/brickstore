@@ -130,7 +130,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         if (type.contains(u"Modulex"))     col.m_type |= Color::Modulex;
         if (type.contains(u"Satin"))       col.m_type |= Color::Satin;
         if (!col.m_type)
-            col.m_type = Color::Solid;
+            col.m_type = ColorTypeFlag::Solid;
 
         int partCnt    = p.elementText(e, "COLORCNTPARTS").toInt();
         int setCnt     = p.elementText(e, "COLORCNTSETS").toInt();
@@ -522,7 +522,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             QColor color = sl[6];
             QColor edgeColor = sl[8];
             float luminance = 0;
-            Color::Type type = Color::Solid;
+            ColorType type = ColorTypeFlag::Solid;
             float particleMinSize = 0;
             float particleMaxSize = 0;
             float particleFraction = 0;
@@ -540,27 +540,27 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
                 if ((sl[idx] == u"ALPHA") && (idx < lastIdx)) {
                     int alpha = sl[++idx].toInt();
                     color.setAlpha(alpha);
-                    type.setFlag(Color::Solid, false);
-                    type.setFlag(Color::Transparent);
+                    type.setFlag(ColorTypeFlag::Solid, false);
+                    type.setFlag(ColorTypeFlag::Transparent);
                 } else if ((sl[idx] == u"LUMINANCE") && (idx < lastIdx)) {
                     luminance = float(sl[++idx].toInt()) / 255;
                 } else if (sl[idx] == u"CHROME") {
-                    type.setFlag(Color::Chrome);
+                    type.setFlag(ColorTypeFlag::Chrome);
                 } else if (sl[idx] == u"PEARLESCENT") {
-                    type.setFlag(Color::Pearl);
+                    type.setFlag(ColorTypeFlag::Pearl);
                 } else if (sl[idx] == u"RUBBER") {
                     ; // ignore
                 } else if (sl[idx] == u"MATTE_METALLIC") {
                     ; // ignore
                 } else if (sl[idx] == u"METAL") {
-                    type.setFlag(Color::Metallic);
+                    type.setFlag(ColorTypeFlag::Metallic);
                 } else if ((sl[idx] == u"MATERIAL") && (idx < lastIdx)) {
                     const auto mat = sl[idx + 1];
 
                     if (mat == u"GLITTER")
-                        type.setFlag(name.startsWith(u"Opal_") ? Color::Satin : Color::Glitter);
+                        type.setFlag(name.startsWith(u"Opal_") ? ColorTypeFlag::Satin : ColorTypeFlag::Glitter);
                     else if (mat == u"SPECKLE")
-                        type.setFlag(Color::Speckle);
+                        type.setFlag(ColorTypeFlag::Speckle);
                     else
                         qWarning() << "Found unsupported MATERIAL" << mat << "at line" << lineno << "of LDConfig.ldr";
                 } else if ((sl[idx] == u"SIZE") && (idx < lastIdx)) {

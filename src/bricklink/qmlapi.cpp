@@ -729,11 +729,8 @@ QmlLot QmlBrickLink::noLot() const
 QVariantList QmlBrickLink::colorTypes() const
 {
     QVariantList result;
-
-    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
-        if (!BrickLink::Color::typeName(ct).isEmpty())
-            result.append(ct);
-    }
+    for (auto ct : Color::allColorTypes())
+        result.append(QVariant::fromValue(ct));
     return result;
 }
 
@@ -743,12 +740,12 @@ QVariantList QmlBrickLink::colorTypes() const
 */
 QImage QmlBrickLink::noImage(int width, int height) const
 {
-    return BrickLink::core()->noImage({ width, height });
+    return core()->noImage({ width, height });
 }
 
-QString QmlBrickLink::colorTypeName(int colorType) const
+QString QmlBrickLink::colorTypeName(ColorTypeFlag colorType) const
 {
-    return BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(colorType));
+    return Color::typeName(colorType);
 }
 
 /*! \qmlmethod Color BrickLink::color(var color)
@@ -1025,14 +1022,14 @@ void QmlColorModel::setPopuplarityFilter(float p)
     m_model->setPopularityFilter(p);
 }
 
-int QmlColorModel::colorTypeFilter() const
+ColorType QmlColorModel::colorTypeFilter() const
 {
-    return int(m_model->colorTypeFilter());
+    return m_model->colorTypeFilter();
 }
 
-void QmlColorModel::setColorTypeFilter(int ct)
+void QmlColorModel::setColorTypeFilter(ColorType ct)
 {
-    m_model->setColorTypeFilter(static_cast<Color::TypeFlag>(ct));
+    m_model->setColorTypeFilter(ct);
 }
 
 QVariantList QmlColorModel::colorListFilter() const
