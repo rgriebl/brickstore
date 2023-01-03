@@ -147,72 +147,66 @@ Item {
                 }
             }
 
-            Loader3D {
-                asynchronous: true
-                Repeater3D {
-                    model: root.renderController.surfaces
+            Repeater3D {
+                model: root.renderController.surfaces
 
-                    Model {
-                        id: model
-                        required property RenderGeometry modelData
+                Model {
+                    id: model
+                    required property RenderGeometry modelData
 
-                        geometry: modelData
-                        materials: PrincipledMaterial {
-                            id: material
-                            property color color       : model.modelData ? model.modelData.color : "pink"
-                            property real luminance    : model.modelData ? model.modelData.luminance : 0
-                            property bool isChrome     : model.modelData && model.modelData.isChrome
-                            property bool isMetallic   : model.modelData && model.modelData.isMetallic
-                            property bool isPearl      : model.modelData && model.modelData.isPearl
-                            property bool isTransparent: (color.a < 1)
-                            property var textureData   : model.modelData ? model.modelData.textureData : null
+                    geometry: modelData
+                    materials: PrincipledMaterial {
+                        id: material
+                        property color color       : model.modelData ? model.modelData.color : "pink"
+                        property real luminance    : model.modelData ? model.modelData.luminance : 0
+                        property bool isChrome     : model.modelData && model.modelData.isChrome
+                        property bool isMetallic   : model.modelData && model.modelData.isMetallic
+                        property bool isPearl      : model.modelData && model.modelData.isPearl
+                        property bool isTransparent: (color.a < 1)
+                        property var textureData   : model.modelData ? model.modelData.textureData : null
 
-                            property var texture: Texture { textureData: material.textureData }
+                        property var texture: Texture { textureData: material.textureData }
 
-                            lighting: RenderSettings.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
+                        lighting: RenderSettings.lighting ? PrincipledMaterial.FragmentLighting : PrincipledMaterial.NoLighting
 
-                            baseColorMap: textureData ? texture : null
-                            baseColor   : textureData ? "white" : color
+                        baseColorMap: textureData ? texture : null
+                        baseColor   : textureData ? "white" : color
 
-                            cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
-                            depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
-                            alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
-                            //blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
+                        cullMode     : isTransparent ? Material.NoCulling          : Material.BackFaceCulling
+                        depthDrawMode: isTransparent ? Material.NeverDepthDraw     : Material.AlwaysDepthDraw
+                        alphaMode    : isTransparent ? PrincipledMaterial.Blend    : PrincipledMaterial.Opaque
+                        //blendMode    : isTransparent ? PrincipledMaterial.Multiply : PrincipledMaterial.SourceOver
 
-                            emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
+                        emissiveFactor: Qt.vector3d(luminance, luminance, luminance)
 
-                            metalness: isChrome ? RenderSettings.chromeMetalness
-                                                : isMetallic ? RenderSettings.metallicMetalness
-                                                             : isPearl ? RenderSettings.pearlMetalness
-                                                                       : RenderSettings.plainMetalness
-                            roughness: isChrome ? RenderSettings.chromeRoughness
-                                                : isMetallic ? RenderSettings.metallicRoughness
-                                                             : isPearl ? RenderSettings.pearlRoughness
-                                                                       : RenderSettings.plainRoughness
-                        }
+                        metalness: isChrome ? RenderSettings.chromeMetalness
+                                            : isMetallic ? RenderSettings.metallicMetalness
+                                                         : isPearl ? RenderSettings.pearlMetalness
+                                                                   : RenderSettings.plainMetalness
+                        roughness: isChrome ? RenderSettings.chromeRoughness
+                                            : isMetallic ? RenderSettings.metallicRoughness
+                                                         : isPearl ? RenderSettings.pearlRoughness
+                                                                   : RenderSettings.plainRoughness
                     }
                 }
             }
 
-            Loader3D {
-                asynchronous: true
-                active: RenderSettings.renderLines
-                sourceComponent: Model {
-                    id: lines
-                    geometry: root.renderController.lineGeometry
-                    instancing: root.renderController.lines
-                    visible: RenderSettings.renderLines
-                    depthBias: -10
+            Model {
+                id: lines
+                geometry: root.renderController.lineGeometry
+                property var noInstancing: [ ]
+                instancing: RenderSettings.renderLines ? root.renderController.lines : noInstancing
+                visible: RenderSettings.renderLines
+                depthBias: -10
 
-                    materials: CustomMaterial {
-                        property real customLineWidth: RenderSettings.lineThickness * rootNode.scale.x / 50
-                        property size resolution: Qt.size(view.width, view.height)
+                materials: CustomMaterial {
+                    property real customLineWidth: RenderSettings.lineThickness * rootNode.scale.x / 50
+                    property size resolution: Qt.size(view.width, view.height)
 
-                        cullMode: Material.BackFaceCulling
-                        shadingMode: CustomMaterial.Unshaded
-                        vertexShader: "./shaders/custom-line.vert"
-                        fragmentShader: "./shaders/custom-line.frag"
-                    }
+                    cullMode: Material.BackFaceCulling
+                    shadingMode: CustomMaterial.Unshaded
+                    vertexShader: "./shaders/custom-line.vert"
+                    fragmentShader: "./shaders/custom-line.frag"
                 }
             }
         }
