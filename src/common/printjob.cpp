@@ -561,7 +561,7 @@ bool QmlPrintJob::print(const QList<uint> &pages)
     bool no_new_page = true;
 
     for (int i = 0; i < pageCount(); ++i) {
-        if (!pages.isEmpty() && !pages.contains(uint(i)))
+        if (!pages.isEmpty() && !pages.contains(uint(i + 1)))
             continue;
 
         QmlPrintPage *page = m_pages.at(i);
