@@ -647,20 +647,27 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         }
         case cell::Quantity:
             if (!is_updating) {
-                if (valid)
-                    str = QString::fromLatin1("%L1 (%L2)").arg(d->m_pg->quantity(c.m_time, c.m_condition))
-                            .arg(d->m_pg->lots(c.m_time, c.m_condition));
-
+                if (valid) {
+                    auto qty = d->m_pg->quantity(c.m_time, c.m_condition);
+                    auto lots = d->m_pg->lots(c.m_time, c.m_condition);
+                    if (!qty && !lots)
+                        str = u"-"_qs;
+                    else
+                        str = u"%L1 (%L2)"_qs.arg(qty).arg(lots);
+                }
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }
             break;
 
         case cell::Price:
             if (!is_updating) {
-                if (valid)
-                    str = Currency::toDisplayString(d->m_pg->price(c.m_time, c.m_condition,
-                                                                   c.m_price) * crate);
-
+                if (valid) {
+                    auto price = d->m_pg->price(c.m_time, c.m_condition, c.m_price) * crate;
+                    if (qFuzzyIsNull(price))
+                        str = u"-"_qs;
+                    else
+                        str = Currency::toDisplayString(price);
+                }
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
                           (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->isValid());
             }
