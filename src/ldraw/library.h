@@ -117,6 +117,7 @@ private:
     bool m_locked = false; // during updates/loading
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
+    QHash<QString, QString> m_partIdMapping;
     Q3Cache<QString, Part> m_cache;  // path -> part
 
     QVector<PartLoaderJob *> m_partLoaderJobs;

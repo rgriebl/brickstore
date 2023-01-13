@@ -21,6 +21,7 @@
 #include <QDirIterator>
 #include <QDebug>
 #include <QtConcurrent>
+#include <QCborValue>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -277,6 +278,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 
     m_zip.reset();
     m_searchpath.clear();
+    m_partIdMapping.clear();
 
     if (valid && m_isZip) {
         QFileInfo(path).dir().mkpath(u"."_qs);
@@ -295,6 +297,32 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
                 valid = false;
         } catch (const Exception &) {
             valid = false;
+        }
+        try {
+            auto cbor = readLDrawFile(u"brickstore-mappings.cbor"_qs);
+            if (cbor.isEmpty())
+                throw Exception(u"mapping file is empty"_qs);
+
+            QCborParserError parseError;
+            auto cborMap = QCborValue::fromCbor(cbor, &parseError);
+            if (parseError.error != QCborError::NoError)
+                throw Exception(u"CBOR parsing failed: %1"_qs).arg(parseError.errorString());
+
+            const auto map = cborMap.toMap();
+            if (map.isEmpty())
+                throw Exception(u"CBOR map is empty"_qs);
+
+            for (const auto &pair : map) {
+                if (pair.first.isString() && (pair.second.isString() || pair.second.isNull()))
+                    m_partIdMapping.insert(pair.first.toString(), pair.second.toString());
+            }
+            if (m_partIdMapping.size() != map.size()) {
+                throw Exception(u"CBOR map parsing failed for %1 of %2 entries"_qs)
+                    .arg(map.size() - m_partIdMapping.size()).arg(map.size());
+            }
+        } catch (const Exception &e) {
+            qCWarning(LogLDraw) << "This ldraw library does not have a brickstore-mapping.cbor file:"
+                                << e.errorString();
         }
     }
 
@@ -442,6 +470,16 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
         filename = u"stud-logo4.dat"_qs;
     else if (filename == u"stud2.dat")
         filename = u"stud2-logo4.dat"_qs;
+
+    if (filename.endsWith(u".dat")) {
+        auto it = m_partIdMapping.constFind(filename.left(filename.length() - 4));
+        if (it != m_partIdMapping.cend()) {
+            qCDebug(LogLDraw) << "Mapped" << it.key() << "to" << it.value();
+            if (it->isEmpty())
+                return nullptr;
+            filename = *it + u".dat";
+        }
+    }
 
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
