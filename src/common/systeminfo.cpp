@@ -69,6 +69,7 @@ SystemInfo::SystemInfo()
     m_map[u"os.arch"_qs] = QSysInfo::currentCpuArchitecture();
     m_map[u"qt.version"_qs] = QString::fromLatin1(qVersion());
     m_map[u"qt.debug"_qs] = QLibraryInfo::isDebugBuild();
+    m_map[u"qt.platformname"_qs] = QGuiApplication::platformName();
     m_map[u"build.compiler"_qs] = QLatin1String(BRICKSTORE_COMPILER_VERSION);
     m_map[u"build.arch"_qs] = QSysInfo::buildCpuArchitecture();
     m_map[u"build.host"_qs] = QLatin1String(BRICKSTORE_BUILD_HOST);
