@@ -327,7 +327,8 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
     }
 
     if (valid) {
-        static const char *subdirs[] = { "p/48", "p", "parts", "models" };
+        static const char *subdirs[] = { "LEGO", "Unofficial/p/48", "Unofficial/p", "p/48", "p",
+                                         "Unofficial/parts", "parts", "models" };
 
         for (auto subdir : subdirs) {
             if (m_zip) {

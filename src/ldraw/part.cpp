@@ -54,10 +54,13 @@ Element *Element::fromString(const QString &line, const QString &dir)
             int count = element_count_lut[t];
             if ((count == 0) || (list.size() == count)) {
                 switch (t) {
-                case 0:
-                    e = CommentElement::create(line.mid(1).trimmed());
+                case 0: {
+                    const QString cmd = line.mid(1).trimmed();
+                    if (cmd.startsWith(u"PE_TEX_")) // Stud.io textures do not have fallbacks
+                        break;
+                    e = CommentElement::create(cmd);
                     break;
-
+                }
                 case 1: {
                     QMatrix4x4 m {
                         list[4].toFloat(), list[5].toFloat(), list[6].toFloat(), list[1].toFloat(),
@@ -227,7 +230,9 @@ Part *Part::parse(const QByteArray &data, const QString &dir)
             p->m_elements.append(e);
             p->m_cost += int(e->size());
         } else {
-            //qCWarning(LogLDraw) << "Could not parse line" << lineno << ":" << line;
+            qCWarning(LogLDraw) << "Could not parse line" << lineno << ":" << line;
+            delete p;
+            return nullptr;
         }
     }
 
