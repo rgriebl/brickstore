@@ -14,7 +14,7 @@
 #include <QtConcurrent>
 #include <QProcess>
 #include <QLibraryInfo>
-#include <QCoreApplication>
+#include <QGuiApplication>
 #include <QLocale>
 
 #if defined(Q_OS_WINDOWS)

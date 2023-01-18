@@ -38,7 +38,7 @@ public:
 
     constexpr std::weak_ordering operator<=>(uint colorId) const { return m_fromColorId <=> colorId; }
     constexpr std::weak_ordering operator<=>(const ColorChangeLogEntry &other) const { return *this <=> other.m_fromColorId; }
-    constexpr bool operator==(uint colorId) const { return (*this <=> colorId) == std::weak_ordering::equivalent; }
+    constexpr bool operator==(uint colorId) const { return (*this <=> colorId == 0); }
     constexpr bool operator==(const ColorChangeLogEntry &other) const { return *this == other.m_fromColorId; }
 
 private:
@@ -71,7 +71,7 @@ public:
 
     std::weak_ordering operator<=>(const QByteArray &typeAndId) const { return m_fromTypeAndId.compare(typeAndId) <=> 0; }
     std::weak_ordering operator<=>(const ItemChangeLogEntry &other) const { return *this <=> other.m_fromTypeAndId; }
-    bool operator==(const QByteArray &typeAndId) const { return (*this <=> typeAndId) == std::weak_ordering::equivalent; }
+    bool operator==(const QByteArray &typeAndId) const { return (*this <=> typeAndId == 0); }
     bool operator==(const ItemChangeLogEntry &other) const { return *this == other.m_fromTypeAndId; }
 
 private:

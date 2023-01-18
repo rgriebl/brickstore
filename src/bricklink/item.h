@@ -115,7 +115,7 @@ public:
     }
     constexpr bool operator==(const std::pair<char, QByteArray> &ids) const
     {
-        return (*this <=> ids) == std::strong_ordering::equal;
+        return (*this <=> ids == 0);
     }
 
 private:

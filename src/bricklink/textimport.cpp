@@ -117,18 +117,18 @@ void BrickLink::TextImport::readColors(const QString &path)
         col.m_color    = QColor(u'#' + p.elementText(e, "COLORRGB"));
 
         col.m_ldraw_id = -1;
-        col.m_type     = Color::Type();
+        col.m_type     = ColorType();
 
         auto type = p.elementText(e, "COLORTYPE");
-        if (type.contains(u"Transparent")) col.m_type |= Color::Transparent;
-        if (type.contains(u"Glitter"))     col.m_type |= Color::Glitter;
-        if (type.contains(u"Speckle"))     col.m_type |= Color::Speckle;
-        if (type.contains(u"Metallic"))    col.m_type |= Color::Metallic;
-        if (type.contains(u"Chrome"))      col.m_type |= Color::Chrome;
-        if (type.contains(u"Pearl"))       col.m_type |= Color::Pearl;
-        if (type.contains(u"Milky"))       col.m_type |= Color::Milky;
-        if (type.contains(u"Modulex"))     col.m_type |= Color::Modulex;
-        if (type.contains(u"Satin"))       col.m_type |= Color::Satin;
+        if (type.contains(u"Transparent")) col.m_type |= ColorTypeFlag::Transparent;
+        if (type.contains(u"Glitter"))     col.m_type |= ColorTypeFlag::Glitter;
+        if (type.contains(u"Speckle"))     col.m_type |= ColorTypeFlag::Speckle;
+        if (type.contains(u"Metallic"))    col.m_type |= ColorTypeFlag::Metallic;
+        if (type.contains(u"Chrome"))      col.m_type |= ColorTypeFlag::Chrome;
+        if (type.contains(u"Pearl"))       col.m_type |= ColorTypeFlag::Pearl;
+        if (type.contains(u"Milky"))       col.m_type |= ColorTypeFlag::Milky;
+        if (type.contains(u"Modulex"))     col.m_type |= ColorTypeFlag::Modulex;
+        if (type.contains(u"Satin"))       col.m_type |= ColorTypeFlag::Satin;
         if (!col.m_type)
             col.m_type = ColorTypeFlag::Solid;
 
@@ -389,13 +389,13 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
                 throw Exception("Invalid Quantity %1").arg(qty);
 
             Item::ConsistsOf co;
-            co.m_quantity = qty;
-            co.m_itemIndex = itemIndex;
-            co.m_colorIndex = colorIndex;
-            co.m_extra = extra;
-            co.m_isalt = alternate;
-            co.m_altid = matchId;
-            co.m_cpart = counterPart;
+            co.m_bits.m_quantity = qty;
+            co.m_bits.m_itemIndex = itemIndex;
+            co.m_bits.m_colorIndex = colorIndex;
+            co.m_bits.m_extra = extra;
+            co.m_bits.m_isalt = alternate;
+            co.m_bits.m_altid = matchId;
+            co.m_bits.m_cpart = counterPart;
 
             // if this itemid was involved in a changelog entry after the last time we downloaded
             // the inventory, we need to reload
@@ -422,10 +422,10 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
         // BL bug: if an extra item is part of an alternative match set, then none of the
         //         alternatives have the 'extra' flag set.
         for (Item::ConsistsOf &co : inventory) {
-            if (co.m_isalt && !co.m_extra) {
+            if (co.isAlternate() && !co.isExtra()) {
                 for (const Item::ConsistsOf &mainCo : std::as_const(inventory)) {
-                    if ((mainCo.m_altid == co.m_altid) && !mainCo.m_isalt) {
-                        co.m_extra = mainCo.m_extra;
+                    if ((mainCo.alternateId() == co.alternateId()) && !mainCo.isAlternate()) {
+                        co.m_bits.m_extra = mainCo.m_bits.m_extra;
                         break;
                     }
                 }
@@ -433,21 +433,21 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
         }
         // pre-sort to have a nice sorting order, even in unsorted views
         std::sort(inventory.begin(), inventory.end(), [](const auto &co1, const auto &co2) {
-            if (co1.m_extra != co2.m_extra)
-                return co1.m_extra < co2.m_extra;
-            else if (co1.m_cpart != co2.m_cpart)
-                return co1.m_cpart < co2.m_cpart;
-            else if (co1.m_altid != co2.m_altid)
-                return co1.m_altid < co2.m_altid;
-            else if (co1.m_isalt != co2.m_isalt)
-                return co1.m_isalt < co2.m_isalt;
+            if (co1.isExtra() != co2.isExtra())
+                return co1.isExtra() < co2.isExtra();
+            else if (co1.isCounterPart() != co2.isCounterPart())
+                return co1.isCounterPart() < co2.isCounterPart();
+            else if (co1.alternateId() != co2.alternateId())
+                return co1.alternateId() < co2.alternateId();
+            else if (co1.isAlternate() != co2.isAlternate())
+                return co1.isAlternate() < co2.isAlternate();
             else
-                return co1.m_itemIndex < co2.m_itemIndex;
+                return co1.itemIndex() < co2.itemIndex();
         });
 
         for (const Item::ConsistsOf &co : std::as_const(inventory)) {
-            if (!co.m_extra) {
-                auto &vec = m_appears_in_hash[co.m_itemIndex][co.m_colorIndex];
+            if (!co.isExtra()) {
+                auto &vec = m_appears_in_hash[co.itemIndex()][co.colorIndex()];
                 vec.append(qMakePair(co.quantity(), itemIndex));
             }
         }
@@ -917,7 +917,7 @@ void BrickLink::TextImport::calculatePartsYearUsed()
                 const auto itemParts = m_consists_of_hash.value(itemIndex);
 
                 for (const BrickLink::Item::ConsistsOf &part : itemParts) {
-                    Item &partItem = m_items[part.m_itemIndex];
+                    Item &partItem = m_items[part.itemIndex()];
                     if (partItem.m_itemTypeId == 'P') {
                         partItem.m_year_from = partItem.m_year_from ? std::min(partItem.m_year_from, item.m_year_from)
                                                                     : item.m_year_from;

@@ -87,21 +87,42 @@ if (NOT ANDROID AND QT_32BIT)
     message(FATAL_ERROR "32bit builds for this platform are not supported.")
 endif()
 
-# this needs to happen before
-if (CLANG)
-    set(coroargs -fcoroutines-ts -stdlib=libc++)
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:>${coroargs}")
-elseif (GCC)
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>")
+# important: set up sentry BEFORE enabling strict error reporting
+if (SENTRY)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        sentry
+        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+        GIT_TAG        0.5.3
+        SOURCE_SUBDIR  "NeedManualAddSubDir"
+    )
+
+    # we need EXCLUDE_FROM_ALL to suppress the installation of sentry into the macOS bundle
+    # and Linux packages
+
+    FetchContent_MakeAvailable(sentry)
+    FetchContent_GetProperties(sentry)
+    add_subdirectory(${sentry_SOURCE_DIR} ${sentry_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+set(copts)
+set(cxxopts)
 if (MSVC)
     # need to disable C4127 due to 6.4.0 QStringBuilder
     # need to disable C4702 due to 6.4.0 QAnyStringView
-    add_compile_options(/W4 /WX /wd4127 /wd4702)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    list(APPEND copts /W4 /WX /wd4127 /wd4702)
+elseif(CLANG)
+    list(APPEND cxxopts -fcoroutines-ts -stdlib=libc++)
+    list(APPEND copts -Wall -Wextra -Wpedantic -Werror)
+    # clang bug, legal in C++20
+    list(APPEND cxxopts -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types)
+elseif (GCC)
+    list(APPEND cxxopts -fcoroutines)
+    list(APPEND copts -Wall -Wextra -Wpedantic -Werror)
 endif()
+add_compile_options("$<$<COMPILE_LANGUAGE:C>:${copts}>")
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${copts}$<SEMICOLON>${cxxopts}>")
 
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
 
@@ -147,15 +168,14 @@ if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
     message(FATAL_ERROR "Qt ${MIN_QT_VERSION} or newer is required for building this variant")
 endif()
 
+set(PARALLEL_STL OFF)
 if (WIN32)
     set(PARALLEL_STL ON)
     add_compile_definitions(
         BS_HAS_PARALLEL_STL
         NOMINMAX
     )
-endif()
-
-if (LINUX)
+elseif (LINUX)
     find_package(TBB)
     if (TBB_FOUND)
         set(PARALLEL_STL ON)
@@ -169,22 +189,6 @@ if (LINUX)
 endif()
 
 if (SENTRY)
-    include(FetchContent)
-
-    FetchContent_Declare(
-        sentry
-        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG        0.5.0
-        SOURCE_SUBDIR  "NeedManualAddSubDir"
-    )
-
-    # we need EXCLUDE_FROM_ALL to suppress the installation of sentry into the macOS bundle
-    # and Linux packages
-
-    FetchContent_MakeAvailable(sentry)
-    FetchContent_GetProperties(sentry)
-    add_subdirectory(${sentry_SOURCE_DIR} ${sentry_BINARY_DIR} EXCLUDE_FROM_ALL)
-
     add_compile_definitions(SENTRY_ENABLED)
     target_link_libraries(${PROJECT_NAME} PRIVATE sentry)
 endif()

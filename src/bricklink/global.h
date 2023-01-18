@@ -60,8 +60,8 @@ enum class PartOutTrait : uint {
     Minifigs     = 0x40,
 };
 
-Q_DECLARE_FLAGS(PartOutTraits, PartOutTrait);
-Q_DECLARE_OPERATORS_FOR_FLAGS(PartOutTraits);
+Q_DECLARE_FLAGS(PartOutTraits, PartOutTrait)
+Q_DECLARE_OPERATORS_FOR_FLAGS(PartOutTraits)
 
 enum class ColorTypeFlag : uint {
     Solid        = 0x0001,
@@ -79,7 +79,7 @@ enum class ColorTypeFlag : uint {
 };
 
 Q_DECLARE_FLAGS(ColorType, ColorTypeFlag)
-Q_DECLARE_OPERATORS_FOR_FLAGS(ColorType);
+Q_DECLARE_OPERATORS_FOR_FLAGS(ColorType)
 
 Q_FLAG_NS(ColorType)
 Q_FLAG_NS(PartOutTraits)

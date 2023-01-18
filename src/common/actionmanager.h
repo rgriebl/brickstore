@@ -114,7 +114,7 @@ public:
 
         std::strong_ordering operator<=>(const char *name) const { return qstrcmp(m_name, name) <=> 0; }
         std::strong_ordering operator<=>(const Action &other) const { return *this <=> other.m_name; }
-        bool operator==(const char *name) const { return (*this <=> name) == std::strong_ordering::equal; }
+        bool operator==(const char *name) const { return (*this <=> name == 0); }
 
     private:
         Action(const char *name, const char *text, Needs needs, Flags flags,

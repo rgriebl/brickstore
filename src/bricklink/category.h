@@ -41,7 +41,7 @@ public:
 
     constexpr std::strong_ordering operator<=>(uint id) const { return m_id <=> id; }
     constexpr std::strong_ordering operator<=>(const Category &other) const { return *this <=> other.m_id; }
-    constexpr bool operator==(uint id) const { return (*this <=> id) == std::strong_ordering::equal; }
+    constexpr bool operator==(uint id) const { return (*this <=> id == 0); }
 
 private:
     uint     m_id = InvalidId;

@@ -75,6 +75,7 @@ void MobileApplication::init()
 
     DocumentModel::setConsolidateFunction([](DocumentModel *model, QVector<DocumentModel::Consolidate> &list, bool addItems) -> QCoro::Task<bool> {
         auto *doc = DocumentList::inst()->documentForModel(model);
+        Q_UNUSED(addItems)
 
         if (!doc || !MobileApplication::inst())
             co_return false;

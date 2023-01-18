@@ -19,8 +19,8 @@
 #include <QException>
 #include <QString>
 
-QT_FORWARD_DECLARE_CLASS(QIODevice);
-QT_FORWARD_DECLARE_CLASS(QFileDevice);
+QT_FORWARD_DECLARE_CLASS(QIODevice)
+QT_FORWARD_DECLARE_CLASS(QFileDevice)
 
 
 class Exception : public QException

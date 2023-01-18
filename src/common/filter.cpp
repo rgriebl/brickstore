@@ -28,7 +28,7 @@ static QString quote(const QString &str)
         return u'"' + str + u'"';
     else
         return str;
-};
+}
 
 
 void Filter::setField(int field)

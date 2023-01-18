@@ -45,7 +45,7 @@ public:
 
     constexpr std::strong_ordering operator<=>(char id) const { return m_id <=> id; }
     constexpr std::strong_ordering operator<=>(const ItemType &other) const { return *this <=> other.m_id; }
-    constexpr bool operator==(char id) const { return (*this <=> id) == std::strong_ordering::equal; }
+    constexpr bool operator==(char id) const { return (*this <=> id == 0); }
 
     static char idFromFirstCharInString(const QString &str);
 

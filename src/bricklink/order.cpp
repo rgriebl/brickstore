@@ -1091,7 +1091,7 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
         }
     }
     return { };
-};
+}
 
 QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const
 {

@@ -508,6 +508,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         if (physicalMem >= 3'000'000'000ULL)
             pgCacheEntries *= 2;
     }
+#else
+    Q_UNUSED(physicalMem)
 #endif
 
     qInfo().noquote() << "Caches:"

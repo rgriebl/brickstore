@@ -988,7 +988,7 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
                 if (co.isExtra() || co.isCounterPart())
                     continue;
 
-                uint alternate = co.alternateId();
+                auto alternate = qsizetype(co.alternateId());
                 if (alternate) {
                     if (alternatesMatched.size() < alternate)
                         alternatesMatched.resize(alternate);
