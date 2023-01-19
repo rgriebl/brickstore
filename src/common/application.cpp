@@ -255,7 +255,8 @@ void Application::afterInit()
         m_undoGroup->addStack(document->model()->undoStack());
     });
 
-    if (!BrickLink::core()->database()->isValid() || BrickLink::core()->database()->isUpdateNeeded()) {
+    if (!BrickLink::core()->database()->isValid()
+            || (BrickLink::core()->database()->isUpdateNeeded() && OnlineState::inst()->isOnline())) {
         if (!QCoro::waitFor(updateDatabase())) {
             QCoro::waitFor(UIHelpers::warning(tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files.")));
         }
@@ -265,6 +266,20 @@ void Application::afterInit()
 
         // restore autosaves and/or last session
         QMetaObject::invokeMethod(this, [this]() { restoreLastSession(); }, Qt::QueuedConnection);
+
+        //TODO: if we haven't opened any documents, but the DB is outdated, we might want to
+        //      retry updating it after a few seconds. The problem here is, that OnlineState uses
+        //      a background thread which takes at least 5sec to update.
+
+        //        if (BrickLink::core()->database()->isUpdateNeeded() && !OnlineState::inst()->isOnline()) {
+        //            QTimer::singleShot(6000, this, []() { // 6000 might not be enough, but is actually to long
+        //                if (DocumentList::inst()->count() == 0) {
+        //                    if (OnlineState::inst()->isOnline()) {
+        //                        updateDatabase();
+        //                    }
+        //                }
+        //            });
+        //        }
     }
 
     connect(Currency::inst(), &Currency::updateRatesFailed,
