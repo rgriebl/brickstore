@@ -10,6 +10,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(SENTRY_VERSION 0.5.3)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(ANDROID_PLATFORM 21) # supress warning by setting it early
 endif()
@@ -88,13 +90,15 @@ if (NOT ANDROID AND QT_32BIT)
 endif()
 
 # important: set up sentry BEFORE enabling strict error reporting
+set(BS_SENTRY OFF)
 if (SENTRY)
+    set(BS_SENTRY ${SENTRY_VERSION})
     include(FetchContent)
 
     FetchContent_Declare(
         sentry
         GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG        0.5.3
+        GIT_TAG        ${SENTRY_VERSION}
         SOURCE_SUBDIR  "NeedManualAddSubDir"
     )
 
@@ -148,6 +152,7 @@ set(MIN_QT_VERSION 6.2.0)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
+    set(BS_TYPE "Mobile")
     set(MIN_QT_VERSION 6.4.0)
     add_compile_definitions(BS_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
@@ -155,10 +160,12 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
+    set(BS_TYPE "Backend")
     add_compile_definitions(BS_BACKEND)
 
 else()
     set(BS_DESKTOP ON)
+    set(BS_TYPE "Desktop")
     add_compile_definitions(BS_DESKTOP)
     find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D QuickControls2Impl)
 
@@ -667,10 +674,9 @@ message(STATUS "  Git describe.... ${GIT_VERSION}")
 message(STATUS "  Build type ..... ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Qt version ..... ${Qt6_VERSION}")
 message(STATUS "  Qt location .... ${Qt6_DIR}")
-message(STATUS "  BACKEND_ONLY ... ${BACKEND_ONLY}")
-message(STATUS "  FORCE_MOBILE ... ${FORCE_MOBILE}")
-message(STATUS "  SANITIZE ....... ${SANITIZE}")
-message(STATUS "  MODELTEST ...... ${MODELTEST}")
-message(STATUS "  SENTRY ......... ${SENTRY}")
-message(STATUS "  PARALLEL_STL ... ${PARALLEL_STL}")
+message(STATUS "  Build type ..... ${BS_TYPE}")
+message(STATUS "  Use sentry.io .. ${BS_SENTRY}")
+message(STATUS "  ASAN ........... ${SANITIZE}")
+message(STATUS "  Qt Modeltest ... ${MODELTEST}")
+message(STATUS "  Parallel STL ... ${PARALLEL_STL}")
 message(STATUS "")
