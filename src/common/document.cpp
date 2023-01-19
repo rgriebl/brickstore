@@ -833,7 +833,6 @@ void Document::duplicate()
     QItemSelection newSelection;
     const QModelIndex oldCurrentIdx = m_selectionModel->currentIndex();
     const Lot *oldCurrent = m_model->lot(oldCurrentIdx);
-    QModelIndex newCurrentIdx;
 
     model()->beginMacro();
 
@@ -856,19 +855,8 @@ void Document::duplicate()
 
     model()->endMacro(tr("Duplicated %Ln item(s)", nullptr, int(selectionCopy.size())));
 
-    int colCount = m_model->columnCount();
-    for (auto i = 0; i < newLotsCopy.size(); ++i) {
-        QModelIndex idx = m_model->index(newLotsCopy.at(i));
-        newSelection.select(idx, idx.siblingAtColumn(colCount - 1));
-        if (oldCurrent == selectionCopy.at(i))
-            newCurrentIdx = m_model->index(idx.row(), oldCurrentIdx.column());
-    }
-
-    // it's way faster to select the complete rows ourselves instead of relying on "Rows" here
-    m_selectionModel->select(newSelection, QItemSelectionModel::ClearAndSelect);
-
-    if (newCurrentIdx.isValid())
-        m_selectionModel->setCurrentIndex(newCurrentIdx, QItemSelectionModel::Current);
+    auto newCurrentLot = newLotsCopy.value(selectionCopy.indexOf(oldCurrent));
+    selectLots(newLotsCopy, newCurrentLot, oldCurrentIdx.column());
 }
 
 void Document::remove()
@@ -899,6 +887,30 @@ void Document::selectAll()
 void Document::selectNone()
 {
     m_selectionModel->clearSelection();
+}
+
+void Document::selectLots(const BrickLink::LotList &selectedLots, const BrickLink::Lot *currentLot,
+                          int currentColumn)
+{
+    QItemSelection newSelection;
+
+    int colCount = m_model->columnCount();
+    for (auto i = 0; i < selectedLots.size(); ++i) {
+        QModelIndex idx = m_model->index(selectedLots.at(i));
+        newSelection.select(idx, idx.siblingAtColumn(colCount - 1));
+    }
+
+    if (currentLot) {
+        QModelIndex idx = m_model->index(currentLot);
+        auto currentIdx = m_model->index(idx.row(), qBound(0, currentColumn, m_model->columnCount()));
+
+        if (currentIdx.isValid())
+            m_selectionModel->setCurrentIndex(currentIdx, QItemSelectionModel::Current);
+    }
+
+
+    // it's way faster to select the complete rows ourselves instead of relying on "Rows" here
+    m_selectionModel->select(newSelection, QItemSelectionModel::ClearAndSelect);
 }
 
 void Document::setFilterFromSelection()

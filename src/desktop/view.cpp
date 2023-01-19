@@ -576,6 +576,7 @@ QCoro::Task<> View::partOutItems()
     if (selection.count() >= 1) {
         auto pom = Config::inst()->partOutMode();
         bool inplace = (pom == Config::PartOutMode::InPlace);
+        int oldCurrentColumn = m_document->currentIndex().column();
 
         if (pom == Config::PartOutMode::Ask) {
             switch (co_await UIHelpers::question(tr("Should the selected items be parted out into the current document, replacing the selected items?"),
@@ -595,6 +596,7 @@ QCoro::Task<> View::partOutItems()
             m_model->beginMacro();
 
         int partcount = 0;
+        BrickLink::LotList inplaceLots;
 
         for (Lot *lot : selection) {
             if (!lot->item() || !lot->item()->hasInventory())
@@ -626,6 +628,7 @@ QCoro::Task<> View::partOutItems()
                                                                status);
                     auto newLots = pr.takeLots();
                     if (!newLots.isEmpty()) {
+                        inplaceLots.append(newLots);
                         m_model->insertLotsAfter(lot, std::move(newLots));
                         m_model->removeLot(lot);
                         partcount++;
@@ -636,8 +639,12 @@ QCoro::Task<> View::partOutItems()
                                             extraParts, partOutTraits, status);
             }
         }
-        if (inplace)
+        if (inplace) {
             m_model->endMacro(tr("Parted out %n item(s)", nullptr, partcount));
+
+            if (!inplaceLots.isEmpty())
+                m_document->selectLots(inplaceLots, inplaceLots.constFirst(), oldCurrentColumn);
+        }
     }
     else
         QApplication::beep();

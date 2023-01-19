@@ -161,6 +161,8 @@ public:
     void remove();
     void selectAll();
     void selectNone();
+    void selectLots(const BrickLink::LotList &lots, const BrickLink::Lot *current = nullptr,
+                    int currentColumn = 0);
 
     void toggleStatus();
     void toggleRetain();
