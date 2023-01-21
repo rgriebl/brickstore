@@ -32,7 +32,7 @@ mkdir -p "$gin"
 ######################################
 # app and doc icons
 
-echo -n "Generating app and doc icons..."
+echo -n "Generating app and doc icons... "
 
 # Unix icons
 convert $b/brickstore.png -resize 256 $gai/brickstore.png
@@ -51,7 +51,7 @@ convert $gai/brickstore_doc.png -define icon:auto-resize=256,96,48,32,16 $gai/br
 #png2icns $gai/brickstore_doc.icns $gai/brickstore_doc.png >/dev/null
 
 ## and makeicns is only available on macOS via brew
-if which makeicns >/dev/null; then
+if which makeicns 2>/dev/null >/dev/null; then
   makeicns -256 $gai/brickstore.png -32 $gai/brickstore.png -out $gai/brickstore.icns
   makeicns -256 $gai/brickstore_doc.png -32 $gai/brickstore_doc.png -out $gai/brickstore_doc.icns
 fi
@@ -61,8 +61,8 @@ gai_ios=$gai/AppIcon.xcassets/AppIcon.appiconset
 mkdir -p $gai_ios
 
 function ios_icon() {
-  s=$1
-  id=$2
+  local s=$1
+  local id=$2
 
   convert -size ${s}x${s} canvas:white \
         \( $b/brickstore.png -scale $((s*9/10)) \) -geometry +$((s*1/20))+$((s*1/20)) -composite \
@@ -80,7 +80,7 @@ echo "done"
 #######################################
 # edit icons with overlays
 
-echo -n "Generating action icons..."
+echo -n "Generating action icons... "
 
 tmp="$b/tmp"
 mkdir -p "$tmp"
@@ -139,7 +139,7 @@ echo "done"
 #######################################
 # creating installer images
 
-echo "Generating images for installers..."
+echo -n "Generating images for installers... "
 
 convert $gai/brickstore.png -resize 96x96 -define bmp3:alpha=true bmp3:$gin/windows-installer.bmp
 
@@ -149,7 +149,7 @@ echo "done"
 #######################################
 # optimize sizes
 
-if which zopflipng >/dev/null; then
+if which zopflipng 2>/dev/null >/dev/null; then
   echo "Optimizing..."
 
   for png in $(ls -1 $cus/*.png $gai/*.png $b/icons/$theme/generated $b/icons/${theme}-dark/generated); do
