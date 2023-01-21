@@ -50,19 +50,22 @@
 
 #include <QtConcurrentRun>
 
+//#define QPARALLELSORT_TESTING // benchmarking
 
-static constexpr qsizetype MinParallelSpan = 500;
+
+static constexpr qsizetype MinParallelSpan = 1024;
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
 void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan,
                          T *tmp, int threadCount)
 {
-    qsizetype span = end - begin;
+    const qsizetype span = end - begin;
 
     // stop if there are no threads left OR if size of array is at most MinParallelSpan (to avoid overhead)
     if ((threadCount == 1) || (span <= MinParallelSpan)) {
         // let's just sort this in serial
         std::sort(begin, end, lessThan);
+        return;
     } else {
         // divide & conquer
         qsizetype a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
@@ -83,16 +86,14 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
             // 'a' if no b left or a < b
             // 'b' if no a left or a >= b
             if (!b_span || (a_span && b_span && lessThan(*a, *b))) {
-                *(tmp + i) = *a;
-                a++;
+                *(tmp + i) = *a++;
                 a_span--;
             } else {
-                *(tmp + i) = *b;
-                b++;
+                *(tmp + i) = *b++;
                 b_span--;
             }
         }
-        std::copy(begin, end, tmp);
+        std::copy(tmp, tmp + span, begin);
     }
 }
 
@@ -102,13 +103,9 @@ inline void qParallelSortImpl(RandomAccessIterator begin, RandomAccessIterator e
     const qsizetype span = end - begin;
     if (span >= 2) {
         int threadCount = QThread::idealThreadCount();
-        if ((threadCount == 1) || (span <= MinParallelSpan)) {
-            std::sort(begin, end, lessThan);
-        } else {
-            auto *tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
-            qParallelSortThread(begin, end, lessThan, tmp, threadCount);
-            delete [] tmp;
-        }
+        auto *tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
+        qParallelSortThread(begin, end, lessThan, tmp, threadCount);
+        delete [] tmp;
     }
 }
 
@@ -149,37 +146,48 @@ inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
 #ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
 
-static void test_par_sort()
+static struct test_par_sort
 {
-    for (int k = 0; k < 3; ++k) {
-        const char *which = (k == 0 ? "std::sort           " :
-                            (k == 1 ? "std::sort par_unseq ":
-                                      "Parallel Sort       "));
-        int maxloop = 24;
+    test_par_sort()
+    {
+        static constinit bool once = true;
+        if (!once)
+            return;
+        once = false;
+
+        const struct {
+            const char *name;
+            std::function<void(int *, size_t)> fun;
+        } tests[] = {
+        { "std::sort           ", [](int *array, size_t count) { std::sort(array, array + count); } },
+        { "std::sort par_unseq ", [](int *array, size_t count) { std::sort(std::execution::par_unseq, array, array + count); } },
+        { "Parallel Sort       ", [](int *array, size_t count) { qParallelSortImpl(array, array + count, std::less<int>()); } },
+        };
+
+        static constexpr int maxloop = 24;
+
         int *src = new int[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
             src[j] = rand();
 
-        for (int i = 0; i <= maxloop; ++i) {
-            size_t count = 1 << i;
-            QByteArray msg = u"%3 test run %1 ... %2 values"_qs.arg(i).arg(count)
-                    .arg(QString::fromLatin1(which)).toLatin1();
-            int *array = new int[count];
-            memcpy(array, src, sizeof(int) * count);
+        for (const auto &test : tests) {
+            for (auto i = 0; i <= maxloop; ++i) {
+                size_t count = size_t(1ULL << i);
+                QByteArray msg = u"%3 test run %1 ... %2 values"_qs.arg(i).arg(count)
+                        .arg(QString::fromLatin1(test.name)).toLatin1();
+                int *array = new int[count];
+                memcpy(array, src, sizeof(int) * count);
 
-            {
-                stopwatch sw(msg.constData());
-                if (k == 0)
-                    std::sort(array, array + count);
-                else if (k == 1)
-                    std::sort(std::execution::par_unseq, array, array + count);
-                else
-                    qParallelSortImpl(array, array + count, std::less<int>());
+                {
+                    stopwatch sw(msg.constData());
+                    test.fun(array, count);
+                }
+                delete [] array;
             }
-            delete [] array;
         }
         delete [] src;
     }
-}
+} dummy;
+
 #  endif
 
