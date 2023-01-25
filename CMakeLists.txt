@@ -599,6 +599,12 @@ elseif (LINUX)
     set(APPIMAGE_DIR "${CMAKE_BINARY_DIR}/AppDir")
     set(LINUXDEPLOY_DIR "${CMAKE_BINARY_DIR}/.linuxdeploy")
 
+    execute_process(
+        COMMAND "${CMAKE_C_COMPILER}" --print-multiarch
+        OUTPUT_VARIABLE ARCH_TRIPLET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
     add_custom_target(appimage
         COMMAND mkdir -p "${APPIMAGE_DIR}"
         COMMAND install -D "${CMAKE_SOURCE_DIR}/unix/brickstore-mime.xml"
@@ -618,6 +624,8 @@ elseif (LINUX)
                     -e "${CMAKE_BINARY_DIR}/bin/brickstore"
                     -i "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png"
                     -d "${CMAKE_SOURCE_DIR}/unix/brickstore.desktop"
+                    -l "/usr/lib/${ARCH_TRIPLET}/libcrypto.so.1.1"
+                    -l "/usr/lib/${ARCH_TRIPLET}/libssl.so.1.1"
                     --plugin qt --output appimage
         DEPENDS ${PROJECT_NAME}
     )
