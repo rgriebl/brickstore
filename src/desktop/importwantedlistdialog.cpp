@@ -32,6 +32,7 @@
 #include "bricklink/wantedlist.h"
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/humanreadabletimedelta.h"
 #include "betteritemdelegate.h"
@@ -206,8 +207,7 @@ void ImportWantedListDialog::showWantedListsOnBrickLink()
     const auto selection = w_wantedLists->selectionModel()->selectedRows();
     for (auto idx : selection) {
         auto wantedList = idx.data(BrickLink::WantedLists::WantedListPointerRole).value<BrickLink::WantedList *>();
-        int id = wantedList->id();
-        BrickLink::core()->openUrl(BrickLink::Url::WantedList, &id);
+        Application::openUrl(BrickLink::Core::urlForWantedList(wantedList->id()));
     }
 }
 

@@ -20,6 +20,7 @@
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "importinventorydialog.h"
@@ -93,21 +94,21 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
         if (auto *a = ActionManager::inst()->action("bricklink_catalog")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 if (const auto currentItem = m_select->currentItem())
-                    BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, currentItem);
+                    Application::openUrl(BrickLink::Core::urlForCatalogInfo(currentItem));
             });
         }
         if (auto *a = ActionManager::inst()->action("bricklink_priceguide")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 const auto currentItem = m_select->currentItem();
                 if (currentItem && !currentItem->itemType()->hasColors())
-                    BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, currentItem);
+                    Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(currentItem));
             });
         }
         if (auto *a = ActionManager::inst()->action("bricklink_lotsforsale")) {
             new QShortcut(a->shortcuts().constFirst(), this, [this]() {
                 const auto currentItem = m_select->currentItem();
                 if (currentItem && !currentItem->itemType()->hasColors())
-                    BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, currentItem);
+                    Application::openUrl(BrickLink::Core::urlForLotsForSale(currentItem));
             });
         }
         checkItem(m_select->currentItem(), false);

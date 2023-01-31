@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QThread>
 #include <QUrlQuery>
-#include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRunnable>
@@ -57,169 +56,148 @@ Q_LOGGING_CATEGORY(LogCache, "cache")
 
 namespace BrickLink {
 
-void Core::openUrl(Url u, const void *opt, const void *opt2)
+QUrl Core::urlForInventoryRequest()
 {
-    QUrl url;
-
-    switch (u) {
-    case Url::InventoryRequest:
-        url = u"https://www.bricklink.com/catalogInvAdd.asp"_qs;
-        break;
-
-    case Url::WantedListUpload:
-        url = u"https://www.bricklink.com/wantedXML.asp"_qs;
-        break;
-
-    case Url::InventoryUpload:
-        url = u"https://www.bricklink.com/invXML.asp"_qs;
-        break;
-
-    case Url::InventoryUpdate:
-        url = u"https://www.bricklink.com/invXML.asp#update"_qs;
-        break;
-
-    case Url::CatalogInfo: {
-        auto item = static_cast<const Item *>(opt);
-        if (item && item->itemType()) {
-            url = u"https://www.bricklink.com/catalogItem.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), QLatin1String(item->id()));
-            if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem(u"C"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::PriceGuideInfo: {
-        auto *item = static_cast<const Item *>(opt);
-        if (item && item->itemType()) {
-            url = u"https://www.bricklink.com/catalogPG.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
-            if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::LotsForSale: {
-        auto item = static_cast<const Item *>(opt);
-        if (item && item->itemType()) {
-            url = u"https://www.bricklink.com/search.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"viewFrom"_qs, u"sa"_qs);
-            query.addQueryItem(u"itemType"_qs, QString(QLatin1Char(item->itemTypeId())));
-
-            // workaround for BL not accepting the -X suffix for sets, instructions and boxes
-            QString id = QLatin1String(item->id());
-            char itt = item->itemTypeId();
-
-            if (itt == 'S' || itt == 'I' || itt == 'O') {
-                auto pos = id.lastIndexOf(u'-');
-                if (pos >= 0)
-                    id.truncate(pos);
-            }
-            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(id));
-
-            if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::AppearsInSets: {
-        auto item = static_cast<const Item *>(opt);
-        if (item && item->itemType()) {
-            url = u"https://www.bricklink.com/catalogItemIn.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()));
-            query.addQueryItem(u"in"_qs, u"S"_qs);
-
-            if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem(u"colorID"_qs, QString::number(static_cast<const Color *>(opt2)->id()));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::ColorChangeLog:
-        url = u"https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R"_qs;
-        break;
-
-    case Url::ItemChangeLog: {
-        url = u"https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I"_qs;
-        QUrlQuery query;
-        if (opt)
-            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(static_cast<const char *>(opt)));
-        url.setQuery(query);
-        break;
-    }
-    case Url::StoreItemDetail: {
-        auto lotId = static_cast<const unsigned int *>(opt);
-        if (lotId && *lotId) {
-            url = u"https://www.bricklink.com/inventory_detail.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"invID"_qs, Utility::urlQueryEscape(QString::number(*lotId)));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::StoreItemSearch: {
-        const Item *item = static_cast<const Item *>(opt);
-        const Color *color = static_cast<const Color *>(opt2);
-        if (item && item->itemType()) {
-            url = u"https://www.bricklink.com/inventory_detail.asp?"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"catType"_qs, QString(QLatin1Char(item->itemTypeId())));
-            QString queryTerm = QString::fromLatin1(item->id());
-            if (queryTerm.contains(u'-')) {
-                queryTerm = item->name();
-                queryTerm.remove(u'(');
-                queryTerm.remove(u')');
-            }
-            if (item->itemType()->hasColors() && color)
-                queryTerm = color->name() + u' ' + queryTerm;
-            query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::OrderDetails: {
-        auto orderId = static_cast<const char *>(opt);
-        if (orderId && *orderId) {
-            url = u"https://www.bricklink.com/orderDetail.asp"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"ID"_qs, Utility::urlQueryEscape(orderId));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::ShoppingCart: {
-        auto shopId = static_cast<const int *>(opt);
-        if (shopId && *shopId) {
-            url = u"https://www.bricklink.com/v2/globalcart.page"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"sid"_qs, Utility::urlQueryEscape(QString::number(*shopId)));
-            url.setQuery(query);
-        }
-        break;
-    }
-    case Url::WantedList: {
-        auto wantedId = static_cast<const int *>(opt);
-        if (wantedId && (*wantedId >= 0)) {
-            url = u"https://www.bricklink.com/v2/wanted/edit.page"_qs;
-            QUrlQuery query;
-            query.addQueryItem(u"wantedMoreID"_qs, Utility::urlQueryEscape(QString::number(*wantedId)));
-            url.setQuery(query);
-        }
-        break;
-    }
-    }
-    if (url.isValid()) {
-        // decouple from the UI, necessary on iOS
-        QMetaObject::invokeMethod(qApp, [=]() { QDesktopServices::openUrl(url); }, Qt::QueuedConnection);
-    }
+    return u"https://www.bricklink.com/catalogInvAdd.asp"_qs;
 }
 
+QUrl Core::urlForWantedListUpload()
+{
+    return u"https://www.bricklink.com/wantedXML.asp"_qs;
+}
+
+QUrl Core::urlForInventoryUpload()
+{
+    return u"https://www.bricklink.com/invXML.asp"_qs;
+}
+
+QUrl Core::urlForInventoryUpdate()
+{
+    return u"https://www.bricklink.com/invXML.asp#update"_qs;
+}
+
+QUrl Core::urlForCatalogInfo(const Item *item, const Color *color)
+{
+    QUrl url;
+    if (item && item->itemType()) {
+        url = u"https://www.bricklink.com/catalogItem.asp"_qs;
+        QUrlQuery query {
+            { QString(QLatin1Char(item->itemTypeId())), QLatin1String(item->id()) }
+        };
+        if (item->itemType()->hasColors() && color)
+            query.addQueryItem(u"C"_qs, QString::number(color->id()));
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QUrl Core::urlForPriceGuideInfo(const Item *item, const Color *color)
+{
+    QUrl url;
+    if (item && item->itemType()) {
+        url = u"https://www.bricklink.com/catalogPG.asp"_qs;
+        QUrlQuery query {
+            { QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()) }
+        };
+        if (item->itemType()->hasColors() && color)
+            query.addQueryItem(u"colorID"_qs, QString::number(color->id()));
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QUrl Core::urlForLotsForSale(const Item *item, const Color *color)
+{
+    QUrl url;
+    if (item && item->itemType()) {
+        url = u"https://www.bricklink.com/search.asp"_qs;
+        QUrlQuery query {
+            { u"viewFrom"_qs, u"sa"_qs },
+            { u"itemType"_qs, QString(QLatin1Char(item->itemTypeId())) },
+        };
+
+        // workaround for BL not accepting the -X suffix for sets, instructions and boxes
+        QString id = QLatin1String(item->id());
+        char itt = item->itemTypeId();
+
+        if (itt == 'S' || itt == 'I' || itt == 'O') {
+            auto pos = id.lastIndexOf(u'-');
+            if (pos >= 0)
+                id.truncate(pos);
+        }
+        query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(id));
+
+        if (item->itemType()->hasColors() && color)
+            query.addQueryItem(u"colorID"_qs, QString::number(color->id()));
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QUrl Core::urlForAppearsInSets(const Item *item, const Color *color)
+{
+    QUrl url;
+    if (item && item->itemType()) {
+        url = u"https://www.bricklink.com/catalogItemIn.asp"_qs;
+        QUrlQuery query {
+            { QString(QLatin1Char(item->itemTypeId())), Utility::urlQueryEscape(item->id()) },
+            { u"in"_qs, u"S"_qs },
+        };
+        if (item->itemType()->hasColors() && color)
+            query.addQueryItem(u"colorID"_qs, QString::number(color->id()));
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QUrl Core::urlForStoreItemDetail(uint lotId)
+{
+    QUrl url = u"https://www.bricklink.com/inventory_detail.asp"_qs;
+    url.setQuery({ { u"invID"_qs, QString::number(lotId) } } );
+    return url;
+}
+
+QUrl Core::urlForStoreItemSearch(const Item *item, const Color *color)
+{
+    QUrl url;
+    if (item && item->itemType()) {
+        url = u"https://www.bricklink.com/inventory_detail.asp?"_qs;
+        QUrlQuery query;
+        query.addQueryItem(u"catType"_qs, QString(QLatin1Char(item->itemTypeId())));
+        QString queryTerm = QString::fromLatin1(item->id());
+        if (queryTerm.contains(u'-')) {
+            queryTerm = item->name();
+            queryTerm.remove(u'(');
+            queryTerm.remove(u')');
+        }
+        if (item->itemType()->hasColors() && color)
+            queryTerm = color->name() + u' ' + queryTerm;
+        query.addQueryItem(u"q"_qs, Utility::urlQueryEscape(queryTerm));
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QUrl Core::urlForOrderDetails(const QString &orderId)
+{
+    QUrl url = u"https://www.bricklink.com/orderDetail.asp"_qs;
+    url.setQuery({ { u"ID"_qs, Utility::urlQueryEscape(orderId) } });
+    return url;
+}
+
+QUrl Core::urlForShoppingCart(int shopId)
+{
+    QUrl url = u"https://www.bricklink.com/v2/globalcart.page"_qs;
+    url.setQuery({ { u"sid"_qs, QString::number(shopId) } });
+    return url;
+}
+
+QUrl Core::urlForWantedList(uint wantedListId)
+{
+    QUrl url = u"https://www.bricklink.com/v2/wanted/edit.page"_qs;
+    url.setQuery({ { u"wantedMoreID"_qs, QString::number(wantedListId) } });
+    return url;
+}
 
 const QImage Core::noImage(const QSize &s) const
 {

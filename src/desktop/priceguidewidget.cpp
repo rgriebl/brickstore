@@ -26,6 +26,7 @@
 
 #include "bricklink/core.h"
 #include "bricklink/priceguide.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/currency.h"
 #include "priceguidewidget.h"
@@ -185,19 +186,19 @@ PriceGuideWidget::~PriceGuideWidget()
 void PriceGuideWidget::showBLCatalogInfo()
 {
     if (d->m_pg && d->m_pg->item())
-        BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, d->m_pg->item(), d->m_pg->color());
+        Application::openUrl(BrickLink::Core::urlForCatalogInfo(d->m_pg->item(), d->m_pg->color()));
 }
 
 void PriceGuideWidget::showBLPriceGuideInfo()
 {
     if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, d->m_pg->item(), d->m_pg->color());
+        Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(d->m_pg->item(), d->m_pg->color()));
 }
 
 void PriceGuideWidget::showBLLotsForSale()
 {
     if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, d->m_pg->item(), d->m_pg->color());
+        Application::openUrl(BrickLink::Core::urlForLotsForSale(d->m_pg->item(), d->m_pg->color()));
 }
 
 QSize PriceGuideWidget::sizeHint() const

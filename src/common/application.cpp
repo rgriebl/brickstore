@@ -232,19 +232,19 @@ void Application::afterInit()
         { "configure", [this](auto) { emit showSettings(); } },
         { "help_extensions", [](auto) {
               QString url = u"https://" + Application::inst()->gitHubPagesUrl() + u"/extensions/";
-              QDesktopServices::openUrl(url);
+              openUrl(url);
           } },
         { "help_reportbug", [](auto) {
               QString url = u"https://" + Application::inst()->gitHubUrl() + u"/issues/new";
-              QDesktopServices::openUrl(url);
+              openUrl(url);
           } },
         { "help_releasenotes", [](auto) {
               QString url = u"https://" + Application::inst()->gitHubUrl() + u"/releases";
-              QDesktopServices::openUrl(url);
+              openUrl(url);
           } },
         { "help_announcements", [](auto) {
               QString url = Application::inst()->announcements()->announcementsWikiUrl();
-              QDesktopServices::openUrl(url);
+              openUrl(url);
           } },
     };
 
@@ -464,6 +464,12 @@ QString Application::databaseUrl() const
 QString Application::ldrawUrl() const
 {
     return QLatin1String(BRICKSTORE_DATABASE_URL);
+}
+
+void Application::openUrl(const QUrl &url)
+{
+    // decouple from the UI, necessary on iOS
+    QMetaObject::invokeMethod(qApp, [=]() { QDesktopServices::openUrl(url); }, Qt::QueuedConnection);
 }
 
 void Application::checkRestart()

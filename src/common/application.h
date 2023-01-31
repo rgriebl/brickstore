@@ -50,6 +50,8 @@ public:
     QString databaseUrl() const;
     QString ldrawUrl() const;
 
+    static void openUrl(const QUrl &url);
+
     typedef std::tuple<QtMsgType, QString, QString, int, QString> UILogMessage;
     typedef void (*UIMessageHandler)(const UILogMessage &msg);
 

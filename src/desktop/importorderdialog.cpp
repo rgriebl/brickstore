@@ -28,6 +28,7 @@
 #include "bricklink/core.h"
 #include "bricklink/order.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentio.h"
@@ -133,8 +134,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
         const auto selection = w_orders->selectionModel()->selectedRows();
         for (const auto &idx : selection) {
             auto order = idx.data(BrickLink::Orders::OrderPointerRole).value<BrickLink::Order *>();
-            QByteArray orderId = order->id().toLatin1();
-            BrickLink::core()->openUrl(BrickLink::Url::OrderDetails, orderId.constData());
+            Application::openUrl(BrickLink::Core::urlForOrderDetails(order->id()));
         }
     });
     m_contextMenu->addAction(m_showOnBrickLink);

@@ -31,24 +31,6 @@ enum class OrderType    : uint { Received, Placed, Any };
 enum class OrderStatus  : uint { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
                                  Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
-enum class Url : uint {
-    InventoryRequest,
-    WantedListUpload,
-    InventoryUpload,
-    InventoryUpdate,
-    CatalogInfo,
-    PriceGuideInfo,
-    ColorChangeLog,
-    ItemChangeLog,
-    LotsForSale,
-    AppearsInSets,
-    StoreItemDetail,
-    StoreItemSearch,
-    OrderDetails,
-    ShoppingCart,
-    WantedList,
-};
-
 enum class PartOutTrait : uint {
     None         = 0x00,
     Instructions = 0x01,
@@ -93,7 +75,6 @@ Q_ENUM_NS(Status)
 Q_ENUM_NS(UpdateStatus)
 Q_ENUM_NS(OrderType)
 Q_ENUM_NS(OrderStatus)
-Q_ENUM_NS(Url)
 
 enum ModelRoles {
     RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
@@ -152,4 +133,3 @@ Q_DECLARE_METATYPE(BrickLink::Stockroom)
 Q_DECLARE_METATYPE(BrickLink::Status)
 Q_DECLARE_METATYPE(BrickLink::OrderType)
 Q_DECLARE_METATYPE(BrickLink::OrderStatus)
-Q_DECLARE_METATYPE(BrickLink::Url)

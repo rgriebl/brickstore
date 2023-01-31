@@ -32,6 +32,7 @@
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/humanreadabletimedelta.h"
 #include "betteritemdelegate.h"
@@ -208,8 +209,7 @@ void ImportCartDialog::showCartsOnBrickLink()
     const auto selection = w_carts->selectionModel()->selectedRows();
     for (auto idx : selection) {
         auto cart = idx.data(BrickLink::Carts::CartPointerRole).value<BrickLink::Cart *>();
-        int sellerId = cart->sellerId();
-        BrickLink::core()->openUrl(BrickLink::Url::ShoppingCart, &sellerId);
+        Application::openUrl(BrickLink::Core::urlForShoppingCart(cart->sellerId()));
     }
 }
 

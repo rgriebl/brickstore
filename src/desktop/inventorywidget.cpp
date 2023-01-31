@@ -25,6 +25,7 @@
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
+#include "common/application.h"
 #include "common/document.h"
 #include "importinventorydialog.h"
 
@@ -124,7 +125,7 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
         const auto entry = selected();
 
         if (entry.m_item)
-            BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, entry.m_item);
+            Application::openUrl(BrickLink::Core::urlForCatalogInfo(entry.m_item));
     });
 
     d->m_priceGuideAction = new QAction(this);
@@ -133,9 +134,12 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     connect(d->m_priceGuideAction, &QAction::triggered, this, [this]() {
         const auto entry = selected();
 
-        if (entry.m_item)
-            BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, entry.m_item,
-                                       entry.m_color ? entry.m_color : BrickLink::core()->color(0));
+        if (entry.m_item) {
+            Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(
+                                             entry.m_item,
+                                             entry.m_color ? entry.m_color
+                                                           : BrickLink::core()->color(0)));
+        }
     });
 
     d->m_lotsForSaleAction = new QAction(this);
@@ -144,9 +148,12 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     connect(d->m_lotsForSaleAction, &QAction::triggered, this, [this]() {
         const auto entry = selected();
 
-        if (entry.m_item)
-            BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, entry.m_item,
-                                       entry.m_color ? entry.m_color : BrickLink::core()->color(0));
+        if (entry.m_item) {
+            Application::openUrl(BrickLink::Core::urlForLotsForSale(
+                                             entry.m_item,
+                                             entry.m_color ? entry.m_color
+                                                           : BrickLink::core()->color(0)));
+        }
     });
 
     d->m_contextMenu->addAction(d->m_partOutAction);

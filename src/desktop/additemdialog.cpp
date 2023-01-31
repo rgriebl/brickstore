@@ -37,6 +37,7 @@
 #include "bricklink/core.h"
 #include "bricklink/picture.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentmodel.h"
@@ -341,27 +342,24 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
-            if (item) {
-                BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, item, color);
-            }
+            if (item)
+                Application::openUrl(BrickLink::Core::urlForCatalogInfo(item, color));
         });
     }
     if (QAction *a = ActionManager::inst()->qAction("bricklink_priceguide")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
-            if (item && (color || !item->itemType()->hasColors())) {
-                BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, item, color);
-            }
+            if (item && (color || !item->itemType()->hasColors()))
+                Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(item, color));
         });
     }
     if (QAction *a = ActionManager::inst()->qAction("bricklink_lotsforsale")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
-            if (item && (color || !item->itemType()->hasColors())) {
-                BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, item, color);
-            }
+            if (item && (color || !item->itemType()->hasColors()))
+                Application::openUrl(BrickLink::Core::urlForLotsForSale(item, color));
         });
     }
 

@@ -49,7 +49,19 @@ class Core : public QObject
 public:
     ~Core() override;
 
-    void openUrl(Url u, const void *opt = nullptr, const void *opt2 = nullptr);
+    static QUrl urlForInventoryRequest();
+    static QUrl urlForWantedListUpload();
+    static QUrl urlForInventoryUpload();
+    static QUrl urlForInventoryUpdate();
+    static QUrl urlForCatalogInfo(const Item *item, const Color *color = nullptr);
+    static QUrl urlForPriceGuideInfo(const Item *item, const Color *color = nullptr);
+    static QUrl urlForLotsForSale(const Item *item, const Color *color = nullptr);
+    static QUrl urlForAppearsInSets(const Item *item, const Color *color = nullptr);
+    static QUrl urlForStoreItemDetail(uint lotId);
+    static QUrl urlForStoreItemSearch(const Item *item, const Color *color = nullptr);
+    static QUrl urlForOrderDetails(const QString &orderId);
+    static QUrl urlForShoppingCart(int shopId);
+    static QUrl urlForWantedList(uint wantedListId);
 
     QString dataPath() const;
     QFile *dataReadFile(QStringView fileName, const Item *item,

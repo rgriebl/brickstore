@@ -492,19 +492,19 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, lot->item(), lot->color());
+              Application::openUrl(BrickLink::Core::urlForCatalogInfo(lot->item(), lot->color()));
           } },
         { "bricklink_priceguide", [this](auto) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, lot->item(), lot->color());
+              Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(lot->item(), lot->color()));
           } },
         { "bricklink_lotsforsale", [this](auto) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
-              BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, lot->item(), lot->color());
+              Application::openUrl(BrickLink::Core::urlForLotsForSale(lot->item(), lot->color()));
           } },
         { "bricklink_myinventory", [this](auto) {
               if (selectedLots().isEmpty())
@@ -512,9 +512,9 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               const auto *lot = selectedLots().constFirst();
               uint lotid = lot->lotId();
               if (lotid)
-              BrickLink::core()->openUrl(BrickLink::Url::StoreItemDetail, &lotid);
+                  Application::openUrl(BrickLink::Core::urlForStoreItemDetail(lotid));
               else
-              BrickLink::core()->openUrl(BrickLink::Url::StoreItemSearch, lot->item(), lot->color());
+                  Application::openUrl(BrickLink::Core::urlForStoreItemSearch(lot->item(), lot->color()));
           } },
     };
 
@@ -1546,7 +1546,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::Url::InventoryUpload);
+            Application::openUrl(BrickLink::Core::urlForInventoryUpload());
     }
 }
 
@@ -1570,7 +1570,7 @@ QCoro::Task<> Document::exportBrickLinkUpdateXMLToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::Url::InventoryUpdate);
+            Application::openUrl(BrickLink::Core::urlForInventoryUpdate());
     }
 }
 
@@ -1583,7 +1583,7 @@ QCoro::Task<> Document::exportBrickLinkInventoryRequestToClipboard()
 
         QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
-            BrickLink::core()->openUrl(BrickLink::Url::InventoryRequest);
+            Application::openUrl(BrickLink::Core::urlForInventoryRequest());
     }
 }
 
@@ -1597,7 +1597,7 @@ QCoro::Task<> Document::exportBrickLinkWantedListToClipboard()
 
             QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
             if (Config::inst()->openBrowserOnExport())
-                BrickLink::core()->openUrl(BrickLink::Url::WantedListUpload);
+                Application::openUrl(BrickLink::Core::urlForWantedListUpload());
         }
     }
 }

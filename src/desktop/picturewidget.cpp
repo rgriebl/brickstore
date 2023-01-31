@@ -140,17 +140,17 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     m_blCatalog = new QAction(QIcon::fromTheme(u"bricklink-catalog"_qs), { }, this);
     connect(m_blCatalog, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::Url::CatalogInfo, m_item, m_color);
+        Application::openUrl(BrickLink::Core::urlForCatalogInfo(m_item, m_color));
     });
 
     m_blPriceGuide = new QAction(QIcon::fromTheme(u"bricklink-priceguide"_qs), { }, this);
     connect(m_blPriceGuide, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::Url::PriceGuideInfo, m_item, m_color);
+        Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(m_item, m_color));
     });
 
     m_blLotsForSale = new QAction(QIcon::fromTheme(u"bricklink-lotsforsale"_qs), { }, this);
     connect(m_blLotsForSale, &QAction::triggered, this, [this]() {
-        BrickLink::core()->openUrl(BrickLink::Url::LotsForSale, m_item, m_color);
+        Application::openUrl(BrickLink::Core::urlForLotsForSale(m_item, m_color));
     });
     m_renderSettings = new QAction({ }, this);
     connect(m_renderSettings, &QAction::triggered, this, []() {
