@@ -415,7 +415,7 @@ FilterWidget::FilterWidget(QWidget *parent)
         m_edit->setVisible(textFilter);
         setFocusProxy(textFilter ? m_edit : m_termsContainer);
     });
-    connect(m_edit, &QLineEdit::textEdited, this, [this]() {
+    connect(m_edit, &QLineEdit::textChanged, this, [this]() {
         m_editDelay->start();
     });
     connect(m_editDelay, &QTimer::timeout,
