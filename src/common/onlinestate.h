@@ -16,8 +16,6 @@
 #include <QObject>
 
 
-class CheckThread;
-
 class OnlineState : public QObject
 {
     Q_OBJECT
@@ -25,23 +23,14 @@ class OnlineState : public QObject
 
 public:
     static OnlineState *inst();
-    ~OnlineState() override;
-
-    bool isOnline() const;
-    void startBackgroundCheck();
+    inline bool isOnline() const { return m_online; }
 
 signals:
     void onlineStateChanged(bool isOnline);
 
 private:
     OnlineState(QObject *parent = nullptr);
-    void setOnline(bool online);
-    static bool checkOnline();
 
     bool m_online = true;
-    CheckThread *m_checkThread = nullptr;
-
     static OnlineState *s_inst;
-
-    friend class CheckThread;
 };

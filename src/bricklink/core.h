@@ -108,8 +108,6 @@ public:
 
     bool applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc);
 
-    bool onlineStatus() const;
-
     QString countryIdFromName(const QString &name) const;
 
     static QString itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight);
@@ -121,7 +119,6 @@ public:
     QPair<int, int> priceGuideCacheStats() const;
 
 public slots:
-    void setOnlineStatus(bool on);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     void cancelTransfers();
@@ -173,7 +170,6 @@ private slots:
 
 private:
     QString  m_datadir;
-    bool     m_online = false;
 
     QIcon                           m_noImageIcon;
     mutable QHash<uint, QImage>     m_noImageCache;
