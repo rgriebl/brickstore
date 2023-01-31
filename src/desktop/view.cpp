@@ -801,7 +801,7 @@ void View::setRowHeightFactor(double factor)
     if (!Config::inst()->liveEditRowHeight())
         return;
 
-    factor = std::clamp(.5, factor, 2.);
+    factor = std::clamp(factor, .5, 2.);
 
     if (!qFuzzyCompare(factor, m_rowHeightFactor)) {
         m_rowHeightFactor = factor;

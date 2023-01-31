@@ -571,7 +571,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                     double sx = std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
                     double sy = isSpeckle ? sx : std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
                     double rot = isSpeckle ? 0. : rd->bounded(90.);
-                    double opacity = isSpeckle ? 1. : std::clamp(0., (rd->bounded(.3) + .7), 1.);
+                    double opacity = isSpeckle ? 1. : std::clamp((rd->bounded(.3) + .7), 0., 1.);
 
                     double area = particleSize * particleSize * sx * sy;
                     if (isSpeckle)
