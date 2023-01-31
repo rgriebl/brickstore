@@ -48,6 +48,7 @@ public:
     bool wasNotModified() const      { return m_was_not_modified; }
     bool isHighPriority() const      { return m_high_priority; }
 
+    bool isInactive() const          { return m_status == Inactive; }
     bool isActive() const            { return m_status == Active; }
 
     bool isCompleted() const         { return m_status == Completed; }
@@ -62,6 +63,7 @@ public:
     Transfer *transfer() const       { return m_transfer; }
     void abort();
 
+    void reprioritize(bool highPriority);
     void resetForReuse();
 
 private:
@@ -129,6 +131,7 @@ public:
     ~TransferRetriever() override;
 
     void addJob(TransferJob *job, bool highPriority);
+    void reprioritizeJob(TransferJob *job, bool highPriority);
     void abortJob(TransferJob *job);
     void abortAllJobs();
     void schedule();
@@ -161,6 +164,7 @@ public:
     ~Transfer() override;
 
     void retrieve(TransferJob *job, bool highPriority = false);
+    void reprioritize(TransferJob *job, bool highPriority);
 
     void abortJob(TransferJob *job);
     void abortAllJobs();

@@ -70,6 +70,12 @@ void TransferJob::abort()
         setStatus(TransferJob::Aborted);
 }
 
+void TransferJob::reprioritize(bool highPriority)
+{
+    if (isInactive() && m_transfer)
+        m_transfer->reprioritize(this, highPriority);
+}
+
 void TransferJob::resetForReuse()
 {
     m_reset_for_reuse = true;
@@ -199,6 +205,16 @@ void Transfer::retrieve(TransferJob *job, bool highPriority)
     }, Qt::QueuedConnection);
 }
 
+void Transfer::reprioritize(TransferJob *job, bool highPriority)
+{
+    if (!job || (job->m_transfer != this) || !job->isInactive())
+        return;
+
+    QMetaObject::invokeMethod(m_retriever, [this, job, highPriority]() {
+        m_retriever->reprioritizeJob(job, highPriority);
+    }, Qt::QueuedConnection);
+}
+
 void Transfer::abortJob(TransferJob *job)
 {
     QMetaObject::invokeMethod(m_retriever, [this, job]() {
@@ -237,7 +253,7 @@ void Transfer::setInitFunction(std::function<void ()> func)
 TransferRetriever::TransferRetriever(Transfer *transfer)
     : QObject()
     , m_transfer(transfer)
-    , m_maxConnections(4) // mirror the internal QNAM setting
+    , m_maxConnections(6) // mirror the internal QNAM setting
 { }
 
 TransferRetriever::~TransferRetriever()
@@ -258,6 +274,17 @@ void TransferRetriever::addJob(TransferJob *job, bool highPriority)
 
         emit m_transfer->overallProgress(m_progressDone, ++m_progressTotal);
         schedule();
+    }
+}
+
+void TransferRetriever::reprioritizeJob(TransferJob *job, bool highPriority)
+{
+    if (job->isInactive()) {
+        auto idx = m_jobs.indexOf(job);
+        if (idx != -1) {
+            job->m_high_priority = highPriority;
+            m_jobs.move(idx, highPriority ? 0 : m_jobs.size());
+        }
     }
 }
 
@@ -302,7 +329,7 @@ void TransferRetriever::schedule()
                 this, &TransferRetriever::downloadFinished);
     }
 
-    while ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
+    while ((m_currentJobs.size() < m_maxConnections) && !m_jobs.isEmpty()) {
         auto j = m_jobs.takeFirst();
 
         bool isget = (j->m_http_method == TransferJob::HttpGet);
@@ -310,7 +337,7 @@ void TransferRetriever::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-//        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
+        req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); //TODO: check why HTTP2 is dog slow with Qt 6.2.4
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects) {
@@ -354,7 +381,8 @@ void TransferRetriever::schedule()
         });
 
         connect(j->m_reply, &QNetworkReply::metaDataChanged, this, [j]() {
-            qCInfo(LogTransfer) << "<< REPLY" << j->m_respcode << j->m_effective_url;
+            qCInfo(LogTransfer) << "<< REPLY" << j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt()
+                                << j->m_effective_url;
             if (LogTransfer().isDebugEnabled()) {
                 const auto headers = j->m_reply->rawHeaderList();
                 for (const auto &header : headers)
