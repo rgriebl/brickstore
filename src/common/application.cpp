@@ -786,7 +786,7 @@ void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContex
 
 void Application::setupLogging()
 {
-    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message} (at %{file}, %{line})"_qs);
+    qSetMessagePattern(u"%{if-category}%{category}: %{endif}%{message}%{if-warning} (at %{file}, %{line})%{endif}"_qs);
 
     m_defaultLoggingFilter = QLoggingCategory::installFilter([](QLoggingCategory *lc) {
         if (qstrcmp(lc->categoryName(), "qt.qml.typeregistration") == 0) {

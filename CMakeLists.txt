@@ -532,6 +532,7 @@ elseif (WIN32)
                 "--no-opengl-sw"
                 "--no-virtualkeyboard"
                 "--no-translations"
+                "--no-qmltooling"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
