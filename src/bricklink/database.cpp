@@ -193,7 +193,7 @@ void Database::cancelUpdate()
 void Database::read(const QString &fileName)
 {
     try {
-        stopwatch *sw = nullptr; //new stopwatch("Database::read()");
+        stopwatch *sw = new stopwatch("Loading database");
 
         QFile f(!fileName.isEmpty() ? fileName : core()->dataPath() + Database::defaultDatabaseName());
 
@@ -386,16 +386,34 @@ void Database::read(const QString &fileName)
                 .arg(f.fileName());
         }
 
-        qInfo().noquote() << "Loaded database from" << f.fileName()
-                          << "\n  Generated at:" << generationDate.toString(Qt::RFC2822Date)
-                          << "\n  Colors      :" << colors.size()
-                          << "\n  LDraw Colors:" << ldrawExtraColors.size()
-                          << "\n  Item Types  :" << itemTypes.size()
-                          << "\n  Categories  :" << categories.size()
-                          << "\n  Items       :" << items.size()
-                          << "\n  PCCs        :" << pccs.size()
-                          << "\n  ChangeLog I :" << itemChangelog.size()
-                          << "\n  ChangeLog C :" << colorChangelog.size();
+        if (true) {
+            QString out = u"Loaded database from " + f.fileName();
+            QLocale loc = QLocale(QLocale::Swedish); // space as number group separator
+            QVector<std::pair<QString, QString>> log = {
+                { u"Generated at"_qs, generationDate.toString(Qt::RFC2822Date) },
+                { u"ChangeLog I"_qs,  loc.toString(itemChangelog.size()).rightJustified(10) },
+                { u"ChangeLog C"_qs,  loc.toString(colorChangelog.size()).rightJustified(10) },
+                { u"PCCs"_qs,         loc.toString(pccs.size()).rightJustified(10) },
+                { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
+                { u"LDraw Colors"_qs, loc.toString(ldrawExtraColors.size()).rightJustified(10) },
+                { u"Item Types"_qs,   loc.toString(itemTypes.size()).rightJustified(10) },
+                { u"Categories"_qs,   loc.toString(categories.size()).rightJustified(10) },
+                { u"Items"_qs,        loc.toString(items.size()).rightJustified(10) },
+            };
+            std::vector<int> itemCount(itemTypes.size());
+            for (const auto &item : std::as_const(items))
+                ++itemCount[item.m_itemTypeIndex];
+            for (size_t i = 0; i < itemTypes.size(); ++i) {
+                log.append({ u"  "_qs + itemTypes.at(i).name(),
+                             loc.toString(itemCount.at(i)).rightJustified(10) });
+            }
+            qsizetype leftSize = 0;
+            for (const auto &logPair : std::as_const(log))
+                leftSize = std::max(leftSize, logPair.first.length());
+            for (const auto &logPair : std::as_const(log))
+                out = out + u"\n  " + logPair.first.leftJustified(leftSize) + u": " + logPair.second;
+            qInfo().noquote() << out;
+        }
 
         m_colors = colors;
         m_ldrawExtraColors = ldrawExtraColors;
