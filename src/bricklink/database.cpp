@@ -424,6 +424,8 @@ void Database::read(const QString &fileName)
         m_colorChangelog = colorChangelog;
         m_pccs = pccs;
 
+        Color::s_colorImageCache.clear();
+
         if (generationDate != m_lastUpdated) {
             m_lastUpdated = generationDate;
             emit lastUpdatedChanged(generationDate);

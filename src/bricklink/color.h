@@ -92,7 +92,7 @@ private:
     float   m_particleVFraction = 0;
     QColor  m_particleColor;
 
-    static QHash<uint, QImage> s_colorImageCache; //TODO: clear cache on DB update
+    static QHash<uint, QImage> s_colorImageCache;
 
     friend class Core;
     friend class Database;
