@@ -599,7 +599,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                 texImage = img.copy(delta, delta, texSize, texSize).rgbSwapped()
                         .scaled(texSize / 2, texSize / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-                QDir(QFileInfo(cacheFile).absolutePath()).mkpath(QLatin1String("."));
+                QDir(QFileInfo(cacheFile).absolutePath()).mkpath(u"."_qs);
                 texImage.save(cacheFile);
             }
             s_materialTextureDatas.insert(color, texImage);

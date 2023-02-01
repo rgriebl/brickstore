@@ -97,7 +97,7 @@ qint64 LZMA::DecompressFilter::readData(char *data, qint64 maxSize)
     Q_UNUSED(data)
     Q_UNUSED(maxSize)
     Q_ASSERT(false);
-    setErrorString(QLatin1String("Reading not supported"));
+    setErrorString(u"Reading not supported"_qs);
     return -1;
 }
 
@@ -190,7 +190,7 @@ qint64 HashHeaderCheckFilter::readData(char *data, qint64 maxSize)
     Q_UNUSED(data)
     Q_UNUSED(maxSize)
     Q_ASSERT(false);
-    setErrorString(QLatin1String("Reading not supported"));
+    setErrorString(u"Reading not supported"_qs);
     return -1;
 }
 

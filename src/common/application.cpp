@@ -965,7 +965,7 @@ void Application::redirectQmlEngineWarnings(const QLoggingCategory &cat)
             if (err.object())
                 func = err.object()->objectName().toLocal8Bit();
             QByteArray file;
-            if (err.url().scheme() == QLatin1String("file"))
+            if (err.url().scheme() == u"file"_qs)
                 file = err.url().toLocalFile().toLocal8Bit();
             else
                 file = err.url().toDisplayString().toLocal8Bit();

@@ -41,7 +41,7 @@ example:
         QDataStream &ds;
 
         ds = cw.startChunk('BSDB'L, 1);
-        ds << QString("INFO TEXT");
+        ds << u"INFO TEXT"_qs;
         ds = cw.startChunk('COLO', 1);
         cw.endChunk();
         cw.endChunk();

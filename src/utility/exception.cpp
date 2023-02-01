@@ -63,8 +63,7 @@ ParseException::ParseException(const char *message)
 { }
 
 ParseException::ParseException(QIODevice *dev, const char *message)
-    : Exception(QString::fromLatin1("Parse error%1: %2")
-                .arg(fileName(dev)).arg(QLatin1String(message)))
+    : Exception(u"Parse error%1: %2"_qs.arg(fileName(dev)).arg(QLatin1String(message)))
 { }
 
 QString ParseException::fileName(QIODevice *dev)

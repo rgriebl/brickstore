@@ -1074,7 +1074,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         case InventoryModel::QuantityColumn:
             return (e.m_quantity < 0) ? u"-"_qs : QString::number(e.m_quantity);
         case InventoryModel::ItemIdColumn:
-            return QString(QChar::fromLatin1(e.m_item->itemTypeId()) + u' ' + QString::fromLatin1(e.m_item->id()));
+            return QString(QLatin1Char(e.m_item->itemTypeId()) + u' ' + QLatin1String(e.m_item->id()));
         case InventoryModel::ItemNameColumn:
             return e.m_item->name();
         case InventoryModel::ColorColumn:

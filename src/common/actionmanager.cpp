@@ -748,8 +748,8 @@ QString ActionManager::toolTipLabel(const QString &label, const QList<QKeySequen
 {
 #if defined(BS_DESKTOP)
 
-    static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
-    static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
+    static const auto fmt = uR"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)"_qs;
+    static const auto fmtExt = uR"(<tr><td colspan="2">%1</td></tr>)"_qs;
 
     QColor color = Utility::gradientColor(Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipBase)),
                                           Utility::premultiplyAlpha(QApplication::palette("QLabel").color(QPalette::Inactive, QPalette::ToolTipText)),

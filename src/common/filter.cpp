@@ -412,9 +412,9 @@ QVector<QPair<Filter::Combination, QString>> Filter::Parser::standardCombination
         if (!(mask & tt->m_combination))
             continue;
     
-        foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
+        foreach (QString word, Filter::tr(tt->m_words).split(u','))
             dct.append({ tt->m_combination, word });
-        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
+        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(u','))
             dct.append({ tt->m_combination, symbol });
     }
     return dct;

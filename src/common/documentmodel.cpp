@@ -1529,7 +1529,7 @@ bool DocumentModel::legacyCurrencyCode() const
 
 QString DocumentModel::currencyCode() const
 {
-    return m_currencycode.isEmpty() ? QString::fromLatin1("USD") : m_currencycode;
+    return m_currencycode.isEmpty() ? u"USD"_qs : m_currencycode;
 }
 
 void DocumentModel::setCurrencyCode(const QString &ccode, double crate)
@@ -1884,7 +1884,7 @@ void DocumentModel::initializeColumns()
                   return QString::number(m_lotIndex.value(lot, -1) + 1);
               } else {
                   auto fi = m_fakeIndexes.at(m_lotIndex.value(lot, -1));
-                  return fi >= 0 ? QString::number(fi + 1) : QString::fromLatin1("+");
+                  return fi >= 0 ? QString::number(fi + 1) : u"+"_qs;
               }
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {

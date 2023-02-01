@@ -167,7 +167,7 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
             break;
 
         // Qt cannot format links in headers
-        QString s = QString::fromLatin1("\n##  \n## Version %1  \n").arg(match.captured(1));
+        QString s = u"\n##  \n## Version %1  \n"_qs.arg(match.captured(1));
         md.replace(match.capturedStart(), match.capturedLength(), s);
 
         if (match.captured(1) == m_currentVersion.toString())
@@ -180,8 +180,7 @@ QCoro::Task<> CheckForUpdates::showVersionChanges(QVersionNumber latestVersion)
     if ((toHeader > 0) && (fromHeader > toHeader)) {
         const QString s1 = tr("A newer version than the one currently installed is available:");
         const QString s2 = tr("Changes:");
-        const QString top = QString::fromLatin1("## %1 %2\n---\n## %3\n")
-                .arg(s1, latestVersion.toString(), s2);
+        const QString top = u"## %1 %2\n---\n## %3\n"_qs.arg(s1, latestVersion.toString(), s2);
         const QString url = m_downloadUrl.arg(latestVersion.toString());
 
         md = top + md.mid(toHeader, fromHeader - toHeader);

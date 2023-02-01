@@ -252,7 +252,7 @@ void TaskInfoWidget::delayedSelectionUpdate()
                                                                           : m_selection,
                                                     false /* ignoreExcluded */);
 
-        QString s = QString::fromLatin1("<h3>%1</h3>")
+        QString s = u"<h3>%1</h3>"_qs
                 .arg(m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"))
                 + stat.asHtmlTable();
 

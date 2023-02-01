@@ -26,7 +26,7 @@ static QString formatJSError(const QJSValue &error)
     if (!error.isError())
         return { };
 
-    QString msg = QString::fromLatin1("<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5")
+    QString msg = u"<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5"_qs
             .arg(error.property(u"name"_qs).toString(),
                  error.property(u"message"_qs).toString(),
                  error.property(u"fileName"_qs).toString(),

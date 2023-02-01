@@ -176,8 +176,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
     }
     if (w_printers->count())
         w_printers->insertSeparator(w_printers->count());
-    w_printers->addItem(QIcon::fromTheme(u"document-save-as"_qs), tr("Save as PDF"),
-                        QString::fromLatin1("__PDF__"));
+    w_printers->addItem(QIcon::fromTheme(u"document-save-as"_qs), tr("Save as PDF"), u"__PDF__"_qs);
 
     if ((defaultIdx == -1) || (m_printer->outputFormat() == QPrinter::PdfFormat))
         defaultIdx = w_printers->count() - 1;

@@ -659,7 +659,7 @@ void SelectItem::setZoomFactor(double zoom)
 
     if (!qFuzzyCompare(zoom, d->m_zoom)) {
         d->m_zoom = zoom;
-        d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100), 3));
+        d->w_zoomLevel->setText(u"%1 %"_qs.arg(int(zoom * 100), 3));
     }
 }
 

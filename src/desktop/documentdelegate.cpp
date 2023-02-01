@@ -1051,9 +1051,9 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
 
         QString tip;
         switch (display.value<BrickLink::Stockroom>()) {
-        case BrickLink::Stockroom::A   : tip = QString::fromLatin1("A"); break;
-        case BrickLink::Stockroom::B   : tip = QString::fromLatin1("B"); break;
-        case BrickLink::Stockroom::C   : tip = QString::fromLatin1("C"); break;
+        case BrickLink::Stockroom::A   : tip = u"A"_qs; break;
+        case BrickLink::Stockroom::B   : tip = u"B"_qs; break;
+        case BrickLink::Stockroom::C   : tip = u"C"_qs; break;
         default:
         case BrickLink::Stockroom::None: tip = tr("None", "ToolTip Stockroom>None"); break;
         }
