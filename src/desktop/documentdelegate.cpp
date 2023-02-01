@@ -786,7 +786,6 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     QValidator *valid = nullptr;
     switch (idx.column()) {
-    case DocumentModel::PartNo      : valid = new QRegularExpressionValidator(QRegularExpression(uR"([a-zA-Z0-9._-]+)"_qs), nullptr); break;
     case DocumentModel::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case DocumentModel::Quantity    :
     case DocumentModel::QuantityDiff: valid = new SmartIntValidator(-DocumentModel::maxQuantity,
@@ -917,6 +916,9 @@ void DocumentDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
         QVariant v = editor->property(n);
 
         switch (static_cast<DocumentModel::Field>(index.column())) {
+        case DocumentModel::PartNo:
+            v = v.toString().simplified();
+            break;
         case DocumentModel::Price:
         case DocumentModel::PriceDiff:
         case DocumentModel::Cost:
