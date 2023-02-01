@@ -11,11 +11,32 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QTimer>
+#include <QLoggingCategory>
+
 #include "ref.h"
 
+Q_DECLARE_LOGGING_CATEGORY(LogCache)
 
-Ref::~Ref()
+
+QVector<Ref *> Ref::s_zombieRefs = { };
+
+void Ref::addZombieRef(Ref *ref)
 {
-//    if (ref != 0)
-//        qWarning("Deleting %p, although refCount=%d", static_cast<void *>(this), int(ref));
+    s_zombieRefs.append(ref);
+
+    QTimer::singleShot(1000 * 60, []() {
+        for (auto it = s_zombieRefs.begin(); it != s_zombieRefs.end(); ) {
+            if ((*it)->refCount() == 0) {
+                delete *it;
+                it = s_zombieRefs.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        if (!s_zombieRefs.isEmpty()) {
+            qCWarning(LogCache) << "After 1 minute, there are still" << s_zombieRefs.size()
+                                << "Refs that cannot be deleted";
+        }
+    });
 }

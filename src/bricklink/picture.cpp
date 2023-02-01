@@ -256,7 +256,9 @@ void PictureCache::clearCache()
     // left, so we just trim the cache as much as possible and leak the remaining objects
     // as a sort of damage control.
 
-    if (auto leakedCount = d->m_cache.clearRecursive()) {
+    auto leakControl = [](Picture *pic) { Ref::addZombieRef(pic); };
+
+    if (auto leakedCount = d->m_cache.clearRecursive(leakControl)) {
         qCWarning(LogCache) << "Picture cache:" << leakedCount
                             << "objects still have a reference after clearing";
     }

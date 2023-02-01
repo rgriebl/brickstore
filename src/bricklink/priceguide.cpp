@@ -647,7 +647,9 @@ void PriceGuideCache::clearCache()
     // left, so we just trim the cache as much as possible and leak the remaining objects
     // as a sort of damage control.
 
-    if (auto leakedCount = d->m_cache.clearRecursive()) {
+    auto leakControl = [](PriceGuide *pg) { Ref::addZombieRef(pg); };
+
+    if (auto leakedCount = d->m_cache.clearRecursive(leakControl)) {
         qCWarning(LogCache) << "PriceGuide cache:" << leakedCount
                             << "objects still have a reference after clearing";
     }
