@@ -80,6 +80,7 @@ qt_add_qml_module(common_module
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickStore
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN
+    RESOURCE_PREFIX /
     IMPORTS
         BrickLink
     DEPENDENCIES

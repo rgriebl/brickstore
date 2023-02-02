@@ -73,10 +73,14 @@ static void setStatusBarColor(const QColor &color)
 #  endif
 #  include <QtGui/qpa/qplatformtheme.h>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+namespace Qt { typedef QPlatformTheme::Appearance Appearance; }
+#endif
+
 static bool darkThemeOS()
 {
     if (const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme())
-        return (theme->appearance() == QPlatformTheme::Appearance::Dark);
+        return (theme->appearance() == Qt::Appearance::Dark);
     return false;
 }
 

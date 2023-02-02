@@ -35,6 +35,7 @@ qt_add_qml_module(mobile_module
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/Mobile
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN
+    RESOURCE_PREFIX /
     #ENABLE_TYPE_COMPILER
     DEPENDENCIES
         QtQuick.Dialogs
@@ -89,6 +90,12 @@ qt_add_qml_module(mobile_module
 
     RESOURCES
         qtquickcontrols2.conf
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_SettingsDialog_qml.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_View_qml.cpp
+    PROPERTIES COMPILE_OPTIONS -Wno-shorten-64-to-32
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE mobile_module)

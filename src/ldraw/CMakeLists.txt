@@ -47,6 +47,7 @@ qt_add_qml_module(ldraw_module
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     #ENABLE_TYPE_COMPILER
     NO_PLUGIN
+    RESOURCE_PREFIX /
     DEPENDENCIES
         QtQuick
         QtQuick3D

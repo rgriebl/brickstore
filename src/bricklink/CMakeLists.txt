@@ -33,6 +33,7 @@ if (NOT BS_BACKEND)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickLink
         IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
         NO_PLUGIN
+        RESOURCE_PREFIX /
         DEPENDENCIES
             QtQml
     )
