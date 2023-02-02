@@ -37,7 +37,7 @@ void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash
 
         AppearsInRecord cair;
         cair.m_colorBits.m_colorIndex = it.key();
-        cair.m_colorBits.m_colorSize = colorVector.size();
+        cair.m_colorBits.m_colorSize = quint32(colorVector.size());
         m_appears_in.push_back(cair);
 
         for (auto vecIt = colorVector.cbegin(); vecIt != colorVector.cend(); ++vecIt) {

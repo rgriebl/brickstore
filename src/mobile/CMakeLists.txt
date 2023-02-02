@@ -92,10 +92,12 @@ qt_add_qml_module(mobile_module
         qtquickcontrols2.conf
 )
 
-set_source_files_properties(
-    ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_SettingsDialog_qml.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_View_qml.cpp
-    PROPERTIES COMPILE_OPTIONS -Wno-shorten-64-to-32
-)
+if (CLANG)
+    set_source_files_properties(
+        ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_SettingsDialog_qml.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_View_qml.cpp
+        PROPERTIES COMPILE_OPTIONS -Wno-shorten-64-to-32
+    )
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE mobile_module)
