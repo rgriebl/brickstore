@@ -36,7 +36,6 @@ public:
     void setColorFilter(const BrickLink::Color *color);
 
     QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
 
     const BrickLink::Category *currentCategory() const;
     const BrickLink::ItemType *currentItemType() const;

@@ -39,14 +39,14 @@
        <item>
         <widget class="SelectItem" name="w_select_item" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
            <horstretch>100</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>0</width>
            <height>50</height>
           </size>
          </property>
@@ -55,10 +55,16 @@
        <item>
         <widget class="SelectColor" name="w_select_color" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
            <horstretch>10</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
          </property>
         </widget>
        </item>

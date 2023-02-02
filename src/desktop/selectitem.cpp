@@ -846,12 +846,6 @@ QSize SelectItem::sizeHint() const
     return { 120 * fm.horizontalAdvance(u'x'), 20 * fm.height() };
 }
 
-QSize SelectItem::minimumSizeHint() const
-{
-    QFontMetrics fm = fontMetrics();
-    return { 80 * fm.horizontalAdvance(u'x'), 12 * fm.height() };
-}
-
 void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {

@@ -363,6 +363,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         });
     }
 
+    auto listMinHeight = QFontMetrics(font()).height();
+    w_select_item->setMinimumHeight(listMinHeight);
+    w_select_color->setMinimumHeight(listMinHeight);
+
     languageChange();
 }
 
