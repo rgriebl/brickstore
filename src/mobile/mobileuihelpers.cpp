@@ -14,11 +14,19 @@
 #include <QQmlApplicationEngine>
 #include <QEventLoop>
 #include <QStandardPaths>
+#if defined(Q_CC_MSVC)
+#  pragma warning(push)
+#  pragma warning(disable: 4458)
+#  pragma warning(disable: 4201)
+#endif
 #include <QtQuickTemplates2/private/qquickapplicationwindow_p.h>
 #include <QtQuickTemplates2/private/qquickdialog_p.h>
 #include <QtQuickDialogs2/private/qquickfiledialog_p.h>
 #include <QtQuickDialogs2/private/qquickmessagedialog_p.h>
 #include <QtQuickDialogs2/private/qquickcolordialog_p.h>
+#if defined(Q_CC_MSVC)
+#  pragma warning(pop)
+#endif
 
 #include "mobileuihelpers.h"
 #include "mobileuihelpers_p.h"

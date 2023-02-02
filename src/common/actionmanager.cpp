@@ -14,7 +14,15 @@
 #include <QAction>
 #include <QActionGroup>
 #if defined(BS_MOBILE)
+#  if defined(Q_CC_MSVC)
+#    pragma warning(push)
+#    pragma warning(disable: 4458)
+#    pragma warning(disable: 4201)
+#  endif
 #  include <QtQuickTemplates2/private/qquickaction_p.h>
+#  if defined(Q_CC_MSVC)
+#    pragma warning(pop)
+#  endif
 #  include <QJSValue>
 #  include <QJSValueIterator>
 #  include <QQmlEngine>

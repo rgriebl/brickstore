@@ -62,7 +62,15 @@ static void setStatusBarColor(const QColor &color)
 }
 
 #else
+#  if defined(Q_CC_MSVC)
+#    pragma warning(push)
+#    pragma warning(disable: 4458)
+#    pragma warning(disable: 4201)
+#  endif
 #  include <QtGui/private/qguiapplication_p.h>
+#  if defined(Q_CC_MSVC)
+#    pragma warning(pop)
+#  endif
 #  include <QtGui/qpa/qplatformtheme.h>
 
 static bool darkThemeOS()
