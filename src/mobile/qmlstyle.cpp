@@ -82,7 +82,7 @@ static bool darkThemeOS()
 
 static void setStatusBarColor(const QColor &color)
 {
-    Q_UNUSED(color);
+    Q_UNUSED(color)
 }
 
 #endif

@@ -79,7 +79,6 @@ int RebuildDatabase::exec()
     m_trans = new Transfer;
 
     BrickLink::Core *bl = BrickLink::core();
-    bl->setOnlineStatus(false);
 
     BrickLink::TextImport blti;
 
