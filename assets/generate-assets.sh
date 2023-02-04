@@ -15,7 +15,7 @@
 
 #set +x
 
-b="$(dirname $0)/../assets"
+b="$(dirname $0)"
 which realpath >/dev/null && b="$(realpath --relative-to=. $b)"
 
 cus="$b/custom"
