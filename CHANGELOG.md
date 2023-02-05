@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+The big new feature is the improved price-guide, which now uses BrickLink's revamped AffilateV1 API:
+- Price-guide data is now downloaded in batches of 500 instead of one-by-one.
+- You can choose to have those prices include VAT or not - even as viewed from a specific territory.
+- As this method needs a private API key, BrickStore will revert to the old mechanism if you compile the app yourself.
+
+While at it, the local caching mechanism for price-guide data and pictures was changed completely:
+- All pictures are now converted to WEBP (lossy/90%) after downloading, which compresses to around 10-20% of the original PNG size without obvious visual artifacts.
+- Both the price-guide data and pictures are not written to individual files in the cache folder anymore. Instead two Sqlite databases will be used. This results in faster lookups (especially on mobile platforms) and less space wasted in the file-system.
+
+Other new features:
+- In addition to "appears-in" and "consists-of", the inventory view now also gained a "can-build" relationship.
+- The consolidate items dialog has been reimplemented and uses a similiar workflow as the *Copy values from document* command now.
+- LDraw and BrickLink item ids are not always matching (especially for decorated or composite parts). In order to make the 3D view usable for those items as well, BrickStore's copy of the LDraw library includes an item id mapping now:
+  - Item id mappings added as comments in the official LDraw library as well as in Studio's version are taken into account.
+  - In addition, manually curated mapping files are applied as well (see [here](https://github.com/rgriebl/brickstore/ldraw).
+  - Currently only the *Wheel & Tire Assembly* category has been manually mapped.
+  - Anybody is welcome to help with additional mappings!
+
+Other fixes:
+- Sorting and filtering large documents on macOS and iOS is now just as fast as on the other platforms.
+- The Linux AppImage is now compatible with modern distros that only ship with OpenSSL version 3.
+
 
 ## [2022.11.2] - 2022-11-28
 
