@@ -29,7 +29,11 @@ OnlineState *OnlineState::inst()
 OnlineState::OnlineState(QObject *parent)
     : QObject(parent)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
+    if (!QNetworkInformation::load(QNetworkInformation::Feature::Reachability)) {
+#else
     if (!QNetworkInformation::loadDefaultBackend()) {
+#endif
         qWarning() << "Failed to load QNetworkInformation's default backend";
         return;
     }
