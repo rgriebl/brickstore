@@ -68,6 +68,7 @@ public:
     void cancelUpdate();
 
     QFuture<Part *> partFromId(const QByteArray &id);
+    QFuture<Part *> partFromBrickLinkId(const QByteArray &brickLinkId);
     QFuture<Part *> partFromFile(const QString &filename);
 
     static QStringList potentialLDrawDirs();

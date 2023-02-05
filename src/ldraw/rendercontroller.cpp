@@ -164,7 +164,7 @@ void RenderController::setItemAndColor(const BrickLink::Item *item, const BrickL
         m_updateTimer->start();
 
         if (item) {
-            LDraw::library()->partFromId(item->id()).then(this, [this, item](Part *part) {
+            LDraw::library()->partFromBrickLinkId(item->id()).then(this, [this, item](Part *part) {
                 bool stillCurrentItem = (item == m_item);
 
                 if ((m_part != part) && stillCurrentItem) {

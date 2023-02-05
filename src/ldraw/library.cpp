@@ -174,6 +174,22 @@ QFuture<Part *> Library::partFromId(const QByteArray &id)
     return partFromFile(filename);
 }
 
+QFuture<Part *> Library::partFromBrickLinkId(const QByteArray &brickLinkId)
+{
+    QString ldrawId = QString::fromLatin1(brickLinkId);
+
+    auto it = m_partIdMapping.constFind(ldrawId);
+    if (it != m_partIdMapping.cend()) {
+        qCDebug(LogLDraw) << "Mapped" << it.key() << "to" << it.value();
+        if (it->isEmpty())
+            return QtFuture::makeReadyFuture<Part *>(nullptr);
+        ldrawId = *it;
+    }
+
+    QString filename = ldrawId + u".dat";
+    return partFromFile(filename);
+}
+
 QFuture<Part *> Library::partFromFile(const QString &file)
 {
     QPromise<Part *> promise;
@@ -471,16 +487,6 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
         filename = u"stud-logo4.dat"_qs;
     else if (filename == u"stud2.dat")
         filename = u"stud2-logo4.dat"_qs;
-
-    if (filename.endsWith(u".dat")) {
-        auto it = m_partIdMapping.constFind(filename.left(filename.length() - 4));
-        if (it != m_partIdMapping.cend()) {
-            qCDebug(LogLDraw) << "Mapped" << it.key() << "to" << it.value();
-            if (it->isEmpty())
-                return nullptr;
-            filename = *it + u".dat";
-        }
-    }
 
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
