@@ -62,11 +62,11 @@
 <li class="fn">Item <b><a href="qml-bricklink-bricklink.html#itemType-method-2">itemType</a></b>(var <i>item</i>)</li>
 <li class="fn">ItemType <b><a href="qml-bricklink-bricklink.html#itemType-method-1">itemType</a></b>(string <i>itemTypeId</i>)</li>
 <li class="fn">ItemType <b><a href="qml-bricklink-bricklink.html#itemType-method">itemType</a></b>(var <i>itemType</i>)</li>
-<li class="fn">Picture <b><a href="qml-bricklink-bricklink.html#largePicture-method">largePicture</a></b>(Item <i>item</i>, bool <i>highPriority</i>)</li>
 <li class="fn">Lot <b><a href="qml-bricklink-bricklink.html#lot-method">lot</a></b>(var <i>lot</i>)</li>
 <li class="fn">Image <b><a href="qml-bricklink-bricklink.html#noImage-method">noImage</a></b>(int <i>width</i>, int <i>height</i>)</li>
 <li class="fn">Picture <b><a href="qml-bricklink-bricklink.html#picture-method">picture</a></b>(Item <i>item</i>, Color <i>color</i>, bool <i>highPriority</i>)</li>
-<li class="fn">PriceGuide <b><a href="qml-bricklink-bricklink.html#priceGuide-method">priceGuide</a></b>(Item <i>item</i>, Color <i>color</i>, bool <i>highPriority</i>)</li>
+<li class="fn">PriceGuide <b><a href="qml-bricklink-bricklink.html#priceGuide-method-1">priceGuide</a></b>(Item <i>item</i>, Color <i>color</i>, bool <i>highPriority</i>)</li>
+<li class="fn">PriceGuide <b><a href="qml-bricklink-bricklink.html#priceGuide-method">priceGuide</a></b>(Item <i>item</i>, Color <i>color</i>, VatType <i>vatType</i>, bool <i>highPriority</i>)</li>
 </ul>
 <!-- $$$BrickLink-description -->
 <h2 id="details">Detailed Description</h2>
@@ -238,17 +238,6 @@
 <div class="qmldoc"><p>Create a JavaScript <a href="qml-bricklink-itemtype.html">ItemType</a> wrapper for a C++ <code>BrickLink::ItemType *</code> <i>itemType</i> obtained from a data model.</p>
 </div></div><!-- @@@itemType -->
 <br/>
-<!-- $$$largePicture[overload1]$$$largePictureItembool -->
-<div class="qmlitem"><div class="qmlproto">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="largePicture-method">
-<td class="tblQmlFuncNode"><p>
-<span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <span class="name">largePicture</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>Creates a Picture object that asynchronously loads (or downloads) the large picture for the given <i>item</i>. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
-<p><b>See also </b><a href="qml-bricklink-picture.html">Picture</a>.</p>
-</div></div><!-- @@@largePicture -->
-<br/>
 <!-- $$$lot[overload1]$$$lotvar -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -280,14 +269,25 @@
 <p><b>See also </b><a href="qml-bricklink-picture.html">Picture</a>.</p>
 </div></div><!-- @@@picture -->
 <br/>
-<!-- $$$priceGuide[overload1]$$$priceGuideItemColorbool -->
+<!-- $$$priceGuide$$$priceGuideItemColorbool -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="priceGuide-method-1">
+<td class="tblQmlFuncNode"><p>
+<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and currentVatType combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be preprended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<p><b>See also </b><a href="qml-bricklink-priceguide.html">PriceGuide</a>.</p>
+</div></div><!-- @@@priceGuide -->
+<br/>
+<!-- $$$priceGuide[overload1]$$$priceGuideItemColorVatTypebool -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="priceGuide-method">
 <td class="tblQmlFuncNode"><p>
-<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
+<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">VatType</span> <i>vatType</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and <i>vatType</i> combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be preprended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
 <p><b>See also </b><a href="qml-bricklink-priceguide.html">PriceGuide</a>.</p>
 </div></div><!-- @@@priceGuide -->
 <br/>
