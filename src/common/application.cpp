@@ -191,10 +191,12 @@ void Application::init()
     am->retranslate();
 
     qInfo() << "UI:";
-    qInfo() << "  Device pixel ratio :" << qApp->devicePixelRatio()
-            << QGuiApplication::highDpiScaleFactorRoundingPolicy();
-    const auto screenSize = QGuiApplication::primaryScreen()->physicalSize();
-    qInfo() << "  Screen size (in mm):" << screenSize.width() << "x" << screenSize.height();
+    qInfo() << "  Device pixel ratio:" << qApp->devicePixelRatio()
+            << "/" << QGuiApplication::highDpiScaleFactorRoundingPolicy();
+    const auto screenSize = QGuiApplication::primaryScreen()->size();
+    const auto screenMMSize = QGuiApplication::primaryScreen()->physicalSize();
+    qInfo() << "  Screen size in pix:" << screenSize.width() << "x" << screenSize.height();
+    qInfo() << "  Screen size in mm :" << screenMMSize.width() << "x" << screenMMSize.height();
 
     setupQml();
 }

@@ -355,6 +355,9 @@ jobs:
     # Build for iOS
     #################################################
 
+    # see here for a description of this setup
+    # https://betterprogramming.pub/deploy-an-ios-app-to-testflight-or-the-app-store-using-github-actions-c4d7082b1430
+
     - name: Import signing certificate
       if: (matrix.config.os == 'ios')
       env:

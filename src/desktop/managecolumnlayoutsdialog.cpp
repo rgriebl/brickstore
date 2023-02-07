@@ -26,15 +26,10 @@ class ColumnLayoutItem : public QListWidgetItem
 {
 public:
     ColumnLayoutItem() = default;
-    ~ColumnLayoutItem() override;
 
     QString m_id;
     QString m_name;
 };
-
-ColumnLayoutItem::~ColumnLayoutItem()
-{ }
-
 
 
 ManageColumnLayoutsDialog::ManageColumnLayoutsDialog(QWidget *parent)
