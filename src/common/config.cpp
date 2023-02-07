@@ -188,6 +188,7 @@ QVariantList Config::availableLanguages() const
                       { u"language"_qs, tr.language },
                       { u"name"_qs, tr.name },
                       { u"localName"_qs, tr.localName },
+                      { u"flagPath"_qs, QString(u"qrc"_qs + tr.flagPath) },
                       { u"author"_qs, tr.author },
                       { u"authorEMail"_qs, tr.authorEmail },
                   });
@@ -729,24 +730,33 @@ bool Config::parseTranslations() const
     for (auto it = root.begin(); it != root.end(); ++it) {
         const QJsonObject value = it.value().toObject();
 
+        auto lang = QLocale::codeToLanguage(it.key());
+        Q_ASSERT(lang != QLocale::AnyLanguage);
+
         Translation trans;
         trans.language = it.key();
+        trans.name = QLocale::languageToString(lang);
+        trans.localName = value[u"localName"].toString(); // QLocale::nativeLanguageName is weird
 
-        trans.name = value[u"name"].toString();
-        trans.localName = value[u"localName"].toString();
+        if (!trans.localName.isEmpty() && (trans.name != trans.localName))
+            trans.localName = trans.localName + u" (" + trans.name + u')';
+        else
+            trans.localName = trans.name;
+
         trans.author = value[u"author"].toString();
         trans.authorEmail = value[u"authorEmail"].toString();
+        trans.flagPath = u":/assets/flags/" + QLocale::territoryToCode(QLocale(lang).territory()).toUpper();
 
-        if (trans.language.isEmpty() || trans.name.isEmpty())
+        if (trans.language.isEmpty())
             continue;
 
         m_translations << trans;
     }
     std::sort(m_translations.begin(), m_translations.end(), [](const auto &tr1, const auto &tr2) {
-        if (tr1.name == u"en")
-            return false;
-        else if (tr2.name == u"en")
+        if (tr1.language == u"en")
             return true;
+        else if (tr2.language == u"en")
+            return false;
         else
             return tr1.localName.localeAwareCompare(tr2.localName) < 0;
     });

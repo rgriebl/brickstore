@@ -1,27 +1,22 @@
 {
   "en": {
-    "name":        "English"
   },
   "de": {
-    "name":        "German",
     "localName":   "Deutsch",
     "author":      "Robert Griebl",
     "authorEmail": "robert@griebl.org"
   },
   "fr": {
-    "name":        "French",
     "localName":   "Français",
     "author":      "Sylvain Perez",
     "authorEmail": "bricklink@1001bricks.com"
   },
   "es": {
-    "name":        "Spanish",
     "localName":   "Español",
     "author":      "Sergio Sobrevela",
     "authorEmail": "info@stellarbricks.com"
   },
   "sv": {
-    "name":        "Swedish",
     "localName":   "Svenska",
     "author":      "SkaraborgJohan",
     "authorEmail": "skaraborgjohan@outlook.com"

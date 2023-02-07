@@ -677,7 +677,7 @@
           <item row="2" column="1">
            <widget class="QLabel" name="w_bl_pg_retriever">
             <property name="text">
-             <string>&lt;pg retriever name&gt;</string>
+             <string notr="true">&lt;pg retriever name&gt;</string>
             </property>
            </widget>
           </item>

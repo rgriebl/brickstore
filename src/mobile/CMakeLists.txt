@@ -63,6 +63,7 @@ qt_add_qml_module(mobile_module
         DeveloperConsole.qml
         GridCell.qml
         GridHeader.qml
+        IconComboBox.qml
         ImportCartDialog.qml
         ImportInventoryDialog.qml
         ImportInventoryWidget.qml

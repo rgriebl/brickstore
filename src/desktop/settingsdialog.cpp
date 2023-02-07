@@ -1061,12 +1061,7 @@ void SettingsDialog::load()
         const QString currentLanguage = Config::inst()->language();
 
         for (const auto &trans : translations) {
-            QString s = trans.name;
-            if (!trans.localName.isEmpty())
-                s = trans.localName + u" (" + s + u')';
-            w_language->addItem(s, trans.language);
-
-
+            w_language->addItem(QIcon(trans.flagPath), trans.localName, trans.language);
             if (currentLanguage == trans.language)
                 w_language->setCurrentIndex(w_language->count()-1);
         }

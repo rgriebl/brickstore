@@ -98,6 +98,7 @@ public:
         QString language;
         QString name;
         QString localName;
+        QString flagPath;
         QString author;
         QString authorEmail;
     };

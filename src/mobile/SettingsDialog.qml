@@ -58,27 +58,14 @@ AutoSizingDialog {
                         text: qsTr("Language")
                         font.pixelSize: langCombo.font.pixelSize
                     }
-                    ComboBox {
+                    IconComboBox {
                         Layout.fillWidth: true
                         id: langCombo
                         model: BS.Config.availableLanguages
-                        textRole: "language"
+                        textRole: "localName"
                         valueRole: "language"
+                        iconSourceRole: "flagPath"
                         enabled: BS.Config.availableLanguages.length > 0
-                        delegate: ItemDelegate {
-                            required property var modelData
-                            width: parent.width
-                            text: langCombo.nameForLang(modelData)
-                        }
-                        displayText: nameForLang(BS.Config.availableLanguages[currentIndex])
-
-                        function nameForLang(map) : string {
-                            let name = map.name
-                            if (map.localName)
-                                name = map.localName + " (" + name + ")"
-                            return name
-                        }
-
                         onActivated: { BS.Config.language = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.language) }
                     }
@@ -270,12 +257,12 @@ AutoSizingDialog {
                         text: qsTr("Price-guide")
                         font.pixelSize: vatTypeCombo.font.pixelSize
                     }
-                    ComboBox {
+                    IconComboBox {
                         Layout.fillWidth: true
                         id: vatTypeCombo
                         textRole: "text"
                         valueRole: "value"
-                        property string iconRole: "icon"
+                        iconNameRole: "icon"
 
                         model: ListModel { id: vatTypeModel }
                         Component.onCompleted: {
@@ -290,27 +277,6 @@ AutoSizingDialog {
                             currentIndex = indexOfValue(BL.BrickLink.currentVatType)
                         }
                         onActivated: { BL.BrickLink.currentVatType = currentValue }
-
-                        delegate: ItemDelegate {
-                            required property int index
-                            required property var model
-                            width: vatTypeCombo.width
-                            icon.name: model[vatTypeCombo.iconRole]
-                            icon.color: "transparent"
-                            text: model[vatTypeCombo.textRole]
-                            highlighted: vatTypeCombo.highlightedIndex === index
-                        }
-                        contentItem: ItemDelegate {
-                            // ignore all mouse/touch events and disable the background
-                            containmentMask: QtObject {
-                                function contains(point: point) : bool { return false }
-                            }
-                            background: null
-                            hoverEnabled: false
-                            icon.name: vatTypeModel.get(vatTypeCombo.currentIndex)[vatTypeCombo.iconRole]
-                            icon.color: "transparent"
-                            text: vatTypeCombo.displayText
-                        }
                     }
                 }
             }
