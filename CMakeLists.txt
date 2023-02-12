@@ -431,8 +431,10 @@ add_custom_target("Other-Files" SOURCES
     .gitattributes
     .gitignore
     .github/workflows/build_cmake.yml
+    .github/scripts/ios-import-apikey.sh
     .github/scripts/ios-import-certificate.sh
     .github/scripts/ios-import-profile.sh
+    .github/FUNDING.yml
     .tag
     CHANGELOG.md
     LICENSE.GPL
@@ -448,27 +450,33 @@ add_custom_target("Other-Files" SOURCES
     android/gradlew
     android/gradlew.bat
     android/res/values/libs.xml
+    android/src/de/brickforge/brickstore/ExtendedQtActivity.java
     assets/COPYING-ICONS
     assets/COPYING-FLAGS
+    assets/generate-assets.sh
+    cmake/SeparateDebugInfo.cmake
+    cmake/SeparateDebugInfo.Info.plist.in
+    doc/extensions.css
     doc/extensions.qdoc
     doc/extensions.qdocconf
-    doc/extensions.css
     doc/images/list_arrow.png
     doc/images/list_expand.png
     doc/images/favicon.ico
     docker/Dockerfile
     docker/entrypoint.sh
+    docker/rebuild-db.sh
     extensions/README.md
     extensions/classic-print-script.bs.qml
-    macos/Info.macos.plist
-    macos/Info.ios.plist
-    macos/ExportOptions.ios.plist
-    macos/locversion.plist.in
-    macos/dmg-ds_store
+    ldraw/create-bricklink-ldraw-id-mappings.py
+    ldraw/mappings/wheels.yaml
     macos/dmg-background.png
-    scripts/generate-assets.sh
+    macos/dmg-ds_store
+    macos/ExportOptions.ios.plist
+    macos/Info.ios.plist
+    macos/Info.macos.plist
+    macos/LaunchScree.storyboard
+    macos/locversion.plist.in
     scripts/git-release.sh
-    scripts/fix-ios-archive-build.sh
     translations/translations.json
     unix/brickstore.desktop
     unix/brickstore-mime.xml
