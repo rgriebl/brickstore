@@ -730,6 +730,13 @@ bool SelectItem::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
+    if ((itt != BrickLink::ItemType::InvalidId) && (itt != -1 /*v3*/))
+        setCurrentItemType(BrickLink::core()->itemType(itt));
+    if (cat != BrickLink::Category::InvalidId) {
+        setCurrentCategory(cat == uint(-2) ? BrickLink::CategoryModel::AllCategories
+                                           : BrickLink::core()->category(cat));
+    }
+
     // we need to reset the filter before setCurrentItem ... otherwise we might not be able to
     // find the item in the model
     if (version == 3) {
@@ -744,12 +751,6 @@ bool SelectItem::restoreState(const QByteArray &ba)
                        ? nullptr : BrickLink::core()->color(colorFilterId));
     }
 
-    if ((itt != BrickLink::ItemType::InvalidId) && (itt != -1 /*v3*/))
-        setCurrentItemType(BrickLink::core()->itemType(itt));
-    if (cat != BrickLink::Category::InvalidId) {
-        setCurrentCategory(cat == uint(-2) ? BrickLink::CategoryModel::AllCategories
-                                           : BrickLink::core()->category(cat));
-    }
     if (!itemid.isEmpty())
         setCurrentItem(BrickLink::core()->item(itt, itemid.toLatin1()), false);
     setZoomFactor(zoom);
