@@ -582,6 +582,26 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
 
             AppStatistics::inst()->update(m_savesStatId, queueSize);
 
+            QHash<Picture *, QByteArray> imageDataHash;
+
+            // do all this before starting a DB transaction, to keep lock times to a minimum
+            for (auto [pic, saveType] : saveQueueCopy) {
+                if (saveType == SaveData) {
+                    QByteArray data;
+                    if (!pic->m_image.isNull()) {
+                        // WebP lossy at 80% compresses to ~10-20% of the original PNG size
+                        // with next to no visible artifacts
+                        QByteArray webpData;
+                        QBuffer buffer(&webpData);
+                        pic->m_image.save(&buffer, "WEBP", 80);
+                        //if (webpData.size() < data.size())
+                        //    qWarning() << "Saving image as WEBP compresses to" << (100 * webpData.size() / data.size()) << "%";
+                        data = webpData;
+                    }
+                    imageDataHash.insert(pic, data);
+                }
+            }
+
             if (db.isOpen()) {
                 db.transaction();
 
@@ -599,17 +619,7 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                         }
                         accessQuery.finish();
                     } else {
-                        QByteArray data;
-                        if (!pic->m_image.isNull()) {
-                            // WebP lossy at 90% compresses to ~10-20% of the original PNG size
-                            // with next to no visible artifacts
-                            QByteArray webpData;
-                            QBuffer buffer(&webpData);
-                            pic->m_image.save(&buffer, "WEBP", 90);
-                            //if (webpData.size() < data.size())
-                            //    qWarning() << "Saving image as WEBP compresses to" << (100 * webpData.size() / data.size()) << "%";
-                            data = webpData;
-                        }
+                        const auto data = imageDataHash.value(pic);
                         auto lastUpdated = QVariant(QMetaType::fromType<qint64>());
                         if (pic->lastUpdated().isValid())
                             lastUpdated = QVariant::fromValue(pic->lastUpdated().toMSecsSinceEpoch());
