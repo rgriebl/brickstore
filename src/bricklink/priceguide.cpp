@@ -26,6 +26,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
+#include "utility/appstatistics.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
 #include "utility/utility.h"
@@ -554,6 +555,10 @@ PriceGuideCache::PriceGuideCache(Core *core)
     Q_ASSERT(!PriceGuide::s_cache);
     PriceGuide::s_cache = this;
 
+    d->m_cacheStatId = AppStatistics::inst()->addSource(u"Price-guides in memory cache"_qs);
+    d->m_loadsStatId = AppStatistics::inst()->addSource(u"Price-guides queued for disk load"_qs);
+    d->m_savesStatId = AppStatistics::inst()->addSource(u"Price-guides queued for disk save"_qs);
+
     d->m_cache.setMaxCost(5000); // each priceguide has a cost of 1
 
     QString batchApiKey;
@@ -653,6 +658,7 @@ void PriceGuideCache::clearCache()
         qCWarning(LogCache) << "PriceGuide cache:" << leakedCount
                             << "objects still have a reference after clearing";
     }
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
 }
 
 QPair<int, int> PriceGuideCache::cacheStats() const
@@ -683,6 +689,7 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
                       int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), 1);
             return nullptr;
         }
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
         needToLoad = true;
     }
 
@@ -820,7 +827,10 @@ void PriceGuideCachePrivate::load(PriceGuide *pg, bool highPriority)
     m_loadQueue.insert(highPriority ? 0 : m_loadQueue.size(),
                        { pg, highPriority ? LoadHighPriority : LoadLowPriority });
     m_loadTrigger.wakeOne();
+    auto queueSize = m_loadQueue.size();
     m_loadMutex.unlock();
+
+    AppStatistics::inst()->update(m_loadsStatId, queueSize);
 }
 
 void PriceGuideCachePrivate::save(PriceGuide *pg)
@@ -832,7 +842,10 @@ void PriceGuideCachePrivate::save(PriceGuide *pg)
     m_saveMutex.lock();
     m_saveQueue.append({ pg, SaveData });
     m_saveTrigger.wakeOne();
+    auto queueSize = m_saveQueue.size();
     m_saveMutex.unlock();
+
+    AppStatistics::inst()->update(m_savesStatId, queueSize);
 }
 
 void PriceGuideCachePrivate::loadThread(QString dbName, int index)
@@ -857,7 +870,10 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
         // alternate between loading and saving in order to not starve one queue
         if (!m_loadQueue.isEmpty()) {
             auto [pg, loadType] = m_loadQueue.takeFirst();
+            auto queueSize = m_loadQueue.size();
             locker.unlock();
+
+            AppStatistics::inst()->update(m_loadsStatId, queueSize);
 
             bool loaded = false;
             QDateTime lastUpdated;
@@ -929,8 +945,13 @@ void PriceGuideCachePrivate::saveThread(QString dbName, int index)
             m_saveTrigger.wait(&m_saveMutex);
 
         if (!m_saveQueue.isEmpty()) {
-            const auto saveQueueCopy = std::exchange(m_saveQueue, { });
+            // we might have multiple saver threads, so don't grab the full queue at once
+            const auto saveQueueCopy = m_saveQueue.mid(0, 10);
+            m_saveQueue.remove(0, saveQueueCopy.size());
+            auto queueSize = m_saveQueue.size();
             locker.unlock();
+
+            AppStatistics::inst()->update(m_savesStatId, queueSize);
 
             if (db.isOpen()) {
                 db.transaction();

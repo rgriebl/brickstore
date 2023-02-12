@@ -148,6 +148,9 @@ public:
     Q3Cache<quint64, PriceGuide> m_cache;
     Core *m_core;
     PriceGuideCache *q;
+    int m_cacheStatId = -1;
+    int m_loadsStatId = -1;
+    int m_savesStatId = -1;
 
     static quint64 cacheKey(const Item *item, const Color *color, VatType vatType);
     static QString databaseTag(PriceGuide *pg, PriceGuideRetrieverInterface *retriever);

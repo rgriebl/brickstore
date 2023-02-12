@@ -159,6 +159,7 @@ private:
     QPair<QString, QString>    m_credentials;
     TransferJob *              m_loginJob = nullptr;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
+    int                        m_transferStatId = -1;
 
     Database *m_database = nullptr;
     Store *m_store = nullptr;

@@ -7,6 +7,8 @@ target_sources(${PROJECT_NAME} PUBLIC
     main.cpp
     version.h.in
 
+    utility/appstatistics.cpp
+    utility/appstatistics.h
     utility/chunkreader.cpp
     utility/chunkreader.h
     utility/chunkwriter.h

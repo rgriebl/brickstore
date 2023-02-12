@@ -19,8 +19,13 @@
 #include <QTextBlock>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QSplitter>
+#include <QTreeView>
+#include <QTableView>
+#include <QHeaderView>
 
 #include "common/eventfilter.h"
+#include "utility/appstatistics.h"
 #include "developerconsole.h"
 
 
@@ -28,12 +33,12 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
                                    std::function<std::tuple<QString, bool>(QString)> executeFunction,
                                    QWidget *parent)
     : QFrame(parent)
-    , m_log(new QPlainTextEdit(this))
-    , m_cmd(new QLineEdit(this))
-    , m_prompt(new QLabel(this))
+    , m_log(new QPlainTextEdit)
+    , m_cmd(new QLineEdit)
+    , m_prompt(new QLabel)
     , m_executeFunction(executeFunction)
 {
-    setFrameStyle(QFrame::StyledPanel);
+    setFrameStyle(QFrame::NoFrame);
 
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
@@ -88,7 +93,15 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
         m_log->ensureCursorVisible();
     });
 
-    auto *layout = new QGridLayout(this);
+    auto split = new QSplitter(Qt::Horizontal);
+    auto *splitLayout = new QVBoxLayout(this);
+    splitLayout->addWidget(split);
+    splitLayout->setContentsMargins(0, 0, 0, 0);
+
+    auto *console = new QFrame();
+    console->setFrameStyle(QFrame::StyledPanel);
+
+    auto *layout = new QGridLayout(console);
     layout->setColumnStretch(1, 10);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setVerticalSpacing(0);
@@ -96,6 +109,21 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
     layout->addWidget(m_log, 0, 0, 1, 2);
     layout->addWidget(m_prompt, 1, 0);
     layout->addWidget(m_cmd, 1, 1);
+    split->addWidget(console);
+
+    auto *stats = new QTreeView();
+    stats->header()->setSectionsMovable(false);
+    stats->setRootIsDecorated(false);
+    stats->setAlternatingRowColors(true);
+    stats->setModel(AppStatistics::inst());
+
+    stats->header()->setStretchLastSection(false);
+    stats->header()->setMinimumSectionSize(20);
+    stats->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    stats->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+    split->addWidget(stats);
+    split->setSizes({ 7000, 3000 });
 
     fontChange();
 }

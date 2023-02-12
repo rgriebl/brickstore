@@ -27,6 +27,7 @@
 #include <QJsonObject>
 #include <QRunnable>
 
+#include "utility/appstatistics.h"
 #include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
 #include "utility/exception.h"
@@ -368,6 +369,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     Q_UNUSED(physicalMem)
 #endif
 
+    m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
+
     //TODO: See if we cannot make this cancellation a bit more robust.
     //      Right now, cancelTransfers() is fully async. We could potentially detect when all
     //      TransferJobs are handled, but the disk-load runnables are very tricky with their
@@ -386,7 +389,10 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     connect(m_transfer, &Transfer::finished,
             this, &Core::transferFinished);
     connect(m_transfer, &Transfer::overallProgress,
-            this, &Core::transferProgress);
+            this, [this](int p, int t) {
+        AppStatistics::inst()->update(m_transferStatId, t - p);
+        emit transferProgress(p, t);
+    });
 
     connect(m_authenticatedTransfer, &Transfer::finished,
             this, [this](TransferJob *job) {

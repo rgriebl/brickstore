@@ -59,6 +59,9 @@ public:
     Q3Cache<quint32, Picture> m_cache;
     Core *m_core;
     PictureCache *q;
+    int m_cacheStatId = -1;
+    int m_loadsStatId = -1;
+    int m_savesStatId = -1;
 
     static quint32 cacheKey(const Item *item, const Color *color);
     static QString databaseTag(Picture *pic);

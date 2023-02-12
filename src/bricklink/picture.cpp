@@ -25,6 +25,7 @@
 #include "bricklink/picture_p.h"
 #include "bricklink/item.h"
 #include "bricklink/core.h"
+#include "utility/appstatistics.h"
 #include "utility/transfer.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogCache)
@@ -116,6 +117,10 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
 
     Q_ASSERT(!Picture::s_cache);
     Picture::s_cache = this;
+
+    d->m_cacheStatId = AppStatistics::inst()->addSource(u"Pictures in memory cache"_qs);
+    d->m_loadsStatId = AppStatistics::inst()->addSource(u"Pictures queued for disk load"_qs);
+    d->m_savesStatId = AppStatistics::inst()->addSource(u"Pictures queued for disk save"_qs);
 
     // The max. pic cache size is at least 500MB. On 64bit systems, this gets expanded to a quarter
     // of the physical memory, but it is capped at 4GB
@@ -262,6 +267,7 @@ void PictureCache::clearCache()
         qCWarning(LogCache) << "Picture cache:" << leakedCount
                             << "objects still have a reference after clearing";
     }
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
 }
 
 QPair<int, int> PictureCache::cacheStats() const
@@ -292,6 +298,7 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
                       int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), int(cost), item->id().constData());
             return nullptr;
         }
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
         needToLoad = true;
     }
 
@@ -408,7 +415,10 @@ void PictureCachePrivate::load(Picture *pic, bool highPriority)
     m_loadQueue.insert(highPriority ? 0 : m_loadQueue.size(),
                        { pic, highPriority ? LoadHighPriority : LoadLowPriority });
     m_loadTrigger.wakeOne();
+    auto queueSize = m_loadQueue.size();
     m_loadMutex.unlock();
+
+    AppStatistics::inst()->update(m_loadsStatId, queueSize);
 }
 
 void PictureCachePrivate::reprioritize(Picture *pic, bool highPriority)
@@ -437,7 +447,10 @@ void PictureCachePrivate::save(Picture *pic)
     m_saveMutex.lock();
     m_saveQueue.append({ pic, SaveData });
     m_saveTrigger.wakeOne();
+    auto queueSize = m_saveQueue.size();
     m_saveMutex.unlock();
+
+    AppStatistics::inst()->update(m_savesStatId, queueSize);
 }
 
 void PictureCachePrivate::loadThread(QString dbName, int index)
@@ -461,7 +474,10 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
 
         if (!m_loadQueue.isEmpty()) {
             auto [pic, loadType] = m_loadQueue.takeFirst();
+            auto queueSize = m_loadQueue.size();
             locker.unlock();
+
+            AppStatistics::inst()->update(m_loadsStatId, queueSize);
 
             bool loaded = false;
             QDateTime lastUpdated;
@@ -534,8 +550,13 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
             m_saveTrigger.wait(&m_saveMutex);
 
         if (!m_saveQueue.isEmpty()) {
-            const auto saveQueueCopy = std::exchange(m_saveQueue, { });
+            // we might have multiple saver threads, so don't grab the full queue at once
+            const auto saveQueueCopy = m_saveQueue.mid(0, 20);
+            m_saveQueue.remove(0, saveQueueCopy.size());
+            auto queueSize = m_saveQueue.size();
             locker.unlock();
+
+            AppStatistics::inst()->update(m_savesStatId, queueSize);
 
             if (db.isOpen()) {
                 db.transaction();
