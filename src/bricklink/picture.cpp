@@ -197,33 +197,36 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
             QSqlQuery newQuery(d->m_db);
             newQuery.prepare(u"INSERT INTO pic(id,updated,accessed,data) VALUES(:id,:updated,:accessed,:data);"_qs);
 
+            int cnt = 0;
+
             while (oldQuery.next()) {
                 QString oldId = oldQuery.value(0).toString();
-                QDateTime oldUpdated = oldQuery.value(1).toDateTime();
-                QByteArray oldData = oldQuery.value(2).toByteArray();
+                QVariant oldUpdated = oldQuery.value(1);
+                QVariant oldAccessed = oldQuery.value(2);
+                QByteArray oldData = oldQuery.value(3).toByteArray();
 
-                if (oldData.size() && !oldData.startsWith("RIFF")) {
-                    QByteArray webpData;
-                    QBuffer buffer(&webpData);
-                    QImage::fromData(oldData).save(&buffer, "WEBP", 90);
-                    oldData = webpData;
-                }
+                QByteArray webpData;
+                QBuffer buffer(&webpData);
+                QImage::fromData(oldData).save(&buffer, "WEBP", 80);
+                oldData = webpData;
+
                 if (oldData.size() && !oldData.startsWith("RIFF")) {
                     qWarning() << "Image for" << oldId << "is not WEBP!";
                     continue;
                 }
-                if (oldData.isEmpty() == oldUpdated.isValid()) {
-                    qWarning() << "Data.empty() == Updated.isValiud() for" << oldId;
-                }
 
                 newQuery.bindValue(u":id"_qs, oldId);
-                newQuery.bindValue(u":updated"_qs, oldUpdated.isValid() ? QVariant::fromValue(oldUpdated.toMSecsSinceEpoch()) : QVariant(QMetaType::fromType<qint64>()));
-                newQuery.bindValue(u":accessed"_qs, QDateTime::currentMSecsSinceEpoch());
+                newQuery.bindValue(u":updated"_qs, oldUpdated);
+                newQuery.bindValue(u":accessed"_qs, oldAccessed);
                 newQuery.bindValue(u":data"_qs, oldData);
                 if (!newQuery.exec()) {
                     qWarning() << "could not add to new db" << newQuery.lastError().text();
                 }
                 newQuery.finish();
+
+                if ((++cnt % 100) == 0) {
+                    qWarning() << "Images converted..." << cnt;
+                }
             }
             d->m_db.commit();
             dbold.close();
