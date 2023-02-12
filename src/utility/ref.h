@@ -17,6 +17,8 @@
 
 #include "utility/q3cache.h"
 
+QT_FORWARD_DECLARE_CLASS(QTimer)
+
 
 class Ref
 {
@@ -34,6 +36,7 @@ private:
     mutable QBasicAtomicInt ref;
 
     static QVector<Ref *> s_zombieRefs;
+    static QTimer *s_zombieCleaner;
 };
 
 // tell Qt that Refs are shared and can't simply be deleted
