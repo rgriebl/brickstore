@@ -169,11 +169,19 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
     if (d->m_db.isOpen()) {
         static constexpr int DBVersion = 1;
 
-        QSqlQuery uvQuery(u"PRAGMA user_version"_qs, d->m_db);
-        uvQuery.next();
-        auto userVersion = uvQuery.value(0).toInt();
-        if (userVersion == 0) // brand new file, bump version
-            QSqlQuery(u"PRAGMA user_version=%1"_qs.arg(DBVersion), d->m_db);
+        {
+            QSqlQuery jnlQuery(u"PRAGMA journal_mode = wal;"_qs, d->m_db);
+            if (jnlQuery.lastError().isValid())
+                qCWarning(LogSql) << "Failed to set journaling mode to 'wal' on the picture database:"
+                                  << jnlQuery.lastError();
+        }
+        {
+            QSqlQuery uvQuery(u"PRAGMA user_version;"_qs, d->m_db);
+            uvQuery.next();
+            auto userVersion = uvQuery.value(0).toInt();
+            if (userVersion == 0) // brand new file, bump version
+                QSqlQuery(u"PRAGMA user_version=%1;"_qs.arg(DBVersion), d->m_db);
+        }
 
         // DB schema upgrade code goes here...
     }
