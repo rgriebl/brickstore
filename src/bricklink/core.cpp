@@ -53,6 +53,7 @@
 
 Q_LOGGING_CATEGORY(LogResolver, "resolver")
 Q_LOGGING_CATEGORY(LogCache, "cache")
+Q_LOGGING_CATEGORY(LogSql, "sql")
 
 
 namespace BrickLink {

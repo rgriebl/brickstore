@@ -29,6 +29,7 @@
 #include "utility/transfer.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogCache)
+Q_DECLARE_LOGGING_CATEGORY(LogSql)
 
 
 namespace BrickLink {
@@ -148,7 +149,7 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
     // try to start from scratch, if the DB open fails
     if (!d->m_db.open() &&
             !(QFile::exists(d->m_dbName) && QFile::remove(d->m_dbName) && d->m_db.open())) {
-        qWarning() << "Failed to open picture database:" << d->m_db.lastError().text();
+        qCWarning(LogSql) << "Failed to open the picture database:" << d->m_db.lastError().text();
     }
 
     if (d->m_db.isOpen()) {
@@ -159,8 +160,8 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
                     "updated INTEGER, "             // msecsSinceEpoch
                     "accessed INTEGER NOT NULL, "   // msecsSinceEpoch
                     "data BLOB) WITHOUT ROWID;"_qs)) {
-            qWarning() << "Failed to create the 'pic' table in picture database:"
-                       << createQuery.lastError().text();
+            qCWarning(LogSql) << "Failed to create the 'pic' table in the picture database:"
+                              << createQuery.lastError().text();
             d->m_db.close();
         }
     }
@@ -569,8 +570,10 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                     if (saveType == SaveAccessTimeOnly) {
                         accessQuery.bindValue(u":id"_qs, dbTag);
                         accessQuery.bindValue(u":accessed"_qs, now);
-                        if (!accessQuery.exec())
-                            qWarning() << "Failed to update the access time of a picture in the database:" << accessQuery.lastError().text();
+                        if (!accessQuery.exec()) {
+                            qCWarning(LogSql) << "Failed to update the access time of a picture:"
+                                              << accessQuery.lastError().text();
+                        }
                         accessQuery.finish();
                     } else {
                         QByteArray data;
@@ -593,8 +596,10 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                         saveQuery.bindValue(u":accessed"_qs, now);
                         saveQuery.bindValue(u":data"_qs, data);
 
-                        if (!saveQuery.exec())
-                            qWarning() << "Failed to save picture data to the database:" << saveQuery.lastError().text();
+                        if (!saveQuery.exec()) {
+                            qCWarning(LogSql) << "Failed to save picture data:"
+                                              << saveQuery.lastError().text();
+                        }
                         saveQuery.finish();
                     }
                     pic->release();

@@ -37,6 +37,7 @@
 #include "bricklink/color.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogCache)
+Q_DECLARE_LOGGING_CATEGORY(LogSql)
 
 
 namespace BrickLink {
@@ -470,8 +471,8 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
                 });
 
                 if (pit == m_currentBatch.end()) {
-                    qWarning() << "PG download was not requested, but received for"
-                               << typeId.mid(0, 1) << itemId << "in" << colorId;
+                    qCWarning(LogCache) << "PG download was not requested, but received for"
+                                        << typeId.mid(0, 1) << itemId << "in" << colorId;
                     continue;
                 }
 
@@ -588,7 +589,7 @@ PriceGuideCache::PriceGuideCache(Core *core)
     // try to start from scratch, if the DB open fails
     if (!d->m_db.open() &&
             !(QFile::exists(d->m_dbName) && QFile::remove(d->m_dbName) && d->m_db.open())) {
-        qWarning() << "Failed to open price-guide database:" << d->m_db.lastError().text();
+        qCWarning(LogSql) << "Failed to open the price-guide database:" << d->m_db.lastError().text();
     }
 
     if (d->m_db.isOpen()) {
@@ -599,7 +600,7 @@ PriceGuideCache::PriceGuideCache(Core *core)
                     "updated INTEGER, "             // msecsSinceEpoch
                     "accessed INTEGER NOT NULL, "   // msecsSinceEpoch
                     "data BLOB) WITHOUT ROWID;"_qs)) {
-            qWarning() << "Failed to create the 'pg' table in price-guide database:"
+            qCWarning(LogSql) << "Failed to create the 'pg' table in the price-guide database:"
                        << createQuery.lastError().text();
             d->m_db.close();
         }
@@ -964,8 +965,10 @@ void PriceGuideCachePrivate::saveThread(QString dbName, int index)
                     if (saveType == SaveAccessTimeOnly) {
                         accessQuery.bindValue(u":id"_qs, dbTag);
                         accessQuery.bindValue(u":accessed"_qs, now);
-                        if (!accessQuery.exec())
-                            qWarning() << "Failed to update the access time of a price-guide in the database:" << accessQuery.lastError().text();
+                        if (!accessQuery.exec()) {
+                            qCWarning(LogSql) << "Failed to update the access time of a price-guide:"
+                                              << accessQuery.lastError().text();
+                        }
                         accessQuery.finish();
                     } else {
                         auto lastUpdated = QVariant(QMetaType::fromType<qint64>());
@@ -977,8 +980,10 @@ void PriceGuideCachePrivate::saveThread(QString dbName, int index)
                         saveQuery.bindValue(u":accessed"_qs, now);
                         saveQuery.bindValue(u":data"_qs, QByteArray::fromRawData(reinterpret_cast<const char *>(&pg->m_data),
                                                                                  sizeof(PriceGuide::Data)));
-                        if (!saveQuery.exec())
-                            qWarning() << "Failed to save price-guide data to the database:" << saveQuery.lastError().text();
+                        if (!saveQuery.exec()) {
+                            qCWarning(LogSql) << "Failed to save price-guide data:"
+                                              << saveQuery.lastError().text();
+                        }
                         saveQuery.finish();
                     }
                     pg->release();
@@ -1022,7 +1027,7 @@ void PriceGuideCachePrivate::retrieveFinished(PriceGuide *pg, const PriceGuide::
 
 void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &errorString)
 {
-    qWarning().noquote() << errorString;
+    qCWarning(LogCache).noquote() << errorString;
     pg->setUpdateStatus(UpdateStatus::UpdateFailed);
     emit q->priceGuideUpdated(pg);
 }
