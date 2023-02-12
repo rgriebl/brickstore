@@ -392,44 +392,46 @@ void BatchedAffiliateAPIPGRetriever::check()
             auto batchSize = qMin(nextSize, MaxBatchSize);
             QJsonArray array;
 
-             for (auto i = 0; i < batchSize; ++i) {
-                 auto *pg = m_nextBatch.at(i).first;
-                 const QString itemId = QLatin1String(pg->item()->id());
-                 const QString typeId = itemTypeApiId(pg->item()->itemType());
-                 int colorId = int(pg->color()->id());
+            for (auto i = 0; i < batchSize; ++i) {
+                auto *pg = m_nextBatch.at(i).first;
+                const QString itemId = QLatin1String(pg->item()->id());
+                const QString typeId = itemTypeApiId(pg->item()->itemType());
+                int colorId = int(pg->color()->id());
 
-                 m_currentBatch.append(pg);
+                m_currentBatch.append(pg);
 
-                 array.append(QJsonObject {
-                                  { u"color_id"_qs, colorId },
-                                  { u"item"_qs, QJsonObject {
-                                        { u"no"_qs, itemId },
-                                        { u"type"_qs, typeId },
-                                    } },
-                              });
-             }
-             m_nextBatch.remove(0, batchSize);
-             m_nextBatchPrioritySize -= qMin(m_nextBatchPrioritySize, batchSize);
+                array.append(QJsonObject {
+                                 { u"color_id"_qs, colorId },
+                                 { u"item"_qs, QJsonObject {
+                                       { u"no"_qs, itemId },
+                                       { u"type"_qs, typeId },
+                                   } },
+                             });
+            }
+            m_nextBatch.remove(0, batchSize);
+            m_nextBatchPrioritySize -= qMin(m_nextBatchPrioritySize, batchSize);
 
-             const auto json = QJsonDocument(array).toJson(QJsonDocument::Compact);
+            const auto json = QJsonDocument(array).toJson(QJsonDocument::Compact);
 
-             // https://api.bricklink.com/api/affiliate/v1/price_guide_batch?currency_code=USD&precision=4&vat_type=1&api_key=...
-             QUrl url = u"https://api.bricklink.com/api/affiliate/v1/price_guide_batch"_qs;
-             url.setQuery({
-                              { u"currency_code"_qs, u"USD"_qs },
-                              { u"precision"_qs,     u"4"_qs },
-                              { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
-                              { u"api_key"_qs,       m_apiKey }
-                          });
+            // https://api.bricklink.com/api/affiliate/v1/price_guide_batch?currency_code=USD&precision=4&vat_type=1&api_key=...
+            QUrl url = u"https://api.bricklink.com/api/affiliate/v1/price_guide_batch"_qs;
+            url.setQuery({
+                             { u"currency_code"_qs, u"USD"_qs },
+                             { u"precision"_qs,     u"4"_qs },
+                             { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
+                             { u"api_key"_qs,       m_apiKey }
+                         });
 
-             m_currentJob = TransferJob::postContent(url, u"application/json"_qs, json);
-             m_currentJob->setUserData("batchedPriceGuide", true);
+            m_currentJob = TransferJob::postContent(url, u"application/json"_qs, json);
+            m_currentJob->setUserData("batchedPriceGuide", true);
 
-             m_core->retrieve(m_currentJob, m_nextBatchPrioritySize > 0);
+            m_core->retrieve(m_currentJob, m_nextBatchPrioritySize > 0);
+        } else if (nextSize) {
+            auto nextCheck = std::max(0LL, (MaxBatchAgeMSec - std::max(nextAge, nextPriorityAge)));
+            m_batchTimer->setInterval(nextCheck);
+            m_batchTimer->start();
         }
     }
-    if ((!m_nextBatch.isEmpty() || !m_wrongVatTypeQueue.isEmpty()) && !m_batchTimer->isActive())
-        m_batchTimer->start();
 }
 
 void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)

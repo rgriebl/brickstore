@@ -97,7 +97,7 @@ public:
     void cancelAll() override;
 
     static constexpr qsizetype MaxBatchSize = 500;
-    static constexpr qint64 MaxBatchAgeMSec = 500;
+    static constexpr qint64 MaxBatchAgeMSec = 100;
 
 private:
     void check();
