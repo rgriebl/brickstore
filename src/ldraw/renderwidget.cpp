@@ -69,10 +69,17 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
         m_window->setResizeMode(QQuickView::SizeRootObjectToView);
 
         m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
-        m_widget = QWidget::createWindowContainer(m_window, this);
 
-        m_controller = m_window->rootObject()->property("renderController").value<RenderController *>();
-    } else {
+        if (auto *ro = m_window->rootObject()) {
+            m_widget = QWidget::createWindowContainer(m_window, this);
+            m_controller = ro->property("renderController").value<RenderController *>();
+        } else {
+            delete m_window;
+            m_window = nullptr;
+        }
+    }
+    if (!m_widget) { // create a dummy widget, if the 3D view could not be created
+        Q_ASSERT(!m_window);
         m_controller = new RenderController(this);
 
         m_widget = new QWidget(this);

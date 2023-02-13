@@ -65,9 +65,9 @@ private:
     void paletteChange();
     void languageChange();
 
-    RenderController *m_controller;
+    RenderController *m_controller = nullptr;
     QQuickView *m_window = nullptr;
-    QWidget *m_widget;
+    QWidget *m_widget = nullptr;
     QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };
 
