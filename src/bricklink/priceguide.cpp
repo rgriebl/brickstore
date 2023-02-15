@@ -428,7 +428,7 @@ void BatchedAffiliateAPIPGRetriever::check()
             m_core->retrieve(m_currentJob, m_nextBatchPrioritySize > 0);
         } else if (nextSize) {
             auto nextCheck = std::max(0LL, (MaxBatchAgeMSec - std::max(nextAge, nextPriorityAge)));
-            m_batchTimer->setInterval(nextCheck);
+            m_batchTimer->setInterval(int(nextCheck));
             m_batchTimer->start();
         }
     }
