@@ -229,8 +229,8 @@ void ImportInventoryDialog::importInventory()
 {
     if (m_verifyItem) {
         accept();
-    } else {
-        Document::fromPartInventory(item(), nullptr, quantity(), condition(),
+    } else if (auto *it = item()) {
+        Document::fromPartInventory(it, nullptr, quantity(), condition(),
                                     extraParts(), partOutTraits());
     }
 }
