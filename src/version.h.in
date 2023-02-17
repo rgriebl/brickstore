@@ -20,7 +20,6 @@
 #define BRICKSTORE_BUILD_NUMBER "@BUILD_NUMBER@"
 #define BRICKSTORE_BUILD_USER   "@BUILD_USER@"
 #define BRICKSTORE_BUILD_HOST   "@BUILD_HOST@"
-#define BRICKSTORE_GIT_VERSION  "@GIT_VERSION@"
 
 // 2 step stringification
 #define BS_STR(s)   BS_STR2(s)

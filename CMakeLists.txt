@@ -45,23 +45,6 @@ else()
 endif()
 cmake_host_system_information(RESULT BUILD_HOST QUERY HOSTNAME)
 
-file(STRINGS ${CMAKE_SOURCE_DIR}/.tag GIT_VERSION)
-if (GIT_VERSION STREQUAL "\$Format:%H\$")
-    set(GIT_VERSION "unknown")
-    if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.git)
-        execute_process(
-            COMMAND git describe --tags --always --dirty
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-            OUTPUT_VARIABLE GIT_DESCRIBE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-        )
-        if (GIT_DESCRIBE)
-            set(GIT_VERSION "${GIT_DESCRIBE}")
-        endif()
-    endif()
-endif()
-
 file(STRINGS "VERSION_NUMBER" VERSION)
 string(REPLACE "." ";" VERSION_LIST ${VERSION})
 list(GET VERSION_LIST 0 VERSION_MAJOR)
@@ -583,17 +566,21 @@ elseif (LINUX)
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
     # Debian will get a Qt 6.2+ with bookworm (currently testing, estimated release in summer 2023)
 
-    # remove this, once the TLS plugin is packaged alongside QtNetwork again
-    set(DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins")
+    set(DEBIAN_PACKAGE_DEPENDS
+        libqt6sql6-sqlite
+        qt6-qpa-plugins   # the TLS and basic image-format plugins are wrongly packaged into here
+    )
 
     if (NOT BS_BACKEND)
         list(APPEND DEBIAN_PACKAGE_DEPENDS
-            "libqt6svg6"
-            "qml6-module-qtqml-workerscript"
-            "qml6-module-qtquick"
-            "qml6-module-qtquick-controls"
-            "qml6-module-qt5compat-graphicaleffects"
-            "qml6-module-quick3d"
+            libqt6svg6
+            qt6-gtk-platformtheme
+            qt6-image-formats-plugins
+            qml6-module-qtqml-workerscript
+            qml6-module-qtquick
+            qml6-module-qtquick-controls
+            qml6-module-qt5compat-graphicaleffects
+            qml6-module-quick3d
     )
     endif()
     string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS "${DEBIAN_PACKAGE_DEPENDS}")
@@ -691,7 +678,7 @@ include(CPack)
 message(STATUS "")
 message(STATUS "Configure Summary:")
 message(STATUS "  Version ........ ${VERSION}")
-message(STATUS "  Git describe.... ${GIT_VERSION}")
+message(STATUS "  Build number ... ${BUILD_NUMBER}")
 message(STATUS "  Build type ..... ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Qt version ..... ${Qt6_VERSION}")
 message(STATUS "  Qt location .... ${Qt6_DIR}")

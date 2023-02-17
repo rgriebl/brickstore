@@ -161,7 +161,7 @@ jobs:
     - name: Install Qt from Linux Distro (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
-        sudo docker run -v `pwd`:/brickstore --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
+        sudo -E docker run -v `pwd`:/brickstore -e BUILD_NUMBER --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install \
             $BRICKSTORE_QT6_DEB_PACKAGES \
