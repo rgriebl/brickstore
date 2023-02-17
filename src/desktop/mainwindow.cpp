@@ -470,10 +470,12 @@ void MainWindow::createCentralWidget()
             this, [this](QWidget *, QWidget *now) {
         for ( ; now; now = now->parentWidget()) {
             if (auto vpl = qobject_cast<ViewPane *>(now)) {
-                if (m_goHome->isChecked())
-                    goHome(false);
-                setActiveViewPane(vpl);
-                break;
+                if (vpl->activeView()) {
+                    if (m_goHome->isChecked())
+                        goHome(false);
+                    setActiveViewPane(vpl);
+                    break;
+                }
             }
         }
     });
