@@ -10,7 +10,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(SENTRY_VERSION 0.5.3)
+set(SENTRY_VERSION 0.6.0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(ANDROID_PLATFORM 21) # supress warning by setting it early
