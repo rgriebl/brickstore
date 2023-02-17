@@ -1,3 +1,5 @@
+# Copyright (C) 2004-2023 Robert Griebl
+# SPDX-License-Identifier: GPL-3.0-only
 
 qt_add_library(mobile_module STATIC
     mobileapplication.h

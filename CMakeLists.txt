@@ -1,3 +1,5 @@
+# Copyright (C) 2004-2023 Robert Griebl
+# SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.19.0)
 
@@ -31,7 +33,7 @@ set(BRICKLINK_AFFILIATE_API_KEY  "" CACHE STRING "BrickLink's Affiliate API key"
 
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")
-set(COPYRIGHT      "2004-2022 Robert Griebl")
+set(COPYRIGHT      "2004-2023 Robert Griebl")
 set(BRICKSTORE_URL "brickforge.de/brickstore")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
 set(BUILD_NUMBER   "$ENV{BUILD_NUMBER}")

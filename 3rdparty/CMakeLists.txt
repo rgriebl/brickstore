@@ -1,3 +1,5 @@
+# Copyright (C) 2004-2023 Robert Griebl
+# SPDX-License-Identifier: GPL-3.0-only
 
 target_sources(${PROJECT_NAME} PUBLIC
     lzma/bs_lzma.h

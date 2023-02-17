@@ -1,3 +1,5 @@
+# Copyright (C) 2004-2023 Robert Griebl
+# SPDX-License-Identifier: GPL-3.0-only
 
 configure_file(version.h.in generated/version.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)

@@ -1,3 +1,6 @@
+// Copyright (C) 2004-2023 Robert Griebl
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Instanced line drawing. Based heavily on:
 // https://wwwtyro.net/2019/11/18/instanced-lines.html
 // The example code is in the public domain.

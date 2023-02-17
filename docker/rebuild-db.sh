@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (C) 2004-2023 Robert Griebl
+# SPDX-License-Identifier: GPL-3.0-only
+
 # This script can be run from a cronjob to trigger a db rebuild
 # using brickstore-backend docker image.
 # Make sure to adjust to your environment!

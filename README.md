@@ -25,8 +25,8 @@ logged into GitHub (this is a GitHub limitation).
 
 ## License
 
-BrickStore is copyrighted &copy;2004-2022 by Robert Griebl, licensed under the
-[GNU General Public License (GPL) version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+BrickStore is copyrighted &copy;2004-2023 by Robert Griebl, licensed under the
+[GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.html).
 All data from [www.bricklink.com](https://www.bricklink.com) is owned by BrickLink. Both BrickLink
 and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this
 software. All other trademarks recognized.
