@@ -1290,7 +1290,7 @@
         <source>%n lot(s) of your Shopping Cart could not be imported.</source>
         <translation>
             <numerusform>Ein Posten des Warenkorbs konnte nicht importiert werden.</numerusform>
-            <numerusform>%1 Posten des Warenkorbs konnten nicht importiert werden.</numerusform>
+            <numerusform>%n Posten des Warenkorbs konnten nicht importiert werden.</numerusform>
         </translation>
     </message>
     <message>
@@ -1377,7 +1377,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="346"/>
+        <location filename="../src/bricklink/core.cpp" line="348"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>Das Datenverzeichnis &apos;%1&apos; ist nicht sowohl les- als auch beschreibbar.</translation>
     </message>
@@ -1519,7 +1519,7 @@
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="893"/>
+        <location filename="../src/desktop/selectitem.cpp" line="894"/>
         <source>consists-of:</source>
         <translation>besteht-aus:</translation>
     </message>
@@ -1617,27 +1617,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="769"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="787"/>
         <source>VAT is included</source>
         <translation>Inklusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="770"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="788"/>
         <source>VAT is excluded</source>
         <translation>Exclusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="774"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
         <source>for the EU</source>
         <translation>für die EU</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="775"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
         <source>for the UK</source>
         <translation>für Großbritannien</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="776"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="794"/>
         <source>for Norway</source>
         <translation>für Norwegen</translation>
     </message>
@@ -1667,7 +1667,7 @@
         <source>%n lot(s) of your Wanted List could not be imported.</source>
         <translation>
             <numerusform>Ein Posten der Suchliste konnte nicht importiert werden.</numerusform>
-            <numerusform>%1 Posten der Suchliste konnten nicht importiert werden.</numerusform>
+            <numerusform>%n Posten der Suchliste konnten nicht importiert werden.</numerusform>
         </translation>
     </message>
     <message>
@@ -2360,7 +2360,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <source>The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</source>
         <translation>
             <numerusform>Die Menge der Teile in einem Posten würde bei einer Multiplikation mit %1 die Höchstzahl (%2) übersteigen.&lt;br&gt;&lt;br&gt;Es wurden keine Werte geändert.</numerusform>
-            <numerusform></numerusform>
+            <numerusform>Die Menge der Teile in %n Posten würde bei einer Multiplikation mit %1 die Höchstzahl (%2) übersteigen.&lt;br&gt;&lt;br&gt;Es wurden keine Werte geändert.</numerusform>
         </translation>
     </message>
     <message>
@@ -2413,7 +2413,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <location filename="../src/common/document.cpp" line="1716"/>
         <location filename="../src/common/document.cpp" line="1719"/>
         <source>Failed to save document</source>
-        <translation>Dokument %1 konnte nicht gesichert werden: %2</translation>
+        <translation>Dokument konnte nicht gesichert werden</translation>
     </message>
     <message>
         <source>Cart in store %1</source>
@@ -2934,17 +2934,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     <message>
         <location filename="../src/common/documentio.cpp" line="204"/>
         <source>Could not open LDraw file for reading</source>
-        <translation>Konnte die LDraw Datei nicht zum Lesen öffnen.</translation>
+        <translation>Konnte die LDraw Datei nicht zum Lesen öffnen</translation>
     </message>
     <message>
         <location filename="../src/common/documentio.cpp" line="216"/>
         <source>Could not parse the LDraw data</source>
-        <translation>Konnte die LDraw Daten nicht verarbeiten.</translation>
+        <translation>Konnte die LDraw Daten nicht verarbeiten</translation>
     </message>
     <message>
         <location filename="../src/common/documentio.cpp" line="223"/>
         <source>Failed to import the LDraw/Studio model %1</source>
-        <translation>Konnte das LDraw/Studio model nicht importieren</translation>
+        <translation>Konnte das LDraw/Studio Modell %1 nicht importieren</translation>
     </message>
     <message>
         <source>Could not parse the Studio model</source>
@@ -4475,7 +4475,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="197"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="204"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -4557,12 +4557,12 @@ Rechts-Click: Menü</translation>
         <translation>Download...&lt;br&gt;Zu &lt;b&gt;%p%&lt;/b&gt; fertig&lt;br&gt;(%v von %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1213"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1215"/>
         <source>Customize Toolbar...</source>
         <translation>Werkzeugleiste anpassen...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1217"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1219"/>
         <source>Reset Info Docks layout</source>
         <translation>Anordnung der Infoleisten zurücksetzen</translation>
     </message>
@@ -4597,7 +4597,7 @@ Rechts-Click: Menü</translation>
     <message>
         <location filename="../3rdparty/minizip/minizip.cpp" line="189"/>
         <source>ZIP file %1 has not been opened for reading</source>
-        <translation>Konnte die ZIP Datei %1 nicht zum Lesen öffnen.</translation>
+        <translation>Konnte die ZIP Datei %1 nicht zum Lesen öffnen</translation>
     </message>
     <message>
         <location filename="../3rdparty/minizip/minizip.cpp" line="194"/>
@@ -4622,7 +4622,7 @@ Rechts-Click: Menü</translation>
     <message>
         <location filename="../3rdparty/minizip/minizip.cpp" line="205"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
-        <translation>Die Datei %1 in der ZIP Datei %2 ist zu gross (%2 Bytes).</translation>
+        <translation>Die Datei %1 in der ZIP Datei %3 ist zu gross (%2 Bytes).</translation>
     </message>
     <message>
         <location filename="../3rdparty/minizip/minizip.cpp" line="208"/>
@@ -5760,7 +5760,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Zur Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="863"/>
+        <location filename="../src/desktop/selectitem.cpp" line="864"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie</translation>
     </message>
@@ -5809,17 +5809,17 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Verkleinern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="873"/>
+        <location filename="../src/desktop/selectitem.cpp" line="874"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="907"/>
+        <location filename="../src/desktop/selectitem.cpp" line="908"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Setze den Filter auf Minifigs, die aus diesem Teil bestehen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="912"/>
+        <location filename="../src/desktop/selectitem.cpp" line="913"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Schränke den Filter auf Minifigs, die aus diesem Teil bestehen, ein</translation>
     </message>
@@ -6367,7 +6367,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="946"/>
         <source>Use this option, if you need custom or unofficial parts</source>
-        <translation>Wählen Sie diese Option, falls Sie individuelle oder inoffzielle Teile benötigen.</translation>
+        <translation>Wählen Sie diese Option, falls Sie individuelle oder inoffzielle Teile benötigen</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="980"/>
@@ -7013,7 +7013,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     <message>
         <location filename="../src/desktop/view.cpp" line="325"/>
         <source>Select the document that should serve as a source to fill in the corresponding fields in the current document</source>
-        <translation>Wähle das Quelldokument, um die entsprechenden Felder aktuellen Dokument zu setzen:</translation>
+        <translation>Wähle das Quelldokument, um die entsprechenden Felder im aktuellen Dokument zu setzen</translation>
     </message>
     <message>
         <location filename="../src/desktop/view.cpp" line="326"/>

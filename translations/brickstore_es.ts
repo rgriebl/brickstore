@@ -1329,7 +1329,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="346"/>
+        <location filename="../src/bricklink/core.cpp" line="348"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>La carpeta de datos &apos;%1&apos; no es de lectura y escritura.</translation>
     </message>
@@ -1467,7 +1467,7 @@
         <translation>Descripción</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="893"/>
+        <location filename="../src/desktop/selectitem.cpp" line="894"/>
         <source>consists-of:</source>
         <translation>consta-de:</translation>
     </message>
@@ -1565,27 +1565,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="769"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="787"/>
         <source>VAT is included</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="770"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="788"/>
         <source>VAT is excluded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="774"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
         <source>for the EU</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="775"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
         <source>for the UK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="776"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="794"/>
         <source>for Norway</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4021,7 +4021,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="197"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="204"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -4103,12 +4103,12 @@ Clic derecho: Menu</translation>
         <translation>Descargando...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finalizado&lt;br&gt;(%v de %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1213"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1215"/>
         <source>Customize Toolbar...</source>
         <translation>Personalizar Barra de heramientas...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1217"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1219"/>
         <source>Reset Info Docks layout</source>
         <translation>Restablecer disposición Cuadros de Información</translation>
     </message>
@@ -5339,22 +5339,22 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Cambiar a la categoría del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="863"/>
+        <location filename="../src/desktop/selectitem.cpp" line="864"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Cambiar a la catecoría &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="873"/>
+        <location filename="../src/desktop/selectitem.cpp" line="874"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Cambiar a la categoría &quot;%1&quot; del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="907"/>
+        <location filename="../src/desktop/selectitem.cpp" line="908"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Establecer el filtro para Minifiguras que constan de esta pieza</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="912"/>
+        <location filename="../src/desktop/selectitem.cpp" line="913"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Delimitar el filtro a Minifiguras que constan de esta pieza</translation>
     </message>

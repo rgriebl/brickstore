@@ -1321,7 +1321,7 @@
 <context>
     <name>BrickLink::Core</name>
     <message>
-        <location filename="../src/bricklink/core.cpp" line="346"/>
+        <location filename="../src/bricklink/core.cpp" line="348"/>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>Katalogen &apos;%1&apos; är inte både läs- och skrivbar.</translation>
     </message>
@@ -1435,7 +1435,7 @@
         <translation>Beskrivning</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="893"/>
+        <location filename="../src/desktop/selectitem.cpp" line="894"/>
         <source>consists-of:</source>
         <translation>Består av:</translation>
     </message>
@@ -1529,27 +1529,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="769"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="787"/>
         <source>VAT is included</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="770"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="788"/>
         <source>VAT is excluded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="774"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
         <source>for the EU</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="775"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
         <source>for the UK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="776"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="794"/>
         <source>for Norway</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3829,7 +3829,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="197"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="204"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
@@ -3907,12 +3907,12 @@ Högerklicka: Meny</translation>
         <translation>Laddar ner...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; färdiga&lt;br&gt;(%v of %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1213"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1215"/>
         <source>Customize Toolbar...</source>
         <translation>Anpassa Verktygsfältet...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1217"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1219"/>
         <source>Reset Info Docks layout</source>
         <translation>Återställ info rutans placering</translation>
     </message>
@@ -5093,22 +5093,22 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Zooma ut</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="863"/>
+        <location filename="../src/desktop/selectitem.cpp" line="864"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Byt till &quot;%1&quot; kategorin</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="873"/>
+        <location filename="../src/desktop/selectitem.cpp" line="874"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Byt till artikelns &quot;%1&quot;&apos;s kategori</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="907"/>
+        <location filename="../src/desktop/selectitem.cpp" line="908"/>
         <source>Set filter to Minifigs consisting of this part</source>
         <translation>Ställ in filtreringen för Minifigurer som består av den här delen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="912"/>
+        <location filename="../src/desktop/selectitem.cpp" line="913"/>
         <source>Narrow filter to Minifigs consisting of this part</source>
         <translation>Närma filtreringen till Minifigurer som består av denna del</translation>
     </message>
