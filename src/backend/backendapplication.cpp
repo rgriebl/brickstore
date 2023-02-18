@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cstdio>
 #include <QtCore/QStandardPaths>
 #include "backendapplication.h"
 #include "bricklink/core.h"
@@ -17,10 +18,15 @@ BackendApplication::BackendApplication(int &argc, char **argv)
     (void) new QCoreApplication(argc, argv);
 
     m_clp.addHelpOption();
-    m_clp.addVersionOption();
+    m_clp.addOption({ { u"v"_qs, u"version"_qs }, u"Display version information."_qs });
     m_clp.addOption({ u"rebuild-database"_qs, u"Rebuild the BrickLink database (required)."_qs });
     m_clp.addOption({ u"skip-download"_qs, u"Do not download the BrickLink XML database export (optional)."_qs });
     m_clp.process(QCoreApplication::arguments());
+
+    if (m_clp.isSet(u"version"_qs)) {
+        puts(BRICKSTORE_NAME " " BRICKSTORE_VERSION " (" BRICKSTORE_BUILD_NUMBER ")");
+        exit(0);
+    }
 
     if (!m_clp.isSet(u"rebuild-database"_qs))
         m_clp.showHelp(1);

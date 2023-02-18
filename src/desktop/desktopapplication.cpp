@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cstdio>
 #include <QtCore/QThread>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -67,7 +68,7 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     m_app = new QApplication(argc, argv);
 
     m_clp.addHelpOption();
-    m_clp.addVersionOption();
+    m_clp.addOption({ { u"v"_qs, u"version"_qs }, u"Display version information."_qs });
     m_clp.addOption({ u"load-translation"_qs, u"Load the specified translation (testing only)."_qs, u"qm-file"_qs });
     m_clp.addOption({ u"new-instance"_qs, u"Start a new instance."_qs });
     m_clp.addPositionalArgument(u"files"_qs, u"The BSX documents to open, optionally."_qs, u"[files...]"_qs);
@@ -75,6 +76,13 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
 
     m_translationOverride = m_clp.value(u"load-translation"_qs);
     m_queuedDocuments << m_clp.positionalArguments();
+
+    if (m_clp.isSet(u"version"_qs)) {
+        QString s = QCoreApplication::applicationName() + u' '  +
+                QCoreApplication::applicationVersion() + u" (build: " + buildNumber() + u')';
+        puts(s.toLocal8Bit());
+        exit(0);
+    }
 
     // check for an already running instance
     if (!m_clp.isSet(u"new-instance"_qs) && notifyOtherInstance())

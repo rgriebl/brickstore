@@ -2076,27 +2076,27 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="148"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="156"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>¿Abilitar reportes anónimos de fallos?&lt;br&gt;&lt;br&gt;Por favor considere activar esta función cuando esté disponible.&lt;br&gt;Si tiene alguna duda sobre qué información se envía y cómo es udada, por favor &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;vea aquí&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Reporte de fallos se puede activar o desactivar en cualquier momento desde la ventana de Ajustes.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="325"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="333"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Su versión de macOS es demasiado antigua para admitir cambios de tema.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="342"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="350"/>
         <source>The theme change will take effect after a restart.</source>
         <translation>El cambio de tema tendrá efecto al reiniciar.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="345"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="353"/>
         <source>Restart now</source>
         <translation>Reiniciar ahora</translation>
     </message>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="344"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="352"/>
         <source>Later</source>
         <translation>Más tarde</translation>
     </message>
