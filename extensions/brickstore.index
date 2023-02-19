@@ -2,14 +2,14 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="BrickStore Extensions" version="" project="BrickStore">
     <namespace name="" status="active" access="public" module="brickstore">
-        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="84" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
-        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="1" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
+        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="87" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
+        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="4" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
             <contents name="installation" title="Installation" level="1"/>
             <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
             <contents name="writing-extensions" title="Writing Extensions" level="1"/>
             <contents name="debugging" title="Debugging" level="1"/>
         </page>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="138" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="141" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
             <contents name="the-simple-changes" title="The simple changes" level="2"/>
             <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
             <contents name="complex-changes" title="Complex changes" level="2"/>
@@ -354,7 +354,7 @@
         <group name="qml-extension" href="qml-extension.html" status="internal" seen="false" title=""/>
         <group name="qml-printing" href="qml-printing.html" status="internal" seen="false" title=""/>
         <group name="qmlmodules" href="qmlmodules.html" status="internal" seen="false" title=""/>
-        <qmlmodule name="BrickLink" qml-module-name="BrickLink" qml-module-version="1.0" href="bricklink-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="76" documented="true" groups="qmlmodules" seen="true" title="BrickLink QML types" brief="Provides QML types for interfacing with the BrickLink database"/>
-        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="69" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore specific functionality"/>
+        <qmlmodule name="BrickLink" qml-module-name="BrickLink" qml-module-version="1.0" href="bricklink-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="79" documented="true" groups="qmlmodules" seen="true" title="BrickLink QML types" brief="Provides QML types for interfacing with the BrickLink database"/>
+        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="72" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore specific functionality"/>
     </namespace>
 </INDEX>
