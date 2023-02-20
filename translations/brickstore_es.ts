@@ -1239,7 +1239,7 @@
     <message>
         <location filename="../src/common/application.cpp" line="924"/>
         <source>The price-guide download mechanism changed. Please make sure your VAT setup is still correct on the BrickLink page in the Settings dialog.</source>
-        <translation type="unfinished"></translation>
+        <translation>El mecanismo de descarga de la guía de precios ha cambiado. Por favor aseguresé de que sus configuración de IVA es correcta en la pestaña Bricklink de la ventana de Configuración.</translation>
     </message>
 </context>
 <context>
@@ -1586,27 +1586,27 @@
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="777"/>
         <source>VAT is included</source>
-        <translation type="unfinished"></translation>
+        <translation>IVA incluido</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="778"/>
         <source>VAT is excluded</source>
-        <translation type="unfinished"></translation>
+        <translation>IVA excluido</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="782"/>
         <source>for the EU</source>
-        <translation type="unfinished"></translation>
+        <translation>para la UE</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="783"/>
         <source>for the UK</source>
-        <translation type="unfinished"></translation>
+        <translation>para Reino Unido</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="784"/>
         <source>for Norway</source>
-        <translation type="unfinished"></translation>
+        <translation>para Noruega</translation>
     </message>
 </context>
 <context>
@@ -1817,62 +1817,62 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="14"/>
         <source>Consolidate lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Consolidar lotes</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="36"/>
         <source>Please choose how you want to resolve them</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor escoge cómo los quiere resolver</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="79"/>
         <source>Use the same options to consolidate all lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar las mismas opciones para consolidar todos los lotes</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="82"/>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="108"/>
         <source>Consolidate each lot individually</source>
-        <translation type="unfinished"></translation>
+        <translation>Consolidar cada lote individualmente</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="111"/>
         <source>Ctrl+I</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+I</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="85"/>
         <source>A quick way to consolidate a large number of lots, but you are restricted when it comes to merge destinations and options.</source>
-        <translation type="unfinished"></translation>
+        <translation>Una manera rápida de consolidar un gran número de lotes, pero tiene restricciones respecto a la destinación y opciones.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="114"/>
         <source>A step-by-step guide through each single consolidation, asking for your input on merge destinations and options.</source>
-        <translation type="unfinished"></translation>
+        <translation>Una guía paso a paso por cada consolidación, pidiendo su entrada para destinaciones y opciones.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="137"/>
         <source>Just add the new lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Solo añadir los nuevos lotes</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="140"/>
         <source>Ctrl+A</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+A</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="143"/>
         <source>No consolidation will be done at all. The new lots will just be added to the document.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se realizará ninguna consolidación. Los nuevos lotes solo se añadiran al documento.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="212"/>
         <source>Each merge operation has at least one source and exactly one destination lot. Please select how to determine the destination:</source>
-        <translation type="unfinished"></translation>
+        <translation>Cada operación de unificar tiene al menos un origen y exactamente un lote destino. Por favor selecciona como determinar la destinación:</translation>
     </message>
     <message>
         <source>Destination</source>
@@ -1881,25 +1881,25 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="264"/>
         <source>How exactly should the lots be merged:</source>
-        <translation type="unfinished"></translation>
+        <translation>Cómo se deben que unifacar los lotes exactamente:</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="286"/>
         <location filename="../src/desktop/consolidatedialog.ui" line="408"/>
         <source>Do not delete source lots, but set their quantity to zero</source>
-        <translation type="unfinished"></translation>
+        <translation>No eliminar los lotes de origen, pero establecer su cantidad a cero</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="380"/>
         <source>More options</source>
-        <translation type="unfinished"></translation>
+        <translation>Más opciones</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/desktop/consolidatedialog.cpp" line="42"/>
         <source>There are %n possible consolidation(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Hay %n posibible consolidación</numerusform>
+            <numerusform>Hay %n posibles consolidaciones</numerusform>
         </translation>
     </message>
     <message>
@@ -1929,72 +1929,72 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="93"/>
         <source>Existing lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Lote existente</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="94"/>
         <source>New lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Nuevo lote</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="99"/>
         <source>Topmost lot in sort order</source>
-        <translation type="unfinished"></translation>
+        <translation>Lote más alto por ordenenación</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="100"/>
         <source>Bottommost lot in sort order</source>
-        <translation type="unfinished"></translation>
+        <translation>Lote más bajo por ordenación</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="101"/>
         <source>Lot with lowest index</source>
-        <translation type="unfinished"></translation>
+        <translation>Lote con el índice más bajo</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="102"/>
         <source>Lot with highest index</source>
-        <translation type="unfinished"></translation>
+        <translation>Lote con el índice más alto</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="149"/>
         <source>%1 of %2 consolidations will not be done, because no destination lot has been set.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 de %2 consolidaciones no se realizarán, porque no se ha establecido lote de destino.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="157"/>
         <source>Do you still want to consolidate the rest?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Aun desea consolidar el resto?</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="148"/>
         <source>Consolidate</source>
-        <translation type="unfinished"></translation>
+        <translation>Consolidar</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="220"/>
         <source>These options are used to consolidate all lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Estas opciones se usan para consolidar todos los lotes</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="228"/>
         <source>These options are used as defaults for each lot consolidation</source>
-        <translation type="unfinished"></translation>
+        <translation>Estas opciones se usan como por defecto para consolidar cada lote</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="231"/>
         <source>No preselection</source>
-        <translation type="unfinished"></translation>
+        <translation>Sin preselección</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="355"/>
         <source>Consolidation %1 of %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Consolidación %1 de %2</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="356"/>
         <source>Select the destination lot (from %1 source lots) and adjust the options if needed</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccione el lote de destino (de los %1 lotes de origen) y ajuste las opciones si es necesario</translation>
     </message>
 </context>
 <context>
@@ -2260,8 +2260,8 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <location filename="../src/common/document.cpp" line="846"/>
         <source>Duplicated %Ln item(s)</source>
         <translation>
-            <numerusform>%Ln artículo(s) duplicados</numerusform>
-            <numerusform></numerusform>
+            <numerusform>%Ln artículo duplicado</numerusform>
+            <numerusform>%Ln artículos duplicados</numerusform>
         </translation>
     </message>
     <message>
@@ -3976,7 +3976,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     <message>
         <location filename="../src/desktop/inventorywidget.cpp" line="178"/>
         <source>Can build</source>
-        <translation type="unfinished"></translation>
+        <translation>Puede montar</translation>
     </message>
     <message>
         <location filename="../src/desktop/inventorywidget.cpp" line="179"/>
@@ -5853,12 +5853,12 @@ Clic derecho: Menu</translation>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="663"/>
         <source>Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Valores</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="673"/>
         <source>Source</source>
-        <translation type="unfinished"></translation>
+        <translation>Origen</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="856"/>
