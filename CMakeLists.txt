@@ -460,7 +460,7 @@ add_custom_target("Other-Files" SOURCES
     macos/ExportOptions.ios.plist
     macos/Info.ios.plist
     macos/Info.macos.plist
-    macos/LaunchScree.storyboard
+    macos/LaunchScreen.storyboard
     macos/locversion.plist.in
     scripts/git-release.sh
     translations/translations.json
