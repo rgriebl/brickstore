@@ -509,6 +509,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                     lastUpdated = f->fileTime(QFile::FileModificationTime);
                     if (f->size() > 0)
                         convertedFromOldCache = loaded = imageFromData(img, f->readAll());
+                    f->remove();
                 }
                 delete f;
             }
