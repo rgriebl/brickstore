@@ -279,15 +279,15 @@ jobs:
         export QT_ANDROID_KEYSTORE_KEY_PASS="${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}"
 
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -C .initcache.txt \
-            -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64) \
-            -DQT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3 \
-            -DQT_ANDROID_TARGET_SDK_VERSION=31 \
-            -DANDROID_NATIVE_API_LEVEL=23 \
-            -DQT_ANDROID_BUILD_ALL_ABIS=TRUE \
-            -DANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }} \
-            -DANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
-            -DQT_ANDROID_SIGN_AAB=TRUE \
-            '-DQT_ANDROID_MULTI_ABI_FORWARD_VARS=BRICKLINK_AFFILIATE_API_KEY;SENTRY' \
+            -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64)" \
+            -D "QT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3" \
+            -D "QT_ANDROID_TARGET_SDK_VERSION=31" \
+            -D "ANDROID_NATIVE_API_LEVEL=23" \
+            -D "QT_ANDROID_BUILD_ALL_ABIS=TRUE" \
+            -D "ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }}" \
+            -D "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" \
+            -D "QT_ANDROID_SIGN_AAB=TRUE" \
+            -D "QT_ANDROID_MULTI_ABI_FORWARD_VARS=BRICKLINK_AFFILIATE_API_KEY;SENTRY" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         echo "Creating AAB"
         cmake --build build --config Release --parallel --target final-aab --verbose
@@ -334,12 +334,38 @@ jobs:
     # Build for macOS
     #################################################
 
+    - name: Import signing certificate
+      if: (matrix.config.os == 'macos')
+      env:
+        SIGNING_CERTIFICATE_P12_DATA: ${{ secrets.MACOS_SIGNING_CERTIFICATE_P12_DATA }}
+        SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
+      run: |
+        exec .github/scripts/apple-import-certificate.sh
+
+    - name: Import AppStore API key
+      if: (matrix.config.os == 'macos')
+      env:
+        API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        API_KEY_P8_DATA: ${{ secrets.APPSTORE_API_KEY_P8_DATA }}
+      run: |
+        exec .github/scripts/apple-import-apikey.sh
+
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
         ${Qt6_DIR}/bin/qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
+            -D "MACOS_SIGNING_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --target dmg --verbose
+      shell: bash
+    - name: Notarize and staple macOS DMG
+      if: (matrix.config.os == 'macos')
+      run: |
+        xcrun notarytool submit --wait build/BrickStore-*.dmg \
+            --issuer "${{ secrets.APPSTORE_API_KEY_ISSUER }}" \
+            --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" \
+            --key "~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8"
+        xcrun stapler staple -v build/BrickStore-*.dmg
       shell: bash
 
     - name: Upload macOS DMG
@@ -369,7 +395,7 @@ jobs:
         SIGNING_CERTIFICATE_P12_DATA: ${{ secrets.IOS_SIGNING_CERTIFICATE_P12_DATA }}
         SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.IOS_SIGNING_CERTIFICATE_PASSWORD }}
       run: |
-        exec .github/scripts/ios-import-certificate.sh
+        exec .github/scripts/apple-import-certificate.sh
 
     - name: Import provisioning profile
       if: (matrix.config.os == 'ios')
@@ -377,25 +403,25 @@ jobs:
         PROVISIONING_PROFILE_DATA: ${{ secrets.IOS_PROVISIONING_PROFILE_DATA }}
         PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROV_PROFILE }}
       run: |
-        exec .github/scripts/ios-import-profile.sh
+        exec .github/scripts/apple-import-profile.sh
 
     - name: Import AppStore API key
       if: (matrix.config.os == 'ios')
       env:
-        API_KEY: ${{ secrets.IOS_API_KEY }}
-        API_KEY_DATA: ${{ secrets.IOS_API_KEY_DATA }}
+        API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        API_KEY_P8_DATA: ${{ secrets.APPSTORE_API_KEY_P8_DATA }}
       run: |
-        exec .github/scripts/ios-import-apikey.sh
+        exec .github/scripts/apple-import-apikey.sh
 
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
         ${Qt6_DIR}/bin/qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -C .initcache.txt \
-            -DQT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos) \
-            -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }} \
-            -DCMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }} \
-            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=${{ secrets.IOS_CODE_SIGN_IDENTITY }} \
-            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual \
+            -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos)" \
+            -D "CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }}" \
+            -D "CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }}" \
+            -D "CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=${{ secrets.IOS_CODE_SIGN_IDENTITY }}" \
+            -D "CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config Release --parallel --target ipa --verbose
       shell: bash
@@ -411,8 +437,8 @@ jobs:
       if: (matrix.config.os == 'ios')
       run: |
         xcrun altool --upload-app -f build/BrickStore-*.ipa -t ios \
-            --apiIssuer "${{ secrets.IOS_API_ISSUER }}" \
-            --apiKey "${{ secrets.IOS_API_KEY }}"
+            --apiIssuer "${{ secrets.APPSTORE_API_KEY_ISSUER }}" \
+            --apiKey "${{ secrets.APPSTORE_API_KEY_ID }}"
       shell: bash
 
     # Generate documentation

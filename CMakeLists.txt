@@ -475,30 +475,43 @@ add_custom_target("Other-Files" SOURCES
 if (MACOS)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
+    set(DMG_DIR "${CMAKE_BINARY_DIR}/dmg")
+
     # deploy sentry dependencies
     set(COPY_SENTRY_COMMAND "")
     if (SENTRY)
-        set(COPY_SENTRY_COMMAND COMMAND "${CMAKE_COMMAND}" -E copy
-            "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-        )
+        set(COPY_SENTRY_COMMAND COMMAND cp "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+    endif()
+    set(MACOS_SIGN_ARGS "")
+    if (MACOS_SIGNING_IDENTITY)
+        set(MACOS_SIGN_ARGS "-sign-for-notarization=${MACOS_SIGNING_IDENTITY}")
     endif()
 
+    # We cannot use CPack here: macdeployqt signs all binaries, but the installation step when
+    # running CPack's DragNDrop generator would try to mess with the rpaths and in turn nullify
+    # the code signatures.
+    # Also: macdeployqt has to be run on the bundle in the build location. If we copy to the dmg
+    # staging directory first, we get weird errors because the tool thinks that all Qt frameworks
+    # are "outside of the bundle"
+
     add_custom_target(dmg
-        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" $<TARGET_FILE_DIR:${PROJECT_NAME}>/../..
+        ${COPY_SENTRY_COMMAND}
+        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../.."
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
-        ${COPY_SENTRY_COMMAND}
-        COMMAND codesign --force -s - --deep $<TARGET_FILE_DIR:${PROJECT_NAME}>/../..
-        COMMAND "${CMAKE_CPACK_COMMAND}" "-C" "$<CONFIGURATION>"
-                "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
+                ${MACOS_SIGN_ARGS}
+        COMMAND rm -rf "${DMG_DIR}"
+        COMMAND mkdir -p "${DMG_DIR}/.background"
+        COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-ds_store" "${DMG_DIR}/.DS_Store"
+        COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-background.png" "${DMG_DIR}/.background/background.png"
+        COMMAND ln -s /Applications "${DMG_DIR}"
+        COMMAND cp -a "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>" "${DMG_DIR}"
+        COMMAND hdiutil create "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.dmg" -quiet
+                               -volname "${PROJECT_NAME}-${VERSION}" -fs "HFS+" -format ULFO -ov
+                               -srcdir "${DMG_DIR}"
         COMMENT "Creating macOS DMG. Please wait..."
         DEPENDS ${PROJECT_NAME}
     )
-    set(CPACK_DMG_DS_STORE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-ds_store")
-    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-background.png")
-    set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}-${VERSION}")
-    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION}")
 
 elseif (WIN32)
     # deploy sentry dependencies
