@@ -7,8 +7,9 @@
 #include <QtQuickTemplates2/private/qquickapplicationwindow_p.h>
 #include <QtQuickTemplates2/private/qquickdialog_p.h>
 
+#include <QCoro/QCoroTask>
+
 #include "common/uihelpers.h"
-#include "qcoro/qcorocore.h"
 
 
 class MobilePDI : public UIHelpers_ProgressDialogInterface

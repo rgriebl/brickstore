@@ -18,7 +18,8 @@
 #include <QThread>
 #include <QAtomicInt>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
+
 #include "utility/q3cache.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogLDraw)

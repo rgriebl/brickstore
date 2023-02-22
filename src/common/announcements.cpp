@@ -8,7 +8,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtGui/QDesktopServices>
 
-#include "qcoro/qcoronetworkreply.h"
+#include <QCoro/QCoroNetworkReply>
+
 #include "common/systeminfo.h"
 #include "announcements.h"
 #include "config.h"

@@ -13,9 +13,10 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 
+#include <QCoro/QCoroNetworkReply>
+
 #include "common/config.h"
 #include "common/onlinestate.h"
-#include "qcoro/qcoronetworkreply.h"
 #include "currency.h"
 
 

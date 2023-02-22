@@ -19,6 +19,7 @@ target_link_libraries(mobile_module PRIVATE
     Qt6::QuickControls2ImplPrivate
     Qt6::QuickTemplates2Private
     Qt6::Svg # force deployment
+    QCoro6::Core
     bricklink_module
     common_module
 )

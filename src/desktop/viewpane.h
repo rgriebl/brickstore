@@ -5,7 +5,8 @@
 
 #include <QFrame>
 
-#include <qcoro/task.h>
+#include <QCoro/QCoroTask>
+
 #include <common/filter.h>
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)

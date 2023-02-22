@@ -38,6 +38,8 @@
 #include <QGridLayout>
 #include <QFrame>
 
+#include <QCoro/QCoroSignal>
+
 #include "bricklink/io.h"
 #include "common/actionmanager.h"
 #include "common/config.h"

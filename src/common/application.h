@@ -9,7 +9,7 @@
 #include <QMutex>
 #include <QLoggingCategory>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
 
 QT_FORWARD_DECLARE_CLASS(QTranslator)
 QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)

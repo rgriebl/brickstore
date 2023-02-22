@@ -18,7 +18,8 @@
 #include <QComboBox>
 #include <QDebug>
 
-#include "qcoro/qcorosignal.h"
+#include <QCoro/QCoroSignal>
+
 #include "desktopuihelpers.h"
 #include "desktopuihelpers_p.h"
 

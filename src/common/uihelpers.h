@@ -8,7 +8,7 @@
 #include <QObject>
 #include <QColor>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
 
 
 inline QString CMB_BOLD(const QString &str)

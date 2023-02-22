@@ -26,6 +26,8 @@
 #include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #include <QtQuick3D/QQuick3D>
 
+#include <QCoro/QCoroSignal>
+
 #include "bricklink/core.h"
 #include "bricklink/store.h"
 #include "bricklink/cart.h"

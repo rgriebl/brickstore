@@ -5,9 +5,10 @@
 
 #include <QFrame>
 
+#include <QCoro/QCoroTask>
+
 #include "bricklink/lot.h"
 #include "bricklink/model.h"
-#include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 class InventoryWidgetPrivate;

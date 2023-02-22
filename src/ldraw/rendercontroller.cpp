@@ -12,7 +12,8 @@
 #include <QQuick3DTextureData>
 #include <QPainter>
 
-#include "qcoro/qcorofuture.h"
+#include <QCoro/QCoroFuture>
+
 #include "bricklink/core.h"
 #include "library.h"
 #include "part.h"

@@ -7,12 +7,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(SENTRY_VERSION 0.6.0)
+set(QCORO_VERSION  0.8.0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(ANDROID_PLATFORM 21) # supress warning by setting it early
@@ -78,22 +80,10 @@ endif()
 set(BS_SENTRY OFF)
 if (SENTRY)
     set(BS_SENTRY ${SENTRY_VERSION})
-    include(FetchContent)
-
-    FetchContent_Declare(
-        sentry
-        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG        ${SENTRY_VERSION}
-        SOURCE_SUBDIR  "NeedManualAddSubDir"
-    )
-
-    # we need EXCLUDE_FROM_ALL to suppress the installation of sentry into the macOS bundle
-    # and Linux packages
-
-    FetchContent_MakeAvailable(sentry)
-    FetchContent_GetProperties(sentry)
-    add_subdirectory(${sentry_SOURCE_DIR} ${sentry_BINARY_DIR} EXCLUDE_FROM_ALL)
+    include(BuildSentry)
 endif()
+
+include(BuildQCoro)
 
 set(copts)
 set(cxxopts)

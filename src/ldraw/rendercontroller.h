@@ -8,8 +8,9 @@
 #include <QtGui/QQuaternion>
 #include <QtQml/qqmlregistration.h>
 
+#include <QCoro/QCoroTask>
+
 #include "ldraw/rendergeometry.h"
-#include "qcoro/task.h"
 #include "bricklink/color.h"
 #include "bricklink/item.h"
 #include "bricklink/qmlapi.h"

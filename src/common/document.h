@@ -12,12 +12,13 @@
 #include <QModelIndex>
 #include <QPointer>
 
+#include <QCoro/QCoroTask>
+
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
 #include "bricklink/order.h"
 #include "common/actionmanager.h"
 #include "common/documentmodel.h"
-#include "qcoro/task.h"
 
 QT_FORWARD_DECLARE_CLASS(QTimer)
 QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)

@@ -4,8 +4,9 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 
+#include <QCoro/QCoroCore>
+
 #include "common/config.h"
-#include "qcoro/qcorocore.h"
 #include "uihelpers.h"
 
 

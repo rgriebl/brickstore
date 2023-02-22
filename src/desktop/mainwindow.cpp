@@ -42,6 +42,8 @@
 #  include <qtwinextras/qwintaskbarprogress.h>
 #endif
 
+#include <QCoro/QCoroSignal>
+
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
 #include "common/announcements.h"
@@ -58,7 +60,6 @@
 #include "common/uihelpers.h"
 #include "common/undo.h"
 #include "utility/exception.h"
-#include "qcoro/qcorosignal.h"
 
 #include "checkforupdates.h"
 #include "desktopapplication.h"

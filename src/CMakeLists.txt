@@ -40,6 +40,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     Qt6::Network
     Qt6::CorePrivate
     Qt6::Concurrent
+    QCoro6::Core
 )
 
 add_subdirectory(bricklink)

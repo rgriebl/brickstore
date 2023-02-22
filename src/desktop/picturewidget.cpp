@@ -17,6 +17,8 @@
 #include <QQmlApplicationEngine>
 #include <QStackedWidget>
 
+#include <QCoro/QCoroSignal>
+
 #include "bricklink/color.h"
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
@@ -27,7 +29,6 @@
 #include "common/eventfilter.h"
 #include "ldraw/library.h"
 #include "ldraw/renderwidget.h"
-#include "qcoro/qcorosignal.h"
 #include "picturewidget.h"
 #include "rendersettingsdialog.h"
 

@@ -18,6 +18,8 @@
 #  pragma warning(pop)
 #endif
 
+#include <QCoro/QCoroSignal>
+
 #include "mobileuihelpers.h"
 #include "mobileuihelpers_p.h"
 

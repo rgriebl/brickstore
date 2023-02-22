@@ -7,7 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QVersionNumber>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 

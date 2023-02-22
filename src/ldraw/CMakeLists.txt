@@ -19,6 +19,8 @@ target_link_libraries(ldraw_module PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::Quick3D
+    QCoro6::Network
+    QCoro6::Core
     bricklink_module
 )
 

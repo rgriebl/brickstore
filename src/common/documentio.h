@@ -7,7 +7,8 @@
 #include "bricklink/global.h"
 #include "bricklink/io.h"
 #include "bricklink/lot.h"
-#include "qcoro/qcoro.h"
+
+#include <QCoro/QCoroTask>
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QIODevice)

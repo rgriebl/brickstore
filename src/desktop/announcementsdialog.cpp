@@ -15,9 +15,10 @@
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QTextBrowser>
 
+#include <QCoro/QCoroSignal>
+
 #include "utility/utility.h"
 #include "common/announcements.h"
-#include "qcoro/qcorocore.h"
 #include "announcementsdialog.h"
 
 

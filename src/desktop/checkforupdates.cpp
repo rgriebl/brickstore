@@ -20,8 +20,10 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 
-#include "qcoro/qcorocore.h"
-#include "qcoro/qcoronetwork.h"
+#include <QCoro/QCoroSignal>
+#include <QCoro/QCoroNetworkReply>
+#include <QCoro/QCoroTimer>
+
 #include "common/config.h"
 #include "checkforupdates.h"
 

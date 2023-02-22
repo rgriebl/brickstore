@@ -9,7 +9,7 @@
 #include <QDate>
 #include <QNetworkAccessManager>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
 
 
 class Announcements : public QObject

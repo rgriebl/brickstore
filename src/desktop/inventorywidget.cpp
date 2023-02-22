@@ -12,13 +12,14 @@
 #include <QToolButton>
 #include <QGridLayout>
 
+#include <QCoro/QCoroSignal>
+
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
 #include "common/application.h"
 #include "common/document.h"
 #include "importinventorydialog.h"
-
 #include "inventorywidget.h"
 
 

@@ -51,6 +51,8 @@ target_link_libraries(bricklink_module PRIVATE
     Qt6::Xml
     Qt6::Concurrent
     Qt6::Sql
+    QCoro6::Network
+    QCoro6::Core
 )
 
 if (BS_BACKEND)

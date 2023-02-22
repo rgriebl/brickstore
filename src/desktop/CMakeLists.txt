@@ -128,6 +128,8 @@ target_link_libraries(desktop_module PRIVATE
     Qt6::PrintSupport
     Qt6::Qml
     Qt6::Quick
+    QCoro6::Network
+    QCoro6::Core
     common_module
     bricklink_module
     ldraw_module

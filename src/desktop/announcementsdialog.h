@@ -6,7 +6,7 @@
 #include <QDialog>
 #include <QPixmap>
 
-#include "qcoro/task.h"
+#include <QCoro/QCoroTask>
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QTextBrowser)

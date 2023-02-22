@@ -13,13 +13,14 @@
 #include <QtConcurrent>
 #include <QCborValue>
 
+#include <QCoro/QCoroFuture>
+
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
 #endif
 
-#include "qcoro/qcorofuture.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
 #include "minizip/minizip.h"
