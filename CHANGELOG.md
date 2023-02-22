@@ -23,6 +23,7 @@ Other new features:
 
 Other fixes:
 - Sorting and filtering large documents on macOS and iOS is now just as fast as on the other platforms.
+- The macOS installation is now signed, so there's no need anymore to unblock BrickStore after installaing new versions.
 - The Linux AppImage is now compatible with modern distros that only ship with OpenSSL version 3.
 
 
