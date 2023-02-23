@@ -407,9 +407,9 @@ add_custom_target("Other-Files" SOURCES
     .gitattributes
     .gitignore
     .github/workflows/build_cmake.yml
-    .github/scripts/ios-import-apikey.sh
-    .github/scripts/ios-import-certificate.sh
-    .github/scripts/ios-import-profile.sh
+    .github/scripts/apple-import-apikey.sh
+    .github/scripts/apple-import-certificate.sh
+    .github/scripts/apple-import-profile.sh
     .github/FUNDING.yml
     .tag
     CHANGELOG.md
