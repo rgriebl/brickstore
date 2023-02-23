@@ -9,12 +9,13 @@ The big new feature is the improved price-guide, which now uses BrickLink's reva
 - As this method needs a private API key, BrickStore will revert to the old mechanism if you compile the app yourself.
 
 While at it, the local caching mechanism for price-guide data and pictures was changed completely:
-- All pictures are now converted to WEBP (lossy/90%) after downloading, which compresses to around 10-20% of the original PNG size without obvious visual artifacts.
+- All pictures are now converted to WEBP (lossy/80%) after downloading, which compresses to around 10-20% of the original PNG size without obvious visual artifacts.
 - Both the price-guide data and pictures are not written to individual files in the cache folder anymore. Instead two Sqlite databases will be used. This results in faster lookups (especially on mobile platforms) and less space wasted in the file-system.
 
 Other new features:
 - In addition to "appears-in" and "consists-of", the inventory view now also gained a "can-build" relationship.
 - The consolidate items dialog has been reimplemented and uses a similiar workflow as the *Copy values from document* command now.
+  - It also allows you to choose what to do with the source lots after the merge: BrickStore can either delete them as it always did, but it can now also be instructed to keep them with their quantity set to `0`. This is especially useful when consolidating your store inventory, because you can Mass-Update those 0-quantity lots afterwards to easily remove them from your store.
 - LDraw and BrickLink item ids are not always matching (especially for decorated or composite parts). In order to make the 3D view usable for those items as well, BrickStore's copy of the LDraw library includes an item id mapping now:
   - Item id mappings added as comments in the official LDraw library as well as in Studio's version are taken into account.
   - In addition, manually curated mapping files are applied as well (see [here](https://github.com/rgriebl/brickstore/ldraw).
@@ -23,7 +24,7 @@ Other new features:
 
 Other fixes:
 - Sorting and filtering large documents on macOS and iOS is now just as fast as on the other platforms.
-- The macOS installation is now signed, so there's no need anymore to unblock BrickStore after installaing new versions.
+- The macOS installation is now digitally signed, so there's no need to unblock BrickStore after installing new versions anymore.
 - The Linux AppImage is now compatible with modern distros that only ship with OpenSSL version 3.
 
 
