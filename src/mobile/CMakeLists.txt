@@ -20,6 +20,7 @@ target_link_libraries(mobile_module PRIVATE
     Qt6::QuickTemplates2Private
     Qt6::Svg # force deployment
     QCoro6::Core
+    QCoro6::Qml
     bricklink_module
     common_module
 )

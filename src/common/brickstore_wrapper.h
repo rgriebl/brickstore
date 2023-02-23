@@ -12,6 +12,8 @@
 #include <QClipboard>
 #include <QFont>
 
+#include <QCoro/QCoroQmlTask>
+
 #include "common/application.h"
 #include "common/currency.h"
 #include "common/onlinestate.h"
@@ -260,6 +262,7 @@ private:
     FilterSyntax m_filterSyntax = FixedString;
 };
 
+
 class QmlClipboard : public QObject
 {
     Q_OBJECT
@@ -298,27 +301,6 @@ public:
     Q_INVOKABLE double roundTo(double f, int decimals) { return Utility::roundTo(f, decimals); }
 };
 
-class QmlThenable : public QObject
-{
-    Q_OBJECT
-    QML_NAMED_ELEMENT(Thenable)
-    QML_UNCREATABLE("")
-
-public:
-    QmlThenable(QJSEngine *engine, QObject *parent = nullptr);
-    ~QmlThenable() override;
-
-    Q_INVOKABLE void then(const QJSValue &function);
-
-    void callThen(const QVariantList &arguments);
-
-private:
-    void callThenInternal(const QVariantList &arguments);
-
-    bool m_thenable = false;
-    QJSValue m_function;
-    QPointer<QJSEngine> m_engine;
-};
 
 class QmlDebugLogModel : public QAbstractListModel
 {
@@ -573,7 +555,7 @@ public:
 
     QmlDocument *activeDocument() const;
 
-    Q_INVOKABLE QmlThenable *checkBrickLinkLogin();
+    Q_INVOKABLE QCoro::QmlTask checkBrickLinkLogin();
 
     Q_INVOKABLE double maxLocalPrice(const QString &currencyCode);
 

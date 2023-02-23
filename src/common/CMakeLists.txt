@@ -60,7 +60,6 @@ target_link_libraries(common_module PRIVATE
     Qt6::QuickTemplates2Private
     QCoro6::Network
     QCoro6::Core
-    QCoro6::Coro
     bricklink_module
 )
 
@@ -68,6 +67,12 @@ if (BS_DESKTOP)
     target_link_libraries(common_module PRIVATE
         Qt6::Widgets
         Qt6::PrintSupport
+    )
+endif()
+
+if (BS_DESKTOP OR BS_MOBILE)
+    target_link_libraries(common_module PRIVATE
+        QCoro6::Qml
     )
 endif()
 

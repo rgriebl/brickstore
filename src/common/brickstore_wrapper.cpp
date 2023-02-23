@@ -269,14 +269,9 @@ QmlDocument *QmlBrickStore::activeDocument() const
     return m_docList->map(ActionManager::inst()->activeDocument());
 }
 
-QmlThenable *QmlBrickStore::checkBrickLinkLogin()
+QCoro::QmlTask QmlBrickStore::checkBrickLinkLogin()
 {
-    auto *thenable = new QmlThenable(qmlEngine(this));
-
-    Application::inst()->checkBrickLinkLogin().then([thenable](bool ok) {
-        thenable->callThen({ ok });
-    });
-    return thenable;
+    return Application::inst()->checkBrickLinkLogin();
 }
 
 double QmlBrickStore::maxLocalPrice(const QString &currencyCode)
@@ -928,58 +923,6 @@ QString QmlClipboard::text() const
 void QmlClipboard::setText(const QString &text)
 {
     QGuiApplication::clipboard()->setText(text, QClipboard::Clipboard);
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-QmlThenable::QmlThenable(QJSEngine *engine, QObject *parent)
-    : QObject(parent)
-    , m_engine(engine)
-{
-    QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-}
-
-QmlThenable::~QmlThenable()
-{ }
-
-void QmlThenable::then(const QJSValue &function)
-{
-    m_thenable = true;
-    m_function = function;
-    if (!m_function.isCallable())
-        qWarning() << "The argument for QmlThenable::then() is not callable";
-}
-
-void QmlThenable::callThen(const QVariantList &arguments)
-{
-    if (!m_thenable) { // not returned to JS yet?
-        QMetaObject::invokeMethod(this, [this, arguments]() {
-            if (!m_thenable) // nobody called then() on the JS side
-                deleteLater();
-            else
-                callThenInternal(arguments);
-        }, Qt::QueuedConnection);
-    } else {
-        callThenInternal(arguments);
-    }
-}
-
-void QmlThenable::callThenInternal(const QVariantList &arguments)
-{
-    if (m_function.isCallable()) {
-        QJSValueList vl;
-        for (const auto &arg : arguments)
-            vl << m_engine->toScriptValue(arg);
-        auto result = m_function.call(vl);
-        if (result.isError()) {
-            qWarning() << "QmlThenable::then() failed:" << result.toString();
-        }
-    }
-    QQmlEngine::setObjectOwnership(this, QQmlEngine::JavaScriptOwnership);
 }
 
 
