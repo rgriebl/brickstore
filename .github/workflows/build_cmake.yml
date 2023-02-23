@@ -89,7 +89,7 @@ jobs:
 
         - name: "macOS Universal"
           artifact: "macOS"
-          runs-on: macos-11
+          runs-on: macos-12
           os: macos
           qt_host: 'mac'
           qt_version: '6.4.2'
