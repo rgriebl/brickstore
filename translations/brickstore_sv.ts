@@ -934,7 +934,7 @@
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="405"/>
         <source>&amp;Used</source>
-        <translation>A&amp;nvänd</translation>
+        <translation>An&amp;vänd</translation>
     </message>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="435"/>
@@ -1231,7 +1231,7 @@
     <message>
         <location filename="../src/common/application.cpp" line="924"/>
         <source>The price-guide download mechanism changed. Please make sure your VAT setup is still correct on the BrickLink page in the Settings dialog.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nedladdningsmekanismen för prisguiden har ändrats. Se till att din momsinställning fortfarande är korrekt på BrickLink-sidan i dialogrutan Inställningar.</translation>
     </message>
 </context>
 <context>
@@ -1550,27 +1550,27 @@
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="777"/>
         <source>VAT is included</source>
-        <translation type="unfinished"></translation>
+        <translation>Inklusive Moms</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="778"/>
         <source>VAT is excluded</source>
-        <translation type="unfinished"></translation>
+        <translation>Exklusive Moms</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="782"/>
         <source>for the EU</source>
-        <translation type="unfinished"></translation>
+        <translation>för EU</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="783"/>
         <source>for the UK</source>
-        <translation type="unfinished"></translation>
+        <translation>för UK</translation>
     </message>
     <message>
         <location filename="../src/bricklink/priceguide.cpp" line="784"/>
         <source>for Norway</source>
-        <translation type="unfinished"></translation>
+        <translation>för Norge</translation>
     </message>
 </context>
 <context>
@@ -1781,17 +1781,17 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="14"/>
         <source>Consolidate lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Slå ihop poster</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="36"/>
         <source>Please choose how you want to resolve them</source>
-        <translation type="unfinished"></translation>
+        <translation>Var vänlig ange hur du vill lösa dom</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="79"/>
         <source>Use the same options to consolidate all lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Använd samma val för att slå ihop alla poster</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="82"/>
@@ -1801,7 +1801,7 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="108"/>
         <source>Consolidate each lot individually</source>
-        <translation type="unfinished"></translation>
+        <translation>Slå ihop varje post för sig</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="111"/>
@@ -1811,17 +1811,17 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="85"/>
         <source>A quick way to consolidate a large number of lots, but you are restricted when it comes to merge destinations and options.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ett snabbt sätt att slå ihop ett stort antal poster, men du är begränsad när det gäller att slå samman destinationer och alternativ.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="114"/>
         <source>A step-by-step guide through each single consolidation, asking for your input on merge destinations and options.</source>
-        <translation type="unfinished"></translation>
+        <translation>En steg för steg handledning genom varje enskild ihopslagning, ber om din input om slå ihop destinationer och alternativ.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="137"/>
         <source>Just add the new lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Lägg bara till nya poster</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="140"/>
@@ -1831,12 +1831,12 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="143"/>
         <source>No consolidation will be done at all. The new lots will just be added to the document.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen ihopslagning kommer att ske. Nya poster blir bara tillagda till dokumentet.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="212"/>
         <source>Each merge operation has at least one source and exactly one destination lot. Please select how to determine the destination:</source>
-        <translation type="unfinished"></translation>
+        <translation>Varje ihopslagning har minst en källa och exakt en destinationspost. Vänligen ange hur destinationen ska bestämmas:</translation>
     </message>
     <message>
         <source>Destination</source>
@@ -1845,25 +1845,25 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="264"/>
         <source>How exactly should the lots be merged:</source>
-        <translation type="unfinished"></translation>
+        <translation>Exakt hur ska posterna slås ihop:</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="286"/>
         <location filename="../src/desktop/consolidatedialog.ui" line="408"/>
         <source>Do not delete source lots, but set their quantity to zero</source>
-        <translation type="unfinished"></translation>
+        <translation>Ta inte bort käll posterna, men sätt dom till noll</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.ui" line="380"/>
         <source>More options</source>
-        <translation type="unfinished"></translation>
+        <translation>Fler val</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/desktop/consolidatedialog.cpp" line="42"/>
         <source>There are %n possible consolidation(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Det finns %n möjlig ihopslagning</numerusform>
+            <numerusform>Det finns %n möjliga ihopslagningar</numerusform>
         </translation>
     </message>
     <message>
@@ -1893,72 +1893,72 @@
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="93"/>
         <source>Existing lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Existerande post</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="94"/>
         <source>New lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Ny post</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="99"/>
         <source>Topmost lot in sort order</source>
-        <translation type="unfinished"></translation>
+        <translation>Sorering högst till lägst</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="100"/>
         <source>Bottommost lot in sort order</source>
-        <translation type="unfinished"></translation>
+        <translation>Sortering lägst till högst</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="101"/>
         <source>Lot with lowest index</source>
-        <translation type="unfinished"></translation>
+        <translation>Post med lägst index</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="102"/>
         <source>Lot with highest index</source>
-        <translation type="unfinished"></translation>
+        <translation>Post med högsta index</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="149"/>
         <source>%1 of %2 consolidations will not be done, because no destination lot has been set.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 av %2 ihopslagningar kommer inte genomföras eftersom ingen destination har angivits.</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="157"/>
         <source>Do you still want to consolidate the rest?</source>
-        <translation type="unfinished"></translation>
+        <translation>Vill du fortfarande slå ihop resterande?</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="148"/>
         <source>Consolidate</source>
-        <translation type="unfinished"></translation>
+        <translation>Slå ihop</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="220"/>
         <source>These options are used to consolidate all lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Dessa val används för att slå ihop poster</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="228"/>
         <source>These options are used as defaults for each lot consolidation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dessa var används som standard för alla ihopslagningar av poster</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="231"/>
         <source>No preselection</source>
-        <translation type="unfinished"></translation>
+        <translation>Inget förval</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="355"/>
         <source>Consolidation %1 of %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Slår ihop %1 av %2</translation>
     </message>
     <message>
         <location filename="../src/desktop/consolidatedialog.cpp" line="356"/>
         <source>Select the destination lot (from %1 source lots) and adjust the options if needed</source>
-        <translation type="unfinished"></translation>
+        <translation>Ange destinationsposten (från %1 poster) och justera alternativet om det behövs</translation>
     </message>
 </context>
 <context>
@@ -3795,7 +3795,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/desktop/inventorywidget.cpp" line="178"/>
         <source>Can build</source>
-        <translation type="unfinished"></translation>
+        <translation>Kan bygga</translation>
     </message>
     <message>
         <location filename="../src/desktop/inventorywidget.cpp" line="179"/>
@@ -5540,12 +5540,12 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="663"/>
         <source>Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Värden</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="673"/>
         <source>Source</source>
-        <translation type="unfinished"></translation>
+        <translation>Källa</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="377"/>
