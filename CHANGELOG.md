@@ -3,7 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-The big new feature is the improved price-guide, which now uses BrickLink's revamped AffilateV1 API:
+
+## [2023.2.1] - 2023-02-24
+
+The big new feature of this release is the improved price-guide, which now uses BrickLink's revamped AffilateV1 API:
 - Price-guide data is now downloaded in batches of 500 instead of one-by-one.
 - You can choose to have those prices include VAT or not - even as viewed from a specific territory.
 - As this method needs a private API key, BrickStore will revert to the old mechanism if you compile the app yourself.
@@ -16,9 +19,9 @@ Other new features:
 - In addition to "appears-in" and "consists-of", the inventory view now also gained a "can-build" relationship.
 - The consolidate items dialog has been reimplemented and uses a similiar workflow as the *Copy values from document* command now.
   - It also allows you to choose what to do with the source lots after the merge: BrickStore can either delete them as it always did, but it can now also be instructed to keep them with their quantity set to `0`. This is especially useful when consolidating your store inventory, because you can Mass-Update those 0-quantity lots afterwards to easily remove them from your store.
-- LDraw and BrickLink item ids are not always matching (especially for decorated or composite parts). In order to make the 3D view usable for those items as well, BrickStore's copy of the LDraw library includes an item id mapping now:
+- LDraw and BrickLink item ids are not always matching (most common with decorated or composite parts). In order to make the 3D view usable for those items as well, BrickStore's copy of the LDraw library includes an item id mapping now:
   - Item id mappings added as comments in the official LDraw library as well as in Studio's version are taken into account.
-  - In addition, manually curated mapping files are applied as well (see [here](https://github.com/rgriebl/brickstore/ldraw).
+  - In addition, manually curated mapping files are applied as well (see [here](https://github.com/rgriebl/brickstore/tree/main/ldraw)).
   - Currently only the *Wheel & Tire Assembly* category has been manually mapped.
   - Anybody is welcome to help with additional mappings!
 
@@ -504,7 +507,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2022.11.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.2.1...HEAD
+[2023.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.2.1
 [2022.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.2
 [2022.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.1
 [2022.10.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.10.2
