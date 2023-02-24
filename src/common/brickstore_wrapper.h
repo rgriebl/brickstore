@@ -448,7 +448,6 @@ class QmlDocumentLots : public QObject
 {
     Q_OBJECT
     QML_ANONYMOUS
-    QML_UNCREATABLE("")
 
 public:
     QmlDocumentLots(DocumentModel *model);
