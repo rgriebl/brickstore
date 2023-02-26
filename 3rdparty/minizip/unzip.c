@@ -426,8 +426,8 @@ local ZPOS64_T unz64local_SearchCentralDir64(const zlib_filefunc64_32_def* pzlib
     ZPOS64_T uBackRead;
     ZPOS64_T uMaxBack=0xffff; /* maximum size of global comment */
     ZPOS64_T uPosFound=0;
-    uLong uL;
-                ZPOS64_T relativeOffset;
+    uLong uL = 0;
+                ZPOS64_T relativeOffset = 0;
 
     if (ZSEEK64(*pzlib_filefunc_def,filestream,0,ZLIB_FILEFUNC_SEEK_END) != 0)
         return 0;
@@ -531,13 +531,13 @@ local unzFile unzOpenInternal (const void *path,
     unz64_s us;
     unz64_s *s;
     ZPOS64_T central_pos;
-    uLong   uL;
+    uLong   uL = 0;
 
-    uLong number_disk;          /* number of the current dist, used for
+    uLong number_disk = 0;          /* number of the current dist, used for
                                    spaning ZIP, unsupported, always 0*/
-    uLong number_disk_with_CD;  /* number the the disk with central dir, used
+    uLong number_disk_with_CD = 0;  /* number the the disk with central dir, used
                                    for spaning ZIP, unsupported, always 0*/
-    ZPOS64_T number_entry_CD;      /* total number of entries in
+    ZPOS64_T number_entry_CD = 0;      /* total number of entries in
                                    the central dir
                                    (same than number_entry on nospan) */
 
@@ -835,9 +835,9 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
     unz_file_info64 file_info;
     unz_file_info64_internal file_info_internal;
     int err=UNZ_OK;
-    uLong uMagic;
+    uLong uMagic = 0;
     long lSeek=0;
-    uLong uL;
+    uLong uL = 0;
 
     if (file==NULL)
         return UNZ_PARAMERROR;
@@ -970,8 +970,8 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
 
         while(acc < file_info.size_file_extra)
         {
-            uLong headerId;
-                                                uLong dataSize;
+            uLong headerId = 0;
+                                                uLong dataSize = 0;
 
             if (unz64local_getShort(&s->z_filefunc, s->filestream,&headerId) != UNZ_OK)
                 err=UNZ_ERRNO;
@@ -1330,9 +1330,9 @@ local int unz64local_CheckCurrentFileCoherencyHeader (unz64_s* s, uInt* piSizeVa
                                                     ZPOS64_T * poffset_local_extrafield,
                                                     uInt  * psize_local_extrafield)
 {
-    uLong uMagic,uData,uFlags;
-    uLong size_filename;
-    uLong size_extra_field;
+    uLong uMagic = 0, uData = 0, uFlags = 0;
+    uLong size_filename = 0;
+    uLong size_extra_field = 0;
     int err=UNZ_OK;
 
     *piSizeVar = 0;
