@@ -159,15 +159,13 @@ if (WIN32)
         NOMINMAX
     )
 elseif (LINUX)
-    find_package(TBB)
+    find_package(TBB QUIET)
     if (TBB_FOUND)
         set(PARALLEL_STL ON)
         add_compile_definitions(
             BS_HAS_PARALLEL_STL
             TBB_SUPPRESS_DEPRECATED_MESSAGES=1
         )
-    else()
-        message(WARNING "No libtbb found: parallel STL algorithms will not be used.")
     endif()
 endif()
 
