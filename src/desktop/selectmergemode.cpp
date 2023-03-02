@@ -52,6 +52,9 @@ void SelectMergeMode::setFieldMergeModes(const DocumentModel::FieldMergeModes &m
     if (m_modes != modes) {
         m_modes = modes;
 
+        if (!isQuantityEnabled())
+            m_modes.remove(DocumentModel::Quantity);
+
         for (QButtonGroup *fieldGroup : std::as_const(m_fieldGroups)) {
             const auto fields = fieldGroup->property("documentFields").value<QVector<DocumentModel::Field>>();
 
