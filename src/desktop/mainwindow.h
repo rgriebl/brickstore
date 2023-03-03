@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QPointer>
 
+#include <QCoro/QCoroTask>
+
 #include "bricklink/global.h"
 
 QT_FORWARD_DECLARE_CLASS(QLabel)

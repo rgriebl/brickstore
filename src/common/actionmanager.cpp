@@ -211,7 +211,7 @@ void ActionManager::updateActions(int updateReason)
     bool isOnline = OnlineState::inst()->isOnline();
     int docItemCount = m_document ? int(m_document->model()->lotCount()) : 0;
 
-    for (auto &a : m_actions) {
+    for (auto &a : std::as_const(m_actions)) {
         if (!a.m_needs)
             continue;
 

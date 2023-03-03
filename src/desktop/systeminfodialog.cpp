@@ -28,7 +28,7 @@ SystemInfoDialog::SystemInfoDialog(QWidget *parent)
                     [](QObject *, QEvent *e) {
         auto *me = static_cast<QMouseEvent *>(e);
         if (me->button() == Qt::RightButton)
-            static_cast<int *>(nullptr)[0] = 1;
+            static_cast<int *>(nullptr)[0] = 1; // NOLINT
         else if (me->button() == Qt::MiddleButton)
             throw Exception("Test exception");
         return EventFilter::ContinueEventProcessing;

@@ -8,7 +8,7 @@
 #include <QColor>
 #include <QVariant>
 #include <QSizeF>
-#include <QtQml/qqmlregistration.h>
+#include <QQmlEngine>
 
 QT_FORWARD_DECLARE_CLASS(QPaintDevice)
 QT_FORWARD_DECLARE_CLASS(QPainter)

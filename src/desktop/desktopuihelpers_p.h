@@ -12,6 +12,8 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 
+#include <QCoro/QCoroSignal>
+
 #include "common/uihelpers.h"
 
 

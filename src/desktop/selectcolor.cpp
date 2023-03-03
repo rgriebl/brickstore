@@ -39,16 +39,16 @@ SelectColor::SelectColor(QWidget *parent)
     : QWidget(parent)
 {
     w_filter = new QComboBox();
-    w_filter->addItem({ }, int(KnownColors));
+    w_filter->addItem(QString { }, int(KnownColors));
     w_filter->insertSeparator(w_filter->count());
-    w_filter->addItem({ }, int(AllColors));
-    w_filter->addItem({ }, int(PopularColors));
-    w_filter->addItem({ }, int(MostPopularColors));
+    w_filter->addItem(QString { }, int(AllColors));
+    w_filter->addItem(QString { }, int(PopularColors));
+    w_filter->addItem(QString { }, int(MostPopularColors));
     w_filter->insertSeparator(w_filter->count());
 
     for (auto ct : BrickLink::Color::allColorTypes()) {
         if (!BrickLink::Color::typeName(ct).isEmpty())
-            w_filter->addItem({ }, int(ct));
+            w_filter->addItem(QString { }, int(ct));
     }
     w_filter->setMaxVisibleItems(w_filter->count());
 

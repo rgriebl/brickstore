@@ -10,6 +10,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
 QT_FORWARD_DECLARE_CLASS(QQuickView)
+QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 
 
 namespace LDraw {

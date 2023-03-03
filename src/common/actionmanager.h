@@ -49,7 +49,7 @@ public:
     };
     Q_DECLARE_FLAGS(Needs, Need)
 
-    static inline Needs NeedSelection(quint8 minSel, quint8 maxSel = 0)
+    static constexpr Needs NeedSelection(quint8 minSel, quint8 maxSel = 0)
     {
         return static_cast<Needs>(NeedDocument | (quint32(minSel) << 24) | (quint32(maxSel) << 16));
     }
@@ -68,11 +68,11 @@ public:
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
-    static inline Flags FlagGroup(char groupId)
+    static constexpr Flags FlagGroup(char groupId)
     {
         return static_cast<Flags>(quint32(groupId) << 24);
     }
-    static inline Flags FlagRole(QAction::MenuRole role)
+    static constexpr Flags FlagRole(QAction::MenuRole role)
     {
         return static_cast<Flags>(quint32(role) << 16);
     }

@@ -160,16 +160,16 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, PriceGuide
     Q_ASSERT(job == j);
 
     try {
-        if (j->isCompleted()) {
+        if (job->isCompleted()) {
             PriceGuide::Data data;
-            if (parseHtml(*j->data(), data))
+            if (parseHtml(*job->data(), data))
                 emit finished(pg, data);
             else
                 throw Exception("invalid price-guide data");
-        } else if (j->isAborted()) {
+        } else if (job->isAborted()) {
             throw Exception();
         } else {
-            throw Exception("%1 (%2)").arg(j->errorString(), j->responseCode());
+            throw Exception("%1 (%2)").arg(job->errorString(), job->responseCode());
         }
     } catch (const Exception &e) {
         emit failed(pg, u"PG download for " + QLatin1String(pg->item()->id()) + u" failed: " + e.errorString());
