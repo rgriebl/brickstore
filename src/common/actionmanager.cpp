@@ -683,6 +683,7 @@ bool ActionManager::createAll(std::function<QAction*(const ActionManager::Action
             setupQAction(aa);
         }
     }
+    updateActions(-1); // initial update
     return true;
 }
 
