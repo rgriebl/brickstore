@@ -110,6 +110,14 @@ if (NOT IOS) # somehow this tries to access the wrong build dir on iOS
     enable_separate_debug_info(${PROJECT_NAME})
 endif()
 
+# Use LTO, if available
+include(CheckIPOSupported)
+check_ipo_supported(RESULT HAS_LTO OUTPUT LTO_STATUS)
+if (HAS_LTO)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  set(LTO_STATUS ON)
+endif()
+
 add_compile_definitions(
     QT_STRICT_ITERATORS
     QT_STRICT_QLIST_ITERATORS
@@ -686,6 +694,7 @@ message(STATUS "  Build type ..... ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Qt version ..... ${Qt6_VERSION}")
 message(STATUS "  Qt location .... ${Qt6_DIR}")
 message(STATUS "  Build type ..... ${BS_TYPE}")
+message(STATUS "  Link-time opt. . ${LTO_STATUS}")
 message(STATUS "  Use sentry.io .. ${BS_SENTRY}")
 message(STATUS "  ASAN ........... ${SANITIZE}")
 message(STATUS "  Qt Modeltest ... ${MODELTEST}")
