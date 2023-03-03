@@ -968,7 +968,9 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
 
     auto map = [=](const Item &set) -> const Item * {
         bool matched = false;
-        if (set.hasInventory() && set.itemTypeId() == 'S') {
+        static const QByteArray canBuildIds = "SM";
+
+        if (set.hasInventory() && canBuildIds.contains(set.itemTypeId())) {
             const QVector<Item::ConsistsOf> &inv = set.consistsOf();
 
             // copy the have vector, as we need to modify it for counting down quantities
