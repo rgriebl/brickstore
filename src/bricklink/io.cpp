@@ -343,18 +343,19 @@ QString IO::toBrickLinkUpdateXML(const LotList &lots,
         if (base->retain() != lot->retain())
             xml.createText("RETAIN", lot->retain() ? u"Y" : u"N");
 
-        if (base->tierQuantity(0) != lot->tierQuantity(0))
+        if ((base->tierQuantity(0) != lot->tierQuantity(0))
+            || !qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0))
+            || (base->tierQuantity(1) != lot->tierQuantity(1))
+            || !qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1))
+            || (base->tierQuantity(2) != lot->tierQuantity(2))
+            || !qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2))) {
             xml.createText("TQ1", QString::number(lot->tierQuantity(0)));
-        if (!qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0)))
             xml.createText("TP1", QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
-        if (base->tierQuantity(1) != lot->tierQuantity(1))
             xml.createText("TQ2", QString::number(lot->tierQuantity(1)));
-        if (!qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1)))
             xml.createText("TP2", QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
-        if (base->tierQuantity(2) != lot->tierQuantity(2))
             xml.createText("TQ3", QString::number(lot->tierQuantity(2)));
-        if (!qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2)))
             xml.createText("TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
+        }
 
         if (base->subCondition() != lot->subCondition()) {
             const char16_t *st = nullptr;
