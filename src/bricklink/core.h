@@ -4,6 +4,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include <QtCore/QDateTime>
 #include <QtCore/QString>
@@ -67,13 +68,13 @@ public:
 
     void retrieve(TransferJob *job, bool highPriority = false);
 
-    Store *store() const  { return m_store; }
-    Orders *orders() const  { return m_orders; }
-    Carts *carts() const  { return m_carts; }
-    WantedLists *wantedLists() const  { return m_wantedLists; }
-    Database *database() const  { return m_database; }
-    PriceGuideCache *priceGuideCache() const { return m_priceGuideCache; }
-    PictureCache *pictureCache() const { return m_pictureCache; }
+    Store *store() const  { return m_store.get(); }
+    Orders *orders() const  { return m_orders.get(); }
+    Carts *carts() const  { return m_carts.get(); }
+    WantedLists *wantedLists() const  { return m_wantedLists.get(); }
+    Database *database() const  { return m_database.get(); }
+    PriceGuideCache *priceGuideCache() const { return m_priceGuideCache.get(); }
+    PictureCache *pictureCache() const { return m_pictureCache.get(); }
 
     inline const std::vector<Color> &colors() const         { return database()->m_colors; }
     inline const std::vector<Category> &categories() const  { return database()->m_categories; }
@@ -151,13 +152,13 @@ private:
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
     int                        m_transferStatId = -1;
 
-    Database *m_database = nullptr;
-    Store *m_store = nullptr;
-    Orders *m_orders = nullptr;
-    Carts *m_carts = nullptr;
-    WantedLists *m_wantedLists = nullptr;
-    PriceGuideCache *m_priceGuideCache = nullptr;
-    PictureCache *m_pictureCache = nullptr;
+    std::unique_ptr<Database> m_database;
+    std::unique_ptr<Store> m_store;
+    std::unique_ptr<Orders> m_orders;
+    std::unique_ptr<Carts> m_carts;
+    std::unique_ptr<WantedLists> m_wantedLists;
+    std::unique_ptr<PriceGuideCache> m_priceGuideCache;
+    std::unique_ptr<PictureCache> m_pictureCache;
 
     friend class QmlBrickLink;
 };

@@ -348,16 +348,17 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(this))
-{
-    m_database = new Database(updateUrl, this);
+    , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
-    m_store = new Store(this);
-    m_orders = new Orders(this);
-    m_carts = new Carts(this);
-    m_wantedLists = new WantedLists(this);
-    m_priceGuideCache = new PriceGuideCache(this);
-    m_pictureCache = new PictureCache(this, physicalMem);
-#else
+    , m_store(new Store(this))
+    , m_orders(new Orders(this))
+    , m_carts(new Carts(this))
+    , m_wantedLists(new WantedLists(this))
+    , m_priceGuideCache(new PriceGuideCache(this))
+    , m_pictureCache(new PictureCache(this, physicalMem))
+#endif
+{
+#if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
 
@@ -370,9 +371,9 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     //      Right now, we are cancelling before the download even starts, which should give us
     //      plenty of iterations through the event loop to handle all the cancelled jobs.
 
-    connect(m_database, &Database::databaseAboutToBeReset,
+    connect(m_database.get(), &Database::databaseAboutToBeReset,
             this, &Core::cancelTransfers);
-    connect(m_database, &Database::databaseReset,
+    connect(m_database.get(), &Database::databaseReset,
             this, [this]() {
         m_priceGuideCache->clearCache();
         m_pictureCache->clearCache();
