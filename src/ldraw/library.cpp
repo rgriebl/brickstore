@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cfloat>
+#include <array>
 
 #include <QFile>
 #include <QTextStream>
@@ -334,15 +335,15 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
     }
 
     if (valid) {
-        static const char *subdirs[] = { "LEGO", "Unofficial/p/48", "Unofficial/p", "p/48", "p",
-                                         "Unofficial/parts", "parts", "models" };
+        static const std::array subdirs = { "LEGO", "Unofficial/p/48", "Unofficial/p", "p/48", "p",
+                                           "Unofficial/parts", "parts", "models" };
 
         for (auto subdir : subdirs) {
             if (m_zip) {
                 m_searchpath << QString(u"!ZIP!ldraw/" + QLatin1String(subdir));
             } else {
                 QDir sdir(m_path);
-                QString s = QLatin1String(subdir);
+                QString s = QString::fromLatin1(subdir);
 
                 if (sdir.cd(s))
                     m_searchpath << sdir.canonicalPath();
@@ -465,7 +466,7 @@ void Library::emitUpdateStartedIfNecessary()
 Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 {
     QString filename = _filename;
-    filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    filename.replace(u'\\', u'/');
     QString parentdir = _parentdir;
     if (!parentdir.isEmpty() && !parentdir.startsWith(u"!ZIP!"))
         parentdir = QDir(parentdir).canonicalPath();
@@ -669,11 +670,9 @@ QStringList Library::potentialLDrawDirs()
 
     QStringList result;
 
-    for (auto dir = dirs.begin(); dir != dirs.end(); ++dir) {
-        if (!dir->isEmpty()) {
-            if (checkLDrawDir(*dir))
-                result.append(*dir);
-        }
+    for (const auto &dir : std::as_const(dirs)) {
+        if (!dir.isEmpty() && checkLDrawDir(dir))
+            result.append(dir);
     }
 
     return result;

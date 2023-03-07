@@ -34,6 +34,10 @@ static QString formatJSError(const QJSValue &error)
     \note The documentation is missing on purpose - the API is not set in stone yet.
 */
 
+ExtensionScriptAction::ExtensionScriptAction(QObject *parent)
+    : QObject(parent)
+{ }
+
 QString ExtensionScriptAction::text() const
 {
     return m_text;
@@ -155,6 +159,10 @@ void ExtensionScriptAction::componentComplete()
 */
 
 
+PrintingScriptAction::PrintingScriptAction(QObject *parent)
+    : QObject(parent)
+{ }
+
 QString PrintingScriptAction::text() const
 {
     return m_text;
@@ -208,6 +216,7 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, Document *doc, bool se
     const auto lots = doc->model()->sortLotList(selectionOnly ? doc->selectedLots()
                                                               : doc->model()->lots());
     QVariantList itemList;
+    itemList.reserve(lots.size());
     for (auto lot : lots)
         itemList << QVariant::fromValue(BrickLink::QmlLot(lot));
 
@@ -267,12 +276,16 @@ void PrintingScriptAction::executePrint(QPaintDevice *pd, Document *doc, bool se
     \e {(Optional)} A version string for this script.
 */
 
+Script::Script(QQuickItem *parent)
+    : QQuickItem(parent)
+{ }
+
 QString Script::name() const
 {
     return m_name;
 }
 
-void Script::setName(QString name)
+void Script::setName(const QString &name)
 
 {
     if (m_name != name) {
@@ -286,7 +299,7 @@ QString Script::author() const
     return m_author;
 }
 
-void Script::setAuthor(QString author)
+void Script::setAuthor(const QString &author)
 {
     if (m_author != author) {
         m_author = author;
@@ -299,7 +312,7 @@ QString Script::version() const
     return m_version;
 }
 
-void Script::setVersion(QString version)
+void Script::setVersion(const QString &version)
 {
     if (m_version != version) {
         m_version = version;

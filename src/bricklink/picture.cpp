@@ -127,7 +127,7 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
     connect(core, &Core::transferFinished,
             this, [this](TransferJob *job) {
         if (job) {
-            if (Picture *pic = job->userData("picture").value<Picture *>())
+            if (auto *pic = job->userData("picture").value<Picture *>())
                 d->transferJobFinished(job, pic);
         }
     });

@@ -1,7 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-
+#include <memory>
 #include <chrono>
 
 #include <QLineEdit>
@@ -933,10 +933,10 @@ QByteArray AddItemDialog::saveBrowseState() const
     QByteArray compressedHistory;
     QDataStream dsCompressed(&compressedHistory, QIODevice::WriteOnly);
 
-    for (int i = 0; i < m_browseHistory.size(); ++i)
-        saveBrowseHistoryEntry(dsCompressed, m_browseHistory.at(i));
-    for (int i = 0; i < m_browseStack.size(); ++i)
-        saveBrowseHistoryEntry(dsCompressed, m_browseStack.at(i));
+    for (const auto &entry : m_browseHistory)
+        saveBrowseHistoryEntry(dsCompressed, entry);
+    for (const auto &entry : m_browseStack)
+        saveBrowseHistoryEntry(dsCompressed, entry);
 
     ds << qCompress(compressedHistory, 9);
     return ba;
@@ -979,7 +979,7 @@ bool AddItemDialog::restoreBrowseState(const QByteArray &ba)
         if (compressedHistory.isEmpty() || (ds.status() != QDataStream::Ok))
             return false;
 
-        dsCompressed.reset(new QDataStream(compressedHistory));
+        dsCompressed = std::make_unique<QDataStream>(compressedHistory);
         dsData = dsCompressed.get();
     }
 

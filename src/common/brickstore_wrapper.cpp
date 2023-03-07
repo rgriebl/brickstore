@@ -114,12 +114,12 @@ Config *QmlBrickStore::config() const
 
 QString QmlBrickStore::versionNumber() const
 {
-    return QLatin1String(BRICKSTORE_VERSION);
+    return u"" BRICKSTORE_VERSION ""_qs;
 }
 
 QString QmlBrickStore::buildNumber() const
 {
-    return QLatin1String(BRICKSTORE_BUILD_NUMBER);
+    return u"" BRICKSTORE_BUILD_NUMBER ""_qs;
 }
 
 RecentFiles *QmlBrickStore::recentFiles() const
@@ -368,8 +368,9 @@ QmlDocument::QmlDocument(Document *doc)
 
 QVariantList QmlDocument::qmlSortColumns() const
 {
-    QVariantList result;
     const auto sortColumns = m_doc->model()->sortColumns();
+    QVariantList result;
+    result.reserve(sortColumns.size());
     for (auto &sc : sortColumns)
         result.append(QVariantMap { { u"column"_qs, sc.first }, { u"order"_qs, sc.second } });
     return result;
@@ -579,7 +580,7 @@ QModelIndex QmlDocument::index(int row, int column, const QModelIndex &) const
 
 QModelIndex QmlDocument::parent(const QModelIndex &) const
 {
-    return QModelIndex();
+    return { };
 }
 
 QVariant QmlDocument::headerData(int section, Qt::Orientation o, int role) const
@@ -653,7 +654,7 @@ void QmlDocument::emitForceLayout()
 
 void QmlDocument::internalMoveColumn(int viFrom, int viTo)
 {
-    int li = v2l[viFrom];
+    int li = v2l.at(viFrom);
     m_doc->moveColumn(li, viFrom, viTo);
 }
 
@@ -665,7 +666,7 @@ bool QmlDocument::internalIsColumnHidden(int li) const
 
 void QmlDocument::internalHideColumn(int vi, bool hidden)
 {
-    int li = v2l[vi];
+    int li = v2l.at(vi);
     const auto &cd = m_doc->columnLayout().value(li);
 
     if (cd.m_hidden != hidden)
@@ -1074,8 +1075,8 @@ void QmlDocumentLots::removeAt(int index)
 BrickLink::QmlLot QmlDocumentLots::at(int index)
 {
     if (index < 0 || index >= m_model->lotCount())
-        return BrickLink::QmlLot { };
-    return BrickLink::QmlLot(m_model->lots().at(index), this);
+        return { };
+    return { m_model->lots().at(index), this };
 }
 
 

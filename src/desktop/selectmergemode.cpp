@@ -169,7 +169,7 @@ void SelectMergeMode::createFields()
     for (const auto &mode : modes) {
         auto tb = new QToolButton();
         tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        tb->setIcon(QIcon::fromTheme(QLatin1String(mode.icon)));
+        tb->setIcon(QIcon::fromTheme(QString::fromLatin1(mode.icon)));
         tb->setText(tr(mode.name));
         tb->setToolTip(tr(mode.toolTip));
         tb->setAutoRaise(true);
@@ -206,7 +206,7 @@ void SelectMergeMode::createFields()
                     || (possibleModes & mode.mergeMode)) {
                 auto tb = new QToolButton();
                 tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-                tb->setIcon(QIcon::fromTheme(QLatin1String(mode.icon)));
+                tb->setIcon(QIcon::fromTheme(QString::fromLatin1(mode.icon)));
                 tb->setText(tr(mode.name));
                 tb->setToolTip(tr(mode.toolTip));
                 tb->setCheckable(true);

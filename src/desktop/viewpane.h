@@ -31,7 +31,8 @@ class ViewPane : public QWidget
     Q_OBJECT
 
 public:
-    ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCreate, Document *activeDocument);
+    ViewPane(const std::function<ViewPane *(Document *, QWidget *)> &viewPaneCreate,
+             Document *activeDocument);
     ~ViewPane() override;
 
     void newWindow();

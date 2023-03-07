@@ -166,12 +166,12 @@ private:
 
     int     m_quantity = 0;
     int     m_bulk_quantity = 1;
-    int     m_tier_quantity[3] = { 0, 0, 0 };
+    std::array<int, 3> m_tier_quantity = { 0, 0, 0 };
     int     m_sale = 0;
 
     double  m_price = 0;
     double  m_cost = 0;
-    double  m_tier_price[3] = { 0, 0, 0 };
+    std::array<double, 3> m_tier_price = { 0, 0, 0 };
 
     double  m_weight = 0;
 
@@ -184,7 +184,7 @@ private:
     friend class Core;
 };
 
-typedef QList<Lot *> LotList;
+using LotList = QList<Lot *>;
 
 } // namespace BrickLink
 

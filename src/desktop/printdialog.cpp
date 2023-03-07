@@ -64,7 +64,7 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
         updateActions();
     });
 
-    QVBoxLayout *containerLayout = new QVBoxLayout(w_print_preview_container);
+    auto *containerLayout = new QVBoxLayout(w_print_preview_container);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addWidget(w_print_preview);
 
@@ -288,8 +288,8 @@ void PrintDialog::updatePageRange()
             if (fromTo.size() == 1) {
                 from = to = fromTo.at(0).toUInt(&ok);
             } else if (fromTo.size() == 2) {
-                QString fromStr = fromTo.at(0);
-                QString toStr = fromTo.at(1);
+                const QString &fromStr = fromTo.at(0);
+                const QString &toStr = fromTo.at(1);
 
                 if (fromStr.isEmpty() && toStr.isEmpty()) {
                     ok = false;

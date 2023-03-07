@@ -240,7 +240,7 @@ QString Transfer::defaultUserAgent()
     return s_default_user_agent;
 }
 
-void Transfer::setInitFunction(std::function<void ()> func)
+void Transfer::setInitFunction(const std::function<void ()> &func)
 {
     s_threadInitFunction = func;
 }

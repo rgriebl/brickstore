@@ -324,7 +324,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
         qsizetype oldSize = buffer.size();
         size_t size = fs.size() * sizeof(float);
         buffer.resize(oldSize + qsizetype(size));
-        float *ptr = reinterpret_cast<float *>(buffer.data() + oldSize);
+        auto *ptr = reinterpret_cast<float *>(buffer.data() + oldSize);
         memcpy(ptr, fs.begin(), size);
     };
 
@@ -394,8 +394,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
                 const float h2 = QVector3D::crossProduct(p2m - p0m, p2m - p1m).length() / (p1m - p0m).length() / 24;
 
                 QRandomGenerator *rd = QRandomGenerator::global();
-                float su = float(rd->generateDouble());
-                float sv = float(rd->generateDouble());
+                auto su = float(rd->generateDouble());
+                auto sv = float(rd->generateDouble());
 
                 u[0] = su;
                 v[0] = sv;
@@ -431,8 +431,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
                 const float l1 = p0m.distanceToPoint(p1m) / 24;
                 const float l3 = p0m.distanceToPoint(p3m)/ 24;
                 QRandomGenerator *rd = QRandomGenerator::global();
-                const float su = float(rd->generateDouble());
-                const float sv = float(rd->generateDouble());
+                const auto su = float(rd->generateDouble());
+                const auto sv = float(rd->generateDouble());
 
                 u[0] = su;
                 v[0] = sv;
@@ -505,7 +505,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
         if (texImage.isNull()) {
             const bool isSpeckle = color->isSpeckle();
 
-            QString cacheName = QLatin1String(isSpeckle ? "Speckle" : "Glitter")
+            QString cacheName = (isSpeckle ? u"Speckle"_qs : u"Glitter"_qs)
                     + u'_' + color->ldrawColor().name(QColor::HexArgb)
                     + u'_' + color->particleColor().name(QColor::HexArgb)
                     + u'_' + QString::number(double(color->particleMinSize()))

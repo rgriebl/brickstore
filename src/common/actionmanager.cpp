@@ -312,7 +312,7 @@ void ActionManager::loadCustomShortcuts()
     for (auto it = savedShortcuts.cbegin(); it != savedShortcuts.cend(); ++it) {
         QByteArray name = it.key().toLatin1();
         if (auto *a = const_cast<Action *>(action(name.constData()))) {
-            QKeySequence customShortcut = it.value().value<QKeySequence>();
+            auto customShortcut = it.value().value<QKeySequence>();
             a->m_customShortcut = customShortcut;
             a->m_shortcuts = { customShortcut };
             updateShortcuts(a);
@@ -669,7 +669,7 @@ QQuickAction *ActionManager::quickAction(const QString &name)
     return nullptr;
 }
 
-bool ActionManager::createAll(std::function<QAction*(const ActionManager::Action *)> creator)
+bool ActionManager::createAll(const std::function<QAction*(const ActionManager::Action *)> &creator)
 {
     if (!creator)
         return false;
@@ -689,7 +689,7 @@ bool ActionManager::createAll(std::function<QAction*(const ActionManager::Action
 
 QObject *ActionManager::connectActionTable(const ActionTable &actionTable)
 {
-    QObject *contextObject = new QObject(this);
+    auto *contextObject = new QObject(this);
 
     for (auto &at : std::as_const(actionTable)) {
         if (QAction *a = qAction(at.first))
@@ -705,7 +705,7 @@ void ActionManager::disconnectActionTable(QObject *contextObject)
 
 QObject *ActionManager::connectQuickActionTable(const QJSValue &nameToCallable)
 {
-    QObject *contextObject = new QObject(this);
+    auto *contextObject = new QObject(this);
 
 #if defined(BS_MOBILE)
     QJSValueIterator it(nameToCallable);
@@ -737,7 +737,8 @@ void ActionManager::disconnectQuickActionTable(QObject *connectionContext)
     delete connectionContext;
 }
 
-QString ActionManager::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
+QString ActionManager::toolTipLabel(const QString &label, const QKeySequence &shortcut,
+                                    const QString &extended)
 {
     return toolTipLabel(label, shortcut.isEmpty() ? QList<QKeySequence> { }
                                                   : QList<QKeySequence> { shortcut }, extended);

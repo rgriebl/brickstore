@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <memory>
 #include <QRegularExpression>
 
 #include "bricklink/core.h"
@@ -154,7 +155,7 @@ Lot *Lot::restore(QDataStream &ds)
     std::unique_ptr<Incomplete> inc;
 
     if (!item || !color) {
-        inc.reset(new Incomplete);
+        inc = std::make_unique<Incomplete>();
         if (!item) {
             inc->m_item_id = itemid.toLatin1();
             inc->m_itemtype_id = itemtypeid;
@@ -167,7 +168,7 @@ Lot *Lot::restore(QDataStream &ds)
         if (core()->applyChangeLog(item, color, inc.get()))
             inc.reset();
     }
-    lot.reset(new Lot(item, color));
+    lot = std::make_unique<Lot>(item, color);
     if (inc)
         lot->setIncomplete(inc.release());
 

@@ -137,13 +137,13 @@ public:
 
     void retranslate();
 
-    typedef QVector<QPair<QByteArray, std::function<void(bool)>>> ActionTable;
+    using ActionTable = QVector<QPair<QByteArray, std::function<void(bool)>>>;
 
     QAction *qAction(const char *name);
 
     Q_INVOKABLE QQuickAction *quickAction(const QString &name);
 
-    bool createAll(std::function<QAction *(const ActionManager::Action *)> creator);
+    bool createAll(const std::function<QAction *(const ActionManager::Action *)> &creator);
 
     QObject *connectActionTable(const ActionTable &actionTable);
     void disconnectActionTable(QObject *contextObject);
@@ -151,7 +151,7 @@ public:
     Q_INVOKABLE QObject *connectQuickActionTable(const QJSValue &nameToCallable);
     Q_INVOKABLE void disconnectQuickActionTable(QObject *connectionContext);
 
-    static QString toolTipLabel(const QString &label, QKeySequence shortcut = { },
+    static QString toolTipLabel(const QString &label, const QKeySequence &shortcut = { },
                                 const QString &extended = { });
     static QString toolTipLabel(const QString &label, const QList<QKeySequence> &shortcuts = { },
                                 const QString &extended = { });

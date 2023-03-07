@@ -22,8 +22,8 @@ public:
     ParseXML(QIODevice *file, const char *rootNodeName, const char *elementNodeName);
     ~ParseXML();
 
-    void parse(std::function<void (const QDomElement &)> callback,
-               std::function<void (const QDomElement &)> rootCallback = { });
+    void parse(const std::function<void (const QDomElement &)> &callback,
+               const std::function<void (const QDomElement &)> &rootCallback = { });
     static QString elementText(const QDomElement &parent, const char *tagName);
     static QString elementText(const QDomElement &parent, const char *tagName, const char *defaultText);
 

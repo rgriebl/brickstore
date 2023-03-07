@@ -15,8 +15,7 @@ static QString sanitizeFileName(const QString &name)
     static QVector<char> illegal { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };
     QString result;
 
-    for (int i = 0; i < name.size(); ++i) {
-        auto c = name.at(i);
+    for (auto c : name) {
         auto u = c.unicode();
 
         if ((u <= 31) || ((u < 128) && illegal.contains(char(u))))
@@ -52,10 +51,6 @@ QCoro::Task<UIHelpers::StandardButton> UIHelpers::showMessageBoxHelper(QString m
     QMetaObject::invokeMethod(this, &UIHelpers::messageBoxClosed);
     co_return result;
 }
-
-UIHelpers::UIHelpers()
-
-{ }
 
 UIHelpers *UIHelpers::inst()
 {

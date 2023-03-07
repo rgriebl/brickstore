@@ -90,7 +90,7 @@ private:
     RenderSettings();
     static RenderSettings *s_inst;
     void setToDefault();
-    void forEachProperty(std::function<void (QMetaProperty &)> callback);
+    void forEachProperty(const std::function<void (QMetaProperty &)> &callback);
 
     QQuaternion m_defaultRotation;
     bool m_orthographicCamera;

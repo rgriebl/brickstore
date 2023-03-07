@@ -39,7 +39,7 @@ bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
 
             for (int i = 0; i < text.length(); ++i) {
                 QChar &ir = text[i];
-                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
+                if (ir == u'.' || ir == u',') {
                     ir = QLocale::system().decimalPoint().at(0);
                     fixed = (text != ke->text());
                 }

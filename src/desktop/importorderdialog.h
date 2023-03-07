@@ -21,7 +21,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
-    virtual void changeEvent(QEvent *e) override;
+    void changeEvent(QEvent *e) override;
     void languageChange();
 
 protected slots:

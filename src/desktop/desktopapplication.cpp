@@ -185,7 +185,7 @@ DeveloperConsole *DesktopApplication::developerConsole()
 {
     if (!m_devConsole) {
         m_devConsole = new DeveloperConsole(u"\u2771\u2771\u2771 "_qs, [](QString command) {
-                return ScriptManager::inst()->executeString(command);
+            return ScriptManager::inst()->executeString(command);
         });
         if (!m_loggingTimer.isActive())
             m_loggingTimer.start();
@@ -235,7 +235,7 @@ bool DesktopApplication::notifyOtherInstance()
         bool res = server->listen(socketName);
 #if defined(Q_OS_UNIX)
         if (!res && server->serverError() == QAbstractSocket::AddressInUseError) {
-            QFile::remove(QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + socketName);
+            QFile::remove(QDir::cleanPath(QDir::tempPath()) + u'/' + socketName);
             res = server->listen(socketName);
         }
 #endif

@@ -23,9 +23,6 @@ ImportInventoryWidget::ImportInventoryWidget(QWidget *parent)
     languageChange();
 }
 
-ImportInventoryWidget::~ImportInventoryWidget()
-{ }
-
 void ImportInventoryWidget::setItem(const BrickLink::Item *item)
 {
     BrickLink::PartOutTraits traits;

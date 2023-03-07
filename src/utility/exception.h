@@ -22,9 +22,9 @@ public:
     explicit Exception(QFileDevice *f, const char *message);
 
     Exception(const Exception &copy);
-    Exception(Exception &&move);
+    Exception(Exception &&move) noexcept;
 
-    virtual ~Exception() = default;
+    ~Exception() override = default;
 
     template <typename... Ts> inline Exception &arg(const Ts & ...ts)
     {

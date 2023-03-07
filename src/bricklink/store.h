@@ -20,13 +20,15 @@ class Store : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
+    Q_PROPERTY(bool valid READ isValid NOTIFY isValidChanged FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
-    Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY updateFinished FINAL)
-    Q_PROPERTY(int lotCount READ lotCount NOTIFY updateFinished FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(QString currencyCode READ currencyCode NOTIFY currencyCodeChanged FINAL)
+    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
 
 public:
+    ~Store() override;
+
     bool isValid() const          { return m_valid; }
     QDateTime lastUpdated() const { return m_lastUpdated; }
     BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
@@ -41,12 +43,16 @@ signals:
     void updateStarted();
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
+    void isValidChanged(bool valid);
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
+    void lastUpdatedChanged(const QDateTime &lastUpdated);
+    void currencyCodeChanged(const QString &currencyCode);
+    void lotCountChanged(int lotCount);
 
 private:
     Store(Core *core);
-    ~Store() override;
     void setUpdateStatus(UpdateStatus updateStatus);
+    void setLastUpdated(const QDateTime &lastUpdated);
 
     Core *m_core;
     bool m_valid = false;

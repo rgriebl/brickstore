@@ -77,10 +77,9 @@ class WantedLists : public QAbstractTableModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
-    Q_PROPERTY(int count READ rowCount NOTIFY updateFinished FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged FINAL)
 
 public:
     enum Column {
@@ -100,7 +99,6 @@ public:
         WantedListSortRole,
     };
 
-    bool isValid() const          { return m_valid; }
     QDateTime lastUpdated() const { return m_lastUpdated; }
     BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
 
@@ -124,16 +122,18 @@ signals:
     void updateFinished(bool success, const QString &message);
     void fetchLotsFinished(BrickLink::WantedList *wantedList, bool success, const QString &message);
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
+    void lastUpdatedChanged(const QDateTime &lastUpdated);
+    void countChanged(int count);
 
 private:
     WantedLists(Core *core);
     QVector<WantedList *> parseGlobalWantedList(const QByteArray &data);
     int parseWantedList(WantedList *wantedList, const QByteArray &data);
     void emitDataChanged(int row, int col);
+    void setLastUpdated(const QDateTime &lastUpdated);
     void setUpdateStatus(UpdateStatus updateStatus);
 
     Core *m_core;
-    bool m_valid = false;
     UpdateStatus m_updateStatus = UpdateStatus::UpdateFailed;
     TransferJob *m_job = nullptr;
     QVector<TransferJob *> m_wantedListJobs;

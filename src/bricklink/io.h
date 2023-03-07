@@ -10,9 +10,7 @@
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
 
-namespace BrickLink {
-
-namespace IO {
+namespace BrickLink::IO {
 
 class ParseResult
 {
@@ -20,7 +18,7 @@ public:
     ParseResult() = default;
     ParseResult(const LotList &lots);
     ParseResult(const ParseResult &) = delete;
-    ParseResult(ParseResult &&pr);
+    ParseResult(ParseResult &&pr) noexcept;
 
     virtual ~ParseResult();
 
@@ -53,7 +51,7 @@ private:
 QString toWantedListXML(const LotList &lots, const QString &wantedList);
 QString toInventoryRequest(const LotList &lots);
 QString toBrickLinkUpdateXML(const LotList &lots,
-                             std::function<const Lot *(const Lot *)> differenceBaseLot);
+                             const std::function<const Lot *(const Lot *)> &differenceBaseLot);
 
 enum class Hint {
     Plain = 0x01,
@@ -71,5 +69,4 @@ ParseResult fromPartInventory(const Item *item, const Color *color = nullptr, in
                               Condition condition = Condition::New, Status extraParts = Status::Extra,
                               PartOutTraits partOutTraits = { }, Status status = Status::Include);
 
-} // namespace IO
-} // namespace BrickLink
+} // namespace BrickLink::IO

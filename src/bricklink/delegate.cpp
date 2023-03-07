@@ -203,8 +203,8 @@ bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos
 
 QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
 {
-    static const QString str = QLatin1String(R"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)");
-    static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
+    static const QString str = uR"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)"_qs;
+    static const QString img_left = uR"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)"_qs;
     QString note_left = u"<i>" + ItemDelegate::tr("[Image is loading]") + u"</i>";
     QString yearStr;
     QString id = QString::fromLatin1(item->id());
@@ -229,7 +229,7 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
         const QImage img = pic->image();
         img.save(&buffer, "PNG");
 
-        return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
+        return str.arg(img_left.arg(QLatin1String(ba.toBase64())).arg(img.width()).arg(img.height()),
                        id, item->name(), yearStr);
     }
 }

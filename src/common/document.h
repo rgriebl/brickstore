@@ -122,11 +122,11 @@ public:
     const LotList &selectedLots() const  { return m_selectedLots; }
 
     bool isBlockingOperationActive() const;
-    void startBlockingOperation(const QString &title, std::function<void()> cancelCallback = { });
+    void startBlockingOperation(const QString &title, const std::function<void ()> &cancelCallback = { });
     void endBlockingOperation();
 
     bool isBlockingOperationCancelable() const;
-    void setBlockingOperationCancelCallback(std::function<void()> cancelCallback);
+    void setBlockingOperationCancelCallback(const std::function<void ()> &cancelCallback);
     void cancelBlockingOperation();
 
     QString blockingOperationTitle() const;
@@ -264,7 +264,7 @@ signals:
 
 private:
     void applyTo(const LotList &lots,
-                 const char *actionName, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback);
+                 const char *actionName, const std::function<DocumentModel::ApplyToResult (const Lot &, Lot &)> &callback);
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void cancelPriceGuideUpdates();
     enum ExportCheckMode {

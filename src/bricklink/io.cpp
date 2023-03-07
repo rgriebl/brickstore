@@ -27,8 +27,8 @@ static QDateTime parseESTDateTimeString(const QString &v)
         int h = sl.at(3).toInt() % 12;
         if (sl.at(6) == u"PM")
             h += 12;
-        return  QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
-                          { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
+        return QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
+                         { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
     } else if (sl.size() == 3) {
         return QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
                          { 0, 0, 0 }, Qt::UTC);
@@ -298,7 +298,7 @@ QString IO::toInventoryRequest(const LotList &lots)
 }
 
 QString IO::toBrickLinkUpdateXML(const LotList &lots,
-                                            std::function<const Lot *(const Lot *)> differenceBaseLot)
+                                 const std::function<const Lot *(const Lot *)> &differenceBaseLot)
 {
     XmlHelpers::CreateXML xml("INVENTORY", "ITEM");
 
@@ -322,7 +322,7 @@ QString IO::toBrickLinkUpdateXML(const LotList &lots,
         xml.createText("LOTID", QString::number(lot->lotId()));
         int qdiff = lot->quantity() - base->quantity();
         if (qdiff && (lot->quantity() > 0))
-            xml.createText("QTY", QString::number(qdiff).prepend(QLatin1String(qdiff > 0 ? "+" : "")));
+            xml.createText("QTY", QString::number(qdiff).prepend(qdiff > 0 ? u"+" : u""));
         else if (qdiff && (lot->quantity() <= 0))
             xml.createEmpty("DELETE");
 
@@ -394,16 +394,14 @@ IO::ParseResult::ParseResult(const LotList &lots)
     , m_ownLots(false)
 { }
 
-IO::ParseResult::ParseResult(ParseResult &&pr)
-    : m_lots(pr.m_lots)
-    , m_currencyCode(pr.m_currencyCode)
+IO::ParseResult::ParseResult(ParseResult &&pr) noexcept
+    : m_lots(std::move(pr.m_lots))
+    , m_currencyCode(std::move(pr.m_currencyCode))
     , m_ownLots(pr.m_ownLots)
     , m_invalidLotCount(pr.m_invalidLotCount)
     , m_fixedLotCount(pr.m_fixedLotCount)
-    , m_differenceModeBase(pr.m_differenceModeBase)
-{
-    pr.m_lots.clear();
-}
+    , m_differenceModeBase(std::move(pr.m_differenceModeBase))
+{ }
 
 IO::ParseResult::~ParseResult()
 {
@@ -489,13 +487,13 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
         bool addAsExtra = part.isExtra() && (extraParts == Status::Extra);
 
         bool found = false;
-        for (auto it = pr.lots().cbegin(); it != pr.lots().cend(); ++it) {
-            if (partItem == (*it)->item() && (partColor == (*it)->color())
-                    && (part.isAlternate() == (*it)->alternate())
-                    && (part.alternateId() == (*it)->alternateId())
-                    && (part.isCounterPart() == (*it)->counterPart())
-                    && (addAsExtra == ((*it)->status() == Status::Extra))) {
-                (*it)->setQuantity((*it)->quantity() + quantity * part.quantity());
+        for (auto *lot : pr.lots()) {
+            if (partItem == lot->item() && (partColor == lot->color())
+                    && (part.isAlternate() == lot->alternate())
+                    && (part.alternateId() == lot->alternateId())
+                    && (part.isCounterPart() == lot->counterPart())
+                    && (addAsExtra == (lot->status() == Status::Extra))) {
+                lot->setQuantity(lot->quantity() + quantity * part.quantity());
                 found = true;
                 break;
             }

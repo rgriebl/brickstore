@@ -14,7 +14,6 @@ class ImportInventoryWidget : public QWidget, private Ui::ImportInventoryWidget
     Q_OBJECT
 public:
     ImportInventoryWidget(QWidget *parent = nullptr);
-    ~ImportInventoryWidget() override;
 
     void setItem(const BrickLink::Item *item);
     int quantity() const;

@@ -352,7 +352,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (lot->stockroom() == BrickLink::Stockroom::None)
             checkmark = -1;
         else
-            str = QLatin1Char('A' + char(lot->stockroom()) - char(BrickLink::Stockroom::A));
+            str = QChar::fromLatin1('A' + char(lot->stockroom()) - char(BrickLink::Stockroom::A));
         break;
     }
 
@@ -595,7 +595,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
 
 bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &option, const QModelIndex &idx)
 {
-    QAbstractItemModel *model = const_cast<QAbstractItemModel *>(idx.model());
+    auto *model = const_cast<QAbstractItemModel *>(idx.model());
 
     bool accept = true;
 
@@ -620,7 +620,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
     case DocumentModel::Stockroom: {
         bool noneKey = (QKeySequence(key) == QKeySequence(tr("-", "set stockroom to none")));
-        const BrickLink::Stockroom value = idx.data(Qt::EditRole).value<BrickLink::Stockroom>();
+        const auto value = idx.data(Qt::EditRole).value<BrickLink::Stockroom>();
         BrickLink::Stockroom setValue = value;
 
         if (keypress && (key == Qt::Key_A))
@@ -642,7 +642,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
         bool newKey = (QKeySequence(key) == QKeySequence(tr("N", "set condition to new")));
         bool usedKey = (QKeySequence(key) == QKeySequence(tr("U", "set condition to used")));
 
-        const BrickLink::Condition value = idx.data(Qt::EditRole).value<BrickLink::Condition>();
+        const auto value = idx.data(Qt::EditRole).value<BrickLink::Condition>();
         BrickLink::Condition setValue = value;
 
         if (keypress && newKey)
@@ -661,7 +661,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
         bool excludeKey = (QKeySequence(key) == QKeySequence(tr("E", "set status to exclude")));
         bool extraKey = (QKeySequence(key) == QKeySequence(tr("X", "set status to extra")));
 
-        const BrickLink::Status value = idx.data(Qt::EditRole).value<BrickLink::Status>();
+        const auto value = idx.data(Qt::EditRole).value<BrickLink::Status>();
         BrickLink::Status setValue = value;
 
         if (keypress && includeKey)
@@ -705,7 +705,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
                 connect(m_select_item, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
                         auto ctxIdx = m_select_item->property("contextIndex").toModelIndex();
-                        QAbstractItemModel *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
+                        auto *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
                         setModelDataInternal(QVariant::fromValue(m_select_item->item()), ctxModel, ctxIdx);
                     }
                 });
@@ -735,7 +735,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
                 connect(m_select_color, &QDialog::finished, this, [this](int result) {
                     if (result == QDialog::Accepted) {
                         auto ctxIdx = m_select_color->property("contextIndex").toModelIndex();
-                        QAbstractItemModel *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
+                        auto *ctxModel = const_cast<QAbstractItemModel *>(ctxIdx.model());
                         setModelDataInternal(QVariant::fromValue(m_select_color->color()), ctxModel, ctxIdx);
                     }
                 });
@@ -980,7 +980,7 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
 QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &display, bool toolTip)
 {
     QLocale loc;
-    static const QString dash = QStringLiteral("-");
+    static const QString dash = u"-"_qs;
 
     switch (idx.column()) {
     case DocumentModel::Status: {
@@ -1017,7 +1017,7 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
                 && (item->subCondition() != BrickLink::SubCondition::None)) {
             QString scStr;
             switch (item->subCondition()) {
-            case BrickLink::SubCondition::None      : scStr = QStringLiteral("-"); break;
+            case BrickLink::SubCondition::None      : scStr = u"-"_qs; break;
             case BrickLink::SubCondition::Sealed    : scStr = tr("Sealed"); break;
             case BrickLink::SubCondition::Complete  : scStr = tr("Complete"); break;
             case BrickLink::SubCondition::Incomplete: scStr = tr("Incomplete"); break;

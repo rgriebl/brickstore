@@ -55,7 +55,7 @@ public:
 
 QSize CollapsibleLabel::minimumSizeHint() const
 {
-    return QSize(0, 0);
+    return {0, 0};
 }
 
 
@@ -171,7 +171,8 @@ private:
     QTreeView *m_list;
 };
 
-ViewPane::ViewPane(std::function<ViewPane *(Document *, QWidget *)> viewPaneCreate, Document *activeDocument)
+ViewPane::ViewPane(const std::function<ViewPane *(Document *, QWidget *)> &viewPaneCreate,
+                   Document *activeDocument)
     : QWidget()
     , m_viewPaneCreate(viewPaneCreate)
     , m_openDocumentsMenu(new OpenDocumentsMenu(this))
@@ -566,19 +567,19 @@ void ViewPane::updateStatistics()
 
     QString wgtstr;
     if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
-        wgtstr = QStringLiteral("-");
+        wgtstr = u"-"_qs;
     } else {
         wgtstr = Utility::weightToString(std::abs(stat.weight()),
                                          Config::inst()->measurementSystem(),
                                          true /*optimize*/, true /*add unit*/);
         if (stat.weight() < 0)
-            wgtstr.prepend(QStringLiteral(u"\u2265 "));
+            wgtstr.prepend(u"\u2265 "_qs);
     }
     m_weight->setText(wgtstr);
 
     QString valstr = Currency::toDisplayString(stat.value());
     if (stat.minValue() < stat.value())
-        valstr.prepend(QStringLiteral(u"\u2264 "));
+        valstr.prepend(u"\u2264 "_qs);
     m_value->setText(valstr);
 
     b = !qFuzzyIsNull(stat.cost());
@@ -795,7 +796,7 @@ void ViewPane::createToolBar()
 
     addSeparator();
 
-    QHBoxLayout *currencyLayout = new QHBoxLayout();
+    auto *currencyLayout = new QHBoxLayout();
     currencyLayout->setSpacing(0);
     currencyLayout->setSizeConstraint(QLayout::SetMaximumSize);
     m_value = new CollapsibleLabel();
@@ -838,7 +839,7 @@ void ViewPane::createToolBar()
     m_splitWindow = new QAction(this);
     m_splitWindow->setIcon(QIcon::fromTheme(u"document-new"_qs));
 
-    QMenu *splitMenu = new QMenu(m_split);
+    auto *splitMenu = new QMenu(m_split);
     splitMenu->addAction(m_splitClose);
     splitMenu->addSeparator();
     splitMenu->addAction(m_splitH);

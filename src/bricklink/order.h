@@ -173,10 +173,9 @@ class Orders : public QAbstractTableModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(bool valid READ isValid NOTIFY updateFinished FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY updateFinished FINAL)
-    Q_PROPERTY(int count READ rowCount NOTIFY updateFinished FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged FINAL)
 
 public:
     enum Column {
@@ -199,7 +198,6 @@ public:
         TypeRole,
     };
 
-    bool isValid() const          { return m_valid; }
     QDateTime lastUpdated() const { return m_lastUpdated; }
     BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
 
@@ -228,6 +226,8 @@ signals:
     void updateProgress(int received, int total);
     void updateFinished(bool success, const QString &message);
     void updateStatusChanged(BrickLink::UpdateStatus updateStatus);
+    void lastUpdatedChanged(const QDateTime &lastUpdated);
+    void countChanged(int count);
 
 private:
     Orders(Core *core);
@@ -237,6 +237,7 @@ private:
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);
     void updateOrder(std::unique_ptr<Order> order);
     void appendOrderToModel(std::unique_ptr<Order> order);
+    void setLastUpdated(const QDateTime &lastUpdated);
     void setUpdateStatus(UpdateStatus updateStatus);
     void emitDataChanged(int row, int col);
     void startUpdateAddress(Order *order);
@@ -245,7 +246,6 @@ private:
     QString orderFilePath(QStringView fileName, OrderType type, const QDate &date) const;
 
     Core *m_core;
-    bool m_valid = false;
     BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
     QString m_userId;
     QVector<TransferJob *> m_jobs;

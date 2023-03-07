@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <array>
 
 #include <QGlobalStatic>
 #include <QStringList>
@@ -41,7 +42,7 @@ static const char *application = "BrickStore";
 
 
 Config::Config()
-    : QSettings(QLatin1String(organization), QLatin1String(application))
+    : QSettings(QString::fromLatin1(organization), QString::fromLatin1(application))
 {
     m_show_input_errors = value(u"General/ShowInputErrors"_qs, true).toBool();
     m_show_difference_indicators = value(u"General/ShowDifferenceIndicators"_qs, false).toBool();
@@ -171,8 +172,9 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 
 QVariantList Config::availableLanguages() const
 {
-    QVariantList al;
     const auto trs = translations();
+    QVariantList al;
+    al.reserve(trs.size());
     for (const Translation &tr : trs) {
         al.append(QVariantMap {
                       { u"language"_qs, tr.language },
@@ -286,7 +288,7 @@ QMap<QByteArray, int> Config::updateIntervals() const
 {
     QMap<QByteArray, int> uiv = updateIntervalsDefault();
 
-    static const char *lut[] = { "Picture", "PriceGuide", "Database" };
+    static const std::array lut = { "Picture", "PriceGuide", "Database" };
 
     for (const auto &iv : lut)
         uiv[iv] = value(u"BrickLink/UpdateInterval/"_qs + QLatin1String(iv), uiv[iv]).toInt();

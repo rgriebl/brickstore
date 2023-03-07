@@ -85,7 +85,7 @@ Currency *Currency::inst()
 void Currency::parseRates(const QStringList &ratesList, QHash<QString, double> &ratesMap)
 {
     for (const QString &s : ratesList) {
-        QStringList sl = s.split(QLatin1Char('|'));
+        QStringList sl = s.split(u'|');
         if (sl.count() == 2) {
             QString sym = sl[0];
             double rate = sl[1].toDouble();

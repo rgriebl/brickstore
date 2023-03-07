@@ -10,9 +10,9 @@ class HumanReadableTimeDelta
 {
     Q_DECLARE_TR_FUNCTIONS(HumanReadableTimeDelta)
 
-    HumanReadableTimeDelta() = delete;
-
 public:
     static QString toString(const QDateTime &from, const QDateTime &to);
+
+    HumanReadableTimeDelta() = delete;
 };
 

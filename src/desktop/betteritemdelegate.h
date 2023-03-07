@@ -26,7 +26,7 @@ public:
 
 protected:
     void extendedPaint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index,
-                       std::function<void()> paintCallback = { }) const;
+                       const std::function<void ()> &paintCallback = { }) const;
 
 protected:
     Options m_options;

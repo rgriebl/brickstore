@@ -168,7 +168,7 @@ public:
     static void setDefaultUserAgent(const QString &ua);
     static QString defaultUserAgent();
 
-    static void setInitFunction(std::function<void()> func);
+    static void setInitFunction(const std::function<void ()> &func);
 
 signals:
     void overallProgress(int done, int total);

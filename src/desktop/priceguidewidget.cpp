@@ -635,7 +635,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     bool valid = d->m_pg && d->m_pg->isValid();
     bool is_updating = d->m_pg && (d->m_pg->updateStatus() == BrickLink::UpdateStatus::Updating);
 
-    QString str = d->m_pg ? QStringLiteral("-") : QString();
+    QString str = d->m_pg ? u"-"_qs : QString();
     auto crate = Currency::inst()->rate(d->m_ccode);
 
     for (const cell &c : std::as_const(d->m_cells)) {

@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <array>
 #include <QIODevice>
 
 #include "chunkreader.h"
@@ -212,9 +213,9 @@ bool ChunkWriter::endChunk()
     m_stream << len;
     m_file->seek(endpos);
 
-    static const char padbytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static const std::array<char, 16> padbytes = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     if (len % 16)
-        m_stream.writeRawData(padbytes, 16 - len % 16);
+        m_stream.writeRawData(padbytes.data(), 16 - len % 16);
 
     m_stream << len << ci.version << ci.id;
 

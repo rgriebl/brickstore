@@ -23,6 +23,7 @@ RecentFiles::RecentFiles(QObject *parent)
     auto config = Config::inst();
     int size = config->beginReadArray(u"RecentFiles"_qs);
     size = std::clamp(size, 0, MaxRecentFiles);
+    m_pathsAndNames.reserve(size);
     for (int i = 0; i < size; ++i) {
         config->setArrayIndex(i);
         auto path = config->value(u"Path"_qs).toString();

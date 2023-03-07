@@ -410,7 +410,7 @@ public:
     QmlLot(Lot *lot = nullptr, ::QmlDocumentLots *documentLots = nullptr);
     QmlLot(const Lot *lot);
     QmlLot(const QmlLot &copy);
-    QmlLot(QmlLot &&move);
+    QmlLot(QmlLot &&move) noexcept;
     ~QmlLot();
 
     static QmlLot create(Lot * &&lot); // QmlLot owns the lot
@@ -502,10 +502,10 @@ public:
 
     QImage image() const;
 
-    typedef std::function<void(::QmlDocumentLots * /*lots*/, Lot * /*which*/,
-                               const Lot & /*value*/)> QmlSetterCallback;
+    using QmlSetterCallback = std::function<void(::QmlDocumentLots * /*lots*/, Lot * /*which*/,
+                                                 const Lot & /*value*/)> ;
 
-    static void setQmlSetterCallback(QmlSetterCallback callback);
+    static void setQmlSetterCallback(const QmlSetterCallback &callback);
 
 private:
     class Setter

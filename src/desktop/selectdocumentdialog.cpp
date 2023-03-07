@@ -50,7 +50,7 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
     for (const Document *doc : docs) {
         auto model = doc->model();
         if (model != self) {
-            QListWidgetItem *item = new QListWidgetItem(doc->filePathOrTitle(), m_documentList);
+            auto *item = new QListWidgetItem(doc->filePathOrTitle(), m_documentList);
             item->setData(Qt::UserRole, QVariant::fromValue(model));
         }
     }
@@ -99,6 +99,7 @@ LotList SelectDocument::lots() const
     }
 
     LotList list;
+    list.reserve(srcList.size());
     for (const Lot *lot : std::as_const(srcList))
         list << new Lot(*lot);
     return list;

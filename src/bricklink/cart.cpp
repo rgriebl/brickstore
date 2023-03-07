@@ -52,7 +52,7 @@ Cart::Cart()
 { }
 
 Cart::~Cart()
-{ }
+{ /* needed to use std::unique_ptr on d */ }
 
 const LotList &Cart::lots() const
 {
@@ -283,7 +283,7 @@ Carts::Carts(Core *core)
                     message = message + u": " + e.errorString();
                 }
             }
-            m_lastUpdated = QDateTime::currentDateTime();
+            setLastUpdated(QDateTime::currentDateTime());
             setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
             emit updateFinished(success, success ? QString { } : message);
             m_job = nullptr;
@@ -418,6 +418,14 @@ void Carts::emitDataChanged(int row, int col)
     emit dataChanged(from, to);
 }
 
+void Carts::setLastUpdated(const QDateTime &lastUpdated)
+{
+    if (lastUpdated != m_lastUpdated) {
+        m_lastUpdated = lastUpdated;
+        emit lastUpdatedChanged(lastUpdated);
+    }
+}
+
 void Carts::setUpdateStatus(UpdateStatus updateStatus)
 {
     if (updateStatus != m_updateStatus) {
@@ -485,7 +493,7 @@ int Carts::columnCount(const QModelIndex &parent) const
 QVariant Carts::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || (index.row() < 0) || (index.row() >= m_carts.size()))
-        return QVariant();
+        return { };
 
     Cart *cart = m_carts.at(index.row());
     int col = index.column();

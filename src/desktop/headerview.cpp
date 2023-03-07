@@ -26,7 +26,6 @@ class SectionItem : public QListWidgetItem
 {
 public:
     SectionItem() = default;
-    ~SectionItem() override;
 
     int logicalIndex() const { return m_lidx; }
     void setLogicalIndex(int idx) { m_lidx = idx; }
@@ -34,9 +33,6 @@ public:
 private:
     int m_lidx = -1;
 };
-
-SectionItem::~SectionItem()
-{ }
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -148,9 +144,9 @@ HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
         } else {
             if (qApp->keyboardModifiers() == Qt::ShiftModifier) {
                 bool found = false;
-                for (int i = 0; i < m_sortColumns.size(); ++i) {
-                    if (m_sortColumns.at(i).first == section) {
-                        m_sortColumns[i].second = Qt::SortOrder(1 - m_sortColumns.at(i).second);
+                for (auto &[s, order] : m_sortColumns) {
+                    if (s == section) {
+                        order = Qt::SortOrder(1 - order);
                         found = true;
                         break;
                     }
@@ -276,6 +272,10 @@ bool HeaderView::restoreLayout(const QByteArray &config)
     QVector<qint32> sizes;
     QVector<qint32> positions;
     QVector<bool> isHiddens;
+
+    sizes.reserve(count);
+    positions.reserve(count);
+    isHiddens.reserve(count);
 
     for (int i = 0; i < count; ++i) {
         qint32 size, position;
@@ -406,12 +406,13 @@ void HeaderView::showMenu(const QPoint &pos)
         return;
 
     QVector<int> order;
+    order.reserve(count());
     for (int vi = 0; vi < count(); ++vi) {
         int li = logicalIndex(vi);
         order << li;
     }
 
-    QMenu *m = new QMenu(this);
+    auto *m = new QMenu(this);
     m->setAttribute(Qt::WA_DeleteOnClose);
 
     m->addAction(tr("Configure columns..."))->setData(-1);

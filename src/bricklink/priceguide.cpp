@@ -104,7 +104,7 @@ SingleHTMLScrapePGRetriever::SingleHTMLScrapePGRetriever(Core *core)
     connect(m_core, &Core::transferFinished,
             this, [this](TransferJob *job) {
         if (job) {
-            if (PriceGuide *pg = job->userData("htmlPriceGuide").value<PriceGuide *>())
+            if (auto *pg = job->userData("htmlPriceGuide").value<PriceGuide *>())
                 transferJobFinished(job, pg);
         }
     });
@@ -449,8 +449,8 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
                 throw Exception("JSON data size mismatch: requested %1, got %2")
                     .arg(m_currentBatch.size()).arg(data.size());
             }
-            for (int i = 0; i < data.size(); ++i) {
-                const auto item = data[i].toObject();
+            for (const auto &d : data) {
+                const auto item = d.toObject();
                 const QString itemId = item[u"item"][u"no"].toString();
                 const QString typeId = item[u"item"][u"type"].toString();
                 const int colorId = item[u"color_id"].toInt();
@@ -774,8 +774,8 @@ QIcon PriceGuideCache::iconForVatType(VatType vatType)
 
 QString PriceGuideCache::descriptionForVatType(VatType vatType)
 {
-    const QString inc = tr("VAT is included");
-    const QString exc = tr("VAT is excluded");
+    QString inc = tr("VAT is included");
+    QString exc = tr("VAT is excluded");
 
     switch (vatType) {
     case VatType::Excluded: return exc;

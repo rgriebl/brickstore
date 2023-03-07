@@ -24,13 +24,13 @@ public:
     Q_DECLARE_FLAGS(Result, ResultFlag)
     Q_FLAG(Result)
 
-    typedef std::function<Result(QObject *, QEvent *e)> Type;
+    using Type = std::function<Result(QObject *, QEvent *)>;
 
-    inline explicit EventFilter(QObject *o, std::initializer_list<QEvent::Type> types, Type filter)
+    inline explicit EventFilter(QObject *o, std::initializer_list<QEvent::Type> types, const Type &filter)
         : EventFilter(o, o, types, filter)
     { }
 
-    inline explicit EventFilter(QObject *parent, QObject *o, std::initializer_list<QEvent::Type> types, Type filter)
+    inline explicit EventFilter(QObject *parent, QObject *o, std::initializer_list<QEvent::Type> types, const Type &filter)
         : QObject(parent)
         , m_filter(filter)
         , m_types(types)

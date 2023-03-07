@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <array>
 #include <QTabWidget>
 #include <QFileDialog>
 #include <QComboBox>
@@ -72,7 +73,7 @@ public:
             { u"<>"_qs, QT_TR_NOOP("Flexible Space Separator") },
         };
         for (const auto &sep : separators) {
-            QAction *a = new QAction(this);
+            auto *a = new QAction(this);
             a->setObjectName(sep.first);
             a->setText(tr(sep.second));
             m_separatorActions.insert(sep.first, a);
@@ -173,7 +174,7 @@ public:
         if (indexes.size() != 1)
             return nullptr;
 
-        QMimeData *mimeData = new QMimeData();
+        auto *mimeData = new QMimeData();
         QByteArray encodedData;
         QDataStream ds(&encodedData, QIODevice::WriteOnly);
 
@@ -679,7 +680,7 @@ static int day2sec(int d)
 
 static QString systemDirName(const QString &path)
 {
-    static const QStandardPaths::StandardLocation locations[] = {
+    static const std::array locations = {
         QStandardPaths::DesktopLocation,
         QStandardPaths::DocumentsLocation,
         QStandardPaths::MusicLocation,
@@ -763,7 +764,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     connect(w_bl_username, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool isWrong = s.contains(QLatin1Char('@'));
+        bool isWrong = s.contains(u'@');
         bool wasWrong = w_bl_username->property("showInputError").toBool();
 
         if (isWrong != wasWrong) {

@@ -27,6 +27,7 @@
 #include <QtQuick3D/QQuick3D>
 
 #include <QCoro/QCoroSignal>
+#include <memory>
 
 #include "bricklink/core.h"
 #include "bricklink/store.h"
@@ -86,8 +87,8 @@ Application::Application(int &argc, char **argv)
 
     s_inst = this;
 
-    QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
-    QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
+    QCoreApplication::setApplicationName(u"" BRICKSTORE_NAME ""_qs);
+    QCoreApplication::setApplicationVersion(u"" BRICKSTORE_VERSION ""_qs);
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
 
 //    QDirIterator dit(u":/"_qs, QDirIterator::Subdirectories);
@@ -443,34 +444,34 @@ Application::~Application()
 
 QString Application::buildNumber() const
 {
-    return QLatin1String(BRICKSTORE_BUILD_NUMBER);
+    return u"" BRICKSTORE_BUILD_NUMBER ""_qs;
 }
 
 QString Application::applicationUrl() const
 {
-    return QLatin1String(BRICKSTORE_URL);
+    return u"" BRICKSTORE_URL ""_qs;
 }
 
 QString Application::gitHubUrl() const
 {
-    return QLatin1String(BRICKSTORE_GITHUB_URL);
+    return u"" BRICKSTORE_GITHUB_URL ""_qs;
 }
 
 QString Application::gitHubPagesUrl() const
 {
-    const auto sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split(u"/"_qs);
+    const QStringList sections = QString::fromLatin1(BRICKSTORE_GITHUB_URL).split(u'/');
     Q_ASSERT(sections.count() == 3);
     return sections[1] + u".github.io/" + sections[2];
 }
 
 QString Application::databaseUrl() const
 {
-    return QLatin1String(BRICKSTORE_DATABASE_URL);
+    return u"" BRICKSTORE_DATABASE_URL ""_qs;
 }
 
 QString Application::ldrawUrl() const
 {
-    return QLatin1String(BRICKSTORE_DATABASE_URL);
+    return u"" BRICKSTORE_DATABASE_URL ""_qs;
 }
 
 void Application::openUrl(const QUrl &url)
@@ -640,8 +641,8 @@ void Application::updateTranslations()
         once = true;
     }
 
-    m_trans_qt.reset(new QTranslator);
-    m_trans_brickstore.reset(new QTranslator);
+    m_trans_qt = std::make_unique<QTranslator>();
+    m_trans_brickstore = std::make_unique<QTranslator>();
 
     if (language != u"en") {
         if (m_trans_qt->load(u"qtbase_"_qs + language, i18n))

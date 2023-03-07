@@ -188,7 +188,7 @@ void Database::cancelUpdate()
 void Database::read(const QString &fileName)
 {
     try {
-        stopwatch *sw = new stopwatch("Loading database");
+        auto *sw = new stopwatch("Loading database");
 
         QFile f(!fileName.isEmpty() ? fileName : core()->dataPath() + Database::defaultDatabaseName());
 

@@ -82,7 +82,7 @@ public:
     QmlPrintPage(const QmlPrintJob *job);
 
     void dump();
-    void print(QPainter *p, double scale [2]) const;
+    void print(QPainter *p, double scaleX, double scaleY) const;
 
 private:
     struct Cmd {
@@ -110,7 +110,7 @@ private:
         QVariant  m_p2;
     };
 
-    void attr_cmd();
+    void pushAttrCmd();
 
 private:
     QVector<Cmd *> m_cmds;

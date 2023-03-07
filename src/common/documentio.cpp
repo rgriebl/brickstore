@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <memory>
 #include <cmath>
 
 #include <QtGui/QGuiApplication>
@@ -176,7 +177,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 
             // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
 
-            f.reset(new QTemporaryFile());
+            f = std::make_unique<QTemporaryFile>();
 
             if (f->open(QIODevice::ReadWrite)) {
                 try {
@@ -187,7 +188,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
                 }
             }
         } else {
-            f.reset(new QFile(fn));
+            f = std::make_unique<QFile>(fn);
         }
 
         if (!f->open(QIODevice::ReadOnly))
@@ -311,8 +312,8 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
             if (line.isEmpty())
                 continue;
 
-            if (line.at(0) == QLatin1Char('0')) {
-                const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+            if (line.at(0) == u'0') {
+                const auto split = QStringView{line}.split(u' ', Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return sv.constData() - line.constData(); };
 
                 if ((split.count() >= 2) && (split.at(1) == u"FILE")) {
@@ -330,10 +331,10 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                         return false; // we need to seek!
                 }
 
-            } else if (line.at(0) == QLatin1Char('1')) {
+            } else if (line.at(0) == u'1') {
                 if (is_mpd && !is_mpd_model_found)
                     continue;
-                const auto split = QStringView{line}.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+                const auto split = QStringView{line}.split(u' ', Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return sv.constData() - line.constData(); };
 
                 if (split.count() >= 15) {
@@ -341,7 +342,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                     QString partname = line.mid(strPosition(split.at(14))).toLower();
 
                     QString partid = partname;
-                    partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
+                    partid.truncate(partid.lastIndexOf(u'.'));
 
                     const BrickLink::Item *itemp = BrickLink::core()->item('P', partid.toLatin1());
 
@@ -568,7 +569,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                     base.setIncomplete(new BrickLink::Incomplete);
 
                     for (int i = 0; i < baseValues.size(); ++i) {
-                        auto attr = baseValues.at(i);
+                        const auto &attr = baseValues.at(i);
                         auto it = tagHash.find(attr.name());
                         if (it != tagHash.end()) {
                             (*it)(&base, attr.value().toString());
@@ -815,14 +816,14 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
     if (!columnLayout.isEmpty()) {
         xml.writeStartElement(u"ColumnLayout"_qs);
         xml.writeAttribute(u"Compressed"_qs, u"1"_qs);
-        xml.writeCDATA(QLatin1String(qCompress(columnLayout).toBase64()));
+        xml.writeCDATA(QString::fromLatin1(qCompress(columnLayout).toBase64()));
         xml.writeEndElement(); // ColumnLayout
     }
     QByteArray sortFilterState = doc->model()->saveSortFilterState();
     if (!sortFilterState.isEmpty()) {
         xml.writeStartElement(u"SortFilterState"_qs);
         xml.writeAttribute(u"Compressed"_qs, u"1"_qs);
-        xml.writeCDATA(QLatin1String(qCompress(sortFilterState).toBase64()));
+        xml.writeCDATA(QString::fromLatin1(qCompress(sortFilterState).toBase64()));
         xml.writeEndElement(); // SortFilterState
     }
     xml.writeEndElement(); // GuiState

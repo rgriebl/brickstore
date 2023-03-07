@@ -28,7 +28,7 @@ QSize BetterItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
 
 void BetterItemDelegate::extendedPaint(QPainter *painter, const QStyleOptionViewItem &option,
                                        const QModelIndex &index,
-                                       std::function<void()> paintCallback) const
+                                       const std::function<void()> &paintCallback) const
 {
     QStyleOptionViewItem myoption(option);
 

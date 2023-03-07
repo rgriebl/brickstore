@@ -164,7 +164,7 @@ static struct test_par_sort
             for (auto i = 0; i <= maxloop; ++i) {
                 size_t count = size_t(1ULL << i);
                 QByteArray msg = u"%3 test run %1 ... %2 values"_qs.arg(i).arg(count)
-                        .arg(QString::fromLatin1(test.name)).toLatin1();
+                        .arg(QLatin1String(test.name)).toLatin1();
                 int *array = new int[count];
                 memcpy(array, src, sizeof(int) * count);
 

@@ -60,13 +60,13 @@ SystemInfo::SystemInfo()
     m_map[u"qt.version"_qs] = QString::fromLatin1(qVersion());
     m_map[u"qt.debug"_qs] = QLibraryInfo::isDebugBuild();
     m_map[u"qt.platformname"_qs] = QGuiApplication::platformName();
-    m_map[u"build.compiler"_qs] = QLatin1String(BRICKSTORE_COMPILER_VERSION);
+    m_map[u"build.compiler"_qs] = u"" BRICKSTORE_COMPILER_VERSION ""_qs;
     m_map[u"build.arch"_qs] = QSysInfo::buildCpuArchitecture();
-    m_map[u"build.host"_qs] = QLatin1String(BRICKSTORE_BUILD_HOST);
+    m_map[u"build.host"_qs] = u"" BRICKSTORE_BUILD_HOST ""_qs;
     m_map[u"build.qt.version"_qs] = QString::fromLatin1(QT_VERSION_STR);
     m_map[u"build.date"_qs] = QLocale::c().toDateTime(QString::fromLatin1(__DATE__ " " __TIME__)
                                                       .simplified(), u"MMM d yyyy HH:mm:ss"_qs);
-    m_map[u"build.number"_qs] = QLatin1String(BRICKSTORE_BUILD_NUMBER);
+    m_map[u"build.number"_qs] = u"" BRICKSTORE_BUILD_NUMBER ""_qs;
     m_map[u"brickstore.locale"_qs] = QLocale().name().left(2);
     m_map[u"brickstore.version"_qs] = QCoreApplication::applicationVersion();
 

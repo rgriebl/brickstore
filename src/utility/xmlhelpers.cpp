@@ -53,8 +53,8 @@ QIODevice *XmlHelpers::ParseXML::openFile(const QString &fileName)
 }
 
 XmlHelpers::ParseXML::ParseXML(QIODevice *file, const char *rootNodeName, const char *elementNodeName)
-    : m_rootNodeName(QLatin1String(rootNodeName))
-    , m_elementNodeName(QLatin1String(elementNodeName))
+    : m_rootNodeName(QString::fromLatin1(rootNodeName))
+    , m_elementNodeName(QString::fromLatin1(elementNodeName))
     , m_file(file)
 { }
 
@@ -63,8 +63,8 @@ XmlHelpers::ParseXML::~ParseXML()
     delete m_file;
 }
 
-void XmlHelpers::ParseXML::parse(std::function<void (const QDomElement &)> callback,
-                                 std::function<void (const QDomElement &)> rootCallback)
+void XmlHelpers::ParseXML::parse(const std::function<void (const QDomElement &)> &callback,
+                                 const std::function<void (const QDomElement &)> &rootCallback)
 {
     QDomDocument doc;
     QString emsg;
@@ -111,7 +111,7 @@ QString XmlHelpers::ParseXML::elementText(const QDomElement &parent, const char 
     try {
         return elementText(parent, tagName);
     } catch (...) {
-        return QLatin1String(defaultText);
+        return QString::fromLatin1(defaultText);
     }
 }
 
@@ -119,9 +119,9 @@ QString XmlHelpers::ParseXML::elementText(const QDomElement &parent, const char 
 
 XmlHelpers::CreateXML::CreateXML(const char *rootNodeName, const char *elementNodeName)
     : m_domDoc(QString { })
-    , m_elementNodeName(QLatin1String(elementNodeName))
+    , m_elementNodeName(QString::fromLatin1(elementNodeName))
 {
-    m_domRoot = m_domDoc.createElement(QLatin1String(rootNodeName));
+    m_domRoot = m_domDoc.createElement(QString::fromLatin1(rootNodeName));
     m_domDoc.appendChild(m_domRoot);
 }
 
@@ -133,13 +133,13 @@ void XmlHelpers::CreateXML::createElement()
 
 void XmlHelpers::CreateXML::createText(const char *tagName, QStringView value)
 {
-    m_domItem.appendChild(m_domDoc.createElement(QLatin1String(tagName))
+    m_domItem.appendChild(m_domDoc.createElement(QString::fromLatin1(tagName))
                           .appendChild(m_domDoc.createTextNode(value.toString())).parentNode());
 }
 
 void XmlHelpers::CreateXML::createEmpty(const char *tagName)
 {
-    m_domItem.appendChild(m_domDoc.createElement(QLatin1String(tagName)));
+    m_domItem.appendChild(m_domDoc.createElement(QString::fromLatin1(tagName)));
 }
 
 QString XmlHelpers::CreateXML::toString() const

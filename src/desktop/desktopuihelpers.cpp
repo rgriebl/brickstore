@@ -36,9 +36,6 @@ void DesktopUIHelpers::setDefaultParent(QWidget *defaultParent)
     s_defaultParent = defaultParent;
 }
 
-DesktopUIHelpers::DesktopUIHelpers()
-{ }
-
 void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
 {
     QSize sh = w->sizeHint();
@@ -67,7 +64,7 @@ void DesktopUIHelpers::setPopupPos(QWidget *w, const QRect &pos)
 EventFilter::Result DesktopUIHelpers::selectAllFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::FocusIn) {
-        QFocusEvent *fe = static_cast<QFocusEvent *>(e);
+        auto *fe = static_cast<QFocusEvent *>(e);
         static const QVector<Qt::FocusReason> validReasons = {
             Qt::MouseFocusReason,
             Qt::TabFocusReason,
@@ -110,7 +107,7 @@ QCoro::Task<UIHelpers::StandardButton> DesktopUIHelpers::showMessageBox(QString 
 
     } else {
         QByteArray out;
-        if (msg.contains(QLatin1Char('<'))) {
+        if (msg.contains(u'<')) {
             QTextDocument doc;
             doc.setHtml(msg);
             out = doc.toPlainText().toLocal8Bit();
@@ -167,7 +164,7 @@ QCoro::Task<std::optional<double>> DesktopUIHelpers::getInputDouble(QString text
 
     if (auto *sp = dlg.findChild<QDoubleSpinBox *>()) {
         if (!unit.isEmpty())
-            sp->setSuffix(QLatin1Char(' ') + unit);
+            sp->setSuffix(u' ' + unit);
         sp->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         sp->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
         sp->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
@@ -198,7 +195,7 @@ QCoro::Task<std::optional<int>> DesktopUIHelpers::getInputInteger(QString text,
 
     if (auto *sp = dlg.findChild<QSpinBox *>()) {
         if (!unit.isEmpty())
-            sp->setSuffix(QLatin1Char(' ') + unit);
+            sp->setSuffix(u' ' + unit);
         sp->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         sp->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
         sp->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);

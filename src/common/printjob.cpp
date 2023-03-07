@@ -218,7 +218,7 @@ void QmlPrintPage::dump()
     }
 }
 
-void QmlPrintPage::print(QPainter *p, double scale [2]) const
+void QmlPrintPage::print(QPainter *p, double scaleX, double scaleY) const
 {
     for (const Cmd *c : m_cmds) {
         if (c->m_cmd == Cmd::Attributes) {
@@ -229,7 +229,7 @@ void QmlPrintPage::print(QPainter *p, double scale [2]) const
             p->setFont(ac->m_font);
 
             if (ac->m_color.isValid())
-                p->setPen(QPen(ac->m_color, int(ac->m_linewidth * (scale [0] + scale [1]) / 2.), Qt::PenStyle(ac->m_linestyle)));
+                p->setPen(QPen(ac->m_color, int(ac->m_linewidth * (scaleX + scaleY) / 2.), Qt::PenStyle(ac->m_linestyle)));
             else
                 p->setPen(QPen(Qt::NoPen));
 
@@ -241,10 +241,10 @@ void QmlPrintPage::print(QPainter *p, double scale [2]) const
         else {
             const auto *dc = static_cast<const DrawCmd *>(c);
 
-            int x = int(dc->m_x * scale [0]);
-            int y = int(dc->m_y * scale [1]);
-            int w = int(dc->m_w * scale [0]);
-            int h = int(dc->m_h * scale [1]);
+            int x = int(dc->m_x * scaleX);
+            int y = int(dc->m_y * scaleY);
+            int w = int(dc->m_w * scaleX);
+            int h = int(dc->m_h * scaleY);
 
             switch (c->m_cmd) {
             case Cmd::Text:
@@ -267,7 +267,7 @@ void QmlPrintPage::print(QPainter *p, double scale [2]) const
                 break;
 
             case Cmd::Image: {
-                QImage img = dc->m_p1.value<QImage>();
+                auto img = dc->m_p1.value<QImage>();
 
                 if (!img.isNull()) {
                     QRect dr = QRect(x, y, w, h);
@@ -318,10 +318,9 @@ double QmlPrintPage::lineWidth() const
     return m_attr.m_linewidth;
 }
 
-void QmlPrintPage::attr_cmd()
+void QmlPrintPage::pushAttrCmd()
 {
-    auto *ac = new AttrCmd();
-    *ac = m_attr;
+    auto *ac = new AttrCmd(m_attr);
     ac->m_cmd = Cmd::Attributes;
     m_cmds.append(ac);
 }
@@ -329,31 +328,31 @@ void QmlPrintPage::attr_cmd()
 void QmlPrintPage::setFont(const QFont &font)
 {
     m_attr.m_font = font;
-    attr_cmd();
+    pushAttrCmd();
 }
 
 void QmlPrintPage::setColor(const QColor &color)
 {
     m_attr.m_color = color;
-    attr_cmd();
+    pushAttrCmd();
 }
 
 void QmlPrintPage::setBgColor(const QColor &color)
 {
     m_attr.m_bgcolor = color;
-    attr_cmd();
+    pushAttrCmd();
 }
 
 void QmlPrintPage::setLineStyle(int linestyle)
 {
     m_attr.m_linestyle = linestyle;
-    attr_cmd();
+    pushAttrCmd();
 }
 
 void QmlPrintPage::setLineWidth(double linewidth)
 {
     m_attr.m_linewidth = linewidth;
-    attr_cmd();
+    pushAttrCmd();
 }
 
 
@@ -545,9 +544,8 @@ bool QmlPrintJob::print(const QList<uint> &pages)
     QPdfWriter *prt = static_cast<QPdfWriter *>(m_pd);
 #endif
 
-    double scaling [2];
-    scaling [0] = double(m_pd->logicalDpiX()) / 25.4;
-    scaling [1] = double(m_pd->logicalDpiY()) / 25.4;
+    double scaleX = double(m_pd->logicalDpiX()) / 25.4;
+    double scaleY = double(m_pd->logicalDpiY()) / 25.4;
     bool no_new_page = true;
 
     for (int i = 0; i < pageCount(); ++i) {
@@ -559,7 +557,7 @@ bool QmlPrintJob::print(const QList<uint> &pages)
         if (!no_new_page && prt)
             prt->newPage();
 
-        page->print(&p, scaling);
+        page->print(&p, scaleX, scaleY);
         no_new_page = false;
     }
     return true;

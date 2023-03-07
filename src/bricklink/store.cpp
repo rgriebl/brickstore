@@ -35,16 +35,23 @@ BrickLink::Store::Store(Core *core)
                 try {
                     auto result = IO::fromBrickLinkXML(*job->data(), IO::Hint::Store);
                     m_lots = result.takeLots();
-                    m_currencyCode = result.currencyCode();
-                    m_valid = true;
+                    if (result.currencyCode() != m_currencyCode) {
+                        m_currencyCode = result.currencyCode();
+                        emit currencyCodeChanged(m_currencyCode);
+                    }
                 } catch (const Exception &e) {
                     success = false;
                     message = tr("Failed to import the store inventory") + u": " + e.errorString();
+                }
+                if (success != m_valid) {
+                    m_valid = success;
+                    emit isValidChanged(success);
                 }
             } else {
                 message = tr("Failed to download the store inventory") + u": " + job->errorString();
             }
             setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+            setLastUpdated(QDateTime::currentDateTime());
             emit updateFinished(success, message);
             m_job = nullptr;
         }
@@ -61,6 +68,14 @@ void BrickLink::Store::setUpdateStatus(UpdateStatus updateStatus)
     if (updateStatus != m_updateStatus) {
         m_updateStatus = updateStatus;
         emit updateStatusChanged(updateStatus);
+    }
+}
+
+void BrickLink::Store::setLastUpdated(const QDateTime &lastUpdated)
+{
+    if (lastUpdated != m_lastUpdated) {
+        m_lastUpdated = lastUpdated;
+        emit lastUpdatedChanged(lastUpdated);
     }
 }
 

@@ -1,7 +1,8 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-
+#include <memory>
+#include <array>
 #include <QBuffer>
 #include <QSaveFile>
 #include <QDirIterator>
@@ -184,7 +185,7 @@ Order::Order(const QString &id, OrderType type)
 }
 
 Order::~Order()
-{ }
+{ /* needed to use std::unique_ptr on d */ }
 
 LotList Order::loadLots() const
 {
@@ -795,13 +796,15 @@ void Orders::reloadOrdersFromCache()
     m_orders.clear();
     endResetModel();
 
+    emit countChanged(0);
+
     if (m_core->userId().isEmpty())
         return;
 
     QString path = m_core->dataPath() + u"orders/" + m_core->userId();
 
     QFileInfo stamp(path + u"/.stamp");
-    m_lastUpdated = stamp.lastModified();
+    setLastUpdated(stamp.lastModified());
     setUpdateStatus(stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
     QThreadPool::globalInstance()->start([this, path]() {
@@ -896,7 +899,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
                     if (order || startOfOrder >= 0)
                         throw Exception("Found a nested ORDER tag");
                     startOfOrder = int(xml.characterOffset());
-                    order.reset(new Order());
+                    order = std::make_unique<Order>();
 
                     QQmlEngine::setObjectOwnership(order.get(), QQmlEngine::CppOwnership);
 
@@ -1012,6 +1015,15 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     m_orders.append(o);
 
     endInsertRows();
+    emit countChanged(rowCount());
+}
+
+void Orders::setLastUpdated(const QDateTime &lastUpdated)
+{
+    if (lastUpdated != m_lastUpdated) {
+        m_lastUpdated = lastUpdated;
+        emit lastUpdatedChanged(lastUpdated);
+    }
 }
 
 void Orders::setUpdateStatus(UpdateStatus updateStatus)
@@ -1140,7 +1152,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
     Q_ASSERT(m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
 
-    static const char *types[] = { "received", "placed" };
+    static const std::array types = { "received", "placed" };
     for (auto &type : types) {
         QUrl url(u"https://www.bricklink.com/orderExcelFinal.asp"_qs);
         QUrlQuery query;
@@ -1217,7 +1229,7 @@ int Orders::columnCount(const QModelIndex &parent) const
 QVariant Orders::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || (index.row() < 0) || (index.row() >= m_orders.size()))
-        return QVariant();
+        return { };
 
     Order *order = m_orders.at(index.row());
     int col = index.column();

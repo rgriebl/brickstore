@@ -20,7 +20,7 @@
 
 
 DeveloperConsole::DeveloperConsole(const QString &prompt,
-                                   std::function<std::tuple<QString, bool>(QString)> executeFunction,
+                                   const std::function<std::tuple<QString, bool>(QString)> &executeFunction,
                                    QWidget *parent)
     : QFrame(parent)
     , m_log(new QPlainTextEdit)

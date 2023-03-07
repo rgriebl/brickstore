@@ -29,6 +29,7 @@ Announcements::Announcements(const QString &baseUrl, QObject *parent)
     m_wikiAnnouncementsUrl.append(u"/wiki/Announcements"_qs);
 
     const auto vl = Config::inst()->value(u"Announcements/ReadIds"_qs).toList();
+    m_readIds.reserve(vl.size());
     for (const QVariant &v : vl)
         m_readIds << v.toUInt();
 }
@@ -133,6 +134,7 @@ void Announcements::markAnnouncementRead(quint32 id)
             m_readIds.append(id);
 
             QVariantList vl;
+            vl.reserve(m_readIds.size());
             for (const quint32 &readId : std::as_const(m_readIds))
                 vl << readId;
 

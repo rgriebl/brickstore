@@ -107,7 +107,7 @@ BfcCommandElement::BfcCommandElement(const QString &text)
     auto c = text.split(u' ');
     if ((c.count() >= 2) && (c.at(0) == u"BFC")) {
         for (int i = 1; i < c.length(); ++i) {
-            QString bfcCommand = c.at(i);
+            const QString &bfcCommand = c.at(i);
 
             if (bfcCommand == u"INVERTNEXT")
                 m_invertNext = true;

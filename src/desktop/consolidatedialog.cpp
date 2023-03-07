@@ -284,9 +284,7 @@ bool ConsolidateDialog::validateCurrentPage()
                 && w_defaultDoNotDeleteEmpty->isChecked();
         m_destination = w_defaultDestination->currentData().value<Destination>();
 
-        for (int i = 0; i < m_list.size(); ++i) {
-            DocumentModel::Consolidate &c = m_list[i];
-
+        for (auto &c : m_list) {
             c.fieldMergeModes = m_fieldMergeModes;
             c.doNotDeleteEmpty = m_doNotDeleteEmpty;
             c.destinationIndex = calculateIndex(c, m_destination);
@@ -333,6 +331,7 @@ void ConsolidateDialog::showIndividualMerge(int idx)
     auto destination = w_defaultDestination->currentData().value<Destination>();
 
     QVector<int> fakeIndexes;
+    fakeIndexes.reserve(c.lots.size());
     for (const auto lot : c.lots)
         fakeIndexes << int(m_documentLots.indexOf(lot));
 

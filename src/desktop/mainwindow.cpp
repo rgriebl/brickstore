@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <array>
 #include <cfloat>
 
 #include <QUndoStack>
@@ -534,8 +535,8 @@ ViewPane *MainWindow::createViewPane(Document *activeDocument, QWidget *window)
 
 QDockWidget *MainWindow::createDock(QWidget *widget, const char *name)
 {
-    QDockWidget *dock = new QDockWidget(QString(), this);
-    dock->setObjectName(QString::fromLatin1(name));
+    auto *dock = new QDockWidget(QString(), this);
+    dock->setObjectName(QLatin1String(name));
     dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
     dock->setTitleBarWidget(new FancyDockTitleBar(dock));
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -827,13 +828,13 @@ bool MainWindow::setupToolBar()
         if (an == u"-") {
             m_toolbar->addSeparator()->setObjectName(an);
         } else if (an == u"|") {
-            QWidget *spacer = new QWidget();
+            auto *spacer = new QWidget();
             spacer->setObjectName(an);
             int sp = 2 * style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setFixedSize(sp, sp);
             m_toolbar->addWidget(spacer);
         } else if (an == u"<>") {
-            QWidget *spacer = new QWidget();
+            auto *spacer = new QWidget();
             spacer->setObjectName(an);
             int sp = 2 * style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setMinimumSize(sp, sp);
@@ -1060,7 +1061,7 @@ void MainWindow::createActions()
 
 QList<QAction *> MainWindow::contextMenuActions() const
 {
-    static const char *contextActions[] =  {
+    static const std::array contextActions =  {
         "edit_cut",
         "edit_copy",
         "edit_paste",
@@ -1083,6 +1084,7 @@ QList<QAction *> MainWindow::contextMenuActions() const
     };
     static QList<QAction *> actions;
     if (actions.isEmpty()) {
+        actions.reserve(contextActions.size());
         for (const auto &an : contextActions)
             actions << ((an == QByteArray("-")) ? nullptr : ActionManager::inst()->qAction(an));
     }
@@ -1335,8 +1337,8 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         button->setPopupMode(QToolButton::MenuButtonPopup);
 
         // we need a margin - otherwise the list will paint over the menu's border
-        QWidget *w = new QWidget();
-        QVBoxLayout *l = new QVBoxLayout(w);
+        auto *w = new QWidget();
+        auto *l = new QVBoxLayout(w);
         int fw = menu->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
         l->setContentsMargins(fw, fw, fw, fw);
 

@@ -52,6 +52,7 @@ void AppStatistics::removeSource(int sourceId)
 QVector<int> AppStatistics::sourceIds() const
 {
     QVector<int> sids;
+    sids.reserve(m_sources.size());
     for (const auto &src : m_sources)
         sids << src.id;
     return sids;

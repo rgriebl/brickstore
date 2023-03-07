@@ -42,8 +42,8 @@ public:
 
     static void openUrl(const QUrl &url);
 
-    typedef std::tuple<QtMsgType, QString, QString, int, QString> UILogMessage;
-    typedef void (*UIMessageHandler)(const UILogMessage &msg);
+    using UILogMessage = std::tuple<QtMsgType, QString, QString, int, QString>;
+    using UIMessageHandler = void(*)(const UILogMessage &);
 
     void setUILoggingHandler(UIMessageHandler callback);
 

@@ -174,7 +174,7 @@ public:
     QCoro::Task<int> addLots(BrickLink::LotList &&lots, AddLotMode addLotMode = AddLotMode::AddAsNew);
     QCoro::Task<> consolidateLots(BrickLink::LotList lots);
 
-    static void setConsolidateFunction(std::function<ConsolidateFunction> consolidateFunction);
+    static void setConsolidateFunction(const std::function<ConsolidateFunction> &consolidateFunction);
 
     static MergeModes possibleMergeModesForField(Field field);
     static FieldMergeModes createFieldMergeModes(MergeMode mergeMode = MergeMode::Ignore);
@@ -191,11 +191,10 @@ public:
     QModelIndex index(const Lot *i, int column = 0) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
 
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QVariant headerData(int section, Qt::Orientation orientation,
-                                int role = Qt::DisplayRole) const override;
+   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+   QVariant data(const QModelIndex &index, int role) const override;
+   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex&) const override;
     bool setData(const QModelIndex&, const QVariant&, int) override;
     QVariant dataForEditRole(const Lot *lot, Field f) const;
@@ -232,7 +231,7 @@ public:
     static DocumentModel *createTemporary(const LotList &list,
                                      const QVector<int> &fakeIndexes = { });
 
-    virtual ~DocumentModel() override;
+    ~DocumentModel() override;
 
     static const QVector<DocumentModel *> &allDocuments();
 
@@ -287,7 +286,7 @@ public:
         LotDidNotChange = 0,
     };
 
-    void applyTo(const LotList &lots, std::function<ApplyToResult(const Lot &, Lot &)> callback,
+    void applyTo(const LotList &lots, const std::function<ApplyToResult(const Lot &, Lot &)> &callback,
                  const QString &actionText = { });
 
     const Lot *differenceBaseLot(const Lot *lot) const;

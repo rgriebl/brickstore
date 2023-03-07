@@ -43,7 +43,7 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
     if (!p) {
         return -1;
     } else if (p->isWidgetType()) {
-        QWidget *pw = static_cast<QWidget *>(p);
+        auto *pw = static_cast<QWidget *>(p);
         return pw->style()->pixelMetric(pm, nullptr, pw);
     } else {
         return static_cast<QLayout *>(p)->spacing();

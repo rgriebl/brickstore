@@ -29,7 +29,7 @@ class PriceGuideRetrieverInterface : public QObject
 
 public:
     PriceGuideRetrieverInterface(QObject *parent = nullptr);
-    virtual ~PriceGuideRetrieverInterface() = default;
+    ~PriceGuideRetrieverInterface() override = default;
 
     virtual QString name() const = 0;
     virtual QString id() const = 0;

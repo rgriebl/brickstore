@@ -77,7 +77,7 @@ QModelIndex ColorModel::index(const Color *color) const
 QVariant ColorModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.column() != 0 || !color(index))
-        return QVariant();
+        return { };
 
     QVariant res;
     const Color *c = color(index);
@@ -104,7 +104,7 @@ QVariant ColorModel::headerData(int section, Qt::Orientation orient, int role) c
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
         return tr("Color by %1").arg(sortOrder() == Qt::AscendingOrder ? tr("Name") : tr("Hue"));
-    return QVariant();
+    return { };
 }
 
 bool ColorModel::isFiltered() const
@@ -265,7 +265,7 @@ QModelIndex CategoryModel::index(const Category *category) const
 QVariant CategoryModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.column() != 0 || !category(index))
-        return QVariant();
+        return { };
 
     QVariant res;
     const Category *c = category(index);
@@ -281,7 +281,7 @@ QVariant CategoryModel::headerData(int section, Qt::Orientation orient, int role
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
         return tr("Category");
-    return QVariant();
+    return { };
 }
 
 QHash<int, QByteArray> CategoryModel::roleNames() const
@@ -405,7 +405,7 @@ QModelIndex ItemTypeModel::index(const ItemType *itemtype) const
 QVariant ItemTypeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.column() != 0 || !itemType(index))
-        return QVariant();
+        return { };
 
     QVariant res;
     const ItemType *i = itemType(index);
@@ -423,7 +423,7 @@ QVariant ItemTypeModel::headerData(int section, Qt::Orientation orient, int role
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
         return tr("Name");
-    return QVariant();
+    return { };
 }
 
 QHash<int, QByteArray> ItemTypeModel::roleNames() const
@@ -531,14 +531,14 @@ QModelIndex ItemModel::index(const Item *item) const
 QVariant ItemModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || !item(index))
-        return QVariant();
+        return { };
 
     QVariant res;
     const Item *i = item(index);
 
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
-        case 1: res = QLatin1String(i->id()); break;
+        case 1: res = QString::fromLatin1(i->id()); break;
         case 2: res = i->name(); break;
         }
     } else if (role == Qt::TextAlignmentRole) {
@@ -568,7 +568,7 @@ QVariant ItemModel::headerData(int section, Qt::Orientation orient, int role) co
         case 2: return tr("Description");
         }
     }
-    return QVariant();
+    return { };
 }
 
 QHash<int, QByteArray> ItemModel::roleNames() const
@@ -767,8 +767,8 @@ bool ItemModel::lessThan(const void *p1, const void *p2, int column) const
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-    return Utility::naturalCompare((column == 2) ? i1->name() : QLatin1String(i1->id()),
-                                   (column == 2) ? i2->name() : QLatin1String(i2->id())) < 0;
+    return Utility::naturalCompare((column == 2) ? i1->name() : QString::fromLatin1(i1->id()),
+                                   (column == 2) ? i2->name() : QString::fromLatin1(i2->id())) < 0;
 }
 
 bool ItemModel::filterAccepts(const void *pointer) const
@@ -937,7 +937,7 @@ void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
         first_item = false;
     }
 
-    for (auto it = unique.begin(); it != unique.end(); ++it) {
+    for (auto it = unique.cbegin(); it != unique.cend(); ++it) {
         if (it->m_quantity >= list.count())
             m_items.emplace_back(it->m_item, nullptr, -1);
     }
@@ -1111,7 +1111,7 @@ QVariant InternalInventoryModel::headerData(int section, Qt::Orientation orient,
         case InventoryModel::ItemNameColumn: return tr("Description");
         }
     }
-    return QVariant();
+    return { };
 }
 
 QHash<int, QByteArray> InternalInventoryModel::roleNames() const
@@ -1161,8 +1161,8 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
         case InventoryModel::QuantityColumn:
             return e1.m_quantity < e2.m_quantity;
         case InventoryModel::ItemIdColumn:
-            return (Utility::naturalCompare(QLatin1String(e1.m_item->id()),
-                                            QLatin1String(e2.m_item->id())) < 0);
+            return (Utility::naturalCompare(QString::fromLatin1(e1.m_item->id()),
+                                            QString::fromLatin1(e2.m_item->id())) < 0);
         case InventoryModel::ItemNameColumn:
             return (Utility::naturalCompare(e1.m_item->name(), e2.m_item->name()) < 0);
         case InventoryModel::ColorColumn:

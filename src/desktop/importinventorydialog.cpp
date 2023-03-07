@@ -42,7 +42,7 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
         setFocusProxy(m_select);
     } else {
         m_verifyLabel = new QLabel(this);
-        m_verifyLabel->setText(tr("Parting out:") + u" <b>" + QString::fromLatin1(m_verifyItem->id())
+        m_verifyLabel->setText(tr("Parting out:") + u" <b>" + QLatin1String(m_verifyItem->id())
                                + u" " + m_verifyItem->name() + u"</b");
 
         setFocusProxy(m_import);
@@ -200,7 +200,7 @@ QSize ImportInventoryDialog::sizeHint() const
         return QDialog::sizeHint();
     } else {
         QFontMetrics fm(font());
-        return QSize(fm.horizontalAdvance(u"m"_qs) * 120, fm.height() * 30);
+        return { fm.horizontalAdvance(u"m"_qs) * 120, fm.height() * 30 };
     }
 }
 

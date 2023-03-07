@@ -9,6 +9,7 @@
 #include <QAction>
 
 #include <limits>
+#include <memory>
 
 #include "progresscircle.h"
 
@@ -102,7 +103,7 @@ void ProgressCircle::resizeEvent(QResizeEvent *)
 
 void ProgressCircle::mousePressEvent(QMouseEvent *e)
 {
-    QMenu *m = new QMenu(this);
+    auto *m = new QMenu(this);
     connect(m, &QMenu::aboutToHide, m, &QObject::deleteLater);
     auto *a = m->addAction(tr("Cancel all active downloads"));
     a->setEnabled(m_online && ((m_value >= m_min) && (m_value < m_max)));
@@ -140,7 +141,7 @@ void ProgressCircle::paintEvent(QPaintEvent *)
 
     if (sweepAngle) {
         if (!m_fill) {
-            m_fill.reset(new QConicalGradient(r.center(), qreal(45)));
+            m_fill = std::make_unique<QConicalGradient>(r.center(), qreal(45));
             m_fill->setColorAt(0, m_color);
             m_fill->setColorAt(0.25, m_color.lighter());
             m_fill->setColorAt(0.5, m_color);

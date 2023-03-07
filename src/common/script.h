@@ -32,6 +32,8 @@ public:
     };
     Q_ENUM(Location)
 
+    ExtensionScriptAction(QObject *parent = nullptr);
+
     QString text() const;
     void setText(const QString &text);
     Location location() const;
@@ -69,6 +71,8 @@ class PrintingScriptAction : public QObject, public QQmlParserStatus
     Q_PROPERTY(QJSValue printFunction READ printFunction WRITE setPrintFunction NOTIFY printFunctionChanged)
 
 public:
+    PrintingScriptAction(QObject *parent = nullptr);
+
     QString text() const;
     void setText(const QString &text);
 
@@ -101,12 +105,14 @@ class Script : public QQuickItem
     Q_PROPERTY(QString version READ version WRITE setVersion NOTIFY versionChanged)
 
 public:
+    Script(QQuickItem *parent = nullptr);
+
     QString name() const;
+    void setName(const QString &name);
     QString author() const;
-    void setName(QString name);
-    void setAuthor(QString author);
+    void setAuthor(const QString &author);
     QString version() const;
-    void setVersion(QString version);
+    void setVersion(const QString &version);
 
     void addExtensionAction(ExtensionScriptAction *extensionAction);
     void addPrintingAction(PrintingScriptAction *printingAction);

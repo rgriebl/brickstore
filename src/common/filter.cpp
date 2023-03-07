@@ -401,11 +401,13 @@ QVector<QPair<Filter::Combination, QString>> Filter::Parser::standardCombination
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!(mask & tt->m_combination))
             continue;
-    
-        foreach (QString word, Filter::tr(tt->m_words).split(u','))
-            dct.append({ tt->m_combination, word });
-        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(u','))
-            dct.append({ tt->m_combination, symbol });
+
+        const auto words = Filter::tr(tt->m_words).split(u',');
+        const auto symbols = QString::fromLatin1(tt->m_symbols).split(u',');
+        for (const auto &word : words)
+            dct.emplace_back(tt->m_combination, word);
+        for (const auto &symbol : symbols)
+            dct.emplace_back(tt->m_combination, symbol);
     }
     return dct;
 }
@@ -438,11 +440,13 @@ QVector<QPair<Filter::Comparison, QString>> Filter::Parser::standardComparisonTo
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!(mask & tt->m_comparison))
             continue;
-    
-        foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
-            dct.append({ tt->m_comparison, word });
-        foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
-            dct.append({ tt->m_comparison, symbol });
+
+        const auto words = Filter::tr(tt->m_words).split(u',');
+        const auto symbols = QString::fromLatin1(tt->m_symbols).split(u',');
+        for (const auto &word : words)
+            dct.emplace_back(tt->m_comparison, word);
+        for (const auto &symbol : symbols)
+            dct.emplace_back(tt->m_comparison, symbol);
     }
     return dct;
 }

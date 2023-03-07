@@ -27,9 +27,9 @@ AnnouncementsDialog::AnnouncementsDialog(const QString &markdown, QWidget *paren
 {
     setAttribute(Qt::WA_TranslucentBackground);
 
-    QVBoxLayout *top = new QVBoxLayout(this);
+    auto *top = new QVBoxLayout(this);
 
-    QHBoxLayout *lay = new QHBoxLayout;
+    auto *lay = new QHBoxLayout;
     lay->setSpacing(lay->spacing() * 2);
     lay->addStretch(1);
 

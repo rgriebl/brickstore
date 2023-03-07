@@ -209,7 +209,7 @@ void BetterCommandButton::updateAction()
     } else {
         const auto objects = m_action->associatedObjects();
         for (auto *object : objects) {
-            if (QMenu *menu = qobject_cast<QMenu *>(object)) {
+            if (auto *menu = qobject_cast<QMenu *>(object)) {
                 if (!menu->icon().isNull())
                     setIcon(menu->icon());
             }

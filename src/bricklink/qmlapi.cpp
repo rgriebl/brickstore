@@ -566,7 +566,7 @@ QmlLot::QmlLot(const QmlLot &copy)
              : copy.wrappedObject(), copy.m_documentLots)
 { }
 
-QmlLot::QmlLot(QmlLot &&move)
+QmlLot::QmlLot(QmlLot &&move) noexcept
     : QmlWrapperBase(move)
 {
     std::swap(m_documentLots, move.m_documentLots);
@@ -580,7 +580,7 @@ QmlLot::~QmlLot()
 
 QmlLot QmlLot::create(Lot *&&lot)
 {
-    return QmlLot(std::move(lot), reinterpret_cast<::QmlDocumentLots *>(Owning));
+    return { std::move(lot), reinterpret_cast<::QmlDocumentLots *>(Owning) };
 }
 
 QmlLot &QmlLot::operator=(const QmlLot &assign)
@@ -599,7 +599,7 @@ QImage QmlLot::image() const
     return pic ? pic->image() : dummy;
 }
 
-void QmlLot::setQmlSetterCallback(QmlSetterCallback callback)
+void QmlLot::setQmlSetterCallback(const QmlSetterCallback &callback)
 {
     s_changeLot = callback;
 }
@@ -634,7 +634,7 @@ QmlLot::Setter::~Setter()
 
 QmlLot::Setter QmlLot::set()
 {
-    return Setter(this);
+    return { this };
 }
 
 Lot *QmlLot::get() const
@@ -904,8 +904,8 @@ InventoryModel *QmlBrickLink::inventoryModel(bool appearsIn, const QVariantList 
         list.reserve(items.size());
 
         for (int i = 0; i < int(items.size()); ++i) {
-            QVariant vitem = items.at(i);
-            QVariant vcolor = colors.at(i);
+            const QVariant &vitem = items.at(i);
+            const QVariant &vcolor = colors.at(i);
             const BrickLink::Item *item = nullptr;
             const BrickLink::Color *color = nullptr;
 

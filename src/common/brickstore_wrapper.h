@@ -248,7 +248,7 @@ public:
 
 signals:
     void countChanged(int newCount);
-    void sortOrderChanged(int newSortOrder);
+    void sortOrderChanged(Qt::SortOrder newSortOrder);
     void sortColumnChanged(int newSortColumn);
 
     void sortRoleNameChanged(QString newSortRoleName);

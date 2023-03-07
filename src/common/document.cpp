@@ -1,6 +1,8 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <memory>
+
 #include <QtCore/QDir>
 #include <QtCore/QItemSelectionModel>
 #include <QtCore/QSaveFile>
@@ -885,8 +887,8 @@ void Document::selectLots(const BrickLink::LotList &selectedLots, const BrickLin
     QItemSelection newSelection;
 
     int colCount = m_model->columnCount();
-    for (auto i = 0; i < selectedLots.size(); ++i) {
-        QModelIndex idx = m_model->index(selectedLots.at(i));
+    for (const auto &selectedLot : selectedLots) {
+        QModelIndex idx = m_model->index(selectedLot);
         newSelection.select(idx, idx.siblingAtColumn(colCount - 1));
     }
 
@@ -1045,7 +1047,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
 
     m_model->beginMacro();
 
-    m_setToPG.reset(new SetToPriceGuideData);
+    m_setToPG = std::make_unique<SetToPriceGuideData>();
     m_setToPG->changes.reserve(uint(sel.size()));
     m_setToPG->totalCount = int(sel.count());
     m_setToPG->doneCount = 0;
@@ -1738,7 +1740,7 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
             document->setThumbnail(thumbnail->image());
         } else if ((thumbnail->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (thumbnail->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-            QMetaObject::Connection *conn = new QMetaObject::Connection;
+            auto *conn = new QMetaObject::Connection;
             *conn = connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
                             document, [=](BrickLink::Picture *pic) {
                 if (pic == thumbnail) {
@@ -1820,6 +1822,7 @@ void Document::updateSelection()
     }
     std::sort(rows.begin(), rows.end());
 
+    newSelectedLots.reserve(rows.size());
     for (int row : std::as_const(rows))
         newSelectedLots.append(m_model->filteredLots().at(row));
 
@@ -1833,7 +1836,7 @@ void Document::updateSelection()
 }
 
 void Document::applyTo(const LotList &lots, const char *actionName,
-                       std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback)
+                       const std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> &callback)
 {
     QString actionText;
     if (auto a = ActionManager::inst()->action(actionName))
@@ -2227,10 +2230,8 @@ QByteArray Document::saveColumnsState() const
        << qint32(m_columnData.size())
        << qint32(sortColumns.size());
 
-    for (int i = 0; i < sortColumns.size(); ++i) {
-       ds << qint32(sortColumns.at(i).first)
-          << (sortColumns.at(i).second == Qt::AscendingOrder);
-    }
+    for (const auto [section, order] : sortColumns)
+       ds << qint32(section) << (order == Qt::AscendingOrder);
 
     for (const auto &cd : m_columnData) {
         ds << qint32(cd.m_size)
@@ -2266,10 +2267,8 @@ std::tuple<QVector<ColumnData>, QVector<QPair<int, Qt::SortOrder>>> Document::pa
         bool sortAscending = false;
         ds >> sortIndicator >> sortAscending;
 
-        if ((sortIndicator >= 0) && (sortIndicator < count)) {
-            sortColumns.append(qMakePair(sortIndicator, sortAscending
-                                         ? Qt::AscendingOrder : Qt::DescendingOrder));
-        }
+        if ((sortIndicator >= 0) && (sortIndicator < count))
+            sortColumns.emplace_back(sortIndicator, sortAscending ? Qt::AscendingOrder : Qt::DescendingOrder);
     }
 
     QVector<ColumnData> columnData;
@@ -2322,7 +2321,7 @@ bool Document::isBlockingOperationCancelable() const
     return bool(m_blockCancelCallback);
 }
 
-void Document::setBlockingOperationCancelCallback(std::function<void ()> cancelCallback)
+void Document::setBlockingOperationCancelCallback(const std::function<void ()> &cancelCallback)
 {
     const bool wasCancelable = isBlockingOperationCancelable();
     m_blockCancelCallback = cancelCallback;
@@ -2338,7 +2337,7 @@ void Document::setBlockingOperationTitle(const QString &title)
     }
 }
 
-void Document::startBlockingOperation(const QString &title, std::function<void ()> cancelCallback)
+void Document::startBlockingOperation(const QString &title, const std::function<void ()> &cancelCallback)
 {
     if (!m_blocked) {
         m_blocked = true;
@@ -2527,7 +2526,7 @@ int Document::processAutosaves(AutosaveAction action)
                     DocumentIO::BsxContents bsx;
                     auto model = new DocumentModel(std::move(pr), true /*mark as modified*/);
                     model->restoreSortFilterState(savedSortFilterState);
-                    Document *doc = new Document(model, columnState, true /* is autosave restore*/);
+                    auto *doc = new Document(model, columnState, true /* is autosave restore*/);
 
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);

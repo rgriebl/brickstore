@@ -50,7 +50,7 @@ WantedList::WantedList()
 { }
 
 WantedList::~WantedList()
-{ }
+{ /* needed to use std::unique_ptr on d */ }
 
 const LotList &WantedList::lots() const
 {
@@ -233,6 +233,7 @@ WantedLists::WantedLists(Core *core)
                         connect(wantedList, &WantedList::itemLeftCountChanged, this, [this, row]() { emitDataChanged(row, ItemLeftCount); });
                     }
                     endResetModel();
+                    emit countChanged(rowCount());
                     message.clear();
 
                 } catch (const Exception &e) {
@@ -240,7 +241,7 @@ WantedLists::WantedLists(Core *core)
                     message = message + u": " + e.errorString();
                 }
             }
-            m_lastUpdated = QDateTime::currentDateTime();
+            setLastUpdated(QDateTime::currentDateTime());
             setUpdateStatus(success ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
             emit updateFinished(success, success ? QString { } : message);
             m_job = nullptr;
@@ -253,6 +254,7 @@ WantedLists::WantedLists(Core *core)
         qDeleteAll(m_wantedLists);
         m_wantedLists.clear();
         endResetModel();
+        emit countChanged(rowCount());
     });
 }
 
@@ -315,6 +317,14 @@ void WantedLists::emitDataChanged(int row, int col)
     QModelIndex from = index(row, col < 0 ? 0 : col);
     QModelIndex to = index(row, col < 0 ? columnCount() - 1 : col);
     emit dataChanged(from, to);
+}
+
+void WantedLists::setLastUpdated(const QDateTime &lastUpdated)
+{
+    if (lastUpdated != m_lastUpdated) {
+        m_lastUpdated = lastUpdated;
+        emit lastUpdatedChanged(lastUpdated);
+    }
 }
 
 void WantedLists::setUpdateStatus(UpdateStatus updateStatus)
@@ -384,7 +394,7 @@ int WantedLists::columnCount(const QModelIndex &parent) const
 QVariant WantedLists::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || (index.row() < 0) || (index.row() >= m_wantedLists.size()))
-        return QVariant();
+        return { };
 
     WantedList *wantedList = m_wantedLists.at(index.row());
     int col = index.column();

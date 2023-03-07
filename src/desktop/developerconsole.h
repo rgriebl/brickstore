@@ -18,7 +18,7 @@ class DeveloperConsole : public QFrame
     Q_OBJECT
 
 public:
-    DeveloperConsole(const QString &prompt, std::function<std::tuple<QString, bool>(QString)> executeFunction,
+    DeveloperConsole(const QString &prompt, const std::function<std::tuple<QString, bool>(QString)> &executeFunction,
                      QWidget *parent = nullptr);
 
     void setPrompt(const QString &prompt);

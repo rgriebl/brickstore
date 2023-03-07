@@ -35,7 +35,7 @@ ProgressDialog::ProgressDialog(const QString &title, TransferJob *job, QWidget *
     m_header->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     lay->addWidget(m_header);
 
-    QFrame *frame = new QFrame(this);
+    auto *frame = new QFrame(this);
     frame->setFrameStyle(int(QFrame::HLine) | int(QFrame::Sunken));
     frame->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     lay->addWidget(frame);

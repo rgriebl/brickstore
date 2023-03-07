@@ -56,7 +56,7 @@ protected:
     void processToastMessages() override;
 
 private:
-    DesktopUIHelpers();
+    DesktopUIHelpers() = default;
 
     std::unique_ptr<ToastMessage> m_currentToastMessage;
 

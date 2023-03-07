@@ -38,7 +38,7 @@ template <auto G, auto S>
 struct FieldOp
 {
     template <typename Result> static Result returnType(Result (Lot::*)() const);
-    typedef decltype(returnType(G)) R;
+    using R = decltype(returnType(G));
 
     static void copy(const Lot &from, Lot &to)
     {
@@ -566,6 +566,7 @@ DocumentModel *DocumentModel::createTemporary(const LotList &list, const QVector
 {
     auto *model = new DocumentModel(1 /*dummy*/);
     LotList lots;
+    lots.reserve(list.size());
 
     // the caller owns the items, so we have to copy here
     for (const Lot *lot : list)
@@ -1025,7 +1026,7 @@ bool DocumentModel::mergeLotFields(const Lot &from, Lot &to, const FieldMergeMod
     return changed;
 }
 
-void DocumentModel::setConsolidateFunction(std::function<ConsolidateFunction> consolidateFunction)
+void DocumentModel::setConsolidateFunction(const std::function<ConsolidateFunction> &consolidateFunction)
 {
     s_consolidateFunction = consolidateFunction;
 }
@@ -1544,7 +1545,7 @@ void DocumentModel::adjustLotCurrencyToModel(BrickLink::LotList &lots, const QSt
     }
 }
 
-void DocumentModel::applyTo(const LotList &lots, std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> callback,
+void DocumentModel::applyTo(const LotList &lots, const std::function<DocumentModel::ApplyToResult(const Lot &, Lot &)> &callback,
                             const QString &actionText)
 {
     if (lots.isEmpty())
@@ -1725,7 +1726,7 @@ bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int
     if (!index.isValid() || (role != Qt::EditRole))
         return false;
 
-    DocumentModel::Field f = static_cast<Field>(index.column());
+    auto f = static_cast<Field>(index.column());
     Lot *lot = this->lot(index);
     Lot lotCopy = *lot;
 
@@ -1924,7 +1925,8 @@ void DocumentModel::initializeColumns()
               return QVariant::fromValue(pic ? pic->image() : QImage { });
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-              return Utility::naturalCompare(QLatin1String(l1->itemId()), QLatin1String(l2->itemId()));
+                       return Utility::naturalCompare(QString::fromLatin1(l1->itemId()),
+                                                      QString::fromLatin1(l2->itemId()));
           },
       });
     C(PartNo, Column {
@@ -1937,7 +1939,8 @@ void DocumentModel::initializeColumns()
                   lot->setItem(newItem);
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-              return Utility::naturalCompare(QLatin1String(l1->itemId()), QLatin1String(l2->itemId()));
+                      return Utility::naturalCompare(QString::fromLatin1(l1->itemId()),
+                                                     QString::fromLatin1(l2->itemId()));
           },
       });
     C(Description, Column {
@@ -2506,16 +2509,15 @@ QByteArray DocumentModel::saveSortFilterState() const
     ds << QByteArray("SFST") << qint32(4);
 
     ds << qint8(m_sortColumns.size());
-    for (int i = 0; i < m_sortColumns.size(); ++i)
-        ds << qint8(m_sortColumns.at(i).first) << qint8(m_sortColumns.at(i).second);
+    for (const auto [section, order] : m_sortColumns)
+        ds << qint8(section) << qint8(order);
 
     ds << qint8(m_filter.size());
     for (const auto &f : m_filter)
         ds << qint8(f.field()) << qint8(f.comparison()) << qint8(f.combination()) << f.expression();
 
     ds << qint32(m_sortedLots.size());
-    for (int i = 0; i < m_sortedLots.size(); ++i) {
-        auto *lot = m_sortedLots.at(i);
+    for (const auto &lot : m_sortedLots) {
         qint32 row = qint32(m_lotIndex.value(lot, -1));
         bool visible = m_filteredLotIndex.contains(lot);
 
@@ -2542,10 +2544,11 @@ bool DocumentModel::restoreSortFilterState(const QByteArray &ba)
         sortColumnsSize = 1;
     else
         ds >> sortColumnsSize;
+    sortColumns.reserve(sortColumnsSize);
     for (int i = 0; i < sortColumnsSize; ++i) {
         qint8 sortColumn, sortOrder;
         ds >> sortColumn >> sortOrder;
-        sortColumns << qMakePair(sortColumn, Qt::SortOrder(sortOrder));
+        sortColumns.emplace_back(sortColumn, Qt::SortOrder(sortOrder));
     }
 
     if (version <= 3) {
@@ -2555,6 +2558,7 @@ bool DocumentModel::restoreSortFilterState(const QByteArray &ba)
     } else {
         qint8 filterSize;
         ds >> filterSize;
+        filter.reserve(filterSize);
         for (int i = 0; i < filterSize; ++i) {
             qint8 filterField, filterComparison, filterCombination;
             QString filterExpression;

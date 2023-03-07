@@ -21,8 +21,6 @@ class UIHelpers_ProgressDialogInterface : public QObject
     Q_OBJECT
 
 public:
-    virtual ~UIHelpers_ProgressDialogInterface() override { }
-
     virtual QCoro::Task<bool> exec() = 0;
 
     virtual void progress(int, int) = 0;
@@ -212,7 +210,7 @@ protected:
     QVector<QPair<QString, int>> m_toastMessages;
     bool m_toastMessageVisible = false;
 
-    UIHelpers();
+    UIHelpers() = default;
     static UIHelpers *inst();
 
     static UIHelpers *s_inst;

@@ -15,9 +15,9 @@
 
 namespace BrickLink {
 
-typedef QPair<int, const Item *>             AppearsInItem;
-typedef QVector<AppearsInItem>               AppearsInColor;
-typedef QHash<const Color *, AppearsInColor> AppearsIn;
+using AppearsInItem = QPair<int, const Item *>;
+using AppearsInColor =  QVector<AppearsInItem>;
+using AppearsIn = QHash<const Color *, AppearsInColor>;
 
 
 class Item

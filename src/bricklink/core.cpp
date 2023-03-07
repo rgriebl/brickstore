@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <array>
 
 #include <QCoreApplication>
 #include <QFile>
@@ -109,7 +110,7 @@ QUrl Core::urlForLotsForSale(const Item *item, const Color *color)
         };
 
         // workaround for BL not accepting the -X suffix for sets, instructions and boxes
-        QString id = QLatin1String(item->id());
+        QString id = QString::fromLatin1(item->id());
         char itt = item->itemTypeId();
 
         if (itt == 'S' || itt == 'I' || itt == 'O') {
@@ -461,7 +462,7 @@ void Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
 QString Core::countryIdFromName(const QString &name) const
 {
     // BrickLink doesn't use the standard ISO country names...
-    static const char * const brickLinkCountries[] = {
+    static const std::array brickLinkCountries = {
         "AF Afghanistan",
         "AL Albania",
         "DZ Algeria",

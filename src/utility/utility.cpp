@@ -1,7 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-
+#include <array>
 #include <cmath>
 
 #include <QtCore/QDir>
@@ -146,7 +146,7 @@ QColor Utility::contrastColor(const QColor &c, float f)
 
 QColor Utility::shadeColor(int n, float alpha)
 {
-    static QColor shades[12];
+    static std::array<QColor, 12> shades;
     static bool once = false;
     if (!once) [[unlikely]] {
         for (int i = 0; i < 12; i++)
@@ -197,7 +197,7 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
     QString s = loc.toString(w, 'f', decimals);
 
     if (show_unit) {
-        s.append(QLatin1Char(' '));
+        s.append(u' ');
         s.append(QLatin1String(unit));
     }
     return s;
@@ -234,7 +234,7 @@ QString Utility::localForInternationalCurrencySymbol(const QString &internationa
 QColor Utility::premultiplyAlpha(const QColor &c)
 {
     if (c.alpha()) {
-        QColor r = QColor(qPremultiply(c.rgba()));
+        auto r = QColor(qPremultiply(c.rgba()));
         r.setAlpha(255);
         return r;
     }

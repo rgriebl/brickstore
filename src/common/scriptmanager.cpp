@@ -36,7 +36,7 @@ static QString stringifyType(QMetaType mt)
     if (mt.metaObject()) {
         int qei = mt.metaObject()->indexOfClassInfo("QML.Element");
         if (qei >= 0) {
-            const auto name = QString::fromLatin1(mt.metaObject()->classInfo(qei).value());
+            auto name = QString::fromLatin1(mt.metaObject()->classInfo(qei).value());
             if (name == u"auto")
                 return QString::fromLatin1(mt.metaObject()->className()).section(u"::"_qs, -1);
             else
@@ -57,7 +57,7 @@ static QString stringifyType(QMetaType mt)
     case QMetaType::QColor      : return u"color"_qs;
     case QMetaType::Float       :
     case QMetaType::Double      : return u"real"_qs;
-    default                     : return QLatin1String(mt.name());
+    default                     : return QString::fromLatin1(mt.name());
     }
 }
 
@@ -66,8 +66,8 @@ static QString stringify(const QVariant &value, int level = 0, bool indentFirstL
 static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int level, bool indentFirstLine)
 {
     QString str;
-    QString indent = QString(level * 2, QLatin1Char(' '));
-    QString nextIndent = QString((level + 1) * 2, QLatin1Char(' '));
+    QString indent = QString(level * 2, u' ');
+    QString nextIndent = QString((level + 1) * 2, u' ');
 
     bool isGadget = mo->metaType().flags().testFlag(QMetaType::IsGadget);
 
@@ -86,7 +86,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         QMetaProperty p = mo->property(i);
         QVariant value = isGadget ? p.readOnGadget(o) : p.read(o);
         str = str + nextIndent + stringifyType(p.metaType()) + u' '
-                + QLatin1String(p.name()) + u": " + stringify(value, level + 1, false) + u'\n';
+              + QLatin1String(p.name()) + u": " + stringify(value, level + 1, false) + u'\n';
     }
 /*
     for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
@@ -118,8 +118,8 @@ static QString stringifyQGadget(const void *g, const QMetaObject *mo, int level,
 static QString stringify(const QVariant &value, int level, bool indentFirstLine)
 {
     QString str;
-    QString indent = QString(level * 2, QLatin1Char(' '));
-    QString nextIndent = QString((level + 1) * 2, QLatin1Char(' '));
+    QString indent = QString(level * 2, u' ');
+    QString nextIndent = QString((level + 1) * 2, u' ');
 
     if (indentFirstLine)
         str.append(indent);
@@ -179,7 +179,7 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
         break;
     }
     case QMetaType::QObjectStar: {
-        QObject *o = qvariant_cast<QObject *>(value);
+        auto *o = qvariant_cast<QObject *>(value);
         if (!o) {
             str.append(u"<invalid QObject>");
             break;
@@ -195,7 +195,7 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
         if (meta.flags().testFlag(QMetaType::IsGadget)) {
             str.append(stringifyQGadget(value.data(), meta.metaObject(), level, false));
         } else if (meta.flags().testFlag(QMetaType::PointerToQObject)) {
-            QObject *o = qvariant_cast<QObject *>(value);
+            auto *o = qvariant_cast<QObject *>(value);
             if (!o) {
                 str.append(u"<invalid QObject>");
                 break;
@@ -307,7 +307,7 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
 {
     Q_ASSERT(m_engine);
 
-    const char script[] =
+    const char *script =
             "import BrickStore\n"
             "import BrickLink\n"
             "import QtQml\n"

@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <memory>
 #include <QByteArray>
 #include <QFile>
 
@@ -27,8 +28,8 @@ Exception::Exception(const Exception &copy)
     : m_errorString(copy.m_errorString)
 { }
 
-Exception::Exception(Exception &&move)
-    : m_errorString(move.m_errorString)
+Exception::Exception(Exception &&move) noexcept
+    : m_errorString(std::move(move.m_errorString))
 {
     std::swap(m_whatBuffer, move.m_whatBuffer);
 }
@@ -36,7 +37,7 @@ Exception::Exception(Exception &&move)
 const char *Exception::what() const noexcept
 {
     if (!m_whatBuffer)
-        m_whatBuffer.reset(new QByteArray);
+        m_whatBuffer = std::make_unique<QByteArray>();
     *m_whatBuffer = m_errorString.toLocal8Bit();
     return m_whatBuffer->constData();
 }

@@ -27,7 +27,7 @@ RenderSettings *RenderSettings::create(QQmlEngine *qe, QJSEngine *)
     return rs;
 }
 
-void RenderSettings::forEachProperty(std::function<void(QMetaProperty &)> callback)
+void RenderSettings::forEachProperty(const std::function<void(QMetaProperty &)> &callback)
 {
     const QMetaObject *mo = metaObject();
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
@@ -48,7 +48,7 @@ void RenderSettings::load()
     const auto pdv = propertyDefaultValues();
 
     forEachProperty([this, pdv](QMetaProperty &mp) {
-        QString name = QLatin1String(mp.name());
+        QString name = QString::fromLatin1(mp.name());
         auto v = Config::inst()->value(u"LDraw/RenderSettings/" + name);
         if (!v.isValid())
             v = pdv.value(name);
@@ -103,7 +103,7 @@ void RenderSettings::resetToDefaults()
     const auto pdv = propertyDefaultValues();
 
     forEachProperty([this, pdv](QMetaProperty &mp) {
-        QString name = QLatin1String(mp.name());
+        QString name = QString::fromLatin1(mp.name());
         auto v = pdv.value(name);
         if (v.isValid())
             mp.write(this, v);

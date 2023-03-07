@@ -299,7 +299,7 @@ QSize InventoryWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return { fm.horizontalAdvance(QLatin1Char('m')) * 20, fm.height() * 4 };
+    return { fm.horizontalAdvance(u'm') * 20, fm.height() * 4 };
 }
 
 QSize InventoryWidget::sizeHint() const
