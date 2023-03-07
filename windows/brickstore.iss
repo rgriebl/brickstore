@@ -49,7 +49,7 @@ Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
-Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion; Excludes: "vc_redist.*.exe"
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion skipifsourcedoesntexist
 Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
