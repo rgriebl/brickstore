@@ -496,6 +496,7 @@ if (MACOS)
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
                 ${MACOS_SIGN_ARGS}
+        COMMAND "${CMAKE_COMMAND}" -E rm -f "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>/Contents/PlugIns/tls/libqopensslbackend.dylib"
         COMMAND rm -rf "${DMG_DIR}"
         COMMAND mkdir -p "${DMG_DIR}/.background"
         COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-ds_store" "${DMG_DIR}/.DS_Store"
@@ -541,6 +542,7 @@ elseif (WIN32)
                 "--no-qmltooling"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
+        COMMAND "${CMAKE_COMMAND}" -E rm -f "${CMAKE_CURRENT_BINARY_DIR}/bin/tls/qopensslbackend.dll"
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
                 "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"
