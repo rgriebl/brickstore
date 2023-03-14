@@ -68,14 +68,15 @@ public:
 
     void retrieve(TransferJob *job, bool highPriority = false);
 
+    Database *database() const  { return m_database.get(); }
+#if !defined(BS_BACKEND)
     Store *store() const  { return m_store.get(); }
     Orders *orders() const  { return m_orders.get(); }
     Carts *carts() const  { return m_carts.get(); }
     WantedLists *wantedLists() const  { return m_wantedLists.get(); }
-    Database *database() const  { return m_database.get(); }
     PriceGuideCache *priceGuideCache() const { return m_priceGuideCache.get(); }
     PictureCache *pictureCache() const { return m_pictureCache.get(); }
-
+#endif
     inline const std::vector<Color> &colors() const         { return database()->m_colors; }
     inline const std::vector<Category> &categories() const  { return database()->m_categories; }
     inline const std::vector<ItemType> &itemTypes() const   { return database()->m_itemTypes; }
@@ -153,12 +154,14 @@ private:
     int                        m_transferStatId = -1;
 
     std::unique_ptr<Database> m_database;
+#if !defined(BS_BACKEND)
     std::unique_ptr<Store> m_store;
     std::unique_ptr<Orders> m_orders;
     std::unique_ptr<Carts> m_carts;
     std::unique_ptr<WantedLists> m_wantedLists;
     std::unique_ptr<PriceGuideCache> m_priceGuideCache;
     std::unique_ptr<PictureCache> m_pictureCache;
+#endif
 
     friend class QmlBrickLink;
 };

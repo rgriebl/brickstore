@@ -373,11 +373,13 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 
     connect(m_database.get(), &Database::databaseAboutToBeReset,
             this, &Core::cancelTransfers);
+#if !defined(BS_BACKEND)
     connect(m_database.get(), &Database::databaseReset,
             this, [this]() {
         m_priceGuideCache->clearCache();
         m_pictureCache->clearCache();
     });
+#endif
 
     connect(m_transfer, &Transfer::finished,
             this, &Core::transferFinished);
@@ -447,17 +449,20 @@ Core::~Core()
 {
     cancelTransfers();
 
+#if !defined(BS_BACKEND)
     m_priceGuideCache->clearCache();
     m_pictureCache->clearCache();
-
+#endif
     s_inst = nullptr;
 }
 
 void Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
 {
     m_database->setUpdateInterval(intervals["Database"]);
+#if !defined(BS_BACKEND)
     m_pictureCache->setUpdateInterval(intervals["Picture"]);
     m_priceGuideCache->setUpdateInterval(intervals["PriceGuide"]);
+#endif
 }
 
 QString Core::countryIdFromName(const QString &name) const
