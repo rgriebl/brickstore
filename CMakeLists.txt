@@ -489,14 +489,20 @@ if (MACOS)
     # Also: macdeployqt has to be run on the bundle in the build location. If we copy to the dmg
     # staging directory first, we get weird errors because the tool thinks that all Qt frameworks
     # are "outside of the bundle"
+    # As for removing the OpenSSL plugin: macdeployqt has no way to skip one specific plugin, so we
+    # need to deploy everything, remove what we don't need and then run macdeployqt again with
+    # -no-plugin to get a valid signature.
 
     add_custom_target(dmg
         ${COPY_SENTRY_COMMAND}
         COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../.."
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "-verbose=2"
-                ${MACOS_SIGN_ARGS}
         COMMAND "${CMAKE_COMMAND}" -E rm -f "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>/Contents/PlugIns/tls/libqopensslbackend.dylib"
+        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../.."
+                "-no-plugins"
+                "-verbose=2"
+                ${MACOS_SIGN_ARGS}
         COMMAND rm -rf "${DMG_DIR}"
         COMMAND mkdir -p "${DMG_DIR}/.background"
         COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-ds_store" "${DMG_DIR}/.DS_Store"
