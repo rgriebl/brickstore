@@ -2509,7 +2509,7 @@ QByteArray DocumentModel::saveSortFilterState() const
     ds << QByteArray("SFST") << qint32(4);
 
     ds << qint8(m_sortColumns.size());
-    for (const auto [section, order] : m_sortColumns)
+    for (const auto &[section, order] : m_sortColumns)
         ds << qint8(section) << qint8(order);
 
     ds << qint8(m_filter.size());

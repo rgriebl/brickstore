@@ -30,7 +30,7 @@ void Item::setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash
         cair.m_colorBits.m_colorSize = quint32(colorVector.size());
         m_appears_in.push_back(cair);
 
-        for (const auto [qty, itemIndex] : colorVector) {
+        for (const auto &[qty, itemIndex] : colorVector) {
             AppearsInRecord iair;
             iair.m_itemBits.m_quantity = qty;
             iair.m_itemBits.m_itemIndex = itemIndex;

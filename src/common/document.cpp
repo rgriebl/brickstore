@@ -2230,7 +2230,7 @@ QByteArray Document::saveColumnsState() const
        << qint32(m_columnData.size())
        << qint32(sortColumns.size());
 
-    for (const auto [section, order] : sortColumns)
+    for (const auto &[section, order] : sortColumns)
        ds << qint32(section) << (order == Qt::AscendingOrder);
 
     for (const auto &cd : m_columnData) {
