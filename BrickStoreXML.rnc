@@ -18,10 +18,14 @@ BrickStoreXML = element BrickStoreXML | BrickStockXML {
     Inventory, GuiState? 
 }
 
-# Currency is optional. The default currency is USD:
+# Currency is optional. The default currency is USD.
+#
+# BrickLinkChangelogId is optional, but quite helpful when automatically applying item and color
+# renames and merges (see also https://www.bricklink.com/btchglog.asp?viewHelp=Y)
 
 Inventory = element Inventory {
     attribute Currency { xsd:string { length="3" } }?,
+    attribute BrickLinkChangelogId { xsd:integer } }?,
     Item*
 }
 

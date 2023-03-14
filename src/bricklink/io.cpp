@@ -103,7 +103,7 @@ QString IO::toBrickLinkXML(const LotList &lots)
 }
 
 
-IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint)
+IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint, const QDateTime &creationTime)
 {
     //stopwatch loadXMLWatch("Load XML");
 
@@ -213,7 +213,7 @@ IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint)
                             xml.skipCurrentElement();
                     }
 
-                    switch (core()->resolveIncomplete(lot)) {
+                    switch (core()->resolveIncomplete(lot, 0, creationTime)) {
                     case Core::ResolveResult::Fail: pr.incInvalidLotCount(); break;
                     case Core::ResolveResult::ChangeLog: pr.incFixedLotCount(); break;
                     default: break;

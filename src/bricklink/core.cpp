@@ -816,81 +816,125 @@ void Core::cancelTransfers()
         m_authenticatedTransfer->abortAllJobs();
 }
 
-bool Core::applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc)
+QByteArray Core::applyItemChangeLog(QByteArray itemTypeAndId, uint startAtChangelogId, const QDate &creationDate)
 {
-    if (!inc)
-        return false;
+    uint changelogId = startAtChangelogId;
+    bool foundChangelogEntry;
 
-    // there are a items that changed their name multiple times, so we have to loop (e.g. 3069bpb78)
+    constexpr bool dbg = false;
+    //bool dbg = itemTypeAndId.startsWith("P72206");
 
-    if (!item) {
-        QByteArray itemTypeAndId = inc->m_itemtype_id + inc->m_item_id;
-        if (!inc->m_itemtype_name.isEmpty())
-            itemTypeAndId[0] = inc->m_itemtype_name.at(0).toUpper().toLatin1();
+    do {
+        foundChangelogEntry = false;
+        auto [lit, uit] = std::equal_range(itemChangelog().cbegin(), itemChangelog().cend(), itemTypeAndId);
 
-        while (!item) {
-            auto it = std::lower_bound(itemChangelog().cbegin(), itemChangelog().cend(), itemTypeAndId);
-            if ((it == itemChangelog().cend()) || (*it != itemTypeAndId))
-                break;
-            item = core()->item(it->toItemTypeId(), it->toItemId());
-            if (!item)
-                itemTypeAndId = it->toItemTypeId() + it->toItemId();
+        if (dbg)
+            qDebug(LogResolver) << "SEARCH:" << itemTypeAndId << "has" << std::distance(lit, uit) << "changes";
+
+        // apply strictly from older to newer, starting at 'startAtChangelogId' or 'creationTime'
+        // in order to avoid infinite loops
+        for (auto it = lit; it != uit; ++it) {
+            if (dbg)
+                qDebug(LogResolver) << "CHANGE:" << it->toItemTypeAndId() << it->id() << changelogId << it->date() << creationDate;
+
+            if (changelogId) {
+                if (it->id() <= changelogId)
+                    continue;
+                changelogId = it->id();
+            } else {
+                if (it->date() <= creationDate)
+                    continue;
+                changelogId = it->id();
+            }
+            qCInfo(LogResolver).noquote() << "item:" << itemTypeAndId << "->" << it->toItemTypeAndId();
+
+            itemTypeAndId = it->toItemTypeAndId();
+            foundChangelogEntry = true;
+            break;
         }
-    }
-    if (!color) {
-        uint colorId = inc->m_color_id;
+    } while (foundChangelogEntry);
 
-        while (!color) {
-            auto it = std::lower_bound(colorChangelog().cbegin(), colorChangelog().cend(), colorId);
-            if ((it == colorChangelog().cend()) || (*it != colorId))
-                break;
-            color = core()->color(it->toColorId());
-            if (!color)
-                colorId = it->toColorId();
-        }
-    }
-
-    return (item && color);
+    return itemTypeAndId;
 }
 
-Core::ResolveResult Core::resolveIncomplete(Lot *lot)
+uint Core::applyColorChangeLog(uint colorId, uint startAtChangelogId, const QDate &creationDate)
 {
-    Incomplete *inc = lot->isIncomplete();
+    uint changelogId = startAtChangelogId;
+    bool foundChangelogEntry;
 
+    do {
+        foundChangelogEntry = false;
+        auto [lit, uit] = std::equal_range(colorChangelog().cbegin(), colorChangelog().cend(), colorId);
+
+        // apply strictly from older to newer, starting at 'startAtChangelogId' or 'creationTime'
+        // in order to avoid infinite loops
+        for (auto it = lit; it != uit; ++it) {
+            if (changelogId) {
+                if (it->id() <= changelogId)
+                    continue;
+                changelogId = it->id();
+            } else {
+                if (it->date() <= creationDate)
+                    continue;
+                changelogId = it->id();
+            }
+            qCInfo(LogResolver) << "color:" << colorId << "->" << it->toColorId();
+
+            colorId = it->toColorId();
+            foundChangelogEntry = true;
+            break;
+        }
+    } while (foundChangelogEntry);
+
+    return colorId;
+}
+
+Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, const QDateTime &creationTime)
+{
+    // How to apply changelog entries:
+    //  * if startAtChangelogId > 0, use it
+    //  * else if creationTime is valid, use that
+    //  * else do not apply the changelog at all
+
+    Incomplete *inc = lot->isIncomplete();
     if (!inc)
         return ResolveResult::Direct;
+
+    QByteArray itemTypeAndId = inc->m_itemtype_id + inc->m_item_id;
+    if (!inc->m_itemtype_name.isEmpty())
+        itemTypeAndId[0] = inc->m_itemtype_name.at(0).toUpper().toLatin1();
+    QByteArray resolvedItemTypeAndId = itemTypeAndId;
+
+    uint colorId = inc->m_color_id;
+    uint resolvedColorId = colorId;
+
+    bool tryToResolveItem = (itemTypeAndId.size() > 1) && itemTypeAndId.at(0);
+    bool tryToResolveColor = (colorId != Color::InvalidId);
+
+    if (startAtChangelogId || creationTime.isValid()) {
+        if (tryToResolveItem)
+            resolvedItemTypeAndId = applyItemChangeLog(itemTypeAndId, startAtChangelogId, creationTime.date());
+        if (tryToResolveColor)
+            resolvedColorId = applyColorChangeLog(colorId, startAtChangelogId, creationTime.date());
+    }
 
     const Item *item = nullptr;
     const Color *color = nullptr;
 
-    if ((inc->m_itemtype_id != ItemType::InvalidId) && !inc->m_item_id.isEmpty())
-        item = core()->item(inc->m_itemtype_id, inc->m_item_id);
-
-    if (inc->m_color_id != Color::InvalidId)
-        color = core()->color(inc->m_color_id);
+    if (tryToResolveItem)
+        item = core()->item(resolvedItemTypeAndId.at(0), resolvedItemTypeAndId.mid(1));
+    if (tryToResolveColor)
+        color = core()->color(resolvedColorId);
 
     if (item)
         lot->setItem(item);
     if (color)
         lot->setColor(color);
-    if (lot->item() && lot->color())
-        return ResolveResult::Direct;
 
-    bool ok = applyChangeLog(item, color, inc);
-
-    if (ok) {
-        qCInfo(LogResolver).nospace() << " [ OK ] "
-                                      << (inc->m_itemtype_id ? inc->m_itemtype_id : '?')
-                                      << '-' << inc->m_item_id.constData() << " (" << int(inc->m_color_id) << ')'
-                                      << " -> "
-                                      << item->itemTypeId()
-                                      << '-' << item->id().constData() << " (" << color->id() << ')';
-    } else {
-        qCWarning(LogResolver).nospace() << " [FAIL] "
-                                         << (inc->m_itemtype_id ? inc->m_itemtype_id : '?')
-                                         << '-' << inc->m_item_id.constData() << " (" << int(inc->m_color_id) << ')';
-
-        if (item) {
+    if (!lot->item() || !lot->color()) {
+        if (!lot->item()) {
+            qCWarning(LogResolver).noquote() << "item:" << resolvedItemTypeAndId << "[failed]";
+        } else {
             inc->m_item_id.clear();
             inc->m_item_name.clear();
             inc->m_itemtype_id = ItemType::InvalidId;
@@ -898,18 +942,21 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot)
             inc->m_category_id = Category::InvalidId;
             inc->m_category_name.clear();
         }
-        if (color) {
+        if (!lot->color()) {
+            qCWarning(LogResolver) << "color:" << resolvedColorId << "[failed]";
+        } else {
             inc->m_color_id = Color::InvalidId;
             inc->m_color_name.clear();
         }
-    }
-    if (item)
-        lot->setItem(item);
-    if (color)
-        lot->setColor(color);
+        return ResolveResult::Fail;
 
-    Q_ASSERT(ok == !lot->isIncomplete());
-    return ok ? ResolveResult::ChangeLog : ResolveResult::Fail;
+    } else if ((resolvedItemTypeAndId != itemTypeAndId) || (resolvedColorId != colorId)) {
+        lot->setIncomplete(nullptr);
+        return ResolveResult::ChangeLog;
+    } else {
+        lot->setIncomplete(nullptr);
+        return ResolveResult::Direct;
+    }
 }
 
 QSize Core::standardPictureSize() const

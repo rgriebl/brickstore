@@ -51,7 +51,7 @@ public:
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);
 
-    static Document *parseBsxInventory(QIODevice *in);
+    static Document *parseBsxInventory(QFile *in);
     static bool createBsxInventory(QIODevice *out, const Document *doc);
 
 private:

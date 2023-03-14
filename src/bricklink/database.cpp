@@ -215,7 +215,7 @@ void Database::read(const QString &fileName)
         }
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
-        bool gotItemChangeLog = false, gotColorChangeLog = false, gotPccs = false;
+        bool gotChangeLog = false, gotPccs = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -238,6 +238,7 @@ void Database::read(const QString &fileName)
         std::vector<ItemChangeLogEntry>  itemChangelog;
         std::vector<ColorChangeLogEntry> colorChangelog;
         std::vector<PartColorCode>       pccs;
+        uint                             latestChangelogId = 0;
 
         while (cr.startChunk()) {
             switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
@@ -315,32 +316,25 @@ void Database::read(const QString &fileName)
                 gotItems = true;
                 break;
             }
-            case ChunkId('I','C','H','G') | 1ULL << 32: {
-                quint32 clc = 0;
-                ds >> clc;
+            case ChunkId('C','H','G','L') | 2ULL << 32: {
+                quint32 clid = 0, clic = 0, clcc = 0;
+                ds >> clid >> clic >> clcc;
                 check();
-                sizeCheck(clc, 1'000'000);
+                sizeCheck(clic, 1'000'000);
+                sizeCheck(clcc, 1'000);
 
-                itemChangelog.resize(clc);
-                for (quint32 i = 0; i < clc; ++i) {
+                itemChangelog.resize(clic);
+                for (quint32 i = 0; i < clic; ++i) {
                     readItemChangeLogFromDatabase(itemChangelog[i], ds, Version::Latest);
                     check();
                 }
-                gotItemChangeLog = true;
-                break;
-            }
-            case ChunkId('C','C','H','G') | 1ULL << 32: {
-                quint32 clc = 0;
-                ds >> clc;
-                check();
-                sizeCheck(clc, 1'000);
-
-                colorChangelog.resize(clc);
-                for (quint32 i = 0; i < clc; ++i) {
+                colorChangelog.resize(clcc);
+                for (quint32 i = 0; i < clcc; ++i) {
                     readColorChangeLogFromDatabase(colorChangelog[i], ds, Version::Latest);
                     check();
                 }
-                gotColorChangeLog = true;
+                latestChangelogId = clid;
+                gotChangeLog = true;
                 break;
             }
             case ChunkId('P','C','C',' ') | 1ULL << 32: {
@@ -375,33 +369,35 @@ void Database::read(const QString &fileName)
 
         delete sw;
 
-        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotItemChangeLog
-                || !gotColorChangeLog || !gotPccs) {
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog || !gotPccs) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
 
-        if (true) {
+        {
             QString out = u"Loaded database from " + f.fileName();
             QLocale loc = QLocale(QLocale::Swedish); // space as number group separator
             QVector<std::pair<QString, QString>> log = {
                 { u"Generated at"_qs, generationDate.toString(Qt::RFC2822Date) },
-                { u"ChangeLog I"_qs,  loc.toString(itemChangelog.size()).rightJustified(10) },
-                { u"ChangeLog C"_qs,  loc.toString(colorChangelog.size()).rightJustified(10) },
-                { u"PCCs"_qs,         loc.toString(pccs.size()).rightJustified(10) },
-                { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
-                { u"LDraw Colors"_qs, loc.toString(ldrawExtraColors.size()).rightJustified(10) },
+                { u"Changelog Id"_qs, QString::number(latestChangelogId) },
+                { u"  Items"_qs,      loc.toString(itemChangelog.size()).rightJustified(10) },
+                { u"  Colors"_qs,     loc.toString(colorChangelog.size()).rightJustified(10) },
                 { u"Item Types"_qs,   loc.toString(itemTypes.size()).rightJustified(10) },
                 { u"Categories"_qs,   loc.toString(categories.size()).rightJustified(10) },
+                { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
+                { u"LDraw Colors"_qs, loc.toString(ldrawExtraColors.size()).rightJustified(10) },
+                { u"PCCs"_qs,         loc.toString(pccs.size()).rightJustified(10) },
                 { u"Items"_qs,        loc.toString(items.size()).rightJustified(10) },
             };
+#if defined(QT_DEBUG)
             std::vector<int> itemCount(itemTypes.size());
             for (const auto &item : std::as_const(items))
                 ++itemCount[item.m_itemTypeIndex];
             for (size_t i = 0; i < itemTypes.size(); ++i) {
                 log.append({ u"  "_qs + itemTypes.at(i).name(),
-                             loc.toString(itemCount.at(i)).rightJustified(10) });
+                            loc.toString(itemCount.at(i)).rightJustified(10) });
             }
+#endif
             qsizetype leftSize = 0;
             for (const auto &logPair : std::as_const(log))
                 leftSize = std::max(leftSize, logPair.first.length());
@@ -418,6 +414,7 @@ void Database::read(const QString &fileName)
         m_itemChangelog = itemChangelog;
         m_colorChangelog = colorChangelog;
         m_pccs = pccs;
+        m_latestChangelogId = latestChangelogId;
 
         Color::s_colorImageCache.clear();
 
@@ -497,7 +494,17 @@ void Database::write(const QString &filename, Version version) const
         writeItemToDatabase(item, ds, version);
     check(cw.endChunk());
 
-    if (version >= Version::V5) {
+    if (version >= Version::V9) {
+        check(cw.startChunk(ChunkId('C','H','G','L'), 2));
+        ds << quint32(m_latestChangelogId)
+           << quint32(m_itemChangelog.size())
+           << quint32(m_colorChangelog.size());
+        for (const ItemChangeLogEntry &e : m_itemChangelog)
+            writeItemChangeLogToDatabase(e, ds, version);
+        for (const ColorChangeLogEntry &e : m_colorChangelog)
+            writeColorChangeLogToDatabase(e, ds, version);
+        check(cw.endChunk());
+    } else if (version >= Version::V5) {
         check(cw.startChunk(ChunkId('I','C','H','G'), 1));
         ds << quint32(m_itemChangelog.size());
         for (const ItemChangeLogEntry &e : m_itemChangelog)
@@ -719,21 +726,25 @@ void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStr
 
 void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Version)
 {
-    dataStream >> e.m_fromTypeAndId >> e.m_toTypeAndId;
+    dataStream >> e.m_id >> e.m_julianDay >> e.m_fromTypeAndId >> e.m_toTypeAndId;
 }
 
-void Database::writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version) const
+void Database::writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version v) const
 {
+    if (v >= Version::V9)
+        dataStream << e.m_id << e.m_julianDay;
     dataStream << e.m_fromTypeAndId << e.m_toTypeAndId;
 }
 
 void Database::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Version)
 {
-    dataStream >> e.m_fromColorId >> e.m_toColorId;
+    dataStream >> e.m_id >> e.m_julianDay >> e.m_fromColorId >> e.m_toColorId;
 }
 
-void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, Version) const
+void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, Version v) const
 {
+    if (v >= Version::V9)
+        dataStream << e.m_id << e.m_julianDay;
     dataStream << e.m_fromColorId << e.m_toColorId;
 }
 

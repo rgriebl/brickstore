@@ -2758,9 +2758,9 @@ void DocumentLotsMimeData::setLots(const LotList &lots, const QString &currencyC
     QString text;
 
     QDataStream ds(&data, QIODevice::WriteOnly);
-    ds << QByteArray("LOTS") << qint32(1);
+    ds << QByteArray("LOTS") << qint32(2);
 
-    ds << currencyCode << quint32(lots.count());
+    ds << currencyCode << BrickLink::core()->latestChangelogId() << quint32(lots.count());
     for (const Lot *lot : lots) {
         lot->save(ds);
         if (!text.isEmpty())
@@ -2779,22 +2779,23 @@ std::tuple<LotList, QString> DocumentLotsMimeData::lots(const QMimeData *md)
     if (md) {
         QByteArray data = md->data(s_mimetype);
         QDataStream ds(data);
+        uint startChangelogAt = 0;
 
         QByteArray tag;
         qint32 version;
         ds >> tag >> version;
-        if ((ds.status() != QDataStream::Ok) || (tag != "LOTS") || (version != 1))
+        if ((ds.status() != QDataStream::Ok) || (tag != "LOTS") || (version != 2))
             return { };
 
         quint32 count = 0;
-        ds >> currencyCode >> count;
+        ds >> currencyCode >> startChangelogAt >> count;
 
         if ((ds.status() != QDataStream::Ok) || (currencyCode.size() != 3) || (count > 1000000))
             return { };
 
         lots.reserve(count);
         for (; count && !ds.atEnd(); count--) {
-            if (auto lot = Lot::restore(ds))
+            if (auto lot = Lot::restore(ds, startChangelogAt))
                 lots << lot;
         }
     }

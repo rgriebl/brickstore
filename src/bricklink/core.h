@@ -85,6 +85,8 @@ public:
     inline const std::vector<ItemChangeLogEntry>  &itemChangelog() const  { return database()->m_itemChangelog; }
     inline const std::vector<ColorChangeLogEntry> &colorChangelog() const { return database()->m_colorChangelog; }
 
+    inline uint latestChangelogId() const { return database()->m_latestChangelogId; }
+
     const QImage noImage(const QSize &s) const;
 
     const Color *color(uint id) const;
@@ -99,14 +101,16 @@ public:
 
     QSize standardPictureSize() const;
 
-    bool applyChangeLog(const Item *&item, const Color *&color, const Incomplete *inc);
+    QByteArray applyItemChangeLog(QByteArray itemTypeAndId, uint startAtChangelogId,
+                                  const QDate &creationDate);
+    uint applyColorChangeLog(uint colorId, uint startAtChangelogId, const QDate &creationDate);
 
     QString countryIdFromName(const QString &name) const;
 
     static QString itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight);
 
     enum class ResolveResult { Fail, Direct, ChangeLog };
-    ResolveResult resolveIncomplete(Lot *lot);
+    ResolveResult resolveIncomplete(Lot *lot, uint startAtChangelogId, const QDateTime &creationTime);
 
 public slots:
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);

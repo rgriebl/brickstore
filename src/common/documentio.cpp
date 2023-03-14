@@ -141,7 +141,9 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
     QFile f(fn);
     if (f.open(QIODevice::ReadOnly)) {
         try {
-            auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(), BrickLink::IO::Hint::PlainOrWanted);
+            auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(),
+                                                          BrickLink::IO::Hint::PlainOrWanted,
+                                                          f.fileTime(QFile::FileModificationTime));
             auto *document = new Document(new DocumentModel(std::move(result))); // Document owns the items now
             document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
             co_return document;
@@ -423,13 +425,15 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
 
 
 
-Document *DocumentIO::parseBsxInventory(QIODevice *in)
+Document *DocumentIO::parseBsxInventory(QFile *in)
 {
     //stopwatch loadBsxWatch("Load BSX");
 
     Q_ASSERT(in);
     QXmlStreamReader xml(in);
     BsxContents bsx;
+    QDateTime creationTime = in->fileTime(QFile::FileModificationTime);
+    uint startAtChangelogId = 0;
 
     try {
         bsx.setCurrencyCode(u"$$$"_qs);  // flag as legacy currency
@@ -550,7 +554,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                     }
                 }
 
-                switch (BrickLink::core()->resolveIncomplete(lot)) {
+                switch (BrickLink::core()->resolveIncomplete(lot, startAtChangelogId, creationTime)) {
                 case BrickLink::Core::ResolveResult::Fail: bsx.incInvalidLotCount(); break;
                 case BrickLink::Core::ResolveResult::ChangeLog: bsx.incFixedLotCount(); break;
                 default: break;
@@ -575,7 +579,8 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                             (*it)(&base, attr.value().toString());
                         }
                     }
-                    if (BrickLink::core()->resolveIncomplete(&base) == BrickLink::Core::ResolveResult::Fail) {
+                    if (BrickLink::core()->resolveIncomplete(&base, startAtChangelogId, creationTime)
+                        == BrickLink::Core::ResolveResult::Fail) {
                         if (!base.item() && lot->item())
                             base.setItem(lot->item());
                         if (!base.color() && lot->color())
@@ -618,6 +623,7 @@ Document *DocumentIO::parseBsxInventory(QIODevice *in)
                     if (xml.name() == u"Inventory") {
                         foundInventory = true;
                         bsx.setCurrencyCode(xml.attributes().value(u"Currency"_qs).toString());
+                        startAtChangelogId = xml.attributes().value(u"BrickLinkChangelogId"_qs).toUInt();
                         parseInventory();
                     } else if ((xml.name() == u"GuiState")
                                 && (xml.attributes().value(u"Application"_qs) == u"BrickStore")
@@ -668,6 +674,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
     xml.writeStartElement(u"BrickStoreXML"_qs);
     xml.writeStartElement(u"Inventory"_qs);
     xml.writeAttribute(u"Currency"_qs, doc->model()->currencyCode());
+    xml.writeAttribute(u"BrickLinkChangelogId"_qs, QString::number(BrickLink::core()->latestChangelogId()));
 
     const Lot *lot;
     const Lot *base;

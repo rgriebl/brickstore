@@ -72,6 +72,8 @@ private:
     QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
     // item-idx -> { vector < consists-of > }
     QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
+
+    uint m_latestChangelogId = 0;
 };
 
 } // namespace BrickLink

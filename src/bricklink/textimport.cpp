@@ -390,12 +390,14 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             // if this itemid was involved in a changelog entry after the last time we downloaded
             // the inventory, we need to reload
             QByteArray itemTypeAndId = itemTypeId + itemId;
-            auto it = std::lower_bound(m_itemChangelog.cbegin(), m_itemChangelog.cend(), itemTypeAndId);
-            if ((it != m_itemChangelog.cend()) && (*it == itemTypeAndId) && (it->date() > fileDate)) {
-                throw Exception("Item id %1 changed on %2 (last download: %3)")
-                    .arg(QString::fromLatin1(itemTypeAndId))
-                    .arg(it->date().toString(u"yyyy/MM/dd"))
-                    .arg(fileDate.toString(u"yyyy/MM/dd"));
+            auto [lit, uit] = std::equal_range(m_itemChangelog.cbegin(), m_itemChangelog.cend(), itemTypeAndId);
+            for (auto it = lit; it != uit; ++it) {
+                if (it->date() > fileDate) {
+                    throw Exception("Item id %1 changed on %2 (last download: %3)")
+                        .arg(QString::fromLatin1(itemTypeAndId))
+                        .arg(it->date().toString(u"yyyy/MM/dd"))
+                        .arg(fileDate.toString(u"yyyy/MM/dd"));
+                }
             }
 
             inventory.append(co);
@@ -752,6 +754,8 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
     if (!f.open(QFile::ReadOnly))
         throw ParseException(&f, "could not open file");
 
+    m_latestChangelogId = 0;
+
     QTextStream ts(&f);
     int lineNumber = 0;
     while (!ts.atEnd()) {
@@ -764,21 +768,23 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         if (strs.count() < 7)
             throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);
 
+        uint id = strs.at(0).toUInt();
+        QDate date = QDate::fromString(strs.at(1), u"M/d/yyyy"_qs);
         char c = ItemType::idFromFirstCharInString(strs.at(2));
-        QDate date = QDate::fromString(strs.at(1), u"M/d/yyyy"_qs); // not stored in the database
 
         switch (c) {
         case 'I':   // ItemId
         case 'T':   // ItemType
         case 'M': { // ItemMerge
-            QString fromType = strs.at(3);
-            QString fromId = strs.at(4);
-            QString toType = strs.at(5);
-            QString toId = strs.at(6);
+            const QString &fromType = strs.at(3);
+            const QString &fromId = strs.at(4);
+            const QString &toType = strs.at(5);
+            const QString &toId = strs.at(6);
             if ((fromType.length() == 1) && (toType.length() == 1)
                     && !fromId.isEmpty() && !toId.isEmpty()) {
-                m_itemChangelog.emplace_back((fromType + fromId).toLatin1(),
-                                             (toType + toId).toLatin1(), date);
+                m_itemChangelog.emplace_back(id, date, (fromType + fromId).toLatin1(),
+                                             (toType + toId).toLatin1());
+                m_latestChangelogId = std::max(m_latestChangelogId, id);
             }
             break;
         }
@@ -786,8 +792,10 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             bool fromOk = false, toOk = false;
             uint fromId = strs.at(3).toUInt(&fromOk);
             uint toId = strs.at(5).toUInt(&toOk);
-            if (fromOk && toOk)
-                m_colorChangelog.emplace_back(fromId, toId, date);
+            if (fromOk && toOk) {
+                m_colorChangelog.emplace_back(id, date, fromId, toId);
+                m_latestChangelogId = std::max(m_latestChangelogId, id);
+            }
             break;
         }
         case 'E':   // CategoryName
@@ -813,6 +821,7 @@ void BrickLink::TextImport::exportTo(Database *db)
     std::swap(db->m_pccs, m_pccs);
     std::swap(db->m_itemChangelog, m_itemChangelog);
     std::swap(db->m_colorChangelog, m_colorChangelog);
+    db->m_latestChangelogId = m_latestChangelogId;
 
     for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
         Item &item = db->m_items[it.key()];

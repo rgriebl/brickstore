@@ -116,10 +116,10 @@ Lot::~Lot()
 
 void Lot::save(QDataStream &ds) const
 {
-    ds << QByteArray("II") << qint32(4)
-       << QString::fromLatin1(itemId())
-       << qint8(itemType() ? itemType()->id() : ItemType::InvalidId)
-       << uint(color() ? color()->id() : Color::InvalidId)
+    ds << QByteArray("II") << qint32(5)
+       << itemId()
+       << (itemType() ? itemType()->id() : ItemType::InvalidId)
+       << (color() ? color()->id() : Color::InvalidId)
        << qint8(m_status) << qint8(m_condition) << qint8(m_scondition) << qint8(m_retain ? 1 : 0)
        << qint8(m_stockroom) << m_lot_id << m_reserved << m_comments << m_remarks
        << m_quantity << m_bulk_quantity
@@ -131,61 +131,63 @@ void Lot::save(QDataStream &ds) const
        << m_dateAdded << m_dateLastSold;
 }
 
-Lot *Lot::restore(QDataStream &ds)
+Lot *Lot::restore(QDataStream &ds, uint startChangelogAt)
 {
     std::unique_ptr<Lot> lot;
 
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 2) || (version > 4))
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version != 5))
         return nullptr;
 
-    QString itemid;
-    uint colorid = 0;
-    qint8 itemtypeid = 0;
+    QByteArray itemId;
+    uint colorId = 0;
+    char itemTypeId = 0;
 
-    ds >> itemid >> itemtypeid >> colorid;
+    ds >> itemId >> itemTypeId >> colorId;
 
     if (ds.status() != QDataStream::Ok)
         return nullptr;
 
-    auto item = core()->item(itemtypeid, itemid.toLatin1());
-    auto color = core()->color(colorid);
-    std::unique_ptr<Incomplete> inc;
+    if (startChangelogAt) {
+        const QByteArray itemTypeAndId = itemTypeId + itemId;
+        QByteArray newId = core()->applyItemChangeLog(itemTypeAndId, startChangelogAt, { });
+        if (newId != itemTypeAndId) {
+            itemTypeId = newId.at(0);
+            itemId = newId.mid(1);
+        }
+        colorId = core()->applyColorChangeLog(colorId, startChangelogAt, { });
+    }
 
+    auto item = core()->item(itemTypeId, itemId);
+    auto color = core()->color(colorId);
+
+    lot = std::make_unique<Lot>(item, color);
     if (!item || !color) {
-        inc = std::make_unique<Incomplete>();
+        auto *inc = new Incomplete;
         if (!item) {
-            inc->m_item_id = itemid.toLatin1();
-            inc->m_itemtype_id = itemtypeid;
+            inc->m_item_id = itemId;
+            inc->m_itemtype_id = itemTypeId;
         }
         if (!color) {
-            inc->m_color_id = colorid;
-            inc->m_color_name = QString::number(colorid);
+            inc->m_color_id = colorId;
+            inc->m_color_name = u"BL #"_qs + QString::number(colorId);
         }
-
-        if (core()->applyChangeLog(item, color, inc.get()))
-            inc.reset();
+        lot->setIncomplete(inc);
     }
-    lot = std::make_unique<Lot>(item, color);
-    if (inc)
-        lot->setIncomplete(inc.release());
 
     // alternate, cpart and altid are left out on purpose!
 
     qint8 status = 0, cond = 0, scond = 0, retain = 0, stockroom = 0;
     ds >> status >> cond >> scond >> retain >> stockroom
-            >> lot->m_lot_id >> lot->m_reserved >> lot->m_comments >> lot->m_remarks
-            >> lot->m_quantity >> lot->m_bulk_quantity
-            >> lot->m_tier_quantity[0] >> lot->m_tier_quantity[1] >> lot->m_tier_quantity[2]
-            >> lot->m_sale >> lot->m_price >> lot->m_cost
-            >> lot->m_tier_price[0] >> lot->m_tier_price[1] >> lot->m_tier_price[2]
-            >> lot->m_weight;
-    if (version >= 3)
-        ds >> lot->m_markerText >> lot->m_markerColor;
-    if (version >= 4)
-        ds >> lot->m_dateAdded >> lot->m_dateLastSold;
+        >> lot->m_lot_id >> lot->m_reserved >> lot->m_comments >> lot->m_remarks
+        >> lot->m_quantity >> lot->m_bulk_quantity
+        >> lot->m_tier_quantity[0] >> lot->m_tier_quantity[1] >> lot->m_tier_quantity[2]
+        >> lot->m_sale >> lot->m_price >> lot->m_cost
+        >> lot->m_tier_price[0] >> lot->m_tier_price[1] >> lot->m_tier_price[2]
+        >> lot->m_weight >> lot->m_markerText >> lot->m_markerColor
+        >> lot->m_dateAdded >> lot->m_dateLastSold;
 
     if (ds.status() != QDataStream::Ok)
         return nullptr;

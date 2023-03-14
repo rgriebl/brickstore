@@ -141,7 +141,7 @@ public:
     void setIncomplete(Incomplete *inc) { m_incomplete.reset(inc); }
 
     void save(QDataStream &ds) const;
-    static Lot *restore(QDataStream &ds);
+    static Lot *restore(QDataStream &ds, uint startChangelogAt);
 
 private:
     const Item * m_item;

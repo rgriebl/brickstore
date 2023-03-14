@@ -43,10 +43,11 @@ public:
         V6, // 2022.2.1
         V7, // 2022.6.1 (not released)
         V8, // 2022.6.2
+        V9, // 2023.3.1
 
         OldestStillSupported = V4,
 
-        Latest = V8
+        Latest = V9
     };
 
     void setUpdateInterval(int interval);
@@ -99,6 +100,8 @@ private:
     std::vector<ItemChangeLogEntry>  m_itemChangelog;
     std::vector<ColorChangeLogEntry> m_colorChangelog;
     std::vector<PartColorCode>       m_pccs;
+
+    uint m_latestChangelogId = 0;
 
     friend class Core;
     friend class TextImport;

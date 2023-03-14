@@ -63,7 +63,7 @@ enum class Hint {
 };
 
 QString toBrickLinkXML(const LotList &lots);
-ParseResult fromBrickLinkXML(const QByteArray &xml, Hint hint = Hint::Plain);
+ParseResult fromBrickLinkXML(const QByteArray &xml, Hint hint, const QDateTime &creationTime = { });
 
 ParseResult fromPartInventory(const Item *item, const Color *color = nullptr, int quantity = 1,
                               Condition condition = Condition::New, Status extraParts = Status::Extra,

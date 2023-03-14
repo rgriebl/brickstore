@@ -2444,12 +2444,13 @@ void Document::autosave() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray(autosaveMagic)
-       << qint32(5) // version
+       << qint32(6) // version
        << title()
        << filePath()
        << m_model->currencyCode()
        << saveColumnsState()
        << model()->saveSortFilterState()
+       << BrickLink::core()->latestChangelogId()
        << qint32(lots.count());
 
     for (auto lot : lots) {
@@ -2488,24 +2489,25 @@ int Document::processAutosaves(AutosaveAction action)
             QByteArray columnState;
             QByteArray savedSortFilterState;
             qint32 count = 0;
+            uint startChangelogAt = 0;
 
             QDataStream ds(&f);
             ds >> magic >> version;
-            if ((magic != QByteArray(autosaveMagic)) || (version != 5))
+            if ((magic != QByteArray(autosaveMagic)) || (version != 6))
                 continue;
             ds >> savedTitle >> savedFileName >> savedCurrencyCode >> columnState
-                    >> savedSortFilterState >> count;
+                >> savedSortFilterState >> startChangelogAt >> count;
 
             BrickLink::IO::ParseResult pr;
             pr.setCurrencyCode(savedCurrencyCode);
 
             if (count > 0) {
                 for (int i = 0; i < count; ++i) {
-                    if (auto lot = Lot::restore(ds)) {
+                    if (auto lot = Lot::restore(ds, startChangelogAt)) {
                         bool hasBase = false;
                         ds >> hasBase;
                         if (hasBase) {
-                            if (auto base = Lot::restore(ds)) {
+                            if (auto base = Lot::restore(ds, startChangelogAt)) {
                                 pr.addToDifferenceModeBase(lot, *base);
                                 delete base;
                             } else {
