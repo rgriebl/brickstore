@@ -607,8 +607,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, const QStyleOptionViewItem &opti
 
     if (keypress) {
         auto *ke = static_cast<QKeyEvent *>(e);
-        fakeeditkey = (ke->key() == Qt::Key_Execute);
-        editkey = ((ke->key() == Qt::Key_Return) || (ke->key() == Qt::Key_Enter))
+        key = ke->key();
+        fakeeditkey = (key == Qt::Key_Execute);
+        editkey = ((key == Qt::Key_Return) || (key == Qt::Key_Enter))
                 && ((ke->modifiers() == Qt::NoModifier) || (ke->modifiers() == Qt::ControlModifier));
     }
 
@@ -1063,8 +1064,8 @@ QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &di
     }
     case DocumentModel::YearReleased: {
         int yearFrom = display.toInt();
-        if (!yearFrom && !toolTip) {
-            return dash;
+        if (!yearFrom) {
+            return toolTip ? QString { } : dash;
         } else {
             const auto *lot = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
             int yearTo = lot->itemYearLastProduced();
