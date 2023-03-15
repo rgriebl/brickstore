@@ -13,6 +13,7 @@
 #include "global.h"
 #include "changelogentry.h"
 #include "item.h"
+#include "relationship.h"
 
 
 namespace BrickLink {
@@ -50,6 +51,7 @@ private:
     void readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath);
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);
+    void readRelationships(const QString &path);
 
     int findItemIndex(char type, const QByteArray &id) const;
     int findColorIndex(uint id) const;
@@ -72,6 +74,9 @@ private:
     QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
     // item-idx -> { vector < consists-of > }
     QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
+
+    std::vector<Relationship>      m_relationships;
+    std::vector<RelationshipMatch> m_relationshipMatches;
 
     uint m_latestChangelogId = 0;
 };

@@ -114,6 +114,8 @@ class WantedLists;
 class Lot;
 class ItemChangeLogEntry;
 class ColorChangeLogEntry;
+class Relationship;
+class RelationshipMatch;
 
 class ColorModel;
 class InternalColorModel;

@@ -14,6 +14,7 @@
 #include "bricklink/itemtype.h"
 #include "bricklink/changelogentry.h"
 #include "bricklink/partcolorcode.h"
+#include "bricklink/relationship.h"
 
 
 class Transfer;
@@ -100,6 +101,8 @@ private:
     std::vector<ItemChangeLogEntry>  m_itemChangelog;
     std::vector<ColorChangeLogEntry> m_colorChangelog;
     std::vector<PartColorCode>       m_pccs;
+    std::vector<Relationship>        m_relationships;
+    std::vector<RelationshipMatch>   m_relationshipMatches;
 
     uint m_latestChangelogId = 0;
 
@@ -122,6 +125,10 @@ private:
     void writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version v) const;
     static void readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Version v);
     void writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, Version v) const;
+    static void readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, Version v);
+    void writeRelationshipToDatabase(const Relationship &e, QDataStream &dataStream, Version v) const;
+    static void readRelationshipMatchFromDatabase(RelationshipMatch &e, QDataStream &dataStream, Version v);
+    void writeRelationshipMatchToDatabase(const RelationshipMatch &e, QDataStream &dataStream, Version v) const;
 };
 
 } // namespace BrickLink

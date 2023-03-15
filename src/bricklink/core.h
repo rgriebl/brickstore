@@ -82,8 +82,10 @@ public:
     inline const std::vector<ItemType> &itemTypes() const   { return database()->m_itemTypes; }
     inline const std::vector<Item> &items() const           { return database()->m_items; }
     inline const std::vector<PartColorCode> &pccs() const   { return database()->m_pccs; }
-    inline const std::vector<ItemChangeLogEntry>  &itemChangelog() const  { return database()->m_itemChangelog; }
-    inline const std::vector<ColorChangeLogEntry> &colorChangelog() const { return database()->m_colorChangelog; }
+    inline const std::vector<ItemChangeLogEntry>  &itemChangelog() const     { return database()->m_itemChangelog; }
+    inline const std::vector<ColorChangeLogEntry> &colorChangelog() const    { return database()->m_colorChangelog; }
+    inline const std::vector<Relationship> &relationships() const            { return database()->m_relationships; }
+    inline const std::vector<RelationshipMatch> &relationshipMatches() const { return database()->m_relationshipMatches; }
 
     inline uint latestChangelogId() const { return database()->m_latestChangelogId; }
 
@@ -98,6 +100,9 @@ public:
     const Item *item(const std::string &tids, const QByteArray &id) const;
 
     const PartColorCode *partColorCode(uint id);
+
+    const Relationship *relationship(uint id);
+    const RelationshipMatch *relationshipMatch(uint id);
 
     QSize standardPictureSize() const;
 

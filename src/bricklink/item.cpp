@@ -81,6 +81,16 @@ const QVector<Item::ConsistsOf> &Item::consistsOf() const
     return m_consists_of;
 }
 
+QVector<const RelationshipMatch *> Item::relationshipMatches() const
+{
+    QVector<const RelationshipMatch *> matches;
+    for (const uint relMatchId : m_relationshipMatchIds) {
+        if (auto m = core()->relationshipMatch(relMatchId))
+            matches << m;
+    }
+    return matches;
+}
+
 PartOutTraits Item::partOutTraits() const
 {
     PartOutTraits traits;
@@ -154,7 +164,7 @@ bool Item::hasKnownColor(const Color *col) const
                               quint16(col - core()->colors().data()));
 }
 
-const QVector<const Color *> Item::knownColors() const
+QVector<const Color *> Item::knownColors() const
 {
     QVector<const Color *> result;
     for (const quint16 idx : m_knownColorIndexes)

@@ -1,6 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <QCoreApplication>
 #include <cstdlib>
 #include <ctime>
 
@@ -14,6 +15,8 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonValue>
 #include <QtCore/QStringBuilder>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
 
 #include "utility/exception.h"
 #include "utility/xmlhelpers.h"
@@ -82,6 +85,7 @@ bool BrickLink::TextImport::import(const QString &path)
             readItems(path + u"items_" + QLatin1Char(itt.m_id) + u".xml", &itt);
             readAdditionalItemCategories(path + u"items_" + QLatin1Char(itt.m_id) + u".csv", &itt);
         }
+        readRelationships(path + u"relationships.html");
 
         readPartColorCodes(path + u"part_color_codes.xml");
         readInventoryList(path + u"btinvlist.csv");
@@ -811,6 +815,136 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
     std::sort(m_itemChangelog.begin(), m_itemChangelog.end());
 }
 
+void BrickLink::TextImport::readRelationships(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(&f, "could not open file");
+
+    auto data = QString::fromUtf8(f.readAll());
+
+    static const QRegularExpression rxLink(uR"-(<A HREF="catalogRelCat\.asp\?relID=(\d+)">([^<]+)</A>)-"_qs);
+
+    QNetworkAccessManager nam;
+
+    for (const auto &m : rxLink.globalMatch(data)) {
+        uint id = m.captured(1).toUInt();
+        QString name = m.captured(2);
+
+        auto &rel = m_relationships.emplace_back(id, name);
+        QHash<uint, std::vector<uint>> matches;   // match-id -> list of item-indexes
+
+        uint page = 1;
+        do {
+            QString url = u"https://www.bricklink.com/catalogRelList.asp?v=0&relID=%1&pg=%2"_qs.arg(id).arg(page);
+            auto reply = nam.get(QNetworkRequest(url));
+            while (!reply->isFinished())
+                QCoreApplication::processEvents();
+            const auto listData = QString::fromUtf8(reply->readAll());
+            delete reply;
+
+            static const QRegularExpression rxHeader(uR"(<B>(\d+)</B> Matches found: Page <B>(\d+)</B> of <B>(\d+)</B>)"_qs);
+            auto mh = rxHeader.match(listData);
+
+            if (!mh.hasMatch())
+                throw Exception("Relationships: couldn't find list header");
+
+            uint count = mh.captured(1).toUInt();
+            uint currentPage = mh.captured(2).toUInt();
+            uint maxPage = mh.captured(3).toUInt();
+
+            if (page == 1)
+                rel.m_count = count;
+            else if (rel.m_count != count)
+                throw Exception("Relationships: count mismatch between pages: expected %1, but got %2 on page %3").arg(rel.m_count).arg(count).arg(page);
+            if (currentPage != page)
+                throw Exception("Relationships: wrong page: expected %1, but got %2").arg(page).arg(currentPage);
+
+            auto startPos = mh.capturedEnd();
+            auto endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
+
+            static const QRegularExpression rxTR(uR"-(<TR .*?</TR>)-"_qs);
+            static const QRegularExpression rxMatch(uR"-(<TR BGCOLOR="#......"><TD COLSPAN="4">.*?<B>Match #(\d+)</B></FONT></TD></TR>)-"_qs);
+            static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs);
+
+            uint currentMatchId = 0;
+            int trCount = 0;
+
+            while (true) {
+                auto mt = rxTR.match(listData, startPos);
+                if (!mt.hasMatch())
+                    break;
+
+                int matchStartPos = mt.capturedStart(0);
+                int matchEndPos = mt.capturedEnd(0);
+                if (matchStartPos > endPos || matchEndPos > endPos)
+                    break;
+                startPos = matchEndPos;
+
+                if (++trCount == 1) // skip header
+                    continue;
+
+                auto currentRow = mt.capturedView(0);
+
+                auto mm = rxMatch.match(currentRow);
+                if (mm.hasMatch()) {
+                    uint matchId = mm.captured(1).toUInt();
+                    currentMatchId = matchId;
+                } else {
+                    if (!currentMatchId)
+                        throw Exception("Relationships: got an item row without a preceeding match # row");
+
+                    auto mi = rxItem.match(currentRow);
+                    if (mi.hasMatch()) {
+                        QString ittId = mi.captured(1);
+                        QString itemId = mi.captured(2);
+                        QString itemId2 = mi.captured(3);
+                        if (itemId != itemId2)
+                            throw Exception("Relationships: item ids do not match up: %1 vs. %2").arg(itemId).arg(itemId2);
+                        if (ittId.size() != 1)
+                            throw Exception("Relationships: invalid item-type id: %1").arg(ittId);
+                        int itemIndex = findItemIndex(ittId.at(0).toLatin1(), itemId.toLatin1());
+
+                        if (itemIndex == -1) {
+                            qWarning() << "  > Relationships: could not resolve item:"
+                                       << ittId << itemId << "for match id" << currentMatchId
+                                       << "in" << rel.m_name;
+                        } else {
+                            matches[currentMatchId].push_back(uint(itemIndex));
+                        }
+                    } else {
+                        qWarning().noquote() << currentRow;
+                        throw Exception("Relationships: Found a TR that is neither an item nor a match id");
+                    }
+                }
+            }
+            page = (page < maxPage) ? (page + 1) : 0;
+        } while (page);
+
+        if (rel.m_count != matches.count()) {
+            qWarning() << "  > Relationships:" << rel.m_name << "should have" << rel.m_count << "entries, but has" << matches.count();
+            rel.m_count = matches.count();
+        }
+
+        for (auto it = matches.begin(); it != matches.end(); ++it)
+            m_relationshipMatches.emplace_back(it.key(), rel.m_id, std::move(it.value()));
+    }
+    std::sort(m_relationships.begin(), m_relationships.end());
+    std::sort(m_relationshipMatches.begin(), m_relationshipMatches.end());
+
+    // store the matches in each affected item as well for faster lookup
+    for (const auto &relMatch : m_relationshipMatches) {
+        if (relMatch.m_id > 0xffffu) {
+            qWarning() << "  > relationship match id" << relMatch.m_id << "exceeds 16 bits";
+            continue;
+        }
+        for (const auto &itemIndex : relMatch.m_itemIndexes) {
+            Item &item = m_items[itemIndex];
+            item.m_relationshipMatchIds.push_back(quint16(relMatch.m_id));
+        }
+    }
+}
+
 void BrickLink::TextImport::exportTo(Database *db)
 {
     std::swap(db->m_colors, m_colors);
@@ -832,6 +966,8 @@ void BrickLink::TextImport::exportTo(Database *db)
         Item &item = db->m_items[it.key()];
         item.setAppearsIn(it.value());
     }
+    std::swap(db->m_relationships, m_relationships);
+    std::swap(db->m_relationshipMatches, m_relationshipMatches);
 }
 
 void BrickLink::TextImport::calculateColorPopularity()

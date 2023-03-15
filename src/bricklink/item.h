@@ -36,7 +36,7 @@ public:
     int yearReleased() const               { return m_year_from ? m_year_from + 1900 : 0; }
     int yearLastProduced() const           { return m_year_to ? m_year_to + 1900 : yearReleased(); }
     bool hasKnownColor(const Color *col) const;
-    const QVector<const Color *> knownColors() const;
+    QVector<const Color *> knownColors() const;
 
     AppearsIn appearsIn(const Color *color = nullptr) const;
 
@@ -86,6 +86,8 @@ public:
     Q_STATIC_ASSERT(sizeof(ConsistsOf) == 8);
 
     const QVector<ConsistsOf> &consistsOf() const;
+
+    QVector<const RelationshipMatch *> relationshipMatches() const;
 
     PartOutTraits partOutTraits() const;
 
@@ -149,6 +151,8 @@ private:
 
     std::vector<AppearsInRecord> m_appears_in;
     QVector<ConsistsOf> m_consists_of;
+
+    std::vector<quint16> m_relationshipMatchIds;
 
 private:
     void setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash);

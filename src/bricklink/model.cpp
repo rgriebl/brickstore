@@ -852,9 +852,10 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
     MODELTEST_ATTACH(this)
 
     switch (mode) {
-        case Mode::ConsistsOf: fillConsistsOf(list); break;
-        case Mode::AppearsIn:  fillAppearsIn(list); break;
-        case Mode::CanBuild:   fillCanBuild(list); break;
+        case Mode::ConsistsOf:    fillConsistsOf(list); break;
+        case Mode::AppearsIn:     fillAppearsIn(list); break;
+        case Mode::CanBuild:      fillCanBuild(list); break;
+        case Mode::Relationships: fillRelationships(list); break;
     }
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, [this](Picture *pic) {
@@ -1028,6 +1029,43 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
         }
         endResetModel();
     });
+}
+
+void InternalInventoryModel::fillRelationships(const QVector<SimpleLot> &lots)
+{
+    QSet<const RelationshipMatch *> allMatches;
+    QSet<const Item *> items;
+    bool first = true;
+
+    for (const auto &p : lots) {
+        if (!p.m_item)
+            continue;
+        items.insert(p.m_item);
+        const auto matches = p.m_item->relationshipMatches();
+        if (matches.isEmpty())
+            continue;
+        QSet<const RelationshipMatch *> matchSet(matches.cbegin(), matches.cend());
+
+        if (first) {
+            first = false;
+            allMatches = matchSet;
+        } else {
+            allMatches.intersect(matchSet);
+            if (allMatches.isEmpty())
+                break;
+        }
+    }
+    if (!allMatches.isEmpty()) {
+        beginResetModel();
+        for (const RelationshipMatch *match : std::as_const(allMatches)) {
+            for (auto itemIndex : match->itemIndexes()) {
+                const auto *item = &core()->items()[itemIndex];
+                if (!items.contains(item))
+                    m_items.emplace_back(item, nullptr, -1);
+            }
+        }
+        endResetModel();
+    }
 }
 
 QModelIndex InternalInventoryModel::index(int row, int column, const QModelIndex &parent) const

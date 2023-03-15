@@ -26,7 +26,6 @@
 
 namespace BrickLink {
 
-
 Database::Database(const QString &updateUrl, QObject *parent)
     : QObject(parent)
     , m_updateUrl(updateUrl)
@@ -216,6 +215,7 @@ void Database::read(const QString &fileName)
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
         bool gotChangeLog = false, gotPccs = false;
+        bool gotRelationships = false, gotRelationshipMatches = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -238,6 +238,8 @@ void Database::read(const QString &fileName)
         std::vector<ItemChangeLogEntry>  itemChangelog;
         std::vector<ColorChangeLogEntry> colorChangelog;
         std::vector<PartColorCode>       pccs;
+        std::vector<Relationship>        relationships;
+        std::vector<RelationshipMatch>   relationshipMatches;
         uint                             latestChangelogId = 0;
 
         while (cr.startChunk()) {
@@ -351,6 +353,34 @@ void Database::read(const QString &fileName)
                 gotPccs = true;
                 break;
             }
+            case ChunkId('R','E','L',' ') | 1ULL << 32: {
+                quint32 relc = 0;
+                ds >> relc;
+                check();
+                sizeCheck(relc, 1'000);
+
+                relationships.resize(relc);
+                for (quint32 i = 0; i < relc; ++i) {
+                    readRelationshipFromDatabase(relationships[i], ds, Version::Latest);
+                    check();
+                }
+                gotRelationships = true;
+                break;
+            }
+            case ChunkId('R','E','L','M') | 1ULL << 32: {
+                quint32 matchc = 0;
+                ds >> matchc;
+                check();
+                sizeCheck(matchc, 1'000'000);
+
+                relationshipMatches.resize(matchc);
+                for (quint32 i = 0; i < matchc; ++i) {
+                    readRelationshipMatchFromDatabase(relationshipMatches[i], ds, Version::Latest);
+                    check();
+                }
+                gotRelationshipMatches = true;
+                break;
+            }
             default: {
                 cr.skipChunk();
                 check();
@@ -369,7 +399,8 @@ void Database::read(const QString &fileName)
 
         delete sw;
 
-        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog || !gotPccs) {
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog
+            || !gotPccs || !gotRelationships || !gotRelationshipMatches) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
@@ -382,6 +413,8 @@ void Database::read(const QString &fileName)
                 { u"Changelog Id"_qs, QString::number(latestChangelogId) },
                 { u"  Items"_qs,      loc.toString(itemChangelog.size()).rightJustified(10) },
                 { u"  Colors"_qs,     loc.toString(colorChangelog.size()).rightJustified(10) },
+                { u"Relationships"_qs,loc.toString(relationships.size()).rightJustified(10) },
+                { u"  Matches"_qs,    loc.toString(relationshipMatches.size()).rightJustified(10) },
                 { u"Item Types"_qs,   loc.toString(itemTypes.size()).rightJustified(10) },
                 { u"Categories"_qs,   loc.toString(categories.size()).rightJustified(10) },
                 { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
@@ -414,6 +447,8 @@ void Database::read(const QString &fileName)
         m_itemChangelog = itemChangelog;
         m_colorChangelog = colorChangelog;
         m_pccs = pccs;
+        m_relationships = relationships;
+        m_relationshipMatches = relationshipMatches;
         m_latestChangelogId = latestChangelogId;
 
         Color::s_colorImageCache.clear();
@@ -535,6 +570,20 @@ void Database::write(const QString &filename, Version version) const
     for (const PartColorCode &pcc : m_pccs)
         writePCCToDatabase(pcc, ds, version);
     check(cw.endChunk());
+
+    if (version >= Version::V9) {
+        check(cw.startChunk(ChunkId('R','E','L',' '), 1));
+        ds << quint32(m_relationships.size());
+        for (const Relationship &rel : m_relationships)
+            writeRelationshipToDatabase(rel, ds, version);
+        check(cw.endChunk());
+
+        check(cw.startChunk(ChunkId('R','E','L','M'), 1));
+        ds << quint32(m_relationshipMatches.size());
+        for (const RelationshipMatch &match : m_relationshipMatches)
+            writeRelationshipMatchToDatabase(match, ds, version);
+        check(cw.endChunk());
+    }
 
     check(cw.endChunk()); // BSDB root chunk
 
@@ -670,17 +719,29 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version
     }
     item.m_knownColorIndexes.shrink_to_fit();
 
-    quint32 additonalCategoriesSize;
-    dataStream >> additonalCategoriesSize;
+    quint32 additionalCategoriesSize;
+    dataStream >> additionalCategoriesSize;
     item.m_additionalCategoryIndexes.clear();
-    item.m_additionalCategoryIndexes.reserve(additonalCategoriesSize);
+    item.m_additionalCategoryIndexes.reserve(additionalCategoriesSize);
 
     qint16 catIndex;
-    while (additonalCategoriesSize-- > 0) {
+    while (additionalCategoriesSize-- > 0) {
         dataStream >> catIndex;
         item.m_additionalCategoryIndexes.push_back(catIndex);
     }
     item.m_additionalCategoryIndexes.shrink_to_fit();
+
+    quint32 relationshipMatchIdsSize;
+    dataStream >> relationshipMatchIdsSize;
+    item.m_relationshipMatchIds.clear();
+    item.m_relationshipMatchIds.reserve(relationshipMatchIdsSize);
+
+    quint16 matchId;
+    while (relationshipMatchIdsSize-- > 0) {
+        dataStream >> matchId;
+        item.m_relationshipMatchIds.push_back(matchId);
+    }
+    item.m_relationshipMatchIds.shrink_to_fit();
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
@@ -708,6 +769,12 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
         dataStream << quint32(item.m_additionalCategoryIndexes.size());
         for (const qint16 categoryIndex : item.m_additionalCategoryIndexes)
             dataStream << categoryIndex;
+    }
+
+    if (v >= Version::V9) {
+        dataStream << quint32(item.m_relationshipMatchIds.size());
+        for (const quint16 matchId : item.m_relationshipMatchIds)
+            dataStream << matchId;
     }
 }
 
@@ -746,6 +813,39 @@ void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QData
     if (v >= Version::V9)
         dataStream << e.m_id << e.m_julianDay;
     dataStream << e.m_fromColorId << e.m_toColorId;
+}
+
+void Database::readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, Version)
+{
+    dataStream >> e.m_id >> e.m_name >> e.m_count;
+}
+
+void Database::writeRelationshipToDatabase(const Relationship &e, QDataStream &dataStream, Version) const
+{
+    dataStream << e.m_id << e.m_name << e.m_count;
+}
+
+void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QDataStream &dataStream, Version)
+{
+    quint32 count;
+    dataStream >> match.m_id >> match.m_relationshipId >> count;
+
+    match.m_itemIndexes.clear();
+    match.m_itemIndexes.reserve(count);
+
+    uint itemIndex;
+    while (count-- > 0) {
+        dataStream >> itemIndex;
+        match.m_itemIndexes.push_back(itemIndex);
+    }
+    match.m_itemIndexes.shrink_to_fit();
+}
+
+void Database::writeRelationshipMatchToDatabase(const RelationshipMatch &match, QDataStream &dataStream, Version) const
+{
+    dataStream << match.m_id << match.m_relationshipId << quint32(match.m_itemIndexes.size());
+    for (uint ii : match.m_itemIndexes)
+        dataStream << ii;
 }
 
 } // namespace BrickLink

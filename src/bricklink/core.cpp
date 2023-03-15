@@ -808,6 +808,22 @@ const PartColorCode *Core::partColorCode(uint id)
     return nullptr;
 }
 
+const Relationship *Core::relationship(uint id)
+{
+    auto it = std::lower_bound(relationships().cbegin(), relationships().cend(), id);
+    if ((it != relationships().cend()) && (it->id() == id))
+        return &(*it);
+    return nullptr;
+}
+
+const RelationshipMatch *Core::relationshipMatch(uint id)
+{
+    auto it = std::lower_bound(relationshipMatches().cbegin(), relationshipMatches().cend(), id);
+    if ((it != relationshipMatches().cend()) && (it->id() == id))
+        return &(*it);
+    return nullptr;
+}
+
 void Core::cancelTransfers()
 {
     if (m_transfer)

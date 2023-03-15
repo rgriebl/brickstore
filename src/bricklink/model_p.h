@@ -47,11 +47,13 @@ protected:
     void fillConsistsOf(const QVector<SimpleLot> &list);
     void fillAppearsIn(const QVector<SimpleLot> &list);
     void fillCanBuild(const QVector<SimpleLot> &lots);
+    void fillRelationships(const QVector<SimpleLot> &lots);
 
     QVector<Entry> m_items;
     Mode m_mode;
 
     friend class InventoryModel;
+private:
 };
 
 } // namespace BrickLink

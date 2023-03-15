@@ -34,6 +34,7 @@ public:
     QToolButton *m_appearsIn;
     QToolButton *m_consistsOf;
     QToolButton *m_canBuild;
+    QToolButton *m_relations;
     QMenu *m_contextMenu;
     QAction *m_partOutAction;
     QAction *m_separatorAction;
@@ -69,27 +70,28 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     d->m_viewDelegate = new BrickLink::ItemThumbsDelegate(1., d->m_view);
     d->m_view->setItemDelegate(d->m_viewDelegate);
 
-    d->m_appearsIn = new QToolButton();
-    d->m_appearsIn->setCheckable(true);
-    d->m_appearsIn->setChecked(true);
-    d->m_appearsIn->setAutoExclusive(true);
-    d->m_appearsIn->setAutoRaise(true);
-    d->m_appearsIn->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    connect(d->m_appearsIn, &QToolButton::clicked, this, [this]() { setMode(Mode::AppearsIn); });
+    auto createButton = [this](InventoryWidget::Mode mode, const char *text, const char *iconName) {
+        auto b = new QToolButton();
+        b->setIcon(QIcon::fromTheme(QString::fromLatin1(iconName)));
+        b->setIconSize(b->iconSize() * .8);
+        b->setCheckable(true);
+        b->setChecked(false);
+        b->setAutoExclusive(true);
+        b->setAutoRaise(true);
+        b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+        connect(b, &QToolButton::toggled, b, [b](bool checked) {
+            b->setToolButtonStyle(checked ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonIconOnly);
+            b->setToolTip(checked ? QString { } : b->text());
+        });
+        connect(b, &QToolButton::clicked, this, [this, mode]() { setMode(mode); });
+        b->setProperty("bsUntranslatedText", QByteArray(text));
+        return b;
+    };
 
-    d->m_consistsOf = new QToolButton();
-    d->m_consistsOf->setCheckable(true);
-    d->m_consistsOf->setAutoExclusive(true);
-    d->m_consistsOf->setAutoRaise(true);
-    d->m_consistsOf->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    connect(d->m_consistsOf, &QToolButton::clicked, this, [this]() { setMode(Mode::ConsistsOf); });
-
-    d->m_canBuild = new QToolButton();
-    d->m_canBuild->setCheckable(true);
-    d->m_canBuild->setAutoExclusive(true);
-    d->m_canBuild->setAutoRaise(true);
-    d->m_canBuild->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    connect(d->m_canBuild, &QToolButton::clicked, this, [this]() { setMode(Mode::CanBuild); });
+    d->m_appearsIn  = createButton(Mode::AppearsIn,     QT_TR_NOOP("Appears in"),  "bootstrap-box-arrow-in-right");
+    d->m_consistsOf = createButton(Mode::ConsistsOf,    QT_TR_NOOP("Consists of"), "bootstrap-box-arrow-right");
+    d->m_canBuild   = createButton(Mode::CanBuild,      QT_TR_NOOP("Can build"),   "bootstrap-bricks");
+    d->m_relations  = createButton(Mode::Relationships, QT_TR_NOOP("Related"),     "bootstrap-share-fill");
 
     auto *grid = new QGridLayout(this);
     grid->setContentsMargins(0, 0, 0, 0);
@@ -101,7 +103,8 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
         grid->addWidget(d->m_canBuild, 0, 2);
     else
         d->m_canBuild->hide();
-    grid->addWidget(d->m_view, 1, 0, 1, d->m_showCanBuild ? 3 : 2);
+    grid->addWidget(d->m_relations, 0, d->m_showCanBuild ? 3 : 2);
+    grid->addWidget(d->m_view, 1, 0, 1, d->m_showCanBuild ? 4 : 3);
 
     d->m_partOutAction = new QAction(this);
     d->m_partOutAction->setObjectName(u"appearsin_partoutitems"_qs);
@@ -174,9 +177,14 @@ InventoryWidget::~InventoryWidget()
 
 void InventoryWidget::languageChange()
 {
-    d->m_appearsIn->setText(tr("Appears in"));
-    d->m_consistsOf->setText(tr("Consists of"));
-    d->m_canBuild->setText(tr("Can build"));
+    auto translateButton = [](QToolButton *b) {
+        b->setText(tr(b->property("bsUntranslatedText").toByteArray().constData()));
+        if (!b->isChecked())
+            b->setToolTip(b->text());
+    };
+
+    for (auto *b : { d->m_appearsIn, d->m_consistsOf, d->m_canBuild, d->m_relations })
+        translateButton(b);
     d->m_partOutAction->setText(tr("Part out Item..."));
     d->m_catalogAction->setText(tr("Show BrickLink Catalog Info..."));
     d->m_priceGuideAction->setText(tr("Show BrickLink Price Guide Info..."));
@@ -222,6 +230,11 @@ void InventoryWidget::setMode(Mode newMode)
             break;
         case Mode::ConsistsOf:
             d->m_consistsOf->setChecked(true);
+            break;
+        case Mode::Relationships:
+            d->m_relations->setChecked(true);
+            columnVisible[BrickLink::InventoryModel::QuantityColumn] = false;
+            columnVisible[BrickLink::InventoryModel::ColorColumn] = false;
             break;
         }
         for (int c = 0; c < BrickLink::InventoryModel::ColumnCount; ++c)
@@ -272,7 +285,8 @@ bool InventoryWidget::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    static QVector<int> validModes { int(Mode::AppearsIn), int(Mode::ConsistsOf), int(Mode::CanBuild) };
+    static QVector<int> validModes { int(Mode::AppearsIn), int(Mode::ConsistsOf),
+                                   int(Mode::CanBuild), int(Mode::Relationships) };
     d->m_viewDelegate->setZoomFactor(zoom);
     setMode(validModes.contains(mode) ? static_cast<Mode>(mode) : Mode::AppearsIn);
 

@@ -220,7 +220,7 @@ class InventoryModel : public QSortFilterProxyModel
     Q_PROPERTY(int count READ count CONSTANT FINAL)
 
 public:
-    enum class Mode { AppearsIn, ConsistsOf, CanBuild };
+    enum class Mode { AppearsIn, ConsistsOf, CanBuild, Relationships };
 
     struct SimpleLot
     {

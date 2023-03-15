@@ -26,6 +26,8 @@ qt_add_library(bricklink_module STATIC
     priceguide.h
     priceguide_p.h
     priceguide.cpp
+    relationship.h
+    relationship.cpp
 )
 
 if (NOT BS_BACKEND)
