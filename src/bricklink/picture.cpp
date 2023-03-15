@@ -249,6 +249,7 @@ PictureCache::~PictureCache()
     for (auto *thread : d->m_threads)
         thread->wait();
     d->m_db.close();
+    delete d;
     Picture::s_cache = nullptr;
 }
 
