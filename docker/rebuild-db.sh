@@ -3,19 +3,29 @@
 # Copyright (C) 2004-2023 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
+set -e
+
 # This script can be run from a cronjob to trigger a db rebuild
 # using brickstore-backend docker image.
 # Make sure to adjust to your environment!
 
-BRICKSTORE_BUILD_NUMBER=59
+BRICKSTORE_BUILD_NUMBER=966
 
-BS_LOCAL_USER=brickstore
-BS_LOCAL_DIR="/srv/brickstore"
-BS_UPLOAD_PORT="22"
-BS_UPLOAD_DIR="user@host:/dir"
+LOCAL_USER="brickstore"
+LOCAL_DIR="/srv/brickstore"
+UPLOAD_SSH_PORT="22"
+UPLOAD_DESTINATION="user@host:/dir"
 
-if [ "$(id -un)" != "$BS_LOCAL_USER" ]; then
-  echo "Please run this script as user '$BS_LOCAL_USER'."
+BRICKLINK_USERNAME='xxx'
+BRICKLINK_PASSWORD='yyy'
+REBRICKABLE_APIKEY='zzz'
+
+
+######################################################################
+
+
+if [ "$(id -un)" != "$LOCAL_USER" ]; then
+  echo "Please run this script as user '$LOCAL_USER'."
   exit 2
 fi
 
@@ -23,20 +33,20 @@ interactive=""
 [ -t 0 ] && interactive="-it"
 
 docker run $interactive --rm \
-    -e 'BRICKLINK_USERNAME=xxx' \
-    -e 'BRICKLINK_PASSWORD=yyy' \
-    -e 'REBRICKABLE_APIKEY=zzz' \
-    -v "$BS_LOCAL_DIR:/data" \
-    --user $(id -u $BS_LOCAL_USER) \
+    -e BRICKLINK_USERNAME="$BRICKLINK_USERNAME" \
+    -e BRICKLINK_PASSWORD="$BRICKLINK_PASSWORD" \
+    -e REBRICKABLE_APIKEY="$REBRICKABLE_APIKEY" \
+    -v "$LOCAL_DIR:/data" \
+    --user $(id -u $LOCAL_USER) \
     --name "brickstore-backend" \
     rgriebl/brickstore-backend:${BRICKSTORE_BUILD_NUMBER}
 
-cd "$BS_DIR"
+cd "$LOCAL_DIR"
 
 echo
 echo -n "Uploading to server... "
 
-scp -q -P ${BS_UPLOAD_PORT} db/*.lzma "${BS_UPLOAD_DIR}"
+scp -q -P ${UPLOAD_SSH_PORT} db/*.lzma "${UPLOAD_SSH_DESTINATION}"
 
 echo "done"
 echo
