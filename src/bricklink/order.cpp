@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <array>
+
 #include <QBuffer>
 #include <QSaveFile>
 #include <QDirIterator>
@@ -12,10 +13,14 @@
 #include <QJsonDocument>
 #include <QXmlStreamReader>
 #include <QQmlEngine>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlQueryModel>
+#include <QtCore/QLoggingCategory>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
 #include "bricklink/order.h"
+#include "bricklink/order_p.h"
 
 #include "common/currency.h"
 #include "utility/exception.h"
@@ -23,45 +28,12 @@
 #include "utility/transfer.h"
 #include "utility/utility.h"
 
+Q_DECLARE_LOGGING_CATEGORY(LogCache)
+Q_DECLARE_LOGGING_CATEGORY(LogSql)
+
 
 namespace BrickLink {
 
-class OrderPrivate
-{
-private:
-    QString   m_id;
-    OrderType m_type;
-    QString   m_otherParty;
-    QDateTime m_date;
-    QDateTime m_lastUpdate;
-    double    m_shipping = 0;
-    double    m_insurance = 0;
-    double    m_addCharges1 = 0;
-    double    m_addCharges2 = 0;
-    double    m_credit = 0;
-    double    m_creditCoupon = 0;
-    double    m_orderTotal = 0;
-    double    m_usSalesTax = 0;
-    double    m_vatChargeBrickLink = 0;
-    QString   m_currencyCode;
-    double    m_grandTotal = 0;
-    QString   m_paymentCurrencyCode;
-    int       m_lotCount = 0;
-    int       m_itemCount = 0;
-    double    m_cost = 0;
-    OrderStatus m_status = OrderStatus::Unknown;
-    QString   m_paymentType;
-    QString   m_remarks;
-    QString   m_trackingNumber;
-    QString   m_paymentStatus;
-    QDateTime m_paymentLastUpdate;
-    double    m_vatChargeSeller = 0;
-    QString   m_countryCode;
-    QString   m_address;
-    QString   m_phone;
-
-    friend class Order;
-};
 
 /*! \qmltype Order
     \inqmlmodule BrickLink
@@ -642,37 +614,28 @@ QString Order::statusAsString(bool translated) const
 
 Orders::Orders(Core *core)
     : QAbstractTableModel(core)
-    , m_core(core)
+    , d(new OrdersPrivate)
 {
-    //TODO: Remove in 2022.6.x
-    QDir legacyPath(core->dataPath() + u"orders/");
-    if (legacyPath.cd(u"received"_qs)) {
-        legacyPath.removeRecursively();
-        legacyPath.cdUp();
-    }
-    if (legacyPath.cd(u"placed"_qs)) {
-        legacyPath.removeRecursively();
-        legacyPath.cdUp();
-    }
+    d->m_core = core;
 
     connect(core, &Core::userIdChanged,
-            this, &Orders::reloadOrdersFromCache);
-    reloadOrdersFromCache();
+            this, &Orders::reloadOrdersFromDatabase);
+    reloadOrdersFromDatabase(core->userId());
 
     connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
-        if ((m_updateStatus == UpdateStatus::Updating) && !m_jobs.isEmpty()
-                && (m_jobs.constFirst() == job)) {
+                if ((d->m_updateStatus == UpdateStatus::Updating) && !d->m_jobs.isEmpty()
+                    && (d->m_jobs.constFirst() == job)) {
             emit updateStarted();
         }
     });
     connect(core, &Core::authenticatedTransferProgress,
             this, [this](TransferJob *job, int progress, int total) {
-        if ((m_updateStatus == UpdateStatus::Updating) && m_jobs.contains(job)) {
-            m_jobProgress[job] = qMakePair(progress, total);
+        if ((d->m_updateStatus == UpdateStatus::Updating) && d->m_jobs.contains(job)) {
+            d->m_jobProgress[job] = qMakePair(progress, total);
 
             int overallProgress = 0, overallTotal = 0;
-            for (auto pair : std::as_const(m_jobProgress)) {
+            for (auto pair : std::as_const(d->m_jobProgress)) {
                 overallProgress += pair.first;
                 overallTotal += pair.second;
             }
@@ -684,8 +647,8 @@ Orders::Orders(Core *core)
         bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
         QByteArray type = job->userTag();
 
-        if (m_addressJobs.contains(job) && (type == "address")) {
-            m_addressJobs.removeOne(job);
+        if (d->m_addressJobs.contains(job) && (type == "address")) {
+            d->m_addressJobs.removeOne(job);
 
             try {
                 if (!jobCompleted)
@@ -693,41 +656,35 @@ Orders::Orders(Core *core)
 
                 int row = indexOfOrder(job->userData(type).toString());
                 if (row >= 0) {
-                    Order *order = m_orders.at(row);
+                    Order *order = d->m_orders.at(row);
                     auto [address, phone] = parseAddressAndPhone(order->type(), *job->data());
                     if (address.isEmpty())
                         address = tr("Address not available");
 
-                    QVariantMap vm = {
-                        { u"id"_qs, order->id() },
-                        { u"address"_qs, address },
-                        { u"phone"_qs, phone },
-                    };
-                    QJsonDocument json = QJsonDocument::fromVariant(vm);
-                    QByteArray utf8 = json.toJson();
-
-                    std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() + u".brickstore.json"),
-                                                                        order->type(), order->date()) };
-
-                    if (!saveFile
-                            || (saveFile->write(utf8) != utf8.size())
-                            || !saveFile->commit()) {
-                        throw Exception(saveFile.get(), tr("Cannot write order address to cache"));
-                    }
                     order->setAddress(address);
+                    order->setPhone(phone);
+
+                    d->m_saveAddressQuery.bindValue(u":id"_qs, order->id());
+                    d->m_saveAddressQuery.bindValue(u":address"_qs, address);
+                    d->m_saveAddressQuery.bindValue(u":phone"_qs, phone);
+
+                    auto finishGuard = qScopeGuard([this]() { d->m_saveAddressQuery.finish(); });
+
+                    if (!d->m_saveAddressQuery.exec())
+                        throw Exception("Failed to save address to database: %1").arg(d->m_saveAddressQuery.lastError().text());
                 }
             } catch (const Exception &e) {
                 qWarning() << "Failed to retrieve address for order"
                            << job->userData(type).toString() << ":" << e.errorString();
             }
-        } else if ((m_updateStatus == UpdateStatus::Updating) && m_jobs.contains(job)) {
+        } else if ((d->m_updateStatus == UpdateStatus::Updating) && d->m_jobs.contains(job)) {
             bool success = true;
             QString message;
 
             if (jobCompleted) { // if there are no matching orders, we get an error reply back...
-                // step 1: split up the individual orders into <cache>/<year>/<month>/<id>.xml
-                OrderType orderType = (type == "received") ? OrderType::Received : OrderType::Placed;
                 QHash<Order *, QString> orders;
+
+                d->m_db.transaction();
 
                 try {
                     orders = parseOrdersXML(*job->data());
@@ -739,13 +696,41 @@ Orders::Orders(Core *core)
                         if (order->id().isEmpty() || !order->date().isValid())
                             throw Exception("Invalid order without ID and DATE");
 
-                        std::unique_ptr<QSaveFile> saveFile { orderSaveFile(QString(order->id() + u".order.xml"),
-                                                                            orderType, order->date()) };
-                        if (!saveFile
-                                || (saveFile->write(orderXml) != orderXml.size())
-                                || !saveFile->commit()) {
-                            throw Exception(saveFile.get(), tr("Cannot write order XML to cache"));
-                        }
+                        d->m_saveOrderQuery.bindValue(u":id"_qs, order->id());
+                        d->m_saveOrderQuery.bindValue(u":type"_qs, int(order->type()));
+                        d->m_saveOrderQuery.bindValue(u":otherParty"_qs, order->otherParty());
+                        d->m_saveOrderQuery.bindValue(u":date"_qs, order->date().toJulianDay());
+                        d->m_saveOrderQuery.bindValue(u":lastUpdated"_qs, order->lastUpdated().toJulianDay());
+                        d->m_saveOrderQuery.bindValue(u":shipping"_qs, order->shipping());
+                        d->m_saveOrderQuery.bindValue(u":insurance"_qs, order->insurance());
+                        d->m_saveOrderQuery.bindValue(u":additionalCharges1"_qs, order->additionalCharges1());
+                        d->m_saveOrderQuery.bindValue(u":additionalCharges2"_qs, order->additionalCharges2());
+                        d->m_saveOrderQuery.bindValue(u":credit"_qs, order->credit());
+                        d->m_saveOrderQuery.bindValue(u":creditCoupon"_qs, order->creditCoupon());
+                        d->m_saveOrderQuery.bindValue(u":orderTotal"_qs, order->orderTotal());
+                        d->m_saveOrderQuery.bindValue(u":usSalesTax"_qs, order->usSalesTax());
+                        d->m_saveOrderQuery.bindValue(u":vatChargeBrickLink"_qs, order->vatChargeBrickLink());
+                        d->m_saveOrderQuery.bindValue(u":currencyCode"_qs, order->currencyCode());
+                        d->m_saveOrderQuery.bindValue(u":grandTotal"_qs, order->grandTotal());
+                        d->m_saveOrderQuery.bindValue(u":paymentCurrencyCode"_qs, order->paymentCurrencyCode());
+                        d->m_saveOrderQuery.bindValue(u":lotCount"_qs, order->lotCount());
+                        d->m_saveOrderQuery.bindValue(u":itemCount"_qs, order->itemCount());
+                        d->m_saveOrderQuery.bindValue(u":cost"_qs, order->cost());
+                        d->m_saveOrderQuery.bindValue(u":status"_qs, int(order->status()));
+                        d->m_saveOrderQuery.bindValue(u":paymentType"_qs, order->paymentType());
+                        d->m_saveOrderQuery.bindValue(u":remarks"_qs, order->remarks());
+                        d->m_saveOrderQuery.bindValue(u":trackingNumber"_qs, order->trackingNumber());
+                        d->m_saveOrderQuery.bindValue(u":paymentStatus"_qs, order->paymentStatus());
+                        d->m_saveOrderQuery.bindValue(u":paymentLastUpdated"_qs, order->paymentLastUpdated().toJulianDay());
+                        d->m_saveOrderQuery.bindValue(u":vatChargeSeller"_qs, order->vatChargeSeller());
+                        d->m_saveOrderQuery.bindValue(u":countryCode"_qs, order->countryCode());
+                        d->m_saveOrderQuery.bindValue(u":orderDataFormat"_qs, int(OrdersPrivate::Format_CompressedXML));
+                        d->m_saveOrderQuery.bindValue(u":orderData"_qs, qCompress(orderXml));
+
+                        auto finishGuard = qScopeGuard([this]() { d->m_saveOrderQuery.finish(); });
+
+                        if (!d->m_saveOrderQuery.exec())
+                            throw Exception("Failed to save order to database: %1").arg(d->m_saveOrderQuery.lastError().text());
                     }
 
                     while (!orders.isEmpty()) {
@@ -757,31 +742,36 @@ Orders::Orders(Core *core)
                     success = false;
                     message = tr("Could not parse the received order XML data") + u": " + e.errorString();
                 }
+                d->m_db.commit();
+
                 qDeleteAll(orders.keyBegin(), orders.keyEnd());
             }
-            m_jobResult[job] = qMakePair(success, message);
-            m_jobs.removeOne(job);
+            d->m_jobResult[job] = qMakePair(success, message);
+            d->m_jobs.removeOne(job);
 
-            if (m_jobs.isEmpty()) {
+            if (d->m_jobs.isEmpty()) {
                 bool overallSuccess = true;
                 QString overallMessage;
-                for (const auto &pair : std::as_const(m_jobResult)) {
+                for (const auto &pair : std::as_const(d->m_jobResult)) {
                     overallSuccess = overallSuccess && pair.first;
                     if (overallMessage.isEmpty()) // only show the first error message
                         overallMessage = pair.second;
                 }
                 setUpdateStatus(overallSuccess ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
 
-                QFile stampFile(m_core->dataPath() + u"orders/" + m_core->userId() + u"/.stamp");
                 if (overallSuccess) {
-                    m_lastUpdated = QDateTime::currentDateTime();
-                    stampFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-                    stampFile.close();
-                } else {
-                    stampFile.remove();
+                    d->m_lastUpdated = QDateTime::currentDateTime();
+                    d->m_saveUpdatedQuery.bindValue(u":updated"_qs, d->m_lastUpdated.toMSecsSinceEpoch());
+
+                    if (!d->m_saveUpdatedQuery.exec()) {
+                        qCWarning(LogSql) << "Failed to write 'updated' field to order database:"
+                                          << d->m_saveOrderQuery.lastError().text();
+                    }
+                    d->m_saveUpdatedQuery.finish();
                 }
-                m_jobProgress.clear();
-                m_jobResult.clear();
+
+                d->m_jobProgress.clear();
+                d->m_jobResult.clear();
 
                 emit updateFinished(overallSuccess, overallMessage);
             }
@@ -789,63 +779,313 @@ Orders::Orders(Core *core)
     });
 }
 
-void Orders::reloadOrdersFromCache()
+void Orders::reloadOrdersFromDatabase(const QString &userId)
 {
+    if (userId == d->m_userId)
+        return;
+
     beginResetModel();
-    qDeleteAll(m_orders);
-    m_orders.clear();
+    qDeleteAll(d->m_orders);
+    d->m_orders.clear();
+    d->m_lastUpdated = { };
     endResetModel();
 
     emit countChanged(0);
 
-    if (m_core->userId().isEmpty())
+    d->m_userId = userId;
+
+    if (d->m_db.isOpen())
+        d->m_db.close();
+
+    if (userId.isEmpty())
         return;
 
-    QString path = m_core->dataPath() + u"orders/" + m_core->userId();
+    QString dbName = d->m_core->dataPath() + u"order_cache_%1.sqlite"_qs.arg(userId);
+    d->m_db = QSqlDatabase::addDatabase(u"QSQLITE"_qs, u"OrderCache"_qs);
+    d->m_db.setDatabaseName(dbName);
 
-    QFileInfo stamp(path + u"/.stamp");
-    setLastUpdated(stamp.lastModified());
-    setUpdateStatus(stamp.exists() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+    // try to start from scratch, if the DB open fails
+    if (!d->m_db.open() &&
+        !(QFile::exists(dbName) && QFile::remove(dbName) && d->m_db.open())) {
+        qCWarning(LogSql) << "Failed to open the orders database:" << d->m_db.lastError().text();
+    }
 
-    QThreadPool::globalInstance()->start([this, path]() {
-        stopwatch sw("Loading orders from cache");
+    // MSVC2022 has a size limit on the literal operator"" _qs, so we have to use QStringLiteral
 
-        QDirIterator dit(path, { u"*.order.xml"_qs },
-                         QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
-        while (dit.hasNext()) {
-            try {
-                dit.next();
-                QFile f(dit.filePath());
-                if (!f.open(QIODevice::ReadOnly))
-                    throw Exception(&f, "Failed to open order XML");
-                auto orders = Orders::parseOrdersXML(f.readAll());
-                if (orders.size() != 1)
-                    throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
-                Order *order = *orders.keyBegin();
-                order->moveToThread(this->thread());
+    if (d->m_db.isOpen()) {
+        QSqlQuery createStatusQuery(d->m_db);
+        if (!createStatusQuery.exec(QStringLiteral(
+                "CREATE TABLE IF NOT EXISTS status ("
+                "id INTEGER NOT NULL PRIMARY KEY, "  // 0
+                "updated INTEGER "                   // msecsSinceEpoch
+                ") WITHOUT ROWID;"))) {
+            qCWarning(LogSql) << "Failed to create the 'status' table in the orders database:"
+                              << createStatusQuery.lastError().text();
+            d->m_db.close();
+        }
 
-                QDir d = dit.fileInfo().absoluteDir();
-                QString addressFileName = order->id() + u".brickstore.json";
-                if (d.exists(addressFileName)) {
-                    QFile fa(d.absoluteFilePath(addressFileName));
-                    if (fa.open(QIODevice::ReadOnly) && (fa.size() < 5000)) {
-                        auto json = QJsonDocument::fromJson(fa.readAll());
-                        if (json.isObject()) {
-                            order->setAddress(json[u"address"].toString());
-                            order->setPhone(json[u"phone"].toString());
-                        }
+        QSqlQuery createOrdersQuery(d->m_db);
+        if (!createOrdersQuery.exec(QStringLiteral(
+                "CREATE TABLE IF NOT EXISTS orders ("
+                "id TEXT NOT NULL PRIMARY KEY,"
+                "type INTEGER NOT NULL,"          // OrderType
+                "otherParty TEXT NOT NULL,"
+                "date INTEGER NOT NULL,"          // Julian day
+                "lastUpdated INTEGER NOT NULL,"   // Julian day
+                "shipping REAL,"
+                "insurance REAL,"
+                "additionalCharges1 REAL,"
+                "additionalCharges2 REAL,"
+                "credit REAL,"
+                "creditCoupon REAL,"
+                "orderTotal REAL,"
+                "usSalesTax REAL,"
+                "vatChargeBrickLink REAL,"
+                "currencyCode TEXT,"
+                "grandTotal REAL,"
+                "paymentCurrencyCode TEXT,"
+                "lotCount INTEGER NOT NULL,"
+                "itemCount INTEGER NOT NULL,"
+                "cost REAL,"
+                "status INTEGER NOT NULL,"      // OrderStatus
+                "paymentType TEXT,"
+                "remarks TEXT,"
+                "trackingNumber TEXT,"
+                "paymentStatus TEXT,"
+                "paymentLastUpdated INTEGER,"   // Julian day
+                "vatChargeSeller REAL,"
+                "countryCode TEXT,"
+                "address TEXT,"
+                "phone TEXT,"
+                "orderDataFormat INTEGER," // enum OrderDataFormat
+                "orderData BLOB NOT NULL"
+                ") WITHOUT ROWID;"))) {
+            qCWarning(LogSql) << "Failed to create the 'orders' table in the orders database:"
+                              << createOrdersQuery.lastError().text();
+            d->m_db.close();
+        }
+
+        d->m_importQuery = QSqlQuery(d->m_db);
+        if (!d->m_importQuery.prepare(QStringLiteral(
+                "INSERT INTO orders(id,type,otherParty,date,lastUpdated,shipping,insurance,additionalCharges1,additionalCharges2,credit,creditCoupon,orderTotal,usSalesTax,vatChargeBrickLink,currencyCode,grandTotal,paymentCurrencyCode,lotCount,itemCount,cost,status,paymentType,remarks,trackingNumber,paymentStatus,paymentLastUpdated,vatChargeSeller,countryCode,address,phone,orderDataFormat,orderData)"
+                " VALUES(:id,:type,:otherParty,:date,:lastUpdated,:shipping,:insurance,:additionalCharges1,:additionalCharges2,:credit,:creditCoupon,:orderTotal,:usSalesTax,:vatChargeBrickLink,:currencyCode,:grandTotal,:paymentCurrencyCode,:lotCount,:itemCount,:cost,:status,:paymentType,:remarks,:trackingNumber,:paymentStatus,:paymentLastUpdated,:vatChargeSeller,:countryCode,:address,:phone,:orderDataFormat,:orderData)"
+                " ON CONFLICT(id) DO NOTHING;"))) {
+            qCWarning(LogSql) << "Failed to prepare import query for the orders database:" << d->m_importQuery.lastError().text();
+        }
+        d->m_loadOrdersQuery = QSqlQuery(d->m_db);
+        if (!d->m_loadOrdersQuery.prepare(QStringLiteral(
+                "SELECT id,type,otherParty,date,lastUpdated,shipping,insurance,additionalCharges1,additionalCharges2,credit,creditCoupon,orderTotal,usSalesTax,vatChargeBrickLink,currencyCode,grandTotal,paymentCurrencyCode,lotCount,itemCount,cost,status,paymentType,remarks,trackingNumber,paymentStatus,paymentLastUpdated,vatChargeSeller,countryCode,address,phone"
+                " FROM orders;"))) {
+            qCWarning(LogSql) << "Failed to prepare load orders query for the orders database:" << d->m_loadOrdersQuery.lastError().text();
+        }
+
+        d->m_loadXmlQuery = QSqlQuery(d->m_db);
+        if (!d->m_loadXmlQuery.prepare(QStringLiteral(
+                "SELECT orderDataFormat,orderData"
+                " FROM orders WHERE id=:id;"))) {
+            qCWarning(LogSql) << "Failed to prepare load xml query for the orders database:" << d->m_loadXmlQuery.lastError().text();
+        }
+
+        d->m_saveAddressQuery = QSqlQuery(d->m_db);
+        if (!d->m_saveAddressQuery.prepare(QStringLiteral(
+                "UPDATE orders SET address=:address,phone=:phone WHERE id=:id;"))) {
+            qCWarning(LogSql) << "Failed to prepare save address query for the orders database:" << d->m_saveAddressQuery.lastError().text();
+        }
+        d->m_saveOrderQuery = QSqlQuery(d->m_db);
+        if (!d->m_saveOrderQuery.prepare(QStringLiteral(
+                "INSERT INTO orders(id,type,otherParty,date,lastUpdated,shipping,insurance,additionalCharges1,additionalCharges2,credit,creditCoupon,orderTotal,usSalesTax,vatChargeBrickLink,currencyCode,grandTotal,paymentCurrencyCode,lotCount,itemCount,cost,status,paymentType,remarks,trackingNumber,paymentStatus,paymentLastUpdated,vatChargeSeller,countryCode,orderDataFormat,orderData)"
+                " VALUES(:id,:type,:otherParty,:date,:lastUpdated,:shipping,:insurance,:additionalCharges1,:additionalCharges2,:credit,:creditCoupon,:orderTotal,:usSalesTax,:vatChargeBrickLink,:currencyCode,:grandTotal,:paymentCurrencyCode,:lotCount,:itemCount,:cost,:status,:paymentType,:remarks,:trackingNumber,:paymentStatus,:paymentLastUpdated,:vatChargeSeller,:countryCode,:orderDataFormat,:orderData)"
+                " ON CONFLICT(id) DO UPDATE"
+                " SET type=excluded.type,otherParty=excluded.otherParty,date=excluded.date,lastUpdated=excluded.lastUpdated,shipping=excluded.shipping,insurance=excluded.insurance,additionalCharges1=excluded.additionalCharges1,additionalCharges2=excluded.additionalCharges2,credit=excluded.credit,creditCoupon=excluded.creditCoupon,orderTotal=excluded.orderTotal,usSalesTax=excluded.usSalesTax,vatChargeBrickLink=excluded.vatChargeBrickLink,currencyCode=excluded.currencyCode,grandTotal=excluded.grandTotal,paymentCurrencyCode=excluded.paymentCurrencyCode,lotCount=excluded.lotCount,itemCount=excluded.itemCount,cost=excluded.cost,status=excluded.status,paymentType=excluded.paymentType,remarks=excluded.remarks,trackingNumber=excluded.trackingNumber,paymentStatus=excluded.paymentStatus,paymentLastUpdated=excluded.paymentLastUpdated,vatChargeSeller=excluded.vatChargeSeller,countryCode=excluded.countryCode,orderDataFormat=excluded.orderDataFormat,orderData=excluded.orderData;"))) {
+            qCWarning(LogSql) << "Failed to prepare save order query for the orders database:" << d->m_saveOrderQuery.lastError().text();
+        }
+
+        d->m_saveUpdatedQuery = QSqlQuery(d->m_db);
+        if (!d->m_saveUpdatedQuery.prepare(QStringLiteral(
+                "INSERT INTO status (id,updated) VALUES(0,:updated)"
+                " ON CONFLICT(id) DO UPDATE"
+                " SET updated=excluded.updated;"))) {
+            qCWarning(LogSql) << "Failed to prepare save update query for the orders database:" << d->m_saveUpdatedQuery.lastError().text();
+        }
+    }
+
+    QDateTime lastUpdated;
+
+    if (d->m_db.isOpen()) {
+        static constexpr int DBVersion = 1;
+
+        {
+            QSqlQuery jnlQuery(u"PRAGMA journal_mode = wal;"_qs, d->m_db);
+            if (jnlQuery.lastError().isValid())
+                qCWarning(LogSql) << "Failed to set journaling mode to 'wal' on the orders database:"
+                                  << jnlQuery.lastError();
+        }
+        {
+            QSqlQuery uvQuery(u"PRAGMA user_version;"_qs, d->m_db);
+            uvQuery.next();
+            auto userVersion = uvQuery.value(0).toInt();
+            if (userVersion == 0) // brand new file, bump version
+                QSqlQuery(u"PRAGMA user_version=%1;"_qs.arg(DBVersion), d->m_db);
+        }
+        {
+            QSqlQuery updatedQuery(u"SELECT updated FROM status WHERE id=0;"_qs, d->m_db);
+            if (updatedQuery.next())
+                lastUpdated = QDateTime::fromMSecsSinceEpoch(updatedQuery.value(0).toLongLong());
+        }
+
+        // DB schema upgrade code goes here...
+    }
+
+    setUpdateStatus(lastUpdated.isValid() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
+    setLastUpdated(lastUpdated);
+
+    importOldCache(userId);
+
+    if (d->m_loadOrdersQuery.exec()) {
+        stopwatch sw("Loading orders");
+
+        auto readValue = [this](const QString &field) {
+            QVariant v = d->m_loadOrdersQuery.value(field);
+            if (!v.isValid()) {
+                qCWarning(LogSql) << "Loading order field" << field << "failed:"
+                                  << d->m_loadOrdersQuery.lastError().text();
+            }
+            return v;
+        };
+
+        while (d->m_loadOrdersQuery.next()) {
+            auto order = std::make_unique<Order>();
+            order->d->m_id = readValue(u"id"_qs).toString();
+            order->d->m_type = OrderType(readValue(u"type"_qs).toInt());
+            order->d->m_otherParty = readValue(u"otherParty"_qs).toString();
+            order->d->m_date = QDate::fromJulianDay(readValue(u"date"_qs).toLongLong()).startOfDay();
+            order->d->m_lastUpdate = QDate::fromJulianDay(readValue(u"lastUpdated"_qs).toLongLong()).startOfDay();
+            order->d->m_shipping = readValue(u"shipping"_qs).toDouble();
+            order->d->m_insurance = readValue(u"insurance"_qs).toDouble();
+            order->d->m_addCharges1 = readValue(u"additionalCharges1"_qs).toDouble();
+            order->d->m_addCharges2 = readValue(u"additionalCharges2"_qs).toDouble();
+            order->d->m_credit = readValue(u"credit"_qs).toDouble();
+            order->d->m_creditCoupon = readValue(u"creditCoupon"_qs).toDouble();
+            order->d->m_orderTotal = readValue(u"orderTotal"_qs).toDouble();
+            order->d->m_usSalesTax = readValue(u"usSalesTax"_qs).toDouble();
+            order->d->m_vatChargeBrickLink = readValue(u"vatChargeBrickLink"_qs).toDouble();
+            order->d->m_currencyCode = readValue(u"currencyCode"_qs).toString();
+            order->d->m_grandTotal = readValue(u"grandTotal"_qs).toDouble();
+            order->d->m_paymentCurrencyCode = readValue(u"paymentCurrencyCode"_qs).toString();
+            order->d->m_lotCount = readValue(u"lotCount"_qs).toInt();
+            order->d->m_itemCount = readValue(u"itemCount"_qs).toInt();
+            order->d->m_cost = readValue(u"cost"_qs).toDouble();
+            order->d->m_status = OrderStatus(readValue(u"status"_qs).toInt());
+            order->d->m_paymentType = readValue(u"paymentType"_qs).toString();
+            order->d->m_remarks = readValue(u"remarks"_qs).toString();
+            order->d->m_trackingNumber = readValue(u"trackingNumber"_qs).toString();
+            order->d->m_paymentStatus = readValue(u"paymentStatus"_qs).toString();
+            order->d->m_paymentLastUpdate = QDate::fromJulianDay(readValue(u"paymentLastUpdated"_qs).toLongLong()).startOfDay();
+            order->d->m_vatChargeSeller = readValue(u"vatChargeSeller"_qs).toDouble();
+            order->d->m_countryCode = readValue(u"countryCode"_qs).toString();
+            order->d->m_address = readValue(u"address"_qs).toString();
+            order->d->m_phone = readValue(u"phone"_qs).toString();
+
+            appendOrderToModel(std::move(order));
+        }
+    } else {
+        qCWarning(LogSql) << "Failed to read orders from database:" << d->m_loadOrdersQuery.lastError().text();
+    }
+    d->m_loadOrdersQuery.finish();
+}
+
+void Orders::importOldCache(const QString &userId)
+{
+    // import the old file-system based cache
+    if (userId.isEmpty() || !d->m_db.isOpen())
+        return;
+
+    QString path = d->m_core->dataPath() + u"orders/" + userId;
+    QFileInfo imported(path + u"/.imported");
+    if (imported.exists())
+        return;
+
+    stopwatch sw("Importing orders from old cache");
+
+    d->m_db.transaction();
+
+    QDirIterator dit(path, { u"*.order.xml"_qs },
+                     QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
+    while (dit.hasNext()) {
+        try {
+            dit.next();
+            QFile f(dit.filePath());
+            if (!f.open(QIODevice::ReadOnly))
+                throw Exception(&f, "Failed to open order XML");
+            auto orders = Orders::parseOrdersXML(f.readAll());
+            if (orders.size() != 1)
+                throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
+            std::unique_ptr<Order> order { orders.cbegin().key() };
+            const QString &xml = orders.cbegin().value();
+            order->moveToThread(this->thread());
+
+            QDir dir = dit.fileInfo().absoluteDir();
+            QString addressFileName = order->id() + u".brickstore.json";
+            if (dir.exists(addressFileName)) {
+                QFile fa(dir.absoluteFilePath(addressFileName));
+                if (fa.open(QIODevice::ReadOnly) && (fa.size() < 5000)) {
+                    auto json = QJsonDocument::fromJson(fa.readAll());
+                    if (json.isObject()) {
+                        order->setAddress(json[u"address"].toString());
+                        order->setPhone(json[u"phone"].toString());
                     }
                 }
-                QMetaObject::invokeMethod(this, [this, order]() {
-                    std::unique_ptr<Order> uniqueOrder { order };
-                    appendOrderToModel(std::move(uniqueOrder));
-                });
-            } catch (const Exception &e) {
-                // keep this UI silent for now
-                qWarning() << "Failed to load order XML:" << e.errorString();
             }
+
+            d->m_importQuery.bindValue(u":id"_qs, order->id());
+            d->m_importQuery.bindValue(u":type"_qs, int(order->type()));
+            d->m_importQuery.bindValue(u":otherParty"_qs, order->otherParty());
+            d->m_importQuery.bindValue(u":date"_qs, order->date().toJulianDay());
+            d->m_importQuery.bindValue(u":lastUpdated"_qs, order->lastUpdated().toJulianDay());
+            d->m_importQuery.bindValue(u":shipping"_qs, order->shipping());
+            d->m_importQuery.bindValue(u":insurance"_qs, order->insurance());
+            d->m_importQuery.bindValue(u":addCharges1"_qs, order->additionalCharges1());
+            d->m_importQuery.bindValue(u":addCharges2"_qs, order->additionalCharges2());
+            d->m_importQuery.bindValue(u":credit"_qs, order->credit());
+            d->m_importQuery.bindValue(u":creditCoupon"_qs, order->creditCoupon());
+            d->m_importQuery.bindValue(u":orderTotal"_qs, order->orderTotal());
+            d->m_importQuery.bindValue(u":usSalesTax"_qs, order->usSalesTax());
+            d->m_importQuery.bindValue(u":vatChargeBrickLink"_qs, order->vatChargeBrickLink());
+            d->m_importQuery.bindValue(u":currencyCode"_qs, order->currencyCode());
+            d->m_importQuery.bindValue(u":grandTotal"_qs, order->grandTotal());
+            d->m_importQuery.bindValue(u":paymentCurrencyCode"_qs, order->paymentCurrencyCode());
+            d->m_importQuery.bindValue(u":lotCount"_qs, order->lotCount());
+            d->m_importQuery.bindValue(u":itemCount"_qs, order->itemCount());
+            d->m_importQuery.bindValue(u":cost"_qs, order->cost());
+            d->m_importQuery.bindValue(u":status"_qs, int(order->status()));
+            d->m_importQuery.bindValue(u":paymentType"_qs, order->paymentType());
+            d->m_importQuery.bindValue(u":remarks"_qs, order->remarks());
+            d->m_importQuery.bindValue(u":trackingNumber"_qs, order->trackingNumber());
+            d->m_importQuery.bindValue(u":paymentStatus"_qs, order->paymentStatus());
+            d->m_importQuery.bindValue(u":paymentLastUpdated"_qs, order->paymentLastUpdated().toJulianDay());
+            d->m_importQuery.bindValue(u":vatChargeSeller"_qs, order->vatChargeSeller());
+            d->m_importQuery.bindValue(u":countryCode"_qs, order->countryCode());
+            d->m_importQuery.bindValue(u":orderDataFormat"_qs, int(OrdersPrivate::Format_CompressedXML));
+            d->m_importQuery.bindValue(u":orderData"_qs, qCompress(xml.toUtf8()));
+            d->m_importQuery.bindValue(u":address"_qs, order->address());
+            d->m_importQuery.bindValue(u":phone"_qs, order->phone());
+
+            auto finishGuard = qScopeGuard([this]() { d->m_importQuery.finish(); });
+
+            if (!d->m_importQuery.exec())
+                throw Exception("SQL error: %1").arg(d->m_importQuery.lastError().text());
+
+        } catch (const Exception &e) {
+            // keep this UI silent for now
+            qWarning() << "Failed to import order XML:" << e.errorString();
         }
-    });
+    }
+
+    d->m_db.commit();
+
+    QFile importedFile(imported.absoluteFilePath());
+    importedFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    importedFile.close();
 }
 
 QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
@@ -947,7 +1187,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
 
 void Orders::updateOrder(std::unique_ptr<Order> newOrder)
 {
-    for (Order *order : std::as_const(m_orders)) {
+    for (Order *order : std::as_const(d->m_orders)) {
         if (order->id() != newOrder->id())
             continue;
 
@@ -984,7 +1224,7 @@ void Orders::updateOrder(std::unique_ptr<Order> newOrder)
 
         newOrder.reset();
 
-        if (order->address().isEmpty() && m_core->isAuthenticated())
+        if (order->address().isEmpty() && d->m_core->isAuthenticated())
             startUpdateAddress(order);
 
         return;
@@ -997,7 +1237,7 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     Order *o = order.release();
     o->setParent(this); // needed to prevent QML from taking ownership
 
-    int row = int(m_orders.count());
+    int row = int(d->m_orders.count());
     beginInsertRows({ }, row, row);
 
     connect(o, &Order::idChanged, this, [this, row]() { emitDataChanged(row, OrderId); });
@@ -1010,9 +1250,9 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     connect(o, &Order::grandTotalChanged, this, [this, row]() { emitDataChanged(row, Total); });
     connect(o, &Order::addressChanged, this, [this, row]() { emitDataChanged(row, -1); });
 
-    if (o->address().isEmpty() && m_core->isAuthenticated())
+    if (o->address().isEmpty() && d->m_core->isAuthenticated())
         startUpdateAddress(o);
-    m_orders.append(o);
+    d->m_orders.append(o);
 
     endInsertRows();
     emit countChanged(rowCount());
@@ -1020,16 +1260,16 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
 
 void Orders::setLastUpdated(const QDateTime &lastUpdated)
 {
-    if (lastUpdated != m_lastUpdated) {
-        m_lastUpdated = lastUpdated;
+    if (lastUpdated != d->m_lastUpdated) {
+        d->m_lastUpdated = lastUpdated;
         emit lastUpdatedChanged(lastUpdated);
     }
 }
 
 void Orders::setUpdateStatus(UpdateStatus updateStatus)
 {
-    if (updateStatus != m_updateStatus) {
-        m_updateStatus = updateStatus;
+    if (updateStatus != d->m_updateStatus) {
+        d->m_updateStatus = updateStatus;
         emit updateStatusChanged(updateStatus);
     }
 }
@@ -1044,7 +1284,7 @@ void Orders::emitDataChanged(int row, int col)
 void Orders::startUpdateAddress(Order *order)
 {
     // is there already a job scheduled for this order's address?
-    for (const auto *job : std::as_const(m_addressJobs)) {
+    for (const auto *job : std::as_const(d->m_addressJobs)) {
         if (job->userData("address").toString() == order->id())
             return;
     }
@@ -1056,9 +1296,9 @@ void Orders::startUpdateAddress(Order *order)
 
     auto job = TransferJob::get(url);
     job->setUserData("address", order->id());
-    m_addressJobs << job;
+    d->m_addressJobs << job;
 
-    m_core->retrieveAuthenticated(job);
+    d->m_core->retrieveAuthenticated(job);
 }
 
 std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const QByteArray &data)
@@ -1095,34 +1335,19 @@ std::pair<QString, QString> Orders::parseAddressAndPhone(OrderType type, const Q
     return { };
 }
 
-QSaveFile *Orders::orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const
+
+Orders::~Orders()
+{ /* needed to use std::unique_ptr on d */ }
+
+QDateTime Orders::lastUpdated() const
 {
-    // Avoid huge directories with 1000s of entries.
-    QString p = orderFilePath(fileName, type, date);
-    QString dir = fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()));
-
-    if (!QFileInfo(dir).isDir() && !QDir(dir).mkpath(u"."_qs)) {
-        qWarning() << "Orders::orderSaveFile failed to mkpath" << dir;
-        return nullptr;
-    }
-
-    auto f = new QSaveFile(p);
-    if (!f->open(QIODevice::WriteOnly)) {
-        qWarning() << "Orders::orderSaveFile failed to open" << f->fileName()
-                   << "for writing:" << f->errorString();
-    }
-    return f;
+    return d->m_lastUpdated;
 }
 
-QString Orders::orderFilePath(QStringView fileName, OrderType type, const QDate &date) const
+UpdateStatus Orders::updateStatus() const
 {
-    return m_core->dataPath() + u"orders/" + m_core->userId()
-            + ((type == OrderType::Received) ? u"/received/": u"/placed/")
-            + QString::number(date.year()) + u'/'
-            + u"%1"_qs.arg(date.month(), 2, 10, QChar(u'0')) + u'/'
-            + fileName;
+    return d->m_updateStatus;
 }
-
 
 void Orders::startUpdate(const QString &id)
 {
@@ -1147,9 +1372,9 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 {
     if (updateStatus() == UpdateStatus::Updating)
         return;
-    if (m_core->userId().isEmpty())
+    if (d->m_core->userId().isEmpty())
         return;
-    Q_ASSERT(m_jobs.isEmpty());
+    Q_ASSERT(d->m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
 
     static const std::array types = { "received", "placed" };
@@ -1178,39 +1403,54 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 
         auto job = TransferJob::post(url);
         job->setUserData(type, true);
-        m_jobs << job;
+        d->m_jobs << job;
 
-        m_core->retrieveAuthenticated(job);
+        d->m_core->retrieveAuthenticated(job);
     }
 }
 
 void Orders::cancelUpdate()
 {
-    if (m_updateStatus == UpdateStatus::Updating)
-        std::for_each(m_jobs.cbegin(), m_jobs.cend(), [](auto job) { job->abort(); });
-    std::for_each(m_addressJobs.cbegin(), m_addressJobs.cend(), [](auto job) { job->abort(); });
+    if (d->m_updateStatus == UpdateStatus::Updating)
+        std::for_each(d->m_jobs.cbegin(), d->m_jobs.cend(), [](auto job) { job->abort(); });
+    std::for_each(d->m_addressJobs.cbegin(), d->m_addressJobs.cend(), [](auto job) { job->abort(); });
 }
 
 LotList Orders::loadOrderLots(const Order *order) const
 {
-    QString fileName = order->id() + u".order.xml";
-    QFile f(Orders::orderFilePath(fileName, order->type(), order->date()));
-    if (!f.open(QIODevice::ReadOnly))
-        throw Exception(&f, tr("Cannot open order XML"));
-    auto xml = f.readAll();
-    auto pr = IO::fromBrickLinkXML(xml, IO::Hint::Order);
+    d->m_loadXmlQuery.bindValue(u":id"_qs, order->id());
+
+    auto finishGuard = qScopeGuard([this]() { d->m_loadXmlQuery.finish(); });
+
+    if (!d->m_loadXmlQuery.next())
+        throw Exception("could not find order %1 in database").arg(order->id());
+
+    auto format = OrdersPrivate::OrderDataFormat(d->m_loadXmlQuery.value(u"orderDataFormat"_qs).toInt());
+    auto data = d->m_loadXmlQuery.value(u"orderData"_qs).toByteArray();
+
+    switch (format) {
+    case OrdersPrivate::Format_XML:
+        break;
+    case OrdersPrivate::Format_CompressedXML:
+        data = qUncompress(data);
+        break;
+    default:
+        throw Exception("unknown data format (%1) for order").arg(int(format));
+        break;
+    }
+    auto pr = IO::fromBrickLinkXML(data, IO::Hint::Order);
     return pr.takeLots();
 }
 
 Order *Orders::order(int index) const
 {
-    return m_orders.value(index);
+    return d->m_orders.value(index);
 }
 
 int Orders::indexOfOrder(const QString &orderId) const
 {
-    for (int i = 0; i < m_orders.count(); ++i) {
-        if (m_orders.at(i)->id() == orderId)
+    for (int i = 0; i < d->m_orders.count(); ++i) {
+        if (d->m_orders.at(i)->id() == orderId)
             return i;
     }
     return -1;
@@ -1218,7 +1458,7 @@ int Orders::indexOfOrder(const QString &orderId) const
 
 int Orders::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : int(m_orders.count());
+    return parent.isValid() ? 0 : int(d->m_orders.count());
 }
 
 int Orders::columnCount(const QModelIndex &parent) const
@@ -1228,10 +1468,10 @@ int Orders::columnCount(const QModelIndex &parent) const
 
 QVariant Orders::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || (index.row() < 0) || (index.row() >= m_orders.size()))
+    if (!index.isValid() || (index.row() < 0) || (index.row() >= d->m_orders.size()))
         return { };
 
-    Order *order = m_orders.at(index.row());
+    Order *order = d->m_orders.at(index.row());
     int col = index.column();
 
     if (role == Qt::DisplayRole) {
@@ -1257,11 +1497,11 @@ QVariant Orders::data(const QModelIndex &index, int role) const
         case OtherParty: {
             QIcon flag;
             QString cc = order->countryCode();
-            flag = m_flags.value(cc);
+            flag = d->m_flags.value(cc);
             if (flag.isNull()) {
                 flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Normal);
                 flag.addFile(u":/assets/flags/" + cc, { }, QIcon::Selected);
-                m_flags.insert(cc, flag);
+                d->m_flags.insert(cc, flag);
             }
             return flag;
         }

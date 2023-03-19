@@ -19,6 +19,7 @@ class TransferJob;
 namespace BrickLink {
 
 class OrderPrivate;
+class OrdersPrivate;
 
 
 class Order : public QObject
@@ -164,6 +165,8 @@ signals:
 
 private:
     std::unique_ptr<OrderPrivate> d;
+
+    friend class Orders;
 };
 
 
@@ -198,8 +201,10 @@ public:
         TypeRole,
     };
 
-    QDateTime lastUpdated() const { return m_lastUpdated; }
-    BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
+    ~Orders() override;
+
+    QDateTime lastUpdated() const;
+    BrickLink::UpdateStatus updateStatus() const;
 
     Q_INVOKABLE void startUpdate(const QString &id);
     Q_INVOKABLE void startUpdate(int lastNDays);
@@ -231,9 +236,9 @@ signals:
 
 private:
     Orders(Core *core);
-    void reloadOrdersFromCache();
+    void reloadOrdersFromDatabase(const QString &userId);
+    void importOldCache(const QString &userId);
     static QHash<Order *, QString> parseOrdersXML(const QByteArray &data_);
-    static Order *orderFromXML(const QString &fileName);
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);
     void updateOrder(std::unique_ptr<Order> order);
     void appendOrderToModel(std::unique_ptr<Order> order);
@@ -242,19 +247,8 @@ private:
     void emitDataChanged(int row, int col);
     void startUpdateAddress(Order *order);
     std::pair<QString, QString> parseAddressAndPhone(OrderType type, const QByteArray &data);
-    QSaveFile *orderSaveFile(QStringView fileName, OrderType type, const QDate &date) const;
-    QString orderFilePath(QStringView fileName, OrderType type, const QDate &date) const;
 
-    Core *m_core;
-    BrickLink::UpdateStatus m_updateStatus = BrickLink::UpdateStatus::UpdateFailed;
-    QString m_userId;
-    QVector<TransferJob *> m_jobs;
-    QVector<TransferJob *> m_addressJobs;
-    QMap<TransferJob *, QPair<int, int>> m_jobProgress;
-    QMap<TransferJob *, QPair<bool, QString>> m_jobResult;
-    QDateTime m_lastUpdated;
-    QVector<Order *> m_orders;
-    mutable QHash<QString, QIcon> m_flags;
+    std::unique_ptr<OrdersPrivate> d;
 
     friend class Core;
 };
