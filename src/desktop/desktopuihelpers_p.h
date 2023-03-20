@@ -129,8 +129,12 @@ public:
 
         connect(m_pd, &QProgressDialog::canceled,
                 this, [this]() {
-            emit cancel();
-            m_pd->reject();
+            if (m_finishedSuccessfully) {
+                m_pd->accept();
+            } else {
+                emit cancel();
+                m_pd->reject();
+            }
         });
     }
 
@@ -164,6 +168,7 @@ public:
         if (showMessage) {
             m_pd->setLabelText(message);
             m_pd->setCancelButtonText(QDialogButtonBox::tr("Ok"));
+            m_finishedSuccessfully = success;
             m_pd->forceShow();
         }
 
@@ -177,5 +182,6 @@ private:
     QString m_title;
     QString m_message;
     ForceableProgressDialog *m_pd;
+    bool m_finishedSuccessfully = false;
 };
 
