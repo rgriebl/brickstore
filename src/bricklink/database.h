@@ -68,6 +68,8 @@ public:
     void read(const QString &fileName = { });
     void write(const QString &fileName, Version version) const;
 
+    static void remove();
+
 signals:
     void updateStarted();
     void updateProgress(int received, int total);

@@ -162,6 +162,16 @@ void Application::init()
         m_startupErrors << tr("Could not initialize the BrickLink kernel:") + u' ' + e.errorString();
     }
 
+    if (QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {
+        // clean start:
+        //  - remove the database
+        //  - clear the last open documents
+        //  - clear the autosaves
+        BrickLink::Database::remove();
+        Document::processAutosaves(Document::AutosaveAction::Delete);
+        Config::inst()->remove(u"MainWindow/LastSessionDocuments"_qs);
+    }
+
     try {
         BrickLink::core()->database()->read();
     } catch (const Exception &) {

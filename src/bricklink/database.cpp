@@ -9,6 +9,7 @@
 #include <QSaveFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QDirIterator>
 #include <QDebug>
 #include <QScopeGuard>
 
@@ -589,6 +590,17 @@ void Database::write(const QString &filename, Version version) const
 
     if (!f.commit())
         throw Exception(f.errorString());
+}
+
+void Database::remove()
+{
+    QString dbDir = core()->dataPath();
+    QString dbNameFilter = defaultDatabaseName(Version::Invalid);
+    dbNameFilter[dbNameFilter.length() - 1] = u'*';
+
+    QDirIterator dit(dbDir, { dbNameFilter }, QDir::Files);
+    while (dit.hasNext())
+        QFile::remove(dit.next());
 }
 
 
