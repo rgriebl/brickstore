@@ -340,7 +340,7 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/catalogDownload.asp", partCategoriesQuery('O'), "items_O.csv" },
         { "https://www.bricklink.com/btinvlist.asp",       { },                "btinvlist.csv"   },
         { "https://www.bricklink.com/btchglog.asp",        { },                "btchglog.csv" },
-        { "https://www.ldraw.org/library/official/LDConfig.ldr", { },          "ldconfig.ldr" },
+        { "https://library.ldraw.org/library/official/LDConfig.ldr", { },      "ldconfig.ldr" },
         { "https://rebrickable.com/api/v3/lego/colors/",   rebrickableQuery(), "rebrickable_colors.json" },
         { "https://www.bricklink.com/catalogRel.asp",      { },                "relationships.html" },
 
