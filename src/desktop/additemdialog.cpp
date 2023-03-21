@@ -522,15 +522,9 @@ void AddItemDialog::updateItemAndColor()
     auto color = w_select_color->currentColor();
 
     w_picture->setItemAndColor(item, color);
+    w_price_guide->setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(item, color, true));
+    w_inventory->setItem(item, color);
 
-    if (item && color) {
-        w_price_guide->setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(item, color, true));
-        w_inventory->setItem(item, color);
-    }
-    else {
-        w_price_guide->setPriceGuide(nullptr);
-        w_inventory->setItem(nullptr, nullptr);
-    }
     checkAddPossible();
 }
 
