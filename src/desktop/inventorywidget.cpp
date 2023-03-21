@@ -60,14 +60,17 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     d->m_view->setFrameStyle(QFrame::NoFrame);
     d->m_view->setAlternatingRowColors(true);
     d->m_view->setAllColumnsShowFocus(true);
-    d->m_view->setUniformRowHeights(true);
+    d->m_view->setUniformRowHeights(false);
     d->m_view->setWordWrap(true);
     d->m_view->setRootIsDecorated(false);
+    d->m_view->setItemsExpandable(false);
+    d->m_view->setIndentation(0);
     d->m_view->setSortingEnabled(true);
     d->m_view->sortByColumn(0, Qt::DescendingOrder);
     d->m_view->header()->setSortIndicatorShown(false);
     d->m_view->setContextMenuPolicy(Qt::CustomContextMenu);
     d->m_viewDelegate = new BrickLink::ItemThumbsDelegate(1., d->m_view);
+    d->m_viewDelegate->setSectionHeaderRole(BrickLink::IsSectionHeaderRole);
     d->m_view->setItemDelegate(d->m_viewDelegate);
 
     auto createButton = [this](InventoryWidget::Mode mode, const char *text, const char *iconName) {
@@ -346,6 +349,15 @@ void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::Simpl
 
     auto resizeColumns = [this]() {
         setUpdatesEnabled(false);
+        d->m_view->collapseAll();
+        if (auto *m = qobject_cast<BrickLink::InventoryModel *>(d->m_view->model())) {
+            for (int row = 0; row < m->rowCount(); ++row) {
+                if (m->data(m->index(row, 0), BrickLink::IsSectionHeaderRole).toBool())
+                    d->m_view->setFirstColumnSpanned(row, QModelIndex { }, true);
+            }
+        }
+        d->m_view->expandAll();
+
         d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::PictureColumn, QHeaderView::Fixed);
         d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::ColorColumn, QHeaderView::Fixed);
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 #include "bricklink/item.h"
 #include "bricklink/model.h"
@@ -14,29 +14,42 @@ namespace BrickLink {
 class InventoryModel;
 
 
-class InternalInventoryModel : public QAbstractTableModel
+class InternalInventoryModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
+    ~InternalInventoryModel() override;
+
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     struct Entry
     {
         Entry() = default;
+        Entry(const QString &sectionTitle);
         Entry(const BrickLink::Item *item, const BrickLink::Color *color, int quantity);
+        ~Entry();
+
+        bool isSection() const { return !m_item && !m_sectionTitle.isEmpty(); }
 
         const BrickLink::Item *m_item = nullptr;
         const BrickLink::Color *m_color = nullptr;
         int m_quantity = 0;
+        Entry *m_section = nullptr;
+
+        QString m_sectionTitle;
+        QVector<Entry *> m_sectionEntries;
     };
-    Entry entry(const QModelIndex &idx) const;
+
+    const Entry *entry(const QModelIndex &idx) const;
 
     using Mode = InventoryModel::Mode;
     using SimpleLot = InventoryModel::SimpleLot;
@@ -49,7 +62,7 @@ protected:
     void fillCanBuild(const QVector<SimpleLot> &lots);
     void fillRelationships(const QVector<SimpleLot> &lots);
 
-    QVector<Entry> m_items;
+    QVector<Entry *> m_entries;
     Mode m_mode;
 
     friend class InventoryModel;

@@ -846,7 +846,7 @@ bool ItemModel::filterAccepts(const void *pointer) const
 
 
 InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLot> &list, QObject *parent)
-    : QAbstractTableModel(parent)
+    : QAbstractItemModel(parent)
     , m_mode(mode)
 {
     MODELTEST_ATTACH(this)
@@ -862,18 +862,28 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
         if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
             return;
 
-        for (int row = 0; row < m_items.size(); ++row) {
-            if (m_items.at(row).m_item == pic->item()) {
-                QModelIndex idx = index(row, InventoryModel::PictureColumn);
-                emit dataChanged(idx, idx);
+        QVector<QModelIndex> indexes;
+
+        for (int row = 0; row < m_entries.size(); ++row) {
+            auto *e = m_entries.at(row);
+            if (e->isSection()) {
+                for (int srow = 0; srow < e->m_sectionEntries.size(); ++srow) {
+                    if (e->m_sectionEntries.at(srow)->m_item == pic->item())
+                        indexes << index(srow, InventoryModel::PictureColumn, index(row, 0));
+                }
+            } else if (e->m_item == pic->item()) {
+                indexes << index(row, InventoryModel::PictureColumn);
             }
         }
+
+        for (const auto &idx : indexes)
+            emit dataChanged(idx, idx);
     });
 }
 
 void InternalInventoryModel::fillConsistsOf(const QVector<SimpleLot> &list)
 {
-    QHash<std::pair<const Item *, const Color *>, Entry> unique;
+    QHash<std::pair<const Item *, const Color *>, Entry *> unique;
 
     for (const auto &p : list) {
         if (!p.m_item)
@@ -900,13 +910,13 @@ void InternalInventoryModel::fillConsistsOf(const QVector<SimpleLot> &list)
 
             auto it = unique.find(key);
             if (it != unique.end())
-                it.value().m_quantity += coi.quantity();
+                it.value()->m_quantity += coi.quantity();
             else
-                unique.emplace(key, partItem, partColor, coi.quantity());
+                unique.emplace(key, new Entry { partItem, partColor, coi.quantity() });
         }
     }
 
-    m_items = unique.values();
+    m_entries = unique.values();
 }
 
 void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
@@ -925,7 +935,7 @@ void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
                 const auto key = std::make_pair(aii.second, nullptr);
 
                 if (single_item) {
-                    m_items.emplace_back(aii.second, nullptr, aii.first);
+                    m_entries.emplace_back(new Entry { aii.second, nullptr, aii.first });
                 } else {
                     auto it = unique.find(key);
                     if (it != unique.end())
@@ -940,7 +950,7 @@ void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
 
     for (auto it = unique.cbegin(); it != unique.cend(); ++it) {
         if (it->m_quantity >= list.count())
-            m_items.emplace_back(it->m_item, nullptr, -1);
+            m_entries.emplace_back(new Entry { it->m_item, nullptr, -1 });
     }
 }
 
@@ -1019,13 +1029,13 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
     const auto &sets = core()->items();
     QtConcurrent::mapped(sets.cbegin(), sets.cend(), map)
             .then(this, [this](QFuture<const BrickLink::Item *> future) {
-        if (!m_items.isEmpty() || (m_mode != Mode::CanBuild))
+        if (!m_entries.isEmpty() || (m_mode != Mode::CanBuild))
             return;
 
         beginResetModel();
         for (const auto *match : std::as_const(future)) {
             if (match)
-                m_items.emplace_back(match, nullptr, -1);
+                m_entries.emplace_back(new Entry { match, nullptr, -1 });
         }
         endResetModel();
     });
@@ -1055,39 +1065,79 @@ void InternalInventoryModel::fillRelationships(const QVector<SimpleLot> &lots)
                 break;
         }
     }
+
     if (!allMatches.isEmpty()) {
         beginResetModel();
+
         for (const RelationshipMatch *match : std::as_const(allMatches)) {
-            for (auto itemIndex : match->itemIndexes()) {
-                const auto *item = &core()->items()[itemIndex];
-                if (!items.contains(item))
-                    m_items.emplace_back(item, nullptr, -1);
+            if (auto rel = core()->relationship(match->relationshipId())) {
+                auto section = m_entries.emplace_back(new Entry { rel->name() });
+                for (auto itemIndex : match->itemIndexes()) {
+                    const auto *item = &core()->items()[itemIndex];
+                    if (!items.contains(item)) {
+                        auto e = section->m_sectionEntries.emplace_back(new Entry { item, nullptr, -1 });
+                        e->m_section = section;
+                    }
+                }
             }
         }
+
         endResetModel();
     }
 }
 
-QModelIndex InternalInventoryModel::index(int row, int column, const QModelIndex &parent) const
+InternalInventoryModel::~InternalInventoryModel()
 {
-    if (hasIndex(row, column, parent) && !parent.isValid())
-        return createIndex(row, column, row);
-    return {};
+    qDeleteAll(m_entries);
 }
 
-InternalInventoryModel::Entry InternalInventoryModel::entry(const QModelIndex &idx) const
+QModelIndex InternalInventoryModel::index(int row, int column, const QModelIndex &parent) const
 {
-    return idx.isValid() ? m_items.at(idx.row()) : Entry { };
+    if (!hasIndex(row, column, parent))
+        return { };
+
+    const Entry *e = nullptr;
+    if (parent.isValid())
+        e = static_cast<const Entry *>(parent.internalPointer())->m_sectionEntries.at(row);
+    else
+        e = m_entries.at(row);
+
+    return createIndex(row, column, e);
+}
+
+QModelIndex InternalInventoryModel::parent(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return { };
+
+    auto *e = static_cast<const Entry *>(index.internalPointer())->m_section;
+    if (!e)
+        return { };
+
+    return createIndex(m_entries.indexOf(e), 0, e);
+}
+
+const InternalInventoryModel::Entry *InternalInventoryModel::entry(const QModelIndex &idx) const
+{
+    return idx.isValid() && idx.constInternalPointer()
+               ? static_cast<const Entry *>(idx.constInternalPointer()) : nullptr;
 }
 
 int InternalInventoryModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : int(m_items.size());
+    if (parent.column() > 0)
+        return 0;
+    else if (!parent.isValid())
+        return int(m_entries.size());
+    else if (auto *e = entry(parent))
+        return int(e->m_sectionEntries.size());
+    else
+        return 0;
 }
 
-int InternalInventoryModel::columnCount(const QModelIndex &parent) const
+int InternalInventoryModel::columnCount(const QModelIndex &) const
 {
-    return parent.isValid() ? 0 : InventoryModel::ColumnCount;
+    return InventoryModel::ColumnCount;
 }
 
 QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
@@ -1095,45 +1145,54 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return { };
 
-    const Entry e = m_items.at(index.row());
+    const Entry *e = entry(index);
+    if (e && e->isSection()) {
+        if (role == Qt::DisplayRole && index.column() == 0)
+            return e->m_sectionTitle;
+        else if (role == IsSectionHeaderRole)
+            return true;
+        return { };
+    }
 
-    if (!e.m_item)
+    if (!e || !e->m_item)
         return { };
 
     switch (role) {
+    case IsSectionHeaderRole:
+        return false;
     case Qt::DisplayRole:
         switch (index.column()) {
         case InventoryModel::QuantityColumn:
-            return (e.m_quantity < 0) ? u"-"_qs : QString::number(e.m_quantity);
+            return (e->m_quantity < 0) ? u"-"_qs : QString::number(e->m_quantity);
         case InventoryModel::ItemIdColumn:
-            return QString(QLatin1Char(e.m_item->itemTypeId()) + u' ' + QLatin1String(e.m_item->id()));
+            return QString(QLatin1Char(e->m_item->itemTypeId()) + u' ' + QLatin1String(e->m_item->id()));
         case InventoryModel::ItemNameColumn:
-            return e.m_item->name();
+            return e->m_item->name();
         case InventoryModel::ColorColumn:
-            return e.m_color ? e.m_color->name() : u"-"_qs;
+            return e->m_color ? e->m_color->name() : u"-"_qs;
         default: return { };
         }
     case Qt::DecorationRole:
         switch (index.column()) { //TODO: size
         case InventoryModel::ColorColumn:
-            return e.m_color ? e.m_color->sampleImage(20, 20) : QImage { };
+            return e->m_color ? e->m_color->sampleImage(20, 20) : QImage { };
         default:
             return { };
         }
     case ItemPointerRole:
         return (index.column() != InventoryModel::ColorColumn)
-                ? QVariant::fromValue(e.m_item) : QVariant { };
+                ? QVariant::fromValue(e->m_item) : QVariant { };
     case ColorPointerRole:
         return QVariant::fromValue((m_mode == Mode::ConsistsOf)
-                                   ? e.m_color : e.m_item->defaultColor());
+                                   ? e->m_color : e->m_item->defaultColor());
     case QuantityRole:
-        return std::max(0, e.m_quantity);
+        return std::max(0, e->m_quantity);
     case NameRole:
-        return e.m_item->name();
+        return e->m_item->name();
     case IdRole:
-        return e.m_item->id();
+        return e->m_item->id();
     case ColorNameRole:
-        return e.m_color ? e.m_color->name() : QString { };
+        return e->m_color ? e->m_color->name() : QString { };
     default:
         return { };
     }
@@ -1150,6 +1209,17 @@ QVariant InternalInventoryModel::headerData(int section, Qt::Orientation orient,
         }
     }
     return { };
+}
+
+Qt::ItemFlags InternalInventoryModel::flags(const QModelIndex &index) const
+{
+    auto flags = QAbstractItemModel::flags(index);
+    const Entry *e = entry(index);
+    if (e && e->isSection()) {
+        flags.setFlag(Qt::ItemIsSelectable, false);
+        flags.setFlag(Qt::ItemIsEnabled, false);
+    }
+    return flags;
 }
 
 QHash<int, QByteArray> InternalInventoryModel::roleNames() const
@@ -1189,22 +1259,25 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     const auto e1 = iim->entry(left);
     const auto e2 = iim->entry(right);
 
-    if (!e1.m_item)
+    if (e1 && e1->isSection() && e2 && e2->isSection())
+        return e1->m_sectionTitle.localeAwareCompare(e2->m_sectionTitle);
+
+    if (!e1 || !e1->m_item)
         return true;
-    else if (!e2.m_item)
+    else if (!e2 || !e2->m_item)
         return false;
     else {
         switch (left.column()) {
         default:
         case InventoryModel::QuantityColumn:
-            return e1.m_quantity < e2.m_quantity;
+            return e1->m_quantity < e2->m_quantity;
         case InventoryModel::ItemIdColumn:
-            return (Utility::naturalCompare(QString::fromLatin1(e1.m_item->id()),
-                                            QString::fromLatin1(e2.m_item->id())) < 0);
+            return (Utility::naturalCompare(QString::fromLatin1(e1->m_item->id()),
+                                            QString::fromLatin1(e2->m_item->id())) < 0);
         case InventoryModel::ItemNameColumn:
-            return (Utility::naturalCompare(e1.m_item->name(), e2.m_item->name()) < 0);
+            return (Utility::naturalCompare(e1->m_item->name(), e2->m_item->name()) < 0);
         case InventoryModel::ColorColumn:
-            return !e1.m_color ? true : (!e2.m_color ? false : e1.m_color->name() < e2.m_color->name());
+            return !e1->m_color ? true : (!e2->m_color ? false : e1->m_color->name() < e2->m_color->name());
         }
     }
 }
@@ -1213,6 +1286,15 @@ InternalInventoryModel::Entry::Entry(const Item *item, const Color *color, int q
     : m_item(item)
     , m_color(color)
     , m_quantity(quantity)
+{ }
+
+InternalInventoryModel::Entry::~Entry()
+{
+    qDeleteAll(m_sectionEntries);
+}
+
+InternalInventoryModel::Entry::Entry(const QString &sectionTitle)
+    : m_sectionTitle(sectionTitle)
 { }
 
 } // namespace BrickLink
