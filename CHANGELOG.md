@@ -1,7 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2023.3.1] - 2023-03-21
+
+This release comes with a lot of bug fixes, the most important ones being:
+- Loading documents containing items that had their ids renamed more than once during their lifetime could potentially send BrickStore into an infinite loop, trying to resolve the id changes.
+- The order import mechanism was implemented on the assumption that the order date never changes. It does however update with each new batch addition, leading to duplicate order entries.
+
+As for new features:
+- The BrickStore database does now incorporate the relationship data (e.g. _Similar Parts with Different Molds_) from BrickLink. This data is available in the UI in the same way as the _appears in_ and _consists of_ data.
+- The _appears in_ and _consists of_ lists will default to "any color", if no color is selected in the add-item dialog.
+- In case BrickStore doesn't startup correctly anymore, you can now hold down `SHIFT` while launching and BrickStore will start in a clean state by re-downloading the latests database and not restoring any documents.
 
 
 ## [2023.2.1] - 2023-02-24
@@ -507,7 +516,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.2.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.3.1...HEAD
+[2023.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.1
 [2023.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.2.1
 [2022.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.2
 [2022.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.1
