@@ -96,6 +96,10 @@ if (BS_DESKTOP)
     )
 endif()
 
+if (MODELTEST)
+    target_link_libraries(bricklink_module PRIVATE Qt6::Test)
+endif()
+
 if (BRICKLINK_AFFILIATE_API_KEY)
     set_source_files_properties(priceguide.cpp PROPERTIES COMPILE_DEFINITIONS
         BS_BRICKLINK_AFFILIATE_API_KEY=${BRICKLINK_AFFILIATE_API_KEY}

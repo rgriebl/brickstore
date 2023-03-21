@@ -183,9 +183,8 @@ if (SENTRY)
 endif()
 
 if (MODELTEST)
-    find_package(Qt6 REQUIRED TestLib)
+    find_package(Qt6 REQUIRED Test)
     add_compile_definitions(MODELTEST)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::TestLib)
 endif()
 
 if (NOT APPLE AND NOT WIN32 AND NOT ANDROID)

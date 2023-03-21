@@ -84,6 +84,10 @@ if (SENTRY)
     target_link_libraries(common_module PRIVATE sentry::sentry)
 endif()
 
+if (MODELTEST)
+    target_link_libraries(common_module PRIVATE Qt6::Test)
+endif()
+
 qt_add_qml_module(common_module
     URI BrickStore
     VERSION 1.0

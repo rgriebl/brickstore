@@ -144,4 +144,8 @@ if (MACOS)
     )
 endif()
 
+if (MODELTEST)
+    target_link_libraries(desktop_module PRIVATE Qt6::Test)
+endif()
+
 target_link_libraries(${PROJECT_NAME} PRIVATE desktop_module)
