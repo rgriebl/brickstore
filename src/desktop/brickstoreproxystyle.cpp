@@ -46,6 +46,9 @@ void BrickStoreProxyStyle::polish(QWidget *w)
             || qobject_cast<QSpinBox *>(w)) {
         w->installEventFilter(this);
 
+    } else if (qobject_cast<QAbstractItemView *>(w)) {
+        w->setMouseTracking(true);
+
     } else if (qobject_cast<QMenu *>(w)) {
         // SH_Menu_Scrollable is checked early in the QMenu constructor,
         // so we need to force an re-evaluation
