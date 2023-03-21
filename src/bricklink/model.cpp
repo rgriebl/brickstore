@@ -1114,7 +1114,7 @@ QModelIndex InternalInventoryModel::parent(const QModelIndex &index) const
     if (!e)
         return { };
 
-    return createIndex(m_entries.indexOf(e), 0, e);
+    return createIndex(int(m_entries.indexOf(e)), 0, e);
 }
 
 const InternalInventoryModel::Entry *InternalInventoryModel::entry(const QModelIndex &idx) const
