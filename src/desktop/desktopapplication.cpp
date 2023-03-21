@@ -142,6 +142,19 @@ void DesktopApplication::init()
     // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();
 
+    new EventFilter(qApp, { QEvent::MouseButtonPress, QEvent::MouseButtonRelease },
+                    [](QObject *o, QEvent *e) -> EventFilter::Result {
+        const auto *me = static_cast<QMouseEvent *>(e);
+        if (me->button() == Qt::ForwardButton || me->button() == Qt::BackButton) {
+            QKeyEvent ke(me->type() == QEvent::MouseButtonPress ? QEvent::KeyPress : QEvent::KeyRelease,
+                         me->button() == Qt::ForwardButton ? Qt::Key_Forward : Qt::Key_Back,
+                         Qt::NoModifier);
+            QCoreApplication::sendEvent(o, &ke);
+            return EventFilter::StopEventProcessing;
+        }
+        return EventFilter::ContinueEventProcessing;
+    });
+
     ScriptManager::create(m_engine);
 
     MainWindow::inst()->show();
