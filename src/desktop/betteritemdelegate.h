@@ -24,12 +24,16 @@ public:
                const QModelIndex &index) const override;
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
+    void setSectionHeaderRole(int role);
+    int sectionHeaderRole() const;
+
 protected:
     void extendedPaint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index,
                        const std::function<void ()> &paintCallback = { }) const;
 
 protected:
     Options m_options;
+    int m_sectionHeaderRole = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(BetterItemDelegate::Options)

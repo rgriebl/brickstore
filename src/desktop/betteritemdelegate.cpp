@@ -26,13 +26,25 @@ QSize BetterItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
     return QStyledItemDelegate::sizeHint(option, index) + ext;
 }
 
+void BetterItemDelegate::setSectionHeaderRole(int role)
+{
+    m_sectionHeaderRole = role;
+}
+
+int BetterItemDelegate::sectionHeaderRole() const
+{
+    return m_sectionHeaderRole;
+}
+
 void BetterItemDelegate::extendedPaint(QPainter *painter, const QStyleOptionViewItem &option,
                                        const QModelIndex &index,
                                        const std::function<void()> &paintCallback) const
 {
     QStyleOptionViewItem myoption(option);
 
-    bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
+    bool isSectionHeader = m_sectionHeaderRole ? index.data(m_sectionHeaderRole).toBool() : false;
+    bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0)
+                                && !isSectionHeader;
 
     bool useFrameHover = false;
     bool useFrameSelection = false;
@@ -42,6 +54,12 @@ void BetterItemDelegate::extendedPaint(QPainter *painter, const QStyleOptionView
         useFrameHover = (option.state & QStyle::State_MouseOver);
         if (useFrameSelection)
             myoption.state &= ~QStyle::State_Selected;
+    } else if (isSectionHeader) {
+        myoption.state.setFlag(QStyle::State_MouseOver, false);
+        myoption.state.setFlag(QStyle::State_HasFocus, false);
+
+        myoption.font.setBold(true);
+        myoption.font.setItalic(true);
     }
 
     if ((m_options & AlwaysShowSelection) && (option.state & QStyle::State_Enabled))

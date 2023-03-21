@@ -135,7 +135,7 @@ void ItemThumbsDelegate::setZoomFactor(double zoom)
 
 QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (index.column() == 0) {
+    if ((index.column() == 0) && !index.data(IsSectionHeaderRole).toBool()) {
         const auto *item = qvariant_cast<const Item *>(index.data(ItemPointerRole));
         return (item ? item->itemType()->pictureSize() : QSize(80, 60)) * m_zoom;
     } else {
