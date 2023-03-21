@@ -1422,6 +1422,7 @@ LotList Orders::loadOrderLots(const Order *order) const
 
     auto finishGuard = qScopeGuard([this]() { d->m_loadXmlQuery.finish(); });
 
+    d->m_loadXmlQuery.exec();
     if (!d->m_loadXmlQuery.next())
         throw Exception("could not find order %1 in database").arg(order->id());
 
