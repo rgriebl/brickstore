@@ -169,7 +169,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_add->animateClick();
     });
     connect(w_select_color, &SelectColor::colorLockChanged,
-            w_select_item, &SelectItem::setColorFilter);
+            this, [this](const BrickLink::Color *color) {
+        w_select_item->setColorFilter(color);
+        recordBrowseEntry();
+    });
 
     connect(w_price, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
@@ -441,10 +444,24 @@ void AddItemDialog::attach(View *view)
 void AddItemDialog::goToItem(const BrickLink::Item *item, const BrickLink::Color *color)
 {
     if (item) {
+        m_currentlyRestoringBrowseHistory = true;
+
+        if (w_select_color->colorLock()) {
+            auto currentColor = w_select_color->currentColor();
+            if ((color && (color != currentColor))
+                || (!color && !item->hasKnownColor(currentColor))) {
+                w_select_color->setColorLock(false);
+                w_select_item->setColorFilter(nullptr);
+            }
+        }
+
         w_select_item->clearFilter();
         w_select_item->setCurrentItem(item, true);
         if (color)
             w_select_color->setCurrentColorAndItem(color, item);
+
+        m_currentlyRestoringBrowseHistory = false;
+        recordBrowseEntry();
     }
 }
 
@@ -800,7 +817,7 @@ void AddItemDialog::recordBrowseEntry(bool onlyUpdateHistory)
             m_browseStack.prepend(he);
             if (m_browseStack.size() > MaxBrowseStack)
                 m_browseStack.resize(MaxBrowseStack);
-        } else if (color) {
+        } else {
             m_browseStack[m_browseStackIndex] = he;
         }
     }
@@ -811,6 +828,8 @@ void AddItemDialog::recordBrowseEntry(bool onlyUpdateHistory)
         m_browseHistory.prepend(he);
         if (m_browseHistory.size() > MaxBrowseHistory)
             m_browseHistory.resize(MaxBrowseHistory);
+    } else {
+        m_browseHistory[0] = he;
     }
 
     updateBrowseActions();

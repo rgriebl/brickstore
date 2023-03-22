@@ -695,13 +695,12 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 3) || (version > 4))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 4) || (version > 4))
         return false;
 
     qint8 itt;
     uint cat;
     QString itemid;
-    QByteArray filterState;
     QString filterText;
     uint colorFilterId = BrickLink::Color::InvalidId;
     double zoom;
@@ -710,12 +709,8 @@ bool SelectItem::restoreState(const QByteArray &ba)
     bool itemSortAsc;
     int itemSortColumn;
 
-    ds >> itt >> cat >> itemid;
-    if (version == 3)
-        ds >> filterState;
-    else
-        ds >> filterText >> colorFilterId;
-    ds >> zoom >> viewMode >> catSortAsc >> itemSortAsc >> itemSortColumn;
+    ds >> itt >> cat >> itemid >> filterText >> colorFilterId
+       >> zoom >> viewMode >> catSortAsc >> itemSortAsc >> itemSortColumn;
 
     if (ds.status() != QDataStream::Ok)
         return false;
@@ -729,20 +724,25 @@ bool SelectItem::restoreState(const QByteArray &ba)
 
     // we need to reset the filter before setCurrentItem ... otherwise we might not be able to
     // find the item in the model
-    if (version == 3) {
-        if (!filterState.isEmpty() && d->w_filter->restoreState(filterState))
-            applyFilter();
-        // v3 forgot to save the color filter
-        // v3 also saved the completer history in the filter edit
-    } else {
+    {
+        QSignalBlocker blocked(this);
+
         d->w_filter->setText(filterText);
-        applyFilter();
-        setColorFilter((colorFilterId == BrickLink::Color::InvalidId)
-                       ? nullptr : BrickLink::core()->color(colorFilterId));
+        d->m_filter_delay->stop();
+        d->itemModel->setFilterText(filterText);
+
+        auto color = (colorFilterId == BrickLink::Color::InvalidId)
+                         ? nullptr : BrickLink::core()->color(colorFilterId);
+        d->m_colorFilter = color;
+        d->itemModel->setFilterColor(color);
+
+        if (d->itemModel->isFilterDelayEnabled())
+            d->itemModel->invalidateFilterNow();
     }
 
     if (!itemid.isEmpty())
         setCurrentItem(BrickLink::core()->item(itt, itemid.toLatin1()), false);
+
     setZoomFactor(zoom);
     setViewMode(viewMode);
     d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
