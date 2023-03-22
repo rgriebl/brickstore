@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+
+## [2023.3.2] - 2023-03-22
+
+This is just a quick bug fix release:
+- Importing orders is completely broken in 2023.3.1
+- Using the color-lock feature in the add-item dialog could mess up both the history navigation and the go-to-item functionality of the relationship view.
+- Double-clicking an item relationship will now jump to that item, instead of trying to part it out. This makes browsing the catalog in the add-item dialog much more convenient with all the new item relationships. The part-out functionality is still available via the context menu.
+- In addition to browser back and forward keys on a keyboard, mice with forward and back buttons are now also supported for history navigation in the add-item dialog.
+
+
 ## [2023.3.1] - 2023-03-21
 
 This release comes with a lot of bug fixes, the most important ones being:
@@ -516,7 +528,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.3.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.3.2...HEAD
+[2023.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.2
 [2023.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.1
 [2023.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.2.1
 [2022.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2022.11.2
