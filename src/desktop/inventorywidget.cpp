@@ -41,6 +41,7 @@ public:
     QAction *m_catalogAction;
     QAction *m_priceGuideAction;
     QAction *m_lotsForSaleAction;
+    QAction *m_activateAction = nullptr;
 };
 
 InventoryWidget::InventoryWidget(QWidget *parent)
@@ -114,6 +115,7 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     d->m_partOutAction->setIcon(QIcon::fromTheme(u"edit-partoutitems"_qs));
     connect(d->m_partOutAction, &QAction::triggered,
             this, &InventoryWidget::partOut);
+    d->m_activateAction = d->m_partOutAction;
 
     d->m_catalogAction = new QAction(this);
     d->m_catalogAction->setObjectName(u"appearsin_bl_catalog"_qs);
@@ -167,8 +169,11 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
         }
     });
 
-    connect(d->m_view, &QAbstractItemView::doubleClicked,
-            this, &InventoryWidget::partOut);
+    connect(d->m_view, &QAbstractItemView::activated,
+            this, [this]() {
+        if (d->m_activateAction)
+            d->m_activateAction->trigger();
+    });
 
     languageChange();
     updateModel({ });
@@ -294,6 +299,12 @@ bool InventoryWidget::restoreState(const QByteArray &ba)
     setMode(validModes.contains(mode) ? static_cast<Mode>(mode) : Mode::AppearsIn);
 
     return true;
+}
+
+void InventoryWidget::setActivateAction(QAction *action)
+{
+    if (actions().contains(action))
+        d->m_activateAction = action;
 }
 
 QCoro::Task<> InventoryWidget::partOut()

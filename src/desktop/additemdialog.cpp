@@ -101,6 +101,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             goToItem(selected.m_item, selected.m_color);
     });
     w_inventory->addAction(m_invGoToAction);
+    w_inventory->setActivateAction(m_invGoToAction);
 
     w_qty->setRange(1, DocumentModel::maxQuantity);
     w_qty->setValue(1);

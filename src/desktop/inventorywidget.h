@@ -38,6 +38,8 @@ public:
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
 
+    void setActivateAction(QAction *action);
+
 signals:
     void customActionTriggered();
 

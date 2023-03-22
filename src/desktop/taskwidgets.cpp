@@ -303,6 +303,8 @@ TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
             MainWindow::inst()->showAddItemDialog(sel.m_item, sel.m_color);
     });
     addAction(m_invGoToAction);
+    setActivateAction(m_invGoToAction);
+
     languageChange();
 
     restoreState(Config::inst()->value(u"MainWindow/TaskInventory/State"_qs).toByteArray());
