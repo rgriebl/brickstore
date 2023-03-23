@@ -663,6 +663,7 @@ void ItemModel::setFilterText(const QString &filter)
 
     QString quoted;
     bool quotedNegate = false;
+    QVector<const void *> scanOrder;
 
     for (const auto &s : sl) {
         if (s.isEmpty())
@@ -716,6 +717,24 @@ void ItemModel::setFilterText(const QString &filter)
                 }
                 m_filter_ids.first = negate;
 
+            } else if (str.startsWith(u"scan:") && (sl.size() == 1) && !negate) {
+                str = str.mid(u"scan:"_qs.length());
+                const auto ids = str.split(u","_qs);
+
+                // This is a bit of a hack to get a fixed sort order, when the internal filter
+                // "scan:" is used. It has to be the only filter expression though, and it
+                // cannot be negated.
+
+                for (const auto &id : ids) {
+                    if (id.length() < 2)
+                        continue;
+                    if (auto item = core()->item(id.at(0).toLatin1(), id.mid(1).toLatin1())) {
+                        m_filter_ids.second << item;
+                        scanOrder << item;
+                    }
+                }
+                m_filter_ids.first = negate;
+
             } else {
                 const bool firstIsQuote = str.startsWith(u"\"");
                 const bool lastIsQuote = str.endsWith(u"\"");
@@ -734,6 +753,8 @@ void ItemModel::setFilterText(const QString &filter)
 
     emit isFilteredChanged();
     invalidateFilter();
+
+    setFixedSortOrder(scanOrder);
 }
 
 bool ItemModel::filterWithoutInventory() const

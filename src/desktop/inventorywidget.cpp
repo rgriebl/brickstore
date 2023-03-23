@@ -82,7 +82,7 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
         b->setChecked(false);
         b->setAutoExclusive(true);
         b->setAutoRaise(true);
-        b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+        b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         connect(b, &QToolButton::toggled, b, [b](bool checked) {
             b->setToolButtonStyle(checked ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonIconOnly);
             b->setToolTip(checked ? QString { } : b->text());

@@ -152,11 +152,12 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
 {
     init();
 
-    if ((column == lastSortColumn) && (order == lastSortOrder))
+    if ((column == lastSortColumn) && (order == lastSortOrder) && !fixedSortOrder)
         return;
 
     lastSortColumn = column;
     lastSortOrder = order;
+    fixedSortOrder = false;
 
     int n = pointerCount();
     if (n < 2)
@@ -196,6 +197,57 @@ int StaticPointerModel::sortColumn() const
 Qt::SortOrder StaticPointerModel::sortOrder() const
 {
     return lastSortOrder;
+}
+
+void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrder)
+{
+    if (fixedSortOrder && fixedOrder.isEmpty()) {
+        sort(lastSortColumn, lastSortOrder);
+        return;
+    }
+
+    init();
+
+    fixedSortOrder = true;
+
+    int n = pointerCount();
+    if (n < 2)
+        return;
+
+    QHash<const void *, qsizetype> hash;
+    qsizetype nextIndex = 0;
+    for (const auto &ptr : fixedOrder)
+        hash.insert(ptr, nextIndex++);
+
+    emit layoutAboutToBeChanged({ }, VerticalSortHint);
+    QModelIndexList before = persistentIndexList();
+
+    qParallelSort(sorted.begin(), sorted.end(),
+                  [hash, this](int r1, int r2) {
+                      const void *pointer1 = pointerAt(r1);
+                      const void *pointer2 = pointerAt(r2);
+                      auto pos1 = hash.value(pointer1, -1);
+                      auto pos2 = hash.value(pointer2, -1);
+
+                      if (pos1 >= 0 && pos2 >= 0)
+                          return (pos1 < pos2);
+                      else if (pos1 >= 0)
+                          return true;
+                      else if (pos2 >= 0)
+                          return false;
+                      else
+                          return lessThan(pointer1, pointer2, lastSortColumn);
+                  });
+
+    if (filterDelayTimer && filterDelayTimer->isActive())
+        filterDelayTimer->stop();
+    invalidateFilterInternal();
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(pointer(idx), idx.column()));
+    changePersistentIndexList(before, after);
+    emit layoutChanged({ }, VerticalSortHint);
 }
 
 

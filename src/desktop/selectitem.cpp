@@ -38,6 +38,7 @@
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
+#include "desktop/itemscannerdialog.h"
 #include "desktopuihelpers.h"
 #include "historylineedit.h"
 #include "selectitem.h"
@@ -65,6 +66,7 @@ public:
     QListView *      w_thumbs;
     HistoryLineEdit *w_filter;
     QToolButton *    w_pcc;
+    QToolButton *    w_itemScan;
     QToolButton *    w_dateFilter;
     QToolButton *    w_zoomLevel;
     QButtonGroup *   w_viewmode;
@@ -239,6 +241,33 @@ void SelectItem::init()
                 setCurrentItem(pcc->item(), true);
                 if (pcc->color())
                     emit showInColor(pcc->color());
+            }
+        }
+    });
+
+    d->w_itemScan = new QToolButton;
+    d->w_itemScan->setIcon(QIcon::fromTheme(u"camera-photo"_qs));
+    d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
+    d->w_itemScan->setAutoRaise(true);
+    connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
+        ItemScannerDialog isd(currentItemType(), this);
+        if (isd.exec() == QDialog::Accepted) {
+            auto items = isd.items();
+
+            if (!items.isEmpty()) {
+                const BrickLink::Item *oldItem = currentItem();
+                d->w_items->clearSelection();
+
+                QStringList filter;
+                filter.reserve(items.size());
+                for (const auto *item : items) {
+                    QString s = QLatin1Char(item->itemTypeId()) + QString::fromLatin1(item->id());
+                    filter << s;
+                }
+                d->w_filter->setText(u"scan:" + filter.join(u','));
+                applyFilter();
+                if (d->itemModel->index(oldItem).isValid())
+                    setCurrentItem(oldItem, false);
             }
         }
     });
@@ -445,6 +474,8 @@ void SelectItem::init()
     viewlay->setSpacing(0);
     viewlay->addWidget(d->w_filter);
     viewlay->addWidget(d->w_pcc);
+    viewlay->addSpacing(5);
+    viewlay->addWidget(d->w_itemScan);
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomLevel);
     viewlay->addSpacing(11);
@@ -494,6 +525,7 @@ void SelectItem::languageChange()
         b->setToolTip(ActionManager::toolTipLabel(text, b->shortcut()));
     };
     setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
+    setToolTipOnButton(d->w_itemScan, tr("Find a part using a webcam"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
 }

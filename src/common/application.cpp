@@ -40,6 +40,7 @@
 #include "common/document.h"
 #include "common/documentio.h"
 #include "common/documentlist.h"
+#include "common/itemscanner.h"
 #include "common/onlinestate.h"
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
@@ -314,6 +315,8 @@ void Application::afterInit()
                                        []() { Currency::inst()->updateRates(true /*silent*/); });
 
     QMetaObject::invokeMethod(this, [this]() { setupLDraw(); }, Qt::QueuedConnection);
+
+    ItemScanner::inst();
 }
 
 QCoro::Task<> Application::restoreLastSession()

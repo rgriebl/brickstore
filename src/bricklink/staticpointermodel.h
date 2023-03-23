@@ -49,6 +49,8 @@ protected:
     QModelIndex index(const void *pointer, int column = 0) const;
     const void *pointer(const QModelIndex &index) const;
 
+    void setFixedSortOrder(const QVector<const void *> &fixedOrder);
+
 private:
     void init() const;
     void invalidateFilterDelayed();
@@ -58,6 +60,7 @@ private:
     QVector<int> filtered;
     int lastSortColumn = -1;
     Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
+    bool fixedSortOrder = false;
     bool filterDelayEnabled = false;
     QTimer *filterDelayTimer = nullptr;
 };

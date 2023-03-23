@@ -15,12 +15,12 @@ env:
   BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
-      qt6-gtk-platformtheme libqt6svg6
+      qt6-gtk-platformtheme libqt6svg6 qt6-multimedia-dev
       qt6-image-formats-plugins
       qml6-module-qt5compat-graphicaleffects
       qml6-module-qtqml-workerscript qml6-module-quick3d
   BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
-      qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats
+      qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats qtmultimedia
 
 on:
   workflow_dispatch:
@@ -234,7 +234,8 @@ jobs:
       if: (matrix.config.os == 'linux') && matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 libxcb-\*
+            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-\* libpulse-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
             ${{ matrix.config.cmake_extra_config }} -B build -S .

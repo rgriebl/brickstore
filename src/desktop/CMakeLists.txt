@@ -61,6 +61,8 @@ qt_add_library(desktop_module STATIC
     incdecpricesdialog.h
     inventorywidget.cpp
     inventorywidget.h
+    itemscannerdialog.h
+    itemscannerdialog.cpp
     mainwindow.cpp
     mainwindow.h
     managecolumnlayoutsdialog.cpp
@@ -128,6 +130,8 @@ target_link_libraries(desktop_module PRIVATE
     Qt6::PrintSupport
     Qt6::Qml
     Qt6::Quick
+    Qt6::Multimedia
+    Qt6::MultimediaWidgets
     QCoro6::Network
     QCoro6::Core
     common_module
