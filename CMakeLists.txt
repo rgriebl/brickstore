@@ -333,6 +333,7 @@ if (APPLE)
         set(MACOS_RESOURCES
             assets/generated-app-icons/brickstore.icns
             assets/generated-app-icons/brickstore_doc.icns
+            macos/macos.entitlements
         )
         target_sources(${PROJECT_NAME} PUBLIC ${MACOS_RESOURCES})
         set_source_files_properties(${MACOS_RESOURCES} PROPERTIES

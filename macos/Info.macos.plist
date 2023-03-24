@@ -35,6 +35,9 @@
     <key>CFBundleVersion</key>
     <string>@BUILD_NUMBER@</string>
 
+    <key>NSCameraUsageDescription</key>
+    <string>BrickStore needs access to your camera, if you want to identify parts with it.</string>
+
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
