@@ -30,6 +30,8 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     : QDialog(parent)
 {
     setWindowTitle(tr("Item Scanner"));
+    setSizeGripEnabled(true);
+
     const auto allCameraDevices = QMediaDevices::videoInputs();
     const auto allBackends = ItemScanner::inst()->availableBackends();
 
@@ -68,6 +70,9 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     }
 
     m_viewFinder = new QVideoWidget;
+    int videoWidth = logicalDpiX() * 3; // ~7.5cm on-screen
+    m_viewFinder->setMinimumSize(videoWidth, videoWidth * 9 / 16);
+    m_viewFinder->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_viewFinder->installEventFilter(this);
 
     m_captureSession = new QMediaCaptureSession(this);
