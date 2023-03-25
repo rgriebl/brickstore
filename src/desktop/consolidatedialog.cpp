@@ -26,6 +26,7 @@ QString ConsolidateDialog::s_baseConfigPath = u"MainWindow/ConsolidateDialog/"_q
 ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolidate> &list, bool addItems)
     : QWizard(view)
     , m_addingItems(addItems)
+    , m_view(view)
     , m_list(list)
 {
     m_documentLots = view->model()->lots();
@@ -73,15 +74,6 @@ ConsolidateDialog::ConsolidateDialog(View *view, QVector<DocumentModel::Consolid
             + w_individualDestination->horizontalScrollBar()->sizeHint().height()
             + w_individualDestination->frameWidth() * 2;
     w_individualDestination->setMinimumHeight(listHeight);
-
-    headerView->restoreState(view->headerView()->saveState());
-    headerView->showSection(DocumentModel::Index);
-    if (headerView->visualIndex(DocumentModel::Index) != 0)
-        headerView->moveSection(headerView->visualIndex(DocumentModel::Index), 0);
-    for (auto field : { DocumentModel::Category, DocumentModel::ItemType,
-         DocumentModel::TotalWeight, DocumentModel::YearReleased, DocumentModel::Weight }) {
-        headerView->hideSection(field);
-    }
 
     w_individualMoreOptions->setExpandingWidget(w_individualFieldMergeModes);
     w_individualMoreOptions->setResizeTopLevelOnExpand(true);
@@ -337,7 +329,26 @@ void ConsolidateDialog::showIndividualMerge(int idx)
 
     DocumentModel *docModel = DocumentModel::createTemporary(c.lots, fakeIndexes);
     docModel->setParent(this);
+
+    if (!w_individualDestination->model()) {
+        // copy the header settings once when we first set a model
+        auto headerView = static_cast<HeaderView *>(w_individualDestination->horizontalHeader());
+        headerView->restoreState(m_view->headerView()->saveState());
+        headerView->setConfigurable(false);
+
+        // make sure index is visible as the first column
+        headerView->showSection(DocumentModel::Index);
+        if (headerView->visualIndex(DocumentModel::Index) != 0)
+            headerView->moveSection(headerView->visualIndex(DocumentModel::Index), 0);
+
+        // hide all columns that do not make sense for consolidation
+        for (auto field : { DocumentModel::Category, DocumentModel::ItemType,
+             DocumentModel::TotalWeight, DocumentModel::YearReleased, DocumentModel::Weight }) {
+            headerView->hideSection(field);
+        }
+    }
     w_individualDestination->setModel(docModel);
+    w_individualDestination->resizeColumnToContents(0);
 
     int selectedIndex = (c.destinationIndex >= 0) ? c.destinationIndex : calculateIndex(c, destination);
 

@@ -30,9 +30,8 @@ public:
 
     QVector<int> visualColumnOrder() const;
 
-private:
-    bool restoreLayout(const QByteArray &config);
-    QByteArray saveLayout() const;
+    bool isConfigurable() const;
+    void setConfigurable(bool configurable);
 
 signals:
     void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &sortColumns);
@@ -57,4 +56,5 @@ private:
     QHash<int, int> m_hiddenSizes;
     QVector<QPair<int, Qt::SortOrder>> m_sortColumns;
     bool m_isSorted = false;
+    bool m_isConfigurable = false;
 };

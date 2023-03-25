@@ -379,11 +379,10 @@ View::View(Document *document, QWidget *parent)
 
     m_table = new TableView(this);
     m_header = new HeaderView(Qt::Horizontal, m_table);
-    m_header->setSectionsClickable(true);
-    m_header->setSectionsMovable(true);
+    m_header->setConfigurable(true);
     m_header->setHighlightSections(false);
-    m_table->setHorizontalHeader(m_header);
     m_header->setSortIndicatorShown(false);
+    m_table->setHorizontalHeader(m_header);
     m_table->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->setAlternatingRowColors(true);

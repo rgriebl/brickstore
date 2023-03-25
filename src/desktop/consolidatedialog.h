@@ -48,6 +48,7 @@ private:
 
     BrickLink::LotList m_documentLots;
     BrickLink::LotList m_documentSortedLots;
+    View *m_view;
 
     QVector<DocumentModel::Consolidate> &m_list;
 
