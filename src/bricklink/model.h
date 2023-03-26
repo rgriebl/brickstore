@@ -25,6 +25,7 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
@@ -40,10 +41,15 @@ public:
     const QVector<const Color *> colorListFilter() const;
     void setColorListFilter(const QVector<const Color *> &colorList);
 
+    void pinId(uint colorId, bool down = true);
+    void setPinnedIds(const QSet<uint> &colorIds);
+    QSet<uint> pinnedIds() const;
+
 signals:
     void colorTypeFilterChanged();
     void popularityFilterChanged();
     void colorListFilterChanged();
+    void pinnedIdsChanged();
 
 protected:
     int pointerCount() const override;
@@ -51,12 +57,13 @@ protected:
     int pointerIndexOf(const void *pointer) const override;
 
     bool filterAccepts(const void *pointer) const override;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column, Qt::SortOrder order) const override;
 
 private:
     ColorType m_colorTypeFilter {};
     float m_popularityFilter = 0.f;
     QVector<const Color *> m_colorListFilter;
+    QSet<uint> m_pinnedColorIds;
 
     friend class Core;
 };
@@ -77,6 +84,7 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
@@ -90,17 +98,25 @@ public:
     bool filterWithoutInventory() const;
     void setFilterWithoutInventory(bool on);
 
+    void pinId(uint categoryId, bool down = true);
+    void setPinnedIds(const QSet<uint> &colorIds);
+    QSet<uint> pinnedIds() const;
+
+signals:
+    void pinnedIdsChanged();
+
 protected:
     int pointerCount() const override;
     const void *pointerAt(int index) const override;
     int pointerIndexOf(const void *pointer) const override;
 
     bool filterAccepts(const void *pointer) const override;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column, Qt::SortOrder order) const override;
 
 private:
     const ItemType *m_itemtype_filter = nullptr;
     bool m_inv_filter = false;
+    QSet<uint> m_pinnedCategoryIds;
 
     friend class Core;
 };
@@ -135,7 +151,7 @@ protected:
     int pointerIndexOf(const void *pointer) const override;
 
     bool filterAccepts(const void *pointer) const override;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column, Qt::SortOrder order) const override;
 
 private:
     bool m_inv_filter = false;
@@ -190,7 +206,7 @@ protected:
     int pointerIndexOf(const void *pointer) const override;
 
     bool filterAccepts(const void *pointer) const override;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column, Qt::SortOrder order) const override;
 
 private:
     const ItemType *m_itemtype_filter = nullptr;

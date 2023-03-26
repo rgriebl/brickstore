@@ -82,8 +82,9 @@ class CategoryDelegate : public BrickLink::ItemDelegate
 {
     Q_OBJECT
 public:
-    CategoryDelegate(QObject *parent = nullptr)
-        : BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, parent)
+    CategoryDelegate(QAbstractItemView *parent)
+        : BrickLink::ItemDelegate(BetterItemDelegate::AlwaysShowSelection
+                                      | BetterItemDelegate::Pinnable, parent)
     { }
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
@@ -355,6 +356,14 @@ void SelectItem::init()
     d->itemTypeModel = new BrickLink::ItemTypeModel(this);
     d->categoryModel = new BrickLink::CategoryModel(this);
     d->itemModel = new BrickLink::ItemModel(this);
+
+    d->categoryModel->setPinnedIds(Config::inst()->pinnedCategoryIds());
+    connect(Config::inst(), &Config::pinnedCategoryIdsChanged, this, [this]() {
+        d->categoryModel->setPinnedIds(Config::inst()->pinnedCategoryIds());
+    });
+    connect(d->categoryModel, &BrickLink::CategoryModel::pinnedIdsChanged, this, [this]() {
+        Config::inst()->setPinnedCategoryIds(d->categoryModel->pinnedIds());
+    });
 
     d->w_item_types->setModel(d->itemTypeModel);
     d->w_categories->setModel(d->categoryModel);

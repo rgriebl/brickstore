@@ -15,7 +15,7 @@ class ItemDelegate : public BetterItemDelegate
 {
     Q_OBJECT
 public:
-    ItemDelegate(Options options = None, QObject *parent = nullptr);
+    ItemDelegate(Options options = None, QAbstractItemView *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;

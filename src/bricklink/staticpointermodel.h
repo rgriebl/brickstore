@@ -22,6 +22,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
+    void forceSort();
 
     int sortColumn() const;
     Qt::SortOrder sortOrder() const;
@@ -30,6 +31,7 @@ public:
 
     bool isFilterDelayEnabled() const;
     void setFilterDelayEnabled(bool enabled);
+
 
 public slots:
     void invalidateFilter();
@@ -44,7 +46,7 @@ protected:
     virtual int pointerIndexOf(const void *pointer) const = 0;
 
     virtual bool filterAccepts(const void *pointer) const;
-    virtual bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+    virtual bool lessThan(const void *pointer1, const void *pointer2, int column, Qt::SortOrder order) const;
 
     QModelIndex index(const void *pointer, int column = 0) const;
     const void *pointer(const QModelIndex &index) const;

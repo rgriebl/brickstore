@@ -14,7 +14,6 @@
 #include <QtGui/QIcon>
 
 #include "utility/utility.h"
-#include "utility/stopwatch.h"
 #include "bricklink/core.h"
 #include "bricklink/category.h"
 #include "bricklink/item.h"
@@ -96,8 +95,22 @@ QVariant ColorModel::data(const QModelIndex &index, int role) const
         }
     } else if (role == ColorPointerRole) {
         res.setValue(c);
+    } else if (role == PinnedRole) {
+        return m_pinnedColorIds.contains(c->id());
     }
     return res;
+}
+
+bool ColorModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && (role == PinnedRole)) {
+        if (auto c = color(index)) {
+            pinId(c->id(), value.toBool());
+            emit dataChanged(index, index, { PinnedRole });
+            return true;
+        }
+    }
+    return false;
 }
 
 QVariant ColorModel::headerData(int section, Qt::Orientation orient, int role) const
@@ -167,17 +180,52 @@ void ColorModel::setColorListFilter(const QVector<const Color *> &colorList)
     invalidateFilter();
 }
 
-bool ColorModel::lessThan(const void *p1, const void *p2, int /*column*/) const
+void ColorModel::pinId(uint colorId, bool down)
+{
+    auto countBefore = m_pinnedColorIds.count();
+
+    if (down)
+        m_pinnedColorIds.insert(colorId);
+    else
+        m_pinnedColorIds.remove(colorId);
+
+    if (m_pinnedColorIds.count() != countBefore) {
+        forceSort();
+        emit pinnedIdsChanged();
+    }
+}
+
+void ColorModel::setPinnedIds(const QSet<uint> &colorIds)
+{
+    if (m_pinnedColorIds != colorIds) {
+        m_pinnedColorIds = colorIds;
+        forceSort();
+        emit pinnedIdsChanged();
+    }
+}
+
+QSet<uint> ColorModel::pinnedIds() const
+{
+    return m_pinnedColorIds;
+}
+
+bool ColorModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt::SortOrder order) const
 {
     const auto *c1 = static_cast<const Color *>(p1);
     const auto *c2 = static_cast<const Color *>(p2);
+    bool asc = (order == Qt::AscendingOrder);
 
     if (!c1)
         return true;
     else if (!c2)
         return false;
     else {
-        if (sortOrder() == Qt::AscendingOrder) {
+        bool isPinned1 = m_pinnedColorIds.contains(c1->id());
+        bool isPinned2 = m_pinnedColorIds.contains(c2->id());
+        if (isPinned1 != isPinned2)
+            return asc ? (isPinned1 > isPinned2) : (isPinned1 < isPinned2);
+
+        if (asc) {
             return (c1->name().localeAwareCompare(c2->name()) < 0);
         } else {
             int lh, rh, ls, rs, lv, rv, d;
@@ -274,7 +322,23 @@ QVariant CategoryModel::data(const QModelIndex &index, int role) const
         res = c != AllCategories ? c->name() : tr("All Items");
     else if (role == CategoryPointerRole)
         res.setValue(c);
+    else if ((role == PinnedRole) && (c != AllCategories))
+        return m_pinnedCategoryIds.contains(c->id());
     return res;
+}
+
+bool CategoryModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && (role == PinnedRole)) {
+        if (auto c = category(index)) {
+            if (c != AllCategories) {
+                pinId(c->id(), value.toBool());
+                emit dataChanged(index, index, { PinnedRole });
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 QVariant CategoryModel::headerData(int section, Qt::Orientation orient, int role) const
@@ -327,18 +391,53 @@ void CategoryModel::setFilterWithoutInventory(bool b)
     invalidateFilter();
 }
 
-bool CategoryModel::lessThan(const void *p1, const void *p2, int /*column*/) const
+void CategoryModel::pinId(uint categoryId, bool down)
+{
+    auto countBefore = m_pinnedCategoryIds.count();
+
+    if (down)
+        m_pinnedCategoryIds.insert(categoryId);
+    else
+        m_pinnedCategoryIds.remove(categoryId);
+
+    if (m_pinnedCategoryIds.count() != countBefore) {
+        forceSort();
+        emit pinnedIdsChanged();
+    }
+}
+
+void CategoryModel::setPinnedIds(const QSet<uint> &categoryIds)
+{
+    if (m_pinnedCategoryIds != categoryIds) {
+        m_pinnedCategoryIds = categoryIds;
+        forceSort();
+        emit pinnedIdsChanged();
+    }
+}
+
+QSet<uint> CategoryModel::pinnedIds() const
+{
+    return m_pinnedCategoryIds;
+}
+
+bool CategoryModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt::SortOrder order) const
 {
     const auto *c1 = static_cast<const Category *>(p1);
     const auto *c2 = static_cast<const Category *>(p2);
-    bool asc = (sortOrder() == Qt::AscendingOrder);
+    bool asc = (order == Qt::AscendingOrder);
 
-    if (!c1 || c1 == AllCategories)
+    if (!c1 || c1 == AllCategories) {
         return asc;
-    else if (!c2 || c2 == AllCategories)
+    } else if (!c2 || c2 == AllCategories) {
         return !asc;
-    else
+    } else {
+        bool isPinned1 = m_pinnedCategoryIds.contains(c1->id());
+        bool isPinned2 = m_pinnedCategoryIds.contains(c2->id());
+        if (isPinned1 != isPinned2)
+            return asc ? (isPinned1 > isPinned2) : (isPinned1 < isPinned2);
+
         return c1->name().localeAwareCompare(c2->name()) < 0;
+    }
 }
 
 bool CategoryModel::filterAccepts(const void *pointer) const
@@ -455,7 +554,7 @@ void ItemTypeModel::setFilterWithoutInventory(bool b)
     invalidateFilter();
 }
 
-bool ItemTypeModel::lessThan(const void *p1, const void *p2, int /*column*/) const
+bool ItemTypeModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt::SortOrder /*order*/) const
 {
     const auto *i1 = static_cast<const ItemType *>(p1);
     const auto *i2 = static_cast<const ItemType *>(p2);
@@ -783,7 +882,7 @@ void ItemModel::setFilterYearRange(int minYear, int maxYear)
     invalidateFilter();
 }
 
-bool ItemModel::lessThan(const void *p1, const void *p2, int column) const
+bool ItemModel::lessThan(const void *p1, const void *p2, int column, Qt::SortOrder /*order*/) const
 {
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);

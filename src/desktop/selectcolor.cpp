@@ -13,6 +13,7 @@
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include "bricklink/delegate.h"
+#include "common/config.h"
 #include "selectcolor.h"
 
 class ColorTreeView : public QTreeView
@@ -64,10 +65,19 @@ SelectColor::SelectColor(QWidget *parent)
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
     w_colors->setRootIsDecorated(false);
-    w_colors->setItemDelegate(new BrickLink::ItemDelegate(BrickLink::ItemDelegate::AlwaysShowSelection, this));
-
+    w_colors->setItemDelegate(new BrickLink::ItemDelegate(BetterItemDelegate::AlwaysShowSelection
+                                                              | BetterItemDelegate::Pinnable, w_colors));
     m_colorModel = new BrickLink::ColorModel(this);
     m_colorModel->setFilterDelayEnabled(true);
+
+    m_colorModel->setPinnedIds(Config::inst()->pinnedColorIds());
+    connect(Config::inst(), &Config::pinnedColorIdsChanged, this, [this]() {
+        m_colorModel->setPinnedIds(Config::inst()->pinnedColorIds());
+    });
+    connect(m_colorModel, &BrickLink::ColorModel::pinnedIdsChanged, this, [this]() {
+        Config::inst()->setPinnedColorIds(m_colorModel->pinnedIds());
+    });
+
     w_colors->setModel(m_colorModel);
 
     w_colors->header()->setSortIndicatorShown(true);

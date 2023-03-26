@@ -27,6 +27,8 @@ public:
                      const QWidget *widget) const override;
     QSize sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &size,
                            const QWidget *widget) const override;
+    QRect subElementRect(SubElement element, const QStyleOption *option,
+                         const QWidget *widget) const override;
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;

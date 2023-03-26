@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QLocale>
 #include <QVector>
+#include <QSet>
 
 
 class Config : public QSettings
@@ -46,17 +47,36 @@ public:
 
     QVariantList availableLanguages() const;
     QString language() const;
+    void setLanguage(const QString &lang);
     QLocale::MeasurementSystem measurementSystem() const;
+    void setMeasurementSystem(QLocale::MeasurementSystem ms);
+
+    struct Translation {
+        QString language;
+        QString name;
+        QString localName;
+        QString flagPath;
+        QString author;
+        QString authorEmail;
+    };
+
+    QVector<Translation> translations() const;
 
     QString defaultCurrencyCode() const;
+    void setDefaultCurrencyCode(const QString &ccode);
 
     QString documentDir() const;
+    void setDocumentDir(const QString &dir);
     QString ldrawDir() const;
+    void setLDrawDir(const QString &dir);
     QString cacheDir() const;
 
     bool showInputErrors() const;
+    void setShowInputErrors(bool b);
     bool showDifferenceIndicators() const;
+    void setShowDifferenceIndicators(bool b);
     bool onlineStatus() const;
+    void setOnlineStatus(bool b);
 
     enum class PartOutMode {
         Ask,
@@ -80,20 +100,12 @@ public:
     static constexpr int MaxFilterHistory = 20;
 
     QString brickLinkUsername() const;
+    void setBrickLinkUsername(const QString &user);
     QString brickLinkPassword() const;
+    void setBrickLinkPassword(const QString &pass, bool doNotSave = false);
     QMap<QByteArray, int> updateIntervals() const;
     QMap<QByteArray, int> updateIntervalsDefault() const;
-
-    struct Translation {
-        QString language;
-        QString name;
-        QString localName;
-        QString flagPath;
-        QString author;
-        QString authorEmail;
-    };
-
-    QVector<Translation> translations() const;
+    void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
     enum class UISize {
         System,
@@ -104,11 +116,12 @@ public:
 
     UISize iconSize() const;
     void setIconSize(UISize iconSize);
-
     int fontSizePercent() const;
+    void setFontSizePercent(int p);
     int rowHeightPercent() const;
+    void setRowHeightPercent(int p);
     bool liveEditRowHeight() const;
-
+    void setLiveEditRowHeight(bool newLiveEditRowHeight);
     int columnSpacing() const;
     void setColumnSpacing(int newColumnSpacing);
 
@@ -116,6 +129,10 @@ public:
     QString columnLayoutName(const QString &id) const;
     int columnLayoutOrder(const QString &id) const;
     QStringList columnLayoutIds() const;
+    QString setColumnLayout(const QString &id, const QByteArray &layout);
+    bool deleteColumnLayout(const QString &id);
+    bool renameColumnLayout(const QString &id, const QString &name);
+    bool reorderColumnLayouts(const QStringList &ids);
 
     QVariantMap shortcuts() const;
     void setShortcuts(const QVariantMap &list);
@@ -142,35 +159,14 @@ public:
     Q_ENUM(UITheme)
 
     UITheme uiTheme() const;
-    UISize mobileUISize() const;
-
-public slots:
-    void setLanguage(const QString &lang);
-    void setMeasurementSystem(QLocale::MeasurementSystem ms);
-    void setDefaultCurrencyCode(const QString &ccode);
-
-    void setDocumentDir(const QString &dir);
-    void setLDrawDir(const QString &dir);
-
-    void setShowInputErrors(bool b);
-    void setShowDifferenceIndicators(bool b);
-    void setOnlineStatus(bool b);
-
-    void setBrickLinkUsername(const QString &user);
-    void setBrickLinkPassword(const QString &pass, bool doNotSave = false);
-    void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
-
-    void setFontSizePercent(int p);
-    void setRowHeightPercent(int p);
-
-    QString setColumnLayout(const QString &id, const QByteArray &layout);
-    bool deleteColumnLayout(const QString &id);
-    bool renameColumnLayout(const QString &id, const QString &name);
-    bool reorderColumnLayouts(const QStringList &ids);
-
     void setUITheme(Config::UITheme theme);
+    UISize mobileUISize() const;
     void setMobileUISize(Config::UISize size);
-    void setLiveEditRowHeight(bool newLiveEditRowHeight);
+
+    QSet<uint> pinnedColorIds() const;
+    void setPinnedColorIds(const QSet<uint> &colors);
+    QSet<uint> pinnedCategoryIds() const;
+    void setPinnedCategoryIds(const QSet<uint> &categories);
 
 signals:
     void languageChanged();
@@ -201,6 +197,9 @@ signals:
     void brickLinkCredentialsChanged();
     void columnSpacingChanged(int spacing);
     void liveEditRowHeightChanged(bool liveEdit);
+    void pinnedColorIdsChanged();
+    void pinnedCategoryIdsChanged();
+    void pinnedRecentFilesChanged();
 
 protected:
     bool parseTranslations() const;

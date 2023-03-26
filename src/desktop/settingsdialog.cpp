@@ -608,7 +608,7 @@ private:
 class ToolBarDelegate : public BetterItemDelegate
 {
 public:
-    ToolBarDelegate(Options options, QObject *parent);
+    ToolBarDelegate(Options options, QAbstractItemView *parent);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
@@ -620,7 +620,7 @@ private:
     QIcon m_deleteIcon;
 };
 
-ToolBarDelegate::ToolBarDelegate(Options options, QObject *parent)
+ToolBarDelegate::ToolBarDelegate(Options options, QAbstractItemView *parent)
     : BetterItemDelegate(options, parent)
     , m_deleteIcon(QIcon::fromTheme(u"window-close"_qs))
 { }
@@ -865,7 +865,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     m_tb_proxymodel->setSourceModel(m_tb_model);
     w_tb_actions->setModel(m_tb_proxymodel);
     w_tb_actions->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    w_tb_actions->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_tb_actions->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, w_tb_actions));
     w_tb_actions->expandAll();
     w_tb_actions->sortByColumn(0, Qt::AscendingOrder);
     w_tb_filter->addAction(QIcon::fromTheme(u"view-filter"_qs), QLineEdit::LeadingPosition);
@@ -876,7 +876,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_tb_toolbar->setModel(m_tb_actions);
     w_tb_toolbar->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     w_tb_toolbar->viewport()->setAttribute(Qt::WA_Hover);  // needed for the (x) button
-    w_tb_toolbar->setItemDelegate(new ToolBarDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_tb_toolbar->setItemDelegate(new ToolBarDelegate(BetterItemDelegate::AlwaysShowSelection, w_tb_toolbar));
 
     connect(w_tb_reset, &QPushButton::clicked, this, [this]() {
         m_tb_actions->resetToDefaults();
@@ -896,7 +896,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     m_sc_proxymodel->setSourceModel(m_sc_model);
     w_sc_list->setModel(m_sc_proxymodel);
     w_sc_list->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, this));
+    w_sc_list->setItemDelegate(new BetterItemDelegate(BetterItemDelegate::AlwaysShowSelection, w_sc_list));
     w_sc_list->expandAll();
     w_sc_list->sortByColumn(0, Qt::AscendingOrder);
     w_sc_filter->addAction(QIcon::fromTheme(u"view-filter"_qs), QLineEdit::LeadingPosition);

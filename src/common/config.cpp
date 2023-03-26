@@ -16,11 +16,10 @@
 #include <QDebug>
 #include <QKeySequence>
 #include <QFileInfo>
+#include <QMetaType>
 
 #include "config.h"
 
-#define XSTR(a) #a
-#define STR(a) XSTR(a)
 
 namespace {
 
@@ -56,6 +55,8 @@ Config::Config()
 
     m_bricklinkUsername = value(u"BrickLink/Login/Username"_qs).toString();
     m_bricklinkPassword = scramble(value(u"BrickLink/Login/Password"_qs).toString());
+
+    qRegisterMetaType<QSet<uint>>();
 }
 
 Config::~Config()
@@ -538,6 +539,32 @@ void Config::setMobileUISize(UISize size)
     if (mobileUISize() != size) {
         setValue(u"Interface/MobileUISize"_qs, int(size));
         emit mobileUISizeChanged(size);
+    }
+}
+
+QSet<uint> Config::pinnedColorIds() const
+{
+    return value(u"Pinning/ColorIds"_qs).value<QSet<uint>>();
+}
+
+void Config::setPinnedColorIds(const QSet<uint> &colors)
+{
+    if (colors != pinnedColorIds()) {
+        setValue(u"Pinning/ColorIds"_qs, QVariant::fromValue(colors));
+        emit pinnedColorIdsChanged();
+    }
+}
+
+QSet<uint> Config::pinnedCategoryIds() const
+{
+    return value(u"Pinning/CategoryIds"_qs).value<QSet<uint>>();
+}
+
+void Config::setPinnedCategoryIds(const QSet<uint> &categories)
+{
+    if (categories != pinnedCategoryIds()) {
+        setValue(u"Pinning/CategoryIds"_qs, QVariant::fromValue(categories));
+        emit pinnedCategoryIdsChanged();
     }
 }
 

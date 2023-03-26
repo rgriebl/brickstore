@@ -43,30 +43,47 @@ public:
             auto rf = RecentFiles::inst();
 
             int cnt = rf->count();
+            int pinCnt = 0;
+            bool lastPinned = false;
             for (int i = 0; i < cnt; ++i) {
                 QString fn = rf->data(rf->index(i, 0), RecentFiles::FileNameRole).toString();
                 QString dn = rf->data(rf->index(i, 0), RecentFiles::DirNameRole).toString();
+                bool pinned = rf->data(rf->index(i, 0), RecentFiles::PinnedRole).toBool();
 
                 QString s = fn + u" (" + dn + u")";
 #if !defined(Q_OS_MACOS)
                 if (i < 9)
                     s.prepend(QString(u"&%1   "_qs).arg(i + 1));
 #endif
-                addAction(s)->setData(i);
+                QIcon icon;
+                if (pinned) {
+                    icon = QIcon::fromTheme(u"window-pin"_qs);
+                    lastPinned = true;
+                    ++pinCnt;
+                } else if (lastPinned) {
+                    addSeparator();
+                    lastPinned = false;
+                }
+                addAction(icon, s)->setData(i);
             }
             if (!cnt) {
                 addAction(tr("No recent files"))->setEnabled(false);
             } else {
                 addSeparator();
-                addAction(tr("Clear recent files"))->setData(-1);
+                if (pinCnt)
+                    addAction(tr("Clear pinned files"))->setData(-2);
+                if (cnt > pinCnt)
+                    addAction(tr("Clear recent files"))->setData(-1);
             }
         });
         connect(this, &QMenu::triggered, this, [](QAction *a) {
-            auto index = a->data().toInt();
-            if (index >= 0)
-                RecentFiles::inst()->open(index);
-            else
-                RecentFiles::inst()->clear();
+            auto data = a->data().toInt();
+            if (data >= 0)
+                RecentFiles::inst()->open(data);
+            else if (data == -1)
+                RecentFiles::inst()->clearRecent();
+            else if (data == -2)
+                RecentFiles::inst()->clearPinned();
         });
     }
 

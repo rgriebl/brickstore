@@ -22,13 +22,16 @@ RecentFiles::RecentFiles(QObject *parent)
 
     auto config = Config::inst();
     int size = config->beginReadArray(u"RecentFiles"_qs);
-    size = std::clamp(size, 0, MaxRecentFiles);
-    m_pathsAndNames.reserve(size);
+    m_entries.reserve(size);
     for (int i = 0; i < size; ++i) {
         config->setArrayIndex(i);
         auto path = config->value(u"Path"_qs).toString();
         auto name = config->value(u"Name"_qs).toString();
-        m_pathsAndNames.append({ path, name });
+        auto pinned = config->value(u"Pinned"_qs).toBool();
+        m_entries.insert(pinned ? m_pinnedCount++ : m_entries.count(), { path, name, pinned });
+
+        if ((m_entries.count() - m_pinnedCount) >= MaxRecentFiles)
+            break;
     }
     config->endArray();
 }
@@ -39,11 +42,12 @@ void RecentFiles::save()
 
     auto config = Config::inst();
     config->beginWriteArray(u"RecentFiles"_qs);
-    for (int i = 0; i < m_pathsAndNames.size(); ++i) {
-        const auto &pan = m_pathsAndNames.at(i);
+    for (int i = 0; i < m_entries.size(); ++i) {
+        const auto &pan = m_entries.at(i);
         config->setArrayIndex(i);
-        config->setValue(u"Path"_qs, pan.first);
-        config->setValue(u"Name"_qs, pan.second);
+        config->setValue(u"Path"_qs, pan.path);
+        config->setValue(u"Name"_qs, pan.name);
+        config->setValue(u"Pinned"_qs, pan.pinned);
     }
     config->endArray();
 }
@@ -61,39 +65,85 @@ void RecentFiles::add(const QString &filePath, const QString &fileName)
 #if !defined(BS_MOBILE)
     absFilePath = QFileInfo(filePath).absoluteFilePath();
 #endif
+    auto it = std::find_if(m_entries.cbegin(), m_entries.cend(), [=](const auto &entry) {
+        return (entry.path == absFilePath) && (entry.name == fileName);
+    });
 
-    auto pan = std::make_pair(absFilePath, fileName);
-
-    int idx = int(m_pathsAndNames.indexOf(pan));
-    if (idx > 0) {
-        beginMoveRows({ }, idx, idx, { }, 0);
-        m_pathsAndNames.move(idx, 0);
-        endMoveRows();
-        save();
-    } else if (idx < 0) {
-        if (m_pathsAndNames.size() >= MaxRecentFiles) {
-            beginRemoveRows({ }, MaxRecentFiles - 1, count() - 1);
-            m_pathsAndNames.resize(MaxRecentFiles - 1);
+    if (it != m_entries.cend()) {
+        int idx = int(std::distance(m_entries.cbegin(), it));
+        if (idx < m_pinnedCount) {
+            if (beginMoveRows({ }, idx, idx, { }, 0)) {
+                m_entries.move(idx, 0);
+                endMoveRows();
+                save();
+            }
+        } else {
+            if (beginMoveRows({ }, idx, idx, { }, int(m_pinnedCount))) {
+                m_entries.move(idx, m_pinnedCount);
+                endMoveRows();
+                save();
+            }
+        }
+    } else {
+        if ((m_entries.size() - m_pinnedCount) >= MaxRecentFiles) {
+            beginRemoveRows({ }, int(m_pinnedCount) + MaxRecentFiles - 1, count() - 1);
+            m_entries.resize(m_pinnedCount + MaxRecentFiles - 1);
             endRemoveRows();
         }
-        beginInsertRows({ }, 0, 0);
-        m_pathsAndNames.prepend(pan);
+        beginInsertRows({ }, int(m_pinnedCount), int(m_pinnedCount));
+        m_entries.insert(m_pinnedCount, { absFilePath, fileName, false });
         endInsertRows();
         save();
     }
 }
 
-void RecentFiles::clear()
+void RecentFiles::pin(int row, bool down)
 {
-    beginRemoveRows({ }, 0, count() - 1);
-    m_pathsAndNames.clear();
+    if (m_entries.at(row).pinned == down)
+        return;
+
+    m_entries[row].pinned = down;
+
+    if (down) { // move to 0
+        ++m_pinnedCount;
+        if (beginMoveRows({ }, row, row, { }, 0)) {
+            m_entries.move(row, 0);
+            endMoveRows();
+            save();
+        }
+    } else { // move to --m_pinnedCount (note: overlap possible)
+        --m_pinnedCount;
+        if (beginMoveRows({ }, row, row, { }, int(m_pinnedCount) + 1)) {
+            m_entries.move(row, m_pinnedCount);
+            endMoveRows();
+            save();
+        }
+        // We might end up with more than MaxRecentFiles entries, but we allow it to give
+        // the user a chance to non-destructively undo this operation.
+        // The list will be shortend on restart or when a non-recent file is loaded.
+    }
+}
+
+void RecentFiles::clearRecent()
+{
+    beginRemoveRows({ }, int(m_pinnedCount), count() - 1);
+    m_entries.remove(m_pinnedCount, count() - m_pinnedCount);
+    endRemoveRows();
+    save();
+}
+
+void RecentFiles::clearPinned()
+{
+    beginRemoveRows({ }, 0, int(m_pinnedCount) - 1);
+    m_entries.remove(0, m_pinnedCount);
+    m_pinnedCount = 0;
     endRemoveRows();
     save();
 }
 
 int RecentFiles::count() const
 {
-    return int(m_pathsAndNames.count());
+    return int(m_entries.count());
 }
 
 int RecentFiles::rowCount(const QModelIndex &parent) const
@@ -106,7 +156,7 @@ QVariant RecentFiles::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.row() < 0 || index.row() >= count())
         return { };
 
-    const auto [filePath, fileName] = m_pathsAndNames.at(index.row());
+    const auto &[filePath, fileName, isPinned] = m_entries.at(index.row());
 #if !defined(BS_MOBILE)
     QFileInfo fi(filePath);
 #endif
@@ -128,8 +178,20 @@ QVariant RecentFiles::data(const QModelIndex &index, int role) const
 #else
         return QDir::toNativeSeparators(fi.absolutePath());
 #endif
+    case PinnedRole:
+        return isPinned;
     }
     return { };
+}
+
+bool RecentFiles::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && (role == PinnedRole)) {
+        pin(index.row(), value.toBool());
+        emit dataChanged(index, index, { PinnedRole });
+        return true;
+    }
+    return false;
 }
 
 QHash<int, QByteArray> RecentFiles::roleNames() const
@@ -139,21 +201,22 @@ QHash<int, QByteArray> RecentFiles::roleNames() const
         { FilePathRole, "filePath" },
         { FileNameRole, "fileName" },
         { DirNameRole, "dirName" },
+        { PinnedRole, "pinned" },
     };
 }
 
 std::pair<QString, QString> RecentFiles::filePathAndName(int index) const
 {
-    if ((index >= 0) && (index < m_pathsAndNames.size()))
-        return m_pathsAndNames.at(index);
+    if ((index >= 0) && (index < m_entries.size()))
+        return { m_entries.at(index).path, m_entries.at(index).name };
     else
         return { };
 }
 
 void RecentFiles::open(int index)
 {
-    if ((index >= 0) && (index < m_pathsAndNames.size()))
-        emit openDocument(m_pathsAndNames.at(index).first);
+    if ((index >= 0) && (index < m_entries.size()))
+        emit openDocument(m_entries.at(index).path);
 }
 
 #include "moc_recentfiles.cpp"

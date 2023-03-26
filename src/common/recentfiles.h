@@ -18,17 +18,20 @@ public:
 
     static constexpr int MaxRecentFiles = 18;
     void add(const QString &filePath, const QString &fileName);
-    void clear();
+    void clearRecent();
+    void clearPinned();
     int count() const;
 
     enum Roles {
         FilePathRole = Qt::UserRole,
         FileNameRole,
         DirNameRole,
+        PinnedRole,
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     QHash<int, QByteArray> roleNames() const override;
 
     std::pair<QString, QString> filePathAndName(int index) const;
@@ -43,8 +46,17 @@ signals:
 private:
     RecentFiles(QObject *parent = nullptr);
     void save();
+    void pin(int row, bool down);
 
-    QVector<std::pair<QString, QString>> m_pathsAndNames;
+    struct Entry
+    {
+        QString path;
+        QString name;
+        bool pinned = false;
+    };
+
+    QVector<Entry> m_entries;
+    qsizetype m_pinnedCount = 0;
 
     static RecentFiles *s_inst;
 };

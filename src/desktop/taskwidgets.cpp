@@ -21,6 +21,7 @@
 #include "common/config.h"
 #include "common/documentlist.h"
 #include "common/recentfiles.h"
+#include "betteritemdelegate.h"
 #include "mainwindow.h"
 
 #include "taskwidgets.h"
@@ -432,7 +433,9 @@ void TaskOpenDocumentsWidget::changeEvent(QEvent *e)
 TaskRecentDocumentsWidget::TaskRecentDocumentsWidget(QWidget *parent)
     : QTreeView(parent)
 {
-    //setItemDelegate(new QStyledItemDelegate());
+    auto delegate = new BetterItemDelegate(BetterItemDelegate::Pinnable, this);
+    delegate->setPinnedRole(RecentFiles::PinnedRole);
+    setItemDelegate(delegate);
     setAlternatingRowColors(true);
     setHeaderHidden(true);
     setAllColumnsShowFocus(true);
@@ -441,8 +444,9 @@ TaskRecentDocumentsWidget::TaskRecentDocumentsWidget(QWidget *parent)
     setTextElideMode(Qt::ElideMiddle);
     setSelectionMode(QAbstractItemView::NoSelection);
     setModel(RecentFiles::inst());
+    setProperty("singleClickActivation", true);
 
-    connect(this, &QTreeView::clicked, this, [](const QModelIndex &idx) {
+    connect(this, &QTreeView::activated, this, [](const QModelIndex &idx) {
         if (idx.isValid()) {
             QString fp = idx.data(RecentFiles::FilePathRole).toString();
             if (!fp.isEmpty())

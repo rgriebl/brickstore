@@ -87,6 +87,7 @@ enum ModelRoles {
     ColorNameRole,
     QuantityRole,
     IsSectionHeaderRole,
+    PinnedRole,
 
     RoleMax
 };

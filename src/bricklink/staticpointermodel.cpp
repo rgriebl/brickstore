@@ -88,7 +88,7 @@ bool StaticPointerModel::filterAccepts(const void *) const
     return true;
 }
 
-bool StaticPointerModel::lessThan(const void *, const void *, int) const
+bool StaticPointerModel::lessThan(const void *, const void *, int, Qt::SortOrder) const
 {
     return true;
 }
@@ -171,7 +171,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
                       [column, order, this](int r1, int r2) {
             const void *pointer1 = pointerAt(order == Qt::AscendingOrder ? r1 : r2);
             const void *pointer2 = pointerAt(order == Qt::AscendingOrder ? r2 : r1);
-            return lessThan(pointer1, pointer2, column);
+            return lessThan(pointer1, pointer2, column, order);
         });
     } else { // restore the source model order
         for (int i = 0; i < n; ++i)
@@ -187,6 +187,14 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
+}
+
+void StaticPointerModel::forceSort()
+{
+    if (fixedSortOrder)
+        return;
+    fixedSortOrder = true; // force a re-sort
+    sort(lastSortColumn, lastSortOrder);
 }
 
 int StaticPointerModel::sortColumn() const
@@ -236,7 +244,7 @@ void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrd
                       else if (pos2 >= 0)
                           return false;
                       else
-                          return lessThan(pointer1, pointer2, lastSortColumn);
+                          return lessThan(pointer1, pointer2, lastSortColumn, lastSortOrder);
                   });
 
     if (filterDelayTimer && filterDelayTimer->isActive())
@@ -249,6 +257,5 @@ void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrd
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
 }
-
 
 #include "moc_staticpointermodel.cpp"

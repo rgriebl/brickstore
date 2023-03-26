@@ -31,9 +31,12 @@ namespace BrickLink {
 /////////////////////////////////////////////////////////////
 
 
-ItemDelegate::ItemDelegate(Options options, QObject *parent)
+ItemDelegate::ItemDelegate(Options options, QAbstractItemView *parent)
     : BetterItemDelegate(options, parent)
-{ }
+{
+    if (options & Pinnable)
+        setPinnedRole(BrickLink::PinnedRole);
+}
 
 void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {

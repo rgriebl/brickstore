@@ -122,6 +122,9 @@ int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *
     } else if (hint == SH_Menu_Scrollable) {
         if (widget && widget->property("scrollableMenu").toBool())
             return true;
+    } else if (hint == SH_ItemView_ActivateItemOnSingleClick) {
+        if (widget && widget->property("singleClickActivation").toBool())
+            return true;
     }
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }
@@ -263,11 +266,27 @@ QSize BrickStoreProxyStyle::sizeFromContents(ContentsType type, const QStyleOpti
                                              const QSize &size, const QWidget *widget) const
 {
     QSize s = QProxyStyle::sizeFromContents(type, option, size, widget);
+
     if ((type == CT_ComboBox) && m_isWindowsVistaStyle) {
         // the Vista Style has problems with the width in high-dpi modes
         s.setWidth(int(s.width() + 16));
+    } else if ((type == CT_ItemViewItem) && qobject_cast<const QAbstractItemView *>(widget)
+               && widget->property("pinnableItems").toBool()) {
+        if (const auto *viewItemOpt = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+            s.setWidth(s.width() + viewItemOpt->decorationSize.width() + 4);
     }
     return s;
+}
+
+QRect BrickStoreProxyStyle::subElementRect(SubElement element, const QStyleOption *option, const QWidget *widget) const
+{
+    QRect r = QProxyStyle::subElementRect(element, option, widget);
+
+    if (qobject_cast<const QAbstractItemView *>(widget) && widget->property("pinnableItems").toBool()) {
+        if (const auto *viewItemOpt = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+            r.setWidth(std::max(0, r.width() - viewItemOpt->decorationSize.width() - 4));
+    }
+    return r;
 }
 
 bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
