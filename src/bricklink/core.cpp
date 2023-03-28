@@ -826,6 +826,9 @@ const RelationshipMatch *Core::relationshipMatch(uint id)
 
 void Core::cancelTransfers()
 {
+    m_priceGuideCache->cancelAllPriceGuideUpdates();
+    m_pictureCache->cancelAllPictureUpdates();;
+
     if (m_transfer)
         m_transfer->abortAllJobs();
     if (m_authenticatedTransfer)

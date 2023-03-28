@@ -104,6 +104,7 @@ public:
 
     void updatePicture(Picture *pic, bool highPriority = false);
     void cancelPictureUpdate(Picture *pic);
+    void cancelAllPictureUpdates();
 
 signals:
     void pictureUpdated(BrickLink::Picture *pic);

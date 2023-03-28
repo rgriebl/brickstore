@@ -114,6 +114,7 @@ public:
 
     void updatePriceGuide(PriceGuide *pg, bool highPriority = false);
     void cancelPriceGuideUpdate(PriceGuide *pg);
+    void cancelAllPriceGuideUpdates();
 
     QString retrieverName() const;
     QString retrieverId() const;

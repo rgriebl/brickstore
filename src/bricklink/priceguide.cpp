@@ -167,9 +167,9 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, PriceGuide
             else
                 throw Exception("invalid price-guide data");
         } else if (job->isAborted()) {
-            throw Exception();
+            throw Exception(job->errorString());
         } else {
-            throw Exception("%1 (%2)").arg(job->errorString(), job->responseCode());
+            throw Exception("%1 (%2)").arg(job->errorString()).arg(job->responseCode());
         }
     } catch (const Exception &e) {
         emit failed(pg, u"PG download for " + QLatin1String(pg->item()->id()) + u" failed: " + e.errorString());
@@ -287,19 +287,19 @@ void BatchedAffiliateAPIPGRetriever::fetch(PriceGuide *pg, bool highPriority)
     if (m_currentBatch.contains(pg))
         return;
 
-    bool wrongVatType = pg->vatType() != m_nextBatchVatType;
+    bool wrongVatType = (pg->vatType() != m_nextBatchVatType);
+    auto &queue = wrongVatType ? m_wrongVatTypeQueue : m_nextBatch;
+    auto &prioSize = wrongVatType ? m_wrongVatTypeQueuePrioritySize : m_nextBatchPrioritySize;
 
-    if (!wrongVatType) {
-        // check if the pg is already scheduled for the next batch and if we need to up the priority
-        auto nit = std::find_if(m_nextBatch.cbegin(), m_nextBatch.cend(),
-                                [pg](const auto &pair) { return pair.first == pg; });
-        if (nit != m_nextBatch.cend()) {
-            auto index = std::distance(m_nextBatch.cbegin(), nit);
-            if (highPriority && (index >= m_nextBatchPrioritySize)) {
-                m_nextBatch.move(index, m_nextBatchPrioritySize++);
-            }
-            return;
-        }
+    // check if the pg is already scheduled for the next batch and if we need to up the priority
+    auto it = std::find_if(queue.cbegin(), queue.cend(), [pg](const auto &pair) {
+        return (pair.first == pg);
+    });
+    if (it != queue.cend()) {
+        auto index = std::distance(queue.cbegin(), it);
+        if (index >= prioSize)
+            queue.move(index, prioSize++);
+        return;
     }
 
     pg->addRef();
@@ -307,32 +307,34 @@ void BatchedAffiliateAPIPGRetriever::fetch(PriceGuide *pg, bool highPriority)
     QElapsedTimer now;
     now.start();
 
-    if (wrongVatType) {
-        if (highPriority)
-            m_wrongVatTypeQueue.emplace(m_wrongVatTypeQueuePrioritySize++, pg, now);
-        else
-            m_wrongVatTypeQueue.emplace_back(pg, now);
-    } else {
-        if (highPriority)
-            m_nextBatch.emplace(m_nextBatchPrioritySize++, pg, now);
-        else
-            m_nextBatch.emplace_back(pg, now);
-    }
+    if (highPriority)
+        queue.emplace(prioSize++, pg, now);
+    else
+        queue.emplace_back(pg, now);
 
     check();
 }
 
 void BatchedAffiliateAPIPGRetriever::cancel(PriceGuide *pg)
 {
-    if (m_currentBatch.contains(pg)) {
+    if (m_currentBatch.contains(pg))
         m_currentJob->abort();
-        return;
-    }
 
-    if (auto removed = m_nextBatch.removeIf([pg](const auto &pair) { return pair.first == pg; })) {
+    bool wrongVatType = (pg->vatType() != m_nextBatchVatType);
+    auto &queue = wrongVatType ? m_wrongVatTypeQueue : m_nextBatch;
+    auto &prioSize = wrongVatType ? m_wrongVatTypeQueuePrioritySize : m_nextBatchPrioritySize;
+
+    auto it = std::find_if(queue.cbegin(), queue.cend(), [pg](const auto &pair) {
+        return (pair.first == pg);
+    });
+    if (it != queue.cend()) {
+        auto index = std::distance(queue.cbegin(), it);
+        if (index < prioSize)
+            --prioSize;
+        queue.removeAt(index);
+
         emit failed(pg, u"aborted"_qs);
-        while (--removed >= 0)
-            pg->release();
+        pg->release();
     }
 }
 
@@ -340,11 +342,18 @@ void BatchedAffiliateAPIPGRetriever::cancelAll()
 {
     if (m_currentJob)
         m_currentJob->abort();
-    for (const auto &pair : std::as_const(m_nextBatch)) {
+
+    const auto list = m_wrongVatTypeQueue + m_nextBatch;
+
+    m_wrongVatTypeQueue.clear();
+    m_nextBatch.clear();
+    m_wrongVatTypeQueuePrioritySize = 0;
+    m_nextBatchPrioritySize = 0;
+
+    for (const auto &pair : list) {
         emit failed(pair.first, u"aborted"_qs);
         pair.first->release();
     }
-    m_nextBatch.clear();
 }
 
 void BatchedAffiliateAPIPGRetriever::check()
@@ -682,7 +691,7 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
     auto key = PriceGuideCachePrivate::cacheKey(item, color, vatType);
     PriceGuide *pg = d->m_cache[key];
 
-    bool needToLoad = false;
+    bool needToLoad = !pg || (!pg->isValid() && (pg->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pg) {
         pg = new PriceGuide(item, color, vatType);
@@ -692,7 +701,6 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
             return nullptr;
         }
         AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
-        needToLoad = true;
     }
 
     if (needToLoad) {
@@ -729,6 +737,11 @@ void PriceGuideCache::updatePriceGuide(PriceGuide *pg, bool highPriority)
 void PriceGuideCache::cancelPriceGuideUpdate(PriceGuide *pg)
 {
     d->m_retriever->cancel(pg);
+}
+
+void PriceGuideCache::cancelAllPriceGuideUpdates()
+{
+    d->m_retriever->cancelAll();
 }
 
 QString PriceGuideCache::retrieverName() const
@@ -1026,9 +1039,9 @@ void PriceGuideCachePrivate::retrieveFinished(PriceGuide *pg, const PriceGuide::
     emit q->priceGuideUpdated(pg);
 }
 
-void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &errorString)
+void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &errorString [[maybe_unused]])
 {
-    qCWarning(LogCache).noquote() << errorString;
+    //qCWarning(LogCache).noquote() << errorString;
     pg->setUpdateStatus(UpdateStatus::UpdateFailed);
     emit q->priceGuideUpdated(pg);
 }

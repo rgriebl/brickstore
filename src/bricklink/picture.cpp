@@ -291,7 +291,7 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
     auto key = PictureCachePrivate::cacheKey(item, color);
     Picture *pic = d->m_cache[key];
 
-    bool needToLoad = false;
+    bool needToLoad = !pic || (!pic->isValid() && (pic->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pic) {
         pic = new Picture(item, color);
@@ -302,7 +302,6 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
             return nullptr;
         }
         AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
-        needToLoad = true;
     }
 
     if (needToLoad) {
@@ -350,8 +349,15 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
 
 void PictureCache::cancelPictureUpdate(Picture *pic)
 {
-    if (pic->m_transferJob)
+    if (pic && pic->m_transferJob)
         pic->m_transferJob->abort();
+}
+
+void PictureCache::cancelAllPictureUpdates()
+{
+    const auto keys = d->m_cache.keys();
+    for (const auto &key : keys)
+        cancelPictureUpdate(d->m_cache.object(key));
 }
 
 
