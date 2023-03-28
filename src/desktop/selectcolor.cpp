@@ -83,7 +83,7 @@ SelectColor::SelectColor(QWidget *parent)
     w_colors->header()->setSortIndicatorShown(true);
     w_colors->header()->setSectionsClickable(true);
 
-    QObject::connect(w_colors->header(), &QHeaderView::sectionClicked,
+    connect(w_colors->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
         w_colors->sortByColumn(section, w_colors->header()->sortIndicatorOrder());
         w_colors->scrollTo(w_colors->currentIndex());

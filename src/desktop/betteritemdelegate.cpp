@@ -14,7 +14,8 @@ BetterItemDelegate::BetterItemDelegate(Options options, QAbstractItemView *paren
     : QStyledItemDelegate(parent)
     , m_options(options)
 {
-    parent->setProperty("pinnableItems", true);
+    if (m_options.testFlag(Pinnable))
+        parent->setProperty("pinnableItems", true);
 }
 
 void BetterItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,

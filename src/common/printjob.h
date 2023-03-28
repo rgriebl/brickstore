@@ -124,6 +124,7 @@ struct QmlPage
     Q_GADGET
     QML_FOREIGN(QmlPrintPage)
     QML_NAMED_ELEMENT(Page)
+    QML_UNCREATABLE("")
 };
 
 

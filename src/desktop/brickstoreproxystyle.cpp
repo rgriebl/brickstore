@@ -282,9 +282,11 @@ QRect BrickStoreProxyStyle::subElementRect(SubElement element, const QStyleOptio
 {
     QRect r = QProxyStyle::subElementRect(element, option, widget);
 
-    if (qobject_cast<const QAbstractItemView *>(widget) && widget->property("pinnableItems").toBool()) {
-        if (const auto *viewItemOpt = qstyleoption_cast<const QStyleOptionViewItem *>(option))
-            r.setWidth(std::max(0, r.width() - viewItemOpt->decorationSize.width() - 4));
+    if (element == SE_ItemViewItemText) {
+        if (qobject_cast<const QAbstractItemView *>(widget) && widget->property("pinnableItems").toBool()) {
+            if (const auto *viewItemOpt = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+                r.setWidth(std::max(0, r.width() - viewItemOpt->decorationSize.width() - 4));
+        }
     }
     return r;
 }
