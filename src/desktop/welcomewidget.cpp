@@ -58,7 +58,8 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     layout->setRowStretch(2, 0);
     layout->setRowStretch(3, 5);
     layout->setRowStretch(4, 0);
-    layout->setRowStretch(5, 1);
+    layout->setRowStretch(5, 0);
+    layout->setRowStretch(6, 1);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(1, 2);
     layout->setColumnStretch(2, 2);
@@ -136,8 +137,39 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
             this, &WelcomeWidget::updateVersionsText);
     layout->addWidget(m_versions, 4, 1, 1, 2);
 
+    static const QVector<std::tuple<const char *, const char *, QString>> links {
+        { "bootstrap-question-circle", QT_TR_NOOP("Tutorials"),   u"https://github.com/rgriebl/brickstore/wiki/Tutorials"_qs },
+        { "bootstrap-chat-dots",       QT_TR_NOOP("Discussions"), u"https://github.com/rgriebl/brickstore/discussions"_qs },
+        { "bootstrap-bug",             QT_TR_NOOP("Bug reports"), u"https://github.com/rgriebl/brickstore/issues"_qs },
+        { "bootstrap-heart",           QT_TR_NOOP("Sponsor"),     u"https://brickforge.de/brickstore/support"_qs },
+    };
+
+    int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);
+    auto linksLayout = new QHBoxLayout();
+    linksLayout->setSpacing(iconSize / 3);
+
+    m_links.reserve(links.size());
+    for (const auto &[ icon, title, link ] : std::as_const(links)) {
+        if (linksLayout->count()) {
+            linksLayout->addWidget(new QLabel(u"     \u00b7     "_qs));
+        }
+        auto iconLabel = new QLabel();
+        iconLabel->setPixmap(QIcon::fromTheme(QString::fromLatin1(icon)).pixmap(iconSize));
+        linksLayout->addWidget(iconLabel);
+
+        auto linkLabel = new QLabel();
+        linkLabel->setProperty("formatText", QString { uR"(<b><a href=")" + link + uR"(">%1</a></b>)"_qs });
+        linkLabel->setProperty("untranslatedText", QByteArray(title));
+        linkLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
+        linkLabel->setOpenExternalLinks(true);
+        linksLayout->addWidget(linkLabel);
+
+        m_links << linkLabel;
+    }
+    layout->addLayout(linksLayout, 5, 1, 1, 2, Qt::AlignCenter);
+
     auto *sizeGrip = new QSizeGrip(this);
-    layout->addWidget(sizeGrip, 5, 3, 1, 1, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(sizeGrip, 6, 3, 1, 1, Qt::AlignBottom | Qt::AlignRight);
 
     languageChange();
     setLayout(layout);
@@ -183,10 +215,10 @@ void WelcomeWidget::updateVersionsText()
     QString dbd = u"<b>" + delta + u"</b>";
     QString ver = u"<b>" + QCoreApplication::applicationVersion() + u"</b>";
 
-    QString s = QCoreApplication::applicationName() + u" " %
-            tr("version %1 (build: %2)").arg(ver).arg(Application::inst()->buildNumber()) %
-            u"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" %
-            tr("Using a database that was generated %1").arg(dbd);
+    QString s = QCoreApplication::applicationName() + u" "
+                + tr("version %1 (build: %2)").arg(ver).arg(Application::inst()->buildNumber())
+                + u"\u00a0\u00a0\u00a0\u00a0\u00a0\u00b7\u00a0\u00a0\u00a0\u00a0\u00a0"
+                + tr("Using a database that was generated %1").arg(dbd);
     m_versions->setText(s);
 }
 
@@ -197,6 +229,10 @@ void WelcomeWidget::languageChange()
     m_import_frame->setTitle(tr("Import items"));
 
     updateVersionsText();
+    for (auto &l : std::as_const(m_links)) {
+        auto ut = l->property("untranslatedText").toByteArray();
+        l->setText(l->property("formatText").toString().arg(tr(ut)));
+    }
 
     if (m_no_recent)
         m_no_recent->setText(tr("No recent files"));

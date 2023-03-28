@@ -41,6 +41,7 @@ private:
     QGroupBox *m_import_frame;
     QPointer<QLabel> m_no_recent;
     QLabel *m_versions;
+    QVector<QLabel *> m_links;
     QIcon m_docIcon;
     QGraphicsOpacityEffect *m_effect;
     QPropertyAnimation *m_animation;
