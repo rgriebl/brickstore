@@ -43,6 +43,8 @@ private:
     QLabel *m_versions;
     QVector<QLabel *> m_links;
     QIcon m_docIcon;
+    QIcon m_pinIcon;
+    QIcon m_unpinIcon;
     QGraphicsOpacityEffect *m_effect;
     QPropertyAnimation *m_animation;
 };

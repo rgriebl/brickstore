@@ -34,8 +34,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::pair<QString, QString> filePathAndName(int index) const;
-
     Q_INVOKABLE void open(int index);
 
 signals:

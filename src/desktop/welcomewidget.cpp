@@ -14,11 +14,11 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 #include <QDir>
+#include <QMenu>
 
 #include "bricklink/core.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
-#include "common/document.h"
 #include "common/humanreadabletimedelta.h"
 #include "common/recentfiles.h"
 #include "bettercommandbutton.h"
@@ -29,6 +29,8 @@
 WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
     , m_docIcon(u":/assets/generated-app-icons/brickstore_doc"_qs)
+    , m_pinIcon(QIcon::fromTheme(u"window-pin"_qs))
+    , m_unpinIcon(QIcon::fromTheme(u"window-unpin"_qs))
 {
     m_effect = new QGraphicsOpacityEffect(this);
     m_effect->setEnabled(false);
@@ -56,7 +58,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     layout->setRowStretch(0, 1);
     layout->setRowStretch(1, 0);
     layout->setRowStretch(2, 0);
-    layout->setRowStretch(3, 5);
+    layout->setRowStretch(3, 7);
     layout->setRowStretch(4, 0);
     layout->setRowStretch(5, 0);
     layout->setRowStretch(6, 1);
@@ -87,11 +89,31 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
         }
 
         for (int i = 0; i < RecentFiles::inst()->count(); ++i) {
-            auto [filePath, fileName] = RecentFiles::inst()->filePathAndName(i);
+            QModelIndex index = RecentFiles::inst()->index(i);
+            const auto filePath = index.data(RecentFiles::FilePathRole).toString();
+            const auto fileName = index.data(RecentFiles::FileNameRole).toString();
+            const bool pinned = index.data(RecentFiles::PinnedRole).toBool();
+
             auto b = new BetterCommandButton(fileName, QDir::toNativeSeparators(filePath));
             b->setFocusPolicy(Qt::NoFocus);
-            b->setIcon(m_docIcon);
+            b->setIcon(pinned ? m_pinIcon : m_docIcon);
+            b->setContextMenuPolicy(Qt::CustomContextMenu);
             recent_layout->addWidget(b);
+
+            connect(b, &BetterCommandButton::customContextMenuRequested,
+                    this, [=](const QPoint &pos) {
+                auto index = RecentFiles::inst()->index(i);
+                const bool pinned = index.data(RecentFiles::PinnedRole).toBool();
+                auto *m = new QMenu(this);
+                m->setAttribute(Qt::WA_DeleteOnClose);
+                connect(m->addAction(pinned ? m_unpinIcon : m_pinIcon,
+                                     pinned ? tr("Unpin") : tr("Pin")),
+                        &QAction::triggered, this, [=]() {
+                    RecentFiles::inst()->setData(RecentFiles::inst()->index(i), !pinned,
+                                                 RecentFiles::PinnedRole);
+                });
+                m->popup(b->mapToGlobal(pos));
+            });
             connect(b, &BetterCommandButton::clicked,
                     this, [=]() { RecentFiles::inst()->open(i); });
         }
@@ -169,7 +191,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     layout->addLayout(linksLayout, 5, 1, 1, 2, Qt::AlignCenter);
 
     auto *sizeGrip = new QSizeGrip(this);
-    layout->addWidget(sizeGrip, 6, 3, 1, 1, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(sizeGrip, 6, 0, 1, 4, Qt::AlignBottom | Qt::AlignRight);
 
     languageChange();
     setLayout(layout);

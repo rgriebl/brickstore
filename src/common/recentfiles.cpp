@@ -189,6 +189,7 @@ bool RecentFiles::setData(const QModelIndex &index, const QVariant &value, int r
     if (index.isValid() && (role == PinnedRole)) {
         pin(index.row(), value.toBool());
         emit dataChanged(index, index, { PinnedRole });
+        emit recentFilesChanged();
         return true;
     }
     return false;
@@ -203,14 +204,6 @@ QHash<int, QByteArray> RecentFiles::roleNames() const
         { DirNameRole, "dirName" },
         { PinnedRole, "pinned" },
     };
-}
-
-std::pair<QString, QString> RecentFiles::filePathAndName(int index) const
-{
-    if ((index >= 0) && (index < m_entries.size()))
-        return { m_entries.at(index).path, m_entries.at(index).name };
-    else
-        return { };
 }
 
 void RecentFiles::open(int index)
