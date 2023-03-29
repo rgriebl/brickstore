@@ -136,8 +136,12 @@ bool BetterItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, c
             if (r.contains(pos)) {
                 QVariant v = index.data(m_pinnedRole);
                 if (!v.isNull()) {
-                    if (event->type() == QEvent::MouseButtonRelease)
-                        model->setData(index, !v.toBool(), m_pinnedRole);
+                    if (event->type() == QEvent::MouseButtonRelease) {
+                        bool pinned = v.toBool();
+                        QMetaObject::invokeMethod(model, [=, role = m_pinnedRole]() {
+                            model->setData(index, !pinned, role);
+                        }, Qt::QueuedConnection);
+                    }
                     return true;
                 }
             }
