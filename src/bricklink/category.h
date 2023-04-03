@@ -6,6 +6,8 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 
+#include "utility/pooledarray.h"
+
 
 namespace BrickLink {
 
@@ -17,7 +19,7 @@ public:
     static constexpr uint InvalidId = static_cast<uint>(-1);
 
     uint id() const       { return m_id; }
-    QString name() const  { return m_name; }
+    QString name() const  { return m_name.asQString(); }
 
     bool hasInventories() const  { return (m_has_inventories); }
     bool hasInventories(const ItemType *itemType) const;
@@ -39,7 +41,7 @@ private:
     quint8   m_year_to = 0;
     quint8   m_year_recency = 0;
     quint8   m_has_inventories = 0;
-    QString  m_name;
+    PooledArray<char16_t> m_name;
 
     friend class Core;
     friend class Database;

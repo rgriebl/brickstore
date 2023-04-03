@@ -1725,7 +1725,7 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
 {
     Q_ASSERT(item);
     Q_ASSERT(item && item->hasInventory());
-    Q_ASSERT(item && !item->consistsOf().isEmpty());
+    Q_ASSERT(item && !item->consistsOf().empty());
     Q_ASSERT(multiply != 0);
 
     auto pr = BrickLink::IO::fromPartInventory(item, color, multiply, condition, extraParts,

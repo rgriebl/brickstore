@@ -107,7 +107,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         uint colid = p.elementText(e, "COLOR").toUInt();
 
         col.m_id       = colid;
-        col.m_name     = p.elementText(e, "COLORNAME").simplified();
+        col.m_name.copyQString(p.elementText(e, "COLORNAME").simplified(), nullptr);
         col.m_color    = QColor(u'#' + p.elementText(e, "COLORRGB"));
 
         col.m_ldraw_id = -1;
@@ -154,7 +154,7 @@ void BrickLink::TextImport::readCategories(const QString &path)
         uint catid = p.elementText(e, "CATEGORY").toUInt();
 
         cat.m_id   = catid;
-        cat.m_name = p.elementText(e, "CATEGORYNAME").simplified();
+        cat.m_name.copyQString(p.elementText(e, "CATEGORYNAME").simplified(), nullptr);
 
         m_categories.push_back(cat);
     });
@@ -191,11 +191,9 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
 
         if (itemIndex == -1)
             throw ParseException(&f, "expected a valid item-id field in line %1").arg(lineNumber);
-        if (m_items.at(itemIndex).m_categoryIndex == -1)
-            throw ParseException(&f, "item has no main category in line %1").arg(lineNumber);
 
         QString catStr = strs.at(1).simplified();
-        const Category &mainCat = m_categories.at(m_items.at(itemIndex).m_categoryIndex);
+        const Category &mainCat = m_categories.at(m_items.at(itemIndex).m_categoryIndexes[0]);
         if (!catStr.startsWith(mainCat.name()))
             throw ParseException(&f, "additional categories do not start with the main category in line %1").arg(lineNumber);
         if (strs.at(0).toUInt() != mainCat.m_id)
@@ -205,10 +203,10 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
 
         const QStringList cats = catStr.split(u" / "_qs);
         for (int i = 0; i < cats.count(); ++i) {
-            for (qint16 catIndex = 0; catIndex < qint16(m_categories.size()); ++catIndex) {
+            for (quint16 catIndex = 0; catIndex < quint16(m_categories.size()); ++catIndex) {
                 const QString catName = m_categories.at(catIndex).name();
                 bool disambiguate = catName.contains(u" / ");
-                qint16 addCatIndex = -1;
+                quint16 addCatIndex = quint16(-1);
 
                 // The " / " sequence is used to separate the fields, but it also appears in
                 // category names like "String Reel / Winch"
@@ -223,8 +221,8 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, Br
                     addCatIndex = catIndex;
                 }
 
-                if (addCatIndex != -1)
-                    m_items[itemIndex].m_additionalCategoryIndexes.push_back(addCatIndex);
+                if (addCatIndex != quint16(-1))
+                    m_items[itemIndex].m_categoryIndexes.push_back(addCatIndex, nullptr);
             }
         }
     }
@@ -241,7 +239,7 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
             return;
 
         itt.m_id   = c;
-        itt.m_name = p.elementText(e, "ITEMTYPENAME").simplified();
+        itt.m_name.copyQString(p.elementText(e, "ITEMTYPENAME").simplified(), nullptr);
 
         itt.m_has_inventories   = false;
         itt.m_has_colors        = (c == 'P' || c == 'G');
@@ -259,15 +257,15 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
     XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
     p.parse([this, &p, itt](QDomElement e) {
         Item item;
-        item.m_id = p.elementText(e, "ITEMID").toLatin1();
-        item.m_name = p.elementText(e, "ITEMNAME").simplified();
+        item.m_id.copyQByteArray(p.elementText(e, "ITEMID").toLatin1(), nullptr);
+        item.m_name.copyQString(p.elementText(e, "ITEMNAME").simplified(), nullptr);
         item.m_itemTypeIndex = (itt - m_item_types.data());
-        item.m_itemTypeId = itt->id();
 
         uint catId = p.elementText(e, "CATEGORY").toUInt();
-        item.m_categoryIndex = findCategoryIndex(catId);
-        if (item.m_categoryIndex == -1)
-            throw ParseException("item %1 has no category").arg(QLatin1String(item.m_id));
+        auto catIndex = findCategoryIndex(catId);
+        if (catIndex == -1)
+            throw ParseException("item %1 has no category").arg(QLatin1String(item.id()));
+        item.m_categoryIndexes.push_back(quint16(catIndex), nullptr);
 
         uint y = p.elementText(e, "ITEMYEAR", "0").toUInt();
         item.m_year_from = ((y > 1900) && (y < 2155)) ? (y - 1900) : 0; // we only have 8 bits for the year
@@ -281,7 +279,7 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
         try {
             item.m_defaultColorIndex = findColorIndex(p.elementText(e, "IMAGECOLOR").toUInt());
         } catch (...) {
-            item.m_defaultColorIndex = -1;
+            item.m_defaultColorIndex = quint16(-1);
         }
 
         m_items.push_back(item);
@@ -337,12 +335,14 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
 bool BrickLink::TextImport::importInventories(std::vector<bool> &processedInvs,
                                               ImportInventoriesStep step)
 {
-    for (uint i = 0; i < m_items.size(); ++i) {
-        if (processedInvs[i]) // already yanked
+    for (uint itemIndex = 0; itemIndex < m_items.size(); ++itemIndex) {
+        if (processedInvs[itemIndex]) // already yanked
             continue;
 
-        if (!m_items[i].hasInventory() || readInventory(&m_items[i], step))
-            processedInvs[i] = true;
+        bool hasInventory = (m_inventoryLastUpdated.value(itemIndex, -1) >= 0);
+
+        if (!hasInventory || readInventory(&m_items[itemIndex], step))
+            processedInvs[itemIndex] = true;
     }
     return true;
 }
@@ -354,8 +354,12 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
     QDateTime fileTime = f->fileTime(QFileDevice::FileModificationTime);
     QDate fileDate = fileTime.date();
 
-    if (!f || !f->isOpen() || (fileTime < item->inventoryUpdated()))
+    uint itemIndex = uint(item - items().data());
+
+    if (!f || !f->isOpen()
+        || (fileTime.toSecsSinceEpoch() < m_inventoryLastUpdated.value(itemIndex, -1))) {
         return false;
+    }
 
     QVector<Item::ConsistsOf> inventory;
     QVector<QPair<int, int>> knownColors;
@@ -411,9 +415,6 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
 
         for (const auto &kc : std::as_const(knownColors))
             addToKnownColors(kc.first, kc.second);
-
-        uint itemIndex = uint(item - items().data());
-
 
         // BL bug: if an extra item is part of an alternative match set, then none of the
         //         alternatives have the 'extra' flag set.
@@ -636,7 +637,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             // be able to render composite parts with fixed colors (e.g. electric motors)
             if (!found) {
                 Color c;
-                c.m_name = u"LDraw: " + name;
+                c.m_name.copyQString(u"LDraw: " + name, nullptr);
                 c.m_type = type;
                 c.m_color = color;
                 updateColor(c);
@@ -687,7 +688,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             c.m_ldraw_color.setAlpha(alpha);
 
             if (!c.isModulex())
-                qWarning() << "  > Could not match BrickLink color" << c.m_id << c.m_name << "to any LDraw color" << c.m_ldraw_color;
+                qWarning() << "  > Could not match BrickLink color" << c.id() << c.name() << "to any LDraw color" << c.m_ldraw_color;
         }
     }
 }
@@ -737,14 +738,13 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
                 }
             }
             Item &item = m_items[itemIndex];
-            item.m_lastInventoryUpdate = t;
-
             m_item_types[item.m_itemTypeIndex].m_has_inventories = true;
 
-            auto catIndexes = item.m_additionalCategoryIndexes;
-            catIndexes.push_back(item.m_categoryIndex);
+            m_inventoryLastUpdated[itemIndex] = t;
+
             Q_ASSERT(item.m_itemTypeIndex < 8);
-            for (const auto &catIndex : catIndexes)
+
+            for (quint16 catIndex : item.m_categoryIndexes)
                 m_categories[catIndex].m_has_inventories |= (quint8(1) << item.m_itemTypeIndex);
         } else {
             qWarning() << "  > btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
@@ -786,8 +786,12 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             const QString &toId = strs.at(6);
             if ((fromType.length() == 1) && (toType.length() == 1)
                     && !fromId.isEmpty() && !toId.isEmpty()) {
-                m_itemChangelog.emplace_back(id, date, (fromType + fromId).toLatin1(),
-                                             (toType + toId).toLatin1());
+                ItemChangeLogEntry icl;
+                icl.m_id = id;
+                icl.m_julianDay = uint(date.toJulianDay());
+                icl.m_fromTypeAndId.copyQByteArray((fromType + fromId).toLatin1(), nullptr);
+                icl.m_toTypeAndId.copyQByteArray((toType + toId).toLatin1(), nullptr);
+                m_itemChangelog.push_back(icl);
                 m_latestChangelogId = std::max(m_latestChangelogId, id);
             }
             break;
@@ -797,7 +801,12 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
             uint fromId = strs.at(3).toUInt(&fromOk);
             uint toId = strs.at(5).toUInt(&toOk);
             if (fromOk && toOk) {
-                m_colorChangelog.emplace_back(id, date, fromId, toId);
+                ColorChangeLogEntry ccl;
+                ccl.m_id = id;
+                ccl.m_julianDay = uint(date.toJulianDay());
+                ccl.m_fromColorId = fromId;
+                ccl.m_toColorId = toId;
+                m_colorChangelog.push_back(ccl);
                 m_latestChangelogId = std::max(m_latestChangelogId, id);
             }
             break;
@@ -831,7 +840,10 @@ void BrickLink::TextImport::readRelationships(const QString &path)
         uint id = m.captured(1).toUInt();
         QString name = m.captured(2);
 
-        auto &rel = m_relationships.emplace_back(id, name);
+        Relationship rel;
+        rel.m_id = id;
+        rel.m_name.copyQString(name, nullptr);
+
         QHash<uint, std::vector<uint>> matches;   // match-id -> list of item-indexes
 
         uint page = 1;
@@ -908,7 +920,7 @@ void BrickLink::TextImport::readRelationships(const QString &path)
                         if (itemIndex == -1) {
                             qWarning() << "  > Relationships: could not resolve item:"
                                        << ittId << itemId << "for match id" << currentMatchId
-                                       << "in" << rel.m_name;
+                                       << "in" << rel.name();
                         } else {
                             matches[currentMatchId].push_back(uint(itemIndex));
                         }
@@ -918,16 +930,24 @@ void BrickLink::TextImport::readRelationships(const QString &path)
                     }
                 }
             }
+
             page = (page < maxPage) ? (page + 1) : 0;
         } while (page);
 
         if (rel.m_count != matches.count()) {
-            qWarning() << "  > Relationships:" << rel.m_name << "should have" << rel.m_count << "entries, but has" << matches.count();
+            qWarning() << "  > Relationships:" << rel.name() << "should have" << rel.m_count << "entries, but has" << matches.count();
             rel.m_count = matches.count();
         }
+        m_relationships.push_back(rel);
 
-        for (auto it = matches.begin(); it != matches.end(); ++it)
-            m_relationshipMatches.emplace_back(it.key(), rel.m_id, std::move(it.value()));
+        for (auto it = matches.cbegin(); it != matches.cend(); ++it) {
+            const auto &itemIndexes = it.value();
+
+            RelationshipMatch relm;
+            relm.m_id = it.key();
+            relm.m_relationshipId = rel.m_id;
+            relm.m_itemIndexes.copyContainer(itemIndexes.cbegin(), itemIndexes.cend(), nullptr);
+        }
     }
     std::sort(m_relationships.begin(), m_relationships.end());
     std::sort(m_relationshipMatches.begin(), m_relationshipMatches.end());
@@ -940,7 +960,7 @@ void BrickLink::TextImport::readRelationships(const QString &path)
         }
         for (const auto &itemIndex : relMatch.m_itemIndexes) {
             Item &item = m_items[itemIndex];
-            item.m_relationshipMatchIds.push_back(quint16(relMatch.m_id));
+            item.m_relationshipMatchIds.push_back(quint16(relMatch.m_id), nullptr);
         }
     }
 }
@@ -959,12 +979,35 @@ void BrickLink::TextImport::exportTo(Database *db)
 
     for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
         Item &item = db->m_items[it.key()];
-        item.setConsistsOf(it.value());
+        const auto &coItems = it.value();
+        item.m_consists_of.copyContainer(coItems.cbegin(), coItems.cend(), nullptr);
     }
 
     for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
         Item &item = db->m_items[it.key()];
-        item.setAppearsIn(it.value());
+
+        // color-idx -> { vector < qty, item-idx > }
+        const QHash<uint, QVector<QPair<int, uint>>> &appearHash = it.value();
+
+        // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
+        QVector<Item::AppearsInRecord> tmp;
+
+        for (auto ait = appearHash.cbegin(); ait != appearHash.cend(); ++ait) {
+            const auto &colorVector = ait.value();
+
+            Item::AppearsInRecord cair;
+            cair.m_colorBits.m_colorIndex = ait.key();
+            cair.m_colorBits.m_colorSize = quint32(colorVector.size());
+            tmp.push_back(cair);
+
+            for (const auto &[qty, itemIndex] : colorVector) {
+                Item::AppearsInRecord iair;
+                iair.m_itemBits.m_quantity = qty;
+                iair.m_itemBits.m_itemIndex = itemIndex;
+                tmp.push_back(iair);
+            }
+        }
+        item.m_appears_in.copyContainer(tmp.cbegin(), tmp.cend(), nullptr);
     }
     std::swap(db->m_relationships, m_relationships);
     std::swap(db->m_relationshipMatches, m_relationshipMatches);
@@ -989,15 +1032,12 @@ void BrickLink::TextImport::calculateItemTypeCategories()
 {
     for (const auto &item : m_items) {
         // calculate the item-type -> category relation
-        auto catIndexes = item.m_additionalCategoryIndexes;
-        catIndexes.push_back(item.m_categoryIndex);
-
         ItemType &itemType = m_item_types[item.m_itemTypeIndex];
         auto &catv = itemType.m_categoryIndexes;
 
-        for (const auto &catIndex : catIndexes) {
+        for (quint16 catIndex : item.m_categoryIndexes) {
             if (std::find(catv.cbegin(), catv.cend(), catIndex) == catv.cend())
-                catv.push_back(catIndex);
+                catv.push_back(catIndex, nullptr);
         }
     }
 }
@@ -1008,11 +1048,7 @@ void BrickLink::TextImport::calculateCategoryRecency()
 
     for (const auto &item : m_items) {
         if (item.m_year_from && item.m_year_to) {
-            auto catIndexes = item.m_additionalCategoryIndexes;
-            if (item.m_categoryIndex != -1)
-                catIndexes.push_back(item.m_categoryIndex);
-
-            for (qint16 catIndex : catIndexes) {
+            for (quint16 catIndex : item.m_categoryIndexes) {
                 auto &cc = catCounter[catIndex];
                 cc.first += (item.m_year_from + item.m_year_to);
                 cc.second += 2;
@@ -1048,12 +1084,12 @@ void BrickLink::TextImport::calculatePartsYearUsed()
 
             bool isPart = (item.itemTypeId() == 'P');
 
-            if ((pass == 1 ? !isPart : isPart) && item.hasInventory() && item.yearReleased()) {
+            if ((pass == 1 ? !isPart : isPart) && item.yearReleased()) {
                 const auto itemParts = m_consists_of_hash.value(itemIndex);
 
                 for (const BrickLink::Item::ConsistsOf &part : itemParts) {
                     Item &partItem = m_items[part.itemIndex()];
-                    if (partItem.m_itemTypeId == 'P') {
+                    if (partItem.itemTypeId() == 'P') {
                         partItem.m_year_from = partItem.m_year_from ? std::min(partItem.m_year_from, item.m_year_from)
                                                                     : item.m_year_from;
                         partItem.m_year_to   = std::max(partItem.m_year_to, item.m_year_to);
@@ -1064,12 +1100,16 @@ void BrickLink::TextImport::calculatePartsYearUsed()
     }
 }
 
-void BrickLink::TextImport::addToKnownColors(int itemIndex, int colorIndex)
+void BrickLink::TextImport::addToKnownColors(int itemIndex, int addColorIndex)
 {
+    if (addColorIndex <= 0)
+        return;
+
     Item &item = m_items[itemIndex];
-    auto it = std::lower_bound(item.m_knownColorIndexes.begin(), item.m_knownColorIndexes.end(),
-                               colorIndex);
-    if ((it == item.m_knownColorIndexes.end()) || (*it != colorIndex))
-        item.m_knownColorIndexes.insert(it, colorIndex);
+    for (quint16 colIndex : item.m_knownColorIndexes) {
+        if (colIndex == quint16(addColorIndex))
+            return;
+    }
+    item.m_knownColorIndexes.push_back(quint16(addColorIndex), nullptr);
 }
 

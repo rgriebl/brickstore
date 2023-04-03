@@ -899,7 +899,7 @@ void SelectItem::showContextMenu(const QPoint &p)
         }
 
         if (item) {
-            const auto cats = item->additionalCategories(true);
+            const auto cats = item->categories(true);
             for (const auto &cat : cats) {
                 if (cat != currentCategory()) {
                     connect(m->addAction(tr("Switch to the item's \"%1\" category").arg(cat->name())),

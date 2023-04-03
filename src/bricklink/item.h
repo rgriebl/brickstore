@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <span>
+
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtCore/QVector>
@@ -11,6 +13,7 @@
 #include "bricklink/category.h"
 #include "bricklink/color.h"
 #include "bricklink/itemtype.h"
+#include "utility/pooledarray.h"
 
 
 namespace BrickLink {
@@ -23,14 +26,13 @@ using AppearsIn = QHash<const Color *, AppearsInColor>;
 class Item
 {
 public:
-    inline QByteArray id() const           { return m_id; }
-    inline QString name() const            { return m_name; }
-    inline char itemTypeId() const         { return m_itemTypeId; }
+    inline QByteArray id() const           { return m_id.asQByteArray(); }
+    inline QString name() const            { return m_name.asQString(); }
+    inline char itemTypeId() const         { return itemType()->id(); }
     const ItemType *itemType() const;
     const Category *category() const;
-    const QVector<const Category *> additionalCategories(bool includeMainCategory = false) const;
-    inline bool hasInventory() const       { return (m_lastInventoryUpdate >= 0); }
-    QDateTime inventoryUpdated() const;
+    const QVector<const Category *> categories(bool includeMainCategory = false) const;
+    inline bool hasInventory() const       { return !m_consists_of.isEmpty(); }
     const Color *defaultColor() const;
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year_from ? m_year_from + 1900 : 0; }
@@ -79,16 +81,14 @@ public:
             quint64 m_data = 0;
         };
 
-        friend class Core;
+        friend class Item;
         friend class Database;
         friend class TextImport;
     };
     Q_STATIC_ASSERT(sizeof(ConsistsOf) == 8);
 
-    const QVector<ConsistsOf> &consistsOf() const;
-
+    std::span<const ConsistsOf, std::dynamic_extent> consistsOf() const;
     QVector<const RelationshipMatch *> relationshipMatches() const;
-
     PartOutTraits partOutTraits() const;
 
     uint index() const;   // only for internal use (picture/priceguide hashes)
@@ -96,35 +96,21 @@ public:
     Item() = default;
     explicit Item(std::nullptr_t) : Item() { } // for scripting only!
 
-    constexpr std::strong_ordering operator<=>(const std::pair<char, QByteArray> &ids) const
+    inline std::strong_ordering operator<=>(const std::pair<char, QByteArray> &ids) const
     {
-        int d = (m_itemTypeId - ids.first);
-        return d == 0 ? (m_id.compare(ids.second) <=> 0) : (d <=> 0);
+        int d = (itemTypeId() - ids.first);
+        return d == 0 ? (id().compare(ids.second) <=> 0) : (d <=> 0);
     }
-    std::strong_ordering operator<=>(const Item &other) const
+    inline std::strong_ordering operator<=>(const Item &other) const
     {
-        return *this <=> std::make_pair(other.m_itemTypeId, other.m_id);
+        return *this <=> std::make_pair(other.itemTypeId(), other.id());
     }
-    constexpr bool operator==(const std::pair<char, QByteArray> &ids) const
+    inline bool operator==(const std::pair<char, QByteArray> &ids) const
     {
         return (*this <=> ids == 0);
     }
 
 private:
-    QString    m_name;
-    QByteArray m_id;
-    qint16     m_itemTypeIndex = -1;
-    qint16     m_categoryIndex = -1;
-    qint16     m_defaultColorIndex = -1;
-    quint8     m_year_from = 0;
-    quint8     m_year_to = 0;
-    qint64     m_lastInventoryUpdate = -1;
-    float      m_weight = 0;
-    char       m_itemTypeId; // the same itemType()->id()
-    // 3 bytes padding here
-    std::vector<qint16> m_additionalCategoryIndexes;
-    std::vector<quint16> m_knownColorIndexes;
-
     union AppearsInRecord {
         struct {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
@@ -149,15 +135,26 @@ private:
 
     Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
 
-    std::vector<AppearsInRecord> m_appears_in;
-    QVector<ConsistsOf> m_consists_of;
+    PooledArray<char16_t> m_name;
+    PooledArray<char>  m_id;
 
-    std::vector<quint16> m_relationshipMatchIds;
+    qint16     m_itemTypeIndex = -1;
+    qint16     m_defaultColorIndex = -1;
+    float      m_weight = 0;
+
+    quint8     m_year_from = 0;
+    quint8     m_year_to = 0;
+    // 6 byte padding
+
+    PooledArray<quint16> m_categoryIndexes;
+    PooledArray<quint16> m_knownColorIndexes;
+
+    PooledArray<AppearsInRecord> m_appears_in;
+    PooledArray<ConsistsOf> m_consists_of;
+
+    PooledArray<quint16> m_relationshipMatchIds;
 
 private:
-    void setAppearsIn(const QHash<uint, QVector<QPair<int, uint>>> &appearHash);
-    void setConsistsOf(const QVector<ConsistsOf> &items);
-
     friend class Core;
     friend class Database;
     friend class ItemType;

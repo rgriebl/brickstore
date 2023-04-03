@@ -10,6 +10,9 @@
 #include <QtCore/QVector>
 #include <QtCore/QSize>
 
+#include "global.h"
+#include "utility/pooledarray.h"
+
 
 namespace BrickLink {
 
@@ -21,7 +24,7 @@ public:
     static constexpr char InvalidId = 0;
 
     char id() const                 { return m_id; }
-    QString name() const            { return m_name; }
+    inline QString name() const     { return m_name.asQString(); }
 
     const QVector<const Category *> categories() const;
     bool hasInventories() const     { return m_has_inventories; }
@@ -49,8 +52,8 @@ private:
 
     // 6 bytes padding here
 
-    QString m_name;
-    std::vector<quint16> m_categoryIndexes;
+    PooledArray<char16_t> m_name;
+    PooledArray<quint16> m_categoryIndexes;
 
     friend class Core;
     friend class Database;

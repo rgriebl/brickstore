@@ -899,7 +899,7 @@ bool ItemModel::filterAccepts(const void *pointer) const
         return false;
     else if (m_itemtype_filter && item->itemType() != m_itemtype_filter)
         return false;
-    else if (m_category_filter && (m_category_filter != CategoryModel::AllCategories) && !item->additionalCategories(true).contains(m_category_filter))
+    else if (m_category_filter && (m_category_filter != CategoryModel::AllCategories) && !item->categories(true).contains(m_category_filter))
         return false;
     else if (m_inv_filter && !item->hasInventory())
         return false;
@@ -1102,7 +1102,7 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
         static const QByteArray canBuildIds = "SM";
 
         if (set.hasInventory() && canBuildIds.contains(set.itemTypeId())) {
-            const QVector<Item::ConsistsOf> &inv = set.consistsOf();
+            const auto inv = set.consistsOf();
 
             // copy the have vector, as we need to modify it for counting down quantities
             auto checkHave = have;
@@ -1192,8 +1192,8 @@ void InternalInventoryModel::fillRelationships(const QVector<SimpleLot> &lots)
         for (const RelationshipMatch *match : std::as_const(allMatches)) {
             if (auto rel = core()->relationship(match->relationshipId())) {
                 auto section = m_entries.emplace_back(new Entry { rel->name() });
-                for (auto itemIndex : match->itemIndexes()) {
-                    const auto *item = &core()->items()[itemIndex];
+                const auto matchItems = match->items();
+                for (auto item : matchItems) {
                     if (!items.contains(item)) {
                         auto e = section->m_sectionEntries.emplace_back(new Entry { item, nullptr, -1 });
                         e->m_section = section;

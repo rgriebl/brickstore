@@ -7,18 +7,21 @@
 
 #include <QString>
 
+#include "global.h"
+
 
 namespace BrickLink {
 
 class Relationship
 {
 public:
+    static constexpr uint InvalidId = 0;
+
     uint id() const       { return m_id; }
-    QString name() const  { return m_name; }
+    QString name() const  { return m_name.asQString(); }
     uint count() const    { return m_count; }
 
     explicit Relationship() = default;
-    explicit Relationship(uint id, const QString &name);
 
     std::weak_ordering operator<=>(uint id) const;
     std::weak_ordering operator<=>(const Relationship &other) const;
@@ -26,7 +29,7 @@ public:
 private:
     uint m_id = 0;
     uint m_count = 0;
-    QString m_name;
+    PooledArray<char16_t> m_name;
 
     friend class TextImport;
     friend class Database;
@@ -35,12 +38,13 @@ private:
 class RelationshipMatch
 {
 public:
+    static constexpr uint InvalidId = 0;
+
     uint id() const              { return m_id; }
     uint relationshipId() const  { return m_relationshipId; }
-    const std::vector<uint> &itemIndexes() const { return m_itemIndexes; }
+    QVector<const Item *> items() const;
 
     explicit RelationshipMatch() = default;
-    explicit RelationshipMatch(uint id, uint relationshipId, std::vector<uint> &&itemIndexes);
 
     std::weak_ordering operator<=>(uint id) const;
     std::weak_ordering operator<=>(const RelationshipMatch &other) const;
@@ -48,7 +52,7 @@ public:
 private:
     uint m_id = 0;
     uint m_relationshipId = 0;
-    std::vector<uint> m_itemIndexes;
+    PooledArray<uint> m_itemIndexes;
 
     friend class TextImport;
     friend class Database;

@@ -9,6 +9,7 @@
 #include <QtGui/QImage>
 
 #include "bricklink/global.h"
+#include "utility/pooledarray.h"
 
 
 namespace BrickLink {
@@ -19,7 +20,7 @@ public:
     static constexpr uint InvalidId = static_cast<uint>(-1);
 
     uint id() const           { return m_id; }
-    QString name() const      { return m_name; }
+    QString name() const      { return m_name.asQString(); }
     QColor color() const      { return m_color; }
 
     ColorType type() const    { return m_type; }
@@ -65,7 +66,7 @@ public:
     const QImage sampleImage(int w, int h) const;
 
 private:
-    QString m_name;
+    PooledArray<char16_t> m_name;
     uint    m_id = InvalidId;
     int     m_ldraw_id = -1;
     QColor  m_color;

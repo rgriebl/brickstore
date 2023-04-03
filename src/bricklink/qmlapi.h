@@ -314,7 +314,6 @@ class QmlItem : public QmlWrapperBase<const Item>
     Q_PRIVATE_PROPERTY(wrapped, BrickLink::QmlItemType itemType READ itemType CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, BrickLink::QmlCategory category READ category CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, bool hasInventory READ hasInventory CONSTANT)
-    Q_PRIVATE_PROPERTY(wrapped, QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, BrickLink::QmlColor defaultColor READ defaultColor CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, double weight READ weight CONSTANT)
     Q_PRIVATE_PROPERTY(wrapped, int yearReleased READ yearReleased CONSTANT)

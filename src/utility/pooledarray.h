@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <concepts>
 #include <iterator>
+#include <memory_resource>
 
 #include <QString>
 #include <QByteArray>
@@ -119,10 +120,10 @@ public:
 
 private:
     template<int N> struct intTypeFromSize { using type = void; };
-    template<> struct intTypeFromSize<1> { using type = qint8; };
-    template<> struct intTypeFromSize<2> { using type = qint16; };
-    template<> struct intTypeFromSize<4> { using type = qint32; };
-    template<> struct intTypeFromSize<8> { using type = qint64; };
+    template<int N> requires (N == 1) struct intTypeFromSize<N> { using type = qint8; };
+    template<int N> requires (N == 2) struct intTypeFromSize<N> { using type = qint16; };
+    template<int N> requires (N == 4) struct intTypeFromSize<N> { using type = qint32; };
+    template<int N> requires (N == 8) struct intTypeFromSize<N> { using type = qint64; };
 
     const typename intTypeFromSize<sizeof(T)>::type &sizeRef(const T *t) const
     {

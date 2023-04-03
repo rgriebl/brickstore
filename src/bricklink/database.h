@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <memory_resource>
+
 #include <QObject>
 #include <QDateTime>
 #include <QtQml/qqmlregistration.h>
@@ -95,6 +97,7 @@ private:
     Transfer *m_transfer;
     TransferJob *m_job = nullptr;
 
+    std::unique_ptr<std::pmr::memory_resource> m_pool;
     std::vector<Color>               m_colors;
     std::vector<Color>               m_ldrawExtraColors;
     std::vector<Category>            m_categories;
@@ -113,23 +116,23 @@ private:
 
     // IO
 
-    static void readColorFromDatabase(Color &col, QDataStream &dataStream, Version v);
+    static void readColorFromDatabase(Color &col, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeColorToDatabase(const Color &color, QDataStream &dataStream, Version v) const;
-    static void readCategoryFromDatabase(Category &cat, QDataStream &dataStream, Version v);
+    static void readCategoryFromDatabase(Category &cat, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeCategoryToDatabase(const Category &category, QDataStream &dataStream, Version v) const;
-    static void readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, Version v);
+    static void readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeItemTypeToDatabase(const ItemType &itemType, QDataStream &dataStream, Version v) const;
-    static void readItemFromDatabase(Item &item, QDataStream &dataStream, Version v);
+    static void readItemFromDatabase(Item &item, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const;
-    static void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Version v);
+    static void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version v) const;
-    static void readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Version v);
+    static void readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version v) const;
-    static void readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Version v);
+    static void readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QDataStream &dataStream, Version v) const;
-    static void readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, Version v);
+    static void readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeRelationshipToDatabase(const Relationship &e, QDataStream &dataStream, Version v) const;
-    static void readRelationshipMatchFromDatabase(RelationshipMatch &e, QDataStream &dataStream, Version v);
+    static void readRelationshipMatchFromDatabase(RelationshipMatch &e, QDataStream &dataStream, std::pmr::memory_resource *pool);
     void writeRelationshipMatchToDatabase(const RelationshipMatch &e, QDataStream &dataStream, Version v) const;
 };
 

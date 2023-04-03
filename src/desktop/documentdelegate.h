@@ -72,4 +72,5 @@ protected:
     };
     friend size_t qHash(const DocumentDelegate::TextLayoutCacheKey &key, size_t seed);
     static QCache<TextLayoutCacheKey, QTextLayout> s_textLayoutCache;
+    static bool s_textLayoutCacheClearConnected;
 };

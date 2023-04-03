@@ -78,6 +78,9 @@ private:
     std::vector<Relationship>      m_relationships;
     std::vector<RelationshipMatch> m_relationshipMatches;
 
+    // item-idx -> secs since epoch
+    QHash<uint, qint64> m_inventoryLastUpdated;
+
     uint m_latestChangelogId = 0;
 };
 

@@ -289,10 +289,6 @@ QmlCategory::QmlCategory(const Category *cat)
     \readonly
     Returns \c true if a valid inventory exists for this item, or \c false otherwise.
 */
-/*! \qmlproperty date Item::inventoryUpdated
-    \readonly
-    Holds the time stamp of the last successful update of the item's inventory.
-*/
 /*! \qmlproperty Color Item::defaultColor
     \readonly
     Returns the default color used by BrickLink to display a large picture for this item.

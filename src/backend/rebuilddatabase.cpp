@@ -166,11 +166,6 @@ int RebuildDatabase::exec()
 
     blti.exportTo(bl->database());
 
-    extern int _dwords_for_appears, _qwords_for_consists;
-
-    printf("  > appears-in : %11d bytes\n", _dwords_for_appears * 4);
-    printf("  > consists-of: %11d bytes\n", _qwords_for_consists * 8);
-
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 8: Writing the database to disk...\n");
 

@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <memory_resource>
 
 #include <QFile>
 #include <QBuffer>
@@ -23,6 +24,45 @@
 #include "bricklink/database.h"
 
 #include "lzma/bs_lzma.h"
+
+
+auto operator""_MiB(unsigned long long const mib) { return mib * 1024ULL * 1024ULL; }
+
+class database_monotonic_buffer_resource : public std::pmr::monotonic_buffer_resource
+{
+public:
+    database_monotonic_buffer_resource(size_t initialSize = 1_MiB)
+        : std::pmr::monotonic_buffer_resource(initialSize)
+    { }
+
+    ~database_monotonic_buffer_resource() noexcept override
+    {
+        if (debug)
+            qWarning() << "DB_MBR:" << this << "releasing" << (count / 1_MiB) << "MB";
+    }
+
+    static bool debug;
+
+protected:
+    void *do_allocate(const size_t size, const size_t align) override
+    {
+        if (debug) {
+            if ((count / 1_MiB) != ((count + size) / 1_MiB))
+                qWarning() << "DB_MBR:" << this << "allocation now over" << ((count + size) / 1_MiB) << "MB";
+            count += size;
+        }
+        return std::pmr::monotonic_buffer_resource::do_allocate(size, align);
+    }
+    void do_deallocate(void *ptr, size_t size, size_t align) override
+    {
+        std::pmr::monotonic_buffer_resource::do_deallocate(ptr, size, align);
+    }
+
+private:
+    quint64 count = 0;
+};
+
+bool database_monotonic_buffer_resource::debug = false;
 
 
 namespace BrickLink {
@@ -131,6 +171,7 @@ void Database::clear()
     m_pccs.clear();
     m_itemChangelog.clear();
     m_colorChangelog.clear();
+    m_pool.reset();
 }
 
 bool Database::startUpdate()
@@ -230,6 +271,9 @@ void Database::read(const QString &fileName)
                     .arg(f.fileName()).arg(f.pos()).arg(s).arg(max);
         };
 
+        // This is the new pool. We need to keep the old alive till the scope end
+        std::unique_ptr<std::pmr::memory_resource> pool(new database_monotonic_buffer_resource);
+
         QDateTime                        generationDate;
         std::vector<Color>               colors;
         std::vector<Color>               ldrawExtraColors;
@@ -257,7 +301,7 @@ void Database::read(const QString &fileName)
 
                 colors.resize(colc);
                 for (quint32 i = 0; i < colc; ++i) {
-                    readColorFromDatabase(colors[i], ds, Version::Latest);
+                    readColorFromDatabase(colors[i], ds, pool.get());
                     check();
                 }
                 gotColors = true;
@@ -271,7 +315,7 @@ void Database::read(const QString &fileName)
 
                 ldrawExtraColors.resize(colc);
                 for (quint32 i = 0; i < colc; ++i) {
-                    readColorFromDatabase(ldrawExtraColors[i], ds, Version::Latest);
+                    readColorFromDatabase(ldrawExtraColors[i], ds, pool.get());
                     check();
                 }
                 break;
@@ -284,7 +328,7 @@ void Database::read(const QString &fileName)
 
                 categories.resize(catc);
                 for (quint32 i = 0; i < catc; ++i) {
-                    readCategoryFromDatabase(categories[i], ds, Version::Latest);
+                    readCategoryFromDatabase(categories[i], ds, pool.get());
                     check();
                 }
                 gotCategories = true;
@@ -298,7 +342,7 @@ void Database::read(const QString &fileName)
 
                 itemTypes.resize(ittc);
                 for (quint32 i = 0; i < ittc; ++i) {
-                    readItemTypeFromDatabase(itemTypes[i], ds, Version::Latest);
+                    readItemTypeFromDatabase(itemTypes[i], ds, pool.get());
                     check();
                 }
                 gotItemTypes = true;
@@ -312,10 +356,9 @@ void Database::read(const QString &fileName)
 
                 items.resize(itc);
                 for (quint32 i = 0; i < itc; ++i) {
-                    readItemFromDatabase(items[i], ds, Version::Latest);
+                    readItemFromDatabase(items[i], ds, pool.get());
                     check();
                 }
-                items.shrink_to_fit();
                 gotItems = true;
                 break;
             }
@@ -328,12 +371,12 @@ void Database::read(const QString &fileName)
 
                 itemChangelog.resize(clic);
                 for (quint32 i = 0; i < clic; ++i) {
-                    readItemChangeLogFromDatabase(itemChangelog[i], ds, Version::Latest);
+                    readItemChangeLogFromDatabase(itemChangelog[i], ds, pool.get());
                     check();
                 }
                 colorChangelog.resize(clcc);
                 for (quint32 i = 0; i < clcc; ++i) {
-                    readColorChangeLogFromDatabase(colorChangelog[i], ds, Version::Latest);
+                    readColorChangeLogFromDatabase(colorChangelog[i], ds, pool.get());
                     check();
                 }
                 latestChangelogId = clid;
@@ -348,7 +391,7 @@ void Database::read(const QString &fileName)
 
                 pccs.resize(pccc);
                 for (quint32 i = 0; i < pccc; ++i) {
-                    readPCCFromDatabase(pccs[i], ds, Version::Latest);
+                    readPCCFromDatabase(pccs[i], ds, pool.get());
                     check();
                 }
                 gotPccs = true;
@@ -362,7 +405,7 @@ void Database::read(const QString &fileName)
 
                 relationships.resize(relc);
                 for (quint32 i = 0; i < relc; ++i) {
-                    readRelationshipFromDatabase(relationships[i], ds, Version::Latest);
+                    readRelationshipFromDatabase(relationships[i], ds, pool.get());
                     check();
                 }
                 gotRelationships = true;
@@ -376,7 +419,7 @@ void Database::read(const QString &fileName)
 
                 relationshipMatches.resize(matchc);
                 for (quint32 i = 0; i < matchc; ++i) {
-                    readRelationshipMatchFromDatabase(relationshipMatches[i], ds, Version::Latest);
+                    readRelationshipMatchFromDatabase(relationshipMatches[i], ds, pool.get());
                     check();
                 }
                 gotRelationshipMatches = true;
@@ -440,17 +483,19 @@ void Database::read(const QString &fileName)
             qInfo().noquote() << out;
         }
 
-        m_colors = colors;
-        m_ldrawExtraColors = ldrawExtraColors;
-        m_categories = categories;
-        m_itemTypes = itemTypes;
-        m_items = items;
-        m_itemChangelog = itemChangelog;
-        m_colorChangelog = colorChangelog;
-        m_pccs = pccs;
-        m_relationships = relationships;
-        m_relationshipMatches = relationshipMatches;
+        m_colors = std::move(colors);
+        m_ldrawExtraColors = std::move(ldrawExtraColors);
+        m_categories = std::move(categories);
+        m_itemTypes = std::move(itemTypes);
+        m_items = std::move(items);
+        m_itemChangelog = std::move(itemChangelog);
+        m_colorChangelog = std::move(colorChangelog);
+        m_pccs = std::move(pccs);
+        m_relationships = std::move(relationships);
+        m_relationshipMatches = std::move(relationshipMatches);
         m_latestChangelogId = latestChangelogId;
+
+        m_pool.swap(pool);
 
         Color::s_colorImageCache.clear();
 
@@ -609,13 +654,16 @@ void Database::remove()
 ///////////////////////////////////////////////////////////////////////
 
 
-void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, Version)
+void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
+    QString name;
     quint32 flags;
 
-    dataStream >> col.m_id >> col.m_name >> col.m_ldraw_id >> col.m_color >> flags
+    dataStream >> col.m_id >> name >> col.m_ldraw_id >> col.m_color >> flags
             >> col.m_popularity >> col.m_year_from >> col.m_year_to;
     col.m_type = static_cast<ColorType>(flags);
+
+    col.m_name.copyQString(name, pool);
 
     dataStream >> col.m_ldraw_color >> col.m_ldraw_edge_color >> col.m_luminance
             >> col.m_particleMinSize >> col.m_particleMaxSize >> col.m_particleColor
@@ -624,7 +672,7 @@ void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, Versio
 
 void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, Version v) const
 {
-    dataStream << col.m_id << col.m_name << col.m_ldraw_id << col.m_color << quint32(col.m_type)
+    dataStream << col.m_id << col.name() << col.m_ldraw_id << col.m_color << quint32(col.m_type)
                << col.m_popularity << col.m_year_from << col.m_year_to;
 
     if (v >= Version::V7) {
@@ -635,15 +683,19 @@ void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, V
 }
 
 
-void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, Version)
+void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
-    dataStream >> cat.m_id >> cat.m_name >> cat.m_year_from >> cat.m_year_to >> cat.m_year_recency
-            >> cat.m_has_inventories;
+    QString name;
+
+    dataStream >> cat.m_id >> name >> cat.m_year_from >> cat.m_year_to >> cat.m_year_recency
+        >> cat.m_has_inventories;
+
+    cat.m_name.copyQString(name, pool);
 }
 
 void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version v) const
 {
-    dataStream << cat.m_id << cat.m_name;
+    dataStream << cat.m_id << cat.name();
     if (v >= Version::V6)
         dataStream << cat.m_year_from << cat.m_year_to << cat.m_year_recency;
     if (v >= Version::V8)
@@ -651,18 +703,19 @@ void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStr
 }
 
 
-void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, Version)
+void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
     quint8 flags = 0;
     quint32 catSize = 0;
-    dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> itt.m_name >> flags >> catSize;
+    QString name;
+    dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> name >> flags >> catSize;
 
-    itt.m_categoryIndexes.reserve(catSize);
-    while (catSize-- > 0) {
-        quint16 catIdx = 0;
-        dataStream >> catIdx;
-        itt.m_categoryIndexes.emplace_back(catIdx);
-    }
+    itt.m_name.copyQString(name, pool);
+
+    Q_ASSERT(itt.m_categoryIndexes.isEmpty());
+    itt.m_categoryIndexes.resize(catSize, pool);
+    for (quint32 i = 0; i < catSize; ++i)
+        dataStream >> itt.m_categoryIndexes[i];
 
     itt.m_has_inventories   = flags & 0x01;
     itt.m_has_colors        = flags & 0x02;
@@ -682,115 +735,116 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
     dataStream << qint8(itt.m_id);
     if (v < Version::V8)
         dataStream << qint8(itt.m_id);
-    dataStream << itt.m_name << flags << quint32(itt.m_categoryIndexes.size());
+    dataStream << itt.name() << flags << quint32(itt.m_categoryIndexes.size());
 
     for (const quint16 catIdx : itt.m_categoryIndexes)
         dataStream << catIdx;
 }
 
 
-void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, Version)
+void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
-    dataStream >> item.m_id >> item.m_name >> item.m_itemTypeIndex >> item.m_categoryIndex
-            >> item.m_defaultColorIndex >> reinterpret_cast<qint8 &>(item.m_itemTypeId)
-            >> item.m_year_from >> item.m_lastInventoryUpdate >> item.m_weight >> item.m_year_to;
+    //TODO V10: unify category list
+    //TODO V10: remove itemTypeId
+    //TODO V10: remove lastInventoryUpdate
+
+    QByteArray id;
+    QString name;
+    quint16 mainCat;
+    qint8 dummyTypeId;
+    qint64 dummyInventoryUpdate;
+
+    dataStream >> id >> name >> item.m_itemTypeIndex >> mainCat
+        >> item.m_defaultColorIndex >> dummyTypeId
+        >> item.m_year_from >> dummyInventoryUpdate >> item.m_weight >> item.m_year_to;
+
+    item.m_id.copyQByteArray(id, pool);
+    item.m_name.copyQString(name, pool);
 
     quint32 appearsInSize = 0;
     dataStream >> appearsInSize;
-    item.m_appears_in.clear();
-    item.m_appears_in.reserve(appearsInSize);
-
-    Item::AppearsInRecord air;
-    while (appearsInSize-- > 0) {
-        dataStream >> air.m_data;
-        item.m_appears_in.push_back(air);
-    }
-    item.m_appears_in.shrink_to_fit();
+    Q_ASSERT(item.m_appears_in.isEmpty());
+    item.m_appears_in.resize(appearsInSize, pool);
+    for (quint32 i = 0; i < appearsInSize; ++i)
+        dataStream >> item.m_appears_in[i].m_data;
 
     quint32 consistsOfSize = 0;
     dataStream >> consistsOfSize;
-    item.m_consists_of.clear();
-    item.m_consists_of.reserve(int(consistsOfSize));
-
-    Item::ConsistsOf co;
-    while (consistsOfSize-- > 0) {
-        dataStream >> co.m_data;
-        item.m_consists_of.push_back(co);
-    }
-    item.m_consists_of.shrink_to_fit();
+    Q_ASSERT(item.m_consists_of.isEmpty());
+    item.m_consists_of.resize(consistsOfSize, pool);
+    for (quint32 i = 0; i < consistsOfSize; ++i)
+        dataStream >> item.m_consists_of[i].m_data;
 
     quint32 knownColorsSize;
     dataStream >> knownColorsSize;
-    item.m_knownColorIndexes.clear();
-    item.m_knownColorIndexes.reserve(knownColorsSize);
+    Q_ASSERT(item.m_knownColorIndexes.isEmpty());
+    item.m_knownColorIndexes.resize(knownColorsSize, pool);
+    for (quint32 i = 0; i < knownColorsSize; ++i)
+        dataStream >> item.m_knownColorIndexes[i];
 
-    quint16 colorIndex;
-    while (knownColorsSize-- > 0) {
-        dataStream >> colorIndex;
-        item.m_knownColorIndexes.push_back(colorIndex);
-    }
-    item.m_knownColorIndexes.shrink_to_fit();
-
-    quint32 additionalCategoriesSize;
-    dataStream >> additionalCategoriesSize;
-    item.m_additionalCategoryIndexes.clear();
-    item.m_additionalCategoryIndexes.reserve(additionalCategoriesSize);
-
-    qint16 catIndex;
-    while (additionalCategoriesSize-- > 0) {
-        dataStream >> catIndex;
-        item.m_additionalCategoryIndexes.push_back(catIndex);
-    }
-    item.m_additionalCategoryIndexes.shrink_to_fit();
+    quint32 categoriesSize;
+    dataStream >> categoriesSize;
+    Q_ASSERT(item.m_categoryIndexes.isEmpty());
+    item.m_categoryIndexes.resize(categoriesSize + 1, pool);
+    item.m_categoryIndexes[0] = mainCat;
+    for (quint32 i = 0; i < categoriesSize; ++i)
+        dataStream >> item.m_categoryIndexes[i + 1];
 
     quint32 relationshipMatchIdsSize;
     dataStream >> relationshipMatchIdsSize;
-    item.m_relationshipMatchIds.clear();
-    item.m_relationshipMatchIds.reserve(relationshipMatchIdsSize);
-
-    quint16 matchId;
-    while (relationshipMatchIdsSize-- > 0) {
-        dataStream >> matchId;
-        item.m_relationshipMatchIds.push_back(matchId);
-    }
-    item.m_relationshipMatchIds.shrink_to_fit();
+    Q_ASSERT(item.m_relationshipMatchIds.isEmpty());
+    item.m_relationshipMatchIds.resize(relationshipMatchIdsSize, pool);
+    for (quint32 i = 0; i < relationshipMatchIdsSize; ++i)
+        dataStream >> item.m_relationshipMatchIds[i];
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
 {
-    dataStream << item.m_id << item.m_name << item.m_itemTypeIndex << item.m_categoryIndex
-               << item.m_defaultColorIndex << qint8(item.m_itemTypeId) << item.m_year_from
-               << item.m_lastInventoryUpdate << item.m_weight;
+    //TODO V10: unify category list
+    //TODO V10: remove itemTypeId
+    //TODO V10: remove lastInventoryUpdate
+
+    qint64 lastInventoryUpdate = item.m_consists_of.isEmpty() ? 0 : 1577833200; // 01.01.2020
+    qint8 itemTypeId = m_itemTypes[item.m_itemTypeIndex].id();
+
+    dataStream << item.id() << item.name() << item.m_itemTypeIndex << item.m_categoryIndexes[0]
+               << item.m_defaultColorIndex << itemTypeId << item.m_year_from
+               << lastInventoryUpdate << item.m_weight;
 
     if (v >= Version::V6)
         dataStream << item.m_year_to;
 
-    dataStream << quint32(item.m_appears_in.size());
-    for (const auto &ai : item.m_appears_in)
-        dataStream << ai.m_data;
+    quint32 appearsInSize = quint32(item.m_appears_in.size());
+    dataStream << appearsInSize;
+    for (quint32 i = 0; i < appearsInSize; ++i)
+        dataStream << item.m_appears_in[i].m_data;
 
-    dataStream << quint32(item.m_consists_of.size());
-    for (const auto &co : item.m_consists_of)
-        dataStream << co.m_data;
+    quint32 consistsOfSize = quint32(item.m_consists_of.size());
+    dataStream << consistsOfSize;
+    for (quint32 i = 0; i < consistsOfSize; ++i)
+        dataStream << item.m_consists_of[i].m_data;
 
-    dataStream << quint32(item.m_knownColorIndexes.size());
-    for (const quint16 colorIndex : item.m_knownColorIndexes)
-        dataStream << colorIndex;
+    quint32 knownColorsSize = quint32(item.m_knownColorIndexes.size());
+    dataStream << knownColorsSize;
+    for (quint32 i = 0; i < knownColorsSize; ++i)
+        dataStream << item.m_knownColorIndexes[i];
 
     if (v >= Version::V6) {
-        dataStream << quint32(item.m_additionalCategoryIndexes.size());
-        for (const qint16 categoryIndex : item.m_additionalCategoryIndexes)
-            dataStream << categoryIndex;
+        quint32 categoriesSize = quint32(std::max(1LL, item.m_categoryIndexes.size()) - 1);
+        dataStream << categoriesSize;
+        for (quint32 i = 0; i < categoriesSize; ++i)
+            dataStream << item.m_categoryIndexes[i + 1];
     }
 
     if (v >= Version::V9) {
-        dataStream << quint32(item.m_relationshipMatchIds.size());
-        for (const quint16 matchId : item.m_relationshipMatchIds)
-            dataStream << matchId;
+        quint32 relationshipMatchIdsSize = quint32(item.m_relationshipMatchIds.size());
+        dataStream << relationshipMatchIdsSize;
+        for (quint32 i = 0; i < relationshipMatchIdsSize; ++i)
+            dataStream << item.m_relationshipMatchIds[i];
     }
 }
 
-void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, Version)
+void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, std::pmr::memory_resource *)
 {
     qint32 itemIndex, colorIndex;
     dataStream >> pcc.m_id >> itemIndex >> colorIndex;
@@ -803,19 +857,23 @@ void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStr
     dataStream << pcc.m_id << qint32(pcc.m_itemIndex) << qint32(pcc.m_colorIndex);
 }
 
-void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, Version)
+void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
-    dataStream >> e.m_id >> e.m_julianDay >> e.m_fromTypeAndId >> e.m_toTypeAndId;
+    QByteArray from, to;
+    dataStream >> e.m_id >> e.m_julianDay >> from >> to;
+
+    e.m_fromTypeAndId.copyQByteArray(from, pool);
+    e.m_toTypeAndId.copyQByteArray(to, pool);
 }
 
 void Database::writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version v) const
 {
     if (v >= Version::V9)
         dataStream << e.m_id << e.m_julianDay;
-    dataStream << e.m_fromTypeAndId << e.m_toTypeAndId;
+    dataStream << e.fromItemTypeAndId() << e.toItemTypeAndId();
 }
 
-void Database::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, Version)
+void Database::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *)
 {
     dataStream >> e.m_id >> e.m_julianDay >> e.m_fromColorId >> e.m_toColorId;
 }
@@ -827,30 +885,28 @@ void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QData
     dataStream << e.m_fromColorId << e.m_toColorId;
 }
 
-void Database::readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, Version)
+void Database::readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
-    dataStream >> e.m_id >> e.m_name >> e.m_count;
+    QString name;
+    dataStream >> e.m_id >> name >> e.m_count;
+
+    e.m_name.copyQString(name, pool);
 }
 
 void Database::writeRelationshipToDatabase(const Relationship &e, QDataStream &dataStream, Version) const
 {
-    dataStream << e.m_id << e.m_name << e.m_count;
+    dataStream << e.m_id << e.name() << e.m_count;
 }
 
-void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QDataStream &dataStream, Version)
+void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QDataStream &dataStream, std::pmr::memory_resource *pool)
 {
     quint32 count;
     dataStream >> match.m_id >> match.m_relationshipId >> count;
 
-    match.m_itemIndexes.clear();
-    match.m_itemIndexes.reserve(count);
-
-    uint itemIndex;
-    while (count-- > 0) {
-        dataStream >> itemIndex;
-        match.m_itemIndexes.push_back(itemIndex);
-    }
-    match.m_itemIndexes.shrink_to_fit();
+    Q_ASSERT(match.m_itemIndexes.isEmpty());
+    match.m_itemIndexes.resize(count, pool);
+    for (quint32 i = 0; i < count; ++i)
+        dataStream >> match.m_itemIndexes[i];
 }
 
 void Database::writeRelationshipMatchToDatabase(const RelationshipMatch &match, QDataStream &dataStream, Version) const

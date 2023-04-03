@@ -1,14 +1,11 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "core.h"
 #include "relationship.h"
 
-namespace BrickLink {
 
-Relationship::Relationship(uint id, const QString &name)
-    : m_id(id)
-    , m_name(name)
-{ }
+namespace BrickLink {
 
 std::weak_ordering Relationship::operator<=>(uint id) const
 {
@@ -22,11 +19,14 @@ std::weak_ordering Relationship::operator<=>(const Relationship &other) const
 
 
 
-RelationshipMatch::RelationshipMatch(uint id, uint relationshipId, std::vector<uint> &&itemIndexes)
-    : m_id(id)
-    , m_relationshipId(relationshipId)
-    , m_itemIndexes(std::move(itemIndexes))
-{ }
+QVector<const Item *> RelationshipMatch::items() const
+{
+    QVector<const Item *> result;
+    result.reserve(m_itemIndexes.size());
+    for (const auto &idx : m_itemIndexes)
+        result.emplace_back(&core()->items()[idx]);
+    return result;
+}
 
 std::weak_ordering RelationshipMatch::operator<=>(uint id) const
 {

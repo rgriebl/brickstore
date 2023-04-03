@@ -38,6 +38,7 @@
 
 
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
+bool DocumentDelegate::s_textLayoutCacheClearConnected = false;
 
 static const quint64 differenceWarningMask = 0ULL
         | (1ULL << DocumentModel::PartNo)
@@ -63,6 +64,14 @@ DocumentDelegate::DocumentDelegate(QTableView *table)
         languageChange();
         return EventFilter::ContinueEventProcessing;
     });
+
+    // we need to clear when the DB updates, because we cache item names from DB alloc pool
+    if (!s_textLayoutCacheClearConnected) {
+        s_textLayoutCacheClearConnected = true;
+
+        connect(BrickLink::core()->database(), &BrickLink::Database::databaseReset,
+                qApp, []() { s_textLayoutCache.clear(); });
+    }
 }
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w)
