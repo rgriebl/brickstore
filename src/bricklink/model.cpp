@@ -575,21 +575,11 @@ bool ItemTypeModel::filterAccepts(const void *pointer) const
 // ITEMMODEL
 /////////////////////////////////////////////////////////////
 
-QString ItemModel::s_appearsInPrefix;
-QString ItemModel::s_consistsOfPrefix;
-QString ItemModel::s_idPrefix;
-
 
 ItemModel::ItemModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
-
-    if (s_consistsOfPrefix.isEmpty()) {
-        s_consistsOfPrefix = tr("consists-of:", "Filter prefix");
-        s_appearsInPrefix = tr("appears-in:", "Filter prefix");
-        s_idPrefix = tr("id:", "Id prefix");
-    }
 
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, &ItemModel::pictureUpdated);
@@ -752,11 +742,8 @@ void ItemModel::setFilterText(const QString &filter)
         return;
 
     m_text_filter = filter;
-    m_filter_text.clear();
-    m_filter_appearsIn.clear();
-    m_filter_consistsOf.clear();
-    m_filter_ids.second.clear();
-    m_filter_ids.first = false;
+    m_filter_terms.clear();
+    m_filter_ids.clear();
 
     const QStringList sl = filter.simplified().split(u' ');
 
@@ -772,51 +759,19 @@ void ItemModel::setFilterText(const QString &filter)
             quoted = quoted + u' ' + s;
             if (quoted.endsWith(u'"')) {
                 quoted.chop(1);
-                m_filter_text << qMakePair(quotedNegate, quoted);
+                m_filter_terms << FilterTerm(quotedNegate, quoted);
                 quoted.clear();
             }
         } else if (s.length() == 1) {
             // just a single character -> search for it literally
-            m_filter_text << qMakePair(false, s);
+            m_filter_terms << FilterTerm(false, s);
 
         } else {
             const QChar first = s.at(0);
             const bool negate = (first == u'-');
             auto str = negate ? s.mid(1) : s;
 
-            if (str.startsWith(s_consistsOfPrefix)) {
-                str = str.mid(s_consistsOfPrefix.length());
-
-                // contains either a minifig or a part, optionally with color-id
-                const Color *color = nullptr;
-
-                auto atPos = str.lastIndexOf(u'@');
-                if (atPos != -1) {
-                    color = core()->color(str.mid(atPos + 1).toUInt());
-                    str = str.left(atPos);
-                }
-
-                if (auto item = core()->item("MP", str.toLatin1()))
-                    m_filter_consistsOf << qMakePair(negate, qMakePair(item, color));
-
-            } else if (str.startsWith(s_appearsInPrefix)) {
-                str = str.mid(s_appearsInPrefix.length());
-
-                // appears-in either a minifig or a set
-                if (auto item = core()->item("MS", str.toLatin1()))
-                    m_filter_appearsIn << qMakePair(negate, item);
-
-            } else if (str.startsWith(s_idPrefix)) {
-                str = str.mid(s_idPrefix.length());
-                const auto ids = str.split(u","_qs);
-
-                for (const auto &id : ids) {
-                    if (auto item = core()->item("MPSG", id.toLatin1()))
-                        m_filter_ids.second << item;
-                }
-                m_filter_ids.first = negate;
-
-            } else if (str.startsWith(u"scan:") && (sl.size() == 1) && !negate) {
+            if (str.startsWith(u"scan:") && (sl.size() == 1) && !negate) {
                 str = str.mid(u"scan:"_qs.length());
                 const auto ids = str.split(u","_qs);
 
@@ -828,12 +783,10 @@ void ItemModel::setFilterText(const QString &filter)
                     if (id.length() < 2)
                         continue;
                     if (auto item = core()->item(id.at(0).toLatin1(), id.mid(1).toLatin1())) {
-                        m_filter_ids.second << item;
+                        m_filter_ids << id;
                         scanOrder << item;
                     }
                 }
-                m_filter_ids.first = negate;
-
             } else {
                 const bool firstIsQuote = str.startsWith(u"\"");
                 const bool lastIsQuote = str.endsWith(u"\"");
@@ -842,9 +795,9 @@ void ItemModel::setFilterText(const QString &filter)
                     quoted = str.mid(1);
                     quotedNegate = negate;
                 } else if (firstIsQuote && lastIsQuote) {
-                    m_filter_text << qMakePair(negate, str.mid(1, str.length() - 2));
+                    m_filter_terms << FilterTerm(negate, str.mid(1, str.length() - 2));
                 } else {
-                    m_filter_text << qMakePair(negate, str);
+                    m_filter_terms << FilterTerm(negate, str);
                 }
             }
         }
@@ -912,50 +865,19 @@ bool ItemModel::filterAccepts(const void *pointer) const
     else {
         const QString matchStr = QLatin1String(item->id()) + u' ' + item->name();
 
-        // .first is always "bool negate"
-
         bool match = true;
-        for (const auto &p : m_filter_text)
-            match = match && (matchStr.contains(p.second, Qt::CaseInsensitive) == !p.first); // contains() xor negate
+        for (const auto &ft : m_filter_terms)
+            match = match && (matchStr.contains(ft.m_text, Qt::CaseInsensitive) == !ft.m_negate); // contains() xor negate
 
-        bool idMatched = m_filter_ids.second.isEmpty();
-        for (const auto &i : m_filter_ids.second) {
-            if (i == item) {
+        bool idMatched = m_filter_ids.isEmpty();
+        for (const auto &id : m_filter_ids) {
+            if (id == QString::fromLatin1(item->itemTypeId() + item->id())) {
                 idMatched = true;
                 break;
             }
         }
-        match = match && (idMatched == !m_filter_ids.first); // found xor negate
 
-        for (const auto &a : m_filter_appearsIn) {
-            bool found = false;
-            const auto appearsvec = item->appearsIn();
-            for (const AppearsInColor &vec : appearsvec) {
-                for (const AppearsInItem &ai : vec) {
-                    if (ai.second == a.second) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    break;
-            }
-            match = match && (found == !a.first); // found xor negate
-        }
-        for (const auto &c : m_filter_consistsOf) {
-            bool found = false;
-            const auto &containslist = item->consistsOf();
-            for (const auto &ci : containslist) {
-                if ((ci.item() == c.second.first)
-                        && (!c.second.second || (ci.color() == c.second.second))) {
-                    found = true;
-                    break;
-                }
-            }
-            match = match && (found == !c.first); // found xor negate
-        }
-
-        return match;
+        return match && idMatched;
     }
 }
 

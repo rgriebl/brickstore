@@ -213,16 +213,19 @@ private:
     const Category *m_category_filter = nullptr;
     const Color *   m_color_filter = nullptr;
     QString         m_text_filter;
-    QVector<QPair<bool, QString>> m_filter_text;
-    QVector<QPair<bool, QPair<const Item *, const Color *>>> m_filter_consistsOf;
-    QVector<QPair<bool, const Item *>> m_filter_appearsIn;
-    QPair<bool, QVector<const Item *>> m_filter_ids;
+
+    struct FilterTerm {
+        explicit FilterTerm(bool negate, const QString &text) : m_negate(negate), m_text(text) { }
+
+        bool m_negate = false;
+        QString m_text;
+    };
+
+    QVector<FilterTerm> m_filter_terms;
+    QStringList     m_filter_ids;
     bool            m_inv_filter = false;
     int             m_year_min_filter = 0;
     int             m_year_max_filter = 0;
-    static QString  s_consistsOfPrefix;
-    static QString  s_appearsInPrefix;
-    static QString  s_idPrefix;
 
     friend class Core;
 };

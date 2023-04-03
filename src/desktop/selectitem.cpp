@@ -34,7 +34,6 @@
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
 #include "bricklink/partcolorcode.h"
-#include "bricklink/picture.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
@@ -905,45 +904,6 @@ void SelectItem::showContextMenu(const QPoint &p)
                     connect(m->addAction(tr("Switch to the item's \"%1\" category").arg(cat->name())),
                             &QAction::triggered, this, [this, cat]() {
                         setCurrentCategory(cat);
-                    });
-                }
-            }
-        }
-
-        // mini-fig special
-        if (item && item->itemType() && (item->itemTypeId() == 'M') && item->hasInventory()) {
-            auto minifigParts = item->consistsOf();
-
-            for (const BrickLink::Item::ConsistsOf &part : minifigParts) {
-                auto partItem = part.item();
-                if (!partItem)
-                    continue;
-                auto partColor = part.color();
-                auto partPicture = BrickLink::core()->pictureCache()->picture(partItem, partColor, true);
-
-
-                QString filter = BrickLink::ItemModel::tr("consists-of:") + QLatin1String(partItem->id());
-                if (partItem->itemType()->hasColors() && partColor)
-                    filter = filter + u'@' + QString::number(partColor->id());
-                QIcon icon;
-                if (partPicture->isValid())
-                    icon = QPixmap::fromImage(partPicture->image());
-
-                m->addSeparator();
-                QString section;
-                if (partColor && partColor->id())
-                    section = partColor->name() + u' ';
-                section = section + partItem->name() + u" [" + QLatin1String(partItem->id()) + u']';
-                m->addAction(icon, section)->setEnabled(false);
-
-                connect(m->addAction(tr("Set filter to Minifigs consisting of this part")),
-                                    &QAction::triggered, this, [this, filter]() {
-                    d->w_filter->setText(filter);
-                });
-                if (!d->w_filter->text().isEmpty()) {
-                    connect(m->addAction(tr("Narrow filter to Minifigs consisting of this part")),
-                                        &QAction::triggered, this, [this, filter]() {
-                        d->w_filter->setText(d->w_filter->text() + u' ' + filter);
                     });
                 }
             }
