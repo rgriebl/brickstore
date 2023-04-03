@@ -1,8 +1,8 @@
 name: QMake Build Matrix
 
 on:
+  workflow_dispatch:
   push:
-    workflow_dispatch:
     branches:
       - legacy-qt5.15-based
 
@@ -24,7 +24,7 @@ jobs:
           os: windows
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
-          openssl_version: 'Win32OpenSSL_Light-1_1_1q'
+          openssl_version: 'Win32OpenSSL_Light-1_1_1t'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
           qmake_extra_config: ''
 
@@ -34,7 +34,7 @@ jobs:
           os: windows
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
-          openssl_version: 'Win64OpenSSL_Light-1_1_1q'
+          openssl_version: 'Win64OpenSSL_Light-1_1_1t'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           qmake_extra_config: ''
 
