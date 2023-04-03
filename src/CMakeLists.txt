@@ -16,6 +16,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/chunkwriter.h
     utility/exception.cpp
     utility/exception.h
+    utility/pooledarray.h
     utility/q3cache.h
     utility/q5hash.cpp
     utility/q5hash.h
