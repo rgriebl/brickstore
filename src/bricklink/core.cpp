@@ -28,14 +28,14 @@
 #include "bricklink/changelogentry.h"
 #include "bricklink/color.h"
 #include "bricklink/core.h"
-#include "bricklink/global.h"
 #include "bricklink/item.h"
 #include "bricklink/itemtype.h"
 #include "bricklink/lot.h"
 #include "bricklink/partcolorcode.h"
-#include "bricklink/picture.h"
-#include "bricklink/priceguide.h"
 #if !defined(BS_BACKEND)
+#  include "bricklink/global.h"
+#  include "bricklink/picture.h"
+#  include "bricklink/priceguide.h"
 #  include "bricklink/cart.h"
 #  include "bricklink/order.h"
 #  include "bricklink/store.h"
@@ -826,8 +826,10 @@ const RelationshipMatch *Core::relationshipMatch(uint id)
 
 void Core::cancelTransfers()
 {
+#if !defined(BS_BACKEND)
     m_priceGuideCache->cancelAllPriceGuideUpdates();
     m_pictureCache->cancelAllPictureUpdates();;
+#endif
 
     if (m_transfer)
         m_transfer->abortAllJobs();

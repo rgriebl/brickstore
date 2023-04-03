@@ -476,7 +476,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pic, _] : m_loadQueue)
+            for (auto [pic, type] : m_loadQueue)
                 pic->release();
             continue;
         }

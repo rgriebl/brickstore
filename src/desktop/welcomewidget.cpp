@@ -101,7 +101,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
             recent_layout->addWidget(b);
 
             connect(b, &BetterCommandButton::customContextMenuRequested,
-                    this, [=](const QPoint &pos) {
+                    this, [this, i, b](const QPoint &pos) {
                 auto index = RecentFiles::inst()->index(i);
                 const bool pinned = index.data(RecentFiles::PinnedRole).toBool();
                 auto *m = new QMenu(this);

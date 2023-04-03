@@ -877,7 +877,7 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pg, _] : m_loadQueue)
+            for (auto [pg, type] : m_loadQueue)
                 pg->release();
             continue;
         }
