@@ -7,7 +7,7 @@
 
 #include <QString>
 
-#include "global.h"
+#include "utility/pooledarray.h"
 
 
 namespace BrickLink {

@@ -10,6 +10,8 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QDataStream>
+#include <QDebug>
 
 
 /*TODO: small array optimization:
@@ -38,20 +40,20 @@ public:
     QString asQString() const requires std::same_as<T, char16_t>
     {
         const auto s = size();
-        return (s < 2) ? QString { } : QString::fromRawData(reinterpret_cast<const QChar *>(cbegin()), s - 1);
+        return (s < 1) ? QString { } : QString::fromRawData(reinterpret_cast<const QChar *>(cbegin()), s);
     }
 
-    // template<typename = std::enable_if_t<std::is_same<char, T>::value>>
-    void copyQByteArray(const QByteArray &str, std::pmr::memory_resource *mr) requires std::same_as<T, char>
+    // template<typename = std::enable_if_t<std::is_same<char8_t, T>::value>>
+    void copyQByteArray(const QByteArray &str, std::pmr::memory_resource *mr) requires std::same_as<T, char8_t>
     {
         copyStringLike(str.constData(), str.size(), mr);
     }
 
-    // template<typename = std::enable_if_t<std::is_same<char, T>::value>>
-    QByteArray asQByteArray(qsizetype offset = 0) const requires std::same_as<T, char>
+    // template<typename = std::enable_if_t<std::is_same<char8_t, T>::value>>
+    QByteArray asQByteArray(qsizetype offset = 0) const requires std::same_as<T, char8_t>
     {
         const auto s = size();
-        return (s < (offset + 2)) ? QByteArray { } : QByteArray::fromRawData(cbegin() + offset, s - offset - 1);
+        return (s < (offset + 2)) ? QByteArray { } : QByteArray::fromRawData(reinterpret_cast<const char *>(cbegin()) + offset, s - offset - 1);
     }
 
     // template<typename InputIt>
@@ -78,15 +80,18 @@ public:
         return (i < size_t(size())) ? *(cbegin() + i)
                                     : throw std::out_of_range("PooledArray operator[] out of range");
     }
-    T &operator[](size_t i) { return const_cast<T &>(const_cast<const PooledArray *>(this)->operator[](i)); }
+    T &operator[](size_t i)
+    {
+        return const_cast<T &>(const_cast<const PooledArray *>(this)->operator[](i));
+    }
 
     void resize(qsizetype s, std::pmr::memory_resource *mr)
     {
         if ((s < 0) || (!s && !data) || (data && (s == sizeRef(data))))
             return;
 
-        if (s > std::numeric_limits<typename intTypeFromSize<sizeof(T)>::type>::max())
-            throw std::out_of_range("PooledArray resize() too large for undelying data-type");
+        if (s > maxSize())
+            throw std::out_of_range("PooledArray resize() too large for underlying data-type");
 
         std::pmr::polymorphic_allocator<> pool(mr ? mr : std::pmr::get_default_resource());
 
@@ -118,6 +123,16 @@ public:
         data[s + 1] = t;
     }
 
+    constexpr qsizetype maxSize() const
+    {
+        return qsizetype(std::numeric_limits<typename intTypeFromSize<sizeof(T)>::type>::max());
+    }
+
+    std::pair<PooledArray<T> &, std::pmr::memory_resource *> deserialize(std::pmr::memory_resource *mr)
+    {
+        return { *this, mr };
+    }
+
 private:
     template<int N> struct intTypeFromSize { using type = void; };
     template<int N> requires (N == 1) struct intTypeFromSize<N> { using type = qint8; };
@@ -139,14 +154,72 @@ private:
 
     void copyStringLike(const void *ptr, qsizetype size, std::pmr::memory_resource *mr)
     {
+        constexpr qsizetype appendNull = std::is_same<T, char8_t>::value ? 1 : 0;
+
         if (!ptr || size <= 0) {
             resize(0, mr);
         } else {
-            resize(size + 1, mr);
+            resize(size + appendNull, mr);
             memcpy(data + 1, ptr, size * sizeof(T));
-            data[size + 1] = T();
+            if (appendNull)
+                data[size + 1] = T();
         }
     }
 
     T *data = nullptr;
 };
+
+template<typename T>
+QDataStream &operator<<(QDataStream &ds, const PooledArray<T> &pa)
+{
+    constexpr bool nullAndEmptyDifferent = (std::is_same<T, char16_t>::value || std::is_same<T, char8_t>::value);
+    constexpr bool sizeInBytes = std::is_same<T, char16_t>::value;
+    constexpr qsizetype appendNull = std::is_same<T, char8_t>::value ? 1 : 0;
+
+    const auto s = std::max(pa.size() - appendNull, qsizetype(0));
+    const auto bytes = s * sizeof(T);
+
+    if (!s && nullAndEmptyDifferent) {
+        ds << quint32(0xffffffff);
+    } else {
+        ds << quint32(sizeInBytes ? bytes : s);
+        ds.writeRawData(reinterpret_cast<const char *>(pa.cbegin()), uint(bytes));
+    }
+    return ds;
+}
+
+template<typename T>
+QDataStream &operator>>(QDataStream &ds, std::pair<PooledArray<T> &, std::pmr::memory_resource *> pa_mr)
+{
+    constexpr bool nullAndEmptyDifferent = (std::is_same<T, char16_t>::value || std::is_same<T, char8_t>::value);
+    constexpr bool sizeInBytes = std::is_same<T, char16_t>::value;
+    constexpr qsizetype appendNull = std::is_same<T, char8_t>::value ? 1 : 0;
+
+    quint32 s;
+    ds >> s;
+
+    if ((s == quint32(0xffffffff)) && nullAndEmptyDifferent)
+        s = 0;
+
+    qsizetype bytes;
+    if constexpr (sizeInBytes) {
+        bytes = s;
+        s /= sizeof(T);
+    } else {
+        bytes = s * sizeof(T);
+    }
+
+    if ((bytes % sizeof(T)) || (s > pa_mr.first.maxSize())) {
+        pa_mr.first.resize(0, pa_mr.second);
+        ds.setStatus(QDataStream::ReadCorruptData);
+        return ds;
+    }
+
+    pa_mr.first.resize(s ? (s + appendNull) : 0, pa_mr.second);
+    if (s) {
+        ds.readRawData(reinterpret_cast<char *>(&pa_mr.first[0]), int(bytes));
+        if (appendNull)
+            pa_mr.first[s] = T();
+    }
+    return ds;
+}

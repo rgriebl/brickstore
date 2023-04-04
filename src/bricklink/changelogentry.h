@@ -68,8 +68,8 @@ public:
 private:
     uint m_id = 0;
     uint m_julianDay = 0;
-    PooledArray<char> m_fromTypeAndId;
-    PooledArray<char> m_toTypeAndId;
+    PooledArray<char8_t> m_fromTypeAndId;
+    PooledArray<char8_t> m_toTypeAndId;
 
     friend class Database;
     friend class TextImport;

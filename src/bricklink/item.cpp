@@ -80,7 +80,7 @@ PartOutTraits Item::partOutTraits() const
 
 const ItemType *Item::itemType() const
 {
-    return (m_itemTypeIndex > -1) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;
+    return (m_itemTypeIndex != 0xf) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;
 }
 
 const Category *Item::category() const
@@ -101,7 +101,7 @@ const QVector<const Category *> Item::categories(bool includeMainCategory) const
 
 const Color *Item::defaultColor() const
 {
-    return (m_defaultColorIndex > -1) ? &core()->colors()[uint(m_defaultColorIndex)] : nullptr;
+    return (m_defaultColorIndex != 0xfff) ? &core()->colors()[uint(m_defaultColorIndex)] : nullptr;
 }
 
 bool Item::hasKnownColor(const Color *col) const

@@ -277,9 +277,10 @@ void BrickLink::TextImport::readItems(const QString &path, BrickLink::ItemType *
             item.m_weight = 0;
 
         try {
-            item.m_defaultColorIndex = findColorIndex(p.elementText(e, "IMAGECOLOR").toUInt());
+            int colIdx = findColorIndex(p.elementText(e, "IMAGECOLOR").toUInt());
+            item.m_defaultColorIndex = (colIdx == -1) ? quint16(0xfff) : quint16(colIdx);
         } catch (...) {
-            item.m_defaultColorIndex = quint16(-1);
+            item.m_defaultColorIndex = quint16(0xfff);
         }
 
         m_items.push_back(item);

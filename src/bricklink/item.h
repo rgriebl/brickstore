@@ -136,15 +136,13 @@ private:
     Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
 
     PooledArray<char16_t> m_name;
-    PooledArray<char>  m_id;
+    PooledArray<char8_t>  m_id;
 
-    qint16     m_itemTypeIndex = -1;
-    qint16     m_defaultColorIndex = -1;
-    float      m_weight = 0;
-
+    quint16    m_itemTypeIndex     : 4 = 0xf;
+    quint16    m_defaultColorIndex : 12 = 0xfff;
     quint8     m_year_from = 0;
     quint8     m_year_to = 0;
-    // 6 byte padding
+    float      m_weight = 0;
 
     PooledArray<quint16> m_categoryIndexes;
     PooledArray<quint16> m_knownColorIndexes;
