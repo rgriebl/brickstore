@@ -48,7 +48,7 @@ public:
         V8, // 2022.6.2
         V9, // 2023.3.1
 
-        OldestStillSupported = V4,
+        OldestStillSupported = V6,
 
         Latest = V9
     };

@@ -592,7 +592,7 @@ void Database::write(const QString &filename, Version version) const
         for (const ColorChangeLogEntry &e : m_colorChangelog)
             writeColorChangeLogToDatabase(e, ds, version);
         check(cw.endChunk());
-    } else if (version >= Version::V5) {
+    } else {
         check(cw.startChunk(ChunkId('I','C','H','G'), 1));
         ds << quint32(m_itemChangelog.size());
         for (const ItemChangeLogEntry &e : m_itemChangelog)
@@ -603,18 +603,6 @@ void Database::write(const QString &filename, Version version) const
         ds << quint32(m_colorChangelog.size());
         for (const ColorChangeLogEntry &e : m_colorChangelog)
             writeColorChangeLogToDatabase(e, ds, version);
-        check(cw.endChunk());
-    } else {
-        check(cw.startChunk(ChunkId('C','H','G','L'), 1));
-        ds << quint32(m_itemChangelog.size() + m_colorChangelog.size());
-        for (const ItemChangeLogEntry &e : m_itemChangelog) {
-            ds << static_cast<QByteArray>("\x03\t" + QByteArray(1, e.fromItemTypeId()) + '\t' + e.fromItemId()
-                                          + '\t' + e.toItemTypeId() + '\t' + e.toItemId());
-        }
-        for (const ColorChangeLogEntry &e : m_colorChangelog) {
-            ds << static_cast<QByteArray>("\x07\t" + QByteArray::number(e.fromColorId()) + "\tx\t"
-                                          + QByteArray::number(e.toColorId()) + "\tx");
-        }
         check(cw.endChunk());
     }
 
@@ -695,9 +683,7 @@ void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, 
 
 void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStream, Version v) const
 {
-    dataStream << cat.m_id << cat.m_name;
-    if (v >= Version::V6)
-        dataStream << cat.m_year_from << cat.m_year_to << cat.m_year_recency;
+    dataStream << cat.m_id << cat.m_name << cat.m_year_from << cat.m_year_to << cat.m_year_recency;
     if (v >= Version::V8)
         dataStream << cat.m_has_inventories;
 }
@@ -774,23 +760,18 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
     qint64 lastInventoryUpdate = item.m_consists_of.isEmpty() ? 0 : 1577833200; // 01.01.2020
     qint8 itemTypeId = m_itemTypes[item.m_itemTypeIndex].id();
 
-    dataStream << item.m_id << item.m_name << quint16(item.m_itemTypeIndex) << item.m_categoryIndexes[0]
+    dataStream << item.m_id << item.m_name
+               << quint16(item.m_itemTypeIndex) << item.m_categoryIndexes[0]
                << quint16(item.m_defaultColorIndex) << itemTypeId << item.m_year_from
-               << lastInventoryUpdate << item.m_weight;
-
-    if (v >= Version::V6)
-        dataStream << item.m_year_to;
-
-    dataStream << item.m_appears_in
+               << lastInventoryUpdate << item.m_weight << item.m_year_to
+               << item.m_appears_in
                << item.m_consists_of
                << item.m_knownColorIndexes;
 
-    if (v >= Version::V6) {
-        quint32 categoriesSize = quint32(std::max(1LL, item.m_categoryIndexes.size()) - 1);
-        dataStream << categoriesSize;
-        for (quint32 i = 0; i < categoriesSize; ++i)
-            dataStream << item.m_categoryIndexes[i + 1];
-    }
+    quint32 categoriesSize = quint32(std::max(1LL, item.m_categoryIndexes.size()) - 1);
+    dataStream << categoriesSize;
+    for (quint32 i = 0; i < categoriesSize; ++i)
+        dataStream << item.m_categoryIndexes[i + 1];
 
     if (v >= Version::V9)
         dataStream << item.m_relationshipMatchIds;
