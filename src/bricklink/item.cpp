@@ -78,6 +78,13 @@ PartOutTraits Item::partOutTraits() const
     return traits;
 }
 
+char Item::itemTypeId() const
+{
+    if (auto itt = itemType())
+        return itt->id();
+    return 0;
+}
+
 const ItemType *Item::itemType() const
 {
     return (m_itemTypeIndex != 0xf) ? &core()->itemTypes()[uint(m_itemTypeIndex)] : nullptr;

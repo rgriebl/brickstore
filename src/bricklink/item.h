@@ -28,7 +28,7 @@ class Item
 public:
     inline QByteArray id() const           { return m_id.asQByteArray(); }
     inline QString name() const            { return m_name.asQString(); }
-    inline char itemTypeId() const         { return itemType()->id(); }
+    char itemTypeId() const;
     const ItemType *itemType() const;
     const Category *category() const;
     const QVector<const Category *> categories(bool includeMainCategory = false) const;
