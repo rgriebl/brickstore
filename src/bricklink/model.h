@@ -237,6 +237,7 @@ class InventoryModel : public QSortFilterProxyModel
     QML_ELEMENT
     QML_UNCREATABLE("")
     Q_PROPERTY(int count READ count CONSTANT FINAL)
+    Q_PROPERTY(bool hasSections READ hasSections CONSTANT FINAL)
 
 public:
     enum class Mode { AppearsIn, ConsistsOf, CanBuild, Relationships };
@@ -248,6 +249,8 @@ public:
                            int quantity = 0)
             : m_item(item), m_color(color), m_quantity(quantity)
         { }
+
+        bool operator==(const SimpleLot &other) const = default;
 
         const BrickLink::Item *m_item = nullptr;
         const BrickLink::Color *m_color = nullptr;
@@ -266,6 +269,8 @@ public:
     InventoryModel(Mode mode, const QVector<SimpleLot> &simpleLots, QObject *parent);
 
     int count() const;
+    bool hasSections() const;
+    Mode mode() const;
 
     using QSortFilterProxyModel::index;
     QModelIndex index(const AppearsInItem *const_ai) const;

@@ -27,6 +27,7 @@ class InventoryWidgetPrivate {
 public:
     QVector<BrickLink::InventoryModel::SimpleLot> m_lots;
     InventoryWidget::Mode m_mode = InventoryWidget::Mode::AppearsIn;
+    BrickLink::InventoryModel *m_model = nullptr;
     bool m_modeSet = false;
     bool m_showCanBuild = false;
     QTreeView *m_view;
@@ -61,7 +62,6 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     d->m_view->setFrameStyle(QFrame::NoFrame);
     d->m_view->setAlternatingRowColors(true);
     d->m_view->setAllColumnsShowFocus(true);
-    d->m_view->setUniformRowHeights(false);
     d->m_view->setWordWrap(true);
     d->m_view->setRootIsDecorated(false);
     d->m_view->setItemsExpandable(false);
@@ -254,13 +254,11 @@ void InventoryWidget::setMode(Mode newMode)
 
 BrickLink::InventoryModel::SimpleLot InventoryWidget::selected() const
 {
-    auto *m = qobject_cast<BrickLink::InventoryModel *>(d->m_view->model());
-
-    if (m && !d->m_view->selectionModel()->selectedIndexes().isEmpty()) {
+    if (d->m_model && !d->m_view->selectionModel()->selectedIndexes().isEmpty()) {
         const auto idx = d->m_view->selectionModel()->selectedIndexes().front().siblingAtColumn(0);
-        auto i = m->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
-        auto c = m->data(idx, BrickLink::ColorPointerRole).value<const BrickLink::Color *>();
-        auto q = m->data(idx, BrickLink::QuantityRole).toInt();
+        auto i = d->m_model->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
+        auto c = d->m_model->data(idx, BrickLink::ColorPointerRole).value<const BrickLink::Color *>();
+        auto q = d->m_model->data(idx, BrickLink::QuantityRole).toInt();
         return BrickLink::InventoryModel::SimpleLot { i, c, q };
     } else {
         return { };
@@ -352,22 +350,25 @@ void InventoryWidget::setItems(const LotList &lots)
 
 void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::SimpleLot> &lots)
 {
+    if ((d->m_lots == lots) && d->m_model && (d->m_model->mode() == d->m_mode))
+        return;
     d->m_lots = lots;
 
-    auto *oldModel = d->m_view->model();
-    auto *newModel = new BrickLink::InventoryModel(d->m_mode, d->m_lots, this);
-    d->m_view->setModel(newModel);
+    auto *oldModel = d->m_model;
+    d->m_model = new BrickLink::InventoryModel(d->m_mode, d->m_lots, this);
+    d->m_view->setModel(d->m_model);
+    d->m_view->setUniformRowHeights(!d->m_model->hasSections());
 
     auto resizeColumns = [this]() {
         setUpdatesEnabled(false);
-        d->m_view->collapseAll();
-        if (auto *m = qobject_cast<BrickLink::InventoryModel *>(d->m_view->model())) {
-            for (int row = 0; row < m->rowCount(); ++row) {
-                if (m->data(m->index(row, 0), BrickLink::IsSectionHeaderRole).toBool())
+
+        if (d->m_model && d->m_model->hasSections()) {
+            for (int row = 0; row < d->m_model->rowCount(); ++row) {
+                if (d->m_model->index(row, 0).data(BrickLink::IsSectionHeaderRole).toBool())
                     d->m_view->setFirstColumnSpanned(row, QModelIndex { }, true);
             }
+            d->m_view->expandToDepth(1);
         }
-        d->m_view->expandAll();
 
         d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::PictureColumn, QHeaderView::Fixed);
         d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::ColorColumn, QHeaderView::Fixed);
@@ -389,7 +390,7 @@ void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::Simpl
     };
 
     resizeColumns();
-    connect(newModel, &QAbstractItemModel::modelReset, this, resizeColumns);
+    connect(d->m_model, &QAbstractItemModel::modelReset, this, resizeColumns);
 
     delete oldModel;
 }

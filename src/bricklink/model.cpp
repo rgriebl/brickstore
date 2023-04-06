@@ -1293,6 +1293,16 @@ int InventoryModel::count() const
     return rowCount();
 }
 
+bool InventoryModel::hasSections() const
+{
+    return (mode() == Mode::Relationships);
+}
+
+InventoryModel::Mode InventoryModel::mode() const
+{
+    return static_cast<const InternalInventoryModel *>(sourceModel())->m_mode;
+}
+
 bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     // the indexes are from the source model, so the internal pointers are valid
