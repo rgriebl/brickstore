@@ -3,7 +3,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <memory_resource>
 
 #include <QFile>
 #include <QBuffer>
@@ -24,47 +23,6 @@
 #include "bricklink/database.h"
 
 #include "lzma/bs_lzma.h"
-
-
-auto operator""_MiB(unsigned long long const mib) { return mib * 1024ULL * 1024ULL; }
-
-class database_monotonic_buffer_resource : public std::pmr::monotonic_buffer_resource
-{
-public:
-    database_monotonic_buffer_resource(size_t initialSize = 1_MiB)
-        : std::pmr::monotonic_buffer_resource(initialSize)
-    { }
-
-    ~database_monotonic_buffer_resource() noexcept override
-    {
-        if (debug)
-            qWarning() << "DB_MBR:" << this << "releasing" << (count / 1_MiB) << "MB";
-    }
-
-    static bool debug;
-
-protected:
-    void *do_allocate(const size_t size, const size_t align) override
-    {
-        if (debug) {
-            if ((count / 1_MiB) != ((count + size) / 1_MiB))
-                qWarning() << "DB_MBR:" << this << "allocation now over" << ((count + size) / 1_MiB) << "MB";
-            count += size;
-        }
-        return std::pmr::monotonic_buffer_resource::do_allocate(size, align);
-    }
-    void do_deallocate(void *ptr, size_t size, size_t align) override
-    {
-        if (debug)
-            qWarning() << "DB_MBR:" << this << "is requested to deallocate" << size << "bytes";
-        std::pmr::monotonic_buffer_resource::do_deallocate(ptr, size, align);
-    }
-
-private:
-    quint64 count = 0;
-};
-
-bool database_monotonic_buffer_resource::debug = false;
 
 
 namespace BrickLink {
@@ -276,7 +234,7 @@ void Database::read(const QString &fileName)
         };
 
         // This is the new pool. We need to keep the old alive till the scope end
-        std::unique_ptr<std::pmr::memory_resource> pool(new database_monotonic_buffer_resource);
+        std::unique_ptr<MemoryResource> pool(new DatabaseMonotonicMemoryResource(1024*1024));
 
         QDateTime                        generationDate;
         std::vector<Color>               colors;
@@ -649,7 +607,7 @@ void Database::remove()
 ///////////////////////////////////////////////////////////////////////
 
 
-void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readColorFromDatabase(Color &col, QDataStream &dataStream, MemoryResource *pool)
 {
     quint32 flags;
 
@@ -675,7 +633,7 @@ void Database::writeColorToDatabase(const Color &col, QDataStream &dataStream, V
 }
 
 
-void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readCategoryFromDatabase(Category &cat, QDataStream &dataStream, MemoryResource *pool)
 {
     dataStream >> cat.m_id >> cat.m_name.deserialize(pool) >> cat.m_year_from >> cat.m_year_to
         >> cat.m_year_recency >> cat.m_has_inventories;
@@ -689,7 +647,7 @@ void Database::writeCategoryToDatabase(const Category &cat, QDataStream &dataStr
 }
 
 
-void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readItemTypeFromDatabase(ItemType &itt, QDataStream &dataStream, MemoryResource *pool)
 {
     quint8 flags = 0;
     dataStream >> reinterpret_cast<qint8 &>(itt.m_id) >> itt.m_name.deserialize(pool) >> flags
@@ -717,7 +675,7 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
 }
 
 
-void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryResource *pool)
 {
     //TODO V10: unify category list
     //TODO V10: remove itemTypeId
@@ -777,7 +735,7 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
         dataStream << item.m_relationshipMatchIds;
 }
 
-void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, std::pmr::memory_resource *)
+void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, MemoryResource *)
 {
     qint32 itemIndex, colorIndex;
     dataStream >> pcc.m_id >> itemIndex >> colorIndex;
@@ -790,7 +748,7 @@ void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStr
     dataStream << pcc.m_id << qint32(pcc.m_itemIndex) << qint32(pcc.m_colorIndex);
 }
 
-void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, MemoryResource *pool)
 {
     dataStream >> e.m_id >> e.m_julianDay >> e.m_fromTypeAndId.deserialize(pool)
         >> e.m_toTypeAndId.deserialize(pool);
@@ -803,7 +761,7 @@ void Database::writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataSt
     dataStream << e.m_fromTypeAndId << e.m_toTypeAndId;
 }
 
-void Database::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, std::pmr::memory_resource *)
+void Database::readColorChangeLogFromDatabase(ColorChangeLogEntry &e, QDataStream &dataStream, MemoryResource *)
 {
     dataStream >> e.m_id >> e.m_julianDay >> e.m_fromColorId >> e.m_toColorId;
 }
@@ -815,7 +773,7 @@ void Database::writeColorChangeLogToDatabase(const ColorChangeLogEntry &e, QData
     dataStream << e.m_fromColorId << e.m_toColorId;
 }
 
-void Database::readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readRelationshipFromDatabase(Relationship &e, QDataStream &dataStream, MemoryResource *pool)
 {
     dataStream >> e.m_id >> e.m_name.deserialize(pool) >> e.m_count;
 }
@@ -825,7 +783,7 @@ void Database::writeRelationshipToDatabase(const Relationship &e, QDataStream &d
     dataStream << e.m_id << e.m_name << e.m_count;
 }
 
-void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QDataStream &dataStream, std::pmr::memory_resource *pool)
+void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QDataStream &dataStream, MemoryResource *pool)
 {
     dataStream >> match.m_id >> match.m_relationshipId >> match.m_itemIndexes.deserialize(pool);
 }

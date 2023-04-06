@@ -6,15 +6,25 @@
 #include <stdexcept>
 #include <concepts>
 #include <iterator>
-#include <memory_resource>
 
 #include <QString>
 #include <QByteArray>
 #include <QDataStream>
 #include <QDebug>
 
+#include "memoryresource.h"
 
-/*TODO: small array optimization:
+
+// see comment in PooledArray below
+namespace PooledArrayPrivate {
+template<int N> struct intTypeFromSize { using type = void; };
+template<> struct intTypeFromSize<1> { using type = qint8; };
+template<> struct intTypeFromSize<2> { using type = qint16; };
+template<> struct intTypeFromSize<4> { using type = qint32; };
+template<> struct intTypeFromSize<8> { using type = qint64; };
+}
+
+/* Small array optimization:
  *  - align to 2bytes at minimum
  *  - if mr && (num_elements < (sizeof(T *)/sizeof(T)), then treat T *data as T data_[...] and store
  *    the size as (num_elements << 1) | 1) in the lower in data_[0] (check be/le: bit zero of the
@@ -23,42 +33,40 @@
  *  Currently we would save ~1.8MB from ~37MB of allocations ... so right now this isn't worth
  *  the effort and runtime penalty for 5% less allocations.
 */
-//extern quint64 possibleSSO;
 
 template<typename T> class PooledArray
 {
 public:
     explicit PooledArray() = default;
 
-    //template<typename = std::enable_if_t<std::is_same<char16_t, T>::value>>
-    void copyQString(const QString &str, std::pmr::memory_resource *mr) requires std::same_as<T, char16_t>
+    template<typename U = T, std::enable_if_t<std::is_same<char16_t, U>::value, bool> = true>
+    void copyQString(const QString &str, MemoryResource *mr) //requires std::same_as<T, char16_t>
     {
         copyStringLike(str.constData(), str.size(), mr);
     }
 
-    // template<typename = std::enable_if_t<std::is_same<char16_t, T>::value>>
-    QString asQString() const requires std::same_as<T, char16_t>
+    template<typename U = T, std::enable_if_t<std::is_same<char16_t, U>::value, bool> = true>
+    QString asQString() const //requires std::same_as<T, char16_t>
     {
         const auto s = size();
         return (s < 1) ? QString { } : QString::fromRawData(reinterpret_cast<const QChar *>(cbegin()), s);
     }
 
-    // template<typename = std::enable_if_t<std::is_same<char8_t, T>::value>>
-    void copyQByteArray(const QByteArray &str, std::pmr::memory_resource *mr) requires std::same_as<T, char8_t>
+    template<typename U = T, std::enable_if_t<std::is_same<char8_t, U>::value, bool> = true>
+    void copyQByteArray(const QByteArray &str, MemoryResource *mr) //requires std::same_as<T, char8_t>
     {
         copyStringLike(str.constData(), str.size(), mr);
     }
 
-    // template<typename = std::enable_if_t<std::is_same<char8_t, T>::value>>
-    QByteArray asQByteArray(qsizetype offset = 0) const requires std::same_as<T, char8_t>
+    template<typename U = T, std::enable_if_t<std::is_same<char8_t, U>::value, bool> = true>
+    QByteArray asQByteArray(qsizetype offset = 0) const //requires std::same_as<T, char8_t>
     {
         const auto s = size();
         return (s < (offset + 2)) ? QByteArray { } : QByteArray::fromRawData(reinterpret_cast<const char *>(cbegin()) + offset, s - offset - 1);
     }
 
-    // template<typename InputIt>
-    template<std::input_iterator InputIt>
-    void copyContainer(InputIt first, InputIt last, std::pmr::memory_resource *mr)
+    template<typename InputIt>
+    void copyContainer(InputIt first, InputIt last, MemoryResource *mr)
     {
         if (first == last) {
             resize(0, mr);
@@ -85,7 +93,7 @@ public:
         return const_cast<T &>(const_cast<const PooledArray *>(this)->operator[](i));
     }
 
-    void resize(qsizetype s, std::pmr::memory_resource *mr)
+    void resize(qsizetype s, MemoryResource *mr)
     {
         if ((s < 0) || (!s && !data) || (data && (s == sizeRef(data))))
             return;
@@ -93,29 +101,27 @@ public:
         if (s > maxSize())
             throw std::out_of_range("PooledArray resize() too large for underlying data-type");
 
-        std::pmr::polymorphic_allocator<> pool(mr ? mr : std::pmr::get_default_resource());
-
-//        if (s && (s < (sizeof(T *) / sizeof(T))))
-//            possibleSSO += ((s + 1) * sizeof(T));
+        if (!mr)
+            mr = defaultMemoryResource();
 
         if (!data) {
-            data = pool.allocate_object<T>(s + 1);
+            data = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
             sizeRef(data) = s;
         } else if (!s) {
-            pool.deallocate_object(data, sizeRef(data));
+            mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
             data = nullptr;
         } else {
             Q_ASSERT_X(!mr, "PooledArray", "resize() should not be called twice with an allocator");
 
-            auto newd = pool.allocate_object<T>(s + 1);
+            auto newd = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
             memcpy(newd, data, size());
             sizeRef(newd) = s;
-            pool.deallocate_object(data, sizeRef(data));
+            mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
             data = newd;
         }
     }
 
-    void push_back(const T &t, std::pmr::memory_resource *mr)
+    void push_back(const T &t, MemoryResource *mr)
     {
         Q_ASSERT_X(!mr, "PooledArray", "Do not call push_back with a non-default allocator");
         const auto s = size();
@@ -125,34 +131,33 @@ public:
 
     constexpr qsizetype maxSize() const
     {
-        return qsizetype(std::numeric_limits<typename intTypeFromSize<sizeof(T)>::type>::max());
+        return qsizetype(std::numeric_limits<typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type>::max());
     }
 
-    std::pair<PooledArray<T> &, std::pmr::memory_resource *> deserialize(std::pmr::memory_resource *mr)
+    std::pair<PooledArray<T> &, MemoryResource *> deserialize(MemoryResource *mr)
     {
         return { *this, mr };
     }
 
 private:
-    template<int N> struct intTypeFromSize { using type = void; };
-    template<int N> requires (N == 1) struct intTypeFromSize<N> { using type = qint8; };
-    template<int N> requires (N == 2) struct intTypeFromSize<N> { using type = qint16; };
-    template<int N> requires (N == 4) struct intTypeFromSize<N> { using type = qint32; };
-    template<int N> requires (N == 8) struct intTypeFromSize<N> { using type = qint64; };
+    // ideally we want this, but (old) clang doesn't support requires and (old) gcc doesn't like
+    // class specializations within another class.
+    //template<int N> struct intTypeFromSize { using type = void; };
+    //template<int N> requires (N == 1) struct intTypeFromSize<N> { using type = qint8; };
 
-    const typename intTypeFromSize<sizeof(T)>::type &sizeRef(const T *t) const
+    const typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type &sizeRef(const T *t) const
     {
         assert(t);
-        return *reinterpret_cast<const intTypeFromSize<sizeof(T)>::type *>(&t[0]);
+        return *reinterpret_cast<const typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type *>(&t[0]);
     }
 
-    intTypeFromSize<sizeof(T)>::type &sizeRef(T *t)
+    typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type &sizeRef(T *t)
     {
         assert(t);
-        return *reinterpret_cast<intTypeFromSize<sizeof(T)>::type *>(&t[0]);
+        return *reinterpret_cast<typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type *>(&t[0]);
     }
 
-    void copyStringLike(const void *ptr, qsizetype size, std::pmr::memory_resource *mr)
+    void copyStringLike(const void *ptr, qsizetype size, MemoryResource *mr)
     {
         constexpr qsizetype appendNull = std::is_same<T, char8_t>::value ? 1 : 0;
 
@@ -189,7 +194,7 @@ QDataStream &operator<<(QDataStream &ds, const PooledArray<T> &pa)
 }
 
 template<typename T>
-QDataStream &operator>>(QDataStream &ds, std::pair<PooledArray<T> &, std::pmr::memory_resource *> pa_mr)
+QDataStream &operator>>(QDataStream &ds, std::pair<PooledArray<T> &, MemoryResource *> pa_mr)
 {
     constexpr bool nullAndEmptyDifferent = (std::is_same<T, char16_t>::value || std::is_same<T, char8_t>::value);
     constexpr bool sizeInBytes = std::is_same<T, char16_t>::value;
