@@ -17,7 +17,7 @@ endif()
 FetchContent_Declare(
     qcoro
     GIT_REPOSITORY https://github.com/danvratil/qcoro.git
-    GIT_TAG        487b413cbaedae3f4d39449e8e8a3c9c12e84fb9 # needed for the iOS fix
+    GIT_TAG        34d7f2f2d2f85804beb2b7e0da8faa5987c280c3 # needed for the iOS fix
     #GIT_TAG        v${QCORO_VERSION}
 )
 FetchContent_MakeAvailable(qcoro)

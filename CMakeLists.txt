@@ -378,10 +378,18 @@ if (ANDROID)
 
     include(FetchContent)
 
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0")
+        set(ANDROID_OPENSSL_TAG qt_6.5)
+    else()
+        set(ANDROID_OPENSSL_TAG master)
+    endif()
+
+    set(ANDROID_TARGET_ARCH ${CMAKE_ANDROID_ARCH_ABI})
+
     FetchContent_Declare(
         android_openssl
         GIT_REPOSITORY https://github.com/KDAB/android_openssl.git
-        GIT_TAG master
+        GIT_TAG ${ANDROID_OPENSSL_TAG}
         GIT_SHALLOW YES
     )
 
