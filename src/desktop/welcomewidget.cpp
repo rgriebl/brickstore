@@ -159,11 +159,12 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
             this, &WelcomeWidget::updateVersionsText);
     layout->addWidget(m_versions, 4, 1, 1, 2);
 
+    static const QString baseUrl = u"https://" + Application::inst()->applicationUrl() + u'/';
     static const QVector<std::tuple<const char *, const char *, QString>> links {
-        { "bootstrap-question-circle", QT_TR_NOOP("Tutorials"),   u"https://github.com/rgriebl/brickstore/wiki/Tutorials"_qs },
-        { "bootstrap-chat-dots",       QT_TR_NOOP("Discussions"), u"https://github.com/rgriebl/brickstore/discussions"_qs },
-        { "bootstrap-bug",             QT_TR_NOOP("Bug reports"), u"https://github.com/rgriebl/brickstore/issues"_qs },
-        { "bootstrap-heart",           QT_TR_NOOP("Sponsor"),     u"https://brickforge.de/brickstore/support"_qs },
+        { "bootstrap-question-circle", QT_TR_NOOP("Tutorials"),   baseUrl + u"tutorials" },
+//        { "bootstrap-chat-dots",       QT_TR_NOOP("Discussions"), baseUrl + u"discussions" },
+        { "bootstrap-bug",             QT_TR_NOOP("Bug reports"), baseUrl + u"report-bugs" },
+        { "bootstrap-heart",           QT_TR_NOOP("Support"),     baseUrl + u"support" },
     };
 
     int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);

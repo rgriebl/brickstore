@@ -36,7 +36,7 @@ set(BRICKLINK_AFFILIATE_API_KEY  "" CACHE STRING "BrickLink's Affiliate API key"
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")
 set(COPYRIGHT      "2004-2023 Robert Griebl")
-set(BRICKSTORE_URL "brickforge.de/brickstore")
+set(BRICKSTORE_URL "www.brickstore.dev")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
 set(BUILD_NUMBER   "$ENV{BUILD_NUMBER}")
 if (NOT BUILD_NUMBER)

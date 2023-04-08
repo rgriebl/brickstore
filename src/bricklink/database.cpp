@@ -145,7 +145,7 @@ bool Database::startUpdate(bool force)
         return false;
 
     QString dbName = defaultDatabaseName();
-    QString remotefile = m_updateUrl + dbName + u".lzma";
+    QString remotefile = u"https://" + m_updateUrl + u'/' + dbName + u".lzma";
     QString localfile = core()->dataPath() + dbName;
 
     if (!QFile::exists(localfile))

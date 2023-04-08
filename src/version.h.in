@@ -36,4 +36,4 @@
 #define BRICKSTORE_GITHUB_URL "@GITHUB_URL@"
 #define BRICKSTORE_NAME       "@NAME@"
 
-#define BRICKSTORE_DATABASE_URL  "https://brickforge.de/brickstore-data/"
+#define BRICKSTORE_DATABASE_URL  "data.brickstore.dev"

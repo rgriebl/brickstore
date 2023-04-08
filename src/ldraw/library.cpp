@@ -399,7 +399,7 @@ bool Library::startUpdate(bool force)
 
     QScopedValueRollback locker(m_locked, true);
 
-    QString remotefile = m_updateUrl + u"complete.zip";
+    QString remotefile = u"https://" + m_updateUrl + u"/complete.zip";
     QString localfile = m_path;
 
     if (!QFile::exists(localfile))
