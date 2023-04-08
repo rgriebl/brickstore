@@ -79,6 +79,11 @@ Root: HKCR; Subkey: "BrickStore.Document\shell\open\command"; ValueType: string;
 Root: HKCR; Subkey: ".bsx"; ValueType: string; \
     ValueData: "BrickStore.Document"; Flags: uninsdeletevalue uninsdeletekeyifempty
 
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\Qt*"
+Type: files; Name: "{app}\*\q*.dll"
+Type: files; Name: "{app}\d3dcompiler*"
+
 [Code]
 function noMSVCInstalled(Arch: String): Boolean;
 var
