@@ -713,12 +713,12 @@ bool AddItemDialog::checkAddPossible()
     w_qty->setProperty("showInputError", !qtyOk);
     w_bulk->setProperty("showInputError", !bulkOk);
 
-    bool acceptable = w_select_item->currentItem() && priceOk && qtyOk && bulkOk;
+    auto item = w_select_item->currentItem();
 
-    if (auto currentType = w_select_item->currentItemType()) {
-        if (currentType->hasColors())
-            acceptable = acceptable && (w_select_color->currentColor());
-    }
+    bool acceptable = item && priceOk && qtyOk && bulkOk;
+
+    if (item && item->itemType())
+        acceptable = acceptable && (item->itemType()->hasColors() == bool(w_select_color->currentColor()));
 
     for (int i = 0; i < 3; i++) {
         bool tierEnabled = w_tier_price [i]->isEnabled();

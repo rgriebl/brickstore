@@ -57,17 +57,21 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     itemTypesLayout->setContentsMargins(0, 0, 0, 0);
     itemTypesLayout->setSpacing(2);
 
-    for (const auto &itt : BrickLink::core()->itemTypes()) {
+    auto createTypeButton = [&](const BrickLink::ItemType *itt) {
         auto *b = new QToolButton;
         b->setFocusPolicy(Qt::NoFocus);
         b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         b->setAutoRaise(true);
         b->setCheckable(true);
-        b->setChecked(itemType && (itt.id() == itemType->id()));
-        b->setText(itt.name());
-        m_selectItemTypes->addButton(b, itt.id());
+        b->setChecked(itt == itemType);
+        b->setText(itt ? itt->name() : tr("Any"));
+        m_selectItemTypes->addButton(b, itt ? itt->id() : '*');
         itemTypesLayout->addWidget(b, 1);
-    }
+    };
+
+    createTypeButton(nullptr);
+    for (const auto &itt : BrickLink::core()->itemTypes())
+        createTypeButton(&itt);
 
     m_viewFinder = new QVideoWidget;
     int videoWidth = logicalDpiX() * 3; // ~7.5cm on-screen

@@ -319,7 +319,7 @@ QVariant CategoryModel::data(const QModelIndex &index, int role) const
     const Category *c = category(index);
 
     if (role == Qt::DisplayRole)
-        res = c != AllCategories ? c->name() : tr("All Items");
+        res = (c != AllCategories) ? c->name() : tr("All Items");
     else if (role == CategoryPointerRole)
         res.setValue(c);
     else if ((role == PinnedRole) && (c != AllCategories))
@@ -450,9 +450,9 @@ bool CategoryModel::filterAccepts(const void *pointer) const
         return true;
     else if (m_inv_filter && !c->hasInventories())
         return false;
-    else if (m_itemtype_filter && !m_itemtype_filter->categories().contains(c))
+    else if (m_itemtype_filter && (m_itemtype_filter != ItemTypeModel::AllItemTypes) && !m_itemtype_filter->categories().contains(c))
         return false;
-    else if (m_inv_filter && m_itemtype_filter && !c->hasInventories(m_itemtype_filter))
+    else if (m_inv_filter && m_itemtype_filter && ((m_itemtype_filter == ItemTypeModel::AllItemTypes ? !c->hasInventories() : !c->hasInventories(m_itemtype_filter))))
         return false;
     else
         return true;
@@ -462,6 +462,9 @@ bool CategoryModel::filterAccepts(const void *pointer) const
 /////////////////////////////////////////////////////////////
 // ITEMTYPEMODEL
 /////////////////////////////////////////////////////////////
+
+// this hack is needed since 0 means 'no selection at all'
+const ItemType *ItemTypeModel::AllItemTypes = reinterpret_cast <const ItemType *>(-1);
 
 ItemTypeModel::ItemTypeModel(QObject *parent)
     : StaticPointerModel(parent)
@@ -476,19 +479,23 @@ int ItemTypeModel::columnCount(const QModelIndex &parent) const
 
 int ItemTypeModel::pointerCount() const
 {
-    return int(core()->itemTypes().size());
+    return int(core()->itemTypes().size() + 1);
 }
 
 const void *ItemTypeModel::pointerAt(int index) const
 {
-    return &core()->itemTypes()[size_t(index)];
+    return (index == 0) ? AllItemTypes : &core()->itemTypes()[size_t(index) - 1];
 }
 
 int ItemTypeModel::pointerIndexOf(const void *pointer) const
 {
-    const auto &itemTypes = core()->itemTypes();
-    auto d = static_cast<const ItemType *>(pointer) - itemTypes.data();
-    return (d >= 0 && d < int(itemTypes.size())) ? int(d) : -1;
+    if (pointer == AllItemTypes) {
+        return 0;
+    } else {
+        const auto &itemTypes = core()->itemTypes();
+        auto d = static_cast<const ItemType *>(pointer) - itemTypes.data();
+        return (d >= 0 && d < int(itemTypes.size())) ? int(d + 1) : -1;
+    }
 }
 
 const ItemType *ItemTypeModel::itemType(const QModelIndex &index) const
@@ -509,12 +516,11 @@ QVariant ItemTypeModel::data(const QModelIndex &index, int role) const
     QVariant res;
     const ItemType *i = itemType(index);
 
-    if (role == Qt::DisplayRole) {
-        res = i->name();
-    }
-    else if (role == ItemTypePointerRole) {
+    if (role == Qt::DisplayRole)
+        res = (i != AllItemTypes) ? i->name() : tr("Any");
+    else if (role == ItemTypePointerRole)
         res.setValue(i);
-    }
+
     return res;
 }
 
@@ -559,14 +565,26 @@ bool ItemTypeModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt:
     const auto *i1 = static_cast<const ItemType *>(p1);
     const auto *i2 = static_cast<const ItemType *>(p2);
 
-    return !i1 ? true : (!i2 ? false : i1->name().localeAwareCompare(i2->name()) < 0);
+    if (!i1 || i1 == AllItemTypes)
+        return true;
+    else if (!i2 || i2 == AllItemTypes)
+        return false;
+    else
+        return i1->name().localeAwareCompare(i2->name()) < 0;
 }
 
 bool ItemTypeModel::filterAccepts(const void *pointer) const
 {
-    const auto *itemtype = static_cast<const ItemType *>(pointer);
+    const auto *i = static_cast<const ItemType *>(pointer);
 
-    return !m_inv_filter || (itemtype && itemtype->hasInventories());
+    if (!i)
+        return false;
+    else if (i == AllItemTypes)
+        return true;
+    else if (m_inv_filter && !i->hasInventories())
+        return false;
+    else
+        return true;
 }
 
 
@@ -850,7 +868,7 @@ bool ItemModel::filterAccepts(const void *pointer) const
 
     if (!item)
         return false;
-    else if (m_itemtype_filter && item->itemType() != m_itemtype_filter)
+    else if (m_itemtype_filter && (m_itemtype_filter != ItemTypeModel::AllItemTypes) && (item->itemType() != m_itemtype_filter))
         return false;
     else if (m_category_filter && (m_category_filter != CategoryModel::AllCategories) && !item->categories(true).contains(m_category_filter))
         return false;

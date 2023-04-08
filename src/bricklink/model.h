@@ -131,6 +131,8 @@ class ItemTypeModel : public StaticPointerModel
 public:
     ItemTypeModel(QObject *parent = nullptr);
 
+    static const ItemType *AllItemTypes;
+
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;

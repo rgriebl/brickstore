@@ -250,7 +250,8 @@ void SelectItem::init()
     d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
     d->w_itemScan->setAutoRaise(true);
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
-        ItemScannerDialog isd(currentItemType(), this);
+        auto itt = currentItemType();
+        ItemScannerDialog isd((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt, this);
         if (isd.exec() == QDialog::Accepted) {
             auto items = isd.items();
 
@@ -260,11 +261,23 @@ void SelectItem::init()
 
                 QStringList filter;
                 filter.reserve(items.size());
+                auto *singleItemtype = items.constFirst()->itemType();
+                auto *singleCategory = items.constFirst()->category();
+
                 for (const auto *item : items) {
-                    QString s = QLatin1Char(item->itemTypeId()) + QString::fromLatin1(item->id());
+                    QString s = QChar::fromLatin1(item->itemTypeId()) + QString::fromLatin1(item->id());
                     filter << s;
+
+                    if (item->itemType() != singleItemtype)
+                        singleItemtype = nullptr;
+                    if (item->category() != singleCategory)
+                        singleCategory = nullptr;
                 }
                 d->w_filter->setText(u"scan:" + filter.join(u','));
+                setCurrentItemType(singleItemtype ? singleItemtype
+                                                  : BrickLink::ItemTypeModel::AllItemTypes);
+                setCurrentCategory(singleCategory ? singleCategory
+                                                  : BrickLink::CategoryModel::AllCategories);
                 applyFilter();
                 if (d->itemModel->index(oldItem).isValid())
                     setCurrentItem(oldItem, false);
@@ -412,7 +425,10 @@ void SelectItem::init()
 
         d->itemModel->setFilterItemType(itemtype);
         d->itemModel->setFilterCategory(currentCategory());
-        if (!itemtype || !itemtype->hasColors())
+
+        bool isAllItt = (itemtype == BrickLink::ItemTypeModel::AllItemTypes);
+        bool ittHasColors = isAllItt || (itemtype && itemtype->hasColors());
+        if (!ittHasColors)
             d->itemModel->setFilterColor(nullptr);
 
         d->w_categories->selectionModel()->blockSignals(false);
@@ -421,7 +437,12 @@ void SelectItem::init()
         // we switch itemtypes, so the same item cannot exist, but we may have the same id
         // (e.g. keeping the same item id, when switching between sets and instructions)
         if (oldItem) {
-            if (auto newItem = BrickLink::core()->item(currentItemType()->id(), oldItem->id()))
+            char ittId = oldItem->itemTypeId();
+            auto *itt = currentItemType();
+            if (itt && (itt != BrickLink::ItemTypeModel::AllItemTypes))
+                ittId = itt->id();
+
+            if (auto newItem = BrickLink::core()->item(ittId, oldItem->id()))
                 setCurrentItem(newItem);
         }
         if (!currentItem()) // a model reset doesn't emit selectionChanged
@@ -429,8 +450,8 @@ void SelectItem::init()
 
         ensureSelectionVisible();
 
-        emit hasColors(itemtype ? itemtype->hasColors() : false);
-        emit hasSubConditions(itemtype ? itemtype->hasSubConditions() : false);
+        emit hasColors(ittHasColors);
+        emit hasSubConditions(isAllItt ? true : (itemtype ? itemtype->hasSubConditions() : false));
     });
 
     connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -593,7 +614,10 @@ void SelectItem::setColorFilter(const BrickLink::Color *color)
     if (color != d->m_colorFilter) {
         d->m_colorFilter = color;
 
-        if (currentItemType() && currentItemType()->hasColors()) {
+        auto *itemtype = currentItemType();
+        bool isAllItt = (itemtype == BrickLink::ItemTypeModel::AllItemTypes);
+
+        if (isAllItt || (itemtype && itemtype->hasColors())) {
             const BrickLink::Item *oldItem = currentItem();
             if (oldItem)
                 d->m_colorFilterLastItem = oldItem;
@@ -625,6 +649,8 @@ const BrickLink::ItemType *SelectItem::currentItemType() const
 bool SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
 {
     QModelIndex idx = d->itemTypeModel->index(it);
+    if (!idx.isValid())
+        idx = d->itemTypeModel->index(BrickLink::ItemTypeModel::AllItemTypes);
     d->w_item_types->setCurrentIndex(idx.isValid() ? idx.row() : -1);
     return idx.isValid();
 }
@@ -714,8 +740,9 @@ QByteArray SelectItem::saveState() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray("SI") << qint32(4)
-       << qint8(itt ? itt->id() : BrickLink::ItemType::InvalidId)
-       << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id())
+       << qint8(itt ? ((itt == BrickLink::ItemTypeModel::AllItemTypes) ? qint8(-2) : itt->id())
+                    : BrickLink::ItemType::InvalidId)
+       << (cat ? ((cat == BrickLink::CategoryModel::AllCategories) ? uint(-2) : cat->id())
                : BrickLink::Category::InvalidId)
        << (item ? QString::fromLatin1(item->id()) : QString())
        << d->w_filter->text()
@@ -755,8 +782,10 @@ bool SelectItem::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    if ((itt != BrickLink::ItemType::InvalidId) && (itt != -1 /*v3*/))
-        setCurrentItemType(BrickLink::core()->itemType(itt));
+    if ((itt != BrickLink::ItemType::InvalidId) && (itt != -1 /*v3*/)) {
+        setCurrentItemType((itt == -2) ? BrickLink::ItemTypeModel::AllItemTypes
+                                       : BrickLink::core()->itemType(itt));
+    }
     if (cat != BrickLink::Category::InvalidId) {
         setCurrentCategory(cat == uint(-2) ? BrickLink::CategoryModel::AllCategories
                                            : BrickLink::core()->category(cat));
@@ -906,6 +935,14 @@ void SelectItem::showContextMenu(const QPoint &p)
                         setCurrentCategory(cat);
                     });
                 }
+            }
+            if (currentItemType() == BrickLink::ItemTypeModel::AllItemTypes) {
+                m->addSeparator();
+                const auto *itt = item->itemType();
+                connect(m->addAction(tr("Switch to the item's \"%1\" item type").arg(itt->name())),
+                        &QAction::triggered, this, [this, itt]() {
+                            setCurrentItemType(itt);
+                        });
             }
         }
 

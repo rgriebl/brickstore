@@ -63,7 +63,7 @@ ItemScanner::ItemScanner()
     d->nam = new QNetworkAccessManager(this);
 
     d->availableBackends = {
-        { "brickognize", u"Brickognize.com"_qs, "PSM", 1024 }
+        { "brickognize", u"Brickognize.com"_qs, "*PSM", 1024 }
     };
     d->defaultBackendId = d->availableBackends.constFirst().id;
 }
