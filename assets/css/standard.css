@@ -1,0 +1,333 @@
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: sans-serif;
+	background: #fed url(/assets/images/grad.jpg) 0 0 repeat-x fixed;
+}
+
+a:link {
+	color: #26a;
+	text-decoration: none;
+	border-bottom: 1px dotted #26a;
+}
+
+a:visited {
+	color: #159;
+	text-decoration: none;
+	border-bottom: 1px dotted #159;
+}
+
+a:hover, a:visited:hover {
+	border-bottom-style: solid;
+}
+
+a:active {
+	color: #d80;
+	border-bottom-color: #d80;
+}
+
+a[rel=external]:before {
+	content: url('/assets/images/external.png') ' ';
+}
+
+a[rel=email]:before {
+	content: url('/assets/images/mailto.png') ' ';
+}
+
+
+div#logo { 
+	position: absolute; top:0px; left:0px; width:14em; height:auto; z-index:2;
+	text-align: center;
+	overflow: hidden;
+}
+
+div#logo a img {
+	border: 0;
+	padding-right: 3px;
+}
+
+div#header { 
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.4em;
+	border-bottom: 2px solid #d80;
+	margin: 0em 3em 0.8em 3em;
+	padding: 0.1em;
+}
+
+div#language { 
+        position: absolute; top: 130px; left: 10em; width: auto; z-index: 3;
+	text-align: center;
+	overflow: hidden;
+}
+
+div#logo a, div#language a, div#language a img {
+	border: 0;
+}
+
+div#content, body.autoindex div#listing {
+        border-left: 2px solid #d80;
+	z-index: 1;
+	margin: 0 0 0 14em;
+        padding: 0 10px 0 15px;
+	color: #000;
+	background: #fff5eb url(/assets/images/gradh.jpg) 0 0 repeat-y;
+	min-height: 100%;
+}
+
+body.autoindex div#listing {
+	margin-left: 5em;
+}
+
+body.autoindex td {
+	padding: 0.2em 0.8em;
+}
+
+body.autoindex .listing img {
+	border: 0;
+	vertical-align: middle;
+}
+
+body.autoindex div#label {
+	position: absolute; 
+	top: 0px; 
+	left: 0px; 
+	width: 4em; 
+	height: auto;
+	margin: 1em 0 1em 0;
+	color: #eee;
+	text-align: center;
+}
+
+div#footer  { 
+	margin: 3em 1em 0em 1em;
+	padding: 0.2em 0em;
+	border-top: 1px solid #aaa;
+	color: #aaa;
+	font-style: italic;
+	font-size: 0.8em;
+	text-align: right;
+	clear: both;
+}
+
+div#language li {
+	padding: 0px 4px 0px 4px;
+	list-style: none;
+	display: inline;
+}
+
+div#language ul {
+	margin: 0;
+	padding: 0;
+}
+
+div#menu { 
+	position: absolute; 
+        top: 100px;
+	left: 0px; 
+	width: 13.5em; 
+	height: auto;
+	margin: 0px 0px 0px 0.5em;
+}
+
+div#menu ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+div#menu ul ul {
+	margin: 0.4em 0em 0.4em 1em;
+	padding: 0;
+}
+
+div#menu a {
+	color: #eee;
+	text-decoration: none;
+	display: block;
+	border-left: 1em solid #159;
+	border-bottom: 2px solid #159;
+	padding: 0.2em 0px 0.2em 0.5em;
+	margin: 0.3em 0px 0px 0px;
+}
+	                                      
+div#menu a:hover { 
+	border-color: #124;
+}
+
+div#menu a#selected {
+	border-color: #d80;
+}
+ 
+div#content ul {
+	list-style-image: url(/assets/images/bullet.png);
+}
+
+div#content ol {
+	list-style-image: none;
+}
+
+div#content .notice {
+        border: 2px solid #d80;
+        padding: 0.5em 2em 0.5em 3em;
+        margin: 0.5em 1.5em 0.5em 1.5em;
+        color: /*#000;*/ #fff;
+        background: /*#fed;*/ #2366aa;
+	font-weight: bold;
+        box-shadow: 0px 0px 10px 3px #000;
+}
+
+div#content div.imglist {
+	float: right;
+	padding: 1em;
+}
+
+div#content div.imglist a {
+	border: 0;
+}
+
+div#content div.imglist a img.imglist-img {
+	border: 0;
+	display: block;
+}
+
+div#content div.imglist td.imglist-cell {
+	padding: 5px;
+}
+
+div#content div.subpages-list {
+	margin: 1.5em;
+}
+
+div#content div.subpages-list ul {
+	list-style-type: none;
+	list-style-image: none;
+}
+
+div#content div.subpages-list a {
+	text-decoration: none;
+	display: table;
+	width: 100%;
+	color: #000;
+	padding: 0.5em;
+	margin: 0.5em;
+	border: 2px dotted #26a;
+	background: #fed;
+}
+
+div#content div.subpages-list a:hover {
+	border-style: solid;
+}
+
+div#content div.subpages-list img.subpage-img {  
+	padding-right: 2em;
+	float: left;
+	border: 0;
+}
+
+div#content div.subpages-list span.subpage-title {
+	font-weight: bold;
+	font-size: 1.2em;  
+	width: 100%;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+div#content div.subpages-list span.subpage-title span.subpage-description {  
+	font-size: 0.8em;
+	font-weight: normal;
+	color: #666;
+}
+
+div#content a img.product-addimg {
+	border: 0;
+}
+
+sup {
+	font-size: 0.6em;
+}
+
+div#footer a#spreadfirefox img {
+	border: 0;
+	float: left;
+	padding: 3px;	
+}
+
+div.filelist {
+	background: #fff;
+	color: #000;
+	border-width: 2px;
+	border-color: #999;
+	border-style: groove;
+	padding: 3px;
+	margin: 0 2em; 
+	max-height: 7em;
+	overflow: scroll;
+}
+
+div.filelist a.filelist-even {
+	background: #ddd;
+	border: 0;
+	padding: 1px 3px;
+	display: block;
+}
+
+div.filelist a.filelist-odd {
+	border: 0;
+	padding: 1px 3px;
+	display: block;
+}
+
+div.filelist ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+div.msg {
+	border: 1px solid #d80;
+	background: #fed;
+	padding: 1em 2em;
+}
+
+div.msg h2 {
+	font-weight: bold;
+	font-size: 1.2em;
+        text-decoration: none;
+	border-bottom: 2px solid #159;
+	padding: 0.1em 1em;
+        margin-top: 0;
+	margin-bottom: 0.8em;
+}
+
+
+div.msg p.msg-footer {
+	clear: both;
+	padding: 0.2em 0em;
+	margin: 0.2em 0em;
+	border-top: 1px solid #aaa;
+	color: #aaa;
+	font-style: italic;
+	font-size: 0.8em;
+        text-align: right;
+}
+
+div.msg img.msg-image {
+        width: 192px;
+	float: right;
+	padding: 1em;
+}
+
+span.brickstore {
+	color: #335;
+}
+
+h2 {
+	margin-top: 1em;
+	margin-bottom: 0.1em;
+	text-decoration: underline;
+}

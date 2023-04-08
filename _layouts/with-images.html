@@ -1,0 +1,16 @@
+---
+layout: "page"
+---
+
+{% if page.images %}
+<div class="imglist">
+  <table class="imglist-table" cellspacing="0" cellpadding="0" border="0" summary="">
+  {% for image in page.images %}
+    {% include image-cell.html url=image.url thumbUrl=image.thumbUrl width="256" title=image.title %}
+  {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+
+{{ content }}

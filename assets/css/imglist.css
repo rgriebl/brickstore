@@ -1,0 +1,17 @@
+div.imglist {
+        float: right;
+        padding: 1em;
+}  
+
+div.imglist a {
+        border: 0;
+}  
+
+div.imglist a img.imglist-img {
+        border: 0;
+        display: block;
+}  
+
+div.imglist td.imglist-cell {
+        padding: 5px;
+}  

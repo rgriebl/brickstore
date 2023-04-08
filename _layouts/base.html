@@ -1,0 +1,34 @@
+---
+common-css:
+  - "/assets/css/bootstrap.min.css"
+  - "/assets/css/fa-all.min.css"
+  - "/assets/css/gf-lora.css"
+  - "/assets/css/gf-opensans.css"
+  - "/assets/css/bootstrap-social.css"
+  - "/assets/css/beautifuljekyll.css"
+common-js:
+  - "/assets/js/jquery-3.5.1.slim.min.js"
+  - "/assets/js/popper.min.js"
+  - "/assets/js/bootstrap.min.js"
+  - "/assets/js/beautifuljekyll.js"
+---
+
+<!DOCTYPE html>
+<html lang="{{ page.language | default: site.language | default: 'en' }}">
+<!-- Beautiful Jekyll 5.0.0 | Copyright Dean Attali 2020 -->
+{% include head.html %}
+
+<body>
+
+  {% include gtm_body.html %}
+
+  {% include nav.html %}
+
+  {{ content }}
+
+  {% include footer.html %}
+
+  {% include footer-scripts.html %}
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+<tr class="imglist-row">
+  <td class="imglist-cell" align="center"><a href="{{ include.url | absolute_url }}" rel="external-image">
+    <img class="imglist-img" src="{{ include.thumbUrl | relative_url }}" alt="{{ include.title }}"
+    {% if include.width %} width="{{ include.width }}" {% endif %} />
+    {% if include.title %}<span class="imglist-label">{{ include.title }}</span>{% endif %}
+  </a></td>
+</tr>
