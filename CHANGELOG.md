@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.4.1] - 2023-04-09
+
+BrickStore has a new website at https://www.brickstore.dev, which is also maintained as part of the GitHub  repository. This should make the somewhat hidden content in the GitHub Wiki pages a lot more visible.
+
+New features:
+- [Brickognize](https://brickcognize.com) is now directly integrated into the add-item dialog: just hook up a webcam (or connect to your phone's camera) and click the new "camera" icon next to the filter.
+  - In order to make Brickcognize's "detect anything" mode more useful, the item type selector now also supports an "Any" type.
+- Colors, categories and recent files can now be _pinned_: once pinned, these items will always stay at the top of their respective lists.
+  - List items can be pinned via the pin icon on the right-hand side, while the recent files on the home page can be pinned via a context menu.
+
+Fixes:
+- The column sizes on the "consolidate individually" dialog page were not mirrored correctly from the current document.
+
+Optimizations:
+- The BrickLink catalog database loads at least twice as fast at startup and uses 50% less memory at runtime.
+- Initializing the "appears-in" view for popular items (e.g. Plate 1 x 1) could take a few seconds.
+
+
 ## [2023.3.2] - 2023-03-22
 
 This is just a quick bug fix release:
@@ -528,7 +546,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.3.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.1...HEAD
+[2023.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.1
 [2023.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.2
 [2023.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.1
 [2023.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.2.1
