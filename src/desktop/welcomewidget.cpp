@@ -161,10 +161,10 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
     static const QString baseUrl = u"https://" + Application::inst()->applicationUrl() + u'/';
     static const QVector<std::tuple<const char *, const char *, QString>> links {
-        { "bootstrap-question-circle", QT_TR_NOOP("Tutorials"),   baseUrl + u"tutorials" },
 //        { "bootstrap-chat-dots",       QT_TR_NOOP("Discussions"), baseUrl + u"discussions" },
-        { "bootstrap-bug",             QT_TR_NOOP("Bug reports"), baseUrl + u"report-bugs" },
-        { "bootstrap-heart",           QT_TR_NOOP("Support"),     baseUrl + u"support" },
+        { "bootstrap-question-circle", QT_TR_NOOP("View tutorials"),       baseUrl + u"tutorials" },
+        { "bootstrap-bug",             QT_TR_NOOP("Report a bug"),         baseUrl + u"report-bugs" },
+        { "bootstrap-heart",           QT_TR_NOOP("Support the project"),  baseUrl + u"support" },
     };
 
     int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);
