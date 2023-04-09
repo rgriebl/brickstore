@@ -49,7 +49,7 @@ Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
-Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion; Excludes: "vc_redist.*.exe"
+Source: "*.exe"; DestDir: "{app}"; Flags: ignoreversion; Excludes: "vc_redist.{#ARCH}.exe"
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion skipifsourcedoesntexist
 Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
@@ -79,10 +79,23 @@ Root: HKCR; Subkey: "BrickStore.Document\shell\open\command"; ValueType: string;
 Root: HKCR; Subkey: ".bsx"; ValueType: string; \
     ValueData: "BrickStore.Document"; Flags: uninsdeletevalue uninsdeletekeyifempty
 
+; Remove old plugins that might get loaded into an incompatible Qt or
+; that might pull in broken libs (e.g. outdated openssl libs in %PATH%)
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\Qt*"
-Type: files; Name: "{app}\*\q*.dll"
+Type: filesandordirs; Name: "{app}\iconengines"
+Type: filesandordirs; Name: "{app}\imageformats"
+Type: filesandordirs; Name: "{app}\multimedia"
+Type: filesandordirs; Name: "{app}\networkinformation"
+Type: filesandordirs; Name: "{app}\qmltooling"
+Type: filesandordirs; Name: "{app}\sqldrivers"
+Type: filesandordirs; Name: "{app}\styles"
+Type: filesandordirs; Name: "{app}\tls"
 Type: files; Name: "{app}\d3dcompiler*"
+Type: files; Name: "{app}\vc_redist.{#ARCH}.exe"
+
+[UninstallDelete]
+Type: dirifempty; Name: "{app}"
 
 [Code]
 function noMSVCInstalled(Arch: String): Boolean;
