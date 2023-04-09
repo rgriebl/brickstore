@@ -1,1 +1,1 @@
-Extensions are documented here: https://rgriebl.github.io/brickstore/extensions/
+Extensions are documented here: https://www.brickstore.dev/extensions

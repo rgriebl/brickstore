@@ -291,7 +291,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>&lt;a href='https://github.com/rgriebl/brickstore/wiki/Crash-Reporting'&gt;See here&lt;/a&gt; for more information.</string>
+            <string>&lt;a href='https://www.brickstore.dev/crash-reporting'&gt;See here&lt;/a&gt; for more information.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

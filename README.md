@@ -3,24 +3,14 @@
 
 ![](https://github.com/rgriebl/brickstore/workflows/QMake%20Build%20Matrix/badge.svg)
 ![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads)
-![Custom badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fbrickforge.de%2Fbrickstore-data%2Fdatabase-last-update.py)
+![Custom badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fdata.brickstore.dev%2Fdatabase-last-update.py)
 
 ## BrickStore
 
 BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and
 Linux), **multilingual** (currently English, German and French), **fast** and **stable**.
 
-* Read more about it on its homepage at https://brickforge.de/brickstore
-
-* Releases are built automatically and can be download here:<br><br>
-  [![GitHub release (latest by date)](https://img.shields.io/github/v/release/rgriebl/brickstore?label=Download%20BrickStore&color=469BC3&style=for-the-badge)](https://github.com/rgriebl/brickstore/releases/latest)
-
-* There is a project Wiki with [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
-
-* Bugs and feature request [can also be reported there](https://github.com/rgriebl/brickstore/issues).
-
-* [Development builds](https://github.com/rgriebl/brickstore/actions) are only accessible when
-logged into GitHub (this is a GitHub limitation).
+# Please see https://www.brickstore.dev for more information on downloads and usage.
 
 
 ## License

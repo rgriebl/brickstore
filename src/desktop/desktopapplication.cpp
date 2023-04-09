@@ -166,7 +166,7 @@ void DesktopApplication::init()
 
 #if defined(SENTRY_ENABLED)
     if (Config::inst()->sentryConsent() == Config::SentryConsent::Unknown) {
-        QString text = tr("Enable anonymous crash reporting?<br><br>Please consider enabling this feature when available.<br>If you have any doubts about what information is being submitted and how it is used, please <a href='https://github.com/rgriebl/brickstore/wiki/Crash-Reporting'>see here</a>.<br><br>Crash reporting can be enabled or disabled at any time in the Settings dialog.");
+        QString text = tr("Enable anonymous crash reporting?<br><br>Please consider enabling this feature when available.<br>If you have any doubts about what information is being submitted and how it is used, please <a href='https://www.brickstore.dev/crash-reporting'>see here</a>.<br><br>Crash reporting can be enabled or disabled at any time in the Settings dialog.");
 
         switch (QMessageBox::question(MainWindow::inst(), QCoreApplication::applicationName(), text)) {
         case QMessageBox::Yes:
