@@ -1642,10 +1642,11 @@ QCoro::Task<Document *> Document::load(QString fileName)
 Document *Document::loadFromFile(const QString &fileName)
 {
     QFile f(fileName);
-    if (!f.open(QIODevice::ReadOnly))
-        throw Exception(f.errorString());
 
     try {
+        if (!f.open(QIODevice::ReadOnly))
+            throw Exception(f.errorString());
+
         auto doc = DocumentIO::parseBsxInventory(&f);
         doc->setFilePath(fileName);
         RecentFiles::inst()->add(doc->filePath(), doc->fileName());
@@ -1704,11 +1705,11 @@ void Document::saveToFile(const QString &fileName)
 {
     QSaveFile f(fileName);
     f.setDirectWriteFallback(true);
-    if (!f.open(QIODevice::WriteOnly))
+    if (!f.open(QIODevice::WriteOnly)
+            || !DocumentIO::createBsxInventory(&f, this)
+            || !f.commit()) {
         throw Exception(&f, tr("Failed to save document"));
-
-    if (!DocumentIO::createBsxInventory(&f, this) || !f.commit())
-        throw Exception(&f, tr("Failed to save document"));
+    }
 
     model()->unsetModified();
     setFilePath(fileName);
