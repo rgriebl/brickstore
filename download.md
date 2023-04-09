@@ -22,7 +22,7 @@ If you are stuck on macOS 10.13 or Windows 7, 8 and 8.1 or a 32bit Windows,
 a final 2022.4.3 legacy release is available for you here:<br><br>
 [![GitHub legacy release](https://img.shields.io/static/v1?message=v2022.4.3&label=Legacy%20Version&color=inactive&style=for-the-badge)](https://github.com/rgriebl/brickstore/releases/v2022.4.3)
 
-<i class="fas fa-tools"></i> [Development builds](https://github.com/rgriebl/brickstore/actions)
+<i class="fas fa-tools"></i> [Development builds](https://github.com/rgriebl/brickstore/actions/workflows/build_cmake.yml)
 are created automatically for every commit to the git repository, but they
 are only accessible if you are logged into your GitHub account (this is a
 GitHub restriction).
