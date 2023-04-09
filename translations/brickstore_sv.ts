@@ -1391,22 +1391,22 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1265"/>
+        <location filename="../src/bricklink/model.cpp" line="1267"/>
         <source>Qty.</source>
         <translation>Antal.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1267"/>
+        <location filename="../src/bricklink/model.cpp" line="1269"/>
         <source>Item Id</source>
         <translation>Artikel nummer</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1268"/>
+        <location filename="../src/bricklink/model.cpp" line="1270"/>
         <source>Description</source>
         <translation>Beskrivning</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1266"/>
+        <location filename="../src/bricklink/model.cpp" line="1268"/>
         <source>Color</source>
         <translation>Färg</translation>
     </message>
@@ -2038,9 +2038,13 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="169"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
-        <translation>Aktivera anonym crash rapportering?&lt;br&gt;&lt;br&gt;Var vänlig överväg att aktivera denna funktion när den är tillgänglig.&lt;br&gt;Om du har något tvivel att information som sänds och på vilket sätt den används, var vänlig &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;kolla här&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash rapportering kan aktiveras eller avaktiveras när du vill via Inställnings dialogrutan.</translation>
+        <translation type="vanished">Aktivera anonym crash rapportering?&lt;br&gt;&lt;br&gt;Var vänlig överväg att aktivera denna funktion när den är tillgänglig.&lt;br&gt;Om du har något tvivel att information som sänds och på vilket sätt den används, var vänlig &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;kolla här&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash rapportering kan aktiveras eller avaktiveras när du vill via Inställnings dialogrutan.</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/desktopapplication.cpp" line="169"/>
+        <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
+        <translation>Aktivera anonym crash rapportering?&lt;br&gt;&lt;br&gt;Var vänlig överväg att aktivera denna funktion när den är tillgänglig.&lt;br&gt;Om du har något tvivel att information som sänds och på vilket sätt den används, var vänlig &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;kolla här&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash rapportering kan aktiveras eller avaktiveras när du vill via Inställnings dialogrutan.</translation>
     </message>
     <message>
         <location filename="../src/desktop/desktopapplication.cpp" line="346"/>
@@ -2293,43 +2297,42 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>Öppna fil</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1654"/>
+        <location filename="../src/common/document.cpp" line="1655"/>
         <source>Failed to load document %1: %2</source>
         <translation>Misslyckades läsa in dokument %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1669"/>
+        <location filename="../src/common/document.cpp" line="1670"/>
         <source>Save File as</source>
         <translation>Spara fil som</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1673"/>
+        <location filename="../src/common/document.cpp" line="1674"/>
         <source>You cannot save this document with the same name as another currently open document. Choose a different name, or close the other document first.</source>
         <translation>Du kan inte spara detta dokument med samma namn som ett annat redan öppet dokument. Välj ett annat namn, eller stäng det andra dokumentet först.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1708"/>
         <location filename="../src/common/document.cpp" line="1711"/>
         <source>Failed to save document</source>
         <translation>Misslyckades sparra dokument</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1735"/>
+        <location filename="../src/common/document.cpp" line="1736"/>
         <source>Inventory for %1</source>
         <translation>Lager för %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1788"/>
+        <location filename="../src/common/document.cpp" line="1789"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Du har valt mer än 1000 poster, men BrickLink&apos;s servrar klarar inte av så många poster samtidigt.&lt;br&gt;Du bör exportera flera mindre omgångar.&lt;br&gt;&lt;br&gt;Vill du exportera den här listan ändå?</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1795"/>
+        <location filename="../src/common/document.cpp" line="1796"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Denna lista innehåller poster med fel.&lt;br&gt;&lt;br&gt;Vill du exportera denna listan ändå?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1874"/>
+        <location filename="../src/common/document.cpp" line="1875"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform>Kopierat eller slått ihop %n artikel</numerusform>
@@ -2337,7 +2340,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1950"/>
+        <location filename="../src/common/document.cpp" line="1951"/>
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform></numerusform>
@@ -2356,37 +2359,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2015"/>
+        <location filename="../src/common/document.cpp" line="2016"/>
         <source>BrickStore default</source>
         <translation>BrickStore standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2017"/>
+        <location filename="../src/common/document.cpp" line="2018"/>
         <source>BrickStore buyer/collector default</source>
         <translation>BrickStore köpare/samlare standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2019"/>
+        <location filename="../src/common/document.cpp" line="2020"/>
         <source>Auto-resize once</source>
         <translation>Automatisk ändring av storlek en gång</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2021"/>
+        <location filename="../src/common/document.cpp" line="2022"/>
         <source>User default</source>
         <translation>Användarens standard</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2156"/>
+        <location filename="../src/common/document.cpp" line="2157"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation>Ange ett unikt namn för denna kolumn layout. Lämna tom för ändra din standard layout.</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2188"/>
+        <location filename="../src/common/document.cpp" line="2189"/>
         <source>Set column layout:</source>
         <translation>Ange kolumn layout:</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2525"/>
+        <location filename="../src/common/document.cpp" line="2526"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>ÅTERSTÄLLD</translation>
@@ -5556,9 +5559,8 @@ Högerklicka: Meny</translation>
         <translation>Skicka anonym crash rapport</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
         <source>&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
-        <translation>&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
+        <translation type="vanished">&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="326"/>
@@ -5646,6 +5648,11 @@ Högerklicka: Meny</translation>
         <location filename="../src/desktop/settingsdialog.ui" line="370"/>
         <source>Icon size</source>
         <translation>Icon storlek</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
+        <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
+        <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="332"/>

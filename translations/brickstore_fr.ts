@@ -1411,22 +1411,22 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1265"/>
+        <location filename="../src/bricklink/model.cpp" line="1267"/>
         <source>Qty.</source>
         <translation>Qté</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1267"/>
+        <location filename="../src/bricklink/model.cpp" line="1269"/>
         <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1268"/>
+        <location filename="../src/bricklink/model.cpp" line="1270"/>
         <source>Description</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1266"/>
+        <location filename="../src/bricklink/model.cpp" line="1268"/>
         <source>Color</source>
         <translation>Couleur</translation>
     </message>
@@ -1966,7 +1966,7 @@
     <name>DesktopApplication</name>
     <message>
         <location filename="../src/desktop/desktopapplication.cpp" line="169"/>
-        <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
+        <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2278,22 +2278,21 @@
         <translation>Ouvrir un fichier</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1654"/>
+        <location filename="../src/common/document.cpp" line="1655"/>
         <source>Failed to load document %1: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1669"/>
+        <location filename="../src/common/document.cpp" line="1670"/>
         <source>Save File as</source>
         <translation>Enregistrer le fichier sous</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1673"/>
+        <location filename="../src/common/document.cpp" line="1674"/>
         <source>You cannot save this document with the same name as another currently open document. Choose a different name, or close the other document first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1708"/>
         <location filename="../src/common/document.cpp" line="1711"/>
         <source>Failed to save document</source>
         <translation type="unfinished"></translation>
@@ -2303,17 +2302,17 @@
         <translation type="vanished">Panier d&apos;achat dans la boutique %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1735"/>
+        <location filename="../src/common/document.cpp" line="1736"/>
         <source>Inventory for %1</source>
         <translation>Inventaire pour %1</translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1788"/>
+        <location filename="../src/common/document.cpp" line="1789"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="1795"/>
+        <location filename="../src/common/document.cpp" line="1796"/>
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2322,7 +2321,7 @@
         <translation type="vanished">Cette liste contient des articles avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous vraiment exporter cette liste?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1874"/>
+        <location filename="../src/common/document.cpp" line="1875"/>
         <source>Copied or merged %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -2330,7 +2329,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/document.cpp" line="1950"/>
+        <location filename="../src/common/document.cpp" line="1951"/>
         <source>Subtracted %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -2338,37 +2337,37 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2015"/>
+        <location filename="../src/common/document.cpp" line="2016"/>
         <source>BrickStore default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2017"/>
+        <location filename="../src/common/document.cpp" line="2018"/>
         <source>BrickStore buyer/collector default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2019"/>
+        <location filename="../src/common/document.cpp" line="2020"/>
         <source>Auto-resize once</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2021"/>
+        <location filename="../src/common/document.cpp" line="2022"/>
         <source>User default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2156"/>
+        <location filename="../src/common/document.cpp" line="2157"/>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2188"/>
+        <location filename="../src/common/document.cpp" line="2189"/>
         <source>Set column layout:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/document.cpp" line="2525"/>
+        <location filename="../src/common/document.cpp" line="2526"/>
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation type="unfinished"></translation>
@@ -6452,11 +6451,6 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
-        <source>&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/desktop/settingsdialog.ui" line="370"/>
         <source>Icon size</source>
         <translation type="unfinished"></translation>
@@ -6599,6 +6593,11 @@ Right click: Menu</source>
         <location filename="../src/desktop/settingsdialog.ui" line="1186"/>
         <source>Filter</source>
         <translation>Filtre</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
+        <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="536"/>
