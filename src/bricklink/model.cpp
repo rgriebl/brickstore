@@ -981,36 +981,38 @@ void InternalInventoryModel::fillConsistsOf(const QVector<SimpleLot> &list)
 
 void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)
 {
-    QHash<std::pair<const Item *, const Color *>, Entry> unique;
-    bool first_item = true;
-    bool single_item = (list.count() == 1);
+    QSet<const BrickLink::Item *> listSet;
+    bool firstItem = true;
+    bool singleItem = (list.count() == 1);
 
     for (const auto &p : list) {
         if (!p.m_item)
             continue;
 
+        // a set could have more than one instance of the same item in alternate sets
+        QSet<const BrickLink::Item *> itemSet;
+
         const auto appearsvec = p.m_item->appearsIn(p.m_color);
         for (const AppearsInColor &vec : appearsvec) {
             for (const AppearsInItem &aii : vec) {
-                const auto key = std::make_pair(aii.second, nullptr);
-
-                if (single_item) {
+                if (singleItem)
                     m_entries.emplace_back(new Entry { aii.second, nullptr, aii.first });
-                } else {
-                    auto it = unique.find(key);
-                    if (it != unique.end())
-                        ++it->m_quantity;
-                    else if (first_item)
-                        unique.emplace(key, aii.second, nullptr, 1);
-                }
+                else
+                    itemSet.insert(aii.second);
             }
         }
-        first_item = false;
+        if (firstItem) {
+            firstItem = false;
+            listSet = itemSet;
+        } else {
+            listSet.intersect(itemSet);
+        }
     }
 
-    for (auto it = unique.cbegin(); it != unique.cend(); ++it) {
-        if (it->m_quantity >= list.count())
-            m_entries.emplace_back(new Entry { it->m_item, nullptr, -1 });
+    if (!listSet.isEmpty()) {
+        m_entries.resize(listSet.size());
+        std::transform(listSet.cbegin(), listSet.cend(), m_entries.begin(),
+                       [](const auto &i) { return new Entry { i, nullptr, -1 }; });
     }
 }
 
