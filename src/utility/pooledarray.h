@@ -15,15 +15,6 @@
 #include "memoryresource.h"
 
 
-// see comment in PooledArray below
-namespace PooledArrayPrivate {
-template<int N> struct intTypeFromSize { using type = void; };
-template<> struct intTypeFromSize<1> { using type = qint8; };
-template<> struct intTypeFromSize<2> { using type = qint16; };
-template<> struct intTypeFromSize<4> { using type = qint32; };
-template<> struct intTypeFromSize<8> { using type = qint64; };
-}
-
 /* Small array optimization:
  *  - align to 2bytes at minimum
  *  - if mr && (num_elements < (sizeof(T *)/sizeof(T)), then treat T *data as T data_[...] and store
@@ -106,7 +97,7 @@ public:
 
         if (!data) {
             data = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
-            sizeRef(data) = s;
+            sizeRef(data) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
         } else if (!s) {
             mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
             data = nullptr;
@@ -115,7 +106,7 @@ public:
 
             auto newd = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
             memcpy(newd, data, size());
-            sizeRef(newd) = s;
+            sizeRef(newd) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
             mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
             data = newd;
         }
@@ -131,7 +122,7 @@ public:
 
     constexpr qsizetype maxSize() const
     {
-        return qsizetype(std::numeric_limits<typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type>::max());
+        return qsizetype(std::numeric_limits<typename QIntegerForSizeof<T>::Signed>::max());
     }
 
     std::pair<PooledArray<T> &, MemoryResource *> deserialize(MemoryResource *mr)
@@ -140,21 +131,16 @@ public:
     }
 
 private:
-    // ideally we want this, but (old) clang doesn't support requires and (old) gcc doesn't like
-    // class specializations within another class.
-    //template<int N> struct intTypeFromSize { using type = void; };
-    //template<int N> requires (N == 1) struct intTypeFromSize<N> { using type = qint8; };
-
-    const typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type &sizeRef(const T *t) const
+    const typename QIntegerForSizeof<T>::Signed &sizeRef(const T *t) const
     {
         assert(t);
-        return *reinterpret_cast<const typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type *>(&t[0]);
+        return *reinterpret_cast<const typename QIntegerForSizeof<T>::Signed *>(&t[0]);
     }
 
-    typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type &sizeRef(T *t)
+    typename QIntegerForSizeof<T>::Signed &sizeRef(T *t)
     {
         assert(t);
-        return *reinterpret_cast<typename PooledArrayPrivate::intTypeFromSize<sizeof(T)>::type *>(&t[0]);
+        return *reinterpret_cast<typename QIntegerForSizeof<T>::Signed *>(&t[0]);
     }
 
     void copyStringLike(const void *ptr, qsizetype size, MemoryResource *mr)
@@ -214,7 +200,7 @@ QDataStream &operator>>(QDataStream &ds, std::pair<PooledArray<T> &, MemoryResou
         bytes = s * sizeof(T);
     }
 
-    if ((bytes % sizeof(T)) || (s > pa_mr.first.maxSize())) {
+    if ((bytes % sizeof(T)) || (qsizetype(s) > pa_mr.first.maxSize())) {
         pa_mr.first.resize(0, pa_mr.second);
         ds.setStatus(QDataStream::ReadCorruptData);
         return ds;

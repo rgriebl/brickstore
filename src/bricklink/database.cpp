@@ -726,7 +726,7 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
                << item.m_consists_of
                << item.m_knownColorIndexes;
 
-    quint32 categoriesSize = quint32(std::max(1LL, item.m_categoryIndexes.size()) - 1);
+    quint32 categoriesSize = quint32(std::max(qsizetype(1), item.m_categoryIndexes.size()) - 1);
     dataStream << categoriesSize;
     for (quint32 i = 0; i < categoriesSize; ++i)
         dataStream << item.m_categoryIndexes[i + 1];

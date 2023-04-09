@@ -457,7 +457,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build/doc/html/extensions
         destination_dir: extensions
-        enable_jekyll: yes
+        enable_jekyll: true
 
     # Generate the Backend Docker image
     #################################################
