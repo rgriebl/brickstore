@@ -15,9 +15,9 @@
 #include <QStyleFactory>
 #include <QPointer>
 #include <QDynamicPropertyChangeEvent>
+#include <QKeyEvent>
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
 #  include <QDialog>
-#  include <QKeyEvent>
 #endif
 
 #include "utility/utility.h"
@@ -48,6 +48,7 @@ void BrickStoreProxyStyle::polish(QWidget *w)
 
     } else if (qobject_cast<QAbstractItemView *>(w)) {
         w->setMouseTracking(true);
+        w->installEventFilter(this);
 
     } else if (qobject_cast<QMenu *>(w)) {
         // SH_Menu_Scrollable is checked early in the QMenu constructor,
@@ -98,7 +99,8 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
 {
     if (qobject_cast<QLineEdit *>(w)
             || qobject_cast<QDoubleSpinBox *>(w)
-            || qobject_cast<QSpinBox *>(w)) {
+            || qobject_cast<QSpinBox *>(w)
+            || qobject_cast<QAbstractItemView *>(w)) {
         w->removeEventFilter(this);
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
     } else if (qobject_cast<QComboBox *>(w)) {
@@ -309,6 +311,11 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
                 w->setPalette(pal);
             }
         }
+    } else if (qobject_cast<QAbstractItemView *>(o)) {
+        // Prevent implicit Ctrl+C in QAbstractItemView, as our model strings have a finite life span
+        if (static_cast<QKeyEvent *>(e) == QKeySequence::Copy)
+            return true;
+
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
     } else if (qobject_cast<QComboBox *>(o)) {
         if (e->type() == QEvent::KeyPress) {
