@@ -1064,12 +1064,12 @@
         <translation>%1 hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="898"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="902"/>
         <source>Clear history</source>
         <translation>Chronik löschen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="906"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="910"/>
         <source>No browsing history</source>
         <translation>Keine Chronik vorhanden</translation>
     </message>
@@ -1642,27 +1642,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="791"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
         <source>VAT is included</source>
         <translation>Inklusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
         <source>VAT is excluded</source>
         <translation>Exclusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="796"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
         <source>for the EU</source>
         <translation>für die EU</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
         <source>for the UK</source>
         <translation>für Großbritannien</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
         <source>for Norway</source>
         <translation>für Norwegen</translation>
     </message>
@@ -1771,14 +1771,18 @@
         <translation>Wechselkurs</translation>
     </message>
     <message>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="98"/>
+        <source>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/desktop/changecurrencydialog.ui" line="265"/>
         <source>From V1 BrickStore/Stock: USD 1 equals %1 %2</source>
         <translation>Von V1 BrickStore/Stock: USD 1 entspricht %1 %2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="98"/>
         <source>From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
-        <translation>Von der &lt;a href=&quot;http://www.ecb.eu&quot;&gt;EZB&lt;/a&gt;: %1 1 entspricht %2 %3</translation>
+        <translation type="vanished">Von der &lt;a href=&quot;http://www.ecb.eu&quot;&gt;EZB&lt;/a&gt;: %1 1 entspricht %2 %3</translation>
     </message>
     <message>
         <location filename="../src/desktop/changecurrencydialog.ui" line="127"/>

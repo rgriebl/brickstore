@@ -1036,12 +1036,12 @@
         <translation>Lagt till %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="898"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="902"/>
         <source>Clear history</source>
         <translation>Rensa historik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="906"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="910"/>
         <source>No browsing history</source>
         <translation>Ingen sökhistorik</translation>
     </message>
@@ -1546,27 +1546,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="791"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
         <source>VAT is included</source>
         <translation>Inklusive Moms</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
         <source>VAT is excluded</source>
         <translation>Exklusive Moms</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="796"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
         <source>for the EU</source>
         <translation>för EU</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
         <source>for the UK</source>
         <translation>för UK</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
         <source>for Norway</source>
         <translation>för Norge</translation>
     </message>
@@ -1676,8 +1676,12 @@
     </message>
     <message>
         <location filename="../src/desktop/changecurrencydialog.ui" line="98"/>
+        <source>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
-        <translation>Från &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 är lika med %2 %3</translation>
+        <translation type="vanished">Från &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 är lika med %2 %3</translation>
     </message>
     <message>
         <location filename="../src/desktop/changecurrencydialog.ui" line="127"/>
