@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.4.2] - 2023-04-10
+
+Quick bug fix release:
+- The `Add` button in the add-item dialog stayed disabled for any item without a color (e.g. Minifigs).
+
+
 ## [2023.4.1] - 2023-04-09
 
 BrickStore has a new website at https://www.brickstore.dev, which is also maintained as part of the GitHub  repository. This should make the somewhat hidden content in the GitHub Wiki pages a lot more visible.
@@ -546,7 +552,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.2...HEAD
+[2023.4.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.2
 [2023.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.1
 [2023.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.2
 [2023.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.1
