@@ -95,7 +95,7 @@
           <item>
            <widget class="QLabel" name="w_labelEcb">
             <property name="text">
-             <string>From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</string>
+             <string>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</string>
             </property>
            </widget>
           </item>
