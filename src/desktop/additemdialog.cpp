@@ -717,8 +717,12 @@ bool AddItemDialog::checkAddPossible()
 
     bool acceptable = item && priceOk && qtyOk && bulkOk;
 
-    if (item && item->itemType())
-        acceptable = acceptable && (item->itemType()->hasColors() == bool(w_select_color->currentColor()));
+    if (item && item->itemType()) {
+        if (item->itemType()->hasColors())
+            acceptable = acceptable && w_select_color->currentColor();
+        else
+            acceptable = acceptable && (w_select_color->currentColor() == BrickLink::core()->color(0));
+    }
 
     for (int i = 0; i < 3; i++) {
         bool tierEnabled = w_tier_price [i]->isEnabled();
