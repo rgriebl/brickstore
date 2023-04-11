@@ -295,8 +295,6 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
     recursionDetection.append(modelName);
 
     QStringList searchpath;
-    int linecount = 0;
-
     bool is_mpd = false;
     int current_mpd_index = -1;
     QString current_mpd_model;
@@ -309,8 +307,6 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
         QString line;
 
         while (!(line = in.readLine()).isNull()) {
-            linecount++;
-
             if (line.isEmpty())
                 continue;
 
