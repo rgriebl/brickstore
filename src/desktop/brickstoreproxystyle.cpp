@@ -313,8 +313,10 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
         }
     } else if (qobject_cast<QAbstractItemView *>(o)) {
         // Prevent implicit Ctrl+C in QAbstractItemView, as our model strings have a finite life span
-        if (static_cast<QKeyEvent *>(e) == QKeySequence::Copy)
-            return true;
+        if (e->type() == QEvent::KeyPress) {
+            if (static_cast<QKeyEvent *>(e) == QKeySequence::Copy)
+                return true;
+        }
 
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
     } else if (qobject_cast<QComboBox *>(o)) {
