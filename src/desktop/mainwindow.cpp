@@ -191,6 +191,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_toolbar, &QToolBar::visibilityChanged,
             this, [this]() {
+        if (!qobject_cast<MainWindow *>(this)) // we may get this callback after ~MainWindow
+            return;
         if (m_welcomeWidget->isVisibleTo(this))
             repositionHomeWidget();
     });
