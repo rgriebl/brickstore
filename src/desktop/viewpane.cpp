@@ -638,20 +638,21 @@ void ViewPane::fontChange()
 
 void ViewPane::paletteChange()
 {
-    if (!m_viewList)
+    if (!m_viewList || !m_viewListBackground)
         return;
 
-    QPalette pal = QApplication::palette(m_viewList);
+    QPalette fgpal = QApplication::palette(m_viewList);
+    QPalette bgpal = fgpal;
 
     QPalette ivp = QApplication::palette("QAbstractItemView");
 
     QColor ihigh = ivp.color(QPalette::Inactive, QPalette::Highlight);
     QColor itext = ivp.color(QPalette::Inactive, QPalette::HighlightedText);
-    QColor iwin = pal.color(QPalette::Inactive, QPalette::Window);
+    QColor iwin = bgpal.color(QPalette::Inactive, QPalette::Window);
 
     QColor high = ivp.color(QPalette::Active, QPalette::Highlight);
     QColor text = ivp.color(QPalette::Active, QPalette::HighlightedText);
-    QColor win = pal.color(QPalette::Active, QPalette::Window);
+    QColor win = bgpal.color(QPalette::Active, QPalette::Window);
 
     if (high == ihigh) {
         ihigh = iwin;
@@ -664,17 +665,17 @@ void ViewPane::paletteChange()
         gradient.setStops({ { 0, high },
                             { .8, Utility::gradientColor(high, win, 0.5) },
                             { 1, win } });
-        pal.setBrush(QPalette::All, QPalette::Window, gradient);
-        pal.setColor(QPalette::All, QPalette::Text, text);
-        pal.setColor(QPalette::All, QPalette::ButtonText, text);
+        bgpal.setBrush(QPalette::All, QPalette::Window, gradient);
+        fgpal.setColor(QPalette::All, QPalette::Text, text);
+        fgpal.setColor(QPalette::All, QPalette::ButtonText, text);
     } else {
-        pal.setColor(QPalette::All, QPalette::Window, iwin);
-        pal.setColor(QPalette::All, QPalette::Text, itext);
-        pal.setColor(QPalette::All, QPalette::ButtonText, itext);
+        bgpal.setColor(QPalette::All, QPalette::Window, iwin);
+        fgpal.setColor(QPalette::All, QPalette::Text, itext);
+        fgpal.setColor(QPalette::All, QPalette::ButtonText, itext);
     }
 
-    m_viewList->setBackgroundRole(QPalette::Window);    
-    m_viewList->setPalette(pal);
+    m_viewList->setPalette(fgpal);
+    m_viewListBackground->setPalette(bgpal);
 }
 
 void ViewPane::languageChange()
@@ -730,13 +731,23 @@ void ViewPane::createToolBar()
     m_viewList = new MenuComboBox();
 
     m_viewList->setModel(DocumentList::inst());
-    m_viewList->setAutoFillBackground(true);
     m_viewList->setMinimumContentsLength(12);
     m_viewList->setMaxVisibleItems(40);
     m_viewList->setSizePolicy({ QSizePolicy::Expanding, QSizePolicy::Expanding });
     m_viewList->setFocusPolicy(Qt::NoFocus);
-    pageLayout->addWidget(m_viewList, 1);
+
+    m_viewListBackground = new QWidget();
+    m_viewListBackground->setAutoFillBackground(true);
+    m_viewListBackground->setBackgroundRole(QPalette::Window);
+
+    auto viewListStack = new QStackedLayout();
+    viewListStack->setStackingMode(QStackedLayout::StackAll);
+    viewListStack->addWidget(m_viewListBackground);
+    viewListStack->addWidget(m_viewList);
+
+    pageLayout->addLayout(viewListStack, 1);
     addSeparator();
+
 
     m_closeView = new QToolButton();
     m_closeView->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_close")->iconName()));

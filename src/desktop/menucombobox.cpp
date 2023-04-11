@@ -17,6 +17,11 @@ MenuComboBox::MenuComboBox(QWidget *parent)
 
 void MenuComboBox::showPopup()
 {
+#if defined(Q_OS_MACOS)
+    QComboBox::showPopup();
+    return;
+#endif
+
     if (!m_menu) {
         m_menu = new QMenu(this);
         connect(m_menu, &QMenu::aboutToHide, this, &QComboBox::hidePopup, Qt::QueuedConnection);

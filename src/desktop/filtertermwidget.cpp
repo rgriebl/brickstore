@@ -52,10 +52,7 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_valueDelay->setSingleShot(true);
 
     m_fields = new MenuComboBox();
-    m_fields->setObjectName(u"filter-fields"_qs);
-    m_fields->view()->setFont(m_fields->font());
     m_comparisons = new MenuComboBox();
-    m_comparisons->setObjectName(u"filter-comparisons"_qs);
     m_value = new QComboBox();
     m_value->setEditable(true);
     m_value->setMinimumContentsLength(16);
@@ -155,7 +152,6 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
             continue;
         comp |= token.first;
         m_comparisons->insertItem(m_comparisons->count(), token.second, token.first);
-        m_comparisons->setItemData(m_comparisons->count() - 1, false, Qt::CheckStateRole);
         if (filter.comparison() == token.first)
             m_comparisons->setCurrentIndex(m_comparisons->count() - 1);
     }

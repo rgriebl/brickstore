@@ -81,6 +81,7 @@ private:
     QWidget *m_toolBar;
     QToolButton *m_filterOnOff;
     QComboBox *m_viewList = nullptr;
+    QWidget *m_viewListBackground = nullptr;
     QToolButton *m_closeView;
     QWidget *m_orderSeparator;
     QToolButton *m_order;
