@@ -720,11 +720,13 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < DocumentModel::FieldCount; ++vi) {
         int li;
-        for (li = 0; li < columnData.count(); ++li) {
+        // make sure to only handle columns that we know about
+        int liMax = std::min(columnData.count(), int(DocumentModel::FieldCount));
+        for (li = 0; li < liMax; ++li) {
             if (columnData.value(li).m_visualIndex == vi)
                 break;
         }
-        if ((li < 0) || (li >= columnData.count())) {
+        if ((li < 0) || (li >= liMax)) {
             continue;
         }
 
@@ -2120,7 +2122,8 @@ std::tuple<QVector<ColumnData>, QVector<QPair<int, Qt::SortOrder>>> Document::pa
         bool sortAscending = false;
         ds >> sortIndicator >> sortAscending;
 
-        if ((sortIndicator >= 0) && (sortIndicator < count)) {
+        if ((sortIndicator >= 0) && (sortIndicator < count)
+                && (sortIndicator < qint32(DocumentModel::FieldCount))) {
             sortColumns.append(qMakePair(sortIndicator, sortAscending
                                          ? Qt::AscendingOrder : Qt::DescendingOrder));
         }
