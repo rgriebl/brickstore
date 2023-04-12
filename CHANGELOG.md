@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.4.3] - 2023-04-12
+
+Another bug fix release:
+- Fixed a crash introduced by the database optimizations than occur at any time during normal usage.
+- Fixed erratic popup placement on secondary screens on macOS.
+
+There's also one new feature:
+- Tier prices can now be set relative to a lot's base price.
+
+
 ## [2023.4.2] - 2023-04-10
 
 Quick bug fix release:
@@ -552,7 +562,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.3...HEAD
+[2023.4.3]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.3
 [2023.4.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.2
 [2023.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.1
 [2023.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.3.2
