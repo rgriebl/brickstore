@@ -450,6 +450,7 @@ void ActionManager::initialize()
     A("edit_price_set",           QT_TR_NOOP("Set price..."),                    NeedSelection(1));
     A("edit_price_to_priceguide", QT_TR_NOOP("Set price to guide..."),           QT_TR_NOOP("Ctrl+G", "Edit|Price|Set to PriceGuide"), NeedSelection(1));
     A("edit_price_inc_dec",       QT_TR_NOOP("Adjust price..."),                 QT_TR_NOOP("Ctrl++", "Edit|Price|Inc/Dec"),           NeedSelection(1));
+    A("edit_tierprice_relative",  QT_TR_NOOP("Set relative tier prices..."),     NeedSelection(1));
     A("edit_cost",                QT_TR_NOOP("Cost"),                            NeedSelection(1), FlagMenu);
     A("edit_cost_round",          QT_TR_NOOP("Round cost to 2 decimals"),        NeedSelection(1));
     A("edit_cost_set",            QT_TR_NOOP("Set cost..."),                     NeedSelection(1));

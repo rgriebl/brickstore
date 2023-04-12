@@ -167,6 +167,7 @@ public:
     void setPrice(double price);
     void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate);
     void priceAdjust(bool isFixed, double value, bool applyToTiers);
+    void setRelativeTierPrices(const std::array<double, 3> &percentagesOff);
     void roundPrice();
     void costAdjust(bool isFixed, double value);
     void divideQuantity(int divisor);

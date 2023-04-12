@@ -59,6 +59,7 @@
 #include "selectdocumentdialog.h"
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
+#include "tierpricesdialog.h"
 #include "importinventorydialog.h"
 
 
@@ -361,6 +362,16 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->priceAdjust(dlg.isFixed(), dlg.value(), dlg.applyToTiers());
           } },
+        { "edit_tierprice_relative", [this](auto) -> QCoro::Task<> {
+             Q_ASSERT(!selectedLots().isEmpty());
+
+             TierPricesDialog dlg(this);
+             dlg.setWindowModality(Qt::ApplicationModal);
+             dlg.show();
+
+             if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
+                 m_document->setRelativeTierPrices(dlg.percentagesOff());
+         } },
         { "edit_cost_inc_dec", [this](auto) -> QCoro::Task<> {
               IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
                                      false, m_model->currencyCode(), this);
@@ -716,6 +727,11 @@ void View::contextMenu(const QPoint &pos)
             break;
         case DocumentModel::LotId:
             actionNames = { "edit_lotid_copy", "edit_lotid_clear" };
+            break;
+        case DocumentModel::TierP1:
+        case DocumentModel::TierP2:
+        case DocumentModel::TierP3:
+            actionNames = { "edit_tierprice_relative" };
             break;
         }
         for (const auto &actionName : std::as_const(actionNames)) {

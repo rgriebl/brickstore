@@ -637,6 +637,8 @@ void MainWindow::setupMenuBar()
                   "edit_price_inc_dec",
                   "edit_price_to_priceguide",
                   "edit_price_round",
+                  "-",
+                  "edit_tierprice_relative",
               });
 
     setupMenu("edit_cost", {

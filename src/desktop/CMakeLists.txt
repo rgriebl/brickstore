@@ -113,6 +113,8 @@ qt_add_library(desktop_module STATIC
     systeminfodialog.ui
     taskwidgets.cpp
     taskwidgets.h
+    tierpricesdialog.cpp
+    tierpricesdialog.h
     view.cpp
     view.h
     view_p.h

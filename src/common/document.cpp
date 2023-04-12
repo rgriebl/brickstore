@@ -1213,6 +1213,29 @@ void Document::priceAdjust(bool isFixed, double value, bool applyToTiers)
     });
 }
 
+void Document::setRelativeTierPrices(const std::array<double, 3> &percentagesOff)
+{
+    bool allZero = true;
+    for (double pc : percentagesOff)
+        allZero = allZero && qFuzzyIsNull(pc);
+
+    if (allZero)
+        return;
+
+    applyTo(m_selectedLots, "edit_tierprice_relative", [percentagesOff](const auto &from, auto &to) {
+        to = from;
+        double price = from.price();
+        if (!qFuzzyIsNull(price)) {
+            for (int i = 0; i < 3; ++i) {
+                double pc = percentagesOff[i];
+                if (!qFuzzyIsNull(pc))
+                    to.setTierPrice(i, price * (100. - pc) / 100.);
+            }
+        }
+        return DocumentModel::LotChanged;
+    });
+}
+
 void Document::setCost(double cost)
 {
     applyTo(m_selectedLots, "edit_cost_set", [cost](const auto &from, auto &to) {
