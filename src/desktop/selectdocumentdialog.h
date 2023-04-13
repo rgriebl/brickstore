@@ -46,6 +46,7 @@ class SelectDocumentDialog : public QDialog
 public:
     SelectDocumentDialog(const DocumentModel *self, const QString &headertext,
                          QWidget *parent = nullptr);
+    ~SelectDocumentDialog() override;
 
     LotList lots() const;
     QString currencyCode() const;

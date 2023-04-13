@@ -32,6 +32,7 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
     m_clipboard = new QRadioButton(tr("Items from Clipboard"));
     m_document = new QRadioButton(tr("Items from an already open document:"));
     m_documentList = new QListWidget();
+    m_documentList->setTextElideMode(Qt::ElideMiddle);
 
     auto layout = new QGridLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -156,6 +157,16 @@ SelectDocumentDialog::SelectDocumentDialog(const DocumentModel *self, const QStr
 
     connect(m_sd, &SelectDocument::documentSelected,
             m_ok, &QAbstractButton::setEnabled);
+
+    QByteArray ba = Config::inst()->value(u"MainWindow/SelectDocumentDialog/Geometry"_qs)
+                        .toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+}
+
+SelectDocumentDialog::~SelectDocumentDialog()
+{
+    Config::inst()->setValue(u"MainWindow/SelectDocumentDialog/Geometry"_qs, saveGeometry());
 }
 
 LotList SelectDocumentDialog::lots() const
