@@ -742,12 +742,12 @@ void ViewPane::createToolBar()
 
     auto viewListStack = new QStackedLayout();
     viewListStack->setStackingMode(QStackedLayout::StackAll);
+    pageLayout->addLayout(viewListStack, 1);
+
     viewListStack->addWidget(m_viewListBackground);
     viewListStack->addWidget(m_viewList);
 
-    pageLayout->addLayout(viewListStack, 1);
     addSeparator();
-
 
     m_closeView = new QToolButton();
     m_closeView->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_close")->iconName()));
