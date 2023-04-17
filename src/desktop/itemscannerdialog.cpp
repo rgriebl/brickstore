@@ -16,6 +16,11 @@
 #include <QProgressBar>
 #include <QPainter>
 #include <QMouseEvent>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && QT_CONFIG(permissions)
+#  include <QCoreApplication>
+#  include <QPermissions>
+#  include <QMessageBox>
+#endif
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
@@ -25,6 +30,27 @@
 
 
 int ItemScannerDialog::s_averageScanTime = 0;
+
+bool ItemScannerDialog::checkSystemPermissions()
+{
+    const QString requestDenied = tr("BrickStore's request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system's Settings application.");
+
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)) && QT_CONFIG(permissions)
+    QCameraPermission cameraPermission;
+    switch (qApp->checkPermission(cameraPermission)) {
+    case Qt::PermissionStatus::Undetermined:
+        qApp->requestPermission(cameraPermission, [](const QPermission &) { });
+        return false;
+    case Qt::PermissionStatus::Denied:
+        QMessageBox::warning(nullptr, QCoreApplication::applicationName(), requestDenied);
+        return false;
+    case Qt::PermissionStatus::Granted:
+        break; // Proceed
+    }
+#endif
+    return true;
+}
 
 ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidget *parent)
     : QDialog(parent)

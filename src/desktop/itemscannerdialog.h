@@ -30,6 +30,8 @@ class ItemScannerDialog : public QDialog
 {
     Q_OBJECT
 public:
+    static bool checkSystemPermissions();
+
     explicit ItemScannerDialog(const BrickLink::ItemType *itemType, QWidget *parent = nullptr);
     ~ItemScannerDialog() override;
 

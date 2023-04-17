@@ -250,6 +250,9 @@ void SelectItem::init()
     d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
     d->w_itemScan->setAutoRaise(true);
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
+        if (!ItemScannerDialog::checkSystemPermissions())
+            return;
+
         auto itt = currentItemType();
         ItemScannerDialog isd((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt, this);
         if (isd.exec() == QDialog::Accepted) {
