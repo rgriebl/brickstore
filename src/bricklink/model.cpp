@@ -75,14 +75,12 @@ QModelIndex ColorModel::index(const Color *color) const
 
 QVariant ColorModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.column() != 0 || !color(index))
+    const Color *c = color(index);
+    if (!c)
         return { };
 
-    QVariant res;
-    const Color *c = color(index);
-
     if ((role == Qt::DisplayRole) || (role == Qt::EditRole)) {
-        res = c->name();
+        return c->name();
     } else if (role == Qt::DecorationRole) {
         QFontMetricsF fm(QGuiApplication::font());
         QImage img = c->sampleImage(int(fm.height()) + 4, int(fm.height()) + 4);
@@ -91,14 +89,14 @@ QVariant ColorModel::data(const QModelIndex &index, int role) const
             QIcon ico;
             ico.addPixmap(pix, QIcon::Normal);
             ico.addPixmap(pix, QIcon::Selected);
-            res = ico;
+            return ico;
         }
     } else if (role == ColorPointerRole) {
-        res.setValue(c);
+        return QVariant::fromValue(c);
     } else if (role == PinnedRole) {
         return m_pinnedColorIds.contains(c->id());
     }
-    return res;
+    return { };
 }
 
 bool ColorModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -312,19 +310,17 @@ QModelIndex CategoryModel::index(const Category *category) const
 
 QVariant CategoryModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.column() != 0 || !category(index))
+    const Category *c = category(index);
+    if (!c)
         return { };
 
-    QVariant res;
-    const Category *c = category(index);
-
     if (role == Qt::DisplayRole)
-        res = (c != AllCategories) ? c->name() : tr("All Items");
+        return (c != AllCategories) ? c->name() : tr("All Items");
     else if (role == CategoryPointerRole)
-        res.setValue(c);
+        return QVariant::fromValue(c);
     else if ((role == PinnedRole) && (c != AllCategories))
         return m_pinnedCategoryIds.contains(c->id());
-    return res;
+    return { };
 }
 
 bool CategoryModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -510,18 +506,15 @@ QModelIndex ItemTypeModel::index(const ItemType *itemtype) const
 
 QVariant ItemTypeModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.column() != 0 || !itemType(index))
+    const ItemType *i = itemType(index);
+    if (!i)
         return { };
 
-    QVariant res;
-    const ItemType *i = itemType(index);
-
     if (role == Qt::DisplayRole)
-        res = (i != AllItemTypes) ? i->name() : tr("Any");
+        return (i != AllItemTypes) ? i->name() : tr("Any");
     else if (role == ItemTypePointerRole)
-        res.setValue(i);
-
-    return res;
+        return QVariant::fromValue(i);
+    return { };
 }
 
 QVariant ItemTypeModel::headerData(int section, Qt::Orientation orient, int role) const
@@ -637,16 +630,14 @@ QModelIndex ItemModel::index(const Item *item) const
 
 QVariant ItemModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || !item(index))
-        return { };
-
-    QVariant res;
     const Item *i = item(index);
+    if (!i)
+        return { };
 
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
-        case 1: res = QString::fromLatin1(i->id()); break;
-        case 2: res = i->name(); break;
+        case 1: return QString::fromLatin1(i->id()); break;
+        case 2: return i->name(); break;
         }
     } else if (role == Qt::TextAlignmentRole) {
         if (index.column() == 0) {
@@ -654,17 +645,17 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
         }
     } else if (role == Qt::ToolTipRole || role == NameRole) {
         if (index.column() == 0)
-            res = i->name();
+            return i->name();
     } else if (role == IdRole) {
-        res = QLatin1String(i->id());
+        return QString::fromLatin1(i->id());
     } else if (role == ItemPointerRole) {
-        res.setValue(i);
+        return QVariant::fromValue(i);
     } else if (role == ItemTypePointerRole) {
-        res.setValue(i->itemType());
+        return QVariant::fromValue(i->itemType());
     } else if (role == CategoryPointerRole) {
-        res.setValue(i->category());
+        return QVariant::fromValue(i->category());
     }
-    return res;
+    return { };
 }
 
 QVariant ItemModel::headerData(int section, Qt::Orientation orient, int role) const
@@ -1204,11 +1195,11 @@ int InternalInventoryModel::columnCount(const QModelIndex &) const
 
 QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
+    const Entry *e = entry(index);
+    if (!e)
         return { };
 
-    const Entry *e = entry(index);
-    if (e && e->isSection()) {
+    if (e->isSection()) {
         if (role == Qt::DisplayRole && index.column() == 0)
             return e->m_sectionTitle;
         else if (role == IsSectionHeaderRole)
@@ -1216,7 +1207,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         return { };
     }
 
-    if (!e || !e->m_item)
+    if (!e->m_item)
         return { };
 
     switch (role) {
@@ -1227,7 +1218,7 @@ QVariant InternalInventoryModel::data(const QModelIndex &index, int role) const
         case InventoryModel::QuantityColumn:
             return (e->m_quantity < 0) ? u"-"_qs : QString::number(e->m_quantity);
         case InventoryModel::ItemIdColumn:
-            return QString(QLatin1Char(e->m_item->itemTypeId()) + u' ' + QLatin1String(e->m_item->id()));
+            return QString(QChar::fromLatin1(e->m_item->itemTypeId()) + u' ' + QString::fromLatin1(e->m_item->id()));
         case InventoryModel::ItemNameColumn:
             return e->m_item->name();
         case InventoryModel::ColorColumn:

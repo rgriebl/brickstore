@@ -1745,15 +1745,14 @@ bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int
 QVariant DocumentModel::data(const QModelIndex &index, int role) const
 {
     if (index.isValid()) {
-        const Lot *lot = this->lot(index);
+        const Lot *lot = static_cast<const Lot *>(index.internalPointer());
         auto f = static_cast<Field>(index.column());
-        const auto &c = m_columns.value(index.column());
 
         switch (role) {
         case Qt::DisplayRole      : return dataForDisplayRole(lot, f);
         case BaseDisplayRole      : return dataForDisplayRole(differenceBaseLot(lot), f);
         case Qt::DecorationRole   : return dataForDecorationRole(lot, f);
-        case Qt::TextAlignmentRole: return c.alignment | Qt::AlignVCenter;
+        case Qt::TextAlignmentRole: return m_columns.value(int(f)).alignment | Qt::AlignVCenter;
         case Qt::EditRole         : return dataForEditRole(lot, f);
         case BaseEditRole         : return dataForEditRole(differenceBaseLot(lot), f);
         case FilterRole           : return dataForFilterRole(lot, f);
