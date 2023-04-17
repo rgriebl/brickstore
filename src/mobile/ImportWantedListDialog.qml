@@ -13,6 +13,9 @@ FullscreenDialog {
     id: root
     title: qsTr("Import Wanted List")
 
+    property var goBackFunction
+    onBackClicked: goBackFunction()
+
     toolButtons: ToolButton {
         icon.name: "view-refresh"
         onClicked: BL.BrickLink.wantedLists.startUpdate()

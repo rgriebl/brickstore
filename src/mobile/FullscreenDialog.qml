@@ -9,17 +9,18 @@ import Qt5Compat.GraphicalEffects
 Page {
     id: root
 
-    property var goBackFunction
+    signal backClicked()
 
     property alias toolButtons: toolbar.data
 
     header: ToolBar {
+        topPadding: Style.topScreenMargin
         RowLayout {
             id: toolbar
             anchors.fill: parent
             ToolButton {
                 icon.name: "go-previous"
-                onClicked: root.goBackFunction()
+                onClicked: root.backClicked()
             }
             Label {
                 Layout.fillWidth: true

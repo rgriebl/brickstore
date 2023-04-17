@@ -14,6 +14,14 @@ FullscreenDialog {
 
     property BL.Item currentItem: BL.BrickLink.noItem
 
+    property var goBackFunction
+    onBackClicked: {
+        if (pages.currentIndex === 0)
+            root.goBackFunction()
+        else if (pages.currentIndex > 0)
+            pages.currentIndex = pages.currentIndex - 1
+    }
+
     toolButtons: ToolButton {
         property bool lastPage: pages.currentIndex === (pages.count - 1)
         text: lastPage ? qsTr("Import") : qsTr("Next")

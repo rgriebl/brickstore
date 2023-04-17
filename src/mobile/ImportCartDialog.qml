@@ -14,6 +14,9 @@ FullscreenDialog {
     id: root
     title: qsTr("Import Cart")
 
+    property var goBackFunction
+    onBackClicked: goBackFunction()
+
     toolButtons: ToolButton {
         icon.name: "view-refresh"
         onClicked: BL.BrickLink.carts.startUpdate()

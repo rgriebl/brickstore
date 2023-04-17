@@ -16,6 +16,9 @@ FullscreenDialog {
 
     property int updateLastNDays: 60
 
+    property var goBackFunction
+    onBackClicked: goBackFunction()
+
     toolButtons: ToolButton {
         icon.name: "view-refresh"
         enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating

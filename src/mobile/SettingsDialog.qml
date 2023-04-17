@@ -15,10 +15,12 @@ FullscreenDialog {
 
     property string page    
 
+    property var goBackFunction
+    onBackClicked: goBackFunction()
+
     footer: TabBar {
         id: tabBar
 
-        position: TabBar.Footer
         currentIndex: swipeView.currentIndex
 
         TabButton { text: qsTr("General");   property string pageName: "general" }
