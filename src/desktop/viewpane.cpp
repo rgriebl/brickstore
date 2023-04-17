@@ -744,8 +744,8 @@ void ViewPane::createToolBar()
     viewListStack->setStackingMode(QStackedLayout::StackAll);
     pageLayout->addLayout(viewListStack, 1);
 
-    viewListStack->addWidget(m_viewListBackground);
     viewListStack->addWidget(m_viewList);
+    viewListStack->addWidget(m_viewListBackground);
 
     addSeparator();
 
