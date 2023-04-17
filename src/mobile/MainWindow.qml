@@ -17,16 +17,6 @@ Control {
         source: "AboutDialog.qml"
     }
     DialogLoader {
-        id: settingsDialog
-        source: "SettingsDialog.qml"
-        property string pageName
-        function openPage(page : string) {
-            pageName = page
-            open()
-        }
-        onLoaded: { item.openPage(pageName) }
-    }
-    DialogLoader {
         id: devConsole
         source: "DeveloperConsole.qml"
     }
@@ -304,7 +294,10 @@ Control {
 
     Connections {
         target: BS.BrickStore
-        function onShowSettings(page : string) { settingsDialog.openPage(page) }
+        function onShowSettings(page : string) {
+            setActiveDocument(null)
+            homeStack.push("SettingsDialog.qml", { "page": page, "goBackFunction": () => { homeStack.pop() } })
+        }
     }
     Connections {
         target: BS.Announcements

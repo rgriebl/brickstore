@@ -6,37 +6,17 @@ pragma ComponentBehavior: Bound
 import Mobile
 import BrickLink as BL
 import BrickStore as BS
+import "utils.js" as Utils
 
 
-Page {
+FullscreenDialog {
     id: root
     title: qsTr("Import Wanted List")
 
-    property var goBackFunction
-
-    header: ToolBar {
-        topPadding: Style.topScreenMargin
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                icon.name: "go-previous"
-                onClicked: root.goBackFunction()
-            }
-            Label {
-                Layout.fillWidth: true
-                font.pointSize: root.font.pointSize * 1.3
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                text: root.title
-                elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignLeft
-            }
-            ToolButton {
-                icon.name: "view-refresh"
-                onClicked: BL.BrickLink.wantedLists.startUpdate()
-                enabled: BL.BrickLink.wantedLists.updateStatus !== BL.BrickLink.UpdateStatus.Updating
-            }
-        }
+    toolButtons: ToolButton {
+        icon.name: "view-refresh"
+        onClicked: BL.BrickLink.wantedLists.startUpdate()
+        enabled: BL.BrickLink.wantedLists.updateStatus !== BL.BrickLink.UpdateStatus.Updating
     }
 
     ColumnLayout {

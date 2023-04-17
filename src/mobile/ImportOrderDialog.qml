@@ -7,54 +7,35 @@ import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 import BrickLink as BL
+import "utils.js" as Utils
 
 
-Page {
+FullscreenDialog {
     id: root
     title: qsTr("Import Order")
 
-    property var goBackFunction
-
     property int updateLastNDays: 60
 
-    header: ToolBar {
-        topPadding: Style.topScreenMargin
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                icon.name: "go-previous"
-                onClicked: root.goBackFunction()
-            }
-            Label {
-                Layout.fillWidth: true
-                font.pointSize: root.font.pointSize * 1.3
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                text: root.title
-                elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignLeft
-            }
-            ToolButton {
-                icon.name: "view-refresh"
-                enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating
-                onClicked: updateDaysDialog.open()
+    toolButtons: ToolButton {
+        icon.name: "view-refresh"
+        enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating
+        onClicked: updateDaysDialog.open()
 
-                InputDialog {
-                    id: updateDaysDialog
-                    mode: "int"
-                    text: qsTr("Synchronize the orders of the last") + " n " + qsTr("days")
-                    intValue: root.updateLastNDays
-                    intMinimum: 1
-                    intMaximum: 180
+        InputDialog {
+            id: updateDaysDialog
+            mode: "int"
+            text: qsTr("Synchronize the orders of the last") + " n " + qsTr("days")
+            intValue: root.updateLastNDays
+            intMinimum: 1
+            intMaximum: 180
 
-                    onAccepted: {
-                        root.updateLastNDays = intValue
-                        BL.BrickLink.orders.startUpdate(root.updateLastNDays)
-                    }
-                }
+            onAccepted: {
+                root.updateLastNDays = intValue
+                BL.BrickLink.orders.startUpdate(root.updateLastNDays)
             }
         }
     }
+
 
     ColumnLayout {
         anchors.fill: parent

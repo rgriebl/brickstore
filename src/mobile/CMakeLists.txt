@@ -65,6 +65,7 @@ qt_add_qml_module(mobile_module
         CornerTag.qml
         DialogLoader.qml
         DeveloperConsole.qml
+        FullscreenDialog.qml
         GridCell.qml
         GridHeader.qml
         IconComboBox.qml

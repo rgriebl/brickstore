@@ -8,11 +8,11 @@ import BrickStore as BS
 import BrickLink as BL
 
 
-AutoSizingDialog {
+FullscreenDialog {
     id: root
     title: qsTr("Settings")
-    relativeWidth: 3 / 4
-    relativeHeight: 3 / 4
+    spacing: 16
+
     property string page    
 
     footer: TabBar {

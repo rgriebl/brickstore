@@ -1,7 +1,7 @@
 // Copyright (C) 2004-2023 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
+//import QtQuick.Controls // needed because of Qt bug (Overlay is not defined)
 import Mobile
 
 

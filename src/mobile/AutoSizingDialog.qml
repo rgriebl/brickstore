@@ -11,8 +11,10 @@ Dialog {
     modal: true
     parent: Overlay.overlay
     anchors.centerIn: parent
-    width: Overlay.overlay ? Overlay.overlay.width * (Style.smallSize ? 1 : relativeWidth) : 0
-    height: Overlay.overlay ? Overlay.overlay.height * (Style.smallSize ? 1 : relativeHeight) : 0
+    width: Overlay.overlay ? Overlay.overlay.width * ((Style.smallSize || root.forceFullscreen) ? 1 : relativeWidth) : 0
+    height: Overlay.overlay ? Overlay.overlay.height * ((Style.smallSize || root.forceFullscreen) ? 1 : relativeHeight) : 0
+
+    property bool forceFullscreen: false
 
     property real relativeWidth: .75
     property real relativeHeight: .75
@@ -89,7 +91,7 @@ Dialog {
         })
     }
     function switchSmallStyle() {
-        if (Style.smallSize) {
+        if (Style.smallSize || root.forceFullscreen) {
             if (!defaultHeader) {
                 defaultHeader = header
                 defaultTopPadding = topPadding

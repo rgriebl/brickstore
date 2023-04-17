@@ -8,6 +8,7 @@ import BrickStore as BS
 AutoSizingDialog {
     id: root
     title: qsTr("System Information")
+    forceFullscreen: true
     keepPaddingInSmallMode: true
 
     footer: TabBar {
@@ -44,8 +45,8 @@ AutoSizingDialog {
     SwipeView {
         anchors.fill: parent
         interactive: false
-        clip: true
 
+        clip: true
         currentIndex: tabBar.currentIndex
 
         ScrollableLayout {

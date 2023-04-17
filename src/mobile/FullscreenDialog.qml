@@ -1,0 +1,35 @@
+// Copyright (C) 2004-2023 Robert Griebl
+// SPDX-License-Identifier: GPL-3.0-only
+
+pragma ComponentBehavior: Bound
+
+import Mobile
+import Qt5Compat.GraphicalEffects
+
+Page {
+    id: root
+
+    property var goBackFunction
+
+    property alias toolButtons: toolbar.data
+
+    header: ToolBar {
+        RowLayout {
+            id: toolbar
+            anchors.fill: parent
+            ToolButton {
+                icon.name: "go-previous"
+                onClicked: root.goBackFunction()
+            }
+            Label {
+                Layout.fillWidth: true
+                font.pointSize: root.font.pointSize * 1.3
+                minimumPointSize: font.pointSize / 2
+                fontSizeMode: Text.Fit
+                text: root.title
+                elide: Label.ElideLeft
+                horizontalAlignment: Qt.AlignLeft
+            }
+        }
+    }
+}

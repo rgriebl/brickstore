@@ -8,53 +8,28 @@ import BrickStore as BS
 import BrickLink as BL
 
 
-Page {
+FullscreenDialog {
     id: root
     title: qsTr("Part out")
 
-    property var goBackFunction
-
     property BL.Item currentItem: BL.BrickLink.noItem
 
-    header: ToolBar {
-        topPadding: Style.topScreenMargin
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                icon.name: "go-previous"
-                onClicked: {
-                    if (pages.currentIndex === 0)
-                        root.goBackFunction()
-                    else if (pages.currentIndex > 0)
-                        pages.currentIndex = pages.currentIndex - 1
-                }
-            }
-            Label {
-                Layout.fillWidth: true
-                scale: 1.3
-                text: root.title
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                horizontalAlignment: Qt.AlignHCenter
-            }
-            ToolButton {
-                property bool lastPage: pages.currentIndex === (pages.count - 1)
-                text: lastPage ? qsTr("Import") : qsTr("Next")
-                icon.name: lastPage ? "brick-1x1" : ""
-                enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
-                onClicked: {
-                    if (lastPage && !root.currentItem.isNull) {
-                        BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
-                                                          importWidget.quantity, importWidget.condition,
-                                                          importWidget.extraParts, importWidget.partOutTraits)
-                        goBackFunction()
-                    } else if (visible) {
-                        pages.currentIndex = pages.currentIndex + 1
-                    }
-                }
+    toolButtons: ToolButton {
+        property bool lastPage: pages.currentIndex === (pages.count - 1)
+        text: lastPage ? qsTr("Import") : qsTr("Next")
+        icon.name: lastPage ? "brick-1x1" : ""
+        enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
+        onClicked: {
+            if (lastPage && !root.currentItem.isNull) {
+                BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
+                                                  importWidget.quantity, importWidget.condition,
+                                                  importWidget.extraParts, importWidget.partOutTraits)
+                goBackFunction()
+            } else if (visible) {
+                pages.currentIndex = pages.currentIndex + 1
             }
         }
-     }
+    }
 
     SwipeView {
         id: pages
