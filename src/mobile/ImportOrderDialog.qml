@@ -66,7 +66,7 @@ Page {
             Layout.fillWidth: true
             clip: true
 
-            ScrollIndicator.vertical: ScrollIndicator { active: true }
+            ScrollIndicator.vertical: ScrollIndicator { }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -186,6 +186,13 @@ Page {
         TabButton { text: qsTr("Received") }
         TabButton { text: qsTr("Placed") }
 
-        onCurrentIndexChanged: table.forceLayout()
+        onCurrentIndexChanged: {
+            table.forceLayout()
+            Utils.flashScrollIndicators(table)
+        }
+    }
+
+    Component.onCompleted: {
+        Utils.flashScrollIndicators(table)
     }
 }

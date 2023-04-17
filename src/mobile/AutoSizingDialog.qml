@@ -28,6 +28,7 @@ Dialog {
     property int defaultFooterLeftPadding: 0
     property int defaultFooterRightPadding: 0
     property Item defaultHeader: null
+    property real defaultBackgroundRadius: 0
 
     property Item smallHeader: ToolBar {
         id: toolBar
@@ -77,6 +78,7 @@ Dialog {
     Component.onCompleted: {
         if (header && ('textFormat' in header))
             header.textFormat = Text.RichText
+        defaultBackgroundRadius = (background && ('radius' in background)) ? background.radius : -1
         switchSmallStyle()
         contentItem.focus = true
         contentItem.Keys.released.connect(function(e) {
@@ -125,6 +127,9 @@ Dialog {
                     bottomPadding = Style.bottomScreenMargin
                 }
             }
+            if (defaultBackgroundRadius >= 0) {
+                background.radius = 0
+            }
         } else {
             if (defaultHeader) {
                 header = defaultHeader
@@ -139,6 +144,9 @@ Dialog {
                 } else {
                     bottomPadding = defaultBottomPadding
                 }
+            }
+            if (defaultBackgroundRadius >= 0) {
+                background.radius = defaultBackgroundRadius
             }
         }
     }

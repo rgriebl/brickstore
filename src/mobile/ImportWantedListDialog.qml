@@ -49,7 +49,7 @@ Page {
             Layout.fillWidth: true
             clip: true
 
-            ScrollIndicator.vertical: ScrollIndicator { active: true }
+            ScrollIndicator.vertical: ScrollIndicator { }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -126,5 +126,6 @@ Page {
 
     Component.onCompleted: {
         Qt.callLater(function() { BL.BrickLink.wantedLists.startUpdate() })
+        Utils.flashScrollIndicators(table)
     }
 }

@@ -140,9 +140,12 @@ Page {
                 anchors.fill: parent
 
                 RowLayout {
+                    Layout.topMargin: 8
+                    Layout.leftMargin: 8
+                    Layout.rightMargin: 8
+
                     TextField {
                         id: filter
-                        Layout.leftMargin: 8
                         Layout.fillWidth: true
                         placeholderText: qsTr("Filter")
                     }

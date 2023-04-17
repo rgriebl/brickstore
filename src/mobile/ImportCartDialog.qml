@@ -49,7 +49,7 @@ Page {
             Layout.fillWidth: true
             clip: true
 
-            ScrollIndicator.vertical: ScrollIndicator { active: true }
+            ScrollIndicator.vertical: ScrollIndicator { }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -153,13 +153,17 @@ Page {
     footer: TabBar {
         id: domesticOrInternational
 
-        TabButton { text: qsTr("Domestic") }
         TabButton { text: qsTr("International") }
+        TabButton { text: qsTr("Domestic") }
 
-        onCurrentIndexChanged: table.forceLayout()
+        onCurrentIndexChanged: {
+            table.forceLayout()
+            Utils.flashScrollIndicators(table)
+        }
     }
 
     Component.onCompleted: {
         Qt.callLater(function() { BL.BrickLink.carts.startUpdate() })
+        Utils.flashScrollIndicators(table)
     }
 }

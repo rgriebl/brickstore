@@ -26,22 +26,19 @@ AutoSizingDialog {
         TabButton { text: qsTr("BrickLink"); property string pageName: "bricklink" }
     }
 
-    function openPage(page : string) {
+    Component.onCompleted: {
         for (let i = 0; i < tabBar.count; ++i) {
             if (tabBar.contentChildren[i].pageName === page) {
                 tabBar.setCurrentIndex(i)
                 break
             }
         }
-        open()
     }
-
-    padding: 0
-    spacing: 16
 
     SwipeView {
         id: swipeView
         anchors.fill: parent
+
         currentIndex: tabBar.currentIndex
         interactive: false
         clip: true
@@ -53,10 +50,13 @@ AutoSizingDialog {
 
             ColumnLayout {
                 width: langScroller.width
-                RowLayout {
-                    spacing: root.spacing
+                GridLayout {
+                    columns: 2
+                    rowSpacing: root.spacing / 2
+                    columnSpacing: root.spacing
                     Layout.leftMargin: root.spacing
                     Layout.rightMargin: root.spacing
+
                     Label {
                         text: qsTr("Language")
                         font.pixelSize: langCombo.font.pixelSize
@@ -72,11 +72,6 @@ AutoSizingDialog {
                         onActivated: { BS.Config.language = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.language) }
                     }
-                }
-                RowLayout {
-                    spacing: root.spacing
-                    Layout.leftMargin: root.spacing
-                    Layout.rightMargin: root.spacing
 
                     Label {
                         text: qsTr("Weights")
@@ -95,11 +90,6 @@ AutoSizingDialog {
                         onActivated: { BS.Config.measurementSystem = currentValue }
                         Component.onCompleted: { currentIndex = indexOfValue(BS.Config.measurementSystem) }
                     }
-                }
-                RowLayout {
-                    spacing: root.spacing
-                    Layout.leftMargin: root.spacing
-                    Layout.rightMargin: root.spacing
 
                     Label {
                         text: qsTr("Default currency")
@@ -142,6 +132,7 @@ AutoSizingDialog {
                     columnSpacing: root.spacing
                     Layout.leftMargin: root.spacing
                     Layout.rightMargin: root.spacing
+
                     Label {
                         text: qsTr("Theme")
                         font.pixelSize: langCombo.font.pixelSize
@@ -203,11 +194,14 @@ AutoSizingDialog {
                 width: blScroller.width
                 GridLayout {
                     columns: 2
-                    Layout.rightMargin: 16
-                    ItemDelegate {
+                    rowSpacing: root.spacing / 2
+                    columnSpacing: root.spacing
+                    Layout.leftMargin: root.spacing
+                    Layout.rightMargin: root.spacing
+
+                    Label {
                         text: qsTr("Username")
                         font.pixelSize: blUsername.font.pixelSize
-                        onClicked: { blUsername.focus = true }
                     }
                     TextField {
                         id: blUsername
@@ -227,10 +221,9 @@ AutoSizingDialog {
                         color: Qt.rgba(1, .4, .4)
                         visible: blUsername.text.indexOf('@') >= 0
                     }
-                    ItemDelegate {
+                    Label {
                         text: qsTr("Password")
                         font.pixelSize: blPassword.font.pixelSize
-                        onClicked: { blPassword.focus = true }
                     }
                     TextField {
                         id: blPassword
@@ -250,11 +243,6 @@ AutoSizingDialog {
                         color: Qt.rgba(1, .4, .4)
                         visible: blPassword.text.length > 15
                     }
-                }
-                RowLayout {
-                    spacing: root.spacing
-                    Layout.leftMargin: root.spacing
-                    Layout.rightMargin: root.spacing
 
                     Label {
                         text: qsTr("Price-guide")

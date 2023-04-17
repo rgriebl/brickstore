@@ -8,10 +8,10 @@ import "utils.js" as Utils
 Flickable {
     id: root
     clip: true
-    contentWidth: contentItem.children[0].width
+    contentWidth: width - leftMargin - rightMargin // contentItem.children[0].width
     contentHeight: contentItem.children[0].implicitHeight
 
-    implicitWidth: contentWidth
+    implicitWidth: width
     implicitHeight: contentHeight
 
     interactive: contentHeight > height

@@ -9,8 +9,8 @@ ApplicationWindow {
     id: root
     visible: true
     title: "BrickStore"
-    width: 800
-    height: 600
+    width: 1280
+    height: 720
 
     // ios: colored statusbar background
     flags: Qt.Window | (Style.isIOS ? Qt.MaximizeUsingFullscreenGeometryHint : 0)

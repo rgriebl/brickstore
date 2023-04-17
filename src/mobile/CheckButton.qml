@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 Button {
-    flat: true
+    flat: !checked
+    highlighted: checked
     checkable: true
     autoExclusive: true
     icon.color: "transparent"
