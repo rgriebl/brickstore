@@ -271,6 +271,12 @@ jobs:
             sudo cp -a $dir/d8 $dir/dx
           fi
         done
+
+        # fix Qt 6.5.0 androiddeployqt being broken: QTBUG-112921
+        mv "$Qt6_DIR/../gcc_64/bin/androiddeployqt" "$Qt6_DIR/../gcc_64/bin/androiddeployqt.real"
+        echo -e '#!/bin/sh\nexec `dirname $0`/androiddeployqt.real --release "$@"\n' > "$Qt6_DIR/../gcc_64/bin/androiddeployqt"
+        chmod +x "$Qt6_DIR/../gcc_64/bin/androiddeployqt"
+
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
 
         echo "${{ secrets.ANDROID_KEYSTORE_STORE_DATA }}" | base64 --decode >android_release.keystore
