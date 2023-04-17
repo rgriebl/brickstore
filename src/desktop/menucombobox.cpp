@@ -22,6 +22,9 @@ void MenuComboBox::showPopup()
     return;
 #endif
 
+    if (!model()->rowCount())
+        return;
+
     if (!m_menu) {
         m_menu = new QMenu(this);
         connect(m_menu, &QMenu::aboutToHide, this, &QComboBox::hidePopup, Qt::QueuedConnection);
