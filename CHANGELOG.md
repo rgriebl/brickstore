@@ -4,10 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.4.4] - 2023-04-18
+
+Fixes:
+- Using a webcam to identify parts could crash on macOS, depending on the webcam driver.
+- Opening a document in a new window could lead to the app locking up on Windows machines.
+- The Android version had a packaging issue, and was missing the SSL libraries required for HTTPS downloads.
+
+Also, the mobile iOS and Android ports are now using the new Material-3 design consistently.
+
+
 ## [2023.4.3] - 2023-04-12
 
 Another bug fix release:
-- Fixed a crash introduced by the database optimizations than occur at any time during normal usage.
+- Fixed a crash introduced by the database optimizations that can occur at any time during normal usage.
 - Fixed erratic popup placement on secondary screens on macOS.
 
 There's also one new feature:
@@ -562,7 +572,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.3...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.4.4...HEAD
+[2023.4.4]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.4
 [2023.4.3]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.3
 [2023.4.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.2
 [2023.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.1
