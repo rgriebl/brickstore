@@ -378,23 +378,15 @@ if (ANDROID)
 
     include(FetchContent)
 
-    # https://github.com/KDAB/android_openssl/issues/41
-    set(ANDROID_TARGET_ARCH ${CMAKE_ANDROID_ARCH_ABI})
-
     FetchContent_Declare(
         android_openssl
         GIT_REPOSITORY https://github.com/KDAB/android_openssl.git
         GIT_TAG master
         GIT_SHALLOW YES
     )
-
     FetchContent_MakeAvailable(android_openssl)
     FetchContent_GetProperties(android_openssl)
-
     include(${android_openssl_SOURCE_DIR}/CMakeLists.txt)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        QT_ANDROID_EXTRA_LIBS "${ANDROID_EXTRA_LIBS}"
-    )
 
     # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
     # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
