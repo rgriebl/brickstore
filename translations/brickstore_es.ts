@@ -1318,12 +1318,12 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="322"/>
+        <location filename="../src/bricklink/model.cpp" line="318"/>
         <source>All Items</source>
         <translation>Todos los Artículos</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="347"/>
+        <location filename="../src/bricklink/model.cpp" line="343"/>
         <source>Category</source>
         <translation>Categoría</translation>
     </message>
@@ -1335,17 +1335,17 @@
         <translation type="vanished">RGB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="119"/>
+        <location filename="../src/bricklink/model.cpp" line="117"/>
         <source>Color by %1</source>
         <translation>Color por %1</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="119"/>
+        <location filename="../src/bricklink/model.cpp" line="117"/>
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="119"/>
+        <location filename="../src/bricklink/model.cpp" line="117"/>
         <source>Hue</source>
         <translation>Tonalidad</translation>
     </message>
@@ -1432,22 +1432,22 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1267"/>
+        <location filename="../src/bricklink/model.cpp" line="1258"/>
         <source>Qty.</source>
         <translation>Cant.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1269"/>
+        <location filename="../src/bricklink/model.cpp" line="1260"/>
         <source>Item Id</source>
         <translation>Id Artículo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1270"/>
+        <location filename="../src/bricklink/model.cpp" line="1261"/>
         <source>Description</source>
         <translation>Descripción</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1268"/>
+        <location filename="../src/bricklink/model.cpp" line="1259"/>
         <source>Color</source>
         <translation>Color</translation>
     </message>
@@ -1478,12 +1478,12 @@
         <translation type="vanished">id:</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="674"/>
+        <location filename="../src/bricklink/model.cpp" line="665"/>
         <source>Item Id</source>
         <translation>Id Artículo</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="675"/>
+        <location filename="../src/bricklink/model.cpp" line="666"/>
         <source>Description</source>
         <translation>Descripción</translation>
     </message>
@@ -1495,12 +1495,12 @@
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="520"/>
+        <location filename="../src/bricklink/model.cpp" line="514"/>
         <source>Any</source>
         <translation>Cualquiera</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="530"/>
+        <location filename="../src/bricklink/model.cpp" line="523"/>
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
@@ -2744,270 +2744,270 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1872"/>
+        <location filename="../src/common/documentmodel.cpp" line="1871"/>
         <source>Index</source>
         <translation>Índice</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1889"/>
+        <location filename="../src/common/documentmodel.cpp" line="1888"/>
         <source>Status</source>
         <translation>Estado</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1890"/>
-        <location filename="../src/common/documentmodel.cpp" line="1895"/>
+        <location filename="../src/common/documentmodel.cpp" line="1889"/>
+        <location filename="../src/common/documentmodel.cpp" line="1894"/>
         <source>Include</source>
         <translation>Incluir</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1890"/>
-        <location filename="../src/common/documentmodel.cpp" line="1898"/>
+        <location filename="../src/common/documentmodel.cpp" line="1889"/>
+        <location filename="../src/common/documentmodel.cpp" line="1897"/>
         <source>Exclude</source>
         <translation>Excluir</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1890"/>
-        <location filename="../src/common/documentmodel.cpp" line="1896"/>
+        <location filename="../src/common/documentmodel.cpp" line="1889"/>
+        <location filename="../src/common/documentmodel.cpp" line="1895"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1920"/>
+        <location filename="../src/common/documentmodel.cpp" line="1919"/>
         <source>Image</source>
         <translation>Imagen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1934"/>
+        <location filename="../src/common/documentmodel.cpp" line="1933"/>
         <source>Item Id</source>
         <translation>Id Artículo</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1948"/>
+        <location filename="../src/common/documentmodel.cpp" line="1947"/>
         <source>Description</source>
         <translation>Descripción</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1957"/>
+        <location filename="../src/common/documentmodel.cpp" line="1956"/>
         <source>Comments</source>
         <translation>Comentarios</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1965"/>
+        <location filename="../src/common/documentmodel.cpp" line="1964"/>
         <source>Remarks</source>
         <translation>Notas</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1976"/>
+        <location filename="../src/common/documentmodel.cpp" line="1975"/>
         <source>Orig. Quantity</source>
         <translation>Orig. Cantidad</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="1990"/>
+        <location filename="../src/common/documentmodel.cpp" line="1989"/>
         <source>Diff. Quantity</source>
         <translation>Dif. Cantidad</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2008"/>
+        <location filename="../src/common/documentmodel.cpp" line="2007"/>
         <source>Quantity</source>
         <translation>Cantidad</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2018"/>
+        <location filename="../src/common/documentmodel.cpp" line="2017"/>
         <source>Bulk</source>
         <translation>Volumen</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2028"/>
+        <location filename="../src/common/documentmodel.cpp" line="2027"/>
         <source>Orig. Price</source>
         <translation>Orig. Precio</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2041"/>
+        <location filename="../src/common/documentmodel.cpp" line="2040"/>
         <source>Diff. Price</source>
         <translation>Dif. Precio</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2058"/>
+        <location filename="../src/common/documentmodel.cpp" line="2057"/>
         <source>Cost</source>
         <translation>Coste</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2067"/>
+        <location filename="../src/common/documentmodel.cpp" line="2066"/>
         <source>Price</source>
         <translation>Precio</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2077"/>
+        <location filename="../src/common/documentmodel.cpp" line="2076"/>
         <source>Total</source>
         <translation>Total</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2086"/>
+        <location filename="../src/common/documentmodel.cpp" line="2085"/>
         <source>Sale</source>
         <translation>Descuento</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2096"/>
+        <location filename="../src/common/documentmodel.cpp" line="2095"/>
         <source>Condition</source>
         <translation>Condición</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2097"/>
-        <location filename="../src/common/documentmodel.cpp" line="2102"/>
+        <location filename="../src/common/documentmodel.cpp" line="2096"/>
+        <location filename="../src/common/documentmodel.cpp" line="2101"/>
         <source>New</source>
         <translation>Nuevo</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2097"/>
-        <location filename="../src/common/documentmodel.cpp" line="2102"/>
+        <location filename="../src/common/documentmodel.cpp" line="2096"/>
+        <location filename="../src/common/documentmodel.cpp" line="2101"/>
         <source>Used</source>
         <translation>Usado</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2111"/>
+        <location filename="../src/common/documentmodel.cpp" line="2110"/>
         <source>Color</source>
         <translation>Color</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2131"/>
+        <location filename="../src/common/documentmodel.cpp" line="2130"/>
         <source>Category</source>
         <translation>Categoría</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2148"/>
+        <location filename="../src/common/documentmodel.cpp" line="2147"/>
         <source>Item Type</source>
         <translation>Tipo de Artículo</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2164"/>
+        <location filename="../src/common/documentmodel.cpp" line="2163"/>
         <source>Tier Q1</source>
         <translation>Escalonado C1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2173"/>
+        <location filename="../src/common/documentmodel.cpp" line="2172"/>
         <source>Tier P1</source>
         <translation>Escalonado P1</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2183"/>
+        <location filename="../src/common/documentmodel.cpp" line="2182"/>
         <source>Tier Q2</source>
         <translation>Escalonado C2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2192"/>
+        <location filename="../src/common/documentmodel.cpp" line="2191"/>
         <source>Tier P2</source>
         <translation>Escalonado P2</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2202"/>
+        <location filename="../src/common/documentmodel.cpp" line="2201"/>
         <source>Tier Q3</source>
         <translation>Escalonado C3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2211"/>
+        <location filename="../src/common/documentmodel.cpp" line="2210"/>
         <source>Tier P3</source>
         <translation>Escalonado P3</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2221"/>
+        <location filename="../src/common/documentmodel.cpp" line="2220"/>
         <source>Lot Id</source>
         <translation>ID Lote</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2230"/>
+        <location filename="../src/common/documentmodel.cpp" line="2229"/>
         <source>Retain</source>
         <translation>Retener</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2231"/>
+        <location filename="../src/common/documentmodel.cpp" line="2230"/>
         <source>Yes</source>
         <translation>Si</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2231"/>
+        <location filename="../src/common/documentmodel.cpp" line="2230"/>
         <source>No</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2235"/>
+        <location filename="../src/common/documentmodel.cpp" line="2234"/>
         <source>Yes</source>
         <comment>Filter&gt;Retain&gt;Yes</comment>
         <translation>Si</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2235"/>
+        <location filename="../src/common/documentmodel.cpp" line="2234"/>
         <source>No</source>
         <comment>Filter&gt;Retain&gt;No</comment>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2243"/>
+        <location filename="../src/common/documentmodel.cpp" line="2242"/>
         <source>Stockroom</source>
         <translation>Almacén</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2244"/>
+        <location filename="../src/common/documentmodel.cpp" line="2243"/>
         <source>None</source>
         <translation>Nada</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2252"/>
+        <location filename="../src/common/documentmodel.cpp" line="2251"/>
         <source>None</source>
         <comment>Filter&gt;Stockroom&gt;None</comment>
         <translation>Nada</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2260"/>
+        <location filename="../src/common/documentmodel.cpp" line="2259"/>
         <source>Reserved</source>
         <translation>Reservado</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2269"/>
+        <location filename="../src/common/documentmodel.cpp" line="2268"/>
         <source>Weight</source>
         <translation>Peso</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2278"/>
+        <location filename="../src/common/documentmodel.cpp" line="2277"/>
         <source>Total Weight</source>
         <translation>Peso Total</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2289"/>
+        <location filename="../src/common/documentmodel.cpp" line="2288"/>
         <source>Year</source>
         <translation>Año</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2296"/>
+        <location filename="../src/common/documentmodel.cpp" line="2295"/>
         <source>Marker</source>
         <translation>Marcador</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2308"/>
+        <location filename="../src/common/documentmodel.cpp" line="2307"/>
         <source>Added</source>
         <translation>Añadido</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2317"/>
+        <location filename="../src/common/documentmodel.cpp" line="2316"/>
         <source>Last Sold</source>
         <translation>Última Venta</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2629"/>
+        <location filename="../src/common/documentmodel.cpp" line="2628"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Este documento no tiene diferencias que se puedan exportar.</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2631"/>
+        <location filename="../src/common/documentmodel.cpp" line="2630"/>
         <source>This list contains items without a BrickLink Lot Id.</source>
         <translation>Esta lista contiene artículos sin Id de Lote de BrickLink.</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2633"/>
+        <location filename="../src/common/documentmodel.cpp" line="2632"/>
         <source>This list contains items with duplicate BrickLink Lot Ids.</source>
         <translation>Esta lista contiene artículos con Ids de Lotes de BrickLink duplicados.</translation>
     </message>
     <message>
-        <location filename="../src/common/documentmodel.cpp" line="2721"/>
+        <location filename="../src/common/documentmodel.cpp" line="2720"/>
         <source>Any</source>
         <translation>Cualquiera</translation>
     </message>
@@ -3394,22 +3394,22 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>%v / %m</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportCartDialog.qml" line="14"/>
+        <location filename="../src/mobile/ImportCartDialog.qml" line="15"/>
         <source>Import Cart</source>
         <translation>Importar Cesta</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportCartDialog.qml" line="123"/>
+        <location filename="../src/mobile/ImportCartDialog.qml" line="107"/>
         <source>%1 items (%2 lots)</source>
         <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportCartDialog.qml" line="156"/>
+        <location filename="../src/mobile/ImportCartDialog.qml" line="141"/>
         <source>Domestic</source>
         <translation>Nacional</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportCartDialog.qml" line="157"/>
+        <location filename="../src/mobile/ImportCartDialog.qml" line="140"/>
         <source>International</source>
         <translation>Internacional</translation>
     </message>
@@ -3517,12 +3517,12 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Despiezar</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="42"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="27"/>
         <source>Next</source>
         <translation>Siguiente</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="147"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="133"/>
         <source>Filter</source>
         <translation>Filtro</translation>
     </message>
@@ -3579,7 +3579,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation type="vanished">&amp;Incluir instracciones</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportInventoryDialog.qml" line="42"/>
+        <location filename="../src/mobile/ImportInventoryDialog.qml" line="27"/>
         <location filename="../src/desktop/importinventorydialog.cpp" line="160"/>
         <source>Import</source>
         <translation>Importar</translation>
@@ -3740,13 +3740,13 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
     </message>
     <message>
         <location filename="../src/desktop/importorderdialog.ui" line="54"/>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="45"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="30"/>
         <source>Synchronize the orders of the last</source>
         <translation>Sincronizas los pedidos de los últimos</translation>
     </message>
     <message>
         <location filename="../src/desktop/importorderdialog.ui" line="77"/>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="45"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="30"/>
         <source>days</source>
         <translation>días</translation>
     </message>
@@ -3790,7 +3790,7 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Mostrar en BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="14"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="15"/>
         <location filename="../src/desktop/importorderdialog.cpp" line="232"/>
         <source>Import Order</source>
         <translation>Import Pedido</translation>
@@ -3835,17 +3835,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Última actualización ha fallado</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="152"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="136"/>
         <source>%1 items (%2 lots)</source>
         <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="186"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="170"/>
         <source>Received</source>
         <translation>Recibidos</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportOrderDialog.qml" line="187"/>
+        <location filename="../src/mobile/ImportOrderDialog.qml" line="171"/>
         <source>Placed</source>
         <translation>Realizados</translation>
     </message>
@@ -3912,17 +3912,17 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
         <translation>Última actualización ha fallado</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportWantedListDialog.qml" line="13"/>
+        <location filename="../src/mobile/ImportWantedListDialog.qml" line="14"/>
         <source>Import Wanted List</source>
         <translation>Imprtar Lista de Deseos</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportWantedListDialog.qml" line="94"/>
+        <location filename="../src/mobile/ImportWantedListDialog.qml" line="77"/>
         <source>%1 items (%2 lots)</source>
         <translation>%1 artículos (%2 lotes)</translation>
     </message>
     <message>
-        <location filename="../src/mobile/ImportWantedListDialog.qml" line="101"/>
+        <location filename="../src/mobile/ImportWantedListDialog.qml" line="84"/>
         <source>%1 items left, %2% filled</source>
         <translation>%1 artículos restantes, %2% rellenados</translation>
     </message>
@@ -4017,52 +4017,57 @@ Por favor seleciona también que atributos (p.ej. notas, precios encadenados, ..
 <context>
     <name>ItemScannerDialog</name>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="32"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="36"/>
+        <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="58"/>
         <source>Item Scanner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="67"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="93"/>
         <source>Any</source>
         <translation>Cualquiera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="106"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="132"/>
         <source>Camera</source>
         <translation>Cámara</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="107"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="133"/>
         <source>Service</source>
         <translation>Servicio</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="108"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="134"/>
         <source>Item type</source>
         <translation>Tipo de Artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="138"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="164"/>
         <source>Click into the camera preview or press Space to capture an image.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="139"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="165"/>
         <source>There is no camera connected to this computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="140"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="166"/>
         <source>No matching item found - try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="193"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="219"/>
         <source>Scanning failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="335"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="361"/>
         <source>An error occured:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5329,7 +5334,7 @@ Clic derecho: Menu</translation>
 <context>
     <name>SelectCopyMergeDialog</name>
     <message>
-        <location filename="../src/desktop/selectdocumentdialog.cpp" line="209"/>
+        <location filename="../src/desktop/selectdocumentdialog.cpp" line="220"/>
         <source>Copy or merge values</source>
         <translation>Copiar o fusionar valores</translation>
     </message>
@@ -5372,22 +5377,22 @@ Clic derecho: Menu</translation>
         <translation>Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="323"/>
+        <location filename="../src/desktop/selectitem.cpp" line="326"/>
         <source>Ctrl+1</source>
         <translation>Ctrl+1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="331"/>
+        <location filename="../src/desktop/selectitem.cpp" line="334"/>
         <source>Ctrl+2</source>
         <translation>Ctrl+2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="557"/>
+        <location filename="../src/desktop/selectitem.cpp" line="560"/>
         <source>Find a part using a webcam</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="942"/>
+        <location filename="../src/desktop/selectitem.cpp" line="945"/>
         <source>Switch to the item&apos;s &quot;%1&quot; item type</source>
         <translation>Cambiar a la tipo &quot;%1&quot; del artículo</translation>
     </message>
@@ -5396,27 +5401,27 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Ctrl+3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="536"/>
+        <location filename="../src/desktop/selectitem.cpp" line="539"/>
         <source>Item type:</source>
         <translation>Tipo de artículo:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="537"/>
+        <location filename="../src/desktop/selectitem.cpp" line="540"/>
         <source>Filter</source>
         <translation>Filtro</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="542"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Mostrar solo los artículos que contengan todas las palabras ingresadas, independientemente del caso, ya sea en el nombre o en el número de pieza. Esto funciona de manera muy similar a un motor de búsqueda web: &lt;ul&gt;&lt;li&gt;para excluir palabras, antepóngalas con &lt;tt&gt;-&lt;/tt&gt;. (P.Ej. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para que coincida con una frase, colóquela entre comillas. (P.Ej. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar las partes que aparecen en un set específico, coloque &lt;tt&gt;aparece-en:&lt;/tt&gt; delante del nombre del set. (P.Ej.&lt;tt&gt; aparece-en:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;para filtrar sets o minifigs que consta de una pieza específica, coloque &lt;tt&gt;consta-de:&lt;/tt&gt; delante de la Id de la pieza. (P.Ej. &lt;tt&gt;consta-de:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="550"/>
+        <location filename="../src/desktop/selectitem.cpp" line="553"/>
         <source>Filter the list using this expression</source>
         <translation>Filtrar la lista usando esta expresión</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="556"/>
+        <location filename="../src/desktop/selectitem.cpp" line="559"/>
         <source>Find a 7-digit Lego element number</source>
         <translation>Encontrar un número de elemento de Lego de 7 dígitos</translation>
     </message>
@@ -5425,12 +5430,12 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Lista</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="559"/>
+        <location filename="../src/desktop/selectitem.cpp" line="562"/>
         <source>Thumbnails</source>
         <translation>Miniaturas</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="558"/>
+        <location filename="../src/desktop/selectitem.cpp" line="561"/>
         <source>List with Images</source>
         <translation>Lista con Imágenes</translation>
     </message>
@@ -5447,12 +5452,12 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Cambiar a la categoría del artículo</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="923"/>
+        <location filename="../src/desktop/selectitem.cpp" line="926"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Cambiar a la catecoría &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="933"/>
+        <location filename="../src/desktop/selectitem.cpp" line="936"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Cambiar a la categoría &quot;%1&quot; del artículo</translation>
     </message>
@@ -5703,37 +5708,37 @@ Clic derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="30"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="24"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="26"/>
         <source>General</source>
         <translation>General</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="42"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="61"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="63"/>
         <source>Language</source>
         <translation>Lenguaje</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="52"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="82"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="79"/>
         <source>Weights</source>
         <translation>Pesos</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="61"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="91"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="88"/>
         <source>Metric (g)</source>
         <translation>Métrico (g)</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="71"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="92"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="89"/>
         <source>Imperial (oz)</source>
         <translation>Imperial (oz)</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="93"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="105"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="97"/>
         <source>Default currency</source>
         <translation>Moneda predeterminada</translation>
     </message>
@@ -5828,33 +5833,33 @@ Clic derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="344"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="139"/>
         <source>Theme</source>
         <translation>Tema</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="352"/>
         <location filename="../src/desktop/settingsdialog.ui" line="503"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="153"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation>Predeterminado del sistema</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="357"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="154"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="147"/>
         <source>Light</source>
         <translation>Claro</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="362"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="155"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="148"/>
         <source>Dark</source>
         <translation>Oscuro</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="508"/>
         <location filename="../src/desktop/settingsdialog.ui" line="558"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="172"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation>Pequeño</translation>
     </message>
@@ -5874,7 +5879,7 @@ Clic derecho: Menu</translation>
         <translation>Restablecer al 100%</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="182"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="175"/>
         <source>Item image size</source>
         <translation>Tamaño de imagen de artículo</translation>
     </message>
@@ -5910,7 +5915,7 @@ Clic derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="596"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="26"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
@@ -5921,13 +5926,13 @@ Clic derecho: Menu</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="614"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="208"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation>Usuario</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="628"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="231"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation>Contraseña</translation>
     </message>
@@ -5997,7 +6002,7 @@ Clic derecho: Menu</translation>
         <translation>Ahora</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="222"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
         <location filename="../src/desktop/settingsdialog.cpp" line="774"/>
         <source>Your username is required here - not your email address.</source>
         <translation>Aquí se requiere su usuario - no su dirección de correo electrónico.</translation>
@@ -6013,7 +6018,7 @@ Clic derecho: Menu</translation>
         <translation>Editable mediante rueda de desplazamiento y gesto de zoom</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="245"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
         <location filename="../src/desktop/settingsdialog.cpp" line="793"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation>La longitud máxima de la contraseña de BrickLink es 15.</translation>
@@ -6105,38 +6110,38 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation>Restablecer</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="25"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="27"/>
         <source>UI</source>
         <translation>IU</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="119"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="111"/>
         <source>Open Browser on Export</source>
         <translation>Abrir Navegador al Exportar</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="125"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="117"/>
         <source>Show input errors</source>
         <translation>Mostart errores de entrada</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="164"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="157"/>
         <source>UI Layout</source>
         <translation>Disposición IU</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="171"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="164"/>
         <source>Automatic</source>
         <translation>Automática</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SettingsDialog.qml" line="260"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="250"/>
         <source>Price-guide</source>
         <translation>Guía de Precios</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="568"/>
-        <location filename="../src/mobile/SettingsDialog.qml" line="173"/>
+        <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation>Grande</translation>
     </message>
@@ -6281,12 +6286,12 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
         <translation>Información del Sistema</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SystemInfoDialog.qml" line="16"/>
+        <location filename="../src/mobile/SystemInfoDialog.qml" line="17"/>
         <source>Colors</source>
         <translation>Colores</translation>
     </message>
     <message>
-        <location filename="../src/mobile/SystemInfoDialog.qml" line="17"/>
+        <location filename="../src/mobile/SystemInfoDialog.qml" line="18"/>
         <source>Diagnostics</source>
         <translation>Diagnósticos</translation>
     </message>
@@ -6638,30 +6643,30 @@ Si no quiere guardar su contraseña, deje este campo vacío y se le pedirá que 
 <context>
     <name>WelcomeWidget</name>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="144"/>
+        <location filename="../src/mobile/MainWindow.qml" line="134"/>
         <location filename="../src/desktop/welcomewidget.cpp" line="251"/>
         <source>Document</source>
         <translation>Documento</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="154"/>
+        <location filename="../src/mobile/MainWindow.qml" line="144"/>
         <location filename="../src/desktop/welcomewidget.cpp" line="252"/>
         <source>Import items</source>
         <translation>Importar artículos</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="167"/>
+        <location filename="../src/mobile/MainWindow.qml" line="157"/>
         <source>Currently Open Documents</source>
         <translation>Documentos Abiertos Actualmente</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="195"/>
+        <location filename="../src/mobile/MainWindow.qml" line="185"/>
         <location filename="../src/desktop/welcomewidget.cpp" line="250"/>
         <source>Open recent files</source>
         <translation>Abrir archios recientes</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="214"/>
+        <location filename="../src/mobile/MainWindow.qml" line="204"/>
         <location filename="../src/desktop/welcomewidget.cpp" line="261"/>
         <source>No recent files</source>
         <translation>Sin archivos recientes</translation>
