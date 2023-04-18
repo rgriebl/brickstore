@@ -122,7 +122,8 @@ public:
 
     constexpr qsizetype maxSize() const
     {
-        return qsizetype(std::numeric_limits<typename QIntegerForSizeof<T>::Signed>::max());
+        // we need to prevent an overflow on 32bit systems here
+        return qsizetype(std::numeric_limits<typename QIntegerForSize<(sizeof(T) < 4) ? sizeof(T) : 4>::Signed>::max());
     }
 
     std::pair<PooledArray<T> &, MemoryResource *> deserialize(MemoryResource *mr)
