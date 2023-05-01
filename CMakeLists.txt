@@ -151,7 +151,7 @@ else()
     set(BS_DESKTOP ON)
     set(BS_TYPE "Desktop")
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D QuickControls2Impl Multimedia MultimediaWidgets)
+    find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia MultimediaWidgets)
 
 endif()
 
@@ -610,39 +610,9 @@ elseif (LINUX)
         DEPENDS ${PROJECT_NAME}
     )
 
-    set(APPIMAGE_DIR "${CMAKE_BINARY_DIR}/AppDir")
-    set(LINUXDEPLOY_DIR "${CMAKE_BINARY_DIR}/.linuxdeploy")
-
-    execute_process(
-        COMMAND "${CMAKE_C_COMPILER}" --print-multiarch
-        OUTPUT_VARIABLE ARCH_TRIPLET
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    add_custom_target(appimage
-        COMMAND mkdir -p "${APPIMAGE_DIR}"
-        COMMAND install -D "${CMAKE_SOURCE_DIR}/unix/brickstore-mime.xml"
-                           "${APPIMAGE_DIR}/share/mime/packages"
-        COMMAND install -D "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore_doc.png"
-                           "${APPIMAGE_DIR}/share/icons/hicolor/128x128/mimetypes"
-        COMMAND mkdir -p "${LINUXDEPLOY_DIR}"
-        COMMAND wget  -P "${LINUXDEPLOY_DIR}" -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-        COMMAND chmod +x "${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage"
-        COMMAND wget  -P "${LINUXDEPLOY_DIR}" -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
-        COMMAND chmod +x "${LINUXDEPLOY_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
-        COMMAND "VERSION=${VERSION}"
-                "QML_SOURCES_PATHS=\"${CMAKE_SOURCE_DIR}\""
-                "EXTRA_QT_PLUGINS=\"svg\""
-                "QMAKE=\"${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/qmake\""
-                ${LINUXDEPLOY_DIR}/linuxdeploy-x86_64.AppImage "--appdir=${APPIMAGE_DIR}"
-                    -e "${CMAKE_BINARY_DIR}/bin/brickstore"
-                    -i "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png"
-                    -d "${CMAKE_SOURCE_DIR}/unix/brickstore.desktop"
-                    -l "/usr/lib/${ARCH_TRIPLET}/libcrypto.so.1.1"
-                    -l "/usr/lib/${ARCH_TRIPLET}/libssl.so.1.1"
-                    --plugin qt --output appimage
-        DEPENDS ${PROJECT_NAME}
-    )
+    set(SNAP_DIR "${CMAKE_BINARY_DIR}/snap")
+    file(COPY "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png" DESTINATION "${SNAP_DIR}/gui/")
+    configure_file("${CMAKE_SOURCE_DIR}/unix/snapcraft.yaml.in" "${SNAP_DIR}/snapcraft.yaml" @ONLY)
 
 elseif (IOS)
     # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake

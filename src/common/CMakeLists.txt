@@ -58,8 +58,6 @@ target_link_libraries(common_module PRIVATE
     Qt6::Xml
     Qt6::Quick
     Qt6::QuickPrivate
-    Qt6::QuickControls2ImplPrivate
-    Qt6::QuickTemplates2Private
     QCoro6::Network
     QCoro6::Core
     bricklink_module
@@ -69,6 +67,13 @@ if (BS_DESKTOP)
     target_link_libraries(common_module PRIVATE
         Qt6::Widgets
         Qt6::PrintSupport
+    )
+endif()
+
+if (BS_MOBILE)
+    target_link_libraries(common_module PRIVATE
+        Qt6::QuickControls2ImplPrivate
+        Qt6::QuickTemplates2Private
     )
 endif()
 

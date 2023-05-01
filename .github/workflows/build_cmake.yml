@@ -35,6 +35,8 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.runs-on }}
+    outputs:
+      snap-file: ${{ steps.create-snap.outputs.snap || '' }}
 
     strategy:
       fail-fast: false
@@ -79,12 +81,23 @@ jobs:
           generate_docker: true
 
         - name: "Linux AppImage 64bit"
-          artifact: "Linux"
+          artifact: "Linux-AppImage"
           runs-on: ubuntu-20.04
           os: linux
           appimage: true
+          qt_tools: tools_opensslv3_src
           qt_host: 'linux'
-          qt_version: '6.4.2'
+          qt_version: '6.5.0'
+          qt_arch: 'gcc_64'
+
+        - name: "Ubuntu Snap 64bit"
+          artifact: "Linux-Snap"
+          runs-on: ubuntu-20.04
+          os: linux
+          snap: true
+          qt_tools: tools_opensslv3_src
+          qt_host: 'linux'
+          qt_version: '6.5.0'
           qt_arch: 'gcc_64'
 
         - name: "macOS Universal"
@@ -131,7 +144,7 @@ jobs:
     #################################################
 
     - name: Install Qt via aqtinstall
-      if: (matrix.config.os != 'linux') || matrix.config.appimage
+      if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap
       shell: sh
       run: |
         python3 -m pip install aqtinstall
@@ -146,6 +159,11 @@ jobs:
                          ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
                          ${{ matrix.config.qt_version }} $arch \
                          -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
+          if [ "${{ matrix.config.qt_tools }}" != "" ]; then
+            python3 -m aqt install-tool -O "${{ runner.workspace }}/Qt/" \
+                           ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
+                           ${{ matrix.config.qt_tools }}
+          fi
         done
         if [ "${{ matrix.config.os }}" = "windows" ]; then
           echo "Qt6_DIR=${{ runner.workspace }}\\Qt\\${{ matrix.config.qt_version }}\\${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
@@ -220,7 +238,7 @@ jobs:
     # Build for Linux
     #################################################
 
-    - name: Build for Linux (container)
+    - name: Build for Linux (Debian package)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
         sudo docker exec -w /brickstore "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
@@ -230,31 +248,122 @@ jobs:
             --parallel --target deb-package --verbose
       shell: bash
 
-    - name: Build for Linux (appimage)
-      if: (matrix.config.os == 'linux') && matrix.config.appimage
-      run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev
-        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
-            -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
-            ${{ matrix.config.cmake_extra_config }} -B build -S .
-        cmake --build build --config RelWithDebInfo --parallel --target appimage --verbose
-      shell: bash
-
     - name: Upload Linux DEB
-      if: (matrix.config.os == 'linux') && !matrix.config.appimage
+      if: (matrix.config.os == 'linux') && matrix.config.debian_container
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.deb"
 
+    # Build for Linux (AppImage / Snap)
+    #################################################
+
+    - name: Build for Linux (AppImage / Snap)
+      if: matrix.config.appimage || matrix.config.snap
+      run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
+            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
+            -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
+            ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config RelWithDebInfo --parallel --verbose
+        env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
+      shell: bash
+
+    - name: OpenSSLv3 for Linux (AppImage / Snap)
+      if: matrix.config.appimage || matrix.config.snap
+      run: |
+        cd ${Qt6_DIR}/../../Tools/OpenSSLv3/src
+        ./Configure --prefix=/usr --libdir=lib --openssldir=/etc/ssl '-Wl,-rpath,\$$ORIGIN,--enable-new-dtags'
+        make -j4 build_libs
+        make DESTDIR=${GITHUB_WORKSPACE}/build/BrickStore-Install install_runtime_libs
+
+        # Qt opens the unversioned libs first, so we need to prevent those from being
+        # loaded from the host system.
+        cd ${GITHUB_WORKSPACE}/build/BrickStore-Install/usr/lib/
+        for i in crypto ssl; do
+            rm -f lib${i}.so.1*
+            ln -sr lib${i}.so.3 lib${i}.so
+        done
+      shell: bash
+
+    - name: Create Linux AppImage
+      if: matrix.config.appimage
+      run: |
+        mkdir -p .linuxdeploy
+        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+        chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
+        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+        chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
+        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src/ldraw EXTRA_QT_PLUGINS=svg \
+            "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
+            .linuxdeploy/linuxdeploy-x86_64.AppImage \
+                --appdir=build/BrickStore-Install \
+                -e build/bin/brickstore \
+                -i assets/generated-app-icons/brickstore.png \
+                -d unix/brickstore.desktop \
+                --plugin qt \
+                --output appimage
+      shell: bash
+
     - name: Upload Linux AppImage
-      if: (matrix.config.os == 'linux') && matrix.config.appimage
+      if: matrix.config.appimage
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
-        path: "build/*.AppImage"
+        path: "*.AppImage"
+
+    - name: Create Linux Snap 1
+      if: matrix.config.snap
+      run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
+        mkdir -p .linuxdeploy
+        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+        chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
+        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+        chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
+        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src/ldraw EXTRA_QT_PLUGINS=svg \
+            "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
+            .linuxdeploy/linuxdeploy-x86_64.AppImage \
+                --appdir=build/BrickStore-Install \
+                --plugin qt
+        find build/BrickStore-Install -maxdepth 1 -iname "AppRun*" -or -not -type d | xargs rm -rf
+        # cqtdeployer would be much faster, but doesn't run on 20.04
+        # wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2285/CQtDeployer_1.6.2285.1507045_Linux_x86_64.zip"
+        # unzip -u .cqtdeployer/CQtDeployer_1.6.2285.1507045_Linux_x86_64.zip -d .cqtdeployer
+        # chmod +x .cqtdeployer/bin/CQtDeployer
+        # chmod +x .cqtdeployer/CQtDeployer.sh
+        # cd build
+        # ../.cqtdeployer/CQtDeployer.sh force-clear \
+        #     -bin bin/brickstore -qmlDir ../src/ldraw \
+        #     -qmake "${Qt6_DIR}/bin/qmake" \
+        #     -targetDir BrickStore-Install/usr -libOut lib -binOut bin \
+        #     -disableRunScript brickstore -disableShortCut brickstore \
+        #     -enablePlugins multimedia
+
+    - name: Create Linux Snap 2
+      if: matrix.config.snap
+      id: create-snap
+      uses: snapcore/action-build@v1
+      with:
+        path: build
+
+    - name: Upload Linux Snap
+      if: matrix.config.snap
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: ${{ steps.create-snap.outputs.snap }}
+
+    - name: Publish to Snapcraft (edge channel)
+      if: matrix.config.snap
+      uses: snapcore/action-publish@v1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
+      with:
+        snap: ${{ steps.create-snap.outputs.snap }}
+        release: edge
 
     # Build for Android
     #################################################
@@ -491,7 +600,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Download Artifacts to Release
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         path: 'artifacts'
 
@@ -500,7 +609,7 @@ jobs:
         find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
           d="$(dirname $a)"
           mv "$a" "${d}-$(basename $a)"
-          rm -rf "$d"
+          rmdir "$d" || true
         done
         echo "Artifacts after flattening:"
         find artifacts
@@ -522,3 +631,11 @@ jobs:
         SENTRY_PROJECT: brickstore
       with:
         version: "brickstore@${{ env.BUILD_NUMBER }}"
+
+    - name: Publish to Snapcraft
+      uses: snapcore/action-publish@v1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
+      with:
+        snap: ${{ needs.build.outputs.snap-file }}
+        release: stable

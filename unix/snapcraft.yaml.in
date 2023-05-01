@@ -1,0 +1,44 @@
+# ./BrickStore-Install needs to contain a brickstore installation into
+# ./usr/bin, including the Qt libraries
+
+name: brickstore
+title: BrickStore
+version: @VERSION@
+summary: @DESCRIPTION@
+grade: stable
+confinement: strict
+base: core20
+description: |
+  See https://@BRICKSTORE_URL@ for more information.
+compression: lzo
+license: GPL-3.0
+source-code: 'https://@GITHUB_URL@'
+website: 'https://@BRICKSTORE_URL@'
+icon: snap/gui/brickstore.png
+
+apps:
+  brickstore:
+    command: usr/bin/brickstore
+    desktop: usr/share/applications/brickstore.desktop
+    extensions: [ gnome-3-38 ]
+    environment:
+      QT_QPA_PLATFORMTHEME: gtk3
+      DISABLE_WAYLAND: 1
+    plugs:
+      - x11
+      - unity7
+      - network
+      - network-bind
+      - network-status
+      - home
+      - removable-media
+      - cups-control
+      - camera
+
+parts:
+  brickstore:
+    plugin: dump
+    source: BrickStore-Install/
+
+architectures:
+  - build-on: amd64

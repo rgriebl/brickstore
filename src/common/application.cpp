@@ -23,8 +23,10 @@
 #include <QtGui/QWindow>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
-#include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #include <QtQuick3D/QQuick3D>
+#if defined(BS_MOBILE)
+#  include <QtQuickControls2Impl/private/qquickiconimage_p.h>
+#endif
 
 #include <QCoro/QCoroSignal>
 #include <memory>
@@ -895,6 +897,7 @@ void Application::setIconTheme(Theme theme)
     QPixmapCache::clear();
     QIcon::setThemeName(theme == DarkTheme ? u"brickstore-breeze-dark"_qs : u"brickstore-breeze"_qs);
 
+#if defined(BS_MOBILE)
     // we need to delay this, because we are called during the construction of the QML root item
     QMetaObject::invokeMethod(this, [this]() {
         auto roots = m_engine->rootObjects();
@@ -910,6 +913,7 @@ void Application::setIconTheme(Theme theme)
             }
         }
     }, Qt::QueuedConnection);
+#endif
 }
 
 
