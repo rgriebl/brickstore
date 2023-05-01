@@ -20,4 +20,13 @@ FetchContent_Declare(
     GIT_TAG        3323139f9289bb8a0283de870df25ab101a66cab # needed for fixes after 0.8.0
     #GIT_TAG        v${QCORO_VERSION}
 )
-FetchContent_MakeAvailable(qcoro)
+
+
+# we need EXCLUDE_FROM_ALL to suppress the installation of qcoro into the macOS bundle
+# and Linux packages
+
+FetchContent_GetProperties(qcoro)
+if(NOT qcoro_POPULATED)
+  FetchContent_Populate(qcoro)
+  add_subdirectory(${qcoro_SOURCE_DIR} ${qcoro_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
