@@ -137,7 +137,7 @@ set(MIN_QT_VERSION 6.2.0)
 if (ANDROID OR IOS OR FORCE_MOBILE)
     set(BS_MOBILE ON)
     set(BS_TYPE "Mobile")
-    set(MIN_QT_VERSION 6.4.0)
+    set(MIN_QT_VERSION 6.5.0)
     add_compile_definitions(BS_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
     find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
@@ -532,6 +532,16 @@ elseif (WIN32)
         set(WINDEPLOYQT_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
     endif()
 
+    set (REMOVE_PLUGINS_COMMAND COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_CURRENT_BINARY_DIR}/bin/tls/qopensslbackend.dll")
+
+    if (${Qt6_VERSION} VERSION_LESS "6.5.0")
+        list(APPEND WINDEPLOYQT_EXTRA_ARGS "--no-qmltooling")
+    elseif (${Qt6_VERSION} VERSION_GREATER "6.5.0")
+        list(APPEND WINDEPLOYQT_EXTRA_ARGS "--skip-plugin-types qmltooling")
+    else()
+        list(APPEND REMOVE_PLUGINS_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bin/qmltooling")
+    endif ()
+
     # deploy Qt dependencies and create an INNO setup installer
     add_custom_target(installer
         COMMAND "${WINDEPLOYQT_PATH}/windeployqt" $<TARGET_FILE:${PROJECT_NAME}>
@@ -540,10 +550,9 @@ elseif (WIN32)
                 "--no-opengl-sw"
                 "--no-virtualkeyboard"
                 "--no-translations"
-                "--no-qmltooling"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
-        COMMAND "${CMAKE_COMMAND}" -E rm -f "${CMAKE_CURRENT_BINARY_DIR}/bin/tls/qopensslbackend.dll"
+        ${REMOVE_PLUGINS_COMMAND}
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
                 "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"

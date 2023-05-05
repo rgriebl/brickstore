@@ -47,7 +47,7 @@ jobs:
           runs-on: windows-2019
           os: windows
           qt_host: 'windows'
-          qt_version: '6.4.2'
+          qt_version: '6.5.0'
           qt_arch: 'win64_msvc2019_64'
           qt_dir: "msvc2019_64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
@@ -59,7 +59,7 @@ jobs:
           os: windows
           qt_host: 'windows'
           qt_host_arch: 'win64_msvc2019_64'
-          qt_version: '6.4.2'
+          qt_version: '6.5.0'
           qt_arch: 'win64_msvc2019_arm64'
           qt_dir: "msvc2019_arm64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
