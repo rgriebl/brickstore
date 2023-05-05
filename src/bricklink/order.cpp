@@ -1382,7 +1382,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         QUrl url(u"https://www.bricklink.com/orderExcelFinal.asp"_qs);
         QUrlQuery query;
         query.addQueryItem(u"action"_qs,        u"save"_qs);
-        query.addQueryItem(u"orderType"_qs,     QLatin1String(type));
+        query.addQueryItem(u"orderType"_qs,     QString::fromLatin1(type));
         query.addQueryItem(u"viewType"_qs,      u"X"_qs);
         if (fromDate.isValid() && toDate.isValid()) {
             query.addQueryItem(u"getOrders"_qs,     u"date"_qs);
@@ -1399,6 +1399,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         query.addQueryItem(u"getFiled"_qs,      u"Y"_qs);
         query.addQueryItem(u"getDetail"_qs,     u"y"_qs);
         query.addQueryItem(u"getDateFormat"_qs, u"0"_qs);    // MM/DD/YYYY
+        query.addQueryItem(u"includeMyCost"_qs, u"Y"_qs);
         url.setQuery(query);
 
         auto job = TransferJob::post(url);
