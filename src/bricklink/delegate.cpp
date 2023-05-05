@@ -45,9 +45,12 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
 
         if (firstColumnImageOnly) {
             if (auto *item = index.data(ItemPointerRole).value<const Item *>()) {
+                auto *color = index.data(ColorPointerRole).value<const Color *>();
+                if (!color)
+                    color = item->defaultColor();
                 QImage image;
 
-                Picture *pic = core()->pictureCache()->picture(item, item->defaultColor());
+                Picture *pic = core()->pictureCache()->picture(item, color);
                 if (pic && pic->isValid())
                     image = pic->image();
                 else
