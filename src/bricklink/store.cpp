@@ -41,7 +41,7 @@ BrickLink::Store::Store(Core *core)
                     }
                 } catch (const Exception &e) {
                     success = false;
-                    message = tr("Failed to import the store inventory") + u": " + e.errorString();
+                    message = tr("Failed to import the store inventory") + u":<br><br>" + e.errorString();
                 }
                 if (success != m_valid) {
                     m_valid = success;

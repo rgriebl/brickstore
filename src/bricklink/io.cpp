@@ -246,8 +246,26 @@ IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint, const QD
             }
         }
     } catch (const Exception &e) {
-        throw Exception("XML parse error at line %1, column %2: %3")
-                .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.errorString());
+        qsizetype pos = xml.characterOffset();
+        QString context = QString::fromUtf8(data);
+        auto lpos = context.lastIndexOf(u'\n', pos ? pos - 1 : 0) + 1;
+        auto rpos = context.indexOf(u'\n', pos);
+        context = context.mid(lpos, rpos == -1 ? context.size() : rpos - lpos);
+        auto contextPos = pos - lpos - 1;
+
+        QString msg = u"XML parse error at line %1, column %2: %3"_qs
+                          .arg(xml.lineNumber()).arg(xml.columnNumber()).arg(e.errorString());
+
+        qDebug().noquote().nospace() << msg << "\n\n  " << context << "\n  "
+                                     << QString(contextPos, u' ') << u'^';
+
+        throw Exception(msg.toHtmlEscaped() + u"<br><br><tt>"
+                        + context.left(contextPos).toHtmlEscaped()
+                        + u"<span style=\"background-color: " + QColor(Qt::red).name() + u"\">"
+                        + context.mid(contextPos, 1).toHtmlEscaped()
+                        + u"</span>"
+                        + context.mid(contextPos + 1).toHtmlEscaped()
+                        + u"</tt>");
     }
 }
 
