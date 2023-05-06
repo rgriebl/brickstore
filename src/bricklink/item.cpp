@@ -126,7 +126,7 @@ bool Item::hasKnownColor(const Color *col) const
 QVector<const Color *> Item::knownColors() const
 {
     QVector<const Color *> result;
-    if (itemType()->hasColors()) {
+    if (itemType() && itemType()->hasColors()) {
         result.reserve(m_knownColorIndexes.size());
         for (const quint16 idx : m_knownColorIndexes)
             result << &core()->colors()[idx];
