@@ -197,8 +197,7 @@ Item {
             Model {
                 id: lines
                 geometry: root.renderController.lineGeometry
-                property var noInstancing: [ ]
-                instancing: RenderSettings.renderLines ? root.renderController.lines : noInstancing
+                instancing: RenderSettings.renderLines ? root.renderController.lines : null
                 visible: RenderSettings.renderLines
                 depthBias: -10
 
