@@ -2,23 +2,20 @@
 # ./usr/bin, including the Qt libraries
 
 name: brickstore
-title: BrickStore
-version: @VERSION@
-summary: @DESCRIPTION@
 grade: stable
 confinement: strict
 base: core22
-description: |
-  See https://@BRICKSTORE_URL@ for more information.
 compression: lzo
 license: GPL-3.0
 source-code: 'https://@GITHUB_URL@'
 website: 'https://@BRICKSTORE_URL@'
+adopt-info: brickstore
 icon: snap/gui/brickstore.png
 
 apps:
   brickstore:
     command: usr/bin/brickstore
+    common-id: dev.brickstore.BrickStore
     desktop: usr/share/applications/brickstore.desktop
     extensions: [ gnome ]
     environment:
@@ -40,6 +37,7 @@ parts:
   brickstore:
     plugin: dump
     source: BrickStore-Install/
+    parse-info: [ usr/share/metainfo/dev.brickstore.BrickStore.appdata.xml ]
 
 architectures:
   - build-on: amd64

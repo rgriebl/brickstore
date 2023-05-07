@@ -30,7 +30,7 @@ option(SENTRY       "Build with sentry.io support" OFF)
 option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 
 set(NAME           "BrickStore")
-set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")
+set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool")
 set(COPYRIGHT      "2004-2024 Robert Griebl")
 set(BRICKSTORE_URL "www.brickstore.dev")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
@@ -619,6 +619,10 @@ elseif (LINUX)
     install(FILES unix/brickstore-mime.xml DESTINATION share/mime/packages)
     install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
     install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes)
+
+    string(TIMESTAMP APPSTREAM_RELEASE_DATE "%Y-%m-%d")
+    configure_file(unix/appstream.xml.in unix/appstream.xml @ONLY)
+    install(FILES ${CMAKE_BINARY_DIR}/unix/appstream.xml DESTINATION share/metainfo RENAME dev.brickstore.BrickStore.appdata.xml)
 
     # Arch has Qt 6.2+ and is handled upstream via AUR
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)
