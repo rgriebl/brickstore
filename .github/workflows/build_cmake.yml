@@ -174,8 +174,12 @@ jobs:
     - name: Fix broken Windows / ARM64 setup
       if: (matrix.config.qt_arch == 'win64_msvc2019_arm64')
       run: |
+        # Qt < 6.5.0
         sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qtpaths.bat"
         sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qmake.bat"
+        # Qt >= 6.5.0
+        sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qtpaths.bat"
+        sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qmake.bat"
         ${Qt6_DIR}/bin/qmake.bat -query
       shell: sh
 
