@@ -535,9 +535,9 @@ elseif (WIN32)
     set (REMOVE_PLUGINS_COMMAND COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_CURRENT_BINARY_DIR}/bin/tls/qopensslbackend.dll")
 
     if (${Qt6_VERSION} VERSION_LESS "6.5.0")
-        list(APPEND WINDEPLOYQT_EXTRA_ARGS "--no-qmltooling")
+        list(APPEND WINDEPLOYQT_EXTRA_ARGS --no-qmltooling)
     elseif (${Qt6_VERSION} VERSION_GREATER "6.5.0")
-        list(APPEND WINDEPLOYQT_EXTRA_ARGS "--skip-plugin-types qmltooling")
+        list(APPEND WINDEPLOYQT_EXTRA_ARGS --skip-plugin-types qmltooling)
     else()
         list(APPEND REMOVE_PLUGINS_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bin/qmltooling")
     endif ()
@@ -548,7 +548,6 @@ elseif (WIN32)
                 ${WINDEPLOYQT_EXTRA_ARGS}
                 "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
                 "--no-opengl-sw"
-                "--no-virtualkeyboard"
                 "--no-translations"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
