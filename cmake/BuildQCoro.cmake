@@ -20,12 +20,19 @@ FetchContent_Declare(
     GIT_TAG        v${QCORO_VERSION}
 )
 
-
 # we need EXCLUDE_FROM_ALL to suppress the installation of qcoro into the macOS bundle
 # and Linux packages
 
 FetchContent_GetProperties(qcoro)
-if(NOT qcoro_POPULATED)
+if (NOT qcoro_POPULATED)
   FetchContent_Populate(qcoro)
+
+  set(mll ${CMAKE_MESSAGE_LOG_LEVEL})
+  if (NOT VERBOSE_FETCH)
+    set(CMAKE_MESSAGE_LOG_LEVEL NOTICE)
+  endif()
+
   add_subdirectory(${qcoro_SOURCE_DIR} ${qcoro_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+  set(CMAKE_MESSAGE_LOG_LEVEL ${mll})
 endif()

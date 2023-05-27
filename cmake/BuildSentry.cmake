@@ -20,4 +20,12 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(sentry)
 FetchContent_GetProperties(sentry)
+
+set(mll ${CMAKE_MESSAGE_LOG_LEVEL})
+if (NOT VERBOSE_FETCH)
+  set(CMAKE_MESSAGE_LOG_LEVEL NOTICE)
+endif()
+
 add_subdirectory(${sentry_SOURCE_DIR} ${sentry_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+set(CMAKE_MESSAGE_LOG_LEVEL ${mll})

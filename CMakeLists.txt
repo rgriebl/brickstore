@@ -31,6 +31,7 @@ option(FORCE_MOBILE "Force a mobile build on desktop" OFF)
 option(SANITIZE     "Build with ASAN" OFF)
 option(MODELTEST    "Build with modeltest" OFF)
 option(SENTRY       "Build with sentry.io support" OFF)
+option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 set(BRICKLINK_AFFILIATE_API_KEY  "" CACHE STRING "BrickLink's Affiliate API key")
 
 set(NAME           "BrickStore")
@@ -61,8 +62,7 @@ project(BrickStore
     HOMEPAGE_URL "https://${BRICKSTORE_URL}"
     LANGUAGES CXX C
 )
-
-find_package(Qt6 COMPONENTS Core REQUIRED)
+find_package(Qt6 CONFIG QUIET COMPONENTS Core REQUIRED)
 include(QtPlatformSupport) # load all the platform names
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -127,11 +127,10 @@ add_compile_definitions(
     QT_USE_QSTRINGBUILDER
 )
 
-find_package(Qt6
+find_package(Qt6 CONFIG QUIET
     REQUIRED Core Gui Xml Network Concurrent Sql LinguistTools
     OPTIONAL_COMPONENTS ToolsTools
 )
-
 set(MIN_QT_VERSION 6.2.0)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
@@ -140,7 +139,7 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(MIN_QT_VERSION 6.5.0)
     add_compile_definitions(BS_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
-    find_package(Qt6 REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
+    find_package(Qt6 CONFIG QUIET REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
@@ -151,7 +150,7 @@ else()
     set(BS_DESKTOP ON)
     set(BS_TYPE "Desktop")
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia MultimediaWidgets)
+    find_package(Qt6 CONFIG QUIET REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia MultimediaWidgets)
 
 endif()
 
