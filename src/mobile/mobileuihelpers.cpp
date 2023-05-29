@@ -251,8 +251,8 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
 #else
                                                          { u"title"_qs, title },
                                                          { u"selectedFile"_qs, fileName },
-#endif
                                                          { u"nameFilters"_qs, filters },
+#endif
                                                      });
 
     if (!fileDialog)
