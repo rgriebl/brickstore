@@ -150,43 +150,43 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     m_copyImage = new QAction(QIcon::fromTheme(u"edit-copy"_qs), { }, this);
     connect(m_copyImage, &QAction::triggered, this, [this]() -> QCoro::Task<> {
-                QImage img;
-                if (w_ldraw->isVisible()) {
-                    if (w_ldraw->startGrab()) {
-                        img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
-                    }
-                } else if (!m_image.isNull()) {
-                    img = m_image;
-                }
-                auto clip = QGuiApplication::clipboard();
-                clip->setImage(img);
-            });
+        QImage img;
+        if (w_ldraw->isVisible()) {
+            if (w_ldraw->startGrab()) {
+                img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
+            }
+        } else if (!m_image.isNull()) {
+            img = m_image;
+        }
+        auto clip = QGuiApplication::clipboard();
+        clip->setImage(img);
+    });
 
     m_saveImageAs = new QAction(QIcon::fromTheme(u"document-save"_qs), { }, this);
     connect(m_saveImageAs, &QAction::triggered, this, [this]() -> QCoro::Task<> {
-                QImage img;
-                if (w_ldraw->isVisible()) {
-                    if (w_ldraw->startGrab()) {
-                        img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
-                    }
-                } else if (!m_image.isNull()) {
-                    img = m_image;
-                }
-                QStringList filters;
-                filters << tr("PNG Image") + u" (*.png)";
+        QImage img;
+        if (w_ldraw->isVisible()) {
+            if (w_ldraw->startGrab()) {
+                img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
+            }
+        } else if (!m_image.isNull()) {
+            img = m_image;
+        }
+        QStringList filters;
+        filters << tr("PNG Image") + u" (*.png)";
 
-                QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
-                Config::inst()->lastDirectory(),
-                filters.join(u";;"));
-                if (!fn.isEmpty()) {
-                    Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
+        QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
+                                                  Config::inst()->lastDirectory(),
+                                                  filters.join(u";;"));
+        if (!fn.isEmpty()) {
+            Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
 
-                    if (fn.right(4) != u".png") {
-                        fn += u".png"_qs;
-                    }
-                    img.save(fn, "PNG");
-                }
-            });
+            if (fn.right(4) != u".png") {
+                fn += u".png"_qs;
+            }
+            img.save(fn, "PNG");
+        }
+    });
 
     connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, [this](BrickLink::Picture *pic) {
