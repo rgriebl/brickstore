@@ -12,6 +12,8 @@
 
 namespace BrickLink {
 
+class Item;
+
 class Relationship
 {
 public:

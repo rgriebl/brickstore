@@ -568,8 +568,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                 if (!baseValues.isEmpty()) {
                     base.setIncomplete(new BrickLink::Incomplete);
 
-                    for (int i = 0; i < baseValues.size(); ++i) {
-                        const auto &attr = baseValues.at(i);
+                    for (const auto &attr : qAsConst(baseValues)) {
                         auto it = tagHash.find(attr.name());
                         if (it != tagHash.end()) {
                             (*it)(&base, attr.value().toString());

@@ -1064,7 +1064,7 @@ const LotList &DocumentModel::filteredLots() const
 DocumentStatistics DocumentModel::statistics(const LotList &list, bool ignoreExcluded,
                                              bool ignorePriceAndQuantityErrors) const
 {
-    return DocumentStatistics(this, list, ignoreExcluded, ignorePriceAndQuantityErrors);
+    return { this, list, ignoreExcluded, ignorePriceAndQuantityErrors };
 }
 
 void DocumentModel::beginMacro(const QString &label)

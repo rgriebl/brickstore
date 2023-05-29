@@ -872,7 +872,7 @@ bool ItemModel::filterAccepts(const void *pointer) const
     else if (m_year_max_filter && (!item->yearLastProduced() || (item->yearLastProduced() > m_year_max_filter)))
         return false;
     else {
-        const QString matchStr = QLatin1String(item->id()) + u' ' + item->name();
+        const QString matchStr = QString::fromLatin1(item->id()) + u' ' + item->name();
 
         bool match = true;
         for (const auto &ft : m_filter_terms)

@@ -1093,7 +1093,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     }
 
     setBlockingOperationTitle(tr("Downloading price guide data from BrickLink"));
-    setBlockingOperationCancelCallback(std::bind(&Document::cancelPriceGuideUpdates, this));
+    setBlockingOperationCancelCallback([this]() { cancelPriceGuideUpdates(); });
 
     if (m_setToPG->priceGuides.isEmpty())
         priceGuideUpdated(nullptr);

@@ -48,6 +48,8 @@ bool ItemScannerDialog::checkSystemPermissions()
     case Qt::PermissionStatus::Granted:
         break; // Proceed
     }
+#else
+    Q_UNUSED(requestDenied)
 #endif
     return true;
 }
