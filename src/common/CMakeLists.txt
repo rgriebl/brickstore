@@ -85,6 +85,9 @@ endif()
 
 if (MACOS)
     target_link_libraries(common_module PRIVATE "-framework SystemConfiguration")
+    target_sources(common_module PRIVATE
+        application_mac.mm
+    )
 endif()
 
 if (SENTRY)

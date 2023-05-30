@@ -66,6 +66,9 @@ Q_LOGGING_CATEGORY(LogSentry, "sentry")
 #  define HAS_CXXABI 1
 #  include <cxxabi.h>
 #endif
+#if defined(Q_OS_MACOS)
+extern bool macDecodeNSException();
+#endif
 
 using namespace std::chrono_literals;
 
@@ -606,6 +609,13 @@ void Application::setupTerminateHandler()
                     if (status == 0 && *demangleBuffer)
                         typeName = demangleBuffer;
                 }
+            }
+#endif
+#if defined(Q_OS_MACOS)
+            if (typeName && (strcmp(typeName, "NSException") == 0)) {
+                // we cannot get the reason from the C++ side, so have to get it via Obj-C
+                macDecodeNSException();
+                abort();
             }
 #endif
             try {
