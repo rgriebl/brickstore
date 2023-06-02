@@ -617,6 +617,7 @@ jobs:
         done
         echo "Artifacts after flattening:"
         find artifacts
+        echo VERSION_NUMBER="`cat VERSION_NUMBER`" >> $GITHUB_ENV
       shell: bash
 
     - name: Release
@@ -641,5 +642,5 @@ jobs:
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
       with:
-        snap: ${{ needs.build.outputs.snap-file }}
+        snap: artifacts/Linux-Snap-brickstore_${{ env.VERSION }}_amd64.snap
         release: stable
