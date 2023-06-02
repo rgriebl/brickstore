@@ -1871,10 +1871,10 @@ void DocumentModel::initializeColumns()
           .title = QT_TR_NOOP("Index"),
           .displayFn = [&](const Lot *lot) {
               if (m_fakeIndexes.isEmpty()) {
-                  return QString::number(m_lotIndex.value(lot, -1) + 1);
+                  return QVariant { m_lotIndex.value(lot, -1) + 1 };
               } else {
                   auto fi = m_fakeIndexes.at(m_lotIndex.value(lot, -1));
-                  return fi >= 0 ? QString::number(fi + 1) : u"+"_qs;
+                  return fi >= 0 ? QVariant { fi + 1 } : QVariant { u"+"_qs };
               }
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
