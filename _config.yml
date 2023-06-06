@@ -57,6 +57,7 @@ markdown: GFM
 
 title-img: /assets/images/brickstore.png
 
+navbar-var-length: yes
 navbar-links:
   '<i class="fas fa-download"></i> Download': "download"
   '<i class="fas fa-bug"></i> Report bugs': "report-bugs"
@@ -70,7 +71,6 @@ navbar-links:
 remove-ads: yes
 
 social-network-links:
-  email: "robert@griebl.org"
   github: rgriebl
   rss: no
 
