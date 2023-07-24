@@ -47,7 +47,7 @@ jobs:
           runs-on: windows-2019
           os: windows
           qt_host: 'windows'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'win64_msvc2019_64'
           qt_dir: "msvc2019_64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
@@ -59,7 +59,7 @@ jobs:
           os: windows
           qt_host: 'windows'
           qt_host_arch: 'win64_msvc2019_64'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'win64_msvc2019_arm64'
           qt_dir: "msvc2019_arm64"
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
@@ -87,7 +87,7 @@ jobs:
           appimage: true
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'gcc_64'
 
         - name: "Ubuntu Snap 64bit"
@@ -97,7 +97,7 @@ jobs:
           snap: true
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'gcc_64'
 
         - name: "macOS Universal"
@@ -105,7 +105,7 @@ jobs:
           runs-on: macos-12
           os: macos
           qt_host: 'mac'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
@@ -119,7 +119,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'gcc_64'
           qt_target: 'android'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: ''
@@ -131,7 +131,7 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.5.1'
+          qt_version: '6.5.2'
           qt_arch: 'ios'
           cmake_extra_config: ''
 
