@@ -164,6 +164,8 @@ public:
             m_pd->setLabelText(message);
             m_pd->setCancelButtonText(QDialogButtonBox::tr("Ok"));
             m_finishedSuccessfully = success;
+            m_pd->setRange(0, 1);
+            m_pd->setValue(success ? 1 : 0);
             ForceableProgressDialog::publicForceShow(m_pd);
         }
 
