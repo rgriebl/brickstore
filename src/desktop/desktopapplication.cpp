@@ -44,9 +44,6 @@
 #  include <QtCore/QVersionNumber>
 #  include <QtGui/private/qguiapplication_p.h>
 #  include <QtGui/private/qshortcutmap_p.h>
-#  if QT_VERSION == QT_VERSION_CHECK(6, 5, 1)
-#    include <QtGui/QAccessible>
-#  endif
 #endif
 
 #include "common/config.h"
@@ -95,9 +92,6 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     QPixmap pix(u":/assets/generated-app-icons/brickstore.png"_qs);
     if (!pix.isNull())
         QGuiApplication::setWindowIcon(pix);
-#endif
-#if defined(Q_OS_MACOS) && (QT_VERSION == QT_VERSION_CHECK(6, 5, 1))
-    QAccessible::installUpdateHandler([](QAccessibleEvent *) { });
 #endif
 }
 
