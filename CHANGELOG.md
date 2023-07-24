@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
-## [2023.6.1] - 2023-06-02
+## [2023.7.1] - 2023-07-25
 
-This is a bug-fix release for macOS only: 2023.5.1 would crash a lot if "Accessibility" options (e.g. voice-over) were enabled in the system preferences.
+This is a bug-fix release, most importantly for macOS: 2023.5.1 would crash a lot if "Accessibility" options (e.g. voice-over) were enabled in the system preferences.
 
 
 ## [2023.5.1] - 2023-05-29
@@ -584,8 +584,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.6.1...HEAD
-[2023.6.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.6.1
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.7.1...HEAD
+[2023.7.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.7.1
 [2023.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.5.1
 [2023.4.4]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.4
 [2023.4.3]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.3
