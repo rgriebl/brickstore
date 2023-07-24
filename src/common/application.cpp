@@ -84,7 +84,7 @@ Application::Application(int &argc, char **argv)
     Q_UNUSED(argc)
     Q_UNUSED(argv)
 
-#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+#if (defined(Q_OS_MACOS) || defined(Q_OS_IOS)) && (QT_VERSION < QT_VERSION_CHECK(6, 5, 2))
     // the System locale on macOS is ~1000 times slower than the built-in ones for toString()
     QString sysLocaleName = QLocale::system().name();
     QLocale::setDefault(QLocale(sysLocaleName));
