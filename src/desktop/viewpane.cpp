@@ -126,16 +126,18 @@ public:
 
     QSize sizeHint() const override
     {
-        class MyTreeView : public QTreeView {
-        public:
-            using QTreeView::viewportSizeHint;
-            using QTreeView::sizeHintForColumn;
+        struct MyTreeView : public QTreeView {
+            static QSize publicViewportSizeHint(QTreeView *view) {
+                return (view->*(&MyTreeView::viewportSizeHint))();
+            }
+            static int publicSizeHintForColumn(QTreeView *view, int col) {
+                return (view->*(&MyTreeView::sizeHintForColumn))(col);
+            }
         };
 
-        auto *view = static_cast<const MyTreeView *>(m_list);
-
-        return QSize(view->sizeHintForColumn(0) + m_list->verticalScrollBar()->width() + m_list->frameWidth() * 2,
-                     view->viewportSizeHint().height() + m_list->frameWidth() * 2)
+        return QSize(MyTreeView::publicSizeHintForColumn(m_list, 0)
+                         + m_list->verticalScrollBar()->width() + m_list->frameWidth() * 2,
+                     MyTreeView::publicViewportSizeHint(m_list).height() + m_list->frameWidth() * 2)
                 + QSize(frameWidth() * 2, frameWidth() * 2);
     }
 

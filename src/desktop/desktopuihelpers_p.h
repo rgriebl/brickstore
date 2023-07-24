@@ -17,15 +17,10 @@
 #include "common/uihelpers.h"
 
 
-class ForceableProgressDialog : public QProgressDialog
-{
-public:
-    ForceableProgressDialog(QWidget *parent)
-        : QProgressDialog(parent)
-    { }
-
-    // why is forceShow() protected?
-    using QProgressDialog::forceShow;
+struct ForceableProgressDialog : public QProgressDialog {
+    static void publicForceShow(QProgressDialog *pd) {
+        (pd->*(&ForceableProgressDialog::forceShow))();
+    }
 };
 
 class ToastMessage : public QWidget
@@ -118,7 +113,7 @@ public:
     DesktopPDI(const QString &title, const QString &message, QWidget *parent)
         : m_title(title)
         , m_message(message)
-        , m_pd(new ForceableProgressDialog(parent))
+        , m_pd(new QProgressDialog(parent))
     {
         m_pd->setWindowModality(Qt::ApplicationModal);
         m_pd->setWindowTitle(title);
@@ -147,7 +142,7 @@ public:
     {
         emit start();
         m_pd->show();
-        int result = co_await qCoro(m_pd, &ForceableProgressDialog::finished);
+        int result = co_await qCoro(m_pd, &QProgressDialog::finished);
         co_return (result == QDialog::Accepted);
     }
 
@@ -169,7 +164,7 @@ public:
             m_pd->setLabelText(message);
             m_pd->setCancelButtonText(QDialogButtonBox::tr("Ok"));
             m_finishedSuccessfully = success;
-            m_pd->forceShow();
+            ForceableProgressDialog::publicForceShow(m_pd);
         }
 
         if (!showMessage) {
@@ -181,7 +176,7 @@ public:
 private:
     QString m_title;
     QString m_message;
-    ForceableProgressDialog *m_pd;
+    QProgressDialog *m_pd;
     bool m_finishedSuccessfully = false;
 };
 

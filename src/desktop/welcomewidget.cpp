@@ -198,6 +198,12 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     setLayout(layout);
 }
 
+WelcomeWidget::~WelcomeWidget()
+{
+    // make sure to not fire an QAbstractAnimation::stateChanged signal during destruction
+    delete m_animation;
+}
+
 void WelcomeWidget::fadeIn()
 {
     fade(true);

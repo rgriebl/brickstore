@@ -21,6 +21,7 @@ class WelcomeWidget : public QWidget
 
 public:
     WelcomeWidget(QWidget *parent = nullptr);
+    ~WelcomeWidget() override;
 
     void fadeIn();
     void fadeOut();

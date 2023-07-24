@@ -375,9 +375,11 @@ void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::Simpl
 
         QStyleOptionViewItem sovi;
         struct MyTreeView : public QTreeView {
-            using QTreeView::initViewItemOption;
+            static void publicInitViewItemOption(QTreeView *view, QStyleOptionViewItem *option) {
+                (view->*(&MyTreeView::initViewItemOption))(option);
+            }
         };
-        static_cast<const MyTreeView *>(d->m_view)->initViewItemOption(&sovi);
+        MyTreeView::publicInitViewItemOption(d->m_view, &sovi);
         int colorWidth = sovi.decorationSize.width() + 4;
 
         d->m_view->header()->resizeSection(BrickLink::InventoryModel::ColorColumn, colorWidth);
