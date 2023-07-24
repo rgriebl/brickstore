@@ -1323,7 +1323,7 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     const auto e2 = iim->entry(right);
 
     if (e1 && e1->isSection() && e2 && e2->isSection())
-        return e1->m_sectionTitle.localeAwareCompare(e2->m_sectionTitle);
+        return e1->m_sectionTitle.localeAwareCompare(e2->m_sectionTitle) < 0;
 
     if (!e1 || !e1->m_item)
         return true;
