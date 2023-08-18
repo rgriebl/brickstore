@@ -401,7 +401,7 @@ jobs:
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -C .initcache.txt \
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64)" \
             -D "QT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3" \
-            -D "QT_ANDROID_TARGET_SDK_VERSION=31" \
+            -D "QT_ANDROID_TARGET_SDK_VERSION=33" \
             -D "ANDROID_NATIVE_API_LEVEL=23" \
             -D "QT_ANDROID_BUILD_ALL_ABIS=TRUE" \
             -D "ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }}" \
