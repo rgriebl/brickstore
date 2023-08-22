@@ -500,7 +500,8 @@ void ViewPane::updateCurrencyRates()
         m->addSeparator();
     }
 
-    foreach (const QString &c, Currency::inst()->currencyCodes()) {
+    const auto ccodes = Currency::inst()->currencyCodes();
+    for (const QString &c : ccodes) {
         auto a = m->addAction(c);
         a->setObjectName(c);
         if (c == m_model->currencyCode())

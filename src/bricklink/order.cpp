@@ -1021,7 +1021,7 @@ void Orders::importOldCache(const QString &userId)
             if (orders.size() != 1)
                 throw Exception("Order XML does not contain exactly one order: %1").arg(f.fileName());
             std::unique_ptr<Order> order { orders.cbegin().key() };
-            const QString &xml = orders.cbegin().value();
+            const QString xml = orders.cbegin().value();
             order->moveToThread(this->thread());
 
             QDir dir = dit.fileInfo().absoluteDir();

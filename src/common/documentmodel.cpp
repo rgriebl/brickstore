@@ -1211,7 +1211,7 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
     Q_ASSERT(isAppend != (positions.size() == lots.size()));
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     m_lotIndex.clear();
     m_filteredLotIndex.clear();
@@ -1241,7 +1241,7 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
         updateLotFlags(lot);
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
@@ -1263,7 +1263,7 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     filteredPositions.resize(lots.count());
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     m_lotIndex.clear();
     m_filteredLotIndex.clear();
@@ -1287,7 +1287,7 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
@@ -2389,7 +2389,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
     bool wasSorted = isSorted();
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     m_filteredLotIndex.clear();
 
@@ -2443,7 +2443,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
@@ -2462,7 +2462,7 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
     bool wasFiltered = isFiltered();
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     m_filteredLotIndex.clear();
 
@@ -2489,7 +2489,7 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);

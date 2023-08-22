@@ -126,12 +126,12 @@ void StaticPointerModel::invalidateFilterDelayed()
 // Using layoutChanged would be faster, but it leads to weird crashes in QListView in debug builds
 //
 //    emit layoutAboutToBeChanged({ }, VerticalSortHint);
-//    QModelIndexList before = persistentIndexList();
+//    const QModelIndexList before = persistentIndexList();
 //
 //    invalidateFilterInternal();
 //
 //    QModelIndexList after;
-//    foreach (const QModelIndex &idx, before)
+//    for (const QModelIndex &idx : before)
 //        after.append(index(pointer(idx), idx.column()));
 //    changePersistentIndexList(before, after);
 //    emit layoutChanged({ }, VerticalSortHint);
@@ -164,7 +164,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
         return;
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     if (column >= 0 && column < columnCount()) {
         qParallelSort(sorted.begin(), sorted.end(),
@@ -183,7 +183,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     invalidateFilterInternal();
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);
@@ -228,7 +228,7 @@ void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrd
         hash.insert(ptr, nextIndex++);
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
-    QModelIndexList before = persistentIndexList();
+    const QModelIndexList before = persistentIndexList();
 
     qParallelSort(sorted.begin(), sorted.end(),
                   [hash, this](int r1, int r2) {
@@ -252,7 +252,7 @@ void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrd
     invalidateFilterInternal();
 
     QModelIndexList after;
-    foreach (const QModelIndex &idx, before)
+    for (const QModelIndex &idx : before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged({ }, VerticalSortHint);

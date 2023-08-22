@@ -390,7 +390,7 @@ void MainWindow::languageChange()
 {
     m_toolbar->setWindowTitle(tr("Toolbar"));
 
-    foreach (QDockWidget *dock, m_dock_widgets) {
+    for (QDockWidget *dock : std::as_const(m_dock_widgets)) {
         QString name = dock->objectName();
 
         if (name == u"dock_info")
@@ -436,7 +436,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 
 void MainWindow::dropEvent(QDropEvent *e)
 {
-    foreach (QUrl u, e->mimeData()->urls())
+    const auto urls = e->mimeData()->urls();
+    for (QUrl u : urls)
         Document::load(u.toLocalFile());
 
     e->setDropAction(Qt::CopyAction);

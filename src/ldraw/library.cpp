@@ -661,7 +661,7 @@ QStringList Library::potentialLDrawDirs()
 
         QString homepath = QDir::homePath();
 
-        foreach (QString d, unixdirs) {
+        for (QString d : std::as_const(unixdirs)) {
             d.replace(u"~"_qs, homepath);
             dirs << d;
         }

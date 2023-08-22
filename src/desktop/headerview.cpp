@@ -71,7 +71,7 @@ public:
 
             v[m_header->visualIndex(i)] = it;
         }
-        foreach(SectionItem *si, v) {
+        for (SectionItem *si : std::as_const(v)) {
             if (si)
                 m_list->addItem(si);
         }

@@ -180,7 +180,7 @@ public:
 
         ds << quintptr(this);
 
-        foreach (const QModelIndex &index, indexes) {
+        for (const QModelIndex &index : indexes) {
             auto s = actionAt(index);
             if (!s.isEmpty())
                 ds << index.row() << index.column() << s;
