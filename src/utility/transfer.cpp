@@ -345,8 +345,9 @@ void TransferRetriever::schedule()
 
         auto ssl = req.sslConfiguration();
         ssl.setSslOption(QSsl::SslOptionDisableSessionPersistence, false);
-        if (!m_sslSession.isEmpty())
-            ssl.setSessionTicket(m_sslSession);
+        QByteArray sslSession = m_sslSessionForHost.value(url.host());
+        if (!sslSession.isEmpty())
+            ssl.setSessionTicket(sslSession);
         req.setSslConfiguration(ssl);
 
         j->setStatus(TransferJob::Active);
@@ -408,7 +409,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
     j->m_effective_url = j->m_reply->url();
 
     if (error != QNetworkReply::NoError) {
-        m_sslSession.clear();
+        m_sslSessionForHost.remove(j->m_url.host());
 
         if ((j->m_respcode == 404) && j->m_retries_left) {
             --j->m_retries_left;
@@ -433,7 +434,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
         j->m_error_string = j->m_reply->errorString();
         j->setStatus(TransferJob::Failed);
     } else {
-        m_sslSession = reply->sslConfiguration().sessionTicket();
+        m_sslSessionForHost.insert(j->m_url.host(), reply->sslConfiguration().sessionTicket());
 
         switch (j->m_respcode) {
         case 304:

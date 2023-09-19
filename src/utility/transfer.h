@@ -146,7 +146,7 @@ private:
     int                    m_maxConnections;
     int                    m_progressDone = 0;
     int                    m_progressTotal = 0;
-    QByteArray             m_sslSession;
+    QHash<QString, QByteArray> m_sslSessionForHost;
 };
 
 
