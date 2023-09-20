@@ -25,7 +25,7 @@ public:
     ~TextImport();
 
     bool import(const QString &path);
-    void exportTo(Database *db);
+    void finalizeDatabase();
 
     enum ImportInventoriesStep {
         ImportFromDiskCache,
@@ -38,14 +38,14 @@ public:
     void calculatePartsYearUsed();
     void calculateItemTypeCategories();
 
-    const std::vector<Item> &items() const { return m_items; }
+    const std::vector<Item> &items() const;
 
 private:
     void readColors(const QString &path);
     void readCategories(const QString &path);
     void readItemTypes(const QString &path);
-    void readItems(const QString &path, ItemType *itt);
-    void readAdditionalItemCategories(const QString &path, BrickLink::ItemType *itt);
+    void readItems(const QString &path, const ItemType *itt);
+    void readAdditionalItemCategories(const QString &path, const ItemType *itt);
     void readPartColorCodes(const QString &path);
     bool readInventory(const Item *item, ImportInventoriesStep step);
     void readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath);
@@ -61,27 +61,13 @@ private:
     void addToKnownColors(int itemIndex, int colorIndex);
 
 private:
-    std::vector<Color>         m_colors;
-    std::vector<Color>         m_ldrawExtraColors;
-    std::vector<ItemType>      m_item_types;
-    std::vector<Category>      m_categories;
-    std::vector<Item>          m_items;
-    std::vector<QByteArray>    m_changelog;
-    std::vector<ItemChangeLogEntry>  m_itemChangelog;
-    std::vector<ColorChangeLogEntry> m_colorChangelog;
-    std::vector<PartColorCode> m_pccs;
+    Database *m_db;
     // item-idx -> { color-idx -> { vector < qty, item-idx > } }
     QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
     // item-idx -> { vector < consists-of > }
     QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
-
-    std::vector<Relationship>      m_relationships;
-    std::vector<RelationshipMatch> m_relationshipMatches;
-
     // item-idx -> secs since epoch
     QHash<uint, qint64> m_inventoryLastUpdated;
-
-    uint m_latestChangelogId = 0;
 };
 
 } // namespace BrickLink

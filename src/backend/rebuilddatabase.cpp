@@ -164,7 +164,7 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Computing the database...\n");
 
-    blti.exportTo(bl->database());
+    blti.finalizeDatabase();
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 8: Writing the database to disk...\n");
