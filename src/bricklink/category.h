@@ -27,6 +27,8 @@ public:
     int yearLastProduced() const { return m_year_to ? m_year_to + 1900 : 0; }
     int yearRecency() const      { return m_year_recency ? m_year_recency + 1900 : 0; }
 
+    uint index() const;   // only for internal use
+
     Category() = default;
 
     explicit Category(std::nullptr_t) : Category() { } // for scripting only!

@@ -18,4 +18,9 @@ bool Category::hasInventories(const ItemType *itemType) const
     return m_has_inventories & quint8(1) << index;
 }
 
+uint Category::index() const
+{
+    return uint(this - core()->categories().data());
+}
+
 } // namespace BrickLink
