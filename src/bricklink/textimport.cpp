@@ -931,6 +931,7 @@ void BrickLink::TextImport::readRelationships(const QString &path)
             relm.m_id = it.key();
             relm.m_relationshipId = rel.m_id;
             relm.m_itemIndexes.copyContainer(itemIndexes.cbegin(), itemIndexes.cend(), nullptr);
+            m_db->m_relationshipMatches.push_back(relm);
         }
     }
     std::sort(m_db->m_relationships.begin(), m_db->m_relationships.end());
