@@ -265,6 +265,7 @@ jobs:
     - name: Build for Linux (AppImage / Snap)
       if: matrix.config.appimage || matrix.config.snap
       run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
             libxcb-\* libpulse-dev libgstreamer\*1.0-dev
@@ -390,6 +391,7 @@ jobs:
         echo -e '#!/bin/sh\nexec `dirname $0`/androiddeployqt.real --release "$@"\n' > "$Qt6_DIR/../gcc_64/bin/androiddeployqt"
         chmod +x "$Qt6_DIR/../gcc_64/bin/androiddeployqt"
 
+        sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
 
         echo "${{ secrets.ANDROID_KEYSTORE_STORE_DATA }}" | base64 --decode >android_release.keystore
