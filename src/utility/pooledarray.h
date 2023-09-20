@@ -92,22 +92,23 @@ public:
         if (s > maxSize())
             throw std::out_of_range("PooledArray resize() too large for underlying data-type");
 
-        if (!mr)
-            mr = defaultMemoryResource();
+        auto amr = mr ? mr : defaultMemoryResource();
+        auto dataByteSize = (size() + 1) * sizeof(T);
 
         if (!data) {
-            data = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
+            data = static_cast<T *>(amr->allocate((s + 1) * sizeof(T), alignof(T)));
             sizeRef(data) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
         } else if (!s) {
-            mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
+            amr->deallocate(data, dataByteSize, alignof(T));
             data = nullptr;
         } else {
             Q_ASSERT_X(!mr, "PooledArray", "resize() should not be called twice with an allocator");
 
-            auto newd = static_cast<T *>(mr->allocate((s + 1) * sizeof(T), alignof(T)));
-            memcpy(newd, data, size());
+            auto newByteSize = (s + 1) * sizeof(T);
+            auto newd = static_cast<T *>(amr->allocate(newByteSize, alignof(T)));
+            memcpy(newd, data, std::min(dataByteSize, newByteSize));
             sizeRef(newd) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
-            mr->deallocate(data, sizeRef(data) * sizeof(T), alignof(T));
+            amr->deallocate(data, dataByteSize, alignof(T));
             data = newd;
         }
     }
