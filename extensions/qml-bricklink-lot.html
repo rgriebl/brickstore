@@ -48,18 +48,25 @@
 <li class="fn"><b><a href="qml-bricklink-lot.html#colorName-prop">colorName</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#comments-prop">comments</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#condition-prop">condition</a></b> : Condition</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#cost-prop">cost</a></b> : real</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#counterPart-prop">counterPart</a></b> : bool</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#dateAdded-prop">dateAdded</a></b> : date</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#dateLastSold-prop">dateLastSold</a></b> : date</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#id-prop">id</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#image-prop">image</a></b> : image</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#incomplete-prop">incomplete</a></b> : bool</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#isMarked-prop">isMarked</a></b> : bool</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#isNull-prop">isNull</a></b> : bool</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#item-prop">item</a></b> : Item</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#itemId-prop">itemId</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#itemName-prop">itemName</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#itemType-prop">itemType</a></b> : ItemType</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#itemTypeName-prop">itemTypeName</a></b> : string</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#itemYearLastProduced-prop">itemYearLastProduced</a></b> : int</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#itemYearReleased-prop">itemYearReleased</a></b> : int</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#lotId-prop">lotId</a></b> : uint</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#markerColor-prop">markerColor</a></b> : color</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#markerText-prop">markerText</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#name-prop">name</a></b> : string</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#price-prop">price</a></b> : real</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#quantity-prop">quantity</a></b> : int</li>
@@ -78,6 +85,7 @@
 <li class="fn"><b><a href="qml-bricklink-lot.html#tier3Quantity-prop">tier3Quantity</a></b> : int</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#total-prop">total</a></b> : real</li>
 <li class="fn"><b><a href="qml-bricklink-lot.html#totalWeight-prop">totalWeight</a></b> : real</li>
+<li class="fn"><b><a href="qml-bricklink-lot.html#weight-prop">weight</a></b> : real</li>
 </ul>
 <!-- $$$Lot-description -->
 <h2 id="details">Detailed Description</h2>
@@ -184,6 +192,16 @@
 </table></div>
 </div></div><!-- @@@condition -->
 <br/>
+<!-- $$$cost -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="cost-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">cost</span> : <span class="type">real</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The unit cost of the item.</p>
+</div></div><!-- @@@cost -->
+<br/>
 <!-- $$$counterPart -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -196,6 +214,26 @@
 <p><b>Note: </b>This value does not get saved.</p>
 </div>
 </div></div><!-- @@@counterPart -->
+<br/>
+<!-- $$$dateAdded -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="dateAdded-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">dateAdded</span> : <span class="type">date</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The date this lot was added to a document (or your store).</p>
+</div></div><!-- @@@dateAdded -->
+<br/>
+<!-- $$$dateLastSold -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="dateLastSold-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">dateLastSold</span> : <span class="type">date</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The date this lot was sold in your store.</p>
+</div></div><!-- @@@dateLastSold -->
 <br/>
 <!-- $$$id -->
 <div class="qmlitem"><div class="qmlproto">
@@ -229,6 +267,16 @@
 </table></div></div>
 <div class="qmldoc"><p>Returns <code>false</code> if this lot has a valid item and color, or <code>true</code> otherwise.</p>
 </div></div><!-- @@@incomplete -->
+<br/>
+<!-- $$$isMarked -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="isMarked-prop">
+<td class="tblQmlPropNode"><p>
+<span class="qmlextra">[read-only] </span><span class="name">isMarked</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>A boolean flag denoting whether this lot is marked in the document, i.e&#x2e; it has a non-empty <a href="qml-bricklink-lot.html#markerText-prop">markerText</a> or <a href="qml-bricklink-lot.html#markerColor-prop">markerColor</a>.</p>
+</div></div><!-- @@@isMarked -->
 <br/>
 <!-- $$$isNull -->
 <div class="qmlitem"><div class="qmlproto">
@@ -290,6 +338,16 @@
 <div class="qmldoc"><p>The item-type name of the lot's item. The same as <code>item.itemType.name</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop">isNull</a> on <code>item</code>.</p>
 </div></div><!-- @@@itemTypeName -->
 <br/>
+<!-- $$$itemYearLastProduced -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="itemYearLastProduced-prop">
+<td class="tblQmlPropNode"><p>
+<span class="qmlextra">[read-only] </span><span class="name">itemYearLastProduced</span> : <span class="type">int</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The year the lot's item was last produced.</p>
+</div></div><!-- @@@itemYearLastProduced -->
+<br/>
 <!-- $$$itemYearReleased -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -309,6 +367,26 @@
 </table></div></div>
 <div class="qmldoc"><p>The BrickLink lot-id, which uniquely identifies a lot for sale on BrickLink.</p>
 </div></div><!-- @@@lotId -->
+<br/>
+<!-- $$$markerColor -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="markerColor-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">markerColor</span> : <span class="type">color</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The color of the marker, if this lot is marked.</p>
+</div></div><!-- @@@markerColor -->
+<br/>
+<!-- $$$markerText -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="markerText-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">markerText</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The text of the marker, if this lot is marked.</p>
+</div></div><!-- @@@markerText -->
 <br/>
 <!-- $$$name -->
 <div class="qmlitem"><div class="qmlproto">
@@ -509,7 +587,7 @@
 <td class="tblQmlPropNode"><p>
 <span class="qmlextra">[read-only] </span><span class="name">total</span> : <span class="type">real</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>A convenience value, return price times quantity.</p>
+<div class="qmldoc"><p>A convenience value, returns <a href="qml-bricklink-lot.html#price-prop">price</a> times <a href="qml-bricklink-lot.html#quantity-prop">quantity</a>.</p>
 </div></div><!-- @@@total -->
 <br/>
 <!-- $$$totalWeight -->
@@ -519,8 +597,18 @@
 <td class="tblQmlPropNode"><p>
 <span class="name">totalWeight</span> : <span class="type">real</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The weight of the complete lot, i.e&#x2e; quantity times the weight of a single item.</p>
+<div class="qmldoc"><p>The weight of the complete lot, i.e&#x2e; <a href="qml-bricklink-lot.html#quantity-prop">quantity</a> times the <a href="qml-bricklink-lot.html#weight-prop">weight</a>.</p>
 </div></div><!-- @@@totalWeight -->
+<br/>
+<!-- $$$weight -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="weight-prop">
+<td class="tblQmlPropNode"><p>
+<span class="name">weight</span> : <span class="type">real</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The weight of a single item in the lot.</p>
+</div></div><!-- @@@weight -->
 <br/>
 </div>
    <p class="copy-notice">
