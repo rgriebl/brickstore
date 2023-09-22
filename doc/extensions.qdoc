@@ -56,7 +56,6 @@ In addition to that, printing extensions also use these types:
 
 \annotatedlist qml-printing
 
-\noautolist
 
 \section1 Debugging
 

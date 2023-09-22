@@ -397,6 +397,7 @@ endif()
 if (TARGET Qt6::qdoc)
     add_custom_target(extensions-doc
         WORKING_DIRECTORY
+        COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_BINARY_DIR}/doc/html/extensions"
         COMMAND Qt6::qdoc "${CMAKE_SOURCE_DIR}/doc/extensions.qdocconf"
                 --indexdir "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_DOCS}"
                 --outputdir "${CMAKE_BINARY_DIR}/doc/html/extensions"

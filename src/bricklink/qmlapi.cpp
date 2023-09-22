@@ -425,6 +425,10 @@ PartOutTraits QmlItem::partOutTraits() const
     \readonly
     The year the lot's item was first released.
 */
+/*! \qmlproperty int Lot::itemYearLastProduced
+    \readonly
+    The year the lot's item was last produced.
+*/
 
 /*! \qmlproperty Status Lot::status
     Represents the status of this lot. The Status enumeration has these values:
@@ -495,7 +499,10 @@ PartOutTraits QmlItem::partOutTraits() const
 */
 /*! \qmlproperty real Lot::total
     \readonly
-    A convenience value, return price times quantity.
+    A convenience value, returns \l price times \l quantity.
+*/
+/*! \qmlproperty real Lot::cost
+    The unit cost of the item.
 */
 
 /*! \qmlproperty uint Lot::lotId
@@ -515,7 +522,10 @@ PartOutTraits QmlItem::partOutTraits() const
 */
 
 /*! \qmlproperty real Lot::totalWeight
-    The weight of the complete lot, i.e. quantity times the weight of a single item.
+    The weight of the complete lot, i.e. \l quantity times the \l weight.
+*/
+/*! \qmlproperty real Lot::weight
+    The weight of a single item in the lot.
 */
 /*! \qmlproperty string Lot::reserved
     The name of the buyer this item is reserved for or an empty string.
@@ -532,7 +542,23 @@ PartOutTraits QmlItem::partOutTraits() const
     A boolean flag denoting this lot as a \e{counter part} in a set inventory.
     \note This value does not get saved.
 */
-
+/*! \qmlproperty date Lot::dateAdded
+    The date this lot was added to a document (or your store).
+*/
+/*! \qmlproperty date Lot::dateLastSold
+    The date this lot was sold in your store.
+*/
+/*! \qmlproperty bool Lot::isMarked
+    \readonly
+    A boolean flag denoting whether this lot is marked in the document, i.e. it has a non-empty
+    \l markerText or \l markerColor.
+*/
+/*! \qmlproperty string Lot::markerText
+    The text of the marker, if this lot is marked.
+*/
+/*! \qmlproperty color Lot::markerColor
+    The color of the marker, if this lot is marked.
+*/
 /*! \qmlproperty bool Lot::incomplete
     \readonly
     Returns \c false if this lot has a valid item and color, or \c true otherwise.

@@ -362,6 +362,7 @@ class QmlLot : public QmlWrapperBase<Lot>
     Q_PROPERTY(QString categoryName READ categoryName)
     Q_PROPERTY(QString itemTypeName READ itemTypeName)
     Q_PROPERTY(int itemYearReleased READ itemYearReleased)
+    Q_PROPERTY(int itemYearLastProduced READ itemYearLastProduced)
 
     Q_PROPERTY(BrickLink::Status status READ status WRITE setStatus)
     Q_PROPERTY(BrickLink::Condition condition READ condition WRITE setCondition)
@@ -383,12 +384,14 @@ class QmlLot : public QmlWrapperBase<Lot>
 
     Q_PROPERTY(int sale READ sale WRITE setSale)
     Q_PROPERTY(double total READ total)
+    Q_PROPERTY(double cost READ cost)
 
     Q_PROPERTY(uint lotId READ lotId WRITE setLotId)
     Q_PROPERTY(bool retain READ retain WRITE setRetain)
     Q_PROPERTY(BrickLink::Stockroom stockroom READ stockroom WRITE setStockroom)
 
     Q_PROPERTY(double totalWeight READ totalWeight WRITE setTotalWeight)
+    Q_PROPERTY(double weight READ weight WRITE setWeight)
     Q_PROPERTY(QString reserved READ reserved WRITE setReserved)
     Q_PROPERTY(bool alternate READ alternate WRITE setAlternate)
     Q_PROPERTY(uint alternateId READ alternateId WRITE setAlternateId)
@@ -428,6 +431,7 @@ public:
     QString categoryName() const       { return get()->categoryName(); }
     QString itemTypeName() const       { return get()->itemTypeName(); }
     int itemYearReleased() const       { return get()->itemYearReleased(); }
+    int itemYearLastProduced() const   { return get()->itemYearLastProduced(); }
 
     BrickLink::Status status() const                { return get()->status(); }
     void setStatus(BrickLink::Status s)             { set().to()->setStatus(s); }
@@ -463,6 +467,8 @@ public:
     int sale() const                   { return get()->sale(); }
     void setSale(int s)                { set().to()->setSale(s); }
     double total() const               { return get()->total(); }
+    double cost() const                { return get()->cost(); }
+    void setCost(double c)             { set().to()->setCost(c); }
 
     uint lotId() const                 { return get()->lotId(); }
     void setLotId(uint lid)            { set().to()->setLotId(lid); }
@@ -472,7 +478,9 @@ public:
     BrickLink::Stockroom stockroom() const     { return get()->stockroom(); }
     void setStockroom(BrickLink::Stockroom sr) { set().to()->setStockroom(sr); }
 
+    double weight() const              { return get()->weight(); }
     double totalWeight() const         { return get()->totalWeight(); }
+    void setWeight(double w)           { set().to()->setWeight(w); }
     void setTotalWeight(double w)      { set().to()->setTotalWeight(w); }
 
     QString reserved() const           { return get()->reserved(); }

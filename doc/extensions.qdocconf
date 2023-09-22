@@ -15,21 +15,17 @@ examples.imageextensions = "*.png *.jpg *.svg"
 includepaths = -I . -I ../src
 
 headerdirs += \
-    ../src/qmlapi/ \
     ../src/bricklink/ \
     ../src/common/ \
     ../src/desktop/ \
 
 sourcedirs += \
     . \
-    ../src/qmlapi/ \
     ../src/bricklink/ \
     ../src/common/ \
     ../src/desktop/ \
 
 depends += qtcore qtqml qtquick qtquickcontrols qtquickdialogs
-
-outputdir = html/extensions
 
 HTML.nonavigationbar = "false"
 HTML.tocdepth        = 2
