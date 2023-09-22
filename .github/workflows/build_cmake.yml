@@ -110,6 +110,16 @@ jobs:
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
 
+        - name: "macOS 10 Legacy"
+          artifact: "macOS-10-Legacy"
+          runs-on: macos-12
+          os: macos
+          qt_host: 'mac'
+          qt_version: '6.4.3'
+          qt_arch: 'clang_64'
+          qt_dir: 'macos'
+          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64" -DSENTRY=ON'
+
         - name: "Android"
           artifact: "Android"
           runs-on: ubuntu-20.04
