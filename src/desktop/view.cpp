@@ -349,8 +349,10 @@ View::View(Document *document, QWidget *parent)
               dlg.setWindowModality(Qt::ApplicationModal);
               dlg.show();
 
-              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
-                  m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate());
+              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+                  m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate(),
+                                              dlg.noPriceGuideOption());
+              }
           } },
         { "edit_price_inc_dec", [this](auto) -> QCoro::Task<> {
               bool showTiers = !m_header->isSectionHidden(DocumentModel::TierQ1);

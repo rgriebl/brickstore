@@ -435,7 +435,7 @@ void QmlDocument::cancelBlockingOperation()
 
 void QmlDocument::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate)
 {
-    m_doc->setPriceToGuide(time, price, forceUpdate);
+    m_doc->setPriceToGuide(time, price, forceUpdate, BrickLink::NoPriceGuideOption::Marker);
 }
 
 void QmlDocument::setColor(BrickLink::QmlColor color)

@@ -21,6 +21,8 @@ enum class OrderType    : uint { Received, Placed, Any };
 enum class OrderStatus  : uint { Unknown, Pending, Updated, Processing, Ready, Paid, Packed, Shipped,
                                  Received, Completed, OCR, NPB, NPX, NRS, NSS, Cancelled, Count };
 
+enum class NoPriceGuideOption : uint { NoChange, Zero, Marker };
+
 enum class VatType : int {
     Excluded = 0,
     Included = -1,
@@ -74,6 +76,7 @@ Q_ENUM_NS(UpdateStatus)
 Q_ENUM_NS(OrderType)
 Q_ENUM_NS(OrderStatus)
 Q_ENUM_NS(VatType)
+Q_ENUM_NS(NoPriceGuideOption)
 
 enum ModelRoles {
     RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))

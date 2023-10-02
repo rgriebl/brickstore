@@ -8,6 +8,8 @@
 #include "bricklink/global.h"
 #include "ui_settopriceguidedialog.h"
 
+QT_FORWARD_DECLARE_CLASS(QButtonGroup)
+
 
 class SetToPriceGuideDialog : public QDialog, private Ui::SetToPriceGuideDialog
 {
@@ -15,8 +17,12 @@ class SetToPriceGuideDialog : public QDialog, private Ui::SetToPriceGuideDialog
 public:
     SetToPriceGuideDialog(QWidget *parent = nullptr);
     ~SetToPriceGuideDialog() override;
-    
+
     BrickLink::Time  time() const;
     BrickLink::Price price() const;
+    BrickLink::NoPriceGuideOption noPriceGuideOption() const;
     bool forceUpdate() const;
+
+private:
+    QButtonGroup *m_noPgOptions;
 };

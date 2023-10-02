@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QStyle>
+#include <QButtonGroup>
 
 #include "bricklink/core.h"
 #include "common/config.h"
@@ -11,8 +12,13 @@
 
 SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     : QDialog(parent)
+    , m_noPgOptions(new QButtonGroup(this))
 {
     setupUi(this);
+
+    m_noPgOptions->addButton(w_noChange, int(BrickLink::NoPriceGuideOption::NoChange));
+    m_noPgOptions->addButton(w_zero, int(BrickLink::NoPriceGuideOption::Zero));
+    m_noPgOptions->addButton(w_marker, int(BrickLink::NoPriceGuideOption::Marker));
 
     w_advanced_button->setResizeTopLevelOnExpand(true);
     w_advanced_button->setExpandingWidget(w_advanced);
@@ -31,6 +37,11 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     w_type_price->setCurrentIndex(Config::inst()->value(u"MainWindow/SetToPriceGuideDialog/Price"_qs,
                                                         int(BrickLink::Price::Average)).toInt());
 
+    auto *option = m_noPgOptions->button(Config::inst()->value(u"MainWindow/SetToPriceGuideDialog/NoPriceOption"_qs,
+                                                               0).toInt());
+    if (option)
+        option->setChecked(true);
+
     auto pgCache = BrickLink::core()->priceGuideCache();
     w_vatTypeDescription->setText(pgCache->descriptionForVatType(pgCache->currentVatType()));
     w_vatTypeIcon->setPixmap(pgCache->iconForVatType(pgCache->currentVatType()).pixmap(
@@ -41,6 +52,7 @@ SetToPriceGuideDialog::~SetToPriceGuideDialog()
 {
     Config::inst()->setValue(u"MainWindow/SetToPriceGuideDialog/Time"_qs, w_type_time->currentIndex());
     Config::inst()->setValue(u"MainWindow/SetToPriceGuideDialog/Price"_qs, w_type_price->currentIndex());
+    Config::inst()->setValue(u"MainWindow/SetToPriceGuideDialog/NoPriceOption"_qs, m_noPgOptions->checkedId());
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const
@@ -51,6 +63,11 @@ BrickLink::Time SetToPriceGuideDialog::time() const
 BrickLink::Price SetToPriceGuideDialog::price() const
 {
     return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
+}
+
+BrickLink::NoPriceGuideOption SetToPriceGuideDialog::noPriceGuideOption() const
+{
+    return static_cast<BrickLink::NoPriceGuideOption>(m_noPgOptions->checkedId());
 }
 
 bool SetToPriceGuideDialog::forceUpdate() const

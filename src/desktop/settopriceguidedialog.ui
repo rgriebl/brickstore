@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>522</width>
-    <height>332</height>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,6 +50,41 @@
        </property>
        <property name="text">
         <string notr="true">vatType</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout" columnstretch="0,10" columnminimumwidth="20,0">
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>If no price-guide data is available:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QRadioButton" name="w_noChange">
+       <property name="text">
+        <string>Don't change the lot price</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QRadioButton" name="w_zero">
+       <property name="text">
+        <string>Set the lot price to 0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QRadioButton" name="w_marker">
+       <property name="text">
+        <string>Just set a red marker on the lot</string>
        </property>
       </widget>
      </item>
