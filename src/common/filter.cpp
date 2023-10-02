@@ -82,15 +82,23 @@ bool Filter::matches(const QVariant &v) const
 
     switch (v.userType()) {
     case QMetaType::Int:
-    case QMetaType::UInt:
-    case QMetaType::LongLong:
-    case QMetaType::ULongLong: {
+    case QMetaType::LongLong: {
         if (m_isInt) {
             i1 = m_asInt;
             i2 = v.toInt();
             isInt = true;
         }
         s2 = loc.toString(i2);
+        break;
+    }
+    case QMetaType::UInt:
+    case QMetaType::ULongLong: {
+        if (m_isInt) {
+            i1 = m_asInt;
+            i2 = v.toInt();
+            isInt = true;
+        }
+        s2 = QString::number(i2);
         break;
     }   
     case QMetaType::Double: {
