@@ -322,6 +322,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
         int qty = cartItem[u"cartQty"].toInt();
         QString priceStr = cartItem[u"nativePrice"].toString();
         double price = en_US.toDouble(priceStr.mid(4));
+        QString comment = cartItem[u"invDescription"].toString().trimmed();
 
         if (itemSeq)
             itemId = itemId + '-' + QByteArray::number(itemSeq);
@@ -346,6 +347,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
 
             lot->setQuantity(qty);
             lot->setPrice(price);
+            lot->setComments(comment);
 
             lots << lot;
         }
