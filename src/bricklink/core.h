@@ -117,6 +117,12 @@ public:
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot, uint startAtChangelogId, const QDateTime &creationTime);
 
+    static const QVector<ApiQuirk> knownApiQuirks();
+    bool isApiQuirkEnabled(ApiQuirk apiQuirk);
+    QString apiQuirkDescription(ApiQuirk apiQuirk);
+    void enableApiQuirk(ApiQuirk apiQuirk);
+    void disableApiQuirk(ApiQuirk apiQuirk);
+
 public slots:
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
@@ -150,6 +156,8 @@ private:
 
 private:
     QString  m_datadir;
+
+    quint64  m_activeApiQuirks;
 
     QIcon                           m_noImageIcon;
     mutable QHash<uint, QImage>     m_noImageCache;

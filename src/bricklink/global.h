@@ -9,6 +9,15 @@ namespace BrickLink {
 
 Q_NAMESPACE
 
+enum class ApiQuirk : uint {
+    OrderQtyHasComma                  = 1,
+    OrderXmlHasUnescapedFields        = 2,
+    InventoryCommentsAreDoubleEscaped = 3,
+    InventoryRemarksAreDoubleEscaped  = 4,
+
+    Count
+};
+
 enum class Time         : uint { PastSix, Current, Count };
 enum class Price        : uint { Lowest, Average, WAverage, Highest, Count };
 enum class Condition    : uint { New, Used, Count };
@@ -65,6 +74,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(ColorType)
 
 Q_FLAG_NS(ColorType)
 Q_FLAG_NS(PartOutTraits)
+Q_ENUM_NS(ApiQuirk)
 
 Q_ENUM_NS(Time)
 Q_ENUM_NS(Price)

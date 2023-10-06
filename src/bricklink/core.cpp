@@ -17,6 +17,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRunnable>
+#include <QMetaObject>
+#include <QMetaEnum>
 
 #include "utility/appstatistics.h"
 #include "utility/q5hashfunctions.h"
@@ -345,6 +347,7 @@ Core *Core::create(const QString &dataDir, const QString &updateUrl, quint64 phy
 
 Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
+    , m_activeApiQuirks(~0ULL)
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(this))
@@ -361,6 +364,14 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
+
+    QStringList quirks;
+    for (const auto apiQuirk : knownApiQuirks()) {
+        if (isApiQuirkEnabled(apiQuirk))
+            quirks << apiQuirkDescription(apiQuirk);
+    }
+    if (!quirks.isEmpty())
+        qWarning().noquote() << "Currently active BrickLink API quirks:\n " << quirks.join(u"\n  "_qs);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
@@ -978,6 +989,38 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
         lot->setIncomplete(nullptr);
         return ResolveResult::Direct;
     }
+}
+
+const QVector<ApiQuirk> Core::knownApiQuirks()
+{
+    static const QVector<ApiQuirk> known {
+        ApiQuirk::OrderQtyHasComma,
+        ApiQuirk::OrderXmlHasUnescapedFields,
+        ApiQuirk::InventoryCommentsAreDoubleEscaped,
+        ApiQuirk::InventoryRemarksAreDoubleEscaped
+    };
+    return known;
+}
+
+bool Core::isApiQuirkEnabled(ApiQuirk apiQuirk)
+{
+    return m_activeApiQuirks & (1ULL << uint(apiQuirk));
+}
+
+QString Core::apiQuirkDescription(ApiQuirk apiQuirk)
+{
+    QMetaEnum me = BrickLink::staticMetaObject.enumerator(BrickLink::staticMetaObject.indexOfEnumerator("ApiQuirk"));
+    return QString::fromLatin1(me.valueToKey(static_cast<int>(apiQuirk)));
+}
+
+void Core::enableApiQuirk(ApiQuirk apiQuirk)
+{
+    m_activeApiQuirks |= (1ULL << uint(apiQuirk));
+}
+
+void Core::disableApiQuirk(ApiQuirk apiQuirk)
+{
+    m_activeApiQuirks &= ~(1ULL << uint(apiQuirk));
 }
 
 QSize Core::standardPictureSize() const
