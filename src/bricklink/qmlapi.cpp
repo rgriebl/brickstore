@@ -747,6 +747,7 @@ QmlLot QmlBrickLink::noLot() const
 QVariantList QmlBrickLink::colorTypes() const
 {
     QVariantList result;
+    result.reserve(Color::allColorTypes().size());
     for (auto ct : Color::allColorTypes())
         result.append(QVariant::fromValue(ct));
     return result;
@@ -977,9 +978,14 @@ void QmlBrickLink::setCurrentVatType(VatType vatType)
     BrickLink::core()->priceGuideCache()->setCurrentVatType(vatType);
 }
 
-QVector<VatType> QmlBrickLink::supportedVatTypes() const
+QVariantList QmlBrickLink::supportedVatTypes() const
 {
-    return BrickLink::core()->priceGuideCache()->supportedVatTypes();
+    QVariantList result;
+    const auto vatTypes = BrickLink::core()->priceGuideCache()->supportedVatTypes();
+    result.reserve(vatTypes.size());
+    std::for_each(vatTypes.cbegin(), vatTypes.cend(),
+                  [&](const auto &vatType) { result << QVariant::fromValue(vatType); });
+    return result;
 }
 
 QString QmlBrickLink::descriptionForVatType(VatType vatType) const
@@ -990,6 +996,36 @@ QString QmlBrickLink::descriptionForVatType(VatType vatType) const
 QString QmlBrickLink::iconForVatType(VatType vatType) const
 {
     return BrickLink::core()->priceGuideCache()->iconForVatType(vatType).name();
+}
+
+QVariantList QmlBrickLink::knownApiQuirks() const
+{
+    QVariantList result;
+    const auto quirks = BrickLink::core()->knownApiQuirks();
+    result.reserve(quirks.size());
+    std::for_each(quirks.cbegin(), quirks.cend(),
+                  [&](const auto &apiQuirk) { result << QVariant::fromValue(apiQuirk); });
+    return result;
+}
+
+bool QmlBrickLink::isApiQuirkEnabled(ApiQuirk apiQuirk) const
+{
+    return BrickLink::core()->isApiQuirkEnabled(apiQuirk);
+}
+
+QString QmlBrickLink::apiQuirkDescription(ApiQuirk apiQuirk) const
+{
+    return BrickLink::core()->apiQuirkDescription(apiQuirk);
+}
+
+void QmlBrickLink::enableApiQuirk(ApiQuirk apiQuirk)
+{
+    BrickLink::core()->enableApiQuirk(apiQuirk);
+}
+
+void QmlBrickLink::disableApiQuirk(ApiQuirk apiQuirk)
+{
+    BrickLink::core()->disableApiQuirk(apiQuirk);
 }
 
 char QmlBrickLink::firstCharInString(const QString &str)

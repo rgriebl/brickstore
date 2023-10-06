@@ -62,7 +62,8 @@ class QmlBrickLink : public QObject
     Q_PRIVATE_PROPERTY(core(), BrickLink::WantedLists *wantedLists READ wantedLists CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), BrickLink::Database *database READ database CONSTANT FINAL)
     Q_PROPERTY(BrickLink::VatType currentVatType READ currentVatType WRITE setCurrentVatType NOTIFY currentVatTypeChanged FINAL)
-    Q_PROPERTY(QVector<BrickLink::VatType> supportedVatTypes READ supportedVatTypes CONSTANT FINAL)
+    Q_PROPERTY(QVariantList supportedVatTypes READ supportedVatTypes CONSTANT FINAL)
+    Q_PROPERTY(QVariantList knownApiQuirks READ knownApiQuirks CONSTANT FINAL)
 
 public:
     QmlBrickLink();
@@ -102,9 +103,15 @@ public:
 
     BrickLink::VatType currentVatType() const;
     void setCurrentVatType(BrickLink::VatType vatType);
-    QVector<BrickLink::VatType> supportedVatTypes() const;
+    QVariantList supportedVatTypes() const;
     Q_INVOKABLE QString descriptionForVatType(BrickLink::VatType vatType) const;
     Q_INVOKABLE QString iconForVatType(BrickLink::VatType vatType) const;
+
+    QVariantList knownApiQuirks() const;
+    Q_INVOKABLE bool isApiQuirkEnabled(BrickLink::ApiQuirk apiQuirk) const;
+    Q_INVOKABLE QString apiQuirkDescription(BrickLink::ApiQuirk apiQuirk) const;
+    Q_INVOKABLE void enableApiQuirk(BrickLink::ApiQuirk apiQuirk);
+    Q_INVOKABLE void disableApiQuirk(BrickLink::ApiQuirk apiQuirk);
 
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);

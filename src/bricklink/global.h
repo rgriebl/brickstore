@@ -14,8 +14,6 @@ enum class ApiQuirk : uint {
     OrderXmlHasUnescapedFields        = 2,
     InventoryCommentsAreDoubleEscaped = 3,
     InventoryRemarksAreDoubleEscaped  = 4,
-
-    Count
 };
 
 enum class Time         : uint { PastSix, Current, Count };
@@ -151,3 +149,5 @@ Q_DECLARE_METATYPE(BrickLink::Stockroom)
 Q_DECLARE_METATYPE(BrickLink::Status)
 Q_DECLARE_METATYPE(BrickLink::OrderType)
 Q_DECLARE_METATYPE(BrickLink::OrderStatus)
+Q_DECLARE_METATYPE(BrickLink::ApiQuirk)
+Q_DECLARE_METATYPE(BrickLink::VatType)

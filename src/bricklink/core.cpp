@@ -347,7 +347,7 @@ Core *Core::create(const QString &dataDir, const QString &updateUrl, quint64 phy
 
 Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
-    , m_activeApiQuirks(~0ULL)
+    , m_activeApiQuirks(~1ULL)
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(this))
@@ -1004,7 +1004,9 @@ const QVector<ApiQuirk> Core::knownApiQuirks()
 
 bool Core::isApiQuirkEnabled(ApiQuirk apiQuirk)
 {
-    return m_activeApiQuirks & (1ULL << uint(apiQuirk));
+    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
+        return m_activeApiQuirks & (1ULL << uint(apiQuirk));
+    return false;
 }
 
 QString Core::apiQuirkDescription(ApiQuirk apiQuirk)
@@ -1015,12 +1017,14 @@ QString Core::apiQuirkDescription(ApiQuirk apiQuirk)
 
 void Core::enableApiQuirk(ApiQuirk apiQuirk)
 {
-    m_activeApiQuirks |= (1ULL << uint(apiQuirk));
+    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
+        m_activeApiQuirks |= (1ULL << uint(apiQuirk));
 }
 
 void Core::disableApiQuirk(ApiQuirk apiQuirk)
 {
-    m_activeApiQuirks &= ~(1ULL << uint(apiQuirk));
+    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
+        m_activeApiQuirks &= ~(1ULL << uint(apiQuirk));
 }
 
 QSize Core::standardPictureSize() const
