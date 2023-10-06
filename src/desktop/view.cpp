@@ -490,6 +490,8 @@ View::View(Document *document, QWidget *parent)
         }
         repositionBlockOverlay();
         m_blockOverlay->setVisible(blocked);
+        m_blockOverlay->updateGeometry();
+        m_blockOverlay->repaint();
         if (blocked)
             m_table->clearFocus();
         else
