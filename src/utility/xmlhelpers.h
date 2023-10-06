@@ -38,26 +38,4 @@ private:
     Q_DISABLE_COPY(ParseXML)
 };
 
-
-class CreateXML
-{
-public:
-    CreateXML(const char *rootNodeName, const char *elementNodeName);
-
-    void createElement();
-    void createText(const char *tagName, QStringView value);
-    void createEmpty(const char *tagName);
-
-    QString toString() const;
-    QByteArray toUtf8() const;
-
-private:
-    QDomDocument m_domDoc;
-    QDomElement m_domRoot;
-    QDomElement m_domItem;
-    QString m_elementNodeName;
-
-    Q_DISABLE_COPY(CreateXML)
-};
-
 }

@@ -1090,7 +1090,35 @@ void Orders::importOldCache(const QString &userId)
 
 QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
 {
-    QString data = QString::fromUtf8(data_); // otherwise characterOffset doesn't match
+    QString data; // otherwise characterOffset doesn't match
+
+    // BrickLink quirk: a few of the fields can contain unescaped '&' characters
+    // we try to fix this by finding all '&' that are not followed by a ';' within 6 characters.
+    if (core()->isApiQuirkEnabled(ApiQuirk::OrderXmlHasUnescapedFields)) {
+        QByteArray fixed(data_);
+        qsizetype pos = 0;
+        while (pos >= 0) {
+            pos = fixed.indexOf('&', pos);
+            if (pos >= 0) {
+                bool doReplace = true;
+                for (qsizetype i = 0; i < 6; ++i) {
+                    const char c = fixed.at(pos + i + 1);
+                    if (c == ';') {
+                        doReplace = false;
+                        break;
+                    } else if (c == '<' || c == '>' || c == '&') {
+                        break;
+                    }
+                }
+                if (doReplace)
+                    fixed.replace(pos, 1, "&amp;");
+                ++pos;
+            }
+        }
+        data = QString::fromUtf8(fixed);
+    } else {
+        data = QString::fromUtf8(data_);
+    }
     QXmlStreamReader xml(data);
 
     QHash<Order *, QString> result;
