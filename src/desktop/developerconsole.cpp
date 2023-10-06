@@ -74,7 +74,8 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
                 m_history.removeAll(cmd);
                 m_history.append(cmd);
             } else {
-                m_log->appendPlainText(u"ERROR: " + message);
+                m_log->appendHtml(uR"(<span style="color:#ff0000">ERROR</span>: <i>)"
+                                  + message + uR"(</i>)");
             }
             m_log->moveCursor(QTextCursor::End);
         }
