@@ -43,7 +43,7 @@ static QString escapeLtGt(const QString &str, bool enabled = true)
     if (enabled)
         return QString(str).replace(u'<', u"&lt;"_qs).replace(u'>', u"&gt;"_qs);
     return str;
-};
+}
 
 // '<' and '>' are double escaped, but '&' isn't
 static QString unescapeLtGt(const QString &str, bool enabled = true)
@@ -51,7 +51,7 @@ static QString unescapeLtGt(const QString &str, bool enabled = true)
     if (enabled)
         return QString(str).replace(u"&lt;"_qs, u"<"_qs).replace(u"&gt;"_qs, u">"_qs);
     return str;
-};
+}
 
 
 namespace BrickLink {
@@ -69,55 +69,55 @@ QString IO::toBrickLinkXML(const LotList &lots)
         if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
-        xml.writeStartElement(u"ITEM");
-        xml.writeTextElement(u"ITEMID", QString::fromLatin1(lot->itemId()));
-        xml.writeTextElement(u"ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
-        xml.writeTextElement(u"COLOR", QString::number(lot->colorId()));
-        xml.writeTextElement(u"CATEGORY", QString::number(lot->categoryId()));
-        xml.writeTextElement(u"QTY", QString::number(lot->quantity()));
-        xml.writeTextElement(u"PRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
-        xml.writeTextElement(u"CONDITION", (lot->condition() == Condition::New) ? u"N" : u"U");
+        xml.writeStartElement(u"ITEM"_qs);
+        xml.writeTextElement(u"ITEMID"_qs, QString::fromLatin1(lot->itemId()));
+        xml.writeTextElement(u"ITEMTYPE"_qs, QString(QChar::fromLatin1(lot->itemTypeId())));
+        xml.writeTextElement(u"COLOR"_qs, QString::number(lot->colorId()));
+        xml.writeTextElement(u"CATEGORY"_qs, QString::number(lot->categoryId()));
+        xml.writeTextElement(u"QTY"_qs, QString::number(lot->quantity()));
+        xml.writeTextElement(u"PRICE"_qs, QString::number(Utility::fixFinite(lot->price()), 'f', 3));
+        xml.writeTextElement(u"CONDITION"_qs, (lot->condition() == Condition::New) ? u"N"_qs : u"U"_qs);
 
-        if (lot->bulkQuantity() != 1)   xml.writeTextElement(u"BULK", QString::number(lot->bulkQuantity()));
-        if (lot->sale())                xml.writeTextElement(u"SALE", QString::number(lot->sale()));
-        if (!lot->comments().isEmpty()) xml.writeTextElement(u"DESCRIPTION", doubleEscapedComments ? escapeLtGt(lot->comments()) : lot->comments());
-        if (!lot->remarks().isEmpty())  xml.writeTextElement(u"REMARKS", doubleEscapedRemarks ? escapeLtGt(lot->remarks()) : lot->remarks());
-        if (lot->retain())              xml.writeTextElement(u"RETAIN", u"Y");
-        if (!lot->reserved().isEmpty()) xml.writeTextElement(u"BUYERUSERNAME", lot->reserved());
-        if (!qFuzzyIsNull(lot->cost())) xml.writeTextElement(u"MYCOST", QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
-        if (lot->hasCustomWeight())     xml.writeTextElement(u"MYWEIGHT", QString::number(Utility::fixFinite(lot->weight()), 'f', 4));
+        if (lot->bulkQuantity() != 1)   xml.writeTextElement(u"BULK"_qs, QString::number(lot->bulkQuantity()));
+        if (lot->sale())                xml.writeTextElement(u"SALE"_qs, QString::number(lot->sale()));
+        if (!lot->comments().isEmpty()) xml.writeTextElement(u"DESCRIPTION"_qs, doubleEscapedComments ? escapeLtGt(lot->comments()) : lot->comments());
+        if (!lot->remarks().isEmpty())  xml.writeTextElement(u"REMARKS"_qs, doubleEscapedRemarks ? escapeLtGt(lot->remarks()) : lot->remarks());
+        if (lot->retain())              xml.writeTextElement(u"RETAIN"_qs, u"Y"_qs);
+        if (!lot->reserved().isEmpty()) xml.writeTextElement(u"BUYERUSERNAME"_qs, lot->reserved());
+        if (!qFuzzyIsNull(lot->cost())) xml.writeTextElement(u"MYCOST"_qs, QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
+        if (lot->hasCustomWeight())     xml.writeTextElement(u"MYWEIGHT"_qs, QString::number(Utility::fixFinite(lot->weight()), 'f', 4));
 
         if (lot->tierQuantity(0)) {
-            xml.writeTextElement(u"TQ1", QString::number(lot->tierQuantity(0)));
-            xml.writeTextElement(u"TP1", QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
-            xml.writeTextElement(u"TQ2", QString::number(lot->tierQuantity(1)));
-            xml.writeTextElement(u"TP2", QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
-            xml.writeTextElement(u"TQ3", QString::number(lot->tierQuantity(2)));
-            xml.writeTextElement(u"TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
+            xml.writeTextElement(u"TQ1"_qs, QString::number(lot->tierQuantity(0)));
+            xml.writeTextElement(u"TP1"_qs, QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
+            xml.writeTextElement(u"TQ2"_qs, QString::number(lot->tierQuantity(1)));
+            xml.writeTextElement(u"TP2"_qs, QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
+            xml.writeTextElement(u"TQ3"_qs, QString::number(lot->tierQuantity(2)));
+            xml.writeTextElement(u"TP3"_qs, QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
         }
 
         if (lot->subCondition() != SubCondition::None) {
-            const char16_t *st = nullptr;
+            QChar sc;
             switch (lot->subCondition()) {
-            case SubCondition::Incomplete: st = u"I"; break;
-            case SubCondition::Complete  : st = u"C"; break;
-            case SubCondition::Sealed    : st = u"S"; break;
+            case SubCondition::Incomplete: sc = u'I'; break;
+            case SubCondition::Complete  : sc = u'C'; break;
+            case SubCondition::Sealed    : sc = u'S'; break;
             default                      : break;
             }
-            if (st)
-                xml.writeTextElement(u"SUBCONDITION", st);
+            if (!sc.isNull())
+                xml.writeTextElement(u"SUBCONDITION"_qs, QString(sc));
         }
         if (lot->stockroom() != Stockroom::None) {
-            const char16_t *st = nullptr;
+            QChar sr;
             switch (lot->stockroom()) {
-            case Stockroom::A: st = u"A"; break;
-            case Stockroom::B: st = u"B"; break;
-            case Stockroom::C: st = u"C"; break;
+            case Stockroom::A: sr = u'A'; break;
+            case Stockroom::B: sr = u'B'; break;
+            case Stockroom::C: sr = u'C'; break;
             default          : break;
             }
-            if (st) {
-                xml.writeTextElement(u"STOCKROOM", u"Y");
-                xml.writeTextElement(u"STOCKROOMID", st);
+            if (!sr.isNull()) {
+                xml.writeTextElement(u"STOCKROOM"_qs, u"Y"_qs);
+                xml.writeTextElement(u"STOCKROOMID"_qs, QString(sr));
             }
         }
         xml.writeEndElement();
@@ -305,21 +305,21 @@ QString IO::toWantedListXML(const LotList &lots, const QString &wantedList)
         if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
-        xml.writeStartElement(u"ITEM");
-        xml.writeTextElement(u"ITEMID", QString::fromLatin1(lot->itemId()));
-        xml.writeTextElement(u"ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
-        xml.writeTextElement(u"COLOR", QString::number(lot->colorId()));
+        xml.writeStartElement(u"ITEM"_qs);
+        xml.writeTextElement(u"ITEMID"_qs, QString::fromLatin1(lot->itemId()));
+        xml.writeTextElement(u"ITEMTYPE"_qs, QString(QChar::fromLatin1(lot->itemTypeId())));
+        xml.writeTextElement(u"COLOR"_qs, QString::number(lot->colorId()));
 
         if (lot->quantity())
-            xml.writeTextElement(u"MINQTY", QString::number(lot->quantity()));
+            xml.writeTextElement(u"MINQTY"_qs, QString::number(lot->quantity()));
         if (!qFuzzyIsNull(lot->price()))
-            xml.writeTextElement(u"MAXPRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
+            xml.writeTextElement(u"MAXPRICE"_qs, QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         if (!lot->remarks().isEmpty())
-            xml.writeTextElement(u"REMARKS", escapeLtGt(lot->remarks()));
+            xml.writeTextElement(u"REMARKS"_qs, escapeLtGt(lot->remarks()));
         if (lot->condition() == Condition::New)
-            xml.writeTextElement(u"CONDITION", u"N");
+            xml.writeTextElement(u"CONDITION"_qs, u"N"_qs);
         if (!wantedList.isEmpty())
-            xml.writeTextElement(u"WANTEDLISTID", wantedList);
+            xml.writeTextElement(u"WANTEDLISTID"_qs, wantedList);
 
         xml.writeEndElement();
     }
@@ -337,13 +337,13 @@ QString IO::toInventoryRequest(const LotList &lots)
         if (lot->isIncomplete() || (lot->status() == Status::Exclude))
             continue;
 
-        xml.writeStartElement(u"ITEM");
-        xml.writeTextElement(u"ITEMID", QString::fromLatin1(lot->itemId()));
-        xml.writeTextElement(u"ITEMTYPE", QString(QChar::fromLatin1(lot->itemTypeId())));
-        xml.writeTextElement(u"COLOR", QString::number(lot->colorId()));
-        xml.writeTextElement(u"QTY", QString::number(lot->quantity()));
+        xml.writeStartElement(u"ITEM"_qs);
+        xml.writeTextElement(u"ITEMID"_qs, QString::fromLatin1(lot->itemId()));
+        xml.writeTextElement(u"ITEMTYPE"_qs, QString(QChar::fromLatin1(lot->itemTypeId())));
+        xml.writeTextElement(u"COLOR"_qs, QString::number(lot->colorId()));
+        xml.writeTextElement(u"QTY"_qs, QString::number(lot->quantity()));
         if (lot->status() == Status::Extra)
-            xml.writeTextElement(u"EXTRA", u"Y");
+            xml.writeTextElement(u"EXTRA"_qs, u"Y"_qs);
 
         xml.writeEndElement();
     }
@@ -379,30 +379,30 @@ QString IO::toBrickLinkUpdateXML(const LotList &lots,
         if (baseLot == *lot)
             continue;
 
-        xml.writeStartElement(u"ITEM");
-        xml.writeTextElement(u"LOTID", QString::number(lot->lotId()));
+        xml.writeStartElement(u"ITEM"_qs);
+        xml.writeTextElement(u"LOTID"_qs, QString::number(lot->lotId()));
         int qdiff = lot->quantity() - base->quantity();
         if (qdiff && (lot->quantity() > 0))
-            xml.writeTextElement(u"QTY", QString::number(qdiff).prepend(qdiff > 0 ? u"+" : u""));
+            xml.writeTextElement(u"QTY"_qs, QString::number(qdiff).prepend(qdiff > 0 ? u"+"_qs : u""_qs));
         else if (qdiff && (lot->quantity() <= 0))
-            xml.writeEmptyElement(u"DELETE");
+            xml.writeEmptyElement(u"DELETE"_qs);
 
         if (!qFuzzyCompare(base->price(), lot->price()))
-            xml.writeTextElement(u"PRICE", QString::number(Utility::fixFinite(lot->price()), 'f', 3));
+            xml.writeTextElement(u"PRICE"_qs, QString::number(Utility::fixFinite(lot->price()), 'f', 3));
         if (!qFuzzyCompare(base->cost(), lot->cost()))
-            xml.writeTextElement(u"MYCOST", QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
+            xml.writeTextElement(u"MYCOST"_qs, QString::number(Utility::fixFinite(lot->cost()), 'f', 3));
         if (base->condition() != lot->condition())
-            xml.writeTextElement(u"CONDITION", (lot->condition() == Condition::New) ? u"N" : u"U");
+            xml.writeTextElement(u"CONDITION"_qs, (lot->condition() == Condition::New) ? u"N"_qs : u"U"_qs);
         if (base->bulkQuantity() != lot->bulkQuantity())
-            xml.writeTextElement(u"BULK", QString::number(lot->bulkQuantity()));
+            xml.writeTextElement(u"BULK"_qs, QString::number(lot->bulkQuantity()));
         if (base->sale() != lot->sale())
-            xml.writeTextElement(u"SALE", QString::number(lot->sale()));
+            xml.writeTextElement(u"SALE"_qs, QString::number(lot->sale()));
         if (base->comments() != lot->comments())
-            xml.writeTextElement(u"DESCRIPTION", doubleEscapedComments ? escapeLtGt(lot->comments()) : lot->comments());
+            xml.writeTextElement(u"DESCRIPTION"_qs, doubleEscapedComments ? escapeLtGt(lot->comments()) : lot->comments());
         if (base->remarks() != lot->remarks())
-            xml.writeTextElement(u"REMARKS", doubleEscapedRemarks ? escapeLtGt(lot->remarks()) : lot->remarks());
+            xml.writeTextElement(u"REMARKS"_qs, doubleEscapedRemarks ? escapeLtGt(lot->remarks()) : lot->remarks());
         if (base->retain() != lot->retain())
-            xml.writeTextElement(u"RETAIN", lot->retain() ? u"Y" : u"N");
+            xml.writeTextElement(u"RETAIN"_qs, lot->retain() ? u"Y"_qs : u"N"_qs);
 
         if ((base->tierQuantity(0) != lot->tierQuantity(0))
             || !qFuzzyCompare(base->tierPrice(0), lot->tierPrice(0))
@@ -410,36 +410,36 @@ QString IO::toBrickLinkUpdateXML(const LotList &lots,
             || !qFuzzyCompare(base->tierPrice(1), lot->tierPrice(1))
             || (base->tierQuantity(2) != lot->tierQuantity(2))
             || !qFuzzyCompare(base->tierPrice(2), lot->tierPrice(2))) {
-            xml.writeTextElement(u"TQ1", QString::number(lot->tierQuantity(0)));
-            xml.writeTextElement(u"TP1", QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
-            xml.writeTextElement(u"TQ2", QString::number(lot->tierQuantity(1)));
-            xml.writeTextElement(u"TP2", QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
-            xml.writeTextElement(u"TQ3", QString::number(lot->tierQuantity(2)));
-            xml.writeTextElement(u"TP3", QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
+            xml.writeTextElement(u"TQ1"_qs, QString::number(lot->tierQuantity(0)));
+            xml.writeTextElement(u"TP1"_qs, QString::number(Utility::fixFinite(lot->tierPrice(0)), 'f', 3));
+            xml.writeTextElement(u"TQ2"_qs, QString::number(lot->tierQuantity(1)));
+            xml.writeTextElement(u"TP2"_qs, QString::number(Utility::fixFinite(lot->tierPrice(1)), 'f', 3));
+            xml.writeTextElement(u"TQ3"_qs, QString::number(lot->tierQuantity(2)));
+            xml.writeTextElement(u"TP3"_qs, QString::number(Utility::fixFinite(lot->tierPrice(2)), 'f', 3));
         }
 
         if (base->subCondition() != lot->subCondition()) {
-            const char16_t *st = nullptr;
+            QChar sc;
             switch (lot->subCondition()) {
-            case SubCondition::Incomplete: st = u"I"; break;
-            case SubCondition::Complete  : st = u"C"; break;
-            case SubCondition::Sealed    : st = u"S"; break;
+            case SubCondition::Incomplete: sc = u'I'; break;
+            case SubCondition::Complete  : sc = u'C'; break;
+            case SubCondition::Sealed    : sc = u'S'; break;
             default                      : break;
             }
-            if (st)
-                xml.writeTextElement(u"SUBCONDITION", st);
+            if (!sc.isNull())
+                xml.writeTextElement(u"SUBCONDITION"_qs, QString(sc));
         }
         if (base->stockroom() != lot->stockroom()) {
-            const char16_t *st = nullptr;
+            QChar sr;
             switch (lot->stockroom()) {
-            case Stockroom::A: st = u"A"; break;
-            case Stockroom::B: st = u"B"; break;
-            case Stockroom::C: st = u"C"; break;
+            case Stockroom::A: sr = u'A'; break;
+            case Stockroom::B: sr = u'B'; break;
+            case Stockroom::C: sr = u'C'; break;
             default          : break;
             }
-            xml.writeTextElement(u"STOCKROOM", st ? u"Y" : u"N");
-            if (st)
-                xml.writeTextElement(u"STOCKROOMID", st);
+            xml.writeTextElement(u"STOCKROOM"_qs, !sr.isNull() ? u"Y"_qs : u"N"_qs);
+            if (!sr.isNull())
+                xml.writeTextElement(u"STOCKROOMID"_qs, QString(sr));
         }
 
         // Ignore the weight - it's just too confusing:
