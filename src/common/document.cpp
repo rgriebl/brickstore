@@ -1823,7 +1823,7 @@ QCoro::Task<BrickLink::LotList> Document::exportCheck(int exportCheckMode) const
 {
     const LotList lots = selectedLots().isEmpty() ? m_model->lots() : selectedLots();
 
-    if ((lots.size() > 1000) && (exportCheckMode & ExportToClipboard)) {
+    if ((lots.size() > 1000) && (exportCheckMode == ExportToClipboard)) {
         if (co_await UIHelpers::question(tr("You have selected more than 1,000 lots, but BrickLink's servers are unable to cope with this many lots at the same time.<br>You should better export multiple, smaller batches.<br><br>Do you want to export this list anyway?"))
                 != UIHelpers::Yes) {
             co_return { };
