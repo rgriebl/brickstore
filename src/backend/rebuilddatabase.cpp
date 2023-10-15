@@ -156,17 +156,21 @@ int RebuildDatabase::exec()
         return error(u"more than 2% of all inventories had errors."_qs);
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
+    printf("\nSTEP 7: Calculating additional data...\n");
+
+    blti.calculateKnownAssemblyColors();
     blti.calculateItemTypeCategories();
     blti.calculatePartsYearUsed();
     blti.calculateCategoryRecency();
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 7: Computing the database...\n");
+    printf("\nSTEP 8: Computing the database...\n");
 
     blti.finalizeDatabase();
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 8: Writing the database to disk...\n");
+    printf("\nSTEP 9: Writing the database to disk...\n");
 
     int dbVersionLowest = int(BrickLink::Database::Version::OldestStillSupported);
     int dbVersionHighest = int(BrickLink::Database::Version::Latest);

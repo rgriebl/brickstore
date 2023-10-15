@@ -35,6 +35,7 @@ public:
     void calculateCategoryRecency();
     void calculatePartsYearUsed();
     void calculateItemTypeCategories();
+    void calculateKnownAssemblyColors();
 
     const std::vector<Item> &items() const;
 

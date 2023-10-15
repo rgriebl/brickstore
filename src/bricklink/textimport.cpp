@@ -1013,6 +1013,33 @@ void BrickLink::TextImport::calculateItemTypeCategories()
     }
 }
 
+void BrickLink::TextImport::calculateKnownAssemblyColors()
+{
+    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
+        Item &item = m_db->m_items[it.key()];
+        ItemType &itemType = m_db->m_itemTypes[item.m_itemTypeIndex];
+
+        // vector < qty, item-idx >
+        const QVector<QPair<int, uint>> &noColor = it->value(0);
+
+        if (!noColor.isEmpty() && itemType.hasColors()) {
+            // not-available, but the type supports colors -> check assemblies
+
+            for (auto &[aiQty, aiItemIndex] : noColor) {
+                const Item &aiItem = m_db->m_items[aiItemIndex];
+
+                // "aiItem" contains "item" with color == 0: now find all possible colors
+                // for "aiItem" and copy those to "item's" appearHash
+
+                for (auto aiColorIndex : aiItem.m_knownColorIndexes) {
+                    if (aiColorIndex)
+                        addToKnownColors(item.index(), aiColorIndex);
+                }
+            }
+        }
+    }
+}
+
 const std::vector<BrickLink::Item> &BrickLink::TextImport::items() const
 {
     return m_db->m_items;
