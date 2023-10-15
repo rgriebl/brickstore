@@ -59,8 +59,8 @@ bool BrickLink::TextImport::import(const QString &path)
         m_db->m_items.reserve(200000);
 
         for (const ItemType &itt : std::as_const(m_db->m_itemTypes)) {
-            readItems(path + u"items_" + QLatin1Char(itt.m_id) + u".xml", &itt);
-            readAdditionalItemCategories(path + u"items_" + QLatin1Char(itt.m_id) + u".csv", &itt);
+            readItems(path + u"items_" + QChar::fromLatin1(itt.m_id) + u".xml", &itt);
+            readAdditionalItemCategories(path + u"items_" + QChar::fromLatin1(itt.m_id) + u".csv", &itt);
         }
         readRelationships(path + u"relationships.html");
 
@@ -240,7 +240,7 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
         uint catId = p.elementText(e, "CATEGORY").toUInt();
         auto cat = core()->category(catId);
         if (!cat)
-            throw ParseException("item %1 has no category").arg(QLatin1String(item.id()));
+            throw ParseException("item %1 has no category").arg(QString::fromLatin1(item.id()));
         item.m_categoryIndexes.push_back(quint16(cat->index()), nullptr);
 
         uint y = p.elementText(e, "ITEMYEAR", "0").toUInt();
@@ -609,9 +609,9 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             if (!found && !isRubber) {
                 uint blColorId = ldrawToBrickLinkId.value(id);
                 if (blColorId) {
-                    auto color = const_cast<Color *>(core()->color(blColorId));
-                    if (color) {
-                        updateColor(*color);
+                    auto blColor = const_cast<Color *>(core()->color(blColorId));
+                    if (blColor) {
+                        updateColor(*blColor);
                         found = true;
                     }
                 }
@@ -707,7 +707,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
             qint64 t(0);   // 1.1.1970 00:00
 
             if (strs.count() > 2) {
-                QString dtStr = strs.at(2);
+                const QString &dtStr = strs.at(2);
                 if (!dtStr.isEmpty()) {
                     static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
                     static QString fmtShort = QStringLiteral("M/d/yyyy");
@@ -722,15 +722,13 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
                     t = dt.toSecsSinceEpoch();
                 }
             }
-            Item &item = m_db->m_items[itemIndex];
-            m_db->m_itemTypes[item.m_itemTypeIndex].m_has_inventories = true;
+            Q_ASSERT(item->m_itemTypeIndex < 8);
+            m_db->m_itemTypes[item->m_itemTypeIndex].m_has_inventories = true;
 
             m_inventoryLastUpdated[itemIndex] = t;
 
-            Q_ASSERT(item.m_itemTypeIndex < 8);
-
-            for (quint16 catIndex : item.m_categoryIndexes)
-                m_db->m_categories[catIndex].m_has_inventories |= (quint8(1) << item.m_itemTypeIndex);
+            for (quint16 catIndex : item->m_categoryIndexes)
+                m_db->m_categories[catIndex].m_has_inventories |= (quint8(1) << item->m_itemTypeIndex);
         } else {
             qWarning() << "  > btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
         }

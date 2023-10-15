@@ -11,9 +11,7 @@
 #include <QtCore/QVector>
 
 #include "global.h"
-#include "changelogentry.h"
 #include "item.h"
-#include "relationship.h"
 
 
 namespace BrickLink {

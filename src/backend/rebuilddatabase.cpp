@@ -91,11 +91,10 @@ int RebuildDatabase::exec()
         if (m_rebrickableApiKey.isEmpty())
             printf("  > Missing Rebrickable API key: please set $REBRICKABLE_APIKEY.\n");
         QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
-        QUrlQuery q;
-        q.addQueryItem(u"userid"_qs, Utility::urlQueryEscape(username));
-        q.addQueryItem(u"password"_qs, Utility::urlQueryEscape(password));
-        q.addQueryItem(u"keepme_loggedin"_qs, u"1"_qs);
-        url.setQuery(q);
+
+        url.setQuery({{ u"userid"_qs,          Utility::urlQueryEscape(username) },
+                      { u"password"_qs,        Utility::urlQueryEscape(password) },
+                      { u"keepme_loggedin"_qs, u"1"_qs }});
 
         auto job = TransferJob::post(url);
         bool loggedIn = false;
@@ -118,7 +117,7 @@ int RebuildDatabase::exec()
                 this, &RebuildDatabase::downloadJobFinished);
 
         if (!httpReply.isEmpty())
-            return error(u"Failed to log into BrickLink:\n"_qs + QLatin1String(httpReply));
+            return error(u"Failed to log into BrickLink:\n"_qs + QString::fromLatin1(httpReply));
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +196,7 @@ static QUrlQuery partCategoriesQuery(char item_type)
     return {
         { u"a"_qs,            u"a"_qs },
         { u"viewType"_qs,     u"0"_qs },
-        { u"itemType"_qs,     QString(QLatin1Char(item_type)) },
+        { u"itemType"_qs,     QString(QChar::fromLatin1(item_type)) },
         { u"downloadType"_qs, u"T"_qs },
     };
 }
@@ -207,7 +206,7 @@ static QUrlQuery itemQuery(char item_type)
     return { //?a=a&viewType=0&itemType=X
         { u"a"_qs,            u"a"_qs },
         { u"viewType"_qs,     u"0"_qs },
-        { u"itemType"_qs,     QString(QLatin1Char(item_type)) },
+        { u"itemType"_qs,     QString(QChar::fromLatin1(item_type)) },
         { u"selItemColor"_qs, u"Y"_qs },  // special BrickStore flag to get default color - thanks Dan
         { u"selWeight"_qs,    u"Y"_qs },
         { u"selYear"_qs,      u"Y"_qs },
@@ -352,16 +351,16 @@ bool RebuildDatabase::download()
     }
 
     for (tptr = table; tptr->m_url; tptr++) {
-        auto *f = new QSaveFile(path + QLatin1String(tptr->m_file));
+        auto *f = new QSaveFile(path + QString::fromLatin1(tptr->m_file));
 
         if (!f->open(QIODevice::WriteOnly)) {
             m_error = QString::fromLatin1("failed to write %1: %2")
-                    .arg(QLatin1String(tptr->m_file), f->errorString());
+                          .arg(QString::fromLatin1(tptr->m_file), f->errorString());
             delete f;
             failed = true;
             break;
         }
-        QUrl url(QLatin1String(tptr->m_url));
+        QUrl url(QString::fromLatin1(tptr->m_url));
         url.setQuery(tptr->m_query);
 
         TransferJob *job = TransferJob::get(url, f, 2);
@@ -432,22 +431,18 @@ bool RebuildDatabase::downloadInventories(const std::vector<BrickLink::Item> &in
                 if (f)
                     m_error = u"failed to write "_qs + f->fileName() + u": " + f->errorString();
                 else
-                    m_error = u"could not get a file handle to write inventory for "_qs + QLatin1String(item->id());
+                    m_error = u"could not get a file handle to write inventory for "_qs + QString::fromLatin1(item->id());
                 delete f;
                 failed = true;
                 break;
             }
 
-            QList<QPair<QString, QString> > items {
-                { QPair<QString, QString>(u"a"_qs,            u"a"_qs) },
-                { QPair<QString, QString>(u"viewType"_qs,     u"4"_qs) },
-                { QPair<QString, QString>(u"itemTypeInv"_qs,  QString(QLatin1Char(item->itemTypeId()))) },
-                { QPair<QString, QString>(u"itemNo"_qs,       QLatin1String(item->id())) },
-                { QPair<QString, QString>(u"downloadType"_qs, u"X"_qs) }
-            };
-            QUrlQuery query;
-            query.setQueryItems(items);
-            url.setQuery(query);
+            url.setQuery({{ u"a"_qs,            u"a"_qs },
+                          { u"viewType"_qs,     u"4"_qs },
+                          { u"itemTypeInv"_qs,  QString(QChar::fromLatin1(item->itemTypeId())) },
+                          { u"itemNo"_qs,       QString::fromLatin1(item->id()) },
+                          { u"downloadType"_qs, u"X"_qs }});
+
             TransferJob *job = TransferJob::get(url, f, 2);
             m_trans->retrieve(job);
             m_downloads_in_progress++;
