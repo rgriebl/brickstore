@@ -21,6 +21,9 @@ OnlineState::OnlineState(QObject *parent)
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
     if (!QNetworkInformation::load(QNetworkInformation::Feature::Reachability)) {
+#elif QT_VERSION >= QT_VERSION_CHECK(6, 4, 0) && defined(Q_OS_LINUX)
+    // the glib one works way better, plus the NM (default) one is blocked inside snaps
+    if (!QNetworkInformation::loadBackendByName(u"glib") && !QNetworkInformation::loadDefaultBackend()) {
 #else
     if (!QNetworkInformation::loadDefaultBackend()) {
 #endif

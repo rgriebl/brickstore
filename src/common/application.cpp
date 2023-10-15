@@ -284,7 +284,8 @@ void Application::afterInit()
     if (!BrickLink::core()->database()->isValid()
             || (BrickLink::core()->database()->isUpdateNeeded() && OnlineState::inst()->isOnline())) {
         if (!QCoro::waitFor(updateDatabase())) {
-            QCoro::waitFor(UIHelpers::warning(tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files.")));
+            if (!BrickLink::core()->database()->isValid())
+                QCoro::waitFor(UIHelpers::warning(tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files.")));
         }
     }
     if (BrickLink::core()->database()->isValid()) {
@@ -310,7 +311,7 @@ void Application::afterInit()
 
     connect(Currency::inst(), &Currency::updateRatesFailed,
             this, [](const QString &errorString) {
-        UIHelpers::warning(errorString);
+        UIHelpers::toast(errorString);
     });
 
     Currency::inst()->updateRates();
