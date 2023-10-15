@@ -12,6 +12,7 @@
 #include "bricklink/global.h"
 #include "bricklink/category.h"
 #include "bricklink/color.h"
+#include "bricklink/dimensions.h"
 #include "bricklink/itemtype.h"
 #include "utility/pooledarray.h"
 
@@ -37,6 +38,8 @@ public:
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year_from ? m_year_from + 1900 : 0; }
     int yearLastProduced() const           { return m_year_to ? m_year_to + 1900 : yearReleased(); }
+    bool hasDimensions() const             { return !m_dimensions.isEmpty(); }
+    std::span<const Dimensions, std::dynamic_extent> dimensions() const;
     bool hasKnownColor(const Color *col) const;
     QVector<const Color *> knownColors() const;
 
@@ -146,11 +149,10 @@ private:
 
     PooledArray<quint16> m_categoryIndexes;
     PooledArray<quint16> m_knownColorIndexes;
-
     PooledArray<AppearsInRecord> m_appears_in;
     PooledArray<ConsistsOf> m_consists_of;
-
     PooledArray<quint16> m_relationshipMatchIds;
+    PooledArray<Dimensions> m_dimensions;
 
 private:
     friend class Core;

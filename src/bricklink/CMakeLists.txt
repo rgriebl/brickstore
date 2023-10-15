@@ -11,6 +11,8 @@ qt_add_library(bricklink_module STATIC
     core.cpp
     database.h
     database.cpp
+    dimensions.h
+    dimensions.cpp
     global.h
     item.h
     item.cpp

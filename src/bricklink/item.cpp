@@ -111,6 +111,11 @@ const Color *Item::defaultColor() const
     return (m_defaultColorIndex != 0xfff) ? &core()->colors()[uint(m_defaultColorIndex)] : nullptr;
 }
 
+std::span<const Dimensions, std::dynamic_extent> Item::dimensions() const
+{
+    return { m_dimensions.cbegin(), m_dimensions.cend() };
+}
+
 bool Item::hasKnownColor(const Color *col) const
 {
     if (!col)

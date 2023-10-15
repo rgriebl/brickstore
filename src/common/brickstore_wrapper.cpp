@@ -12,6 +12,7 @@
 #include "utility/utility.h"
 #include "common/currency.h"
 #include "bricklink/order.h"
+#include "bricklink/dimensions.h"
 #include "ldraw/library.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
@@ -147,6 +148,16 @@ QmlDebug *QmlBrickStore::debug() const
 QString QmlBrickStore::defaultCurrencyCode() const
 {
     return Config::inst()->defaultCurrencyCode();
+}
+
+QString QmlBrickStore::dim(const QString &str) const
+{
+    auto d = BrickLink::Dimensions::parseString(str, 0, BrickLink::Dimensions::Relaxed);
+    QString result = u"X: " + QString::number(d.x())
+                     + u" | Y: " + QString::number(d.y())
+                     + u" | Z: " + QString::number(d.z())
+                     + u" | @: " + QString::number(d.offset()) + u", " + QString::number(d.length());
+    return result;
 }
 
 /*! \qmlmethod string BrickStore::symbolForCurrencyCode(string currencyCode)

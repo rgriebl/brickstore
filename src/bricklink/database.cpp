@@ -21,6 +21,7 @@
 
 #include "bricklink/core.h"
 #include "bricklink/database.h"
+#include "bricklink/dimensions.h"
 
 #include "lzma/bs_lzma.h"
 
@@ -677,19 +678,17 @@ void Database::writeItemTypeToDatabase(const ItemType &itt, QDataStream &dataStr
 
 void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryResource *pool)
 {
-    //TODO V10: unify category list
-    //TODO V10: remove itemTypeId
-    //TODO V10: remove lastInventoryUpdate
-
-    quint16 mainCat;
-    qint8 dummyTypeId;
-    qint64 dummyInventoryUpdate;
     quint16 itemTypeIndex;
     quint16 defaultColorIndex;
 
-    dataStream >> item.m_id.deserialize(pool) >> item.m_name.deserialize(pool)
-        >> itemTypeIndex >> mainCat >> defaultColorIndex >> dummyTypeId
-        >> item.m_year_from >> dummyInventoryUpdate >> item.m_weight >> item.m_year_to;
+    dataStream
+        >> item.m_id.deserialize(pool)
+        >> item.m_name.deserialize(pool)
+        >> itemTypeIndex
+        >> defaultColorIndex
+        >> item.m_year_from
+        >> item.m_year_to
+        >> item.m_weight;
 
     item.m_itemTypeIndex = itemTypeIndex;
     item.m_defaultColorIndex = defaultColorIndex;
@@ -697,42 +696,49 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryR
     dataStream >> item.m_appears_in.deserialize(pool);
     dataStream >> item.m_consists_of.deserialize(pool);
     dataStream >> item.m_knownColorIndexes.deserialize(pool);
-
-    quint32 categoriesSize;
-    dataStream >> categoriesSize;
-    Q_ASSERT(item.m_categoryIndexes.isEmpty());
-    item.m_categoryIndexes.resize(categoriesSize + 1, pool);
-    item.m_categoryIndexes[0] = mainCat;
-    for (quint32 i = 0; i < categoriesSize; ++i)
-        dataStream >> item.m_categoryIndexes[i + 1];
-
+    dataStream >> item.m_categoryIndexes.deserialize(pool);
     dataStream >> item.m_relationshipMatchIds.deserialize(pool);
+    dataStream >> item.m_dimensions.deserialize(pool);
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
 {
-    //TODO V10: unify category list
-    //TODO V10: remove itemTypeId
-    //TODO V10: remove lastInventoryUpdate
+    dataStream << item.m_id
+               << item.m_name
+               << quint16(item.m_itemTypeIndex);
 
-    qint64 lastInventoryUpdate = item.m_consists_of.isEmpty() ? 0 : 1577833200; // 01.01.2020
-    qint8 itemTypeId = m_itemTypes[item.m_itemTypeIndex].id();
+    if (v < Version::V10) {
+        dataStream << item.m_categoryIndexes[0]
+                   << quint16(item.m_defaultColorIndex)
+                   << qint8(m_itemTypes[item.m_itemTypeIndex].id())
+                   << item.m_year_from
+                   << qint64(item.m_consists_of.isEmpty() ? 0 : 1577833200) // 01.01.2020
+                   << item.m_weight << item.m_year_to
+                   << item.m_appears_in
+                   << item.m_consists_of
+                   << item.m_knownColorIndexes;
 
-    dataStream << item.m_id << item.m_name
-               << quint16(item.m_itemTypeIndex) << item.m_categoryIndexes[0]
-               << quint16(item.m_defaultColorIndex) << itemTypeId << item.m_year_from
-               << lastInventoryUpdate << item.m_weight << item.m_year_to
-               << item.m_appears_in
-               << item.m_consists_of
-               << item.m_knownColorIndexes;
+        quint32 categoriesSize = quint32(std::max(qsizetype(1), item.m_categoryIndexes.size()) - 1);
+        dataStream << categoriesSize;
+        for (quint32 i = 0; i < categoriesSize; ++i)
+            dataStream << item.m_categoryIndexes[i + 1];
 
-    quint32 categoriesSize = quint32(std::max(qsizetype(1), item.m_categoryIndexes.size()) - 1);
-    dataStream << categoriesSize;
-    for (quint32 i = 0; i < categoriesSize; ++i)
-        dataStream << item.m_categoryIndexes[i + 1];
+    } else {
+        dataStream << quint16(item.m_defaultColorIndex)
+                   << item.m_year_from
+                   << item.m_year_to
+                   << item.m_weight
+                   << item.m_appears_in
+                   << item.m_consists_of
+                   << item.m_knownColorIndexes
+                   << item.m_categoryIndexes;
+    }
 
     if (v >= Version::V9)
         dataStream << item.m_relationshipMatchIds;
+
+    if (v >= Version::V10)
+        dataStream << item.m_dimensions;
 }
 
 void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, MemoryResource *)

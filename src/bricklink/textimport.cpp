@@ -21,6 +21,7 @@
 #include "utility/exception.h"
 #include "utility/xmlhelpers.h"
 #include "bricklink/core.h"
+#include "bricklink/dimensions.h"
 #include "bricklink/textimport.h"
 #include "bricklink/partcolorcode.h"
 #include "bricklink/changelogentry.h"
@@ -234,7 +235,8 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
     p.parse([this, &p, itt](QDomElement e) {
         Item item;
         item.m_id.copyQByteArray(p.elementText(e, "ITEMID").toLatin1(), nullptr);
-        item.m_name.copyQString(p.elementText(e, "ITEMNAME").simplified(), nullptr);
+        const QString itemName = p.elementText(e, "ITEMNAME").simplified();
+        item.m_name.copyQString(itemName, nullptr);
         item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());
 
         uint catId = p.elementText(e, "CATEGORY").toUInt();
@@ -259,10 +261,22 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
             item.m_defaultColorIndex = quint16(0xfff);
         }
 
-        m_db->m_items.push_back(item);
+        // extract dimensions
+        if (itemName.contains(u" x ")) {
+            std::vector<Dimensions> dims;
+            qsizetype offset = 0;
+            while (true) {
+                const auto dim = Dimensions::parseString(itemName, offset, Dimensions::Strict);
+                if (!dim.isValid())
+                    break;
+                dims.push_back(dim);
+                offset = dim.offset() + dim.length();
+            }
+            if (!dims.empty())
+                item.m_dimensions.copyContainer(dims.cbegin(), dims.cend(), nullptr);
+        }
 
-        if (m_db->m_items.back().m_categoryIndexes[0] > 1082)
-            qWarning() << "WTF?";
+        m_db->m_items.push_back(item);
     });
 
     std::sort(m_db->m_items.begin(), m_db->m_items.end());

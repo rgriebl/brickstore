@@ -532,6 +532,8 @@ public:
     QmlDebug *debug() const;
     QString defaultCurrencyCode() const;
 
+    Q_INVOKABLE QString dim(const QString &str) const;
+
     Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;
     Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
     Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;

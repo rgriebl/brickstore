@@ -37,19 +37,20 @@ public:
 
     enum class Version {
         Invalid,
-        V1, // deprecated
-        V2, // deprecated
-        V3, // deprecated
-        V4, // 2021.5.1
-        V5, // 2022.1.1
-        V6, // 2022.2.1
-        V7, // 2022.6.1 (not released)
-        V8, // 2022.6.2
-        V9, // 2023.3.1
+        V1,  // deprecated
+        V2,  // deprecated
+        V3,  // deprecated
+        V4,  // 2021.5.1
+        V5,  // 2022.1.1
+        V6,  // 2022.2.1
+        V7,  // 2022.6.1 (not released)
+        V8,  // 2022.6.2
+        V9,  // 2023.3.1
+        V10, // 2023.11.1
 
         OldestStillSupported = V6,
 
-        Latest = V9
+        Latest = V10
     };
 
     void setUpdateInterval(int interval);
