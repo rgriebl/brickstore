@@ -371,7 +371,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             quirks << apiQuirkDescription(apiQuirk);
     }
     if (!quirks.isEmpty())
-        qWarning().noquote() << "Currently active BrickLink API quirks:\n " << quirks.join(u"\n  "_qs);
+        qInfo().noquote() << "Currently active BrickLink API quirks:\n " << quirks.join(u"\n  "_qs);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
