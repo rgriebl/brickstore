@@ -117,9 +117,9 @@ Dimensions Dimensions::parseString(const QString &str, qsizetype offset, Strictn
                 f = nm.captured(7).toFloat();
 
             switch (i) {
-            case 0: dim.m_bits.x = f; break;
-            case 1: dim.m_bits.y = f; break;
-            case 2: dim.m_bits.z = f; break;
+            case 0: dim.m_bits.x = qfloat16(f); break;
+            case 1: dim.m_bits.y = qfloat16(f); break;
+            case 2: dim.m_bits.z = qfloat16(f); break;
             }
         }
 
