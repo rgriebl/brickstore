@@ -1029,28 +1029,44 @@ void BrickLink::TextImport::calculateItemTypeCategories()
 
 void BrickLink::TextImport::calculateKnownAssemblyColors()
 {
-    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
-        Item &item = m_db->m_items[it.key()];
-        ItemType &itemType = m_db->m_itemTypes[item.m_itemTypeIndex];
+    for (auto it = m_appears_in_hash.begin(); it != m_appears_in_hash.end(); ++it) {
+        const Item &item = m_db->m_items[it.key()];
+        const ItemType &itemType = m_db->m_itemTypes[item.m_itemTypeIndex];
 
-        // vector < qty, item-idx >
-        const QVector<QPair<int, uint>> &noColor = it->value(0);
+        if (!it->contains(0) || !itemType.hasColors())
+            continue;
 
-        if (!noColor.isEmpty() && itemType.hasColors()) {
-            // not-available, but the type supports colors -> check assemblies
+        // The type supports colors, but we have entries for color "not available"
+        //   -> check assemblies
 
-            for (auto &[aiQty, aiItemIndex] : noColor) {
-                const Item &aiItem = m_db->m_items[aiItemIndex];
+        // We need to copy here, as we modify (*it) later on and this would invalidate noColor
+        QVector<QPair<int, uint>> noColor = it->value(0);
 
-                // "aiItem" contains "item" with color == 0: now find all possible colors
-                // for "aiItem" and copy those to "item's" appearHash
+        for (auto ncit = noColor.begin(); ncit != noColor.end(); ) {
+            int ncQty = ncit->first;
+            uint ncItemIndex = ncit->second;
+            const Item &ncItem = m_db->m_items[ncItemIndex];
 
-                for (auto aiColorIndex : aiItem.m_knownColorIndexes) {
-                    if (aiColorIndex)
-                        addToKnownColors(item.index(), aiColorIndex);
+            // "aiItem" contains "item" with color == 0: now find all possible colors
+            // for "aiItem" and copy those to "item's" appearHash.
+            // Also update the known colors.
+            bool foundColor = false;
+            for (auto colorIndex : ncItem.m_knownColorIndexes) {
+                if (colorIndex) {
+                    addToKnownColors(item.index(), colorIndex);
+                    (*it)[colorIndex].append({ ncQty, ncItemIndex });
+                    foundColor = true;
                 }
             }
+            if (foundColor)
+                ncit = noColor.erase(ncit);
+            else
+                ++ncit;
         }
+        if (!noColor.isEmpty())
+            (*it)[0] = noColor;
+        else
+            it->remove(0);
     }
 }
 
