@@ -150,7 +150,7 @@
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
    <receiver>ImportWantedListDialog</receiver>
-   <slot>reject()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>973</x>

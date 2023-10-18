@@ -110,11 +110,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportCartDialog::updateCarts, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Geometry"_qs)
-            .toByteArray();
-    if (!ba.isEmpty())
-        restoreGeometry(ba);
-    ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
+    auto ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
     ba = Config::inst()->value(u"MainWindow/ImportCartDialog/ListState"_qs).toByteArray();
@@ -126,7 +122,6 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
 ImportCartDialog::~ImportCartDialog()
 {
-    Config::inst()->setValue(u"MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"MainWindow/ImportCartDialog/Filter"_qs, w_filter->saveState());
     Config::inst()->setValue(u"MainWindow/ImportCartDialog/ListState"_qs, w_carts->header()->saveState());
 }
@@ -135,7 +130,7 @@ void ImportCartDialog::keyPressEvent(QKeyEvent *e)
 {
     // simulate QDialog behavior
     if (e->matches(QKeySequence::Cancel)) {
-        reject();
+        close();
         return;
     } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
                || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
@@ -147,6 +142,22 @@ void ImportCartDialog::keyPressEvent(QKeyEvent *e)
     }
 
     QWidget::keyPressEvent(e);
+}
+
+void ImportCartDialog::showEvent(QShowEvent *e)
+{
+    auto ba = Config::inst()->value(u"MainWindow/ImportCartDialog/Geometry"_qs).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+
+    QDialog::showEvent(e);
+    activateWindow();
+}
+
+void ImportCartDialog::closeEvent(QCloseEvent *e)
+{
+    Config::inst()->setValue(u"MainWindow/ImportCartDialog/Geometry"_qs, saveGeometry());
+    QDialog::closeEvent(e);
 }
 
 void ImportCartDialog::changeEvent(QEvent *e)

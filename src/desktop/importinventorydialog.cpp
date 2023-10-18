@@ -53,7 +53,7 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
     connect(m_buttons, &QDialogButtonBox::accepted,
             this, &ImportInventoryDialog::importInventory);
     connect(m_buttons, &QDialogButtonBox::rejected,
-            this, &ImportInventoryDialog::reject);
+            this, &ImportInventoryDialog::close);
 
     auto *layout = new QVBoxLayout(this);
     if (m_select)
@@ -68,10 +68,6 @@ ImportInventoryDialog::ImportInventoryDialog(const BrickLink::Item *item, int qu
     m_import->restoreState(ba);
 
     if (m_select) {
-        ba = Config::inst()->value(u"MainWindow/ImportInventoryDialog/Geometry"_qs).toByteArray();
-        if (!ba.isEmpty())
-            restoreGeometry(ba);
-
         ba = Config::inst()->value(u"MainWindow/ImportInventoryDialog/SelectItem"_qs)
                 .toByteArray();
         if (!m_select->restoreState(ba)) {
@@ -119,7 +115,6 @@ ImportInventoryDialog::~ImportInventoryDialog()
 {
     if (!m_verifyItem) {
         Config::inst()->setValue(u"MainWindow/ImportInventoryDialog/Filter"_qs, m_favoriteFilters->stringList());
-        Config::inst()->setValue(u"MainWindow/ImportInventoryDialog/Geometry"_qs, saveGeometry());
         Config::inst()->setValue(u"MainWindow/ImportInventoryDialog/SelectItem"_qs, m_select->saveState());
     }
     Config::inst()->setValue(u"MainWindow/ImportInventoryDialog/Details"_qs, m_import->saveState());
@@ -169,15 +164,28 @@ void ImportInventoryDialog::changeEvent(QEvent *e)
 
 void ImportInventoryDialog::showEvent(QShowEvent *e)
 {
+    if (!m_verifyItem) {
+        auto ba = Config::inst()->value(u"MainWindow/ImportInventoryDialog/Geometry"_qs).toByteArray();
+        if (!ba.isEmpty())
+            restoreGeometry(ba);
+    }
+
     QDialog::showEvent(e);
     activateWindow();
+}
+
+void ImportInventoryDialog::closeEvent(QCloseEvent *e)
+{
+    if (!m_verifyItem)
+        Config::inst()->setValue(u"MainWindow/ImportInventoryDialog/Geometry"_qs, saveGeometry());
+    QDialog::closeEvent(e);
 }
 
 void ImportInventoryDialog::keyPressEvent(QKeyEvent *e)
 {
     // simulate QDialog behavior
     if (e->matches(QKeySequence::Cancel)) {
-        reject();
+        close();
         return;
     } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
                || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {

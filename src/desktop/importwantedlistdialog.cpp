@@ -110,11 +110,7 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
     QMetaObject::invokeMethod(this, &ImportWantedListDialog::updateWantedLists, Qt::QueuedConnection);
 
-    QByteArray ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Geometry"_qs)
-            .toByteArray();
-    if (!ba.isEmpty())
-        restoreGeometry(ba);
-    ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Filter"_qs).toByteArray();
+    auto ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Filter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_filter->restoreState(ba);
     ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/ListState"_qs).toByteArray();
@@ -126,7 +122,6 @@ ImportWantedListDialog::ImportWantedListDialog(QWidget *parent)
 
 ImportWantedListDialog::~ImportWantedListDialog()
 {
-    Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/Filter"_qs, w_filter->saveState());
     Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/ListState"_qs, w_wantedLists->header()->saveState());
 }
@@ -135,7 +130,7 @@ void ImportWantedListDialog::keyPressEvent(QKeyEvent *e)
 {
     // simulate QDialog behavior
     if (e->matches(QKeySequence::Cancel)) {
-        reject();
+        close();
         return;
     } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
                || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
@@ -147,6 +142,22 @@ void ImportWantedListDialog::keyPressEvent(QKeyEvent *e)
     }
 
     QWidget::keyPressEvent(e);
+}
+
+void ImportWantedListDialog::showEvent(QShowEvent *e)
+{
+    auto ba = Config::inst()->value(u"MainWindow/ImportWantedListDialog/Geometry"_qs).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+
+    QDialog::showEvent(e);
+    activateWindow();
+}
+
+void ImportWantedListDialog::closeEvent(QCloseEvent *e)
+{
+    Config::inst()->setValue(u"MainWindow/ImportWantedListDialog/Geometry"_qs, saveGeometry());
+    QDialog::closeEvent(e);
 }
 
 void ImportWantedListDialog::changeEvent(QEvent *e)

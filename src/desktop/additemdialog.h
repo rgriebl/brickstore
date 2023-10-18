@@ -35,8 +35,9 @@ protected slots:
     void languageChange();
 
 protected:
-    void closeEvent(QCloseEvent *e) override;
     void changeEvent(QEvent *e) override;
+    void showEvent(QShowEvent *) override;
+    void closeEvent(QCloseEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
 
 private slots:

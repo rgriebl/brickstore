@@ -20,8 +20,10 @@ public:
     void updateOrders();
 
 protected:
-    void keyPressEvent(QKeyEvent *e) override;
     void changeEvent(QEvent *e) override;
+    void showEvent(QShowEvent *) override;
+    void closeEvent(QCloseEvent *) override;
+    void keyPressEvent(QKeyEvent *e) override;
     void languageChange();
 
 protected slots:

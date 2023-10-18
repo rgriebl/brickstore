@@ -198,7 +198,7 @@
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
    <receiver>ImportOrderDialog</receiver>
-   <slot>reject()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>973</x>

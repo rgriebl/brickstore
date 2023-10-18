@@ -266,17 +266,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     checkTieredPrices();
 
-    QByteArray ba = Config::inst()->value(u"MainWindow/AddItemDialog/Geometry"_qs)
-            .toByteArray();
-    if (!ba.isEmpty())
-        restoreGeometry(ba);
-
-    ba = Config::inst()->value(u"MainWindow/AddItemDialog/VSplitter"_qs)
-            .toByteArray();
+    auto ba = Config::inst()->value(u"MainWindow/AddItemDialog/VSplitter"_qs).toByteArray();
     if (!ba.isEmpty())
         w_splitter_vertical->restoreState(ba);
-    ba = Config::inst()->value(u"MainWindow/AddItemDialog/HSplitter"_qs)
-            .toByteArray();
+    ba = Config::inst()->value(u"MainWindow/AddItemDialog/HSplitter"_qs).toByteArray();
     if (!ba.isEmpty()) {
         char hidden = ba.at(0);
         for (int i = 0; i < 3; ++i) {
@@ -380,8 +373,6 @@ void AddItemDialog::languageChange()
 AddItemDialog::~AddItemDialog()
 {
     Config::inst()->setValue(u"MainWindow/AddItemDialog/Filter"_qs, m_favoriteFilters->stringList());
-
-    Config::inst()->setValue(u"MainWindow/AddItemDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"MainWindow/AddItemDialog/VSplitter"_qs, w_splitter_vertical->saveState());
 
     QByteArray ba = w_splitter_bottom->saveState();
@@ -466,8 +457,20 @@ void AddItemDialog::goToItem(const BrickLink::Item *item, const BrickLink::Color
     }
 }
 
+void AddItemDialog::showEvent(QShowEvent *e)
+{
+    auto ba = Config::inst()->value(u"MainWindow/AddItemDialog/Geometry"_qs).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+
+    QWidget::showEvent(e);
+    activateWindow();
+}
+
 void AddItemDialog::closeEvent(QCloseEvent *e)
 {
+    Config::inst()->setValue(u"MainWindow/AddItemDialog/Geometry"_qs, saveGeometry());
+
     QWidget::closeEvent(e);
 
     if (e->isAccepted()) {
