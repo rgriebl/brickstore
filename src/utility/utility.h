@@ -32,12 +32,13 @@ constexpr double fixFinite(double d)
     return std::isfinite(d) ? d : 0;
 }
 
-constexpr bool fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, but also usable around 0
+constexpr std::partial_ordering fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, but also usable around 0
 {
-    return qAbs(d1 - d2) <= 1e-12 * std::max({ 1.0, qAbs(d1), qAbs(d2) });
+    bool equal = qAbs(d1 - d2) <= 1e-12 * std::max({ 1.0, qAbs(d1), qAbs(d2) });
+    return equal ? std::partial_ordering::equivalent : (d1 <=> d2);
 }
 
-int naturalCompare(QAnyStringView s1, QAnyStringView s2);
+std::strong_ordering naturalCompare(QAnyStringView s1, QAnyStringView s2);
 
 QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5);
 QColor textColor(const QColor &backgroundColor);

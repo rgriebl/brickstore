@@ -139,6 +139,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     const auto *base = idx.data(DocumentModel::BaseLotPointerRole).value<const Lot *>();
     const auto errorFlags = idx.data(DocumentModel::ErrorFlagsRole).toULongLong();
     const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).toULongLong();
+    const auto nullValue = idx.model()->headerData(idx.column(), Qt::Horizontal, DocumentModel::HeaderNullValueRole);
+
+    QString str = idx.data(Qt::DisplayRole).toString();
+    if (nullValue.isValid() && (idx.data(Qt::EditRole) == nullValue))
+        str = u"-"_qs;
 
     p->save();
     auto restorePainter = qScopeGuard([p] { p->restore(); });
@@ -198,8 +203,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     QImage image;
-    QVariant display = idx.data(Qt::DisplayRole);
-    QString str = displayData(idx, display, false);
     int checkmark = 0;
     bool selectionFrame = false;
     QColor selectionFrameFill = Qt::white;
@@ -335,7 +338,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case DocumentModel::Picture: {
-        image = display.value<QImage>();
+        if (auto *pic = BrickLink::core()->pictureCache()->picture(lot->item(), lot->color()))
+            image = pic->image();
         double dpr = p->device()->devicePixelRatioF();
         QSize s = option.rect.size();
 
@@ -853,9 +857,8 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
         if (item->item())
             BrickLink::ToolTip::inst()->show(item->item(), nullptr, nullptr, event->globalPos(), view);
     } else {
-        QVariant v = idx.data(Qt::DisplayRole);
-        QString text = displayData(idx, v, false);
-        QString tip = displayData(idx, v, true);
+        QString text = idx.data(Qt::DisplayRole).toString();
+        QString tip = idx.data(Qt::ToolTipRole).toString();
 
         const auto differenceFlags = idx.data(DocumentModel::DifferenceFlagsRole).toULongLong();
         if (differenceFlags & (1ULL << idx.column())) {
@@ -865,8 +868,7 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
                 tip = tip + u"<br><br>"
                       + tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
             }
-            QVariant vold = idx.data(DocumentModel::BaseDisplayRole);
-            QString oldText = displayData(idx, vold, true);
+            QString oldText = idx.data(DocumentModel::BaseToolTipRole).toString();
 
             tip = tip + u"<br><br>"
                   + tr("The original value of this field was:") + u"<br><b>" + oldText + u"</b>";
@@ -986,148 +988,6 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
             }
         }
         model->setData(index.siblingAtRow(s.row()), newValue);
-    }
-}
-
-QString DocumentDelegate::displayData(const QModelIndex &idx, const QVariant &display, bool toolTip)
-{
-    QLocale loc;
-    static const QString dash = u"-"_qs;
-
-    switch (idx.column()) {
-    case DocumentModel::Status: {
-        if (!toolTip)
-            return { };
-
-        QString tip;
-        switch (display.value<BrickLink::Status>()) {
-        case BrickLink::Status::Exclude: tip = tr("Exclude"); break;
-        case BrickLink::Status::Extra  : tip = tr("Extra"); break;
-        case BrickLink::Status::Include: tip = tr("Include"); break;
-        default                        : break;
-        }
-
-        const auto *item = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
-        if (item->counterPart())
-            tip = tip + u"<br>(" + tr("Counter part") + u")";
-        else if (item->alternateId())
-            tip = tip + u"<br>(" + tr("Alternate match id: %1").arg(item->alternateId()) + u")";
-        return tip;
-    }
-    case DocumentModel::Condition: {
-        QString str;
-        if (!toolTip) {
-            str = (display.value<BrickLink::Condition>() == BrickLink::Condition::New)
-                    ?  tr("N", "List>Cond>New") : tr("U", "List>Cond>Used");
-        } else {
-            str = (display.value<BrickLink::Condition>() == BrickLink::Condition::New)
-                    ?  tr("New", "ToolTip Cond>New") : tr("Used", "ToolTip Cond>Used");
-        }
-
-        const auto *item = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
-        if (item && item->itemType() && item->itemType()->hasSubConditions()
-                && (item->subCondition() != BrickLink::SubCondition::None)) {
-            QString scStr;
-            switch (item->subCondition()) {
-            case BrickLink::SubCondition::None      : scStr = u"-"_qs; break;
-            case BrickLink::SubCondition::Sealed    : scStr = tr("Sealed"); break;
-            case BrickLink::SubCondition::Complete  : scStr = tr("Complete"); break;
-            case BrickLink::SubCondition::Incomplete: scStr = tr("Incomplete"); break;
-            default: break;
-            }
-            if (!scStr.isEmpty()) {
-                if (toolTip)
-                    str = str + u"<br><i>" + scStr + u"</i>";
-                else
-                    str = str + u" (" + scStr + u")";
-            }
-        }
-        return str;
-    }
-    case DocumentModel::Retain: {
-        if (!toolTip)
-            return { };
-        return display.toBool() ? tr("Retain") : tr("Do not retain");
-    }
-    case DocumentModel::Stockroom: {
-        if (!toolTip)
-            return { };
-
-        QString tip;
-        switch (display.value<BrickLink::Stockroom>()) {
-        case BrickLink::Stockroom::A   : tip = u"A"_qs; break;
-        case BrickLink::Stockroom::B   : tip = u"B"_qs; break;
-        case BrickLink::Stockroom::C   : tip = u"C"_qs; break;
-        default:
-        case BrickLink::Stockroom::None: tip = tr("None", "ToolTip Stockroom>None"); break;
-        }
-        tip = tr("Stockroom") + u": " + tip;
-        return tip;
-    }
-    case DocumentModel::QuantityOrig:
-    case DocumentModel::QuantityDiff:
-    case DocumentModel::Quantity:
-    case DocumentModel::TierQ1:
-    case DocumentModel::TierQ2:
-    case DocumentModel::TierQ3: {
-        int i = display.toInt();
-        return (!i && !toolTip) ? dash : loc.toString(i);
-    }
-    case DocumentModel::YearReleased: {
-        int yearFrom = display.toInt();
-        if (!yearFrom) {
-            return toolTip ? QString { } : dash;
-        } else {
-            const auto *lot = idx.data(DocumentModel::LotPointerRole).value<const Lot *>();
-            int yearTo = lot->itemYearLastProduced();
-            if (yearTo && (yearTo != yearFrom))
-                return QString::number(yearFrom) + u" - " + QString::number(yearTo);
-            else
-                return QString::number(yearFrom);
-        }
-    }
-    case DocumentModel::LotId: {
-        uint i = display.toUInt();
-        return (!i && !toolTip) ? dash : QString::number(i);
-    }
-    case DocumentModel::PriceOrig:
-    case DocumentModel::PriceDiff:
-    case DocumentModel::Price:
-    case DocumentModel::Total:
-    case DocumentModel::Cost:
-    case DocumentModel::TierP1:
-    case DocumentModel::TierP2:
-    case DocumentModel::TierP3: {
-        double d = display.toDouble();
-        return (qFuzzyIsNull(d) && !toolTip) ? dash : Currency::toDisplayString(d);
-    }
-    case DocumentModel::Bulk: {
-        int i = display.toInt();
-        return ((i == 1) && !toolTip) ? dash : loc.toString(i);
-    }
-    case DocumentModel::Sale: {
-        int i = display.toInt();
-        return (!i && !toolTip) ? dash : loc.toString(i) + u'%';
-    }
-    case DocumentModel::Weight:
-    case DocumentModel::TotalWeight: {
-        double d = display.toDouble();
-        return (qFuzzyIsNull(d) && !toolTip) ? dash : Utility::weightToString
-                                               (d, Config::inst()->measurementSystem(), true, true);
-    }
-    case DocumentModel::DateAdded:
-    case DocumentModel::DateLastSold: {
-        QDateTime dt = display.toDateTime();
-        if (dt.isValid() && (dt.time() == QTime(0, 0))) {
-            return loc.toString(dt.date(), QLocale::ShortFormat);
-            //return HumanReadableTimeDelta::toString(QDate::currentDate().startOfDay(), dt);
-        } else {
-            return dt.isValid() ? loc.toString(dt.toLocalTime(), QLocale::ShortFormat) : dash;
-            //return HumanReadableTimeDelta::toString(QDateTime::currentDateTime(), dt);
-        }
-    }
-    default:
-        return display.toString();
     }
 }
 

@@ -228,27 +228,15 @@ Page {
                 id: chooser
                 role: "documentField"
 
-                component CurrencyGridCell: GridCell {
-                    text: BS.Utility.fuzzyCompare(display, 0) ? "-" : BS.Currency.format(display)
-                }
-                component UIntGridCell : GridCell {
-                    property int ui: display
-                    text: ui === 0 ? "-" : ui
-                }
-                component DateGridCell : GridCell {
-                    property date dt: display
-
-                    text: (isFinite(dt) && (dt.getUTCHours() === 0) && (dt.getUTCMinutes() === 0))
-                          ? dt.toLocaleDateString(Locale.ShortFormat)
-                          : isFinite(dt) ? dt.toLocaleString(Locale.ShortFormat)
-                                         : '-'
+                component StandardGridCell: GridCell {
+                    required property var edit
+                    required property var nullValue
+                    text: (nullValue !== undefined && edit === nullValue) ? '-' : display
                 }
 
                 DelegateChoice { roleValue: BS.Document.Condition
-                    GridCell {
-                        property bool isNew: display === BL.BrickLink.Condition.New
-                        //horizontalAlignment: Text.AlignHCenter
-                        text: isNew ? qsTr("N") : qsTr("U")
+                    StandardGridCell {
+                        property bool isNew: edit === BL.BrickLink.Condition.New
                         tint: isNew ? "transparent" : Qt.rgba(.5, .5, .5, .5)
                     }
                 }
@@ -256,7 +244,7 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Status
                     GridCell {
                         id: statusCell
-                        property var status: display
+                        required property var edit
                         required property var lot
                         property BL.Lot bllot: BL.BrickLink.lot(lot)
                         property string tagText: bllot.counterPart
@@ -280,9 +268,9 @@ Page {
                             anchors.fill: parent
                             enabled: false
                             icon.color: "transparent"
-                            icon.name: statusCell.status === BL.BrickLink.Status.Exclude
-                                       ? "vcs-removed" : (statusCell.status === BL.BrickLink.Status.Include
-                                                          ? "vcs-normal" : "vcs-added")
+                            icon.name: statusCell.edit === BL.BrickLink.Status.Exclude
+                                       ? "vcs-removed" : (statusCell.edit === BL.BrickLink.Status.Include
+                                                       ? "vcs-normal" : "vcs-added")
                         }
                     }
                 }
@@ -290,9 +278,10 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Picture
                     GridCell {
                         id: picCell
+                        required property var edit
                         background: QImageItem {
                             fillColor: "white"
-                            image: picCell.display
+                            image: (picCell.edit as BL.Picture)?.image
                             fallbackImage: BL.BrickLink.noImage(width, height)
                         }
                     }
@@ -301,6 +290,7 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Color
                     GridCell {
                         id: colorCell
+                        required property var edit
                         QImageItem {
                             id: colorImage
                             anchors {
@@ -311,7 +301,7 @@ Page {
                             }
                             property real s: Screen.devicePixelRatio
                             width: colorCell.font.pixelSize * 2
-                            image: BL.BrickLink.color(colorCell.display).sampleImage(width * s, height * s)
+                            image: BL.BrickLink.color(colorCell.edit).sampleImage(width * s, height * s)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display
@@ -321,140 +311,85 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Retain
                     GridCell {
                         id: retainCell
-                        property bool retain: display
-                        text: ""
+                        required property var edit
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
-                            checked: retainCell.retain
+                            checked: edit
                         }
-                    }
-                }
-
-                DelegateChoice { roleValue: BS.Document.Weight
-                    GridCell {
-                        text: BS.BrickStore.toWeightString(display, true)
-                    }
-                }
-
-                DelegateChoice { roleValue: BS.Document.TotalWeight
-                    GridCell {
-                        text: BS.BrickStore.toWeightString(display, true)
                     }
                 }
 
                 DelegateChoice { roleValue: BS.Document.Stockroom
                     GridCell {
                         id: stockroomCell
-                        property var stockroom: display
-                        text: stockroom === BL.BrickLink.Stockroom.A
-                              ? 'A' : (stockroom === BL.BrickLink.Stockroom.B
-                                ? 'B' : (stockroom === BL.BrickLink.Stockroom.C
+                        required property var edit
+                        text: edit === BL.BrickLink.Stockroom.A
+                              ? 'A' : (edit === BL.BrickLink.Stockroom.B
+                                ? 'B' : (edit === BL.BrickLink.Stockroom.C
                                   ? 'C' : ''))
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
                             checked: false
-                            visible: stockroomCell.stockroom === BL.BrickLink.Stockroom.None
+                            visible: stockroomCell.edit === BL.BrickLink.Stockroom.None
                         }
                     }
                 }
 
-                DelegateChoice { roleValue: BS.Document.Sale
-                    GridCell { text: root.humanReadableInteger(display, 0, "%") }
-                }
-
-                DelegateChoice { roleValue: BS.Document.Bulk
-                    GridCell { text: root.humanReadableInteger(display, 1) }
-                }
-
-                DelegateChoice { roleValue: BS.Document.Price
-                    CurrencyGridCell { }
-                }
-                DelegateChoice { roleValue: BS.Document.PriceOrig
-                    CurrencyGridCell { }
-                }
                 DelegateChoice { roleValue: BS.Document.PriceDiff
-                    GridCell {
-//                        required property var baseLot  remove?
-                        text: root.humanReadableCurrency(display)
-                        tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
-                                          : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
+                    StandardGridCell {
+                        tint: edit < 0 ? Qt.rgba(1, 0, 0, 0.3)
+                                       : edit > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
                 }
 
                 DelegateChoice { roleValue: BS.Document.Total
-                    GridCell {
-                        text: root.humanReadableCurrency(display)
+                    StandardGridCell {
                         tint: Qt.rgba(1, 1, 0, .1)
                     }
                 }
-                DelegateChoice { roleValue: BS.Document.Cost
-                    CurrencyGridCell { }
-                }
                 DelegateChoice { roleValue: BS.Document.TierP1
-                    GridCell {
-                        text: root.humanReadableCurrency(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierP2
-                    GridCell {
-                        text: root.humanReadableCurrency(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierP3
-                    GridCell {
-                        text: root.humanReadableCurrency(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.Quantity
-                    GridCell {
-                        property int qty: display
-                        text: root.humanReadableInteger(display)
-                        tint: qty < 0 ? Qt.rgba(1, 0, 0, .4)
-                                      : qty === 0 ? Qt.rgba(1, 1, 0, .4)
-                                                  : "transparent"
-                    }
-                }
-                DelegateChoice { roleValue: BS.Document.QuantityOrig
-                    GridCell {
-                        property int qty: display
-                        text: qty === 0 ? "-" : qty.toLocaleString()
+                    StandardGridCell {
+                        tint: edit < 0 ? Qt.rgba(1, 0, 0, .4)
+                                       : edit === 0 ? Qt.rgba(1, 1, 0, .4) : "transparent"
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.QuantityDiff
-                    GridCell {
-                        text: root.humanReadableInteger(display)
-                        tint: display < 0 ? Qt.rgba(1, 0, 0, 0.3)
-                                          : display > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
+                    StandardGridCell {
+                        tint: edit < 0 ? Qt.rgba(1, 0, 0, 0.3)
+                                       : edit > 0 ? Qt.rgba(0, 1, 0, 0.3) : "transparent"
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierQ1
-                    GridCell {
-                        text: root.humanReadableInteger(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .12)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierQ2
-                    GridCell {
-                        text: root.humanReadableInteger(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .24)
                     }
                 }
                 DelegateChoice { roleValue: BS.Document.TierQ3
-                    GridCell {
-                        text: root.humanReadableInteger(display)
+                    StandardGridCell {
                         tint: Qt.rgba(.5, .5, .5, .36)
                     }
-                }
-                DelegateChoice { roleValue: BS.Document.LotId
-                    UIntGridCell { }
-                }
-                DelegateChoice { roleValue: BS.Document.YearReleased
-                    UIntGridCell { }
                 }
                 DelegateChoice { roleValue: BS.Document.Category
                     GridCell {
@@ -470,12 +405,6 @@ Page {
                         text: display
                     }
                 }
-                DelegateChoice { roleValue: BS.Document.DateAdded
-                    DateGridCell { }
-                }
-                DelegateChoice { roleValue: BS.Document.DateLastSold
-                    DateGridCell { }
-                }
                 DelegateChoice { roleValue: BS.Document.Marker
                     GridCell {
                         required property color decoration // the marker color
@@ -484,20 +413,9 @@ Page {
                     }
                 }
 
-                DelegateChoice { GridCell { text: display } }
+                DelegateChoice { StandardGridCell { } }
             }
         }
-    }
-
-    function humanReadableInteger(i : int, zero : int, unit : string) : string {
-        if (typeof zero === 'undefined')
-            zero = 0
-        if (typeof unit === 'undefined')
-            unit = ''
-        return i === zero ? "-" : i.toLocaleString() + unit
-    }
-    function humanReadableCurrency(c : real) : string {
-        return BS.Utility.fuzzyCompare(c, 0) ? "-" : BS.Currency.format(c)
     }
 
     Loader {

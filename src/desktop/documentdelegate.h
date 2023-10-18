@@ -46,8 +46,6 @@ public:
 
     void languageChange();
 
-    static QString displayData(const QModelIndex &idx, const QVariant &display, bool toolTip);
-
 protected:
     bool nonInlineEdit(QEvent *e, const QStyleOptionViewItem &option, const QModelIndex &idx);
     void setModelDataInternal(const QVariant &value, QAbstractItemModel *model,

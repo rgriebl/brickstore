@@ -62,9 +62,6 @@ public:
     void setComparison(Comparison cmp);
     void setCombination(Combination cmb);
 
-    bool matches(const QVariant &v) const;
-    
-
     class Parser {
     public:
         Parser() = default;
@@ -101,7 +98,34 @@ public:
         QVector<QPair<Filter::Comparison,  QString>> m_comparison_tokens;
         QVector<QPair<Filter::Combination, QString>> m_combination_tokens;
     };
-    
+
+    template<typename T> bool is() const
+    {
+        if constexpr (std::is_same_v<T, int>)
+            return m_isInt;
+        else if constexpr (std::is_same_v<T, double>)
+            return m_isDouble;
+        else if constexpr (std::is_same_v<T, QRegularExpression>)
+            return m_isRegExp;
+        else
+            return false;
+    }
+
+    template<typename T> T as() const
+    {
+        if constexpr (std::is_same_v<T, int>)
+            return m_asInt;
+        else if constexpr (std::is_same_v<T, double>)
+            return m_asDouble;
+        else if constexpr (std::is_same_v<T, QRegularExpression>)
+            return m_asRegExp;
+        else if constexpr (std::is_same_v<T, QDateTime>)
+            return m_asDateTime;
+        else {
+            Q_ASSERT(false);
+        }
+    }
+
 private:
     QString     m_expression;
     int         m_field = -1;

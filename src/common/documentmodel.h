@@ -129,16 +129,19 @@ public:
     enum ExtraRoles {
         FilterRole = Qt::UserRole,
         BaseDisplayRole, // like Qt::DisplayRole, but for differenceBase
+        BaseToolTipRole, // like Qt::ToolTipRole, but for differenceBase
         BaseEditRole,    // like Qt::EditRole, but for differenceBase
         LotPointerRole,
         BaseLotPointerRole,
         ErrorFlagsRole,
         DifferenceFlagsRole,
         DocumentFieldRole,
+        NullValueRole,
 
         HeaderDefaultWidthRole,
         HeaderValueModelRole,
         HeaderFilterableRole,
+        HeaderNullValueRole,
     };
 
     enum class MergeMode {
@@ -194,13 +197,12 @@ public:
 
    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-   QVariant data(const QModelIndex &index, int role) const override;
-   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex&) const override;
     bool setData(const QModelIndex&, const QVariant&, int) override;
+    QString dataForDisplayRole(const Lot *lot, Field f, bool asToolTip) const;
     QVariant dataForEditRole(const Lot *lot, Field f) const;
-    QVariant dataForDisplayRole(const Lot *lot, Field f) const;
-    QVariant dataForDecorationRole(const Lot *lot, Field f) const;
     QVariant dataForFilterRole(const Lot *lot, Field f) const;
     QHash<int, QByteArray> roleNames() const override;
 
@@ -354,19 +356,23 @@ private:
 
 private:
     struct Column {
+        enum class Type { String, Integer, NonLocalizedInteger, Currency, Date, Weight, Enum, Special };
+        Type type = Type::String;
         int defaultWidth = 8;
         int alignment = Qt::AlignLeft;
         bool editable = true;
         bool checkable = false;
         bool filterable = true;
+        int integerNullValue = 0;
         const char *title;
+        using EnumDefinition = std::tuple<qint64, QString, QString>;  // value, tooltip, filter
+        std::vector<EnumDefinition> enumValues = { };
         std::function<QAbstractItemModel *()> valueModelFn = { };
         std::function<QVariant(const Lot *)> dataFn = { };
         std::function<QVariant(const Lot *)> auxDataFn = { };
         std::function<void(Lot *, const QVariant &v)> setDataFn = { };
-        std::function<QVariant(const Lot *)> displayFn = { };
-        std::function<QVariant(const Lot *)> filterFn = { };
-        std::function<int(const Lot *, const Lot *)> compareFn;
+        std::function<QString(const Lot *, bool asToolTip)> displayFn = { };
+        std::function<std::partial_ordering(const Lot *, const Lot *)> compareFn = { };
     };
     QHash<int, Column> m_columns;
 

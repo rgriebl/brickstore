@@ -21,7 +21,7 @@
 #include "utility.h"
 
 
-int Utility::naturalCompare(QAnyStringView name1, QAnyStringView name2)
+std::strong_ordering Utility::naturalCompare(QAnyStringView name1, QAnyStringView name2)
 {
     return name1.visit([name2](auto name1) {
         return name2.visit([name1](auto name2) {
@@ -65,8 +65,8 @@ int Utility::naturalCompare(QAnyStringView name1, QAnyStringView name2)
 
                 // 2) check for numbers
                 if (c1.isDigit() && c2.isDigit()) {
-                    const int d = [&]() {
-                        int result = 0;
+                    const auto d = [&]() {
+                        std::strong_ordering result = std::strong_ordering::equivalent;
 
                         while (true) {
                             const auto d1 = c1.digitValue();
@@ -77,30 +77,30 @@ int Utility::naturalCompare(QAnyStringView name1, QAnyStringView name2)
                             if (invalid1 && invalid2)
                                 return result;
                             else if (invalid1)
-                                return -1;
+                                return std::strong_ordering::less;
                             else if (invalid2)
-                                return 1;
-                            else if ((d1 != d2) && !result)
-                                result = d1 - d2;
+                                return std::strong_ordering::greater;
+                            else if ((d1 != d2) && (result == 0))
+                                result = d1 <=> d2;
 
                             next1(); next2();
                         }
                     }();
-                    if (d)
+                    if (d != 0)
                         return d;
                 }
 
                 // 4) naturally the same -> let the unicode order decide
                 if (c1.isNull() && c2.isNull())
-                    return special ? QAnyStringView::compare(name1, name2) : 0;
+                    return (special ? QAnyStringView::compare(name1, name2) : 0) <=> 0;
 
                 // 5) found a difference
                 else if (c1.isNull())
-                    return -1;
+                    return std::strong_ordering::less;
                 else if (c2.isNull())
-                    return 1;
+                    return std::strong_ordering::greater;
                 else if (c1 != c2)
-                    return c1.unicode() - c2.unicode();
+                    return c1.unicode() <=> c2.unicode();
             }
         });
     });

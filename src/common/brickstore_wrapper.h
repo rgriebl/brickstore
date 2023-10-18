@@ -299,9 +299,14 @@ class QmlUtility : public QObject
 public:
     QmlUtility() = default;
 
-    Q_INVOKABLE bool fuzzyCompare(double d1, double d2) { return Utility::fuzzyCompare(d1, d2); }
-
-    Q_INVOKABLE int naturalCompare(const QString &s1, const QString &s2) const { return Utility::naturalCompare(s1, s2); }
+    Q_INVOKABLE int fuzzyCompare(double d1, double d2) {
+        auto o = Utility::fuzzyCompare(d1, d2);
+        return (o < 0) ? -1 : ((o > 0) ? 1 : 0);
+    }
+    Q_INVOKABLE int naturalCompare(const QString &s1, const QString &s2) const {
+        auto o = Utility::naturalCompare(s1, s2);
+        return (o < 0) ? -1 : ((o > 0) ? 1 : 0);
+    }
 
     Q_INVOKABLE QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5) { return Utility::gradientColor(c1, c2, f); }
     Q_INVOKABLE QColor textColor(const QColor &backgroundColor) { return Utility::textColor(backgroundColor); }
