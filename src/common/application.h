@@ -72,6 +72,7 @@ public:
 signals:
     void openDocument(const QString &fileName);
     void showSettings(const QString &page = { });
+    void showDeveloperConsole();
     void languageChanged();
 
 protected:

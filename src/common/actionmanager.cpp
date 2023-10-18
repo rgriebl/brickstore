@@ -410,6 +410,7 @@ void ActionManager::initialize()
     A("update_database",          QT_TR_NOOP("Update Database"),                 NeedNetwork);
     a->m_iconName = "view_refresh";
     A("configure",                QT_TR_NOOP("Settings..."),                     QT_TR_NOOP("Ctrl+,", "ExQT_TR_NOOPas|Settings"), NoNeed, FlagRole(QAction::PreferencesRole));
+    A("developer_console",        QT_TR_NOOP("Developer Console"));
     A("reload_scripts",           QT_TR_NOOP("Reload User Scripts"));
     A("menu_window",              QT_TR_NOOP("&Windows"), NoNeed, FlagMenu);
 

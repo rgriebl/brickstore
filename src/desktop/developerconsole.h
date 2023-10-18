@@ -5,7 +5,7 @@
 
 #include <functional>
 
-#include <QFrame>
+#include <QDialog>
 #include <QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
@@ -13,7 +13,7 @@ QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 
 
-class DeveloperConsole : public QFrame
+class DeveloperConsole : public QDialog
 {
     Q_OBJECT
 
@@ -28,6 +28,8 @@ public:
 
 protected:
     void changeEvent(QEvent *e) override;
+    void showEvent(QShowEvent *e) override;
+    void closeEvent(QCloseEvent *e) override;
 
 private:
     void fontChange();

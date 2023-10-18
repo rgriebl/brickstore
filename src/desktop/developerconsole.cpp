@@ -14,6 +14,7 @@
 #include <QTableView>
 #include <QHeaderView>
 
+#include "common/config.h"
 #include "common/eventfilter.h"
 #include "utility/appstatistics.h"
 #include "developerconsole.h"
@@ -22,17 +23,19 @@
 DeveloperConsole::DeveloperConsole(const QString &prompt,
                                    const std::function<std::tuple<QString, bool>(QString)> &executeFunction,
                                    QWidget *parent)
-    : QFrame(parent)
+    : QDialog(parent)
     , m_log(new QPlainTextEdit)
     , m_cmd(new QLineEdit)
     , m_prompt(new QLabel)
     , m_executeFunction(executeFunction)
 {
-    setFrameStyle(QFrame::NoFrame);
+    setWindowTitle(u"Developer Console"_qs);
+    setSizeGripEnabled(true);
 
     m_log->setReadOnly(true);
     m_log->setMaximumBlockCount(1000);
     m_log->setFrameStyle(QFrame::NoFrame);
+    m_log->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
     m_cmd->setFrame(false);
     m_cmd->setPlaceholderText(u"JS console, type \"help\" for help, \u2191/\u2193 for history"_qs);
@@ -117,6 +120,9 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
     split->setSizes({ 7000, 3000 });
 
     fontChange();
+
+    m_cmd->setFocus();
+    setFocusProxy(m_cmd);
 }
 
 void DeveloperConsole::setPrompt(const QString &prompt)
@@ -132,11 +138,27 @@ void DeveloperConsole::changeEvent(QEvent *e)
     QWidget::changeEvent(e);
 }
 
+void DeveloperConsole::showEvent(QShowEvent *e)
+{
+    auto ba = Config::inst()->value(u"MainWindow/DeveloperConsole/Geometry"_qs).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+    QDialog::showEvent(e);
+}
+
+void DeveloperConsole::closeEvent(QCloseEvent *e)
+{
+    Config::inst()->setValue(u"MainWindow/DeveloperConsole/Geometry"_qs, saveGeometry());
+    QDialog::closeEvent(e);
+}
+
 void DeveloperConsole::fontChange()
 {
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     f.setPointSizeF(qApp->font().pointSizeF());
     m_log->document()->setDefaultFont(f);
+    m_log->setMinimumWidth(QFontMetrics(f).averageCharWidth() * 80 + 4);
+    m_log->setMinimumHeight(QFontMetrics(f).height() * 10 + 4);
     //m_cmd->setCursorWidth(QFontMetrics(f).averageCharWidth());
     m_cmd->setFont(f);
     m_prompt->setFont(f);

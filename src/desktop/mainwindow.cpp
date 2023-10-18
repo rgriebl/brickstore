@@ -182,6 +182,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(Application::inst(), &Application::showSettings,
             this, &MainWindow::showSettings);
+    connect(Application::inst(), &Application::showDeveloperConsole,
+            this, [this]() {
+        if (auto *dc = DesktopApplication::inst()->developerConsole()) {
+            if (dc->parentWidget() != this)
+                dc->setParent(this, dc->windowFlags());
+            if (dc->isVisible()) {
+                dc->raise();
+                dc->activateWindow();
+            } else {
+                dc->show();
+            }
+        }
+    });
 
     // vvv increase DockStateVersion if you change the dock/toolbar setup
 
@@ -403,8 +416,6 @@ void MainWindow::languageChange()
             dock->setWindowTitle(tr("Open Documents"));
         if (name == u"dock_recentdocuments")
             dock->setWindowTitle(tr("Recent Documents"));
-        if (name == u"dock_errorlog")
-            dock->setWindowTitle(tr("Error Log"));
     }
     if (m_progress) {
         m_progress->setToolTipTemplates(tr("Offline"),
@@ -780,6 +791,9 @@ void MainWindow::setupMenuBar()
                                  "update_database",
                                  "-",
                                  "configure",
+                                 "-",
+                                 "developer_console",
+                                 "-",
                                  "-scripts-start",
                                  "-scripts-end",
                                  "reload_scripts",
@@ -888,11 +902,6 @@ void MainWindow::setupDockWidgets()
     tabifyDockWidget(dockRecent, dockOpen);
     tabifyDockWidget(dockOpen, dockInfo);
     tabifyDockWidget(dockInventory, dockPriceGuide);
-
-    auto logDock = createDock(DesktopApplication::inst()->developerConsole(), "dock_errorlog");
-    logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    logDock->setVisible(false);
-    addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);
 }
 
 QMenu *MainWindow::setupMenu(const QByteArray &name, const QVector<QByteArray> &a_names)

@@ -311,6 +311,12 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
     // to QTBUG-33514 (singletons are not available inside QQmlExpressions) and BrickStore relying
     // heavily on singletons.
 
+    const char *help =
+            "  This is a JavaScript shell with full access to BrickStore's internals.\n"
+            "  bl and bs are shortcuts for the BrickLink and BrickStore singletons.\n"
+            "  The available JS API is documented here:\n"
+            "    https://www.brickstore.dev/extensions\n";
+
     const char *script =
             "import BrickStore\n"
             "import BrickLink\n"
@@ -318,7 +324,7 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
             "QtObject {\n"
             "    property var bl: BrickLink\n"
             "    property var bs: BrickStore\n"
-            "    property string help: \"Use 'bl'/'bs' to access the BrickLink/BrickStore singletons\"\n"
+            "    property string help: \"${HELP}\"\n"
             "    property var __result\n"
             "    property var __error\n"
             "    Component.onCompleted: {\n"
@@ -328,7 +334,8 @@ std::tuple<QString, bool> ScriptManager::executeString(const QString &s)
             "}\n";
 
     QQmlComponent component(m_engine);
-    component.setData(QByteArray(script).replace("${SCRIPT}", s.toUtf8()), QUrl());
+    component.setData(QByteArray(script).replace("${HELP}", help)
+                          .replace("${SCRIPT}", s.toUtf8()), QUrl());
     if (component.status() == QQmlComponent::Error) {
         QStringList errorStrings;
         const auto errors = component.errors();
