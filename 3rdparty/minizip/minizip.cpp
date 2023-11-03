@@ -216,6 +216,14 @@ void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
 
     if (zip.openInternal(false)) {
         if (unzLocateFile(zip.m_zip, extractFileName, 2 /*case insensitive*/) == UNZ_OK) {
+            if (extractPassword) { // check if the file is actually encrypted
+                unz_file_info64 ufi;
+                ::memset(&ufi, 0, sizeof(ufi));
+                unzGetCurrentFileInfo64(zip.m_zip, &ufi, nullptr, 0, nullptr, 0, nullptr, 0);
+                if (!(ufi.flag & 1)) // bit 1 = encrypted
+                    extractPassword = nullptr;
+            }
+
             if (unzOpenCurrentFilePassword(zip.m_zip, extractPassword) == UNZ_OK) {
                 QByteArray block;
                 block.resize(1024*1024);
