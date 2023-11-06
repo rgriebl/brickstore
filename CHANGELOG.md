@@ -8,11 +8,11 @@ All notable changes to this project will be documented in this file.
 
 Fixes:
 - Improved handling of missing price-guide data: you can now choose to set to zero (old behavior), don't change the existing price or even add a red marker to the lots in question.
-- New, unencrypted Stud.io files can now be opened the same way as older, encrypted ones.
+- New, unencrypted BrickLink Studio files can now be opened the same way as older, encrypted ones.
 - Better handling of all the BrickLink XML parsing and generation bugs that will probably never be fixed:
   - Orders with an '&' character in any of the fields should import correctly now.
   - Store inventory downloads, uploads and updates are now able to handle HTML tags in the comments and remarks fields.
-- macOS: added a build for older macOS versions. (10.14 and 10.15)
+- macOS: added a *legacy* build for older macOS versions. (10.14 and 10.15)
 - Linux: online/offline detection was sometimes not working correctly.
 
 
