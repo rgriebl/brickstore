@@ -29,6 +29,10 @@ and eject the BrickStore image again, as you would on any other software
 installation.  Then start BrickStore from your computer's `Applications`
 folder.
 
+Please note: the current version will only install on macOS 10.15 or newer.
+Both 10.13 and 10.14 are still supported by the *legacy* build though, but
+this might have problems with some web cams not working correctly.
+
 > **Only for old versions from 2021 and 2022**: These are not digitally signed,
 > so when you start BrickStore from your computer's `Applications` folder,
 > macOS will tell you it "can't be opened", but gives you no way to remove
@@ -43,7 +47,7 @@ folder.
 Please note that the Debian *Backend* package is a command-line only utility and its only purpose is to generate BrickStore's database. It is not usable for anything else.
 
 ### Ubuntu
-As of version 2023.5.1, BrickStore is also distributed as a Snap via Ubuntu's Snapcraft store: https://snapcraft.io/brickstore
+BrickStore is also distributed as a Snap via Ubuntu's Snapcraft store: https://snapcraft.io/brickstore
 You should be able to install it straight from the Ubuntu Software Center.
 
 ### Ubuntu 22.04
