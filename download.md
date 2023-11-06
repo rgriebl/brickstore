@@ -8,7 +8,7 @@ All releases are built automatically on GitHub.com and can be downloaded from he
 BrickStore works on:
 * **Windows** (10 and 11, 64-bit only)
 * **macOS** (10.14 or newer)
-* **Linux** (Ubuntu 22.04, Arch, Distro independent AppImages)
+* **Linux** (Ubuntu 22.04, Arch, distro independent AppImages)
 * **Android** (currently in beta test)
 * **iOS** (currently in beta test)
 

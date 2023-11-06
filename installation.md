@@ -29,11 +29,11 @@ and eject the BrickStore image again, as you would on any other software
 installation.  Then start BrickStore from your computer's `Applications`
 folder.
 
-Please note: the current version will only install on macOS 10.15 or newer.
-Both 10.13 and 10.14 are still supported by the *legacy* build though, but
+Please note: the standard version will only install on macOS 11 or newer.
+Both 10.14 and 10.15 are still supported by the *legacy* build though, but
 this might have problems with some web cams not working correctly.
 
-> **Only for old versions from 2021 and 2022**: These are not digitally signed,
+> **Only for very old versions from 2021 and 2022**: These are not digitally signed,
 > so when you start BrickStore from your computer's `Applications` folder,
 > macOS will tell you it "can't be opened", but gives you no way to remove
 > this block directly.  You have to go to your `System Preferences` (Apple
