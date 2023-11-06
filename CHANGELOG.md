@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.11.1] - 2023-11-06
+
+Fixes:
+- Improved handling of missing price-guide data: you can now choose to set to zero (old behavior), don't change the existing price or even add a red marker to the lots in question.
+- New, unencrypted Stud.io files can now be opened the same way as older, encrypted ones.
+- Better handling of all the BrickLink XML parsing and generation bugs that will probably never be fixed:
+  - Orders with an '&' character in any of the fields should import correctly now.
+  - Store inventory downloads, uploads and updates are now able to handle HTML tags in the comments and remarks fields.
+- macOS: added a build for older macOS versions. (10.14 and 10.15)
+- Linux: online/offline detection was sometimes not working correctly.
+
+
 ## [2023.8.1] - 2023-08-12
 
 This is an overall bug-fix release.
@@ -585,7 +597,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.8.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.11.1...HEAD
+[2023.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.1
 [2023.8.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.8.1
 [2023.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.5.1
 [2023.4.4]: https://github.com/rgriebl/brickstore/releases/tag/v2023.4.4
