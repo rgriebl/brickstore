@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QLocale>
 #include <QNetworkAccessManager>
+#include <QNetworkCookieJar>
 #include <QTimer>
 #include <QNetworkReply>
 #include <QCoreApplication>
@@ -133,13 +134,17 @@ std::function<void()> Transfer::s_threadInitFunction;
 
 
 Transfer::Transfer(QObject *parent)
+    : Transfer(nullptr, parent)
+{ }
+
+Transfer::Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *parent)
     : QObject(parent)
 {
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = qApp->applicationName() + u'/' + qApp->applicationVersion();
     m_user_agent = s_default_user_agent;
 
-    m_retriever = new TransferRetriever(this);
+    m_retriever = new TransferRetriever(this, cookieJar.release());
 #if QT_CONFIG(cxx11_future)
     m_retrieverThread = QThread::create([this]() {
         if (s_threadInitFunction)
@@ -248,15 +253,20 @@ void Transfer::setInitFunction(const std::function<void ()> &func)
 
 #include "moc_transfer.cpp"
 
-TransferRetriever::TransferRetriever(Transfer *transfer)
+TransferRetriever::TransferRetriever(Transfer *transfer, QNetworkCookieJar *cookieJar)
     : QObject()
     , m_transfer(transfer)
+    , m_cookieJar(cookieJar)
     , m_maxConnections(6) // mirror the internal QNAM setting
-{ }
+{
+    if (cookieJar)
+        cookieJar->setParent(this);
+}
 
 TransferRetriever::~TransferRetriever()
 {
     abortAllJobs();
+    delete m_nam;
 }
 
 void TransferRetriever::addJob(TransferJob *job, bool highPriority)
@@ -322,6 +332,8 @@ void TransferRetriever::schedule()
 {
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
+        if (m_cookieJar)
+            m_nam->setCookieJar(m_cookieJar);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
         connect(m_nam, &QNetworkAccessManager::finished,
                 this, &TransferRetriever::downloadFinished);

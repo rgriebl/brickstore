@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2023.11.2] - 2023-11-14
+
+Password related improvements:
+- No more "Login from a new device" emails from BrickLink every time you restart BrickStore.
+- Your BrickLink password is now saved in the encrypted password store of the operating system:
+  - Windows: Credential Manager
+  - macOS and iOS: Keychain
+  - Linux: GNOME Keyring or KDE Wallet (via libsecret, if available)
+
+  These password stores can give out the password to other (malicious) applications running in the
+  same user session (at least macOS and Linux can be configured to notify you about that), so the
+  password is also obfuscated to prevent accidental leaks.
+
+
 ## [2023.11.1] - 2023-11-06
 
 Fixes:
@@ -597,7 +611,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.11.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.11.2...HEAD
+[2023.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.2
 [2023.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.1
 [2023.8.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.8.1
 [2023.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.5.1

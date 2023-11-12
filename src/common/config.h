@@ -37,7 +37,7 @@ private:
     Config();
     static Config *s_inst;
 
-    static QString scramble(const QString &);
+    static QString legacyScramble(const QString &);
 
 public:
     ~Config() override;

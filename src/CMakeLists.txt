@@ -18,6 +18,10 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/exception.h
     utility/memoryresource.cpp
     utility/memoryresource.h
+    utility/passwordmanager.cpp
+    utility/passwordmanager.h
+    utility/persistentcookiejar.cpp
+    utility/persistentcookiejar.h
     utility/pooledarray.h
     utility/q3cache.h
     utility/q5hash.cpp

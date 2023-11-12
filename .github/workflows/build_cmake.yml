@@ -13,6 +13,7 @@ env:
       qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
       qt6-qpa-plugins
   BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
+      libsecret-1-dev
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
       qt6-gtk-platformtheme libqt6svg6 qt6-multimedia-dev
@@ -278,7 +279,7 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev libgstreamer\*1.0-dev
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
             ${{ matrix.config.cmake_extra_config }} -B build -S .

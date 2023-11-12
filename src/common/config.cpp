@@ -18,6 +18,8 @@
 #include <QFileInfo>
 #include <QMetaType>
 
+#include "utility/exception.h"
+#include "utility/passwordmanager.h"
 #include "config.h"
 
 
@@ -54,7 +56,31 @@ Config::Config()
     m_translations_parsed = false;
 
     m_bricklinkUsername = value(u"BrickLink/Login/Username"_qs).toString();
-    m_bricklinkPassword = scramble(value(u"BrickLink/Login/Password"_qs).toString());
+    try {
+        auto utf8pw = PasswordManager::load(u"BrickStore"_qs, u"BrickLink-Password"_qs);
+        m_bricklinkPassword = QString::fromUtf8(utf8pw);
+    } catch (const Exception &e) {
+        qWarning() << "Failed to load BrickLink password:" << e.errorString();
+    }
+
+    const auto passwordKey = u"BrickLink/Login/Password"_qs;
+    // always delete a legacy password, but convert it first, if we don't have an encrypted one
+    if (contains(passwordKey)) {
+        bool doRemove = true;
+
+        if (m_bricklinkPassword.isNull()) {
+            m_bricklinkPassword = legacyScramble(value(passwordKey).toString());
+            try {
+                PasswordManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
+                                      m_bricklinkPassword.toUtf8());
+            } catch (const Exception &e) {
+                qWarning() << "Failed to save BrickLink password:" << e.errorString();
+                doRemove = false;
+            }
+        }
+        if (doRemove)
+            remove(passwordKey);
+    }
 
     qRegisterMetaType<QSet<uint>>();
 }
@@ -73,7 +99,7 @@ Config *Config::inst()
     return s_inst;
 }
 
-QString Config::scramble(const QString &str)
+QString Config::legacyScramble(const QString &str)
 {
     QString result;
     const QChar *unicode = str.unicode();
@@ -591,7 +617,14 @@ void Config::setBrickLinkPassword(const QString &pass, bool doNotSave)
 {
     if (m_bricklinkPassword != pass) {
         m_bricklinkPassword = pass;
-        setValue(u"BrickLink/Login/Password"_qs, doNotSave ? QString { } : scramble(pass));
+
+        try {
+            PasswordManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
+                                  doNotSave ? QByteArray { } : pass.toUtf8());
+        } catch (const Exception &e) {
+            qWarning() << "Failed to save BrickLink password:" << e.errorString();
+            setValue(u"BrickLink/Login/Password"_qs, doNotSave ? QString { } : legacyScramble(pass));
+        }
         emit brickLinkCredentialsChanged();
     }
 }

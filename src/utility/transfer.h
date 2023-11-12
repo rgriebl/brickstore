@@ -13,6 +13,7 @@ Q_DECLARE_LOGGING_CATEGORY(LogTransfer)
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
 QT_FORWARD_DECLARE_CLASS(QNetworkReply)
+QT_FORWARD_DECLARE_CLASS(QNetworkCookieJar)
 class Transfer;
 class TransferRetriever;
 
@@ -116,13 +117,14 @@ private:
 
 Q_DECLARE_METATYPE(TransferJob *)
 
-
 class TransferRetriever : public QObject
 {
     Q_OBJECT
 public:
-    TransferRetriever(Transfer *transfer);
+    TransferRetriever(Transfer *transfer, QNetworkCookieJar *cookieJar);
     ~TransferRetriever() override;
+
+    void setCookieJar(QNetworkCookieJar *cookieJar);
 
     void addJob(TransferJob *job, bool highPriority);
     void reprioritizeJob(TransferJob *job, bool highPriority);
@@ -141,6 +143,7 @@ private:
 
     Transfer *m_transfer;
     QNetworkAccessManager *m_nam = nullptr;
+    QNetworkCookieJar *    m_cookieJar = nullptr;
     QVector<TransferJob *> m_jobs;
     QVector<TransferJob *> m_currentJobs;
     int                    m_maxConnections;
@@ -155,6 +158,8 @@ class Transfer : public QObject
     Q_OBJECT
 public:
     Transfer(QObject *parent = nullptr);
+    // be careful: cookieJar is moved to the retriever thread!
+    Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *parent = nullptr);
     ~Transfer() override;
 
     void retrieve(TransferJob *job, bool highPriority = false);

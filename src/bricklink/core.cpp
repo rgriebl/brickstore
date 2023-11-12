@@ -25,6 +25,7 @@
 #include "utility/utility.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
+#include "utility/persistentcookiejar.h"
 
 #include "bricklink/category.h"
 #include "bricklink/changelogentry.h"
@@ -345,12 +346,14 @@ Core *Core::create(const QString &dataDir, const QString &updateUrl, quint64 phy
     return s_inst;
 }
 
+
+
 Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_activeApiQuirks(~1ULL)
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
-    , m_authenticatedTransfer(new Transfer(this))
+    , m_authenticatedTransfer(new Transfer(std::make_unique<PersistentCookieJar>(datadir, u"BrickLink"_qs)))
     , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
     , m_store(new Store(this))
@@ -413,7 +416,9 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 auto json = QJsonDocument::fromJson(*job->data());
                 if (!json.isNull()) {
                     bool wasAuthenticated = m_authenticated;
-                    m_authenticated = (json[u"returnCode"].toInt() == 0);
+                    m_authenticated = (json[u"returnCode"].toInt() == 0)
+                                      || ((json[u"returnCode"].toInt() == -4)
+                                          && (json[u"returnMessage"] == u"Already Logged-in!"_qs));
                     if (!m_authenticated)
                         error = json[u"returnMessage"].toString();
 
