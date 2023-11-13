@@ -14,12 +14,12 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/chunkreader.cpp
     utility/chunkreader.h
     utility/chunkwriter.h
+    utility/credentialsmanager.cpp
+    utility/credentialsmanager.h
     utility/exception.cpp
     utility/exception.h
     utility/memoryresource.cpp
     utility/memoryresource.h
-    utility/passwordmanager.cpp
-    utility/passwordmanager.h
     utility/persistentcookiejar.cpp
     utility/persistentcookiejar.h
     utility/pooledarray.h

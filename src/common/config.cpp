@@ -19,7 +19,7 @@
 #include <QMetaType>
 
 #include "utility/exception.h"
-#include "utility/passwordmanager.h"
+#include "utility/credentialsmanager.h"
 #include "config.h"
 
 
@@ -57,7 +57,7 @@ Config::Config()
 
     m_bricklinkUsername = value(u"BrickLink/Login/Username"_qs).toString();
     try {
-        auto utf8pw = PasswordManager::load(u"BrickStore"_qs, u"BrickLink-Password"_qs);
+        auto utf8pw = CredentialsManager::load(u"BrickStore"_qs, u"BrickLink-Password"_qs);
         m_bricklinkPassword = QString::fromUtf8(utf8pw);
     } catch (const Exception &e) {
         qWarning() << "Failed to load BrickLink password:" << e.errorString();
@@ -71,7 +71,7 @@ Config::Config()
         if (m_bricklinkPassword.isNull()) {
             m_bricklinkPassword = legacyScramble(value(passwordKey).toString());
             try {
-                PasswordManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
+                CredentialsManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
                                       m_bricklinkPassword.toUtf8());
             } catch (const Exception &e) {
                 qWarning() << "Failed to save BrickLink password:" << e.errorString();
@@ -619,7 +619,7 @@ void Config::setBrickLinkPassword(const QString &pass, bool doNotSave)
         m_bricklinkPassword = pass;
 
         try {
-            PasswordManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
+            CredentialsManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
                                   doNotSave ? QByteArray { } : pass.toUtf8());
         } catch (const Exception &e) {
             qWarning() << "Failed to save BrickLink password:" << e.errorString();

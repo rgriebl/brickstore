@@ -4,7 +4,10 @@
 #pragma once
 
 #include <QNetworkCookieJar>
+#include <QWaitCondition>
 #include <QMutex>
+
+QT_FORWARD_DECLARE_CLASS(QThread)
 
 
 class PersistentCookieJar : public QNetworkCookieJar
@@ -12,16 +15,18 @@ class PersistentCookieJar : public QNetworkCookieJar
     Q_OBJECT
 public:
     PersistentCookieJar(const QString &datadir, const QString &name, QObject *parent = nullptr);
+    ~PersistentCookieJar() override;
 
-    QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const override;
     bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url) override;
 
 private:
-    void load();
-    void save();
-
     QMutex m_mutex;
+    QThread *m_saveThread = nullptr;
+    bool m_stopSaveThread = false;
+    QWaitCondition m_saveCondition;
+    QByteArray m_lastSaveData;
+    QByteArray m_nextSaveData;
+
     QString m_dataDir;
     QString m_name;
-    bool m_loaded = false;
 };

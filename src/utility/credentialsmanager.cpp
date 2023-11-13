@@ -7,7 +7,7 @@
 #include <QSettings>
 
 #include "exception.h"
-#include "passwordmanager.h"
+#include "credentialsmanager.h"
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -33,14 +33,14 @@ static const SecretSchema brickstoreSchema = {
 #endif
 
 
-static QByteArray codePassword(const QByteArray &in, bool encode)
+static QByteArray codeCredential(const QByteArray &in, bool encode)
 {
-    // This binds the password to the current OS installation, plus it obscures it quite nicely:
+    // This binds the credential to the current OS installation, plus it obscures it quite nicely:
     // - we calculate a "machineId" based on QSysInfo::machineUniqueId() and a BrickStore specific
     //   BLOB appended
     // - we hash this once with Blake2s_128 to get a 16 byte value on any platform
-    // - the encrypted password is then the password XORed with the machine-id hash
-    // - since the machine id can change (e.g. when the user reinstalls the OS), we also append a
+    // - the encrypted credential is then the credential XORed with the machine-id hash
+    // - since the machine id can change (e.g. when the user reinstalls the OS), we also preend a
     //   hash of that hash, in order to fail sensibly on loading
 
     static const auto brickStoreId = "BrickStore\x89\x59\x00\x22\x3c\x76"_qba;
@@ -64,25 +64,25 @@ static QByteArray codePassword(const QByteArray &in, bool encode)
         return hashedMachineId + xorByteArray(in, normalizedMachineId);
     } else {
         const auto savedHashedMachineId = in.left(hashLen);
-        if (savedHashedMachineId != hashedMachineId)
-            throw Exception("Password was saved on a different machine");
+        if (!savedHashedMachineId.isEmpty() && (savedHashedMachineId != hashedMachineId))
+            throw Exception("credentials were saved on a different machine");
 
         return xorByteArray(in.mid(hashLen), normalizedMachineId);
     }
 }
 
-QByteArray PasswordManager::load(const QString &service, const QString &id)
+QByteArray CredentialsManager::load(const QString &service, const QString &id)
 {
-    QByteArray codedPassword;
+    QByteArray codedCredential;
 
 #if defined(Q_OS_WINDOWS)
-    CREDENTIALW *credential = nullptr;
+    CREDENTIALW *credentialw = nullptr;
     QString serviceAndId = service + u'/' + id;
 
-    if (CredReadW((LPCWSTR) serviceAndId.utf16(), CRED_TYPE_GENERIC, 0, &credential)) {
-        codedPassword = QByteArray((const char *) credential->CredentialBlob,
-                                   credential->CredentialBlobSize);
-        CredFree(credential);
+    if (CredReadW((LPCWSTR) serviceAndId.utf16(), CRED_TYPE_GENERIC, 0, &credentialw)) {
+        codedCredential = QByteArray((const char *) credentialw->CredentialBlob,
+                                   credentialw->CredentialBlobSize);
+        CredFree(credentialw);
     } else {
         auto error = GetLastError();
         if (error != ERROR_NOT_FOUND) {
@@ -110,7 +110,7 @@ QByteArray PasswordManager::load(const QString &service, const QString &id)
 
     if (status == errSecSuccess) {
         if (data)
-            codedPassword = QByteArray::fromCFData((CFDataRef) data);
+            codedCredential = QByteArray::fromCFData((CFDataRef) data);
     } else if (status != errSecItemNotFound) {
         QCFType<CFStringRef> msg = SecCopyErrorMessageString(status, nullptr);
         throw Exception(QString::fromCFString(msg));
@@ -135,7 +135,7 @@ QByteArray PasswordManager::load(const QString &service, const QString &id)
         const QByteArray contentType = ::secret_value_get_content_type(secret);
         gsize secretSize = 0;
         const auto secretPointer = ::secret_value_get(secret, &secretSize);
-        codedPassword = QByteArray(secretPointer, qsizetype(secretSize));
+        codedCredential = QByteArray(secretPointer, qsizetype(secretSize));
 
         ::secret_value_unref(secret);
 
@@ -144,29 +144,29 @@ QByteArray PasswordManager::load(const QString &service, const QString &id)
     }
 
 #else
-    codedPassword = QSettings().value(u"/FallbackPasswordManager/"_qs + service + u'/' + id)
-                        .toByteArray();
+    codedCredential = QSettings().value(u"/FallbackCredentialsManager/"_qs + service + u'/' + id)
+                          .toByteArray();
 #endif
 
-    return codePassword(codedPassword, false);
+    return codeCredential(codedCredential, false);
 }
 
-void PasswordManager::save(const QString &service, const QString &id, const QByteArray &password)
+void CredentialsManager::save(const QString &service, const QString &id, const QByteArray &credential)
 {
-    const QByteArray codedPassword = codePassword(password, true);
+    const QByteArray codedCredential = codeCredential(credential, true);
 
 #if defined(Q_OS_WINDOWS)
     QString serviceAndId = service + u'/' + id;
 
-    CREDENTIALW credential;
-    ::memset(&credential, 0, sizeof(CREDENTIALW));
-    credential.Type = CRED_TYPE_GENERIC;
-    credential.TargetName = (LPWSTR) serviceAndId.utf16();
-    credential.CredentialBlobSize = codedPassword.size();
-    credential.CredentialBlob = (LPBYTE) codedPassword.constData();
-    credential.Persist = CRED_PERSIST_LOCAL_MACHINE;
+    CREDENTIALW credentialw;
+    ::memset(&credentialw, 0, sizeof(CREDENTIALW));
+    credentialw.Type = CRED_TYPE_GENERIC;
+    credentialw.TargetName = (LPWSTR) serviceAndId.utf16();
+    credentialw.CredentialBlobSize = codedCredential.size();
+    credentialw.CredentialBlob = (LPBYTE) codedCredential.constData();
+    credentialw.Persist = CRED_PERSIST_LOCAL_MACHINE;
 
-    if (!CredWriteW(&credential, 0)) {
+    if (!CredWriteW(&credentialw, 0)) {
         auto error = GetLastError();
         LPWSTR msg = nullptr;
         FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -180,10 +180,10 @@ void PasswordManager::save(const QString &service, const QString &id, const QByt
 #elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
     QCFString cfservice = service;
     QCFString cfkey = id;
-    QCFType<CFDataRef> cfpassword = codedPassword.toCFData();
+    QCFType<CFDataRef> cfcredential = codedCredential.toCFData();
 
     const void *queryKeys[] = { kSecClass, kSecAttrService, kSecAttrAccount, kSecValueData };
-    const void *queryValues[] = { kSecClassGenericPassword, cfservice, cfkey, cfpassword };
+    const void *queryValues[] = { kSecClassGenericPassword, cfservice, cfkey, cfcredential };
 
     QCFType<CFDictionaryRef> query = CFDictionaryCreate(0, queryKeys, queryValues, 4, 0, 0);
 
@@ -201,7 +201,7 @@ void PasswordManager::save(const QString &service, const QString &id, const QByt
     QByteArray idUtf8 = id.toUtf8();
     QByteArray serviceAndIdUtf8 = serviceUtf8 + '/' + idUtf8;
 
-    auto secret = ::secret_value_new(codedPassword.constData(), codedPassword.size(),
+    auto secret = ::secret_value_new(codedCredential.constData(), codedCredential.size(),
                                      "application/octet-stream");
 
     ::secret_password_store_binary_sync(&brickstoreSchema, SECRET_COLLECTION_DEFAULT,
@@ -219,7 +219,7 @@ void PasswordManager::save(const QString &service, const QString &id, const QByt
     }
 
 #else
-    QSettings().setValue(u"/FallbackPasswordManager/"_qs + service + u'/' + id,
-                         QVariant::fromValue(codedPassword));
+    QSettings().setValue(u"/FallbackCredentialsManager/"_qs + service + u'/' + id,
+                         QVariant::fromValue(codedCredential));
 #endif
 }

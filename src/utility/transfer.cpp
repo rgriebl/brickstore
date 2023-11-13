@@ -145,7 +145,6 @@ Transfer::Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *pare
     m_user_agent = s_default_user_agent;
 
     m_retriever = new TransferRetriever(this, cookieJar.release());
-#if QT_CONFIG(cxx11_future)
     m_retrieverThread = QThread::create([this]() {
         if (s_threadInitFunction)
             s_threadInitFunction();
@@ -154,9 +153,6 @@ Transfer::Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *pare
         delete m_retriever;
         return returnCode;
     });
-#else
-    m_retrieverThread = new QThread(); // we're leaking m_retriever here
-#endif
     m_retriever->moveToThread(m_retrieverThread);
     m_retrieverThread->setObjectName(u"TransferRetriever"_qs);
     m_retrieverThread->setParent(this);

@@ -5,9 +5,9 @@
 
 #include <QByteArray>
 
-namespace PasswordManager {
+namespace CredentialsManager {
 
 QByteArray load(const QString &service, const QString &id);
-void save(const QString &service, const QString &id, const QByteArray &password);
+void save(const QString &service, const QString &id, const QByteArray &credential);
 
-} // namespace PasswordManager
+} // namespace CredentialsManager

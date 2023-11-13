@@ -353,7 +353,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     , m_activeApiQuirks(~1ULL)
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
-    , m_authenticatedTransfer(new Transfer(std::make_unique<PersistentCookieJar>(datadir, u"BrickLink"_qs)))
+    , m_authenticatedTransfer(new Transfer(std::make_unique<PersistentCookieJar>(datadir, u"BrickLink"_qs), this))
     , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
     , m_store(new Store(this))
