@@ -26,7 +26,9 @@ PersistentCookieJar::PersistentCookieJar(const QString &datadir, const QString &
     try {
         m_lastSaveData = m_nextSaveData =
             qUncompress(CredentialsManager::load(u"BrickStore"_qs, m_name + u"-Cookies"_qs));
-        setAllCookies(QNetworkCookie::parseCookies(m_lastSaveData));
+        const auto cookies = QNetworkCookie::parseCookies(m_lastSaveData);
+        for (const auto &cookie : cookies)
+            insertCookie(cookie);
     } catch (const Exception &e) {
         qWarning() << "Could not load cookies for" << m_name << ":" << e.errorString();
     }
@@ -66,6 +68,11 @@ PersistentCookieJar::~PersistentCookieJar()
     m_saveThread->wait();
 }
 
+QList<QNetworkCookie> PersistentCookieJar::cookiesForUrl(const QUrl &url) const
+{
+    return QNetworkCookieJar::cookiesForUrl(url);
+}
+
 bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url)
 {
     bool result = QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
@@ -82,10 +89,10 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
     return result;
 }
 
-void PersistentCookieJar::dumpCookies(const QList<QNetworkCookie> &cookies)
+void PersistentCookieJar::dumpCookies(const QList<QNetworkCookie> &cookies) const
 {
     for (const auto &cookie : cookies) {
-        qWarning() << " *" << cookie.name() << cookie.expirationDate() << cookie.value()
+        qWarning() << " *" << cookie.name() << cookie.expirationDate() << cookie.value().left(16)
                    << cookie.domain();
     }
 }

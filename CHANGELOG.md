@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Password related improvements:
 - No more "Login from a new device" emails from BrickLink every time you restart BrickStore.
+  This will not get rid of the these emails completely though, but at least reduce them to around 1 per day, until someone figures out how to extend the login session.
 - Your BrickLink password is now saved in the encrypted password store of the operating system:
   - Windows: Credential Manager
   - macOS and iOS: Keychain
@@ -15,7 +16,7 @@ Password related improvements:
 
   These password stores can give out the password to other (malicious) applications running in the
   same user session (at least macOS and Linux can be configured to notify you about that), so the
-  password is also obfuscated to prevent accidental leaks.
+  password is also heavily obfuscated to prevent accidental leaks.
 
 
 ## [2023.11.1] - 2023-11-06

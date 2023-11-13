@@ -17,10 +17,11 @@ public:
     PersistentCookieJar(const QString &datadir, const QString &name, QObject *parent = nullptr);
     ~PersistentCookieJar() override;
 
+    QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const override;
     bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url) override;
 
 private:
-    void dumpCookies(const QList<QNetworkCookie> &cookies);
+    void dumpCookies(const QList<QNetworkCookie> &cookies) const;
 
     QMutex m_mutex;
     QThread *m_saveThread = nullptr;
