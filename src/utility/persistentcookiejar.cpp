@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QThread>
+#include <QDateTime>
 
 #include "exception.h"
 #include "credentialsmanager.h"
@@ -23,7 +24,8 @@ PersistentCookieJar::PersistentCookieJar(const QString &datadir, const QString &
 {
     // load
     try {
-        m_lastSaveData = qUncompress(CredentialsManager::load(u"BrickStore"_qs, m_name + u"-Cookies"_qs));
+        m_lastSaveData = m_nextSaveData =
+            qUncompress(CredentialsManager::load(u"BrickStore"_qs, m_name + u"-Cookies"_qs));
         setAllCookies(QNetworkCookie::parseCookies(m_lastSaveData));
     } catch (const Exception &e) {
         qWarning() << "Could not load cookies for" << m_name << ":" << e.errorString();
@@ -78,6 +80,14 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
     m_mutex.unlock();
 
     return result;
+}
+
+void PersistentCookieJar::dumpCookies(const QList<QNetworkCookie> &cookies)
+{
+    for (const auto &cookie : cookies) {
+        qWarning() << " *" << cookie.name() << cookie.expirationDate() << cookie.value()
+                   << cookie.domain();
+    }
 }
 
 #include "moc_persistentcookiejar.cpp"

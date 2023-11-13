@@ -20,6 +20,8 @@ public:
     bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url) override;
 
 private:
+    void dumpCookies(const QList<QNetworkCookie> &cookies);
+
     QMutex m_mutex;
     QThread *m_saveThread = nullptr;
     bool m_stopSaveThread = false;

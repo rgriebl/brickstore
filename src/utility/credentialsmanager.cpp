@@ -81,7 +81,7 @@ QByteArray CredentialsManager::load(const QString &service, const QString &id)
 
     if (CredReadW((LPCWSTR) serviceAndId.utf16(), CRED_TYPE_GENERIC, 0, &credentialw)) {
         codedCredential = QByteArray((const char *) credentialw->CredentialBlob,
-                                   credentialw->CredentialBlobSize);
+                                     credentialw->CredentialBlobSize);
         CredFree(credentialw);
     } else {
         auto error = GetLastError();
