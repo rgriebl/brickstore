@@ -655,5 +655,5 @@ jobs:
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
       with:
-        snap: artifacts/Linux-Snap-brickstore_${{ env.VERSION }}_amd64.snap
+        snap: artifacts/Linux-Snap-brickstore_${{ env.VERSION_NUMBER }}_amd64.snap
         release: stable
