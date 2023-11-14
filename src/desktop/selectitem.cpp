@@ -74,6 +74,7 @@ public:
     double           m_zoom = 0;
     const BrickLink::Color *m_colorFilter = nullptr;
     const BrickLink::Item *m_colorFilterLastItem = nullptr;
+    ItemScannerDialog *m_itemScannerDialog = nullptr;
 };
 
 
@@ -252,11 +253,14 @@ void SelectItem::init()
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
         if (!ItemScannerDialog::checkSystemPermissions())
             return;
+        if (!d->m_itemScannerDialog)
+            d->m_itemScannerDialog = new ItemScannerDialog(this);
 
         auto itt = currentItemType();
-        ItemScannerDialog isd((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt, this);
-        if (isd.exec() == QDialog::Accepted) {
-            auto items = isd.items();
+        d->m_itemScannerDialog->setItemType((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt);
+
+        if (d->m_itemScannerDialog->exec() == QDialog::Accepted) {
+            auto items = d->m_itemScannerDialog->items();
 
             if (!items.isEmpty()) {
                 const BrickLink::Item *oldItem = currentItem();

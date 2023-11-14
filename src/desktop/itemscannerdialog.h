@@ -22,6 +22,7 @@ QT_FORWARD_DECLARE_CLASS(QMediaCaptureSession)
 QT_FORWARD_DECLARE_CLASS(QImageCapture)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QVideoWidget)
+QT_FORWARD_DECLARE_CLASS(QMediaDevices)
 
 class VideoOverlay;
 
@@ -32,29 +33,34 @@ class ItemScannerDialog : public QDialog
 public:
     static bool checkSystemPermissions();
 
-    explicit ItemScannerDialog(const BrickLink::ItemType *itemType, QWidget *parent = nullptr);
+    explicit ItemScannerDialog(QWidget *parent = nullptr);
     ~ItemScannerDialog() override;
 
+    void setItemType(const BrickLink::ItemType *itemType);
     QVector<const BrickLink::Item *> items() const;
 
 protected:
+    void hideEvent(QHideEvent *e) override;
+    void changeEvent(QEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
+    void updateCameraDevices();
     void updateCamera(const QByteArray &cameraId);
     void updateCameraResolution(int preferredImageSize);
     void updateBackend(const QByteArray &backendId);
     void capture();
-    void onScanStarted(uint id);
     void onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores);
     void onScanFailed(uint id, const QString &error);
 
-    QScopedPointer<QCamera> m_camera;
+    std::unique_ptr<QMediaDevices> m_mediaDevices;
+    std::unique_ptr<QCamera> m_camera;
     QComboBox *m_selectCamera;
     QComboBox *m_selectBackend;
     QButtonGroup *m_selectItemTypes;
     QVideoWidget *m_viewFinder;
+    bool m_resizeFix = false;
     QMediaCaptureSession *m_captureSession;
     QImageCapture *m_imageCapture;
 
@@ -73,5 +79,8 @@ private:
     QString m_noMatchText;
     QString m_okText;
 
+    QVector<const BrickLink::ItemType *> m_validItemTypes;
     QVector<const BrickLink::Item *> m_items;
+
+    static bool s_hasCameraPermission;
 };

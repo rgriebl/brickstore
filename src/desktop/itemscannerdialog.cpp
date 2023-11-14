@@ -30,9 +30,13 @@
 
 
 int ItemScannerDialog::s_averageScanTime = 0;
+bool ItemScannerDialog::s_hasCameraPermission = false;
 
 bool ItemScannerDialog::checkSystemPermissions()
 {
+    if (s_hasCameraPermission)
+        return true;
+
     const QString requestDenied = tr("BrickStore's request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system's Settings application.");
 
 
@@ -51,29 +55,30 @@ bool ItemScannerDialog::checkSystemPermissions()
 #else
     Q_UNUSED(requestDenied)
 #endif
+    s_hasCameraPermission = true;
     return true;
 }
 
-ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidget *parent)
+ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     : QDialog(parent)
+    , m_mediaDevices(std::make_unique<QMediaDevices>())
 {
+    connect(m_mediaDevices.get(), &QMediaDevices::videoInputsChanged,
+            this, &ItemScannerDialog::updateCameraDevices);
+
     setWindowTitle(tr("Item Scanner"));
     setSizeGripEnabled(true);
 
-    const auto allCameraDevices = QMediaDevices::videoInputs();
     const auto allBackends = ItemScanner::inst()->availableBackends();
-
     connect(ItemScanner::inst(), &ItemScanner::scanFinished,
             this, &ItemScannerDialog::onScanFinished);
     connect(ItemScanner::inst(), &ItemScanner::scanFailed,
             this, &ItemScannerDialog::onScanFailed);
 
-    m_selectCamera = new QComboBox;
+    m_selectCamera = new QComboBox(this);
     m_selectCamera->setFocusPolicy(Qt::NoFocus);
-    for (const auto &cameraDevice : allCameraDevices)
-        m_selectCamera->addItem(cameraDevice.description(), cameraDevice.id());
 
-    m_selectBackend = new QComboBox;
+    m_selectBackend = new QComboBox(this);
     m_selectBackend->setFocusPolicy(Qt::NoFocus);
     for (const auto &backend : allBackends)
         m_selectBackend->addItem(backend.name, backend.id);
@@ -85,13 +90,13 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     itemTypesLayout->setContentsMargins(0, 0, 0, 0);
     itemTypesLayout->setSpacing(2);
 
-    auto createTypeButton = [&](const BrickLink::ItemType *itt) {
-        auto *b = new QToolButton;
+    auto createTypeButton = [&, this](const BrickLink::ItemType *itt) {
+        auto *b = new QToolButton(this);
         b->setFocusPolicy(Qt::NoFocus);
         b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         b->setAutoRaise(true);
         b->setCheckable(true);
-        b->setChecked(itt == itemType);
+        b->setChecked(!itt);
         b->setText(itt ? itt->name() : tr("Any"));
         m_selectItemTypes->addButton(b, itt ? itt->id() : '*');
         itemTypesLayout->addWidget(b, 1);
@@ -101,7 +106,7 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     for (const auto &itt : BrickLink::core()->itemTypes())
         createTypeButton(&itt);
 
-    m_viewFinder = new QVideoWidget;
+    m_viewFinder = new QVideoWidget(this);
     int videoWidth = logicalDpiX() * 3; // ~7.5cm on-screen
     m_viewFinder->setMinimumSize(videoWidth, videoWidth * 9 / 16);
     m_viewFinder->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -113,16 +118,16 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     m_imageCapture = new QImageCapture(m_captureSession);
     m_captureSession->setImageCapture(m_imageCapture);
 
-    m_progress = new QProgressBar();
+    m_progress = new QProgressBar(this);
     m_progress->setTextVisible(false);
     m_progressTimer = new QTimer(m_progress);
     m_progressTimer->setInterval(30);
     connect(m_progressTimer, &QTimer::timeout,
             this, [this]() {
-                m_progress->setValue(qMin(int(m_lastScanTime.elapsed()), m_progress->maximum()));
-            });
+        m_progress->setValue(qMin(int(m_lastScanTime.elapsed()), m_progress->maximum()));
+    });
 
-    m_status = new QLabel();
+    m_status = new QLabel(this);
     QPalette pal = m_status->palette();
     pal.setColor(QPalette::Text, pal.color(QPalette::Active, QPalette::Text));
     m_status->setPalette(pal);
@@ -155,6 +160,12 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
             updateBackend(m_selectBackend->itemData(index).toByteArray());
     });
 
+    m_okText = tr("Click into the camera preview or press Space to capture an image.");
+    m_noCameraText = u"<b>" + tr("There is no camera connected to this computer.") + u"</b>";
+    m_noMatchText = u"<b>" + tr("No matching item found - try again.") + u"</b><br>" + m_okText;
+
+    updateCameraDevices();
+
     const QByteArray cameraId = Config::inst()->value(u"MainWindow/ItemScannerDialog/CameraId"_qs).toByteArray();
     int cameraIndex = m_selectCamera->findData(cameraId);
     m_selectCamera->setCurrentIndex(cameraIndex < 0 ? 0 : cameraIndex);
@@ -162,17 +173,6 @@ ItemScannerDialog::ItemScannerDialog(const BrickLink::ItemType *itemType, QWidge
     const QByteArray backendId = Config::inst()->value(u"MainWindow/ItemScannerDialog/BackendId"_qs).toByteArray();
     int backendIndex = m_selectBackend->findData(backendId);
     m_selectBackend->setCurrentIndex(backendIndex < 0 ? 0 : backendIndex);
-
-    m_okText = tr("Click into the camera preview or press Space to capture an image.");
-    m_noCameraText = u"<b>" + tr("There is no camera connected to this computer.") + u"</b>";
-    m_noMatchText = u"<b>" + tr("No matching item found - try again.") + u"</b><br>" + m_okText;
-
-    if (allCameraDevices.isEmpty()) {
-        setEnabled(false);
-        m_status->setText(m_noCameraText);
-    } else {
-        m_status->setText(m_okText);
-    }
 
     restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray());
 }
@@ -182,6 +182,43 @@ ItemScannerDialog::~ItemScannerDialog()
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/CameraId"_qs, m_selectCamera->currentData().toByteArray());
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/BackendId"_qs, m_selectBackend->currentData().toByteArray());
+}
+
+void ItemScannerDialog::setItemType(const BrickLink::ItemType *itemType)
+{
+    QAbstractButton *first = nullptr;
+    bool checkedAny = false;
+
+    const auto buttons = m_selectItemTypes->buttons();
+    for (auto *b : buttons) {
+        int id = m_selectItemTypes->id(b);
+        const auto itt = BrickLink::core()->itemType(char(id));
+        bool valid = m_validItemTypes.contains(itt);
+        bool checked = valid && (itt == itemType);
+        b->setVisible(valid);
+        b->setChecked(checked);
+        checkedAny = checkedAny || checked;
+        if (!first && valid)
+            first = b;
+    }
+    if (!checkedAny && first)
+        first->setChecked(true);
+}
+
+void ItemScannerDialog::updateCameraDevices()
+{
+    const auto allCameraDevices = m_mediaDevices->videoInputs();
+
+    m_selectCamera->clear();
+    for (const auto &cameraDevice : allCameraDevices)
+        m_selectCamera->addItem(cameraDevice.description(), cameraDevice.id());
+
+    if (allCameraDevices.isEmpty()) {
+        setEnabled(false);
+        m_status->setText(m_noCameraText);
+    } else {
+        m_status->setText(m_okText);
+    }
 }
 
 void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
@@ -210,18 +247,12 @@ void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
         Q_UNUSED(id)
 
         m_lastScanTime.restart();
-
-        // m_camera->setViewfinder(static_cast<QVideoWidget *>(nullptr));
-        // m_overlay->pause(rawimg);
-
         m_currentScan = ItemScanner::inst()->scan(img, char(m_selectItemTypes->checkedId()),
                                                   m_selectBackend->currentData().toByteArray());
 
         if (!m_currentScan) {
             onScanFailed(0, tr("Scanning failed"));
             return;
-        } else {
-            onScanStarted(m_currentScan);
         }
 
         m_progress->setValue(0);
@@ -273,27 +304,39 @@ void ItemScannerDialog::updateBackend(const QByteArray &backendId)
         }
     }
 
-    auto currentChecked = m_selectItemTypes->checkedId();
-    QAbstractButton *first = nullptr;
-
-    const auto buttons = m_selectItemTypes->buttons();
-    for (auto *b : buttons) {
-        int id = m_selectItemTypes->id(b);
-        bool valid = itemTypeIds.contains(char(id));
-        b->setVisible(valid);
-        b->setChecked(valid && (id == currentChecked));
-        if (!first && valid)
-            first = b;
+    m_validItemTypes.clear();
+    for (char c : std::as_const(itemTypeIds)) {
+        const auto itt = BrickLink::core()->itemType(c);
+        if (itt || (c == '*'))
+            m_validItemTypes << itt;
     }
-    if ((m_selectItemTypes->checkedId() == -1) && first)
-        first->setChecked(true);
 
+    setItemType(BrickLink::core()->itemType(char(m_selectItemTypes->checkedId())));
     updateCameraResolution(preferredImageSize);
 }
 
 QVector<const BrickLink::Item *> ItemScannerDialog::items() const
 {
     return m_items;
+}
+
+void ItemScannerDialog::hideEvent(QHideEvent *e)
+{
+    QDialog::hideEvent(e);
+
+    // QVideoWidget cannot cope with being hidden and shown again (actually the problem is the
+    // completely private QVideoWindow). The only way to re-activate that video overylay window is
+    // to resize it. We are doing it here when hiding to minimize the flicker.
+
+    m_viewFinder->resize(m_viewFinder->size() + QSize { 0, m_resizeFix ? 1 : -1 });
+    m_resizeFix = !m_resizeFix;
+}
+
+void ItemScannerDialog::changeEvent(QEvent *e)
+{
+    if ((e->type() == QEvent::ActivationChange) && m_camera)
+        m_camera->setActive(isActiveWindow());
+    QDialog::changeEvent(e);
 }
 
 void ItemScannerDialog::keyPressEvent(QKeyEvent *e)
@@ -318,13 +361,6 @@ void ItemScannerDialog::capture()
     }
 }
 
-void ItemScannerDialog::onScanStarted(uint id)
-{
-    if (id == m_currentScan) {
-        //m_overlay->pausePoints(points);
-    }
-}
-
 void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores)
 {
     if (id == m_currentScan) {
@@ -341,8 +377,6 @@ void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Resul
 
         if (m_items.isEmpty()) {
             m_status->setText(m_noMatchText);
-//            m_overlay->unpause();
-//            m_camera->setViewfinder(m_overlay);
         } else {
             accept();
         }
@@ -356,9 +390,6 @@ void ItemScannerDialog::onScanFailed(uint id, const QString &error)
 
         m_bottomStack->setCurrentWidget(m_status);
         m_progressTimer->stop();
-
-//        m_overlay->unpause();
-//        m_camera->setViewfinder(m_overlay);
 
         m_status->setText(u"<b>"_qs + tr("An error occured:") + u"</b><br>" + error);
     }
