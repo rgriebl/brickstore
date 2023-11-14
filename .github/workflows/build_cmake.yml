@@ -154,8 +154,18 @@ jobs:
     # Get Qt
     #################################################
 
-    - name: Install Qt via aqtinstall
+    - name: Cache Qt from aqtinstall
+      id: cache-qt
       if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap
+      uses: actions/cache@v3
+      with:
+        path: "${{ runner.workspace }}/Qt/"
+        key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}"
+
+    - name: Install Qt via aqtinstall
+      if: |
+        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap)
+        && (steps.cache-qt.outputs.cache-hit != 'true')
       shell: sh
       run: |
         python3 -m pip install aqtinstall
@@ -176,23 +186,30 @@ jobs:
                            ${{ matrix.config.qt_tools }}
           fi
         done
-        if [ "${{ matrix.config.os }}" = "windows" ]; then
-          echo "Qt6_DIR=${{ runner.workspace }}\\Qt\\${{ matrix.config.qt_version }}\\${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
-        else
-          echo "Qt6_DIR=${{ runner.workspace }}/Qt/${{ matrix.config.qt_version }}/${{ matrix.config.qt_dir || matrix.config.qt_arch }}" >> $GITHUB_ENV
-        fi
 
-    - name: Fix broken Windows / ARM64 setup
-      if: (matrix.config.qt_arch == 'win64_msvc2019_arm64')
-      run: |
-        # Qt < 6.5.0
-        sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qtpaths.bat"
-        sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qmake.bat"
-        # Qt >= 6.5.0
-        sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qtpaths.bat"
-        sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qmake.bat"
-        ${Qt6_DIR}/bin/qmake.bat -query
+    - name: Install Qt via aqtinstall (finalize)
+      if: |
+        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap)
       shell: sh
+      run: |
+        # Set and export Qt6_DIR
+        if [ "${{ matrix.config.os }}" = "windows" ]; then
+          export Qt6_DIR="${{ runner.workspace }}\\Qt\\${{ matrix.config.qt_version }}\\${{ matrix.config.qt_dir || matrix.config.qt_arch }}"
+        else
+          export Qt6_DIR="${{ runner.workspace }}/Qt/${{ matrix.config.qt_version }}/${{ matrix.config.qt_dir || matrix.config.qt_arch }}"
+        fi
+        echo "Qt6_DIR=$Qt6_DIR" >> $GITHUB_ENV
+
+        # Fix broken Windows / ARM64 setup
+        if [ "${{ matrix.config.qt_arch }}" = "win64_msvc2019_arm64" ]; then
+          # Qt < 6.5.0
+          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qtpaths.bat"
+          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qmake.bat"
+          # Qt >= 6.5.0
+          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qtpaths.bat"
+          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qmake.bat"
+          ${Qt6_DIR}/bin/qmake.bat -query
+        fi
 
     - name: Install Qt from Linux Distro (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
