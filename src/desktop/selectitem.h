@@ -62,6 +62,7 @@ protected slots:
 
 protected:
     void showEvent(QShowEvent *) override;
+    void hideEvent(QHideEvent *) override;
     void changeEvent(QEvent *e) override;
 
 private:

@@ -1246,12 +1246,12 @@ void MainWindow::showAddItemDialog(const BrickLink::Item *item, const BrickLink:
         });
     }
 
-    if (m_add_dialog->isVisible()) {
-        m_add_dialog->raise();
-        m_add_dialog->activateWindow();
-    } else {
+    if (!m_add_dialog->isVisible())
         m_add_dialog->show();
-    }
+    if (m_add_dialog->isMinimized())
+        m_add_dialog->setWindowState(m_add_dialog->windowState() & ~Qt::WindowMinimized);
+    m_add_dialog->raise();
+    m_add_dialog->activateWindow();
 
     if (item) {
         QMetaObject::invokeMethod(m_add_dialog.get(), [this, item, color]() {

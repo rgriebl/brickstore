@@ -75,6 +75,7 @@ public:
     const BrickLink::Color *m_colorFilter = nullptr;
     const BrickLink::Item *m_colorFilterLastItem = nullptr;
     ItemScannerDialog *m_itemScannerDialog = nullptr;
+    bool             m_itemScannerDialogWasVisible = false;
 };
 
 
@@ -253,16 +254,14 @@ void SelectItem::init()
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
         if (!ItemScannerDialog::checkSystemPermissions())
             return;
-        if (!d->m_itemScannerDialog)
+        if (!d->m_itemScannerDialog) {
             d->m_itemScannerDialog = new ItemScannerDialog(this);
 
-        auto itt = currentItemType();
-        d->m_itemScannerDialog->setItemType((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt);
+            connect(d->m_itemScannerDialog, &ItemScannerDialog::itemsScanned,
+                    this, [this](const QVector<const BrickLink::Item *> &items) {
+                if (items.isEmpty())
+                    return;
 
-        if (d->m_itemScannerDialog->exec() == QDialog::Accepted) {
-            auto items = d->m_itemScannerDialog->items();
-
-            if (!items.isEmpty()) {
                 const BrickLink::Item *oldItem = currentItem();
                 d->w_items->clearSelection();
 
@@ -288,8 +287,12 @@ void SelectItem::init()
                 applyFilter();
                 if (d->itemModel->index(oldItem).isValid())
                     setCurrentItem(oldItem, false);
-            }
+            });
         }
+
+        auto itt = currentItemType();
+        d->m_itemScannerDialog->setItemType((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt);
+        d->m_itemScannerDialog->show();
     });
 
     d->w_dateFilter = new QToolButton();
@@ -870,6 +873,24 @@ void SelectItem::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
     ensureSelectionVisible();
+
+    if (d->m_itemScannerDialogWasVisible) {
+        d->m_itemScannerDialogWasVisible = false;
+        QMetaObject::invokeMethod(this, [this]() {
+                if (d->m_itemScannerDialog)
+                    d->m_itemScannerDialog->show();
+        }, Qt::QueuedConnection);
+    }
+}
+
+void SelectItem::hideEvent(QHideEvent *e)
+{
+    if (d->m_itemScannerDialog && d->m_itemScannerDialog->isVisible()) {
+        d->m_itemScannerDialogWasVisible = true;
+        d->m_itemScannerDialog->setVisible(false);
+    }
+
+    QWidget::hideEvent(e);
 }
 
 void SelectItem::ensureSelectionVisible()

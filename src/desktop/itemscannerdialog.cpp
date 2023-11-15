@@ -39,7 +39,6 @@ bool ItemScannerDialog::checkSystemPermissions()
 
     const QString requestDenied = tr("BrickStore's request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system's Settings application.");
 
-
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)) && QT_CONFIG(permissions)
     QCameraPermission cameraPermission;
     switch (qApp->checkPermission(cameraPermission)) {
@@ -66,7 +65,6 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     connect(m_mediaDevices.get(), &QMediaDevices::videoInputsChanged,
             this, &ItemScannerDialog::updateCameraDevices);
 
-    setWindowTitle(tr("Item Scanner"));
     setSizeGripEnabled(true);
 
     const auto allBackends = ItemScanner::inst()->availableBackends();
@@ -83,7 +81,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     for (const auto &backend : allBackends)
         m_selectBackend->addItem(backend.name, backend.id);
 
-    m_selectItemTypes = new QButtonGroup(this);
+    m_selectItemType = new QButtonGroup(this);
     auto *itemTypesWidget = new QWidget;
     itemTypesWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     auto *itemTypesLayout = new QHBoxLayout(itemTypesWidget);
@@ -98,7 +96,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
         b->setCheckable(true);
         b->setChecked(!itt);
         b->setText(itt ? itt->name() : tr("Any"));
-        m_selectItemTypes->addButton(b, itt ? itt->id() : '*');
+        m_selectItemType->addButton(b, itt ? itt->id() : '*');
         itemTypesLayout->addWidget(b, 1);
     };
 
@@ -134,18 +132,32 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     m_status->setTextFormat(Qt::RichText);
     m_status->setAlignment(Qt::AlignCenter);
 
+    m_pinWindow = new QToolButton(this);
+    m_pinWindow->setCheckable(true);
+    m_pinWindow->setAutoRaise(true);
+
+    auto updatePinIcon = [this]() {
+        bool b = m_pinWindow->isChecked();
+        m_pinWindow->setIcon(QIcon::fromTheme(b ? u"window-unpin"_qs : u"window-pin"_qs));
+    };
+    connect(m_pinWindow, &QToolButton::toggled, this, updatePinIcon);
+    updatePinIcon();
+
     auto *layout = new QVBoxLayout(this);
     auto *form = new QFormLayout();
-    form->addRow(new QLabel(tr("Camera")), m_selectCamera);
-    form->addRow(new QLabel(tr("Service")), m_selectBackend);
-    form->addRow(new QLabel(tr("Item type")), itemTypesWidget);
+    form->addRow(m_labelCamera = new QLabel(this), m_selectCamera);
+    form->addRow(m_labelBackend = new QLabel(this), m_selectBackend);
+    form->addRow(m_labelItemType = new QLabel(this), itemTypesWidget);
     layout->addLayout(form);
     layout->addWidget(m_viewFinder, 100);
     m_bottomStack = new QStackedLayout();
     m_bottomStack->setContentsMargins(0, 0, 0, 0);
     m_bottomStack->addWidget(m_status);
     m_bottomStack->addWidget(m_progress);
-    layout->addLayout(m_bottomStack, 0);
+    auto *bottomLayout = new QHBoxLayout();
+    bottomLayout->addWidget(m_pinWindow);
+    bottomLayout->addLayout(m_bottomStack, 1);
+    layout->addLayout(bottomLayout, 0);
 
     m_selectCamera->setCurrentIndex(-1);
     connect(m_selectCamera, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -160,10 +172,6 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
             updateBackend(m_selectBackend->itemData(index).toByteArray());
     });
 
-    m_okText = tr("Click into the camera preview or press Space to capture an image.");
-    m_noCameraText = u"<b>" + tr("There is no camera connected to this computer.") + u"</b>";
-    m_noMatchText = u"<b>" + tr("No matching item found - try again.") + u"</b><br>" + m_okText;
-
     updateCameraDevices();
 
     const QByteArray cameraId = Config::inst()->value(u"MainWindow/ItemScannerDialog/CameraId"_qs).toByteArray();
@@ -174,7 +182,10 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     int backendIndex = m_selectBackend->findData(backendId);
     m_selectBackend->setCurrentIndex(backendIndex < 0 ? 0 : backendIndex);
 
+    languageChange();
+
     restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray());
+    m_pinWindow->setChecked(Config::inst()->value(u"MainWindow/ItemScannerDialog/Pinned"_qs, false).toBool());
 }
 
 ItemScannerDialog::~ItemScannerDialog()
@@ -182,6 +193,7 @@ ItemScannerDialog::~ItemScannerDialog()
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/Geometry"_qs, saveGeometry());
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/CameraId"_qs, m_selectCamera->currentData().toByteArray());
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/BackendId"_qs, m_selectBackend->currentData().toByteArray());
+    Config::inst()->setValue(u"MainWindow/ItemScannerDialog/Pinned"_qs, m_pinWindow->isChecked());
 }
 
 void ItemScannerDialog::setItemType(const BrickLink::ItemType *itemType)
@@ -189,9 +201,9 @@ void ItemScannerDialog::setItemType(const BrickLink::ItemType *itemType)
     QAbstractButton *first = nullptr;
     bool checkedAny = false;
 
-    const auto buttons = m_selectItemTypes->buttons();
+    const auto buttons = m_selectItemType->buttons();
     for (auto *b : buttons) {
-        int id = m_selectItemTypes->id(b);
+        int id = m_selectItemType->id(b);
         const auto itt = BrickLink::core()->itemType(char(id));
         bool valid = m_validItemTypes.contains(itt);
         bool checked = valid && (itt == itemType);
@@ -247,7 +259,7 @@ void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
         Q_UNUSED(id)
 
         m_lastScanTime.restart();
-        m_currentScan = ItemScanner::inst()->scan(img, char(m_selectItemTypes->checkedId()),
+        m_currentScan = ItemScanner::inst()->scan(img, char(m_selectItemType->checkedId()),
                                                   m_selectBackend->currentData().toByteArray());
 
         if (!m_currentScan) {
@@ -311,13 +323,8 @@ void ItemScannerDialog::updateBackend(const QByteArray &backendId)
             m_validItemTypes << itt;
     }
 
-    setItemType(BrickLink::core()->itemType(char(m_selectItemTypes->checkedId())));
+    setItemType(BrickLink::core()->itemType(char(m_selectItemType->checkedId())));
     updateCameraResolution(preferredImageSize);
-}
-
-QVector<const BrickLink::Item *> ItemScannerDialog::items() const
-{
-    return m_items;
 }
 
 void ItemScannerDialog::hideEvent(QHideEvent *e)
@@ -334,8 +341,15 @@ void ItemScannerDialog::hideEvent(QHideEvent *e)
 
 void ItemScannerDialog::changeEvent(QEvent *e)
 {
-    if ((e->type() == QEvent::ActivationChange) && m_camera)
-        m_camera->setActive(isActiveWindow());
+    if ((e->type() == QEvent::ActivationChange) && m_camera) {
+        // we need to decouple this from window activation to prevent crashes on Windows
+        QMetaObject::invokeMethod(this, [this]() {
+            if (m_camera)
+                m_camera->setActive(isActiveWindow());
+        }, Qt::QueuedConnection);
+    } else if (e->type() == QEvent::LanguageChange) {
+        languageChange();
+    }
     QDialog::changeEvent(e);
 }
 
@@ -355,19 +369,17 @@ bool ItemScannerDialog::eventFilter(QObject *o, QEvent *e)
 
 void ItemScannerDialog::capture()
 {
-    if (!m_currentScan) {
-        m_items.clear();
+    if (!m_currentScan)
         m_imageCapture->capture();
-    }
 }
 
 void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores)
 {
     if (id == m_currentScan) {
         m_currentScan = 0;
-        m_items.clear();
+        QVector<const BrickLink::Item *> items;
         for (const auto &is : itemsAndScores)
-            m_items << is.item;
+            items << is.item;
 
         m_bottomStack->setCurrentWidget(m_status);
         m_progressTimer->stop();
@@ -375,10 +387,12 @@ void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Resul
         int elapsed = m_lastScanTime.elapsed();
         s_averageScanTime = s_averageScanTime ? (s_averageScanTime + elapsed) / 2 : elapsed;
 
-        if (m_items.isEmpty()) {
+        if (items.isEmpty()) {
             m_status->setText(m_noMatchText);
         } else {
-            accept();
+            if (!m_pinWindow->isChecked())
+                accept();
+            emit itemsScanned(items);
         }
     }
 }
@@ -393,6 +407,21 @@ void ItemScannerDialog::onScanFailed(uint id, const QString &error)
 
         m_status->setText(u"<b>"_qs + tr("An error occured:") + u"</b><br>" + error);
     }
+}
+
+void ItemScannerDialog::languageChange()
+{
+    setWindowTitle(tr("Item Scanner"));
+
+    m_okText = tr("Click into the camera preview or press Space to capture an image.");
+    m_noCameraText = u"<b>" + tr("There is no camera connected to this computer.") + u"</b>";
+    m_noMatchText = u"<b>" + tr("No matching item found - try again.") + u"</b><br>" + m_okText;
+
+    m_labelCamera->setText(tr("Camera"));
+    m_labelBackend->setText(tr("Service"));
+    m_labelItemType->setText(tr("Item type"));
+
+    m_pinWindow->setToolTip(tr("Keep this window open"));
 }
 
 
