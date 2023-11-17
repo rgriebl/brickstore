@@ -68,6 +68,10 @@
             <qmlproperty name="noLot" fullname="BrickLink.BrickLink.noLot" href="qml-bricklink-bricklink.html#noLot-prop" status="active" access="public" documented="true" type="Lot" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="BrickStore" qml-module-name="BrickStore" fullname="BrickStore.BrickStore" href="qml-brickstore-brickstore.html" status="active" access="public" documented="true" groups="qml-api" title="BrickStore" fulltitle="BrickStore" subtitle="" brief="This singleton represents global settings and state">
+            <function name="exchangeRate" fullname="BrickStore.BrickStore.exchangeRate" href="qml-brickstore-brickstore.html#exchangeRate-method" status="active" access="public" documented="true" meta="qmlmethod" type="string">
+                <parameter type="string" name="fromCode" default=""/>
+                <parameter type="string" name="toCode" default=""/>
+            </function>
             <function name="nameFiltersForBrickLinkXML" fullname="BrickStore.BrickStore.nameFiltersForBrickLinkXML" href="qml-brickstore-brickstore.html#nameFiltersForBrickLinkXML-method" status="active" access="public" documented="true" meta="qmlmethod" type="stringlist">
                 <parameter type="bool" name="includeAll" default="false"/>
             </function>
