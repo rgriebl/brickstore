@@ -532,6 +532,8 @@ public:
     QmlDebug *debug() const;
     QString defaultCurrencyCode() const;
 
+    Q_INVOKABLE double exchangeRate(const QString &fromCode, const QString &toCode) const;
+
     Q_INVOKABLE QString dim(const QString &str) const;
 
     Q_INVOKABLE QString symbolForCurrencyCode(const QString &currencyCode) const;

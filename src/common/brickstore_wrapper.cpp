@@ -150,6 +150,16 @@ QString QmlBrickStore::defaultCurrencyCode() const
     return Config::inst()->defaultCurrencyCode();
 }
 
+/*! \qmlmethod string BrickStore::exchangeRate(string fromCode, string toCode)
+
+    Returns the currency exchange cross-rate between the two given currencies, denoted as ISO
+    currency code (e.g. \c EUR).
+*/
+double QmlBrickStore::exchangeRate(const QString &fromCode, const QString &toCode) const
+{
+    return Currency::inst()->crossRate(fromCode, toCode);
+}
+
 QString QmlBrickStore::dim(const QString &str) const
 {
     auto d = BrickLink::Dimensions::parseString(str, 0, BrickLink::Dimensions::Relaxed);
