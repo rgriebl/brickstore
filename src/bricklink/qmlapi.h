@@ -391,7 +391,7 @@ class QmlLot : public QmlWrapperBase<Lot>
 
     Q_PROPERTY(int sale READ sale WRITE setSale)
     Q_PROPERTY(double total READ total)
-    Q_PROPERTY(double cost READ cost)
+    Q_PROPERTY(double cost READ cost WRITE setCost)
 
     Q_PROPERTY(uint lotId READ lotId WRITE setLotId)
     Q_PROPERTY(bool retain READ retain WRITE setRetain)
