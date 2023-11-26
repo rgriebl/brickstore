@@ -952,7 +952,7 @@ void MainWindow::createActions()
 
     ActionManager::ActionTable actionTable = {
         { "go_home", [this](bool b) { goHome(b); } },
-        { "document_save_all", [this](auto) {
+        { "document_save_all", [this](bool) {
               auto oldView = m_activeView;
               auto oldViewPane = m_activeViewPane;
               const auto docs = DocumentList::inst()->documents();
@@ -982,12 +982,12 @@ void MainWindow::createActions()
               if (m_activeView != oldView)
                   setActiveView(oldView);
         } },
-        { "document_import_bl_inv", [this](auto) {
+        { "document_import_bl_inv", [this](bool) {
               if (!m_importinventory_dialog)
                   m_importinventory_dialog = new ImportInventoryDialog(this);
               m_importinventory_dialog->show();
           } },
-        { "document_import_bl_order", [this](auto) -> QCoro::Task<> {
+        { "document_import_bl_order", [this](bool) -> QCoro::Task<> {
               if (!co_await Application::inst()->checkBrickLinkLogin())
                   co_return;
 
@@ -995,7 +995,7 @@ void MainWindow::createActions()
                   m_importorder_dialog = new ImportOrderDialog(this);
               m_importorder_dialog->show();
           } },
-        { "document_import_bl_cart", [this](auto) -> QCoro::Task<> {
+        { "document_import_bl_cart", [this](bool) -> QCoro::Task<> {
               if (!co_await Application::inst()->checkBrickLinkLogin())
                   co_return;
 
@@ -1003,7 +1003,7 @@ void MainWindow::createActions()
                   m_importcart_dialog = new ImportCartDialog(this);
               m_importcart_dialog->show();
           } },
-        { "document_import_bl_wanted", [this](auto) -> QCoro::Task<> {
+        { "document_import_bl_wanted", [this](bool) -> QCoro::Task<> {
               if (!co_await Application::inst()->checkBrickLinkLogin())
                   co_return;
 
@@ -1011,49 +1011,49 @@ void MainWindow::createActions()
                   m_importwanted_dialog = new ImportWantedListDialog(this);
               m_importwanted_dialog->show();
           } },
-        { "application_exit", [this](auto) { close(); } },
-        { "edit_additems", [this](auto) {
+        { "application_exit", [this](bool) { close(); } },
+        { "edit_additems", [this](bool) {
               showAddItemDialog();
           } },
         { "view_fullscreen", [this](bool fullScreen) {
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
           } },
-        { "view_row_height_inc", [](auto) {
+        { "view_row_height_inc", [](bool) {
               // round up to 10% and add 10%
               Config::inst()->setRowHeightPercent((((Config::inst()->rowHeightPercent() + 5) / 10) + 1) * 10);
           } },
-        { "view_row_height_dec", [](auto) {
+        { "view_row_height_dec", [](bool) {
               // round down to 10% and subtract 10%
               Config::inst()->setRowHeightPercent((((Config::inst()->rowHeightPercent()) / 10) - 1) * 10);
           } },
-        { "view_row_height_reset", [](auto) {
+        { "view_row_height_reset", [](bool) {
               Config::inst()->setRowHeightPercent(100);
           } },
-        { "update_database", [](auto) { Application::inst()->updateDatabase(); } },
-        { "help_about", [this](auto) {
+        { "update_database", [](bool) { Application::inst()->updateDatabase(); } },
+        { "help_about", [this](bool) {
               auto *dlg = new AboutDialog(this);
               dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
               dlg->show();
           } },
-        { "help_systeminfo", [this](auto) {
+        { "help_systeminfo", [this](bool) {
               auto *dlg = new SystemInfoDialog(this);
               dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
               dlg->show();
           } },
-        { "check_for_updates", [this](auto) { m_checkForUpdates->check(false /*not silent*/); } },
-        { "view_filter", [this](auto) {
+        { "check_for_updates", [this](bool) { m_checkForUpdates->check(false /*not silent*/); } },
+        { "view_filter", [this](bool) {
               if (m_activeViewPane)
                   m_activeViewPane->focusFilter();
           } },
-        { "view_column_layout_manage", [this](auto) {
+        { "view_column_layout_manage", [this](bool) {
               auto *dlg = new ManageColumnLayoutsDialog(this);
               dlg->setWindowModality(Qt::ApplicationModal);
               dlg->setAttribute(Qt::WA_DeleteOnClose);
               dlg->show();
           } },
-        { "reload_scripts", [](auto) { ScriptManager::inst()->reload(); } },
+        { "reload_scripts", [](bool) { ScriptManager::inst()->reload(); } },
     };
 
     am->connectActionTable(actionTable);

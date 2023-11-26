@@ -312,8 +312,8 @@ View::View(Document *document, QWidget *parent)
     m_latest_timer->setInterval(100ms);
 
     m_actionTable = {
-        { "edit_partoutitems", [this](auto) { partOutItems(); } },
-        { "edit_copy_fields", [this](auto) -> QCoro::Task<> {
+        { "edit_partoutitems", [this](bool) { partOutItems(); } },
+        { "edit_copy_fields", [this](bool) -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
                                         tr("Choose how fields are getting copied or merged."), this);
@@ -329,7 +329,7 @@ View::View(Document *document, QWidget *parent)
                   qDeleteAll(lots);
               }
           } },
-        { "edit_subtractitems", [this](auto) -> QCoro::Task<> {
+        { "edit_subtractitems", [this](bool) -> QCoro::Task<> {
               SelectDocumentDialog dlg(model(), tr("Which items should be subtracted from the current document:"), this);
               dlg.setWindowModality(Qt::ApplicationModal);
               dlg.show();
@@ -341,7 +341,7 @@ View::View(Document *document, QWidget *parent)
                   qDeleteAll(lots);
               }
           } },
-        { "edit_price_to_priceguide", [this](auto) -> QCoro::Task<> {
+        { "edit_price_to_priceguide", [this](bool) -> QCoro::Task<> {
               Q_ASSERT(!selectedLots().isEmpty());
               //Q_ASSERT(m_setToPG.isNull());
 
@@ -354,7 +354,7 @@ View::View(Document *document, QWidget *parent)
                                               dlg.noPriceGuideOption());
               }
           } },
-        { "edit_price_inc_dec", [this](auto) -> QCoro::Task<> {
+        { "edit_price_inc_dec", [this](bool) -> QCoro::Task<> {
               bool showTiers = !m_header->isSectionHidden(DocumentModel::TierQ1);
               IncDecPricesDialog dlg(tr("Increase or decrease the prices of the selected items by"),
                                      showTiers, m_model->currencyCode(), this);
@@ -364,7 +364,7 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->priceAdjust(dlg.isFixed(), dlg.value(), dlg.applyToTiers());
           } },
-        { "edit_tierprice_relative", [this](auto) -> QCoro::Task<> {
+        { "edit_tierprice_relative", [this](bool) -> QCoro::Task<> {
              Q_ASSERT(!selectedLots().isEmpty());
 
              TierPricesDialog dlg(this);
@@ -374,7 +374,7 @@ View::View(Document *document, QWidget *parent)
              if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                  m_document->setRelativeTierPrices(dlg.percentagesOff());
          } },
-        { "edit_cost_inc_dec", [this](auto) -> QCoro::Task<> {
+        { "edit_cost_inc_dec", [this](bool) -> QCoro::Task<> {
               IncDecPricesDialog dlg(tr("Increase or decrease the costs of the selected items by"),
                                      false, m_model->currencyCode(), this);
               dlg.setWindowModality(Qt::ApplicationModal);
@@ -383,11 +383,11 @@ View::View(Document *document, QWidget *parent)
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted)
                   m_document->costAdjust(dlg.isFixed(), dlg.value());
           } },
-        { "edit_color", [this](auto) { m_table->editCurrentItem(DocumentModel::Color); } },
-        { "edit_item", [this](auto) { m_table->editCurrentItem(DocumentModel::Description); } },
+        { "edit_color", [this](bool) { m_table->editCurrentItem(DocumentModel::Color); } },
+        { "edit_item", [this](bool) { m_table->editCurrentItem(DocumentModel::Description); } },
 
-        { "document_print", [this](auto) { print(false); } },
-        { "document_print_pdf", [this](auto) { print(true); } },
+        { "document_print", [this](bool) { print(false); } },
+        { "document_print_pdf", [this](bool) { print(true); } },
     };
 
     m_table = new TableView(this);

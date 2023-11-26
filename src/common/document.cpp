@@ -263,10 +263,10 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
     }
 
     m_actionTable = {
-        { "edit_cut", [this](auto) { cut(); } },
-        { "edit_copy", [this](auto) { copy(); } },
-        { "edit_duplicate", [this](auto) { duplicate(); } },
-        { "edit_paste", [this](auto) -> QCoro::Task<> {
+        { "edit_cut", [this](bool) { cut(); } },
+        { "edit_copy", [this](bool) { copy(); } },
+        { "edit_duplicate", [this](bool) { duplicate(); } },
+        { "edit_paste", [this](bool) -> QCoro::Task<> {
               auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
               QModelIndex oldCurrentIdx;
 
@@ -289,41 +289,41 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   }
               }
           } },
-        { "edit_paste_silent", [this](auto) {
+        { "edit_paste_silent", [this](bool) {
               auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
               if (!lots.empty()) {
                   m_model->adjustLotCurrencyToModel(lots, currencyCode);
                   m_model->addLots(std::move(lots), DocumentModel::AddLotMode::AddAsNew);
               }
           } },
-        { "edit_mergeitems", [this](auto) {
+        { "edit_mergeitems", [this](bool) {
               if (!selectedLots().isEmpty())
                   m_model->consolidateLots(selectedLots());
               else
                   m_model->consolidateLots(m_model->sortedLots());
           } },
-        { "edit_delete", [this](auto) { remove(); } },
-        { "edit_select_all", [this](auto) { selectAll(); } },
-        { "edit_select_none", [this](auto) { selectNone(); } },
-        { "edit_filter_from_selection", [this](auto) { setFilterFromSelection(); } },
-        { "edit_status_include", [this](auto) { setStatus(BrickLink::Status::Include); } },
-        { "edit_status_exclude", [this](auto) { setStatus(BrickLink::Status::Exclude); } },
-        { "edit_status_extra", [this](auto) { setStatus(BrickLink::Status::Extra); } },
-        { "edit_status_toggle", [this](auto) { toggleStatus(); } },
-        { "edit_cond_new", [this](auto) { setCondition(BrickLink::Condition::New); } },
-        { "edit_cond_used", [this](auto) { setCondition(BrickLink::Condition::Used); } },
-        { "edit_subcond_none", [this](auto) { setSubCondition(BrickLink::SubCondition::None); } },
-        { "edit_subcond_sealed", [this](auto) { setSubCondition(BrickLink::SubCondition::Sealed); } },
-        { "edit_subcond_complete", [this](auto) { setSubCondition(BrickLink::SubCondition::Complete); } },
-        { "edit_subcond_incomplete", [this](auto) { setSubCondition(BrickLink::SubCondition::Incomplete); } },
-        { "edit_retain_yes", [this](auto) { setRetain(true); } },
-        { "edit_retain_no", [this](auto) { setRetain(false); } },
-        { "edit_retain_toggle", [this](auto) { toggleRetain(); } },
-        { "edit_stockroom_no", [this](auto) { setStockroom(BrickLink::Stockroom::None); } },
-        { "edit_stockroom_a", [this](auto) { setStockroom(BrickLink::Stockroom::A); } },
-        { "edit_stockroom_b", [this](auto) { setStockroom(BrickLink::Stockroom::B); } },
-        { "edit_stockroom_c", [this](auto) { setStockroom(BrickLink::Stockroom::C); } },
-        { "edit_price_set", [this](auto) -> QCoro::Task<> {
+        { "edit_delete", [this](bool) { remove(); } },
+        { "edit_select_all", [this](bool) { selectAll(); } },
+        { "edit_select_none", [this](bool) { selectNone(); } },
+        { "edit_filter_from_selection", [this](bool) { setFilterFromSelection(); } },
+        { "edit_status_include", [this](bool) { setStatus(BrickLink::Status::Include); } },
+        { "edit_status_exclude", [this](bool) { setStatus(BrickLink::Status::Exclude); } },
+        { "edit_status_extra", [this](bool) { setStatus(BrickLink::Status::Extra); } },
+        { "edit_status_toggle", [this](bool) { toggleStatus(); } },
+        { "edit_cond_new", [this](bool) { setCondition(BrickLink::Condition::New); } },
+        { "edit_cond_used", [this](bool) { setCondition(BrickLink::Condition::Used); } },
+        { "edit_subcond_none", [this](bool) { setSubCondition(BrickLink::SubCondition::None); } },
+        { "edit_subcond_sealed", [this](bool) { setSubCondition(BrickLink::SubCondition::Sealed); } },
+        { "edit_subcond_complete", [this](bool) { setSubCondition(BrickLink::SubCondition::Complete); } },
+        { "edit_subcond_incomplete", [this](bool) { setSubCondition(BrickLink::SubCondition::Incomplete); } },
+        { "edit_retain_yes", [this](bool) { setRetain(true); } },
+        { "edit_retain_no", [this](bool) { setRetain(false); } },
+        { "edit_retain_toggle", [this](bool) { toggleRetain(); } },
+        { "edit_stockroom_no", [this](bool) { setStockroom(BrickLink::Stockroom::None); } },
+        { "edit_stockroom_a", [this](bool) { setStockroom(BrickLink::Stockroom::A); } },
+        { "edit_stockroom_b", [this](bool) { setStockroom(BrickLink::Stockroom::B); } },
+        { "edit_stockroom_c", [this](bool) { setStockroom(BrickLink::Stockroom::C); } },
+        { "edit_price_set", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new price for all selected items:"),
@@ -333,8 +333,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setPrice(*d);
               }
           } },
-        { "edit_price_round", [this](auto) { roundPrice(); } },
-        { "edit_cost_set", [this](auto) -> QCoro::Task<> {
+        { "edit_price_round", [this](bool) { roundPrice(); } },
+        { "edit_cost_set", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the new cost for all selected items:"),
@@ -344,8 +344,8 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setCost(*d);
               }
           } },
-        { "edit_cost_round", [this](auto) { roundCost(); } },
-        { "edit_cost_spread_price", [this](auto) -> QCoro::Task<> {
+        { "edit_cost_round", [this](bool) { roundCost(); } },
+        { "edit_cost_spread_price", [this](bool) -> QCoro::Task<> {
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
@@ -353,7 +353,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   spreadCost(*d, SpreadCost::ByPrice);
               }
           } },
-        { "edit_cost_spread_weight", [this](auto) -> QCoro::Task<> {
+        { "edit_cost_spread_weight", [this](bool) -> QCoro::Task<> {
               Q_ASSERT(selectedLots().size() >= 2);
               if (auto d = co_await UIHelpers::getDouble(tr("Enter the cost amount to spread over all the selected items:"),
                                                          m_model->currencyCode(), 0,
@@ -361,19 +361,19 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   spreadCost(*d, SpreadCost::ByWeight);
               }
           } },
-        { "edit_qty_divide", [this](auto) -> QCoro::Task<> {
+        { "edit_qty_divide", [this](bool) -> QCoro::Task<> {
               if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"),
                                                           QString(), 1, 1, 1000)) {
                   divideQuantity(*i);
               }
           } },
-        { "edit_qty_multiply", [this](auto) -> QCoro::Task<> {
+        { "edit_qty_multiply", [this](bool) -> QCoro::Task<> {
               if (auto i = co_await UIHelpers::getInteger(tr("Multiply the quantities of all selected items with this factor."),
                                                           tr("x"), 1, -1000, 1000)) {
                   multiplyQuantity(*i);
               }
           } },
-        { "edit_bulk", [this](auto) -> QCoro::Task<> {
+        { "edit_bulk", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Set bulk quantity for the selected items:"),
@@ -383,7 +383,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setBulkQuantity(*i);
               }
           } },
-        { "edit_sale", [this](auto) -> QCoro::Task<> {
+        { "edit_sale", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."),
@@ -392,7 +392,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setSale(*i);
               }
           } },
-        { "edit_qty_set", [this](auto) -> QCoro::Task<> {
+        { "edit_qty_set", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto i = co_await UIHelpers::getInteger(tr("Enter the new quantities for all selected items:"),
@@ -401,7 +401,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setQuantity(*i);
               }
           } },
-        { "edit_remark_set", [this](auto) -> QCoro::Task<> {
+        { "edit_remark_set", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new remark for all selected items:"),
@@ -409,18 +409,18 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setRemarks(*s);
               }
           } },
-        { "edit_remark_clear", [this](auto) { setRemarks({ }); } },
-        { "edit_remark_add", [this](auto) -> QCoro::Task<> {
+        { "edit_remark_clear", [this](bool) { setRemarks({ }); } },
+        { "edit_remark_add", [this](bool) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be added to the remarks of all selected items:"))) {
                   addRemarks(*s);
               }
           } },
-        { "edit_remark_rem", [this](auto) -> QCoro::Task<> {
+        { "edit_remark_rem", [this](bool) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be removed from the remarks of all selected items:"))) {
                   removeRemarks(*s);
               }
           } },
-        { "edit_comment_set", [this](auto) -> QCoro::Task<> {
+        { "edit_comment_set", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new comment for all selected items:"),
@@ -428,18 +428,18 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setComments(*s);
               }
           } },
-        { "edit_comment_clear", [this](auto) { setComments({ }); } },
-        { "edit_comment_add", [this](auto) -> QCoro::Task<> {
+        { "edit_comment_clear", [this](bool) { setComments({ }); } },
+        { "edit_comment_add", [this](bool) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be added to the comments of all selected items:"))) {
                   addComments(*s);
               }
           } },
-        { "edit_comment_rem", [this](auto) -> QCoro::Task<> {
+        { "edit_comment_rem", [this](bool) -> QCoro::Task<> {
               if (auto s = co_await UIHelpers::getString(tr("Enter the text, that should be removed from the comments of all selected items:"))) {
                   removeComments(*s);
               }
           } },
-        { "edit_reserved", [this](auto) -> QCoro::Task<> {
+        { "edit_reserved", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto s = co_await UIHelpers::getString(tr("Reserve all selected items for this specific buyer (BrickLink username):"),
@@ -447,7 +447,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setReserved(*s);
               }
           } },
-        { "edit_marker_text", [this](auto) -> QCoro::Task<> {
+        { "edit_marker_text", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto s = co_await UIHelpers::getString(tr("Enter the new marker text for all selected items:"),
@@ -455,50 +455,50 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   setMarkerText(*s);
               }
           } },
-        { "edit_marker_color", [this](auto) -> QCoro::Task<> {
+        { "edit_marker_color", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
               if (auto c = co_await UIHelpers::getColor(selectedLots().front()->markerColor())) {
                   setMarkerColor(*c);
               }
           } },
-        { "edit_marker_clear", [this](auto) { clearMarker(); } },
-        { "edit_lotid_copy", [this](auto) { copyLotId(); } },
-        { "edit_lotid_clear", [this](auto) { clearLotId(); } },
+        { "edit_marker_clear", [this](bool) { clearMarker(); } },
+        { "edit_lotid_copy", [this](bool) { copyLotId(); } },
+        { "edit_lotid_clear", [this](bool) { clearLotId(); } },
 
-        { "view_reset_diff_mode", [this](auto) { resetDifferenceMode(); } },
-        { "view_goto_next_diff", [this](auto) { gotoNextErrorOrDifference(true); } },
-        { "view_goto_next_input_error", [this](auto) { gotoNextErrorOrDifference(false); } },
-        { "view_column_layout_save", [this](auto) { saveCurrentColumnLayout(); } },
+        { "view_reset_diff_mode", [this](bool) { resetDifferenceMode(); } },
+        { "view_goto_next_diff", [this](bool) { gotoNextErrorOrDifference(true); } },
+        { "view_goto_next_input_error", [this](bool) { gotoNextErrorOrDifference(false); } },
+        { "view_column_layout_save", [this](bool) { saveCurrentColumnLayout(); } },
 
-        { "document_save", [this](auto) { save(false); } },
-        { "document_save_as", [this](auto) { save(true); } },
-        { "document_close", [this](auto) { requestClose(); } },
-        { "document_export_bl_xml", [this](auto) { exportBrickLinkXMLToFile(); } },
-        { "document_export_bl_xml_clip", [this](auto) { exportBrickLinkXMLToClipboard(); } },
-        { "document_export_bl_update_clip", [this](auto) { exportBrickLinkUpdateXMLToClipboard(); } },
-        { "document_export_bl_invreq_clip", [this](auto) { exportBrickLinkInventoryRequestToClipboard(); } },
-        { "document_export_bl_wantedlist_clip", [this](auto) { exportBrickLinkWantedListToClipboard(); } },
+        { "document_save", [this](bool) { save(false); } },
+        { "document_save_as", [this](bool) { save(true); } },
+        { "document_close", [this](bool) { requestClose(); } },
+        { "document_export_bl_xml", [this](bool) { exportBrickLinkXMLToFile(); } },
+        { "document_export_bl_xml_clip", [this](bool) { exportBrickLinkXMLToClipboard(); } },
+        { "document_export_bl_update_clip", [this](bool) { exportBrickLinkUpdateXMLToClipboard(); } },
+        { "document_export_bl_invreq_clip", [this](bool) { exportBrickLinkInventoryRequestToClipboard(); } },
+        { "document_export_bl_wantedlist_clip", [this](bool) { exportBrickLinkWantedListToClipboard(); } },
 
-        { "bricklink_catalog", [this](auto) {
+        { "bricklink_catalog", [this](bool) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
               Application::openUrl(BrickLink::Core::urlForCatalogInfo(lot->item(), lot->color()));
           } },
-        { "bricklink_priceguide", [this](auto) {
+        { "bricklink_priceguide", [this](bool) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
               Application::openUrl(BrickLink::Core::urlForPriceGuideInfo(lot->item(), lot->color()));
           } },
-        { "bricklink_lotsforsale", [this](auto) {
+        { "bricklink_lotsforsale", [this](bool) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();
               Application::openUrl(BrickLink::Core::urlForLotsForSale(lot->item(), lot->color()));
           } },
-        { "bricklink_myinventory", [this](auto) {
+        { "bricklink_myinventory", [this](bool) {
               if (selectedLots().isEmpty())
                   return;
               const auto *lot = selectedLots().constFirst();

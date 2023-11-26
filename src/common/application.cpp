@@ -226,11 +226,11 @@ void Application::afterInit()
     }
 
     ActionManager::ActionTable applicationActionTable = {
-        { "document_new", [](auto) { new Document(); } },
-        { "document_open", [](auto) { Document::load(); } },
-        { "document_import_bl_xml", [](auto) { DocumentIO::importBrickLinkXML(); } },
-        { "document_import_ldraw_model", [](auto) { DocumentIO::importLDrawModel(); } },
-        { "document_import_bl_store_inv", [this](auto) -> QCoro::Task<> {
+        { "document_new", [](bool) { new Document(); } },
+        { "document_open", [](bool) { Document::load(); } },
+        { "document_import_bl_xml", [](bool) { DocumentIO::importBrickLinkXML(); } },
+        { "document_import_ldraw_model", [](bool) { DocumentIO::importLDrawModel(); } },
+        { "document_import_bl_store_inv", [this](bool) -> QCoro::Task<> {
               if (!co_await checkBrickLinkLogin())
                   co_return;
 
@@ -257,21 +257,21 @@ void Application::afterInit()
               Config::inst()->setShowDifferenceIndicators(b);
               ActionManager::inst()->qAction("view_goto_next_diff")->setEnabled(b);
           } },
-        { "configure", [this](auto) { emit showSettings(); } },
-        { "developer_console", [this](auto) { emit showDeveloperConsole(); } },
-        { "help_extensions", [](auto) {
+        { "configure", [this](bool) { emit showSettings(); } },
+        { "developer_console", [this](bool) { emit showDeveloperConsole(); } },
+        { "help_extensions", [](bool) {
               QString url = u"https://" + Application::inst()->gitHubPagesUrl() + u"/extensions/";
               openUrl(url);
           } },
-        { "help_reportbug", [](auto) {
+        { "help_reportbug", [](bool) {
               QString url = u"https://" + Application::inst()->gitHubUrl() + u"/issues/new";
               openUrl(url);
           } },
-        { "help_releasenotes", [](auto) {
+        { "help_releasenotes", [](bool) {
               QString url = u"https://" + Application::inst()->gitHubUrl() + u"/releases";
               openUrl(url);
           } },
-        { "help_announcements", [](auto) {
+        { "help_announcements", [](bool) {
               QString url = Application::inst()->announcements()->announcementsWikiUrl();
               openUrl(url);
           } },
