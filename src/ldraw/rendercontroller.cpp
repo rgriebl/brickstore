@@ -134,7 +134,7 @@ void RenderController::setItemAndColor(BrickLink::QmlItem item, BrickLink::QmlCo
 void RenderController::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
 {
     if (!color)
-        color = BrickLink::core()->color(99); // Very Light Bluish Gray
+        color = BrickLink::core()->color(0); // not-applicable
 
     if (item == m_item) {
         if (!item || (color == m_color))
@@ -215,8 +215,9 @@ QCoro::Task<void> RenderController::updateGeometries()
                 continue;
 
             const BrickLink::Color *surfaceColor = it.key();
+            const bool isTextured = surfaceColor->hasParticles() || (surfaceColor->id() == 0);
 
-            const int stride = (3 + 3 + (surfaceColor->hasParticles() ? 2 : 0)) * sizeof(float);
+            const int stride = (3 + 3 + (isTextured ? 2 : 0)) * sizeof(float);
 
             auto geo = new QmlRenderGeometry(surfaceColor);
 
@@ -247,7 +248,7 @@ QCoro::Task<void> RenderController::updateGeometries()
             geo->setStride(stride);
             geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
             geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-            if (surfaceColor->hasParticles()) {
+            if (isTextured) {
                 geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
 
                 QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
@@ -386,7 +387,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
             const auto p2m = matrix.map(ccw ? p[1] : p[2]);
             const auto n = QVector3D::normal(p0m, p1m, p2m);
 
-            if (color->hasParticles()) {
+            if (color->hasParticles() || (color->id() == 0)) {
                 float u[3], v[3];
                 const float l1 = p0m.distanceToPoint(p1m) / 24;
                 const float l2 = p0m.distanceToPoint(p2m) / 24;
@@ -426,7 +427,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
             const auto p3m = matrix.map(p[ccw ? 1 : 3]);
             const auto n = QVector3D::normal(p0m, p1m, p2m);
 
-            if (color->hasParticles()) {
+            if (color->hasParticles() || (color->id() == 0)) {
                 float u[4], v[4];
                 const float l1 = p0m.distanceToPoint(p1m) / 24;
                 const float l3 = p0m.distanceToPoint(p3m)/ 24;
@@ -499,97 +500,113 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
 
 QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color)
 {
-    if (color && color->hasParticles()) {
+    if (color && (color->hasParticles() || color->id() == 0)) {
         QImage texImage = s_materialTextureDatas.value(color);
 
         if (texImage.isNull()) {
+            QString cacheName;
             const bool isSpeckle = color->isSpeckle();
 
-            QString cacheName = (isSpeckle ? u"Speckle"_qs : u"Glitter"_qs)
-                    + u'_' + color->ldrawColor().name(QColor::HexArgb)
-                    + u'_' + color->particleColor().name(QColor::HexArgb)
-                    + u'_' + QString::number(double(color->particleMinSize()))
-                    + u'_' + QString::number(double(color->particleMaxSize()))
-                    + u'_' + QString::number(double(color->particleFraction()));
+            if (color->id() == 0) {
+                cacheName = u"Not-Applicable"_qs;
+            } else {
+                cacheName = (isSpeckle ? u"Speckle"_qs : u"Glitter"_qs)
+                            + u'_' + color->ldrawColor().name(QColor::HexArgb)
+                            + u'_' + color->particleColor().name(QColor::HexArgb)
+                            + u'_' + QString::number(double(color->particleMinSize()))
+                            + u'_' + QString::number(double(color->particleMaxSize()))
+                            + u'_' + QString::number(double(color->particleFraction()));
+            }
 
             static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
             QString cacheFile = cacheDir + u"/ldraw-textures/" + cacheName + u".png";
 
             if (!texImage.load(cacheFile) || texImage.isNull()) {
-                const int particleSize = 50;
-
-                QPixmap particle(particleSize, particleSize);
-                if (isSpeckle) {
-                    particle.fill(Qt::transparent);
-                    QPainter pp(&particle);
-                    pp.setRenderHint(QPainter::Antialiasing);
-                    pp.setPen(Qt::NoPen);
-                    pp.setBrush(color->particleColor());
-                    pp.drawEllipse(particle.rect());
+                if (color->id() == 0) {
+                    texImage = QImage(256, 256, QImage::Format_ARGB32);
+                    texImage.fill(Qt::white);
+                    QPainter p(&texImage);
+                    for (int xdiv = 0; xdiv < 8; ++xdiv) {
+                        for (int ydiv = 0; ydiv < 8; ++ydiv) {
+                            if ((xdiv + ydiv) % 2 == 0)
+                                p.fillRect(xdiv * 32, ydiv * 32, 32, 32, Qt::lightGray);
+                        }
+                    }
                 } else {
-                    particle.fill(color->particleColor());
-                }
+                    const int particleSize = 50;
 
-                double particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.;
-                particleArea *= particleArea;
-                if (isSpeckle)
-                    particleArea *= (M_PI / 4.);
+                    QPixmap particle(particleSize, particleSize);
+                    if (isSpeckle) {
+                        particle.fill(Qt::transparent);
+                        QPainter pp(&particle);
+                        pp.setRenderHint(QPainter::Antialiasing);
+                        pp.setPen(Qt::NoPen);
+                        pp.setBrush(color->particleColor());
+                        pp.drawEllipse(particle.rect());
+                    } else {
+                        particle.fill(color->particleColor());
+                    }
 
-                const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
-                const double ldus = 24.;
-                int particleCount = int(std::floor((ldus * ldus * color->particleFraction()) / particleArea));
-                int delta = int(std::ceil(color->particleMaxSize() * texSize / ldus));
-
-                QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
-                // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
-                img.fill(color->ldrawColor().rgba());
-
-                QList<QPainter::PixmapFragment> fragments;
-                fragments.reserve(particleCount);
-                QRandomGenerator *rd = QRandomGenerator::global();
-                std::uniform_real_distribution<double> dis(color->particleMinSize(),
-                                                           color->particleMaxSize());
-
-                double neededArea = std::floor(texSize * texSize * color->particleFraction());
-                double filledArea = 0;
-
-                //TODO: maybe partition the square into a grid and use random noise to offset drawing
-                //      into each cell to get a more uniform distribution
-
-                while (filledArea < neededArea) {
-                    double x = rd->bounded(texSize) + delta;
-                    double y = rd->bounded(texSize) + delta;
-                    double sx = std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    double sy = isSpeckle ? sx : std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
-                    double rot = isSpeckle ? 0. : rd->bounded(90.);
-                    double opacity = isSpeckle ? 1. : std::clamp((rd->bounded(.3) + .7), 0., 1.);
-
-                    double area = particleSize * particleSize * sx * sy;
+                    double particleArea = (color->particleMinSize() + color->particleMaxSize()) / 2.;
+                    particleArea *= particleArea;
                     if (isSpeckle)
-                        area *= (M_PI / 4.);
-                    filledArea += area;
+                        particleArea *= (M_PI / 4.);
 
-                    fragments << QPainter::PixmapFragment::create({ x, y }, particle.rect(), sx, sy, rot, opacity);
+                    const int texSize = 512; // ~ 24 LDU, the width of a 1 x 1 Brick
+                    const double ldus = 24.;
+                    int particleCount = int(std::floor((ldus * ldus * color->particleFraction()) / particleArea));
+                    int delta = int(std::ceil(color->particleMaxSize() * texSize / ldus));
 
-                    // make it seamless
-                    if (x < (2 * delta))
-                        fragments << QPainter::PixmapFragment::create({ x + texSize, y }, particle.rect(), sx, sy, rot, opacity);
-                    else if (x > texSize)
-                        fragments << QPainter::PixmapFragment::create({ x - texSize, y }, particle.rect(), sx, sy, rot, opacity);
-                    if (y < (2 * delta))
-                        fragments << QPainter::PixmapFragment::create({ x, y + texSize }, particle.rect(), sx, sy, rot, opacity);
-                    else if (y > texSize)
-                        fragments << QPainter::PixmapFragment::create({ x, y - texSize }, particle.rect(), sx, sy, rot, opacity);
+                    QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
+                    // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
+                    img.fill(color->ldrawColor().rgba());
+
+                    QList<QPainter::PixmapFragment> fragments;
+                    fragments.reserve(particleCount);
+                    QRandomGenerator *rd = QRandomGenerator::global();
+                    std::uniform_real_distribution<double> dis(color->particleMinSize(),
+                                                               color->particleMaxSize());
+
+                    double neededArea = std::floor(texSize * texSize * color->particleFraction());
+                    double filledArea = 0;
+
+                    //TODO: maybe partition the square into a grid and use random noise to offset drawing
+                    //      into each cell to get a more uniform distribution
+
+                    while (filledArea < neededArea) {
+                        double x = rd->bounded(texSize) + delta;
+                        double y = rd->bounded(texSize) + delta;
+                        double sx = std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                        double sy = isSpeckle ? sx : std::max(1. / (particleSize - 5), texSize / (ldus * particleSize) * dis(*rd));
+                        double rot = isSpeckle ? 0. : rd->bounded(90.);
+                        double opacity = isSpeckle ? 1. : std::clamp((rd->bounded(.3) + .7), 0., 1.);
+
+                        double area = particleSize * particleSize * sx * sy;
+                        if (isSpeckle)
+                            area *= (M_PI / 4.);
+                        filledArea += area;
+
+                        fragments << QPainter::PixmapFragment::create({ x, y }, particle.rect(), sx, sy, rot, opacity);
+
+                        // make it seamless
+                        if (x < (2 * delta))
+                            fragments << QPainter::PixmapFragment::create({ x + texSize, y }, particle.rect(), sx, sy, rot, opacity);
+                        else if (x > texSize)
+                            fragments << QPainter::PixmapFragment::create({ x - texSize, y }, particle.rect(), sx, sy, rot, opacity);
+                        if (y < (2 * delta))
+                            fragments << QPainter::PixmapFragment::create({ x, y + texSize }, particle.rect(), sx, sy, rot, opacity);
+                        else if (y > texSize)
+                            fragments << QPainter::PixmapFragment::create({ x, y - texSize }, particle.rect(), sx, sy, rot, opacity);
+                    }
+
+                    QPainter p(&img);
+                    p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+                    p.drawPixmapFragments(fragments.constData(), int(fragments.count()), particle);
+                    p.end();
+
+                    texImage = img.copy(delta, delta, texSize, texSize).rgbSwapped()
+                                   .scaled(texSize / 2, texSize / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
                 }
-
-                QPainter p(&img);
-                p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-                p.drawPixmapFragments(fragments.constData(), int(fragments.count()), particle);
-                p.end();
-
-                texImage = img.copy(delta, delta, texSize, texSize).rgbSwapped()
-                        .scaled(texSize / 2, texSize / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
                 QDir(QFileInfo(cacheFile).absolutePath()).mkpath(u"."_qs);
                 texImage.save(cacheFile);
             }

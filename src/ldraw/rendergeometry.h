@@ -37,7 +37,7 @@ public:
 
     QColor color() const        { return m_color->ldrawColor(); }
     float luminance() const     { return m_color->luminance(); }
-    bool isChrome() const       { return m_color->isChrome(); }
+    bool isChrome() const       { return m_color->isChrome() || (m_color->id() == 0); }
     bool isMetallic() const     { return m_color->isMetallic(); }
     bool isPearl() const        { return m_color->isPearl(); }
     QQuick3DTextureData *textureData() const     { return m_texture; }
