@@ -612,14 +612,14 @@ QString AddItemDialog::addhistoryTextFor(const QDateTime &when, const BrickLink:
     QString cs;
     if (lot.color() && lot.color()->id()) {
         QColor color = lot.color()->color();
-        cs = uR"(<b><font color=")" + Utility::textColor(color).name() %
-                uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)" %
-                lot.colorName() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
+        cs = uR"(<b><font color=")" + Utility::textColor(color).name()
+             + uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)"
+             + lot.colorName() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
     }
 
-    QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %
-            u":&nbsp;&nbsp;<b>" + QString::number(lot.quantity()) + u"</b>&nbsp;&nbsp;" + cs %
-            lot.itemName() + u" <i>[" + QLatin1String(lot.itemId()) + u"]</i>";
+    QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when))
+                + u":&nbsp;&nbsp;<b>" + QString::number(lot.quantity()) + u"</b>&nbsp;&nbsp;" + cs
+                + lot.itemName() + u" <i>[" + QLatin1String(lot.itemId()) + u"]</i>";
 
     return s;
 }

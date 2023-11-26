@@ -221,9 +221,9 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
         yearStr = yearStr + u'-' + QString::number(item->yearLastProduced());
 
     QColor color = qApp->palette().color(QPalette::Highlight);
-    id = id + uR"(&nbsp;&nbsp;<i><font color=")" + Utility::textColor(color).name() %
-            uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)" %
-            item->itemType()->name() + uR"(&nbsp;</font></i>)";
+    id = id + uR"(&nbsp;&nbsp;<i><font color=")" + Utility::textColor(color).name()
+         + uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)"
+         + item->itemType()->name() + uR"(&nbsp;</font></i>)";
 
     if (pic && ((pic->updateStatus() == UpdateStatus::Updating)
                 || (pic->updateStatus() == UpdateStatus::Loading))) {

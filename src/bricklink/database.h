@@ -47,10 +47,11 @@ public:
         V8,  // 2022.6.2
         V9,  // 2023.3.1
         V10, // 2023.11.1
+        V11, // 2023.12.1
 
         OldestStillSupported = V6,
 
-        Latest = V10
+        Latest = V11
     };
 
     void setUpdateInterval(int interval);
@@ -105,7 +106,6 @@ private:
     std::vector<Item>                m_items;
     std::vector<ItemChangeLogEntry>  m_itemChangelog;
     std::vector<ColorChangeLogEntry> m_colorChangelog;
-    std::vector<PartColorCode>       m_pccs;
     std::vector<Relationship>        m_relationships;
     std::vector<RelationshipMatch>   m_relationshipMatches;
 
@@ -124,7 +124,6 @@ private:
     void writeItemTypeToDatabase(const ItemType &itemType, QDataStream &dataStream, Version v) const;
     static void readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryResource *pool);
     void writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const;
-    static void readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, MemoryResource *pool);
     void writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version v) const;
     static void readItemChangeLogFromDatabase(ItemChangeLogEntry &e, QDataStream &dataStream, MemoryResource *pool);
     void writeItemChangeLogToDatabase(const ItemChangeLogEntry &e, QDataStream &dataStream, Version v) const;

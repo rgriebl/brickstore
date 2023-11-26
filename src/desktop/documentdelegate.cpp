@@ -287,8 +287,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
     case DocumentModel::Status: {
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
-        QString key = u"dd_st_" + QString::number(quint32(lot->status())) + u"-" %
-                QString::number(iconSize);
+        QString key = u"dd_st_" + QString::number(quint32(lot->status())) + u"-"
+                      + QString::number(iconSize);
         QPixmap pix;
 
         if (!QPixmapCache::find(key, &pix)) {
@@ -860,14 +860,14 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
             if (tip.isEmpty())
                 tip = text;
             if (differenceFlags & differenceWarningMask & (1ULL << idx.column())) {
-                tip = tip + u"<br><br>" %
-                        tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
+                tip = tip + u"<br><br>"
+                      + tr("This change cannot be applied via BrickLink's Mass-Update mechanism!");
             }
             QVariant vold = idx.data(DocumentModel::BaseDisplayRole);
             QString oldText = displayData(idx, vold, true);
 
-            tip = tip + u"<br><br>" %
-                    tr("The original value of this field was:") + u"<br><b>" + oldText + u"</b>";
+            tip = tip + u"<br><br>"
+                  + tr("The original value of this field was:") + u"<br><b>" + oldText + u"</b>";
         }
 
         bool isElided = m_elided.contains(quint64(idx.row()) << 32 | quint64(idx.column()));

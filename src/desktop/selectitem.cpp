@@ -33,7 +33,6 @@
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
 #include "bricklink/model.h"
-#include "bricklink/partcolorcode.h"
 #include "common/actionmanager.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
@@ -239,10 +238,11 @@ void SelectItem::init()
         QString code = QInputDialog::getText(this, tr("Find element number"),
                                              tr("Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)"));
         if (!code.isEmpty()) {
-            if (auto *pcc = BrickLink::core()->partColorCode(code.toUInt())) {
-                setCurrentItem(pcc->item(), true);
-                if (pcc->color())
-                    emit showInColor(pcc->color());
+            const auto &[pccItem, pccColor] = BrickLink::core()->partColorCode(code.toUInt());
+            if (pccItem) {
+                setCurrentItem(pccItem, true);
+                if (pccColor)
+                    emit showInColor(pccColor);
             }
         }
     });

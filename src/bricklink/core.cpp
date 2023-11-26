@@ -34,7 +34,6 @@
 #include "bricklink/item.h"
 #include "bricklink/itemtype.h"
 #include "bricklink/lot.h"
-#include "bricklink/partcolorcode.h"
 #if !defined(BS_BACKEND)
 #  include "bricklink/global.h"
 #  include "bricklink/picture.h"
@@ -715,24 +714,58 @@ QString Core::countryIdFromName(const QString &name) const
     return { };
 }
 
-QString Core::itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight)
+QString Core::itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight) const
 {
     if (item) {
-        QString cs;
+        QString typeStr;
+        QString colorStr;
+        QString pccStr;
+
         if (!QByteArray("MP").contains(item->itemTypeId())) {
-            cs = cs + uR"(<i><font color=")" + Utility::textColor(highlight).name() %
-                    uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)" %
-                    item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
+            typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
+                      + uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)"
+                      + item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
         }
         if (color && color->id()) {
             QColor c = color->color();
-            cs = cs + uR"(<b><font color=")" + Utility::textColor(c).name() %
-                    uR"(" style="background-color: )" + c.name() + uR"(;">&nbsp;)" %
-                    color->name() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
+            colorStr = uR"(<b><font color=")" + Utility::textColor(c).name()
+                       + uR"(" style="background-color: )" + c.name() + uR"(;">&nbsp;)"
+                       + color->name() + uR"(&nbsp;</font></b>&nbsp;&nbsp;)";
+
+        }
+        if (item) {
+            QVector<std::tuple<uint, const Color *>> pccToColor;
+
+            const uint colorIndex = color ? color->index() : 0;
+            const auto pccs = item->pccs();
+            for (const auto &pcc : pccs) {
+                if (!color || (pcc.m_colorIndex == colorIndex))
+                    pccToColor.push_back(std::make_tuple(pcc.pcc(), pcc.color()));
+            }
+
+            if (!color && (pccToColor.size() > 5)) {
+                pccStr = uR"(<br><i>%1 PCCs</i>)"_qs.arg(pccToColor.size());
+            } else if (!pccToColor.isEmpty()) {
+                pccStr = uR"(<br><i>PCC:&nbsp;)" + std::accumulate(pccToColor.cbegin(), pccToColor.cend(), QString { },
+                                                                   [color](const QString &s, const std::tuple<uint, const Color *> &t) {
+                             QString colorStr = u"%1"_qs;
+                             if (!color) {
+                                 const auto *pccColor = std::get<1>(t);
+                                 if (pccColor) {
+                                     QColor c = pccColor->color();
+                                     colorStr = uR"(<font color=")" + Utility::textColor(c).name()
+                                                + uR"(" style="background-color: )" + c.name() + uR"(;">&nbsp;)"
+                                                + u"%1" + uR"(&nbsp;</font>)";
+                                 }
+                             }
+                             return QString { s +  (s.isEmpty() ? u"" : u", ") + colorStr.arg(std::get<0>(t)) };
+                         })
+                         + uR"(</i>)";
+            }
         }
 
-        return u"<center><b>" + QLatin1String(item->id()) + u"</b>&nbsp; " + cs %
-                item->name() + u"</center>";
+        return u"<center><b>" + QLatin1String(item->id()) + u"</b>&nbsp; "
+               + typeStr + colorStr + item->name() + pccStr + u"</center>";
     } else {
         return { };
     }
@@ -816,15 +849,16 @@ const Item *Core::item(const std::string &tids, const QByteArray &id) const
     return nullptr;
 }
 
-const PartColorCode *Core::partColorCode(uint id)
+std::tuple<const Item *, const Color *> Core::partColorCode(uint id) const
 {
-    auto it = std::lower_bound(pccs().cbegin(), pccs().cend(), id);
-    if ((it != pccs().cend()) && (*it == id))
-        return &(*it);
-    return nullptr;
+    for (const auto &item : items()) {
+        if (const auto *color = item.hasPCC(id))
+            return std::make_tuple(&item, color);
+    }
+    return { nullptr, nullptr };
 }
 
-const Relationship *Core::relationship(uint id)
+const Relationship *Core::relationship(uint id) const
 {
     auto it = std::lower_bound(relationships().cbegin(), relationships().cend(), id);
     if ((it != relationships().cend()) && (it->id() == id))
@@ -832,7 +866,7 @@ const Relationship *Core::relationship(uint id)
     return nullptr;
 }
 
-const RelationshipMatch *Core::relationshipMatch(uint id)
+const RelationshipMatch *Core::relationshipMatch(uint id) const
 {
     auto it = std::lower_bound(relationshipMatches().cbegin(), relationshipMatches().cend(), id);
     if ((it != relationshipMatches().cend()) && (it->id() == id))

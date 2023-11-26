@@ -965,7 +965,7 @@ InventoryModel *QmlBrickLink::consistsOfModel(const QVariantList &items, const Q
 
 QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const
 {
-    return BrickLink::Core::itemHtmlDescription(item.wrappedObject(), color.wrappedObject(), highlight);
+    return BrickLink::core()->itemHtmlDescription(item.wrappedObject(), color.wrappedObject(), highlight);
 }
 
 VatType QmlBrickLink::currentVatType() const

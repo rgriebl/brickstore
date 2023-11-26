@@ -292,8 +292,8 @@ const Filter &FilterTermWidget::filter() const
 
 QString FilterTermWidget::filterString() const
 {
-    QString s = m_fields->currentText() + u' ' + m_comparisons->currentText() %
-            u" '" + m_value->currentText() + u"'";
+    QString s = m_fields->currentText() + u' ' + m_comparisons->currentText()
+                + u" '" + m_value->currentText() + u"'";
     if (m_andOrGroup->checkedId() >= 0)
         s = s + u' ' + m_andOrGroup->checkedButton()->text();
     return s;

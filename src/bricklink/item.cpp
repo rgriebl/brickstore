@@ -78,6 +78,21 @@ PartOutTraits Item::partOutTraits() const
     return traits;
 }
 
+std::span<const Item::PCC, std::dynamic_extent> Item::pccs() const
+{
+    return { m_pccs.cbegin(), m_pccs.cend() };
+}
+
+const Color *Item::hasPCC(uint pcc) const
+{
+    auto it = std::lower_bound(m_pccs.cbegin(), m_pccs.cend(), pcc, [](const auto &p1, uint p2) {
+        return p1.pcc() < p2;
+    });
+    if ((it != m_pccs.end()) && (it->pcc() == pcc))
+        return &core()->colors()[it->m_colorIndex];
+    return nullptr;
+}
+
 char Item::itemTypeId() const
 {
     if (auto itt = itemType())
@@ -149,12 +164,17 @@ uint Item::index() const
 
 const Item *Item::ConsistsOf::item() const
 {
-    return &core()->items().at(m_bits.m_itemIndex);
+    return &core()->items().at(m_itemIndex);
 }
 
 const Color *Item::ConsistsOf::color() const
 {
-    return &core()->colors().at(m_bits.m_colorIndex);
+    return &core()->colors().at(m_colorIndex);
+}
+
+const Color *Item::PCC::color() const
+{
+    return &core()->colors().at(m_colorIndex);
 }
 
 } // namespace BrickLink

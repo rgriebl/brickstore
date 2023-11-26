@@ -313,8 +313,8 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     m_blPriceGuide->setVisible(item && color);
     m_blLotsForSale->setVisible(item && color);
 
-    QString s = BrickLink::Core::itemHtmlDescription(m_item, m_color,
-                                                     palette().color(QPalette::Highlight));
+    QString s = BrickLink::core()->itemHtmlDescription(m_item, m_color,
+                                                       palette().color(QPalette::Highlight));
     w_text->setText(s);
     w_image->setPixmap({ });
     w_3d->setEnabled(w_ldraw->canRender());

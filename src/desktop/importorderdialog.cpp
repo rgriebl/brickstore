@@ -270,9 +270,9 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
                 for (auto orderLot : orderLots) {
                     QString marker = orderLot->markerText();
 
-                    orderLot->setMarkerText(order->id() + u' ' + order->otherParty() %
-                                            (marker.isEmpty() ? QString()
-                                                              : QString(u' ' + tr("Batch") + u": " + marker)));
+                    orderLot->setMarkerText(order->id() + u' ' + order->otherParty()
+                                            + (marker.isEmpty() ? QString()
+                                                                : QString(u' ' + tr("Batch") + u": " + marker)));
                     orderLot->setMarkerColor(col);
 
                     if (!qFuzzyIsNull(crate)) {

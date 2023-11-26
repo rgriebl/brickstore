@@ -224,9 +224,9 @@ void BrickStoreProxyStyle::drawControl(ControlElement element, const QStyleOptio
 
                 for (int i = 0; i < sortColumns.size(); ++i) {
                     if (sortColumns.at(i).first == headerOpt->section) {
-                        QString key = u"hv_" + QString::number(iconSize) + u"-" %
-                                QString::number(i) + u"-" + QString::number(
-                                    headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
+                        QString key = u"hv_" + QString::number(iconSize) + u"-"
+                                      + QString::number(i) + u"-" + QString::number(
+                                          headerView->isSorted() ? int(sortColumns.at(i).second) : 2);
 
                         QPixmap pix;
                         if (!QPixmapCache::find(key, &pix)) {

@@ -8,20 +8,16 @@
 
 namespace BrickLink {
 
+// deprecated with DB v11 and only kept around to generate older DB versions
+
 class PartColorCode
 {
 public:
     static constexpr uint InvalidId = static_cast<uint>(-1);
 
-    uint id() const             { return m_id; }
-    const Item *item() const;
-    const Color *color() const;
-
     PartColorCode() = default;
 
-    constexpr std::strong_ordering operator<=>(uint id) const { return m_id <=> id; }
-    constexpr std::strong_ordering operator<=>(const PartColorCode &other) const { return *this <=> other.m_id; }
-    constexpr bool operator==(uint id) const { return (*this <=> id == 0); }
+    constexpr std::strong_ordering operator<=>(const PartColorCode &other) const { return m_id <=> other.m_id; }
 
 private:
     uint m_id = InvalidId;

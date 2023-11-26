@@ -224,7 +224,8 @@ private:
     };
 
     QVector<FilterTerm> m_filter_terms;
-    QStringList     m_filter_ids;
+    QByteArrayList  m_filter_ids;
+    bool            m_filter_ids_optional = false;
     bool            m_inv_filter = false;
     int             m_year_min_filter = 0;
     int             m_year_max_filter = 0;

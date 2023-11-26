@@ -81,7 +81,6 @@ public:
     inline const std::vector<Category> &categories() const  { return database()->m_categories; }
     inline const std::vector<ItemType> &itemTypes() const   { return database()->m_itemTypes; }
     inline const std::vector<Item> &items() const           { return database()->m_items; }
-    inline const std::vector<PartColorCode> &pccs() const   { return database()->m_pccs; }
     inline const std::vector<ItemChangeLogEntry>  &itemChangelog() const     { return database()->m_itemChangelog; }
     inline const std::vector<ColorChangeLogEntry> &colorChangelog() const    { return database()->m_colorChangelog; }
     inline const std::vector<Relationship> &relationships() const            { return database()->m_relationships; }
@@ -99,10 +98,10 @@ public:
     const Item *item(char tid, const QByteArray &id) const;
     const Item *item(const std::string &tids, const QByteArray &id) const;
 
-    const PartColorCode *partColorCode(uint id);
+    std::tuple<const Item *, const Color *> partColorCode(uint id) const;
 
-    const Relationship *relationship(uint id);
-    const RelationshipMatch *relationshipMatch(uint id);
+    const Relationship *relationship(uint id) const;
+    const RelationshipMatch *relationshipMatch(uint id) const;
 
     QSize standardPictureSize() const;
 
@@ -112,7 +111,7 @@ public:
 
     QString countryIdFromName(const QString &name) const;
 
-    static QString itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight);
+    QString itemHtmlDescription(const Item *item, const Color *color, const QColor &highlight) const;
 
     enum class ResolveResult { Fail, Direct, ChangeLog };
     ResolveResult resolveIncomplete(Lot *lot, uint startAtChangelogId, const QDateTime &creationTime);

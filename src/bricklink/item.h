@@ -49,40 +49,35 @@ public:
     public:
         const Item *item() const;
         const Color *color() const;
-        int quantity() const        { return m_bits.m_quantity; }
-        bool isExtra() const        { return m_bits.m_extra; }
-        bool isAlternate() const    { return m_bits.m_isalt; }
-        uint alternateId() const    { return m_bits.m_altid; }
-        bool isCounterPart() const  { return m_bits.m_cpart; }
+        int quantity() const        { return m_quantity; }
+        bool isExtra() const        { return m_extra; }
+        bool isAlternate() const    { return m_isalt; }
+        uint alternateId() const    { return m_altid; }
+        bool isCounterPart() const  { return m_cpart; }
 
-        uint itemIndex() const      { return m_bits.m_itemIndex; }  // only for internal use
-        uint colorIndex() const     { return m_bits.m_colorIndex; } // only for internal use
+        uint itemIndex() const      { return m_itemIndex; }  // only for internal use
+        uint colorIndex() const     { return m_colorIndex; } // only for internal use
 
     private:
-        union {
-            struct {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-                quint64  m_quantity   : 12;
-                quint64  m_itemIndex  : 20;
-                quint64  m_colorIndex : 12;
-                quint64  m_extra      : 1;
-                quint64  m_isalt      : 1;
-                quint64  m_altid      : 6;
-                quint64  m_cpart      : 1;
-                quint64  m_reserved   : 11;
+        quint64  m_quantity   : 12;
+        quint64  m_itemIndex  : 20;
+        quint64  m_colorIndex : 12;
+        quint64  m_extra      : 1;
+        quint64  m_isalt      : 1;
+        quint64  m_altid      : 6;
+        quint64  m_cpart      : 1;
+        quint64  m_reserved   : 11;
 #else
-                quint64  m_reserved   : 11;
-                quint64  m_cpart      : 1;
-                quint64  m_altid      : 6;
-                quint64  m_isalt      : 1;
-                quint64  m_extra      : 1;
-                quint64  m_colorIndex : 12;
-                quint64  m_itemIndex  : 20;
-                quint64  m_quantity   : 12;
+        quint64  m_reserved   : 11;
+        quint64  m_cpart      : 1;
+        quint64  m_altid      : 6;
+        quint64  m_isalt      : 1;
+        quint64  m_extra      : 1;
+        quint64  m_colorIndex : 12;
+        quint64  m_itemIndex  : 20;
+        quint64  m_quantity   : 12;
 #endif
-            } m_bits;
-            quint64 m_data = 0;
-        };
 
         friend class Item;
         friend class Database;
@@ -93,6 +88,31 @@ public:
     std::span<const ConsistsOf, std::dynamic_extent> consistsOf() const;
     QVector<const RelationshipMatch *> relationshipMatches() const;
     PartOutTraits partOutTraits() const;
+
+    class PCC {
+    public:
+        inline uint pcc() const  { return m_pcc; }
+        const Color *color() const;
+
+    private:
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+        quint32  m_pcc;
+        quint32  m_colorIndex : 12;
+        quint32  m_reserved   : 20 = 0;
+#else
+        quint32  m_reserved   : 20 = 0;
+        quint32  m_colorIndex : 12;
+        quint32  m_pcc;
+#endif
+        friend class Item;
+        friend class Core;
+        friend class Database;
+        friend class TextImport;
+    };
+    Q_STATIC_ASSERT(sizeof(PCC) == 8);
+
+    std::span<const PCC, std::dynamic_extent> pccs() const;
+    const Color *hasPCC(uint pcc) const;
 
     uint index() const;   // only for internal use (picture/priceguide hashes)
 
@@ -133,7 +153,6 @@ private:
             quint32  m_quantity  : 12;
 #endif
         } m_itemBits;
-        quint32 m_data = 0;
     };
 
     Q_STATIC_ASSERT(sizeof(AppearsInRecord) == 4);
@@ -153,6 +172,7 @@ private:
     PooledArray<ConsistsOf> m_consists_of;
     PooledArray<quint16> m_relationshipMatchIds;
     PooledArray<Dimensions> m_dimensions;
+    PooledArray<PCC> m_pccs;
 
 private:
     friend class Core;

@@ -129,7 +129,6 @@ void Database::clear()
     m_itemTypes.clear();
     m_categories.clear();
     m_items.clear();
-    m_pccs.clear();
     m_itemChangelog.clear();
     m_colorChangelog.clear();
     m_pool.reset();
@@ -219,8 +218,7 @@ void Database::read(const QString &fileName)
         }
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
-        bool gotChangeLog = false, gotPccs = false;
-        bool gotRelationships = false, gotRelationshipMatches = false;
+        bool gotChangeLog = false, gotRelationships = false, gotRelationshipMatches = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -346,20 +344,6 @@ void Database::read(const QString &fileName)
                 gotChangeLog = true;
                 break;
             }
-            case ChunkId('P','C','C',' ') | 1ULL << 32: {
-                quint32 pccc = 0;
-                ds >> pccc;
-                check();
-                sizeCheck(pccc, 1'000'000);
-
-                pccs.resize(pccc);
-                for (quint32 i = 0; i < pccc; ++i) {
-                    readPCCFromDatabase(pccs[i], ds, pool.get());
-                    check();
-                }
-                gotPccs = true;
-                break;
-            }
             case ChunkId('R','E','L',' ') | 1ULL << 32: {
                 quint32 relc = 0;
                 ds >> relc;
@@ -409,7 +393,7 @@ void Database::read(const QString &fileName)
         delete sw;
 
         if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog
-            || !gotPccs || !gotRelationships || !gotRelationshipMatches) {
+            || !gotRelationships || !gotRelationshipMatches) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
@@ -455,7 +439,6 @@ void Database::read(const QString &fileName)
         m_items = std::move(items);
         m_itemChangelog = std::move(itemChangelog);
         m_colorChangelog = std::move(colorChangelog);
-        m_pccs = std::move(pccs);
         m_relationships = std::move(relationships);
         m_relationshipMatches = std::move(relationshipMatches);
         m_latestChangelogId = latestChangelogId;
@@ -565,11 +548,26 @@ void Database::write(const QString &filename, Version version) const
         check(cw.endChunk());
     }
 
-    check(cw.startChunk(ChunkId('P','C','C',' '), 1));
-    ds << quint32(m_pccs.size());
-    for (const PartColorCode &pcc : m_pccs)
-        writePCCToDatabase(pcc, ds, version);
-    check(cw.endChunk());
+    if (version < Version::V11) {
+        // we need to recalculate the pcc list used in older BS versions from the items
+        std::vector<PartColorCode> oldPccs;
+        for (const auto &item : m_items) {
+            for (const auto &newPcc : item.pccs()) {
+                PartColorCode oldPcc;
+                oldPcc.m_id = newPcc.pcc();
+                oldPcc.m_itemIndex = item.index();
+                oldPcc.m_colorIndex = newPcc.m_colorIndex;
+                oldPccs.push_back(oldPcc);
+            }
+        }
+        std::sort(oldPccs.begin(), oldPccs.end());
+
+        check(cw.startChunk(ChunkId('P','C','C',' '), 1));
+        ds << quint32(oldPccs.size());
+        for (const PartColorCode &pcc : std::as_const(oldPccs))
+            writePCCToDatabase(pcc, ds, version);
+        check(cw.endChunk());
+    }
 
     if (version >= Version::V9) {
         check(cw.startChunk(ChunkId('R','E','L',' '), 1));
@@ -699,6 +697,7 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryR
     dataStream >> item.m_categoryIndexes.deserialize(pool);
     dataStream >> item.m_relationshipMatchIds.deserialize(pool);
     dataStream >> item.m_dimensions.deserialize(pool);
+    dataStream >> item.m_pccs.deserialize(pool);
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
@@ -739,14 +738,9 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
 
     if (v >= Version::V10)
         dataStream << item.m_dimensions;
-}
 
-void Database::readPCCFromDatabase(PartColorCode &pcc, QDataStream &dataStream, MemoryResource *)
-{
-    qint32 itemIndex, colorIndex;
-    dataStream >> pcc.m_id >> itemIndex >> colorIndex;
-    pcc.m_itemIndex = itemIndex;
-    pcc.m_colorIndex = colorIndex;
+    if (v >= Version::V11)
+        dataStream << item.m_pccs;
 }
 
 void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version) const

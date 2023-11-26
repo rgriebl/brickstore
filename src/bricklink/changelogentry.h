@@ -43,8 +43,7 @@ inline std::weak_ordering ColorChangeLogEntry::operator<=>(uint colorId) const
 
 inline std::weak_ordering ColorChangeLogEntry::operator<=>(const ColorChangeLogEntry &other) const
 {
-    auto cmp = (m_fromColorId <=> other.m_fromColorId);
-    return (cmp == 0) ? (m_id <=> other.m_id) : cmp;
+    return std::tie(m_fromColorId, m_id) <=> std::tie(other.m_fromColorId, other.m_id);
 }
 
 

@@ -753,6 +753,7 @@ void ItemModel::setFilterText(const QString &filter)
     m_text_filter = filter;
     m_filter_terms.clear();
     m_filter_ids.clear();
+    m_filter_ids_optional = true;
 
     const QStringList sl = filter.simplified().split(u' ');
 
@@ -791,11 +792,13 @@ void ItemModel::setFilterText(const QString &filter)
                 for (const auto &id : ids) {
                     if (id.length() < 2)
                         continue;
-                    if (auto item = core()->item(id.at(0).toLatin1(), id.mid(1).toLatin1())) {
-                        m_filter_ids << id;
+                    QByteArray ba = id.toLatin1();
+                    if (auto item = core()->item(ba.at(0), ba.mid(1))) {
+                        m_filter_ids << ba;
                         scanOrder << item;
                     }
                 }
+                m_filter_ids_optional = false;
             } else {
                 const bool firstIsQuote = str.startsWith(u"\"");
                 const bool lastIsQuote = str.endsWith(u"\"");
@@ -809,6 +812,17 @@ void ItemModel::setFilterText(const QString &filter)
                     m_filter_terms << FilterTerm(negate, str);
                 }
             }
+        }
+    }
+    // check for PCC ids
+    for (const auto &ft : std::as_const(m_filter_terms)) {
+
+        bool ok = false;
+        uint pccId = ft.m_text.toUInt(&ok);
+        if (ok && pccId) {
+            const auto &[pccItem, pccColor] = core()->partColorCode(pccId);
+            if (pccItem)
+                m_filter_ids << QByteArray(pccItem->itemTypeId() + pccItem->id());
         }
     }
 
@@ -878,15 +892,18 @@ bool ItemModel::filterAccepts(const void *pointer) const
         for (const auto &ft : m_filter_terms)
             match = match && (matchStr.contains(ft.m_text, Qt::CaseInsensitive) == !ft.m_negate); // contains() xor negate
 
-        bool idMatched = m_filter_ids.isEmpty();
+        bool idMatched = m_filter_ids.isEmpty() && !m_filter_ids_optional;
         for (const auto &id : m_filter_ids) {
-            if (id == QString::fromLatin1(item->itemTypeId() + item->id())) {
+            if (id == QByteArray(item->itemTypeId() + item->id())) {
                 idMatched = true;
                 break;
             }
         }
 
-        return match && idMatched;
+        if (m_filter_ids_optional)
+            return match || idMatched;
+        else
+            return match && idMatched;
     }
 }
 

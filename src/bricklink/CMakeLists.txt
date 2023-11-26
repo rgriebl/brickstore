@@ -21,7 +21,6 @@ qt_add_library(bricklink_module STATIC
     lot.h
     lot.cpp
     partcolorcode.h
-    partcolorcode.cpp
     picture.h
     picture_p.h
     picture.cpp

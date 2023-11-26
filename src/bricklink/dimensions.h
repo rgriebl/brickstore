@@ -39,11 +39,19 @@ public:
 private:
     union {
         struct {
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
             qfloat16 x;
             qfloat16 y;
             qfloat16 z;
             quint8   pos = 0;
             quint8   len = 0;
+#else
+            quint8   len = 0;
+            quint8   pos = 0;
+            qfloat16 z;
+            qfloat16 y;
+            qfloat16 x;
+#endif
         } m_bits = { };
         quint64 m_data;
     };

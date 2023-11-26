@@ -284,20 +284,29 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
 
 void BrickLink::TextImport::readPartColorCodes(const QString &path)
 {
+    QHash<uint, std::vector<Item::PCC>> pccs;
+
     XmlHelpers::ParseXML p(path, "CODES", "ITEM");
-    p.parse([this, &p](QDomElement e) {
+    p.parse([this, &p, &pccs](QDomElement e) {
         char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
         const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
-        const QString colorName = p.elementText(e, "COLOR").simplified();
+        QString colorName = p.elementText(e, "COLOR").simplified();
         bool numeric = false;
         uint code = p.elementText(e, "CODENAME").toUInt(&numeric, 10);
 
         if (!numeric) {
-            qWarning() << "  > Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME") << "is not numeric";
+            qWarning() << "  > Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME")
+                       << "is not numeric";
         }
 
-        auto item = core()->item(itemTypeId, itemId);
-        if (item) {
+        if (auto item = core()->item(itemTypeId, itemId)) {
+            bool colorLess = !core()->itemType(itemTypeId)->hasColors();
+
+            // workaround for a few Minifigs having a PCC with a real color
+            static const QString notApplicable = core()->color(0)->name();
+            if (colorLess && (colorName != notApplicable))
+                colorName = notApplicable;
+
             int itemIndex = item->index();
             bool found = false;
             for (uint colorIndex = 0; colorIndex < m_db->m_colors.size(); ++colorIndex) {
@@ -305,11 +314,10 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
                     addToKnownColors(itemIndex, colorIndex);
 
                     if (numeric) {
-                        PartColorCode pcc;
-                        pcc.m_id = code;
-                        pcc.m_itemIndex = itemIndex;
+                        Item::PCC pcc;
+                        pcc.m_pcc = code;
                         pcc.m_colorIndex = colorIndex;
-                        m_db->m_pccs.push_back(pcc);
+                        pccs[itemIndex].push_back(pcc);
                     }
                     found = true;
                     break;
@@ -323,7 +331,14 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         }
     });
 
-    std::sort(m_db->m_pccs.begin(), m_db->m_pccs.end());
+    for (auto it = pccs.cbegin(); it != pccs.cend(); ++it) {
+        auto itemPccs = it.value();
+        std::sort(itemPccs.begin(), itemPccs.end(), [](const auto &pcc1, const auto &pcc2) {
+            return pcc1.pcc() < pcc2.pcc();
+        });
+
+        m_db->m_items[it.key()].m_pccs.copyContainer(itemPccs.cbegin(), itemPccs.cend(), nullptr);
+    }
 }
 
 
@@ -385,13 +400,13 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             int colorIndex = color->index();
 
             Item::ConsistsOf co;
-            co.m_bits.m_quantity = qty;
-            co.m_bits.m_itemIndex = itemIndex;
-            co.m_bits.m_colorIndex = colorIndex;
-            co.m_bits.m_extra = extra;
-            co.m_bits.m_isalt = alternate;
-            co.m_bits.m_altid = matchId;
-            co.m_bits.m_cpart = counterPart;
+            co.m_quantity = qty;
+            co.m_itemIndex = itemIndex;
+            co.m_colorIndex = colorIndex;
+            co.m_extra = extra;
+            co.m_isalt = alternate;
+            co.m_altid = matchId;
+            co.m_cpart = counterPart;
 
             // if this itemid was involved in a changelog entry after the last time we downloaded
             // the inventory, we need to reload
@@ -420,7 +435,7 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             if (co.isAlternate() && !co.isExtra()) {
                 for (const Item::ConsistsOf &mainCo : std::as_const(inventory)) {
                     if ((mainCo.alternateId() == co.alternateId()) && !mainCo.isAlternate()) {
-                        co.m_bits.m_extra = mainCo.m_bits.m_extra;
+                        co.m_extra = mainCo.m_extra;
                         break;
                     }
                 }
@@ -1138,7 +1153,11 @@ void BrickLink::TextImport::addToKnownColors(int itemIndex, int addColorIndex)
     if (addColorIndex <= 0)
         return;
 
+    // colorless items don't need the pointless "(Not Applicable)" entry
     Item &item = m_db->m_items[itemIndex];
+    if (!item.itemType()->hasColors())
+        return;
+
     for (quint16 colIndex : item.m_knownColorIndexes) {
         if (colIndex == quint16(addColorIndex))
             return;
