@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/rgriebl/brickstore/main/assets/brickstore.png" align="right"
      alt="BrickStore Logo" width="192" height="192">
 
-![](https://github.com/rgriebl/brickstore/workflows/QMake%20Build%20Matrix/badge.svg)
+![](https://github.com/rgriebl/brickstore/workflows/CMake%20Build%20Matrix/badge.svg)
 ![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads)
 ![Custom badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fdata.brickstore.dev%2Fdatabase-last-update.py)
 
