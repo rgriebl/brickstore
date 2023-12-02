@@ -91,8 +91,11 @@ if (MSVC)
     # need to disable C4127 due to 6.4.0 QStringBuilder
     # need to disable C4702 due to 6.4.0 QAnyStringView
     list(APPEND copts /W4 /WX /wd4127 /wd4702)
-elseif(CLANG)
-    list(APPEND cxxopts -fcoroutines-ts -stdlib=libc++)
+elseif (CLANG)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+        list(APPEND cxxopts -fcoroutines-ts)
+    endif()
+    list(APPEND cxxopts -stdlib=libc++)
     list(APPEND copts -Wall -Wextra -Wpedantic -Werror)
     # clang bug, legal in C++20
     list(APPEND cxxopts -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types)
