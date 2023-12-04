@@ -246,8 +246,10 @@ PictureCache::~PictureCache()
     d->m_saveMutex.lock();
     d->m_saveTrigger.wakeAll();
     d->m_saveMutex.unlock();
-    for (auto *thread : d->m_threads)
+    for (auto *thread : d->m_threads) {
         thread->wait();
+        delete thread;
+    }
     d->m_db.close();
     delete d;
     Picture::s_cache = nullptr;

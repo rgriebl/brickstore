@@ -66,6 +66,7 @@ PersistentCookieJar::~PersistentCookieJar()
     m_mutex.unlock();
 
     m_saveThread->wait();
+    delete m_saveThread;
 }
 
 QList<QNetworkCookie> PersistentCookieJar::cookiesForUrl(const QUrl &url) const
