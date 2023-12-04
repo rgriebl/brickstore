@@ -159,17 +159,14 @@ public:
 
     void finished(bool success, const QString &message) override
     {
-        bool showMessage = !message.isEmpty();
-        if (showMessage) {
+        if (!message.isEmpty()) {
             m_pd->setLabelText(message);
             m_pd->setCancelButtonText(QDialogButtonBox::tr("Ok"));
             m_finishedSuccessfully = success;
+            ForceableProgressDialog::publicForceShow(m_pd);
             m_pd->setRange(0, 1);
             m_pd->setValue(success ? 1 : 0);
-            ForceableProgressDialog::publicForceShow(m_pd);
-        }
-
-        if (!showMessage) {
+        } else {
             m_pd->reset();
             m_pd->done(success ? QDialog::Accepted : QDialog::Rejected);
         }
