@@ -243,15 +243,15 @@ void ActionManager::updateActions(int updateReason)
         }
 
         if (a.m_needs & NeedItemMask) {
-            for (const Lot *item : std::as_const(m_selection)) {
+            for (const Lot *lot : std::as_const(m_selection)) {
                 if (a.m_needs & NeedLotId)
-                    b = b && (item->lotId() != 0);
+                    b = b && (lot->lotId() != 0);
                 if (a.m_needs & NeedInventory)
-                    b = b && (item->item() && item->item()->hasInventory());
+                    b = b && (lot->item() && lot->item()->hasInventory());
                 if (a.m_needs & NeedQuantity)
-                    b = b && (item->quantity() != 0);
+                    b = b && (lot->quantity() != 0);
                 if (a.m_needs & NeedSubCondition)
-                    b = b && (item->itemType() && item->itemType()->hasSubConditions());
+                    b = b && (lot->itemType() && lot->itemType()->hasSubConditions());
 
                 if (!b)
                     break;
