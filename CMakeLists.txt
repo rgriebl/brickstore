@@ -404,7 +404,8 @@ if (ANDROID)
     )
     FetchContent_MakeAvailable(android_openssl)
     FetchContent_GetProperties(android_openssl)
-    include(${android_openssl_SOURCE_DIR}/CMakeLists.txt)
+    include(${android_openssl_SOURCE_DIR}/android_openssl.cmake)
+    add_android_openssl_libraries(${PROJECT_NAME})
 
     # Mixing pre-NDK23 objects (e.g. Qt) and (post-)NDK23 objects will crash when unwinding:
     # https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#Unwinding
