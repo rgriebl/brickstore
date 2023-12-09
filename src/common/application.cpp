@@ -264,7 +264,7 @@ void Application::afterInit()
               openUrl(url);
           } },
         { "help_reportbug", [](bool) {
-              QString url = u"https://" + Application::inst()->gitHubUrl() + u"/issues/new";
+              QString url = u"https://" + Application::inst()->gitHubUrl() + u"/issues/new?template=bug_report.md";
               openUrl(url);
           } },
         { "help_releasenotes", [](bool) {
