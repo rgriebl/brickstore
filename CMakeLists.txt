@@ -487,6 +487,7 @@ if (MACOS)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
 
     set(DMG_DIR "${CMAKE_BINARY_DIR}/dmg")
+    set(DMG_FILE "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.dmg")
 
     # deploy sentry dependencies
     set(COPY_SENTRY_COMMAND "")
@@ -504,18 +505,14 @@ if (MACOS)
     # Also: macdeployqt has to be run on the bundle in the build location. If we copy to the dmg
     # staging directory first, we get weird errors because the tool thinks that all Qt frameworks
     # are "outside of the bundle"
-    # As for removing the OpenSSL plugin: macdeployqt has no way to skip one specific plugin, so we
-    # need to deploy everything, remove what we don't need and then run macdeployqt again with
-    # -no-plugin to get a valid signature.
 
-    add_custom_target(dmg
+    add_custom_command(
+        OUTPUT ${DMG_FILE}
+        COMMENT "Creating macOS DMG. Please wait..."
+        DEPENDS ${PROJECT_NAME}
         ${COPY_SENTRY_COMMAND}
         COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../.."
                 "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
-                "-verbose=2"
-        COMMAND "${CMAKE_COMMAND}" -E rm -f "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>/Contents/PlugIns/tls/libqopensslbackend.dylib"
-        COMMAND "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}/macdeployqt" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../.."
-                "-no-plugins"
                 "-verbose=2"
                 ${MACOS_SIGN_ARGS}
         COMMAND rm -rf "${DMG_DIR}"
@@ -524,12 +521,12 @@ if (MACOS)
         COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-background.png" "${DMG_DIR}/.background/background.png"
         COMMAND ln -s /Applications "${DMG_DIR}"
         COMMAND cp -a "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>" "${DMG_DIR}"
-        COMMAND hdiutil create "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.dmg" -quiet
+        COMMAND sleep 20 # wait for XProtect to release ${DMG_DIR}
+        COMMAND hdiutil create ${DMG_FILE}
                                -volname "${PROJECT_NAME}-${VERSION}" -fs "HFS+" -format ULFO -ov
-                               -srcdir "${DMG_DIR}"
-        COMMENT "Creating macOS DMG. Please wait..."
-        DEPENDS ${PROJECT_NAME}
+                               -srcdir ${DMG_DIR}
     )
+    add_custom_target(dmg DEPENDS ${DMG_FILE})
 
 elseif (WIN32)
     # deploy sentry dependencies

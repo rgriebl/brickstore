@@ -215,6 +215,12 @@ jobs:
         find "$Qt6_DIR/plugins/sqldrivers" -type f -not -ipath "*qsqlite*" -delete
         find "$Qt6_DIR/lib/cmake/Qt6Sql" -name "*DriverPlugin*" -not -name "*QSQLite*" -delete
 
+        # macOS: remove the openssl TLS plugin, as this can cause problems with brew installations
+        if [ "${{ matrix.config.os }}" = "macos" ]; then
+          find "$Qt6_DIR/plugins/tls" -type f -ipath "*libqopensslbackend*" -delete
+          find "$Qt6_DIR/lib/cmake/Qt6Network" -name "*QTlsBackendOpenSSL*" -delete
+        fi
+
     - name: Install Qt from Linux Distro (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
@@ -505,6 +511,8 @@ jobs:
         ${Qt6_DIR}/bin/qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
             -D "MACOS_SIGNING_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
+        # try to workaround macos-13's XProtect daemon locking the dmg being created
+        sudo pkill -9 XProtect || true
         cmake --build build --config RelWithDebInfo --parallel --target dmg --verbose
       shell: bash
     - name: Notarize and staple macOS DMG
