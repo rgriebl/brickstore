@@ -90,6 +90,8 @@ private:
                                   bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
                                   QByteArray &lineBuffer);
     static QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color);
+    static std::vector<std::pair<float, float> > uvMapToNearestPlane(const QVector3D &normal,
+                                                                     std::initializer_list<const QVector3D> vectors);
 
     QList<QmlRenderGeometry *> m_geos;
     QQuick3DGeometry *m_lineGeo = nullptr;

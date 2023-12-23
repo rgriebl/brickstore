@@ -310,6 +310,36 @@ QCoro::Task<void> RenderController::updateGeometries()
     emit canRenderChanged(canRender());
 }
 
+std::vector<std::pair<float, float>> RenderController::uvMapToNearestPlane(const QVector3D &normal,
+                                                                           std::initializer_list<const QVector3D> vectors)
+{
+    const float ax = std::abs(normal.x());
+    const float ay = std::abs(normal.y());
+    const float az = std::abs(normal.z());
+
+    int uc = 0, vc = 0;
+
+    if ((ax >= ay) && (ax >= az)) {
+        uc = 1; vc = 2;
+        if (normal.x() < 0)
+            std::swap(uc, vc);
+    } else if ((ay > ax) && (ay >= az)) {
+        uc = 0; vc = 2;
+        if (normal.y() < 0)
+            std::swap(uc, vc);
+    } else if ((az > ax) && (az > ay)) {
+        uc = 0; vc = 1;
+        if (normal.z() < 0)
+            std::swap(uc, vc);
+    }
+
+    std::vector<std::pair<float, float>> uv;
+    for (auto &&vec : std::as_const(vectors))
+        uv.emplace_back(vec[uc] / 24, vec[vc] / 24);
+
+    return uv;
+}
+
 void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
                                          const BrickLink::Color *baseColor,const QMatrix4x4 &matrix,
                                          bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
@@ -388,27 +418,12 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
             const auto n = QVector3D::normal(p0m, p1m, p2m);
 
             if (color->hasParticles() || (color->id() == 0)) {
-                float u[3], v[3];
-                const float l1 = p0m.distanceToPoint(p1m) / 24;
-                const float l2 = p0m.distanceToPoint(p2m) / 24;
-                //const float h2 = p2m.distanceToLine(p0m, p1m - p0m) / 24; // sometimes way off
-                const float h2 = QVector3D::crossProduct(p2m - p0m, p2m - p1m).length() / (p1m - p0m).length() / 24;
-
-                QRandomGenerator *rd = QRandomGenerator::global();
-                auto su = float(rd->generateDouble());
-                auto sv = float(rd->generateDouble());
-
-                u[0] = su;
-                v[0] = sv;
-                u[1] = su + l1;
-                v[1] = sv;
-                u[2] = su + std::sqrt(l2 * l2 - h2 * h2);
-                v[2] = sv + h2;
+                const auto uv = uvMapToNearestPlane(n, { p0m, p1m, p2m });
 
                 addFloatsToByteArray(surfaceBuffers[color], {
-                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0],
-                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), u[1], v[1],
-                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2] });
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), uv[0].first, uv[0].second,
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), uv[1].first, uv[1].second,
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), uv[2].first, uv[2].second });
             } else {
                 addFloatsToByteArray(surfaceBuffers[color], {
                     p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(),
@@ -428,28 +443,15 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
             const auto n = QVector3D::normal(p0m, p1m, p2m);
 
             if (color->hasParticles() || (color->id() == 0)) {
-                float u[4], v[4];
-                const float l1 = p0m.distanceToPoint(p1m) / 24;
-                const float l3 = p0m.distanceToPoint(p3m)/ 24;
-                QRandomGenerator *rd = QRandomGenerator::global();
-                const auto su = float(rd->generateDouble());
-                const auto sv = float(rd->generateDouble());
+                const auto uv = uvMapToNearestPlane(n, { p0m, p1m, p2m, p3m });
 
-                u[0] = su;
-                v[0] = sv;
-                u[1] = su + l1;
-                v[1] = sv;
-                u[2] = su + l1;
-                v[2] = sv + l3;
-                u[3] = su;
-                v[3] = sv + l3;
                 addFloatsToByteArray(surfaceBuffers[color], {
-                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0],
-                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), u[1], v[1],
-                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2],
-                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), u[2], v[2],
-                    p3m.x(), p3m.y(), p3m.z(), n.x(), n.y(), n.z(), u[3], v[3],
-                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), u[0], v[0] });
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), uv[0].first, uv[0].second,
+                    p1m.x(), p1m.y(), p1m.z(), n.x(), n.y(), n.z(), uv[1].first, uv[1].second,
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), uv[2].first, uv[2].second,
+                    p2m.x(), p2m.y(), p2m.z(), n.x(), n.y(), n.z(), uv[2].first, uv[2].second,
+                    p3m.x(), p3m.y(), p3m.z(), n.x(), n.y(), n.z(), uv[3].first, uv[3].second,
+                    p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(), uv[0].first, uv[0].second });
             } else {
                 addFloatsToByteArray(surfaceBuffers[color], {
                     p0m.x(), p0m.y(), p0m.z(), n.x(), n.y(), n.z(),
@@ -500,6 +502,8 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
 
 QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color)
 {
+    static constexpr int GeneratorVersion = 1;
+
     if (color && (color->hasParticles() || color->id() == 0)) {
         QImage texImage = s_materialTextureDatas.value(color);
 
@@ -519,17 +523,20 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
             }
 
             static auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-            QString cacheFile = cacheDir + u"/ldraw-textures/" + cacheName + u".png";
+            QString cacheFile = cacheDir + u"/ldraw-textures/" + cacheName + u"_v"
+                                + QString::number(GeneratorVersion) + u".png";
 
             if (!texImage.load(cacheFile) || texImage.isNull()) {
                 if (color->id() == 0) {
-                    texImage = QImage(256, 256, QImage::Format_ARGB32);
+                    constexpr int tiles = 4;
+                    constexpr int tileSize = 16;
+                    texImage = QImage(tiles * tileSize, tiles * tileSize, QImage::Format_ARGB32);
                     texImage.fill(Qt::white);
                     QPainter p(&texImage);
-                    for (int xdiv = 0; xdiv < 8; ++xdiv) {
-                        for (int ydiv = 0; ydiv < 8; ++ydiv) {
+                    for (int xdiv = 0; xdiv < tiles; ++xdiv) {
+                        for (int ydiv = 0; ydiv < tiles; ++ydiv) {
                             if ((xdiv + ydiv) % 2 == 0)
-                                p.fillRect(xdiv * 32, ydiv * 32, 32, 32, Qt::lightGray);
+                                p.fillRect(xdiv * tileSize, ydiv * tileSize, tileSize, tileSize, Qt::lightGray);
                         }
                     }
                 } else {
