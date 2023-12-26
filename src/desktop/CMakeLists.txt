@@ -131,7 +131,6 @@ target_link_libraries(desktop_module PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::Multimedia
-    Qt6::MultimediaWidgets
     QCoro6::Network
     QCoro6::Core
     common_module

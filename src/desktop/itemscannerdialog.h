@@ -22,7 +22,6 @@ QT_FORWARD_DECLARE_CLASS(QCameraViewfinder)
 QT_FORWARD_DECLARE_CLASS(QMediaCaptureSession)
 QT_FORWARD_DECLARE_CLASS(QImageCapture)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
-QT_FORWARD_DECLARE_CLASS(QVideoWidget)
 QT_FORWARD_DECLARE_CLASS(QMediaDevices)
 
 class VideoOverlay;
@@ -43,7 +42,6 @@ signals:
     void itemsScanned(const QVector<const BrickLink::Item *> &items);
 
 protected:
-    void hideEvent(QHideEvent *e) override;
     void changeEvent(QEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     bool eventFilter(QObject *o, QEvent *e) override;
@@ -66,8 +64,7 @@ private:
     QLabel *m_labelCamera;
     QLabel *m_labelBackend;
     QLabel *m_labelItemType;
-    QVideoWidget *m_viewFinder;
-    bool m_resizeFix = false;
+    QWidget *m_qmlViewFinder;
     QMediaCaptureSession *m_captureSession;
     QImageCapture *m_imageCapture;
 
@@ -81,11 +78,19 @@ private:
     static int s_averageScanTime;
     QElapsedTimer m_lastScanTime;
 
-    QString m_noCameraText;
-    QString m_noDbText;
-    QString m_loadingDbText;
-    QString m_noMatchText;
-    QString m_okText;
+    QString m_lastError;
+    QTimer m_noMatchMessageTimeout;
+    QTimer m_errorMessageTimeout;
+
+    enum class State : int {
+        Idle,     // -> Scanning
+        Scaning,  // -> Idle | NoMatch | Error
+        NoMatch,  // 10sec -> Idle
+        Error,    // 10sec -> Idle
+        NoCamera
+    };
+    State m_state = State::Idle;
+    void setState(State newState);
 
     QVector<const BrickLink::ItemType *> m_validItemTypes;
 
