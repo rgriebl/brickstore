@@ -48,6 +48,7 @@ class QmlBrickLink : public QObject
     QML_SINGLETON
     QML_EXTENDED_NAMESPACE(BrickLink)
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+    Q_CLASSINFO("bsNoStringify", "noItem,noColor,noLot")
 
     Q_PRIVATE_PROPERTY(core(), QString cachePath READ dataPath CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(core(), QSize standardPictureSize READ standardPictureSize CONSTANT FINAL)
@@ -261,6 +262,7 @@ class QmlItemType : public QmlWrapperBase<const ItemType>
     Q_GADGET
     QML_NAMED_ELEMENT(ItemType)
     QML_UNCREATABLE("")
+    Q_CLASSINFO("bsNoStringify", "categories")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QString id READ id CONSTANT)

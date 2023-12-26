@@ -71,9 +71,10 @@ Q_DECLARE_FLAGS(ColorType, ColorTypeFlag)
 Q_DECLARE_OPERATORS_FOR_FLAGS(ColorType)
 
 Q_FLAG_NS(ColorType)
+Q_ENUM_NS(ColorTypeFlag) // Qt bug: needed for QVariant::toString()
 Q_FLAG_NS(PartOutTraits)
+Q_ENUM_NS(PartOutTrait) // Qt bug: needed for QVariant::toString()
 Q_ENUM_NS(ApiQuirk)
-
 Q_ENUM_NS(Time)
 Q_ENUM_NS(Price)
 Q_ENUM_NS(Condition)
@@ -140,14 +141,3 @@ class InternalInventoryModel;
 class ItemDelegate;
 
 } // namespace BrickLink
-
-Q_DECLARE_METATYPE(BrickLink::Time)
-Q_DECLARE_METATYPE(BrickLink::Price)
-Q_DECLARE_METATYPE(BrickLink::Condition)
-Q_DECLARE_METATYPE(BrickLink::SubCondition)
-Q_DECLARE_METATYPE(BrickLink::Stockroom)
-Q_DECLARE_METATYPE(BrickLink::Status)
-Q_DECLARE_METATYPE(BrickLink::OrderType)
-Q_DECLARE_METATYPE(BrickLink::OrderStatus)
-Q_DECLARE_METATYPE(BrickLink::ApiQuirk)
-Q_DECLARE_METATYPE(BrickLink::VatType)

@@ -82,11 +82,19 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
                 + stringifyQObject(o, mo->superClass(), level + 1, false) + u'\n';
     }
 
+    QByteArrayList noStringify;
+    if (int nostr = mo->indexOfClassInfo("bsNoStringify"); nostr >= 0)
+        noStringify = QByteArray(mo->classInfo(nostr).value()).split(',');
+
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
         QMetaProperty p = mo->property(i);
-        QVariant value = isGadget ? p.readOnGadget(o) : p.read(o);
+        QString valueStr;
+        if (noStringify.contains(p.name()))
+            valueStr = u"..."_qs;
+        else
+            valueStr = stringify(isGadget ? p.readOnGadget(o) : p.read(o), level + 1, false);
         str = str + nextIndent + stringifyType(p.metaType()) + u' '
-              + QLatin1String(p.name()) + u": " + stringify(value, level + 1, false) + u'\n';
+              + QString::fromLatin1(p.name()) + u": " + valueStr + u'\n';
     }
 /*
     for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
