@@ -81,8 +81,9 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     });
 
     switchType(0);
-    setFocusProxy(m_value);
     m_value->selectAll();
+    setFocusProxy(m_value);
+    setFocus();
 }
 
 void IncDecPricesDialog::switchType(int type)
