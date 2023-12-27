@@ -521,8 +521,7 @@ if (MACOS)
         COMMAND cp "${CMAKE_SOURCE_DIR}/macos/dmg-background.png" "${DMG_DIR}/.background/background.png"
         COMMAND ln -s /Applications "${DMG_DIR}"
         COMMAND cp -a "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>" "${DMG_DIR}"
-        COMMAND sleep 20 # wait for XProtect to release ${DMG_DIR}
-        COMMAND hdiutil create ${DMG_FILE}
+        COMMAND "${CMAKE_SOURCE_DIR}/macos/retry.sh" 5 hdiutil create ${DMG_FILE}
                                -volname "${PROJECT_NAME}-${VERSION}" -fs "HFS+" -format ULFO -ov
                                -srcdir ${DMG_DIR}
     )
