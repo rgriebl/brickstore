@@ -144,7 +144,7 @@ void ColumnLayoutCmd::undo()
     \ingroup qml-api
     \brief Each instance of this type represents an open document.
 
-    \note The \e index paramter of the lot API is the index into the internal data structure and
+    \note The \e index parameter of the lot API is the index into the internal data structure and
           not related to any sorting or filtering in the visible document window.
 */
 /*! \qmlproperty string Document::currencyCode
@@ -362,7 +362,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_qty_divide", [this](bool) -> QCoro::Task<> {
-              if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"),
+              if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantities are exactly divisible without reminder, before this operation is performed.)"),
                                                           QString(), 1, 1, 1000)) {
                   divideQuantity(*i);
               }
@@ -538,7 +538,7 @@ void Document::setActive(bool active)
                                    nullptr, m_model->invalidLotCount());
                 }
                 if (m_model->fixedLotCount()) {
-                    messages << tr("%n oudated item or color reference(s) in this file have been updated according to the BrickLink catalog.",
+                    messages << tr("%n outdated item or color reference(s) in this file have been updated according to the BrickLink catalog.",
                                    nullptr, m_model->fixedLotCount());
                 }
                 if (m_model->legacyCurrencyCode() && (Config::inst()->defaultCurrencyCode() != u"USD")) {
@@ -1891,7 +1891,7 @@ void Document::copyFields(const LotList &srcLots, const DocumentModel::FieldMerg
 
     int copyCount = 0;
     std::vector<std::pair<Lot *, Lot>> changes;
-    changes.reserve(uint(m_model->lots().size())); // just a guestimate
+    changes.reserve(uint(m_model->lots().size())); // just a guesstimate
 
     model()->beginMacro();
 
@@ -1920,7 +1920,7 @@ void Document::subtractItems(const LotList &subLots)
     const LotList &lots = model()->lots();
 
     std::vector<std::pair<Lot *, Lot>> changes;
-    changes.reserve(uint(subLots.size() * 2)); // just a guestimate
+    changes.reserve(uint(subLots.size() * 2)); // just a guesstimate
     LotList newLots;
 
     model()->beginMacro();
@@ -2471,7 +2471,7 @@ void AutosaveJob::run()
                     document->m_autosaveClean = true;
             });
         } else {
-            qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
+            qWarning() << "Auto-save rename from" << newFileName << "to" << fileName << "failed";
         }
     }
 }

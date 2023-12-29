@@ -250,7 +250,7 @@ public:
         }
         case Qt::DecorationRole: {
             QIcon ico = action->icon();
-            // returning the icon directly will create scaling artefacts
+            // returning the icon directly will create scaling artifacts
             if (!ico.isNull()) {
                 return QIcon(ico.pixmap(64, QIcon::Normal, QIcon::On));
             } else {
@@ -1146,7 +1146,7 @@ void SettingsDialog::save()
         Config::inst()->setDocumentDir(dd.absolutePath());
     } else {
         QMessageBox::warning(this, QCoreApplication::applicationName(),
-                             tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
+                             tr("The specified document directory does not exist or is not read- and writable.<br />The document directory setting will not be changed."));
     }
 
 #if defined(SENTRY_ENABLED)

@@ -561,7 +561,7 @@ PriceGuideCache::PriceGuideCache(Core *core)
     d->m_loadsStatId = AppStatistics::inst()->addSource(u"Price-guides queued for disk load"_qs);
     d->m_savesStatId = AppStatistics::inst()->addSource(u"Price-guides queued for disk save"_qs);
 
-    d->m_cache.setMaxCost(5000); // each priceguide has a cost of 1
+    d->m_cache.setMaxCost(5000); // each price guide has a cost of 1
 
     QString batchApiKey;
 #if defined(BS_BRICKLINK_AFFILIATE_API_KEY)
@@ -698,7 +698,7 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
     if (!pg) {
         pg = new PriceGuide(item, color, vatType);
         if (!d->m_cache.insert(key, pg)) {
-            qCWarning(LogCache, "Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)",
+            qCWarning(LogCache, "Can not add price guide to cache (cache max/cur: %d/%d, cost: %d)",
                       int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), 1);
             return nullptr;
         }
@@ -709,7 +709,7 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
         pg->setUpdateStatus(UpdateStatus::Loading);
         d->load(pg, highPriority);
 
-        //TODO reprioritize?
+        //TODO re-prioritize?
     }
 
     return pg;
@@ -1117,7 +1117,7 @@ void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &error
 */
 /*! \qmlmethod PriceGuide::update(bool highPriority = false)
     Tries to re-download the price guide from the BrickLink server. If you set \a highPriority to \c
-    true the load/download request will be pre-prended to the work queue instead of appended.
+    true the load/download request will be prepended to the work queue instead of appended.
 */
 /*! \qmlmethod int PriceGuide::quantity(Time time, Condition condition)
     Returns the number of items for sale (or item that have been sold) given the \a time frame and

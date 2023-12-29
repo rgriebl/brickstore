@@ -331,7 +331,7 @@ void ActionManager::initialize()
 {
     Action *a = nullptr;
 
-    A("go_home",                        QT_TR_NOOP("Go to the Quickstart page"), QT_TR_NOOP("HomePage", "Go to the homepage"), NoNeed, FlagCheckable);
+    A("go_home",                        QT_TR_NOOP("Go to the Quick-start page"), QT_TR_NOOP("HomePage", "Go to the homepage"), NoNeed, FlagCheckable);
 
     A("menu_file",                      QT_TR_NOOP("&File"), NoNeed, FlagMenu);
     A("document_new",                   QT_TR_NOOP("New", "File|New"), QKeySequence::New);
@@ -409,7 +409,7 @@ void ActionManager::initialize()
     A("menu_extras",              QT_TR_NOOP("E&xtras"), NoNeed, FlagMenu);
     A("update_database",          QT_TR_NOOP("Update Database"),                 NeedNetwork);
     a->m_iconName = "view_refresh";
-    A("configure",                QT_TR_NOOP("Settings..."),                     QT_TR_NOOP("Ctrl+,", "ExQT_TR_NOOPas|Settings"), NoNeed, FlagRole(QAction::PreferencesRole));
+    A("configure",                QT_TR_NOOP("Settings..."),                     QT_TR_NOOP("Ctrl+,", "Extras|Settings"), NoNeed, FlagRole(QAction::PreferencesRole));
     A("developer_console",        QT_TR_NOOP("Developer Console"));
     A("reload_scripts",           QT_TR_NOOP("Reload User Scripts"));
     A("menu_window",              QT_TR_NOOP("&Windows"), NoNeed, FlagMenu);

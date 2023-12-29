@@ -366,7 +366,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
     // on macOS, the dark mode alternate base color is white with alpha, making it a medium gray
-    // since we need an opaque color for filling, we need to premultiply it:
+    // since we need an opaque color for filling, we need to pre-multiply it:
     normalbg = Utility::premultiplyAlpha(normalbg);
 
     // we only want to do a single, opaque color fill, so we calculate the

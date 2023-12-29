@@ -244,7 +244,7 @@ void HistoryLineEdit::showPopup()
 
 void HistoryLineEdit::setFilterPixmap()
 {
-    // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
+    // Adding a menuAction() to a QLineEdit leads to a strange activation behavior:
     // only the right side of the icon will react to mouse clicks
     QPixmap filterPix(QIcon::fromTheme(u"view-filter"_qs)
                       .pixmap(style()->pixelMetric(QStyle::PM_SmallIconSize)));

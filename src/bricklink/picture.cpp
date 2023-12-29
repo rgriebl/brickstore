@@ -115,7 +115,7 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
 
     // The max. pic cache size is at least 500MB. On 64bit systems, this gets expanded to a quarter
     // of the physical memory, but it is capped at 4GB
-    quint64 picCacheMem = 500'000'000ULL; // more than that and Win32 runs oom
+    quint64 picCacheMem = 500'000'000ULL; // more than that and Win32 runs out of memory
 
     if (physicalMem && (Q_PROCESSOR_WORDSIZE >= 8))
         picCacheMem = std::clamp(physicalMem / 4, picCacheMem, picCacheMem * 8);
@@ -509,7 +509,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                 }
                 loadQuery.finish();
             }
-            // try the old filesystem based cache
+            // try the old file-system based cache
             if (!loaded) {
                 bool large = (!pic->color());
                 bool hasColors = pic->item()->itemType()->hasColors();
@@ -732,7 +732,7 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
 */
 /*! \qmlmethod Picture::update(bool highPriority = false)
     Tries to re-download the picture from the BrickLink server. If you set \a highPriority to \c
-    true the load/download request will be pre-prended to the work queue instead of appended.
+    true the load/download request will be prepended to the work queue instead of appended.
 */
 
 } // namespace BrickLink

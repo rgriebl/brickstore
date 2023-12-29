@@ -40,7 +40,7 @@ static QByteArray codeCredential(const QByteArray &in, bool encode)
     //   BLOB appended
     // - we hash this once with Blake2s_128 to get a 16 byte value on any platform
     // - the encrypted credential is then the credential XORed with the machine-id hash
-    // - since the machine id can change (e.g. when the user reinstalls the OS), we also preend a
+    // - since the machine id can change (e.g. when the user re-installs the OS), we also prepend a
     //   hash of that hash, in order to fail sensibly on loading
 
     static const auto brickStoreId = "BrickStore\x89\x59\x00\x22\x3c\x76"_qba;

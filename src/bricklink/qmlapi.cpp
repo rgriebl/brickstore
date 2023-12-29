@@ -435,7 +435,7 @@ PartOutTraits QmlItem::partOutTraits() const
 
 /*! \qmlproperty Status Lot::status
     Represents the status of this lot. The Status enumeration has these values:
-    \value BrickLink.Status.Include   The green checkmark in the UI.
+    \value BrickLink.Status.Include   The green check mark in the UI.
     \value BrickLink.Status.Exclude   The red stop sign in the UI.
     \value BrickLink.Status.Extra     The blue plus sign in the UI.
 */
@@ -859,14 +859,14 @@ QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) con
 }
 
 /*! \qmlsignal BrickLink::priceGuideUpdated(PriceGuide priceGuide)
-    This signal is emitted everytime the state of the \a priceGuide object changes. Receiving this
-    signal doesn't mean the preice guide data is available: you have to check the object's
+    This signal is emitted every time the state of the \a priceGuide object changes. Receiving this
+    signal doesn't mean the price guide data is available: you have to check the object's
     properties to see what has changed.
 */
 /*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, VatType vatType, bool highPriority = false)
     Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
     the given \a item, \a color and \a vatType combination. If you set \a highPriority to \c true, the
-    load/download request will be preprended to the work queue instead of appended.
+    load/download request will be prepended to the work queue instead of appended.
     You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
     been loaded.
     \sa PriceGuide
@@ -882,7 +882,7 @@ PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, VatType vatTy
 /*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
     Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
     the given \a item, \a color and currentVatType combination. If you set \a highPriority to \c true, the
-    load/download request will be preprended to the work queue instead of appended.
+    load/download request will be prepended to the work queue instead of appended.
     You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
     been loaded.
     \sa PriceGuide
@@ -894,14 +894,14 @@ PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPrio
 
 
 /*! \qmlsignal BrickLink::pictureUpdated(Picture picture)
-    This signal is emitted everytime the state of the \a picture object changes. Receiving this
+    This signal is emitted every time the state of the \a picture object changes. Receiving this
     signal doesn't mean the picture is available: you have to check the object's properties
     to see what has changed.
 */
 /*! \qmlmethod Picture BrickLink::picture(Item item, Color color, bool highPriority = false)
     Creates a \l Picture object that asynchronously loads (or downloads) the picture for the given
     \a item and \a color combination. If you set \a highPriority to \c true the load/download
-    request will be pre-prended to the work queue instead of appended.
+    request will be prepended to the work queue instead of appended.
     You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
     been loaded.
     \sa Picture

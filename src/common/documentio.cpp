@@ -233,7 +233,7 @@ bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, BrickLink::IO::ParseRe
     }
     {
         stopwatch consolidate("removing duplicates");
-        // remove duplicate lot pointers that get added due to sub-module cacheing
+        // remove duplicate lot pointers that get added due to sub-module caching
         for (int i = 0; i < ldrawLots.count(); ++i) {
             if (auto *lot = ldrawLots[i]) {
                 for (int j = i + 1; j < ldrawLots.count(); ++j) {
@@ -494,7 +494,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                 lot->setCondition(v == u"N" ? BrickLink::Condition::New
                                             : BrickLink::Condition::Used); } },
             { u"SubCondition", [](auto *lot, auto &v) {
-                // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
+                // 'M' for sealed is an historic artifact. BL called this 'MISB' back in the day
                 lot->setSubCondition(v == u"C" ? BrickLink::SubCondition::Complete :
                                      v == u"I" ? BrickLink::SubCondition::Incomplete :
                                      v == u"M" ? BrickLink::SubCondition::Sealed
@@ -752,7 +752,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
 
         create(u"SubCondition", &Lot::subCondition,
                 [](auto sc) {
-            // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
+            // 'M' for sealed is an historic artifact. BL called this 'MISB' back in the day
             switch (sc) {
             case BrickLink::SubCondition::Incomplete: return u"I"_qs;
             case BrickLink::SubCondition::Complete  : return u"C"_qs;

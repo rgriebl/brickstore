@@ -174,7 +174,7 @@ void Application::init()
         // clean start:
         //  - remove the database
         //  - clear the last open documents
-        //  - clear the autosaves
+        //  - clear the auto-saves
         BrickLink::Database::remove();
         Document::processAutosaves(Document::AutosaveAction::Delete);
         Config::inst()->remove(u"MainWindow/LastSessionDocuments"_qs);
@@ -294,7 +294,7 @@ void Application::afterInit()
     if (BrickLink::core()->database()->isValid()) {
         openQueuedDocuments();
 
-        // restore autosaves and/or last session
+        // restore auto-saves and/or last session
         QMetaObject::invokeMethod(this, [this]() { restoreLastSession(); }, Qt::QueuedConnection);
 
         //TODO: if we haven't opened any documents, but the DB is outdated, we might want to
@@ -658,7 +658,7 @@ void Application::updateTranslations()
 
     QString i18n = u":/translations"_qs;
 
-    static bool once = false; // always load english
+    static bool once = false; // always load English
     if (!once) {
         auto transQt = new QTranslator(this);
         if (transQt->load(u"qtbase_en"_qs, i18n))

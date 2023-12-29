@@ -14,7 +14,7 @@
 namespace {
 
 
-} // namspace
+} // namespace
 
 ImportInventoryWidget::ImportInventoryWidget(QWidget *parent)
     : QWidget(parent)

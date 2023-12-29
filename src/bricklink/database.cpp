@@ -458,7 +458,7 @@ void Database::read(const QString &fileName)
     } catch (const Exception &e) {
         if (m_valid) {
             m_valid = false;
-            m_etag.clear(); // better redownload the db in this case
+            m_etag.clear(); // better re-download the db in this case
             emit validChanged(m_valid);
         }
         qWarning() << "Loading database failed:" << e.errorString();

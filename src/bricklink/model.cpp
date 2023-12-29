@@ -1334,7 +1334,7 @@ InventoryModel::Mode InventoryModel::mode() const
 bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     // the indexes are from the source model, so the internal pointers are valid
-    // this is faster than fetching the Category* via data()/QVariant marshalling
+    // this is faster than fetching the Category* via data()/QVariant marshaling
     const auto *iim = static_cast<const InternalInventoryModel *>(sourceModel());
     const auto e1 = iim->entry(left);
     const auto e2 = iim->entry(right);

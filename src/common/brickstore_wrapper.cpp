@@ -66,7 +66,7 @@ using namespace std::chrono_literals;
 /*! \qmlproperty Document BrickStore::activeDocument
     \readonly
     The currently active document, i.e. the document the user is working on. Can be \c null, if
-    no documents are open, but also if the quickstart page is active.
+    no documents are open, but also if the quick-start page is active.
 */
 
 QmlBrickStore *QmlBrickStore::s_inst = nullptr;
@@ -279,7 +279,7 @@ void QmlBrickStore::importPartInventory(BrickLink::QmlItem item, BrickLink::QmlC
 
 /*! \qmlmethod void BrickStore::updateDatabase()
 
-    Starts an asychronous database update in the background.
+    Starts an asynchronous database update in the background.
 */
 void QmlBrickStore::updateDatabase()
 {

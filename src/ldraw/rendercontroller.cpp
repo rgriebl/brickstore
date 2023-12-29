@@ -66,7 +66,7 @@ RenderController::~RenderController()
 QQuaternion RenderController::rotateArcBall(QPointF pressPos, QPointF mousePos,
                                             QQuaternion pressRotation, QSizeF viewportSize)
 {
-    // map the mouse coordiantes to the sphere describing this arcball
+    // map the mouse coordinates to the sphere describing this arcball
     auto mapMouseToBall = [=](const QPointF &mouse) -> QVector3D {
         // normalize mouse pos to -1..+1 and reverse y
         QVector3D mouseView(
@@ -566,7 +566,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                     int delta = int(std::ceil(color->particleMaxSize() * texSize / ldus));
 
                     QImage img(texSize + delta * 2, texSize + delta * 2, QImage::Format_ARGB32);
-                    // we need to use .rgba() here - otherwise the alpha channel will be premultiplied to RGB
+                    // we need to use .rgba() here - otherwise the alpha channel will be pre-multiplied to RGB
                     img.fill(color->ldrawColor().rgba());
 
                     QList<QPainter::PixmapFragment> fragments;

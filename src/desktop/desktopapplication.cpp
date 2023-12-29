@@ -138,7 +138,7 @@ void DesktopApplication::init()
     if (fsp != 100)
         setFontSizePercentLambda(fsp);
 
-    // tranform . or , into the local decimal separator in all QDoubleSpinBoxes and all
+    // transform . or , into the local decimal separator in all QDoubleSpinBoxes and all
     // QLineEdits with a QDoubleValidator set
     DotCommaFilter::install();
 

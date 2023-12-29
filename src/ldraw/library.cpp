@@ -368,7 +368,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
     } else if (path.isEmpty()) {
         qInfo().noquote() << "No LDraw installation specified";
     } else {
-        qInfo().noquote() << "LDraw installation at" << m_path << "is not useable";
+        qInfo().noquote() << "LDraw installation at" << m_path << "is not usable";
     }
 
     emit libraryReset();

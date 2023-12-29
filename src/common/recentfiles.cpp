@@ -120,7 +120,7 @@ void RecentFiles::pin(int row, bool down)
         }
         // We might end up with more than MaxRecentFiles entries, but we allow it to give
         // the user a chance to non-destructively undo this operation.
-        // The list will be shortend on restart or when a non-recent file is loaded.
+        // The list will be shortened on restart or when a non-recent file is loaded.
     }
 }
 

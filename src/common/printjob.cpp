@@ -34,7 +34,7 @@
 */
 /*! \qmlproperty font PrintPage::font
     The currently selected font.
-    You can create and assing font objects using the \c{Qt.font()} factory function.
+    You can create and assign font objects using the \c{Qt.font()} factory function.
 
     See the \l {https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method} {Qt documentation for Qt.font}
     and the \l {https://doc.qt.io/qt-5/qml-font.html} {QML font documentation} for the available

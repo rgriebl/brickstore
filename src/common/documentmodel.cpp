@@ -2430,7 +2430,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
         }
     }
 
-    // we were filtered before, but we don't want to refilter: the solution is to
+    // we were filtered before, but we don't want to re-filter: the solution is to
     // keep the old filtered lots, but use the order from m_sortedLots
     if (!m_filteredLots.isEmpty()
             && (m_filteredLots.size() != m_sortedLots.size())

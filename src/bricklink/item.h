@@ -114,7 +114,7 @@ public:
     std::span<const PCC, std::dynamic_extent> pccs() const;
     const Color *hasPCC(uint pcc) const;
 
-    uint index() const;   // only for internal use (picture/priceguide hashes)
+    uint index() const;   // only for internal use (picture/price guide hashes)
 
     Item() = default;
     explicit Item(std::nullptr_t) : Item() { } // for scripting only!

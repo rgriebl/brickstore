@@ -173,7 +173,7 @@ IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint, const QD
         lot->setCondition(v == u"N" ? Condition::New
                                     : Condition::Used); } },
     { u"SUBCONDITION", [](auto *lot, auto &v) {
-        // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
+        // 'M' for sealed is an historic artifact. BL called this 'MISB' back in the day
         lot->setSubCondition(v == u"C" ? SubCondition::Complete :
                              v == u"I" ? SubCondition::Incomplete :
                              v == u"M" ? SubCondition::Sealed : // legacy
