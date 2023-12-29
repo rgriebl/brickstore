@@ -324,7 +324,7 @@ public:
         connect(stackOrGroup, un ? &T::canUndoChanged  : &T::canRedoChanged,
                 a, &QAction::setEnabled);
 
-        connect(a, qOverload<int>(&UndoAction::triggered),
+        connect(a, &UndoAction::multipleTriggered,
                 stackOrGroup, un ? &T::undoMultiple : &T::redoMultiple);
         connect(a, &QAction::triggered,
                 stackOrGroup, un ? &T::undo : &T::redo);
@@ -342,7 +342,7 @@ public slots:
     }
 
 signals:
-    void triggered(int);
+    void multipleTriggered(int count);
 
 protected:
     QWidget *createWidget(QWidget *parent) override;
@@ -368,9 +368,11 @@ private:
         QStringList sl;
 
         if (m_type == Undo) {
+            sl.reserve(stack->index());
             for (int i = stack->index() - 1; i >= 0; --i)
                 sl.append(stack->text(i));
         } else {
+            sl.reserve(stack->count() - stack->index());
             for (int i = stack->index(); i < stack->count(); ++i)
                 sl.append(stack->text(i));
         }

@@ -167,39 +167,37 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
         loc.setNumberOptions(QLocale::OmitGroupSeparator);
 
     int decimals = 0;
-    const char *unit = nullptr;
+    QString unit;
 
     if (ms != QLocale::MetricSystem) {
         w *= 0.035273961949580412915675808215204;
 
         decimals = 3;
-        unit = "oz";
+        unit = u"oz"_qs;
 
         if (optimize && (w >= 32)) {
-            unit = "lb";
+            unit = u"lb"_qs;
             w /= 16.;
         }
     }
     else {
         decimals = 2;
-        unit = "g";
+        unit = u"g"_qs;
 
         if (optimize && (w >= 1000.)) {
-            unit = "kg";
+            unit = u"kg"_qs;
             w /= 1000.;
 
             if (w >= 1000.) {
-                unit = "t";
+                unit = u"t"_qs;
                 w /= 1000.;
             }
         }
     }
     QString s = loc.toString(w, 'f', decimals);
 
-    if (show_unit) {
-        s.append(u' ');
-        s.append(QLatin1String(unit));
-    }
+    if (show_unit)
+        s = s + u' ' + unit;
     return s;
 }
 

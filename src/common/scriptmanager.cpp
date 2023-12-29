@@ -74,7 +74,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
     if (indentFirstLine)
         str.append(indent);
 
-    str = str + QLatin1String(mo->className()) + u" {\n";
+    str = str + QString::fromLatin1(mo->className()) + u" {\n";
 
     if (!isGadget && mo->superClass()
             && ((mo->superClass() != &QObject::staticMetaObject) || !o->objectName().isEmpty())) {

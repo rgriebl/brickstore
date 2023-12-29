@@ -588,7 +588,7 @@ void ActionManager::setupQAction(Action &aa)
     Q_ASSERT(aa.m_qaction);
     QAction *a = aa.m_qaction;
 
-    a->setObjectName(QLatin1String(aa.name()));
+    a->setObjectName(QString::fromLatin1(aa.name()));
     a->setProperty("bsAction", true);
 
     if (QIcon::hasThemeIcon(aa.iconName()))

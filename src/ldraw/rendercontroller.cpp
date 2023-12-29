@@ -19,6 +19,7 @@
 #include "part.h"
 #include "rendercontroller.h"
 
+using namespace std::chrono_literals;
 
 namespace LDraw {
 
@@ -46,7 +47,7 @@ RenderController::RenderController(QObject *parent)
     m_lineGeo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
     m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo), sizeof(lineGeo)));
 
-    m_updateTimer->setInterval(200);
+    m_updateTimer->setInterval(200ms);
     m_updateTimer->setSingleShot(true);
     connect(m_updateTimer, &QTimer::timeout, this, &RenderController::updateGeometries);
     m_updateTimer->start();

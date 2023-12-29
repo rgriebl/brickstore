@@ -192,18 +192,18 @@ void DeveloperConsole::appendLogMessage(QtMsgType type, const QString &category,
     QString str = u"<pre>"_qs;
     const auto lines = msg.split(u"\n"_qs);
     for (int i = 0; i < lines.count(); ++i) {
-        str = str + uR"(<span style="color:#)" + QLatin1String(msgTypeColor[type])
-                + uR"(;background-color:#)" + QLatin1String(msgTypeBgColor[type]) + uR"(;">)"
-                + QLatin1String(msgTypeNames[type]) + uR"(</span>)"
+        str = str + uR"(<span style="color:#)" + QString::fromLatin1(msgTypeColor[type])
+                + uR"(;background-color:#)" + QString::fromLatin1(msgTypeBgColor[type]) + uR"(;">)"
+                + QString::fromLatin1(msgTypeNames[type]) + uR"(</span>)"
                 + uR"(&nbsp;<span style="color:#)"
-                + QLatin1String(categoryColor[catIndex])
+                + QString::fromLatin1(categoryColor[catIndex])
                 + uR"(;font-weight:bold;">)" + category + uR"(</span>)" + u":&nbsp;"
                 + lines.at(i).toHtmlEscaped();
         if (i == (lines.count() - 1)) {
             if ((type != QtInfoMsg) && !filename.isEmpty()) {
-                str = str + uR"( at <span style="color:#)" + QLatin1String(fileColor)
+                str = str + uR"( at <span style="color:#)" + QString::fromLatin1(fileColor)
                         + uR"(;font-weight:bold;">)" + filename
-                        + uR"(</span>, line <span style="color:#)" + QLatin1String(lineColor)
+                        + uR"(</span>, line <span style="color:#)" + QString::fromLatin1(lineColor)
                         + uR"(;font-weight:bold;">)" + QString::number(line) + uR"(</span></pre>)";
             } else {
                 str = str + u"</pre>";

@@ -197,13 +197,14 @@ QmlItemType::QmlItemType(const BrickLink::ItemType *itt)
 
 QString QmlItemType::id() const
 {
-    return QString { QLatin1Char(wrapped->id()) };
+    return QString { QChar::fromLatin1(wrapped->id()) };
 }
 
 QVariantList QmlItemType::categories() const
 {
-    auto cats = wrapped->categories();
+    const auto cats = wrapped->categories();
     QVariantList result;
+    result.reserve(cats.size());
     for (auto cat : cats)
         result.append(QVariant::fromValue(QmlCategory { cat }));
     return result;
@@ -328,8 +329,9 @@ bool QmlItem::hasKnownColor(QmlColor color) const
 
 QVariantList QmlItem::knownColors() const
 {
-    auto known = wrapped->knownColors();
+    const auto known = wrapped->knownColors();
     QVariantList result;
+    result.reserve(known.size());
     for (auto c : known)
         result.append(QVariant::fromValue(QmlColor { c }));
     return result;
@@ -339,6 +341,7 @@ QVariantList QmlItem::consistsOf() const
 {
     const auto consists = wrapped->consistsOf();
     QVariantList result;
+    result.reserve(consists.size());
     for (const auto &co : consists) {
         auto *lot = new Lot { co.item(), co.color() };
         lot->setAlternate(co.isAlternate());
@@ -641,12 +644,15 @@ Lot *QmlLot::Setter::to()
 
 QmlLot::Setter::~Setter()
 {
+    if (!m_lot)
+        return;
+
     if (!m_lot->m_documentLots) {
         qmlWarning(nullptr) << "Cannot modify a const Lot";
         return;
     }
 
-    if (m_lot && (*m_lot->wrapped != m_to)) {
+    if (*m_lot->wrapped != m_to) {
         if (m_lot->m_documentLots && QmlLot::s_changeLot)
             QmlLot::s_changeLot(m_lot->m_documentLots, m_lot->wrapped, m_to);
         else
@@ -1113,8 +1119,9 @@ void QmlColorModel::setColorTypeFilter(ColorType ct)
 
 QVariantList QmlColorModel::colorListFilter() const
 {
-    QVariantList result;
     const auto rawColors = m_model->colorListFilter();
+    QVariantList result;
+    result.reserve(rawColors.size());
     for (const auto &raw : rawColors)
         result.append(QVariant::fromValue(QmlColor(raw)));
     return result;

@@ -21,7 +21,7 @@ Exception::Exception(QFileDevice *f, const QString &message)
 { }
 
 Exception::Exception(QFileDevice *f, const char *message)
-    : Exception(QLatin1String(message) + fileMessage(f))
+    : Exception(QString::fromLatin1(message) + fileMessage(f))
 { }
 
 Exception::Exception(const Exception &copy)
@@ -50,11 +50,11 @@ QString Exception::fileMessage(QFileDevice *f)
 
 
 ParseException::ParseException(const char *message)
-    : Exception(u"Parse error: "_qs + QLatin1String(message))
+    : Exception(u"Parse error: "_qs + QString::fromLatin1(message))
 { }
 
 ParseException::ParseException(QIODevice *dev, const char *message)
-    : Exception(u"Parse error%1: %2"_qs.arg(fileName(dev)).arg(QLatin1String(message)))
+    : Exception(u"Parse error%1: %2"_qs.arg(fileName(dev)).arg(QString::fromLatin1(message)))
 { }
 
 QString ParseException::fileName(QIODevice *dev)

@@ -183,6 +183,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     invalidateFilterInternal();
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
@@ -252,6 +253,7 @@ void StaticPointerModel::setFixedSortOrder(const QVector<const void *> &fixedOrd
     invalidateFilterInternal();
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);

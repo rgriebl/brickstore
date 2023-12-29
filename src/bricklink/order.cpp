@@ -593,8 +593,9 @@ static const std::pair<OrderStatus, const char *> orderStatus[] = {
 
 OrderStatus Order::statusFromString(const QString &s)
 {
+    const QByteArray bs = s.toLatin1();
     for (const auto &os : orderStatus) {
-        if (s == QLatin1String(os.second))
+        if (bs == os.second)
             return os.first;
     }
     return OrderStatus::Unknown;

@@ -117,14 +117,14 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 #if defined(BS_DESKTOP)
     // import old settings from BrickStock 1.2.x
     if (!value(u"General/ImportedV12xSettings"_qs, 0).toInt()) {
-        static const std::vector<const char *> ignore = {
-            "MainWindow/",
-            "General/Registration/",
-            "General/ConfigVersion",
-            "General/Money/",
-            "General/lastApplicationUpdateCheck",
-            "Internet/UseProxy",
-            "Internet/Proxy"
+        static const QStringList ignore = {
+            u"MainWindow/"_qs,
+            u"General/Registration/"_qs,
+            u"General/ConfigVersion"_qs,
+            u"General/Money/"_qs,
+            u"General/lastApplicationUpdateCheck"_qs,
+            u"Internet/UseProxy"_qs,
+            u"Internet/Proxy"_qs
         };
 
         QSettings old(u"patrickbrans.com"_qs, u"BrickStock"_qs);
@@ -132,8 +132,8 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
             const auto allOldKeys = old.allKeys();
             for (const QString &key : allOldKeys) {
                 bool skip = false;
-                for (const char *ign : ignore) {
-                    if (key.startsWith(QLatin1String(ign), Qt::CaseInsensitive))
+                for (const auto &ign : ignore) {
+                    if (key.startsWith(ign, Qt::CaseInsensitive))
                         skip = true;
                 }
                 if (!skip)
@@ -318,7 +318,7 @@ QMap<QByteArray, int> Config::updateIntervals() const
     static const std::array lut = { "Picture", "PriceGuide", "Database" };
 
     for (const auto &iv : lut)
-        uiv[iv] = value(u"BrickLink/UpdateInterval/"_qs + QLatin1String(iv), uiv[iv]).toInt();
+        uiv[iv] = value(u"BrickLink/UpdateInterval/"_qs + QString::fromLatin1(iv), uiv[iv]).toInt();
     return uiv;
 }
 
@@ -343,7 +343,7 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
         it.next();
 
         if (it.value() != old_uiv.value(it.key())) {
-            setValue(u"BrickLink/UpdateInterval/"_qs + QLatin1String(it.key()), it.value());
+            setValue(u"BrickLink/UpdateInterval/"_qs + QString::fromLatin1(it.key()), it.value());
             modified = true;
         }
     }

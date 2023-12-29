@@ -25,6 +25,7 @@ int DocumentList::count() const
 QStringList DocumentList::allFiles() const
 {
     QStringList files;
+    files.reserve(m_documents.count());
     for (const auto *doc : m_documents) {
         QString fileName = doc->filePath();
         if (!fileName.isEmpty())

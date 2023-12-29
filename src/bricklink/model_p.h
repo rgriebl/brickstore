@@ -47,6 +47,8 @@ public:
 
         QString m_sectionTitle;
         QVector<Entry *> m_sectionEntries;
+
+        Q_DISABLE_COPY_MOVE(Entry)
     };
 
     const Entry *entry(const QModelIndex &idx) const;
@@ -67,6 +69,7 @@ protected:
 
     friend class InventoryModel;
 private:
+    Q_DISABLE_COPY_MOVE(InternalInventoryModel)
 };
 
 } // namespace BrickLink

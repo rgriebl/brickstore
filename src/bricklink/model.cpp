@@ -940,7 +940,7 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
                         indexes << index(srow, InventoryModel::PictureColumn, index(row, 0));
                 }
             } else if (e->m_item == pic->item()) {
-                indexes << index(row, InventoryModel::PictureColumn);
+                indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
             }
         }
 
@@ -984,7 +984,7 @@ void InternalInventoryModel::fillConsistsOf(const QVector<SimpleLot> &list)
         }
     }
 
-    m_entries = unique.values();
+    m_entries = unique.values();  // clazy:exclude=qt6-deprecated-api-fixes
 }
 
 void InternalInventoryModel::fillAppearsIn(const QVector<SimpleLot> &list)

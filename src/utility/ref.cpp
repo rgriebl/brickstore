@@ -9,6 +9,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(LogCache)
 
+using namespace std::chrono_literals;
 
 QVector<Ref *> Ref::s_zombieRefs = { };
 QTimer *Ref::s_zombieCleaner = nullptr;
@@ -19,14 +20,14 @@ void Ref::addZombieRef(Ref *ref)
 
     if (!s_zombieCleaner) {
         s_zombieCleaner = new QTimer(qApp);
-        s_zombieCleaner->setInterval(60 * 1000);
+        s_zombieCleaner->setInterval(1min);
 
         QObject::connect(s_zombieCleaner, &QTimer::timeout,
                          s_zombieCleaner, []() {
             for (auto it = s_zombieRefs.begin(); it != s_zombieRefs.end(); ) {
                 if ((*it)->refCount() == 0) {
                     delete *it;
-                    it = s_zombieRefs.erase(it);
+                    it = s_zombieRefs.erase(it);  // clazy:exclude=strict-iterators
                 } else {
                     ++it;
                 }

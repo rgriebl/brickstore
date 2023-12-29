@@ -79,7 +79,7 @@ void ManageColumnLayoutsDialog::accept()
         if (remove) {
             Config::inst()->deleteColumnLayout(id);
         } else {
-            newOrder.append(id);
+            newOrder.append(id);  // clazy:exclude=reserve-candidates
             if (cli->text() != cli->m_name)
                 Config::inst()->renameColumnLayout(id, cli->text());
         }

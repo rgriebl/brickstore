@@ -26,7 +26,7 @@ AppearsIn Item::appearsIn(const Color *onlyColor) const
                 const Item *item = &core()->items()[it->m_itemBits.m_itemIndex];
 
                 if (quint32 qty = it->m_itemBits.m_quantity)
-                    vec.append(qMakePair(qty, item));
+                    vec.append(qMakePair(qty, item)); // clazy:exclude=reserve-candidates
             }
         } else {
             it += vectorSize; // skip 2nd level

@@ -18,7 +18,7 @@ public:
         ContinueEventProcessing = 0,
         StopEventProcessing     = 1,
         RemoveEventFilter       = 0x1000,
-        DeleteEventFilter       = 0x3000,
+        DeleteEventFilter       = 0x2000 | RemoveEventFilter,
     };
     Q_ENUM(ResultFlag)
     Q_DECLARE_FLAGS(Result, ResultFlag)

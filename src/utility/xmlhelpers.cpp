@@ -24,7 +24,7 @@ static QString decodeEntities(const QString &src)
         if (endpos < 0) {
             pos += 2;
         } else {
-            int unicode = decoded.mid(pos + 2, endpos - pos - 2).toInt();
+            int unicode = QStringView { decoded }.mid(pos + 2, endpos - pos - 2).toInt();
             if (unicode > 0) {
                 decoded.replace(pos, endpos - pos + 1, QChar(unicode));
                 pos++;
@@ -99,7 +99,7 @@ QString XmlHelpers::ParseXML::elementText(const QDomElement &parent, const char 
     auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
     if (dnl.size() != 1) {
         throw ParseException("Expected a single %1 tag, but found %2")
-                .arg(QLatin1String(tagName)).arg(dnl.size());
+                .arg(QString::fromLatin1(tagName)).arg(dnl.size());
     }
     // the contents are double XML escaped. QDom unescaped once already, now have to do one more
     return decodeEntities(dnl.at(0).toElement().text().trimmed());

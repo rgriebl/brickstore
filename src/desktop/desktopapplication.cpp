@@ -301,8 +301,9 @@ bool DesktopApplication::notifyOtherInstance()
         }
 
         if (client.state() == QLocalSocket::ConnectedState) {
-            QStringList files;
             const auto fileArgs = QCoreApplication::arguments().mid(1);
+            QStringList files;
+            files.reserve(fileArgs.size());
             for (const QString &arg : fileArgs) {
                 QFileInfo fi(arg);
                 if (fi.exists() && fi.isFile())

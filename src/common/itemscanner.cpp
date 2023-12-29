@@ -137,14 +137,16 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
 
             } else if (statusCode == 422) {
                 const auto json = QJsonDocument::fromJson(reply->readAll());
-                QStringList errorStrings;
                 const auto jsonDetails = json[u"detail"_qs].toArray();
+                QStringList errorStrings;
+                errorStrings.reserve(jsonDetails.size());
                 for (const auto &jsonDetail : jsonDetails) {
                     QString str = jsonDetail[u"msg"_qs].toString() + u" (type: "
                                   + jsonDetail[u"type"_qs].toString() + u")";
                     const auto locs = jsonDetail[u"loc"_qs].toArray();
                     if (!locs.isEmpty()) {
                         QStringList locList;
+                        locList.reserve(locs.size());
                         for (const auto &loc : locs)
                             locList << loc.toVariant().toString();
                         str = str + u" at [" + locList.join(u", ") + u']';

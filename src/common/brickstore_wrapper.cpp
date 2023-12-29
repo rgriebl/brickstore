@@ -23,6 +23,7 @@
 #include "brickstore_wrapper.h"
 #include "version.h"
 
+using namespace std::chrono_literals;
 
 /*! \qmltype BrickStore
     \inherits QtObject
@@ -333,7 +334,7 @@ QmlDocument::QmlDocument(Document *doc)
     , m_forceLayoutDelay(new QTimer(this))
     , m_columnModel(new QmlDocumentColumnModel(this))
 {
-    m_forceLayoutDelay->setInterval(100);
+    m_forceLayoutDelay->setInterval(100ms);
     m_forceLayoutDelay->setSingleShot(true);
     connect(m_forceLayoutDelay, &QTimer::timeout,
             this, &QmlDocument::forceLayout);

@@ -1771,7 +1771,7 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
                                                partOutTraits, status);
 
     auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
-    document->setTitle(tr("Inventory for %1").arg(QLatin1String(item->id())));
+    document->setTitle(tr("Inventory for %1").arg(QString::fromLatin1(item->id())));
 
     auto thumbnail = BrickLink::core()->pictureCache()->picture(item, color, true);
     if (thumbnail) {
@@ -2086,8 +2086,9 @@ QString Document::columnLayoutCommandId(Document::ColumnLayoutCommand clc)
 
 Document::ColumnLayoutCommand Document::columnLayoutCommandFromId(const QString &id)
 {
+    const QByteArray bid = id.toLatin1();
     for (const auto cmd : columnLayoutCommandList) {
-        if (id == QLatin1String(cmd.id))
+        if (bid == cmd.id)
             return cmd.cmd;
     }
     return ColumnLayoutCommand::User;

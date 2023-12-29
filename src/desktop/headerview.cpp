@@ -234,7 +234,7 @@ QVector<int> HeaderView::visualColumnOrder() const
     for (int vi = 0; vi < count(); ++vi) {
         int li = logicalIndex(vi);
         if (!isSectionHidden(li))
-            order << li;
+            order << li;  // clazy:exclude=reserve-candidates
     }
     return order;
 }

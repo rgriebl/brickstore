@@ -204,7 +204,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_toolbar, &QToolBar::visibilityChanged,
             this, [this]() {
-        if (!qobject_cast<MainWindow *>(this)) // we may get this callback after ~MainWindow
+        // we may get this callback after ~MainWindow
+        if (!qobject_cast<MainWindow *>(this)) // clazy:exclude=unneeded-cast
             return;
         if (m_welcomeWidget->isVisibleTo(this))
             repositionHomeWidget();
@@ -448,7 +449,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 void MainWindow::dropEvent(QDropEvent *e)
 {
     const auto urls = e->mimeData()->urls();
-    for (QUrl u : urls)
+    for (const QUrl &u : urls)
         Document::load(u.toLocalFile());
 
     e->setDropAction(Qt::CopyAction);
@@ -550,7 +551,7 @@ ViewPane *MainWindow::createViewPane(Document *activeDocument, QWidget *window)
 QDockWidget *MainWindow::createDock(QWidget *widget, const char *name)
 {
     auto *dock = new QDockWidget(QString(), this);
-    dock->setObjectName(QLatin1String(name));
+    dock->setObjectName(QString::fromLatin1(name));
     dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
     dock->setTitleBarWidget(new FancyDockTitleBar(dock));
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -1395,7 +1396,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         connect(list, &QListWidget::itemActivated, this, [this, list, menu](QListWidgetItem *item) {
             if (item) {
                 menu->close();
-                emit triggered(list->row(item) + 1);
+                emit multipleTriggered(list->row(item) + 1);
             }
         });
 

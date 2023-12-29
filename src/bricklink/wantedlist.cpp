@@ -216,10 +216,11 @@ WantedLists::WantedLists(Core *core)
             QString message = tr("Failed to import the wanted lists");
             if (success) {
                 try {
+                    const auto wantedLists = parseGlobalWantedList(*job->data());
                     beginResetModel();
                     qDeleteAll(m_wantedLists);
                     m_wantedLists.clear();
-                    const auto wantedLists = parseGlobalWantedList(*job->data());
+                    m_wantedLists.reserve(wantedLists.size());
                     for (auto &wantedList : wantedLists) {
                         int row = int(m_wantedLists.count());
                         m_wantedLists.append(wantedList);
@@ -283,6 +284,7 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
         throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
     const QJsonArray jsonWantedLists = json[u"wantedLists"].toArray();
+    wantedLists.reserve(jsonWantedLists.size());
 
     for (auto &&jsonWantedList : jsonWantedLists) {
         int id = jsonWantedList[u"id"].toInt(-1);

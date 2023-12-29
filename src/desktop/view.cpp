@@ -923,6 +923,7 @@ bool View::printPages(QPrinter *prt, const LotList &lots, const QList<uint> &pag
 
     QVector<QVector<QPair<DocumentModel::Field, double>>> colWidthsPerPageAcross;
     QVector<QPair<DocumentModel::Field, double>> curPageColWidths;
+    curPageColWidths.reserve(colWidths.size());
     double cwUsed = 0;
     for (const auto &cw : colWidths) {
         if (!qFuzzyIsNull(cwUsed) && ((cwUsed + cw.second) > pageRect.width())) {

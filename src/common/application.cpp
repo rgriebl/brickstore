@@ -875,7 +875,7 @@ void Application::setupLogging()
         }
     };
 
-    s_inst->m_loggingTimer.setInterval(100);
+    s_inst->m_loggingTimer.setInterval(100ms);
     s_inst->m_loggingTimer.setSingleShot(true);
 
     connect(&s_inst->m_loggingTimer, &QTimer::timeout, s_inst, []() {

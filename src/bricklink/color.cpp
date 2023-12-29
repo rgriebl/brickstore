@@ -20,7 +20,7 @@ const QVector<ColorTypeFlag> &Color::allColorTypes()
     static QVector<ColorTypeFlag> all;
     if (all.isEmpty()) [[unlikely]] {
         for (int ct = int(ColorTypeFlag::Solid); ct & int(ColorTypeFlag::Mask); ct <<= 1)
-            all.append(ColorTypeFlag(ct));
+            all.append(ColorTypeFlag(ct));  // clazy:exclude=reserve-candidates
     }
     return all;
 }

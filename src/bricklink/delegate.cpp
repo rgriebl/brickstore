@@ -235,7 +235,7 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
         const QImage img = pic->image();
         img.save(&buffer, "PNG");
 
-        return str.arg(img_left.arg(QLatin1String(ba.toBase64())).arg(img.width()).arg(img.height()),
+        return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
                        id, item->name(), yearStr);
     }
 }

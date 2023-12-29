@@ -257,10 +257,11 @@ Carts::Carts(Core *core)
             QString message = tr("Failed to import the carts");
             if (success) {
                 try {
+                    const auto carts = parseGlobalCart(*job->data());
                     beginResetModel();
                     qDeleteAll(m_carts);
                     m_carts.clear();
-                    const auto carts = parseGlobalCart(*job->data());
+                    m_carts.reserve(carts.size());
                     for (auto &cart : carts) {
                         int row = int(m_carts.count());
                         m_carts.append(cart);
@@ -310,6 +311,7 @@ int Carts::parseSellerCart(Cart *cart, const QByteArray &data)
         throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
     const QJsonArray cartItems = json[u"cart"].toObject()[u"items"].toArray();
+    lots.reserve(cartItems.size());
     for (auto &&v : cartItems) {
         const QJsonObject cartItem = v.toObject();
 
@@ -376,10 +378,12 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
     const QJsonArray domesticCarts = json[u"domestic"].toObject()[u"stores"].toArray();
     const QJsonArray internationalCarts = json[u"international"].toObject()[u"stores"].toArray();
     QVector<QJsonObject> jsonCarts;
+    jsonCarts.reserve(domesticCarts.size() + internationalCarts.size());
     for (auto &&v : domesticCarts)
         jsonCarts << v.toObject();
     for (auto &&v : internationalCarts)
         jsonCarts << v.toObject();
+    carts.reserve(jsonCarts.size());
 
     for (auto &&jsonCart : jsonCarts) {
         int sellerId = jsonCart[u"sellerID"].toInt();
@@ -396,7 +400,7 @@ QVector<BrickLink::Cart *> Carts::parseGlobalCart(const QByteArray &data)
                 cart->setCurrencyCode(totalPrice.left(2) + u'D');
             else
                 cart->setCurrencyCode(totalPrice.left(3));
-            cart->setTotal(totalPrice.mid(4).toDouble());
+            cart->setTotal(QStringView { totalPrice }.mid(4).toDouble());
             cart->setDomestic(jsonCart[u"type"].toString() == u"domestic");
             cart->setLastUpdated(QDate::fromString(jsonCart[u"lastUpdated"].toString(),
                                  u"yyyy-MM-dd"));

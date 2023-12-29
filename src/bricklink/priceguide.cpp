@@ -125,15 +125,15 @@ void SingleHTMLScrapePGRetriever::fetch(PriceGuide *pg, bool highPriority)
 
     QUrl url = QUrl(u"https://www.bricklink.com/priceGuideSummary.asp"_qs);
     url.setQuery({
-                     { u"a"_qs,           QString(QLatin1Char(pg->item()->itemTypeId())) },
-                     { u"vcID"_qs,        u"1"_qs }, // USD
-                     { u"vatInc"_qs,      (pg->vatType() == VatType::Included) ? u"Y"_qs : u"N"_qs },
-                     { u"viewExclude"_qs, u"Y"_qs },
-                     { u"ajView"_qs,      u"Y"_qs }, // only the AJAX snippet
-                     { u"colorID"_qs,     QString::number(pg->color()->id()) },
-                     { u"itemID"_qs,      Utility::urlQueryEscape(pg->item()->id()) },
-                     { u"uncache"_qs,     QString::number(QDateTime::currentMSecsSinceEpoch()) },
-                 });
+        { u"a"_qs,           QString(QChar::fromLatin1(pg->item()->itemTypeId())) },
+        { u"vcID"_qs,        u"1"_qs }, // USD
+        { u"vatInc"_qs,      (pg->vatType() == VatType::Included) ? u"Y"_qs : u"N"_qs },
+        { u"viewExclude"_qs, u"Y"_qs },
+        { u"ajView"_qs,      u"Y"_qs }, // only the AJAX snippet
+        { u"colorID"_qs,     QString::number(pg->color()->id()) },
+        { u"itemID"_qs,      Utility::urlQueryEscape(pg->item()->id()) },
+        { u"uncache"_qs,     QString::number(QDateTime::currentMSecsSinceEpoch()) },
+    });
 
     auto job = TransferJob::get(url, nullptr, 2);
     job->setUserData("htmlPriceGuide", QVariant::fromValue(pg));
@@ -172,7 +172,7 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, PriceGuide
             throw Exception("%1 (%2)").arg(job->errorString()).arg(job->responseCode());
         }
     } catch (const Exception &e) {
-        emit failed(pg, u"PG download for " + QLatin1String(pg->item()->id()) + u" failed: " + e.errorString());
+        emit failed(pg, u"PG download for " + QString::fromLatin1(pg->item()->id()) + u" failed: " + e.errorString());
     }
     pg->release();
 }
@@ -393,7 +393,7 @@ void BatchedAffiliateAPIPGRetriever::check()
 
             for (auto i = 0; i < batchSize; ++i) {
                 auto *pg = m_nextBatch.at(i).first;
-                const QString itemId = QLatin1String(pg->item()->id());
+                const QString itemId = QString::fromLatin1(pg->item()->id());
                 const QString typeId = itemTypeApiId(pg->item()->itemType());
                 int colorId = int(pg->color()->id());
 
@@ -415,11 +415,11 @@ void BatchedAffiliateAPIPGRetriever::check()
             // https://api.bricklink.com/api/affiliate/v1/price_guide_batch?currency_code=USD&precision=4&vat_type=1&api_key=...
             QUrl url = u"https://api.bricklink.com/api/affiliate/v1/price_guide_batch"_qs;
             url.setQuery({
-                             { u"currency_code"_qs, u"USD"_qs },
-                             { u"precision"_qs,     u"4"_qs },
-                             { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
-                             { u"api_key"_qs,       m_apiKey }
-                         });
+                { u"currency_code"_qs, u"USD"_qs },
+                { u"precision"_qs,     u"4"_qs },
+                { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
+                { u"api_key"_qs,       m_apiKey }
+            });
 
             m_currentJob = TransferJob::postContent(url, u"application/json"_qs, json);
             m_currentJob->setUserData("batchedPriceGuide", true);
@@ -513,8 +513,8 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
     } catch (const Exception &e) {
         for (auto *pg : std::as_const(m_currentBatch)) {
             if (pg) {
-                emit failed(pg, u"PG download for " + QLatin1Char(pg->item()->itemType()->id())
-                            + u' ' + QLatin1String(pg->item()->id()) + u" in "
+                emit failed(pg, u"PG download for " + QChar::fromLatin1(pg->item()->itemType()->id())
+                                    + u' ' + QString::fromLatin1(pg->item()->id()) + u" in "
                             + pg->color()->name() + u" failed: " + e.errorString());
                 pg->release();
             }
@@ -823,7 +823,7 @@ QString PriceGuideCachePrivate::databaseTag(PriceGuide *pg, PriceGuideRetrieverI
     if (!pg || !pg->item() || !pg->color() || !retriever)
         return { };
 
-    return QLatin1Char(pg->item()->itemTypeId()) + QLatin1String(pg->item()->id())
+    return QChar::fromLatin1(pg->item()->itemTypeId()) + QString::fromLatin1(pg->item()->id())
             + u'@' + QString::number(pg->color()->id())
             + u'@' + retriever->id() + QString::number(int(pg->vatType()));
 }

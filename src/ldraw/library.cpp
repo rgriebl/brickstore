@@ -162,7 +162,7 @@ Library::~Library()
 
 QFuture<Part *> Library::partFromId(const QByteArray &id)
 {
-    QString filename = QLatin1String(id) + u".dat";
+    QString filename = QString::fromLatin1(id) + u".dat";
     return partFromFile(filename);
 }
 
@@ -340,7 +340,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
 
         for (auto subdir : subdirs) {
             if (m_zip) {
-                m_searchpath << QString(u"!ZIP!ldraw/" + QLatin1String(subdir));
+                m_searchpath << QString(u"!ZIP!ldraw/" + QString::fromLatin1(subdir));
             } else {
                 QDir sdir(m_path);
                 QString s = QString::fromLatin1(subdir);

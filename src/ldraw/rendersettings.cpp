@@ -39,7 +39,7 @@ void RenderSettings::forEachProperty(const std::function<void(QMetaProperty &)> 
 void RenderSettings::save()
 {
     forEachProperty([this](QMetaProperty &mp) {
-        Config::inst()->setValue(u"LDraw/RenderSettings/" + QLatin1String(mp.name()), mp.read(this));
+        Config::inst()->setValue(u"LDraw/RenderSettings/" + QString::fromLatin1(mp.name()), mp.read(this));
     });
 }
 

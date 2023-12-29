@@ -14,7 +14,6 @@ class BetterCommandButton : public QPushButton
 {
     Q_OBJECT
     Q_DISABLE_COPY(BetterCommandButton)
-    Q_PROPERTY(QString description READ description WRITE setDescription)
 
 public:
     explicit BetterCommandButton(QAction *action, QWidget *parent = nullptr);

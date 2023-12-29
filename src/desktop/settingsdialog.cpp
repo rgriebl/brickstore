@@ -87,7 +87,7 @@ public:
             for (auto it = m_actions.begin(); it != m_actions.end(); ) {
                 if (QAction *a = ActionManager::inst()->qAction(it->toLatin1().constData())) {
                     if (a->menu()) {
-                        it = m_actions.erase(it);
+                        it = m_actions.erase(it);  // clazy:exclude=strict-iterators
                         continue;
                     }
                 }

@@ -863,7 +863,7 @@ QCoro::Task<> DocumentModel::consolidateLots(BrickLink::LotList lots)
         for (int j = i + 1; j < sourceLots.count(); ++j) {
             Lot *otherLot = sourceLots.at(j);
             if (canLotsBeMerged(*lot, *otherLot))
-                mergeLots << sourceLots.takeAt(j--);
+                mergeLots << sourceLots.takeAt(j--);  // clazy:exclude=reserve-candidates
         }
         if (mergeLots.isEmpty())
             continue;
@@ -1241,6 +1241,7 @@ void DocumentModel::insertLotsDirect(const LotList &lots, QVector<int> &position
         updateLotFlags(lot);
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
@@ -1287,6 +1288,7 @@ void DocumentModel::removeLotsDirect(const LotList &lots, QVector<int> &position
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
@@ -2443,6 +2445,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
@@ -2489,6 +2492,7 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
     rebuildFilteredLotIndex();
 
     QModelIndexList after;
+    after.reserve(before.size());
     for (const QModelIndex &idx : before)
         after.append(index(lot(idx), idx.column()));
     changePersistentIndexList(before, after);
@@ -2764,7 +2768,7 @@ void DocumentLotsMimeData::setLots(const LotList &lots, const QString &currencyC
         lot->save(ds);
         if (!text.isEmpty())
             text.append(u"\n"_qs);
-        text.append(QLatin1String(lot->itemId()));
+        text.append(QString::fromLatin1(lot->itemId()));
     }
     setText(text);
     setData(s_mimetype, data);

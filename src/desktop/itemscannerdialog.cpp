@@ -31,6 +31,8 @@
 #include "common/itemscanner.h"
 #include "itemscannerdialog.h"
 
+using namespace std::chrono_literals;
+
 static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
 {
     // QTBUG-120026: The default FFmpeg backend completely freezes the main thread for 1-3 sec
@@ -163,7 +165,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     m_progress = new QProgressBar(this);
     m_progress->setTextVisible(false);
     m_progressTimer = new QTimer(m_progress);
-    m_progressTimer->setInterval(30);
+    m_progressTimer->setInterval(30ms);
     connect(m_progressTimer, &QTimer::timeout,
             this, [this]() {
         m_progress->setValue(qMin(int(m_lastScanTime.elapsed()), m_progress->maximum()));
@@ -232,10 +234,12 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray());
     m_pinWindow->setChecked(Config::inst()->value(u"MainWindow/ItemScannerDialog/Pinned"_qs, false).toBool());
 
+    m_errorMessageTimeout.setInterval(10s);
     connect(&m_errorMessageTimeout, &QTimer::timeout, this, [this]() {
         if (m_state == State::Error)
             setState(State::Idle);
     });
+    m_noMatchMessageTimeout.setInterval(10s);
     connect(&m_noMatchMessageTimeout, &QTimer::timeout, this, [this]() {
         if (m_state == State::NoMatch)
             setState(State::Idle);

@@ -528,7 +528,8 @@ private:
     {
     public:
         Setter(QmlLot *lot);
-        Setter(const Setter &copy) = default;
+        Setter(const Setter &copy) = delete;
+        Setter(Setter &&move) = delete;
         Lot *to();
         ~Setter();
 

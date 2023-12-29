@@ -342,8 +342,8 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
     pic->addRef();
 
     uint colorId = pic->color() ? pic->color()->id() : 0;
-    QString url = u"https://img.bricklink.com/ItemImage/" + QLatin1Char(pic->item()->itemTypeId())
-            + u"N/" + QString::number(colorId) + u'/' + QLatin1String(pic->item()->id()) + u".png";
+    QString url = u"https://img.bricklink.com/ItemImage/" + QChar::fromLatin1(pic->item()->itemTypeId())
+                  + u"N/" + QString::number(colorId) + u'/' + QString::fromLatin1(pic->item()->id()) + u".png";
 
     pic->m_transferJob = TransferJob::get(url);
     pic->m_transferJob->setUserData("picture", QVariant::fromValue(pic));
@@ -381,7 +381,7 @@ QString PictureCachePrivate::databaseTag(Picture *pic)
     if (!pic || !pic->item())
         return { };
 
-    return QLatin1Char(pic->item()->itemTypeId()) + QLatin1String(pic->item()->id())
+    return QChar::fromLatin1(pic->item()->itemTypeId()) + QString::fromLatin1(pic->item()->id())
             + u'@' + QString::number(pic->color() ? pic->color()->id() : 0);
 }
 
