@@ -16,7 +16,12 @@ class SelectColor : public QWidget
 {
     Q_OBJECT
 public:
-    SelectColor(QWidget *parent = nullptr);
+    enum class Feature {
+        ColorLock = 1,
+    };
+
+    explicit SelectColor(QWidget *parent = nullptr);
+    explicit SelectColor(const QVector<Feature> &features, QWidget *parent = nullptr);
 
     void setWidthToContents(bool b);
 
@@ -44,13 +49,12 @@ protected:
     void changeEvent(QEvent *) override;
     void showEvent(QShowEvent *) override;
 
-    void populateFilter(const BrickLink::Color *color);
-
 protected:
     QComboBox *w_filter;
     QTreeView *w_colors;
     QToolButton *w_lock;
     BrickLink::ColorModel *m_colorModel;
     const BrickLink::Item *m_item = nullptr;
+    bool m_hasLock = false;
     bool m_locked = false;
 };

@@ -41,7 +41,12 @@ enum {
 
 
 SelectColor::SelectColor(QWidget *parent)
+    : SelectColor({ }, parent)
+{ }
+
+SelectColor::SelectColor(const QVector<Feature> &features, QWidget *parent)
     : QWidget(parent)
+    , m_hasLock(features.contains(Feature::ColorLock))
 {
     w_filter = new QComboBox(this);
     w_filter->addItem(QString { }, int(KnownColors));
@@ -123,8 +128,12 @@ SelectColor::SelectColor(QWidget *parent)
     lay->setRowStretch(1, 1);
     lay->setColumnStretch(0, 1);
     lay->setColumnStretch(1, 0);
-    lay->addWidget(w_filter, 0, 0);
-    lay->addWidget(w_lock, 0, 1);
+    if (m_hasLock) {
+        lay->addWidget(w_filter, 0, 0);
+        lay->addWidget(w_lock, 0, 1);
+    } else {
+        lay->addWidget(w_filter, 0, 0, 1, 2);
+    }
     lay->addWidget(w_colors, 1, 0, 1, 2);
 
     languageChange();
@@ -208,11 +217,14 @@ const BrickLink::Color *SelectColor::currentColor() const
 
 bool SelectColor::colorLock() const
 {
-    return m_locked;
+    return m_hasLock && m_locked;
 }
 
 void SelectColor::setColorLock(bool locked)
 {
+    if (!m_hasLock)
+        return;
+
     if (locked != m_locked) {
         m_locked = locked;
         w_lock->setChecked(locked);
