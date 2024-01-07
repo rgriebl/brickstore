@@ -411,6 +411,7 @@ void ActionManager::initialize()
     a->m_iconName = "view_refresh";
     A("configure",                QT_TR_NOOP("Settings..."),                     QT_TR_NOOP("Ctrl+,", "Extras|Settings"), NoNeed, FlagRole(QAction::PreferencesRole));
     A("developer_console",        QT_TR_NOOP("Developer Console"));
+    a->m_iconName = "scriptnew";
     A("reload_scripts",           QT_TR_NOOP("Reload User Scripts"));
     A("menu_window",              QT_TR_NOOP("&Windows"), NoNeed, FlagMenu);
 
