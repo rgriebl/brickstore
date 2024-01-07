@@ -6,7 +6,10 @@
 #include <QtGui/QHelpEvent>
 #include <QtQuick/QQuickView>
 #include <QtQuick/QQuickItem>
+#include <QQmlEngine>
 
+#include "camerapreviewwidget.h"
+#ifdef BS_USE_TYPE_COMPILER
 #ifdef Q_CC_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4458) // in qquickitem_p.h
@@ -15,7 +18,6 @@
 #ifdef Q_CC_MSVC
 #  pragma warning(pop)
 #endif
-#include "camerapreviewwidget.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
 namespace Scanner {
@@ -27,7 +29,49 @@ public:
 };
 }
 #endif
+#else
+namespace Scanner {
 
+// This is a very hacky way to NOT use qmltc (Debian bug 1060228), but also avoid
+// a ton of #ifdefs in the actual application logic below
+
+class CameraPreview : public QObject
+{
+    Q_OBJECT
+public:
+    CameraPreview(QQmlEngine *e)
+    {
+        QQmlComponent c(e);
+        c.loadUrl(u"qrc:/Scanner/CameraPreview.qml"_qs);
+        auto obj = c.create();
+        m_root = qobject_cast<QQuickItem *>(obj);
+        if (m_root)
+            connect(m_root, SIGNAL(clicked()), this, SIGNAL(clicked()));
+    }
+    void setParentItem(QQuickItem *parent)
+    {
+        if (m_root) m_root->setParentItem(parent);
+    }
+    bool active() const
+    {
+        return m_root ? m_root->property("active").toBool() : false;
+    }
+    void setActive(bool a)
+    {
+        if (m_root) m_root->setProperty("active", a);
+    }
+    QObject *videoOutput() const
+    {
+        return m_root;
+    }
+    Q_SIGNAL void clicked();
+
+private:
+    QQuickItem *m_root = nullptr;
+};
+
+}
+#endif
 
 CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
@@ -73,5 +117,11 @@ void CameraPreviewWidget::setActive(bool newActive)
 
 QObject *CameraPreviewWidget::videoOutput() const
 {
+#ifdef BS_USE_TYPE_COMPILER
     return m_cameraPreview;
+#else
+    return m_cameraPreview->videoOutput();
+#endif
 }
+
+#include "camerapreviewwidget.moc"

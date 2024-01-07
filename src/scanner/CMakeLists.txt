@@ -6,12 +6,29 @@ qt_add_library(scanner_module STATIC
     itemscanner.cpp
 )
 
+set(USE_TYPE_COMPILER)
+
+if (TARGET Qt::MultimediaQuickPrivate)
+    set(USE_TYPE_COMPILER "ENABLE_TYPE_COMPILER")
+    target_compile_definitions(scanner_module PRIVATE BS_USE_TYPE_COMPILER)
+    target_link_libraries(scanner_module PRIVATE
+        Qt6::MultimediaQuickPrivate
+        Qt6::QmlPrivate
+        Qt6::QuickPrivate
+    )
+
+    if (WIN32)
+        set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/.qmltc/scanner_module/camerapreview.cpp
+            PROPERTIES COMPILE_FLAGS /wd4458)
+    endif()
+endif()
+
 qt_add_qml_module(scanner_module
     URI Scanner
     VERSION 1.0
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/Scanner
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
-    ENABLE_TYPE_COMPILER
+    ${USE_TYPE_COMPILER}
     NO_PLUGIN
     RESOURCE_PREFIX /
     DEPENDENCIES
@@ -41,11 +58,8 @@ target_link_libraries(scanner_module PRIVATE
     Qt6::Network
     Qt6::Gui
     Qt6::Multimedia
-    Qt6::MultimediaQuickPrivate
     Qt6::Qml
-    Qt6::QmlPrivate
     Qt6::Quick
-    Qt6::QuickPrivate
     QCoro6::Network
     QCoro6::Core
     bricklink_module

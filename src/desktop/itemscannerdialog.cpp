@@ -37,17 +37,13 @@ using namespace std::chrono_literals;
 static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
 {
     // QTBUG-120026: The default FFmpeg backend completely freezes the main thread for 1-3 sec
-    // when enumerating camera devices.
+    // when enumerating camera devices on Windows and macOS.
     SetQtMMBackend()
     {
 #if defined(Q_OS_WINDOWS)
         qputenv("QT_MEDIA_BACKEND", "windows");
 #elif defined(Q_OS_MACOS)
         qputenv("QT_MEDIA_BACKEND", "darwin");
-#elif defined(Q_OS_ANDROID)
-        qputenv("QT_MEDIA_BACKEND", "android");
-#elif defined(Q_OS_LINUX)
-        qputenv("QT_MEDIA_BACKEND", "gstreamer");
 #endif
     }
 } setQtMMBackend;
@@ -86,9 +82,6 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     : QDialog(parent)
     , m_mediaDevices(std::make_unique<QMediaDevices>())
 {
-    connect(m_mediaDevices.get(), &QMediaDevices::videoInputsChanged,
-            this, &ItemScannerDialog::updateCameraDevices);
-
     setSizeGripEnabled(true);
 
     const auto allBackends = ItemScanner::inst()->availableBackends();
@@ -199,6 +192,8 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     });
 
     updateCameraDevices();
+    connect(m_mediaDevices.get(), &QMediaDevices::videoInputsChanged,
+            this, &ItemScannerDialog::updateCameraDevices);
 
     const QByteArray cameraId = Config::inst()->value(u"MainWindow/ItemScannerDialog/CameraId"_qs).toByteArray();
     int cameraIndex = m_selectCamera->findData(cameraId);
