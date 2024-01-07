@@ -275,11 +275,6 @@ void PictureWidget::paletteChange()
         pal.setColor(w_image->backgroundRole(), Qt::white);
         w_image->setPalette(pal);
     }
-    if (w_ldraw) {
-        auto pal = w_ldraw->palette();
-        pal.setColor(w_ldraw->backgroundRole(), Qt::white);
-        w_ldraw->setPalette(pal);
-    }
 }
 
 PictureWidget::~PictureWidget()
