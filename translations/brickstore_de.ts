@@ -462,8 +462,13 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="412"/>
         <source>Ctrl+,</source>
-        <comment>ExQT_TR_NOOPas|Settings</comment>
+        <comment>Extras|Settings</comment>
         <translation>Ctrl+,</translation>
+    </message>
+    <message>
+        <source>Ctrl+,</source>
+        <comment>ExQT_TR_NOOPas|Settings</comment>
+        <translation type="vanished">Ctrl+,</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="413"/>
@@ -471,226 +476,226 @@
         <translation>Entwicklerkonsole</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="414"/>
+        <location filename="../src/common/actionmanager.cpp" line="415"/>
         <source>Reload User Scripts</source>
         <translation>Benutzerskripte neu laden</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="415"/>
+        <location filename="../src/common/actionmanager.cpp" line="416"/>
         <source>&amp;Windows</source>
         <translation>&amp;Fenster</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="417"/>
+        <location filename="../src/common/actionmanager.cpp" line="418"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="418"/>
+        <location filename="../src/common/actionmanager.cpp" line="419"/>
         <source>About...</source>
         <translation>Über BrickStore...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="419"/>
+        <location filename="../src/common/actionmanager.cpp" line="420"/>
         <source>System Information...</source>
         <translation>Systeminformationen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="420"/>
+        <location filename="../src/common/actionmanager.cpp" line="421"/>
         <source>Important Announcements...</source>
         <translation>Wichtige Ankündigungen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="421"/>
+        <location filename="../src/common/actionmanager.cpp" line="422"/>
         <source>Release notes...</source>
         <translation>Versionshinweise...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="422"/>
+        <location filename="../src/common/actionmanager.cpp" line="423"/>
         <source>Report a bug...</source>
         <translation>Fehler melden...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="423"/>
+        <location filename="../src/common/actionmanager.cpp" line="424"/>
         <source>Extensions Interface Documentation...</source>
         <translation>Dokumentation der Erweiterungsschnittstelle...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="424"/>
+        <location filename="../src/common/actionmanager.cpp" line="425"/>
         <source>Check for Program Updates...</source>
         <translation>Nach Programm-Updates suchen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="427"/>
+        <location filename="../src/common/actionmanager.cpp" line="428"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="428"/>
+        <location filename="../src/common/actionmanager.cpp" line="429"/>
         <source>Set status to Include</source>
         <translation>Status auf Einschliessen setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="430"/>
+        <location filename="../src/common/actionmanager.cpp" line="431"/>
         <source>Set status to Exclude</source>
         <translation>Status auf Ausschliessen setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="432"/>
+        <location filename="../src/common/actionmanager.cpp" line="433"/>
         <source>Set status to Extra</source>
         <translation>Status auf Extra setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="434"/>
+        <location filename="../src/common/actionmanager.cpp" line="435"/>
         <source>Toggle status between Include and Exclude</source>
         <translation>Status zwischen Ein- und Aussschliessen umschalten</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="435"/>
+        <location filename="../src/common/actionmanager.cpp" line="436"/>
         <source>Condition</source>
         <translation>Zustand</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="436"/>
+        <location filename="../src/common/actionmanager.cpp" line="437"/>
         <source>Set condition to New</source>
         <translation>Zustand auf Neu setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="437"/>
+        <location filename="../src/common/actionmanager.cpp" line="438"/>
         <source>Set condition to Used</source>
         <translation>Zustand auf Gebraucht setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="438"/>
+        <location filename="../src/common/actionmanager.cpp" line="439"/>
         <source>Set sub-condition to None</source>
         <translation>Unterzustand auf Keiner setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="439"/>
+        <location filename="../src/common/actionmanager.cpp" line="440"/>
         <source>Set sub-condition to Sealed</source>
         <translation>Unterzustand auf Versiegelt setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="440"/>
+        <location filename="../src/common/actionmanager.cpp" line="441"/>
         <source>Set sub-condition to Complete</source>
         <translation>Unterzustand auf Vollständig setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="441"/>
+        <location filename="../src/common/actionmanager.cpp" line="442"/>
         <source>Set sub-condition to Incomplete</source>
         <translation>Unterzustand auf Unvollständig setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="442"/>
+        <location filename="../src/common/actionmanager.cpp" line="443"/>
         <source>Set item...</source>
         <translation>Teil ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="443"/>
+        <location filename="../src/common/actionmanager.cpp" line="444"/>
         <source>Set color...</source>
         <translation>Farbe ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="445"/>
+        <location filename="../src/common/actionmanager.cpp" line="446"/>
         <source>Quantity</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="446"/>
+        <location filename="../src/common/actionmanager.cpp" line="447"/>
         <source>Set quantity...</source>
         <translation>Menge ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="447"/>
+        <location filename="../src/common/actionmanager.cpp" line="448"/>
         <source>Multiply quantity...</source>
         <translation>Menge multiplizieren...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="447"/>
+        <location filename="../src/common/actionmanager.cpp" line="448"/>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
         <translation>Ctrl+*</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="448"/>
+        <location filename="../src/common/actionmanager.cpp" line="449"/>
         <source>Divide quantity...</source>
         <translation>Menge teilen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="448"/>
+        <location filename="../src/common/actionmanager.cpp" line="449"/>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
         <translation>Ctrl+/</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="449"/>
+        <location filename="../src/common/actionmanager.cpp" line="450"/>
         <source>Price</source>
         <translation>Preis</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="450"/>
+        <location filename="../src/common/actionmanager.cpp" line="451"/>
         <source>Round price to 2 decimals</source>
         <translation>Preis auf 2 Nachkommastellen runden</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="451"/>
+        <location filename="../src/common/actionmanager.cpp" line="452"/>
         <source>Set price...</source>
         <translation>Preis ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="452"/>
+        <location filename="../src/common/actionmanager.cpp" line="453"/>
         <source>Set price to guide...</source>
         <translation>Preis auf Richtpreis setzen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="452"/>
+        <location filename="../src/common/actionmanager.cpp" line="453"/>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
         <translation>Ctrl+G</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="453"/>
+        <location filename="../src/common/actionmanager.cpp" line="454"/>
         <source>Adjust price...</source>
         <translation>Preis anpassen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="453"/>
+        <location filename="../src/common/actionmanager.cpp" line="454"/>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
         <translation>Ctrl++</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="454"/>
+        <location filename="../src/common/actionmanager.cpp" line="455"/>
         <source>Set relative tier prices...</source>
         <translation>Relative Staffelpreise setzen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="455"/>
+        <location filename="../src/common/actionmanager.cpp" line="456"/>
         <source>Cost</source>
         <translation>Unkosten</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="456"/>
+        <location filename="../src/common/actionmanager.cpp" line="457"/>
         <source>Round cost to 2 decimals</source>
         <translation>Unkosten auf 2 Nachkommastellen runden</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="457"/>
+        <location filename="../src/common/actionmanager.cpp" line="458"/>
         <source>Set cost...</source>
         <translation>Unkosten ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="458"/>
+        <location filename="../src/common/actionmanager.cpp" line="459"/>
         <source>Adjust cost...</source>
         <translation>Unkosten anpassen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="459"/>
+        <location filename="../src/common/actionmanager.cpp" line="460"/>
         <source>Spread cost relative to price...</source>
         <translation>Teile die Unkosten relative zum Preis auf...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="460"/>
+        <location filename="../src/common/actionmanager.cpp" line="461"/>
         <source>Spread cost relative to weight...</source>
         <translation>Teile die Unkosten relative zum Gewicht auf...</translation>
     </message>
@@ -699,191 +704,191 @@
         <translation type="vanished">Teile die Unkosten auf...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="461"/>
+        <location filename="../src/common/actionmanager.cpp" line="462"/>
         <source>Set bulk quantity...</source>
         <translation>Gebindegrösse ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="462"/>
+        <location filename="../src/common/actionmanager.cpp" line="463"/>
         <source>Set sale...</source>
         <translation>Ausverkauf ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="462"/>
+        <location filename="../src/common/actionmanager.cpp" line="463"/>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
         <translation>Ctrl+%</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="463"/>
+        <location filename="../src/common/actionmanager.cpp" line="464"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="464"/>
+        <location filename="../src/common/actionmanager.cpp" line="465"/>
         <source>Set comment...</source>
         <translation>Kommentar ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="465"/>
+        <location filename="../src/common/actionmanager.cpp" line="466"/>
         <source>Add to comment...</source>
         <translation>Zum Kommentar hinzufügen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="466"/>
+        <location filename="../src/common/actionmanager.cpp" line="467"/>
         <source>Remove from comment...</source>
         <translation>Vom Kommentar entfernen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="467"/>
+        <location filename="../src/common/actionmanager.cpp" line="468"/>
         <source>Clear comment</source>
         <translation>Kommentar löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="468"/>
+        <location filename="../src/common/actionmanager.cpp" line="469"/>
         <source>Remark</source>
         <translation>Anmerkung</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="469"/>
+        <location filename="../src/common/actionmanager.cpp" line="470"/>
         <source>Set remark...</source>
         <translation>Anmerkung ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="470"/>
+        <location filename="../src/common/actionmanager.cpp" line="471"/>
         <source>Add to remark...</source>
         <translation>Zur Anmerkung hinzufügen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="471"/>
+        <location filename="../src/common/actionmanager.cpp" line="472"/>
         <source>Remove from remark...</source>
         <translation>Von der Anmerkung entfernen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="472"/>
+        <location filename="../src/common/actionmanager.cpp" line="473"/>
         <source>Clear remark</source>
         <translation>Anmerkung löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="473"/>
+        <location filename="../src/common/actionmanager.cpp" line="474"/>
         <source>Retain in Inventory</source>
         <translation>Im Bestand halten</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="474"/>
+        <location filename="../src/common/actionmanager.cpp" line="475"/>
         <source>Set retain flag</source>
         <translation>Halten Markierung setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="475"/>
+        <location filename="../src/common/actionmanager.cpp" line="476"/>
         <source>Unset retain flag</source>
         <translation>Halten Markierung löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="476"/>
+        <location filename="../src/common/actionmanager.cpp" line="477"/>
         <source>Toggle retain flag</source>
         <translation>Halten Markierung umschalten</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="477"/>
+        <location filename="../src/common/actionmanager.cpp" line="478"/>
         <source>Stockroom Item</source>
         <translation>Teil ist auf Lager</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="478"/>
+        <location filename="../src/common/actionmanager.cpp" line="479"/>
         <source>Set stockroom to None</source>
         <translation>Lager Status löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="479"/>
+        <location filename="../src/common/actionmanager.cpp" line="480"/>
         <source>Set stockroom to A</source>
         <translation>A Lager Status setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="480"/>
+        <location filename="../src/common/actionmanager.cpp" line="481"/>
         <source>Set stockroom to B</source>
         <translation>B Lager Status setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="481"/>
+        <location filename="../src/common/actionmanager.cpp" line="482"/>
         <source>Set stockroom to C</source>
         <translation>C Lager Status setzen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="482"/>
+        <location filename="../src/common/actionmanager.cpp" line="483"/>
         <source>Set reserved for...</source>
         <translation>Reservierung ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="483"/>
+        <location filename="../src/common/actionmanager.cpp" line="484"/>
         <source>Marker</source>
         <translation>Markierung</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="484"/>
+        <location filename="../src/common/actionmanager.cpp" line="485"/>
         <source>Set marker text</source>
         <translation>Markierungstext ändern</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="485"/>
+        <location filename="../src/common/actionmanager.cpp" line="486"/>
         <source>Set marker color...</source>
         <translation>Markierungsfarbe ändern...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="486"/>
+        <location filename="../src/common/actionmanager.cpp" line="487"/>
         <source>Clear marker</source>
         <translation>Markierung löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="487"/>
+        <location filename="../src/common/actionmanager.cpp" line="488"/>
         <source>Copy lot id</source>
         <translation>Posten Id kopieren</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="488"/>
+        <location filename="../src/common/actionmanager.cpp" line="489"/>
         <source>Clear lot id</source>
         <translation>Posten Id löschen</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="490"/>
+        <location filename="../src/common/actionmanager.cpp" line="491"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>BrickLink Kataloginformationen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="490"/>
+        <location filename="../src/common/actionmanager.cpp" line="491"/>
         <source>Ctrl+B,Ctrl+C</source>
         <comment>Edit|Show BL Catalog Info</comment>
         <translation>Ctrl+B,Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="491"/>
+        <location filename="../src/common/actionmanager.cpp" line="492"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>BrickLink Richtpreisinformationen...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="491"/>
+        <location filename="../src/common/actionmanager.cpp" line="492"/>
         <source>Ctrl+B,Ctrl+P</source>
         <comment>Edit|Show BL Price Guide</comment>
         <translation>Ctrl+B,Ctrl+P</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="492"/>
+        <location filename="../src/common/actionmanager.cpp" line="493"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="492"/>
+        <location filename="../src/common/actionmanager.cpp" line="493"/>
         <source>Ctrl+B,Ctrl+L</source>
         <comment>Edit|Show BL Lots for Sale</comment>
         <translation>Ctrl+B,Ctrl+L</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="493"/>
+        <location filename="../src/common/actionmanager.cpp" line="494"/>
         <source>Show in my Store on BrickLink...</source>
         <translation>Dieses Teil in meinem BrickLink Shop...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="493"/>
+        <location filename="../src/common/actionmanager.cpp" line="494"/>
         <source>Ctrl+B,Ctrl+I</source>
         <comment>Edit|Show BL my Inventory</comment>
         <translation>Ctrl+B,Ctrl+I</translation>
@@ -926,61 +931,58 @@
     <name>AddItemDialog</name>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="14"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="478"/>
         <source>Add Items to %1</source>
         <translation>Teile zu %1 hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="199"/>
         <source>&amp;Quantity</source>
-        <translation>&amp;Anzahl</translation>
+        <translation type="vanished">&amp;Anzahl</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="144"/>
         <source>&amp;Bulk</source>
-        <translation>Ge&amp;binde</translation>
+        <translation type="vanished">Ge&amp;binde</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="127"/>
         <source>&amp;Cost</source>
-        <translation>&amp;Unkosten</translation>
+        <translation type="vanished">&amp;Unkosten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="435"/>
         <source>Complete</source>
-        <translation>Vollständig</translation>
+        <translation type="vanished">Vollständig</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="440"/>
         <source>Incomplete</source>
-        <translation>Unvollständig</translation>
+        <translation type="vanished">Unvollständig</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="445"/>
         <source>Sealed</source>
-        <translation>Versiegelt</translation>
+        <translation type="vanished">Versiegelt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="473"/>
         <source>&amp;Price (%1)</source>
-        <translation>&amp;Preis (%1)</translation>
+        <translation type="vanished">&amp;Preis (%1)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="490"/>
+        <location filename="../src/desktop/additemdialog.ui" line="106"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="439"/>
         <source>Click to go back one item, hold to see history</source>
         <translation>Klicken um zurückzugehen. Gedrückt halten, um den Verlauf aufzurufen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="507"/>
+        <location filename="../src/desktop/additemdialog.ui" line="122"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="440"/>
         <source>Click to go forward one item, hold to see history</source>
         <translation>Klicken um weiterzugehen. Gedrückt halten, um den Verlauf aufzurufen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="524"/>
+        <location filename="../src/desktop/additemdialog.ui" line="138"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="441"/>
         <source>Menu</source>
         <translation>Menü</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="228"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="300"/>
         <source>Show item information</source>
         <translation>Zeige Infomationen</translation>
     </message>
@@ -989,99 +991,167 @@
         <translation type="vanished">Zeige die Sets in denen ein Teil vorkommt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="230"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="302"/>
         <source>Show price guide</source>
         <translation>Zeige Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="241"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="313"/>
         <source>Show additional input fields for sellers</source>
         <translation>Zeige zusätzliche Eingabefelder für Verkäufer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="598"/>
+        <location filename="../src/desktop/additemdialog.ui" line="211"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="442"/>
         <source>Consolidate added items into document</source>
         <translation>Hinzugefügte Teile mit Dokument zusammenführen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="601"/>
+        <location filename="../src/desktop/additemdialog.ui" line="214"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="443"/>
         <source>Conso&amp;lidate</source>
         <translation>&amp;Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="264"/>
         <source>&amp;Tiered prices</source>
-        <translation>S&amp;taffelpreise</translation>
+        <translation type="vanished">S&amp;taffelpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="457"/>
         <source>%</source>
-        <translation>%</translation>
+        <translation type="vanished">%</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="216"/>
         <source>Condition</source>
-        <translation>Zustand</translation>
+        <translation type="vanished">Zustand</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="395"/>
         <source>&amp;New</source>
-        <translation>&amp;Neu</translation>
+        <translation type="vanished">&amp;Neu</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="405"/>
         <source>&amp;Used</source>
-        <translation>&amp;Gebraucht</translation>
+        <translation type="vanished">&amp;Gebraucht</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="154"/>
         <source>Co&amp;mments</source>
-        <translation>&amp;Kommentar</translation>
+        <translation type="vanished">&amp;Kommentar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="274"/>
         <source>&amp;Remarks</source>
-        <translation>An&amp;merkungen</translation>
+        <translation type="vanished">An&amp;merkungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="249"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="321"/>
         <source>Browsing history</source>
         <translation>Chronik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="229"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="301"/>
         <source>Show item inventory and appearance</source>
         <translation>Zeige Inventarlisten und Vorkommen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="365"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="436"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="366"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="437"/>
         <source>Go to Item</source>
         <translation>Springe zu diesem Teil</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="600"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="677"/>
         <source>Your recently added items will be listed here</source>
         <translation>Die zuletzt hinzugefügten Teile werden hier aufgelistet</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="620"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="697"/>
         <source>Added %1</source>
         <translation>%1 hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="905"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="982"/>
         <source>Clear history</source>
         <translation>Chronik löschen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="913"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="990"/>
         <source>No browsing history</source>
         <translation>Keine Chronik vorhanden</translation>
+    </message>
+</context>
+<context>
+    <name>AddItemWidget</name>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="29"/>
+        <source>&amp;Quantity</source>
+        <translation>&amp;Anzahl</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="58"/>
+        <source>&amp;Bulk</source>
+        <translation>Ge&amp;binde</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="93"/>
+        <source>&amp;Price (%1)</source>
+        <translation>&amp;Preis (%1)</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="122"/>
+        <source>&amp;Cost</source>
+        <translation>&amp;Unkosten</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="151"/>
+        <source>&amp;Tiered prices</source>
+        <translation>S&amp;taffelpreise</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="272"/>
+        <source>%</source>
+        <translation>%</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="288"/>
+        <source>Condition</source>
+        <translation>Zustand</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="300"/>
+        <source>&amp;New</source>
+        <translation>&amp;Neu</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="310"/>
+        <source>&amp;Used</source>
+        <translation>&amp;Gebraucht</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="340"/>
+        <source>Complete</source>
+        <translation>Vollständig</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="345"/>
+        <source>Incomplete</source>
+        <translation>Unvollständig</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="350"/>
+        <source>Sealed</source>
+        <translation>Versiegelt</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="360"/>
+        <source>Co&amp;mments</source>
+        <translation>&amp;Kommentar</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="377"/>
+        <source>&amp;Remarks</source>
+        <translation>An&amp;merkungen</translation>
     </message>
 </context>
 <context>
@@ -1130,27 +1200,27 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="162"/>
+        <location filename="../src/common/application.cpp" line="164"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Die Installation ist defekt: benötigte Bildformat Plugins sind nicht verfügbar!</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="168"/>
+        <location filename="../src/common/application.cpp" line="170"/>
         <source>Could not initialize the BrickLink kernel:</source>
         <translation>Konnte den BrickLink-Kernel nicht starten:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="191"/>
+        <location filename="../src/common/application.cpp" line="193"/>
         <source>Failed to authenticate with BrickLink as user %1</source>
         <translation>Authentifizierung bei BrickLink als Benutzer %1 ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="239"/>
+        <location filename="../src/common/application.cpp" line="241"/>
         <source>Import BrickLink Store</source>
         <translation>BrickLink Shop-Bestand importieren</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="240"/>
+        <location filename="../src/common/application.cpp" line="242"/>
         <source>Importing BrickLink Store</source>
         <translation>BrickLink Shop-Bestand wird importiert</translation>
     </message>
@@ -1159,12 +1229,12 @@
         <translation type="vanished">Shop-Bestand %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="289"/>
+        <location filename="../src/common/application.cpp" line="291"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>Die BrickLink Datenbankdateien konnten nicht geladen werden.&lt;br /&gt;&lt;br /&gt;Ohne diese Dateien ist das Programm nicht funktionsfähig.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/application.cpp" line="334"/>
+        <location filename="../src/common/application.cpp" line="336"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Anscheinend ist BrickStore abgestürzt, während ein Dokument ungesicherte Änderungen hatte.</numerusform>
@@ -1172,87 +1242,87 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="335"/>
+        <location filename="../src/common/application.cpp" line="337"/>
         <source>Should these documents be restored from their last available auto-save state?</source>
         <translation>Sollen diese Dokumente auf den automatisch gesicherten Stand wiederhergestellt werden?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="336"/>
+        <location filename="../src/common/application.cpp" line="338"/>
         <source>Restore Documents</source>
         <translation>Dokumente wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="361"/>
+        <location filename="../src/common/application.cpp" line="363"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
         <translation>Die Art, wie BrickStore LDraw für die Darstellung von 3D Modellen verwendet, hat sich geändert: standardmässig lädt es nun seine eigene LDraw Installation herunter und hält diese aktuell.&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem eine andere LDraw Installation verwenden wollen, so können Sie dies auf der LDraw Seite in den Einstellungen umstellen.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="375"/>
+        <location filename="../src/common/application.cpp" line="377"/>
         <source>Started downloading an LDraw library update</source>
         <translation>LDraw Bibliotheksupdate wurde gestartet</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="380"/>
+        <location filename="../src/common/application.cpp" line="382"/>
         <source>Finished downloading an LDraw library update</source>
         <translation>LDraw Bibliotheksupdate wurde beendet</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="382"/>
+        <location filename="../src/common/application.cpp" line="384"/>
         <source>Failed to download a LDraw library update</source>
         <translation>LDraw Bibliotheksupdate ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="512"/>
+        <location filename="../src/common/application.cpp" line="514"/>
         <source>Please enter the password for the BrickLink account %1:</source>
         <translation>Bitte geben Sie das Passwort für das BrickLink Konto %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="519"/>
+        <location filename="../src/common/application.cpp" line="521"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Keine gültigen BrickLink Logineinstellungen vorhanden.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Einstellungen jetzt ändern?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="543"/>
+        <location filename="../src/common/application.cpp" line="545"/>
         <source>Update Database</source>
         <translation>Datenbank aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="544"/>
+        <location filename="../src/common/application.cpp" line="546"/>
         <source>Updating the BrickLink database</source>
         <translation>BrickLink Datenbank wird aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="697"/>
+        <location filename="../src/common/application.cpp" line="699"/>
         <source>Version %1 (build: %2)</source>
         <translation>Version %1 (Build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="699"/>
+        <location filename="../src/common/application.cpp" line="701"/>
         <source>Copyright &amp;copy; %1</source>
         <translation>Copyright &amp;copy; %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="700"/>
+        <location filename="../src/common/application.cpp" line="702"/>
         <source>Visit %1</source>
         <translation>Besuche %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="708"/>
+        <location filename="../src/common/application.cpp" line="710"/>
         <source>BrickStore is free software licensed under the %1.</source>
         <translation>BrickStore ist freie Software, die unter der %1 lizenziert ist.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="709"/>
+        <location filename="../src/common/application.cpp" line="711"/>
         <source>The source code is available on %1.</source>
         <translation>Der Quellcode ist auf %1 verfügbar.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="710"/>
+        <location filename="../src/common/application.cpp" line="712"/>
         <source>All data from %1 is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks are the property of their respective owners.</source>
         <translation>Alle Daten von %1 sind Eigentum von BrickLink. Sowohl BrickLink als auch LEGO sind Warenzeichen der LEGO Gruppe, die diese Software nicht sponsert, autorisiert oder unterstützt. Alle anderen Marken sind das Eigentum ihrer jeweiligen Besitzer.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="711"/>
+        <location filename="../src/common/application.cpp" line="713"/>
         <source>Only made possible by the support of %1.</source>
         <translation>Ermöglicht durch die Unterstützung von %1.</translation>
     </message>
@@ -1269,17 +1339,17 @@
         <translation type="vanished">&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br&gt;Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK&lt;br&gt;Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&quot;&gt;www.gnu.org/licens s/old-licenses/gpl-2.0.html&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Alle Daten von &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink. BrickLink und LEGO sind Warenzeichen der LEGO Gruppe, welche diese Software weder gesponsort noch autorisiert hat. Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;&lt;p&gt;Ermöglicht durch &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezeks&lt;/a&gt; Unterstützung.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="712"/>
+        <location filename="../src/common/application.cpp" line="714"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="724"/>
+        <location filename="../src/common/application.cpp" line="726"/>
         <source>Translators</source>
         <translation>Übersetzer</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="956"/>
+        <location filename="../src/common/application.cpp" line="958"/>
         <source>The price-guide download mechanism changed. Please make sure your VAT setup is still correct on the BrickLink page in the Settings dialog.</source>
         <translation>Der Download-Mechanismus für Richtpreise hat sich geändert. Bitte stellen Sie sicher, dass die MwSt. Einstellungen auf der BrickLink Seite in den Einstellungen noch korrekt sind.</translation>
     </message>
@@ -1493,22 +1563,22 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1258"/>
+        <location filename="../src/bricklink/model.cpp" line="1275"/>
         <source>Qty.</source>
         <translation>Anz.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1260"/>
+        <location filename="../src/bricklink/model.cpp" line="1277"/>
         <source>Item Id</source>
         <translation>Teile-Id</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1261"/>
+        <location filename="../src/bricklink/model.cpp" line="1278"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1259"/>
+        <location filename="../src/bricklink/model.cpp" line="1276"/>
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
@@ -1652,27 +1722,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="794"/>
         <source>VAT is included</source>
         <translation>Inklusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="795"/>
         <source>VAT is excluded</source>
         <translation>Exclusive MwSt.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
         <source>for the EU</source>
         <translation>für die EU</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="800"/>
         <source>for the UK</source>
         <translation>für Großbritannien</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="801"/>
         <source>for Norway</source>
         <translation>für Norwegen</translation>
     </message>
@@ -1771,22 +1841,22 @@
         <translation>Aktuelle Währung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="48"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="47"/>
         <source>New currency</source>
         <translation>Neue Währung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="61"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="60"/>
         <source>Exchange rate</source>
         <translation>Wechselkurs</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="98"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="97"/>
         <source>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
         <translation>Von der &lt;a href=&quot;https://www.ecb.eu&quot;&gt;EZB&lt;/a&gt;: %1 1 entspricht %2 %3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="265"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="257"/>
         <source>From V1 BrickStore/Stock: USD 1 equals %1 %2</source>
         <translation>Von V1 BrickStore/Stock: USD 1 entspricht %1 %2</translation>
     </message>
@@ -1795,17 +1865,17 @@
         <translation type="vanished">Von der &lt;a href=&quot;http://www.ecb.eu&quot;&gt;EZB&lt;/a&gt;: %1 1 entspricht %2 %3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="127"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="120"/>
         <source>Reload cross rates from the ECB</source>
         <translation>Neue Wechselkurse von der EZB laden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="130"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="123"/>
         <source>Reload</source>
         <translation>Neu laden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="188"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="180"/>
         <source>Custom: %1 1 equals %2</source>
         <translation>Individuell: %1 1 entspricht %2</translation>
     </message>
@@ -3483,32 +3553,32 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>FilterWidget</name>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="487"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="481"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="488"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="482"/>
         <source>Re-apply filter</source>
         <translation>Filter erneut auswerten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="489"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="483"/>
         <source>More actions for this filter</source>
         <translation>Zusätzliche Aktionen für diesen Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="490"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="484"/>
         <source>Copy filter</source>
         <translation>Filter kopieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="491"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="485"/>
         <source>Paste filter</source>
         <translation>Filter einfügen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="492"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="486"/>
         <source>Text-only filter mode</source>
         <translation>Nur-Text Filtermodus</translation>
     </message>
@@ -3843,27 +3913,27 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Warenkorb in Shop %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="174"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="176"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="175"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="179"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="178"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="180"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="240"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="242"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -3876,12 +3946,12 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">%1 Posten des Warenkorbs konnten nicht importiert werden.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="230"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="232"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="238"/>
         <source>Currently updating carts</source>
         <translation>Warenkörbe werden aktualisiert</translation>
     </message>
@@ -4241,17 +4311,17 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Betrag</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="216"/>
         <source>Import combined</source>
         <translation>Zusammen importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
@@ -4260,18 +4330,18 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="218"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="220"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="15"/>
-        <location filename="../src/desktop/importorderdialog.cpp" line="243"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="245"/>
         <source>Import Order</source>
         <translation>Bestellung Import</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="354"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="356"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -4292,37 +4362,37 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Konnte Bestellung %1 nicht importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="219"/>
         <source>Show order information</source>
         <translation>Zeige Bestellinfos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="244"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
         <source>You have selected multiple orders with differing currencies, which cannot be combined as-is.</source>
         <translation>Es sind mehrere Bestellungen mit unterschiedlichen Währung ausgewählt, die so nicht zusammen importiert werden können.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="248"/>
         <source>Do you want to continue and convert all prices to your default currency (%1)?</source>
         <translation>Sollen zum Weitermachen alle Preise in deine Standardwährung (%1) konvertiert werden?</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="275"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="277"/>
         <source>Batch</source>
         <translation>Charge</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="296"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="298"/>
         <source>Multiple Orders</source>
         <translation>Mehrere Bestellungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="344"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="346"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="352"/>
         <source>Currently updating orders</source>
         <translation>Bestellungen werden aktualisiert</translation>
     </message>
@@ -4365,32 +4435,32 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation>%1 Teile fehlen, %2% erledigt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="174"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="176"/>
         <source>Import</source>
         <translation>Importieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="175"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Die Listeneinträge anhand dieser Wörter filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="179"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="178"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="180"/>
         <source>Show on BrickLink</source>
         <translation>Zeige auf BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="228"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="230"/>
         <source>Last updated %1</source>
         <translation>Letzte Aktualisierung: %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="236"/>
         <source>Currently updating wanted lists</source>
         <translation>Suchlisten werden aktualisiert</translation>
     </message>
@@ -4399,7 +4469,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
         <translation type="vanished">Suchlisten werden aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="238"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="240"/>
         <source>Last update failed</source>
         <translation>Letzte Aktualisierung schlug fehl</translation>
     </message>
@@ -4494,59 +4564,68 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
 <context>
     <name>ItemScannerDialog</name>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="36"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="61"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
         <translation>Die Anfrage von BrickStore nach Kamerazugriff wurde abgelehnt. Sie können Ihre Webcam erst dann zur Identifizierung von Teilen verwenden, wenn die erforderlichen Berechtigungen über die Systemeinstellungen erteilt wurdent.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="60"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="449"/>
         <source>Item Scanner</source>
         <translation>Teile Scanner</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="95"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="119"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="134"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="452"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="135"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="453"/>
         <source>Service</source>
         <translation>Dienst</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="136"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="454"/>
         <source>Item type</source>
         <translation>Teiletyp</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="166"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="456"/>
+        <source>Keep this window open</source>
+        <translation>Dieses Fenster nicht automatisch schliessen</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="463"/>
         <source>Click into the camera preview or press Space to capture an image.</source>
         <translation>Klicken Sie in die Kameravorschau oder drücken Sie die Leertaste, um ein Bild aufzunehmen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="167"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="472"/>
+        <source>An error occurred:</source>
+        <translation>Es ist ein Fehler aufgetreten:</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="476"/>
         <source>There is no camera connected to this computer.</source>
         <translation>Es ist keine Kamera an diesen Computer angeschlossen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="168"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="468"/>
         <source>No matching item found - try again.</source>
         <translation>Keine Übereinstimmung gefunden - versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="221"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="321"/>
         <source>Scanning failed</source>
         <translation>Der Scanvorgang ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="363"/>
         <source>An error occured:</source>
-        <translation>Es ist ein Fehler aufgetreten:</translation>
+        <translation type="vanished">Es ist ein Fehler aufgetreten:</translation>
     </message>
 </context>
 <context>
@@ -4614,17 +4693,17 @@ Rechts-Click: Menü</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="404"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="391"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="410"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="397"/>
         <source>Info</source>
         <translation>Info</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="412"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="399"/>
         <source>Price Guide</source>
         <translation>Richtpreise</translation>
     </message>
@@ -4637,17 +4716,17 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Enthalten in</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="414"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="401"/>
         <source>Item Inventory</source>
         <translation>Inventarlisten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="416"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="403"/>
         <source>Open Documents</source>
         <translation>Offene Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="418"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="405"/>
         <source>Recent Documents</source>
         <translation>Zuletzt geöffnete</translation>
     </message>
@@ -4656,27 +4735,27 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Fehlerprotokoll</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="421"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="408"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="422"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="409"/>
         <source>No outstanding jobs</source>
         <translation>Nichts zu tun</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="423"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="410"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation>Download...&lt;br&gt;Zu &lt;b&gt;%p%&lt;/b&gt; fertig&lt;br&gt;(%v von %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1222"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1209"/>
         <source>Customize Toolbar...</source>
         <translation>Werkzeugleiste anpassen...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1226"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1213"/>
         <source>Reset Info Docks layout</source>
         <translation>Anordnung der Infoleisten zurücksetzen</translation>
     </message>
@@ -4920,22 +4999,22 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Mehrwertsteuer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="44"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="47"/>
         <source>Order %1, %2 %3 on %4</source>
         <translation>Bestellung %1, %2 %3 am %4</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="46"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="49"/>
         <source>received from</source>
         <translation>erhalten von</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="47"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="50"/>
         <source>placed at</source>
         <translation>getätigt bei</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="88"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="92"/>
         <source>Payment in</source>
         <translation>Bezahlung in</translation>
     </message>
@@ -5325,7 +5404,7 @@ Rechts-Click: Menü</translation>
     </message>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="285"/>
-        <location filename="../src/desktop/printdialog.cpp" line="260"/>
+        <location filename="../src/desktop/printdialog.cpp" line="271"/>
         <source>Print</source>
         <translation>Drucken</translation>
     </message>
@@ -5388,13 +5467,13 @@ Rechts-Click: Menü</translation>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="424"/>
         <location filename="../src/desktop/printdialog.ui" line="434"/>
-        <location filename="../src/desktop/printdialog.cpp" line="244"/>
+        <location filename="../src/desktop/printdialog.cpp" line="255"/>
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="439"/>
-        <location filename="../src/desktop/printdialog.cpp" line="246"/>
+        <location filename="../src/desktop/printdialog.cpp" line="257"/>
         <source>Black and white</source>
         <translation>Schwarz-Weiß</translation>
     </message>
@@ -5435,29 +5514,29 @@ Rechts-Click: Menü</translation>
         <translation>An Seitenbreite anpassen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="75"/>
+        <location filename="../src/desktop/printdialog.cpp" line="86"/>
         <source>Print using the system dialog...</source>
         <translation>Über den Systemdialog drucken...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="169"/>
-        <location filename="../src/desktop/printdialog.cpp" line="429"/>
-        <location filename="../src/desktop/printdialog.cpp" line="438"/>
+        <location filename="../src/desktop/printdialog.cpp" line="180"/>
+        <location filename="../src/desktop/printdialog.cpp" line="440"/>
+        <location filename="../src/desktop/printdialog.cpp" line="449"/>
         <source>Save as PDF</source>
         <translation>Als PDF speichern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="260"/>
+        <location filename="../src/desktop/printdialog.cpp" line="271"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="430"/>
+        <location filename="../src/desktop/printdialog.cpp" line="441"/>
         <source>PDF Documents</source>
         <translation>PDF Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="439"/>
+        <location filename="../src/desktop/printdialog.cpp" line="450"/>
         <source>The PDF document already exists and is not writable.</source>
         <translation>Das PDF Dokument existiert bereits, ist aber nicht schreibbar.</translation>
     </message>
@@ -5511,7 +5590,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>QDialogButtonBox</name>
     <message>
-        <location filename="../src/desktop/desktopuihelpers_p.h" line="165"/>
+        <location filename="../src/desktop/desktopuihelpers_p.h" line="164"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
@@ -5763,31 +5842,31 @@ Rechts-Click: Menü</translation>
     <name>SelectColor</name>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="75"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="130"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="144"/>
         <source>Known Colors</source>
         <translation>Bekannte Farben</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="76"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="131"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="145"/>
         <source>All Colors</source>
         <translation>Alle Farben</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="77"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="132"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="146"/>
         <source>Popular Colors</source>
         <translation>Gängige Farben</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="78"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="133"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="147"/>
         <source>Most Popular Colors</source>
         <translation>Die gängisten Farben</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="81"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="138"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="152"/>
         <source>Only &quot;%1&quot; Colors</source>
         <translation>Nur &quot;%1&quot; Farben</translation>
     </message>
@@ -5802,7 +5881,7 @@ Rechts-Click: Menü</translation>
         <translation>Farbe nach Farbton</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectcolor.cpp" line="140"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="154"/>
         <source>Lock color selection: only shows items known to be available in this color</source>
         <translation>Farbauswahl sperren: zeigt nur noch Teile an, für welche die ausgewählte Farbe bekannt ist</translation>
     </message>
@@ -5811,11 +5890,12 @@ Rechts-Click: Menü</translation>
     <name>SelectColorDialog</name>
     <message>
         <location filename="../src/desktop/selectcolordialog.ui" line="14"/>
+        <location filename="../src/desktop/selectcolordialog.cpp" line="23"/>
         <source>Select Color</source>
         <translation>Farbe Auswählen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectcolordialog.cpp" line="35"/>
+        <location filename="../src/desktop/selectcolordialog.cpp" line="48"/>
         <source>Reset the position to automatic mode</source>
         <translation>Position auf Automatikmodus zurücksetzen</translation>
     </message>
@@ -5844,22 +5924,22 @@ Rechts-Click: Menü</translation>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="326"/>
+        <location filename="../src/desktop/selectitem.cpp" line="333"/>
         <source>Ctrl+1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="334"/>
+        <location filename="../src/desktop/selectitem.cpp" line="341"/>
         <source>Ctrl+2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="546"/>
         <source>Item type:</source>
         <translation>Teiletyp:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="540"/>
+        <location filename="../src/desktop/selectitem.cpp" line="547"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
@@ -5868,7 +5948,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Liste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="561"/>
+        <location filename="../src/desktop/selectitem.cpp" line="568"/>
         <source>List with Images</source>
         <translation>Liste mit Bildern</translation>
     </message>
@@ -5877,59 +5957,59 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Zur Kategorie des Teils</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="926"/>
+        <location filename="../src/desktop/selectitem.cpp" line="951"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="562"/>
+        <location filename="../src/desktop/selectitem.cpp" line="569"/>
         <source>Thumbnails</source>
         <translation>Bilder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="234"/>
+        <location filename="../src/desktop/selectitem.cpp" line="235"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation>Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="237"/>
+        <location filename="../src/desktop/selectitem.cpp" line="238"/>
         <source>Find element number</source>
         <translation>Suche Elementnummer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="238"/>
+        <location filename="../src/desktop/selectitem.cpp" line="239"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation>Geben Sie eine 7-stellige Lego Elementnummer, auch bekannt als Part-Color-Code (PCC), ein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="250"/>
+        <location filename="../src/desktop/selectitem.cpp" line="252"/>
         <source>Ctrl+D</source>
         <comment>Shortcut for opening the webcam scanner</comment>
         <translation>Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="542"/>
+        <location filename="../src/desktop/selectitem.cpp" line="549"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Zeige nur Teile an, in deren Namen oder Teilenummer alle eingegebenen Wörter (unabhängig der Gross- und Kleinschreibung) vorkommen. Das Prinzip ist ähnlich einer Web Suchmaschine:&lt;ul&gt;&lt;li&gt;um Wörter auszuschliessen, wird ihnen ein &lt;tt&gt;-&lt;/tt&gt; vorangestellt. (z.B. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um einen Ausdruck mit Leerzeichen zu finden, werden die Wörter in Anführungszeichen eingeschlossen. (z.B. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um nach Teilen zu filtern, die in einem spezifischen Set vorkommen, stelle der Setnummer ein &lt;tt&gt;enthalten-in:&lt;/tt&gt; voran. (z.B. &lt;tt&gt;enthalten-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;um Sets oder Minifigs einzuschränken, die ein spezielles Teile enthalten, stelle der Teilenummer ein &lt;tt&gt;besteht-aus:&lt;/tt&gt; voran. (z.B. &lt;tt&gt;besteht-aus:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="553"/>
+        <location filename="../src/desktop/selectitem.cpp" line="560"/>
         <source>Filter the list using this expression</source>
         <translation>Die Liste anhand dieses Ausdrucks filtern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="559"/>
+        <location filename="../src/desktop/selectitem.cpp" line="566"/>
         <source>Find a 7-digit Lego element number</source>
         <translation>Suche eine 7-stellige Lego Elementnummer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="560"/>
+        <location filename="../src/desktop/selectitem.cpp" line="567"/>
         <source>Find a part using a webcam</source>
         <translation>Suche ein Teil mit Hilfe einer Webcam</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="945"/>
+        <location filename="../src/desktop/selectitem.cpp" line="970"/>
         <source>Switch to the item&apos;s &quot;%1&quot; item type</source>
         <translation>Zum &quot;%1&quot; Teiletyp des Teils</translation>
     </message>
@@ -5942,7 +6022,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Verkleinern</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="936"/>
+        <location filename="../src/desktop/selectitem.cpp" line="961"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Zur &quot;%1&quot; Kategorie des Teils</translation>
     </message>
@@ -5959,11 +6039,12 @@ Rechts-Click: Menü</translation>
     <name>SelectItemDialog</name>
     <message>
         <location filename="../src/desktop/selectitemdialog.ui" line="14"/>
+        <location filename="../src/desktop/selectitemdialog.cpp" line="24"/>
         <source>Select Item</source>
         <translation>Teil Auswählen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitemdialog.cpp" line="40"/>
+        <location filename="../src/desktop/selectitemdialog.cpp" line="52"/>
         <source>Reset the position to automatic mode</source>
         <translation>Position auf Automatikmodus zurücksetzen</translation>
     </message>
@@ -6241,96 +6322,96 @@ Rechts-Click: Menü</translation>
         <translation>Neue Wechselkurse von der EZB laden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="287"/>
         <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
         <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Siehe hier&lt;/a&gt; für mehr Infomationen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="326"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="319"/>
         <source>Interface</source>
         <translation>Benutzeroberfläche</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="191"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="184"/>
         <source>Open a Web-Browser window when exporting to the clipboard</source>
         <translation>Web-Browser Fenster öffnen bei Export in die Zwischenablage</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="144"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="137"/>
         <source>Document Directory</source>
         <translation>Dokumenten Verzeichnis</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="205"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="198"/>
         <source>Restore the saved documents from the previous session</source>
         <translation>Die gespeicherten Dokumente der letzten Sitzung wieder herstellen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="184"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="177"/>
         <source>On export</source>
         <translation>Beim Exportieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="635"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation>Wenn Sie hier ein Passwort setzen, dann wird es auf Ihrem System gespeichert: es wird allerdings nur verwürfelt und &lt;b&gt;nicht&lt;/b&gt; verschlüsselt, weil BrickStore dieses Passwort bei jeder Anfrage in Ihrem Namen an die BrickLink Server senden muss.&lt;br&gt;&lt;br&gt;Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld leer. BrickStore wird dann nach jedem Programmstart, bei der ersten Anfrage in Ihrem Namen, nach dem Passwort fragen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="651"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="644"/>
         <source>Price guide</source>
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="663"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="656"/>
         <source>Values</source>
         <translation>Preise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="673"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="666"/>
         <source>Source</source>
         <translation>Quelle</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
         <source>BrickLink database, if older than</source>
         <translation>BrickLink Datenbank, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="596"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="589"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="529"/>
         <source>Row height</source>
         <translation>Zeilenhöhe</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation>Per Mausrad und Zoom Geste veränderbar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="614"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="607"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation>Benutzername</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="621"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation>Passwort</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="774"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="773"/>
         <source>Your username is required here - not your email address.</source>
         <translation>Bitte den Benutzernamen eingeben - nicht die E-Mail-Adresse.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="847"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
@@ -6351,52 +6432,52 @@ Rechts-Click: Menü</translation>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="158"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="151"/>
         <source>Parting out items</source>
         <translation>Teile zerlegen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="166"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="159"/>
         <source>Ask the user</source>
         <translation>Den Benutzer fragen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="171"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="164"/>
         <source>Always replace the item being parted out</source>
         <translation>Immer das zerlegte Teile ersetzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="176"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="169"/>
         <source>Always part out to a new document</source>
         <translation>Immer in ein neues Dokument zerlegen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="212"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="205"/>
         <source>Modifications</source>
         <translation>Änderungen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="219"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="212"/>
         <source>Visual changes modify the document</source>
         <translation>Visuelle Änderungen modifizieren das Dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="247"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="240"/>
         <source>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</source>
         <translation>Das aktivieren dieser Option bewirkt, dass Dokumente nur durch sortieren, filtern oder anpassen der Spalten als modifiziert markiert werden.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="198"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="191"/>
         <source>On startup</source>
         <translation>Beim Starten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="262"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="255"/>
         <source>On crashes</source>
         <translation>Bei Abstürzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="269"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="262"/>
         <source>Send anonymous crash reports</source>
         <translation>Sende einen anonymen Absturzbericht</translation>
     </message>
@@ -6405,85 +6486,85 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;Siehe hier&lt;/a&gt; für mehr Infomationen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
         <source>Icon size</source>
         <translation>Symbolgröße</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="352"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="503"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="345"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="496"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation>Systemvorgabe</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="344"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="337"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="139"/>
         <source>Theme</source>
         <translation>Thema</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="357"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="350"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="147"/>
         <source>Light</source>
         <translation>Hell</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="362"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="355"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="148"/>
         <source>Dark</source>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="508"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="558"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="501"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="551"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation>Klein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="513"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="506"/>
         <source>Big</source>
         <translation>Gross</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="377"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
         <source>Font size</source>
         <translation>Textgröße</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="332"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="325"/>
         <source>Global</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="458"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="451"/>
         <source>Reset to 100%</source>
         <translation>Auf 100% setzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="489"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="482"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation>Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="524"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="517"/>
         <source>Document Views</source>
         <translation>Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="550"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
         <source>Column spacing</source>
         <translation>Spaltenabstand</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="563"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="556"/>
         <source>Medium</source>
         <translation>Mittel</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="793"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="792"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation>The maximale Passwortlänge bei BrickLink ist 15 Zeichen.</translation>
     </message>
@@ -6496,22 +6577,22 @@ If you do not want to save your password, then just leave this field empty and y
 Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld leer. BrickStore wird dann nach jedem Programmstart, bei der ersten Anfrage in Ihrem Namen, nach dem Passwort fragen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="856"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="849"/>
         <source>Library</source>
         <translation>Bibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="874"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="867"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>BrickStore verwaltet seine eigene LDraw Teilebibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="890"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="883"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation>Dies ist die bevorzugte Einstellung, da BrickStore diese Installation aktuell hält.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1040"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1033"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation>Updates werden automatisch im Hintergrund heruntergeladen und installiert. Bitte starten Sie nur ein manuelles Update, falls die Automatik nicht funktioniert.</translation>
     </message>
@@ -6520,22 +6601,22 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Verwendung einer vorhandenen LDraw Teilebibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="946"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="939"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation>Wählen Sie diese Option, falls Sie individuelle oder inoffzielle Teile benötigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="980"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="973"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1011"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1004"/>
         <source>Update</source>
         <translation>Aktualisierung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1020"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
         <source>Now</source>
         <translation>Jetzt</translation>
     </message>
@@ -6544,33 +6625,33 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Updates werden automatisch im Hintergrund heruntergeladen und installiert. #############</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1059"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1052"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1058"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Anpassen der Hauptwerkzeugleiste mittels Ziehen und Ablegen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1173"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1166"/>
         <source>Keyboard</source>
         <translation>Tastatur</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1172"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassen der globalen Tastenkürzel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1072"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1186"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="916"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="909"/>
         <source>Use an existing LDraw installation</source>
         <translation>Verwendung einer vorhandenen LDraw Teilebibliothek</translation>
     </message>
@@ -6579,13 +6660,13 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="obsolete">Updates werden automatisch im Hintergrund heruntergeladen und installiert. Das manuelle Update wird nur benötigt, falls es </translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1165"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1241"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1158"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1234"/>
         <source>Reset all</source>
         <translation>Alle zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1251"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1244"/>
         <source>Reset</source>
         <translation>Zurücksetzen</translation>
     </message>
@@ -6595,34 +6676,34 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation>Bildergröße Teile</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="690"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="683"/>
         <source>Automatically update cached data</source>
         <translation>Zwischengespeicherte BrickLink Daten automatisch aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="711"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="734"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="757"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
         <source> days</source>
         <translation> Tage</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="720"/>
         <source>BrickLink Pictures, if older than</source>
         <translation>BrickLink Bilder, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation>BrickLink Richtpreise, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="815"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="808"/>
         <source>Reset to defaults</source>
         <translation>Auf Voreinstellungen zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="602"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="595"/>
         <source>BrickLink Login</source>
         <translation>BrickLink Anmeldung</translation>
     </message>
@@ -6636,38 +6717,38 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Automatisch erkennen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="940"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="939"/>
         <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
         <translation>Tastenkürzel mit &apos;Alt&apos; müssen auch &apos;Steuerung&apos; enthalten, damit das Menu System nicht gestört wird.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="948"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="954"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="947"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
         <source>This shortcut is already used by another action.</source>
         <translation>Diese Tastenkürzel wird schon von einer anderen Aktion benutzt.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="982"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="981"/>
         <source>could not find a cross rate for %1</source>
         <translation>konnte keinen Wechselkurs für %1 finden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="984"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="983"/>
         <source>1 %1 equals %2 USD</source>
         <translation>1 %1 entspricht %2 USD</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="993"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="992"/>
         <source>Document directory location</source>
         <translation>Verzeichnis für Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1208"/>
         <source>Not a valid LDraw installation</source>
         <translation>Keine gültige LDraw Installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1210"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
         <source>Valid LDraw installation</source>
         <translation>Gültige LDraw Installation</translation>
     </message>
@@ -6676,12 +6757,12 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Gültige LDraw Installation, LDConfig vom %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="817"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="816"/>
         <source>LDraw directory location</source>
         <translation>Verzeichnis der LDraw Installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1149"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1148"/>
         <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Das angegebene Dokumentenverzeichnis existiert nicht (oder es ist nicht les- und beschreibbar).&lt;br /&gt;Die Einstellung für das Dokumentenverzeichnis wird nicht geändert.</translation>
     </message>
@@ -6736,7 +6817,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="568"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="561"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation>Gross</translation>
@@ -6949,7 +7030,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>Transfer</name>
     <message>
-        <location filename="../src/utility/transfer.cpp" line="59"/>
+        <location filename="../src/utility/transfer.cpp" line="60"/>
         <source>Aborted</source>
         <translation>Abgebrochen</translation>
     </message>
@@ -7010,7 +7091,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     <name>View</name>
     <message>
         <location filename="../src/mobile/View.qml" line="16"/>
-        <location filename="../src/desktop/view.cpp" line="561"/>
+        <location filename="../src/desktop/view.cpp" line="560"/>
         <source>Untitled</source>
         <translation>Unbenannt</translation>
     </message>
@@ -7043,7 +7124,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/mobile/View.qml" line="564"/>
-        <location filename="../src/desktop/view.cpp" line="359"/>
+        <location filename="../src/desktop/view.cpp" line="358"/>
         <source>Increase or decrease the prices of the selected items by</source>
         <translation>Erhöhe oder erniedrige die Preise der ausgewählten Teile um</translation>
     </message>
@@ -7053,7 +7134,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
     </message>
     <message>
         <location filename="../src/mobile/View.qml" line="581"/>
-        <location filename="../src/desktop/view.cpp" line="378"/>
+        <location filename="../src/desktop/view.cpp" line="377"/>
         <source>Increase or decrease the costs of the selected items by</source>
         <translation>Erhöhe oder erniedrige die Unkosten der ausgewählten Teile um</translation>
     </message>
@@ -7077,7 +7158,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Spaltenlayout gesetzt:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="976"/>
+        <location filename="../src/desktop/view.cpp" line="975"/>
         <source>Page %1/%2</source>
         <translation>Seite %1/%2</translation>
     </message>
@@ -7094,7 +7175,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/view.cpp" line="649"/>
+        <location filename="../src/desktop/view.cpp" line="648"/>
         <source>Parted out %n item(s)</source>
         <translation>
             <numerusform>Ein Teil zerlegt</numerusform>
@@ -7106,7 +7187,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Geben Sie einen eindeutigen Namen für dieses Spaltenlayout ein. Lassen Sie das Feld leer, um das Benutzer Standard Layout zu ändern.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="865"/>
+        <location filename="../src/desktop/view.cpp" line="864"/>
         <source>Printing failed.</source>
         <translation>Das Drucken ist fehlgeschlagen.</translation>
     </message>
@@ -7184,12 +7265,12 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Der neue Markierungstextr für alle ausgewählten Teile:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="318"/>
+        <location filename="../src/desktop/view.cpp" line="317"/>
         <source>Select the document that should serve as a source to fill in the corresponding fields in the current document</source>
         <translation>Wähle das Quelldokument, um die entsprechenden Felder im aktuellen Dokument zu setzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="319"/>
+        <location filename="../src/desktop/view.cpp" line="318"/>
         <source>Choose how fields are getting copied or merged.</source>
         <translation>Wähle wie die Felder kopiert und zusammengeführt werden sollen.</translation>
     </message>
@@ -7245,17 +7326,17 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Reserviere alle ausgewählten Teile für einen bestimmten Käufer (BrickLink Benutzername):</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="333"/>
+        <location filename="../src/desktop/view.cpp" line="332"/>
         <source>Which items should be subtracted from the current document:</source>
         <translation>Welche Teile sollen vom aktuellen Dokument abgezogen werden:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="553"/>
+        <location filename="../src/desktop/view.cpp" line="552"/>
         <source>Cancel the currently running blocking operation</source>
         <translation>Den aktuellen, blockierenden Vorgang abbrechen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="588"/>
+        <location filename="../src/desktop/view.cpp" line="587"/>
         <source>Should the selected items be parted out into the current document, replacing the selected items?</source>
         <translation>Sollen die neu zerlegten Teile die aktuell ausgewählten in diesem Dokument ersetzen?</translation>
     </message>
@@ -7340,57 +7421,57 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
 <context>
     <name>ViewPane</name>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="498"/>
+        <location filename="../src/desktop/viewpane.cpp" line="479"/>
         <source>Default currency (%1)</source>
         <translation>Standard Währung (%1)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="567"/>
+        <location filename="../src/desktop/viewpane.cpp" line="548"/>
         <source>Items</source>
         <translation>Teile</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="686"/>
+        <location filename="../src/desktop/viewpane.cpp" line="667"/>
         <source>Go to the next difference</source>
         <translation>Springe zum nächsten Unterschied</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="688"/>
+        <location filename="../src/desktop/viewpane.cpp" line="669"/>
         <source>Go to the next error</source>
         <translation>Springe zum nächsten Fehler</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="690"/>
+        <location filename="../src/desktop/viewpane.cpp" line="671"/>
         <source>Show order information</source>
         <translation>Zeige Bestellinfos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="691"/>
+        <location filename="../src/desktop/viewpane.cpp" line="672"/>
         <source>Currency:</source>
         <translation>Währung:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="693"/>
+        <location filename="../src/desktop/viewpane.cpp" line="674"/>
         <source>Split</source>
         <translation>Teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="694"/>
+        <location filename="../src/desktop/viewpane.cpp" line="675"/>
         <source>Split horizontally</source>
         <translation>Nebeneinander teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="695"/>
+        <location filename="../src/desktop/viewpane.cpp" line="676"/>
         <source>Split vertically</source>
         <translation>Untereinander teilen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="696"/>
+        <location filename="../src/desktop/viewpane.cpp" line="677"/>
         <source>Remove split</source>
         <translation>Teilung entfernen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="697"/>
+        <location filename="../src/desktop/viewpane.cpp" line="678"/>
         <source>Open in new window</source>
         <translation>In neuem Fenster öffnen</translation>
     </message>

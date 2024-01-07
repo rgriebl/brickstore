@@ -436,9 +436,14 @@
         <translation>Inställningar...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="412"/>
         <source>Ctrl+,</source>
         <comment>ExQT_TR_NOOPas|Settings</comment>
+        <translation type="vanished">Ctrl+,</translation>
+    </message>
+    <message>
+        <location filename="../src/common/actionmanager.cpp" line="412"/>
+        <source>Ctrl+,</source>
+        <comment>Extras|Settings</comment>
         <translation>Ctrl+,</translation>
     </message>
     <message>
@@ -447,415 +452,415 @@
         <translation>Utvecklarkonsol</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="414"/>
+        <location filename="../src/common/actionmanager.cpp" line="415"/>
         <source>Reload User Scripts</source>
         <translation>Återställ Användarscripts</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="415"/>
+        <location filename="../src/common/actionmanager.cpp" line="416"/>
         <source>&amp;Windows</source>
         <translation>&amp;Fönster</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="417"/>
+        <location filename="../src/common/actionmanager.cpp" line="418"/>
         <source>&amp;Help</source>
         <translation>&amp;Hjälp</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="418"/>
+        <location filename="../src/common/actionmanager.cpp" line="419"/>
         <source>About...</source>
         <translation>Om...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="419"/>
+        <location filename="../src/common/actionmanager.cpp" line="420"/>
         <source>System Information...</source>
         <translation>System Information...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="420"/>
+        <location filename="../src/common/actionmanager.cpp" line="421"/>
         <source>Important Announcements...</source>
         <translation>Viktiga Meddelanden...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="421"/>
+        <location filename="../src/common/actionmanager.cpp" line="422"/>
         <source>Release notes...</source>
         <translation>Version Information...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="422"/>
+        <location filename="../src/common/actionmanager.cpp" line="423"/>
         <source>Report a bug...</source>
         <translation>Rapportera fel...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="423"/>
+        <location filename="../src/common/actionmanager.cpp" line="424"/>
         <source>Extensions Interface Documentation...</source>
         <translation>Dokumentation till det utökade gränssnittet...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="424"/>
+        <location filename="../src/common/actionmanager.cpp" line="425"/>
         <source>Check for Program Updates...</source>
         <translation>Kontrollera om det finns Program Uppdateringar...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="427"/>
+        <location filename="../src/common/actionmanager.cpp" line="428"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="428"/>
+        <location filename="../src/common/actionmanager.cpp" line="429"/>
         <source>Set status to Include</source>
         <translation>Sätt status till Inkludera</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="430"/>
+        <location filename="../src/common/actionmanager.cpp" line="431"/>
         <source>Set status to Exclude</source>
         <translation>Sätt status till Undanta</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="432"/>
+        <location filename="../src/common/actionmanager.cpp" line="433"/>
         <source>Set status to Extra</source>
         <translation>Sätt satus till Extra</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="434"/>
+        <location filename="../src/common/actionmanager.cpp" line="435"/>
         <source>Toggle status between Include and Exclude</source>
         <translation>Byt status mellan Inkludera och Undanta</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="435"/>
+        <location filename="../src/common/actionmanager.cpp" line="436"/>
         <source>Condition</source>
         <translation>Skick</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="436"/>
+        <location filename="../src/common/actionmanager.cpp" line="437"/>
         <source>Set condition to New</source>
         <translation>Sätt skick till Ny</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="437"/>
+        <location filename="../src/common/actionmanager.cpp" line="438"/>
         <source>Set condition to Used</source>
         <translation>Sätt skick till Begagnad</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="438"/>
+        <location filename="../src/common/actionmanager.cpp" line="439"/>
         <source>Set sub-condition to None</source>
         <translation>Sätt undervillkor skick till Inget</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="439"/>
+        <location filename="../src/common/actionmanager.cpp" line="440"/>
         <source>Set sub-condition to Sealed</source>
         <translation>Sätt undervillkor skick till Oöppnad</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="440"/>
+        <location filename="../src/common/actionmanager.cpp" line="441"/>
         <source>Set sub-condition to Complete</source>
         <translation>Sätt undervillkor skick till Komplett</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="441"/>
+        <location filename="../src/common/actionmanager.cpp" line="442"/>
         <source>Set sub-condition to Incomplete</source>
         <translation>Sätt undervillkor skick till Ej Komplett</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="442"/>
+        <location filename="../src/common/actionmanager.cpp" line="443"/>
         <source>Set item...</source>
         <translation>Ställ in Artikel...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="443"/>
+        <location filename="../src/common/actionmanager.cpp" line="444"/>
         <source>Set color...</source>
         <translation>Sätt Färg...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="445"/>
+        <location filename="../src/common/actionmanager.cpp" line="446"/>
         <source>Quantity</source>
         <translation>Antal</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="446"/>
+        <location filename="../src/common/actionmanager.cpp" line="447"/>
         <source>Set quantity...</source>
         <translation>Sätt Antal...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="447"/>
+        <location filename="../src/common/actionmanager.cpp" line="448"/>
         <source>Multiply quantity...</source>
         <translation>Multiplicera antal...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="447"/>
+        <location filename="../src/common/actionmanager.cpp" line="448"/>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
         <translation>Ctrl+*</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="448"/>
+        <location filename="../src/common/actionmanager.cpp" line="449"/>
         <source>Divide quantity...</source>
         <translation>Dela antal...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="448"/>
+        <location filename="../src/common/actionmanager.cpp" line="449"/>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
         <translation>Ctrl+*</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="449"/>
+        <location filename="../src/common/actionmanager.cpp" line="450"/>
         <source>Price</source>
         <translation>Pris</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="450"/>
+        <location filename="../src/common/actionmanager.cpp" line="451"/>
         <source>Round price to 2 decimals</source>
         <translation>Avrunda pris till 2 decimaler</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="451"/>
+        <location filename="../src/common/actionmanager.cpp" line="452"/>
         <source>Set price...</source>
         <translation>Sätt pris...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="452"/>
+        <location filename="../src/common/actionmanager.cpp" line="453"/>
         <source>Set price to guide...</source>
         <translation>Ställ in pris till prisguide...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="452"/>
+        <location filename="../src/common/actionmanager.cpp" line="453"/>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
         <translation>Ctrl+G</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="453"/>
+        <location filename="../src/common/actionmanager.cpp" line="454"/>
         <source>Adjust price...</source>
         <translation>Justera pris...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="453"/>
+        <location filename="../src/common/actionmanager.cpp" line="454"/>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
         <translation>Ctrl++</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="454"/>
+        <location filename="../src/common/actionmanager.cpp" line="455"/>
         <source>Set relative tier prices...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="455"/>
+        <location filename="../src/common/actionmanager.cpp" line="456"/>
         <source>Cost</source>
         <translation>Kostnad</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="456"/>
+        <location filename="../src/common/actionmanager.cpp" line="457"/>
         <source>Round cost to 2 decimals</source>
         <translation>Avrunda kostnad till 2 decimaler</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="457"/>
+        <location filename="../src/common/actionmanager.cpp" line="458"/>
         <source>Set cost...</source>
         <translation>Sätt kostnad...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="458"/>
+        <location filename="../src/common/actionmanager.cpp" line="459"/>
         <source>Adjust cost...</source>
         <translation>Justera kostnad...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="459"/>
+        <location filename="../src/common/actionmanager.cpp" line="460"/>
         <source>Spread cost relative to price...</source>
         <translation>Sprid ut kostnad relativt till pris...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="460"/>
+        <location filename="../src/common/actionmanager.cpp" line="461"/>
         <source>Spread cost relative to weight...</source>
         <translation>Sprid ut kostnad relativt till vikt...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="461"/>
+        <location filename="../src/common/actionmanager.cpp" line="462"/>
         <source>Set bulk quantity...</source>
         <translation>Sätt säljs i antal av...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="462"/>
+        <location filename="../src/common/actionmanager.cpp" line="463"/>
         <source>Set sale...</source>
         <translation>Sätt Rea...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="462"/>
+        <location filename="../src/common/actionmanager.cpp" line="463"/>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
         <translation>Ctrl+%</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="463"/>
+        <location filename="../src/common/actionmanager.cpp" line="464"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="464"/>
+        <location filename="../src/common/actionmanager.cpp" line="465"/>
         <source>Set comment...</source>
         <translation>Sätt kommentar...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="465"/>
+        <location filename="../src/common/actionmanager.cpp" line="466"/>
         <source>Add to comment...</source>
         <translation>Lägg till i kommentar...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="466"/>
+        <location filename="../src/common/actionmanager.cpp" line="467"/>
         <source>Remove from comment...</source>
         <translation>Ta bort från kommentar...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="467"/>
+        <location filename="../src/common/actionmanager.cpp" line="468"/>
         <source>Clear comment</source>
         <translation>Radera kommentar</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="468"/>
+        <location filename="../src/common/actionmanager.cpp" line="469"/>
         <source>Remark</source>
         <translation>Anmärkning</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="469"/>
+        <location filename="../src/common/actionmanager.cpp" line="470"/>
         <source>Set remark...</source>
         <translation>Sätt anmärkning...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="470"/>
+        <location filename="../src/common/actionmanager.cpp" line="471"/>
         <source>Add to remark...</source>
         <translation>Lätt till i anmärkning...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="471"/>
+        <location filename="../src/common/actionmanager.cpp" line="472"/>
         <source>Remove from remark...</source>
         <translation>Ta bort från anmärkning...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="472"/>
+        <location filename="../src/common/actionmanager.cpp" line="473"/>
         <source>Clear remark</source>
         <translation>Radera anmärkning</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="473"/>
+        <location filename="../src/common/actionmanager.cpp" line="474"/>
         <source>Retain in Inventory</source>
         <translation>Behåll i Lagret</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="474"/>
+        <location filename="../src/common/actionmanager.cpp" line="475"/>
         <source>Set retain flag</source>
         <translation>Sätt behåll-flaggan</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="475"/>
+        <location filename="../src/common/actionmanager.cpp" line="476"/>
         <source>Unset retain flag</source>
         <translation>Ta bort behåll-flaggan</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="476"/>
+        <location filename="../src/common/actionmanager.cpp" line="477"/>
         <source>Toggle retain flag</source>
         <translation>Växla behåll flaggan</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="477"/>
+        <location filename="../src/common/actionmanager.cpp" line="478"/>
         <source>Stockroom Item</source>
         <translation>Lagerrum (Stockroom) arikel</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="478"/>
+        <location filename="../src/common/actionmanager.cpp" line="479"/>
         <source>Set stockroom to None</source>
         <translation>Sätt Lagerrum (Stockroom) till Inget</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="479"/>
+        <location filename="../src/common/actionmanager.cpp" line="480"/>
         <source>Set stockroom to A</source>
         <translation>Sätt Lagerrum (Stockroom) till A</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="480"/>
+        <location filename="../src/common/actionmanager.cpp" line="481"/>
         <source>Set stockroom to B</source>
         <translation>Sätt Lagerrum (Stockroom) till B</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="481"/>
+        <location filename="../src/common/actionmanager.cpp" line="482"/>
         <source>Set stockroom to C</source>
         <translation>Sätt Lagerrum (Stockroom) till C</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="482"/>
+        <location filename="../src/common/actionmanager.cpp" line="483"/>
         <source>Set reserved for...</source>
         <translation>Sätt reserverad för...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="483"/>
+        <location filename="../src/common/actionmanager.cpp" line="484"/>
         <source>Marker</source>
         <translation>Märkning</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="484"/>
+        <location filename="../src/common/actionmanager.cpp" line="485"/>
         <source>Set marker text</source>
         <translation>Sätt märkningstext</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="485"/>
+        <location filename="../src/common/actionmanager.cpp" line="486"/>
         <source>Set marker color...</source>
         <translation>Sätt märkningsfärg...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="486"/>
+        <location filename="../src/common/actionmanager.cpp" line="487"/>
         <source>Clear marker</source>
         <translation>Radera märkning</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="487"/>
+        <location filename="../src/common/actionmanager.cpp" line="488"/>
         <source>Copy lot id</source>
         <translation>Kopiera post-id</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="488"/>
+        <location filename="../src/common/actionmanager.cpp" line="489"/>
         <source>Clear lot id</source>
         <translation>Rensa post-id</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="490"/>
+        <location filename="../src/common/actionmanager.cpp" line="491"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Visa BrickLink Katalog Info...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="490"/>
+        <location filename="../src/common/actionmanager.cpp" line="491"/>
         <source>Ctrl+B,Ctrl+C</source>
         <comment>Edit|Show BL Catalog Info</comment>
         <translation>Ctrl+B,Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="491"/>
+        <location filename="../src/common/actionmanager.cpp" line="492"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Visa BrickLink Pris Guide Info...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="491"/>
+        <location filename="../src/common/actionmanager.cpp" line="492"/>
         <source>Ctrl+B,Ctrl+P</source>
         <comment>Edit|Show BL Price Guide</comment>
         <translation>Ctrl+B,Ctrl+P</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="492"/>
+        <location filename="../src/common/actionmanager.cpp" line="493"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Visa Poster (Lots) som är till salu på BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="492"/>
+        <location filename="../src/common/actionmanager.cpp" line="493"/>
         <source>Ctrl+B,Ctrl+L</source>
         <comment>Edit|Show BL Lots for Sale</comment>
         <translation>Ctrl+B,Ctrl+L</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="493"/>
+        <location filename="../src/common/actionmanager.cpp" line="494"/>
         <source>Show in my Store on BrickLink...</source>
         <translation>Visa i min Affär på BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/common/actionmanager.cpp" line="493"/>
+        <location filename="../src/common/actionmanager.cpp" line="494"/>
         <source>Ctrl+B,Ctrl+I</source>
         <comment>Edit|Show BL my Inventory</comment>
         <translation>Ctrl+B,Ctrl+I</translation>
@@ -898,96 +903,86 @@
     <name>AddItemDialog</name>
     <message>
         <location filename="../src/desktop/additemdialog.ui" line="14"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="478"/>
         <source>Add Items to %1</source>
         <translation>Lägg till Artikel till %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="127"/>
         <source>&amp;Cost</source>
-        <translation>K&amp;ostnad</translation>
+        <translation type="vanished">K&amp;ostnad</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="144"/>
         <source>&amp;Bulk</source>
-        <translation>Säljs i an&amp;tal av</translation>
+        <translation type="vanished">Säljs i an&amp;tal av</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="154"/>
         <source>Co&amp;mments</source>
-        <translation>&amp;Kommentarer</translation>
+        <translation type="vanished">&amp;Kommentarer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="199"/>
         <source>&amp;Quantity</source>
-        <translation>&amp;Antal</translation>
+        <translation type="vanished">&amp;Antal</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="216"/>
         <source>Condition</source>
-        <translation>Skick</translation>
+        <translation type="vanished">Skick</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="264"/>
         <source>&amp;Tiered prices</source>
-        <translation>&amp;Stafflade priser</translation>
+        <translation type="vanished">&amp;Stafflade priser</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="274"/>
         <source>&amp;Remarks</source>
-        <translation>An&amp;märkningar</translation>
+        <translation type="vanished">An&amp;märkningar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="395"/>
         <source>&amp;New</source>
-        <translation>&amp;Ny</translation>
+        <translation type="vanished">&amp;Ny</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="405"/>
         <source>&amp;Used</source>
-        <translation>An&amp;vänd</translation>
+        <translation type="vanished">An&amp;vänd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="435"/>
         <source>Complete</source>
-        <translation>Komplett</translation>
+        <translation type="vanished">Komplett</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="440"/>
         <source>Incomplete</source>
-        <translation>Ej komplett</translation>
+        <translation type="vanished">Ej komplett</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="445"/>
         <source>Sealed</source>
-        <translation>Oöppnad</translation>
+        <translation type="vanished">Oöppnad</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="457"/>
         <source>%</source>
-        <translation>%</translation>
+        <translation type="vanished">%</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="473"/>
         <source>&amp;Price (%1)</source>
-        <translation>&amp;Pris (%1)</translation>
+        <translation type="vanished">&amp;Pris (%1)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="490"/>
+        <location filename="../src/desktop/additemdialog.ui" line="106"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="439"/>
         <source>Click to go back one item, hold to see history</source>
         <translation>Klicka för att gå tillbaka en artikel, håll inne för att se historik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="507"/>
+        <location filename="../src/desktop/additemdialog.ui" line="122"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="440"/>
         <source>Click to go forward one item, hold to see history</source>
         <translation>Klicka för att gå framåt en artikel, håll inne för att se historik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="524"/>
+        <location filename="../src/desktop/additemdialog.ui" line="138"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="441"/>
         <source>Menu</source>
         <translation>Meny</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="228"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="300"/>
         <source>Show item information</source>
         <translation>Visa information om artikel</translation>
     </message>
@@ -996,64 +991,139 @@
         <translation type="vanished">Visa vilka Lego-set denna artikel ingår i</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="230"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="302"/>
         <source>Show price guide</source>
         <translation>Visa prisguide</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="241"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="313"/>
         <source>Show additional input fields for sellers</source>
         <translation>Visa ytterligare inmatningsfält för säljare</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="598"/>
+        <location filename="../src/desktop/additemdialog.ui" line="211"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="442"/>
         <source>Consolidate added items into document</source>
         <translation>Slå ihop tillagda artiklar med nuvarande dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.ui" line="601"/>
+        <location filename="../src/desktop/additemdialog.ui" line="214"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="443"/>
         <source>Conso&amp;lidate</source>
         <translation>S&amp;lå ihop</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="229"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="301"/>
         <source>Show item inventory and appearance</source>
         <translation>Visa artikelns innehåll och vilket set den ingår i</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="249"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="321"/>
         <source>Browsing history</source>
         <translation>Sökhistorik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="365"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="436"/>
         <source>Add</source>
         <translation>Lägg till</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="366"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="437"/>
         <source>Go to Item</source>
         <translation>Gå till Artikel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="600"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="677"/>
         <source>Your recently added items will be listed here</source>
         <translation>Dina senaste tillagda artiklar listas här</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="620"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="697"/>
         <source>Added %1</source>
         <translation>Lagt till %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="905"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="982"/>
         <source>Clear history</source>
         <translation>Rensa historik</translation>
     </message>
     <message>
-        <location filename="../src/desktop/additemdialog.cpp" line="913"/>
+        <location filename="../src/desktop/additemdialog.cpp" line="990"/>
         <source>No browsing history</source>
         <translation>Ingen sökhistorik</translation>
+    </message>
+</context>
+<context>
+    <name>AddItemWidget</name>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="29"/>
+        <source>&amp;Quantity</source>
+        <translation>&amp;Antal</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="58"/>
+        <source>&amp;Bulk</source>
+        <translation>Säljs i an&amp;tal av</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="93"/>
+        <source>&amp;Price (%1)</source>
+        <translation>&amp;Pris (%1)</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="122"/>
+        <source>&amp;Cost</source>
+        <translation>K&amp;ostnad</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="151"/>
+        <source>&amp;Tiered prices</source>
+        <translation>&amp;Stafflade priser</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="272"/>
+        <source>%</source>
+        <translation>%</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="288"/>
+        <source>Condition</source>
+        <translation>Skick</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="300"/>
+        <source>&amp;New</source>
+        <translation>&amp;Ny</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="310"/>
+        <source>&amp;Used</source>
+        <translation>An&amp;vänd</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="340"/>
+        <source>Complete</source>
+        <translation>Komplett</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="345"/>
+        <source>Incomplete</source>
+        <translation>Ej komplett</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="350"/>
+        <source>Sealed</source>
+        <translation>Oöppnad</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="360"/>
+        <source>Co&amp;mments</source>
+        <translation>&amp;Kommentarer</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/additemwidget.ui" line="377"/>
+        <source>&amp;Remarks</source>
+        <translation>An&amp;märkningar</translation>
     </message>
 </context>
 <context>
@@ -1102,37 +1172,37 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="162"/>
+        <location filename="../src/common/application.cpp" line="164"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Din installation är trasig: Bildformatets plugin saknas!</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="168"/>
+        <location filename="../src/common/application.cpp" line="170"/>
         <source>Could not initialize the BrickLink kernel:</source>
         <translation>Kunde inte starta BrickLink&apos;s kärna:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="191"/>
+        <location filename="../src/common/application.cpp" line="193"/>
         <source>Failed to authenticate with BrickLink as user %1</source>
         <translation>Kunde inte logga in på BrickLink med användarnamnet %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="239"/>
+        <location filename="../src/common/application.cpp" line="241"/>
         <source>Import BrickLink Store</source>
         <translation>Importera BrickLink butik</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="240"/>
+        <location filename="../src/common/application.cpp" line="242"/>
         <source>Importing BrickLink Store</source>
         <translation>Importerar BrickLink butik</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="289"/>
+        <location filename="../src/common/application.cpp" line="291"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>Kunde inte ladda BrickLink&apos;s databasfiler.&lt;br /&gt;&lt;br /&gt;Programmet kan inte fungera utan dessa filer.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/common/application.cpp" line="334"/>
+        <location filename="../src/common/application.cpp" line="336"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Det verkar som BrickStore krashade medans %n dokumentet hade osparade förändringar.</numerusform>
@@ -1140,87 +1210,87 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="335"/>
+        <location filename="../src/common/application.cpp" line="337"/>
         <source>Should these documents be restored from their last available auto-save state?</source>
         <translation>Ska dessa dokument återställas från senaste auto-sparandet?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="336"/>
+        <location filename="../src/common/application.cpp" line="338"/>
         <source>Restore Documents</source>
         <translation>Återställ dokumenten</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="361"/>
+        <location filename="../src/common/application.cpp" line="363"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
         <translation>Sättet BrickStore använder LDraw för att generera 3D modeller för legobitar har ändrats: som standard kommer nu den laddas ner och sköta sin egen LDraw installation.&lt;br&gt;&lt;br&gt;Var vänlig och kontrollera LDraw fliken under inställningar om du fortfarande vill använda en anpassad LDraw installation.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="375"/>
+        <location filename="../src/common/application.cpp" line="377"/>
         <source>Started downloading an LDraw library update</source>
         <translation>Startat nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="380"/>
+        <location filename="../src/common/application.cpp" line="382"/>
         <source>Finished downloading an LDraw library update</source>
         <translation>Färdig med nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="382"/>
+        <location filename="../src/common/application.cpp" line="384"/>
         <source>Failed to download a LDraw library update</source>
         <translation>Misslyckades med nedladdning av LDraw library uppdatering</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="512"/>
+        <location filename="../src/common/application.cpp" line="514"/>
         <source>Please enter the password for the BrickLink account %1:</source>
         <translation>Var vänlig och ange lösenordet för ditt BrickLink konto %1:</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="519"/>
+        <location filename="../src/common/application.cpp" line="521"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Inga godkända BrickLink inloggnings inställningar hittades.&lt;br /&gt;&lt;br /&gt;Vill du ändra dessa inställningar nu?</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="543"/>
+        <location filename="../src/common/application.cpp" line="545"/>
         <source>Update Database</source>
         <translation>Uppdatera Databas</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="544"/>
+        <location filename="../src/common/application.cpp" line="546"/>
         <source>Updating the BrickLink database</source>
         <translation>Uppdaterar BrickLink databas</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="697"/>
+        <location filename="../src/common/application.cpp" line="699"/>
         <source>Version %1 (build: %2)</source>
         <translation>Version %1 (build: %2)</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="699"/>
+        <location filename="../src/common/application.cpp" line="701"/>
         <source>Copyright &amp;copy; %1</source>
         <translation>Copyright &amp;copy; %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="700"/>
+        <location filename="../src/common/application.cpp" line="702"/>
         <source>Visit %1</source>
         <translation>Besök %1</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="708"/>
+        <location filename="../src/common/application.cpp" line="710"/>
         <source>BrickStore is free software licensed under the %1.</source>
         <translation>BrickStore är en fri programvara som är licensierad under %1.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="709"/>
+        <location filename="../src/common/application.cpp" line="711"/>
         <source>The source code is available on %1.</source>
         <translation>Källkoden finns på %1.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="710"/>
+        <location filename="../src/common/application.cpp" line="712"/>
         <source>All data from %1 is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks are the property of their respective owners.</source>
         <translation>Alla data från %1 ägs av BrickLink. Både BrickLink och LEGO är varumärken som tillhör LEGO-gruppen, som inte sponsrar, godkänner eller stöder denna programvara. Alla andra varumärken tillhör deras respektive ägare.</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="711"/>
+        <location filename="../src/common/application.cpp" line="713"/>
         <source>Only made possible by the support of %1.</source>
         <translation>Endast möjliggjort av %1.</translation>
     </message>
@@ -1229,17 +1299,17 @@
         <translation type="vanished">&lt;p&gt;Detta program är fri programvara; det kan distribueras och/eller modifieras under villkoren i GNU General Public License version 2 som publicerats av Free Software Foundation och som finns i filen LICENSE.GPL som ingår i detta programpaket.&lt;br/&gt;Detta program tillhandahålls i befintligt skick. INGEN GARANTI AV NÅGOT SLAG, INKLUSIVE GARANTI FÖR DESIGN, SÄLJBARHET OCH LÄMPLIGHET FÖR ETT SÄRSKILT SYFTE.&lt;br/&gt;Se &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0 .html&quot;&gt;www.gnu.org/licenses/old-licenses/gpl-2.0.html&lt;/a&gt; för GPL-licensinformation.&lt;/p&gt;&lt;p&gt;All data från &lt;a href=&quot;https://www .bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; ägs av BrickLink. Både BrickLink och LEGO är varumärken som tillhör LEGO-gruppen, som inte sponsrar, godkänner eller stöder denna programvara. Alla andra varumärken erkända.&lt;/p&gt;&lt;p&gt;Endast möjliggjort av &lt;a href=&quot;https://www.danjezek.com/&quot;&gt;Dan Jezeks&lt;/a&gt; support.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="712"/>
+        <location filename="../src/common/application.cpp" line="714"/>
         <source>License</source>
         <translation>Licens</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="724"/>
+        <location filename="../src/common/application.cpp" line="726"/>
         <source>Translators</source>
         <translation>Översättare</translation>
     </message>
     <message>
-        <location filename="../src/common/application.cpp" line="956"/>
+        <location filename="../src/common/application.cpp" line="958"/>
         <source>The price-guide download mechanism changed. Please make sure your VAT setup is still correct on the BrickLink page in the Settings dialog.</source>
         <translation>Nedladdningsmekanismen för prisguiden har ändrats. Se till att din momsinställning fortfarande är korrekt på BrickLink-sidan i dialogrutan Inställningar.</translation>
     </message>
@@ -1401,22 +1471,22 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1258"/>
+        <location filename="../src/bricklink/model.cpp" line="1275"/>
         <source>Qty.</source>
         <translation>Antal.</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1260"/>
+        <location filename="../src/bricklink/model.cpp" line="1277"/>
         <source>Item Id</source>
         <translation>Artikel nummer</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1261"/>
+        <location filename="../src/bricklink/model.cpp" line="1278"/>
         <source>Description</source>
         <translation>Beskrivning</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="1259"/>
+        <location filename="../src/bricklink/model.cpp" line="1276"/>
         <source>Color</source>
         <translation>Färg</translation>
     </message>
@@ -1556,27 +1626,27 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="792"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="794"/>
         <source>VAT is included</source>
         <translation>Inklusive Moms</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="793"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="795"/>
         <source>VAT is excluded</source>
         <translation>Exklusive Moms</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="797"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
         <source>for the EU</source>
         <translation>för EU</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="798"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="800"/>
         <source>for the UK</source>
         <translation>för UK</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="799"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="801"/>
         <source>for Norway</source>
         <translation>för Norge</translation>
     </message>
@@ -1675,17 +1745,17 @@
         <translation>Nuvarande Valuta</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="48"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="47"/>
         <source>New currency</source>
         <translation>Ny Valuta</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="61"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="60"/>
         <source>Exchange rate</source>
         <translation>Växelkurs</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="98"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="97"/>
         <source>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
         <translation>Från &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 är lika med %2 %3</translation>
     </message>
@@ -1694,22 +1764,22 @@
         <translation type="vanished">Från &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 är lika med %2 %3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="127"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="120"/>
         <source>Reload cross rates from the ECB</source>
         <translation>Ladda om växelkurser från ECB</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="130"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="123"/>
         <source>Reload</source>
         <translation>Ladda om</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="188"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="180"/>
         <source>Custom: %1 1 equals %2</source>
         <translation>Egen: %1 1 är lika med %2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="265"/>
+        <location filename="../src/desktop/changecurrencydialog.ui" line="257"/>
         <source>From V1 BrickStore/Stock: USD 1 equals %1 %2</source>
         <translation>Från V1 BrickStore/Lager: USD 1 är lika med %1 %2</translation>
     </message>
@@ -3138,32 +3208,32 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
 <context>
     <name>FilterWidget</name>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="487"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="481"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="488"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="482"/>
         <source>Re-apply filter</source>
         <translation>Återanvänd filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="489"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="483"/>
         <source>More actions for this filter</source>
         <translation>Fler åtgärder för detta filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="490"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="484"/>
         <source>Copy filter</source>
         <translation>Kopiera filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="491"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="485"/>
         <source>Paste filter</source>
         <translation>Klistra in filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/filtertermwidget.cpp" line="492"/>
+        <location filename="../src/desktop/filtertermwidget.cpp" line="486"/>
         <source>Text-only filter mode</source>
         <translation>Endast text filter mode</translation>
     </message>
@@ -3310,37 +3380,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>%v / %m</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="174"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="176"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="175"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan efter linjer som innehåller följande ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="177"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="179"/>
         <source>Show</source>
         <translation>Visa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="178"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="180"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="230"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="232"/>
         <source>Last updated %1</source>
         <translation>Senaste uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="236"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="238"/>
         <source>Currently updating carts</source>
         <translation>Uppdaterar för nuvarande kundvagnarna</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importcartdialog.cpp" line="240"/>
+        <location filename="../src/desktop/importcartdialog.cpp" line="242"/>
         <source>Last update failed</source>
         <translation>Senaste uppdataring misslyckades</translation>
     </message>
@@ -3608,7 +3678,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     </message>
     <message>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="15"/>
-        <location filename="../src/desktop/importorderdialog.cpp" line="243"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="245"/>
         <source>Import Order</source>
         <translation>Importera Order</translation>
     </message>
@@ -3628,62 +3698,62 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>Lagd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="213"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="214"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="216"/>
         <source>Import combined</source>
         <translation>Importera tillsammans</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="215"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan för att hitta orderlinjer innehålande dessa ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="217"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="219"/>
         <source>Show order information</source>
         <translation>Visa order information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="218"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="220"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="244"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
         <source>You have selected multiple orders with differing currencies, which cannot be combined as-is.</source>
         <translation>Du har markerat flera ordrar med olika valutor, vilket inte kan slås ihop.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="246"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="248"/>
         <source>Do you want to continue and convert all prices to your default currency (%1)?</source>
         <translation>Vill du fortsätta och konvertera alla priser till din standard valuta (%1)?</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="275"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="277"/>
         <source>Batch</source>
         <translation>Delorder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="296"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="298"/>
         <source>Multiple Orders</source>
         <translation>Flera ordrar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="344"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="346"/>
         <source>Last updated %1</source>
         <translation>Senast uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="350"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="352"/>
         <source>Currently updating orders</source>
         <translation>Uppdatering av ordrar pågår</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importorderdialog.cpp" line="354"/>
+        <location filename="../src/desktop/importorderdialog.cpp" line="356"/>
         <source>Last update failed</source>
         <translation>Senaste uppdateringen misslyckades</translation>
     </message>
@@ -3711,37 +3781,37 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <translation>%v / %m</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="174"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="176"/>
         <source>Import</source>
         <translation>Importera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="175"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrera listan på orderlinjer som innehåller desssa ord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="177"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="179"/>
         <source>Show</source>
         <translation>Visa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="178"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="180"/>
         <source>Show on BrickLink</source>
         <translation>Visa på BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="228"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="230"/>
         <source>Last updated %1</source>
         <translation>Senast uppdaterad %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="234"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="236"/>
         <source>Currently updating wanted lists</source>
         <translation>Uppdatering av önskelistor pågår</translation>
     </message>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.cpp" line="238"/>
+        <location filename="../src/desktop/importwantedlistdialog.cpp" line="240"/>
         <source>Last update failed</source>
         <translation>Senaste uppdateringen misslyckades</translation>
     </message>
@@ -3851,58 +3921,63 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
 <context>
     <name>ItemScannerDialog</name>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="36"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="61"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="60"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="449"/>
         <source>Item Scanner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="95"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="119"/>
         <source>Any</source>
         <translation>Någon</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="134"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="452"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="135"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="453"/>
         <source>Service</source>
         <translation>Tjänster</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="136"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="454"/>
         <source>Item type</source>
         <translation>Artikel typ</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="166"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="456"/>
+        <source>Keep this window open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="463"/>
         <source>Click into the camera preview or press Space to capture an image.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="167"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="472"/>
+        <source>An error occurred:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="476"/>
         <source>There is no camera connected to this computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="168"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="468"/>
         <source>No matching item found - try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="221"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="321"/>
         <source>Scanning failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="363"/>
-        <source>An error occured:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3960,17 +4035,17 @@ Högerklicka: Meny</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="404"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="391"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="410"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="397"/>
         <source>Info</source>
         <translation>Info</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="412"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="399"/>
         <source>Price Guide</source>
         <translation>Pris Information</translation>
     </message>
@@ -3979,17 +4054,17 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Finns i Sats</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="414"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="401"/>
         <source>Item Inventory</source>
         <translation>Artikel består av</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="416"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="403"/>
         <source>Open Documents</source>
         <translation>Öppna dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="418"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="405"/>
         <source>Recent Documents</source>
         <translation>Senaste Dokument</translation>
     </message>
@@ -3998,27 +4073,27 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Fel logg</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="421"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="408"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="422"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="409"/>
         <source>No outstanding jobs</source>
         <translation>Inga utestående jobb</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="423"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="410"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation>Laddar ner...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; färdiga&lt;br&gt;(%v of %m)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1222"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1209"/>
         <source>Customize Toolbar...</source>
         <translation>Anpassa Verktygsfältet...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="1226"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="1213"/>
         <source>Reset Info Docks layout</source>
         <translation>Återställ info rutans placering</translation>
     </message>
@@ -4222,22 +4297,22 @@ Högerklicka: Meny</translation>
         <translation>Betalnings Status</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="44"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="47"/>
         <source>Order %1, %2 %3 on %4</source>
         <translation>Order %1, %2 %3 på %4</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="46"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="49"/>
         <source>received from</source>
         <translation>Mottagen från</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="47"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="50"/>
         <source>placed at</source>
         <translation>görs hos</translation>
     </message>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.cpp" line="88"/>
+        <location filename="../src/desktop/orderinformationdialog.cpp" line="92"/>
         <source>Payment in</source>
         <translation>Betalning i</translation>
     </message>
@@ -4610,7 +4685,7 @@ Högerklicka: Meny</translation>
     </message>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="285"/>
-        <location filename="../src/desktop/printdialog.cpp" line="260"/>
+        <location filename="../src/desktop/printdialog.cpp" line="271"/>
         <source>Print</source>
         <translation>Skriv ut</translation>
     </message>
@@ -4673,13 +4748,13 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="424"/>
         <location filename="../src/desktop/printdialog.ui" line="434"/>
-        <location filename="../src/desktop/printdialog.cpp" line="244"/>
+        <location filename="../src/desktop/printdialog.cpp" line="255"/>
         <source>Color</source>
         <translation>Färg</translation>
     </message>
     <message>
         <location filename="../src/desktop/printdialog.ui" line="439"/>
-        <location filename="../src/desktop/printdialog.cpp" line="246"/>
+        <location filename="../src/desktop/printdialog.cpp" line="257"/>
         <source>Black and white</source>
         <translation>Svartvit</translation>
     </message>
@@ -4720,29 +4795,29 @@ Högerklicka: Meny</translation>
         <translation>Anpassa bredden till en sida</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="75"/>
+        <location filename="../src/desktop/printdialog.cpp" line="86"/>
         <source>Print using the system dialog...</source>
         <translation>Skriv ut med hjälp av systemdialogrutan...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="169"/>
-        <location filename="../src/desktop/printdialog.cpp" line="429"/>
-        <location filename="../src/desktop/printdialog.cpp" line="438"/>
+        <location filename="../src/desktop/printdialog.cpp" line="180"/>
+        <location filename="../src/desktop/printdialog.cpp" line="440"/>
+        <location filename="../src/desktop/printdialog.cpp" line="449"/>
         <source>Save as PDF</source>
         <translation>Spara som PDF</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="260"/>
+        <location filename="../src/desktop/printdialog.cpp" line="271"/>
         <source>Save</source>
         <translation>Spara</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="430"/>
+        <location filename="../src/desktop/printdialog.cpp" line="441"/>
         <source>PDF Documents</source>
         <translation>PDF Dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/printdialog.cpp" line="439"/>
+        <location filename="../src/desktop/printdialog.cpp" line="450"/>
         <source>The PDF document already exists and is not writable.</source>
         <translation>PDF dokumentet finns redan och är inte överskrivningsbar.</translation>
     </message>
@@ -4792,7 +4867,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>QDialogButtonBox</name>
     <message>
-        <location filename="../src/desktop/desktopuihelpers_p.h" line="165"/>
+        <location filename="../src/desktop/desktopuihelpers_p.h" line="164"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
@@ -5044,31 +5119,31 @@ Högerklicka: Meny</translation>
     <name>SelectColor</name>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="75"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="130"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="144"/>
         <source>Known Colors</source>
         <translation>Kända färger</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="76"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="131"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="145"/>
         <source>All Colors</source>
         <translation>Alla färger</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="77"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="132"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="146"/>
         <source>Popular Colors</source>
         <translation>Populära färger</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="78"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="133"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="147"/>
         <source>Most Popular Colors</source>
         <translation>Mest populära färger</translation>
     </message>
     <message>
         <location filename="../src/mobile/SelectColor.qml" line="81"/>
-        <location filename="../src/desktop/selectcolor.cpp" line="138"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="152"/>
         <source>Only &quot;%1&quot; Colors</source>
         <translation>Bara &quot;%1&quot; Färger</translation>
     </message>
@@ -5083,7 +5158,7 @@ Högerklicka: Meny</translation>
         <translation>Färg efter Nyans</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectcolor.cpp" line="140"/>
+        <location filename="../src/desktop/selectcolor.cpp" line="154"/>
         <source>Lock color selection: only shows items known to be available in this color</source>
         <translation>Lås vald färg: Visa bara artiklar som finns med denna färg</translation>
     </message>
@@ -5092,11 +5167,12 @@ Högerklicka: Meny</translation>
     <name>SelectColorDialog</name>
     <message>
         <location filename="../src/desktop/selectcolordialog.ui" line="14"/>
+        <location filename="../src/desktop/selectcolordialog.cpp" line="23"/>
         <source>Select Color</source>
         <translation>Välj färg</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectcolordialog.cpp" line="35"/>
+        <location filename="../src/desktop/selectcolordialog.cpp" line="48"/>
         <source>Reset the position to automatic mode</source>
         <translation>Återställ läget till automatiskt läge</translation>
     </message>
@@ -5125,44 +5201,44 @@ Högerklicka: Meny</translation>
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="234"/>
+        <location filename="../src/desktop/selectitem.cpp" line="235"/>
         <source>Ctrl+E</source>
         <comment>Shortcut for entering PCC</comment>
         <translation>Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="237"/>
+        <location filename="../src/desktop/selectitem.cpp" line="238"/>
         <source>Find element number</source>
         <translation>Hitta artikel nummer (element number)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="238"/>
+        <location filename="../src/desktop/selectitem.cpp" line="239"/>
         <source>Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)</source>
         <translation>Skriv in en 7-siffrig Lego-artikelnummer, också känd som artikel-färg-kod (PCC)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="250"/>
+        <location filename="../src/desktop/selectitem.cpp" line="252"/>
         <source>Ctrl+D</source>
         <comment>Shortcut for opening the webcam scanner</comment>
         <translation>Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="326"/>
+        <location filename="../src/desktop/selectitem.cpp" line="333"/>
         <source>Ctrl+1</source>
         <translation>Ctrl+1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="334"/>
+        <location filename="../src/desktop/selectitem.cpp" line="341"/>
         <source>Ctrl+2</source>
         <translation>Ctrl+2</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="560"/>
+        <location filename="../src/desktop/selectitem.cpp" line="567"/>
         <source>Find a part using a webcam</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="945"/>
+        <location filename="../src/desktop/selectitem.cpp" line="970"/>
         <source>Switch to the item&apos;s &quot;%1&quot; item type</source>
         <translation>Byt till artikelns &quot;%1&quot;&apos;s typ</translation>
     </message>
@@ -5171,27 +5247,27 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Ctrl+3</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="539"/>
+        <location filename="../src/desktop/selectitem.cpp" line="546"/>
         <source>Item type:</source>
         <translation>Artikel typ:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="540"/>
+        <location filename="../src/desktop/selectitem.cpp" line="547"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="542"/>
+        <location filename="../src/desktop/selectitem.cpp" line="549"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Visa endast objekt som innehåller alla inmatade ord - oavsett fall - i antingen namnet eller artikelnumret. Detta fungerar ungefär som en webbsökmotor:&lt;ul&gt;&lt;li&gt;för att utesluta ord, sätt ett &lt;tt&gt;-&lt;/tt&gt;. (t. ex. &lt;tt&gt;-mönster&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att matcha en fras, sätt den inom citattecken. (t.ex. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att filtrera delar som förekommer i en specifik sats, sätt&lt;tt&gt;appears-in:&lt;/tt&gt; framför uppsättningens namn. (t.ex. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;att filtrera uppsättningar eller minifigs som består av en specifik del, sätt&lt;tt&gt;consists-of:&lt;/tt&gt; framför delens artikel nummer.&lt;br&gt; (t.ex. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="553"/>
+        <location filename="../src/desktop/selectitem.cpp" line="560"/>
         <source>Filter the list using this expression</source>
         <translation>Filtrera listan enligt detta uttryck</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="559"/>
+        <location filename="../src/desktop/selectitem.cpp" line="566"/>
         <source>Find a 7-digit Lego element number</source>
         <translation>Hitta ett 7-siffriga Lego-artikelnummer</translation>
     </message>
@@ -5200,12 +5276,12 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Lista</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="562"/>
+        <location filename="../src/desktop/selectitem.cpp" line="569"/>
         <source>Thumbnails</source>
         <translation>Miniatyr</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="561"/>
+        <location filename="../src/desktop/selectitem.cpp" line="568"/>
         <source>List with Images</source>
         <translation>Lista med Bilder</translation>
     </message>
@@ -5218,12 +5294,12 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Zooma ut</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="926"/>
+        <location filename="../src/desktop/selectitem.cpp" line="951"/>
         <source>Switch to the &quot;%1&quot; category</source>
         <translation>Byt till &quot;%1&quot; kategorin</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitem.cpp" line="936"/>
+        <location filename="../src/desktop/selectitem.cpp" line="961"/>
         <source>Switch to the item&apos;s &quot;%1&quot; category</source>
         <translation>Byt till artikelns &quot;%1&quot;&apos;s kategori</translation>
     </message>
@@ -5240,11 +5316,12 @@ Högerklicka: Meny</translation>
     <name>SelectItemDialog</name>
     <message>
         <location filename="../src/desktop/selectitemdialog.ui" line="14"/>
+        <location filename="../src/desktop/selectitemdialog.cpp" line="24"/>
         <source>Select Item</source>
         <translation>Välj artikel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/selectitemdialog.cpp" line="40"/>
+        <location filename="../src/desktop/selectitemdialog.cpp" line="52"/>
         <source>Reset the position to automatic mode</source>
         <translation>Återställ positionen till automatisk läge</translation>
     </message>
@@ -5535,72 +5612,72 @@ Högerklicka: Meny</translation>
         <translation>Ladda om växelkurs från ECB</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="144"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="137"/>
         <source>Document Directory</source>
         <translation>Standard mapp för lagring</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="158"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="151"/>
         <source>Parting out items</source>
         <translation>Bryta isär artiklar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="166"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="159"/>
         <source>Ask the user</source>
         <translation>Fråga användaren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="171"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="164"/>
         <source>Always replace the item being parted out</source>
         <translation>Ersätt alltid artikeln som du bryter isär</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="176"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="169"/>
         <source>Always part out to a new document</source>
         <translation>Bryt alltid ut artiklar till ett nytt dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="184"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="177"/>
         <source>On export</source>
         <translation>Vid export</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="191"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="184"/>
         <source>Open a Web-Browser window when exporting to the clipboard</source>
         <translation>Öppna en webbläsare när du exporterar till urklipp</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="198"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="191"/>
         <source>On startup</source>
         <translation>Vid uppstart</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="205"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="198"/>
         <source>Restore the saved documents from the previous session</source>
         <translation>Återställ de sparade dokumenten sedan sist</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="212"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="205"/>
         <source>Modifications</source>
         <translation>Ändringar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="219"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="212"/>
         <source>Visual changes modify the document</source>
         <translation>Visuella ändringar förändrar dokumentet</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="247"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="240"/>
         <source>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</source>
         <translation>När detta alternativ väljs, markeras dokumentet som ändrad vid sortering, filtrering eller bara ändrar kolumn layouten.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="262"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="255"/>
         <source>On crashes</source>
         <translation>Vid crash</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="269"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="262"/>
         <source>Send anonymous crash reports</source>
         <translation>Skicka anonym crash rapport</translation>
     </message>
@@ -5609,74 +5686,74 @@ Högerklicka: Meny</translation>
         <translation type="vanished">&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="326"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="319"/>
         <source>Interface</source>
         <translation>Gränssnitt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="344"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="337"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="139"/>
         <source>Theme</source>
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="352"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="503"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="345"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="496"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation>Standard enligt systemet</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="357"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="350"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="147"/>
         <source>Light</source>
         <translation>Ljust</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="362"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="355"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="148"/>
         <source>Dark</source>
         <translation>Mörkt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="508"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="558"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="501"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="551"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation>Liten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="513"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="506"/>
         <source>Big</source>
         <translation>Stor</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="635"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation>Om du anger ett lösenord, då sparas detta i ditt system: det är bara förvrängt, men &lt;b&gt;inte&lt;/b&gt; krypterat, BrickStore behöver detta för att kunna skicka ditt lösenord till BrickLink server vid nedladdning av din data.&lt;br&gt;&lt;br&gt;Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du få en fråga att ange ditt lösenord första gången BricStore ska ladda ner din data från BrickLink efter start av programmet.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="651"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="644"/>
         <source>Price guide</source>
         <translation>Pris Information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="663"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="656"/>
         <source>Values</source>
         <translation>Värden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="673"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="666"/>
         <source>Source</source>
         <translation>Källa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="377"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
         <source>Font size</source>
         <translation>Teckenstorlek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="458"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="451"/>
         <source>Reset to 100%</source>
         <translation>Återställ till 100%</translation>
     </message>
@@ -5686,88 +5763,88 @@ Högerklicka: Meny</translation>
         <translation>Storlek på artikelbilder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="489"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="482"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation>Den snabba bruna räven hoppar över en lat hund.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
         <source>Icon size</source>
         <translation>Icon storlek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="294"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="287"/>
         <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
         <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="332"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="325"/>
         <source>Global</source>
         <translation>Global</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="524"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="517"/>
         <source>Document Views</source>
         <translation>Dokumentvyer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="529"/>
         <source>Row height</source>
         <translation>Radhöjd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation>Redigerbar med rullhjul och zoom rörelse</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="550"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
         <source>Column spacing</source>
         <translation>Kolumnavstånd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="563"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="556"/>
         <source>Medium</source>
         <translation>Medium</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="568"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="561"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation>Stor</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="596"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="589"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="602"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="595"/>
         <source>BrickLink Login</source>
         <translation>BrickLink inloggning</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="614"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="607"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation>Användarnamn</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="774"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="773"/>
         <source>Your username is required here - not your email address.</source>
         <translation>Du måste använda ditt användarnam här - inte din epost adress.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="621"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation>Lösenord</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="793"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="792"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation>BrickLink&apos;s maximala lösenordslängd är 15 tecken.</translation>
     </message>
@@ -5780,121 +5857,121 @@ If you do not want to save your password, then just leave this field empty and y
 Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du få en fråga att ange ditt lösenord första gången BricStore ska ladda ner din data från BrickLink efter start av programmet.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="690"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="683"/>
         <source>Automatically update cached data</source>
         <translation>Uppdatera cached data automatiskt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
         <source>BrickLink database, if older than</source>
         <translation>OM BrickLink databasen är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="711"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="734"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="757"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
         <source> days</source>
         <translation> dagar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="720"/>
         <source>BrickLink Pictures, if older than</source>
         <translation>OM BrickLink bilder är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation>OM BrickLink pris gudies är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="815"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="808"/>
         <source>Reset to defaults</source>
         <translation>Återställ till standard</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="847"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="856"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="849"/>
         <source>Library</source>
         <translation>Bibliotek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="874"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="867"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>Låt BrickStore hantera sin egna LDraw artikelbibliotek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="890"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="883"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation>Denna inställning är att föredra, eftersom BrickStore kommer hålla denna installationen uppdaterad.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="916"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="909"/>
         <source>Use an existing LDraw installation</source>
         <translation>Använd en redan installerad LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="946"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="939"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation>Använd detta alternativet om du behöver anpassade eller inofficiella delar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="980"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="973"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1011"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1004"/>
         <source>Update</source>
         <translation>Uppdatera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1020"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
         <source>Now</source>
         <translation>Nu</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1040"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1033"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation>Uppdateringar laddas ner och tillämpas automatiskt i bakgrunden. Starta bara en manuell uppdatering om den automatiska misslyckas.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1059"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1052"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1058"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Ändra huvudverktygsfältet genom dra och släpp</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1072"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1186"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1165"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1241"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1158"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1234"/>
         <source>Reset all</source>
         <translation>Återställ alla</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1173"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1166"/>
         <source>Keyboard</source>
         <translation>Tangentbord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1172"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassa de globala kortkommandon</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1251"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1244"/>
         <source>Reset</source>
         <translation>Återställ</translation>
     </message>
@@ -5946,48 +6023,48 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         <translation>Andra...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="817"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="816"/>
         <source>LDraw directory location</source>
         <translation>LDraw katalogplats</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="940"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="939"/>
         <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
         <translation>Kortkommandon med &apos;Alt&apos; kräver även en &apos;CTRL&apos; för att inte störa menysystemets gränssnitt.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="948"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="954"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="947"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
         <source>This shortcut is already used by another action.</source>
         <translation>Detta kortkommando används redan för en annan åtgärd.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="982"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="981"/>
         <source>could not find a cross rate for %1</source>
         <translation>kunde inte hitta en valutakurs för %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="984"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="983"/>
         <source>1 %1 equals %2 USD</source>
         <translation>1 %1 är like med %2 USD</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="993"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="992"/>
         <source>Document directory location</source>
         <translation>Dokumentkatalogens plats</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1149"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1148"/>
         <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Denna dokumentkatalog finns inte eller är inte läs- och skrivbar.&lt;br /&gt;Dokumentkatalogen kommer inte att ändras.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1208"/>
         <source>Not a valid LDraw installation</source>
         <translation>Detta är ine en godkänd LDraw installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1210"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
         <source>Valid LDraw installation</source>
         <translation>Detta är en godkänd LDraw installation</translation>
     </message>
@@ -6134,7 +6211,7 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
 <context>
     <name>Transfer</name>
     <message>
-        <location filename="../src/utility/transfer.cpp" line="59"/>
+        <location filename="../src/utility/transfer.cpp" line="60"/>
         <source>Aborted</source>
         <translation>Avbruten</translation>
     </message>
@@ -6172,7 +6249,7 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     <name>View</name>
     <message>
         <location filename="../src/mobile/View.qml" line="16"/>
-        <location filename="../src/desktop/view.cpp" line="561"/>
+        <location filename="../src/desktop/view.cpp" line="560"/>
         <source>Untitled</source>
         <translation>Namnlös</translation>
     </message>
@@ -6192,17 +6269,17 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         <translation>CP</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="318"/>
+        <location filename="../src/desktop/view.cpp" line="317"/>
         <source>Select the document that should serve as a source to fill in the corresponding fields in the current document</source>
         <translation>Välj det dokument som ska användas som källa för att fylla i motsvarande fält i nuvarande dokument</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="319"/>
+        <location filename="../src/desktop/view.cpp" line="318"/>
         <source>Choose how fields are getting copied or merged.</source>
         <translation>Välj hur fält ska kopieras eller slås ihop.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="333"/>
+        <location filename="../src/desktop/view.cpp" line="332"/>
         <source>Which items should be subtracted from the current document:</source>
         <translation>Vilken artikel ska tas bort från nuvarande dokument:</translation>
     </message>
@@ -6212,18 +6289,18 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     </message>
     <message>
         <location filename="../src/mobile/View.qml" line="564"/>
-        <location filename="../src/desktop/view.cpp" line="359"/>
+        <location filename="../src/desktop/view.cpp" line="358"/>
         <source>Increase or decrease the prices of the selected items by</source>
         <translation>Öka eller minska priset på de markerade artiklarna med</translation>
     </message>
     <message>
         <location filename="../src/mobile/View.qml" line="581"/>
-        <location filename="../src/desktop/view.cpp" line="378"/>
+        <location filename="../src/desktop/view.cpp" line="377"/>
         <source>Increase or decrease the costs of the selected items by</source>
         <translation>Öka eller minska kostnaden på de markerade artiklarna med</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="553"/>
+        <location filename="../src/desktop/view.cpp" line="552"/>
         <source>Cancel the currently running blocking operation</source>
         <translation>Avbryt den aktuella &quot;blockin operation&quot;</translation>
     </message>
@@ -6239,12 +6316,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         </translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="588"/>
+        <location filename="../src/desktop/view.cpp" line="587"/>
         <source>Should the selected items be parted out into the current document, replacing the selected items?</source>
         <translation>Ska de markerade artiklarna brytas isär i det nuvarande dokumentet, och byta ut de markerade artiklarna?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/desktop/view.cpp" line="649"/>
+        <location filename="../src/desktop/view.cpp" line="648"/>
         <source>Parted out %n item(s)</source>
         <translation>
             <numerusform>Bröt ut %n artikel</numerusform>
@@ -6252,12 +6329,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         </translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="865"/>
+        <location filename="../src/desktop/view.cpp" line="864"/>
         <source>Printing failed.</source>
         <translation>Fel vid utskrift.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/view.cpp" line="976"/>
+        <location filename="../src/desktop/view.cpp" line="975"/>
         <source>Page %1/%2</source>
         <translation>Sida %1/%2</translation>
     </message>
@@ -6302,58 +6379,58 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
 <context>
     <name>ViewPane</name>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="498"/>
+        <location filename="../src/desktop/viewpane.cpp" line="479"/>
         <source>Default currency (%1)</source>
         <translation>Standard valuta (%1)</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="567"/>
+        <location filename="../src/desktop/viewpane.cpp" line="548"/>
         <source>Items</source>
         <translation>Artiklar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="686"/>
+        <location filename="../src/desktop/viewpane.cpp" line="667"/>
         <source>Go to the next difference</source>
         <translatorcomment>är inte säker på ordet difference hur det ska översättas</translatorcomment>
         <translation>Gå till nästa förändring</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="688"/>
+        <location filename="../src/desktop/viewpane.cpp" line="669"/>
         <source>Go to the next error</source>
         <translation>Gå till nästa fel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="690"/>
+        <location filename="../src/desktop/viewpane.cpp" line="671"/>
         <source>Show order information</source>
         <translation>Visa order information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="691"/>
+        <location filename="../src/desktop/viewpane.cpp" line="672"/>
         <source>Currency:</source>
         <translation>Valuta:</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="693"/>
+        <location filename="../src/desktop/viewpane.cpp" line="674"/>
         <source>Split</source>
         <translation>Sära</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="694"/>
+        <location filename="../src/desktop/viewpane.cpp" line="675"/>
         <source>Split horizontally</source>
         <translation>Dela horisontellt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="695"/>
+        <location filename="../src/desktop/viewpane.cpp" line="676"/>
         <source>Split vertically</source>
         <translation>Dela vertikalt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="696"/>
+        <location filename="../src/desktop/viewpane.cpp" line="677"/>
         <source>Remove split</source>
         <translation>Ta bort delningen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/viewpane.cpp" line="697"/>
+        <location filename="../src/desktop/viewpane.cpp" line="678"/>
         <source>Open in new window</source>
         <translation>Öppna i nytt fönster</translation>
     </message>
