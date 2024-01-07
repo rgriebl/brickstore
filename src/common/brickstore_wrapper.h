@@ -162,7 +162,7 @@ class QmlDocumentColumnModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(DocumentColumnModel)
-    QML_ANONYMOUS
+    QML_UNCREATABLE("")
     Q_PROPERTY(int count READ rowCount CONSTANT FINAL)
 
 public:

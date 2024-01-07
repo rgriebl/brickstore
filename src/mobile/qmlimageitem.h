@@ -54,7 +54,7 @@ class QmlImage // make QImage known to qmllint
     Q_GADGET
     QML_FOREIGN(QImage)
     QML_NAMED_ELEMENT(QImage)
-    QML_ANONYMOUS
+    QML_UNCREATABLE("")
 };
 
 Q_DECLARE_METATYPE(QImage)
