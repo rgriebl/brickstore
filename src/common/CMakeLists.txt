@@ -19,8 +19,6 @@ qt_add_library(common_module STATIC
     documentmodel.cpp
     documentmodel.h
     documentmodel_p.h
-    itemscanner.h
-    itemscanner.cpp
     onlinestate.cpp
     onlinestate.h
     recentfiles.cpp

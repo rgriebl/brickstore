@@ -55,6 +55,7 @@ add_subdirectory(bricklink)
 if (BS_DESKTOP OR BS_MOBILE)
     add_subdirectory(common)
     add_subdirectory(ldraw)
+    add_subdirectory(scanner)
 endif()
 
 if (BS_BACKEND)

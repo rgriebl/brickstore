@@ -21,6 +21,11 @@
 Q_LOGGING_CATEGORY(LogScanner, "scanner")
 
 
+QIcon ItemScanner::Backend::icon() const
+{
+    return QIcon(u":/Scanner/service_"_qs + QString::fromLatin1(id));
+}
+
 class ItemScannerPrivate
 {
 public:

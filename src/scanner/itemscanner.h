@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QIcon>
 
 #include "bricklink/global.h"
 
@@ -24,6 +25,7 @@ public:
         QString    name;
         QByteArray itemTypeFilter; // "BCGIMOPS" + '*' == Any
         int        preferredImageSize;
+        QIcon icon() const;
     };
 
     struct Result {

@@ -10,7 +10,7 @@
 #include <QTimer>
 
 #include "bricklink/global.h"
-#include "common/itemscanner.h"
+#include "scanner/itemscanner.h"
 
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QButtonGroup)
@@ -24,7 +24,7 @@ QT_FORWARD_DECLARE_CLASS(QImageCapture)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QMediaDevices)
 
-class VideoOverlay;
+class CameraPreviewWidget;
 
 
 class ItemScannerDialog : public QDialog
@@ -44,7 +44,6 @@ signals:
 protected:
     void changeEvent(QEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     void updateCameraDevices();
@@ -64,9 +63,10 @@ private:
     QLabel *m_labelCamera;
     QLabel *m_labelBackend;
     QLabel *m_labelItemType;
-    QWidget *m_qmlViewFinder;
+    CameraPreviewWidget *m_cameraPreviewWidget;
     QMediaCaptureSession *m_captureSession;
     QImageCapture *m_imageCapture;
+    QTimer m_cameraStopTimer;
 
     QLabel *m_status;
     QProgressBar *m_progress;
@@ -83,11 +83,12 @@ private:
     QTimer m_errorMessageTimeout;
 
     enum class State : int {
-        Idle,     // -> Scanning
-        Scaning,  // -> Idle | NoMatch | Error
-        NoMatch,  // 10sec -> Idle
-        Error,    // 10sec -> Idle
-        NoCamera
+        Idle,         // -> Scanning / Window inactive -> SoonInactive
+        Scaning,      // -> Idle | NoMatch | Error
+        NoMatch,      // 10sec -> Idle
+        Error,        // 10sec -> Idle
+        SoonInactive, // 10sec -> Inactive / Window active -> Idle
+        Inactive,     // Click -> Idle [dark overlay, play button]
     };
     State m_state = State::Idle;
     void setState(State newState);

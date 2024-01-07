@@ -42,7 +42,6 @@
 #include "common/document.h"
 #include "common/documentio.h"
 #include "common/documentlist.h"
-#include "common/itemscanner.h"
 #include "common/onlinestate.h"
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
@@ -54,6 +53,7 @@
 #include "common/systeminfo.h"
 #include "utility/transfer.h"
 #include "common/undo.h"
+#include "scanner/itemscanner.h"
 #include "version.h"
 
 #if defined(SENTRY_ENABLED)
