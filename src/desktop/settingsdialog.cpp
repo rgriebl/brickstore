@@ -748,8 +748,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_docdir->insertSeparator(1);
     w_docdir->insertItem(2, QIcon(), tr("Other..."));
 
-    int is = fontMetrics().height();
-    w_currency_update->setIconSize(QSize(is, is));
+    w_currency_update->setProperty("toolBarLike", true);
 
     connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectDocDir);

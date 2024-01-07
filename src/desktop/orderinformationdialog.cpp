@@ -20,13 +20,16 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
 
     static auto setup = [](QLineEdit *label, QToolButton *button, const QString &value,
             bool visible = true, QWidget *alsoHide = nullptr) {
+        button->setProperty("toolBarLike", true);
+
         if (visible) {
             label->setText(value);
             label->setMinimumWidth(label->fontMetrics().horizontalAdvance(value) + 64);
-            if (button)
-                QObject::connect(button, &QToolButton::clicked, button, [label]() {
+            if (button) {
+                connect(button, &QToolButton::clicked, button, [label]() {
                     QGuiApplication::clipboard()->setText(label->text(), QClipboard::Clipboard);
                 });
+            }
         } else {
             label->hide();
             if (button)
@@ -52,6 +55,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     setup(w_tracking, w_trackingCopy, order->trackingNumber());
 
     w_addressCopy->setProperty("bsAddress", order->address());
+    w_addressCopy->setProperty("toolBarLike", true);
     QObject::connect(w_addressCopy, &QToolButton::clicked, this, [this]() {
         QGuiApplication::clipboard()->setText(w_addressCopy->property("bsAddress").toString(),
                                               QClipboard::Clipboard);

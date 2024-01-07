@@ -51,9 +51,9 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_valueDelay->setInterval(800ms);
     m_valueDelay->setSingleShot(true);
 
-    m_fields = new MenuComboBox();
-    m_comparisons = new MenuComboBox();
-    m_value = new QComboBox();
+    m_fields = new MenuComboBox(this);
+    m_comparisons = new MenuComboBox(this);
+    m_value = new QComboBox(this);
     m_value->setEditable(true);
     m_value->setMinimumContentsLength(16);
     m_value->setInsertPolicy(QComboBox::NoInsert);
@@ -63,16 +63,16 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_value->setItemDelegate(new QStyledItemDelegate(m_value));
     m_value->setProperty("transparentCombo", true);
     m_value->setObjectName(u"filter-value"_qs);
-    auto bdel = new QToolButton();
-    bdel->setAutoRaise(true);
+    auto bdel = new QToolButton(this);
+    bdel->setProperty("toolBarLike", true);
     bdel->setText(QString(QChar(0x00d7)));
     bdel->setObjectName(u"filter-delete"_qs);
-    auto band = new QToolButton();
-    band->setAutoRaise(true);
+    auto band = new QToolButton(this);
+    band->setProperty("toolBarLike", true);
     band->setCheckable(true);
     band->setObjectName(u"filter-and"_qs);
-    auto bor = new QToolButton();
-    bor->setAutoRaise(true);
+    auto bor = new QToolButton(this);
+    bor->setProperty("toolBarLike", true);
     bor->setCheckable(true);
     bor->setObjectName(u"filter-or"_qs);
 
@@ -89,22 +89,22 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
 
     layout->addWidget(bdel);
     int frameStyle = int(QFrame::VLine);
-    auto f = new QFrame();
+    auto f = new QFrame(this);
     f->setFrameStyle(frameStyle);
     f->setDisabled(true);
     layout->addWidget(f);
     layout->addWidget(m_fields);
-    f = new QFrame();
+    f = new QFrame(this);
     f->setFrameStyle(frameStyle);
     f->setDisabled(true);
     layout->addWidget(f);
     layout->addWidget(m_comparisons);
-    f = new QFrame();
+    f = new QFrame(this);
     f->setFrameStyle(frameStyle);
     f->setDisabled(true);
     layout->addWidget(f);
     layout->addWidget(m_value, 10);
-    f = new QFrame();
+    f = new QFrame(this);
     f->setFrameStyle(frameStyle);
     f->setDisabled(true);
     layout->addWidget(f);
@@ -336,31 +336,31 @@ FilterWidget::FilterWidget(QWidget *parent)
     layout->setContentsMargins(4, 0, 4, 4);
     layout->setSpacing(4);
 
-    m_refilter = new QToolButton();
+    m_refilter = new QToolButton(this);
     m_refilter->setIcon(QIcon::fromTheme(u"view-refresh"_qs));
-    m_refilter->setAutoRaise(true);
+    m_refilter->setProperty("toolBarLike", true);
     QSizePolicy sp = m_refilter->sizePolicy();
     sp.setRetainSizeWhenHidden(true);
     m_refilter->setSizePolicy(sp);
     m_refilter->setVisible(false);
     layout->addWidget(m_refilter);
 
-    m_termsContainer = new QWidget();
+    m_termsContainer = new QWidget(this);
     m_termsFlow = new FlowLayout(m_termsContainer, FlowLayout::HorizontalFirst, 0, 4, 1);
 //    m_termsFlow = new QVBoxLayout(m_termsContainer);
 //    m_termsFlow->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_termsContainer, 1);
 
-    m_edit = new HistoryLineEdit();
+    m_edit = new HistoryLineEdit(this);
     m_edit->setToFavoritesMode(true);
     m_edit->hide();
     new EventFilter(m_edit, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
     layout->addWidget(m_edit, 1);
 
-    m_menu = new QToolButton();
+    m_menu = new QToolButton(this);
     m_menu->setIcon(QIcon::fromTheme(u"overflow-menu"_qs));
     m_menu->setProperty("noMenuArrow", true);
-    m_menu->setAutoRaise(true);
+    m_menu->setProperty("toolBarLike", true);
     layout->addWidget(m_menu);
 
     auto *filterMenu = new QMenu(this);
@@ -419,12 +419,6 @@ FilterWidget::FilterWidget(QWidget *parent)
 
     languageChange();
     setFocusProxy(m_termsContainer);
-}
-
-void FilterWidget::setIconSize(const QSize &s)
-{
-    m_refilter->setIconSize(s);
-    m_menu->setIconSize(s);
 }
 
 void FilterWidget::setDocument(Document *doc)

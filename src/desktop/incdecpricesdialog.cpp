@@ -22,14 +22,14 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
 {
     auto layout = new QVBoxLayout(this);
 
-    auto label = new QLabel();
+    auto label = new QLabel(this);
     label->setText(text);
     layout->addWidget(label);
 
     auto hlayout = new QHBoxLayout();
     hlayout->setSpacing(0);
 
-    m_value = new QDoubleSpinBox();
+    m_value = new QDoubleSpinBox(this);
     m_value->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
     m_value->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
     m_value->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
@@ -38,8 +38,8 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
 
     hlayout->addSpacing(11);
 
-    auto percent = new QToolButton();
-    percent->setAutoRaise(true);
+    auto percent = new QToolButton(this);
+    percent->setProperty("toolBarLike", true);
     percent->setText(u"%"_qs);
     percent->setCheckable(true);
     percent->setChecked(true);
@@ -47,8 +47,8 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     percent->setToolTip(ActionManager::toolTipLabel(tr("Percent"), percent->shortcut()));
     hlayout->addWidget(percent);
 
-    auto fixed = new QToolButton();
-    fixed->setAutoRaise(true);
+    auto fixed = new QToolButton(this);
+    fixed->setProperty("toolBarLike", true);
     fixed->setText(currencyCode);
     fixed->setCheckable(true);
     fixed->setShortcut(tr("Ctrl+$"));
@@ -62,11 +62,11 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     m_percentOrFixed->addButton(fixed, 1);
 
     if (showTiers) {
-        m_applyToTiers = new QCheckBox(tr("Also apply this change to &tier prices"));
+        m_applyToTiers = new QCheckBox(tr("Also apply this change to &tier prices"), this);
         layout->addWidget(m_applyToTiers);
     }
 
-    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     layout->addWidget(buttons);
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);

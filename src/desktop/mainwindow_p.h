@@ -228,7 +228,7 @@ public:
         layout->addWidget(m_text, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_button = new QToolButton();
         m_button->setIcon(QIcon::fromTheme(u"overflow-menu"_qs));
-        m_button->setAutoRaise(true);
+        m_button->setProperty("toolBarLike", true);
         m_button->setPopupMode(QToolButton::InstantPopup);
         m_button->setProperty("noMenuArrow", true);
         layout->addWidget(m_button, 0, Qt::AlignRight | Qt::AlignVCenter);

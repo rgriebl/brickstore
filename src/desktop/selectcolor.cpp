@@ -20,6 +20,10 @@ class ColorTreeView : public QTreeView
 {
     Q_OBJECT
 public:
+    ColorTreeView(QWidget *parent)
+        : QTreeView(parent)
+    { }
+
     QSize sizeHint() const override
     {
         QSize s = QTreeView::sizeHint();
@@ -39,7 +43,7 @@ enum {
 SelectColor::SelectColor(QWidget *parent)
     : QWidget(parent)
 {
-    w_filter = new QComboBox();
+    w_filter = new QComboBox(this);
     w_filter->addItem(QString { }, int(KnownColors));
     w_filter->insertSeparator(w_filter->count());
     w_filter->addItem(QString { }, int(AllColors));
@@ -53,14 +57,15 @@ SelectColor::SelectColor(QWidget *parent)
     }
     w_filter->setMaxVisibleItems(w_filter->count());
 
-    w_lock = new QToolButton();
+    w_lock = new QToolButton(this);
     w_lock->setIcon(QIcon::fromTheme(u"folder-locked"_qs));
-    w_lock->setAutoRaise(true);
+    w_lock->setProperty("toolBarLike", true);
     w_lock->setCheckable(true);
     w_lock->setChecked(false);
+    w_lock->setVisible(m_hasLock);
     connect(w_lock, &QToolButton::toggled, this, &SelectColor::setColorLock);
 
-    w_colors = new ColorTreeView();
+    w_colors = new ColorTreeView(this);
     w_colors->setAlternatingRowColors(true);
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);

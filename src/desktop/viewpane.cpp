@@ -211,25 +211,6 @@ ViewPane::ViewPane(const std::function<ViewPane *(Document *, QWidget *)> &viewP
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &ViewPane::updateCurrencyRates);
 
-    auto setIconSizeLambda = [this](Config::UISize iconSize) {
-        static const QMap<Config::UISize, QStyle::PixelMetric> map = {
-            { Config::UISize::System, QStyle::PM_SmallIconSize },
-            { Config::UISize::Small, QStyle::PM_SmallIconSize },
-            { Config::UISize::Large, QStyle::PM_ToolBarIconSize },
-        };
-        auto pm = map.value(iconSize, QStyle::PM_SmallIconSize);
-        int s = style()->pixelMetric(pm, nullptr, this);
-        for (QToolButton *tb : { m_filterOnOff, m_order, m_errors, m_differences, m_split }) {
-            if (tb)
-                tb->setIconSize({s, s});
-        }
-        m_viewList->setIconSize({ s, s });
-        m_filter->setIconSize({ s, s});
-
-    };
-    connect(Config::inst(), &Config::iconSizeChanged, this, setIconSizeLambda);
-    setIconSizeLambda(Config::inst()->iconSize());
-
     fontChange();
     paletteChange();
     languageChange();
@@ -752,9 +733,9 @@ void ViewPane::createToolBar()
 
     addSeparator();
 
-    m_closeView = new QToolButton();
+    m_closeView = new QToolButton(this);
     m_closeView->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_close")->iconName()));
-    m_closeView->setAutoRaise(true);
+    m_closeView->setProperty("toolBarLike", true);
     m_closeView->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_closeView);
 
@@ -764,9 +745,9 @@ void ViewPane::createToolBar()
     });
 
     m_orderSeparator = addSeparator();
-    m_order = new QToolButton();
+    m_order = new QToolButton(this);
     m_order->setIcon(QIcon::fromTheme(ActionManager::inst()->action("document_import_bl_order")->iconName()));
-    m_order->setAutoRaise(true);
+    m_order->setProperty("toolBarLike", true);
     m_order->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_order);
 
@@ -781,22 +762,22 @@ void ViewPane::createToolBar()
     });
 
     m_differencesSeparator = addSeparator();
-    m_differences = new QToolButton();
+    m_differences = new QToolButton(this);
     m_differences->setDefaultAction(ActionManager::inst()->qAction("view_goto_next_diff"));
     connect(m_differences->defaultAction(), &QAction::changed,
             this, &ViewPane::updateStatistics);
     m_differences->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_differences->setAutoRaise(true);
+    m_differences->setProperty("toolBarLike", true);
     m_differences->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_differences);
 
     m_errorsSeparator = addSeparator();
-    m_errors = new QToolButton();
+    m_errors = new QToolButton(this);
     m_errors->setDefaultAction(ActionManager::inst()->qAction("view_goto_next_input_error"));
     connect(m_errors->defaultAction(), &QAction::changed,
             this, &ViewPane::updateStatistics);
     m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_errors->setAutoRaise(true);
+    m_errors->setProperty("toolBarLike", true);
     m_errors->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_errors);
 
@@ -815,10 +796,10 @@ void ViewPane::createToolBar()
     currencyLayout->setSizeConstraint(QLayout::SetMaximumSize);
     m_value = new CollapsibleLabel();
     currencyLayout->addWidget(m_value);
-    m_currency = new QToolButton();
+    m_currency = new QToolButton(this);
     m_currency->setPopupMode(QToolButton::InstantPopup);
     m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    m_currency->setAutoRaise(true);
+    m_currency->setProperty("toolBarLike", true);
     m_currency->setFocusPolicy(Qt::NoFocus);
     currencyLayout->addWidget(m_currency);
     pageLayout->addLayout(currencyLayout, 10'000);
@@ -828,17 +809,17 @@ void ViewPane::createToolBar()
 
     addSeparator();
 
-    m_filterOnOff = new QToolButton();
+    m_filterOnOff = new QToolButton(this);
     m_filterOnOff->setDefaultAction(m_filter->action());
-    m_filterOnOff->setAutoRaise(true);
+    m_filterOnOff->setProperty("toolBarLike", true);
     m_filterOnOff->setFocusPolicy(Qt::NoFocus);
     pageLayout->addWidget(m_filterOnOff);
 
     addSeparator();
 
-    m_split = new QToolButton();
+    m_split = new QToolButton(this);
     m_split->setIcon(QIcon::fromTheme(u"view-split-left-right"_qs));
-    m_split->setAutoRaise(true);
+    m_split->setProperty("toolBarLike", true);
     m_split->setPopupMode(QToolButton::InstantPopup);
     m_split->setProperty("noMenuArrow", true);
     m_split->setFocusPolicy(Qt::NoFocus);

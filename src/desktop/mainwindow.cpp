@@ -211,19 +211,6 @@ MainWindow::MainWindow(QWidget *parent)
             repositionHomeWidget();
     });
 
-    auto setIconSizeLambda = [this](Config::UISize iconSize) {
-        static const QMap<Config::UISize, QStyle::PixelMetric> map = {
-            { Config::UISize::System, QStyle::PM_ToolBarIconSize },
-            { Config::UISize::Small, QStyle::PM_SmallIconSize },
-            { Config::UISize::Large, QStyle::PM_LargeIconSize },
-        };
-        auto pm = map.value(iconSize, QStyle::PM_ToolBarIconSize);
-        int s = style()->pixelMetric(pm, nullptr, this);
-        m_toolbar->setIconSize(QSize(s, s));
-    };
-    connect(Config::inst(), &Config::iconSizeChanged, this, setIconSizeLambda);
-    setIconSizeLambda(Config::inst()->iconSize());
-
     createActions();
     setupMenuBar();
     setupToolBar();

@@ -459,7 +459,7 @@ View::View(Document *document, QWidget *parent)
     blockLayout->addWidget(m_blockProgress, 1, 0);
     m_blockCancel = new QToolButton();
     m_blockCancel->setIcon(QIcon::fromTheme(u"process-stop"_qs));
-    m_blockCancel->setAutoRaise(true);
+    m_blockCancel->setProperty("toolBarLike", true);
     blockLayout->addWidget(m_blockCancel, 1, 1);
 
     connect(m_latest_timer, &QTimer::timeout,

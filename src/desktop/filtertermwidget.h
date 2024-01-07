@@ -26,7 +26,6 @@ class FilterWidget : public QWidget
 public:
     FilterWidget(QWidget *parent = nullptr);
 
-    void setIconSize(const QSize &s);
     void setDocument(Document *doc);
 
     void setFavoritesModel(QStringListModel *model);

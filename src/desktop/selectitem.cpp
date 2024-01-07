@@ -235,7 +235,7 @@ void SelectItem::init()
     d->w_pcc = new QToolButton(this);
     d->w_pcc->setIcon(QIcon::fromTheme(u"edit-find"_qs));
     d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
-    d->w_pcc->setAutoRaise(true);
+    d->w_pcc->setProperty("toolBarLike", true);
     connect(d->w_pcc, &QToolButton::clicked, this, [this]() {
         QString code = QInputDialog::getText(this, tr("Find element number"),
                                              tr("Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)"));
@@ -252,7 +252,7 @@ void SelectItem::init()
     d->w_itemScan = new QToolButton(this);
     d->w_itemScan->setIcon(QIcon::fromTheme(u"camera-photo"_qs));
     d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
-    d->w_itemScan->setAutoRaise(true);
+    d->w_itemScan->setProperty("toolBarLike", true);
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
         if (!ItemScannerDialog::checkSystemPermissions())
             return;
@@ -303,7 +303,7 @@ void SelectItem::init()
     d->w_dateFilter = new QToolButton(this);
     d->w_dateFilter->setVisible(false);
     d->w_dateFilter->setIcon(QIcon::fromTheme(u"appointment-new"_qs));
-    d->w_dateFilter->setAutoRaise(true);
+    d->w_dateFilter->setProperty("toolBarLike", true);
     connect(d->w_dateFilter, &QToolButton::clicked, this, [this]() {
         int minYear = QInputDialog::getInt(this, u"Min Year"_qs, u"Min Year"_qs, 1950);
         int maxYear = QInputDialog::getInt(this, u"Max Year"_qs, u"Max Year"_qs, 2050);
@@ -321,7 +321,7 @@ void SelectItem::init()
     d->w_zoomLevel = new QToolButton(this);
     d->w_zoomLevel->setToolButtonStyle(Qt::ToolButtonTextOnly);
     d->w_zoomLevel->setPopupMode(QToolButton::MenuButtonPopup);
-    d->w_zoomLevel->setAutoRaise(true);
+    d->w_zoomLevel->setProperty("toolBarLike", true);
     connect(d->w_zoomLevel, &QToolButton::clicked,
             this, [this]() { setZoomFactor(2); });
     auto *zoomMenu = new QMenu(d->w_zoomLevel);
@@ -337,7 +337,7 @@ void SelectItem::init()
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+1"));
     tb->setIcon(QIcon::fromTheme(u"view-list-details"_qs));
-    tb->setAutoRaise(true);
+    tb->setProperty("toolBarLike", true);
     tb->setCheckable(true);
     tb->setChecked(true);
     d->w_viewmode->addButton(tb, 1);
@@ -345,7 +345,7 @@ void SelectItem::init()
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon::fromTheme(u"view-list-icons"_qs));
-    tb->setAutoRaise(true);
+    tb->setProperty("toolBarLike", true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
 

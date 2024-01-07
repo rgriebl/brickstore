@@ -57,7 +57,7 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
 
     d->m_contextMenu = new QMenu(this);
 
-    d->m_view = new QTreeView();
+    d->m_view = new QTreeView(this);
     setFrameStyle(d->m_view->frameStyle());
     d->m_view->setFrameStyle(QFrame::NoFrame);
     d->m_view->setAlternatingRowColors(true);
@@ -75,13 +75,12 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
     d->m_view->setItemDelegate(d->m_viewDelegate);
 
     auto createButton = [this](InventoryWidget::Mode mode, const char *text, const char *iconName) {
-        auto b = new QToolButton();
+        auto b = new QToolButton(this);
         b->setIcon(QIcon::fromTheme(QString::fromLatin1(iconName)));
-        b->setIconSize(b->iconSize() * .8);
         b->setCheckable(true);
         b->setChecked(false);
         b->setAutoExclusive(true);
-        b->setAutoRaise(true);
+        b->setProperty("toolBarLike", true);
         b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         connect(b, &QToolButton::toggled, b, [b](bool checked) {
             b->setToolButtonStyle(checked ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonIconOnly);

@@ -175,7 +175,7 @@ void SelectMergeMode::createFields()
         tb->setIcon(QIcon::fromTheme(QString::fromLatin1(mode.icon)));
         tb->setText(tr(mode.name));
         tb->setToolTip(tr(mode.toolTip));
-        tb->setAutoRaise(true);
+        tb->setProperty("toolBarLike", true);
         grid->addWidget(tb, row, col + 1);
         m_allGroup->addButton(tb, int(mode.mergeMode));
         ++col;
@@ -213,7 +213,7 @@ void SelectMergeMode::createFields()
                 tb->setText(tr(mode.name));
                 tb->setToolTip(tr(mode.toolTip));
                 tb->setCheckable(true);
-                tb->setAutoRaise(true);
+                tb->setProperty("toolBarLike", true);
                 grid->addWidget(tb, row, col + 1);
                 fieldGroup->addButton(tb, int(mode.mergeMode));
             }

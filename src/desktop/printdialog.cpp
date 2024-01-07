@@ -37,6 +37,17 @@ PrintDialog::PrintDialog(bool asPdf, View *window)
 
     setupUi(this);
 
+    w_page_first->setProperty("toolBarLike", true);
+    w_page_prev->setProperty("toolBarLike", true);
+    w_page_next->setProperty("toolBarLike", true);
+    w_page_last->setProperty("toolBarLike", true);
+    w_page_double->setProperty("toolBarLike", true);
+    w_page_single->setProperty("toolBarLike", true);
+    w_fit_best->setProperty("toolBarLike", true);
+    w_fit_width->setProperty("toolBarLike", true);
+    w_zoom_in->setProperty("toolBarLike", true);
+    w_zoom_out->setProperty("toolBarLike", true);
+
     if (!m_hasSelection)
         w_pageMode->removeItem(1);
 

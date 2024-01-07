@@ -40,7 +40,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAutoFillBackground(true);
 
-    w_text = new QLabel();
+    w_text = new QLabel(this);
     w_text->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     w_text->setWordWrap(true);
     w_text->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -64,7 +64,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         return EventFilter::ContinueEventProcessing;
     });
 
-    w_image = new QLabel();
+    w_image = new QLabel(this);
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     w_image->setMinimumSize(2 * BrickLink::core()->standardPictureSize());
@@ -73,7 +73,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     w_ldraw = new LDraw::RenderWidget(Application::inst()->qmlEngine(), this);
 
-    w_stack = new QStackedWidget();
+    w_stack = new QStackedWidget(this);
 
     auto layout = new QVBoxLayout(this);
     layout->addWidget(w_text);
@@ -82,17 +82,17 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_stack->addWidget(w_ldraw);
     layout->setContentsMargins(2, 6, 2, 2);
 
-    w_2d = new QToolButton();
+    w_2d = new QToolButton(this);
     w_2d->setText(u"2D"_qs);
-    w_2d->setAutoRaise(true);
+    w_2d->setProperty("toolBarLike", true);
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
         setPrefer3D(false);
     });
 
-    w_3d = new QToolButton();
+    w_3d = new QToolButton(this);
     w_3d->setText(u"3D"_qs);
-    w_3d->setAutoRaise(true);
+    w_3d->setProperty("toolBarLike", true);
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
         setPrefer3D(true);
@@ -106,8 +106,8 @@ PictureWidget::PictureWidget(QWidget *parent)
     m_rescaleIcon = QIcon::fromTheme(u"zoom-fit-best"_qs);
     m_reloadIcon = QIcon::fromTheme(u"view-refresh"_qs);
 
-    w_reloadRescale = new QToolButton();
-    w_reloadRescale->setAutoRaise(true);
+    w_reloadRescale = new QToolButton(this);
+    w_reloadRescale->setProperty("toolBarLike", true);
     w_reloadRescale->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     w_reloadRescale->setIcon(m_reloadIcon);

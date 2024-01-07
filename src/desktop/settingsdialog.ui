@@ -122,14 +122,7 @@
             <string notr="true">Reload</string>
            </property>
            <property name="icon">
-            <iconset theme="view-refresh">
-             <normaloff>.</normaloff>.</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>16</width>
-             <height>16</height>
-            </size>
+            <iconset theme="view-refresh"/>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
