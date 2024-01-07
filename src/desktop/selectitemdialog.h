@@ -5,10 +5,11 @@
 
 #include <QDialog>
 #include "bricklink/global.h"
-#include "ui_selectitemdialog.h"
 
+QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
+class SelectItem;
 
-class SelectItemDialog : public QDialog, private Ui::SelectItemDialog
+class SelectItemDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -40,4 +41,7 @@ private:
     QRect m_popupPos;
     QString m_geometryConfigKey;
     QAction *m_resetGeometryAction = nullptr;
+
+    QDialogButtonBox *w_buttons;
+    SelectItem *w_si;
 };

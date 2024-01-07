@@ -7,17 +7,30 @@
 #include <QPointer>
 #include <QDateTime>
 
-#include "ui_additemdialog.h"
-
+#include "bricklink/global.h"
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
 QT_FORWARD_DECLARE_CLASS(QTimer)
+QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QSplitter)
+QT_FORWARD_DECLARE_CLASS(QSpinBox)
+QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QSpinBox)
+QT_FORWARD_DECLARE_CLASS(QDoubleSpinBox)
+QT_FORWARD_DECLARE_CLASS(QButtonGroup)
 
 class View;
+class PriceGuideWidget;
+class InventoryWidget;
+class SelectItem;
+class SelectColor;
+class PictureWidget;
+class Ui_AddItemWidget;
 
-
-class AddItemDialog : public QWidget, private Ui::AddItemDialog
+class AddItemDialog : public QWidget
 {
     Q_OBJECT
 public:
@@ -62,14 +75,28 @@ private:
     QPointer<View> m_view;
 
     QAction *m_invGoToAction;
-    QPushButton *w_add;
     QSpinBox *w_tier_qty[3];
     QDoubleSpinBox *w_tier_price[3];
+    QSplitter *w_splitter_vertical;
+    SelectItem *w_select_item;
+    SelectColor *w_select_color;
+    QSplitter *w_splitter_bottom;
+    PictureWidget *w_picture;
+    InventoryWidget *w_inventory;
+    PriceGuideWidget *w_price_guide;
+    QWidget *w_additem;
+    Ui_AddItemWidget *w_ui_additem;
+    QToolButton *w_go_back;
+    QToolButton *w_go_next;
+    QToolButton *w_menu;
+    QLabel *w_last_added;
+    QCheckBox *w_merge;
+    QDialogButtonBox *w_buttons;
+    QPushButton *w_add;
 
     QButtonGroup *m_tier_type;
     QButtonGroup *m_condition;
 
-    QString m_caption_fmt;
     QString m_price_label_fmt;
 
     QString m_currency_code;

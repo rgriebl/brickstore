@@ -5,10 +5,12 @@
 
 #include <QDialog>
 #include "bricklink/global.h"
-#include "ui_selectcolordialog.h"
+
+QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
+class SelectColor;
 
 
-class SelectColorDialog : public QDialog, private Ui::SelectColorDialog
+class SelectColorDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -40,4 +42,7 @@ private:
     QRect m_popupPos;
     QString m_geometryConfigKey;
     QAction *m_resetGeometryAction = nullptr;
+
+    SelectColor *w_sc;
+    QDialogButtonBox *w_buttons;
 };

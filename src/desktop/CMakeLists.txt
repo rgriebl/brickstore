@@ -7,7 +7,7 @@ qt_add_library(desktop_module STATIC
     aboutdialog.ui
     additemdialog.cpp
     additemdialog.h
-    additemdialog.ui
+    additemwidget.ui
     announcementsdialog.h
     announcementsdialog.cpp
     bettercommandbutton.cpp
@@ -88,14 +88,12 @@ qt_add_library(desktop_module STATIC
     selectcolor.h
     selectcolordialog.cpp
     selectcolordialog.h
-    selectcolordialog.ui
     selectdocumentdialog.cpp
     selectdocumentdialog.h
     selectitem.cpp
     selectitem.h
     selectitemdialog.cpp
     selectitemdialog.h
-    selectitemdialog.ui
     selectmergemode.cpp
     selectmergemode.h
     settingsdialog.cpp

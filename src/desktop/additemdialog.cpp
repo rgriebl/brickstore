@@ -23,6 +23,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QStringListModel>
+#include <QDialogButtonBox>
+#include <QSplitter>
 
 #include "bricklink/core.h"
 #include "bricklink/picture.h"
@@ -44,6 +46,8 @@
 #include "selectitem.h"
 #include "view.h"
 
+#include "ui_additemwidget.h"
+
 
 using namespace std::chrono_literals;
 
@@ -63,20 +67,88 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     : QWidget(parent, Qt::Window)
     , m_favoriteFilters(new QStringListModel(this))
 {
-    setupUi(this);
+    auto verticalLayout = new QVBoxLayout(this);
+    verticalLayout->setContentsMargins(6, 6, 6, 6);
+
+    w_splitter_vertical = new QSplitter(this);
+    w_splitter_vertical->setOrientation(Qt::Vertical);
+    w_splitter_vertical->setChildrenCollapsible(false);
+    verticalLayout->addWidget(w_splitter_vertical);
+
+    auto selectWidget = new QWidget(w_splitter_vertical);
+    w_select_item = new SelectItem(selectWidget);
+    w_select_color = new SelectColor({ SelectColor::Feature::ColorLock }, selectWidget);
+    auto selectLayout = new QHBoxLayout(selectWidget);
+    selectLayout->setContentsMargins({ });
+    selectLayout->addWidget(w_select_item, 10);
+    selectLayout->addWidget(w_select_color, 1);
+    w_splitter_vertical->addWidget(selectWidget);
+
+    w_splitter_bottom = new QSplitter(w_splitter_vertical);
+    w_splitter_bottom->setOrientation(Qt::Horizontal);
+    w_splitter_bottom->setChildrenCollapsible(false);
+    w_picture = new PictureWidget(w_splitter_bottom);
+    w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+    w_splitter_bottom->addWidget(w_picture);
+    w_inventory = new InventoryWidget(w_splitter_bottom);
+    w_splitter_bottom->addWidget(w_inventory);
+    w_price_guide = new PriceGuideWidget(w_splitter_bottom);
+    w_price_guide->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+    w_splitter_bottom->addWidget(w_price_guide);
+    w_additem = new QWidget(w_splitter_bottom);
+    w_ui_additem = new Ui_AddItemWidget();
+    w_ui_additem->setupUi(w_additem);
+    w_splitter_bottom->addWidget(w_additem);
+    w_splitter_vertical->addWidget(w_splitter_bottom);
+
+    w_go_back = new QToolButton(this);
+    w_go_back->setProperty("toolBarLike", true);
+    w_go_back->setIcon(QIcon::fromTheme(u"go-previous"_qs));
+    w_go_back->setShortcut(u"Back"_qs);
+
+    w_go_next = new QToolButton(this);
+    w_go_next->setProperty("toolBarLike", true);
+    w_go_next->setIcon(QIcon::fromTheme(u"go-next"_qs));
+    w_go_next->setShortcut(u"Forward"_qs);
+
+    w_menu = new QToolButton(this);
+    w_menu->setProperty("toolBarLike", true);
+    w_menu->setIcon(QIcon::fromTheme(u"application-menu"_qs));
+    w_menu->setPopupMode(QToolButton::InstantPopup);
+
+    w_last_added = new QLabel(this);
+    w_last_added->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    w_last_added->setTextFormat(Qt::RichText);
+    w_last_added->setAlignment(Qt::AlignCenter);
+    w_last_added->setMargin(1);
+
+    w_merge = new QCheckBox(this);
+    w_buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
+    connect(w_buttons, &QDialogButtonBox::rejected, this, &QWidget::close);
+
+    auto bottomLayout = new QHBoxLayout;
+    bottomLayout->addWidget(w_go_back);
+    bottomLayout->addWidget(w_go_next);
+    bottomLayout->addWidget(w_menu);
+    bottomLayout->addSpacing(20);
+    bottomLayout->addWidget(w_last_added, 10);
+    bottomLayout->addSpacing(20);
+    bottomLayout->addWidget(w_merge);
+    bottomLayout->addSpacing(11);
+    bottomLayout->addWidget(w_buttons);
+    verticalLayout->addLayout(bottomLayout);
 
     m_view = nullptr;
-    m_caption_fmt        = windowTitle();
 
     m_tier_type = new QButtonGroup(this);
     m_tier_type->setExclusive(true);
-    m_tier_type->addButton(w_radio_percent, 0);
-    m_tier_type->addButton(w_radio_currency, 1);
+    m_tier_type->addButton(w_ui_additem->w_radio_percent, 0);
+    m_tier_type->addButton(w_ui_additem->w_radio_currency, 1);
 
     m_condition = new QButtonGroup(this);
     m_condition->setExclusive(true);
-    m_condition->addButton(w_radio_new, int(BrickLink::Condition::New));
-    m_condition->addButton(w_radio_used, int(BrickLink::Condition::Used));
+    m_condition->addButton(w_ui_additem->w_radio_new, int(BrickLink::Condition::New));
+    m_condition->addButton(w_ui_additem->w_radio_used, int(BrickLink::Condition::Used));
 
     w_select_item->setFilterFavoritesModel(m_favoriteFilters);
     w_select_color->setWidthToContents(true);
@@ -103,27 +175,27 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_inventory->addAction(m_invGoToAction);
     w_inventory->setActivateAction(m_invGoToAction);
 
-    w_qty->setRange(1, DocumentModel::maxQuantity);
-    w_qty->setValue(1);
-    new EventFilter(w_qty, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
+    w_ui_additem->w_qty->setRange(1, DocumentModel::maxQuantity);
+    w_ui_additem->w_qty->setValue(1);
+    new EventFilter(w_ui_additem->w_qty, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
-    w_bulk->setRange(1, DocumentModel::maxQuantity);
-    w_bulk->setValue(1);
-    new EventFilter(w_bulk, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
+    w_ui_additem->w_bulk->setRange(1, DocumentModel::maxQuantity);
+    w_ui_additem->w_bulk->setValue(1);
+    new EventFilter(w_ui_additem->w_bulk, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
     double maxPrice = DocumentModel::maxLocalPrice(m_currency_code);
 
-    w_price->setRange(0, maxPrice);
-    new EventFilter(w_price, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
-    w_cost->setRange(0, maxPrice);
-    new EventFilter(w_cost, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
+    w_ui_additem->w_price->setRange(0, maxPrice);
+    new EventFilter(w_ui_additem->w_price, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
+    w_ui_additem->w_cost->setRange(0, maxPrice);
+    new EventFilter(w_ui_additem->w_cost, { QEvent::FocusIn }, DesktopUIHelpers::selectAllFilter);
 
-    w_tier_qty[0] = w_tier_qty_0;
-    w_tier_qty[1] = w_tier_qty_1;
-    w_tier_qty[2] = w_tier_qty_2;
-    w_tier_price[0] = w_tier_price_0;
-    w_tier_price[1] = w_tier_price_1;
-    w_tier_price[2] = w_tier_price_2;
+    w_tier_qty[0] = w_ui_additem->w_tier_qty_0;
+    w_tier_qty[1] = w_ui_additem->w_tier_qty_1;
+    w_tier_qty[2] = w_ui_additem->w_tier_qty_2;
+    w_tier_price[0] = w_ui_additem->w_tier_price_0;
+    w_tier_price[1] = w_ui_additem->w_tier_price_1;
+    w_tier_price[2] = w_ui_additem->w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
         w_tier_qty[i]->setRange(0, DocumentModel::maxQuantity);
@@ -148,7 +220,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         }
     });
     connect(w_select_item, &SelectItem::hasSubConditions,
-            w_subcondition, &QWidget::setEnabled);
+            w_ui_additem->w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
             this, [this](const BrickLink::Item *item, bool confirmed) {
         updateItemAndColor();
@@ -175,13 +247,13 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         recordBrowseEntry();
     });
 
-    connect(w_price, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(w_ui_additem->w_price, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
-    connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
+    connect(w_ui_additem->w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
     connect(m_tier_type, &QButtonGroup::idClicked,
             this, &AddItemDialog::setTierType);
-    connect(w_bulk, QOverload<int>::of(&QSpinBox::valueChanged),
+    connect(w_ui_additem->w_bulk, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &AddItemDialog::checkAddPossible);
 
     connect(w_add, &QAbstractButton::clicked,
@@ -190,11 +262,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_price_guide, &PriceGuideWidget::priceDoubleClicked,
             this, [this](double p) {
         p *= Currency::inst()->rate(m_currency_code);
-        w_price->setValue(p);
+        w_ui_additem->w_price->setValue(p);
         checkAddPossible();
     });
 
-    w_radio_percent->click();
+    w_ui_additem->w_radio_percent->click();
 
     m_backMenu = new QMenu(this);
     m_nextMenu = new QMenu(this);
@@ -359,11 +431,16 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
 void AddItemDialog::languageChange()
 {
-    Ui::AddItemDialog::retranslateUi(this);
-    m_price_label_fmt = w_label_currency->text();
+    m_price_label_fmt = w_ui_additem->w_label_currency->text();
 
     w_add->setText(tr("Add"));
     m_invGoToAction->setText(tr("Go to Item"));
+
+    w_go_back->setToolTip(tr("Click to go back one item, hold to see history"));
+    w_go_next->setToolTip(tr("Click to go forward one item, hold to see history"));
+    w_menu->setToolTip(tr("Menu"));
+    w_merge->setToolTip(tr("Consolidate added items into document"));
+    w_merge->setText(tr("Conso&lidate"));
 
     updateCurrencyCode();
     updateCaption();
@@ -398,8 +475,8 @@ AddItemDialog::~AddItemDialog()
 
 void AddItemDialog::updateCaption()
 {
-    setWindowTitle(m_caption_fmt.arg(m_view ? m_view->document()->filePathOrTitle()
-                                              : QString { }));
+    setWindowTitle(tr("Add Items to %1").arg(m_view ? m_view->document()->filePathOrTitle()
+                                                    : QString { }));
 }
 
 void AddItemDialog::updateCurrencyCode()
@@ -408,8 +485,8 @@ void AddItemDialog::updateCurrencyCode()
 
     w_price_guide->setCurrencyCode(m_currency_code);
 
-    w_label_currency->setText(m_price_label_fmt.arg(m_currency_code));
-    w_radio_currency->setText(m_currency_code);
+    w_ui_additem->w_label_currency->setText(m_price_label_fmt.arg(m_currency_code));
+    w_ui_additem->w_radio_currency->setText(m_currency_code);
 }
 
 void AddItemDialog::attach(View *view)
@@ -505,19 +582,19 @@ void AddItemDialog::keyPressEvent(QKeyEvent *e)
 void AddItemDialog::setSellerMode(bool b)
 {
     QWidget *wl [] = {
-        w_bulk,
-        w_bulk_label,
-        w_tier_label,
-        w_radio_percent,
-        w_radio_currency,
-        w_tier_price_0,
-        w_tier_price_1,
-        w_tier_price_2,
-        w_tier_qty_0,
-        w_tier_qty_1,
-        w_tier_qty_2,
-        w_comments,
-        w_comments_label,
+        w_ui_additem->w_bulk,
+        w_ui_additem->w_bulk_label,
+        w_ui_additem->w_tier_label,
+        w_ui_additem->w_radio_percent,
+        w_ui_additem->w_radio_currency,
+        w_ui_additem->w_tier_price_0,
+        w_ui_additem->w_tier_price_1,
+        w_ui_additem->w_tier_price_2,
+        w_ui_additem->w_tier_qty_0,
+        w_ui_additem->w_tier_qty_1,
+        w_ui_additem->w_tier_qty_2,
+        w_ui_additem->w_comments,
+        w_ui_additem->w_comments_label,
 
         nullptr
     };
@@ -530,9 +607,9 @@ void AddItemDialog::setSellerMode(bool b)
     }
 
     if (!b) {
-        w_bulk->setValue(1);
+        w_ui_additem->w_bulk->setValue(1);
         w_tier_qty[0]->setValue(0);
-        w_comments->setText(QString());
+        w_ui_additem->w_comments->setText(QString());
         checkTieredPrices();
     }
 }
@@ -551,7 +628,7 @@ void AddItemDialog::updateItemAndColor()
 
 void AddItemDialog::setTierType(int type)
 {
-    (type == 0 ? w_radio_percent : w_radio_currency)->setChecked(true);
+    (type == 0 ? w_ui_additem->w_radio_percent : w_ui_additem->w_radio_currency)->setChecked(true);
 
     for (auto *tp : std::as_const(w_tier_price)) {
         if (type == 0) {
@@ -587,7 +664,7 @@ double AddItemDialog::tierPriceValue(int i)
     double val;
 
     if (m_tier_type->checkedId() == 0)     // %
-        val = Currency::fromString(w_price->text()) * (100 - w_tier_price [i]->text().toInt()) / 100;
+        val = Currency::fromString(w_ui_additem->w_price->text()) * (100 - w_tier_price [i]->text().toInt()) / 100;
     else // $
         val = Currency::fromString(w_tier_price [i]->text());
 
@@ -626,15 +703,15 @@ QString AddItemDialog::addhistoryTextFor(const QDateTime &when, const BrickLink:
 
 QByteArray AddItemDialog::saveState() const
 {
-    bool tierCurrency = w_radio_currency->isChecked();
+    bool tierCurrency = w_ui_additem->w_radio_currency->isChecked();
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray("AI") << qint32(3)
-       << w_qty->value()
-       << w_bulk->value()
-       << Currency::fromString(w_price->text())
-       << Currency::fromString(w_cost->text())
+       << w_ui_additem->w_qty->value()
+       << w_ui_additem->w_bulk->value()
+       << Currency::fromString(w_ui_additem->w_price->text())
+       << Currency::fromString(w_ui_additem->w_cost->text())
        << tierCurrency;
 
     for (int i = 0; i < 3; ++i) {
@@ -642,10 +719,10 @@ QByteArray AddItemDialog::saveState() const
         ds << w_tier_qty[i]->value() << (tierCurrency ? Currency::fromString(s) : s.toDouble());
     }
 
-    ds << w_radio_new->isChecked()
-       << w_subcondition->currentIndex()
-       << w_comments->text()
-       << w_remarks->text()
+    ds << w_ui_additem->w_radio_new->isChecked()
+       << w_ui_additem->w_subcondition->currentIndex()
+       << w_ui_additem->w_comments->text()
+       << w_ui_additem->w_remarks->text()
        << w_merge->isChecked();
 
     ds << w_picture->prefer3D();
@@ -685,20 +762,20 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    w_qty->setValue(qty);
-    w_bulk->setValue(bulk);
-    w_price->setValue(price);
-    w_cost->setValue(cost);
+    w_ui_additem->w_qty->setValue(qty);
+    w_ui_additem->w_bulk->setValue(bulk);
+    w_ui_additem->w_price->setValue(price);
+    w_ui_additem->w_cost->setValue(cost);
     setTierType(tierCurrency ? 1 : 0);
     for (int i = 0; i < 3; ++i) {
         w_tier_qty[i]->setValue(tierQty[i]);
         w_tier_price[i]->setValue(tierPrice[i]);
     }
-    w_radio_new->setChecked(isNew);
-    w_radio_used->setChecked(!isNew);
-    w_subcondition->setCurrentIndex(subConditionIndex);
-    w_comments->setText(comments);
-    w_remarks->setText(remarks);
+    w_ui_additem->w_radio_new->setChecked(isNew);
+    w_ui_additem->w_radio_used->setChecked(!isNew);
+    w_ui_additem->w_subcondition->setCurrentIndex(subConditionIndex);
+    w_ui_additem->w_comments->setText(comments);
+    w_ui_additem->w_remarks->setText(remarks);
     w_merge->setChecked(consolidate);
     checkAddPossible();
 
@@ -709,12 +786,12 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
 
 bool AddItemDialog::checkAddPossible()
 {
-    bool priceOk = w_price->hasAcceptableInput();
-    bool qtyOk = w_qty->hasAcceptableInput();
-    bool bulkOk = w_bulk->hasAcceptableInput();
-    w_price->setProperty("showInputError", !priceOk);
-    w_qty->setProperty("showInputError", !qtyOk);
-    w_bulk->setProperty("showInputError", !bulkOk);
+    bool priceOk = w_ui_additem->w_price->hasAcceptableInput();
+    bool qtyOk = w_ui_additem->w_qty->hasAcceptableInput();
+    bool bulkOk = w_ui_additem->w_bulk->hasAcceptableInput();
+    w_ui_additem->w_price->setProperty("showInputError", !priceOk);
+    w_ui_additem->w_qty->setProperty("showInputError", !qtyOk);
+    w_ui_additem->w_bulk->setProperty("showInputError", !bulkOk);
 
     auto item = w_select_item->currentItem();
 
@@ -739,7 +816,7 @@ bool AddItemDialog::checkAddPossible()
             tpriceLower = (tierPriceValue(i - 1) > tierPriceValue(i));
             tqtyHigher = (w_tier_qty[i - 1]->text().toInt() < w_tier_qty[i]->text().toInt());
         } else {
-            tpriceLower = (Currency::fromString(w_price->text()) > tierPriceValue(i));
+            tpriceLower = (Currency::fromString(w_ui_additem->w_price->text()) > tierPriceValue(i));
         }
         w_tier_price[i]->setProperty("showInputError", tierEnabled && (!tpriceOk || !tpriceLower));
         w_tier_qty[i]->setProperty("showInputError", tierEnabled && (!tqtyOk || !tqtyHigher));
@@ -766,15 +843,15 @@ void AddItemDialog::addClicked()
 
     auto lot = new BrickLink::Lot(item, color);
 
-    lot->setQuantity(w_qty->text().toInt());
-    lot->setPrice(Currency::fromString(w_price->text()));
-    lot->setCost(Currency::fromString(w_cost->text()));
-    lot->setBulkQuantity(w_bulk->text().toInt());
+    lot->setQuantity(w_ui_additem->w_qty->text().toInt());
+    lot->setPrice(Currency::fromString(w_ui_additem->w_price->text()));
+    lot->setCost(Currency::fromString(w_ui_additem->w_cost->text()));
+    lot->setBulkQuantity(w_ui_additem->w_bulk->text().toInt());
     lot->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
     if (lot->itemType() && lot->itemType()->hasSubConditions())
-        lot->setSubCondition(static_cast<BrickLink::SubCondition>(1 + w_subcondition->currentIndex()));
-    lot->setRemarks(w_remarks->text());
-    lot->setComments(w_comments->text());
+        lot->setSubCondition(static_cast<BrickLink::SubCondition>(1 + w_ui_additem->w_subcondition->currentIndex()));
+    lot->setRemarks(w_ui_additem->w_remarks->text());
+    lot->setComments(w_ui_additem->w_comments->text());
 
     for (int i = 0; i < 3; i++) {
         if (!w_tier_price [i]->isEnabled())

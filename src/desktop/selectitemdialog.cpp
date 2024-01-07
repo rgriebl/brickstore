@@ -4,6 +4,8 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QAction>
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
@@ -19,9 +21,19 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
 {
     if (popupMode)
         setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    setWindowTitle(tr("Select Item"));
 
-    setupUi(this);
+    setSizeGripEnabled(true);
+    setModal(true);
+    w_si = new SelectItem(this);
     w_si->setExcludeWithoutInventoryFilter(false);
+    w_buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok, this);
+    connect(w_buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(w_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    auto vboxLayout = new QVBoxLayout(this);
+    vboxLayout->addWidget(w_si);
+    vboxLayout->addWidget(w_buttons);
 
     auto ba = Config::inst()->value(u"MainWindow/ModifyItemDialog/SelectItem"_qs)
             .toByteArray();
@@ -47,7 +59,7 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
 
     if (popupMode) {
         auto reset = new QToolButton();
-        reset->setAutoRaise(true);
+        reset->setProperty("toolBarLike", true);
         reset->setToolButtonStyle(Qt::ToolButtonIconOnly);
         reset->setDefaultAction(m_resetGeometryAction);
 

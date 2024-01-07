@@ -4,10 +4,13 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QAction>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
 
 #include "bricklink/color.h"
 #include "common/config.h"
 #include "desktopuihelpers.h"
+#include "selectcolor.h"
 #include "selectcolordialog.h"
 
 
@@ -17,8 +20,18 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 {
     if (popupMode)
         setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    setWindowTitle(tr("Select Color"));
 
-    setupUi(this);
+    setSizeGripEnabled(true);
+    setModal(true);
+    w_sc = new SelectColor(this);
+    w_buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok, this);
+    connect(w_buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(w_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    auto vboxLayout = new QVBoxLayout(this);
+    vboxLayout->addWidget(w_sc);
+    vboxLayout->addWidget(w_buttons);
 
     auto ba = Config::inst()->value(u"MainWindow/ModifyColorDialog/SelectColor"_qs)
             .toByteArray();
@@ -42,7 +55,7 @@ SelectColorDialog::SelectColorDialog(bool popupMode, QWidget *parent)
 
     if (popupMode) {
         auto reset = new QToolButton();
-        reset->setAutoRaise(true);
+        reset->setProperty("toolBarLike", true);
         reset->setToolButtonStyle(Qt::ToolButtonIconOnly);
         reset->setDefaultAction(m_resetGeometryAction);
 
