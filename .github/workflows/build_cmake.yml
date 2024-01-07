@@ -239,18 +239,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Pre-populate the cmake cache
-    #################################################
-
-    - name: Pre-populate cmake cache
-      env:
-        BRICKLINK_AFFILIATE_API_KEY: ${{ secrets.BRICKLINK_AFFILIATE_API_KEY }}
-      run: |
-        cat <<EOF >.initcache.txt
-        set(BRICKLINK_AFFILIATE_API_KEY "$BRICKLINK_AFFILIATE_API_KEY" CACHE INTERNAL "")
-        EOF
-      shell: bash
-
     # Build for Windows
     #################################################
 
@@ -259,7 +247,7 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        call %Qt6_DIR%\bin\qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt ${{ matrix.config.cmake_extra_config }} -B build -S .
+        call %Qt6_DIR%\bin\qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --target installer --verbose
       shell: cmd
 
@@ -284,7 +272,7 @@ jobs:
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
       run: |
         sudo docker exec -w /brickstore "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         sudo docker exec -w /brickstore "debian-build" cmake --build build --config RelWithDebInfo \
             --parallel --target deb-package --verbose
@@ -307,7 +295,7 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
             libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev
-        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --verbose
@@ -433,7 +421,7 @@ jobs:
         export QT_ANDROID_KEYSTORE_STORE_PASS="${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}"
         export QT_ANDROID_KEYSTORE_KEY_PASS="${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}"
 
-        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -C .initcache.txt \
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64)" \
             -D "QT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3" \
             -D "QT_ANDROID_TARGET_SDK_VERSION=33" \
@@ -442,7 +430,7 @@ jobs:
             -D "ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }}" \
             -D "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" \
             -D "QT_ANDROID_SIGN_AAB=TRUE" \
-            -D "QT_ANDROID_MULTI_ABI_FORWARD_VARS=BRICKLINK_AFFILIATE_API_KEY;SENTRY" \
+            -D "QT_ANDROID_MULTI_ABI_FORWARD_VARS=SENTRY" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         echo "Creating AAB"
         cmake --build build --config Release --parallel --target final-aab --verbose
@@ -508,7 +496,7 @@ jobs:
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
-        ${Qt6_DIR}/bin/qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -C .initcache.txt \
+        ${Qt6_DIR}/bin/qt-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -D "MACOS_SIGNING_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --target dmg --verbose
@@ -571,7 +559,7 @@ jobs:
     - name: Build for iOS
       if: (matrix.config.os == 'ios')
       run: |
-        ${Qt6_DIR}/bin/qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -C .initcache.txt \
+        ${Qt6_DIR}/bin/qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release \
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos)" \
             -D "CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }}" \
             -D "CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }}" \

@@ -142,7 +142,7 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(MIN_QT_VERSION 6.5.0)
     add_compile_definitions(BS_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
-    find_package(Qt6 CONFIG QUIET REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg)
+    find_package(Qt6 CONFIG QUIET REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg Multimedia MultimediaQuickPrivate)
 
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
