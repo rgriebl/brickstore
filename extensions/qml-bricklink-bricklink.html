@@ -119,7 +119,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="name">pictureUpdated</span>(<span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <i>picture</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>This signal is emitted everytime the state of the <i>picture</i> object changes. Receiving this signal doesn't mean the picture is available: you have to check the object's properties to see what has changed.</p>
+<div class="qmldoc"><p>This signal is emitted every time the state of the <i>picture</i> object changes. Receiving this signal doesn't mean the picture is available: you have to check the object's properties to see what has changed.</p>
 <p><b>Note: </b>The corresponding handler is <code>onPictureUpdated</code>.</p>
 </div></div><!-- @@@pictureUpdated -->
 <br/>
@@ -130,7 +130,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="name">priceGuideUpdated</span>(<span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <i>priceGuide</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>This signal is emitted everytime the state of the <i>priceGuide</i> object changes. Receiving this signal doesn't mean the preice guide data is available: you have to check the object's properties to see what has changed.</p>
+<div class="qmldoc"><p>This signal is emitted every time the state of the <i>priceGuide</i> object changes. Receiving this signal doesn't mean the price guide data is available: you have to check the object's properties to see what has changed.</p>
 <p><b>Note: </b>The corresponding handler is <code>onPriceGuideUpdated</code>.</p>
 </div></div><!-- @@@priceGuideUpdated -->
 <br/>
@@ -265,7 +265,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type"><a href="qml-bricklink-picture.html">Picture</a></span> <span class="name">picture</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Creates a <a href="qml-bricklink-picture.html">Picture</a> object that asynchronously loads (or downloads) the picture for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be pre-prended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-picture.html">Picture</a> object that asynchronously loads (or downloads) the picture for the given <i>item</i> and <i>color</i> combination. If you set <i>highPriority</i> to <code>true</code> the load/download request will be prepended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
 <p><b>See also </b><a href="qml-bricklink-picture.html">Picture</a>.</p>
 </div></div><!-- @@@picture -->
 <br/>
@@ -276,7 +276,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and currentVatType combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be preprended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and currentVatType combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be prepended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
 <p><b>See also </b><a href="qml-bricklink-priceguide.html">PriceGuide</a>.</p>
 </div></div><!-- @@@priceGuide -->
 <br/>
@@ -287,7 +287,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type"><a href="qml-bricklink-priceguide.html">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html">Color</a></span> <i>color</i>, <span class="type">VatType</span> <i>vatType</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and <i>vatType</i> combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be preprended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i>item</i>, <i>color</i> and <i>vatType</i> combination. If you set <i>highPriority</i> to <code>true</code>, the load/download request will be prepended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
 <p><b>See also </b><a href="qml-bricklink-priceguide.html">PriceGuide</a>.</p>
 </div></div><!-- @@@priceGuide -->
 <br/>
