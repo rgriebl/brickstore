@@ -1013,6 +1013,11 @@ void BrickLink::TextImport::finalizeDatabase()
     }
 }
 
+void BrickLink::TextImport::setApiKeys(const QHash<QByteArray, QString> &apiKeys)
+{
+    m_db->m_apiKeys = apiKeys;
+}
+
 void BrickLink::TextImport::calculateColorPopularity()
 {
     float maxpop = 0;

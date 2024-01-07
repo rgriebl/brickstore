@@ -356,6 +356,12 @@ void BatchedAffiliateAPIPGRetriever::cancelAll()
     }
 }
 
+void BatchedAffiliateAPIPGRetriever::setApiKey(const QString &key)
+{
+    if ((key != m_apiKey) && !key.isEmpty())
+        m_apiKey = key;
+}
+
 void BatchedAffiliateAPIPGRetriever::check()
 {
     if (m_currentBatch.isEmpty() && !m_currentJob) {
@@ -563,14 +569,17 @@ PriceGuideCache::PriceGuideCache(Core *core)
 
     d->m_cache.setMaxCost(5000); // each price guide has a cost of 1
 
-    QString batchApiKey;
-#if defined(BS_BRICKLINK_AFFILIATE_API_KEY)
-    batchApiKey = QString::fromLatin1(QT_STRINGIFY(BS_BRICKLINK_AFFILIATE_API_KEY));
-#endif
-    if (!batchApiKey.isEmpty())
-        d->m_retriever = new BatchedAffiliateAPIPGRetriever(core, batchApiKey);
-    else
-        d->m_retriever = new SingleHTMLScrapePGRetriever(core);
+    QString batchApiKey = core->apiKey("affiliate");
+    auto affiliate = new BatchedAffiliateAPIPGRetriever(core, batchApiKey);
+    connect(core->database(), &Database::updateFinished,
+            affiliate, [this, affiliate](bool success, const QString &) {
+        if (success)
+            affiliate->setApiKey(d->m_core->apiKey("affiliate"));
+    });
+    d->m_retriever = affiliate;
+
+    // this is the old retriever:
+    // d->m_retriever = new SingleHTMLScrapePGRetriever(core);
 
     qInfo() << "Using BrickLink price-guide retriever plugin:" << d->m_retriever->name();
 

@@ -47,7 +47,7 @@ public:
         V8,  // 2022.9.1
         V9,  // 2023.3.1
         V10, // 2023.11.1
-        V11, // 2023.12.1
+        V11, // 2024.1.1
 
         OldestStillSupported = V6,
 
@@ -108,6 +108,7 @@ private:
     std::vector<ColorChangeLogEntry> m_colorChangelog;
     std::vector<Relationship>        m_relationships;
     std::vector<RelationshipMatch>   m_relationshipMatches;
+    QHash<QByteArray, QString>       m_apiKeys;
 
     uint m_latestChangelogId = 0;
 
@@ -133,6 +134,9 @@ private:
     void writeRelationshipToDatabase(const Relationship &e, QDataStream &dataStream, Version v) const;
     static void readRelationshipMatchFromDatabase(RelationshipMatch &e, QDataStream &dataStream, MemoryResource *pool);
     void writeRelationshipMatchToDatabase(const RelationshipMatch &e, QDataStream &dataStream, Version v) const;
+    static void readApiKeyFromDatabase(QByteArray &id, QString &key, QDataStream &dataStream, MemoryResource *pool);
+    void writeApiKeyToDatabase(const QByteArray &id, const QString &key, QDataStream &dataStream, Version v) const;
+
 };
 
 } // namespace BrickLink

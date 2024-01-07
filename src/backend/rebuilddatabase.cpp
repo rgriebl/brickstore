@@ -80,16 +80,19 @@ int RebuildDatabase::exec()
 
     // login hack
     {
-        QString username = QString::fromLocal8Bit(qgetenv("BRICKLINK_USERNAME"));
-        QString password = QString::fromLocal8Bit(qgetenv("BRICKLINK_PASSWORD"));
-
+        QString username = qEnvironmentVariable("BRICKLINK_USERNAME");
+        QString password = qEnvironmentVariable("BRICKLINK_PASSWORD");
         if (username.isEmpty() || password.isEmpty())
-            printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");
+            return error(u"Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD."_qs);
 
-        m_rebrickableApiKey = QString::fromLocal8Bit(qgetenv("REBRICKABLE_APIKEY"));
+        m_affiliateApiKey = qEnvironmentVariable("BRICKLINK_AFFILIATE_APIKEY");
+        if (m_affiliateApiKey.isEmpty())
+            return error(u"Missing BrickLink Affiliate API key: please set $BRICKLINK_AFFILIATE_APIKEY."_qs);
 
+        m_rebrickableApiKey = qEnvironmentVariable("REBRICKABLE_APIKEY");
         if (m_rebrickableApiKey.isEmpty())
-            printf("  > Missing Rebrickable API key: please set $REBRICKABLE_APIKEY.\n");
+            return error(u"Missing Rebrickable API key: please set $REBRICKABLE_APIKEY."_qs);
+
         QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
 
         url.setQuery({{ u"userid"_qs,          Utility::urlQueryEscape(username) },
@@ -168,6 +171,7 @@ int RebuildDatabase::exec()
     printf("\nSTEP 8: Computing the database...\n");
 
     blti.finalizeDatabase();
+    blti.setApiKeys({ { "affiliate", m_affiliateApiKey } });
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 9: Writing the database to disk...\n");

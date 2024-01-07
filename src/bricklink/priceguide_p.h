@@ -86,6 +86,8 @@ public:
     void cancel(PriceGuide *pg) override;
     void cancelAll() override;
 
+    void setApiKey(const QString &key);
+
     static constexpr qsizetype MaxBatchSize = 500;
     static constexpr qint64 MaxBatchAgeMSec = 100;
 

@@ -219,6 +219,7 @@ void Database::read(const QString &fileName)
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
         bool gotChangeLog = false, gotRelationships = false, gotRelationshipMatches = false;
+        bool gotApiKeys = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -247,6 +248,7 @@ void Database::read(const QString &fileName)
         std::vector<Relationship>        relationships;
         std::vector<RelationshipMatch>   relationshipMatches;
         uint                             latestChangelogId = 0;
+        QHash<QByteArray, QString>       apiKeys;
 
         while (cr.startChunk()) {
             switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
@@ -372,6 +374,22 @@ void Database::read(const QString &fileName)
                 gotRelationshipMatches = true;
                 break;
             }
+            case ChunkId('A','K','E','Y') | 1ULL << 32: {
+                quint32 akeyc = 0;
+                ds >> akeyc;
+                check();
+                sizeCheck(akeyc, 100);
+
+                for (quint32 i = 0; i < akeyc; ++i) {
+                    QByteArray id;
+                    QString key;
+                    readApiKeyFromDatabase(id, key, ds, pool.get());
+                    check();
+                    apiKeys.insert(id, key);
+                }
+                gotApiKeys = true;
+                break;
+            }
             default: {
                 cr.skipChunk();
                 check();
@@ -393,7 +411,7 @@ void Database::read(const QString &fileName)
         delete sw;
 
         if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog
-            || !gotRelationships || !gotRelationshipMatches) {
+            || !gotRelationships || !gotRelationshipMatches || !gotApiKeys) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
@@ -442,6 +460,7 @@ void Database::read(const QString &fileName)
         m_relationships = std::move(relationships);
         m_relationshipMatches = std::move(relationshipMatches);
         m_latestChangelogId = latestChangelogId;
+        m_apiKeys = apiKeys;
 
         m_pool.swap(pool);
 
@@ -580,6 +599,14 @@ void Database::write(const QString &filename, Version version) const
         ds << quint32(m_relationshipMatches.size());
         for (const RelationshipMatch &match : m_relationshipMatches)
             writeRelationshipMatchToDatabase(match, ds, version);
+        check(cw.endChunk());
+    }
+
+    if (version >= Version::V11) {
+        check(cw.startChunk(ChunkId('A','K','E','Y'), 1));
+        ds << quint32(m_apiKeys.size());
+        for (auto it = m_apiKeys.cbegin(); it != m_apiKeys.cend(); ++it)
+            writeApiKeyToDatabase(it.key(), it.value(), ds, version);
         check(cw.endChunk());
     }
 
@@ -791,6 +818,46 @@ void Database::readRelationshipMatchFromDatabase(RelationshipMatch &match, QData
 void Database::writeRelationshipMatchToDatabase(const RelationshipMatch &match, QDataStream &dataStream, Version) const
 {
     dataStream << match.m_id << match.m_relationshipId << match.m_itemIndexes;
+}
+
+// This is minimal protection, but it's still better than storing the keys in plain text.
+static QByteArray scramble(const QByteArray &array, Database::Version v)
+{
+    auto xorByteArray = [](const QByteArray &data, const QByteArray &key) -> QByteArray
+    {
+        QByteArray result;
+        result.resize(data.size());
+        for (int i = 0; i < data.size(); ++i)
+            result[i] = data[i] ^ key[i % key.size()];
+        return result;
+    };
+
+    // cache the scramble keys for faster DB reloading
+    static QHash<Database::Version, QByteArray> scrambleKeys;
+    QByteArray scrambleKey = scrambleKeys.value(v);
+    if (scrambleKey.isEmpty()) {
+        scrambleKey = "DBv" + QByteArray::number(int(v));
+        scrambleKey = QCryptographicHash::hash(scrambleKey, QCryptographicHash::Blake2s_128);
+        scrambleKeys.insert(v, scrambleKey);
+    }
+    return xorByteArray(array, scrambleKey);
+}
+
+void Database::readApiKeyFromDatabase(QByteArray &id, QString &key, QDataStream &dataStream,  MemoryResource *)
+{
+    QByteArray idScrambled, keyScrambled;
+    dataStream >> idScrambled >> keyScrambled;
+
+    id = scramble(idScrambled, Version::Latest);
+    key = QString::fromUtf8(scramble(keyScrambled, Version::Latest));
+}
+
+void Database::writeApiKeyToDatabase(const QByteArray &id, const QString &key, QDataStream &dataStream, Version v) const
+{
+    QByteArray idScrambled = scramble(id, v);
+    QByteArray keyScrambled = scramble(key.toUtf8(), v);
+
+    dataStream << idScrambled << keyScrambled;
 }
 
 } // namespace BrickLink

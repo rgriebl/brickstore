@@ -88,6 +88,8 @@ public:
 
     inline uint latestChangelogId() const { return database()->m_latestChangelogId; }
 
+    inline QString apiKey(const QByteArray &id) const { return database()->m_apiKeys.value(id); }
+
     const QImage noImage(const QSize &s) const;
 
     const Color *color(uint id) const;

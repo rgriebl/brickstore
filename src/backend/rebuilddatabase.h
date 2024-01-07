@@ -36,4 +36,5 @@ private:
     int m_downloads_failed = 0;
     QDateTime m_date;
     QString m_rebrickableApiKey;
+    QString m_affiliateApiKey;
 };
