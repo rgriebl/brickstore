@@ -19,11 +19,11 @@ class Color
 public:
     static constexpr uint InvalidId = static_cast<uint>(-1);
 
-    uint id() const           { return m_id; }
-    QString name() const      { return m_name.asQString(); }
-    QColor color() const      { return m_color; }
+    uint id() const            { return m_id; }
+    QString name() const       { return m_name.asQString(); }
+    QColor color() const       { return m_color; }
 
-    ColorType type() const    { return m_type; }
+    ColorType type() const     { return m_type; }
 
     bool isSolid() const       { return m_type & ColorTypeFlag::Solid; }
     bool isTransparent() const { return m_type & ColorTypeFlag::Transparent; }
@@ -38,18 +38,20 @@ public:
 
     float luminance() const    { return m_luminance; }
 
-    int ldrawId() const        { return m_ldraw_id; }
-    QColor ldrawColor() const  { return m_ldraw_color; }
-    QColor ldrawEdgeColor() const  { return m_ldraw_edge_color; }
+    int ldrawId() const              { return m_ldraw_id; }
+    QColor ldrawColor() const        { return m_ldraw_color; }
+    QColor ldrawEdgeColor() const    { return m_ldraw_edge_color; }
 
-    bool hasParticles() const           { return !qFuzzyIsNull(m_particleMinSize) && !qFuzzyIsNull(m_particleMaxSize); }
-    double particleMinSize() const      { return double(m_particleMinSize); }
-    double particleMaxSize() const      { return double(m_particleMaxSize); }
-    double particleFraction() const     { return double(m_particleFraction); }
-    double particleVFraction() const    { return double(m_particleVFraction); }
-    QColor particleColor() const        { return m_particleColor; }
+    bool hasParticles() const        { return !qFuzzyIsNull(m_particleMinSize) && !qFuzzyIsNull(m_particleMaxSize); }
+    double particleMinSize() const   { return double(m_particleMinSize); }
+    double particleMaxSize() const   { return double(m_particleMaxSize); }
+    double particleFraction() const  { return double(m_particleFraction); }
+    double particleVFraction() const { return double(m_particleVFraction); }
+    QColor particleColor() const     { return m_particleColor; }
+    float popularity() const         { return m_popularity < 0 ? 0 : m_popularity; }
 
-    float popularity() const  { return m_popularity < 0 ? 0 : m_popularity; }
+    int yearReleased() const         { return m_year_from; }
+    int yearLastProduced() const     { return m_year_to; }
 
     static const QVector<ColorTypeFlag> &allColorTypes();
     static QString typeName(ColorTypeFlag t);

@@ -849,7 +849,7 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
 
     if (f == DocumentModel::Picture) {
         if (item->item())
-            BrickLink::ToolTip::inst()->show(item->item(), nullptr, event->globalPos(), view);
+            BrickLink::ToolTip::inst()->show(item->item(), nullptr, nullptr, event->globalPos(), view);
     } else {
         QVariant v = idx.data(Qt::DisplayRole);
         QString text = displayData(idx, v, false);

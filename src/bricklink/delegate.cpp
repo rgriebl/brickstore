@@ -15,11 +15,13 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QTreeView>
 
+#include "bricklink/category.h"
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include "bricklink/picture.h"
 #include "bricklink/item.h"
 #include "bricklink/delegate.h"
+#include "bricklink/model.h"
 #include "common/eventfilter.h"
 #include "utility/utility.h"
 
@@ -73,9 +75,10 @@ bool ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const Q
     if (event->type() == QEvent::ToolTip && index.isValid()) {
         auto item = index.data(ItemPointerRole).value<const Item *>();
         auto color = index.data(ColorPointerRole).value<const Color *>();
+        auto category = index.data(CategoryPointerRole).value<const Category *>();
 
-        if (item || color) {
-            ToolTip::inst()->show(item, color, event->globalPos(), view);
+        if (item || color || category) {
+            ToolTip::inst()->show(item, color, category, event->globalPos(), view);
             return true;
         }
     }
@@ -177,7 +180,8 @@ ToolTip *ToolTip::inst()
     return s_inst;
 }
 
-bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos, QWidget *parent)
+bool ToolTip::show(const Item *item, const Color *color, const Category *category,
+                   const QPoint &globalPos, QWidget *parent)
 {
     QString tt;
 
@@ -186,18 +190,12 @@ bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos
             m_tooltip_pic = ((pic->updateStatus() == UpdateStatus::Updating)
                              || (pic->updateStatus() == UpdateStatus::Loading)) ? pic : nullptr;
 
-            // need to 'clear' to reset the image cache of the QTextDocument
-            const auto tlwidgets = QApplication::topLevelWidgets();
-            for (QWidget *w : tlwidgets) {
-                if (w->inherits("QTipLabel")) {
-                    qobject_cast<QLabel *>(w)->clear();
-                    break;
-                }
-            }
             tt = createItemToolTip(pic->item(), pic);
         }
     } else if (color) {
         tt = createColorToolTip(color);
+    } else if (category) {
+        tt = createCategoryToolTip(category);
     }
 
     if (!tt.isEmpty()) {
@@ -209,16 +207,11 @@ bool ToolTip::show(const Item *item, const Color *color, const QPoint &globalPos
 
 QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
 {
-    static const QString str = uR"(<table class="tooltip_picture" style="float: right;"><tr><td><i>%4</i></td></tr></table><div>%2<br><b>%3</b><br>%1</div>)"_qs;
+    static const QString str = uR"(<table class="tooltip_picture"><tr><td>%2</td><td align="right"><i>&nbsp;%4</i></td></tr><tr><td colspan="2"><b>%3</b></td></tr><tr><td colspan="2">%1</td></tr></table>)"_qs;
     static const QString img_left = uR"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)"_qs;
     QString note_left = u"<i>" + ItemDelegate::tr("[Image is loading]") + u"</i>";
-    QString yearStr;
+    QString yearStr = yearSpan(item->yearReleased(), item->yearLastProduced());
     QString id = QString::fromLatin1(item->id());
-
-    if (item->yearReleased())
-        yearStr = QString::number(item->yearReleased());
-    if (item->yearLastProduced() && (item->yearLastProduced() != item->yearReleased()))
-        yearStr = yearStr + u'-' + QString::number(item->yearLastProduced());
 
     QColor color = qApp->palette().color(QPalette::Highlight);
     id = id + uR"(&nbsp;&nbsp;<i><font color=")" + Utility::textColor(color).name()
@@ -245,16 +238,42 @@ QString ToolTip::createColorToolTip(const Color *color) const
     QString str;
 
     if (color->id() > 0) {
-        static const QString tpl = uR"(<table width="100%" border="0" bgcolor="%1"><tr><td><br><br></td></tr></table><br>%2 (%3)<br>BrickLink id: %4)"_qs;
+        static const QString tpl = uR"(<table width="100%" border="0" bgcolor="%1"><tr><td><br><br></td></tr></table><br><b>%2</b> (%3)<br>BrickLink id: %4)"_qs;
         str = str + tpl.arg(color->color().name(), color->name(), color->color().name(),
                             QString::number(color->id()));
 
         if (color->ldrawId() != -1)
             str = str + u", LDraw id: " + QString::number(color->ldrawId());
     } else {
-        str = color->name();
+        str = u"<b>" + color->name() + u"</b>";
     }
+    QString yearStr = yearSpan(color->yearReleased(), color->yearLastProduced());
+    if (!yearStr.isEmpty())
+        str = str + u"<br><i>" + yearStr + u"</i>";
     return str;
+}
+
+QString ToolTip::createCategoryToolTip(const Category *category) const
+{
+    if (category == CategoryModel::AllCategories)
+        return { };
+
+    QString str = u"<b>%1</b><br>BrickLink id: %2"_qs
+                      .arg(category->name()).arg(category->id());
+    QString yearStr = yearSpan(category->yearReleased(), category->yearLastProduced());
+    if (!yearStr.isEmpty())
+        str = str + u"<br><i>" + yearStr + u"</i>";
+    return str;
+}
+
+QString ToolTip::yearSpan(int from, int to)
+{
+    QString yearStr;
+    if (from)
+        yearStr = QString::number(from);
+    if (to && (to != from))
+        yearStr = yearStr + u'-' + QString::number(to);
+    return yearStr;
 }
 
 void ToolTip::pictureUpdated(Picture *pic)

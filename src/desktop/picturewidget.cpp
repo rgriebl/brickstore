@@ -391,7 +391,7 @@ void PictureWidget::changeEvent(QEvent *e)
 bool PictureWidget::event(QEvent *e)
 {
     if (m_item && e && e->type() == QEvent::ToolTip) {
-        return BrickLink::ToolTip::inst()->show(m_item, m_color,
+        return BrickLink::ToolTip::inst()->show(m_item, m_color, nullptr,
                                                 static_cast<QHelpEvent *>(e)->globalPos(), this);
     }
     return QFrame::event(e);
