@@ -88,12 +88,12 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_splitter_bottom->setOrientation(Qt::Horizontal);
     w_splitter_bottom->setChildrenCollapsible(false);
     w_picture = new PictureWidget(w_splitter_bottom);
-    w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+    w_picture->setFrameStyle(QFrame::StyledPanel | int(QFrame::Raised));
     w_splitter_bottom->addWidget(w_picture);
     w_inventory = new InventoryWidget(w_splitter_bottom);
     w_splitter_bottom->addWidget(w_inventory);
     w_price_guide = new PriceGuideWidget(w_splitter_bottom);
-    w_price_guide->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+    w_price_guide->setFrameStyle(QFrame::StyledPanel | int(QFrame::Raised));
     w_splitter_bottom->addWidget(w_price_guide);
     w_additem = new QWidget(w_splitter_bottom);
     w_ui_additem = new Ui_AddItemWidget();
@@ -117,7 +117,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_menu->setPopupMode(QToolButton::InstantPopup);
 
     w_last_added = new QLabel(this);
-    w_last_added->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    w_last_added->setFrameStyle(QFrame::StyledPanel | int(QFrame::Plain));
     w_last_added->setTextFormat(Qt::RichText);
     w_last_added->setAlignment(Qt::AlignCenter);
     w_last_added->setMargin(1);

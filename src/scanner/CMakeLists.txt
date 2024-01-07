@@ -20,6 +20,8 @@ if (TARGET Qt::MultimediaQuickPrivate)
     if (WIN32)
         set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/.qmltc/scanner_module/camerapreview.cpp
             PROPERTIES COMPILE_FLAGS /wd4458)
+        set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/.qmltc/scanner_module/moc_camerapreview.cpp
+            PROPERTIES COMPILE_FLAGS /wd4458)
     endif()
 endif()
 
