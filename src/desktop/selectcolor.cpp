@@ -147,8 +147,9 @@ void SelectColor::setWidthToContents(bool b)
                 + 2 * w_colors->frameWidth()
                 + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4;
         int w2 = w_filter->minimumSizeHint().width();
-        w_filter->setMinimumWidth(std::max(w1, w2));
-        w_colors->setMinimumWidth(std::max(w1, w2));
+        int w3 = w_lock->minimumSizeHint().width() + 4;
+        w_filter->setMinimumWidth(std::max(w1 - w3, w2));
+        w_colors->setMinimumWidth(std::max(w1, w2 + w3));
         w_colors->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     }
 }
@@ -175,7 +176,10 @@ void SelectColor::updateColorFilter(int index)
         m_colorModel->setColorTypeFilter(BrickLink::ColorType(BrickLink::ColorTypeFlag::Mask).setFlag(BrickLink::ColorTypeFlag::Modulex, false));
         m_colorModel->setPopularityFilter(popularity);
     } else if (filter == 0 && m_item) {
-        m_colorModel->setColorListFilter(m_item->knownColors());
+        const auto known = m_item->knownColors();
+        m_colorModel->setColorListFilter(known);
+        if (known.isEmpty())
+            m_colorModel->setColorTypeFilter(BrickLink::ColorType(BrickLink::ColorTypeFlag::Mask).setFlag(BrickLink::ColorTypeFlag::Modulex, false));
     }
 
     m_colorModel->invalidateFilterNow();

@@ -29,6 +29,7 @@
 #include <QShortcut>
 #include <QTimer>
 #include <QInputDialog>
+#include <QSplitter>
 
 #include "bricklink/core.h"
 #include "bricklink/delegate.h"
@@ -68,6 +69,7 @@ public:
     QToolButton *    w_dateFilter;
     QToolButton *    w_zoomLevel;
     QButtonGroup *   w_viewmode;
+    QSplitter *      w_splitter;
     bool             m_inv_only = false;
     QTimer *         m_filter_delay;
     double           m_zoom = 0;
@@ -230,7 +232,7 @@ void SelectItem::init()
     connect(d->w_viewmode, &QButtonGroup::idClicked,
             this, &SelectItem::setViewMode);
 
-    d->w_pcc = new QToolButton();
+    d->w_pcc = new QToolButton(this);
     d->w_pcc->setIcon(QIcon::fromTheme(u"edit-find"_qs));
     d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
     d->w_pcc->setAutoRaise(true);
@@ -247,14 +249,17 @@ void SelectItem::init()
         }
     });
 
-    d->w_itemScan = new QToolButton;
+    d->w_itemScan = new QToolButton(this);
     d->w_itemScan->setIcon(QIcon::fromTheme(u"camera-photo"_qs));
     d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
     d->w_itemScan->setAutoRaise(true);
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
         if (!ItemScannerDialog::checkSystemPermissions())
             return;
-        if (!d->m_itemScannerDialog) {
+        if (d->m_itemScannerDialog) {
+            d->m_itemScannerDialog->raise();
+            d->m_itemScannerDialog->activateWindow();
+        } else {
             d->m_itemScannerDialog = new ItemScannerDialog(this);
 
             connect(d->m_itemScannerDialog, &ItemScannerDialog::itemsScanned,
@@ -295,7 +300,7 @@ void SelectItem::init()
         d->m_itemScannerDialog->show();
     });
 
-    d->w_dateFilter = new QToolButton();
+    d->w_dateFilter = new QToolButton(this);
     d->w_dateFilter->setVisible(false);
     d->w_dateFilter->setIcon(QIcon::fromTheme(u"appointment-new"_qs));
     d->w_dateFilter->setAutoRaise(true);
@@ -313,7 +318,7 @@ void SelectItem::init()
             this, [this]() {
         setZoomFactor((int(std::round(d->m_zoom * 4)) + 1) / 4.); // 25% steps
     });
-    d->w_zoomLevel = new QToolButton();
+    d->w_zoomLevel = new QToolButton(this);
     d->w_zoomLevel->setToolButtonStyle(Qt::ToolButtonTextOnly);
     d->w_zoomLevel->setPopupMode(QToolButton::MenuButtonPopup);
     d->w_zoomLevel->setAutoRaise(true);
@@ -329,7 +334,7 @@ void SelectItem::init()
     d->w_zoomLevel->setMenu(zoomMenu);
 
     QToolButton *tb;
-    tb = new QToolButton();
+    tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+1"));
     tb->setIcon(QIcon::fromTheme(u"view-list-details"_qs));
     tb->setAutoRaise(true);
@@ -337,14 +342,14 @@ void SelectItem::init()
     tb->setChecked(true);
     d->w_viewmode->addButton(tb, 1);
 
-    tb = new QToolButton();
+    tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon::fromTheme(u"view-list-icons"_qs));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
 
-    d->w_items = new QTreeView();
+    d->w_items = new QTreeView(this);
     d->w_items->setAlternatingRowColors(true);
     d->w_items->setAllColumnsShowFocus(true);
     d->w_items->setUniformRowHeights(true);
@@ -357,7 +362,7 @@ void SelectItem::init()
     d->m_itemsDelegate = new BrickLink::ItemThumbsDelegate(d->m_zoom, d->w_items);
     d->w_items->setItemDelegate(d->m_itemsDelegate);
 
-    d->w_thumbs = new QListView();
+    d->w_thumbs = new QListView(this);
     d->w_thumbs->setUniformItemSizes(true);
     d->w_thumbs->setMovement(QListView::Static);
     d->w_thumbs->setViewMode(QListView::IconMode);
@@ -493,20 +498,28 @@ void SelectItem::init()
     connect(d->w_thumbs, &QWidget::customContextMenuRequested,
             this, &SelectItem::showContextMenu);
 
-    auto *lay = new QGridLayout(this);
-    lay->setContentsMargins(0, 0, 0, 0);
-    lay->setColumnStretch(0, 25);
-    lay->setColumnStretch(1, 75);
-    lay->setRowStretch(0, 0);
-    lay->setRowStretch(1, 1);
+    d->w_splitter = new QSplitter(Qt::Horizontal, this);
+    d->w_splitter->setChildrenCollapsible(false);
+    d->w_splitter->setStretchFactor(0, 1);
+    d->w_splitter->setStretchFactor(1, 100);
+    auto topLay = new QVBoxLayout(this);
+    topLay->setContentsMargins({ });
+    topLay->addWidget(d->w_splitter);
+    auto leftWidget = new QWidget(this);
+    auto leftLay = new QVBoxLayout(leftWidget);
+    leftLay->setContentsMargins({ });
+    d->w_splitter->addWidget(leftWidget);
+    auto rightWidget = new QWidget(this);
+    auto rightLay = new QVBoxLayout(rightWidget);
+    rightLay->setContentsMargins({ });
+    d->w_splitter->addWidget(rightWidget);
 
     auto *ittlay = new QHBoxLayout();
     ittlay->addWidget(d->w_item_types_label);
     ittlay->addWidget(d->w_item_types, 10);
     ittlay->addWidget(d->w_dateFilter);
-    lay->addLayout(ittlay, 0, 0);
-
-    lay->addWidget(d->w_categories, 1, 0, 1, 1);
+    leftLay->addLayout(ittlay);
+    leftLay->addWidget(d->w_categories);
 
     auto *viewlay = new QHBoxLayout();
     viewlay->setContentsMargins(0, 0, 0, 0);
@@ -520,10 +533,10 @@ void SelectItem::init()
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
-    lay->addLayout(viewlay, 0, 1);
+    rightLay->addLayout(viewlay);
 
     d->m_stack = new QStackedLayout();
-    lay->addLayout(d->m_stack, 1, 1, 1, 1);
+    rightLay->addLayout(d->m_stack);
 
     d->m_stack->addWidget(d->w_items);
     d->m_stack->addWidget(d->w_thumbs);
@@ -749,7 +762,7 @@ QByteArray SelectItem::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(4)
+    ds << QByteArray("SI") << qint32(5)
        << qint8(itt ? ((itt == BrickLink::ItemTypeModel::AllItemTypes) ? qint8(-2) : itt->id())
                     : BrickLink::ItemType::InvalidId)
        << (cat ? ((cat == BrickLink::CategoryModel::AllCategories) ? uint(-2) : cat->id())
@@ -761,7 +774,8 @@ QByteArray SelectItem::saveState() const
        << d->w_viewmode->checkedId()
        << (d->w_categories->header()->sortIndicatorOrder() == Qt::AscendingOrder)
        << (d->w_items->header()->sortIndicatorOrder() == Qt::AscendingOrder)
-       << d->w_items->header()->sortIndicatorSection();
+       << d->w_items->header()->sortIndicatorSection()
+       << d->w_splitter->saveState();
 
     return ba;
 }
@@ -772,7 +786,7 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 4) || (version > 4))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 4) || (version > 5))
         return false;
 
     qint8 itt;
@@ -785,9 +799,13 @@ bool SelectItem::restoreState(const QByteArray &ba)
     bool catSortAsc;
     bool itemSortAsc;
     int itemSortColumn;
+    QByteArray splitterState;
 
     ds >> itt >> cat >> itemid >> filterText >> colorFilterId
        >> zoom >> viewMode >> catSortAsc >> itemSortAsc >> itemSortColumn;
+
+    if (version >= 5)
+        ds >> splitterState;
 
     if (ds.status() != QDataStream::Ok)
         return false;
@@ -822,6 +840,9 @@ bool SelectItem::restoreState(const QByteArray &ba)
     if (!itemid.isEmpty())
         setCurrentItem(BrickLink::core()->item(itt, itemid.toLatin1()), false);
 
+    if (!splitterState.isEmpty())
+        d->w_splitter->restoreState(splitterState);
+
     setZoomFactor(zoom);
     setViewMode(viewMode);
     d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
@@ -833,7 +854,7 @@ QByteArray SelectItem::defaultState()
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(4)
+    ds << QByteArray("SI") << qint32(5)
        << qint8('P')  // parts
        << uint(-2)    // all categories
        << QString()   // no item id
@@ -843,7 +864,8 @@ QByteArray SelectItem::defaultState()
        << int(1)      // listview
        << true        // cat sorted asc
        << true        // items sorted asc
-       << int(2);     // items sorted by name
+       << int(2)      // items sorted by name
+       << QByteArray(); // no splitter state
     return ba;
 }
 
