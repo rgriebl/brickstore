@@ -550,6 +550,8 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                     }
                 }
 
+                BrickLink::Incomplete lotIncomplete = *lot->isIncomplete();
+
                 switch (BrickLink::core()->resolveIncomplete(lot, startAtChangelogId, creationTime)) {
                 case BrickLink::Core::ResolveResult::Fail: bsx.incInvalidLotCount(); break;
                 case BrickLink::Core::ResolveResult::ChangeLog: bsx.incFixedLotCount(); break;
@@ -566,7 +568,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
 
                 Lot base = *lot;
                 if (!baseValues.isEmpty()) {
-                    base.setIncomplete(new BrickLink::Incomplete);
+                    base.setIncomplete(new BrickLink::Incomplete(lotIncomplete));
 
                     for (const auto &attr : std::as_const(baseValues)) {
                         auto it = tagHash.find(attr.name());
@@ -574,13 +576,12 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                             (*it)(&base, attr.value().toString());
                         }
                     }
-                    if (BrickLink::core()->resolveIncomplete(&base, startAtChangelogId, creationTime)
-                        == BrickLink::Core::ResolveResult::Fail) {
-                        if (!base.item() && lot->item())
-                            base.setItem(lot->item());
-                        if (!base.color() && lot->color())
-                            base.setColor(lot->color());
+
+                    if (lot->item() && lot->color() && (*base.isIncomplete() == lotIncomplete)) {
+                        // skip doing the same resolve a second time
                         base.setIncomplete(nullptr);
+                    } else {
+                        BrickLink::core()->resolveIncomplete(&base, startAtChangelogId, creationTime);
                     }
                 }
                 bsx.addToDifferenceModeBase(lot, base);
