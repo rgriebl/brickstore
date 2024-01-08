@@ -675,27 +675,37 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
     const Lot *base;
     QXmlStreamAttributes baseValues;
 
-    enum CreateFlags { Required = 0, Optional = 1, Constant = 2, WriteEmpty = 8 };
+    enum CreateFlags {
+        Required = 0,           // needs to be serialized
+        Optional = 1,           // only needs to be serialized if different from the default value
+        Constant = 2,           // does not need a 'base' attribute to track changes
+        SkipBaseIfDefault = 4,  // does not need a 'base' attribute if it's the default value
+        EmptyElement = 8        // if serialized, write an empty element only (no text)
+    };
 
     auto create = [&](QStringView tagName, auto getter, auto stringify,
             int flags = CreateFlags::Required, const QVariant &def = { }) {
 
         auto v = (lot->*getter)();
         const QString t = tagName.toString();
-        const bool writeEmpty = (flags & WriteEmpty);
-        const bool optional = ((flags & ~WriteEmpty) == Optional);
-        const bool constant = ((flags & ~WriteEmpty) == Constant);
+        const bool emptyElement = (flags & EmptyElement);
+        const bool optional = (flags & Optional);
+        const bool constant = (flags & Constant);
+        const bool skipBaseIfDefault = (flags & SkipBaseIfDefault);
 
         if (!optional || (QVariant::fromValue(v) != def)) {
-            if (writeEmpty)
+            if (emptyElement)
                 xml.writeEmptyElement(t);
             else
                 xml.writeTextElement(t, stringify(v));
         }
         if (!constant && base) {
             auto bv = (base->*getter)();
-            if (QVariant::fromValue(v) != QVariant::fromValue(bv))
-                baseValues.append(t, stringify(bv));
+            QVariant vbv = QVariant::fromValue(bv);
+            if (QVariant::fromValue(v) != vbv) {
+                if (!(skipBaseIfDefault && (vbv == def)))
+                    baseValues.append(t, stringify(bv));
+            }
         }
     };
     static auto asString   = [](const QString &s)      { return s; };
@@ -715,22 +725,22 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
 
         // vvv Required Fields (part 1)
         create(u"ItemID",       &Lot::itemId,       [](auto l1s) {
-            return QString::fromLatin1(l1s); });
+                return QString::fromLatin1(l1s); }, Required | SkipBaseIfDefault);
         create(u"ItemTypeID",   &Lot::itemTypeId,   [](auto c) {
             QChar qc = QLatin1Char(c);
-            return qc.isPrint() ? QString(qc) :QString();
-        });
-        create(u"ColorID",      &Lot::colorId,      asInt);
+            return qc.isPrint() ? QString(qc) : QString();
+            }, Required | SkipBaseIfDefault);
+        create(u"ColorID",      &Lot::colorId,      asInt, Required | SkipBaseIfDefault);
 
         // vvv Redundancy Fields
 
         // this extra information is useful, if the e.g.the color- or item-id
         // are no longer available after a database update
-        create(u"ItemName",     &Lot::itemName,     asString);
-        create(u"ItemTypeName", &Lot::itemTypeName, asString);
-        create(u"ColorName",    &Lot::colorName,    asString);
-        create(u"CategoryID",   &Lot::categoryId,   asInt);
-        create(u"CategoryName", &Lot::categoryName, asString);
+        create(u"ItemName",     &Lot::itemName,     asString, Required | Constant);
+        create(u"ItemTypeName", &Lot::itemTypeName, asString, Required | Constant);
+        create(u"ColorName",    &Lot::colorName,    asString, Required | Constant);
+        create(u"CategoryID",   &Lot::categoryId,   asInt,    Required | Constant);
+        create(u"CategoryName", &Lot::categoryName, asString, Required | Constant);
 
         // vvv Required Fields (part 2)
 
@@ -776,7 +786,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         create(u"TP3",       &Lot::tierPrice2,    asCurrency, Optional, 0);
 
         create(u"Retain", &Lot::retain, [](bool b) {
-            return b ? u"Y"_qs : u"N"_qs; }, Optional | WriteEmpty, false);
+            return b ? u"Y"_qs : u"N"_qs; }, Optional | EmptyElement, false);
 
         create(u"Stockroom", &Lot::stockroom, [](auto st) {
             switch (st) {
