@@ -1004,7 +1004,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
 
     if (!lot->item() || !lot->color()) {
         if (!lot->item()) {
-            qCWarning(LogResolver).noquote() << "item:" << resolvedItemTypeAndId << "[failed]";
+            qCWarning(LogResolver).noquote() << "item:" << inc->m_item_id << "/" << inc->m_item_name << "[failed]";
         } else {
             inc->m_item_id.clear();
             inc->m_item_name.clear();
@@ -1014,7 +1014,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
             inc->m_category_name.clear();
         }
         if (!lot->color()) {
-            qCWarning(LogResolver) << "color:" << resolvedColorId << "[failed]";
+            qCWarning(LogResolver) << "color:" << inc->m_color_id << "[failed]";
         } else {
             inc->m_color_id = Color::InvalidId;
             inc->m_color_name.clear();
