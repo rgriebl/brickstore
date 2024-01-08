@@ -93,8 +93,6 @@ Application::Application(int &argc, char **argv)
 
     s_inst = this;
 
-    QCoreApplication::setOrganizationName(u"" BRICKSTORE_NAME ""_qs);
-    QCoreApplication::setOrganizationDomain(u"" BRICKSTORE_URL ""_qs.section(u'.', -2, -1));
     QCoreApplication::setApplicationName(u"" BRICKSTORE_NAME ""_qs);
     QCoreApplication::setApplicationVersion(u"" BRICKSTORE_VERSION ""_qs);
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());

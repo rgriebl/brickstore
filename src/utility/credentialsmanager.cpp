@@ -4,7 +4,6 @@
 #include <QSysInfo>
 #include <QCryptographicHash>
 #include <QString>
-#include <QSettings>
 
 #include "exception.h"
 #include "credentialsmanager.h"
@@ -30,6 +29,18 @@ static const SecretSchema brickstoreSchema = {
      },
     0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
 };
+#else
+#  include <QStandardPaths>
+#  include <QSettings>
+
+static QSettings &fallbackSettings()
+{
+    static const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    static const QString cacheFile = cacheDir + u"/credentials.conf";
+    static QSettings s(cacheFile, QSettings::IniFormat);
+    return s;
+}
+
 #endif
 
 
@@ -144,7 +155,7 @@ QByteArray CredentialsManager::load(const QString &service, const QString &id)
     }
 
 #else
-    codedCredential = QSettings().value(u"/FallbackCredentialsManager/"_qs + service + u'/' + id)
+    codedCredential = fallbackSettings().value(u"/FallbackCredentialsManager/"_qs + service + u'/' + id)
                           .toByteArray();
 #endif
 
@@ -219,7 +230,7 @@ void CredentialsManager::save(const QString &service, const QString &id, const Q
     }
 
 #else
-    QSettings().setValue(u"/FallbackCredentialsManager/"_qs + service + u'/' + id,
-                         QVariant::fromValue(codedCredential));
+    fallbackSettings().setValue(u"/FallbackCredentialsManager/"_qs + service + u'/' + id,
+                                QVariant::fromValue(codedCredential));
 #endif
 }
