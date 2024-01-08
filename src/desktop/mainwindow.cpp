@@ -2,40 +2,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <array>
-#include <cfloat>
 
 #include <QUndoStack>
 #include <QAction>
-#include <QActionGroup>
 #include <QCloseEvent>
 #include <QMetaObject>
-#include <QMetaMethod>
 #include <QMenuBar>
 #include <QToolBar>
-#include <QPainter>
 #include <QTimer>
 #include <QLabel>
-#include <QBitmap>
-#include <QDir>
-#include <QFileInfo>
 #include <QToolButton>
-#include <QToolTip>
-#include <QCursor>
-#include <QShortcut>
 #include <QDockWidget>
-#include <QSizeGrip>
-#include <QPlainTextEdit>
 #include <QFont>
-#include <QCommandLinkButton>
 #include <QStyle>
-#include <QLinearGradient>
-#include <QDesktopServices>
 #include <QWidgetAction>
-#include <QPlainTextEdit>
-#include <QFileDialog>
-#include <QProgressDialog>
-#include <QDialogButtonBox>
-#include <QStackedLayout>
 #include <QSplitter>
 #include <QListWidget>
 #if defined(Q_OS_WINDOWS)

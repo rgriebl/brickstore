@@ -59,7 +59,7 @@ target_link_libraries(bricklink_module PRIVATE
 )
 
 if (BS_BACKEND)
-    target_sources(${PROJECT_NAME} PRIVATE
+    target_sources(bricklink_module PRIVATE
         textimport.h
         textimport.cpp
     )
@@ -99,12 +99,6 @@ endif()
 
 if (MODELTEST)
     target_link_libraries(bricklink_module PRIVATE Qt6::Test)
-endif()
-
-if (BRICKLINK_AFFILIATE_API_KEY)
-    set_source_files_properties(priceguide.cpp PROPERTIES COMPILE_DEFINITIONS
-        BS_BRICKLINK_AFFILIATE_API_KEY=${BRICKLINK_AFFILIATE_API_KEY}
-    )
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE bricklink_module)

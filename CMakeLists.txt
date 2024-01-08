@@ -32,7 +32,6 @@ option(SANITIZE     "Build with ASAN" OFF)
 option(MODELTEST    "Build with modeltest" OFF)
 option(SENTRY       "Build with sentry.io support" OFF)
 option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
-set(BRICKLINK_AFFILIATE_API_KEY  "" CACHE STRING "BrickLink's Affiliate API key")
 
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool.")

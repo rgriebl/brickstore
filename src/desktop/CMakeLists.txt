@@ -137,10 +137,10 @@ target_link_libraries(desktop_module PRIVATE
 )
 
 if (MACOS)
-    target_sources(${PROJECT_NAME} PRIVATE
+    target_sources(desktop_module PRIVATE
         desktopapplication_mac.mm
     )
-    target_link_libraries(${PROJECT_NAME} PRIVATE
+    target_link_libraries(desktop_module PRIVATE
         "-framework AppKit"
     )
 endif()
