@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2024.1.1] - 2024-01-10
+
+- The Webcam view for Brickognize has been rewritten and should now be a lot faster and more stable on Windows and macOS. Plus the window can now also be "pinned" to keep it open.
+- All icons in the UI are now scaling with the *Icon size* setting (before, it was only the main toolbar).
+- LEGO's PCCs (part-color-codes) are now displayed in the item info views and they can also be used directly in the add-item dialog's filter field.
+- Not having selected a valid color is now shown with a chrome checkerboard pattern on 3D models (before, the part was confusingly shown as light gray).
+- Speckle and Glitter colors on 3D models are now looking a lot more natural.
+- The 3D render settings are now directly accessible from the main menu: the two most important settings are *Anti-Aliasing*, which users with decent GPUs should always increase to "Very high" for nicer looks and *Lines* / *Line width* where you can adjust how realistic or "cartoony" you want the rendering to look.
+
+**Please note**: 2023.11.2 introduced a bug where the cache and app-data directories got an extra sub-directory "BrickStore" appended. This change was reverted and it shouldn't affect most of the users, unless you are working with **extensions**. If you are, then please move your extension files up one level again, where they were before 2023.11.2.
+
 
 ## [2023.11.2] - 2023-11-14
 
@@ -612,7 +623,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2023.11.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.1.1...HEAD
+[2024.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.1
 [2023.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.2
 [2023.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.1
 [2023.8.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.8.1
