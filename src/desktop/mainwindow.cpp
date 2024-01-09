@@ -49,6 +49,7 @@
 #include "mainwindow.h"
 #include "mainwindow_p.h"
 #include "progresscircle.h"
+#include "rendersettingsdialog.h"
 #include "taskwidgets.h"
 #include "view.h"
 #include "viewpane.h"
@@ -162,6 +163,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(Application::inst(), &Application::showSettings,
             this, &MainWindow::showSettings);
+    connect(Application::inst(), &Application::show3DSettings,
+            this, &MainWindow::show3DSettings);
     connect(Application::inst(), &Application::showDeveloperConsole,
             this, [this]() {
         if (auto *dc = DesktopApplication::inst()->developerConsole()) {
@@ -759,6 +762,7 @@ void MainWindow::setupMenuBar()
                                  "update_database",
                                  "-",
                                  "configure",
+                                 "3d_settings",
                                  "-",
                                  "developer_console",
                                  "-",
@@ -1270,6 +1274,11 @@ void MainWindow::showSettings(const QString &page)
     dlg->setWindowModality(Qt::ApplicationModal);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
+}
+
+void MainWindow::show3DSettings()
+{
+    RenderSettingsDialog::inst()->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

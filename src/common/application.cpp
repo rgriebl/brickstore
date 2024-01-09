@@ -256,6 +256,7 @@ void Application::afterInit()
               ActionManager::inst()->qAction("view_goto_next_diff")->setEnabled(b);
           } },
         { "configure", [this](bool) { emit showSettings(); } },
+        { "3d_settings", [this](bool) { emit show3DSettings(); } },
         { "developer_console", [this](bool) { emit showDeveloperConsole(); } },
         { "help_extensions", [](bool) {
               QString url = u"https://" + Application::inst()->gitHubPagesUrl() + u"/extensions/";

@@ -410,6 +410,8 @@ void ActionManager::initialize()
     A("update_database",          QT_TR_NOOP("Update Database"),                 NeedNetwork);
     a->m_iconName = "view_refresh";
     A("configure",                QT_TR_NOOP("Settings..."),                     QT_TR_NOOP("Ctrl+,", "Extras|Settings"), NoNeed, FlagRole(QAction::PreferencesRole));
+    A("3d_settings",              QT_TR_NOOP("3D Render Settings..."),           NoNeed, FlagRole(QAction::PreferencesRole));
+    a->m_iconName = "draw_cuboid";
     A("developer_console",        QT_TR_NOOP("Developer Console"));
     a->m_iconName = "scriptnew";
     A("reload_scripts",           QT_TR_NOOP("Reload User Scripts"));

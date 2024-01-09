@@ -84,6 +84,7 @@ private slots:
     void transferProgressUpdate(int p, int t);
 
     void showSettings(const QString &page = { });
+    void show3DSettings();
 
     void goHome(bool home);
     void repositionHomeWidget();
