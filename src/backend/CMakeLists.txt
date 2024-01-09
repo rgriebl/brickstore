@@ -11,6 +11,7 @@ qt_add_library(backend_module STATIC
 target_link_libraries(backend_module PRIVATE
     Qt6::Core
     Qt6::Gui
+    bricklink_module
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE backend_module)
