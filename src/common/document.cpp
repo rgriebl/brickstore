@@ -362,7 +362,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
               }
           } },
         { "edit_qty_divide", [this](bool) -> QCoro::Task<> {
-              if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantities are exactly divisible without reminder, before this operation is performed.)"),
+              if (auto i = co_await UIHelpers::getInteger(tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantities are exactly divisible without remainder, before this operation is performed.)"),
                                                           QString(), 1, 1, 1000)) {
                   divideQuantity(*i);
               }
