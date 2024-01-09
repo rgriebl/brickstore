@@ -58,6 +58,9 @@
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
+    <key>NSCameraUsageDescription</key>
+    <string>BrickStore needs access to your camera, if you want to identify parts with it.</string>
+
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>
