@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QCoreApplication>
-#include <cstdlib>
-#include <ctime>
-
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QTextStream>
@@ -15,18 +12,73 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonValue>
 #include <QtCore/QStringBuilder>
+#include <QtXml/QDomElement>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 
 #include "utility/exception.h"
-#include "utility/xmlhelpers.h"
 #include "bricklink/core.h"
 #include "bricklink/dimensions.h"
 #include "bricklink/textimport.h"
-#include "bricklink/partcolorcode.h"
 #include "bricklink/changelogentry.h"
 
 
+static void xmlParse(const QString &path, const QString &rootName, const QString &elementName,
+                     const std::function<void (const QDomElement &)> &callback)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(&f, "could not open file");
+
+    QDomDocument doc;
+    QString emsg;
+    int eline = 0, ecolumn = 0;
+    if (!doc.setContent(&f, false, &emsg, &eline, &ecolumn))
+        throw ParseException(&f, "%1 at line %2, column %3").arg(emsg).arg(eline).arg(ecolumn);
+
+    auto root = doc.documentElement().toElement();
+    if (root.nodeName() != rootName)
+        throw ParseException(&f, "expected root node %1, but got %2").arg(rootName, root.nodeName());
+
+    try {
+        for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+            if (node.nodeName() == elementName)
+                callback(node.toElement());
+        }
+    } catch (const Exception &e) {
+        throw ParseException(&f, e.what());
+    }
+}
+
+static QString xmlTagText(const QDomElement &parent, const char *tagName)
+{
+    const auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
+    if (dnl.size() != 1) {
+        throw ParseException("Expected a single %1 tag, but found %2")
+            .arg(QString::fromLatin1(tagName)).arg(dnl.size());
+    }
+    QString text = dnl.at(0).toElement().text().trimmed();
+
+    // QXml did not decode entities, so we have to do it here
+    qsizetype pos = 0;
+    while ((pos = text.indexOf(u"&#", pos)) >= 0) {
+        auto endpos = text.indexOf(u';', pos + 2);
+        if (endpos < 0) {
+            pos += 2;
+        } else {
+            bool isHex = (text.at(pos + 2) == u'x');
+            int unicode = QStringView { text }.mid(pos + 2, endpos - pos - 2)
+                              .toInt(nullptr, isHex ? 16 : 10);
+            if (unicode > 0) {
+                text.replace(pos, endpos - pos + 1, QChar(unicode));
+                pos++;
+            } else {
+                pos = endpos + 1;
+            }
+        }
+    }
+    return text;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -79,19 +131,18 @@ bool BrickLink::TextImport::import(const QString &path)
 
 void BrickLink::TextImport::readColors(const QString &path)
 {
-    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
-    p.parse([this, &p](QDomElement e) {
+    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         Color col;
-        uint colid = p.elementText(e, "COLOR").toUInt();
+        uint colid = xmlTagText(e, "COLOR").toUInt();
 
         col.m_id       = colid;
-        col.m_name.copyQString(p.elementText(e, "COLORNAME").simplified(), nullptr);
-        col.m_color    = QColor(u'#' + p.elementText(e, "COLORRGB"));
+        col.m_name.copyQString(xmlTagText(e, "COLORNAME").simplified(), nullptr);
+        col.m_color    = QColor(u'#' + xmlTagText(e, "COLORRGB"));
 
         col.m_ldraw_id = -1;
         col.m_type     = ColorType();
 
-        auto type = p.elementText(e, "COLORTYPE");
+        auto type = xmlTagText(e, "COLORTYPE");
         if (type.contains(u"Transparent")) col.m_type |= ColorTypeFlag::Transparent;
         if (type.contains(u"Glitter"))     col.m_type |= ColorTypeFlag::Glitter;
         if (type.contains(u"Speckle"))     col.m_type |= ColorTypeFlag::Speckle;
@@ -104,10 +155,10 @@ void BrickLink::TextImport::readColors(const QString &path)
         if (!col.m_type)
             col.m_type = ColorTypeFlag::Solid;
 
-        int partCnt    = p.elementText(e, "COLORCNTPARTS").toInt();
-        int setCnt     = p.elementText(e, "COLORCNTSETS").toInt();
-        int wantedCnt  = p.elementText(e, "COLORCNTWANTED").toInt();
-        int forSaleCnt = p.elementText(e, "COLORCNTINV").toInt();
+        int partCnt    = xmlTagText(e, "COLORCNTPARTS").toInt();
+        int setCnt     = xmlTagText(e, "COLORCNTSETS").toInt();
+        int wantedCnt  = xmlTagText(e, "COLORCNTWANTED").toInt();
+        int forSaleCnt = xmlTagText(e, "COLORCNTINV").toInt();
 
         col.m_popularity = float(partCnt + setCnt + wantedCnt + forSaleCnt);
 
@@ -115,8 +166,8 @@ void BrickLink::TextImport::readColors(const QString &path)
         // mark it as raw data meanwhile:
         col.m_popularity = -col.m_popularity;
 
-        col.m_year_from = p.elementText(e, "COLORYEARFROM").toUShort();
-        col.m_year_to   = p.elementText(e, "COLORYEARTO").toUShort();
+        col.m_year_from = xmlTagText(e, "COLORYEARFROM").toUShort();
+        col.m_year_to   = xmlTagText(e, "COLORYEARTO").toUShort();
 
         m_db->m_colors.push_back(col);
     });
@@ -126,13 +177,12 @@ void BrickLink::TextImport::readColors(const QString &path)
 
 void BrickLink::TextImport::readCategories(const QString &path)
 {
-    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
-    p.parse([this, &p](QDomElement e) {
+    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         Category cat;
-        uint catid = p.elementText(e, "CATEGORY").toUInt();
+        uint catid = xmlTagText(e, "CATEGORY").toUInt();
 
         cat.m_id   = catid;
-        cat.m_name.copyQString(p.elementText(e, "CATEGORYNAME").simplified(), nullptr);
+        cat.m_name.copyQString(xmlTagText(e, "CATEGORYNAME").simplified(), nullptr);
 
         m_db->m_categories.push_back(cat);
     });
@@ -207,16 +257,15 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, co
 
 void BrickLink::TextImport::readItemTypes(const QString &path)
 {
-    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
-    p.parse([this, &p](QDomElement e) {
+    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         ItemType itt;
-        char c = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
+        char c = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
 
         if (c == 'U')
             return;
 
         itt.m_id   = c;
-        itt.m_name.copyQString(p.elementText(e, "ITEMTYPENAME").simplified(), nullptr);
+        itt.m_name.copyQString(xmlTagText(e, "ITEMTYPENAME").simplified(), nullptr);
 
         itt.m_has_inventories   = false;
         itt.m_has_colors        = (c == 'P' || c == 'G');
@@ -231,31 +280,33 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
 
 void BrickLink::TextImport::readItems(const QString &path, const BrickLink::ItemType *itt)
 {
-    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
-    p.parse([this, &p, itt](QDomElement e) {
+    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
         Item item;
-        item.m_id.copyQByteArray(p.elementText(e, "ITEMID").toLatin1(), nullptr);
-        const QString itemName = p.elementText(e, "ITEMNAME").simplified();
+        item.m_id.copyQByteArray(xmlTagText(e, "ITEMID").toLatin1(), nullptr);
+        const QString itemName = xmlTagText(e, "ITEMNAME").simplified();
         item.m_name.copyQString(itemName, nullptr);
         item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());
 
-        uint catId = p.elementText(e, "CATEGORY").toUInt();
+        uint catId = xmlTagText(e, "CATEGORY").toUInt();
         auto cat = core()->category(catId);
         if (!cat)
             throw ParseException("item %1 has no category").arg(QString::fromLatin1(item.id()));
         item.m_categoryIndexes.push_back(quint16(cat->index()), nullptr);
 
-        uint y = p.elementText(e, "ITEMYEAR", "0").toUInt();
+        uint y = 0;
+        try {
+            y = xmlTagText(e, "ITEMYEAR").toUInt();
+        } catch (...) { }
         item.m_year_from = ((y > 1900) && (y < 2155)) ? (y - 1900) : 0; // we only have 8 bits for the year
         item.m_year_to = item.m_year_from;
 
         if (itt->hasWeight())
-            item.m_weight = p.elementText(e, "ITEMWEIGHT").toFloat();
+            item.m_weight = xmlTagText(e, "ITEMWEIGHT").toFloat();
         else
             item.m_weight = 0;
 
         try {
-            auto color = core()->color(p.elementText(e, "IMAGECOLOR").toUInt());
+            auto color = core()->color(xmlTagText(e, "IMAGECOLOR").toUInt());
             item.m_defaultColorIndex = !color ? quint16(0xfff) : quint16(color->index());
         } catch (...) {
             item.m_defaultColorIndex = quint16(0xfff);
@@ -286,16 +337,15 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
 {
     QHash<uint, std::vector<Item::PCC>> pccs;
 
-    XmlHelpers::ParseXML p(path, "CODES", "ITEM");
-    p.parse([this, &p, &pccs](QDomElement e) {
-        char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
-        const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
-        QString colorName = p.elementText(e, "COLOR").simplified();
+    xmlParse(path, u"CODES"_qs, u"ITEM"_qs, [this, &pccs](QDomElement e) {
+        char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
+        const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
+        QString colorName = xmlTagText(e, "COLOR").simplified();
         bool numeric = false;
-        uint code = p.elementText(e, "CODENAME").toUInt(&numeric, 10);
+        uint code = xmlTagText(e, "CODENAME").toUInt(&numeric, 10);
 
         if (!numeric) {
-            qWarning() << "  > Parsing part_color_codes: pcc" << p.elementText(e, "CODENAME")
+            qWarning() << "  > Parsing part_color_codes: pcc" << xmlTagText(e, "CODENAME")
                        << "is not numeric";
         }
 
@@ -361,30 +411,31 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
 {
     std::unique_ptr<QFile> f(BrickLink::core()->dataReadFile(u"inventory.xml", item));
 
+    if (!f || !f->isOpen())
+        return false;
+
     QDateTime fileTime = f->fileTime(QFileDevice::FileModificationTime);
     QDate fileDate = fileTime.date();
-
     uint itemIndex = uint(item - items().data());
 
-    if (!f || !f->isOpen()
-        || (fileTime.toSecsSinceEpoch() < m_inventoryLastUpdated.value(itemIndex, -1))) {
+    if (fileTime.toSecsSinceEpoch() < m_inventoryLastUpdated.value(itemIndex, -1))
         return false;
-    }
 
     QVector<Item::ConsistsOf> inventory;
     QVector<QPair<int, int>> knownColors;
 
     try {
-        XmlHelpers::ParseXML p(f.release(), "INVENTORY", "ITEM");
-        p.parse([this, &p, &inventory, &knownColors, fileDate](QDomElement e) {
-            char itemTypeId = ItemType::idFromFirstCharInString(p.elementText(e, "ITEMTYPE"));
-            const QByteArray itemId = p.elementText(e, "ITEMID").toLatin1();
-            uint colorId = p.elementText(e, "COLOR").toUInt();
-            int qty = p.elementText(e, "QTY").toInt();
-            bool extra = (p.elementText(e, "EXTRA") == u"Y");
-            bool counterPart = (p.elementText(e, "COUNTERPART") == u"Y");
-            bool alternate = (p.elementText(e, "ALTERNATE") == u"Y");
-            uint matchId = p.elementText(e, "MATCHID").toUInt();
+        f->close();
+        xmlParse(f->fileName(), u"INVENTORY"_qs, u"ITEM"_qs,
+                 [this, &inventory, &knownColors, fileDate](QDomElement e) {
+            char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
+            const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
+            uint colorId = xmlTagText(e, "COLOR").toUInt();
+            int qty = xmlTagText(e, "QTY").toInt();
+            bool extra = (xmlTagText(e, "EXTRA") == u"Y");
+            bool counterPart = (xmlTagText(e, "COUNTERPART") == u"Y");
+            bool alternate = (xmlTagText(e, "ALTERNATE") == u"Y");
+            uint matchId = xmlTagText(e, "MATCHID").toUInt();
 
             auto item = core()->item(itemTypeId, itemId);
             auto color = core()->color(colorId);

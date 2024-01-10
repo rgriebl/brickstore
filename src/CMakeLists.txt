@@ -35,8 +35,6 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/transfer.h
     utility/utility.cpp
     utility/utility.h
-    utility/xmlhelpers.cpp
-    utility/xmlhelpers.h
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
