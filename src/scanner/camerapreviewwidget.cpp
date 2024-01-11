@@ -19,7 +19,7 @@
 #  pragma warning(pop)
 #endif
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 6, 0)
 namespace Scanner {
 class CameraPreview : public ::CameraPreview {
 public:
