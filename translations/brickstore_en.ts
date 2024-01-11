@@ -5311,36 +5311,37 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="389"/>
         <source>Icon size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="345"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="496"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="371"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="501"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="551"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="376"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="687"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="506"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="381"/>
         <source>Big</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="489"/>
         <source>Font size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="451"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="470"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="570"/>
         <source>Reset to 100%</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5350,105 +5351,105 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="482"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="634"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="529"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="665"/>
         <source>Row height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="672"/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="683"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="819"/>
         <source>Automatically update cached data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="863"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="886"/>
         <source> days</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="720"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="856"/>
         <source>BrickLink Pictures, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="879"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="808"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="944"/>
         <source>Reset to defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="595"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="731"/>
         <source>BrickLink Login</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="749"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="763"/>
         <source>Other...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="981"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="995"/>
         <source>could not find a cross rate for %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="983"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="997"/>
         <source>1 %1 equals %2 USD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="992"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1006"/>
         <source>Document directory location</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1148"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1163"/>
         <source>The specified document directory does not exist or is not read- and writable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1208"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1224"/>
         <source>Not a valid LDraw installation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1225"/>
         <source>Valid LDraw installation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="833"/>
         <source>BrickLink database, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="589"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="725"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="976"/>
         <source>LDraw</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="816"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="830"/>
         <source>LDraw directory location</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5459,13 +5460,13 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="607"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="621"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="757"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
@@ -5512,7 +5513,7 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="773"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="787"/>
         <source>Your username is required here - not your email address.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5542,110 +5543,110 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="517"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="653"/>
         <source>Document Views</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="679"/>
         <source>Column spacing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="556"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="692"/>
         <source>Medium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="764"/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="644"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="780"/>
         <source>Price guide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="656"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="792"/>
         <source>Values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="666"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="802"/>
         <source>Source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="849"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="985"/>
         <source>Library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="867"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1003"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="883"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1019"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="939"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1075"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="973"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1109"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1004"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1140"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1149"/>
         <source>Now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1166"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1302"/>
         <source>Keyboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1172"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1308"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1201"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1315"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1158"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1234"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1294"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1370"/>
         <source>Reset all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1244"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1380"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="939"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
         <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="947"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="961"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="967"/>
         <source>This shortcut is already used by another action.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5660,22 +5661,23 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="909"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1045"/>
         <source>Use an existing LDraw installation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1033"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1169"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1052"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1188"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1058"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1194"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5699,7 +5701,7 @@ Right click: Menu</source>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="792"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="806"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5734,7 +5736,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="561"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation type="unfinished"></translation>

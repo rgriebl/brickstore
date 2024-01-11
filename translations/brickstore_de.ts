@@ -2343,7 +2343,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     <message>
         <location filename="../src/common/document.cpp" line="389"/>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation>Sonderangebotsprozente für alle ausgewählten Teile setzen  (die Preise selbst werden &lt;u&gt;nicht&lt;/u&gt; geändert).&lt;br /&gt;Negative Werte sind ebenfalls möglich.</translation>
+        <translation>Sonderangebotsprozente für alle ausgewählten Teile setzen (die Preise selbst werden &lt;u&gt;nicht&lt;/u&gt; geändert).&lt;br /&gt;Negative Werte sind ebenfalls möglich.</translation>
     </message>
     <message>
         <location filename="../src/common/document.cpp" line="390"/>
@@ -3460,7 +3460,7 @@ Bitte wählen Sie auch aus, welche Eigenschaften (z.B. Anmerkungen, Staffelpreis
     <message>
         <location filename="../src/common/filter.cpp" line="329"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Der Filterausdruck kann entweder in (fast) natürlicher Sprache oder mit logischen Operatoren eingegeben werden.&lt;br /&gt;Ein einzelner Ausdruck entspricht dabei folgendem Muster: &lt;b&gt;&lt;i&gt;FELDNAME VERGLEICH&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FELDNAME&lt;/i&gt;&lt;/b&gt; und &lt;b&gt;&lt;i&gt;VERGLEICH&lt;/i&gt;&lt;/b&gt; sind dabei optional und sind standardmässig  &lt;b&gt;in irgendeinem Feld&lt;/b&gt;, bzw. &lt;b&gt;beinhaltet&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Mehrere Ausdrücke können mit &lt;b&gt;KOMBINATIONs&lt;/b&gt; Symbolen verbunden werden.&lt;/p&gt;&lt;p&gt;Um z.B. nach irgendeinem Stein in  blau  zu suchen, könnte man schreiben: &lt;b&gt;brick und Farbe ist blue&lt;/b&gt;&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Der Filterausdruck kann entweder in (fast) natürlicher Sprache oder mit logischen Operatoren eingegeben werden.&lt;br /&gt;Ein einzelner Ausdruck entspricht dabei folgendem Muster: &lt;b&gt;&lt;i&gt;FELDNAME VERGLEICH&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FELDNAME&lt;/i&gt;&lt;/b&gt; und &lt;b&gt;&lt;i&gt;VERGLEICH&lt;/i&gt;&lt;/b&gt; sind dabei optional und sind standardmässig &lt;b&gt;in irgendeinem Feld&lt;/b&gt;, bzw. &lt;b&gt;beinhaltet&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Mehrere Ausdrücke können mit &lt;b&gt;KOMBINATIONs&lt;/b&gt; Symbolen verbunden werden.&lt;/p&gt;&lt;p&gt;Um z.B. nach irgendeinem Stein in blau zu suchen, könnte man schreiben: &lt;b&gt;brick und Farbe ist blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/common/filter.cpp" line="336"/>
@@ -5344,8 +5344,8 @@ Rechts-Click: Menü</translation>
         <location filename="../src/desktop/priceguidewidget.cpp" line="774"/>
         <source>A total quantity of %Ln item(s) has been sold</source>
         <translation>
-            <numerusform>Es wurde  ein Teil zu verkauft</numerusform>
-            <numerusform>Insgesamt wurden %Ln Teile zu verkauft</numerusform>
+            <numerusform>Es wurde ein Teil verkauft</numerusform>
+            <numerusform>Insgesamt wurden %Ln Teile verkauft</numerusform>
         </translation>
     </message>
     <message>
@@ -6364,66 +6364,66 @@ Rechts-Click: Menü</translation>
         <translation>Beim Exportieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="764"/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation>Wenn Sie hier ein Passwort setzen, dann wird es auf Ihrem System gespeichert: es wird allerdings nur verwürfelt und &lt;b&gt;nicht&lt;/b&gt; verschlüsselt, weil BrickStore dieses Passwort bei jeder Anfrage in Ihrem Namen an die BrickLink Server senden muss.&lt;br&gt;&lt;br&gt;Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld leer. BrickStore wird dann nach jedem Programmstart, bei der ersten Anfrage in Ihrem Namen, nach dem Passwort fragen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="644"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="780"/>
         <source>Price guide</source>
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="656"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="792"/>
         <source>Values</source>
         <translation>Preise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="666"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="802"/>
         <source>Source</source>
         <translation>Quelle</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="833"/>
         <source>BrickLink database, if older than</source>
         <translation>BrickLink Datenbank, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="589"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="725"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="529"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="665"/>
         <source>Row height</source>
         <translation>Zeilenhöhe</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="672"/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation>Per Mausrad und Zoom Geste veränderbar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="607"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation>Benutzername</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="621"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="757"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation>Passwort</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="773"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="787"/>
         <source>Your username is required here - not your email address.</source>
         <translation>Bitte den Benutzernamen eingeben - nicht die E-Mail-Adresse.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="976"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
@@ -6498,13 +6498,13 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">&lt;a href=&apos;https://github.com/rgriebl/brickstore/wiki/Crash-Reporting&apos;&gt;Siehe hier&lt;/a&gt; für mehr Infomationen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="389"/>
         <source>Icon size</source>
         <translation>Symbolgröße</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="345"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="496"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="371"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation>Systemvorgabe</translation>
@@ -6528,19 +6528,19 @@ Rechts-Click: Menü</translation>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="501"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="551"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="376"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="687"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation>Klein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="506"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="381"/>
         <source>Big</source>
         <translation>Gross</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="489"/>
         <source>Font size</source>
         <translation>Textgröße</translation>
     </message>
@@ -6550,33 +6550,34 @@ Rechts-Click: Menü</translation>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="451"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="470"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="570"/>
         <source>Reset to 100%</source>
         <translation>Auf 100% setzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="482"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="634"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation>Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="517"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="653"/>
         <source>Document Views</source>
         <translation>Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="679"/>
         <source>Column spacing</source>
         <translation>Spaltenabstand</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="556"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="692"/>
         <source>Medium</source>
         <translation>Mittel</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="792"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="806"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation>The maximale Passwortlänge bei BrickLink ist 15 Zeichen.</translation>
     </message>
@@ -6589,22 +6590,22 @@ If you do not want to save your password, then just leave this field empty and y
 Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld leer. BrickStore wird dann nach jedem Programmstart, bei der ersten Anfrage in Ihrem Namen, nach dem Passwort fragen.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="849"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="985"/>
         <source>Library</source>
         <translation>Bibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="867"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1003"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>BrickStore verwaltet seine eigene LDraw Teilebibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="883"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1019"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation>Dies ist die bevorzugte Einstellung, da BrickStore diese Installation aktuell hält.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1033"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1169"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation>Updates werden automatisch im Hintergrund heruntergeladen und installiert. Bitte starten Sie nur ein manuelles Update, falls die Automatik nicht funktioniert.</translation>
     </message>
@@ -6613,22 +6614,22 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Verwendung einer vorhandenen LDraw Teilebibliothek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="939"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1075"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation>Wählen Sie diese Option, falls Sie individuelle oder inoffzielle Teile benötigen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="973"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1109"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1004"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1140"/>
         <source>Update</source>
         <translation>Aktualisierung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1149"/>
         <source>Now</source>
         <translation>Jetzt</translation>
     </message>
@@ -6637,33 +6638,34 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Updates werden automatisch im Hintergrund heruntergeladen und installiert. #############</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1052"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1188"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1058"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1194"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Anpassen der Hauptwerkzeugleiste mittels Ziehen und Ablegen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1166"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1302"/>
         <source>Keyboard</source>
         <translation>Tastatur</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1172"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1308"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassen der globalen Tastenkürzel</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1201"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1315"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="909"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1045"/>
         <source>Use an existing LDraw installation</source>
         <translation>Verwendung einer vorhandenen LDraw Teilebibliothek</translation>
     </message>
@@ -6672,13 +6674,13 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="obsolete">Updates werden automatisch im Hintergrund heruntergeladen und installiert. Das manuelle Update wird nur benötigt, falls es </translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1158"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1234"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1294"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1370"/>
         <source>Reset all</source>
         <translation>Alle zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1244"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1380"/>
         <source>Reset</source>
         <translation>Zurücksetzen</translation>
     </message>
@@ -6688,39 +6690,39 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation>Bildergröße Teile</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="683"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="819"/>
         <source>Automatically update cached data</source>
         <translation>Zwischengespeicherte BrickLink Daten automatisch aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="863"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="886"/>
         <source> days</source>
         <translation> Tage</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="720"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="856"/>
         <source>BrickLink Pictures, if older than</source>
         <translation>BrickLink Bilder, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="879"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation>BrickLink Richtpreise, wenn älter als</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="808"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="944"/>
         <source>Reset to defaults</source>
         <translation>Auf Voreinstellungen zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="595"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="731"/>
         <source>BrickLink Login</source>
         <translation>BrickLink Anmeldung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="749"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="763"/>
         <source>Other...</source>
         <translation>Ändern...</translation>
     </message>
@@ -6729,43 +6731,43 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Automatisch erkennen</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="939"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
         <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
         <translation>Tastenkürzel mit &apos;Alt&apos; müssen auch &apos;Steuerung&apos; enthalten, damit das Menu System nicht gestört wird.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="947"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="961"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="967"/>
         <source>This shortcut is already used by another action.</source>
         <translation>Diese Tastenkürzel wird schon von einer anderen Aktion benutzt.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="981"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="995"/>
         <source>could not find a cross rate for %1</source>
         <translation>konnte keinen Wechselkurs für %1 finden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="983"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="997"/>
         <source>1 %1 equals %2 USD</source>
         <translation>1 %1 entspricht %2 USD</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="992"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1006"/>
         <source>Document directory location</source>
         <translation>Verzeichnis für Dokumente</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1148"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1163"/>
         <source>The specified document directory does not exist or is not read- and writable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Das angegebene Dokumentenverzeichnis existiert nicht (oder es ist nicht les- und beschreibbar).&lt;br /&gt;Die Einstellung für das Dokumentenverzeichnis wird nicht geändert.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1208"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1224"/>
         <source>Not a valid LDraw installation</source>
         <translation>Keine gültige LDraw Installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1225"/>
         <source>Valid LDraw installation</source>
         <translation>Gültige LDraw Installation</translation>
     </message>
@@ -6774,7 +6776,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation type="vanished">Gültige LDraw Installation, LDConfig vom %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="816"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="830"/>
         <source>LDraw directory location</source>
         <translation>Verzeichnis der LDraw Installation</translation>
     </message>
@@ -6833,7 +6835,7 @@ Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="561"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation>Gross</translation>

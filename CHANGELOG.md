@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2024.1.1] - 2024-01-10
+## [2024.1.1] - 2024-01-12
 
 - The Webcam view for Brickognize has been rewritten and should now be a lot faster and more stable on Windows and macOS. Plus the window can now also be "pinned" to keep it open.
 - All icons in the UI are now scaling with the *Icon size* setting (before, it was only the main toolbar).

@@ -610,7 +610,7 @@
         <location filename="../src/common/actionmanager.cpp" line="451"/>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
-        <translation>Ctrl+*</translation>
+        <translation>Ctrl+/</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="452"/>
@@ -652,7 +652,7 @@
     <message>
         <location filename="../src/common/actionmanager.cpp" line="457"/>
         <source>Set relative tier prices...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ange relativa nivåpriser...</translation>
     </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="458"/>
@@ -1145,7 +1145,7 @@
         <location filename="../src/mobile/AnnouncementsDialog.qml" line="17"/>
         <location filename="../src/desktop/announcementsdialog.cpp" line="70"/>
         <source>Mark read</source>
-        <translation>Markera läst läst</translation>
+        <translation>Markera läst</translation>
     </message>
 </context>
 <context>
@@ -2451,8 +2451,8 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
         <location filename="../src/common/document.cpp" line="1989"/>
         <source>Subtracted %n item(s)</source>
         <translation>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>Subtraherad %n post</numerusform>
+            <numerusform>Subtraherat %n poster</numerusform>
         </translation>
     </message>
     <message>
@@ -2695,7 +2695,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/documentio.cpp" line="91"/>
         <source>Order %1 (%2)</source>
-        <translation>Order %1 (%2)</translation>
+        <translation>Beställning %1 (%2)</translation>
     </message>
     <message>
         <location filename="../src/common/documentio.cpp" line="107"/>
@@ -3115,7 +3115,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/filter.cpp" line="329"/>
         <source>&lt;p&gt;Enter the filter expression in either (near) natural language or with logical operators.&lt;br /&gt;A single expression looks like &lt;b&gt;&lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; are optional and default to &lt;b&gt;in any field&lt;/b&gt; and &lt;b&gt;contains&lt;/b&gt; respectively.&lt;/p&gt;&lt;p&gt;Multiple expressions can be combined by separating them with a &lt;b&gt;COMBINATION&lt;/b&gt; token.&lt;/p&gt;&lt;p&gt;E.g. to search for anything resembling an brick in blue, you could use: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Ange filter uttryck i antingen (nära) naturligt språl eller med logiska operatorer.&lt;br /&gt;Ett enkelt uttryck ser ut &lt;b&gt;&lt;i&gt;FIELDNAME COMPARISION&lt;/i&gt; TEXT &lt;b&gt;. &lt;i&gt;FIELDNAME COMPARSION&lt;/i&gt; TEXT&lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; är valfritt och är standard till &lt;b&gt;in any field&lt;/b&gt; och &lt;b&gt;innehåller&lt;/b&gt; respektive.&lt;/p&gt;&lt;p&gt;Flera uttryck kan kombineras genom sära på deom med &lt;b&gt;COMBINATION&lt;/b&gt;token.&lt;/p&gt;&lt;p&gt;Tex. att söka något som liknar en blå legobit, då kan du använda: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Ange filter uttryck i antingen (nära) naturligt språl eller med logiska operatorer.&lt;br /&gt;Ett enkelt uttryck ser ut &lt;b&gt;&lt;i&gt;FIELDNAME COMPARISION&lt;/i&gt; TEXT &lt;/b&gt;. &lt;b&gt;&lt;i&gt;FIELDNAME&lt;/i&gt;&lt;/b&gt; and &lt;b&gt;&lt;i&gt;COMPARISON&lt;/i&gt;&lt;/b&gt; är valfritt och är standard till &lt;b&gt;in any field&lt;/b&gt; och &lt;b&gt;innehåller&lt;/b&gt; respektive.&lt;/p&gt;&lt;p&gt;Flera uttryck kan kombineras genom sära på deom med &lt;b&gt;COMBINATION&lt;/b&gt;token.&lt;/p&gt;&lt;p&gt;Tex. att söka något som liknar en blå legobit, då kan du använda: &lt;b&gt;brick and color is blue&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/common/filter.cpp" line="336"/>
@@ -3180,7 +3180,7 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/common/filter.cpp" line="437"/>
         <source>doesn&apos;t contain,does not contain,doesn&apos;t match,does not match</source>
-        <translation>innehåller inte,innehåller inte,matchar inte,matchar inte</translation>
+        <translation>innehåller inte,matchar inte</translation>
     </message>
     <message>
         <location filename="../src/common/filter.cpp" line="438"/>
@@ -3937,12 +3937,12 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="60"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickStores begäran om kameraåtkomst avslogs. Du kommer inte att kunna använda din webbkamera för att identifiera delar förrän du har beviljat de nödvändiga behörigheterna via ditt systems Inställningar-applikation.</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="443"/>
         <source>Item Scanner</source>
-        <translation type="unfinished"></translation>
+        <translation>Scanner för artiklar</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="115"/>
@@ -3967,32 +3967,32 @@ Var vänlig välj vilka attribut (tex. anmärkning, stafflade priser, ...) som s
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="450"/>
         <source>Keep this window open</source>
-        <translation type="unfinished"></translation>
+        <translation>Håll detta fönster öppet</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="458"/>
         <source>Click into the camera preview or press Space to capture an image.</source>
-        <translation type="unfinished"></translation>
+        <translation>Klicka i kamerans förhandsgranskning eller tryck på Space för att ta en bild.</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="479"/>
         <source>An error occurred:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ett fel har uppstått:</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="460"/>
         <source>There is no camera connected to this computer.</source>
-        <translation type="unfinished"></translation>
+        <translation>Det finns ingen kamera ansluten till den här datorn.</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="475"/>
         <source>No matching item found - try again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen matchande artikel hittades - försök igen.</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="314"/>
         <source>Scanning failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Skanning misslyckades</translation>
     </message>
 </context>
 <context>
@@ -4197,7 +4197,7 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="20"/>
         <source>Order information</source>
-        <translation>Order information</translation>
+        <translation>Information om beställning</translation>
     </message>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="84"/>
@@ -4917,7 +4917,7 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/mainwindow_p.h" line="74"/>
         <source>Clear pinned files</source>
-        <translation type="unfinished"></translation>
+        <translation>Tydliga nålade filer</translation>
     </message>
     <message>
         <location filename="../src/desktop/mainwindow_p.h" line="76"/>
@@ -4985,7 +4985,7 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="179"/>
         <source>Animation</source>
-        <translation>Animation</translation>
+        <translation>Animering</translation>
     </message>
     <message>
         <location filename="../src/desktop/rendersettingsdialog.ui" line="207"/>
@@ -5248,7 +5248,7 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="580"/>
         <source>Find a part using a webcam</source>
-        <translation type="unfinished"></translation>
+        <translation>Hitta en del med hjälp av en webbkamera</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="992"/>
@@ -5272,7 +5272,7 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="562"/>
         <source>&lt;p&gt;Only show items that contain all the entered words - regardless of case - in either the name or the part number. This works much like a web search engine:&lt;ul&gt;&lt;li&gt;to exclude words, prefix them with &lt;tt&gt;-&lt;/tt&gt;. (e.g. &lt;tt&gt;-pattern&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to match on a phrase, put it inside quotes. (e.g. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter parts appearing in a specific set, put &lt;tt&gt;appears-in:&lt;/tt&gt; in front of the set name. (e.g. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;to filter sets or minifigs consisting of a specific part, put &lt;tt&gt;consists-of:&lt;/tt&gt; in front of the part id. (e.g. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Visa endast objekt som innehåller alla inmatade ord - oavsett fall - i antingen namnet eller artikelnumret. Detta fungerar ungefär som en webbsökmotor:&lt;ul&gt;&lt;li&gt;för att utesluta ord, sätt ett &lt;tt&gt;-&lt;/tt&gt;. (t. ex. &lt;tt&gt;-mönster&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att matcha en fras, sätt den inom citattecken. (t.ex. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att filtrera delar som förekommer i en specifik sats, sätt&lt;tt&gt;appears-in:&lt;/tt&gt; framför uppsättningens namn. (t.ex. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;att filtrera uppsättningar eller minifigs som består av en specifik del, sätt&lt;tt&gt;consists-of:&lt;/tt&gt; framför delens artikel nummer.&lt;br&gt; (t.ex. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Visa endast objekt som innehåller alla inmatade ord - oavsett fall - i antingen namnet eller artikelnumret. Detta fungerar ungefär som en webbsökmotor:&lt;ul&gt;&lt;li&gt;för att utesluta ord, sätt ett &lt;tt&gt;-&lt;/tt&gt;. (t. ex. &lt;tt&gt;-mönster&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att matcha en fras, sätt den inom citattecken. (t.ex. &lt;tt&gt;&quot;1 x 1&quot;&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;för att filtrera delar som förekommer i en specifik sats, sätt&lt;tt&gt;appears-in:&lt;/tt&gt; framför uppsättningens namn. (t.ex. &lt;tt&gt;appears-in:8868-1&lt;/tt&gt;)&lt;/li&gt;&lt;li&gt;att filtrera uppsättningar eller minifigs som består av en specifik del, sätt&lt;tt&gt;consists-of:&lt;/tt&gt; framför delens artikel nummer. (t.ex. &lt;tt&gt;consists-of:3001&lt;/tt&gt;)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/desktop/selectitem.cpp" line="573"/>
@@ -5497,22 +5497,22 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/settopriceguidedialog.ui" line="63"/>
         <source>If no price-guide data is available:</source>
-        <translation type="unfinished"></translation>
+        <translation>Om ingen prisguide finns tillgänglig:</translation>
     </message>
     <message>
         <location filename="../src/desktop/settopriceguidedialog.ui" line="70"/>
         <source>Don&apos;t change the lot price</source>
-        <translation type="unfinished"></translation>
+        <translation>Ändra inte priset på lotten</translation>
     </message>
     <message>
         <location filename="../src/desktop/settopriceguidedialog.ui" line="80"/>
         <source>Set the lot price to 0</source>
-        <translation type="unfinished"></translation>
+        <translation>Sätt lotpriset till 0</translation>
     </message>
     <message>
         <location filename="../src/desktop/settopriceguidedialog.ui" line="87"/>
         <source>Just set a red marker on the lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Sätt bara en röd markör på lotten</translation>
     </message>
     <message>
         <location filename="../src/desktop/settopriceguidedialog.ui" line="96"/>
@@ -5710,7 +5710,7 @@ Högerklicka: Meny</translation>
     </message>
     <message>
         <location filename="../src/desktop/settingsdialog.ui" line="345"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="496"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="371"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="146"/>
         <source>System default</source>
         <translation>Standard enligt systemet</translation>
@@ -5728,44 +5728,45 @@ Högerklicka: Meny</translation>
         <translation>Mörkt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="501"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="551"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="376"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="687"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="165"/>
         <source>Small</source>
         <translation>Liten</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="506"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="381"/>
         <source>Big</source>
         <translation>Stor</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="628"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="764"/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation>Om du anger ett lösenord, då sparas detta i ditt system: det är bara förvrängt, men &lt;b&gt;inte&lt;/b&gt; krypterat, BrickStore behöver detta för att kunna skicka ditt lösenord till BrickLink server vid nedladdning av din data.&lt;br&gt;&lt;br&gt;Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du få en fråga att ange ditt lösenord första gången BricStore ska ladda ner din data från BrickLink efter start av programmet.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="644"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="780"/>
         <source>Price guide</source>
         <translation>Pris Information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="656"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="792"/>
         <source>Values</source>
         <translation>Värden</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="666"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="802"/>
         <source>Source</source>
         <translation>Källa</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="370"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="489"/>
         <source>Font size</source>
         <translation>Teckenstorlek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="451"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="470"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="570"/>
         <source>Reset to 100%</source>
         <translation>Återställ till 100%</translation>
     </message>
@@ -5775,12 +5776,12 @@ Högerklicka: Meny</translation>
         <translation>Storlek på artikelbilder</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="482"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="634"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation>Den snabba bruna räven hoppar över en lat hund.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="389"/>
         <source>Icon size</source>
         <translation>Icon storlek</translation>
     </message>
@@ -5795,68 +5796,68 @@ Högerklicka: Meny</translation>
         <translation>Global</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="517"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="653"/>
         <source>Document Views</source>
         <translation>Dokumentvyer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="529"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="665"/>
         <source>Row height</source>
         <translation>Radhöjd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="536"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="672"/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation>Redigerbar med rullhjul och zoom rörelse</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="543"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="679"/>
         <source>Column spacing</source>
         <translation>Kolumnavstånd</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="556"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="692"/>
         <source>Medium</source>
         <translation>Medium</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="561"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="166"/>
         <source>Large</source>
         <translation>Stor</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="589"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="725"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="28"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="595"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="731"/>
         <source>BrickLink Login</source>
         <translation>BrickLink inloggning</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="607"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="205"/>
         <source>Username</source>
         <translation>Användarnamn</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="218"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="773"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="787"/>
         <source>Your username is required here - not your email address.</source>
         <translation>Du måste använda ditt användarnam här - inte din epost adress.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="621"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="757"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="227"/>
         <source>Password</source>
         <translation>Lösenord</translation>
     </message>
     <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="240"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="792"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="806"/>
         <source>BrickLink&apos;s maximum password length is 15.</source>
         <translation>BrickLink&apos;s maximala lösenordslängd är 15 tecken.</translation>
     </message>
@@ -5869,121 +5870,122 @@ If you do not want to save your password, then just leave this field empty and y
 Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du få en fråga att ange ditt lösenord första gången BricStore ska ladda ner din data från BrickLink efter start av programmet.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="683"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="819"/>
         <source>Automatically update cached data</source>
         <translation>Uppdatera cached data automatiskt</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="697"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="833"/>
         <source>BrickLink database, if older than</source>
         <translation>OM BrickLink databasen är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="704"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="727"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="750"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="863"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="886"/>
         <source> days</source>
         <translation> dagar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="720"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="856"/>
         <source>BrickLink Pictures, if older than</source>
         <translation>OM BrickLink bilder är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="743"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="879"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation>OM BrickLink pris gudies är äldre än</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="808"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="944"/>
         <source>Reset to defaults</source>
         <translation>Återställ till standard</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="840"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="976"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="849"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="985"/>
         <source>Library</source>
         <translation>Bibliotek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="867"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1003"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>Låt BrickStore hantera sin egna LDraw artikelbibliotek</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="883"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1019"/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation>Denna inställning är att föredra, eftersom BrickStore kommer hålla denna installationen uppdaterad.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="909"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1045"/>
         <source>Use an existing LDraw installation</source>
         <translation>Använd en redan installerad LDraw</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="939"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1075"/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation>Använd detta alternativet om du behöver anpassade eller inofficiella delar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="973"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1109"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1004"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1140"/>
         <source>Update</source>
         <translation>Uppdatera</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1013"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1149"/>
         <source>Now</source>
         <translation>Nu</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1033"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1169"/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation>Uppdateringar laddas ner och tillämpas automatiskt i bakgrunden. Starta bara en manuell uppdatering om den automatiska misslyckas.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1052"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="363"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1188"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1058"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1194"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Ändra huvudverktygsfältet genom dra och släpp</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1065"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1179"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1201"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1315"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1158"/>
-        <location filename="../src/desktop/settingsdialog.ui" line="1234"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1294"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1370"/>
         <source>Reset all</source>
         <translation>Återställ alla</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1166"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1302"/>
         <source>Keyboard</source>
         <translation>Tangentbord</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1172"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1308"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassa de globala kortkommandon</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="1244"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="1380"/>
         <source>Reset</source>
         <translation>Återställ</translation>
     </message>
@@ -6030,43 +6032,43 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         <translation type="vanished">Använd ett mörkt tema</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="749"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="763"/>
         <source>Other...</source>
         <translation>Andra...</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="816"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="830"/>
         <source>LDraw directory location</source>
         <translation>LDraw katalogplats</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="939"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
         <source>Shortcuts with &apos;Alt&apos; need to also include &apos;Control&apos; in order to not interfere with the menu system.</source>
         <translation>Kortkommandon med &apos;Alt&apos; kräver även en &apos;CTRL&apos; för att inte störa menysystemets gränssnitt.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="947"/>
-        <location filename="../src/desktop/settingsdialog.cpp" line="953"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="961"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="967"/>
         <source>This shortcut is already used by another action.</source>
         <translation>Detta kortkommando används redan för en annan åtgärd.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="981"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="995"/>
         <source>could not find a cross rate for %1</source>
         <translation>kunde inte hitta en valutakurs för %1</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="983"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="997"/>
         <source>1 %1 equals %2 USD</source>
         <translation>1 %1 är like med %2 USD</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="992"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1006"/>
         <source>Document directory location</source>
         <translation>Dokumentkatalogens plats</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1148"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1163"/>
         <source>The specified document directory does not exist or is not read- and writable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Denna dokumentkatalog finns inte eller är inte läs- och skrivbar.&lt;br /&gt;Dokumentkatalogen kommer inte att ändras.</translation>
     </message>
@@ -6075,12 +6077,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
         <translation type="vanished">Denna dokumentkatalog finns inte eller är inte läs- och skrivbar.&lt;br /&gt;Dokumentkatalogen kommer inte att ändras.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1208"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1224"/>
         <source>Not a valid LDraw installation</source>
         <translation>Detta är ine en godkänd LDraw installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="1209"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="1225"/>
         <source>Valid LDraw installation</source>
         <translation>Detta är en godkänd LDraw installation</translation>
     </message>
@@ -6202,17 +6204,17 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     <message>
         <location filename="../src/desktop/tierpricesdialog.cpp" line="20"/>
         <source>Set tier prices relative to the lot&apos;s base price</source>
-        <translation type="unfinished"></translation>
+        <translation>Ange nivåpriser i förhållande till partiets baspris</translation>
     </message>
     <message>
         <location filename="../src/desktop/tierpricesdialog.cpp" line="34"/>
         <source>No change</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen förändring</translation>
     </message>
     <message>
         <location filename="../src/desktop/tierpricesdialog.cpp" line="36"/>
         <source>Tier %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nivå %1</translation>
     </message>
 </context>
 <context>
@@ -6492,12 +6494,12 @@ Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du f�
     <message>
         <location filename="../src/desktop/welcomewidget.cpp" line="110"/>
         <source>Unpin</source>
-        <translation type="unfinished"></translation>
+        <translation>Ta bort stift</translation>
     </message>
     <message>
         <location filename="../src/desktop/welcomewidget.cpp" line="110"/>
         <source>Pin</source>
-        <translation type="unfinished"></translation>
+        <translation>Stift</translation>
     </message>
     <message>
         <location filename="../src/desktop/welcomewidget.cpp" line="165"/>
