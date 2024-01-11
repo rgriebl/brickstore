@@ -80,7 +80,7 @@ InventoryWidget::InventoryWidget(bool showCanBuild, QWidget *parent)
         b->setCheckable(true);
         b->setChecked(false);
         b->setAutoExclusive(true);
-        b->setProperty("toolBarLike", true);
+        b->setProperty("iconScaling", true);
         b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         connect(b, &QToolButton::toggled, b, [b](bool checked) {
             b->setToolButtonStyle(checked ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonIconOnly);

@@ -64,15 +64,15 @@ FilterTermWidget::FilterTermWidget(Document *doc, const Filter &filter, QWidget 
     m_value->setProperty("transparentCombo", true);
     m_value->setObjectName(u"filter-value"_qs);
     auto bdel = new QToolButton(this);
-    bdel->setProperty("toolBarLike", true);
+    bdel->setProperty("iconScaling", true);
     bdel->setText(QString(QChar(0x00d7)));
     bdel->setObjectName(u"filter-delete"_qs);
     auto band = new QToolButton(this);
-    band->setProperty("toolBarLike", true);
+    band->setProperty("iconScaling", true);
     band->setCheckable(true);
     band->setObjectName(u"filter-and"_qs);
     auto bor = new QToolButton(this);
-    bor->setProperty("toolBarLike", true);
+    bor->setProperty("iconScaling", true);
     bor->setCheckable(true);
     bor->setObjectName(u"filter-or"_qs);
 
@@ -338,7 +338,7 @@ FilterWidget::FilterWidget(QWidget *parent)
 
     m_refilter = new QToolButton(this);
     m_refilter->setIcon(QIcon::fromTheme(u"view-refresh"_qs));
-    m_refilter->setProperty("toolBarLike", true);
+    m_refilter->setProperty("iconScaling", true);
     QSizePolicy sp = m_refilter->sizePolicy();
     sp.setRetainSizeWhenHidden(true);
     m_refilter->setSizePolicy(sp);
@@ -360,7 +360,7 @@ FilterWidget::FilterWidget(QWidget *parent)
     m_menu = new QToolButton(this);
     m_menu->setIcon(QIcon::fromTheme(u"overflow-menu"_qs));
     m_menu->setProperty("noMenuArrow", true);
-    m_menu->setProperty("toolBarLike", true);
+    m_menu->setProperty("iconScaling", true);
     layout->addWidget(m_menu);
 
     auto *filterMenu = new QMenu(this);

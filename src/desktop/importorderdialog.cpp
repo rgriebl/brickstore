@@ -35,7 +35,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 {
     setupUi(this);
 
-    w_update->setProperty("toolBarLike", true);
+    w_update->setProperty("iconScaling", true);
 
     w_orders->header()->setStretchLastSection(false);
     auto proxyModel = new QSortFilterProxyModel(this);

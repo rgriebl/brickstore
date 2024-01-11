@@ -102,17 +102,17 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_splitter_vertical->addWidget(w_splitter_bottom);
 
     w_go_back = new QToolButton(this);
-    w_go_back->setProperty("toolBarLike", true);
+    w_go_back->setProperty("iconScaling", true);
     w_go_back->setIcon(QIcon::fromTheme(u"go-previous"_qs));
     w_go_back->setShortcut(u"Back"_qs);
 
     w_go_next = new QToolButton(this);
-    w_go_next->setProperty("toolBarLike", true);
+    w_go_next->setProperty("iconScaling", true);
     w_go_next->setIcon(QIcon::fromTheme(u"go-next"_qs));
     w_go_next->setShortcut(u"Forward"_qs);
 
     w_menu = new QToolButton(this);
-    w_menu->setProperty("toolBarLike", true);
+    w_menu->setProperty("iconScaling", true);
     w_menu->setIcon(QIcon::fromTheme(u"application-menu"_qs));
     w_menu->setPopupMode(QToolButton::InstantPopup);
 

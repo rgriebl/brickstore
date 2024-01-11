@@ -195,6 +195,9 @@ void Config::upgrade(int vmajor, int vminor, int vpatch)
 #endif
         remove(u"Files"_qs);
     }
+    if (cfgver < mkver(2024, 1, 1)) {
+        setValue(u"Interface/ToolBarSizeEnum"_qs, value(u"Interface/IconSizeEnum"_qs, 0).toInt());
+    }
 }
 
 QVariantList Config::availableLanguages() const
@@ -350,27 +353,6 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
 
     if (modified)
         emit updateIntervalsChanged(updateIntervals());
-}
-
-void Config::setFontSizePercent(int p)
-{
-    auto oldp = fontSizePercent();
-
-    if (oldp != p) {
-        setValue(u"Interface/FontSizePercent"_qs, std::clamp(p, 50, 200));
-        emit fontSizePercentChanged(p);
-    }
-}
-
-void Config::setRowHeightPercent(int p)
-{
-    p = std::clamp(p, 50, 200);
-
-    if (m_rowHeightPercent != p) {
-        m_rowHeightPercent = p;
-        setValue(u"Interface/ItemImageSizePercent"_qs, p);
-        emit rowHeightPercentChanged(p);
-    }
 }
 
 QByteArray Config::columnLayout(const QString &id) const
@@ -712,22 +694,58 @@ int Config::fontSizePercent() const
     return value(u"Interface/FontSizePercent"_qs, 100).toInt();
 }
 
+void Config::setFontSizePercent(int p)
+{
+    auto oldp = fontSizePercent();
+
+    if (oldp != p) {
+        setValue(u"Interface/FontSizePercent"_qs, std::clamp(p, 50, 200));
+        emit fontSizePercentChanged(p);
+    }
+}
+
 int Config::rowHeightPercent() const
 {
     return m_rowHeightPercent;
 }
 
-Config::UISize Config::iconSize() const
+void Config::setRowHeightPercent(int p)
 {
-    int s = value(u"Interface/IconSizeEnum"_qs, 0).toInt();
+    p = std::clamp(p, 50, 200);
+
+    if (m_rowHeightPercent != p) {
+        m_rowHeightPercent = p;
+        setValue(u"Interface/ItemImageSizePercent"_qs, p);
+        emit rowHeightPercentChanged(p);
+    }
+}
+
+int Config::iconSizePercent() const
+{
+    return value(u"Interface/IconSizePercent"_qs, 100).toInt();
+}
+
+void Config::setIconSizePercent(int p)
+{
+    auto oldp = iconSizePercent();
+
+    if (oldp != p) {
+        setValue(u"Interface/IconSizePercent"_qs, std::clamp(p, 50, 200));
+        emit iconSizePercentChanged(p);
+    }
+}
+
+Config::UISize Config::toolBarSize() const
+{
+    int s = value(u"Interface/ToolBarSizeEnum"_qs, 0).toInt();
     return static_cast<UISize>(std::clamp(s, 0, 2));
 }
 
-void Config::setIconSize(UISize iconSize)
+void Config::setToolBarSize(UISize tbSize)
 {
-    if (this->iconSize() != iconSize) {
-        setValue(u"Interface/IconSizeEnum"_qs, int(iconSize));
-        emit iconSizeChanged(iconSize);
+    if (this->toolBarSize() != tbSize) {
+        setValue(u"Interface/ToolBarSizeEnum"_qs, int(tbSize));
+        emit toolBarSizeChanged(tbSize);
     }
 }
 

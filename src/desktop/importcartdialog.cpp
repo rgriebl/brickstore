@@ -37,7 +37,7 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 {
     setupUi(this);
 
-    w_update->setProperty("toolBarLike", true);
+    w_update->setProperty("iconScaling", true);
 
     w_carts->header()->setStretchLastSection(false);
     auto proxyModel = new QSortFilterProxyModel(this);

@@ -64,7 +64,7 @@ SelectColor::SelectColor(const QVector<Feature> &features, QWidget *parent)
 
     w_lock = new QToolButton(this);
     w_lock->setIcon(QIcon::fromTheme(u"folder-locked"_qs));
-    w_lock->setProperty("toolBarLike", true);
+    w_lock->setProperty("iconScaling", true);
     w_lock->setCheckable(true);
     w_lock->setChecked(false);
     w_lock->setVisible(m_hasLock);

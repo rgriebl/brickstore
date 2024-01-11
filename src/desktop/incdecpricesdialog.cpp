@@ -39,7 +39,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     hlayout->addSpacing(11);
 
     auto percent = new QToolButton(this);
-    percent->setProperty("toolBarLike", true);
+    percent->setProperty("iconScaling", true);
     percent->setText(u"%"_qs);
     percent->setCheckable(true);
     percent->setChecked(true);
@@ -48,7 +48,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &text, bool showTiers,
     hlayout->addWidget(percent);
 
     auto fixed = new QToolButton(this);
-    fixed->setProperty("toolBarLike", true);
+    fixed->setProperty("iconScaling", true);
     fixed->setText(currencyCode);
     fixed->setCheckable(true);
     fixed->setShortcut(tr("Ctrl+$"));

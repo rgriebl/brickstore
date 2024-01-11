@@ -109,7 +109,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
         auto *b = new QToolButton(this);
         b->setFocusPolicy(Qt::NoFocus);
         b->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        b->setProperty("toolBarLike", true);
+        b->setProperty("iconScaling", true);
         b->setCheckable(true);
         b->setChecked(!itt);
         b->setText(itt ? itt->name() : tr("Any"));
@@ -153,7 +153,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     m_pinWindow = new QToolButton(this);
     m_pinWindow->setFocusPolicy(Qt::NoFocus);
     m_pinWindow->setCheckable(true);
-    m_pinWindow->setProperty("toolBarLike", true);
+    m_pinWindow->setProperty("iconScaling", true);
 
     auto updatePinIcon = [this]() {
         bool b = m_pinWindow->isChecked();

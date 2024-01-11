@@ -26,7 +26,7 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
 {
     setupUi(this);
 
-    w_updateEcb->setProperty("toolBarLike", true);
+    w_updateEcb->setProperty("iconScaling", true);
 
     w_oldCurrency->setText(w_oldCurrency->text().arg(from));
 

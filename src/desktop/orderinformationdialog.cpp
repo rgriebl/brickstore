@@ -20,7 +20,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
 
     static auto setup = [](QLineEdit *label, QToolButton *button, const QString &value,
             bool visible = true, QWidget *alsoHide = nullptr) {
-        button->setProperty("toolBarLike", true);
+        button->setProperty("iconScaling", true);
 
         if (visible) {
             label->setText(value);
@@ -55,7 +55,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     setup(w_tracking, w_trackingCopy, order->trackingNumber());
 
     w_addressCopy->setProperty("bsAddress", order->address());
-    w_addressCopy->setProperty("toolBarLike", true);
+    w_addressCopy->setProperty("iconScaling", true);
     QObject::connect(w_addressCopy, &QToolButton::clicked, this, [this]() {
         QGuiApplication::clipboard()->setText(w_addressCopy->property("bsAddress").toString(),
                                               QClipboard::Clipboard);

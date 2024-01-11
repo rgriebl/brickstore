@@ -30,6 +30,7 @@ class Config : public QSettings
     Q_PROPERTY(Config::UISize mobileUISize READ mobileUISize WRITE setMobileUISize NOTIFY mobileUISizeChanged)
     Q_PROPERTY(int rowHeightPercent READ rowHeightPercent WRITE setRowHeightPercent NOTIFY rowHeightPercentChanged)
     Q_PROPERTY(int fontSizePercent READ fontSizePercent WRITE setFontSizePercent NOTIFY fontSizePercentChanged)
+    Q_PROPERTY(int iconSizePercent READ iconSizePercent WRITE setIconSizePercent NOTIFY iconSizePercentChanged)
     Q_PROPERTY(int columnSpacing READ columnSpacing WRITE setColumnSpacing NOTIFY columnSpacingChanged)
     Q_PROPERTY(bool liveEditRowHeight READ liveEditRowHeight WRITE setLiveEditRowHeight NOTIFY liveEditRowHeightChanged)
 
@@ -114,8 +115,10 @@ public:
     };
     Q_ENUM(UISize)
 
-    UISize iconSize() const;
-    void setIconSize(UISize iconSize);
+    UISize toolBarSize() const;
+    void setToolBarSize(UISize tbSize);
+    int iconSizePercent() const;
+    void setIconSizePercent(int p);
     int fontSizePercent() const;
     void setFontSizePercent(int p);
     int rowHeightPercent() const;
@@ -182,7 +185,8 @@ signals:
     void visualChangesMarkModifiedChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
-    void iconSizeChanged(Config::UISize iconSize);
+    void toolBarSizeChanged(Config::UISize iconSize);
+    void iconSizePercentChanged(int p);
     void fontSizePercentChanged(int p);
     void rowHeightPercentChanged(int p);
     void columnLayoutChanged(const QString &id, const QByteArray &layout);

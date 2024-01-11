@@ -59,7 +59,7 @@ SelectItemDialog::SelectItemDialog(bool popupMode, QWidget *parent)
 
     if (popupMode) {
         auto reset = new QToolButton();
-        reset->setProperty("toolBarLike", true);
+        reset->setProperty("iconScaling", true);
         reset->setToolButtonStyle(Qt::ToolButtonIconOnly);
         reset->setDefaultAction(m_resetGeometryAction);
 

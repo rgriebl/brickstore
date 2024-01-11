@@ -360,12 +360,131 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_15">
             <property name="text">
-             <string>Icon size</string>
+             <string>Toolbar</string>
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="w_toolbar_size">
+            <item>
+             <property name="text">
+              <string>System default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Small</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Big</string>
+             </property>
+            </item>
+           </widget>
+          </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="label_14i">
+            <property name="text">
+             <string>Icon size</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QGridLayout" name="gridLayouti">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMaximumSize</enum>
+            </property>
+            <property name="horizontalSpacing">
+             <number>11</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
+            <item row="0" column="0" colspan="3">
+             <widget class="QSlider" name="w_icon_size">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>10</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimum">
+               <number>5</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="singleStep">
+               <number>1</number>
+              </property>
+              <property name="pageStep">
+               <number>1</number>
+              </property>
+              <property name="value">
+               <number>10</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksBelow</enum>
+              </property>
+              <property name="tickInterval">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="w_icon_size_percent">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string notr="true">1000%</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_16i">
+              <property name="text">
+               <string notr="true">&lt;small&gt;50%&lt;/small&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QToolButton" name="w_icon_size_reset">
+              <property name="text">
+               <string>Reset to 100%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_17i">
+              <property name="text">
+               <string notr="true">&lt;small&gt;200%&lt;/small&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_14f">
             <property name="text">
              <string>Font size</string>
             </property>
@@ -374,8 +493,8 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <layout class="QGridLayout" name="gridLayout">
+          <item row="3" column="1">
+           <layout class="QGridLayout" name="gridLayoutf">
             <property name="sizeConstraint">
              <enum>QLayout::SetMaximumSize</enum>
             </property>
@@ -436,7 +555,7 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_16">
+             <widget class="QLabel" name="label_16f">
               <property name="text">
                <string notr="true">&lt;small&gt;50%&lt;/small&gt;</string>
               </property>
@@ -453,7 +572,7 @@
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QLabel" name="label_17">
+             <widget class="QLabel" name="label_17f">
               <property name="text">
                <string notr="true">&lt;small&gt;200%&lt;/small&gt;</string>
               </property>
@@ -464,8 +583,8 @@
             </item>
            </layout>
           </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="w_font_example">
+          <item row="4" column="1">
+           <widget class="QFrame" name="w_icon_font_example">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -478,34 +597,51 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text">
-             <string>The quick brown fox jumps over the lazy dog.</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="w_icon_size">
-            <item>
-             <property name="text">
-              <string>System default</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Small</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Big</string>
-             </property>
-            </item>
+            <layout class="QHBoxLayout" name="horizontalLayoutfi">
+             <item>
+              <widget class="QToolButton" name="w_icon_example_1">
+               <property name="icon">
+                <iconset theme="edit-find"/>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="w_icon_example_2">
+               <property name="icon">
+                <iconset theme="view-refresh"/>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="w_icon_example_3">
+               <property name="icon">
+                <iconset theme="zoom-fit-best"/>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="w_font_example">
+               <property name="text">
+                <string>The quick brown fox jumps over the lazy dog.</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -1285,6 +1421,9 @@
   <tabstop>w_crash_reports</tabstop>
   <tabstop>checkBox_3</tabstop>
   <tabstop>w_theme</tabstop>
+  <tabstop>w_toolbar_size</tabstop>
+  <tabstop>w_icon_size</tabstop>
+  <tabstop>w_icon_size_reset</tabstop>
   <tabstop>w_font_size</tabstop>
   <tabstop>w_font_size_reset</tabstop>
   <tabstop>w_upd_database</tabstop>

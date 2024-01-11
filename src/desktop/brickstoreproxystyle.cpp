@@ -38,6 +38,12 @@ static QSize toolButtonSize(Config::UISize uiSize, QStyle *style)
     return { s, s };
 }
 
+static QSize iconSize(int p, QStyle::PixelMetric pm, QStyle *style)
+{
+    int s = style->pixelMetric(pm, nullptr, nullptr) * p / 100;
+    return { s, s };
+}
+
 
 BrickStoreProxyStyle::BrickStoreProxyStyle(QStyle *baseStyle)
     : QProxyStyle(baseStyle)
@@ -52,23 +58,30 @@ BrickStoreProxyStyle::BrickStoreProxyStyle(QStyle *baseStyle)
 #endif
     m_isWindowsVistaStyle = ((baseStyle ? baseStyle : qApp->style())->name() == u"windowsvista");
 
-    connect(Config::inst(), &Config::iconSizeChanged,
-            this, [this](Config::UISize iconSize) {
-        auto s = toolButtonSize(iconSize, this);
+    connect(Config::inst(), &Config::toolBarSizeChanged,
+            this, [this](Config::UISize uiSize) {
+        auto s = toolButtonSize(uiSize, this);
 
         const auto allWidgets = qApp->allWidgets();
         for (auto w : allWidgets) {
-            if (auto *iv = qobject_cast<QAbstractItemView *>(w)) {
-                iv->setIconSize(s);
-            } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
-                cb->setIconSize(s);
-            } else if (auto *tbar = qobject_cast<QToolBar *>(w)) {
+            if (auto *tbar = qobject_cast<QToolBar *>(w))
                 tbar->setIconSize(s);
+        }
+    });
+    connect(Config::inst(), &Config::iconSizePercentChanged,
+            this, [this](int p) {
+        const auto allWidgets = qApp->allWidgets();
+        for (auto w : allWidgets) {
+            if (!w->property("iconScaling").toBool())
+                continue;
+
+            if (auto *iv = qobject_cast<QAbstractItemView *>(w)) {
+                iv->setIconSize(iconSize(p, PM_ListViewIconSize, this));
+            } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
+                cb->setIconSize(iconSize(p, PM_ListViewIconSize, this));
             } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
-                if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
-                    if (tb->property("toolBarLike").toBool())
-                        tb->setIconSize(s);
-                }
+                if (!qobject_cast<QToolBar *>(tb->parentWidget()))
+                    tb->setIconSize(iconSize(p, PM_ButtonIconSize, this));
             }
         }
     });
@@ -76,6 +89,8 @@ BrickStoreProxyStyle::BrickStoreProxyStyle(QStyle *baseStyle)
 
 void BrickStoreProxyStyle::polish(QWidget *w)
 {
+    int iconScaling = w->property("iconScaling").toBool() ? Config::inst()->iconSizePercent() : 0;
+
     if (qobject_cast<QLineEdit *>(w)
             || qobject_cast<QDoubleSpinBox *>(w)
             || qobject_cast<QSpinBox *>(w)) {
@@ -84,7 +99,8 @@ void BrickStoreProxyStyle::polish(QWidget *w)
     } else if (auto *iv = qobject_cast<QAbstractItemView *>(w)) {
         w->setMouseTracking(true);
         w->installEventFilter(this);
-        iv->setIconSize(toolButtonSize(Config::inst()->iconSize(), this));
+        if (iconScaling)
+            iv->setIconSize(iconSize(iconScaling, PM_ListViewIconSize, this));
 
     } else if (qobject_cast<QMenu *>(w)) {
         // SH_Menu_Scrollable is checked early in the QMenu constructor,
@@ -94,9 +110,13 @@ void BrickStoreProxyStyle::polish(QWidget *w)
 
     } else if (auto *tb = qobject_cast<QToolButton *>(w)) {
         if (!qobject_cast<QToolBar *>(tb->parentWidget())) {
-            if (tb->property("toolBarLike").toBool()) {
+            if (tb->property("toolBarScaling").toBool()) {
                 tb->setAutoRaise(true);
-                tb->setIconSize(toolButtonSize(Config::inst()->iconSize(), this));
+                tb->setIconSize(toolButtonSize(Config::inst()->toolBarSize(), this));
+            }
+            if (iconScaling) {
+                tb->setAutoRaise(true);
+                tb->setIconSize(iconSize(iconScaling, PM_ButtonIconSize, this));
             }
 
             QPointer<QToolButton> tbptr(tb);
@@ -128,10 +148,11 @@ void BrickStoreProxyStyle::polish(QWidget *w)
             });
         }
     } else if (auto *tbar = qobject_cast<QToolBar *>(w)) {
-        tbar->setIconSize(toolButtonSize(Config::inst()->iconSize(), this));
+        tbar->setIconSize(toolButtonSize(Config::inst()->toolBarSize(), this));
 
     } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
-        cb->setIconSize(toolButtonSize(Config::inst()->iconSize(), this));
+        if (iconScaling)
+            cb->setIconSize(iconSize(iconScaling, PM_ListViewIconSize, this));
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
         if (qobject_cast<QDialog *>(cb->window()))
             w->installEventFilter(this);

@@ -711,6 +711,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     setupUi(this);
 
     w_font_size_percent->setFixedWidth(w_font_size_percent->width());
+    w_icon_size_percent->setFixedWidth(w_icon_size_percent->width());
 
     auto setFontSize = [this](int v) {
         w_font_size_percent->setText(QString::number(v * 10) + u" %");
@@ -721,11 +722,24 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         f.setPointSizeF(defaultFontSize * double(v) / 10.);
         w_font_example->setFont(f);
     };
-
     connect(w_font_size, &QAbstractSlider::valueChanged,
             this, setFontSize);
     setFontSize(10);
 
+    auto setIconSize = [this](int v) {
+        w_icon_size_percent->setText(QString::number(v * 10) + u" %");
+        int s = w_icon_example_1->style()->pixelMetric(QStyle::PM_ButtonIconSize, nullptr, w_icon_example_1);
+        s = int(s * double(v) / 10.);
+        w_icon_example_1->setIconSize({ s, s });
+        w_icon_example_2->setIconSize({ s, s });
+        w_icon_example_3->setIconSize({ s, s });
+    };
+    connect(w_icon_size, &QAbstractSlider::valueChanged,
+            this, setIconSize);
+    setIconSize(10);
+
+    connect(w_icon_size_reset, &QToolButton::clicked,
+            this, [this]() { w_icon_size->setValue(10); });
     connect(w_font_size_reset, &QToolButton::clicked,
             this, [this]() { w_font_size->setValue(10); });
 
@@ -748,7 +762,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_docdir->insertSeparator(1);
     w_docdir->insertItem(2, QIcon(), tr("Other..."));
 
-    w_currency_update->setProperty("toolBarLike", true);
+    w_currency_update->setProperty("iconScaling", true);
 
     connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectDocDir);
@@ -1081,7 +1095,8 @@ void SettingsDialog::load()
     // --[ INTERFACE ]-------------------------------------------------
 
     w_theme->setCurrentIndex(int(Config::inst()->uiTheme()));
-    w_icon_size->setCurrentIndex(int(Config::inst()->iconSize()));
+    w_toolbar_size->setCurrentIndex(int(Config::inst()->toolBarSize()));
+    w_icon_size->setValue(Config::inst()->iconSizePercent() / 10);
     w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
 
     w_rowHeight->setChecked(Config::inst()->liveEditRowHeight());
@@ -1155,7 +1170,8 @@ void SettingsDialog::save()
 
     // --[ INTERFACE ]-----------------------------------------------------------------
 
-    Config::inst()->setIconSize(static_cast<Config::UISize>(w_icon_size->currentIndex()));
+    Config::inst()->setToolBarSize(static_cast<Config::UISize>(w_toolbar_size->currentIndex()));
+    Config::inst()->setIconSizePercent(w_icon_size->value() * 10);
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
     Config::inst()->setColumnSpacing(w_columnSpacing->currentIndex());
     Config::inst()->setLiveEditRowHeight(w_rowHeight->isChecked());

@@ -84,7 +84,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     w_2d = new QToolButton(this);
     w_2d->setText(u"2D"_qs);
-    w_2d->setProperty("toolBarLike", true);
+    w_2d->setProperty("iconScaling", true);
     w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_2d, &QToolButton::clicked, this, [this]() {
         setPrefer3D(false);
@@ -92,7 +92,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     w_3d = new QToolButton(this);
     w_3d->setText(u"3D"_qs);
-    w_3d->setProperty("toolBarLike", true);
+    w_3d->setProperty("iconScaling", true);
     w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(w_3d, &QToolButton::clicked, this, [this]() {
         setPrefer3D(true);
@@ -107,7 +107,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     m_reloadIcon = QIcon::fromTheme(u"view-refresh"_qs);
 
     w_reloadRescale = new QToolButton(this);
-    w_reloadRescale->setProperty("toolBarLike", true);
+    w_reloadRescale->setProperty("iconScaling", true);
     w_reloadRescale->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     w_reloadRescale->setIcon(m_reloadIcon);
