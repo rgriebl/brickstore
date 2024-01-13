@@ -1,3 +1,3 @@
 files:
-  - source: /translations/brickstore_en.ts
+  - source: /translations/brickstore.ts
     translation: /translations/brickstore_%two_letters_code%.ts
