@@ -81,28 +81,28 @@ CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
-    m_window->setResizeMode(QQuickView::SizeRootObjectToView);
-    m_window->setColor(Qt::black);
+    auto window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
+    window->setResizeMode(QQuickView::SizeRootObjectToView);
+    window->setColor(Qt::black);
 
     m_cameraPreview = new Scanner::CameraPreview(engine);
-    m_cameraPreview->setParentItem(m_window->contentItem());
-    m_widget = QWidget::createWindowContainer(m_window, this);
+    m_cameraPreview->setParentItem(window->contentItem());
+    auto widget = QWidget::createWindowContainer(window, this);
 
     connect(m_cameraPreview, &Scanner::CameraPreview::clicked,
             this, &CameraPreviewWidget::clicked);
 
     int videoWidth = logicalDpiX() * 3; // ~7.5cm on-screen
-    m_widget->setMinimumSize(videoWidth, videoWidth * 9 / 16);
-    m_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    widget->setMinimumSize(videoWidth, videoWidth * 9 / 16);
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    layout->addWidget(m_widget, 10);
+    layout->addWidget(widget, 10);
 }
 
 CameraPreviewWidget::~CameraPreviewWidget()
 {
-    delete m_widget;
-    m_widget = nullptr;
+    m_cameraPreview->setParentItem(nullptr);
+    delete m_cameraPreview;
 }
 
 bool CameraPreviewWidget::isActive() const

@@ -5,7 +5,6 @@
 
 #include <QWidget>
 
-QT_FORWARD_DECLARE_CLASS(QQuickView)
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 
 namespace Scanner {
@@ -27,7 +26,5 @@ public:
     Q_SIGNAL void clicked();
 
 private:
-    QQuickView *m_window = nullptr;
-    QWidget *m_widget = nullptr;
     Scanner::CameraPreview *m_cameraPreview = nullptr;
 };
