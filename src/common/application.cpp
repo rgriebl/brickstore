@@ -865,7 +865,7 @@ void Application::setupLogging()
             if (s_inst->m_uiMessageHandler) {
                 // can't start a timer from another thread
                 QMetaObject::invokeMethod(s_inst, []() {
-                    if (!s_inst->m_loggingTimer.isActive())
+                    if (s_inst && !s_inst->m_loggingTimer.isActive())
                         s_inst->m_loggingTimer.start();
                 }, Qt::QueuedConnection);
             }
