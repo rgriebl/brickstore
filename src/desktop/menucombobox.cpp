@@ -10,7 +10,6 @@
 MenuComboBox::MenuComboBox(QWidget *parent)
     : QComboBox(parent)
 {
-    setSizeAdjustPolicy(QComboBox::AdjustToContents);
     setFrame(false);
     setProperty("transparentCombo", true);
 }

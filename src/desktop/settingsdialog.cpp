@@ -761,6 +761,8 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
     w_docdir->insertItem(2, QIcon(), tr("Other..."));
+    // Qt 6.6.1 on macOS + accessibility enabled crashes on insertItem(), if this is enabled earlier
+    w_docdir->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     w_currency_update->setProperty("iconScaling", true);
 
