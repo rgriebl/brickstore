@@ -120,6 +120,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_last_added->setFrameStyle(QFrame::StyledPanel | int(QFrame::Plain));
     w_last_added->setTextFormat(Qt::RichText);
     w_last_added->setAlignment(Qt::AlignCenter);
+    w_last_added->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     w_last_added->setMargin(1);
 
     w_merge = new QCheckBox(this);
