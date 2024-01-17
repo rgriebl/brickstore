@@ -221,10 +221,13 @@ void ImportOrderDialog::languageChange()
     updateStatusLabel();
 }
 
-void ImportOrderDialog::updateOrders()
+QCoro::Task<> ImportOrderDialog::updateOrders()
 {
     if (BrickLink::core()->orders()->updateStatus() == BrickLink::UpdateStatus::Updating)
-        return;
+        co_return;
+
+    if (!co_await Application::inst()->checkBrickLinkLogin())
+        co_return;
 
     m_updateMessage.clear();
     w_update->setEnabled(false);

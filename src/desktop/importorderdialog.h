@@ -7,6 +7,8 @@
 #include <QDateTime>
 #include <QSet>
 
+#include <QCoro/QCoroTask>
+
 #include "ui_importorderdialog.h"
 
 
@@ -17,7 +19,7 @@ public:
     ImportOrderDialog(QWidget *parent = nullptr);
     ~ImportOrderDialog() override;
 
-    void updateOrders();
+    QCoro::Task<> updateOrders();
 
 protected:
     void changeEvent(QEvent *e) override;

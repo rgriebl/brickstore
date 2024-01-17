@@ -959,10 +959,7 @@ void MainWindow::createActions()
                   m_importinventory_dialog = new ImportInventoryDialog(this);
               m_importinventory_dialog->show();
           } },
-        { "document_import_bl_order", [this](bool) -> QCoro::Task<> {
-              if (!co_await Application::inst()->checkBrickLinkLogin())
-                  co_return;
-
+        { "document_import_bl_order", [this](bool) {
               if (!m_importorder_dialog)
                   m_importorder_dialog = new ImportOrderDialog(this);
               m_importorder_dialog->show();
