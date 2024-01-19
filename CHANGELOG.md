@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2024.1.3] - 2024-01-20
+
+A few bug fixes, especially for macOS users with accessibility features enabled on their system.
+
+
 ## [2024.1.2] - 2024-01-11
 
 - The Webcam view for Brickognize has been rewritten and should now be a lot faster and more stable on Windows and macOS. Plus the window can now also be "pinned" to keep it open.
@@ -623,7 +628,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.1.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.1.3...HEAD
+[2024.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.3
 [2024.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.2
 [2023.11.2]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.2
 [2023.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2023.11.1
