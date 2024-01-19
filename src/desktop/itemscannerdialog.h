@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <QVector>
 #include <QDialog>
 #include <QCamera>
@@ -31,7 +33,7 @@ class ItemScannerDialog : public QDialog
 {
     Q_OBJECT
 public:
-    static bool checkSystemPermissions();
+    static void checkSystemPermissions(QObject *context, const std::function<void(bool)> &callback);
 
     explicit ItemScannerDialog(QWidget *parent = nullptr);
     ~ItemScannerDialog() override;

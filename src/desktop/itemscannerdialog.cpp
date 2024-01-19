@@ -22,6 +22,7 @@
 #  include <QCoreApplication>
 #  include <QMessageBox>
 #  include <QPermissions>
+#  include <QPointer>
 #endif
 
 #include "bricklink/core.h"
@@ -52,10 +53,13 @@ static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
 int ItemScannerDialog::s_averageScanTime = 1500;
 bool ItemScannerDialog::s_hasCameraPermission = false;
 
-bool ItemScannerDialog::checkSystemPermissions()
+void ItemScannerDialog::checkSystemPermissions(QObject *context, const std::function<void(bool)> &callback)
 {
-    if (s_hasCameraPermission)
-        return true;
+    if (s_hasCameraPermission) {
+        if (callback)
+            callback(true);
+        return;
+    }
 
     const QString requestDenied = tr("BrickStore's request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system's Settings application.");
 
@@ -63,19 +67,28 @@ bool ItemScannerDialog::checkSystemPermissions()
     QCameraPermission cameraPermission;
     switch (qApp->checkPermission(cameraPermission)) {
     case Qt::PermissionStatus::Undetermined:
-        qApp->requestPermission(cameraPermission, [](const QPermission &) { });
-        return false;
+        qApp->requestPermission(cameraPermission, context, [callback](const QPermission &p) {
+            s_hasCameraPermission = (p.status() == Qt::PermissionStatus::Granted);
+            if (callback)
+                callback(s_hasCameraPermission);
+        });
+        return;
     case Qt::PermissionStatus::Denied:
         QMessageBox::warning(nullptr, QCoreApplication::applicationName(), requestDenied);
-        return false;
+        if (callback)
+            callback(false);
+        return;
     case Qt::PermissionStatus::Granted:
         break; // Proceed
     }
 #else
+    Q_UNUSED(context)
     Q_UNUSED(requestDenied)
 #endif
     s_hasCameraPermission = true;
-    return true;
+    if (callback)
+        callback(true);
+    return;
 }
 
 ItemScannerDialog::ItemScannerDialog(QWidget *parent)

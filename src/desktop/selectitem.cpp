@@ -254,50 +254,10 @@ void SelectItem::init()
     d->w_itemScan->setShortcut(tr("Ctrl+D", "Shortcut for opening the webcam scanner"));
     d->w_itemScan->setProperty("iconScaling", true);
     connect(d->w_itemScan, &QToolButton::clicked, this, [this]() {
-        if (!ItemScannerDialog::checkSystemPermissions())
-            return;
-        if (d->m_itemScannerDialog) {
-            d->m_itemScannerDialog->raise();
-            d->m_itemScannerDialog->activateWindow();
-        } else {
-            d->m_itemScannerDialog = new ItemScannerDialog(this);
-
-            connect(d->m_itemScannerDialog, &ItemScannerDialog::itemsScanned,
-                    this, [this](const QVector<const BrickLink::Item *> &items) {
-                if (items.isEmpty())
-                    return;
-
-                const BrickLink::Item *oldItem = currentItem();
-                d->w_items->clearSelection();
-
-                QStringList filter;
-                filter.reserve(items.size());
-                auto *singleItemtype = items.constFirst()->itemType();
-                auto *singleCategory = items.constFirst()->category();
-
-                for (const auto *item : items) {
-                    QString s = QChar::fromLatin1(item->itemTypeId()) + QString::fromLatin1(item->id());
-                    filter << s;
-
-                    if (item->itemType() != singleItemtype)
-                        singleItemtype = nullptr;
-                    if (item->category() != singleCategory)
-                        singleCategory = nullptr;
-                }
-                d->w_filter->setText(u"scan:" + filter.join(u','));
-                setCurrentItemType(singleItemtype ? singleItemtype
-                                                  : BrickLink::ItemTypeModel::AllItemTypes);
-                setCurrentCategory(singleCategory ? singleCategory
-                                                  : BrickLink::CategoryModel::AllCategories);
-                applyFilter();
-                if (d->itemModel->index(oldItem).isValid())
-                    setCurrentItem(oldItem, false);
-            });
-        }
-
-        auto itt = currentItemType();
-        d->m_itemScannerDialog->setItemType((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt);
-        d->m_itemScannerDialog->show();
+        ItemScannerDialog::checkSystemPermissions(this, [this](bool successful) {
+            if (successful)
+                scanItemInternal();
+        });
     });
 
     d->w_dateFilter = new QToolButton(this);
@@ -751,6 +711,52 @@ void SelectItem::clearFilter()
 void SelectItem::setFilterFavoritesModel(QStringListModel *model)
 {
     d->w_filter->setModel(model);
+}
+
+void SelectItem::scanItemInternal()
+{
+    if (d->m_itemScannerDialog) {
+        d->m_itemScannerDialog->raise();
+        d->m_itemScannerDialog->activateWindow();
+    } else {
+        d->m_itemScannerDialog = new ItemScannerDialog(this);
+
+        connect(d->m_itemScannerDialog, &ItemScannerDialog::itemsScanned,
+                this, [this](const QVector<const BrickLink::Item *> &items) {
+                    if (items.isEmpty())
+                        return;
+
+                    const BrickLink::Item *oldItem = currentItem();
+                    d->w_items->clearSelection();
+
+                    QStringList filter;
+                    filter.reserve(items.size());
+                    auto *singleItemtype = items.constFirst()->itemType();
+                    auto *singleCategory = items.constFirst()->category();
+
+                    for (const auto *item : items) {
+                        QString s = QChar::fromLatin1(item->itemTypeId()) + QString::fromLatin1(item->id());
+                        filter << s;
+
+                        if (item->itemType() != singleItemtype)
+                            singleItemtype = nullptr;
+                        if (item->category() != singleCategory)
+                            singleCategory = nullptr;
+                    }
+                    d->w_filter->setText(u"scan:" + filter.join(u','));
+                    setCurrentItemType(singleItemtype ? singleItemtype
+                                                      : BrickLink::ItemTypeModel::AllItemTypes);
+                    setCurrentCategory(singleCategory ? singleCategory
+                                                      : BrickLink::CategoryModel::AllCategories);
+                    applyFilter();
+                    if (d->itemModel->index(oldItem).isValid())
+                        setCurrentItem(oldItem, false);
+                });
+    }
+
+    auto itt = currentItemType();
+    d->m_itemScannerDialog->setItemType((itt == BrickLink::ItemTypeModel::AllItemTypes) ? nullptr : itt);
+    d->m_itemScannerDialog->show();
 }
 
 QByteArray SelectItem::saveState() const

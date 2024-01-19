@@ -69,6 +69,7 @@ private:
     void init();
     void ensureSelectionVisible();
     void sortItems(int section, Qt::SortOrder order);
+    void scanItemInternal();
 
 protected:
     std::unique_ptr<SelectItemPrivate> d;
