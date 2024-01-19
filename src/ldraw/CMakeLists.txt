@@ -31,6 +31,7 @@ if (BS_DESKTOP)
     )
     target_link_libraries(ldraw_module PRIVATE
         Qt6::Widgets
+        Qt6::QuickWidgets
     )
 endif()
 

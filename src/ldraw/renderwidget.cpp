@@ -8,6 +8,7 @@
 #include <QtQuick/QQuickView>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
+#include <QtQuickWidgets/QQuickWidget>
 
 #include "common/systeminfo.h"
 #include "rendercontroller.h"
@@ -51,37 +52,20 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    m_widget = engine ? new QQuickWidget(engine, this) : new QQuickWidget(this);
+
     if (isGPUSupported()) {
-        m_window = engine ? new QQuickView(engine, nullptr) : new QQuickView();
-
         QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
-        m_window->setFormat(fmt);
-        m_window->setResizeMode(QQuickView::SizeRootObjectToView);
-
-        m_window->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
-
-        if (auto *ro = m_window->rootObject()) {
-            m_widget = QWidget::createWindowContainer(m_window, this);
-            m_controller = ro->property("renderController").value<RenderController *>();
-        } else {
-            delete m_window;
-            m_window = nullptr;
-        }
+        m_widget->setFormat(fmt);
+        m_widget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+        m_widget->setSource(QUrl(u"qrc:/LDraw/PartRenderer.qml"_qs));
     }
-    if (!m_widget) { // create a dummy widget, if the 3D view could not be created
-        Q_ASSERT(!m_window);
+
+    if (auto *ro = m_widget->rootObject())
+        m_controller = ro->property("renderController").value<RenderController *>();
+    else
         m_controller = new RenderController(this);
 
-        m_widget = new QWidget(this);
-        m_widget->setBackgroundRole(QPalette::Window);
-        m_widget->setAutoFillBackground(true);
-        connect(m_controller, &RenderController::clearColorChanged,
-                m_widget, [this](const QColor &color) {
-            auto pal = m_widget->palette();
-            pal.setColor(QPalette::Window, color);
-            m_widget->setPalette(pal);
-        });
-    }
     paletteChange();
 
     m_widget->setMinimumSize(100, 100);
@@ -145,8 +129,8 @@ void RenderWidget::setAnimationActive(bool active)
 
 bool RenderWidget::startGrab()
 {
-    if (m_window && !m_grabResult) {
-        m_grabResult = m_window->rootObject()->grabToImage();
+    if (m_widget->rootObject() && !m_grabResult) {
+        m_grabResult = m_widget->rootObject()->grabToImage();
         if (m_grabResult) {
             connect(m_grabResult.get(), &QQuickItemGrabResult::ready,
                     this, [this]() {
@@ -190,7 +174,7 @@ void RenderWidget::paletteChange()
 
 void RenderWidget::languageChange()
 {
-    if (m_window)
+    if (m_widget->rootObject())
         setToolTip(tr("Hold left button: Rotate\nHold right button: Move\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
 }
 

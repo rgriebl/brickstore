@@ -152,7 +152,7 @@ else()
     set(BS_DESKTOP ON)
     set(BS_TYPE "Desktop")
     add_compile_definitions(BS_DESKTOP)
-    find_package(Qt6 CONFIG QUIET REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia)
+    find_package(Qt6 CONFIG QUIET REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia QuickWidgets)
     find_package(Qt6 CONFIG QUIET OPTIONAL_COMPONENTS MultimediaQuickPrivate) # Debian bug 1060228
 
 endif()

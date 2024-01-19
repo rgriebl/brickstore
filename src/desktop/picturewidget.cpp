@@ -15,7 +15,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QQmlApplicationEngine>
-#include <QStackedWidget>
+#include <QStackedLayout>
 
 #include <QCoro/QCoroSignal>
 
@@ -73,13 +73,14 @@ PictureWidget::PictureWidget(QWidget *parent)
 
     w_ldraw = new LDraw::RenderWidget(Application::inst()->qmlEngine(), this);
 
-    w_stack = new QStackedWidget(this);
+    w_stackLayout = new QStackedLayout();
+    w_stackLayout->setStackingMode(QStackedLayout::StackAll);
 
     auto layout = new QVBoxLayout(this);
     layout->addWidget(w_text);
-    layout->addWidget(w_stack, 10);
-    w_stack->addWidget(w_image);
-    w_stack->addWidget(w_ldraw);
+    layout->addLayout(w_stackLayout, 10);
+    w_stackLayout->addWidget(w_image);
+    w_stackLayout->addWidget(w_ldraw);
     layout->setContentsMargins(2, 6, 2, 2);
 
     w_2d = new QToolButton(this);
@@ -113,7 +114,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_reloadRescale->setIcon(m_reloadIcon);
     connect(w_reloadRescale, &QToolButton::clicked,
             this, [this]() {
-        if (w_stack->currentWidget() == w_ldraw) {
+        if (w_stackLayout->currentWidget() == w_ldraw) {
             w_ldraw->resetCamera();
         } else if (m_pic) {
             m_pic->update(true);
@@ -203,7 +204,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         w_ldraw->clear();
     });
 
-    connect(w_stack, &QStackedWidget::currentChanged,
+    connect(w_stackLayout, &QStackedLayout::currentChanged,
             this, [this]() {
         stackSwitch();
     });
@@ -211,9 +212,10 @@ PictureWidget::PictureWidget(QWidget *parent)
     connect(w_ldraw, &LDraw::RenderWidget::canRenderChanged,
             this, [this](bool b) {
         if (!b)
-            w_stack->setCurrentWidget(w_image);
-        else if (prefer3D() && m_supports3D)
-            w_stack->setCurrentWidget(w_ldraw);
+            w_stackLayout->setCurrentWidget(w_image);
+        else if (prefer3D() && m_supports3D) {
+            w_stackLayout->setCurrentWidget(w_ldraw);
+        }
         w_3d->setEnabled(b);
     });
 
@@ -235,7 +237,7 @@ PictureWidget::PictureWidget(QWidget *parent)
 
 void PictureWidget::stackSwitch()
 {
-    bool is3D = (w_stack->currentWidget() == w_ldraw);
+    bool is3D = (w_stackLayout->currentWidget() == w_ldraw);
     w_reloadRescale->setIcon(is3D ? m_rescaleIcon : m_reloadIcon);
     w_reloadRescale->setToolTip(is3D ? tr("Center view") : tr("Update"));
     m_renderSettings->setVisible(is3D);
@@ -316,7 +318,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     w_reloadRescale->setEnabled(m_item);
 
     // the RenderWidget will emit canRender() asynchronously, so we don't handle that here
-    if (w_stack->currentWidget() == w_image)
+    if (w_stackLayout->currentWidget() == w_image)
         showImage();
 }
 
@@ -330,12 +332,12 @@ void PictureWidget::setPrefer3D(bool b)
     if (m_prefer3D != b)
         m_prefer3D = b;
 
-    w_stack->setCurrentWidget((b && m_supports3D) ? static_cast<QWidget *>(w_ldraw) : w_image);
+    w_stackLayout->setCurrentWidget((b && m_supports3D) ? static_cast<QWidget *>(w_ldraw) : w_image);
 }
 
 void PictureWidget::showImage()
 {
-    if (w_stack->currentWidget() != w_image)
+    if (w_stackLayout->currentWidget() != w_image)
         return;
 
     if (m_pic && ((m_pic->updateStatus() == BrickLink::UpdateStatus::Updating) ||

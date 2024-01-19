@@ -10,6 +10,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
 QT_FORWARD_DECLARE_CLASS(QQuickView)
+QT_FORWARD_DECLARE_CLASS(QQuickWidget)
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 
 
@@ -57,8 +58,7 @@ private:
     void languageChange();
 
     RenderController *m_controller = nullptr;
-    QQuickView *m_window = nullptr;
-    QWidget *m_widget = nullptr;
+    QQuickWidget *m_widget = nullptr;
     QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };
 

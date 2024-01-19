@@ -4,8 +4,9 @@
 #pragma once
 
 #include <QFrame>
-#include <QImage>
 #include <QIcon>
+#include <QImage>
+#include <QStackedLayout>
 
 #include "bricklink/global.h"
 
@@ -17,7 +18,7 @@ QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QMenu)
-QT_FORWARD_DECLARE_CLASS(QStackedWidget)
+QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 
 
 class PictureWidget : public QFrame
@@ -62,7 +63,7 @@ private:
     QIcon m_rescaleIcon;
     QIcon m_reloadIcon;
     QMenu *m_contextMenu = nullptr;
-    QStackedWidget *w_stack;
+    QStackedLayout *w_stackLayout;
     QSize m_currentImageSize;
 
     QAction *m_renderSettings;
