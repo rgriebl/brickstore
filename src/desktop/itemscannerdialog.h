@@ -46,6 +46,7 @@ signals:
 protected:
     void changeEvent(QEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
+    void hideEvent(QHideEvent *e) override;
 
 private:
     void updateCameraDevices();

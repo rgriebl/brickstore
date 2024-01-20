@@ -400,6 +400,12 @@ void ItemScannerDialog::keyPressEvent(QKeyEvent *e)
     QDialog::keyPressEvent(e);
 }
 
+void ItemScannerDialog::hideEvent(QHideEvent *e)
+{
+    setState(State::Inactive);
+    QDialog::hideEvent(e);
+}
+
 void ItemScannerDialog::capture()
 {
     if (!m_currentScan) {
