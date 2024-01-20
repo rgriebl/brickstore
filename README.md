@@ -7,8 +7,7 @@
 
 ## BrickStore
 
-BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and
-Linux), **multilingual** (currently English, German and French), **fast** and **stable**.
+BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and Linux as well as iOS and Android), **multilingual** (currently English, German, Spanish, Swedish and French), **fast** and **stable**.
 
 # Please see https://www.brickstore.dev for more information on downloads and usage.
 

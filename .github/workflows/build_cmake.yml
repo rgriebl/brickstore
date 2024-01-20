@@ -660,10 +660,9 @@ jobs:
       with:
         version: "brickstore@${{ env.BUILD_NUMBER }}"
 
-    - name: Publish to Snapcraft
-      uses: snapcore/action-publish@v1
+    - name: Promote Snapcraft build to stable
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
-      with:
-        snap: artifacts/Linux-Snap-brickstore_${{ env.VERSION_NUMBER }}_amd64.snap
-        release: stable
+      run: |
+        snapcraft promote --from-channel edge --to-channel stable --yes brickstore
+      shell: bash
