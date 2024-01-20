@@ -3,8 +3,10 @@ import QtMultimedia
 
 VideoOutput {
     id: root
-    anchors.fill: parent
     focus: true
+
+    implicitWidth: 320
+    implicitHeight: 180
 
     property bool active: false
     signal clicked()
