@@ -94,7 +94,7 @@ def scanStudioUnOfficial(dir):
 
 
 def downloadAndUnpack(tempDir):
-    ldrawUrl = 'https://www.ldraw.org/library/updates/complete.zip'
+    ldrawUrl = 'https://library.ldraw.org/library/updates/complete.zip'
     studioUrl = 'https://dzncyaxjqx7p3.cloudfront.net/Studio2.0/Studio+2.0.pkg'
 
     ldrawFile = "ldraw.zip"
