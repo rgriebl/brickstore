@@ -19,6 +19,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QMessageBox>
+#include <QSysInfo>
 
 #include <QCoro/QCoroSignal>
 #include <QCoro/QCoroNetworkReply>
@@ -87,16 +88,20 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
         m_installerUrl.clear();
         for (const QJsonValueRef &asset : assets) {
             QString name = asset[u"name"].toString();
+            bool match = false;
 #if defined(Q_OS_MACOS)
             if (name.startsWith(u"macOS-", Qt::CaseInsensitive)) {
+                bool dlLegacy = name.startsWith(u"macOS-10-Legacy-", Qt::CaseInsensitive);
+                bool osLegacy = QSysInfo::productVersion().startsWith(u"10.");
+                match = (dlLegacy == osLegacy);
+            }
 #elif defined(Q_OS_WINDOWS) && defined(_M_AMD64)
-            if (name.startsWith(u"Windows-x64-", Qt::CaseInsensitive)
-                    || name.startsWith(u"Windows-Intel64-", Qt::CaseInsensitive)) {
+            match = name.startsWith(u"Windows-x64-", Qt::CaseInsensitive)
+                    || name.startsWith(u"Windows-Intel64-", Qt::CaseInsensitive);
 #elif defined(Q_OS_WINDOWS) && defined(_M_ARM64)
-            if (name.startsWith(u"Windows-ARM64-", Qt::CaseInsensitive)) {
-#else
-            if (false) {
+            match = name.startsWith(u"Windows-ARM64-", Qt::CaseInsensitive);
 #endif
+            if (match) {
                 m_installerName = name;
                 m_installerUrl = asset[u"browser_download_url"].toString();
                 break;
