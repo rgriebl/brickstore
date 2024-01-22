@@ -2,7 +2,7 @@
 layout: page
 title: BrickStore
 cover-img: 
-  - "/assets/screenshots/linux.jpg"
+  - "/assets/screenshots/windows.jpg"
   - "/assets/screenshots/macos.jpg"
   - "/assets/screenshots/linux.jpg"
 redirect_from: 
