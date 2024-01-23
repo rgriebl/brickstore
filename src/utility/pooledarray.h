@@ -94,21 +94,22 @@ public:
 
         auto amr = mr ? mr : defaultMemoryResource();
         auto dataByteSize = (size() + 1) * sizeof(T);
+        const auto alignment = std::max(alignof(T), alignof(typename QIntegerForSizeof<T>::Signed));
 
         if (!data) {
-            data = static_cast<T *>(amr->allocate((s + 1) * sizeof(T), alignof(T)));
+            data = static_cast<T *>(amr->allocate((s + 1) * sizeof(T), alignment));
             sizeRef(data) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
         } else if (!s) {
-            amr->deallocate(data, dataByteSize, alignof(T));
+            amr->deallocate(data, dataByteSize, alignment);
             data = nullptr;
         } else {
             Q_ASSERT_X(!mr, "PooledArray", "resize() should not be called twice with an allocator");
 
             auto newByteSize = (s + 1) * sizeof(T);
-            auto newd = static_cast<T *>(amr->allocate(newByteSize, alignof(T)));
+            auto newd = static_cast<T *>(amr->allocate(newByteSize, alignment));
             memcpy(newd, data, std::min(dataByteSize, newByteSize));
             sizeRef(newd) = static_cast<typename QIntegerForSizeof<T>::Signed>(s);
-            amr->deallocate(data, dataByteSize, alignof(T));
+            amr->deallocate(data, dataByteSize, alignment);
             data = newd;
         }
     }
