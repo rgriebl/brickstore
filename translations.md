@@ -12,6 +12,8 @@ See also this file for a list of maintainers: <https://github.com/rgriebl/bricks
 
 Here's how you can translate BrickStore into another language:
 
+**NOTE** We're currently also adding the possibility to use [Weblate](https://hosted.weblate.org/projects/brickstore/) for easier maintenance.
+
 ## Get the sources
 
 Check if a (partial) translation already exists for the language you are aiming for here: <https://github.com/rgriebl/brickstore/blob/master/translations>
