@@ -268,10 +268,18 @@ void PictureCache::clearCache()
 
     auto leakControl = [](Picture *pic) { Ref::addZombieRef(pic); };
 
-    if (auto leakedCount = d->m_cache.clearRecursive(leakControl)) {
+    constexpr int MaxClearRuns = 10;
+
+    for (int i = 1; i <= MaxClearRuns; ++i) {
+        auto leakedCount = (i == MaxClearRuns) ? d->m_cache.clearRecursive(leakControl)
+                                               : d->m_cache.clearRecursive();
         qCWarning(LogCache) << "Picture cache:" << leakedCount
-                            << "objects still have a reference after clearing";
+                            << "objects still have a reference after clearing run" << i;
+        if (!leakedCount)
+            break;
+        QThread::msleep(100);
     }
+
     AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
 }
 

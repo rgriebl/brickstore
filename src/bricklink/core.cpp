@@ -385,14 +385,13 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     //      plenty of iterations through the event loop to handle all the cancelled jobs.
 
     connect(m_database.get(), &Database::databaseAboutToBeReset,
-            this, &Core::cancelTransfers);
-#if !defined(BS_BACKEND)
-    connect(m_database.get(), &Database::databaseReset,
             this, [this]() {
+        cancelTransfers();
+#if !defined(BS_BACKEND)
         m_priceGuideCache->clearCache();
         m_pictureCache->clearCache();
-    });
 #endif
+    });
 
     connect(m_transfer, &Transfer::finished,
             this, &Core::transferFinished);
