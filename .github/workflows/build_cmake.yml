@@ -670,5 +670,6 @@ jobs:
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
       run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
         snapcraft promote --from-channel edge --to-channel stable --yes brickstore
       shell: bash
