@@ -574,7 +574,7 @@ QCoro::Task<bool> Document::requestClose()
                                              UIHelpers::Save | UIHelpers::Discard | UIHelpers::Cancel,
                                              UIHelpers::Save)) {
         case UIHelpers::Save:
-            save(false);
+            co_await save(false);
             doClose = (!m_model->isModified());
             break;
 

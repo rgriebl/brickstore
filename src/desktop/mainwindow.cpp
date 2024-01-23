@@ -924,7 +924,7 @@ void MainWindow::createActions()
 
     ActionManager::ActionTable actionTable = {
         { "go_home", [this](bool b) { goHome(b); } },
-        { "document_save_all", [this](bool) {
+        { "document_save_all", [this](bool) -> QCoro::Task<> {
               auto oldView = m_activeView;
               auto oldViewPane = m_activeViewPane;
               const auto docs = DocumentList::inst()->documents();
@@ -944,7 +944,7 @@ void MainWindow::createActions()
                           m_activeViewPane->activateDocument(doc);
                       }
 
-                      doc->save(false /* saveas */);
+                      co_await doc->save(false /* saveas */);
 
                       if (m_activeViewPane != oldViewPane) {
                           setActiveViewPane(oldViewPane);
