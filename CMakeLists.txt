@@ -133,6 +133,13 @@ find_package(Qt6 CONFIG QUIET
     REQUIRED Core Gui Xml Network Concurrent Sql LinguistTools
     OPTIONAL_COMPONENTS ToolsTools
 )
+
+if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.8.0")
+    add_compile_definitions(
+        "QT_WARN_DEPRECATED_UP_TO=QT_VERSION_CHECK(6,7,0)"
+    )
+endif()
+
 set(MIN_QT_VERSION 6.2.0)
 
 if (ANDROID OR IOS OR FORCE_MOBILE)
